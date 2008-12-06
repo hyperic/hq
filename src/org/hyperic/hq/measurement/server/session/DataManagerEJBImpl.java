@@ -221,11 +221,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public void addData(Integer mid, MetricValue mv, boolean overwrite) {
-        List pts = new ArrayList(1);
         MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
         Measurement meas = mMan.getMeasurement(mid);
-        pts.add(new MeasDataPoint(
-            meas.getId(), mv, meas.getTemplate().isAvailability()));
+        List pts = Collections.singletonList(new DataPoint(meas.getId(), mv));
 
         addData(pts, overwrite);
     }
@@ -250,6 +248,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
         HQDialect dialect = Util.getHQDialect();
         boolean succeeded = false;
+        final boolean debug = _log.isDebugEnabled();
 
         Connection conn = safeGetConnection();
         if (conn == null) {
@@ -261,6 +260,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             boolean autocommit = conn.getAutoCommit();
             
             try {
+                long start = -1l;
+                if (debug) {
+                    start = System.currentTimeMillis();
+                }
                 conn.setAutoCommit(false);
                 if (dialect.supportsMultiInsertStmt()) {
                     succeeded = insertDataWithOneInsert(data, conn);
@@ -269,17 +272,28 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 }            
 
                 if (succeeded) {
-                    _log.debug("Inserting data in a single transaction succeeded.");
                     conn.commit();
+                    if (debug) {
+                        long end = System.currentTimeMillis();
+                        _log.debug("Inserting data in a single transaction " +
+                            "succeeded");
+                        _log.debug("Data Insertion process took " +
+                            (end-start) + " ms");
+                    }
                     sendMetricEvents(data);
                 } else {
-                    if (_log.isDebugEnabled()) {
+                    if (debug) {
                         _log.debug("Inserting data in a single transaction failed." +
                                    "  Rolling back transaction.");
                     }
                     conn.rollback();
                     conn.setAutoCommit(true);
                     addDataWithCommits(data, true, conn);
+                    if (debug) {
+                        long end = System.currentTimeMillis();
+                        _log.debug("Data Insertion process took " +
+                            (end-start) + " ms");
+                    }
                 }
                 
             } catch (SQLException e) {
@@ -669,8 +683,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // If there is a SQLException, then none of the data points 
             // should be inserted. Roll back the txn.
             if (_log.isDebugEnabled()) {
-                _log.debug("Error while inserting data in batch (this is ok)" +
-                    e.getMessage() + " (this is ok)");
+                _log.debug("Error while inserting data in batch (this is ok) " +
+                    e.getMessage());
             }
             return false;
         }
@@ -723,29 +737,46 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                             boolean continueOnSQLException) 
         throws SQLException {
         PreparedStatement stmt = null;
-        List left = new ArrayList();
-        Map buckets = MeasRangeObj.getInstance().bucketData(data);
-        HQDialect dialect = Util.getHQDialect();
-        boolean supportsDupInsStmt = dialect.supportsDuplicateInsertStmt();
-        
+        final List left = new ArrayList();
+        final Map buckets = MeasRangeObj.getInstance().bucketData(data);
+        final HQDialect dialect = Util.getHQDialect();
+        final boolean supportsDupInsStmt = dialect.supportsDuplicateInsertStmt();
+        final boolean supportsPLSQL = dialect.supportsPLSQL();
+        final String plSQL = 
+            "BEGIN " +
+            "INSERT INTO :table (measurement_id, timestamp, value) " +
+            "VALUES(?, ?, ?); " +
+            "EXCEPTION WHEN DUP_VAL_ON_INDEX THEN " +
+                "UPDATE :table SET VALUE = ? " +
+                "WHERE timestamp = ? and measurement_id = ?; " +
+            "END; ";
+
+        final StringBuilder buf = new StringBuilder();
         for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); )
         {
+            buf.setLength(0);
             Map.Entry entry = (Map.Entry) it.next();
-            String table = (String) entry.getKey();
-            List dpts = (List) entry.getValue();
+            final String table = (String) entry.getKey();
+            final List dpts = (List) entry.getValue();
 
             try
             {
                 if (supportsDupInsStmt) {
                     stmt = conn.prepareStatement(
-                        "INSERT /*+ APPEND */ INTO " + table + 
-                        " (measurement_id, timestamp, value) VALUES (?, ?, ?)" +
-                        " ON DUPLICATE KEY UPDATE value = ?");
+                        buf.append("INSERT /*+ APPEND */ INTO ").append(table)
+                           .append(" (measurement_id, timestamp, value) VALUES (?, ?, ?)")
+                           .append(" ON DUPLICATE KEY UPDATE value = ?")
+                           .toString());
+                }
+                else if (supportsPLSQL) {
+                    final String sql =  plSQL.replaceAll(":table", table);
+                    stmt = conn.prepareStatement(sql);
                 }
                 else {
                     stmt = conn.prepareStatement(
-                        "INSERT /*+ APPEND */ INTO " + table + 
-                        " (measurement_id, timestamp, value) VALUES (?, ?, ?)");
+                        buf.append("INSERT /*+ APPEND */ INTO ").append(table)
+                           .append(" (measurement_id, timestamp, value) VALUES (?, ?, ?)")
+                           .toString());
                 }
 
                 for (Iterator i=dpts.iterator(); i.hasNext(); )
@@ -759,9 +790,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     stmt.setLong(2, val.getTimestamp());
                     stmt.setBigDecimal(3, getDecimalInRange(bigDec, metricId));
 
-                    if (supportsDupInsStmt)
-                        stmt.setBigDecimal(4, getDecimalInRange(bigDec,
-                                                                metricId));
+                    if (supportsDupInsStmt) {
+                        stmt.setBigDecimal(4, getDecimalInRange(bigDec, metricId));
+                    } else if (supportsPLSQL) {
+                        stmt.setBigDecimal(4, getDecimalInRange(bigDec, metricId));
+                        stmt.setLong(5, val.getTimestamp());
+                        stmt.setInt(6, metricId.intValue());
+                    }
                     
                     stmt.addBatch();
                 }
