@@ -406,4 +406,8 @@ public class MySQL5InnoDBDialect
     public int getMaxExpressions() {
         return -1;
     }
+
+    public boolean supportsPLSQL() {
+        return false;
+    }
 }
