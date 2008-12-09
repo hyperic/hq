@@ -41,5 +41,17 @@ public interface DataInserter {
     public void insertMetrics(List metricData)
         throws InterruptedException, DataInserterException;
 
+    /**
+     * Insert priority data into the DB, possibly blocking.  This may or may not
+     * be implemented by the inherited class.
+     * 
+     * @param metricData a list of {@link DataPoint}s
+     * @param isPriority tells the inserter to prioritize the metricData List.
+     * When implemented the DataInserter will give will insert the priority
+     * data before the low priority data.
+     */
+    public void insertMetrics(List metricData, boolean isPriority)
+        throws InterruptedException, DataInserterException;
+
     public Object getLock();
 }

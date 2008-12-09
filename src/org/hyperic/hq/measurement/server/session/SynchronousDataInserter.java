@@ -47,4 +47,9 @@ public class SynchronousDataInserter
     public Object getLock() {
         return _lock;
     }
+
+    public void insertMetrics(List metricData, boolean isPriority)
+        throws InterruptedException, DataInserterException {
+        insertMetrics(metricData);
+    }
 }

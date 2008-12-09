@@ -49,4 +49,9 @@ public class SynchronousAvailDataInserter implements DataInserter {
         return _lock;
     }
 
+    public void insertMetrics(List metricData, boolean isPriority)
+        throws InterruptedException, DataInserterException {
+        insertMetrics(metricData);
+    }
+
 }
