@@ -10,7 +10,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.tapestry.IRequestCycle;
 import org.apache.tapestry.engine.ILink;
 import org.apache.tapestry.services.ServiceConstants;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -19,6 +21,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * The User Interface's search service
@@ -78,33 +81,59 @@ public class SearchService extends BaseService {
             page = new PageControl(0, Integer.parseInt(pageSize));
 
         else
-            page = new PageControl(Integer.parseInt(pageNum), Integer.parseInt(pageSize));
+            page = new PageControl(Integer.parseInt(pageNum),
+                                   Integer.parseInt(pageSize));
 
-        WebUser user = (WebUser) _request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
+        WebUser user = (WebUser)
+            _request.getSession().getAttribute(Constants.WEBUSER_SES_ATTR);
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(_servletContext);
+        AuthzBoss authzBoss = ContextUtils.getAuthzBoss(_servletContext);
 
         PageList res;
+        PageList users;
         try {
             res = appdefBoss.search(user.getSessionId(), query, page);
+            users = authzBoss.getSubjectsByName(user.getSessionId(), query,
+                                                page);
         } catch (Exception e) {
             log.error(e.getMessage());
             return;
         }
-        _response.getWriter().write(getJsonResutls(res));
+        _response.getWriter().write(getJsonResutls(res, users));
     }
 
-    private String getJsonResutls(PageList res) {
-        Iterator i = res.iterator();
-        JSONArray jsArray = new JSONArray();
-        while (i.hasNext()) {
+    private String getJsonResutls(PageList res, PageList users) {
+        JSONArray resArray = new JSONArray();
+        JSONArray usrArray = new JSONArray();
+        for (Iterator i = res.iterator(); i.hasNext();) {
             SearchResult r = (SearchResult) i.next();
             try {
-                jsArray.put(r.toJson());
+                resArray.put(r.toJson());
             } catch (JSONException e) {
-                log.warn("Cannot create search result list. " + e.getStackTrace());
+                log.warn("Cannot create resource search result list. " +
+                         e.getStackTrace());
             }
         }
-        return jsArray.toString();
+        
+        for (Iterator i = users.iterator(); i.hasNext();) {
+            AuthzSubject s = (AuthzSubject) i.next();
+            try {
+                usrArray.put(new JSONObject().put("name", s.getName())
+                                             .put("id", s.getId()));
+            } catch (JSONException e) {
+                log.warn("Cannot create user search result list. " +
+                         e.getStackTrace());
+            }
+        }
+        
+        JSONObject json = new JSONObject();
+        try {
+            json.put("resources", resArray);
+            json.put("users", usrArray);
+        } catch (JSONException e) {
+            log.warn("Cannot create search result JSON. " + e.getStackTrace());
+        }
+        return json.toString();
     }
 
 }

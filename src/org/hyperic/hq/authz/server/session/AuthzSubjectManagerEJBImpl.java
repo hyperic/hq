@@ -299,6 +299,13 @@ public class AuthzSubjectManagerEJBImpl
     }
 
     /** 
+     * @ejb:interface-method
+     */
+    public PageList findMatchingName(String name, PageControl pc) {
+        return getSubjectDAO().findMatchingName(name, pc);
+    }
+    
+    /** 
      * List all subjects in the system
      * @ejb:interface-method
      * @param excludes the IDs of subjects to exclude from result

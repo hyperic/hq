@@ -44,6 +44,7 @@
         menuLayers.hide();
     }
     var resourceURL = '/Resource.do';
+    var userURL = '/admin/user/UserAdmin.do';
     var searchWidget = new hyperic.widget.search({search:'/search.shtml'}, 3, {keyCode: 83, ctrl: true});
     dojo.require("dojo.lfx.html");
     dojo.event.connect(window, "onload",function(){ 
@@ -171,6 +172,12 @@
         <div class="resultsGroup">
             <div class="category"><fmt:message key="header.Resources"/> (<span id="resourceResultsCount"></span>)</div>
             <ul id="resourceResults">
+                <li></li>
+            </ul>
+        </div>
+        <div class="resultsGroup">
+            <div class="category"><fmt:message key="header.users"/> (<span id="usersResultsCount"></span>)</div>
+            <ul id="usersResults">
                 <li></li>
             </ul>
         </div>

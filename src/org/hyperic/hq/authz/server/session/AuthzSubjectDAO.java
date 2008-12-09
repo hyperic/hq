@@ -122,6 +122,26 @@ class AuthzSubjectDAO
             .setCacheRegion("AuthzSubject.findByName")
             .uniqueResult();
     }
+    
+    private Criteria findMatchingNameCriteria(String name) {
+        name = '%' + name + '%';
+        return createCriteria()
+            .add(Restrictions.or(Restrictions.ilike("name", name),
+                                 Restrictions.or(
+                                     Restrictions.ilike("firstName", name),
+                                     Restrictions.ilike("lastName", name))))
+            .add(Restrictions.eq("system", Boolean.FALSE));
+    }
+    
+    public PageList findMatchingName(String name, PageControl pc) {
+        Integer count = (Integer) findMatchingNameCriteria(name)
+            .setProjection(Projections.rowCount())
+            .uniqueResult();
+        
+        Criteria crit =
+            findMatchingNameCriteria(name).addOrder(Order.asc("sortName"));
+        return getPagedResult(crit, count, pc);
+    }
 
     /**
      * Create the criteria used by findById_orderName() because Criteria does

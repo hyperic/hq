@@ -289,6 +289,7 @@ hyperic.widget.search = function(/*Object*/ urls, /*number*/ minStrLenth, /*Obje
 function loadSearchData(type, response, evt) {
     if(type == 'load'){
         var resURL = resourceURL+"?eid=";
+        var usrURL = userURL +"?mode=view&u=";
         var template = "<li class='type'><a href='link' title='fullname'>text<\/a><\/li>";
         var count = 0;
         var res = "";
@@ -296,17 +297,34 @@ function loadSearchData(type, response, evt) {
         var retext = new RegExp("text", "g");
         var refulltext = new RegExp("fullname", "g");
         var retype = new RegExp("type", "g");
-        for(var i = 0; i < response.length; i++) {
-            var length = response[i].name.length;
-            var fullname = response[i].name;
+        var resources = response.resources;
+        for(var i = 0; i < resources.length; i++) {
+            var length = resources[i].name.length;
+            var fullname = resources[i].name;
             if(length >= 37){
-                response[i].name = response[i].name.substring(0,4) + "..." + response[i].name.substring(length-28, length);
+                resources[i].name = resources[i].name.substring(0,4) + "..." + resources[i].name.substring(length-28, length);
             }
-            res += template.replace(relink, resURL+response[i].eId).replace(retext, response[i].name).replace(retype, response[i].resType).replace(refulltext, fullname);
+            res += template.replace(relink, resURL+resources[i].eId)
+                           .replace(retext, resources[i].name)
+                           .replace(retype, resources[i].resType)
+                           .replace(refulltext, fullname);
             count++;
         }
         dojo.byId("resourceResults").innerHTML = res;
         dojo.byId("resourceResultsCount").innerHTML = count;
+
+        count = 0;
+        res = "";
+        var users = response.users;
+        for(var i = 0; i < users.length; i++) {
+            var fullname = users[i].name;
+            res += template.replace(relink, usrURL+users[i].id)
+                           .replace(retext, users[i].name);
+            count++;
+        }
+        dojo.byId("usersResults").innerHTML = res;
+        dojo.byId("usersResultsCount").innerHTML = count;
+
         dojo.byId('headerSearchResults').style.display = '';
         dojo.byId('searchBox').className = "";
     }
