@@ -367,27 +367,7 @@ public class DBUtil {
      */
     public static String getBooleanValue(boolean bool, Connection conn)
         throws SQLException {
-        int type = DBUtil.getDBType(conn);
-        return DBUtil.getBooleanValue(bool, type);
-    }
-
-    /**
-     * Get the value for a boolean as a string for the required database
-     *
-     * @param type the database type
-     * @return the appropriate boolean string for the db you're using
-     */
-    public static String getBooleanValue(boolean bool, int type) {
-        switch (type) {
-            case DBUtil.DATABASE_ORACLE_8:
-            case DBUtil.DATABASE_ORACLE_9:
-            case DBUtil.DATABASE_ORACLE_10:
-            case DBUtil.DATABASE_ORACLE_11:
-            case DBUtil.DATABASE_MYSQL5:
-                return bool ? "1" : "0";
-            default:
-                return bool ? "true" : "false";
-        }
+        return bool ? "'1'" : "'0'";
     }
 
     /**

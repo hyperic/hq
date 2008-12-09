@@ -65,7 +65,7 @@ public class PermissionManagerImpl
     private static final Log _log =
         LogFactory.getLog(PermissionManagerImpl.class.getName());
 
-    private String _falseToken = null;
+    private final String _falseToken;
 
     private static final String VIEWABLE_SELECT =
         "SELECT instance_id, EAM_RESOURCE.sort_name, EAM_RESOURCE.id, " +
