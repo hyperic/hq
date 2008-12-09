@@ -38,6 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
@@ -70,18 +71,27 @@ public class ReportProcessorEJBImpl
         MeasurementManagerEJBImpl.getOne();
     private final MeasurementProcessorLocal _measurementProc =
         MeasurementProcessorEJBImpl.getOne();
+    private final long MINUTE = MeasurementConstants.MINUTE;
+    private final long PRIORITY_OFFSET = MINUTE*3;
     
-    private void addPoint(List points, Measurement m, MetricValue[] vals)
+    private void addPoint(List points, List priorityPts, Measurement m,
+                          MetricValue[] vals)
     {
         final boolean debug = _log.isDebugEnabled();
         for (int i=0; i<vals.length; i++)
         {
+            long now = System.currentTimeMillis();
+            now = TimingVoodoo.roundDownTime(now, MINUTE);
             try {
                 //this is just to check if the metricvalue is valid
                 //will throw a NumberFormatException if there is a problem
                 new BigDecimal(vals[i].getValue());
                 DataPoint pt = new DataPoint(m.getId(), vals[i]);
-                points.add(pt);
+                if (priorityPts != null && isPriority(now, pt.getTimestamp())) {
+                    priorityPts.add(pt);
+                } else {
+                    points.add(pt);
+                }
                 if (debug && m.getTemplate().isAvailability()) {
                     _log.debug("availability -> " + pt);
                 }
@@ -91,9 +101,16 @@ public class ReportProcessorEJBImpl
             }
         }
     }
-    
-    private void addData(List points, Measurement m, int dsnId, 
-                         MetricValue[] dpts)
+
+    private boolean isPriority(long timestamp, long metricTimestamp) {
+        if (metricTimestamp >= (timestamp-PRIORITY_OFFSET)) {
+            return true;
+        }
+        return false;
+    }
+
+    private void addData(List points, List priorityPts, Measurement m,
+                         int dsnId, MetricValue[] dpts)
     {
         long interval = m.getInterval();
 
@@ -118,7 +135,7 @@ public class ReportProcessorEJBImpl
                                                    adjust);
             passThroughs[i] = modified;
         }
-        addPoint(points, m, passThroughs);
+        addPoint(points, priorityPts, m, passThroughs);
     }
 
     /**
@@ -135,6 +152,7 @@ public class ReportProcessorEJBImpl
 
         List dataPoints = new ArrayList(dsnLists.length);
         List availPoints = new ArrayList(dsnLists.length);
+        List priorityAvailPts = new ArrayList(dsnLists.length);
         
         for (int i = 0; i < dsnLists.length; i++) {
             Integer dmId = new Integer(dsnLists[i].getClientId());
@@ -156,17 +174,18 @@ public class ReportProcessorEJBImpl
                 MetricValue[] vals = valLists[j].getValues();
 
                 if (isAvail) {
-                    addData(availPoints, m, dsnId, vals);
+                    addData(availPoints, priorityAvailPts, m, dsnId, vals);
                 } else {
-                    addData(dataPoints, m, dsnId, vals);
+                    addData(dataPoints, null, m, dsnId, vals);
                 }
             }
         }
 
         DataInserter d = MeasurementStartupListener.getDataInserter();
-        sendMetricDataToDB(d, dataPoints);
+        sendMetricDataToDB(d, dataPoints, false);
         DataInserter a = MeasurementStartupListener.getAvailDataInserter();
-        sendMetricDataToDB(a, availPoints);
+        sendMetricDataToDB(a, availPoints, false);
+        sendMetricDataToDB(a, priorityAvailPts, true);
 
         // Check the SRNs to make sure the agent is up-to-date
         SRNManagerLocal srnManager = getSRNManager();
@@ -188,11 +207,15 @@ public class ReportProcessorEJBImpl
     /**
      * Sends the actual data to the DB.
      */
-    private void sendMetricDataToDB(DataInserter d, List dataPoints) 
+    private void sendMetricDataToDB(DataInserter d, List dataPoints,
+                                    boolean isPriority) 
         throws DataInserterException
     {
+        if (dataPoints.size() <= 0) {
+            return;
+        }
         try {
-            d.insertMetrics(dataPoints);
+            d.insertMetrics(dataPoints, isPriority);
             int size = dataPoints.size();
             long ts = System.currentTimeMillis();
             ReportStatsCollector.getInstance().getCollector().add(size, ts);
