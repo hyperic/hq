@@ -1350,6 +1350,7 @@ select {
 
 .ToolbarContent td {
     background-color: #fff;
+    padding: 1px;
 /*    border-left:1px solid #D5D8DE;*/
 /*    border-right:1px solid #D5D8DE;*/
 }
