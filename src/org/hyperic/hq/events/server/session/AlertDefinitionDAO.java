@@ -394,5 +394,15 @@ public class AlertDefinitionDAO extends HibernateDAO {
             		     " where id = " + id)
             .uniqueResult();
     }
+    
+    int setChildrenActive(AlertDefinition def, boolean active) {
+        return createQuery("update AlertDefinition set active = :active, " +
+                           "enabled = :active, mtime = :mtime " +
+                           "where parent = :def")
+            .setBoolean("active", active)
+            .setLong("mtime", System.currentTimeMillis())
+            .setParameter("def", def)
+            .executeUpdate();
+    }
 
 }

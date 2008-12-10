@@ -413,12 +413,7 @@ public class AlertDefinitionManagerEJBImpl
         List alertdefs = new ArrayList();
         
         for (int i = 0; i < ids.length; i++) {
-            AlertDefinition alert = badFindById(ids[i]);
-
-            alertdefs.add(alert);
-            
-            // If there are any children, add them, too
-            alertdefs.addAll(alert.getChildren());
+            alertdefs.add(badFindById(ids[i]));
         }
 
         for (Iterator i = alertdefs.iterator(); i.hasNext(); ) {
@@ -443,7 +438,8 @@ public class AlertDefinitionManagerEJBImpl
             def.setActiveStatus(activate);
             def.setMtime(System.currentTimeMillis());            
         }
-       
+        
+        getAlertDefDAO().setChildrenActive(def, activate);
     }
     
     /** 
