@@ -319,6 +319,7 @@ function loadSearchData(type, response, evt) {
         for(var i = 0; i < users.length; i++) {
             var fullname = users[i].name;
             res += template.replace(relink, usrURL+users[i].id)
+                           .replace(retype, "user")
                            .replace(retext, users[i].name);
             count++;
         }

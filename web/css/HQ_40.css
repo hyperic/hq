@@ -187,6 +187,10 @@ a:visited,a:hover,a {
     background: transparent url('/images/4.0/icons/group.png') no-repeat 0% 50%;
 }
 
+#headerSearchResults li.user {
+    background: transparent url('/images/group_key.gif') no-repeat 0% 50%;
+}
+
 /* Navigation Tabs */
 
 #navTabContainer {
