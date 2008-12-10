@@ -122,10 +122,11 @@ public class AlertDefinitionManagerEJBImpl
         StopWatch watch = new StopWatch();
         
         // Get rid of their triggers first
-        watch.markTimeBegin("removeTriggers");
-        TriggerDAO tdao = getTriggerDAO();
-        tdao.removeTriggers(alertdef);
-        watch.markTimeEnd("removeTriggers");
+        watch.markTimeBegin("removeActOnTrigger");
+        EventsStartupListener.getChangedTriggerCallback()
+            .beforeTriggersDeleted(alertdef.getTriggers());
+        alertdef.setActOnTrigger(null);
+        watch.markTimeEnd("removeActOnTrigger");
 
         // Delete escalation state
         watch.markTimeBegin("endEscalation");
@@ -171,6 +172,10 @@ public class AlertDefinitionManagerEJBImpl
 
         deleteAlertDefinitionStuff(subj, alertdef, escMan);
 
+        watch.markTimeBegin("deleteTriggers");
+        getTriggerDAO().deleteAlertDefinition(alertdef);
+        watch.markTimeBegin("deleteTriggers");
+        
         watch.markTimeBegin("markActionsDeleted");
         getActionDAO().deleteAlertDefinition(alertdef);
         watch.markTimeBegin("markActionsDeleted");

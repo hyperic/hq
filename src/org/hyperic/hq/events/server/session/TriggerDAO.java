@@ -62,6 +62,22 @@ public class TriggerDAO extends HibernateDAO {
         def.clearTriggers();
     }
 
+    void deleteAlertDefinition(AlertDefinition def) {
+        String sql = "update AlertCondition c set trigger = null " +
+                     "where alertDefinition = :def or " +
+                           "exists (select d.id from AlertDefinition d where " +
+                           "d.parent = :def and c.alertDefinition = d)";
+
+        getSession().createQuery(sql).setParameter("def", def).executeUpdate();
+
+        sql = "delete from RegisteredTrigger r " +
+                     "where alertDefinition = :def or " +
+                           "exists (select d.id from AlertDefinition d where " +
+                           "d.parent = :def and r.alertDefinition = d)";
+
+        getSession().createQuery(sql).setParameter("def", def).executeUpdate();
+    }
+
     public RegisteredTrigger findById(Integer id) {
         return (RegisteredTrigger) super.findById(id);
     }

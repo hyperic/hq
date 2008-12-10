@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.hibernate.Query;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -82,11 +83,15 @@ public class ActionDAO extends HibernateDAO {
                             .list();
         
         // Bulk update all actions
-        String sql = "update Action set parent = null, deleted = true " +
-        		     "where parent in (:acts) or alertDefinition = :def";
-        createQuery(sql).setParameterList("acts", actions)
-                        .setParameter("def", def)
-                        .executeUpdate();
+        String sql = "update Action set parent = null, deleted = true where " +
+        		     (actions.size() > 0 ? "parent in (:acts) or" : "") +
+        		             " alertDefinition = :def";
+        Query q = createQuery(sql).setParameter("def", def);
+        
+        if (actions.size() > 0)
+            q.setParameterList("acts", actions);
+                        
+        q.executeUpdate();
     }
 
     /**
