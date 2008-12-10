@@ -36,16 +36,23 @@
  <hq:userResourcePermissions debug="false" resource="${Resource}"/>
   <table border="0"><tr><td class="LinkBox">
     <html:link page="/resource/service/Inventory.do?mode=editConfig&eid=${Resource.entityId}"><fmt:message key="resource.service.inventory.link.Configure"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link>
-	<br>
+	<br />
     <tiles:insert definition=".resource.common.quickDelete">
       <tiles:put name="resource" beanName="resource"/>
 	  <tiles:put name="deleteMessage">
 		<fmt:message key="resource.service.inventory.link.DeleteService"/>
 	  </tiles:put>
     </tiles:insert>
-	<br>
+	<br />
     <tiles:insert definition=".resource.common.quickFavorites">
       <tiles:put name="resource" beanName="resource"/>
     </tiles:insert>
+	<br />
+	<html:link page="#" styleId="AddToGroupMenuLink"><fmt:message key="resource.group.AddToGroup.Title"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link>
 </td></tr></table>
+
+<tiles:insert definition=".resource.common.addToGroup">
+	<tiles:put name="resource" beanName="resource"/>
+</tiles:insert>
+
 </c:if>

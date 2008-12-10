@@ -493,6 +493,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <html:hidden property="pn"/>
 
 </html:form>
+<tiles:insert definition=".resource.common.addToGroup"/>
 <tiles:insert definition=".page.footer"/>
 
 <script type="text/javascript">

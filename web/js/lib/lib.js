@@ -2465,6 +2465,90 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
 // set the hyperic.dashboard.widget as the ancestor of the summaryWidget class.
 hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
 
+hyperic.group_manager = function() {
+	var that = this;
+	that.dialogs = {};
+	
+	that.init = function() {
+		if(!that.dialogs.AddToGroup){
+	    	var pane = dojo11.byId("add_to_group_dialog");
+			that.dialogs.AddToGroup = new dijit11.Dialog({
+				id: "Add_to_Group_Dialog",
+				refocus: true,
+				autofocus: false,
+				title: "Group Manager"
+				}, pane);			
+		}
+	}
+	
+	that.processAction = function(myForm) {
+		var formArray = Form.serialize(myForm, true);
+
+		if (formArray.radioAction) {
+			// from Resource Tools menu
+			eval("that." + formArray.radioAction + "('" + formArray.eid + "')");
+		} else if (formArray.resources) {
+			// from Browse Resources page
+			if (typeof formArray.resources == "string") {
+				// the AddToGroup dialog requires that only one resource is selected
+				document.AddToGroupForm.eid.value = formArray.resources;
+				that.dialogs.AddToGroup.show();
+				return false;
+			} else {
+				// multiple resources selected
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
+	that.addNewGroup = function(eid) {
+		var entityType = eid.split(":")[0];
+		var url = "/resource/hub/RemoveResource.do";
+		url += "?resources=" + escape(eid);
+		url += "&ff=" + entityType;
+		url += "&group.x=1&preventCache=" + new Date().getTime();
+		document.location = url;
+	}
+	
+	that.addToGroup = function(eid) {
+		var entityType = parseInt(eid.split(":")[0]);
+		var entityId = parseInt(eid.split(":")[1]);
+		var url = "/resource/{0}/Inventory.do";
+		url += "?mode=addGroups";
+		url += "&rid=" + entityId;
+		url += "&type=" + entityType;
+		url += "&preventCache=" + new Date().getTime();
+		
+		switch(entityType) {
+			case 1:
+				url = url.replace("{0}", "platform");
+				break;
+			case 2:
+				url = url.replace("{0}", "server");
+				break;
+			case 3:
+				url = url.replace("{0}", "service");
+				break;
+			case 4:
+				url = url.replace("{0}", "application");
+				break;
+			case 5:
+				url = url.replace("{0}", "group").replace("addGroups", "addResources");
+				break;
+			default:
+				alert("Unable to process your request");
+				that.dialogs.AddToGroup.hide();
+				return;
+		}
+				
+		document.location = url;
+	}
+	
+	that.init();
+}
+
 hyperic.alert_center = function() {
 	var that = this;
 	that.dialog = null;

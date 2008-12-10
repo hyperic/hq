@@ -56,6 +56,10 @@
   <definition name=".resource.common.quickDelete"
               path="/resource/common/QuickDelete.jsp"/>
 
+  <!-- quick "delete resource" from tools menu -->
+  <definition name=".resource.common.addToGroup"
+              path="/resource/common/AddToGroup.jsp"/>
+
   <!-- tabs -->
   <definition name=".tabs.resource.inventoryonly"
               path="/resource/common/ControlTab.jsp">

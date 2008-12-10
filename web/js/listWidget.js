@@ -51,11 +51,13 @@ function ReplaceButton(divId, tdId, tdState, imageId, btnFunction) {
 		newInput.setAttribute("src", imgPath);
 		newInput.setAttribute("name", inputName);
         if (btnFunction == 'delete' || btnFunction == 'remove') {
-            newInput.setAttribute("onclick", "return confirm('Are you sure you want to remove or disable selections?');");
+            newInput.onclick = function() { return confirm('Are you sure you want to remove or disable selections?'); };
+        } else if (btnFunction == 'group') {
+        	newInput.onclick = function() { return MyGroupManager.processAction(this.form); };
         } else if (btnFunction == 'enableAlerts') {
-        	newInput.setAttribute("onclick", "return confirm('Are you sure you want to enable all alerts for the selections?');");
+        	newInput.onclick = function() { return confirm('Are you sure you want to enable all alerts for the selections?'); };
         } else if (btnFunction == 'disableAlerts') {
-        	newInput.setAttribute("onclick", "return confirm('Are you sure you want to disable all alerts for the selections?');");        	
+        	newInput.onclick = function() { return confirm('Are you sure you want to disable all alerts for the selections?'); };        	
         }
 		newDiv.appendChild(newInput);
 	}

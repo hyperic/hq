@@ -78,6 +78,12 @@
     <tiles:insert definition=".resource.common.quickFavorites">
       <tiles:put name="resource" beanName="resource"/>
     </tiles:insert>
+	<br />
+	<html:link page="#" styleId="AddToGroupMenuLink"><fmt:message key="resource.group.AddToGroup.Title"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link>
 </td></tr></table>
+
+<tiles:insert definition=".resource.common.addToGroup">
+	<tiles:put name="resource" beanName="resource"/>
+</tiles:insert>
 
 </c:if>
