@@ -115,8 +115,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             sql += " where t.defaultOn = :defaultOn ";
         }
         
-        sql += 
-            "order by " + 
+        sql += " order by " + 
             ((MeasurementTemplateSortField)pInfo.getSort()).getSortString("t");
         
         Query q = getSession().createQuery(sql);

@@ -142,51 +142,54 @@ public class RegisteredDispatcherEJBImpl
             return;
         }
         
-        // Just to be safe, start with a fresh queue.
-        Messenger.resetThreadLocalQueue();
-        final Set visitedMCTriggers = new HashSet();
-        boolean debug = log.isDebugEnabled();
-        
+        final boolean debug = log.isDebugEnabled();
+        ObjectMessage om = (ObjectMessage) inMessage;
+        Object obj;
         try {
-            ObjectMessage om = (ObjectMessage) inMessage;
-            Object obj = om.getObject();
-            
+            obj = om.getObject();
+
             if (debug) {
-                log.debug("Redelivering message="+inMessage.getJMSRedelivered());
-            }
-                       
-            if (obj instanceof AbstractEvent) {
-                AbstractEvent event = (AbstractEvent) obj;
-                
-                if (debug) {
-                    log.debug("1 event in the message");
-                }
-                
-                dispatchEvent(event, visitedMCTriggers);
-            } else if (obj instanceof Collection) {
-                Collection events = (Collection) obj;
-                
-                if (debug) {
-                    log.debug(events.size()+" events in the message");
-                }
-                
-                for (Iterator it = events.iterator(); it.hasNext(); ) {
-                    AbstractEvent event = (AbstractEvent) it.next();
-                    dispatchEvent(event, visitedMCTriggers);
-                }
+                log.debug("Redelivering message=" +
+                          inMessage.getJMSRedelivered());
             }
         } catch (JMSException e) {
             log.error("Cannot open message object", e);
-        } catch (InterruptedException e) {
-            log.info("Thread was interrupted while processing events.");
-        } finally {
+            return;
+        }
+        
+        Collection events = new ArrayList();
+        if (obj instanceof AbstractEvent) {
+            events.add(obj);
+        } else if (obj instanceof Collection) {
+            events.addAll((Collection) obj);
+        }
+        
+        while (events.size() > 0) {
+            // Just to be safe, start with a fresh queue.
+            Messenger.resetThreadLocalQueue();
+            final Set visitedMCTriggers = new HashSet();
+
             try {
-                flushStateForVisitedMCTriggers(visitedMCTriggers);
-            } catch (Exception e) {
-                log.error("Failed to flush state for multi condition trigger", e);
+                if (debug) {
+                    log.debug(events.size()+" events in the message");
+                }
+
+                for (Iterator it = events.iterator(); it.hasNext(); ) {
+                    AbstractEvent event = (AbstractEvent) it.next();
+                    dispatchEvent(event, visitedMCTriggers);
+                    it.remove();
+                }
+            } catch (InterruptedException e) {
+                log.info("Thread was interrupted while processing events.");
+            } finally {
+                try {
+                    flushStateForVisitedMCTriggers(visitedMCTriggers);
+                } catch (Exception e) {
+                    log.error("Failed to flush state for multi condition trigger", e);
+                }
+
+                dispatchEnqueuedEvents();
             }
-            
-            dispatchEnqueuedEvents();
         }
     }
     
