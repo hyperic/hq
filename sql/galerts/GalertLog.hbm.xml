@@ -45,14 +45,14 @@
 
     <bag name="actionLogBag" table="EAM_ALERT_ACTION_LOG"
          cascade="all-delete-orphan" inverse="true"
-         order-by="TIMESTAMP, ID">
+         order-by="ID">
       <cache usage="read-write" />
       <key on-delete="cascade" column="GALERT_ID" not-null="true"/>
       <one-to-many class="GalertActionLog" />
     </bag>
 
     <bag name="auxLogBag" table="EAM_GALERT_AUX_LOGS" 
-         cascade="all-delete-orphan" inverse="true" order-by="TIMESTAMP, ID">
+         cascade="all-delete-orphan" inverse="true" order-by="ID">
       <cache usage="read-write" />
       <key on-delete="cascade" column="GALERT_ID" not-null="true"/>
       <one-to-many class="GalertAuxLog" />
