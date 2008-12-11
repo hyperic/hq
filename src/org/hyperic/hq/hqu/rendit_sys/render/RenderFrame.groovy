@@ -200,6 +200,8 @@ class RenderFrame {
                         t = eng.createTemplate(reader)
                         _templates[gspFile] = [mtime: mtime, template : t]
                     }
+                } else {
+                    t = tmplMap.template
                 }
             }
             if (t) {
