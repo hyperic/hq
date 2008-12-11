@@ -77,7 +77,9 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
@@ -2300,14 +2302,69 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      */
     public List findGroupCurrentHealth(int sessionId, AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
-               AppdefEntityNotFoundException, GroupNotCompatibleException,
-               PermissionException {
-        AuthzSubject subject = manager.getSubject(sessionId);
-    
-        List members = GroupUtil.getGroupMembers(subject, entId, null);
-        PageList siblings = new PageList(members, members.size());
-    
-        return getResourcesCurrentHealth(subject, siblings);
+               AppdefEntityNotFoundException, PermissionException {
+        final AuthzSubject subject = manager.getSubject(sessionId);
+        final PlatformManagerLocal platMan = getPlatformManager();
+        
+        // Find the group
+        final ResourceGroupManagerLocal resGrpMgr = getResourceGroupManager();
+        final ResourceGroup group =
+            resGrpMgr.findResourceGroupById(subject, entId.getId());
+
+        StopWatch watch = new StopWatch();
+        PageList summaries = new PageList();
+        for (Iterator it = resGrpMgr.getMembers(group).iterator();
+             it.hasNext(); ) {
+            Resource res = (Resource) it.next();
+            AppdefEntityID aeid = new AppdefEntityID(res);
+            ResourceDisplaySummary summary = new ResourceDisplaySummary();
+        
+            // Set the resource
+            AppdefResourceValue parent = null;
+            HashSet categories = new HashSet(4);
+            switch (aeid.getType()) {
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER :
+                    parent = platMan
+                        .getPlatformByServer(subject, aeid.getId());
+                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
+                    categories.add(MeasurementConstants.CAT_AVAILABILITY);
+                    categories.add(MeasurementConstants.CAT_THROUGHPUT);
+                
+                    setResourceDisplaySummaryValueForCategory(
+                        subject, aeid, summary, categories);
+                    
+                    summary.setMonitorable(Boolean.TRUE);
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                    summary.setMonitorable(Boolean.TRUE);
+                    // Set the availability now
+                    summary.setAvailability(new Double(getAvailability(subject,
+                                                                       aeid)));
+                    
+                    try {
+                        // Get the availability template
+                        MeasurementTemplate tmpl =
+                            getAvailabilityMetricTemplate(subject, aeid);
+                        summary.setAvailTempl(tmpl.getId());
+                    } catch (MeasurementNotFoundException e) {
+                        // No availability metric, don't set it
+                    }
+                    break;
+                default:
+                    throw new InvalidAppdefTypeException(
+                        "entity type is not monitorable, id type: " +
+                        aeid.getType());
+            }            
+            setResourceDisplaySummary(summary, res, aeid, parent);
+            summaries.add(summary);
+        }
+        if (_log.isDebugEnabled()) {
+            _log.debug("getGroupCurrentHealth: " + watch);
+        }
+        summaries.setTotalSize(summaries.size());
+        return summaries;
     }
 
     /**
@@ -2351,6 +2408,26 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         rds.setResourceName(resource.getName());
         rds.setResourceEntityTypeName(resource.getID().getTypeName());
         rds.setResourceTypeName(resource.getTypeName());
+        if (parentResource == null) {
+            rds.setHasParentResource(Boolean.FALSE);
+        } else {
+            rds.setParentResourceId(parentResource.getId());
+            rds.setParentResourceName(parentResource.getName());
+            rds.setParentResourceTypeId(
+                new Integer(parentResource.getEntityId().getType()));
+            rds.setHasParentResource(Boolean.TRUE);
+        }
+    }
+
+    private void setResourceDisplaySummary(ResourceDisplaySummary rds, 
+                                           Resource resource,
+                                           AppdefEntityID aeid,
+                                           AppdefResourceValue parentResource)
+        throws AppdefEntityNotFoundException, PermissionException {
+        rds.setEntityId(aeid);
+        rds.setResourceName(resource.getName());
+        rds.setResourceEntityTypeName(aeid.getTypeName());
+        rds.setResourceTypeName(resource.getPrototype().getName());
         if (parentResource == null) {
             rds.setHasParentResource(Boolean.FALSE);
         } else {
