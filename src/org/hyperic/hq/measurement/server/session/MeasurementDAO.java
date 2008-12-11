@@ -452,8 +452,9 @@ public class MeasurementDAO extends HibernateDAO {
             .setCacheRegion("Measurement.findAvailMeasurements");
         // should be a unique result if only one resource is being examined
         if (resources.size() == 1) {
-            List rtn = new ArrayList();
+            List rtn = new ArrayList(1);
             rtn.add(query.uniqueResult());
+            return rtn;
         }
         return query.list();
     }
