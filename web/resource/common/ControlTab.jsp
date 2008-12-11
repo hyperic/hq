@@ -126,13 +126,13 @@
        <td class="SubTabCellWhite"><html:link href="${tabLink}"><html:img page="/images/Sub${subSectionName}_${tab.value}_off.gif" onmouseover="imageSwap (this, imagePath +  'Sub${subSectionName}_${tab.value}', '_over')" onmouseout="imageSwap (this, imagePath +  'Sub${subSectionName}_${tab.value}', '_off')" alt="" border="0"/></html:link></td>
     </c:when>
     <c:otherwise>
-    <td class="SubTabCell"><html:img page="/images/spacer.gif" width="${tab.width}" height="${tab.height}" alt="" border="0"/></td>
+    <td class="SubTabCellWhite"><html:img page="/images/spacer.gif" width="${tab.width}" height="${tab.height}" alt="" border="0"/></td>
     </c:otherwise>
     </c:choose>
     </c:otherwise>
   </c:choose>
   <c:if test="${status.count == 2}">
-    <td class="SubTabCell"><html:img page="/images/spacer.gif" width="25" height="1" alt="" border="0"/></td>
+    <td class="SubTabCellWhite"><html:img page="/images/spacer.gif" width="25" height="1" alt="" border="0"/></td>
   </c:if>
 </c:forEach>
        <td width="100%" class="SubTabCell" id="SubTabTarget"><html:img page="/images/spacer.gif" width="1" height="25" alt="" border="0"/></td>
