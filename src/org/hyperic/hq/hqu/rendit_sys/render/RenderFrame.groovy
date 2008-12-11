@@ -50,6 +50,7 @@ import groovy.text.SimpleTemplateEngine
  */
 class RenderFrame {
     Log log = LogFactory.getLog(RenderFrame)
+    private static final Map<String, Map> _templates = [:]
      
     private Map    opts
     private Writer output
@@ -187,24 +188,36 @@ class RenderFrame {
     	    } else {
                 gspFile = new File(subViewDir, "${actionArg}.gsp")
     	    }
-            
-            gspFile.withReader { reader ->
-				def eng = new SimpleTemplateEngine(controller.dumpScripts)
-				def template = eng.createTemplate(reader)
-				locals['render'] = { subOpts ->
+    	    
+            long mtime = gspFile.lastModified()
+            def t;
+            synchronized(_templates) {
+                Map tmplMap = _templates.get(gspFile)
+                if (!tmplMap || tmplMap.mtime != mtime) {
+                    log.info("Creating template for [${gspFile.absolutePath}]")
+                    gspFile.withReader { reader ->
+                        def eng = new SimpleTemplateEngine(controller.dumpScripts)
+                        t = eng.createTemplate(reader)
+                        _templates[gspFile] = [mtime: mtime, template : t]
+                    }
+                }
+            }
+            if (t) {
+                locals['render'] = { subOpts ->
                     // Setup a new closure for 'render' so that the context
                     // gets copied around.  Also merge parent rendering options
                     // with sub-options
-				    def passOpts = new HashMap(opts)
-				    passOpts.putAll(subOpts)
-                    if (!passOpts['output'])
+                    def passOpts = new HashMap(opts)
+                    passOpts.putAll(subOpts)
+                    if (!passOpts['output']) {
                         passOpts['output'] = output
+                    }
                     passOpts['partialDir'] = partialDir                        
                     new RenderFrame(passOpts, controller, this).render()
-				}
-				template.make(locals).writeTo(output)
-				output.flush()
-			}
+                }
+                t.make(locals).writeTo(output)
+                output.flush()
+            }
         } catch(Exception e) {
             def pw = new PrintWriter(output)
             e.printStackTrace(pw)
