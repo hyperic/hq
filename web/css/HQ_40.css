@@ -2248,6 +2248,10 @@ button span{
     background-color:#fff
 }
 
+.SubTabCellWhite img {
+    padding-left: 2px;
+}
+
 .SubTabCellWhiteLeft {
     background-color:#fff;
     border-left: 1px solid gray
