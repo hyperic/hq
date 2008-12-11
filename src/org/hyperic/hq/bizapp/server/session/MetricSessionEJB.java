@@ -361,10 +361,6 @@ public class MetricSessionEJB extends BizappSessionEJB {
             }
         }
         
-        long acceptable =
-            liveMillis == 0 ? MeasurementConstants.TIMERANGE_UNLIMITED:
-                              current - liveMillis; 
-    
         double[] result = new double[ids.length];
         Arrays.fill(result, MeasurementConstants.AVAIL_UNKNOWN);
         
@@ -372,7 +368,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         if (midMap.size() > 0) {
             Integer[] mids = (Integer[]) midMap.values().
                 toArray(new Integer[midMap.values().size()]);
-            data = getAvailManager().getLastAvail(mids, acceptable);
+            data = getAvailManager().getLastAvail(mids);
         }
     
         // Organize by agent
