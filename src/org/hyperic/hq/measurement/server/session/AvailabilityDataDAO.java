@@ -69,66 +69,56 @@ public class AvailabilityDataDAO extends HibernateDAO {
 
     List findLastAvail(List mids, long after) {
         List rtn = new ArrayList(mids.size());
+        if (mids.isEmpty())
+            return rtn;
+        
         String hql = new StringBuilder()
                      .append("from AvailabilityDataRLE")
                      .append(" WHERE endtime > :endtime")
                      .append(" AND availabilityDataId.measurement in (:ids)")
                      .append(" ORDER BY endtime desc").toString();
-        int i=0;
         List tmp = new ArrayList(BATCH_SIZE);
-        for (Iterator it=mids.iterator(); it.hasNext(); i++) {
+        for (Iterator it = mids.iterator(); it.hasNext(); ) {
             tmp.add(it.next());
-            if (i != 0 && (i%BATCH_SIZE) == 0) {
+            if (tmp.size() == BATCH_SIZE || !it.hasNext()) {
                 rtn.addAll(getSession()
-                    .createQuery(hql)
-                    .setLong("endtime", after)
-                    .setParameterList("ids", tmp, new IntegerType())
-                    .list());
+                           .createQuery(hql)
+                           .setLong("endtime", after)
+                           .setParameterList("ids", tmp, new IntegerType())
+                           .list());
                 tmp.clear();
             }
-        }
-        if (tmp.size() > 0) {
-            rtn.addAll(getSession()
-                .createQuery(hql)
-                .setLong("endtime", after)
-                .setParameterList("ids", tmp, new IntegerType())
-                .list());
         }
         return rtn;
     }
 
     List findLastAvail(List mids) {
         List rtn = new ArrayList(mids.size());
+        if (mids.isEmpty())
+            return rtn;
+        
         String hql = new StringBuilder()
 			         .append("from AvailabilityDataRLE")
                      .append(" WHERE endtime = :endtime")
                      .append(" AND availabilityDataId.measurement in (:ids)")
-                     .append(" ORDER BY endtime desc").toString();
+                     .toString();
         // need to do this because of hibernate bug
         // http://opensource.atlassian.com/projects/hibernate/browse/HHH-1985
-        int i=0;
         List tmp = new ArrayList(BATCH_SIZE);
-        for (Iterator it=mids.iterator(); it.hasNext(); i++) {
+        for (Iterator it = mids.iterator(); it.hasNext(); ) {
             tmp.add(it.next());
-            if (i != 0 && (i%BATCH_SIZE) == 0) {
+            if (tmp.size() == BATCH_SIZE || !it.hasNext()) {
                 rtn.addAll(getSession()
-                    .createQuery(hql)
-                    .setLong("endtime", MAX_TIMESTAMP)
-                    .setParameterList("ids", tmp, new IntegerType())
-                    .list());
+                           .createQuery(hql)
+                           .setLong("endtime", MAX_TIMESTAMP)
+                           .setParameterList("ids", tmp, new IntegerType())
+                           .list());
                 tmp.clear();
             }
         }
-        if (tmp.size() > 0) {
-            rtn.addAll(getSession()
-                .createQuery(hql)
-                .setLong("endtime", MAX_TIMESTAMP)
-                .setParameterList("ids", tmp, new IntegerType())
-                .list());
-        }
         return rtn;
     }
-    
+
     AvailabilityDataRLE findAvail(DataPoint state) {
         String sql = new StringBuilder()
                      .append("FROM AvailabilityDataRLE")
@@ -140,7 +130,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
             .setLong("startime", state.getTimestamp())
             .setInteger("meas", state.getMetricId().intValue())
         	.list();
-        if (list.size() == 0) {
+        if (list.isEmpty()) {
             return null;
         }
         return (AvailabilityDataRLE)list.get(0);
@@ -152,7 +142,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
                      .append(" WHERE availabilityDataId.measurement = :meas")
                      .append(" AND availabilityDataId.startime > :startime")
                      .append(" ORDER BY startime asc").toString();
-        return  getSession().createQuery(sql)
+        return getSession().createQuery(sql)
             .setLong("startime", state.getTimestamp())
             .setInteger("meas", state.getMetricId().intValue())
         	.list();
@@ -169,7 +159,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
             .setLong("startime", state.getTimestamp())
             .setInteger("meas", state.getMetricId().intValue())
         	.setMaxResults(1).list();
-        if (list.size() == 0) {
+        if (list.isEmpty()) {
             return null;
         }
         return (AvailabilityDataRLE)list.get(0);
@@ -191,7 +181,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
             .setLong("startime", state.getTimestamp())
             .setInteger("meas", state.getMetricId().intValue())
         	.setMaxResults(1).list();
-        if (list.size() == 0) {
+        if (list.isEmpty()) {
             return null;
         }
         return (AvailabilityDataRLE)list.get(0);
