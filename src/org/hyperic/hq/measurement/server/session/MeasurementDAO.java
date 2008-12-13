@@ -299,7 +299,7 @@ public class MeasurementDAO extends HibernateDAO {
         return count;
     }
 
-    List findEnabledByResource(Resource resource) {
+    public List findEnabledByResource(Resource resource) {
         String sql =
             "select m from Measurement m " +
             "join m.template t " +
