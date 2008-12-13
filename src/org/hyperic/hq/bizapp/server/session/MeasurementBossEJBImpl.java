@@ -2311,6 +2311,30 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         final ResourceGroup group =
             resGrpMgr.findResourceGroupById(subject, entId.getId());
 
+        Map cats = new HashMap(2);
+        cats.put(MeasurementConstants.CAT_AVAILABILITY, null);
+        cats.put(MeasurementConstants.CAT_THROUGHPUT, null);
+
+        // Look up metrics by group first
+        MeasurementManagerLocal mman = getMetricManager();
+        for (Iterator it = cats.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry) it.next();
+            List metrics =
+                mman.findDesignatedMeasurements(subject, group,
+                                                (String) entry.getKey());
+            Map mmap = new HashMap(metrics.size());
+            // Optimization for the fact that we can have multiple indicator
+            // metrics for each category, only keep one
+            for (Iterator mit = metrics.iterator(); mit.hasNext(); ) {
+                Measurement m = (Measurement) mit.next();
+                if (mmap.containsKey(m.getResource()))
+                    continue;
+                
+                mmap.put(m.getResource(), m);
+            }
+            entry.setValue(mmap);
+        }
+        
         StopWatch watch = new StopWatch();
         PageList summaries = new PageList();
         for (Iterator it = resGrpMgr.getMembers(group).iterator();
@@ -2321,19 +2345,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
             // Set the resource
             AppdefResourceValue parent = null;
-            HashSet categories = new HashSet(4);
             switch (aeid.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER :
                     parent = platMan
                         .getPlatformByServer(subject, aeid.getId());
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
-                    categories.add(MeasurementConstants.CAT_AVAILABILITY);
-                    categories.add(MeasurementConstants.CAT_THROUGHPUT);
-                
-                    setResourceDisplaySummaryValueForCategory(
-                        subject, aeid, summary, categories);
-                    
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    setResourceDisplaySummaryValueForCategories(subject, res,
+                                                                summary, cats);
                     summary.setMonitorable(Boolean.TRUE);
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
@@ -2582,6 +2601,64 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
 
             done.add(category);
+        }
+        watch.markTimeEnd("get designated metrics data");
+        if (_log.isDebugEnabled()) {
+            _log.debug("setResourceDisplaySummaryValueForCategory: " + watch);
+        }
+    }
+
+    /**
+     * @param id the AppdefEntityID of the resource our ResourceDisplaySummary is for
+     * @param summary a ResourceDisplaySummary
+     * @throws PermissionException
+     * @throws AppdefEntityNotFoundException
+     */
+    private void setResourceDisplaySummaryValueForCategories(
+                                            AuthzSubject subject, Resource res,
+                                            ResourceDisplaySummary summary,
+                                            Map categories)
+        throws AppdefEntityNotFoundException, PermissionException {        
+        StopWatch watch = new StopWatch();
+        List resMetrics = new ArrayList(categories.size());
+        
+        // First find the measurements
+        for (Iterator it = categories.values().iterator(); it.hasNext(); ) {
+            Map metrics = (Map) it.next();
+            if (metrics.containsKey(res)) {
+                resMetrics.add((Measurement) metrics.remove(res));
+            }
+        }
+
+        watch.markTimeBegin("get designated metrics data");
+        AppdefEntityID id = new AppdefEntityID(res);
+        for (Iterator it = resMetrics.iterator(); it.hasNext(); ) {
+            Measurement m = (Measurement) it.next();
+            MeasurementTemplate templ = m.getTemplate();
+            String category = templ.getCategory().getName();
+    
+            if (category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
+                summary.setAvailability(
+                    new Double(getAvailability(subject, id)));
+                summary.setAvailTempl(templ.getId());
+                continue;
+            }
+            
+            MetricValue mv = getDataMan().getLastHistoricalData(m);
+            if (mv == null) {
+                continue;
+            }
+            Double theValue = mv.getObjectValue();
+    
+            if (category.equals(MeasurementConstants.CAT_THROUGHPUT)) {
+                summary.setThroughput(theValue);
+                summary.setThroughputUnits(templ.getUnits());
+                summary.setThroughputTempl(templ.getId());
+            } else if (category.equals(MeasurementConstants.CAT_PERFORMANCE)) {
+                summary.setPerformance(theValue);
+                summary.setPerformanceUnits(templ.getUnits());
+                summary.setPerformTempl(templ.getId());
+            }
         }
         watch.markTimeEnd("get designated metrics data");
         if (_log.isDebugEnabled()) {

@@ -474,25 +474,6 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * if false, it will be disabled.
      * @ejb:interface-method
      */
-    public void toggleRuntimeScan(int sessionID,
-                                  AppdefEntityID id,
-                                  boolean doEnable)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException, AppdefEntityNotFoundException,
-               AppdefGroupNotFoundException, GroupNotCompatibleException,
-               UpdateException, ConfigFetchException, EncodingException 
-    {
-        AuthzSubject subject = sessionManager.getSubject(sessionID);
-        toggleRuntimeScan(subject, id, doEnable);
-    }
-    
-    /**
-     * Process queued AI resources.
-     * @param id The server to enable runtime-AI for.
-     * @param doEnable If true, runtime autodiscovery will be enabled,
-     * if false, it will be disabled.
-     * @ejb:interface-method
-     */
     public void toggleRuntimeScan(AuthzSubject subject,
                                   AppdefEntityID id,
                                   boolean doEnable)

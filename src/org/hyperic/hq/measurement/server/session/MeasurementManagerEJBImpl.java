@@ -58,6 +58,7 @@ import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -651,6 +652,17 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                                            AppdefEntityID id, String cat) {
         return getMeasurementDAO()
             .findDesignatedByResourceForCategory(getResource(id), cat);
+    }
+
+    /**
+     * Look up a list of designated Measurements for an group for a category
+     *
+     * @return A List of Measurements
+     * @ejb:interface-method
+     */
+    public List findDesignatedMeasurements(AuthzSubject subject,
+                                           ResourceGroup g, String cat) {
+        return getMeasurementDAO().findDesignatedByCategoryForGroup(g, cat);
     }
 
     /**

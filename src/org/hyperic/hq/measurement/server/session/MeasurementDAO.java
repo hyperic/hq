@@ -46,6 +46,7 @@ import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 
@@ -180,7 +181,7 @@ public class MeasurementDAO extends HibernateDAO {
             .list();
     }
     
-    public List findIdsByTemplateForInstances(Integer tid, Integer[] iids) {
+    List findIdsByTemplateForInstances(Integer tid, Integer[] iids) {
         if (iids.length == 0)
             return new ArrayList(0);
         
@@ -298,7 +299,7 @@ public class MeasurementDAO extends HibernateDAO {
         return count;
     }
 
-    public List findEnabledByResource(Resource resource) {
+    List findEnabledByResource(Resource resource) {
         String sql =
             "select m from Measurement m " +
             "join m.template t " +
@@ -395,6 +396,20 @@ public class MeasurementDAO extends HibernateDAO {
             .setCacheRegion("Measurement.findDesignatedByResource")
             .list();
     }
+
+    List findDesignatedByCategoryForGroup(ResourceGroup g, String cat) {
+        String sql =
+            "select m from Measurement m, GroupMember gm " +
+            "join m.template t " +
+            "join t.category c " +
+            "where gm.group = :group and gm.resource = m.resource " +
+            "and t.designate = true and c.name = :cat order by t.name";
+
+        return getSession().createQuery(sql)
+            .setParameter("group", g)
+            .setParameter("cat", cat)
+            .list();
+        }
 
     List findByCategory(String cat) {
         String sql =
