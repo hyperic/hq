@@ -500,7 +500,7 @@ public class DBUtil {
      * @param clause      the clause to repeat
      * @return the resulting String
      */
-    public static String composeConjunctions(int iterations, String conjunction,
+    private static String composeConjunctions(int iterations, String conjunction,
                                              String clause) {
         StringBuffer strBuf = new StringBuffer();
         for (int i = 0; i < iterations; i++) {
