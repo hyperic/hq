@@ -54,9 +54,10 @@ public class AvailabilityCheckService
     extends SessionMBeanBase
     implements AvailabilityCheckServiceMBean
 {
-    private Log _log = LogFactory.getLog(AvailabilityCheckService.class);
-    private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
-    private static final double AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
+    private final Log _log = LogFactory.getLog(AvailabilityCheckService.class);
+    private static final double AVAIL_DOWN   = MeasurementConstants.AVAIL_DOWN,
+                                AVAIL_PAUSED = MeasurementConstants.AVAIL_PAUSED,
+                                AVAIL_NULL   = MeasurementConstants.AVAIL_NULL;
 
     private long _interval = 0;
     private long _startTime = 0;
@@ -137,16 +138,21 @@ public class AvailabilityCheckService
                     // another interval
                     continue;
                 }
-                if (last.getValue() == AVAIL_DOWN ||
+                if (!meas.isEnabled()) {
+                    long t = last.getValue() != AVAIL_DOWN ?
+                        lastTimestamp + interval :
+                        TimingVoodoo.roundDownTime(now - interval, interval);
+                    DataPoint point = new DataPoint(
+                        meas.getId(), new MetricValue(AVAIL_PAUSED, t));
+                    rtn.add(new ResourceDataPoint(meas.getResource(), point));
+                } else if (last.getValue() == AVAIL_DOWN ||
                     (now - lastTimestamp) > interval*2)
                 {
                     long t = last.getValue() != AVAIL_DOWN ?
-                             lastTimestamp + interval :
-                             TimingVoodoo.roundDownTime(now - interval,
-                                                        interval);
-                    DataPoint point = new DataPoint(meas.getId(),
-                                                    new MetricValue(AVAIL_DOWN,
-                                                                    t));
+                        lastTimestamp + interval :
+                        TimingVoodoo.roundDownTime(now - interval, interval);
+                    DataPoint point = new DataPoint(
+                        meas.getId(), new MetricValue(AVAIL_DOWN, t));
                     rtn.add(new ResourceDataPoint(meas.getResource(), point));
                 }
             }
