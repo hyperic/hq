@@ -1596,11 +1596,28 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                    aid);
         } else if (aid.isGroup()) {
             try {
-                AppdefEntityID[] ids = getGroupMemberIDs(subject, aid);
-            
-                // Get the list of measurements
-                return getMetricManager().findMeasurements(subject,
-                                                           tmpl.getId(), ids);
+                if (tmpl.isAvailability()) {
+                    // Find the group
+                    final ResourceGroup group = getResourceGroupManager()
+                        .findResourceGroupById(subject, aid.getId());
+                    List metrics = getMetricManager()
+                        .findDesignatedMeasurements(subject, group, 
+                                         MeasurementConstants.CAT_AVAILABILITY);
+                    for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+                        Measurement m =  (Measurement) it.next();
+                        if (!m.getTemplate().equals(tmpl))
+                            it.remove();
+                    }
+                    return metrics;
+                }
+                else {
+                    AppdefEntityID[] ids = getGroupMemberIDs(subject, aid);
+                
+                    // Get the list of measurements
+                    return getMetricManager().findMeasurements(subject,
+                                                               tmpl.getId(),
+                                                               ids);
+                }
             } catch (GroupNotCompatibleException e) {
                 throw new MeasurementNotFoundException(
                     "Incompatible group members: " + aid);
@@ -2955,10 +2972,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
         try {
             if (id.isGroup()) {
-                // determine the aggregate from the AppdefEntityID's
-                List members = GroupUtil.getGroupMembers(subject, id, null);
-                return getAggregateAvailability(subject, 
-                                                toAppdefEntityIDArray(members));
+                return getGroupAvailability(subject, id.getId());
             }
             else if (id.isApplication()) {
                 AppdefEntityValue appVal = new AppdefEntityValue(id, subject);

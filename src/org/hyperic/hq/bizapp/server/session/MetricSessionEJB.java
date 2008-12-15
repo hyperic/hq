@@ -44,18 +44,23 @@ import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityID_test;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.GroupMember;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayConstants;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
@@ -71,6 +76,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
 
@@ -345,10 +351,6 @@ public class MetricSessionEJB extends BizappSessionEJB {
         throws AppdefEntityNotFoundException, PermissionException {
         long current = System.currentTimeMillis();
     
-        AgentManagerLocal agentMan = AgentManagerEJBImpl.getOne();
-        
-        long liveMillis = MeasurementConstants.ACCEPTABLE_PLATFORM_LIVE_MILLIS;
-        
         // Allow for the maximum window based on collection interval
         Map midMap = new HashMap(ids.length);        
         for (int i = 0; i < ids.length; i++) {
@@ -356,10 +358,18 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 .getAvailabilityMeasurement(subject, ids[i]);
     
             if (m != null) {
-                liveMillis = Math.max(liveMillis, 3 * m.getInterval());
                 midMap.put(ids[i], m.getId());
             }
         }
+        
+        return getAvailability(subject, ids, midMap);
+    }
+
+    private double[] getAvailability(AuthzSubject subject,
+                                     AppdefEntityID[] ids, Map midMap)
+        throws ApplicationNotFoundException, AppdefEntityNotFoundException,
+        PermissionException {
+        final AgentManagerLocal agentMan = AgentManagerEJBImpl.getOne();
         
         double[] result = new double[ids.length];
         Arrays.fill(result, MeasurementConstants.AVAIL_UNKNOWN);
@@ -409,18 +419,14 @@ public class MetricSessionEJB extends BizappSessionEJB {
                         result[i] = getAggregateAvailability(subject, services);
                         break;
                     case AppdefEntityConstants.APPDEF_TYPE_GROUP :
-                        // determine the aggregate from the AppdefEntityID's
-                        List grpMembers =
-                            GroupUtil.getGroupMembers(subject, ids[i], null);
-                        result[i] = getAggregateAvailability(subject, 
-                            toAppdefEntityIDArray(grpMembers));
+                        result[i] = getGroupAvailability(subject,
+                                                         ids[i].getId());
                         break;
                     default :
                         break;
                 }
             }
         }
-    
         return result;
     }
 
@@ -478,6 +484,79 @@ public class MetricSessionEJB extends BizappSessionEJB {
             double[] avails = getAvailability(subject, subids);
             
             for (int i = 0; i < avails.length; i++) {
+                 if (avails[i] == MeasurementConstants.AVAIL_UNKNOWN) {
+                     unknownCount++;
+                 }
+                 else {
+                     sum += avails[i];
+                     count++;
+                 }
+             }
+        }
+        
+        if (unknownCount == ids.length)
+            // All resources are unknown
+            return MeasurementConstants.AVAIL_UNKNOWN;
+        
+        return sum / count;
+    }
+
+    /**
+     * Given a group, disqualifies their aggregate availability (with the
+     * disqualifying status) for all of them if any are down or unknown,
+     * otherwise the aggregate is deemed available
+     * 
+     * If there's nothing in the array, then aggregate is not populated. Ergo,
+     * the availability shall be disqualified as unknown i.e. the (?)
+     * representation
+     */
+    protected double getGroupAvailability(AuthzSubject subject, Integer gid)
+        throws AppdefEntityNotFoundException, PermissionException {
+        final ResourceGroupManagerLocal resGrpMgr = getResourceGroupManager();
+        final ResourceGroup group =
+            resGrpMgr.findResourceGroupById(subject, gid);
+
+        Collection members = resGrpMgr.getMembers(group);
+        AppdefEntityID[] ids = new AppdefEntityID[members.size()];
+        int i = 0;
+        for (Iterator it = members.iterator(); it.hasNext(); ) {
+            Resource r = (Resource) it.next();
+            ids[i++] = new AppdefEntityID(r);
+        }
+        
+        MeasurementManagerLocal mman = getMetricManager();
+        List metrics =
+            mman.findDesignatedMeasurements(subject, group,
+                                            MeasurementConstants.CAT_AVAILABILITY);
+
+        // Allow for the maximum window based on collection interval
+        Map midMap = new HashMap(metrics.size());
+        for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+            Measurement m =  (Measurement) it.next();
+            if (!m.getTemplate().isAvailability())
+                continue;
+            midMap.put(new AppdefEntityID(m.getResource()), m.getId());
+        }
+        
+        // Break them up and do 10 at a time
+        int length = 10;
+        double sum = 0;
+        int count = 0;
+        int unknownCount = 0;
+        for (int ind = 0; ind < ids.length; ind += length) {
+            
+            if (ids.length - ind < length)
+                length = ids.length - ind;
+    
+            AppdefEntityID[] subids = new AppdefEntityID[length];
+            
+            for (i = ind; i < ind + length; i++) {
+                subids[i - ind] = ids[i];
+            }
+            
+            double[] avails = getAvailability(subject, ids, midMap);
+
+            for (i = 0; i < avails.length; i++) {
                  if (avails[i] == MeasurementConstants.AVAIL_UNKNOWN) {
                      unknownCount++;
                  }
