@@ -384,28 +384,18 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // Service manager will update the collection, so we need to copy
             Collection services = new ArrayList(server.getServices());
             for (Iterator i = services.iterator(); i.hasNext(); ) {
-                Service service = (Service)i.next();
-                getServiceManager().removeService(subject, service);
+                getServiceManager().removeService(subject, (Service)i.next());
             }
-
-            // Keep config response ID so it can be deleted later.
-            final ConfigResponseDB config = server.getConfigResponse();
 
             // Remove server from parent Platform Server collection.
             Platform platform = server.getPlatform();
-            Collection servers = platform.getServersBag();
-            for (Iterator i = servers.iterator(); i.hasNext(); ) {
-                Server s = (Server)i.next();
-                if (s.equals(server)) {
-                    i.remove();
-                    break;
-                }
-            }
+            platform.getServersBag().remove(server);
             
-            getServerDAO().remove(server);
+            // Keep config response ID so it can be deleted later.
+            final ConfigResponseDB config = server.getConfigResponse();
 
-            // Remove authz resource
-            removeAuthzResource(subject, aeid, r);
+            final ServerDAO dao = getServerDAO();
+            dao.remove(server);
 
             // Remove the config response
             if (config != null) {
@@ -413,6 +403,11 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
 
             deleteCustomProperties(aeid);
+
+            // Remove authz resource
+            removeAuthzResource(subject, aeid, r);
+
+            dao.getSession().flush();
         } finally {
             if (pushed) {
                 AuditManagerEJBImpl.getOne().popContainer(true);

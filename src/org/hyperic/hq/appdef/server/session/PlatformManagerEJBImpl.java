@@ -294,18 +294,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
             ConfigResponseDB config = platform.getConfigResponse();
 
             ServerManagerLocal srvMgr = getServerManager();
-            // Server manager will update the collection, so we need to copy
-            Collection servers = platform.getServers();
             // Remove servers
-            for (Iterator i = servers.iterator(); i.hasNext();) {
-                Server server = (Server) i.next();
-                srvMgr.removeServer(subject, server);
+            for (Iterator i = platform.getServers().iterator(); i.hasNext();) {
+                srvMgr.removeServer(subject, (Server) i.next());
             }
 
-            getPlatformDAO().remove(platform);
-
-            // now remove the resource for the platform
-            removeAuthzResource(subject, aeid, r);
+            final PlatformDAO dao = getPlatformDAO();
+            dao.remove(platform);
 
             // remove the config response
             if (config != null) {
@@ -314,6 +309,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
 
             // remove custom properties
             deleteCustomProperties(aeid);
+
+            // now remove the resource for the platform
+            removeAuthzResource(subject, aeid, r);
+
+            dao.getSession().flush();
         } catch (RemoveException e) {
             _log.debug("Error while removing Platform");
             rollback();

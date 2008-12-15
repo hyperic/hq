@@ -292,6 +292,8 @@ public class ResourceGroupManagerEJBImpl
 
         GroupingStartupListener.getCallbackObj().preGroupDelete(group);
         dao.remove(group);
+        
+        dao.getSession().flush();
 
         // Send resource delete event
         ResourceDeletedZevent zevent =

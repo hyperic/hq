@@ -236,6 +236,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         checkRemovePermission(subject, app.getEntityId());
         dao.remove(app);
         removeAuthzResource(subject, app.getEntityId(), app.getResource());
+        dao.getSession().flush();
     }
 
     /**

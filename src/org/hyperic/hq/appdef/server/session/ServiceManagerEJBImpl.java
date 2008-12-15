@@ -1387,26 +1387,17 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws RemoveException, PermissionException, VetoException  
     {
         AppdefEntityID aeid = service.getEntityId();
-
         checkRemovePermission(subject, aeid);
-        final ConfigResponseDB config = service.getConfigResponse();
 
         // Remove service from parent Server's Services collection
         Server server = service.getServer();
-        Collection services = server.getServices();
-        for (Iterator i = services.iterator(); i.hasNext(); ) {
-            Service s = (Service)i.next();
-            if (s.equals(service)) {
-                i.remove();
-                break;
-            }
-        }
+        server.getServices().remove(service);
 
-        // Remove authz resource.
-        removeAuthzResource(subject, aeid, service.getResource());
+        final ConfigResponseDB config = service.getConfigResponse();
 
         // remove from appdef
-        getServiceDAO().remove(service);
+        final ServiceDAO dao = getServiceDAO();
+        dao.remove(service);
 
         // remove the config response
         if (config != null) {
@@ -1415,6 +1406,11 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
         // remove custom properties
         deleteCustomProperties(aeid);
+        
+        // Remove authz resource.
+        removeAuthzResource(subject, aeid, service.getResource());
+
+        dao.getSession().flush();
     }
 
     /**

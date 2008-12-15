@@ -1325,8 +1325,11 @@ public class AppdefBossEJBImpl
         Collection applications =
             getApplicationManager().findDeletedApplications();
         for (Iterator it = applications.iterator(); it.hasNext(); ) {
-            Application application = (Application) it.next();
-            removeApplication(subject, application);
+            try {
+                removeApplication(subject, (Application) it.next());
+            } catch (Exception e) {
+                log.error("Unable to remove application: " + e);
+            }
         }
         watch.markTimeEnd("removeApplications");
         if (log.isDebugEnabled()) {
@@ -1336,8 +1339,11 @@ public class AppdefBossEJBImpl
         watch.markTimeBegin("removeResourceGroups");
         Collection groups = getResourceGroupManager().findDeletedGroups();
         for (Iterator it = groups.iterator(); it.hasNext(); ) {
-            ResourceGroup group = (ResourceGroup) it.next();
-            removeGroup(subject, group);
+            try {
+                removeGroup(subject, (ResourceGroup) it.next());
+            } catch (Exception e) {
+                log.error("Unable to remove group: " + e);
+            }
         }
         watch.markTimeEnd("removeResourceGroups");
         if (log.isDebugEnabled()) {
@@ -1348,8 +1354,11 @@ public class AppdefBossEJBImpl
         // Look through services, servers, platforms, applications, and groups
         Collection services = getServiceManager().findDeletedServices();
         for (Iterator it = services.iterator(); it.hasNext(); ) {
-            Service service = (Service) it.next();
-            removeService(subject, service);
+            try {
+                removeService(subject, (Service) it.next());
+            } catch (Exception e) {
+                log.error("Unable to remove service: " + e);
+            }
         }
         watch.markTimeEnd("removeServices");
         if (log.isDebugEnabled()) {
@@ -1359,8 +1368,11 @@ public class AppdefBossEJBImpl
         watch.markTimeBegin("removeServers");
         Collection servers = getServerManager().findDeletedServers();
         for (Iterator it = servers.iterator(); it.hasNext(); ) {
-            Server server = (Server) it.next();
-            removeServer(subject, server);
+            try {
+                removeServer(subject, (Server) it.next());
+            } catch (Exception e) {
+                log.error("Unable to remove server: " + e);
+            }
         }
         watch.markTimeEnd("removeServers");
         if (log.isDebugEnabled()) {
@@ -1370,8 +1382,11 @@ public class AppdefBossEJBImpl
         watch.markTimeBegin("removePlatforms");
         Collection platforms = getPlatformManager().findDeletedPlatforms();
         for (Iterator it = platforms.iterator(); it.hasNext(); ) {
-            Platform platform = (Platform) it.next();
-            removePlatform(subject, platform);
+            try {
+                removePlatform(subject, (Platform) it.next());
+            } catch (Exception e) {
+                log.error("Unable to remove platform: " + e);
+            }
         }
         watch.markTimeEnd("removePlatforms");
         if (log.isDebugEnabled()) {
@@ -1521,13 +1536,12 @@ public class AppdefBossEJBImpl
     private void removeGroup(AuthzSubject subject, ResourceGroup group)
         throws SessionException, PermissionException, VetoException
     {
-        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
-        groupMan.removeResourceGroup(subject, group);
+        getResourceGroupManager().removeResourceGroup(subject, group);
     }
 
     private void removeApplication(AuthzSubject subject, Application app)
-        throws ApplicationException, PermissionException, 
-               SessionException, VetoException
+        throws ApplicationException, PermissionException, SessionException,
+               VetoException
     {
         try {
             getApplicationManager().removeApplication(subject, app.getId());
