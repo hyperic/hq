@@ -744,7 +744,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         final boolean supportsPLSQL = dialect.supportsPLSQL();
         final String plSQL = 
             "BEGIN " +
-            "INSERT INTO :table (measurement_id, timestamp, value) " +
+            "INSERT /*+ APPEND */ INTO :table (measurement_id, timestamp, value) " +
             "VALUES(?, ?, ?); " +
             "EXCEPTION WHEN DUP_VAL_ON_INDEX THEN " +
                 "UPDATE :table SET VALUE = ? " +
