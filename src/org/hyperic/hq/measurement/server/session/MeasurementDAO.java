@@ -408,6 +408,8 @@ public class MeasurementDAO extends HibernateDAO {
         return getSession().createQuery(sql)
             .setParameter("group", g)
             .setParameter("cat", cat)
+            .setCacheable(true)
+            .setCacheRegion("Measurement.findDesignatedByCategoryForGroup")
             .list();
         }
 
