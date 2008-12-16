@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.measurement.action;
 
-import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
@@ -51,36 +51,40 @@ import org.hyperic.util.config.InvalidOptionValueException;
  * Log the fact that an alert was generated due to some measurement
  */
 public class MetricAlertAction implements ActionInterface {
-    private Log log = LogFactory.getLog(MetricAlertAction.class);
+    private final Log log = LogFactory.getLog(MetricAlertAction.class);
 
     public String execute(AlertInterface aIface, ActionExecutionInfo info) 
         throws ActionExecuteException 
     {
-        MetricProblemDAO dao =
-            DAOFactory.getDAOFactory().getMetricProblemDAO();
-        StringBuffer actLog = new StringBuffer();
+        final MetricProblemDAO dao =
+            new MetricProblemDAO(DAOFactory.getDAOFactory());
+        final StringBuilder actLog = new StringBuilder();
 
         // XXX -- This is probably not a safe cast.  The information here
         //        should probably be contained within the short/long reasons
         //        as well -- JMT
-        Alert alert = (Alert)aIface;
-        Collection logs = alert.getConditionLog();
-        for (Iterator it = logs.iterator(); it.hasNext(); ) {
-            AlertConditionLog log = (AlertConditionLog) it.next();
-            AlertCondition cond = log.getCondition();
+        final Alert alert = (Alert) aIface;
+        final HashSet track = new HashSet();
+        for (Iterator it = alert.getConditionLog().iterator(); it.hasNext(); ) {
+            final AlertConditionLog log = (AlertConditionLog) it.next();
+            final AlertCondition cond = log.getCondition();
             if (cond.getType() == EventConstants.TYPE_THRESHOLD ||
                 cond.getType() == EventConstants.TYPE_BASELINE) {
-                dao.create(new Integer(cond.getMeasurementId()),
-                           System.currentTimeMillis(),
+                final Integer mid = new Integer(cond.getMeasurementId());
+                if (track.contains(mid))
+                    continue;
+
+                track.add(mid);
+                dao.create(mid, alert.getCtime(),
                            MeasurementConstants.PROBLEM_TYPE_ALERT,
                            alert.getId());
 
                 // Append to action log
-                actLog.append("MeasurementAlert added for mid: ");
-                actLog.append(cond.getMeasurementId());
-                actLog.append(" aid: ");
-                actLog.append(alert.getId());
-                actLog.append("\n");
+                actLog.append("MeasurementAlert added for mid: ")
+                      .append(cond.getMeasurementId())
+                      .append(" aid: ")
+                      .append(alert.getId())
+                      .append("\n");
             }
         }
 
@@ -108,8 +112,7 @@ public class MetricAlertAction implements ActionInterface {
     }
 
     public void setParentActionConfig(AppdefEntityID aeid,
-                                      ConfigResponse config)
-    {
+                                      ConfigResponse config) {
         init(config);
     }
 }
