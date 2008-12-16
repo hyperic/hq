@@ -42,6 +42,7 @@ public class RemoveForm extends ResourceForm  {
     private Integer _ad;
     
     private String _buttonAction;
+    private String _output;
     private String _ackNote;
     private String _fixedNote;
 
@@ -95,6 +96,14 @@ public class RemoveForm extends ResourceForm  {
         _buttonAction = action;
     }
     
+    public String getOutput() {
+        return _output;
+    }
+    
+    public void setOutput(String output) {
+        _output = output;
+    }
+    
     public String getAckNote() {
         return _ackNote;
     }
@@ -117,6 +126,7 @@ public class RemoveForm extends ResourceForm  {
         _ealerts = null;
         _ad = null;
         _buttonAction = null;
+        _output = null;
         _ackNote = null;
         _fixedNote = null;
     }

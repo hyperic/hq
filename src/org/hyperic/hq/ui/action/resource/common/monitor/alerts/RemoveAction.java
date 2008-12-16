@@ -167,7 +167,7 @@ public class RemoveAction extends BaseAction {
             }
         }
 
-        if ("json".equals(RequestUtils.getStringParameter(request, "output"))) {
+        if ("json".equals(nwForm.getOutput())) {
             JSONObject ajaxJson = new JSONObject();
             request.setAttribute(Constants.AJAX_JSON, ajaxJson);
             return constructForward(request, mapping, "json");
