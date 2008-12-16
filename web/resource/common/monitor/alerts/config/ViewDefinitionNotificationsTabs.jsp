@@ -38,6 +38,7 @@
 <tiles:importAttribute name="viewSnmpUrl" ignore="true"/>
 <tiles:importAttribute name="viewScriptUrl" ignore="true"/>
 <tiles:importAttribute name="viewOpenNMSUrl" ignore="true"/>
+<tiles:importAttribute name="viewControlUrl" ignore="true"/>
 
 <c:set var="mode" value="${param.mode}"/>
 <c:if test="${mode == 'viewDefinition'}">
@@ -74,6 +75,9 @@
     </c:when>
     <c:when test="${tab.value == 'OpenNMS'}">
       <c:set var="tabUrl" value="${viewOpenNMSUrl}"/>
+    </c:when>
+    <c:when test="${tab.value == 'Control'}">
+      <c:set var="tabUrl" value="${viewControlUrl}"/>
     </c:when>
   </c:choose>
 
