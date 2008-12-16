@@ -26,6 +26,7 @@
 package org.hyperic.hq.common.util;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -46,6 +47,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.events.EventConstants;
 
 public class Messenger {
     private static Log _log = LogFactory.getLog(Messenger.class);
@@ -165,6 +167,18 @@ public class Messenger {
         }
     }
 
+    /**
+     * Send a List to a Topic.
+     */
+    public void publishMessage(String name, List msgList, int maxSize) {
+        for (int i = 0; i < msgList.size(); i += maxSize) {
+            int end = Math.min(i + maxSize, msgList.size());
+            ArrayList msgObj = new ArrayList(msgList.subList(i, end));
+            publishMessage(name, msgObj);
+            _log.debug("Sent " + (end - i) + " batched events to " + name);
+        }
+    }
+    
     /**
      * Send message to a Topic.
      */

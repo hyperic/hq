@@ -531,7 +531,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         
         if (!events.isEmpty()) {
             Messenger sender = new Messenger();
-            sender.publishMessage(EventConstants.EVENTS_TOPIC, events);
+            sender.publishMessage(EventConstants.EVENTS_TOPIC, events, 100);
         }
         
         if (!zevents.isEmpty()) {
