@@ -337,11 +337,11 @@ public class AlertDefinitionDAO extends HibernateDAO {
                    (enabled.booleanValue() ? "true" : "false");
         }
         
+        sql += " and (d.parent is null";
         if (excludeTypeBased) {
-            sql += " and d.parent is null ";
-        }
-        else {
-            sql += " and not d.parent.id = 0 ";
+            sql += ") ";            
+        } else {
+            sql += " or not d.parent.id = 0) ";
         }
 
         sql += getOrderByClause(pInfo);
