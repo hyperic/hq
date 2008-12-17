@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.galerts.server.session;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -37,6 +35,9 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hibernate.SortField;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -142,34 +143,28 @@ class GalertLogDAO
     {
         GalertLogSortField sort = (GalertLogSortField)pageInfo.getSort();
         String op = AuthzConstants.groupOpManageAlerts;
-        String hql =  PermissionManagerFactory.getInstance()
+        String sql =  PermissionManagerFactory.getInstance()
                 .getGroupAlertsHQL(inEsc, notFixed, groupId) +
             " order by " + sort.getSortString("a", "d", "g") + 
             (pageInfo.isAscending() ? "" : " DESC");
 
                
         if (!sort.equals(GalertLogSortField.DATE)) {
-            hql += ", " + GalertLogSortField.DATE.getSortString("a", "d", "g") +
+            sql += ", " + GalertLogSortField.DATE.getSortString("a", "d", "g") +
                    " DESC";
         }
                
-        Query q = getSession().createQuery(hql)
+        Query q = getSession().createQuery(sql)
                               .setLong("begin", begin)
                               .setLong("end", end)
                               .setInteger("priority", severity.getCode());
                               
-        if (hql.indexOf("subj") > 0) {
+        if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subjectId.intValue())
              .setParameter("op", op);
         }
 
-        List ids = pageInfo.pageResults(q).list();
-        List logs = new ArrayList(ids.size());
-        for (Iterator it = ids.iterator(); it.hasNext(); ) {
-            logs.add(findById((Integer) it.next()));
-        }
-        
-        return logs;
+        return pageInfo.pageResults(q).list();
     }
 
     void removeAll(ResourceGroup g) {
