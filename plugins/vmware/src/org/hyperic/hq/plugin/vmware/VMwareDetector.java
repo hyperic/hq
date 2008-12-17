@@ -252,6 +252,14 @@ public class VMwareDetector
         if (info == null) {
             return null;
         }
+        if (isESX()) {
+            if ((info.major == 3) && (info.minor > 0)) {
+                //only 3.0.x and lower are supported
+                log.warn(info.version + " not supported, see: " +
+                         "http://support.hyperic.com/display/hypcomm/VMware");
+                return null;
+            }
+        }
 
         if (path == null) {
             path = "/etc/vmware";
