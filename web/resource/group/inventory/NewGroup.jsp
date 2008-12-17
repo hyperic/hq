@@ -38,7 +38,7 @@
 <tiles:insert definition=".resource.group.inventory.generalProperties"/>
       &nbsp;<br>
       
-<tiles:insert page="/resource/group/inventory/GroupTypeForm.jsp"/>
+<tiles:insert definition=".resource.group.inventory.GroupType"/>
       &nbsp;<br>
 
 <c:if test="${not empty GroupForm.entityIds}">

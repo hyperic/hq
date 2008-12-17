@@ -32,6 +32,7 @@
   USA.
  --%>
 
+<tiles:importAttribute name="canBePrivate" ignore="true"/>
 
 <!-- CONSTANT DEFINITIONS -->
 <hq:constant
@@ -171,14 +172,16 @@ function changeDropDown (masterSelName, selName, selectVal){
 
 <!--  GENERAL PROPERTIES CONTENTS -->
 <table width="100%" cellpadding="0" cellspacing="0" class="BottomLine">
+<c:if test="${canBePrivate}">
     <tr>
         <td class="BlockLabel" width="20%"><fmt:message key="resource.group.inventory.New.Label.Private"/></td>
         <td class="BlockContent" colspan="3"><html:checkbox property="privateGroup"/></td>
     </tr>
+</c:if>
 	<tr>
 <c:choose>
 <c:when test="${not empty GroupForm.typeName}">
-      <td class="BlockLabel" nowrap><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="resource.group.inventory.New.Label.Contains"/></td>
+      <td class="BlockLabel" width="20%" nowrap><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="resource.group.inventory.New.Label.Contains"/></td>
       <td class="BlockContent">
         <c:out value="${GroupForm.typeName}"/>
         <html:hidden property="typeAndResourceTypeId"/>
@@ -186,7 +189,7 @@ function changeDropDown (masterSelName, selName, selectVal){
       </td>
 </c:when>
 <c:otherwise>
-		<td class="BlockLabel" nowrap><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="resource.group.inventory.New.Label.Contains"/></td>
+		<td class="BlockLabel" width="20%" nowrap><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="resource.group.inventory.New.Label.Contains"/></td>
 <logic:messagesPresent property="groupType">
     <td class="ErrorField">
 	  <html:select property="groupType" onchange="changeDropDown('groupType', 'typeAndResourceTypeId');">

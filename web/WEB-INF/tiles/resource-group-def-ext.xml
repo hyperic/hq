@@ -53,4 +53,7 @@
          value="/resource/group/inventory/GroupLinks.jsp"/>
   </definition>
   
-</tiles-definitions>
+  <definition name=".resource.group.inventory.GroupType"
+              path="/resource/group/inventory/GroupTypeForm.jsp"/>
+
+ </tiles-definitions>
