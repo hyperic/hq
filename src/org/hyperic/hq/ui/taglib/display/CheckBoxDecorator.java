@@ -138,6 +138,7 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
         String value = null;
 		String label = null;
         String click = "";
+        String style = "";
 
         try {
             name = (String) evalAttr("name", this.name, String.class);
@@ -207,9 +208,17 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
         try {
             click = (String) evalAttr("onclick", this.getOnclick(), String.class);
         } catch (NullAttributeException e) {
-            // Onclick is empty
-        } catch (JspException e) {
-            // Onclick is empty
+            log.debug("bean " + this.getOnclick() + " not found");
+        } catch (JspException je) {
+            log.debug("can't evaluate onclick [" + this.getOnclick() + "]: ", je);
+        }
+        
+        try {
+            style = (String) evalAttr("styleClass", this.getStyleClass(), String.class);
+        } catch (NullAttributeException e) {
+            log.debug("bean " + this.getStyleClass() + " not found");
+        } catch (JspException je) {
+            log.debug("can't evaluate styleClass [" + this.getStyleClass() + "]: ", je);
         }
 
         StringBuffer buf = new StringBuffer();
@@ -221,7 +230,7 @@ public class CheckBoxDecorator extends ColumnDecorator implements Tag
         buf.append("<input type=\"checkbox\" onclick=\"");
         buf.append(click);
         buf.append("\" class=\"");
-        buf.append(getStyleClass());
+        buf.append(style);
         buf.append("\" id=\"");
         buf.append(elementId);
         buf.append("\" name=\"");

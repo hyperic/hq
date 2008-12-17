@@ -15,7 +15,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2008], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -261,7 +261,7 @@
 </script>
 
 <!-- FORM -->
-<html:form method="GET" action="/alerts/RemoveAlerts">
+<html:form styleId="${widgetInstanceName}_FixForm" method="POST" action="/alerts/RemoveAlerts">
 <html:hidden property="eid" value="${Resource.entityId}"/>
   <c:if test="${not empty param.year}">
     <input type="hidden" name="year" value="<c:out value="${param.year}"/>"/>
@@ -277,16 +277,22 @@
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>
 
+<script type="text/javascript">
+	dojo11.require("dijit.dijit");
+	dojo11.require("dijit.Dialog");
+          	
+	var MyAlertCenter = null;
+	dojo11.addOnLoad(function(){
+		MyAlertCenter = new hyperic.alert_center();          		
+	});
+</script>
+
 <table width="100%" style="background-color:#fff;border-left:1px solid gray;border-right:1px solid gray"><tr>
 <td><a href="javascript:previousDay()"><html:img page="/images/schedule_left.gif" border="0"/></a></td>
 <td nowrap="true" class="BoldText"><hq:dateFormatter value="${date}" showTime="false"/></td>
 <td><a href="javascript:nextDay()"><html:img page="/images/schedule_right.gif" border="0"/></a></td>
 <td><html:link href="javascript:popupCal()"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link></td>
 <td class="ButtonCaptionText" width="100%" style="text-align: right; font-style: italic;">
-    <c:url var="path" value="/"/>
-    <fmt:message key="dash.settings.criticalAlerts.ack.instruction">
-      <fmt:param value="${path}"/>
-    </fmt:message>
 </td>
 </tr></table>
 
@@ -302,11 +308,12 @@
 <display:table cellspacing="0" cellpadding="0" width="100%" order="${so}" action="${sortAction}" items="${Alerts}" var="Alert">
 
 <display:column width="1%" property="id" title="<input
-type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\"
-name=\"listToggleAll\">" isLocalizedTitle="false"
+type=\"checkbox\" onclick=\"MyAlertCenter.toggleAll(this)\"
+id=\"${widgetInstanceName}_CheckAllBox\">" isLocalizedTitle="false"
 styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
-<display:checkboxdecorator name="alerts"
-onclick="ToggleSelection(this,widgetProperties)"
+<display:alertcheckboxdecorator name="alerts"
+onclick="MyAlertCenter.toggleAlertButtons(this)"
+fixable="${!Alert.fixed}" acknowledgeable="${Alert.acknowledgeable}"
 styleClass="listMember"/> </display:column>
 
 <display:column width="10%" property="priority"
@@ -338,8 +345,7 @@ title="alerts.alert.AlertList.ListHeader.ActualValue" />
 </display:column>
 
 <display:column width="11%" property="acknowledgeable" align="center"
-                title="alerts.alert.AlertList.ListHeader.Acknowledge"
-                href="/alerts/RemoveAlerts.do?eid=${Resource.entityId.appdefKey}&alerts=${Alert.id}&buttonAction=ACKNOWLEDGE">
+                title="alerts.alert.AlertList.ListHeader.Acknowledge">
   <display:booleandecorator flagKey="acknowledgeable"/>
 </display:column>
 
@@ -355,6 +361,7 @@ title="alerts.alert.AlertList.ListHeader.ActualValue" />
   <tiles:put name="defaultSortColumn" value="2"/>
   <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
 </tiles:insert>
+<div id="AlertCenterFixedNoteDialog" style="display:none;"></div>
 <tiles:insert definition=".page.footer">
 </tiles:insert>
 </html:form>

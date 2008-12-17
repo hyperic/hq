@@ -38,6 +38,7 @@
 
 <script type="text/javascript">
 var pageData = new Array();
+var _hqu_<c:out value="${widgetInstanceName}"/>_refreshTimeout;
 initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
 
@@ -47,15 +48,22 @@ function requestRecentAlerts<c:out value="${portlet.token}"/>() {
 	new Ajax.Request(critAlertUrl, {method: 'get', onSuccess:showRecentAlerts, onFailure :reportError});
 }
 
-onloads.push(requestRecentAlerts<c:out value="${portlet.token}"/>);
-
-function acknowledgeAlert(img, eid, aid) {
-    //new Effect.Shrink(img, {duration: 1.5});
-    var ackAlertUrl = "<html:rewrite page="/alerts/Alerts.do?mode=ACKNOWLEDGE&eid="/>"
-    var pars = eid + "&a=" + aid;
-    var url = ackAlertUrl + pars;
-    new Ajax.Request(url);
+function _hqu_<c:out value="${widgetInstanceName}"/>_autoRefresh() {
+    _hqu_<c:out value="${widgetInstanceName}"/>_refreshTimeout = setTimeout("_hqu_<c:out value="${widgetInstanceName}"/>_autoRefresh()", 30000);
+	requestRecentAlerts<c:out value="${portlet.token}"/>();
 }
+
+dojo11.require("dijit.dijit");
+dojo11.require("dijit.Dialog");
+
+var MyAlertCenter = null;
+dojo11.addOnLoad(function(){
+	MyAlertCenter = new hyperic.alert_center();
+
+	dojo11.connect("requestRecentAlerts<c:out value="${portlet.token}"/>", function() { MyAlertCenter.resetAlertTable(dojo11.byId('<c:out value="${widgetInstanceName}"/>_FixForm')); });
+
+	_hqu_<c:out value="${widgetInstanceName}"/>_autoRefresh();
+});
 </script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
 
@@ -77,12 +85,13 @@ function acknowledgeAlert(img, eid, aid) {
 </tiles:insert>
 
   <!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
-    <html:form method="POST" action="/alerts/RemoveAlerts.do">
+  <html:form styleId="${widgetInstanceName}_FixForm" method="POST" action="/alerts/RemoveAlerts.do">
+  <html:hidden property="output" value="json" />
   <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
      <thead>
 		<tr class="ListRow">
 			<td width="1%" class="ListHeaderCheckbox">
-				<input type="checkbox" onclick="ToggleAll(this, widgetProperties, false);" name="listToggleAll" id="listToggleAll">
+				<input type="checkbox" onclick="MyAlertCenter.toggleAll(this)" name="listToggleAll" id="<c:out value="${widgetInstanceName}"/>_CheckAllBox">
 			</td>
 			<td width="30%" class="ListHeaderInactiveSorted" align="left">
 				Date / Time<html:img page="/images/tb_sortdown.gif" height="9" width="9" border="0" />
@@ -110,10 +119,7 @@ function acknowledgeAlert(img, eid, aid) {
     	</tr>
          <tr class="ListRow" id="<c:out value="ackInstruction${portlet.token}"/>" style="display: none;">
            <td class="ListCell" colspan="6" align="right" style="font-style: italic;">
-              <c:url var="path" value="/"/>
-              <fmt:message key="dash.settings.criticalAlerts.ack.instruction">
-                <fmt:param value="${path}"/>
-              </fmt:message>
+           </td>
     	</tr>
         <tr>
              <td colspan="5">
@@ -131,5 +137,6 @@ function acknowledgeAlert(img, eid, aid) {
           </tr>
       </tfoot>
   </table>
+  <div id="AlertCenterFixedNoteDialog" style="display:none;"></div>
   </html:form>
 </div>

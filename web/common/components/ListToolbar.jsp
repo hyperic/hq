@@ -117,7 +117,15 @@
 </td>
 </c:if>
 <c:if test="${alerts}">
-    <td align="left" id="<c:out value="${widgetInstanceName}"/>FixedButtonTd"><div id="<c:out value="${widgetInstanceName}"/>FixedButtonDiv"><input type="submit" name="buttonAction" value="<fmt:message key="resource.common.alert.action.fixed.label"/>" class="CompactButtonInactive" disabled="true"></div></td>
+    <td align="left" id="<c:out value="${widgetInstanceName}"/>FixedButtonTd" style="white-space: nowrap">
+		<div id="<c:out value="${widgetInstanceName}"/>FixedButtonDiv">
+			<input type="button" id="<c:out value="${widgetInstanceName}"/>_FixButton" value="<fmt:message key="resource.common.alert.action.fixed.label"/>" class="CompactButtonInactive" disabled="disabled" onclick="MyAlertCenter.processButtonAction(this)" />
+			&nbsp;&nbsp;
+			<input type="button" id="<c:out value="${widgetInstanceName}"/>_AckButton" value="<fmt:message key="resource.common.alert.action.acknowledge.label"/>" class="CompactButtonInactive" disabled="disabled" onclick="MyAlertCenter.processButtonAction(this)" />
+			<input type="hidden" name="buttonAction" value="" />
+          	<input type="hidden" name="fixedNote" value="" />
+		</div>
+	</td>
 </c:if>
 <c:choose>
   <c:when test="${not empty pageSizeAction}">

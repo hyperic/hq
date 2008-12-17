@@ -120,6 +120,7 @@ function refreshPortlets() {
         }
     }
 
+	/*
     for (i = 0; i < getRecentForm.length; i++) {
 
         if (/RemoveAlerts/.test(getRecentForm[i].action)) {
@@ -140,7 +141,7 @@ function refreshPortlets() {
             }
         }
     }
-
+	*/
 
     if (problemPortlet) {
         setInterval("requestProblemResponse()", 30000);

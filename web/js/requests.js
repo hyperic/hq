@@ -179,11 +179,14 @@
                   var checkbox = document.createElement('input');
                   checkbox.setAttribute("type", "checkbox");
                   checkbox.setAttribute("name", "ealerts");
-                  checkbox.setAttribute("class", "listMember");
-                  //checkbox.setAttribute("onclick", "ToggleSelection(this, widgetProperties, false);");
-                  checkbox.onclick = new Function("ToggleSelection(this, widgetProperties, false)");
+                  checkbox.onclick = new Function("MyAlertCenter.toggleAlertButtons(this)");
                   checkbox.setAttribute("value",
                                         aList[i].alertType + ":" + aList[i].alertId);
+                  if (aList[i].acknowledgeable) {
+                      checkbox.setAttribute("class", "ackableAlert");
+                  } else {
+                      checkbox.setAttribute("class", "fixableAlert");                  
+                  }
                   td1.appendChild(checkbox);
                 }
 
@@ -221,7 +224,6 @@
                 td6.setAttribute("align", "center");
                 if (aList[i].acknowledgeable) {
                     var ackAnchor = document.createElement("a");
-                    //ackAnchor .setAttribute("href", ".");
                      td6.appendChild(ackAnchor);
                      ackAnchor.setAttribute("text-decoration", "none");
 
@@ -233,13 +235,6 @@
                     imgNode.setAttribute('id', 'ack_'+ aList[i].alertId);
 
                     ackAnchor.appendChild(imgNode);
-                    ackAnchor.setAttribute("href", "javascript:acknowledgeAlert(this,'" + aList[i].appdefKey + "'," + aList[i].alertId + ");");
-
-                    //imgNode.onclick = new Function("imgHide", "this.parentNode.innerHTML='';");
-                    //ackAnchor.onclick = new Function("imgHide", "this.parentNode.innerHTML='&nbsp;';");
-
-
-                    imgNode.onclick = new Function("imgHide", "this.src ='images/spacer.gif';this.border='0';");
                     ackInstruction.style.display = "";
 
                 } else {
@@ -264,11 +259,6 @@
 
         $('modifiedCritTime' + (token != null ? token : '')).innerHTML =
         'Updated: ' + refreshTime();
-        //rTimer = setTimeout(alertFunc, 60000);
-        // Refresh in 60 seconds
-        unCheck();
-
-        ToggleRecentAlertButton(document.FixAlertsForm);
     }
 
     function showAvailSummary(originalRequest) {

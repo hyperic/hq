@@ -157,26 +157,7 @@ dojo.addOnLoad( function(){
           </form>
         </div>
       </div>
-      <div id="FixedNoteDialog" style="display:none;">
-          	<table cellspacing="0" cellpadding="0">
-          		<tr>
-          			<td colspan="2">
-          	        	<span class="BoldText">Resolution for Fix for Selected Alerts (Optional):</span>
-          	        	<br/>
-          	        	<textarea id="FixedNoteTextArea" cols="70" rows="5"></textarea>
-          	        </td>
-          	    </tr>
-          	    <tr>
-          	    	<td class="buttonLeft"></td>
-          	    	<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">
-          	    		<span id="button"><a href="javascript:MyAlertCenter.fixAlert();">FIXED</a></span>
-          	    		<span style="padding-left: 3px;"><img src="/images/icon_fixed.gif" align="middle" alt="Click to mark as Fixed"></span>
-          	    		<span>Click the "Fixed" button to mark alert condition as fixed</span>
-          	    	</td>
-          	    </tr>          	    
-          	</table>
-      </div>
-          
+      <div id="AlertCenterFixedNoteDialog" style="display:none;"></div>
       <script type="text/javascript">
           	dojo11.require("dijit.dijit");
           	dojo11.require("dijit.Dialog");
@@ -185,11 +166,10 @@ dojo.addOnLoad( function(){
           	dojo11.addOnLoad(function(){
           		MyAlertCenter = new hyperic.alert_center();
           		
-          		dojo11.connect("Alerts_refreshTable", function() { MyAlertCenter.resetAlertTable(document.Alerts_FixForm); });
-          		dojo11.connect("GroupAlerts_refreshTable", function() { MyAlertCenter.resetAlertTable(document.GroupAlerts_FixForm); });         		
+          		dojo11.connect("Alerts_refreshTable", function() { MyAlertCenter.resetAlertTable(dojo11.byId('Alerts_FixForm')); });
+          		dojo11.connect("GroupAlerts_refreshTable", function() { MyAlertCenter.resetAlertTable(dojo11.byId('GroupAlerts_FixForm')); });         		
           	});
-      </script>
-      
+      </script>      
     </div>
 <div style="clear:both;height:1px;"></div>
   </div>
