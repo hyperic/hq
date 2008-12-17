@@ -99,7 +99,8 @@ public class RoleDAO extends HibernateDAO {
                                         null,  // The Resource prototype
                                         null,  // Location
                                         0,     // clusterId
-                                        true); // system
+                                        true,
+                                        false);// system
 
         ResourceGroup group;
         try {

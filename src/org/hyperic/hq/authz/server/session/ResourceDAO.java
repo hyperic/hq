@@ -56,19 +56,28 @@ public class ResourceDAO
     Resource create(ResourceType type, Resource prototype, String name, 
                     AuthzSubject creator, Integer instanceId, boolean system) 
     {
+        Resource resource = createPrivate(type, prototype, name, creator, 
+                                          instanceId, system);
+                                         
+        /* add it to the root resource group */
+        ResourceGroupDAO gDao = new ResourceGroupDAO(DAOFactory.getDAOFactory());
+        ResourceGroup authzGroup = gDao.findRootGroup();
+        gDao.addMembers(authzGroup, Collections.singleton(resource));
+        
+        return resource;
+    }
+
+    Resource createPrivate(ResourceType type, Resource prototype, String name, 
+                           AuthzSubject creator, Integer instanceId,
+                           boolean system) 
+    {
         if (type == null) {
             throw new IllegalArgumentException("ResourceType not set");
         }
         Resource resource = new Resource(type, prototype, name, creator, 
                                          instanceId, system);
                                          
-        save(resource);
-
-        /* add it to the root resourcegroup */
-        ResourceGroupDAO gDao = 
-            DAOFactory.getDAOFactory().getResourceGroupDAO();
-        ResourceGroup authzGroup = gDao.findRootGroup();
-        gDao.addMembers(authzGroup, Collections.singleton(resource));
+        save(resource);    
 
         // Need to flush so that later permission checking can succeed
         getSession().flush();
@@ -124,7 +133,7 @@ public class ResourceDAO
 
     List findResourcesOfType(int typeId, PageInfo pInfo) {
         String sql = "from Resource r where resourceType.id = :typeId ";
-        ResourceSortField sort = (ResourceSortField)pInfo.getSort();
+        ResourceSortField sort = (ResourceSortField) pInfo.getSort();
         
         sql += " order by " + sort.getSortString("r") + 
                (pInfo.isAscending() ? "" : " DESC");
@@ -138,16 +147,17 @@ public class ResourceDAO
         // Resource table is often updated.  Manage the instance id and type
         // to resource mapping manually to avoid the query cache getting
         // invalidated on updates to the resource table.
-        Cache ridCache = CacheManager.getInstance().getCache("ResourceByInstanceId");
-        String key = "" + typeId + "" + id;
+        Cache ridCache = CacheManager.getInstance()
+            .getCache("ResourceByInstanceId");
+        String key = typeId.toString() + id;
 
         Element e = ridCache.get(key);
         if (e != null) {
-            Integer rid = (Integer)e.getObjectValue();
+            Integer rid = (Integer) e.getObjectValue();
             return get(rid);
         } else {
-            String sql = "from Resource where instanceId = ? and" +
-                         " resourceType.id = ?";
+            String sql = "from Resource where instanceId = ? and " +
+                                             "resourceType.id = ?";
             Resource r = (Resource)getSession().createQuery(sql)
                 .setInteger(0, id.intValue())
                 .setInteger(1, typeId.intValue())
@@ -173,7 +183,8 @@ public class ResourceDAO
      *                   sync with the database.
      * @return The Resource.
      */
-    public Resource findByInstanceId(Integer typeId, Integer id, boolean allowStale) {                    
+    public Resource findByInstanceId(Integer typeId, Integer id,
+                                     boolean allowStale) {                    
         FlushMode oldFlushMode = this.getSession().getFlushMode();
         
         try {
@@ -350,13 +361,13 @@ public class ResourceDAO
         StringBuffer sb = new StringBuffer();
 
         sb.append ("SELECT DISTINCT r " )
-            .append ( "FROM Resource r      " )
-            .append ( "  join r.resourceGroups g" )
-            .append ( "  join g.roles e         " )
-            .append ( "  join e.operations o    " )
-            .append ( "  join e.subjects s       " )
-            .append ( "    WHERE s.id = ?         " )
-            .append ( "          AND (          " );
+          .append ( "FROM Resource r " )
+          .append ( " join r.resourceGroups g " )
+          .append ( " join g.roles e " )
+          .append ( " join e.operations o " )
+          .append ( " join e.subjects s " )
+          .append ( " WHERE s.id = ? " )
+          .append (   " AND ( " );
 
         for (int x=0; x< resLocArr.length ; x++) {
             if (x>0) sb.append(" OR ");
@@ -397,8 +408,8 @@ public class ResourceDAO
     
     boolean resourcesExistOfType(String typeName) {
         String sql = "select r from Resource r " + 
-            "join r.prototype p " +
-            "where p.name = :protoName";
+                     "join r.prototype p " +
+                     "where p.name = :protoName";
         
         return getSession().createQuery(sql)
             .setParameter("protoName", typeName)
@@ -407,8 +418,7 @@ public class ResourceDAO
     }
     
     List findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
-        String sql = "select r from Resource r " + 
-            "where r.prototype = :proto";
+        String sql = "select r from Resource r where r.prototype = :proto";
         
         return pInfo.pageResults(getSession().createQuery(sql)
                                      .setParameter("proto", proto)).list();

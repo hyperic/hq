@@ -1936,7 +1936,7 @@ public class AppdefBossEJBImpl
      */
     public ResourceGroup createGroup(int sessionId, String name,
                                      String description, String location,
-                                     String[] resources)
+                                     String[] resources, boolean privGrp)
         throws GroupCreationException, GroupDuplicateNameException,
                SessionException
     {
@@ -1947,7 +1947,8 @@ public class AppdefBossEJBImpl
                               null,      // prototype
                               location,
                               0,         // clusterId 
-                              false);    // system?
+                              false,     // system?
+                              privGrp);
 
         // No roles or resources
         return getResourceGroupManager()
@@ -1973,7 +1974,7 @@ public class AppdefBossEJBImpl
      */
     public ResourceGroup createGroup(int sessionId, int adType, String name,
                                      String description, String location,
-                                     String[] resources)
+                                     String[] resources, boolean privGrp)
         throws GroupCreationException, SessionException,
                GroupDuplicateNameException
     {
@@ -1996,7 +1997,8 @@ public class AppdefBossEJBImpl
                                         null,      // prototype
                                         location,
                                         0,         // clusterId 
-                                        false);    // system?
+                                        false,     // system?
+                                        privGrp);
 
         // No roles or resources
         return getResourceGroupManager()
@@ -2019,10 +2021,10 @@ public class AppdefBossEJBImpl
      * @param location    - Location of group (optional)
      * @ejb:interface-method
      */
-    public ResourceGroup createGroup(int sessionId, int adType, 
-                                     int adResType, String name, 
-                                     String description, String location,
-                                     String[] resources)
+    public ResourceGroup createGroup(int sessionId, int adType, int adResType,
+                                     String name, String description,
+                                     String location, String[] resources,
+                                     boolean privGrp)
         throws GroupCreationException, GroupDuplicateNameException,
                SessionException
     {
@@ -2050,8 +2052,9 @@ public class AppdefBossEJBImpl
                                         groupType,
                                         prototype,      
                                         location,
-                                        0,         // clusterId 
-                                        false);    // system?
+                                        0,          // clusterId 
+                                        false,      // system?
+                                        privGrp);
 
         // No roles or resources
         return getResourceGroupManager()

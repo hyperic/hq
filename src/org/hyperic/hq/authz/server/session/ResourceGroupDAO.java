@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -116,10 +116,13 @@ public class ResourceGroupDAO extends HibernateDAO
             .findById(AuthzConstants.authzGroup);
         
         assert resType != null;
-        ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
-        Resource proto = rDao.findById(AuthzConstants.rootResourceId);
-        Resource r = rDao.create(resType, proto, cInfo.getName(), creator,  
-                                 resGrp.getId(), cInfo.getSystem());
+        final ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
+        final Resource proto = rDao.findById(AuthzConstants.rootResourceId);
+        Resource r = cInfo.isPrivateGroup() ?
+            rDao.createPrivate(resType, proto, cInfo.getName(), creator,  
+                               resGrp.getId(), cInfo.isSystem()) :
+            rDao.create(resType, proto, cInfo.getName(), creator,  
+                        resGrp.getId(), cInfo.isSystem());
 
         resGrp.setResource(r);
         save(resGrp);
@@ -184,7 +187,7 @@ public class ResourceGroupDAO extends HibernateDAO
         }
         int numDeleted = 
             createQuery("delete from GroupMember where group = :group " +
-                    "and resource.id in (:members)")
+                        "and resource.id in (:members)")
             .setParameter("group", group)
             .setParameterList("members", memberIds)
             .executeUpdate();

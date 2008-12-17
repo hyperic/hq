@@ -59,7 +59,7 @@ public class NewGroupAction extends BaseAction {
                                  HttpServletResponse response)
         throws Exception {
 
-        GroupForm newForm = (GroupForm) form;
+        final GroupForm newForm = (GroupForm) form;
         
         // Clean up after ourselves first
         HttpSession session = request.getSession();
@@ -77,30 +77,31 @@ public class NewGroupAction extends BaseAction {
             ResourceGroup newGroup;
             AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
+            final int entType = newForm.getEntityTypeId().intValue();
             if (newForm.getGroupType().intValue() ==
                     Constants.APPDEF_TYPE_GROUP_COMPAT)
             {
                 newGroup = boss.createGroup(sessionId.intValue(), 
-                                        newForm.getEntityTypeId().intValue(), 
+                                        entType, 
                                         newForm.getResourceTypeId().intValue(),
                                         newForm.getName(),
                                         newForm.getDescription(),
                                         newForm.getLocation(),
-                                        newForm.getEntityIds());
+                                        newForm.getEntityIds(),
+                                        newForm.isPrivateGroup());
             } else {
                 // Constants.APPDEF_TYPE_GROUP_ADHOC
-                if (newForm.getEntityTypeId().intValue() ==
-                        AppdefEntityConstants.APPDEF_TYPE_APPLICATION ||
-                        newForm.getEntityTypeId().intValue() ==
-                        AppdefEntityConstants.APPDEF_TYPE_GROUP )
+                if (entType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION ||
+                    entType == AppdefEntityConstants.APPDEF_TYPE_GROUP)
                 {
                     newGroup = 
                       boss.createGroup(sessionId.intValue(),
-                                       newForm.getEntityTypeId().intValue(), 
+                                       entType, 
                                        newForm.getName(), 
                                        newForm.getDescription(),
                                        newForm.getLocation(),
-                                       newForm.getEntityIds());
+                                       newForm.getEntityIds(),
+                                       newForm.isPrivateGroup());
                 } else {
                     // otherwise, create a mixed group
                     newGroup = 
@@ -108,13 +109,14 @@ public class NewGroupAction extends BaseAction {
                                        newForm.getName(),
                                        newForm.getDescription(), 
                                        newForm.getLocation(),
-                                       newForm.getEntityIds());
+                                       newForm.getEntityIds(),
+                                       newForm.isPrivateGroup());
                 }
             }
     
               
-            log.trace("creating group [" + newForm.getName()
-                               + "]" + " with attributes " + newForm);
+            log.trace("creating group [" + newForm.getName() +
+                      "] with attributes " + newForm);
     
             Integer rid;
             Integer entityType;

@@ -170,12 +170,15 @@ function changeDropDown (masterSelName, selName, selectVal){
 <!--  /  -->
 
 <!--  GENERAL PROPERTIES CONTENTS -->
-<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<table width="100%" cellpadding="0" cellspacing="0" class="BottomLine">
+    <tr>
+        <td class="BlockLabel" width="20%"><fmt:message key="resource.group.inventory.New.Label.Private"/></td>
+        <td class="BlockContent" colspan="3"><html:checkbox property="privateGroup"/></td>
+    </tr>
 	<tr>
 <c:choose>
 <c:when test="${not empty GroupForm.typeName}">
-    <tr>
-        <td width="20%" class="BlockLabel" nowrap><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="resource.group.inventory.New.Label.Contains"/></td>
+      <td class="BlockLabel" nowrap><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="resource.group.inventory.New.Label.Contains"/></td>
       <td class="BlockContent">
         <c:out value="${GroupForm.typeName}"/>
         <html:hidden property="typeAndResourceTypeId"/>
@@ -183,7 +186,7 @@ function changeDropDown (masterSelName, selName, selectVal){
       </td>
 </c:when>
 <c:otherwise>
-		<td width="20%" class="BlockLabel" nowrap><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="resource.group.inventory.New.Label.Contains"/></td>
+		<td class="BlockLabel" nowrap><html:img page="/images/icon_required.gif" width="9" height="9" border="0"/><fmt:message key="resource.group.inventory.New.Label.Contains"/></td>
 <logic:messagesPresent property="groupType">
     <td class="ErrorField">
 	  <html:select property="groupType" onchange="changeDropDown('groupType', 'typeAndResourceTypeId');">
@@ -224,7 +227,7 @@ function changeDropDown (masterSelName, selName, selectVal){
 	</tr>
 <logic:messagesPresent property="groupType">
 	<tr>
-      <td width="20%" class="BlockLabel" nowrap>&nbsp;</td>
+      <td class="BlockLabel" nowrap>&nbsp;</td>
       <td width="20%" class="ErrorField">
           <span class="ErrorFieldContent">- <html:errors property="groupType"/></span>
       </td>
@@ -233,7 +236,7 @@ function changeDropDown (masterSelName, selName, selectVal){
 </logic:messagesPresent>      
 <logic:messagesPresent property="typeAndResourceTypeId">
 	<tr>
-      <td width="20%" class="BlockLabel" nowrap>&nbsp;</td>
+      <td class="BlockLabel" nowrap>&nbsp;</td>
       <td width="20%" class="BlockContent">&nbsp;</td>
       <td width="60%" class="ErrorField">
           &nbsp;
@@ -241,9 +244,7 @@ function changeDropDown (masterSelName, selName, selectVal){
       </td>
     </tr>
 </logic:messagesPresent>      
-	<tr>
-      <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </c:otherwise>
+</c:otherwise>
 </c:choose>
     </tr>
 </table>

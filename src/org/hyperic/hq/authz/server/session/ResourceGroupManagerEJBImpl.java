@@ -122,8 +122,9 @@ public class ResourceGroupManagerEJBImpl
                                              Collection resources)
         throws GroupCreationException, GroupDuplicateNameException
     {
+        final ResourceGroupDAO grpDao = getResourceGroupDAO();
         ResourceGroup existing = 
-            getResourceGroupDAO().findByName(cInfo.getName());
+            grpDao.findByName(cInfo.getName());
         
         if (existing != null) {
             throw new GroupDuplicateNameException("Group by the name [" + 
@@ -131,10 +132,9 @@ public class ResourceGroupManagerEJBImpl
                                                   "] already exists"); 
         }
         
-        ResourceGroup res = getResourceGroupDAO().create(whoami, cInfo,
-                                                         resources, roles);
-        ResourceEdgeDAO eDAO = new ResourceEdgeDAO(DAOFactory.getDAOFactory());
-        eDAO.create(res.getResource(), res.getResource(), 0,
+        ResourceGroup res = grpDao.create(whoami, cInfo, resources, roles);
+        new ResourceEdgeDAO(DAOFactory.getDAOFactory())
+            .create(res.getResource(), res.getResource(), 0,
                     getContainmentRelation());  // Self-edge
 
         GroupingStartupListener.getCallbackObj().postGroupCreate(res);

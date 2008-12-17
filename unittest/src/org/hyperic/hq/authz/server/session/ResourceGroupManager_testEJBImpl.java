@@ -87,7 +87,7 @@ public class ResourceGroupManager_testEJBImpl implements SessionBean {
                                                       ADHOC,
                                                       null,
                                                       "Test Group Location",
-                                                      0, false);
+                                                      0, false, false);
 
         rgMan.createResourceGroup(overlord, info,
                                   Collections.EMPTY_LIST,
@@ -118,7 +118,7 @@ public class ResourceGroupManager_testEJBImpl implements SessionBean {
                                                       ADHOC,
                                                       null,
                                                       "Test Group Location",
-                                                      0, false);
+                                                      0, false, false);
 
         ResourceGroup.ResourceGroupCreateInfo info2 =
             new ResourceGroup.ResourceGroupCreateInfo("Test Group 2",
@@ -126,7 +126,7 @@ public class ResourceGroupManager_testEJBImpl implements SessionBean {
                                                       ADHOC,
                                                       null,
                                                       "Test Group Location",
-                                                      0, false);
+                                                      0, false, false);
 
         rgMan.createResourceGroup(overlord, info1,
                                   Collections.EMPTY_LIST,
@@ -167,8 +167,9 @@ public class ResourceGroupManager_testEJBImpl implements SessionBean {
                 .getOverlordPojo();
         ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();
         ResourceGroup.ResourceGroupCreateInfo info = new ResourceGroup.ResourceGroupCreateInfo(
-                "Test Criteria Group " + System.currentTimeMillis(), "Test Criteria Group Description", ADHOC, null,
-                "Test Criteria Group Location", 0, false);
+                "Test Criteria Group " + System.currentTimeMillis(),
+                "Test Criteria Group Description", ADHOC, null,
+                "Test Criteria Group Location", 0, false, false);
         
         ResourceGroup rg = rgMan.createResourceGroup(overlord, info,
                 Collections.EMPTY_LIST, Collections.EMPTY_LIST);

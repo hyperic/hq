@@ -56,6 +56,7 @@ public class GroupForm extends NonScheduleResourceForm {
     private List _groupTypes;
     private String[] _entityIds;
     private String _typeName;
+    private boolean _privateGroup;
 
     public Integer getCompatibleCount()
     {
@@ -211,6 +212,14 @@ public class GroupForm extends NonScheduleResourceForm {
         _typeName = typeName;
     }
     
+    public boolean isPrivateGroup() {
+        return _privateGroup;
+    }
+
+    public void setPrivateGroup(boolean privateGroup) {
+        _privateGroup = privateGroup;
+    }
+
     /** 
      * Overide the validate method.  need to do validation.
      */

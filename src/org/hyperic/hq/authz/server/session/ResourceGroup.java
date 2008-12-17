@@ -70,20 +70,21 @@ public class ResourceGroup extends PersistedObject
         private Resource _resourcePrototype;
         private int      _clusterId;
         private boolean  _system;
+        private boolean  _privateGroup;
         
         public ResourceGroupCreateInfo(String name, String description,
-                                       int groupType,
-                                       Resource resourcePrototype,
-                                       String location,
-                                       int clusterId, boolean system)  
+                                       int groupType, Resource prototype,
+                                       String location, int clusterId,
+                                       boolean system, boolean privateGroup)  
         {
             _name              = name;
             _description       = description;
-            _resourcePrototype = resourcePrototype;
+            _resourcePrototype = prototype;
             _groupType         = groupType;
             _location          = location;
             _clusterId         = clusterId;
             _system            = system;
+            _privateGroup      = privateGroup;
         }
         
         public String getName() { return _name; }
@@ -92,7 +93,8 @@ public class ResourceGroup extends PersistedObject
         public int getGroupType() { return _groupType; }
         public Resource getResourcePrototype() { return _resourcePrototype; }
         public int getClusterId() { return _clusterId; }
-        public boolean getSystem() { return _system; }
+        public boolean isSystem() { return _system; }
+        public boolean isPrivateGroup() { return _privateGroup; }
     }
     
     public ResourceGroup() {
@@ -103,7 +105,7 @@ public class ResourceGroup extends PersistedObject
         _clusterId         = new Integer(cInfo.getClusterId());
         _description       = cInfo.getDescription();
         _location          = cInfo.getLocation();
-        _system            = cInfo.getSystem();
+        _system            = cInfo.isSystem();
         _groupType         = new Integer(cInfo.getGroupType());
         _resourcePrototype = cInfo.getResourcePrototype();
         _ctime = _mtime    = System.currentTimeMillis();
