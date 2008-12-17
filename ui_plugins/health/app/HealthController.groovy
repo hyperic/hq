@@ -30,7 +30,7 @@ import javax.naming.InitialContext
 import groovy.sql.Sql
 
 class HealthController 
-	extends BaseController
+    extends BaseController
 {
     private final DateFormat df = 
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
@@ -40,7 +40,7 @@ class HealthController
     HealthController() {
         onlyAllowSuperUsers()
         setJSONMethods(['getSystemStats', 'getDiag', 'cacheData', 
-                        'agentData', 'runQuery'])
+                        'agentData', 'runQuery', 'executeQuery'])
     }
     
     private getAgentSchema() {
@@ -53,7 +53,7 @@ class HealthController
             rowId: {it.id},
             columns: [
                 [field: [getValue: {localeBundle.fqdn},
-                         description:'fqdn', sortable:false], 
+                 description:'fqdn', sortable:false], 
                  width: '20%',
                  label: {it.platformHtml}],
                 [field: AgentSortField.ADDR,
@@ -66,26 +66,26 @@ class HealthController
                  width: '10%',
                  label: {it.agent.version}],
                 [field: [getValue: {localeBundle.build},
-                         description:'build', sortable:false],
+                 description:'build', sortable:false],
                  width: '5%',
                  label: {it.build}],                 
                 [field: [getValue: {localeBundle.bundleVersion},
-                          description:'bundleVersion', sortable:false],
-                  width: '10%',
-                  label: {it.bundleVersion}],                 
+                 description:'bundleVersion', sortable:false],
+                 width: '10%',
+                 label: {it.bundleVersion}],                 
                 [field: AgentSortField.CTIME,
                  width: '18%',
                  label: {it.creationTime}],
                 [field: [getValue: {localeBundle.numPlatforms},
-                         description:'numPlatforms', sortable:false], 
+                 description:'numPlatforms', sortable:false], 
                  width: '8%',
                  label: {it.agent.platforms.size()}],
                 [field: [getValue: {localeBundle.numMetrics},
-                         description:'numMetrics', sortable:false], 
+                 description:'numMetrics', sortable:false], 
                  width: '10%',
                  label: {it.numMetrics}],
                 [field: [getValue: {localeBundle.timeOffset},
-                         description:'timeOffset', sortable:false], 
+                 description:'timeOffset', sortable:false], 
                  width: '19%',
                  label: {it.offsetHtml}],
             ],
@@ -94,7 +94,7 @@ class HealthController
         if (HQUtil.isEnterpriseEdition()) {
             res.columns << [
                 field: [getValue: {localeBundle.licenseCount},
-                        description:'licenseCount', sortable:false],
+                description:'licenseCount', sortable:false],
                 width: '10%',
                 label: {it.licenseCount}]
         }
@@ -203,67 +203,68 @@ class HealthController
         ]
     }
     
-	private getCacheData(pageInfo) {
+    private getCacheData(pageInfo) {
         def res = Util.cacheHealths
-	    
-	    def d = pageInfo.sort.description
-	    res = res.sort {a, b ->
-	        return a."${d}" <=> b."${d}"
-	    }
-	    if (!pageInfo.ascending) 
-	        res = res.reverse()
-	    
-	    // XXX:  This is still incorrect
-	    def startIdx = pageInfo.startRow
-	    def endIdx   = startIdx + pageInfo.pageSize
-	    if (endIdx >= res.size)
-	        endIdx = -1
-	    return res[startIdx..endIdx]
+        
+        def d = pageInfo.sort.description
+        res = res.sort {a, b ->
+            return a."${d}" <=> b."${d}"
+        }
+        if (!pageInfo.ascending) 
+            res = res.reverse()
+        
+        // XXX:  This is still incorrect
+        def startIdx = pageInfo.startRow
+        def endIdx   = startIdx + pageInfo.pageSize
+        if (endIdx >= res.size)
+            endIdx = -1
+        return res[startIdx..endIdx]
     }
 
-	private getDiagnostics() {
-	    DiagnosticThread.diagnosticObjects.sort {a, b -> a.name <=> b.name }
-	}
-	
-	def index(params) {
-    	render(locals:[ 
-    	    diags:             diagnostics,
-    	    cacheSchema:       cacheSchema,
-    	    agentSchema:       agentSchema,
-    	    metricsPerMinute:  metricsPerMinute,
-    	    numPlatforms:      resourceHelper.find(count:'platforms'),
-    	    numCpus:   resourceHelper.find(count:'cpus'),
-    	    
-            numAgents:         agentHelper.find(count:'agents'),
-            numActiveAgents: agentHelper.find(count:'activeAgents'),
-    	    
-    	    numServers:        resourceHelper.find(count:'servers'),
-    	    numServices:       resourceHelper.find(count:'services'),
-    	    numApplications:   resourceHelper.find(count:'applications'),
-    	    numRoles:   resourceHelper.find(count:'roles'),
-    	    numUsers:  resourceHelper.find(count:'users'),
-    	    numAlerts:  resourceHelper.find(count:'alerts'),
-    	    numResources:  resourceHelper.find(count:'resources'),
-    	    numResourceTypes:  resourceHelper.find(count:'resourceTypes'),
-    	    numGroups:  resourceHelper.find(count:'groups'),
-    	    
-    	    numEscalations:  resourceHelper.find(count:'escalations'),
-    	    numActiveEscalations:  resourceHelper.find(count:'activeEscalations'),
-    	   
-    	    databaseQueries:   databaseQueries,
-    	    jvmSupportsTraces: getJVMSupportsTraces() ])
+    private getDiagnostics() {
+        DiagnosticThread.diagnosticObjects.sort {a, b -> a.name <=> b.name }
     }
     
-	private getMetricsPerMinute() {
-	    def vals  = MM.one.findMetricCountSummaries()
-	    def total = 0.0
-	    
-	    for (v in vals) {
-	        total = total + (float)v.total / (float)v.interval
-	    }
-	    (int)total
-	}
-	
+    def index(params) {
+        render(locals:[ 
+            diags:             diagnostics,
+            cacheSchema:       cacheSchema,
+            agentSchema:       agentSchema,
+            metricsPerMinute:  metricsPerMinute,
+            numPlatforms:      resourceHelper.find(count:'platforms'),
+            numCpus:   resourceHelper.find(count:'cpus'),
+            
+            numAgents:         agentHelper.find(count:'agents'),
+            numActiveAgents: agentHelper.find(count:'activeAgents'),
+            
+            numServers:        resourceHelper.find(count:'servers'),
+            numServices:       resourceHelper.find(count:'services'),
+            numApplications:   resourceHelper.find(count:'applications'),
+            numRoles:   resourceHelper.find(count:'roles'),
+            numUsers:  resourceHelper.find(count:'users'),
+            numAlerts:  resourceHelper.find(count:'alerts'),
+            numResources:  resourceHelper.find(count:'resources'),
+            numResourceTypes:  resourceHelper.find(count:'resourceTypes'),
+            numGroups:  resourceHelper.find(count:'groups'),
+            
+            numEscalations:  resourceHelper.find(count:'escalations'),
+            numActiveEscalations:  resourceHelper.find(count:'activeEscalations'),
+           
+            databaseQueries:   databaseQueries,
+            databaseActions:   databaseActions,
+            jvmSupportsTraces: getJVMSupportsTraces() ])
+    }
+    
+    private getMetricsPerMinute() {
+        def vals  = MM.one.findMetricCountSummaries()
+        def total = 0.0
+        
+        for (v in vals) {
+            total = total + (float)v.total / (float)v.interval
+        }
+        (int)total
+    }
+    
     def getDiag(params) {
         def diagName = params.getOne('diag')
         for (d in diagnostics) {
@@ -379,23 +380,23 @@ class HealthController
             numCpu:           Runtime.runtime.availableProcessors(),
             fqdn:             s.getFQDN(),
             guid:             SCM.one.getGUID(),
-            dbVersion:    runQueryAsText('version'),
+            dbVersion:        runQueryAsText('version'),
             reportTime:       dateFormat.format(System.currentTimeMillis()),
             userName:         user.fullName,
-            numPlatforms:      resourceHelper.find(count:'platforms'),
-            numCpus:   resourceHelper.find(count:'cpus'),            
-            numAgents:         agentHelper.find(count:'agents'),
-            numActiveAgents: agentHelper.find(count:'activeAgents'),            
-            numServers:        resourceHelper.find(count:'servers'),
-            numServices:       resourceHelper.find(count:'services'),
-            numApplications:   resourceHelper.find(count:'applications'),
-            numRoles:   resourceHelper.find(count:'roles'),
-            numUsers:  resourceHelper.find(count:'users'),
-            numAlerts:  resourceHelper.find(count:'alerts'),
-            numResources:  resourceHelper.find(count:'resources'),
-            numResourceTypes:  resourceHelper.find(count:'resourceTypes'),
-            numGroups:  resourceHelper.find(count:'groups'),            
-            numEscalations:  resourceHelper.find(count:'escalations'),
+            numPlatforms:     resourceHelper.find(count:'platforms'),
+            numCpus:          resourceHelper.find(count:'cpus'),            
+            numAgents:        agentHelper.find(count:'agents'),
+            numActiveAgents:  agentHelper.find(count:'activeAgents'),            
+            numServers:       resourceHelper.find(count:'servers'),
+            numServices:      resourceHelper.find(count:'services'),
+            numApplications:  resourceHelper.find(count:'applications'),
+            numRoles:         resourceHelper.find(count:'roles'),
+            numUsers:         resourceHelper.find(count:'users'),
+            numAlerts:        resourceHelper.find(count:'alerts'),
+            numResources:     resourceHelper.find(count:'resources'),
+            numResourceTypes: resourceHelper.find(count:'resourceTypes'),
+            numGroups:        resourceHelper.find(count:'groups'),            
+            numEscalations:   resourceHelper.find(count:'escalations'),
             numActiveEscalations:  resourceHelper.find(count:'activeEscalations'),           
             metricsPerMinute: metricsPerMinute,
             diagnostics:      diagnostics,
@@ -417,7 +418,7 @@ class HealthController
             locals.licenseInfo = com.hyperic.hq.license.LicenseManager.licenseInfo
         }
         
-    	render(locals: locals)
+        render(locals: locals)
     }
     
     private withConnection(Closure c) {
@@ -515,6 +516,19 @@ class HealthController
         res
     }
     
+    private getDatabaseActions() {
+        def queries = [ 
+          aiqPurge: [ 
+             name: localeBundle['actionPurgeAI'], 
+             query: [ "DELETE FROM EAM_AIQ_IP",
+                      "DELETE FROM EAM_AIQ_SERVICE",
+                      "DELETE FROM EAM_AIQ_SERVER",
+                      "DELETE FROM EAM_AIQ_PLATFORM",
+                    ]
+          ],
+        ]
+    }
+
     private getDatabaseVersionQuery(conn) {
         if (DBUtil.isOracle(conn)) {
             return "SELECT * FROM V\$VERSION"
@@ -563,7 +577,6 @@ class HealthController
             def rowIdx = 0
             def md
 
-
             sql.eachRow(query) { rs ->
                 if (rowIdx++ == 0) {
                     output << "<table cellspadding=3 cellspacing=0 border=0 width=98%><thead><tr>"
@@ -581,15 +594,15 @@ class HealthController
                     if (type in [Types.BINARY, Types.VARBINARY, Types.LONGVARBINARY]) {
                         output << "<td>*binary*</td>"
                     } else {
-                       def trimmedCol = h(rs[i].toString().trim())
+                        def trimmedCol = h(rs[i].toString().trim())
                         if (trimmedCol.length() == 0) {
-                        output << "<td>&nbsp;</td>"
+                            output << "<td>&nbsp;</td>"
                         } else {
-                         output << "<td>"
-                         output << trimmedCol
-                         txtOutput << "${trimmedCol}\n"
-                         output << "</td>"
-                       }
+                            output << "<td>"
+                            output << trimmedCol
+                            txtOutput << "${trimmedCol}\n"
+                            output << "</td>"
+                        }
                     }
                 }
                 output << "</tr>"
@@ -607,6 +620,49 @@ class HealthController
             }
         }
         
+        def queryData = "${name} executed in ${now() - start} ms<br/><br/>"
+        if (returnHtml) {
+            return [ queryData: queryData + res ]
+        }
+        else {
+            return res
+        }
+    }
+
+    def executeQuery(params) {
+        executeQuery(params, true)
+    }
+
+    def executeQuery(params, returnHtml) {
+        def id    = params.getOne('query')
+        def queries
+        
+        if (databaseActions[id].query in Closure) {
+            queries = withConnection() { conn -> 
+                databaseActions[id].query(conn)       
+            }
+        } else {
+            queries = databaseActions[id].query        
+        }    
+        
+        def name  = databaseActions[id].name
+        def start = now()
+
+        log.info("Running queries [${queries}]")
+        def res = withConnection() { conn ->
+            def sql    = new Sql(conn)
+            def output = new StringBuffer()
+            def txtOutput = new StringBuffer()
+            def md
+            output << "<ol>\n"
+            queries.each {
+                output << "\t<li>${it}: "
+                output << sql.executeUpdate(it)
+                output << " ${localeBundle['rows']}</li>\n"
+            }
+            output << "</ol>"
+        }
+
         def queryData = "${name} executed in ${now() - start} ms<br/><br/>"
         if (returnHtml) {
             return [ queryData: queryData + res ]

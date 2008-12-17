@@ -214,7 +214,9 @@ getSystemStats();
 <div id="fullBody" style="clear:both">
   <% dojoTabContainer(id:'bodyTabContainer', style:'width: 100%; height:500px;') { %>
     <% dojoTabPane(id:'diagTab', label:l.diagnostics) { %>
+      <div style="padding: 6px;">${l.diagWatchNotice}</div>
       <div id="diagSelectControls">
+        <span>${l.selectDiagLabel}</span>
         <select id="diagSelect" onchange='selectDiag(options[selectedIndex].value)'>
           <option value='none'>-- ${l.selectDiag} --</option>
         <% for (d in diags) { %>
@@ -223,7 +225,6 @@ getSystemStats();
         </select>
         
         <img src="/images/arrow_refresh.png" onclick="loadDiag()"/>
-        <span>${l.diagWatchNotice}</span>
       </div>
       <pre style="background-color: #FFF; border: 0px none;">
         <div id="diagData">
@@ -259,6 +260,16 @@ getSystemStats();
 
     <% dojoTabPane(id:'databaseTab', label:l.database) { %>
       <div id="querySelectControls">
+        <span>${l.selectActionLabel}</span>
+        <select id="queryExecute">
+          <option value='none'>-- ${l.selectAction} --</option>
+        <% for (q in databaseActions.entrySet().sort {a,b-> a.key <=> b.key}) { %>
+          <option value='${q.key}'>${h q.value.name}</option>
+        <% } %>
+        </select>
+        <img src="/images/tbb_go.gif" onclick="queryAction()"/>
+        <p></p>
+        <span>${l.selectQueryLabel}</span>
         <select id="querySelect" onchange='selectQuery(options[selectedIndex].value)'>
           <option value='none'>-- ${l.selectQuery} --</option>
         <% for (q in databaseQueries.entrySet().sort {a,b-> a.key <=> b.key}) { %>
@@ -318,6 +329,27 @@ function selectQuery(q) {
     
   dojo.io.bind({
     url: '<%= urlFor(action:"runQuery") %>' + '?query=' + q,
+    method: "post",
+    mimetype: "text/json-comment-filtered",
+    load: function(type, data, evt) {
+      dojo.byId('queryData').innerHTML = data.queryData;
+    }
+  });
+}
+
+function queryAction() {
+  var selectDrop = document.getElementById('queryExecute');
+  executeQuery(selectDrop.options[selectDrop.selectedIndex].value);
+}
+
+function executeQuery(q) {
+  if (q == 'none') {
+    dojo.byId('queryData').innerHTML = '';
+    return;
+  }
+    
+  dojo.io.bind({
+    url: '<%= urlFor(action:"executeQuery") %>' + '?query=' + q,
     method: "post",
     mimetype: "text/json-comment-filtered",
     load: function(type, data, evt) {

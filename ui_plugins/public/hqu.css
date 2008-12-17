@@ -1005,4 +1005,8 @@ p a {
     font-weight: bold
 }
 
+img {
+    vertical-align: middle;
+}
+
 /*GConsole*/
