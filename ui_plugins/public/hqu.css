@@ -809,7 +809,7 @@ e;
 
 /* HQ Health */
 
-#cacheTable {
+#cacheTable, #agentTable {
     font-family: Lucida Grande, Verdana;
     font-size: 11px;
     width: 100%;
@@ -822,7 +822,7 @@ table border on left side - do not remove */
     cursor: default;
 }
 
-#cacheTable th {
+#cacheTable th, #agentTable th {
     font-weight: bold;
     padding: 3px;
     padding-left: 5px;
@@ -830,13 +830,13 @@ table border on left side - do not remove */
     border-top: 1px solid #7bafff;
 }
 
-#cacheTable td {
+#cacheTable td, #agentTable td {
     padding: 3px;
     font-weight: normal;
     padding-left: 5px;
 }
 
-#cacheTabletd, #cacheTable th {
+#cacheTable th {
     background-image: url( "images/ft-head.gif" );
     background-repeat: no-repeat;
     background-position: top right;
@@ -927,7 +927,7 @@ pre {
 .printButton {
     border: 1px solid #cccccc;
     padding: 2px 6px 2px 6px;
-    margin-left: 5px;
+    margin-left: 15px;
     margin-top: 5px;
     background-color: #F2F4F7;
     width: 35px
