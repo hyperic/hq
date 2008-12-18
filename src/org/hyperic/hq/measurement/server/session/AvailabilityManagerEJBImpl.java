@@ -1102,13 +1102,7 @@ public class AvailabilityManagerEJBImpl
 
         if (!events.isEmpty()) {
             Messenger sender = new Messenger();
-            final int BATCH_SIZE = 10;
-            for (int i = 0; i < events.size(); i += BATCH_SIZE) {
-                int end = Math.min(i + BATCH_SIZE, events.size());
-                ArrayList msgObj = new ArrayList(events.subList(i, end));
-                sender.publishMessage(EventConstants.EVENTS_TOPIC, msgObj);
-                _log.debug("Sent " + (end - i) + " batched events to JMS");
-            }
+            sender.publishMessage(EventConstants.EVENTS_TOPIC, events);
         }
 
         if (!zevents.isEmpty()) {
