@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -44,12 +44,12 @@ public class TriggerEventDAO extends HibernateDAO {
                 .getSessionFactory().openSession();
     }
         
-    void save(TriggerEvent event, Session session) {                
-        session.saveOrUpdate(event);
+    void save(TriggerEvent event) {                
+        super.save(event);
     }
     
-    TriggerEvent findById(Long id, Session session) {
-        return (TriggerEvent)session.load(getPersistentClass(), id);            
+    TriggerEvent findById(Long id) {
+        return (TriggerEvent) super.findById(id);            
     }
     
     List findUnexpiredByTriggerId(Integer tid, Session session) {
@@ -72,11 +72,11 @@ public class TriggerEventDAO extends HibernateDAO {
                         .uniqueResult()).intValue();            
     }
     
-    void deleteByTriggerId(Integer tid, Session session) {
+    void deleteByTriggerId(Integer tid) {
         String hql = "delete from TriggerEvent te where te.triggerId= :tid " +
         		     "or te.expiration < :exp";
 
-        session.createQuery(hql)
+        createQuery(hql)
                 .setInteger("tid", tid.intValue())
                 .setLong("exp", System.currentTimeMillis())
                 .executeUpdate();
