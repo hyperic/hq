@@ -531,7 +531,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         
         if (!events.isEmpty()) {
             Messenger sender = new Messenger();
-            sender.publishMessage(EventConstants.EVENTS_TOPIC, events);
+            final int BATCH_SIZE = 10;
+            for (int i = 0; i < events.size(); i += BATCH_SIZE) {
+                int end = Math.min(i + BATCH_SIZE, events.size());
+                ArrayList msgObj = new ArrayList(events.subList(i, end));
+                sender.publishMessage(EventConstants.EVENTS_TOPIC, msgObj);
+                _log.debug("Sent " + (end - i) + " batched events to JMS");
+            }
         }
         
         if (!zevents.isEmpty()) {
