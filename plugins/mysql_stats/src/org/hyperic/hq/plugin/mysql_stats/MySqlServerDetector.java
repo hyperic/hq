@@ -94,6 +94,7 @@ public class MySqlServerDetector
         try {
             setGlobalStatusService(rtn, serverConfig);
             setSlaveStatusService(rtn, serverConfig);
+            setMasterSlaveStatusService(rtn, serverConfig);
         } catch (SQLException e) {
             String msg = "Error querying for services: "+e.getMessage();
             throw new PluginException(msg, e);
@@ -149,6 +150,44 @@ public class MySqlServerDetector
             // The issue is that if you have permissions to run the
             // command, replication still may not be enabled.
             // Therefore just return and ignore service.
+            return;
+        } finally {
+            DBUtil.closeJDBCObjects(_logCtx, conn, stmt, rs);
+        }
+    }
+
+    private void setMasterSlaveStatusService(List services,
+                                       ConfigResponse serverConfig) {
+        String url  = serverConfig.getValue(JDBCMeasurementPlugin.PROP_URL);
+        String user = serverConfig.getValue(JDBCMeasurementPlugin.PROP_USER);
+        String pass = serverConfig.getValue(JDBCMeasurementPlugin.PROP_PASSWORD);
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            conn = getConnection(url, user, pass, serverConfig);
+            stmt = conn.createStatement();
+            rs = stmt.executeQuery("show full processlist");
+            int userCol = rs.findColumn("User"),
+                addrCol = rs.findColumn("Host");
+            while (rs.next()) {
+                String pUser = rs.getString(userCol);
+                if (!pUser.equalsIgnoreCase("slave")) {
+                    continue;
+                }
+                ServiceResource service = new ServiceResource();
+                service.setType(this, "Slave Status");
+                service.setServiceName("Slave Status");
+                ConfigResponse productConfig = new ConfigResponse();
+                service.setProductConfig(productConfig);
+                ConfigResponse replConfig = new ConfigResponse();
+                String addr = rs.getString(addrCol);
+                replConfig.setValue("slaveAddress", addr);
+                service.setMeasurementConfig(replConfig);
+//                service.setControlConfig();
+                services.add(service);
+            }
+        } catch (SQLException e) {
             return;
         } finally {
             DBUtil.closeJDBCObjects(_logCtx, conn, stmt, rs);

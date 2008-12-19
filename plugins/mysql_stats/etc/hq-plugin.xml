@@ -43,6 +43,8 @@
               value="query=show /*!50002 global */ status"/>
     <property name="showSlave"
               value="query=show slave status"/>
+    <property name="showDatabases"
+              value="query=show databases"/>
 
   <!--
     Metric groups.
@@ -54,6 +56,20 @@
     (e.g. not within a <metrics>...</metrics> block) but of course then they
     wouldn't be reusable in more complicated use cases.
   -->
+
+    <!--
+        This is used to validate the configuration provided by the user
+    -->
+    <filter name="template"
+            value="${domain}:${showDatabases}:${alias}"/>
+    <metrics name="global-validation">
+        <metric name="Number Of Databases"
+                alias="NumDatabases"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="static" />
+    </metrics>
 
   <!-- Global Status metrics -->
 
@@ -128,7 +144,7 @@
             alias="Bytes_received"
             category="THROUGHPUT"
             group="Connection"
-            indicator="true"
+            indicator="false"
             units="B"
             collectionType="trendsup"/>
 
@@ -136,7 +152,7 @@
             alias="Bytes_sent"
             category="THROUGHPUT"
             group="Connection"
-            indicator="true"
+            indicator="false"
             units="B"
             collectionType="trendsup"/>
 
@@ -160,7 +176,7 @@
             alias="Created_tmp_tables"
             category="UTILIZATION"
             group="Query/Runtime"
-            indicator="true"
+            indicator="false"
             units="none"
             collectionType="trendsup"/>
 
@@ -176,7 +192,7 @@
             alias="Delayed_insert_threads"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             units="none"
             collectionType="trendsup"/>
 
@@ -184,7 +200,7 @@
             alias="Delayed_writes"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             units="none"
             collectionType="trendsup"/>
 
@@ -192,7 +208,7 @@
             alias="Delayed_errors"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             units="none"
             collectionType="trendsup"/>
 
@@ -200,7 +216,7 @@
             alias="Com_admin_commands"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -209,7 +225,7 @@
             alias="Com_alter_table"
             category="UTILIZATION"
             group="DDL Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -218,7 +234,7 @@
             alias="Com_analyze"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -227,7 +243,7 @@
             alias="Com_backup_table"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -236,7 +252,7 @@
             alias="Com_begin"
             category="UTILIZATION"
             group="Tx Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -245,7 +261,7 @@
             alias="Com_change_db"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -254,7 +270,7 @@
             alias="Com_change_master"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -263,7 +279,7 @@
             alias="Com_check"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -272,7 +288,7 @@
             alias="Com_commit"
             category="UTILIZATION"
             group="Tx Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -281,7 +297,7 @@
             alias="Com_create_db"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -290,7 +306,7 @@
             alias="Com_create_function"
             category="UTILIZATION"
             group="DDL Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -299,7 +315,7 @@
             alias="Com_create_index"
             category="UTILIZATION"
             group="DDL Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -308,7 +324,7 @@
             alias="Com_create_table"
             category="UTILIZATION"
             group="DDL Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -317,7 +333,7 @@
             alias="Com_delete"
             category="UTILIZATION"
             group="DML Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -326,7 +342,7 @@
             alias="Com_drop_db"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -335,7 +351,7 @@
             alias="Com_drop_function"
             category="UTILIZATION"
             group="DDL Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -344,7 +360,7 @@
             alias="Com_drop_index"
             category="UTILIZATION"
             group="DDL Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -353,7 +369,7 @@
             alias="Com_drop_table"
             category="UTILIZATION"
             group="DDL Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -362,7 +378,7 @@
             alias="Com_flush"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -371,7 +387,7 @@
             alias="Com_grant"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -380,7 +396,7 @@
             alias="Com_insert"
             category="UTILIZATION"
             group="DML Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -389,7 +405,7 @@
             alias="Com_insert_select"
             category="UTILIZATION"
             group="DML Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -398,7 +414,7 @@
             alias="Com_kill"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -407,7 +423,7 @@
             alias="Com_load"
             category="UTILIZATION"
             group="DML Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -416,7 +432,7 @@
             alias="Com_load_master_table"
             category="UTILIZATION"
             group="DML Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -425,7 +441,7 @@
             alias="Com_lock_tables"
             category="UTILIZATION"
             group="Tx Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -434,7 +450,7 @@
             alias="Com_optimize"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -443,7 +459,7 @@
             alias="Com_purge"
             category="UTILIZATION"
             group="DML Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -452,7 +468,7 @@
             alias="Com_rename_table"
             category="UTILIZATION"
             group="DDL Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -461,7 +477,7 @@
             alias="Com_repair"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -470,7 +486,7 @@
             alias="Com_replace"
             category="UTILIZATION"
             group="DML Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -479,7 +495,7 @@
             alias="Com_replace_select"
             category="UTILIZATION"
             group="DML Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -488,7 +504,7 @@
             alias="Com_reset"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -497,7 +513,7 @@
             alias="Com_restore_table"
             category="UTILIZATION"
             group="DML Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -506,7 +522,7 @@
             alias="Com_revoke"
             category="UTILIZATION"
             group="DBA Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -524,7 +540,7 @@
             alias="Com_select"
             category="UTILIZATION"
             group="General Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -533,7 +549,7 @@
             alias="Com_set_option"
             category="UTILIZATION"
             group="General Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -542,7 +558,7 @@
             alias="Com_show_binlogs"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -551,7 +567,7 @@
             alias="Com_show_databases"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -560,7 +576,7 @@
             alias="Com_show_fields"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -569,7 +585,7 @@
             alias="Com_show_grants"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -578,7 +594,7 @@
             alias="Com_show_keys"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -587,7 +603,7 @@
             alias="Com_show_logs"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -596,7 +612,7 @@
             alias="Com_show_master_status"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -605,7 +621,7 @@
             alias="Com_show_open_tables"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -614,7 +630,7 @@
             alias="Com_show_processlist"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -623,7 +639,7 @@
             alias="Com_show_slave_status"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -632,7 +648,7 @@
             alias="Com_show_status"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -641,7 +657,7 @@
             alias="Com_show_innodb_status"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -650,7 +666,7 @@
             alias="Com_show_tables"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -659,7 +675,7 @@
             alias="Com_show_variables"
             category="UTILIZATION"
             group="Show Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -668,7 +684,7 @@
             alias="Com_slave_start"
             category="UTILIZATION"
             group="General Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -677,7 +693,7 @@
             alias="Com_slave_stop"
             category="UTILIZATION"
             group="General Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -686,7 +702,7 @@
             alias="Com_truncate"
             category="UTILIZATION"
             group="DML Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -695,7 +711,7 @@
             alias="Com_unlock_tables"
             category="UTILIZATION"
             group="Tx Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -704,7 +720,7 @@
             alias="Com_update"
             category="UTILIZATION"
             group="DML Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -714,7 +730,7 @@
             alias="Handler_commit"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -723,7 +739,7 @@
             alias="Handler_delete"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -732,7 +748,7 @@
             alias="Handler_read_first"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -741,7 +757,7 @@
             alias="Handler_read_key"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -750,7 +766,7 @@
             alias="Handler_read_next"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -759,7 +775,7 @@
             alias="Handler_read_prev"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -768,7 +784,7 @@
             alias="Handler_read_rnd"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -777,7 +793,7 @@
             alias="Handler_read_rnd_next"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -786,7 +802,7 @@
             alias="Handler_update"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -795,7 +811,7 @@
             alias="Handler_write"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -804,7 +820,7 @@
             alias="Key_blocks_used"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -813,7 +829,7 @@
             alias="Key_read_requests"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -822,7 +838,7 @@
             alias="Key_reads"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -831,7 +847,7 @@
             alias="Key_write_requests"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -840,7 +856,7 @@
             alias="Key_writes"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -849,7 +865,7 @@
             alias="Max_used_connections"
             category="THROUGHPUT"
             group="Connection"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -858,7 +874,7 @@
             alias="Not_flushed_delayed_rows"
             category="UTILIZATION"
             group="I/O"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -903,7 +919,7 @@
             alias="Qcache_free_blocks"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -939,7 +955,7 @@
             alias="Qcache_lowmem_prunes"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -966,7 +982,7 @@
             alias="Qcache_total_blocks"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -975,7 +991,7 @@
             alias="Questions"
             category="THROUGHPUT"
             group="Connection"
-            indicator="true"
+            indicator="false"
             units="none"
             collectionType="trendsup" />
 
@@ -983,7 +999,7 @@
             alias="Select_full_join"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -992,7 +1008,7 @@
             alias="Select_full_range_join"
             category="UTILIZATION"
             group="Query/Runtime"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1001,7 +1017,7 @@
             alias="Select_range"
             category="UTILIZATION"
             group="Query/Runtime"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1010,7 +1026,7 @@
             alias="Select_range_check"
             category="UTILIZATION"
             group="Query/Runtime"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1019,7 +1035,7 @@
             alias="Select_scan"
             category="UTILIZATION"
             group="Query/Runtime"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1028,7 +1044,7 @@
             alias="Slave_open_temp_tables"
             category="UTILIZATION"
             group="Query/Runtime"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1037,7 +1053,7 @@
             alias="Slow_launch_threads"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1054,7 +1070,7 @@
             alias="Sort_merge_passes"
             category="UTILIZATION"
             group="Query/Runtime"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1063,7 +1079,7 @@
             alias="Sort_range"
             category="UTILIZATION"
             group="Query/Runtime"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1072,7 +1088,7 @@
             alias="Sort_rows"
             category="UTILIZATION"
             group="Query/Runtime"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1081,7 +1097,7 @@
             alias="Sort_scan"
             category="UTILIZATION"
             group="Query/Runtime"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1090,7 +1106,7 @@
             alias="Table_locks_immediate"
             category="UTILIZATION"
             group="Query/Runtime"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1099,7 +1115,7 @@
             alias="Table_locks_waited"
             category="UTILIZATION"
             group="Query/Runtime"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1108,7 +1124,7 @@
             alias="Threads_cached"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1117,7 +1133,7 @@
             alias="Threads_created"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1126,7 +1142,7 @@
             alias="Threads_connected"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             units="none"
             collectionType="dynamic"/>
 
@@ -1134,7 +1150,7 @@
             alias="Threads_running"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1154,7 +1170,7 @@
             alias="Uptime"
             category="PERFORMANCE"
             group="Reliability"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="sec"
             collectionType="trendsup"
@@ -1189,7 +1205,7 @@
             alias="Connection_usage"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             units="percentage"
             collectionType="dynamic"/-->
     </metrics>
@@ -1204,7 +1220,7 @@
             alias="Binlog_cache_disk_use"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1214,7 +1230,7 @@
             alias="Binlog_cache_use"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1229,7 +1245,7 @@
             alias="Com_stmt_prepare"
             category="UTILIZATION"
             group="Prepared Statement Commands"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1239,7 +1255,7 @@
             alias="Com_stmt_execute"
             category="UTILIZATION"
             group="Prepared Statement Commands"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1249,7 +1265,7 @@
             alias="Com_stmt_send_long_data"
             category="UTILIZATION"
             group="Prepared Statement Commands"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1259,7 +1275,7 @@
             alias="Com_stmt_reset"
             category="UTILIZATION"
             group="Prepared Statement Commands"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1269,7 +1285,7 @@
             alias="Com_stmt_close"
             category="UTILIZATION"
             group="Prepared Statement Commands"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1279,7 +1295,7 @@
             alias="Com_prepare_sql"
             category="UTILIZATION"
             group="Prepared Statement Commands"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1289,7 +1305,7 @@
             alias="Com_execute_sql"
             category="UTILIZATION"
             group="Prepared Statement Commands"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1299,7 +1315,7 @@
             alias="Com_dealloc_sql"
             category="UTILIZATION"
             group="Prepared Statement Commands"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1309,7 +1325,7 @@
             alias="Key_blocks_not_flushed"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1319,7 +1335,7 @@
             alias="Key_blocks_unused"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1329,7 +1345,7 @@
             alias="Prepared_stmt_count"
             category="UTILIZATION"
             group="Prepared Statement Commands"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1339,7 +1355,7 @@
             alias="Slave_retried_transactions"
             category="UTILIZATION"
             group="Replication"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1360,7 +1376,7 @@
             alias="Handler_prepare"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1370,7 +1386,7 @@
             alias="Handler_savepoint"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1380,7 +1396,7 @@
             alias="Handler_savepoint_rollback"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1395,7 +1411,7 @@
             alias="Innodb_buffer_pool_pages_data"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1405,7 +1421,7 @@
             alias="Innodb_buffer_pool_pages_dirty"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1415,7 +1431,7 @@
             alias="Innodb_buffer_pool_pages_flushed"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1425,7 +1441,7 @@
             alias="Innodb_buffer_pool_pages_free"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1435,7 +1451,7 @@
             alias="Innodb_buffer_pool_pages_latched"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1445,7 +1461,7 @@
             alias="Innodb_buffer_pool_pages_misc"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1455,7 +1471,7 @@
             alias="Innodb_buffer_pool_pages_total"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="static"/>
@@ -1465,7 +1481,7 @@
             alias="Innodb_buffer_pool_read_ahead_rnd"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1475,7 +1491,7 @@
             alias="Innodb_buffer_pool_read_ahead_seq"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1485,7 +1501,7 @@
             alias="Innodb_buffer_pool_read_requests"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1495,7 +1511,7 @@
             alias="Innodb_buffer_pool_reads"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1505,7 +1521,7 @@
             alias="Innodb_buffer_pool_wait_free"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1515,7 +1531,7 @@
             alias="Innodb_buffer_pool_write_requests"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1525,7 +1541,7 @@
             alias="Innodb_data_fsyncs"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1535,7 +1551,7 @@
             alias="Innodb_data_pending_fsyncs"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1545,7 +1561,7 @@
             alias="Innodb_data_pending_reads"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1555,7 +1571,7 @@
             alias="Innodb_data_pending_writes"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1565,7 +1581,7 @@
             alias="Innodb_data_read"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="B"
             collectionType="trendsup"/>
@@ -1575,7 +1591,7 @@
             alias="Innodb_data_reads"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1585,7 +1601,7 @@
             alias="Innodb_data_writes"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1595,7 +1611,7 @@
             alias="Innodb_data_written"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="B"
             collectionType="trendsup"/>
@@ -1605,7 +1621,7 @@
             alias="Innodb_dblwr_writes"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1615,7 +1631,7 @@
             alias="Innodb_dblwr_pages_written"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1625,7 +1641,7 @@
             alias="Innodb_log_waits"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1635,7 +1651,7 @@
             alias="Innodb_log_write_requests"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1645,7 +1661,7 @@
             alias="Innodb_log_writes"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1655,7 +1671,7 @@
             alias="Innodb_os_log_fsyncs"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1665,7 +1681,7 @@
             alias="Innodb_os_log_pending_fsyncs"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1675,7 +1691,7 @@
             alias="Innodb_os_log_pending_writes"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1685,7 +1701,7 @@
             alias="Innodb_os_log_written"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="B"
             collectionType="trendsup"/>
@@ -1695,7 +1711,7 @@
             alias="Innodb_page_size"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="B"
             collectionType="static"/>
@@ -1705,7 +1721,7 @@
             alias="Innodb_pages_created"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1715,7 +1731,7 @@
             alias="Innodb_pages_read"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1725,7 +1741,7 @@
             alias="Innodb_pages_written"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1735,7 +1751,7 @@
             alias="Innodb_row_lock_current_waits"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1745,7 +1761,7 @@
             alias="Innodb_row_lock_time"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="ms"
             collectionType="trendsup"/>
@@ -1755,7 +1771,7 @@
             alias="Innodb_row_lock_time_avg"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="ms"
             collectionType="dynamic"/>
@@ -1765,7 +1781,7 @@
             alias="Innodb_row_lock_time_max"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="ms"
             collectionType="dynamic"/>
@@ -1775,7 +1791,7 @@
             alias="Innodb_row_lock_waits"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1785,7 +1801,7 @@
             alias="Innodb_rows_deleted"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1795,7 +1811,7 @@
             alias="Innodb_rows_inserted"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1805,7 +1821,7 @@
             alias="Innodb_rows_read"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -1815,7 +1831,7 @@
                 alias="Innodb_rows_updated"
                 category="UTILIZATION"
                 group="Resource Utilization"
-                indicator="true"
+                indicator="false"
                 defaultOn="false"
                 units="none"
                 collectionType="trendsup"/>
@@ -1827,7 +1843,7 @@
                 alias="Open_table_definitions"
                 category="UTILIZATION"
                 group="Resource Utilization"
-                indicator="true"
+                indicator="false"
                 defaultOn="false"
                 units="none"
                 collectionType="dynamic"/>
@@ -1837,7 +1853,7 @@
                 alias="Prepared_statement_count"
                 category="UTILIZATION"
                 group="Resource Utilization"
-                indicator="true"
+                indicator="false"
                 defaultOn="false"
                 units="none"
                 collectionType="dynamic"/>
@@ -1850,7 +1866,7 @@
 
   <!-- Filter for Replication Metrics -->
     <filter name="template"
-            value="${domain}:${showSlave},${properties}:${alias}"/>
+            value="${domain}:${showSlave},key=Master_Host,value=${alias}:${alias}"/>
   <!-- Replication metrics -->
     <metrics name="MySQL Status 4.0.x Replication">
     <!--
@@ -1948,9 +1964,25 @@
                     description="Process query"
                     default="State.Name.eq=mysqld"/>
         </config>
+        <metric name="Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                indicator="true"/>
         &process-metrics;
+        <metrics include="global-validation"/>
         <service name="Show Global Status">
             <metrics include="global-4.0"/>
+        </service>
+        <service name="Slave Status">
+            <config>
+              <option name="slaveAddress"
+                      description="slave address info ip:port"/>
+            </config>
+            <metric name="Availability"
+                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
+                    indicator="true"/>
+            <metric name="Replication Process Time"
+                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
+                    indicator="true"/>
         </service>
         <service name="Show Slave Status">
             <metrics include="MySQL Status 4.0.x Replication"/>
@@ -1979,9 +2011,25 @@
                     description="Process query"
                     default="State.Name.eq=mysqld"/>
         </config>
+        <metric name="Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                indicator="true"/>
         &process-metrics;
+        <metrics include="global-validation"/>
         <service name="Show Global Status">
             <metrics include="global-4.1"/>
+        </service>
+        <service name="Slave Status">
+            <config>
+              <option name="slaveAddress"
+                      description="slave address info ip:port"/>
+            </config>
+            <metric name="Availability"
+                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
+                    indicator="true"/>
+            <metric name="Replication Process Time"
+                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
+                    indicator="true"/>
         </service>
         <service name="Show Slave Status">
             <metrics include="MySQL Status 4.1.x Replication"/>
@@ -2010,9 +2058,25 @@
                     description="Process query"
                     default="State.Name.eq=mysqld"/>
         </config>
+        <metric name="Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                indicator="true"/>
         &process-metrics;
+        <metrics include="global-validation"/>
         <service name="Show Global Status">
             <metrics include="global-5.0"/>
+        </service>
+        <service name="Slave Status">
+            <config>
+              <option name="slaveAddress"
+                      description="slave address info ip:port"/>
+            </config>
+            <metric name="Availability"
+                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
+                    indicator="true"/>
+            <metric name="Replication Process Time"
+                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
+                    indicator="true"/>
         </service>
         <service name="Show Slave Status">
             <metrics include="MySQL Status 5.0.x Replication"/>
@@ -2041,9 +2105,25 @@
                     description="Process query"
                     default="State.Name.eq=mysqld"/>
         </config>
+        <metric name="Availability"
+                template="sigar:Type=ProcState,Arg=%process.query%:State"
+                indicator="true"/>
         &process-metrics;
+        <metrics include="global-validation"/>
         <service name="Show Global Status">
             <metrics include="global-5.1"/>
+        </service>
+        <service name="Slave Status">
+            <config>
+              <option name="slaveAddress"
+                      description="slave address info ip:port"/>
+            </config>
+            <metric name="Availability"
+                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
+                    indicator="true"/>
+            <metric name="Replication Process Time"
+                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
+                    indicator="true"/>
         </service>
         <service name="Show Slave Status">
             <metrics include="MySQL Status 5.1.x Replication"/>
