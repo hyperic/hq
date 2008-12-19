@@ -274,7 +274,7 @@ public class MeasurementPluginManager extends PluginManager {
                 return getPluginValue(name, metric);
             }
         } catch(NoClassDefFoundError e) {
-            throw new PluginException(classNotFoundMessage(e));
+            throw new PluginException(classNotFoundMessage(e), e);
         }
     }
 
