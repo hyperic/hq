@@ -1,0 +1,2094 @@
+<?xml version="1.0"?>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004-2008], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin package="org.hyperic.hq.plugin.mysql_stats">
+    <classpath>
+      <include name="pdk/lib/jdbc/mysql-connector-java-5.0.5-bin.jar"/>
+    </classpath>
+    <property name="template-config"
+              value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
+    <property name="domain"
+              value="mysqlstats"/>
+    <property name="properties"
+              value="key=Variable_name,value=Value"/>
+    <property name="showGlobal"
+              value="query=show /*!50002 global */ status"/>
+    <property name="showSlave"
+              value="query=show slave status"/>
+
+  <!--
+    Metric groups.
+    These need to be outside of any <server> or <service> elements, as the only
+    allowed usage of the <metrics> tags within those elements is to include groups
+    defined elsewhere (at the plugin top level)...
+    
+    It's also OK to just define individual metrics within a server or service
+    (e.g. not within a <metrics>...</metrics> block) but of course then they
+    wouldn't be reusable in more complicated use cases.
+  -->
+
+  <!-- Global Status metrics -->
+
+  <!--
+    We name these groups to identify the minimum MySQL version which supports
+    the metrics in the group; later, when we define servers, we include the
+    appropriate group for the version of the server.
+  -->
+
+  <!-- Filter for Global Status Metrics -->
+    <filter name="template"
+            value="${domain}:${showGlobal},${properties}:${alias}"/>
+    <metrics name="global-4.0">
+    <!--
+      Must ALWAYS capture an Availability metric, or none of the other metrics for
+      this service will be collected. :(
+    -->
+        <metric name="Availability"
+            alias="Availability"
+            category="AVAILABILITY"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic" />
+
+    <!--
+      Metrics available in version 4.0
+
+      A few metrics either don't exist at global level, or aren't useful
+      and are omitted:
+        Slave_running:
+          Available in 3.23.16+, values are OFF or ON and Hyperic requires
+          numeric metrics only.  Not useful as a monitored/graphed metric
+          in the Global Status service, but can be used (by external automation
+          scripting, or by a more advanced MySQL server/service detector)
+          to see if a Replication service resource would be useful for the
+          parent server.  Also see the same named metric exposed by the
+          Replication service, computed by the data collector.
+
+      Most of the exposed metrics are counters having a collectionType of
+      'trendsup', and will also have a rate metric added (by Hyperic)
+      as well reflecting values/minute; for more info see
+      http://support.hyperic.com/confluence/display/DOC/Measurement+Plugin
+
+      For a metric to have its indicator graph available for display in the
+      'Indicators' tab when viewing a monitored resource, set the
+      'indicator' attribute to "true".
+
+      For an indicator metric to have its graph displayed by default, set
+      'defaultOn' true also (default value for this attribute).
+
+      I've made all metrics 'indicator' by default, with the majority having
+      'defaultOn' to false.
+    -->
+
+        <metric name="Aborted Clients"
+            alias="Aborted_clients"
+            category="THROUGHPUT"
+            group="Connection"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Aborted Connects"
+            alias="Aborted_connects"
+            category="THROUGHPUT"
+            group="Connection"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Bytes Received"
+            alias="Bytes_received"
+            category="THROUGHPUT"
+            group="Connection"
+            indicator="true"
+            units="B"
+            collectionType="trendsup"/>
+
+        <metric name="Bytes Sent"
+            alias="Bytes_sent"
+            category="THROUGHPUT"
+            group="Connection"
+            indicator="true"
+            units="B"
+            collectionType="trendsup"/>
+
+        <metric name="Connections"
+            alias="Connections"
+            category="THROUGHPUT"
+            group="Connection"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Temporary Disk Tables Created"
+            alias="Created_tmp_disk_tables"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Temporary Memory Tables Created"
+            alias="Created_tmp_tables"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Temporary Files Created"
+            alias="Created_tmp_files"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Delayed Insert Threads"
+            alias="Delayed_insert_threads"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Delayed Writes"
+            alias="Delayed_writes"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Delayed Errors"
+            alias="Delayed_errors"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of admin commands"
+            alias="Com_admin_commands"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of ALTER TABLE commands"
+            alias="Com_alter_table"
+            category="UTILIZATION"
+            group="DDL Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of ANALYZE commands"
+            alias="Com_analyze"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of BACKUP TABLE commands"
+            alias="Com_backup_table"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of BEGIN commands"
+            alias="Com_begin"
+            category="UTILIZATION"
+            group="Tx Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of CHANGE DATABASE commands"
+            alias="Com_change_db"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of CHANGE MASTER commands"
+            alias="Com_change_master"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of CHECK commands"
+            alias="Com_check"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of COMMIT commands"
+            alias="Com_commit"
+            category="UTILIZATION"
+            group="Tx Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of CREATE DATABASE commands"
+            alias="Com_create_db"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of CREATE FUNCTION commands"
+            alias="Com_create_function"
+            category="UTILIZATION"
+            group="DDL Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of CREATE INDEX commands"
+            alias="Com_create_index"
+            category="UTILIZATION"
+            group="DDL Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of CREATE TABLE commands"
+            alias="Com_create_table"
+            category="UTILIZATION"
+            group="DDL Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of DELETE commands"
+            alias="Com_delete"
+            category="UTILIZATION"
+            group="DML Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of DROP DATABASE commands"
+            alias="Com_drop_db"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of DROP FUNCTION commands"
+            alias="Com_drop_function"
+            category="UTILIZATION"
+            group="DDL Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of DROP INDEX commands"
+            alias="Com_drop_index"
+            category="UTILIZATION"
+            group="DDL Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of DROP TABLE commands"
+            alias="Com_drop_table"
+            category="UTILIZATION"
+            group="DDL Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of FLUSH commands"
+            alias="Com_flush"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of GRANT commands"
+            alias="Com_grant"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of INSERT commands"
+            alias="Com_insert"
+            category="UTILIZATION"
+            group="DML Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of INSERT SELECT commands"
+            alias="Com_insert_select"
+            category="UTILIZATION"
+            group="DML Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of KILL commands"
+            alias="Com_kill"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of LOAD commands"
+            alias="Com_load"
+            category="UTILIZATION"
+            group="DML Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of LOAD MASTER TABLE commands"
+            alias="Com_load_master_table"
+            category="UTILIZATION"
+            group="DML Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of LOCK TABLES commands"
+            alias="Com_lock_tables"
+            category="UTILIZATION"
+            group="Tx Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of OPTIMIZE commands"
+            alias="Com_optimize"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of PURGE commands"
+            alias="Com_purge"
+            category="UTILIZATION"
+            group="DML Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of RENAME TABLE commands"
+            alias="Com_rename_table"
+            category="UTILIZATION"
+            group="DDL Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of REPAIR commands"
+            alias="Com_repair"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of REPLACE commands"
+            alias="Com_replace"
+            category="UTILIZATION"
+            group="DML Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of REPLACE SELECT commands"
+            alias="Com_replace_select"
+            category="UTILIZATION"
+            group="DML Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of RESET commands"
+            alias="Com_reset"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of RESTORE TABLE commands"
+            alias="Com_restore_table"
+            category="UTILIZATION"
+            group="DML Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of REVOKE commands"
+            alias="Com_revoke"
+            category="UTILIZATION"
+            group="DBA Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of ROLLBACK commands"
+            alias="Com_rollback"
+            category="UTILIZATION"
+            group="Tx Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SELECT commands"
+            alias="Com_select"
+            category="UTILIZATION"
+            group="General Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SET OPTION commands"
+            alias="Com_set_option"
+            category="UTILIZATION"
+            group="General Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW BINLOGS commands"
+            alias="Com_show_binlogs"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW DATABASES commands"
+            alias="Com_show_databases"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW FIELDS commands"
+            alias="Com_show_fields"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW GRANTS commands"
+            alias="Com_show_grants"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW KEYS commands"
+            alias="Com_show_keys"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW LOGS commands"
+            alias="Com_show_logs"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW MASTER STATUS commands"
+            alias="Com_show_master_status"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW OPEN TABLES commands"
+            alias="Com_show_open_tables"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW PROCESSLIST commands"
+            alias="Com_show_processlist"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW SLAVE STATUS commands"
+            alias="Com_show_slave_status"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW STATUS commands"
+            alias="Com_show_status"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW INNODB STATUS commands"
+            alias="Com_show_innodb_status"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW TABLES commands"
+            alias="Com_show_tables"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of SHOW VARIABLES commands"
+            alias="Com_show_variables"
+            category="UTILIZATION"
+            group="Show Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of START SLAVE commands"
+            alias="Com_slave_start"
+            category="UTILIZATION"
+            group="General Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of STOP SLAVE commands"
+            alias="Com_slave_stop"
+            category="UTILIZATION"
+            group="General Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of TRUNCATE commands"
+            alias="Com_truncate"
+            category="UTILIZATION"
+            group="DML Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of UNLOCK TABLE commands"
+            alias="Com_unlock_tables"
+            category="UTILIZATION"
+            group="Tx Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of UPDATE commands"
+            alias="Com_update"
+            category="UTILIZATION"
+            group="DML Command"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 4.0.2+ -->
+        <metric name="Number of internal commits (Handler_commit)"
+            alias="Handler_commit"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of Rows Deleted (Handler_delete)"
+            alias="Handler_delete"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of Rows Read from First Index (Handler_read_first)"
+            alias="Handler_read_first"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of Rows Read from Key (Handler_read_key)"
+            alias="Handler_read_key"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of Next Rows Read in Key Order (Handler_read_next)"
+            alias="Handler_read_next"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of Prev Rows Read in Key Order (Handler_read_prev)"
+            alias="Handler_read_prev"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of Rows Read from Fixed Position (Handler_read_rnd)"
+            alias="Handler_read_rnd"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of Next Rows Read from Datafile (Handler_read_rnd_next)"
+            alias="Handler_read_rnd_next"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of Rows Updated (Handler_update)"
+            alias="Handler_update"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of Rows Inserted (Handler_write)"
+            alias="Handler_write"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Key Blocks Used"
+            alias="Key_blocks_used"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Key Read Requests"
+            alias="Key_read_requests"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Key Reads"
+            alias="Key_reads"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Key Write Requests"
+            alias="Key_write_requests"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Key Writes"
+            alias="Key_writes"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Max Used Connections"
+            alias="Max_used_connections"
+            category="THROUGHPUT"
+            group="Connection"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Not Flushed Delayed Rows"
+            alias="Not_flushed_delayed_rows"
+            category="UTILIZATION"
+            group="I/O"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Open Tables"
+            alias="Open_tables"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+        <metric name="Open Files"
+            alias="Open_files"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+        <metric name="Open Streams"
+            alias="Open_streams"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+        <metric name="Opened Tables"
+            alias="Opened_tables"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Query cache free blocks"
+            alias="Qcache_free_blocks"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+        <metric name="Query cache free memory"
+            alias="Qcache_free_memory"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="B"
+            collectionType="dynamic"/>
+
+        <metric name="Number of query cache hits"
+            alias="Qcache_hits"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of query cache inserts"
+            alias="Qcache_inserts"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of query cache low memory prunes"
+            alias="Qcache_lowmem_prunes"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of queries not cached"
+            alias="Qcache_not_cached"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of queries in cache"
+            alias="Qcache_queries_in_cache"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+        <metric name="Number of blocks in query cache"
+            alias="Qcache_total_blocks"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+        <metric name="Questions"
+            alias="Questions"
+            category="THROUGHPUT"
+            group="Connection"
+            indicator="true"
+            units="none"
+            collectionType="trendsup" />
+
+        <metric name="Select Full Join"
+            alias="Select_full_join"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Select Full Range Join"
+            alias="Select_full_range_join"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Select Range"
+            alias="Select_range"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Select Range Check"
+            alias="Select_range_check"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Select Scan"
+            alias="Select_scan"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Slave Open Temp Tables"
+            alias="Slave_open_temp_tables"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+        <metric name="Slow Launch Threads"
+            alias="Slow_launch_threads"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Slow Queries"
+            alias="Slow_queries"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Sort Merge Passes"
+            alias="Sort_merge_passes"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of sorts done with ranges"
+            alias="Sort_range"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of sorted rows"
+            alias="Sort_rows"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Number of sorts done with table scan"
+            alias="Sort_scan"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Table Locks Immediate"
+            alias="Table_locks_immediate"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Table Locks Waited"
+            alias="Table_locks_waited"
+            category="UTILIZATION"
+            group="Query/Runtime"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+        <metric name="Threads Cached"
+            alias="Threads_cached"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+        <metric name="Threads Created"
+            alias="Threads_created"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+        <metric name="Threads Connected"
+            alias="Threads_connected"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            units="none"
+            collectionType="dynamic"/>
+
+        <metric name="Threads Running"
+            alias="Threads_running"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+    <!--
+      3/3/08 - Had to change category from AVAILABILITY to PERFORMANCE,
+      started getting complaints from HQ server about invalid alias
+      (must be 'Availability', apparently there can only be one such
+      metric in category AVAILABILITY...)
+      Why did complaints just start after I added another
+      metric after this one?
+
+      Made 'trendsup' since this will always increase, but
+      disabled the automagically added rate metric.
+    -->
+        <metric name="Up Time"
+            alias="Uptime"
+            category="PERFORMANCE"
+            group="Reliability"
+            indicator="true"
+            defaultOn="false"
+            units="sec"
+            collectionType="trendsup"
+            rate="none"/>
+
+    <!--
+      Some additional 'metrics' from system variables
+      These will necessarily be 'static' collectionType.
+      Values are emitted by collector script and queried
+      along with global status; including because they're
+      useful in setting alerts involving comparisons of
+      dynamic variables against their limits, e.g.
+      Threads_connected compared to Max_connections
+      *Note* Turns out we can't set an alert comparing one metric
+      to a different one...
+    -->
+        <!--metric name="Max Connections"
+            alias="Max_connections"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="static"/-->
+
+    <!--
+      A computed 'rollup' metric expressing current number of connections
+      as a percentage of Max_connections, as this is the simplest way to
+      be able to alert on a high connection threshold.
+    -->
+        <!--metric name="Connection Usage"
+            alias="Connection_usage"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            units="percentage"
+            collectionType="dynamic"/-->
+    </metrics>
+
+  <!--
+    TODO:  Add additional metrics specific to later versions
+  -->
+
+    <metrics name="global-4.1" include="global-4.0">
+    <!-- 4.1.2+ -->
+        <metric name="Binlog Cache Disk Use"
+            alias="Binlog_cache_disk_use"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 4.1.2+ -->
+        <metric name="Binlog Cache Use"
+            alias="Binlog_cache_use"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!--
+      TODO:  MySQL docs are contradictory; the next several metrics shown as being
+      available in 4.1.13+ are documented in the 4.1 manual, but the 5.0 manual
+      lists them as being available starting with 5.0.8...
+    -->
+    <!-- 4.1.13+ -->
+        <metric name="Number of PREPARE Statements and mysql_stmt_prepare() calls"
+            alias="Com_stmt_prepare"
+            category="UTILIZATION"
+            group="Prepared Statement Commands"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 4.1.13+ -->
+        <metric name="Number of EXECUTE Statements and mysql_stmt_execute() calls"
+            alias="Com_stmt_execute"
+            category="UTILIZATION"
+            group="Prepared Statement Commands"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 4.1.13+ -->
+        <metric name="Number of mysql_stmt_send_long_data() calls"
+            alias="Com_stmt_send_long_data"
+            category="UTILIZATION"
+            group="Prepared Statement Commands"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 4.1.13+ -->
+        <metric name="Number of mysql_stmt_reset() calls"
+            alias="Com_stmt_reset"
+            category="UTILIZATION"
+            group="Prepared Statement Commands"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 4.1.13+ -->
+        <metric name="Number of DEALLOCATE PREPARE Statements and mysql_stmt_close() calls"
+            alias="Com_stmt_close"
+            category="UTILIZATION"
+            group="Prepared Statement Commands"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 4.1.3+ -->
+        <metric name="Number of PREPARE statements"
+            alias="Com_prepare_sql"
+            category="UTILIZATION"
+            group="Prepared Statement Commands"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 4.1.3+ -->
+        <metric name="Number of EXECUTE statements"
+            alias="Com_execute_sql"
+            category="UTILIZATION"
+            group="Prepared Statement Commands"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 4.1.3+ -->
+        <metric name="Number of DEALLOCATE PREPARE statements"
+            alias="Com_dealloc_sql"
+            category="UTILIZATION"
+            group="Prepared Statement Commands"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 4.1.1+  TODO: docs say this replaced 'Not_flushed_key_blocks' -->
+        <metric name="Key Blocks Not Flushed"
+            alias="Key_blocks_not_flushed"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+    <!-- 4.1.2+ -->
+        <metric name="Key Blocks Unused"
+            alias="Key_blocks_unused"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+    <!-- 4.1.23+  TODO:  5.0 docs claim added in 5.0.32 -->
+        <metric name="Prepared Statement Count"
+            alias="Prepared_stmt_count"
+            category="UTILIZATION"
+            group="Prepared Statement Commands"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+    <!-- 4.1.11+  TODO:  5.0 docs claim added in 5.0.4 -->
+        <metric name="Slave Retried Transactions"
+            alias="Slave_retried_transactions"
+            category="UTILIZATION"
+            group="Replication"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+    </metrics>
+
+    <metrics name="global-5.0" include="global-4.1">
+    <!--
+      Metrics added starting with 5.0
+
+      A few metrics either don't exist at global level, or aren't useful
+      and are omitted:
+        Compression
+        Last_query_cost
+    -->
+
+    <!-- 5.0.3+ -->
+        <metric name="Prepare statements in two-phase commits"
+            alias="Handler_prepare"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.3+ -->
+        <metric name="Storage engine savepoints"
+            alias="Handler_savepoint"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.3+ -->
+        <metric name="Storage engine savepoint rollbacks"
+            alias="Handler_savepoint_rollback"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!--
+      InnoDB-specific metrics; according to MySQL docs, these were all
+      added in 5.0 though InnoDB was available in earlier versions
+    -->
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB buffer pool pages containing data"
+            alias="Innodb_buffer_pool_pages_data"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB buffer pool pages marked dirty"
+            alias="Innodb_buffer_pool_pages_dirty"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB buffer pool page flush requests"
+            alias="Innodb_buffer_pool_pages_flushed"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of free InnoDB buffer pool pages"
+            alias="Innodb_buffer_pool_pages_free"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB buffer pool pages latched"
+            alias="Innodb_buffer_pool_pages_latched"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB buffer pool pages busy"
+            alias="Innodb_buffer_pool_pages_misc"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Total number of InnoDB buffer pool pages"
+            alias="Innodb_buffer_pool_pages_total"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="static"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB random read-aheads"
+            alias="Innodb_buffer_pool_read_ahead_rnd"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB sequential read-aheads"
+            alias="Innodb_buffer_pool_read_ahead_seq"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB buffer pool read requests"
+            alias="Innodb_buffer_pool_read_requests"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB buffer pool reads"
+            alias="Innodb_buffer_pool_reads"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB buffer pool waits for free pages"
+            alias="Innodb_buffer_pool_wait_free"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB buffer pool write requests"
+            alias="Innodb_buffer_pool_write_requests"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB data fsyncs"
+            alias="Innodb_data_fsyncs"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB data pending fsyncs"
+            alias="Innodb_data_pending_fsyncs"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB data pending reads"
+            alias="Innodb_data_pending_reads"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB data pending writes"
+            alias="Innodb_data_pending_writes"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Total InnoDB data bytes read"
+            alias="Innodb_data_read"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="B"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB data reads"
+            alias="Innodb_data_reads"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB data writes"
+            alias="Innodb_data_writes"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Total InnoDB data bytes written"
+            alias="Innodb_data_written"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="B"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB doublewrite operations"
+            alias="Innodb_dblwr_writes"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB doublewrite pages written"
+            alias="Innodb_dblwr_pages_written"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB log buffer waits"
+            alias="Innodb_log_waits"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB log file write requests"
+            alias="Innodb_log_write_requests"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB log file writes"
+            alias="Innodb_log_writes"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB log file fsyncs"
+            alias="Innodb_os_log_fsyncs"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB pending log file fsyncs"
+            alias="Innodb_os_log_pending_fsyncs"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB pending log file writes"
+            alias="Innodb_os_log_pending_writes"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Total InnoDB log file bytes written"
+            alias="Innodb_os_log_written"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="B"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="InnoDB page size (bytes)"
+            alias="Innodb_page_size"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="B"
+            collectionType="static"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB pages created"
+            alias="Innodb_pages_created"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB pages read"
+            alias="Innodb_pages_read"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB pages written"
+            alias="Innodb_pages_written"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.3+ -->
+        <metric name="Number of InnoDB row lock current waits"
+            alias="Innodb_row_lock_current_waits"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="dynamic"/>
+
+    <!-- 5.0.3+ -->
+        <metric name="Total InnoDB row lock time"
+            alias="Innodb_row_lock_time"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="ms"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.3+ -->
+        <metric name="Average InnoDB row lock time"
+            alias="Innodb_row_lock_time_avg"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="ms"
+            collectionType="dynamic"/>
+
+    <!-- 5.0.3+ -->
+        <metric name="Maximum InnoDB row lock time"
+            alias="Innodb_row_lock_time_max"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="ms"
+            collectionType="dynamic"/>
+
+    <!-- 5.0.3+ -->
+        <metric name="Number of InnoDB row lock waits"
+            alias="Innodb_row_lock_waits"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB rows deleted"
+            alias="Innodb_rows_deleted"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB rows inserted"
+            alias="Innodb_rows_inserted"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB rows read"
+            alias="Innodb_rows_read"
+            category="UTILIZATION"
+            group="Resource Utilization"
+            indicator="true"
+            defaultOn="false"
+            units="none"
+            collectionType="trendsup"/>
+
+    <!-- 5.0.2+ -->
+        <metric name="Number of InnoDB rows updated"
+                alias="Innodb_rows_updated"
+                category="UTILIZATION"
+                group="Resource Utilization"
+                indicator="true"
+                defaultOn="false"
+                units="none"
+                collectionType="trendsup"/>
+    </metrics>
+
+    <metrics name="global-5.1" include="global-5.0">
+    <!-- 5.1.3+ -->
+        <metric name="Open table definitions"
+                alias="Open_table_definitions"
+                category="UTILIZATION"
+                group="Resource Utilization"
+                indicator="true"
+                defaultOn="false"
+                units="none"
+                collectionType="dynamic"/>
+
+    <!-- 5.1.14+ - 5.0 docs state added in 5.0.32 -->
+        <metric name="Prepared Statement Count"
+                alias="Prepared_statement_count"
+                category="UTILIZATION"
+                group="Resource Utilization"
+                indicator="true"
+                defaultOn="false"
+                units="none"
+                collectionType="dynamic"/>
+    </metrics>
+
+  <!--
+    TODO:  Add metric groups for InnoDB-specific status metrics
+    to be used in an 'InnoDB' service
+  -->
+
+  <!-- Filter for Replication Metrics -->
+    <filter name="template"
+            value="${domain}:${showSlave},${properties}:${alias}"/>
+  <!-- Replication metrics -->
+    <metrics name="MySQL Status 4.0.x Replication">
+    <!--
+      Replication is "available" if the slave is running
+    -->
+        <metric name="Availability"
+                category="AVAILABILITY"
+                indicator="true"
+                interval="300000"/>
+
+    <!--
+      MySQL 4.0.x lacks a 'Bytes_Behind_Master' metric.
+      Additionally, at least one directly accessible metric differs in
+      case name from 4.1 or later, but for our purposes we're only
+      interested in the derived metrics representing absolute lag behind
+      master's log position...
+    -->
+        <metric name="Bytes Behind Master"
+                alias="Bytes_Behind_Master"
+                category="PERFORMANCE"
+                indicator="true"
+                units="B"/>
+        <metric name="Log Files Behind Master"
+                alias="Log_Files_Behind_Master"
+                category="PERFORMANCE"
+                indicator="true"/>
+    </metrics>
+
+    <metrics name="MySQL Status 4.1.x Replication">
+    <!--
+      Replication is "available" if the slave is running
+    -->
+
+        <metric name="Availability"
+                category="AVAILABILITY"
+                indicator="true"
+                interval="300000"/>
+
+    <!--
+      Replication lag behind master, measured in seconds; available with MySQL 4.1 and
+      later.  This isn't a terribly accurate metric, as it compares current system time
+      (of slave) with the timestamp of the statement's execution of the master; a
+      consequence of this is the lag time includes any time interval during which
+      replication was down.
+    -->
+        <metric name="Seconds Behind Master"
+                category="PERFORMANCE"
+                indicator="true"
+                units="sec"
+                alias="Seconds_Behind_Master"/>
+
+    <!-- Derived metrics representing slave's lag behind master log position -->
+
+        <metric name="Bytes Behind Master"
+                category="PERFORMANCE"
+                indicator="true"
+                units="B"
+                alias="Bytes_Behind_Master"/>
+        <metric name="Log Files Behind Master"
+                category="PERFORMANCE"
+                indicator="true"
+                alias="Log_Files_Behind_Master"/> 
+    </metrics>
+
+    <metrics name="MySQL Status 5.0.x Replication"
+             include="MySQL Status 4.1.x Replication"/>
+
+    <metrics name="MySQL Status 5.1.x Replication"
+             include="MySQL Status 5.0.x Replication"/>
+
+    <property name="DEFAULT_DRIVER"
+              value="com.mysql.jdbc.Driver"/>
+    <property name="DEFAULT_URL"
+              value="jdbc:mysql://%hostname%:%port%/mysql" />
+
+    <server name="MySQL Status" version="4.0.x">
+        <plugin type="autoinventory"
+                class="org.hyperic.hq.plugin.mysql_stats.MySqlServerDetector"/>
+        <plugin type="measurement"
+                class="org.hyperic.hq.plugin.mysql_stats.MySqlStatsMeasurementPlugin"/>
+        <config>
+            <option name="port"
+                    description="Port number of instance being monitored"/>
+            <option name="hostname"
+                    description="Hostname of instane being monitored" 
+                    default="localhost" />
+            <option name="jdbcUser"
+                    description="JDBC User"
+                    default="root"/>
+            <option name="jdbcPassword"
+                    description="JDBC Password"
+                    type="secret"
+                    default="mysql"/>
+            <option name="process.query"
+                    description="Process query"
+                    default="State.Name.eq=mysqld"/>
+        </config>
+        &process-metrics;
+        <service name="Show Global Status">
+            <metrics include="global-4.0"/>
+        </service>
+        <service name="Show Slave Status">
+            <metrics include="MySQL Status 4.0.x Replication"/>
+        </service>
+    </server>
+
+    <server name="MySQL Status" version="4.1.x">
+        <plugin type="autoinventory"
+                class="org.hyperic.hq.plugin.mysql_stats.MySqlServerDetector"/>
+        <plugin type="measurement"
+                class="org.hyperic.hq.plugin.mysql_stats.MySqlStatsMeasurementPlugin"/>
+        <config>
+            <option name="port"
+                    description="Port number of instance being monitored"/>
+            <option name="hostname"
+                    description="Hostname of instane being monitored" 
+                    default="localhost" />
+            <option name="jdbcUser"
+                    description="JDBC User"
+                    default="root"/>
+            <option name="jdbcPassword"
+                    description="JDBC Password"
+                    type="secret"
+                    default="mysql"/>
+            <option name="process.query"
+                    description="Process query"
+                    default="State.Name.eq=mysqld"/>
+        </config>
+        &process-metrics;
+        <service name="Show Global Status">
+            <metrics include="global-4.1"/>
+        </service>
+        <service name="Show Slave Status">
+            <metrics include="MySQL Status 4.1.x Replication"/>
+        </service>
+    </server>
+
+    <server name="MySQL Stats" version="5.0.x">
+        <plugin type="autoinventory"
+                class="org.hyperic.hq.plugin.mysql_stats.MySqlServerDetector"/>
+        <plugin type="measurement"
+                class="org.hyperic.hq.plugin.mysql_stats.MySqlStatsMeasurementPlugin"/>
+        <config>
+            <option name="port"
+                    description="Port number of instance being monitored"/>
+            <option name="hostname"
+                    description="Hostname of instane being monitored" 
+                    default="localhost" />
+            <option name="jdbcUser"
+                    description="JDBC User"
+                    default="root"/>
+            <option name="jdbcPassword"
+                    description="JDBC Password"
+                    type="secret"
+                    default="mysql"/>
+            <option name="process.query"
+                    description="Process query"
+                    default="State.Name.eq=mysqld"/>
+        </config>
+        &process-metrics;
+        <service name="Show Global Status">
+            <metrics include="global-5.0"/>
+        </service>
+        <service name="Show Slave Status">
+            <metrics include="MySQL Status 5.0.x Replication"/>
+        </service>
+    </server>
+
+    <server name="MySQL Stats" version="5.1.x">
+        <plugin type="autoinventory"
+                class="org.hyperic.hq.plugin.mysql_stats.MySqlServerDetector"/>
+        <plugin type="measurement"
+                class="org.hyperic.hq.plugin.mysql_stats.MySqlStatsMeasurementPlugin"/>
+        <config>
+            <option name="port"
+                    description="Port number of instance being monitored"/>
+            <option name="hostname"
+                    description="Hostname of instane being monitored" 
+                    default="localhost" />
+            <option name="jdbcUser"
+                    description="JDBC User"
+                    default="root"/>
+            <option name="jdbcPassword"
+                    description="JDBC Password"
+                    type="secret"
+                    default="mysql"/>
+            <option name="process.query"
+                    description="Process query"
+                    default="State.Name.eq=mysqld"/>
+        </config>
+        &process-metrics;
+        <service name="Show Global Status">
+            <metrics include="global-5.1"/>
+        </service>
+        <service name="Show Slave Status">
+            <metrics include="MySQL Status 5.1.x Replication"/>
+        </service>
+    </server>
+
+    <help name="mysql">
+  <![CDATA[
+  <p>
+  <h3>Configure MySQL ${product.version} for Monitoring</h3>
+  </p>
+  <p>
+  The MySQL ${product.version} plugin monitors the MySQL server
+  using standard status queries.  The only prerequisites for enabling
+  monitoring are:
+  </p>
+  <ul>
+    <li>You can connect to the MySQL server ${hostname}:${port} as ${jdbcUser}</li>
+    <li>The user ${jdbcUser} is able to execute the following statements:
+        'SHOW STATUS', 'SHOW SLAVE STATUS' (minimal privileges needed:
+        SELECT, REPLICATION CLIENT)</li>
+  </ul>
+  <p>Shared properties (values propagate to child services):</p>
+  <ul>
+    <li><strong>port</strong> - TCP/IP port on which the MySQL instance to be monitored listens</li>
+    <li><strong>hostname</strong> - Fully qualified hostname of platform hosting MySQL</li>
+    <li><strong>process.query</strong> - The SIGAR process query detecting the MySQL instance.
+      Ordinarily you will not need to change this.</li>
+    <li><strong>jdbcUser</strong> - Username for MySQL login for status checks (see above)</li>
+    <li><strong>jdbcPassword</strong> - Password for MySQL login</li>
+  </ul>
+  <p>Monitoring properties affect log tracking, described below.</p>
+  <p>Check <strong>Auto-Discover Global Statuses and Replications?</strong> if you want these child services auto-discovered.
+     Note that currently this will create a superfluous Replication service resource for a monitored instance that is not
+     a replication slave.  Leave this check box off to prevent this, especially if you're relying on external automation
+     to create and configure resources.</p>
+  ]]>
+    </help>
+
+    <help name="MySQL 4.0.x" include="mysql"/>
+
+    <help name="MySQL 4.1.x" include="mysql"/>
+
+    <help name="MySQL 5.0.x" include="mysql"/>
+
+    <help name="MySQL 5.1.x" include="mysql"/>
+</plugin>
+

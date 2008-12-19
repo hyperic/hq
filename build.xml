@@ -1011,6 +1011,8 @@
 
     <hqplugin name="sybase"/>
 
+    <hqplugin name="mysql_stats"/>
+
     <hqplugin name="coldfusion"/>
 
     <hqplugin name="alfresco"/>
