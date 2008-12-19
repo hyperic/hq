@@ -2552,6 +2552,7 @@ hyperic.group_manager = function() {
 hyperic.alert_center = function() {
 	var that = this;
 	that.dialogs = {};
+	// TO DO: these variables need to be moved into the respective dialogs
 	that.form = null;
 	that.subgroup = null;
 	that.fixedNote = null;
@@ -2580,6 +2581,9 @@ hyperic.alert_center = function() {
 				title: "Alert Center"
 				}, pane);
 	    	
+	    	// restart auto refresh after dialog closes
+	    	dojo11.connect(that.dialogs.FixAlert, "hide", this, "delayAutoRefresh");
+	    	
 	    	that.fixedNote = dojo11.byId("FixedNoteTextArea");
 		}
 	    
@@ -2593,10 +2597,38 @@ hyperic.alert_center = function() {
 		eval("if (window._hqu_" + that.subgroup + "_autoRefresh) { window._hqu_" + that.subgroup + "_autoRefresh(); }");		
 	}
 
-	that.stopAutoRefresh = function() {
-		eval("if (window._hqu_" + that.subgroup + "_refreshTimeout) { clearTimeout(window._hqu_" + that.subgroup + "_refreshTimeout); }");	
+	that.stopAutoRefresh = function(mySubgroup) {
+		var subgroup = null;
+		if (typeof mySubgroup == "string") {
+			subgroup = mySubgroup;
+		} else {
+			subgroup = that.subgroup;
+		}
+		
+		if (subgroup != null) {
+			eval("if (window._hqu_" + subgroup + "_refreshTimeout) { clearTimeout(window._hqu_" + subgroup + "_refreshTimeout); }");
+		}
 	}
-	
+
+	that.delayAutoRefresh = function(mySubgroup) {		
+		var subgroup = null;
+		if (typeof mySubgroup == "string") {
+			subgroup = mySubgroup;
+		} else {
+			subgroup = that.subgroup;
+		}
+		
+		if (subgroup != null) {
+			var refreshDelay = 60000;
+			var adhocScript = "if (window._hqu_" + subgroup + "_refreshTimeout) { ";
+			adhocScript += "window._hqu_" + subgroup + "_refreshTimeout = setTimeout('window._hqu_" + subgroup + "_autoRefresh()', refreshDelay);";
+			adhocScript += " }";
+			
+			that.stopAutoRefresh(subgroup);
+			eval(adhocScript);
+		}
+	}
+
 	that.confirmFixAlert = function() {
 		that.stopAutoRefresh();
 		that.dialogs.FixAlert.show();
@@ -2604,7 +2636,6 @@ hyperic.alert_center = function() {
 	
 	that.fixAlert = function() {
 		that.form.fixedNote.value = that.fixedNote.value;
-		//alert(Form.serialize(that.form));
 		if (that.form.output && that.form.output.value == "json") {
 			that.xhrSubmit(that.form);
 		} else {
@@ -2614,7 +2645,6 @@ hyperic.alert_center = function() {
 	}
 	
 	that.acknowledgeAlert = function() {
-		//alert(Form.serialize(that.form));
 		that.stopAutoRefresh();
 		if (that.form.output && that.form.output.value == "json") {
 			that.xhrSubmit(that.form);
@@ -2658,6 +2688,12 @@ hyperic.alert_center = function() {
 	        if (e.className.indexOf("fixableAlert") >= 0 
 	        		|| e.className.indexOf("ackableAlert") >= 0) {
 	        	e.checked = checkedState;
+	        	
+	        	if (e.checked) {
+	        		highlight(e);
+	        	} else {
+	        		unhighlight(e);
+	        	}
 			}
 		}
 		that.toggleAlertButtons(checkAllBox);
@@ -2666,20 +2702,21 @@ hyperic.alert_center = function() {
 	that.toggleAlertButtons = function(myCheckBox) {
 		var myList = myCheckBox.form;
 		var subgroup = myList.id.substring(0, myList.id.indexOf("_FixForm"));
-		var refreshDelay = 60000;
 		var checkAllBox = dojo11.byId(subgroup + "_CheckAllBox");
 		var fixedButton = dojo11.byId(subgroup + "_FixButton");
 		var ackButton = dojo11.byId(subgroup + "_AckButton");
 
 		// delay refresh for X milliseconds if checkbox is clicked
-		var adhocScript = "if (window._hqu_" + subgroup + "_refreshTimeout) { ";
-		adhocScript += "clearTimeout(window._hqu_" + subgroup + "_refreshTimeout);";
-		adhocScript += "window._hqu_" + subgroup + "_refreshTimeout = setTimeout('window._hqu_" + subgroup + "_autoRefresh()', refreshDelay);";
-		adhocScript += " }";
-		eval(adhocScript);
+		that.delayAutoRefresh(subgroup);
 
 		if (myCheckBox.id != checkAllBox.id) {
 			checkAllBox.checked = false;
+			
+			if (myCheckBox.checked) {
+				highlight(myCheckBox);
+			} else {
+				unhighlight(myCheckBox);
+			}
 		}
 		
 		if (getNumCheckedByClass(myList, "fixableAlert") > 0) {
