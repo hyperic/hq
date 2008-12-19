@@ -183,9 +183,9 @@
                   checkbox.setAttribute("value",
                                         aList[i].alertType + ":" + aList[i].alertId);
                   if (aList[i].acknowledgeable) {
-                      checkbox.setAttribute("class", "ackableAlert");
+                      checkbox.className = "ackableAlert";
                   } else {
-                      checkbox.setAttribute("class", "fixableAlert");                  
+                      checkbox.className = "fixableAlert";                  
                   }
                   td1.appendChild(checkbox);
                 }
