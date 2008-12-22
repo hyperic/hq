@@ -1948,11 +1948,9 @@
         <plugin type="measurement"
                 class="org.hyperic.hq.plugin.mysql_stats.MySqlStatsMeasurementPlugin"/>
         <config>
-            <option name="port"
-                    description="Port number of instance being monitored"/>
-            <option name="hostname"
-                    description="Hostname of instane being monitored" 
-                    default="localhost" />
+            <option name="jdbcUrl"
+                    default="jdbc:mysql://localhost:3306"
+                    description="JDBC URL"/>
             <option name="jdbcUser"
                     description="JDBC User"
                     default="root"/>
@@ -1995,11 +1993,9 @@
         <plugin type="measurement"
                 class="org.hyperic.hq.plugin.mysql_stats.MySqlStatsMeasurementPlugin"/>
         <config>
-            <option name="port"
-                    description="Port number of instance being monitored"/>
-            <option name="hostname"
-                    description="Hostname of instane being monitored" 
-                    default="localhost" />
+            <option name="jdbcUrl"
+                    default="jdbc:mysql://localhost:3306"
+                    description="JDBC URL"/>
             <option name="jdbcUser"
                     description="JDBC User"
                     default="root"/>
@@ -2042,11 +2038,9 @@
         <plugin type="measurement"
                 class="org.hyperic.hq.plugin.mysql_stats.MySqlStatsMeasurementPlugin"/>
         <config>
-            <option name="port"
-                    description="Port number of instance being monitored"/>
-            <option name="hostname"
-                    description="Hostname of instane being monitored" 
-                    default="localhost" />
+            <option name="jdbcUrl"
+                    default="jdbc:mysql://localhost:3306"
+                    description="JDBC URL"/>
             <option name="jdbcUser"
                     description="JDBC User"
                     default="root"/>
@@ -2089,11 +2083,9 @@
         <plugin type="measurement"
                 class="org.hyperic.hq.plugin.mysql_stats.MySqlStatsMeasurementPlugin"/>
         <config>
-            <option name="port"
-                    description="Port number of instance being monitored"/>
-            <option name="hostname"
-                    description="Hostname of instane being monitored" 
-                    default="localhost" />
+            <option name="jdbcUrl"
+                    default="jdbc:mysql://localhost:3306"
+                    description="JDBC URL"/>
             <option name="jdbcUser"
                     description="JDBC User"
                     default="root"/>

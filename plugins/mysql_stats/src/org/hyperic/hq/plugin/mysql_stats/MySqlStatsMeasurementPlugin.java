@@ -43,6 +43,9 @@ import org.hyperic.hq.product.MetricNotFoundException;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.jdbc.DBUtil;
 
 public class MySqlStatsMeasurementPlugin
@@ -92,6 +95,12 @@ public class MySqlStatsMeasurementPlugin
         }
         throw new MetricNotFoundException(
             "Service "+objectName+":"+alias+" not found");
+    }
+    
+    public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config)
+    {
+        // Override JDBCMeasurementPlugin.
+        return new ConfigSchema();
     }
 
     private double getMasterSlaveStatusMetric(Metric metric)

@@ -58,15 +58,22 @@ public class MySqlServerDetector
     private static final String _logCtx = MySqlServerDetector.class.getName();
     private final Log _log = LogFactory.getLog(_logCtx);
     // generic process name, generic server daemon
-    private static final String PROCESS_NAME = "mysqld";
+    private static String PROCESS_NAME = "mysqld";
+    static {
+        if (isWin32()) {
+            PROCESS_NAME = "mysqld-nt";
+        }
+    }
     // this PTQL query matches the PROCESS_NAME and returns the parent process
     // id.  An example process path is /usr/sbin/mysqld
-    private static final String PTQL_QUERY = "State.Name.re="+PROCESS_NAME+
-        ",State.Name.Pne=$1,Args.0.re=.*"+PROCESS_NAME+"$";
+    private static final String PTQL_QUERY = "State.Name.eq=" + PROCESS_NAME;
+
     private static final String VERSION_4_0_x = "4.0.x",
                                 VERSION_4_1_x = "4.1.x",
                                 VERSION_5_0_x = "5.0.x",
-                                VERSION_5_1_x = "4.1.x";
+                                VERSION_5_1_x = "4.1.x",
+                                SLAVE_STATUS  = "Slave Status",
+                                SHOW_SLAVE_STATUS  = "Show Slave Status";
     private static final Pattern REGEX_VER_4_0 = Pattern.compile("Ver 4.0.[0-9]+"),
                                  REGEX_VER_4_1 = Pattern.compile("Ver 4.1.[0-9]+"),
                                  REGEX_VER_5_0 = Pattern.compile("Ver 5.0.[0-9]+"),
@@ -134,11 +141,11 @@ public class MySqlServerDetector
         try {
             conn = getConnection(url, user, pass, serverConfig);
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("show slave status");
+            rs = stmt.executeQuery(SHOW_SLAVE_STATUS.toLowerCase());
             if (rs.next()) {
                 ServiceResource service = new ServiceResource();
-                service.setType(this, "Show Slave Status");
-                service.setServiceName("Show Slave Status");
+                service.setType(this, SHOW_SLAVE_STATUS);
+                service.setServiceName(SHOW_SLAVE_STATUS);
                 ConfigResponse productConfig = new ConfigResponse();
                 service.setProductConfig(productConfig);
                 service.setMeasurementConfig(serverConfig);
@@ -175,13 +182,13 @@ public class MySqlServerDetector
                 if (!pUser.equalsIgnoreCase("slave")) {
                     continue;
                 }
+                final String addr = rs.getString(addrCol);
                 ServiceResource service = new ServiceResource();
-                service.setType(this, "Slave Status");
-                service.setServiceName("Slave Status");
+                service.setType(this, SLAVE_STATUS);
+                service.setServiceName(SLAVE_STATUS + " " + addr);
                 ConfigResponse productConfig = new ConfigResponse();
                 service.setProductConfig(productConfig);
                 ConfigResponse replConfig = new ConfigResponse();
-                String addr = rs.getString(addrCol);
                 replConfig.setValue("slaveAddress", addr);
                 service.setMeasurementConfig(replConfig);
 //                service.setControlConfig();
@@ -203,7 +210,7 @@ public class MySqlServerDetector
         service.setServiceName("Show Global Status");
         ConfigResponse productConfig = new ConfigResponse();
         service.setProductConfig(productConfig);
-        service.setMeasurementConfig(serverConfig);
+        service.setMeasurementConfig(new ConfigResponse());
 //        service.setControlConfig();
         services.add(service);
     }
@@ -229,7 +236,6 @@ public class MySqlServerDetector
     private List getServerList(String path)
         throws PluginException
     {
-        ConfigResponse productConfig = new ConfigResponse();
         List servers = new ArrayList();
         String installdir = getParentDir(path, 1);
         String version = getVersion(path);
@@ -243,11 +249,12 @@ public class MySqlServerDetector
         ConfigResponse cprop = new ConfigResponse();
         cprop.setValue("version", version);
         server.setCustomProperties(cprop);
-        // server.setProductConfig(productConfig);
+        ConfigResponse productConfig = new ConfigResponse();
+        productConfig.setValue("process.query", PTQL_QUERY);
         setProductConfig(server, productConfig);
         // sets a default Measurement Config property with no values
-        server.setMeasurementConfig();
-        server.setName("MySQL Stats "+version);
+        setMeasurementConfig(server, new ConfigResponse());
+        server.setName(getPlatformName() + " MySQL Stats "+version);
         servers.add(server);
         return servers;
     }
