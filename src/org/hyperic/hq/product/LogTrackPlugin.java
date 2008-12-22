@@ -275,16 +275,18 @@ public class LogTrackPlugin extends GenericPlugin {
                                        String source,
                                        String message)
     {
-        Integer intLevel = (Integer)getLogLevelMap().get(level);
-        if (intLevel == null) {
-            if (debugLogging) {
-                debugLog(message,
-                         "no level mapped to '" + level + "'");
+        if (supportsLogLevels()) {
+            Integer intLevel = (Integer)getLogLevelMap().get(level);
+            if (intLevel == null) {
+                if (debugLogging) {
+                    debugLog(message,
+                             "no level mapped to '" + level + "'");
+                }
+                return null;
             }
-            return null;
+            return newTrackEvent(time, intLevel.intValue(), source, message);
         }
-        return newTrackEvent(time, intLevel.intValue(),
-                             source, message);
+        return newTrackEvent(time, 0, source, message);
     }
 
     void debugLog(String debugMsg) {
