@@ -2552,6 +2552,8 @@ hyperic.group_manager = function() {
 hyperic.alert_center = function() {
 	var that = this;
 	that.dialogs = {};
+	that.button_area = {};
+	that.message_area = {};
 	// TO DO: these variables need to be moved into the respective dialogs
 	that.form = null;
 	that.subgroup = null;
@@ -2561,16 +2563,24 @@ hyperic.alert_center = function() {
 	    if(!that.dialogs.FixAlert){
 	    	var pane = dojo11.byId("AlertCenterFixedNoteDialog");
 			pane.innerHTML = 
-	          	'<table cellspacing="0" cellpadding="0">' +
+	          	'<div id="AlertCenterFixedStatus" style="display:none"></div>' +
+				'<table cellspacing="0" cellpadding="0">' +
 				'<tr><td colspan="2">' +
       	        '	<span class="BoldText">Resolution for Fix for Selected Alerts (Optional):</span><br/>' +
       	        '	<textarea id="FixedNoteTextArea" cols="70" rows="5"></textarea>' +
       	        '</td></tr>' +
-      	        '<tr><td class="buttonLeft"></td>' +
+      	        '<tr id="AlertCenterFixedButtonActive"><td class="buttonLeft"></td>' +
       	    	'<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
       	    	'	<span id="button"><a href="javascript:MyAlertCenter.fixAlert();">FIXED</a></span>' +
       	    	'	<span style="padding-left: 3px;"><img src="/images/icon_fixed.gif" align="middle" alt="Click to mark as Fixed"></span>' +
       	    	'	<span>Click the "Fixed" button to mark alert condition as fixed</span>' +
+      	    	'</td></tr>' +
+      	        '<tr id="AlertCenterFixedButtonInActive" style="display:none"><td class="buttonLeft"></td>' +
+      	    	'<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
+      	    	'   <span class="InactiveText">FIXED</span>' +
+      	    	'   <span style="filter: alpha(opacity=50); opacity: 0.5;">' +
+      	    	'   	<span style="padding-left: 3px;"><img src="/images/icon_fixed.gif" align="middle" alt="Click to mark as Fixed"></span>' +
+      	    	'	</span>' +
       	    	'</td></tr>' +
       	    	'</table>';
 	    	
@@ -2585,6 +2595,9 @@ hyperic.alert_center = function() {
 	    	dojo11.connect(that.dialogs.FixAlert, "hide", this, "delayAutoRefresh");
 	    	
 	    	that.fixedNote = dojo11.byId("FixedNoteTextArea");
+	        that.message_area.request_status = dojo11.byId("AlertCenterFixedStatus");
+	        that.button_area.fixed_active = dojo11.byId("AlertCenterFixedButtonActive");
+	        that.button_area.fixed_inactive = dojo11.byId("AlertCenterFixedButtonInActive");
 		}
 	    
 	    if (myForm) {
@@ -2631,17 +2644,23 @@ hyperic.alert_center = function() {
 
 	that.confirmFixAlert = function() {
 		that.stopAutoRefresh();
+		that.message_area.request_status.style.display = "none";
+		that.button_area.fixed_active.style.display = "";
+		that.button_area.fixed_inactive.style.display = "none";
 		that.dialogs.FixAlert.show();
 	}
 	
 	that.fixAlert = function() {
 		that.form.fixedNote.value = that.fixedNote.value;
+		that.button_area.fixed_active.style.display = "none";
+		that.button_area.fixed_inactive.style.display = "";
+		that.displayConfirmation('Please wait. Processing your request...');
+
 		if (that.form.output && that.form.output.value == "json") {
 			that.xhrSubmit(that.form);
 		} else {
 			that.form.submit();
 		}
-		that.dialogs.FixAlert.hide();
 	}
 	
 	that.acknowledgeAlert = function() {
@@ -2659,11 +2678,13 @@ hyperic.alert_center = function() {
 	    	content: Form.serialize(myForm,true),
 	    	handleAs: 'json',
 	    	load: function(data){
+	    		that.dialogs.FixAlert.hide();
 	    		that.startAutoRefresh();
 	    	},
 	    	error: function(data){
-	    		alert("An error occurred processing your request.");
-	    		console.debug("An error occurred.", data);
+	    		var errorText = "An error occurred processing your request.";
+	    		that.displayError(errorText);
+	    		console.debug(errorText, data);
 			}
 		});	    
 	}
@@ -2747,6 +2768,18 @@ hyperic.alert_center = function() {
 			that.acknowledgeAlert();
 		}
 	}
+
+	that.displayConfirmation = function(msg) {
+		that.message_area.request_status.className = 'confirmationPanel';
+		that.message_area.request_status.innerHTML = msg;
+		that.message_area.request_status.style.display = '';   	
+    }
+    
+    that.displayError = function(msg) {
+		that.message_area.request_status.className = 'errorPanel';
+		that.message_area.request_status.innerHTML = msg;
+		that.message_area.request_status.style.display = '';
+    }
 	
 	that.init();
 }
