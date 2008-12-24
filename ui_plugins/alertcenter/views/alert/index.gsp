@@ -164,7 +164,7 @@ dojo.addOnLoad( function(){
           	
           	var MyAlertCenter = null;
           	dojo11.addOnLoad(function(){
-          		MyAlertCenter = new hyperic.alert_center();
+          		MyAlertCenter = new hyperic.alert_center("Alert Center");
           		
           		dojo11.connect("Alerts_refreshTable", function() { MyAlertCenter.resetAlertTable(dojo11.byId('Alerts_FixForm')); });
           		dojo11.connect("GroupAlerts_refreshTable", function() { MyAlertCenter.resetAlertTable(dojo11.byId('GroupAlerts_FixForm')); });         		

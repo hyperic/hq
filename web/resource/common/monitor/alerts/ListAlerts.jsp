@@ -283,7 +283,7 @@
           	
 	var MyAlertCenter = null;
 	dojo11.addOnLoad(function(){
-		MyAlertCenter = new hyperic.alert_center();          		
+		MyAlertCenter = new hyperic.alert_center("Alerts");          		
 	});
 </script>
 
@@ -293,6 +293,10 @@
 <td><a href="javascript:nextDay()"><html:img page="/images/schedule_right.gif" border="0"/></a></td>
 <td><html:link href="javascript:popupCal()"><html:img page="/images/schedule_iconCal.gif" width="19" height="17" alt="" border="0"/></html:link></td>
 <td class="ButtonCaptionText" width="100%" style="text-align: right; font-style: italic;">
+    <c:url var="path" value="/"/>
+    <fmt:message key="dash.settings.criticalAlerts.ack.instruction">
+      <fmt:param value="${path}"/>
+    </fmt:message>
 </td>
 </tr></table>
 
@@ -345,7 +349,8 @@ title="alerts.alert.AlertList.ListHeader.ActualValue" />
 </display:column>
 
 <display:column width="11%" property="acknowledgeable" align="center"
-                title="alerts.alert.AlertList.ListHeader.Acknowledge">
+                title="alerts.alert.AlertList.ListHeader.Acknowledge"
+                href="/alerts/RemoveAlerts.do?eid=${Resource.entityId.appdefKey}&alerts=${Alert.id}&buttonAction=ACKNOWLEDGE">
   <display:booleandecorator flagKey="acknowledgeable"/>
 </display:column>
 

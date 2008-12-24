@@ -2549,15 +2549,12 @@ hyperic.group_manager = function() {
 	that.init();
 }
 
-hyperic.alert_center = function() {
+hyperic.alert_center = function(title_name) {
 	var that = this;
+	that.title_name = title_name;
 	that.dialogs = {};
 	that.button_area = {};
 	that.message_area = {};
-	// TO DO: these variables need to be moved into the respective dialogs
-	that.form = null;
-	that.subgroup = null;
-	that.fixedNote = null;
 	
 	that.init = function(myForm) {
 	    if(!that.dialogs.FixAlert){
@@ -2588,26 +2585,32 @@ hyperic.alert_center = function() {
 				id: "Alert_Center_Fix_Alert_Dialog",
 				refocus: true,
 				autofocus: false,
-				title: "Alert Center"
+				title: that.title_name
 				}, pane);
+	    	
+	    	that.dialogs.FixAlert.data = {
+	    		form: null,
+	    		subgroup: null,
+	    		fixedNote: dojo11.byId("FixedNoteTextArea")
+	    	}
 	    	
 	    	// restart auto refresh after dialog closes
 	    	dojo11.connect(that.dialogs.FixAlert, "hide", this, "delayAutoRefresh");
 	    	
-	    	that.fixedNote = dojo11.byId("FixedNoteTextArea");
 	        that.message_area.request_status = dojo11.byId("AlertCenterFixedStatus");
 	        that.button_area.fixed_active = dojo11.byId("AlertCenterFixedButtonActive");
 	        that.button_area.fixed_inactive = dojo11.byId("AlertCenterFixedButtonInActive");
 		}
 	    
 	    if (myForm) {
-	    	that.form = myForm;
-	    	that.subgroup = that.form.id.substring(0, that.form.id.indexOf("_FixForm"));
+	    	that.dialogs.FixAlert.data.form = myForm;
+	    	that.dialogs.FixAlert.data.subgroup = that.dialogs.FixAlert.data.form.id.substring(0, that.dialogs.FixAlert.data.form.id.indexOf("_FixForm"));
 	    }
 	}
 		
 	that.startAutoRefresh = function() {
-		eval("if (window._hqu_" + that.subgroup + "_autoRefresh) { window._hqu_" + that.subgroup + "_autoRefresh(); }");		
+		var subgroup = that.dialogs.FixAlert.data.subgroup;
+		eval("if (window._hqu_" + subgroup + "_autoRefresh) { window._hqu_" + subgroup + "_autoRefresh(); }");		
 	}
 
 	that.stopAutoRefresh = function(mySubgroup) {
@@ -2615,7 +2618,7 @@ hyperic.alert_center = function() {
 		if (typeof mySubgroup == "string") {
 			subgroup = mySubgroup;
 		} else {
-			subgroup = that.subgroup;
+			subgroup = that.dialogs.FixAlert.data.subgroup;
 		}
 		
 		if (subgroup != null) {
@@ -2628,7 +2631,7 @@ hyperic.alert_center = function() {
 		if (typeof mySubgroup == "string") {
 			subgroup = mySubgroup;
 		} else {
-			subgroup = that.subgroup;
+			subgroup = that.dialogs.FixAlert.data.subgroup;
 		}
 		
 		if (subgroup != null) {
@@ -2651,24 +2654,27 @@ hyperic.alert_center = function() {
 	}
 	
 	that.fixAlert = function() {
-		that.form.fixedNote.value = that.fixedNote.value;
+		var myForm = that.dialogs.FixAlert.data.form;
+		myForm.fixedNote.value = that.dialogs.FixAlert.data.fixedNote.value;
 		that.button_area.fixed_active.style.display = "none";
 		that.button_area.fixed_inactive.style.display = "";
 		that.displayConfirmation('Please wait. Processing your request...');
 
-		if (that.form.output && that.form.output.value == "json") {
-			that.xhrSubmit(that.form);
+		if (myForm.output && myForm.output.value == "json") {
+			that.xhrSubmit(myForm);
 		} else {
-			that.form.submit();
+			myForm.submit();
 		}
 	}
 	
 	that.acknowledgeAlert = function() {
 		that.stopAutoRefresh();
-		if (that.form.output && that.form.output.value == "json") {
-			that.xhrSubmit(that.form);
+
+		var myForm = that.dialogs.FixAlert.data.form;
+		if (myForm.output && myForm.output.value == "json") {
+			that.xhrSubmit(myForm);
 		} else {
-			that.form.submit();
+			myForm.submit();
 		}
 	}
 	
@@ -2694,7 +2700,7 @@ hyperic.alert_center = function() {
 		var checkAllBox = dojo11.byId(subgroup + "_CheckAllBox");
 		checkAllBox.checked = false;
 		that.toggleAll(checkAllBox);
-		that.fixedNote.value = "";
+		that.dialogs.FixAlert.data.fixedNote.value = "";
 		myForm.fixedNote.value = "";
 	}
 	

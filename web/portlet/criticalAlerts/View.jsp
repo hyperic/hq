@@ -58,7 +58,7 @@ dojo11.require("dijit.Dialog");
 
 var MyAlertCenter = null;
 dojo11.addOnLoad(function(){
-	MyAlertCenter = new hyperic.alert_center();
+	MyAlertCenter = new hyperic.alert_center("<fmt:message key="dash.home.CriticalAlerts"/>");
 
 	dojo11.connect("requestRecentAlerts<c:out value="${portlet.token}"/>", function() { MyAlertCenter.resetAlertTable(dojo11.byId('<c:out value="${widgetInstanceName}"/>_FixForm')); });
 
