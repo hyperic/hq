@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -42,6 +42,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -77,25 +78,35 @@ public class NewGroupAction extends BaseAction {
             ResourceGroup newGroup;
             AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
 
-            final int entType = newForm.getEntityTypeId().intValue();
-            if (newForm.getGroupType().intValue() ==
-                    Constants.APPDEF_TYPE_GROUP_COMPAT)
+            final Integer entType = newForm.getEntityTypeId();
+            
+            // Append username to private groups
+            if (newForm.isPrivateGroup()) {
+                final WebUser user = RequestUtils.getWebUser(session);
+                final String privateName =
+                    RequestUtils.message(request,
+                                         "resource.group.name.private",
+                                         new Object[] { user.getName() });
+                newForm.setName(newForm.getName() + " " + privateName);
+            }
+            
+            if (newForm.getGroupType() == Constants.APPDEF_TYPE_GROUP_COMPAT)
             {
-                newGroup = boss.createGroup(sessionId.intValue(), 
-                                        entType, 
-                                        newForm.getResourceTypeId().intValue(),
-                                        newForm.getName(),
-                                        newForm.getDescription(),
-                                        newForm.getLocation(),
-                                        newForm.getEntityIds(),
-                                        newForm.isPrivateGroup());
+                newGroup = boss.createGroup(sessionId, 
+                                            entType, 
+                                            newForm.getResourceTypeId(),
+                                            newForm.getName(),
+                                            newForm.getDescription(),
+                                            newForm.getLocation(),
+                                            newForm.getEntityIds(),
+                                            newForm.isPrivateGroup());
             } else {
                 // Constants.APPDEF_TYPE_GROUP_ADHOC
                 if (entType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION ||
                     entType == AppdefEntityConstants.APPDEF_TYPE_GROUP)
                 {
                     newGroup = 
-                      boss.createGroup(sessionId.intValue(),
+                      boss.createGroup(sessionId,
                                        entType, 
                                        newForm.getName(), 
                                        newForm.getDescription(),
@@ -105,7 +116,7 @@ public class NewGroupAction extends BaseAction {
                 } else {
                     // otherwise, create a mixed group
                     newGroup = 
-                      boss.createGroup(sessionId.intValue(), 
+                      boss.createGroup(sessionId, 
                                        newForm.getName(),
                                        newForm.getDescription(), 
                                        newForm.getLocation(),
@@ -118,16 +129,12 @@ public class NewGroupAction extends BaseAction {
             log.trace("creating group [" + newForm.getName() +
                       "] with attributes " + newForm);
     
-            Integer rid;
-            Integer entityType;
             HashMap forwardParams = new HashMap(2);
+            forwardParams.put(Constants.RESOURCE_PARAM, newGroup.getId());
+            forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM,
+                              AppdefEntityConstants.APPDEF_TYPE_GROUP);
             
-            rid = newGroup.getId();
-            entityType = new Integer(AppdefEntityConstants.APPDEF_TYPE_GROUP);
-            forwardParams.put(Constants.RESOURCE_PARAM, rid);
-            forwardParams.put(Constants.RESOURCE_TYPE_ID_PARAM, entityType);
-            
-            newForm.setRid(rid);
+            newForm.setRid(newGroup.getId());
     
             RequestUtils.setConfirmation(request,
                                          "resource.group.inventory.confirm.CreateGroup",
