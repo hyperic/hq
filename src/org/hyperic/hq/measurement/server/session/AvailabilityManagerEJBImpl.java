@@ -28,6 +28,7 @@ package org.hyperic.hq.measurement.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -561,12 +562,13 @@ public class AvailabilityManagerEJBImpl
             try {
                 cache.beginTran();
                 begin = getDebugTime(debug);
-                setCurrAvails(availPoints);
-                debugTimes(begin, "setCurrAvails", availPoints.size());
-                state = captureCurrAvailState();
-                begin = getDebugTime(debug);
                 updateCache(availPoints, updateList, outOfOrderAvail);
                 debugTimes(begin, "updateCache", availPoints.size());
+                begin = getDebugTime(debug);
+                setCurrAvails(outOfOrderAvail, updateList);
+                debugTimes(begin, "setCurrAvails",
+                           outOfOrderAvail.size() + updateList.size());
+                state = captureCurrAvailState();
                 begin = getDebugTime(debug);
                 updateStates(updateList);
                 debugTimes(begin, "updateStates", updateList.size());
@@ -610,14 +612,15 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
-    private long getDebugTime(boolean debug) {
+    private long getDebugTime(final boolean debug) {
         if (debug) {
             return System.currentTimeMillis();
         }
         return -1;
     }
     
-    private void debugTimes(long begin, String name, int points) {
+    private void debugTimes(final long begin, final String name,
+                            final int points) {
         if (_log.isDebugEnabled()) {
             long time = System.currentTimeMillis() - begin;
             _log.debug("AvailabilityInserter time to " + name + " -> "
@@ -625,7 +628,7 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
-    private void logErrorInfo(Map oldState, List availPoints) {
+    private void logErrorInfo(final Map oldState, final List availPoints) {
         if (!_traceLog.isDebugEnabled()) {
             return;
         }
@@ -640,16 +643,34 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
-    private void setCurrAvails(List states) {
-        int i=0;
-        HashSet mids = new HashSet();
-        // only allow data for the last MAX_DATA_BACKLOG_TIME ms
-        // this way we don't have to bring too much into memory which could
-        // severily
+    private void setCurrAvails(final List outOfOrderAvail,
+                               final List updateList) {
+        if (outOfOrderAvail.size() == 0 && updateList.size() == 0) {
+            _currAvails = Collections.EMPTY_MAP;
+            return;
+        }
         long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), 60000);
+        HashSet mids = getMidsWithinAllowedDataWindow(updateList, now);
+        mids.addAll(getMidsWithinAllowedDataWindow(outOfOrderAvail, now));
+        if (mids.size() <= 0) {
+            _currAvails = Collections.EMPTY_MAP;
+            return;
+        }
+        Integer[] mIds = (Integer[])mids.toArray(new Integer[0]);
+        _currAvails = _dao.getHistoricalAvailMap(
+            mIds, now-MAX_DATA_BACKLOG_TIME, false);
+    }
+    
+    private HashSet getMidsWithinAllowedDataWindow(final List states,
+                                                   final long now) {
+        HashSet mids = new HashSet();
+        int i=0;
         for (Iterator it=states.iterator(); it.hasNext(); i++) {
             DataPoint pt = (DataPoint)it.next();
             long timestamp = pt.getTimestamp();
+            // only allow data for the last MAX_DATA_BACKLOG_TIME ms
+            // this way we don't have to bring too much into memory which could
+            // severely impact performance
             if ((now-timestamp) > MAX_DATA_BACKLOG_TIME) {
                 it.remove();
                 long days = (now-timestamp)/MeasurementConstants.DAY;
@@ -664,9 +685,7 @@ public class AvailabilityManagerEJBImpl
                 mids.add(mId);
             }
         }
-        Integer[] mIds = (Integer[])mids.toArray(new Integer[0]);
-        _currAvails = _dao.getHistoricalAvailMap(
-            mIds, now-MAX_DATA_BACKLOG_TIME, false);
+        return mids;
     }
     
     private void updateDup(DataPoint state, AvailabilityDataRLE dup)
@@ -1003,6 +1022,7 @@ public class AvailabilityManagerEJBImpl
         }
         // as a performance optimization, fetch all the last avails
         // at once, rather than one at a time in updateState()
+        final boolean debug = _log.isDebugEnabled();
         for (Iterator i=states.iterator(); i.hasNext(); ) {
             DataPoint state = (DataPoint)i.next();
             try {
@@ -1014,7 +1034,7 @@ public class AvailabilityManagerEJBImpl
                     continue;
                 }
                 boolean updateCache = updateState(state);
-                if (_log.isDebugEnabled()) {
+                if (debug) {
                     _log.debug("state " + state + 
                                " was updated, cache updated: " + updateCache);
                 }
@@ -1049,6 +1069,7 @@ public class AvailabilityManagerEJBImpl
             return;
         }
         AvailabilityCache cache = AvailabilityCache.getInstance();
+        final boolean debug = _log.isDebugEnabled();
         for (Iterator i=availPoints.iterator(); i.hasNext(); ) {
             DataPoint pt = (DataPoint)i.next();
 			int id = pt.getMetricId().intValue();
@@ -1066,7 +1087,7 @@ public class AvailabilityManagerEJBImpl
             } else if (oldState == null || oldState.getValue() == AVAIL_NULL ||
                     oldState.getValue() != val) {
                 updateList.add(newState);
-                if (_log.isDebugEnabled()) {
+                if (debug) {
                     String msg = "value of state " + newState + 
                                  " differs from" + " current value" +
                                  ((oldState != null) ? oldState.toString() :
