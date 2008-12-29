@@ -25,7 +25,8 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -74,20 +75,20 @@ public class MetricDataCache {
      *         older than what is already cached will NOT be contained in this 
      *         list.
      */
-    public List bulkAdd(List data) {
-        List cachedData = new ArrayList(data.size());
+    public Collection bulkAdd(List data) {
+        HashMap cachedData = new HashMap(data.size());
         
         synchronized (_cacheLock) {
             for (Iterator iter = data.iterator(); iter.hasNext();) {
                 DataPoint dp = (DataPoint) iter.next();
                 
                 if (add(dp.getMetricId(), dp.getMetricValue())) {
-                    cachedData.add(dp);
+                    cachedData.put(dp.getMetricId(), dp);
                 }
             }
         }
         
-        return cachedData;
+        return cachedData.values();
     }
 
     /**
