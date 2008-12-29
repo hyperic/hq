@@ -962,8 +962,8 @@ public class ResourceGroupManagerEJBImpl
         throws FinderException, PermissionException 
     {
         ResourceGroup groupLocal = lookupGroup(group);
-        removeRoles(whoami, group, (RoleValue[])fromLocals(groupLocal.getRoles(), 
-                                                           RoleValue.class));
+        removeRoles(whoami, group, (RoleValue[])fromPojos(groupLocal.getRoles(),
+                                                          RoleValue.class));
     }
 
     /**
