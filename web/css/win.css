@@ -259,6 +259,13 @@ a.listheaderlink:hover {
     padding: 3px
 }
 
+.tbalerowinactiveblue {
+   text-align: left;
+   background-color: #DBE3F5;
+   border-bottom: 1px solid #D5D8DE;
+   whitespace:nowrap;
+}
+
 .listheaderinactivesorted {
     background:transparent url(/images/4.0/backgrounds/table_header_large.png) repeat scroll 0 0;
     border-bottom: solid #C6CFE5;

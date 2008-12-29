@@ -415,21 +415,12 @@
             trHeader.setAttribute("class", "tableRowHeader");
             trHeader.appendChild(th1);
             th1.setAttribute("width", "90%");
-            th1.setAttribute("class", "tableRowInactive");
-            th1.style.textAlign = "left";
-            th1.style.backgroundColor = "#DBE3F5";
-            th1.style.padding = "3px";
-            th1.style.borderBottom = "1px solid #D5D8DE";
+            th1.setAttribute("class", "tableRowInactive tbalerowinactiveblue");
             th1.appendChild(document.createTextNode(resourceNameHeader));
             
             trHeader.appendChild(th2);
             th2.setAttribute("width", "10%");
-            th2.setAttribute("class", "tableRowInactive");
-            th2.style.backgroundColor = "#DBE3F5";
-            th2.style.padding = "3px";
-            th2.style.textAlign = "left";
-            th2.style.borderBottom = "1px solid #D5D8DE";
-            th2.setAttribute("noWrap", true);
+            th2.setAttribute("class", "tableRowInactive tbalerowinactiveblue");
             th2.appendChild(document.createTextNode(resourceLoadTypeHeader));
 
             for (i = 0; i < metricValues.values.length; i++) {
