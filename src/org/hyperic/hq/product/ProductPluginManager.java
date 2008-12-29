@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -39,6 +40,7 @@ import java.util.Iterator;
 import java.util.Properties;
 
 import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.common.LicenseManager;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.sigar.OperatingSystem;
@@ -826,7 +828,8 @@ public class ProductPluginManager extends PluginManager {
                 }
                 log.info("Loading plugin: " + name);
                 try {
-                    registerPluginJar(plugins[j].getAbsolutePath());
+                    if (registerPluginJar(plugins[j].getAbsolutePath()) == null)
+                        continue;
                 } catch (UnsupportedClassVersionError e) {
                     log.info("Cannot load " + name + ": " +
                              unsupportedClassVersionMessage(e.getMessage()));
@@ -961,6 +964,24 @@ public class ProductPluginManager extends PluginManager {
                 if (pluginName == null) {
                     throw new PluginException("Malformed name for: " + jarName);
                 }
+            }
+            
+            // Check with LicenseManager
+            try {
+                Class c = Class.forName("com.hyperic.hq.license.LicenseManager");
+                Method getInstance = c.getMethod("instance", null);
+                LicenseManager mgr = (LicenseManager) getInstance.invoke(null,
+                                                                         null);
+                if (!mgr.isPluginEnabled(pluginName)) {
+                    if (DEBUG_LIFECYCLE) {
+                        log.debug("Skipping " + pluginName +
+                        " (in license.exclude)");
+                    }
+                    return null;
+                }
+
+            } catch (Exception e) {
+                // Don't validate against LicenseManager then
             }
             
             if (data.getName() == null) {
