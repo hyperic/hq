@@ -34,6 +34,7 @@ import javax.servlet.ServletContext;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -77,7 +78,11 @@ public class DashboardUtils {
         Iterator i = list.iterator();
 
         while (i.hasNext()) {
-            resources.add(new AppdefEntityID((String) i.next()));
+            try {
+                resources.add(new AppdefEntityID((String) i.next()));
+            } catch (InvalidAppdefTypeException e) {
+                // Skip resource
+            }
         }
 
         return resources;
