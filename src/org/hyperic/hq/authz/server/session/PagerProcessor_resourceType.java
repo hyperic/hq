@@ -32,15 +32,6 @@ public class PagerProcessor_resourceType implements PagerProcessor {
     public PagerProcessor_resourceType () {}
 
     public Object processElement(Object o) {
-        if (o == null) return null;
-        try {
-            if ( o instanceof ResourceType) {
-                return ((ResourceType) o).getResourceTypeValue();
-            }
-        } catch (Exception e) {
-            throw new IllegalStateException("Error converting to ResourceType: "
-                + e);
-        }
         return o;
     }
 }

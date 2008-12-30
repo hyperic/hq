@@ -29,13 +29,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.ResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 
 public class ResourceType extends AuthzNamedBean {
     private static final Map TYPE_TO_PROP = new HashMap();
@@ -54,8 +52,6 @@ public class ResourceType extends AuthzNamedBean {
     private Resource   _resource;
     private boolean    _system = false;
     private Collection _operations = new ArrayList();
-
-    private ResourceTypeValue _resourceTypeValue = new ResourceTypeValue();
 
     protected ResourceType() {
         super();
@@ -119,18 +115,8 @@ public class ResourceType extends AuthzNamedBean {
         }
     }
 
-    /**
-     * @deprecated use (this) ResourceType instead
-     */
-    public ResourceTypeValue getResourceTypeValue() {
-        _resourceTypeValue.setId(getId());
-        _resourceTypeValue.setName(getName());
-        _resourceTypeValue.setSystem(isSystem());
-        return _resourceTypeValue;
-    }
-
     public Object getValueObject() {
-        return getResourceTypeValue();
+        return this;
     }
     
     public String getLocalizedName() {
