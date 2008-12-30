@@ -505,7 +505,10 @@ class ResourceCategory {
                                                "to createInstance()")
         }
     }
-    
+
+    /**
+     * @deprecated Use ResourceHelper.createGroup
+     */
     static ResourceGroup createGroup(Resource r, AuthzSubject user, String name,
                                      String description, String location) {
         def groupType

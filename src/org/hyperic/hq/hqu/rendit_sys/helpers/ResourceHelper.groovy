@@ -20,6 +20,8 @@ import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
 import org.hyperic.util.pager.PageControl
+import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 
 class ResourceHelper extends BaseHelper {
     private rman = ResourceManagerEJBImpl.one
@@ -284,7 +286,7 @@ class ResourceHelper extends BaseHelper {
     }
 
     /**
-     * Find all resource groups:
+     * Find all resource groups
      *
      * Returns a list of {@link ResourceGroup}s
      */
@@ -300,7 +302,27 @@ class ResourceHelper extends BaseHelper {
             !it.system
         }
     }
-     
+
+    ResourceGroup createGroup(String name, String description, String location,
+                              Resource prototype, Collection roles,
+                              Collection resources) {        
+        int groupType
+        if (!prototype) {
+            groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS
+        } else {
+            if (prototype.isService()) {
+                groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC
+            } else {
+                groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS
+            }
+        }
+
+        ResourceGroupCreateInfo info =
+            new ResourceGroupCreateInfo(name, description, groupType, prototype,
+                                        location, 0, false);
+        groupMan.createResourceGroup(user, info, roles, resources)
+    }
+
     /**
      * Find a prototype by name.
      */
