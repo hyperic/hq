@@ -2650,6 +2650,7 @@ hyperic.alert_center = function(title_name) {
 		that.message_area.request_status.style.display = "none";
 		that.button_area.fixed_active.style.display = "";
 		that.button_area.fixed_inactive.style.display = "none";
+		that.dialogs.FixAlert.data.fixedNote.value = "";
 		that.dialogs.FixAlert.show();
 	}
 	
@@ -2667,7 +2668,7 @@ hyperic.alert_center = function(title_name) {
 		}
 	}
 	
-	that.acknowledgeAlert = function() {
+	that.acknowledgeAlerts = function() {
 		that.stopAutoRefresh();
 
 		var myForm = that.dialogs.FixAlert.data.form;
@@ -2676,6 +2677,29 @@ hyperic.alert_center = function(title_name) {
 		} else {
 			myForm.submit();
 		}
+	}
+
+	that.acknowledgeAlert = function(inputId) {		
+		var myInput = dojo11.byId(inputId);
+		var myParam = {buttonAction: "ACKNOWLEDGE", output: "json"}
+		
+		myParam[myInput.name] = myInput.value;
+		that.init(myInput.form);
+		that.stopAutoRefresh();
+
+		dojo11.xhrPost( {
+	    	url: myInput.form.action,
+	    	content: myParam,
+	    	handleAs: 'json',
+	    	load: function(data) {
+	    		that.startAutoRefresh();
+	    	},
+	    	error: function(data){
+	    		var errorText = "An error occurred processing your request.";
+	    		that.displayError(errorText);
+	    		console.debug(errorText, data);
+			}
+		});
 	}
 	
 	that.xhrSubmit = function(myForm) {
@@ -2700,7 +2724,6 @@ hyperic.alert_center = function(title_name) {
 		var checkAllBox = dojo11.byId(subgroup + "_CheckAllBox");
 		checkAllBox.checked = false;
 		that.toggleAll(checkAllBox);
-		that.dialogs.FixAlert.data.fixedNote.value = "";
 		myForm.fixedNote.value = "";
 	}
 	
@@ -2771,7 +2794,7 @@ hyperic.alert_center = function(title_name) {
 		if (myButton.value == "FIXED") {
 			that.confirmFixAlert();
 		} else if (myButton.value == "ACKNOWLEDGE") {
-			that.acknowledgeAlert();
+			that.acknowledgeAlerts();
 		}
 	}
 

@@ -34,6 +34,7 @@
 <tiles:importAttribute name="listNewParamName" ignore="true"/>
 <tiles:importAttribute name="listNewParamValue" ignore="true"/>
 <tiles:importAttribute name="widgetInstanceName" ignore="true"/>
+<tiles:importAttribute name="portletToken" ignore="true"/>
 <tiles:importAttribute name="noButtons" ignore="true"/>
 <tiles:importAttribute name="newOnly" ignore="true"/>
 <tiles:importAttribute name="deleteOnly" ignore="true"/>
@@ -117,11 +118,11 @@
 </td>
 </c:if>
 <c:if test="${alerts}">
-    <td align="left" id="<c:out value="${widgetInstanceName}"/>FixedButtonTd" style="white-space: nowrap">
-		<div id="<c:out value="${widgetInstanceName}"/>FixedButtonDiv">
-			<input type="button" id="<c:out value="${widgetInstanceName}"/>_FixButton" value="<fmt:message key="resource.common.alert.action.fixed.label"/>" class="CompactButtonInactive" disabled="disabled" onclick="MyAlertCenter.processButtonAction(this)" />
+    <td align="left" id="<c:out value="${widgetInstanceName}${portletToken}"/>FixedButtonTd" style="white-space: nowrap">
+		<div id="<c:out value="${widgetInstanceName}${portletToken}"/>FixedButtonDiv">
+			<input type="button" id="<c:out value="${widgetInstanceName}${portletToken}"/>_FixButton" value="<fmt:message key="resource.common.alert.action.fixed.label"/>" class="CompactButtonInactive" disabled="disabled" onclick="MyAlertCenter.processButtonAction(this)" />
 			&nbsp;&nbsp;
-			<input type="button" id="<c:out value="${widgetInstanceName}"/>_AckButton" value="<fmt:message key="resource.common.alert.action.acknowledge.label"/>" class="CompactButtonInactive" disabled="disabled" onclick="MyAlertCenter.processButtonAction(this)" />
+			<input type="button" id="<c:out value="${widgetInstanceName}${portletToken}"/>_AckButton" value="<fmt:message key="resource.common.alert.action.acknowledge.label"/>" class="CompactButtonInactive" disabled="disabled" onclick="MyAlertCenter.processButtonAction(this)" />
 			<input type="hidden" name="buttonAction" value="" />
           	<input type="hidden" name="fixedNote" value="" />
 		</div>

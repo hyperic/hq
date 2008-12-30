@@ -118,7 +118,6 @@
     }
 
     function showRecentAlerts(originalRequest) {
-
         var alertText = eval("(" + originalRequest.responseText + ")");
         var aList = alertText.criticalAlerts;
         var token = alertText.token;
@@ -163,7 +162,7 @@
                 var td5 = document.createElement('td');
                 var td6 = document.createElement('td');
                 var alertAnchor = document.createElement("a");
-                var checkBox = document.createElement("input");
+                var checkbox = document.createElement("input");
                 var urlAmp = "&a="
 
                 tbody.appendChild(tr);
@@ -176,7 +175,8 @@
                   td1.innerHTML = "&nbsp;";
                 }
                 else {
-                  var checkbox = document.createElement('input');
+                  var checkboxId = "alert" + (token == null ? "" : token) + "_" + aList[i].appdefKey + "_" + aList[i].alertId;
+                  checkbox.id = checkboxId.replace(":", "_");
                   checkbox.setAttribute("type", "checkbox");
                   checkbox.setAttribute("name", "ealerts");
                   checkbox.onclick = new Function("MyAlertCenter.toggleAlertButtons(this)");
@@ -233,10 +233,9 @@
                     imgNode.setAttribute("border", "0");
                     imgNode.setAttribute("alt", "Acknowledge");
                     imgNode.setAttribute('id', 'ack_'+ aList[i].alertId);
-
                     ackAnchor.appendChild(imgNode);
+                    ackAnchor.href = "javascript:MyAlertCenter.acknowledgeAlert('" + checkbox.id + "');";
                     ackInstruction.style.display = "";
-
                 } else {
                     
                     imgNode = document.createElement('img');

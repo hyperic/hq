@@ -38,7 +38,7 @@
 
 <script type="text/javascript">
 var pageData = new Array();
-var _hqu_<c:out value="${widgetInstanceName}"/>_refreshTimeout;
+var _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_refreshTimeout;
 initializeWidgetProperties('<c:out value="${widgetInstanceName}"/>');
 widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>');  
 
@@ -48,8 +48,8 @@ function requestRecentAlerts<c:out value="${portlet.token}"/>() {
 	new Ajax.Request(critAlertUrl, {method: 'get', onSuccess:showRecentAlerts, onFailure :reportError});
 }
 
-function _hqu_<c:out value="${widgetInstanceName}"/>_autoRefresh() {
-    _hqu_<c:out value="${widgetInstanceName}"/>_refreshTimeout = setTimeout("_hqu_<c:out value="${widgetInstanceName}"/>_autoRefresh()", 30000);
+function _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh() {
+    _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_refreshTimeout = setTimeout("_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh()", 30000);
 	requestRecentAlerts<c:out value="${portlet.token}"/>();
 }
 
@@ -58,11 +58,13 @@ dojo11.require("dijit.Dialog");
 
 var MyAlertCenter = null;
 dojo11.addOnLoad(function(){
-	MyAlertCenter = new hyperic.alert_center("<fmt:message key="dash.home.CriticalAlerts"/>");
+	if (MyAlertCenter == null) {
+		MyAlertCenter = new hyperic.alert_center("<fmt:message key="dash.home.CriticalAlerts"/>");
+	}
 
-	dojo11.connect("requestRecentAlerts<c:out value="${portlet.token}"/>", function() { MyAlertCenter.resetAlertTable(dojo11.byId('<c:out value="${widgetInstanceName}"/>_FixForm')); });
+	dojo11.connect("requestRecentAlerts<c:out value="${portlet.token}"/>", function() { MyAlertCenter.resetAlertTable(dojo11.byId('<c:out value="${widgetInstanceName}${portlet.token}"/>_FixForm')); });
 
-	_hqu_<c:out value="${widgetInstanceName}"/>_autoRefresh();
+	_hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh();
 });
 </script>
 <c:set var="rssUrl" value="/rss/ViewCriticalAlerts.rss"/>
@@ -85,13 +87,13 @@ dojo11.addOnLoad(function(){
 </tiles:insert>
 
   <!-- JSON available at /dashboard/ViewCriticalAlerts.do -->
-  <html:form styleId="${widgetInstanceName}_FixForm" method="POST" action="/alerts/RemoveAlerts.do">
+  <html:form styleId="${widgetInstanceName}${portlet.token}_FixForm" method="POST" action="/alerts/RemoveAlerts.do">
   <html:hidden property="output" value="json" />
   <table width="100%" cellpadding="0" cellspacing="0" border="0" id="<c:out value="${tableName}"/>" class="portletLRBorder">
      <thead>
 		<tr class="ListRow">
 			<td width="1%" class="ListHeaderCheckbox">
-				<input type="checkbox" onclick="MyAlertCenter.toggleAll(this)" name="listToggleAll" id="<c:out value="${widgetInstanceName}"/>_CheckAllBox">
+				<input type="checkbox" onclick="MyAlertCenter.toggleAll(this)" name="listToggleAll" id="<c:out value="${widgetInstanceName}${portlet.token}"/>_CheckAllBox">
 			</td>
 			<td width="30%" class="ListHeaderInactiveSorted" align="left">
 				Date / Time<html:img page="/images/tb_sortdown.gif" height="9" width="9" border="0" />
@@ -119,6 +121,10 @@ dojo11.addOnLoad(function(){
     	</tr>
          <tr class="ListRow" id="<c:out value="ackInstruction${portlet.token}"/>" style="display: none;">
            <td class="ListCell" colspan="6" align="right" style="font-style: italic;">
+              <c:url var="path" value="/"/>
+              <fmt:message key="dash.settings.criticalAlerts.ack.instruction">
+                <fmt:param value="${path}"/>
+              </fmt:message>
            </td>
     	</tr>
         <tr>
@@ -126,7 +132,8 @@ dojo11.addOnLoad(function(){
     <tiles:insert definition=".toolbar.list">                
       <tiles:put name="noButtons" value="true"/>
       <tiles:put name="alerts" value="true"/>
-      <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>  
+      <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
+	  <tiles:put name="portletToken"><c:out value="${portlet.token}"/></tiles:put> 
       <%--none of this is being used--%>
       <tiles:put name="pageSizeAction" value="" />
       <tiles:put name="pageNumAction" value=""/>    
@@ -137,6 +144,10 @@ dojo11.addOnLoad(function(){
           </tr>
       </tfoot>
   </table>
-  <div id="AlertCenterFixedNoteDialog" style="display:none;"></div>
+  <script type="text/javascript">
+  	if (dojo11.byId("AlertCenterFixedNoteDialog") == null) {
+  		document.write('<div id="AlertCenterFixedNoteDialog" style="display:none;"></div>');
+  	}
+  </script>
   </html:form>
 </div>
