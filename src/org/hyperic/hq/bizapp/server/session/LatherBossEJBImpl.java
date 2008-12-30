@@ -61,7 +61,12 @@ public class LatherBossEJBImpl
                                       LatherValue arg)
         throws LatherRemoteException
     {
-        return dispatchWithoutTx(ctx, method, arg);
+        try {
+            return dispatchWithoutTx(ctx, method, arg);
+        } catch (LatherRemoteException e) {
+            _ctx.setRollbackOnly();
+            throw e;
+        }
     }
 
     /**
