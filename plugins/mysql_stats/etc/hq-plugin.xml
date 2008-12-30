@@ -46,6 +46,27 @@
     <property name="showDatabases"
               value="query=show databases"/>
 
+    <config name="mysql_stats_config">
+        <option name="jdbcUrl"
+                default="jdbc:mysql://localhost:3306"
+                description="JDBC URL"/>
+        <option name="jdbcUser"
+                description="JDBC User"
+                default="root"/>
+        <option name="jdbcPassword"
+                description="JDBC Password"
+                type="secret"
+                default="mysql"/>
+        <option name="process.query"
+                description="Process query"
+                default="State.Name.eq=mysqld"/>
+    </config>
+
+    <config name="repl_slave_config">
+      <option name="slaveAddress"
+              description="slave address info ip:port"/>
+    </config>
+
   <!--
     Metric groups.
     These need to be outside of any <server> or <service> elements, as the only
@@ -57,18 +78,13 @@
     wouldn't be reusable in more complicated use cases.
   -->
 
-    <!--
-        This is used to validate the configuration provided by the user
-    -->
-    <filter name="template"
-            value="${domain}:${showDatabases}:${alias}"/>
-    <metrics name="global-validation">
-        <metric name="Number Of Databases"
-                alias="NumDatabases"
-                category="UTILIZATION"
-                indicator="true"
-                units="none"
-                collectionType="static" />
+    <metrics name="master-slave-metrics">
+        <metric name="Availability"
+                template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
+                indicator="true"/>
+        <metric name="Replication Process Time"
+                template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
+                indicator="true"/>
     </metrics>
 
   <!-- Global Status metrics -->
@@ -128,7 +144,7 @@
             alias="Aborted_clients"
             category="THROUGHPUT"
             group="Connection"
-            indicator="true"
+            indicator="false"
             units="none"
             collectionType="trendsup"/>
 
@@ -136,7 +152,7 @@
             alias="Aborted_connects"
             category="THROUGHPUT"
             group="Connection"
-            indicator="true"
+            indicator="false"
             units="none"
             collectionType="trendsup"/>
 
@@ -160,7 +176,7 @@
             alias="Connections"
             category="THROUGHPUT"
             group="Connection"
-            indicator="true"
+            indicator="false"
             units="none"
             collectionType="trendsup"/>
 
@@ -531,7 +547,7 @@
             alias="Com_rollback"
             category="UTILIZATION"
             group="Tx Command"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -883,7 +899,7 @@
             alias="Open_tables"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -892,7 +908,7 @@
             alias="Open_files"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -901,7 +917,7 @@
             alias="Open_streams"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -910,7 +926,7 @@
             alias="Opened_tables"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -928,7 +944,7 @@
             alias="Qcache_free_memory"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="B"
             collectionType="dynamic"/>
@@ -937,7 +953,7 @@
             alias="Qcache_hits"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -946,7 +962,7 @@
             alias="Qcache_inserts"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -964,7 +980,7 @@
             alias="Qcache_not_cached"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="trendsup"/>
@@ -973,7 +989,7 @@
             alias="Qcache_queries_in_cache"
             category="UTILIZATION"
             group="Resource Utilization"
-            indicator="true"
+            indicator="false"
             defaultOn="false"
             units="none"
             collectionType="dynamic"/>
@@ -1942,181 +1958,51 @@
     <property name="DEFAULT_URL"
               value="jdbc:mysql://%hostname%:%port%/mysql" />
 
-    <server name="MySQL Status" version="4.0.x">
+    <server name="MySQL Stats" version="base">
         <plugin type="autoinventory"
-                class="org.hyperic.hq.plugin.mysql_stats.MySqlServerDetector"/>
+                class="MySqlServerDetector"/>
         <plugin type="measurement"
-                class="org.hyperic.hq.plugin.mysql_stats.MySqlStatsMeasurementPlugin"/>
-        <config>
-            <option name="jdbcUrl"
-                    default="jdbc:mysql://localhost:3306"
-                    description="JDBC URL"/>
-            <option name="jdbcUser"
-                    description="JDBC User"
-                    default="root"/>
-            <option name="jdbcPassword"
-                    description="JDBC Password"
-                    type="secret"
-                    default="mysql"/>
-            <option name="process.query"
-                    description="Process query"
-                    default="State.Name.eq=mysqld"/>
-        </config>
+                class="MySqlStatsMeasurementPlugin"/>
+        <plugin type="log_track"
+                class="MySqlStatsLogTrackPlugin"/>
+        <properties>
+            <property name="version"
+                      description="MySQL Version"/>
+        </properties>
+        <config include="mysql_stats_config"/>
         <metric name="Availability"
                 template="sigar:Type=ProcState,Arg=%process.query%:State"
                 indicator="true"/>
         &process-metrics;
-        <metrics include="global-validation"/>
-        <service name="Show Global Status">
-            <metrics include="global-4.0"/>
-        </service>
         <service name="Slave Status">
-            <config>
-              <option name="slaveAddress"
-                      description="slave address info ip:port"/>
-            </config>
-            <metric name="Availability"
-                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
-                    indicator="true"/>
-            <metric name="Replication Process Time"
-                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
-                    indicator="true"/>
+            <config include="repl_slave_config"/>
+            <metrics include="master-slave-metrics"/>
         </service>
+    </server>
+
+    <server name="MySQL Stats" version="4.0.x" include="base">
+        <metrics include="global-4.0"/>
         <service name="Show Slave Status">
             <metrics include="MySQL Status 4.0.x Replication"/>
         </service>
     </server>
 
-    <server name="MySQL Status" version="4.1.x">
-        <plugin type="autoinventory"
-                class="org.hyperic.hq.plugin.mysql_stats.MySqlServerDetector"/>
-        <plugin type="measurement"
-                class="org.hyperic.hq.plugin.mysql_stats.MySqlStatsMeasurementPlugin"/>
-        <config>
-            <option name="jdbcUrl"
-                    default="jdbc:mysql://localhost:3306"
-                    description="JDBC URL"/>
-            <option name="jdbcUser"
-                    description="JDBC User"
-                    default="root"/>
-            <option name="jdbcPassword"
-                    description="JDBC Password"
-                    type="secret"
-                    default="mysql"/>
-            <option name="process.query"
-                    description="Process query"
-                    default="State.Name.eq=mysqld"/>
-        </config>
-        <metric name="Availability"
-                template="sigar:Type=ProcState,Arg=%process.query%:State"
-                indicator="true"/>
-        &process-metrics;
-        <metrics include="global-validation"/>
-        <service name="Show Global Status">
-            <metrics include="global-4.1"/>
-        </service>
-        <service name="Slave Status">
-            <config>
-              <option name="slaveAddress"
-                      description="slave address info ip:port"/>
-            </config>
-            <metric name="Availability"
-                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
-                    indicator="true"/>
-            <metric name="Replication Process Time"
-                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
-                    indicator="true"/>
-        </service>
+    <server name="MySQL Stats" version="4.1.x" include="base">
+        <metrics include="global-4.1"/>
         <service name="Show Slave Status">
             <metrics include="MySQL Status 4.1.x Replication"/>
         </service>
     </server>
 
-    <server name="MySQL Stats" version="5.0.x">
-        <plugin type="autoinventory"
-                class="org.hyperic.hq.plugin.mysql_stats.MySqlServerDetector"/>
-        <plugin type="measurement"
-                class="org.hyperic.hq.plugin.mysql_stats.MySqlStatsMeasurementPlugin"/>
-        <config>
-            <option name="jdbcUrl"
-                    default="jdbc:mysql://localhost:3306"
-                    description="JDBC URL"/>
-            <option name="jdbcUser"
-                    description="JDBC User"
-                    default="root"/>
-            <option name="jdbcPassword"
-                    description="JDBC Password"
-                    type="secret"
-                    default="mysql"/>
-            <option name="process.query"
-                    description="Process query"
-                    default="State.Name.eq=mysqld"/>
-        </config>
-        <metric name="Availability"
-                template="sigar:Type=ProcState,Arg=%process.query%:State"
-                indicator="true"/>
-        &process-metrics;
-        <metrics include="global-validation"/>
-        <service name="Show Global Status">
-            <metrics include="global-5.0"/>
-        </service>
-        <service name="Slave Status">
-            <config>
-              <option name="slaveAddress"
-                      description="slave address info ip:port"/>
-            </config>
-            <metric name="Availability"
-                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
-                    indicator="true"/>
-            <metric name="Replication Process Time"
-                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
-                    indicator="true"/>
-        </service>
+    <server name="MySQL Stats" version="5.0.x" include="base">
+        <metrics include="global-5.0"/>
         <service name="Show Slave Status">
             <metrics include="MySQL Status 5.0.x Replication"/>
         </service>
     </server>
 
-    <server name="MySQL Stats" version="5.1.x">
-        <plugin type="autoinventory"
-                class="org.hyperic.hq.plugin.mysql_stats.MySqlServerDetector"/>
-        <plugin type="measurement"
-                class="org.hyperic.hq.plugin.mysql_stats.MySqlStatsMeasurementPlugin"/>
-        <config>
-            <option name="jdbcUrl"
-                    default="jdbc:mysql://localhost:3306"
-                    description="JDBC URL"/>
-            <option name="jdbcUser"
-                    description="JDBC User"
-                    default="root"/>
-            <option name="jdbcPassword"
-                    description="JDBC Password"
-                    type="secret"
-                    default="mysql"/>
-            <option name="process.query"
-                    description="Process query"
-                    default="State.Name.eq=mysqld"/>
-        </config>
-        <metric name="Availability"
-                template="sigar:Type=ProcState,Arg=%process.query%:State"
-                indicator="true"/>
-        &process-metrics;
-        <metrics include="global-validation"/>
-        <service name="Show Global Status">
-            <metrics include="global-5.1"/>
-        </service>
-        <service name="Slave Status">
-            <config>
-              <option name="slaveAddress"
-                      description="slave address info ip:port"/>
-            </config>
-            <metric name="Availability"
-                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
-                    indicator="true"/>
-            <metric name="Replication Process Time"
-                    template="${domain}:Type=SlaveStatus,slaveAddress=%slaveAddress%:${alias}"
-                    indicator="true"/>
-        </service>
+    <server name="MySQL Stats" version="5.1.x" include="base">
+        <metrics include="global-5.1"/>
         <service name="Show Slave Status">
             <metrics include="MySQL Status 5.1.x Replication"/>
         </service>
@@ -2133,17 +2019,20 @@
   monitoring are:
   </p>
   <ul>
-    <li>You can connect to the MySQL server ${hostname}:${port} as ${jdbcUser}</li>
+    <li>The configured mysql has the ability to connect to the MySQL server ${hostname}:${port}</li>
     <li>The user ${jdbcUser} is able to execute the following statements:
-        'SHOW STATUS', 'SHOW SLAVE STATUS' (minimal privileges needed:
+        'SHOW GLOBAL STATUS', 'SHOW SLAVE STATUS' (minimal privileges needed:
         SELECT, REPLICATION CLIENT)</li>
+    <li>To enable full process monitoring of the MySQL daemon the agent user must either own the process or have permissions to view all process stats.</li>
   </ul>
   <p>Shared properties (values propagate to child services):</p>
   <ul>
-    <li><strong>port</strong> - TCP/IP port on which the MySQL instance to be monitored listens</li>
-    <li><strong>hostname</strong> - Fully qualified hostname of platform hosting MySQL</li>
     <li><strong>process.query</strong> - The SIGAR process query detecting the MySQL instance.
       Ordinarily you will not need to change this.</li>
+    <li><strong>jdbcUrl</strong> - The MySQL JDBC Url to connect to the server:port and database.
+      This takes the form of &quot;jdbc:mysql://hostname:port/database&quot;.  To connect
+      to a running server with default settings on localhost use &quot;jdbc:mysql://localhost:3306&quot;
+      (port 3306 is MySQL default, specified in my.cnf)
     <li><strong>jdbcUser</strong> - Username for MySQL login for status checks (see above)</li>
     <li><strong>jdbcPassword</strong> - Password for MySQL login</li>
   </ul>
@@ -2155,12 +2044,12 @@
   ]]>
     </help>
 
-    <help name="MySQL 4.0.x" include="mysql"/>
+    <help name="MySQL Stats 4.0.x" include="mysql"/>
 
-    <help name="MySQL 4.1.x" include="mysql"/>
+    <help name="MySQL Stats 4.1.x" include="mysql"/>
 
-    <help name="MySQL 5.0.x" include="mysql"/>
+    <help name="MySQL Stats 5.0.x" include="mysql"/>
 
-    <help name="MySQL 5.1.x" include="mysql"/>
+    <help name="MySQL Stats 5.1.x" include="mysql"/>
 </plugin>
 

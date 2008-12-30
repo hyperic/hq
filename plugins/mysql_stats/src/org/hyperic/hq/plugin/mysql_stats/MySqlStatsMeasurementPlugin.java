@@ -56,7 +56,7 @@ public class MySqlStatsMeasurementPlugin
     private final Log _log = LogFactory.getLog(MySqlStatsMeasurementPlugin.class);
     static final String PROP_JDBC_DRIVER = "DEFAULT_DRIVER",
                         DEFAULT_DRIVER   = "com.mysql.jdbc.Driver";
-    private static final String  SELECT_VERSION     = "select @@version",
+    private static final String SELECT_VERSION = "select @@version",
                            SHOW_DATABASES     = "show databases",
                            SLAVE_STATUS       = "slavestatus",
                            SHOW_SLAVE_STATUS  = "show slave status",
@@ -67,6 +67,7 @@ public class MySqlStatsMeasurementPlugin
     private String _driver;
     private JDBCQueryCache _globalStatus = null,
                            _replStatus   = null;
+    private static final int TIMEOUT_VALUE = 60000;
     
     protected double getQueryValue(Metric metric)
         throws MetricNotFoundException,
@@ -290,7 +291,7 @@ public class MySqlStatsMeasurementPlugin
             final Properties props = new Properties();
             props.put("user", user);
             props.put("password", password);
-            return driver.connect(url, props);
+            return driver.connect(getJdbcUrl(url), props);
         } catch (InstantiationException e) {
             throw new SQLException(e.getMessage());
         } catch (IllegalAccessException e) {
@@ -300,8 +301,23 @@ public class MySqlStatsMeasurementPlugin
         }
     }
 
+    private String getJdbcUrl(String url) {
+        if (url == null) {
+            return url;
+        }
+        else if (url.indexOf('?') > 0) {
+            return url + "&socketTimeout=" + TIMEOUT_VALUE + "&connectTimeout="
+                    + TIMEOUT_VALUE;
+        }
+        else {
+            return url + "?socketTimeout=" + TIMEOUT_VALUE + "&connectTimeout="
+                    + TIMEOUT_VALUE;
+        }
+    }
+
+    // This is legacy before config props were specified in hq-plugin.xml,
+    // not needed
     protected String getDefaultURL() {
-        // XXX need to add timeout params
         return null;
     }
 

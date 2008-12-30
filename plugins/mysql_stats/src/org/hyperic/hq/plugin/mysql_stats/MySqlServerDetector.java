@@ -57,7 +57,7 @@ public class MySqlServerDetector
 {
     private static final String _logCtx = MySqlServerDetector.class.getName();
     private final Log _log = LogFactory.getLog(_logCtx);
-    // generic process name, generic server daemon
+    // mysqld process name for unix systems
     private static String PROCESS_NAME = "mysqld";
     static {
         if (isWin32()) {
@@ -98,14 +98,8 @@ public class MySqlServerDetector
         throws PluginException
     {
         final List rtn = new ArrayList();
-        try {
-            setGlobalStatusService(rtn, serverConfig);
-            setSlaveStatusService(rtn, serverConfig);
-            setMasterSlaveStatusService(rtn, serverConfig);
-        } catch (SQLException e) {
-            String msg = "Error querying for services: "+e.getMessage();
-            throw new PluginException(msg, e);
-        }
+        setSlaveStatusService(rtn, serverConfig);
+        setMasterSlaveStatusService(rtn, serverConfig);
         return rtn;
     }
     
@@ -149,7 +143,6 @@ public class MySqlServerDetector
                 ConfigResponse productConfig = new ConfigResponse();
                 service.setProductConfig(productConfig);
                 service.setMeasurementConfig(serverConfig);
-//                service.setControlConfig();
                 services.add(service);
             }
         } catch (SQLException e) {
@@ -191,7 +184,6 @@ public class MySqlServerDetector
                 ConfigResponse replConfig = new ConfigResponse();
                 replConfig.setValue("slaveAddress", addr);
                 service.setMeasurementConfig(replConfig);
-//                service.setControlConfig();
                 services.add(service);
             }
         } catch (SQLException e) {
@@ -199,20 +191,6 @@ public class MySqlServerDetector
         } finally {
             DBUtil.closeJDBCObjects(_logCtx, conn, stmt, rs);
         }
-    }
-
-    private void setGlobalStatusService(List services,
-                                        ConfigResponse serverConfig)
-        throws SQLException
-    {
-        ServiceResource service = new ServiceResource();
-        service.setType(this, "Show Global Status");
-        service.setServiceName("Show Global Status");
-        ConfigResponse productConfig = new ConfigResponse();
-        service.setProductConfig(productConfig);
-        service.setMeasurementConfig(new ConfigResponse());
-//        service.setControlConfig();
-        services.add(service);
     }
 
     private static List getServerProcessList()
@@ -237,7 +215,7 @@ public class MySqlServerDetector
         throws PluginException
     {
         List servers = new ArrayList();
-        String installdir = getParentDir(path, 1);
+        String installdir = getParentDir(path, 2);
         String version = getVersion(path);
         // ensure this instance of ServerDetector is associated with the
         // correct version
