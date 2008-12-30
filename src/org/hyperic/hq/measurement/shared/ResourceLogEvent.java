@@ -46,7 +46,7 @@ public class ResourceLogEvent extends AbstractEvent
     private static Map levelStrs = new HashMap();
     
     static {
-        levelStrs.put(new Integer(-1),                            "ANY");
+        levelStrs.put(new Integer(LogTrackPlugin.LOGLEVEL_ANY),   "ANY");
         levelStrs.put(new Integer(LogTrackPlugin.LOGLEVEL_ERROR), "ERR");
         levelStrs.put(new Integer(LogTrackPlugin.LOGLEVEL_WARN),  "WRN");
         levelStrs.put(new Integer(LogTrackPlugin.LOGLEVEL_INFO),  "INF");

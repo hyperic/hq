@@ -52,6 +52,7 @@ public class LogTrackPlugin extends GenericPlugin {
         "true".equals(System.getProperty("log_track.debug"));
     
     /* Log levels */
+    public static final int LOGLEVEL_ANY     = -1;
     public static final int LOGLEVEL_ERROR   = 3;
     public static final int LOGLEVEL_WARN    = 4;
     public static final int LOGLEVEL_INFO    = 6;
