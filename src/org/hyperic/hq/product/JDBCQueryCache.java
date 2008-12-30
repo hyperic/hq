@@ -36,6 +36,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
@@ -62,6 +64,7 @@ import org.hyperic.util.jdbc.DBUtil;
  */
 public class JDBCQueryCache {
     private static final String _logCtx = JDBCQueryCache.class.getName();
+    private final Log _log = LogFactory.getLog(_logCtx);
     private final Map _cache = new HashMap();
     private final String _query, _queryKey;
     private long _last = -1l;
@@ -106,7 +109,7 @@ public class JDBCQueryCache {
                 String key = null;
                 for (Iterator it = columns.iterator(); it.hasNext(); i++) {
                     String column = (String) it.next();
-                    if (column.equals(_queryKey)) {
+                    if (column.equalsIgnoreCase(_queryKey)) {
                         key = rs.getString(i);
                     } else {
                         vals.add(new NameValuePair(column, rs.getObject(i)));
