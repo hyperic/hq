@@ -69,4 +69,8 @@ class ResourceGroupCategory {
                             String name, String description, String location) {
         groupMan.updateGroup(subject, g, name, description, location)
     }
+
+    static void remove(ResourceGroup g, AuthzSubject subject) {
+        groupMan.removeResourceGroup(subject, g)
+    }
 }
