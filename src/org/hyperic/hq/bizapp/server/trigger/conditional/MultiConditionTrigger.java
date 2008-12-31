@@ -551,8 +551,8 @@ public class MultiConditionTrigger
                 etracker.addReference(getId(), event, getTimeRange());
             }          
         } catch (SQLException e) {
-            throw new ActionExecuteException(
-                    "Failed to update event references for trigger id="+getId(), e);
+            log.error("Failed to update event references for trigger id=" +
+                      getId(), e);
         }
         
         return new ArrayList(fulfilled.values());

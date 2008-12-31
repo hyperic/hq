@@ -489,8 +489,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         // we update our internal cache, kick off the events, etc.
         analyzeMetricData(data);
         
-        List cachedData = updateMetricDataCache(data);
-        
+        Collection cachedData = updateMetricDataCache(data);
         sendDataToEventHandlers(cachedData);        
     }  
     
@@ -505,12 +504,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
     
-    private List updateMetricDataCache(List data) {
+    private Collection updateMetricDataCache(List data) {
         MetricDataCache cache = MetricDataCache.getInstance();
         return cache.bulkAdd(data);
     }
     
-    private void sendDataToEventHandlers(List data) {
+    private void sendDataToEventHandlers(Collection data) {
         ArrayList events  = new ArrayList();
         List zevents = new ArrayList();
         
