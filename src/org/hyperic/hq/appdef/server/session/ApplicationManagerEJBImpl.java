@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ResourceBundle;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -65,7 +64,6 @@ import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -833,4 +831,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     public void ejbRemove() { }
     public void ejbActivate() { }
     public void ejbPassivate() { }
+
+    protected ApplicationTypeDAO getApplicationTypeDAO() {
+        return new ApplicationTypeDAO(DAOFactory.getDAOFactory());
+    }
 }

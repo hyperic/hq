@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -31,7 +31,6 @@ import java.util.Collection;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.ResourceValue;
 
 public class Resource extends AuthzNamedBean implements Comparable {
     public static final Log _log = LogFactory.getLog(Resource.class);
@@ -47,8 +46,6 @@ public class Resource extends AuthzNamedBean implements Comparable {
     private Collection   _toEdges = new ArrayList();
     private Collection   _groupBag = new ArrayList();
     
-    private ResourceValue resourceValue = new ResourceValue();
-
     protected Resource() {
     }
 
@@ -152,21 +149,6 @@ public class Resource extends AuthzNamedBean implements Comparable {
     
     protected Collection getToEdges() {
         return _toEdges;
-    }
-
-    public Object getValueObject() {
-        resourceValue.setId(getId());
-        resourceValue.setAuthzSubjectValue(getOwner());
-        resourceValue.setInstanceId(getInstanceId());
-        resourceValue.setName(getName());
-        resourceValue.setSortName(getSortName());
-        resourceValue.setSystem(isSystem());
-        
-        // Resource type of a resource should never change
-        if (resourceValue.getResourceType() == null)
-            resourceValue.setResourceType(getResourceType());
-        
-        return resourceValue;
     }
 
     public boolean isOwner(Integer possibleOwner)

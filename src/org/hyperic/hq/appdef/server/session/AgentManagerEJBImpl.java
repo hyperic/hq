@@ -40,6 +40,7 @@ import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -1190,4 +1191,12 @@ public class AgentManagerEJBImpl
     public void ejbActivate() {}
     public void ejbPassivate() {}
     public void setSessionContext(SessionContext ctx) {}
+
+    protected AgentTypeDAO getAgentTypeDAO() {
+        return new AgentTypeDAO(DAOFactory.getDAOFactory());
+    }
+
+    protected AgentReportStatusDAO getAgentReportStatusDAO() {
+        return new AgentReportStatusDAO(DAOFactory.getDAOFactory());
+    }
 }

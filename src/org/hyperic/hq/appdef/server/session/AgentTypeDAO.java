@@ -23,10 +23,11 @@
  * USA.
  */
 
-package org.hyperic.hq.dao;
+package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AgentType;
+import org.hyperic.hq.dao.HibernateDAO;
 
 public class AgentTypeDAO extends HibernateDAO
 {

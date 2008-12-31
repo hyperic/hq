@@ -192,10 +192,6 @@ public class Role extends AuthzNamedBean {
         setSystem(val.getSystem());
     }
 
-    public Object getValueObject() {
-        return getRoleValue();
-    }
-
     public boolean equals(Object obj) {
         return (obj instanceof Role) && super.equals(obj);
     }

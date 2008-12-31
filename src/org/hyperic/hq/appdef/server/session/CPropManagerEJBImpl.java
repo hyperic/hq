@@ -56,8 +56,10 @@ import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.CPropManagerUtil;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.autoinventory.server.session.AgentReportStatusDAO;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.dao.AIServerDAO;
 import org.hyperic.hq.appdef.server.session.CpropDAO;
 import org.hyperic.hq.appdef.server.session.CpropKeyDAO;
 import org.hyperic.hq.events.EventConstants;
@@ -599,6 +601,18 @@ public class CPropManagerEJBImpl
     public void ejbActivate() {}
     public void ejbPassivate() {}
     public void setSessionContext(SessionContext ctx) {}
+
+    protected AgentTypeDAO getAgentTypeDAO() {
+        return new AgentTypeDAO(DAOFactory.getDAOFactory());
+    }
+
+    protected AgentReportStatusDAO getAgentReportStatusDAO() {
+        return new AgentReportStatusDAO(DAOFactory.getDAOFactory());
+    }
+
+    protected AIServerDAO getAIServerDAO() {
+        return new AIServerDAO(DAOFactory.getDAOFactory());
+    }
 
     /**
      * Split a string into a list of same sized chunks, and 

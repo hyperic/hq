@@ -202,10 +202,6 @@ public class AuthzSubject extends AuthzNamedBean {
         _prefs = c;
     }
     
-    public Object getValueObject() {
-        return getAuthzSubjectValue();
-    }
-
     /**
      * @deprecated use (this) AuthzSubject instead
      */

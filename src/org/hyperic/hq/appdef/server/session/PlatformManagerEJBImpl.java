@@ -98,8 +98,6 @@ import org.hyperic.sigar.NetFlags;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
-import org.hyperic.hq.dao.PlatformTypeDAO;
-import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.dao.DAOFactory;
 import org.hibernate.NonUniqueObjectException;

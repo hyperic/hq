@@ -47,8 +47,8 @@ public class PagerProcessor_control_schedule implements PagerProcessor {
         if (o == null) return null;
         try {
             if (o instanceof ControlSchedule) {
-                ControlScheduleDAO cdao = DAOFactory.getDAOFactory()
-                    .getControlScheduleDAO();
+                ControlScheduleDAO cdao =
+                    new ControlScheduleDAO(DAOFactory.getDAOFactory());
                 SchedulerLocal scheduler = 
                     SchedulerUtil.getLocalHome().create();
                 ControlSchedule s = (ControlSchedule)o;

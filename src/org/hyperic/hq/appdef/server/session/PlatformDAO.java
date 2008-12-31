@@ -48,7 +48,6 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.dao.AgentDAO;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class PlatformDAO extends HibernateDAO {

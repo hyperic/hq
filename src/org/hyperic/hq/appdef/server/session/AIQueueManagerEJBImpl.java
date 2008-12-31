@@ -68,7 +68,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
@@ -799,5 +798,9 @@ public class AIQueueManagerEJBImpl
     protected AIIpDAO getAIIpDAO()
     {
         return DAOFactory.getDAOFactory().getAIIpDAO();
+    }
+
+    protected AIServerDAO getAIServerDAO() {
+        return new AIServerDAO(DAOFactory.getDAOFactory());
     }
 }

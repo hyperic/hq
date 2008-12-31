@@ -313,7 +313,8 @@ public class ControlActionGroupJob extends ControlJob {
     }
 
     private void refresh(ControlHistory hist) {
-        ControlHistoryDAO dao = DAOFactory.getDAOFactory().getControlHistoryDAO();
+        ControlHistoryDAO dao =
+            new ControlHistoryDAO(DAOFactory.getDAOFactory());
         dao.getSession().refresh(hist);
     }
 }

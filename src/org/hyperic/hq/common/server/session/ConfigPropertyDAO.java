@@ -1,9 +1,10 @@
-package org.hyperic.hq.dao;
+package org.hyperic.hq.common.server.session;
 
 import java.util.Collection;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.ConfigProperty;
+import org.hyperic.hq.dao.HibernateDAO;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -13,7 +14,7 @@ import org.hyperic.hq.common.ConfigProperty;
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify

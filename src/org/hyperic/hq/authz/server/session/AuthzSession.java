@@ -25,10 +25,7 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import java.lang.reflect.Array;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import javax.ejb.SessionContext;
@@ -60,15 +57,15 @@ public abstract class AuthzSession {
     private static final Integer RELATION_CONTAINMENT_ID = new Integer(1);
 
     protected ResourceTypeDAO getResourceTypeDAO() {
-        return DAOFactory.getDAOFactory().getResourceTypeDAO();
+        return new ResourceTypeDAO(DAOFactory.getDAOFactory());
     }
 
     protected ResourceDAO getResourceDAO() {
-        return DAOFactory.getDAOFactory().getResourceDAO();
+        return new ResourceDAO(DAOFactory.getDAOFactory());
     }
 
     protected ResourceGroupDAO getResourceGroupDAO() {
-        return DAOFactory.getDAOFactory().getResourceGroupDAO();
+        return new ResourceGroupDAO(DAOFactory.getDAOFactory());
     }
 
     protected AuthzSubjectDAO getSubjectDAO() {
@@ -145,23 +142,6 @@ public abstract class AuthzSession {
         }
                 
         return ret;
-    }
-    
-    protected Object[] fromPojos(Collection pojos, Class c) {
-        Object[] values = (Object[]) Array.newInstance(c, pojos.size());
-        
-        int i = 0;
-        for (Iterator it = pojos.iterator(); it.hasNext(); i++) {
-            AuthzNamedBean ent = (AuthzNamedBean) it.next();
-            values[i] = ent.getValueObject();
-            
-            // Verify that it's the expected class
-            if (!c.isInstance(values[i]))
-                log.error("Invalid type: " + values[i].getClass() +
-                          " when expecting " + c);
-        }
-        
-        return values;
     }
     
     protected AuthzSubject lookupSubject(Integer id) {

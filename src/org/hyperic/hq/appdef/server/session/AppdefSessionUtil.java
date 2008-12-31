@@ -38,15 +38,8 @@ import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
-import org.hyperic.hq.autoinventory.server.session.AgentReportStatusDAO;
-import org.hyperic.hq.dao.AIServerDAO;
-import org.hyperic.hq.dao.AgentDAO;
-import org.hyperic.hq.dao.AgentTypeDAO;
-import org.hyperic.hq.dao.ApplicationTypeDAO;
-import org.hyperic.hq.dao.PlatformTypeDAO;
 import org.hyperic.hq.product.TypeInfo;
 
 
@@ -100,20 +93,8 @@ public abstract class AppdefSessionUtil {
         return aiqManagerLocal;
     }
 
-    protected AgentReportStatusDAO getAgentReportStatusDAO() {
-        return new AgentReportStatusDAO(DAOFactory.getDAOFactory());
-    }
-
     protected AgentDAO getAgentDAO() {
         return new AgentDAO(DAOFactory.getDAOFactory());
-    }
-
-    protected ResourceGroupDAO getResourceGroupDAO() {
-        return new ResourceGroupDAO(DAOFactory.getDAOFactory());
-    }
-
-    protected AgentTypeDAO getAgentTypeDAO() {
-        return new AgentTypeDAO(DAOFactory.getDAOFactory());
     }
 
     protected ConfigResponseDAO getConfigResponseDAO() {
@@ -144,16 +125,8 @@ public abstract class AppdefSessionUtil {
         return new ServiceDAO(DAOFactory.getDAOFactory());
     }
 
-    protected ApplicationTypeDAO getApplicationTypeDAO() {
-        return new ApplicationTypeDAO(DAOFactory.getDAOFactory());
-    }
-
     protected ApplicationDAO getApplicationDAO() {
         return new ApplicationDAO(DAOFactory.getDAOFactory());
-    }
-
-    protected AIServerDAO getAIServerDAO() {
-        return DAOFactory.getDAOFactory().getAIServerDAO();
     }
 
     protected AppdefResourceType findResourceType(int appdefType,

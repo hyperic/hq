@@ -1,6 +1,7 @@
-package org.hyperic.hq.dao;
+package org.hyperic.hq.product.server.session;
 
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.Plugin;
 
 /*

@@ -79,7 +79,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         Category cat;
         if (info.getCategory() != null) {
             if (!mt.getCategory().getName().equals(info.getCategory())) {
-                CategoryDAO catDAO = DAOFactory.getDAOFactory().getCategoryDAO();
+                CategoryDAO catDAO = new CategoryDAO(DAOFactory.getDAOFactory());
                 cat = catDAO.findByName(info.getCategory());
                 if (cat == null) {
                     cat = catDAO.create(info.getCategory());

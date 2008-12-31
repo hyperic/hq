@@ -14,7 +14,6 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.dao.AppSvcDependencyDAO;
 import org.hyperic.hq.dao.HibernateDAO;
 
 /*

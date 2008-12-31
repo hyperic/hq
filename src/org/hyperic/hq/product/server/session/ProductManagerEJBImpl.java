@@ -59,7 +59,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
-import org.hyperic.hq.dao.PluginDAO;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
@@ -415,6 +414,6 @@ public class ProductManagerEJBImpl
     }
 
     private PluginDAO getPluginDAO(){
-        return DAOFactory.getDAOFactory().getPluginDAO();
+        return new PluginDAO(DAOFactory.getDAOFactory());
     }
 }

@@ -1,10 +1,9 @@
-package org.hyperic.hq.dao;
+package org.hyperic.hq.appdef.server.session;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.dao.HibernateDAO;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
