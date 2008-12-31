@@ -42,7 +42,6 @@ import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.product.PlatformTypeInfo;
@@ -61,7 +60,6 @@ import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collection;
 import java.util.Iterator;
 
