@@ -22,7 +22,7 @@ rem and invoke the bundle hq-agent.bat script
 for /F "delims== tokens=1*" %%i in (%ROLLBACK_PROPS%) do (
   if "%%i"=="%AGENT_BUNDLE_PROP%" (
     if not EXIST bundles\%%j\bin\hq-agent.bat (
-      echo Failed to find bundle script %_AGENTHOME%bundles\%%j\bin\hq-agent.bat.
+      echo Failed to find bundle script "%_AGENTHOME%bundles\%%j\bin\hq-agent.bat".
     ) else (
       call bundles\%%j\bin\hq-agent.bat %*
     )
