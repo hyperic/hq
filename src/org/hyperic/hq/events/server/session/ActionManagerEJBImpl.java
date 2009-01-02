@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -134,8 +134,10 @@ public class ActionManagerEJBImpl implements SessionBean {
             }
             return null;
         }
-            
-        action.setActionValue(val);
+
+        // Set action properties from value object
+        action.setClassName(val.getClassname());
+        action.setConfig(val.getConfig());
         setParentAction(action, val.getParentId());
         long mtime = System.currentTimeMillis();
         
@@ -155,7 +157,8 @@ public class ActionManagerEJBImpl implements SessionBean {
         val.setParentId(val.getId());
         for (Iterator i = children.iterator(); i.hasNext(); ) {
             Action act = (Action) i.next();
-            act.setActionValue(val);
+            act.setClassName(val.getClassname());
+            act.setConfig(val.getConfig());
             setParentAction(act, val.getParentId());
             
             // HQ 942: We have seen orphaned actions on upgrade from 
