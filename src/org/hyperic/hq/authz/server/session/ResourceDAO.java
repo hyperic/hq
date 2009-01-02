@@ -247,8 +247,8 @@ public class ResourceDAO
         String sql =
             "select r from Resource r join r.resourceType rt " +
             "where r.system = :system and exists " +
-                 "(select rg from ResourceGroup rg " +
-                 " join rg.memberBag g " +
+                 "(select rg from GroupMember g " +
+                 " join g.group rg " +
                  " join g.resource rs " +
                  "where ((rg.resource = r and rg.groupType = 15) or " +
                         "(rt.name = :resSvcType and r = rs)) " +
