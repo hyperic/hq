@@ -258,7 +258,7 @@ public class ResourceGroupDAO extends HibernateDAO
      */
     List getMembers(List groupIds) {
         return createQuery("select g.resource from GroupMember g " +
-                           "where g.group in (:groups)")
+                           "where g.group.id in (:groups)")
             .setParameterList("group", groupIds, new IntegerType())
             .list();
     }
