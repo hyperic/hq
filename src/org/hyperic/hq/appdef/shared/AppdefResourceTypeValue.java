@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -26,8 +26,6 @@
 package org.hyperic.hq.appdef.shared;
 
 import java.text.DateFormat;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 
 /**
  * Abstract base class for firt class appdef resource types.  This was 
@@ -41,8 +39,8 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
  *
  */
 public abstract class AppdefResourceTypeValue {
-    DateFormat dateFmt = DateFormat.getDateTimeInstance(DateFormat.SHORT,
-                                                        DateFormat.MEDIUM);
+    final DateFormat dateFmt = DateFormat.getDateTimeInstance(DateFormat.SHORT,
+                                                              DateFormat.MEDIUM);
     // they all have id's
     public abstract Integer getId();
     public abstract void setId(Integer id);
@@ -68,7 +66,8 @@ public abstract class AppdefResourceTypeValue {
     public String getCreateTime()
     {
         Long ctime = getCTime();
-        if ( ctime == null ) ctime = new Long(System.currentTimeMillis());
+        if (ctime == null)
+            ctime = new Long(System.currentTimeMillis());
         return dateFmt.format(ctime);
     }
     
@@ -79,7 +78,8 @@ public abstract class AppdefResourceTypeValue {
     public String getModifiedTime()
     {
         Long mtime = getMTime();
-        if ( mtime == null ) mtime = new Long(System.currentTimeMillis());
+        if (mtime == null)
+            mtime = new Long(System.currentTimeMillis());
         return dateFmt.format(mtime);
     }
     
