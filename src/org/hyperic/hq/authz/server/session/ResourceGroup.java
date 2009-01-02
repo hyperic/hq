@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -56,7 +56,6 @@ public class ResourceGroup extends PersistedObject
     private String _modifiedBy;
     private Resource _resource;
     private Resource _resourcePrototype;
-    private Collection _memberBag = new ArrayList();
     private Collection _roles = new HashSet();
     private List _criteria = new ArrayList();
 
@@ -274,14 +273,6 @@ public class ResourceGroup extends PersistedObject
         _modifiedBy = val;
     }
 
-    protected Collection getMemberBag() {
-        return _memberBag;
-    }
-    
-    void setMemberBag(Collection b) {
-        _memberBag = b;
-    }
-    
     void setResourcePrototype(Resource r) {
         _resourcePrototype = r;
     }

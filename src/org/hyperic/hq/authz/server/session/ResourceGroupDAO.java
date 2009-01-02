@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -339,34 +339,6 @@ public class ResourceGroupDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findContaining_orderName(Integer instanceId,
-                                               Integer typeId,
-                                               boolean asc)
-    {
-
-        String sql="select distinct rg from ResourceGroup rg " +
-                   "join rg.memberBag g " +
-                   "join g.resource r " +
-                   "where r.instanceId = ? and  r.resourceType.id = ? " +
-                   "order by rg.resource.sortName " +
-                   (asc ? "asc" : "desc");
-        return getSession().createQuery(sql)
-            .setInteger(0, instanceId.intValue())
-            .setInteger(1, typeId.intValue())
-            .list();
-    }
-
-    public Collection findContaining(Resource r) {
-        String sql = "select distinct rg from ResourceGroup rg " +
-                   "join rg.memberBag g " +
-                   "join g.resource r " +
-                   "where r.instanceId = ? and  r.resourceType.id = ?";
-        return getSession().createQuery(sql)
-            .setInteger(0, r.getInstanceId().intValue())
-            .setInteger(1, r.getResourceType().getId().intValue())
-            .list();
-    }
-
     public Collection findCompatible(Resource proto) {
         String sql =
             "from ResourceGroup g " +
@@ -390,9 +362,8 @@ public class ResourceGroupDAO extends HibernateDAO
      */
     public Long getMaxCollectionInterval(ResourceGroup g, Integer templateId) {
         String sql =
-            "select max(m.interval) from Measurement m, " +
-            "ResourceGroup rg " +
-            "join rg.memberBag g " +
+            "select max(m.interval) from Measurement m, GroupMember g " +
+            "join g.group rg " +
             "join g.resource r " +
             "where m.instanceId = r.instanceId and "+
             "rg = ? and m.template.id = ?";
@@ -416,9 +387,8 @@ public class ResourceGroupDAO extends HibernateDAO
      */
     public List getMetricsCollecting(ResourceGroup g, Integer templateId) {
         String sql =
-            "select m from Measurement m, " +
-            "ResourceGroup rg " +
-            "join rg.memberBag g " +
+            "select m from Measurement m, GroupMember g " +
+            "join g.group rg " +
             "join g.resource r " +
             "where m.instanceId = r.instanceId and "+
             "rg = ? and m.template.id = ? and m.enabled = true";
