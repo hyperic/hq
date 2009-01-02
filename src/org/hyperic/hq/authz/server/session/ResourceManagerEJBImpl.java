@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -38,10 +38,8 @@ import javax.ejb.SessionBean;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
@@ -80,9 +78,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 {
     private Pager resourceTypePager = null;
     
-    private final String RES_TYPE_PAGER =
-        PagerProcessor_resourceType.class.getName();
-
     private ResourceEdgeDAO getResourceEdgeDAO() {
         return new ResourceEdgeDAO(DAOFactory.getDAOFactory());
     }
@@ -194,8 +189,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public Resource findResourceByInstanceId(ResourceType type,
                                              Integer instanceId) {
-        Resource resource = getResourceDAO().findByInstanceId(type.getId(),
-                                                              instanceId);
+        Resource resource = findResourcePojoByInstanceId(type, instanceId);
         
         if (resource == null) {
             throw new RuntimeException("Unable to find resourceType=" + 
@@ -211,7 +205,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     public Resource findResourcePojoByInstanceId(ResourceType type,
                                                  Integer instanceId)
     {
-        return getResourceDAO().findByInstanceId(type.getId(), instanceId);
+        return findResourcePojoByInstanceId(type.getId(), instanceId);
     }
 
     /**
@@ -564,7 +558,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     
     public void ejbCreate() throws CreateException {
         try {
-            resourceTypePager = Pager.getPager(RES_TYPE_PAGER);
+            resourceTypePager = Pager.getDefaultPager();
         } catch (Exception e) {
             throw new CreateException("Could not create value pager: " + e);
         }
