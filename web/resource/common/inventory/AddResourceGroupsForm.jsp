@@ -212,7 +212,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <td width="50%" valign="top">
 
 <tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="resource.common.inventory.groups.GroupsTab"/>
+  <tiles:put name="tabKey" value="resource.common.inventory.groups.NewGroupsTab"/>
   <tiles:put name="useFromSideBar" value="true"/>
 </tiles:insert>
 
