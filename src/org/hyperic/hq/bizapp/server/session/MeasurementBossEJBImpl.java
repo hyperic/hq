@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -109,9 +109,7 @@ import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.collection.IntHashMap;
@@ -659,8 +657,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     Measurement dm = findAvailabilityMetric(subj, id);
                     
                     if (dm != null) {
-                        metrics = new ArrayList(1);
-                        metrics.add(dm);
+                        metrics = Collections.singletonList(dm);
                     }
                 }
             }
@@ -1325,7 +1322,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // Get the template
         getTemplateManager().getTemplate(tid);
         
-        List entities;
+        final List entities;
 
         if (aid.isGroup()) {
             List memberIds =
@@ -1361,9 +1358,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                         aid.getType());
             }
         } else {
-            entities = new ArrayList();
             AppdefEntityValue entVal = new AppdefEntityValue(aid, subject);
-            entities.add(entVal.getResourceValue());
+            entities = Collections.singletonList(entVal.getResourceValue());
         }
         
         AppdefEntityID[] aeids = new AppdefEntityID[entities.size()];
@@ -1442,8 +1438,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
     
         // Just one metric
-        List mtids = new ArrayList();
-        mtids.add(tid);
+        final List mtids = Collections.singletonList(tid);
         
         // Look up the metric summaries of all associated resources
         Map results = getResourceMetrics(subject, resources, mtids, begin, end,
@@ -1503,8 +1498,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         AuthzSubject subject = manager.getSubject(sessionId);
         
         // Just one metric
-        List mtids = new ArrayList();
-        mtids.add(tid);
+        final List mtids = Collections.singletonList(tid);
         
         // Look up the metric summaries of all associated resources
         Map results = getResourceMetrics(subject, resources, mtids, begin, end,
@@ -1673,7 +1667,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                 AppdefEntityTypeID ctype)
         throws AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
-        List resources;
+        final List resources;
         if (ctype == null) {
             if (aeid.isGroup()) {
                 resources =
@@ -1682,8 +1676,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
             else {
                 // Just one
-                resources = new ArrayList();
-                resources.add(aeid);
+                resources = Collections.singletonList(aeid);
             }
         }
         else {
