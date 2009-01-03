@@ -36,7 +36,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -252,17 +251,6 @@ public class ResourceGroupDAO extends HibernateDAO
             .list();
     }
     
-    /**
-     * @param List<Integer> resourceGroupIds
-     * @return List<Resource> {@link Resource}s
-     */
-    List getMembers(List groupIds) {
-        return createQuery("select g.resource from GroupMember g " +
-                           "where g.group.id in (:groups)")
-            .setParameterList("group", groupIds, new IntegerType())
-            .list();
-    }
-
     public ResourceGroup findById(Integer id) {
         return (ResourceGroup) super.findById(id);
     }
@@ -406,9 +394,7 @@ public class ResourceGroupDAO extends HibernateDAO
                                   PageInfo pInfo, boolean inclusive)
     {
         ResourceGroupSortField sort = (ResourceGroupSortField)pInfo.getSort();
-        String hql = "from ResourceGroup g " + 
-                     "where " +  
-                     "g.system = false and ";
+        String hql = "from ResourceGroup g where g.system = false and ";
         
         if (prototype != null) {
             hql += " (g.resourcePrototype = :proto ";
@@ -440,9 +426,9 @@ public class ResourceGroupDAO extends HibernateDAO
             inclusionStr = " not ";
         
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        hql += "g.id " + inclusionStr + " in ( " + 
-               "   select m.group.id from GroupMember m " + 
-               "   where m.resource = :resource " + 
+        hql += inclusionStr + " exists ( " + 
+               " select m.id from GroupMember m " + 
+               " where m.resource = :resource and m.group = g " + 
                ") ";
         
         String pmql = pm.getOperableGroupsHQL("g",

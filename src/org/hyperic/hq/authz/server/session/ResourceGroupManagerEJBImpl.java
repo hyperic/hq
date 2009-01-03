@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -29,11 +29,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -427,28 +425,6 @@ public class ResourceGroupManagerEJBImpl
     }
 
     /**
-     * @return Map<Integer, Resource> Integer is the groupId and Resource is the
-     * associated Resource to the ResourceGroupId
-     * @ejb:interface-method
-     */
-    public Map getMembers(List groupIds) {
-        Map rtn = new HashMap();
-        List groups = getResourceGroupDAO().getMembers(groupIds);
-        List tmp;
-        for (Iterator i=groups.iterator(); i.hasNext(); ) {
-            GroupMember mem = (GroupMember)i.next();
-            Resource res = mem.getResource();
-            Integer gId = mem.getGroup().getId();
-            if (null == (tmp = (List)rtn.get(gId))) {
-                tmp = new ArrayList();
-                rtn.put(gId, tmp);
-            }
-            tmp.add(res);
-        }
-        return rtn;
-    }
-    
-    /**
      * Get all the groups a resource belongs to
      * 
      * @return {@link ResourceGroup}s
@@ -606,13 +582,13 @@ public class ResourceGroupManagerEJBImpl
     }
 
     /**
-     * Get a list of {@link ResourceGroup}s which are compatable with
+     * Get a list of {@link ResourceGroup}s which are compatible with
      * the specified prototype.
      * 
      * Do not return any groups contained within 'excludeGroups' (a list of
      * {@link ResourceGroup}s
      * 
-     * @param prototype  If specified, the resulting groups must be compatable
+     * @param prototype  If specified, the resulting groups must be compatible
      *                   with the prototype.  
      * 
      * @param pInfo Pageinfo with a sort field of type 
