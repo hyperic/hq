@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -24,11 +24,6 @@
  */
 
 package org.hyperic.hq.measurement;
-
-import org.hyperic.util.math.Average;
-import org.hyperic.util.math.Sum;
-
-import java.util.HashMap;
 
 /**
  * Constant measurement values shared by other subsystems
