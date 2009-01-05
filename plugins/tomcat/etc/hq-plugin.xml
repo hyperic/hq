@@ -129,7 +129,8 @@
   </metrics>
 
   <server name="Apache Tomcat"
-          version="5.5">
+          version="5.5"
+          platforms="Unix,Win32">
 
     <property name="VERSION_FILE"
               value="server/lib/catalina-storeconfig.jar"/>
