@@ -72,7 +72,7 @@ import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 
 public class EmailFilter {
-    private static Log _log = LogFactory.getLog(EmailFilter.class);
+    private Log _log = LogFactory.getLog(EmailFilter.class);
 
     public  static final String     JOB_GROUP      = "EmailFilterGroup";
     private static final IntHashMap _alertBuffer   = new IntHashMap();
@@ -211,7 +211,8 @@ public class EmailFilter {
     }
     
     private static InternetAddress getFromAddress() {
-        ServerConfigManagerLocal configMan =
+        final Log log = LogFactory.getLog(EmailFilter.class);
+        final ServerConfigManagerLocal configMan =
             ServerConfigManagerEJBImpl.getOne();
         try {
             Properties props = configMan.getConfig();
@@ -220,9 +221,9 @@ public class EmailFilter {
                 return new InternetAddress(from);
             }
         } catch (ConfigPropertyException e) {
-            _log.error("ConfigPropertyException fetch FROM address", e);
+            log.error("ConfigPropertyException fetch FROM address", e);
         } catch (AddressException e) {
-            _log.error("Bad FROM address", e);
+            log.error("Bad FROM address", e);
         }
         return null;
     }
@@ -231,13 +232,14 @@ public class EmailFilter {
                                  String[] body, String[] htmlBody,
                                  Integer priority)
     {
-        Session session;
+        final Log log = LogFactory.getLog(EmailFilter.class);
+        final Session session;
         try {
             session = (Session) 
-            PortableRemoteObject.narrow(
+                PortableRemoteObject.narrow(
                                new InitialContext().lookup("java:/SpiderMail"),
                                Session.class);
-        } catch(NamingException e) {
+        } catch (NamingException e) {
             throw new SystemException(e);
         }
 
@@ -274,14 +276,14 @@ public class EmailFilter {
                 
                 if (addresses[i].useHtml()) {
                     m.setContent(htmlBody[i], "text/html");
-                    if (_log.isDebugEnabled()) {
-                        _log.debug("Sending HTML Alert notification: " +
+                    if (log.isDebugEnabled()) {
+                        log.debug("Sending HTML Alert notification: " +
                                    subject + " to " +
                                    addresses[i].getAddress().getAddress());
                     }
                 } else {
-                    if (_log.isDebugEnabled()) {
-                        _log.debug("Sending Alert notification: " + subject +
+                    if (log.isDebugEnabled()) {
+                        log.debug("Sending Alert notification: " + subject +
                                    " to " +
                                    addresses[i].getAddress().getAddress());
                     }
@@ -291,8 +293,8 @@ public class EmailFilter {
                 Transport.send(m);
             }
         } catch (MessagingException e) {
-            _log.error("Error sending email: " + subject);
-            _log.debug("Messaging Error sending email", e);
+            log.error("Error sending email: " + subject);
+            log.debug("Messaging Error sending email", e);
         }
     }
     
