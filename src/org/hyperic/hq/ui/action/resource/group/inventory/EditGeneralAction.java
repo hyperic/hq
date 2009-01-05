@@ -26,14 +26,22 @@
 package org.hyperic.hq.ui.action.resource.group.inventory;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForm;
+import org.apache.struts.action.ActionForward;
+import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.ui.Constants;
@@ -42,12 +50,6 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionForward;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * Action which saves the general properties for a group
@@ -96,6 +98,27 @@ public class EditGeneralAction extends BaseAction {
 
             ResourceGroup group = boss.findGroupById(sessionId.intValue(), 
                                                      groupId);
+            
+            // See if this is a private group
+            boolean isPrivate = true;
+            for (Iterator it = group.getRoles().iterator(); it.hasNext(); ) {
+                Role role = (Role) it.next();
+                isPrivate = role.getId() == AuthzConstants.rootResourceGroupId;
+                if (!isPrivate)
+                    break;
+            }
+            
+            if (isPrivate) {
+                // Make sure the username appears in the name
+                final String owner = group.getResource().getOwner().getName();
+                if (rForm.getName().indexOf(owner) < 0) {
+                    final String privateName =
+                        RequestUtils.message(request,
+                                             "resource.group.name.private",
+                                             new Object[] { owner });
+                    rForm.setName(rForm.getName() + " " + privateName);
+                }
+            }
             
             boss.updateGroup(sessionId.intValue(), group,
                              rForm.getName(), rForm.getDescription(),
