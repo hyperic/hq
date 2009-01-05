@@ -98,6 +98,11 @@ public class JDBCQueryCache {
     {
         Statement stmt = null;
         ResultSet rs = null;
+        if (_log.isDebugEnabled()) {
+            final String msg = "re-populating JDBCQueryCache for " + _query +
+                " with queryKey of " + _queryKey;
+            _log.debug(msg);
+        }
         try {
             _cache.clear();
             stmt = conn.createStatement();
