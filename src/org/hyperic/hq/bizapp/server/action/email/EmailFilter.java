@@ -72,7 +72,7 @@ import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
 
 public class EmailFilter {
-    private Log _log = LogFactory.getLog(EmailFilter.class);
+    private static Log _log = LogFactory.getLog(EmailFilter.class);
 
     public  static final String     JOB_GROUP      = "EmailFilterGroup";
     private static final IntHashMap _alertBuffer   = new IntHashMap();
@@ -210,7 +210,7 @@ public class EmailFilter {
         sendEmail(addresses, subject, body, htmlBody, new Integer(priority));
     }
     
-    private InternetAddress getFromAddress() {
+    private static InternetAddress getFromAddress() {
         ServerConfigManagerLocal configMan =
             ServerConfigManagerEJBImpl.getOne();
         try {
@@ -227,8 +227,9 @@ public class EmailFilter {
         return null;
     }
     
-    private void sendEmail(EmailRecipient[] addresses, String subject, 
-                           String[] body, String[] htmlBody, Integer priority)
+    public static void sendEmail(EmailRecipient[] addresses, String subject, 
+                                 String[] body, String[] htmlBody,
+                                 Integer priority)
     {
         Session session;
         try {
@@ -243,7 +244,7 @@ public class EmailFilter {
         MimeMessage m = new MimeMessage(session);
         
         try {
-            InternetAddress from = this.getFromAddress();
+            InternetAddress from = getFromAddress();
             if (from == null) {
                 m.setFrom();
             } else {
