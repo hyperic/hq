@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -244,6 +245,9 @@ public class AvailabilityDataDAO extends HibernateDAO {
      */
     Map getHistoricalAvailMap(Integer[] mids, final long after,
                               final boolean descending) {
+        if (mids.length <= 0) {
+            return Collections.EMPTY_MAP;
+        }
         final Comparator comparator = new Comparator() {
             public int compare(Object arg0, Object arg1) {
                 AvailabilityDataRLE lhs = (AvailabilityDataRLE)arg0;
