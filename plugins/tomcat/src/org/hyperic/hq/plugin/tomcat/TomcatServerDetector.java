@@ -28,11 +28,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
-import org.hyperic.hq.product.SigarMeasurementPlugin;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.hq.product.jmx.MxServerDetector;
 import org.hyperic.hq.product.jmx.MxUtil;
@@ -61,12 +58,46 @@ public class TomcatServerDetector extends MxServerDetector {
 
     private Log log = LogFactory.getLog(TomcatServerDetector.class);
 
-    private ServerResource getServerResource(String path, String win32Service)
+    private ServerResource getServerResource(String win32Service, List options)
             throws PluginException {
+
+        if (!isWin32ServiceRunning(win32Service)) {
+            log.debug(win32Service + " is not running, skipping.");
+            return null;
+        }
+        String path;
+        String[] args = (String[])options.toArray(new String[0]);
+        String catalinaBase = getCatalinaBase(args);
+        if (catalinaBase == null) {
+            // no catalina base found
+            log.error("No Catalina Base found for service " +
+                      win32Service + ". Skipping..");
+            return null;
+        }
+        else {
+            File catalinaBaseDir = new File(catalinaBase);
+            if (catalinaBaseDir.exists()) {
+                log.debug("Successfully detected Catalina Base for service: " +
+                          catalinaBase + " options=" + options);
+                path = catalinaBaseDir.getAbsolutePath();
+            }
+            else {
+                log.error("Resolved catalina base " + catalinaBase +
+                          " is not a valid directory. Skipping Tomcat service " +
+                          win32Service);
+                return null;
+            }
+        }
+
         ServerResource server = createServerResource(path);
         // Set PTQL query
         ConfigResponse config = new ConfigResponse();
         config.setValue(MxUtil.PROP_JMX_URL, TOMCAT_DEFAULT_URL);
+        for (int i=0; i<args.length; i++) {
+            if (configureMxURL(config, args[i])) {
+                break;
+            }
+        }
         config.setValue(Win32ControlPlugin.PROP_SERVICENAME, win32Service);
         config.setValue(PTQL_CONFIG_OPTION, PTQL_QUERY_WIN32);
         server.setName(server.getName() + " " + win32Service);
@@ -126,31 +157,7 @@ public class TomcatServerDetector extends MxServerDetector {
                     key.close();
                 }
             }
-
-            String catalinaBase = getCatalinaBase((String[]) options
-                    .toArray(new String[0]));
-            if (catalinaBase != null) {
-                File catalinaBaseDir = new File(catalinaBase);
-                if (catalinaBaseDir.exists()) {
-                    log
-                            .debug("Successfully detected Catalina Base for service: "
-                                    + catalinaBase);
-                    serverMap.put(services[i], catalinaBaseDir
-                            .getAbsolutePath());
-                }
-                else {
-                    log
-                            .error("Resolved catalina base "
-                                    + catalinaBase
-                                    + " is not a valid directory. Skipping Tomcat service "
-                                    + services[i]);
-                }
-            }
-            // no catalina base found
-            else {
-                log.error("No Catalina Base found for service " + services[i]
-                        + ". Skipping..");
-            }
+            serverMap.put(services[i], options);
         }
         return serverMap;
     }
@@ -164,12 +171,15 @@ public class TomcatServerDetector extends MxServerDetector {
 
         // if we are on windows, take a look at the registry for autodiscovery
         if (isWin32()) {
-            Map registryPaths = getServerRegistryMap();
-            // convert paths to server value types
-            for (Iterator it = registryPaths.keySet().iterator(); it.hasNext();) {
+            Map registryMap = getServerRegistryMap();
+            // convert registry options to server value types
+            for (Iterator it = registryMap.keySet().iterator(); it.hasNext();) {
                 String serviceName = (String) it.next();
-                String dir = (String) registryPaths.get(serviceName);
-                servers.add(getServerResource(dir, serviceName));
+                List options = (List) registryMap.get(serviceName);
+                ServerResource server = getServerResource(serviceName, options);
+                if (server != null) {
+                    servers.add(server);
+                }
             }
         }
         return servers;
