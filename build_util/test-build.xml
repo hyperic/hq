@@ -48,12 +48,12 @@
                <include name="**/*_test.java"/>
 
                <!-- XXX exclude in-container tests in JBoss 4.2.3 -->
-               <include name="**/AuthzSubjectManager_test.java"/>
-               <include name="**/AvailabilityManager_test.java"/>
-               <include name="**/ResourceGroupManager_test.java"/>
-               <include name="**/DataManager_test.java"/>
-               <include name="**/CritterTranslator_test.java"/>
-               <include name="**/ProblemMetricManager_test.java"/>
+               <exclude name="**/AuthzSubjectManager_test.java"/>
+               <exclude name="**/AvailabilityManager_test.java"/>
+               <exclude name="**/ResourceGroupManager_test.java"/>
+               <exclude name="**/DataManager_test.java"/>
+               <exclude name="**/CritterTranslator_test.java"/>
+               <exclude name="**/ProblemMetricManager_test.java"/>
 
                <!-- Need to figure out why this test is failing -->
                <exclude name="**/SignIn_test.java"/>
