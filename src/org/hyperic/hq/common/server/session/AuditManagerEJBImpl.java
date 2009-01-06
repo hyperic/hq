@@ -82,6 +82,11 @@ public class AuditManagerEJBImpl implements SessionBean {
     
     private void saveRecursively(Audit a) {
         _DAO.save(a);
+        
+        if (_log.isDebugEnabled()) {
+            _log.debug("Audit: " + a);
+        }
+        
         for (Iterator i=a.getChildren().iterator(); i.hasNext(); ) {
             Audit child = (Audit)i.next();
             
