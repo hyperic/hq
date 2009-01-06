@@ -76,6 +76,10 @@ public class JDBCQueryCache {
         _cacheTimeout = cacheTimeout;
     }
 
+    /**
+     * @return Object representation of the row key/column value or null if it 
+     * does not exist
+     */
     public Object get(Connection conn, String key, String column)
         throws SQLException, JDBCQueryCacheException {
         long now = System.currentTimeMillis();
@@ -83,6 +87,9 @@ public class JDBCQueryCache {
             repopulateCache(conn);
         }
         List list = (List) _cache.get(key);
+        if (list == null) {
+            return null;
+        }
         for (Iterator it = list.iterator(); it.hasNext();) {
             NameValuePair pair = (NameValuePair) it.next();
             if (pair.getName().equals(column)) {
