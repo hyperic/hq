@@ -40,7 +40,9 @@ goto :eof
 if not EXIST "%HQ_JAVA_HOME%" (
   echo HQ_JAVA_HOME must be set to a valid directory
   goto :eof
-) 
+) else (
+  set HQ_JAVA_HOME="%HQ_JAVA_HOME%"
+)
 
 :gotjava
 rem Decide on the wrapper binary.
