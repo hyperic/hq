@@ -21,7 +21,7 @@
   <!-- ==================== Defaults ==================== -->
   <property name="jboss.home" location="${ENV.JBOSS_HOME}" />
   <property name="j2ee.jar" location="${jboss.home}/client/jboss-j2ee.jar" />
-  <property name="jbossweb.home" value="jbossweb-tomcat55.sar"/>
+  <property name="jbossweb.home" value="jboss-web.deployer"/>
   <property name="tomcat.home" 
   	location="${jboss.home}/server/default/deploy/${jbossweb.home}" />
 
