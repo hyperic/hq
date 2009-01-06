@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2009], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -258,8 +258,6 @@ public class Service extends AppdefResource
         setLocation( valueHolder.getLocation() );
         setParentId( valueHolder.getParentId() );
         setName( valueHolder.getName() );
-        setModifiedTime( valueHolder.getMTime() );
-        setCreationTime( valueHolder.getCTime() );
     }
 
     public boolean equals(Object obj) {

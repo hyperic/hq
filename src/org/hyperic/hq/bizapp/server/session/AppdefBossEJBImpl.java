@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -135,7 +135,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
-import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.AIBossLocal;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
@@ -1274,9 +1273,12 @@ public class AppdefBossEJBImpl
     {
         try {
             ServiceManagerLocal svcMan = getServiceManager();
-            Service savedService = svcMan.createService(subject, serverPK,
-                                                        serviceTypePK,
-                                                        serviceVal);
+            Service savedService =
+                svcMan.createService(subject, serverPK,
+                                     serviceTypePK,
+                                     serviceVal.getName(),
+                                     serviceVal.getDescription(),
+                                     serviceVal.getLocation());
             if(cProps != null ) {
                 AppdefEntityID entityId = savedService.getEntityId();
                 setCPropValues(subject, entityId, cProps);

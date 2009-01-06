@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -142,17 +142,15 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public Service createService(AuthzSubject subject, Integer serverId,
-                                 Integer serviceTypeId, ServiceValue sValue)
+                                 Integer serviceTypeId, String name,
+                                 String desc, String location)
         throws CreateException, ValidationException, PermissionException,
                ServerNotFoundException, AppdefDuplicateNameException
     {
         Server server = getServerDAO().findById(serverId);
-        ServiceType serviceType =
-            getServiceTypeDAO().findById(serviceTypeId);
-
-        return createService(subject, server, serviceType,
-                                  sValue.getName(), sValue.getDescription(),
-                                  sValue.getLocation(), null);
+        ServiceType serviceType = getServiceTypeDAO().findById(serviceTypeId);
+        return createService(subject, server, serviceType, name, desc,
+                             location, null);
     }
 
     /**
@@ -200,33 +198,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * @ejb:interface-method
-     */
-    public ServiceValue[] findServicesByName(AuthzSubject subject, String name)
-        throws ServiceNotFoundException, PermissionException
-    {
-        List serviceLocals = getServiceDAO().findByName(name);
-
-        int numServices = serviceLocals.size();
-        
-        if (numServices == 0)
-            throw new ServiceNotFoundException("Service: " + name +
-                                               " not found");
-
-        List services = new ArrayList();
-        for (int i = 0; i < numServices; i++) {
-            Service sLocal = (Service)serviceLocals.get(i);
-            try {
-                checkViewPermission(subject, sLocal.getEntityId());
-                services.add(sLocal.getServiceValue());
-            } catch (PermissionException e) {
-                //Ok, won't be added to the list
-            }
-        }
-        return (ServiceValue[])services.toArray(new ServiceValue[0]);
-    }
-
-    /**
      * Get service IDs by service type.
      * @ejb:interface-method
      *
@@ -269,15 +240,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @return List of ServiceValue objects
      * @ejb:interface-method
      */
-    public PageList findServicesById(AuthzSubject subject, Integer[] serviceIds,
-                                     PageControl pc) 
+    public List findServicesById(AuthzSubject subject, Integer[] serviceIds) 
         throws ServiceNotFoundException, PermissionException {
-        // TODO paging... Not sure if its even needed.
-        PageList serviceList = new PageList();
+        List serviceList = new ArrayList(serviceIds.length);
         for(int i = 0; i < serviceIds.length; i++) {
-            serviceList.add(getServiceById(subject, serviceIds[i]));
+            Service s = findServiceById(serviceIds[i]);
+            checkViewPermission(subject, s.getEntityId());
+            serviceList.add(s.getServiceValue());
         }
-        serviceList.setTotalSize(serviceIds.length);
         return serviceList;
     }
 
@@ -388,18 +358,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             return new PageList();
         }
         return valuePager.seek(serviceTypes, PageControl.PAGE_ALL);
-    }
-
-    /** 
-     * @deprecated
-     * @ejb:interface-method
-     */
-    public ServiceValue getServiceById(AuthzSubject subject, Integer id)
-        throws ServiceNotFoundException, PermissionException {
-
-        Service s = findServiceById(id);
-        checkViewPermission(subject, s.getEntityId());
-        return s.getServiceValue();
     }
 
     /**
@@ -1182,7 +1140,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     {
         checkModifyPermission(subject, svc.getEntityId());
         svc.setModifiedBy(subject.getName());
-        svc.setModifiedTime(new Long(System.currentTimeMillis()));
         svc.setAutodiscoveryZombie(zombieStatus);
     }
     
@@ -1192,11 +1149,16 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     public Service updateService(AuthzSubject subject, ServiceValue existing)
         throws PermissionException, UpdateException, 
                AppdefDuplicateNameException, ServiceNotFoundException {
+        checkModifyPermission(subject, existing.getEntityId());
         Service service = getServiceDAO().findById(existing.getId());
-        checkModifyPermission(subject, service.getEntityId());
+        
         existing.setModifiedBy(subject.getName());
-        existing.setMTime(new Long(System.currentTimeMillis()));
-        trimStrings(existing);
+        if (existing.getDescription() != null)
+            existing.setDescription(existing.getDescription().trim());
+        if (existing.getLocation() != null)
+            existing.setLocation(existing.getLocation().trim());
+        if (existing.getName() != null)
+            existing.setName(existing.getName().trim());
 
         if(service.matchesValueObject(existing)) {
             log.debug("No changes found between value object and entity");
@@ -1452,15 +1414,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         } catch ( Exception e ) {
             throw new CreateException("Could not create value pager:" + e);
         }
-    }
-
-    private void trimStrings(ServiceValue service) {
-        if (service.getDescription() != null)
-            service.setDescription(service.getDescription().trim());
-        if (service.getLocation() != null)
-            service.setLocation(service.getLocation().trim());
-        if (service.getName() != null)
-            service.setName(service.getName().trim());
     }
 
     public void ejbRemove() { }
