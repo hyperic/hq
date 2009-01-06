@@ -2,7 +2,7 @@
 
 <project name="jboss-build" basedir="..">
 
-  <!-- JBoss 4.0.3SP1 targets -->
+  <!-- JBoss 4.2.3.GA targets -->
 
   <!-- Server ports -->
   <property name="jboss.server.port" value="9093" />
@@ -78,6 +78,7 @@
         <include name="commons-modeler.jar" />
         <include name="jgroups-all.jar" />
         <include name="commons-collections-3.2.jar" />
+        <include name="quartz-1.6.3.jar" />
       </fileset>
       <fileset dir="${thirdparty.lib}/oracle_jdbc" includes="ojdbc14.jar"/>
       <fileset dir="${thirdparty.lib}/postgresql">
@@ -102,6 +103,7 @@
 
     <!-- remove obsolete jars -->
     <delete file="${jboss.home}/server/default/lib/antlr-2.7.5H3.jar" />
+    <delete file="${jboss.home}/server/default/lib/quartz.jar"/>
 
     <!-- Remove stuff we don't need to deploy -->
     <property name="jboss-deploy-dir"
@@ -259,9 +261,9 @@
 
   <target name="prepare-release-jboss">
     <!-- Copy our log4j config file, overwrite the existing one -->
-    <delete file="${jboss.home}/server/default/conf/log4j.xml"/>
-    <copy file="${hq.home}/installer/data/hq-engine/log4j.xml"
-          tofile="${jboss.home}/server/default/conf/log4j.xml"/>
+    <delete file="${jboss.home}/server/default/conf/jboss-log4j.xml"/>
+    <copy file="${hq.home}/installer/data/hq-engine/jboss-log4j.xml"
+          tofile="${jboss.home}/server/default/conf/jboss-log4j.xml"/>
   </target>
   
   <target name="prepare-ssl" unless="available.keystore">
