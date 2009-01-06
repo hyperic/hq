@@ -46,6 +46,15 @@
        <batchtest todir="${junitResults.dir}" unless="single.test">
            <fileset dir="unittest/src">
                <include name="**/*_test.java"/>
+
+               <!-- XXX exclude in-container tests in JBoss 4.2.3 -->
+               <include name="**/AuthzSubjectManager_test.java"/>
+               <include name="**/AvailabilityManager_test.java"/>
+               <include name="**/ResourceGroupManager_test.java"/>
+               <include name="**/DataManager_test.java"/>
+               <include name="**/CritterTranslator_test.java"/>
+               <include name="**/ProblemMetricManager_test.java"/>
+
                <!-- Need to figure out why this test is failing -->
                <exclude name="**/SignIn_test.java"/>
 
@@ -58,6 +67,7 @@
                <exclude name="**/ServerLifecycleManagement_test.java"/>
            </fileset>
       </batchtest>
+
       <sysproperty key="hq.example.plugins" value="${hq.home}/plugins/examples"/>
       <sysproperty key="pdk.dir" value="${pdk.dir}"/>
       <sysproperty key="hq.server.ds-mapping" value="${hq.server.ds-mapping}"/>
