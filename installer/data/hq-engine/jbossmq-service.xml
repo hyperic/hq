@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- $Id: jbossmq-service.xml,v 1.3 2006/04/01 02:33:42 clee Exp $ -->
+<!-- $Id: jbossmq-service.xml 65363 2007-09-13 15:05:39Z adrian@jboss.org $ -->
 
 <server>
 
@@ -31,6 +31,7 @@
       </security>
     </attribute>
     <attribute name="SecurityDomain">java:/jaas/jbossmq</attribute>
+    <depends>jboss.security:service=JaasSecurityManager</depends> 
     <depends optional-attribute-name="NextInterceptor">jboss.mq:service=DestinationManager</depends>
   </mbean>
 -->
@@ -43,23 +44,29 @@
   <!--
   <mbean code="org.jboss.mq.server.jmx.ClientMonitorInterceptor" name="jboss.mq:service=ClientMonitorInterceptor">
     <attribute name="ClientTimeout">80000</attribute>
-    <depends optional-attribute-name="NextInterceptor">jboss.mq:service=ClientReconnectInterceptor</depends>
-  </mbean>
-  -->
-
-  <!--
-    | The ClientReconnectInterceptor is used to allow a client to connect to the server even
-    | if it's clientID is allready being used by another client.  This interceptor will disconnect
-    | the previously connected client to allow the new connection to succeed.  This is not enabled
-    | by default since the JMS spec states that the 2nd client connecting to the server with the same
-    | id should get an exception.
-   -->
-  <!--
-  <mbean code="org.jboss.mq.server.jmx.InterceptorLoader" name="jboss.mq:service=ClientReconnectInterceptor">
-    <attribute name="InterceptorClass">org.jboss.mq.server.ClientReconnectInterceptor</attribute>
     <depends optional-attribute-name="NextInterceptor">jboss.mq:service=DestinationManager</depends>
   </mbean>
   -->
+
+  <!-- A Thread pool service -->
+  <mbean code="org.jboss.util.threadpool.BasicThreadPool"
+     name="jboss.mq:service=ThreadPool">
+     <attribute name="Name">JMSThread</attribute>
+     <attribute name="ThreadGroupName">JBossMQ Server Threads</attribute>
+     <!-- The max number of threads in the pool -->
+     <attribute name="MaximumPoolSize">10</attribute>
+     <!-- The max number of tasks before the queue is full -->
+     <attribute name="MaximumQueueSize">1000</attribute>
+     <!-- The behavior of the pool when a task is added and the queue is full.
+     abort - a RuntimeException is thrown
+     run - the calling thread executes the task
+     wait - the calling thread blocks until the queue has room
+     discard - the task is silently discarded without being run
+     discardOldest - check to see if a task is about to complete and enque
+        the new task if possible, else run the task in the calling thread
+     -->
+     <attribute name="BlockingMode">run</attribute>
+  </mbean>
 
   <!-- ==================================================================== -->
   <!-- System Destinations                                                  -->
