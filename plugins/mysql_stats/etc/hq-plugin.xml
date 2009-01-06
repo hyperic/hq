@@ -1953,6 +1953,64 @@
     <metrics name="MySQL Status 5.1.x Replication"
              include="MySQL Status 5.0.x Replication"/>
 
+    <filter name="template"
+            value="${domain}:Type=Table,database=%database%,table=%table%:${alias}"/>
+    <metrics name="mysql-table">
+        <metric name="Availability"
+                alias="Availability"
+                category="AVAILABILITY"
+                indicator="true"
+                units="percentage"
+                collectionType="dynamic"/>
+        <metric name="Number of Rows"
+                alias="Rows"
+                category="UTILIZATION"
+                indicator="true"
+                units="none"
+                collectionType="dynamic"/>
+        <metric name="Average Row Length"
+                alias="Avg_row_length"
+                category="UTILIZATION"
+                units="B"
+                collectionType="dynamic"/>
+        <metric name="Data Length"
+                alias="Data_length"
+                category="UTILIZATION"
+                indicator="true"
+                units="B"
+                collectionType="dynamic"/>
+        <metric name="Max Data Length"
+                alias="Max_data_length"
+                category="UTILIZATION"
+                units="B"
+                collectionType="dynamic"/>
+        <metric name="Index Length"
+                alias="Index_length"
+                category="UTILIZATION"
+                indicator="true"
+                units="B"
+                collectionType="dynamic"/>
+        <metric name="Data Free"
+                alias="Data_free"
+                category="UTILIZATION"
+                units="B"
+                collectionType="dynamic"/>
+<!-- TODO scottmf, need to add index level stats
+        <metric name="Number of Indicies"
+                alias="NumIndicies"
+                category="UTILIZATION"
+                group="Index Usage"
+                units="none"
+                collectionType="dynamic"/>
+        <metric name="Average Index Cardinality"
+                alias="AvgCardinality"
+                category="UTILIZATION"
+                group="Index Usage"
+                units="none"
+                collectionType="dynamic"/>
+-->
+    </metrics>
+
     <property name="DEFAULT_DRIVER"
               value="com.mysql.jdbc.Driver"/>
     <property name="DEFAULT_URL"
@@ -1977,6 +2035,22 @@
         <service name="Slave Status">
             <config include="repl_slave_config"/>
             <metrics include="master-slave-metrics"/>
+        </service>
+        <service name="Table">
+            <plugin type="measurement"
+                    class="MySqlStatsMeasurementPlugin"/>
+<!-- TODO scottmf need to add index level stats
+            <plugin type="control"
+                    class="MySqlStatsControlPlugin"/>
+            <actions include="Analyze,Check,Optimize,Repair"/>
+-->
+            <config>
+              <option name="table"
+                      description="Table Name"/>
+              <option name="database"
+                      description="Database Name"/>
+            </config>
+            <metrics include="mysql-table"/>
         </service>
     </server>
 

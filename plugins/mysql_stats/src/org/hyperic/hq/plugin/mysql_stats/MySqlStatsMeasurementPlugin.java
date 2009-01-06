@@ -30,6 +30,8 @@ import java.sql.Driver;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -59,6 +61,8 @@ public class MySqlStatsMeasurementPlugin
     private static final String SELECT_VERSION = "select @@version",
                            SHOW_DATABASES     = "show databases",
                            SLAVE_STATUS       = "slavestatus",
+                           TABLE_SERVICE      = "type=table",
+                           SHOW_TABLE_STATUS  = "show table status",
                            SHOW_SLAVE_STATUS  = "show slave status",
                            SHOW_GLOBAL_STATUS = "show /*!50002 global */ status",
                            // computed for mysql replication
@@ -67,6 +71,7 @@ public class MySqlStatsMeasurementPlugin
     private String _driver;
     private JDBCQueryCache _globalStatus = null,
                            _replStatus   = null;
+    private final Map _tableStatusCacheMap = new HashMap();
     private static final int TIMEOUT_VALUE = 60000;
     
     protected double getQueryValue(Metric metric)
@@ -89,7 +94,11 @@ public class MySqlStatsMeasurementPlugin
                 return getMasterSlaveStatusMetric(metric);
             } else if (objectName.indexOf(SHOW_DATABASES) != -1) {
                 return getNumberOfDatabases(metric);
+            } else if (objectName.indexOf(TABLE_SERVICE) != -1) {
+                return getTableMetric(metric);
             }
+        } catch (MetricUnreachableException e) {
+            throw e;
         } catch (Exception e) {
             throw new MetricNotFoundException(
                 "Service "+objectName+":"+alias+" not found", e);
@@ -97,7 +106,47 @@ public class MySqlStatsMeasurementPlugin
         throw new MetricNotFoundException(
             "Service "+objectName+":"+alias+" not found");
     }
-    
+
+    private double getTableMetric(Metric metric)
+        throws NumberFormatException,
+               SQLException,
+               JDBCQueryCacheException,
+               MetricUnreachableException {
+        final String table = metric.getObjectProperty("table");
+        String alias = metric.getAttributeName();
+        JDBCQueryCache tableCache =
+            (JDBCQueryCache)_tableStatusCacheMap.get(table);
+        // don't want to cache all of "show table status" in the case
+        // we have a deployment with 1000s of tables.  They probably don't care
+        // about all the tables.  There is still a speed/effieciency improvement
+        // over the old mysql plugin since the query only has to be run once for
+        // all the individual table metrics.
+        if (tableCache == null) {
+            final String query = new StringBuilder(SHOW_TABLE_STATUS)
+                .append(" like '").append(table).append("'").toString();
+            tableCache = new JDBCQueryCache(query, "Name", 10000);
+            _tableStatusCacheMap.put(table, tableCache);
+        }
+        if (metric.isAvail()) {
+            alias = "Rows";
+        }
+        Connection conn = getCachedConnection(metric);
+        Object cachedVal = tableCache.get(conn, table, alias);
+        if (cachedVal == null) {
+            if (metric.isAvail()) {
+                return Metric.AVAIL_DOWN;
+            } else {
+                final String msg = "Could not get metric for table " + table;
+                throw new MetricUnreachableException(msg);
+            }
+        }
+        Double val = Double.valueOf(cachedVal.toString());
+        if (metric.isAvail()) {
+            return Metric.AVAIL_UP;
+        }
+        return val.doubleValue();
+    }
+
     public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config)
     {
         // Override JDBCMeasurementPlugin.
@@ -168,7 +217,7 @@ public class MySqlStatsMeasurementPlugin
             return getBytesBehindMaster(metric);
         } else if (alias.equalsIgnoreCase(LOG_FILES_BEHIND_MASTER)) {
             return getLogFilesBehindMaster(metric);
-        } else if (alias.trim().equalsIgnoreCase(Metric.ATTR_AVAIL)) {
+        } else if (metric.isAvail()) {
             // XXX need to figure out how to determine if repl is down from slave
             return Metric.AVAIL_UP;
         } else {
