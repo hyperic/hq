@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2009], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -80,7 +80,7 @@ public class HQDialectUtil {
                                  Integer[] tids, Integer[] iids,
                                  long begin, long end, String table)
         throws SQLException {
-//      Keep track of the "last" reported time
+        // Keep track of the "last" reported time
         HashMap lastMap = new HashMap();
 
         ResultSet rs            = null;
@@ -94,48 +94,62 @@ public class HQDialectUtil {
         StringBuffer tidsConj = new StringBuffer(
                 DBUtil.composeConjunctions("template_id", tids.length));
         DBUtil.replacePlaceHolders(tidsConj, tids);
+        
+        final String countSQL =
+            "SELECT template_id, COUNT(id) as count FROM " + TAB_MEAS +
+            " WHERE " + iidsConj + " AND " + tidsConj +
+            " AND EXISTS (SELECT measurement_id FROM " + table  +
+            " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id) " +
+            " GROUP BY template_id";
         final String aggregateSQL =
-            "SELECT COUNT(DISTINCT id)," + minMax +
-            "MAX(timestamp), template_id " +
+            "SELECT template_id," + minMax + " MAX(timestamp) " +
             " FROM " + table + "," + TAB_MEAS +
             " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id AND " +
             iidsConj + " AND " + tidsConj + " GROUP BY template_id";
+        
         try {
-//          Prepare aggregate SQL
-            astmt = conn.prepareStatement(aggregateSQL);
-//          First set the time range
+            astmt = conn.prepareStatement(countSQL);
             int ind = 1;
+            astmt.setLong(ind++, begin);
+            astmt.setLong(ind++, end);
+            rs = astmt.executeQuery();
+            while (rs.next()) {
+                Integer tid = new Integer(rs.getInt("template_id"));
+                double[] data = new double[IND_LAST_TIME + 1];
+                data[IND_CFG_COUNT] = rs.getInt("count");
+                // Put it into the result map
+                resMap.put(tid, data);
+            }
+            
+            // Close JDBC objects
+            DBUtil.closeJDBCObjects(logCtx, null, astmt, rs);
+
+            // Prepare aggregate SQL
+            astmt = conn.prepareStatement(aggregateSQL);
+            // First set the time range
+            ind = 1;
             astmt.setLong(ind++, begin);
             astmt.setLong(ind++, end);
 
             if (_log.isTraceEnabled())
                 _log.trace("getAggregateData() for begin=" + begin +
-                        " end = " + end + ": " + aggregateSQL);
-//          First get the min, max, average
+                           " end = " + end + ": " + aggregateSQL);
+            // First get the min, max, average
             rs = astmt.executeQuery();
             while (rs.next()) {
                 Integer tid = new Integer(rs.getInt("template_id"));
-                double[] data =
-                    new double[IND_LAST_TIME + 1];
-//              data[0] = min, data[1] = avg, data[2] = max,
-//              data[3] = last, data[4] = count of measurement ID's
-                data[IND_CFG_COUNT] = rs.getInt(1);
-//              If there are no metrics, then forget it
-                if (data[IND_CFG_COUNT] == 0)
-                    continue;
+                // data[0] = min, data[1] = avg, data[2] = max,
+                // data[3] = last, data[4] = count of measurement ID's
+                double[] data = (double[]) resMap.get(tid);
                 data[IND_MIN] = rs.getDouble(2);
                 data[IND_AVG] = rs.getDouble(3);
                 data[IND_MAX] = rs.getDouble(4);
-//              Put it into the result map
-                resMap.put(tid, data);
-//              Get the time
-                Long lastTime = new Long(rs.getLong(5));
-//              Put it into the last map
-                lastMap.put(tid, lastTime);
+                // Put it into the last map
+                lastMap.put(tid, new Long(rs.getLong(5)));
             }
             if (_log.isTraceEnabled())
-                _log.trace("getAggregateData(): Statement query elapsed: " +
-                        timer.reset());
+                _log.trace("getAggregateData(): Statements query elapsed: " +
+                        timer.getElapsed());
         } finally {
             DBUtil.closeResultSet(logCtx, rs);
             DBUtil.closeStatement(logCtx, astmt);
@@ -168,39 +182,39 @@ public class HQDialectUtil {
             Integer tid = (Integer) entry.getKey();
             Long lastTime = (Long) entry.getValue();
 
-//          Now get the last timestamp
+            // Now get the last timestamp
             if (_log.isTraceEnabled()) {
-                _log.trace("getAggregateData() for tid=" + tid +
-                        " lastTime=" + lastTime + ": " + lastSQL);
+                _log.trace("getAggregateData() for tid=" + tid + " lastTime=" +
+                           lastTime + ": " + lastSQL);
             }
 
             try {
-//              Prepare last value SQL
+                // Prepare last value SQL
                 lstmt = conn.prepareStatement(lastSQL);
 
-//              Reset the index
+                // Reset the index
                 int ind = 1;
                 lstmt.setInt(ind++, tid.intValue());
                 lstmt.setLong(ind++, lastTime.longValue());
 
                 rs = lstmt.executeQuery();
 
-//              Assume data exists
+                // Assume data exists
                 rs.next();
 
-//              Get the double[] value from results
+                // Get the double[] value from results
                 double[] data = (double[]) resMap.get(tid);
 
-//              Now set the the last reported value
+                // Now set the the last reported value
                 data[IND_LAST_TIME] = rs.getDouble(1);
             } finally {
-//              Close ResultSet
+                // Close ResultSet
                 DBUtil.closeResultSet(logCtx, rs);
                 DBUtil.closeStatement(logCtx, lstmt);
             }
             if (_log.isTraceEnabled()) {
                 _log.trace("getAggregateData(): Statement query elapsed " +
-                        "time: " + timer.reset());
+                           "time: " + timer.getElapsed());
             }
         }
         return resMap;
