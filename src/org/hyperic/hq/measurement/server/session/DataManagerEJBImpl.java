@@ -1481,14 +1481,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             conn = DBUtil.getConnByContext(getInitialContext(),
                                            DATASOURCE_NAME);
 
-            String metricUnion =
-                MeasTabManagerUtil.getUnionStatement(getPurgeRaw(),
-                                                     m.getId().intValue());
-            StringBuilder sqlBuf = new StringBuilder(
-                "SELECT timestamp, value FROM " + metricUnion +
-                    ", (SELECT MAX(timestamp) AS maxt" +
-                    " FROM " + metricUnion + ") mt " +
-                "WHERE measurement_id = " + m.getId() + " AND timestamp = maxt");
+            final String metricUnion = MeasTabManagerUtil.getUnionStatement(
+                8*HOUR, m.getId().intValue());
+            StringBuilder sqlBuf = new StringBuilder()
+                .append("SELECT timestamp, value FROM ").append(metricUnion)
+                .append(", (SELECT MAX(timestamp) AS maxt")
+                .append(" FROM ").append(metricUnion).append(") mt ")
+                .append("WHERE measurement_id = ").append(m.getId())
+                .append(" AND timestamp = maxt");
 
             stmt = conn.createStatement();
             
