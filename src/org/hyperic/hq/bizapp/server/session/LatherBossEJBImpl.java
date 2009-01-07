@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,11 +25,16 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
+import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.shared.LatherBossLocal;
+import org.hyperic.hq.bizapp.shared.LatherBossUtil;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.lather.LatherContext;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
@@ -106,7 +111,7 @@ public class LatherBossEJBImpl
         throws LatherRemoteException
     {
         if (_dispatcher.methIsTransactional(method)) {
-            return dispatchWithTx(ctx, method, arg);
+            return getOne().dispatchWithTx(ctx, method, arg);
         } else {
             return dispatchWithoutTx(ctx, method, arg);
         }
@@ -117,6 +122,16 @@ public class LatherBossEJBImpl
     public void ejbRemove() {
         if (_dispatcher != null) {
             _dispatcher.destroy();
+        }
+    }
+    
+    public static LatherBossLocal getOne() {
+        try {
+            return LatherBossUtil.getLocalHome().create();
+        } catch (CreateException e) {
+            throw new SystemException(e);
+        } catch (NamingException e) {
+            throw new SystemException(e);
         }
     }
 
