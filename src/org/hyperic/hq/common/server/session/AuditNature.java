@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -44,7 +44,10 @@ public class AuditNature
         new AuditNature(3, "start", "audit.nature.start");
     public static AuditNature STOP = 
         new AuditNature(4, "stop", "audit.nature.stop");
-    
+    public static AuditNature ENABLE = 
+        new AuditNature(5, "enable", "audit.nature.enable");
+    public static AuditNature DISABLE = 
+        new AuditNature(6, "disable", "audit.nature.disable");
     
     protected AuditNature(int code, String desc, String localeProp) {
         super(AuditNature.class, code, desc, localeProp, BUNDLE);

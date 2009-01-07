@@ -93,5 +93,7 @@
               discriminator-value="sysConfig"/>
     <subclass name="org.hyperic.hq.product.server.session.PluginAudit"
               discriminator-value="plugin"/>
+    <subclass name="org.hyperic.hq.events.server.session.AlertAudit"
+              discriminator-value="alert"/>
   </class>
 </hibernate-mapping>

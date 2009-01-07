@@ -299,24 +299,26 @@ public class AlertDefinitionManagerEJBImpl
                                            int priority, boolean activate)
         throws PermissionException
     {
-        List alertdefs = new ArrayList(1);
         AlertDefinition def = getAlertDefDAO().findById(id);
         canManageAlerts(subj, def);
+        List alertdefs = new ArrayList(def.getChildren().size() + 1);
         alertdefs.add(def);
         
         // If there are any children, add them, too
         alertdefs.addAll(def.getChildren());
         
-        for (Iterator i = alertdefs.iterator(); i.hasNext(); ) {
-            AlertDefinition ad = (AlertDefinition)i.next();
+        for (Iterator it = alertdefs.iterator(); it.hasNext(); ) {
+            def = (AlertDefinition) it.next();
 
-            ad.setName(name);
-            ad.setDescription(desc);
-            ad.setPriority(priority);
+            def.setName(name);
+            def.setDescription(desc);
+            def.setPriority(priority);
             
-            ad.setActiveStatus(activate);
-            
-            ad.setMtime(System.currentTimeMillis());
+            if (def.isActive() != activate || def.isEnabled() != activate) {
+                def.setActiveStatus(activate);
+                AlertAudit.enableAlert(def, subj, System.currentTimeMillis());
+            }
+            def.setMtime(System.currentTimeMillis());
         }
     }
 
@@ -441,7 +443,8 @@ public class AlertDefinitionManagerEJBImpl
         
         if (def.isActive() != activate || def.isEnabled() != activate) {
             def.setActiveStatus(activate);
-            def.setMtime(System.currentTimeMillis());            
+            def.setMtime(System.currentTimeMillis());
+            AlertAudit.enableAlert(def, subj, System.currentTimeMillis());
         }
         
         getAlertDefDAO().setChildrenActive(def, activate);

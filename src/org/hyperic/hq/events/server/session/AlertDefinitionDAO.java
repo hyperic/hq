@@ -273,7 +273,6 @@ public class AlertDefinitionDAO extends HibernateDAO {
         
         def.setName(val.getName());
         def.setCtime(val.getCtime());
-        def.setMtime(val.getMtime());
         if (val.parentIdHasBeenSet() && val.getParentId() != null) {
             def.setParent(aDAO.findById(val.getParentId()));
         }

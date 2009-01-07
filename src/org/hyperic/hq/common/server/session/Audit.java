@@ -226,8 +226,9 @@ public abstract class Audit
     }
     
     public String toString() {
-        return "Audit[purpose=" + _purpose + ",time=" + _startTime + ",msg=" +
-            _message + "]";
+        return "Audit[purpose=" + _purpose + ",time=" + _startTime +
+               ",resource=" + (_resource != null ? _resource.getName() : "N/A")+
+               ",msg=" + _message + "]";
     }
     
     public boolean equals(Object obj) {
