@@ -450,7 +450,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
             return server;
         }
         ServerType serverType =
-            smLocal.findServerTypePojoByName(aiserver.getServerTypeName());
+            smLocal.findServerTypeByName(aiserver.getServerTypeName());
         // if (virtual == true) for this server type that means that there may
         // only be one server per platform of this type
         if (false == serverType.isVirtual()) {

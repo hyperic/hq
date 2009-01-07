@@ -327,8 +327,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @throws PermissionException 
      * @ejb:interface-method
      */
-    public Server createVirtualServer(AuthzSubject subject,
-                                      Platform platform, ServerType st)
+    public Server createVirtualServer(AuthzSubject subject, Platform platform,
+                                      ServerType st)
         throws PermissionException, CreateException, FinderException {
         // First of all, make sure this is a virtual type
         if (!st.isVirtual()) {
@@ -556,21 +556,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Find a ServerType by id
      * @ejb:interface-method
      */
-    public ServerType findServerType(Integer id) throws ObjectNotFoundException
-    {
+    public ServerType findServerType(Integer id) {
         return getServerTypeDAO().findById(id); 
-    }
-    
-    /**
-     * @ejb:interface-method
-     */
-    public ServerType findServerTypePojoByName(String name)
-        throws FinderException {
-        ServerType type = getServerTypeDAO().findByName(name);
-        if (type == null) {
-            throw new FinderException("name not found: " + name);
-        }
-        return type;
     }
     
     /**
@@ -579,14 +566,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return ServerTypeValue
      * @ejb:interface-method
      */
-    public ServerType findServerTypeByName(String name)
-        throws FinderException {
-
-        ServerType ejb = findServerTypePojoByName(name);
-        if (ejb == null) {
+    public ServerType findServerTypeByName(String name) throws FinderException {
+        ServerType type = getServerTypeDAO().findByName(name);
+        if (type == null) {
             throw new FinderException("name not found: " + name);
         }
-        return ejb;
+        return type;
     }
 
     /**
@@ -608,7 +593,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * Get server lite value by id.  Does not check permission.
      * @ejb:interface-method
      */
-    public Server getServerPOJOById(AuthzSubject subject, Integer id)
+    public Server getServerById(AuthzSubject subject, Integer id)
         throws ServerNotFoundException, PermissionException {
         Server server = findServerById(id);
         checkViewPermission(subject, server.getEntityId());
@@ -654,18 +639,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
-    /** 
-     * Get server by id.
-     * @ejb:interface-method
-     */
-    public ServerValue getServerById(AuthzSubject subject, Integer id)
-        throws ServerNotFoundException, PermissionException {
-
-        Server s = findServerById(id);
-        checkViewPermission(subject, s.getEntityId());
-        return s.getServerValue();
-    }
-
     /**
      * Get server by service.
      * @ejb:interface-method
@@ -674,16 +647,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         throws ServerNotFoundException, ServiceNotFoundException, 
                PermissionException
     {
-        Service svc;
-        Server s;
-        ServerValue serverValue;
-
-        svc = getServiceDAO().findById(sID);
-        s = svc.getServer();
+        Service svc = getServiceDAO().findById(sID);
+        Server s = svc.getServer();
         checkViewPermission(subject, s.getEntityId());
-        serverValue = s.getServerValue();
-
-        return serverValue;
+        return s.getServerValue();
     }
 
     /**
@@ -801,7 +768,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
         }
         for(Iterator i = servers.iterator(); i.hasNext();) {
-            Server aServer = (Server)i.next();
+            Server aServer = (Server) i.next();
             
             // Keep the virtual ones, we need them so that child services can be
             // added.  Otherwise, no one except the super user will have access
@@ -1416,18 +1383,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             log.debug("Checking for: " + AuthzConstants.platformOpAddServer + 
                 " for subject: " + subject);
         }
-        Integer platformId = server.getPlatform().getId();
-        checkPermission(subject, getPlatformResourceType(),
-                        platformId,
+        AppdefEntityID platId = server.getPlatform().getEntityId();
+        checkPermission(subject, getPlatformResourceType(), platId.getId(),
                         AuthzConstants.platformOpAddServer);
 
         ResourceType serverProto = getServerPrototypeResourceType();
         ServerType serverType = server.getServerType();
         Resource proto = ResourceManagerEJBImpl.getOne()
-            .findResourcePojoByInstanceId(serverProto,
-                                          serverType.getId());
-        AppdefEntityID platId = 
-            AppdefEntityID.newPlatformID(platformId);
+            .findResourcePojoByInstanceId(serverProto, serverType.getId());
         Resource parent = getResourceManager().findResource(platId);
 
         if (parent == null) {

@@ -144,8 +144,8 @@ public class AppdefEntityValue {
         throws AppdefEntityNotFoundException, PermissionException {
         if (server == null) {
             if (permCheck) {
-                server = getServerManager().getServerPOJOById(getSubject(),
-                                                              _id.getId());
+                server = getServerManager().getServerById(getSubject(),
+                                                          _id.getId());
             }
             else {
                 server = getServerManager().findServerById(_id.getId());
