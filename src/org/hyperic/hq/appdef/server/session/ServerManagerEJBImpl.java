@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -553,37 +553,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Find servers by name
-     * @param subject - who
-     * @param name - name of server
-     * @ejb:interface-method
-     */
-    public ServerValue[] findServersByName(AuthzSubject subject, String name)
-        throws ServerNotFoundException
-    {
-        List serverLocals = getServerDAO().findByName(name);
-
-        int numServers = serverLocals.size();
-        if (numServers == 0) {
-            throw new ServerNotFoundException("Server '" + name +
-                                              "' not found");
-        }
-
-        List servers = new ArrayList();
-        for (int i = 0; i < numServers; i++) {
-            Server sLocal = (Server)serverLocals.get(i);
-            ServerValue sValue = sLocal.getServerValue();
-            try {
-                checkViewPermission(subject, sValue.getEntityId());
-                servers.add(sValue);
-            } catch (PermissionException e) {
-                //Ok, won't be added to the list
-            }
-        }
-        return (ServerValue[])servers.toArray(new ServerValue[0]);
-    }
-
-    /**
      * Find a ServerType by id
      * @ejb:interface-method
      */
@@ -698,16 +667,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Get servers by name.
-     * @ejb:interface-method
-     * @param name - name of server
-     */
-    public ServerValue[] getServersByName(AuthzSubject subject, String name)
-        throws ServerNotFoundException {
-        return findServersByName(subject, name);
-    }
-
-    /**
      * Get server by service.
      * @ejb:interface-method
      */
@@ -721,9 +680,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
         svc = getServiceDAO().findById(sID);
         s = svc.getServer();
+        checkViewPermission(subject, s.getEntityId());
         serverValue = s.getServerValue();
-
-        checkViewPermission(subject, serverValue.getEntityId());
 
         return serverValue;
     }
