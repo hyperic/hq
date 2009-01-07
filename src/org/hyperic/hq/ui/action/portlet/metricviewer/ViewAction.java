@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -53,6 +53,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
@@ -134,8 +135,8 @@ public class ViewAction extends BaseAction {
         
         // Load resources
         List entityIds = DashboardUtils.preferencesAsEntityIds(resKey, dashPrefs);
-        AppdefEntityID[] arrayIds =
-            (AppdefEntityID[]) entityIds.toArray(new AppdefEntityID[entityIds.size()]);
+        AppdefEntityID[] arrayIds = (AppdefEntityID[])
+            entityIds.toArray(new AppdefEntityID[entityIds.size()]);
         int count = Integer.parseInt(dashPrefs.getValue(numKey, "10"));
         String metric = dashPrefs.getValue(metricKey, "");
         boolean isDescending =
@@ -303,22 +304,21 @@ public class ViewAction extends BaseAction {
         }
 
         // Otherwise, load from the backend
-        ServletContext ctx = getServlet().getServletContext();
+        ServletContext  ctx = getServlet().getServletContext();
         AppdefBoss      aBoss = ContextUtils.getAppdefBoss(ctx);
         MeasurementBoss mBoss = ContextUtils.getMeasurementBoss(ctx);
 
         try {
             AppdefResourceValue val = aBoss.findById(sessionId, id);
-            Measurement m = mBoss.getMeasurement(sessionId, id, template.getAlias());
-            if (m == null) {
-                return null; // No metric scheduled.
-            }
-
+            Measurement m = mBoss.findMeasurement(sessionId, template.getId(),
+                                                  id);
             CacheData data = new CacheData(val, m);
             cache.put(new Element(key, data));
             return data;
         } catch (AppdefEntityNotFoundException ex) {
             throw ex;
+        } catch (MeasurementNotFoundException ex) {
+            return null; // No metric scheduled.
         } catch (Exception ex) {
             _log.debug("Caught exception loading data: " + ex, ex);
             return null;
