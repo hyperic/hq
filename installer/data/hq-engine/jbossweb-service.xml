@@ -1,11 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- $Id: jboss-service.xml,v 1.3.2.8 2005/09/11 22:24:36 dimitris Exp $ -->
-
-<server>
-
-   <mbean code="org.jboss.web.tomcat.tc5.Tomcat5"
+<!-- $Id: jboss-service.xml 75558 2008-07-09 16:50:17Z bstansberry@jboss.com $ -->
+<server> 
+   
+   <!-- JBossWeb Service-->
+   <mbean code="org.jboss.web.tomcat.service.JBossWeb"
       name="jboss.web:service=WebServer" xmbean-dd="META-INF/webserver-xmbean.xml">
-
+      
+      <!-- You can configure a set of authenticators keyed by http-auth method used. This
+      will apply the same set of authenticators across all web applications. You can
+      override the set of authenticators at the web application level by adding
+      <authenticators> element to the respective jboss-web.xml --> 
+      <!--
+      -->
+      <attribute name="Authenticators" serialDataType="jbxb">
+         <java:properties xmlns:java="urn:jboss:java-properties"
+            xmlns:xs="http://www.w3.org/2001/XMLSchema-instance"
+            xs:schemaLocation="urn:jboss:java-properties resource:java-properties_1_0.xsd">
+            <java:property>
+               <java:key>BASIC</java:key>
+               <java:value>org.apache.catalina.authenticator.BasicAuthenticator</java:value>
+            </java:property>
+            <java:property>
+               <java:key>CLIENT-CERT</java:key>
+               <java:value>org.apache.catalina.authenticator.SSLAuthenticator</java:value>
+            </java:property>
+            <java:property>
+               <java:key>DIGEST</java:key>
+               <java:value>org.apache.catalina.authenticator.DigestAuthenticator</java:value>
+            </java:property>
+            <java:property>
+               <java:key>FORM</java:key>
+               <java:value>org.apache.catalina.authenticator.FormAuthenticator</java:value>
+            </java:property> 
+            <java:property>
+               <java:key>NONE</java:key>
+               <java:value>org.apache.catalina.authenticator.NonLoginAuthenticator</java:value>
+            </java:property> 
+         </java:properties>
+      </attribute> 
+	   
       <!-- The JAAS security domain to use in the absense of an explicit
       security-domain specification in the war WEB-INF/jboss-web.xml
       -->
@@ -31,15 +64,18 @@
          whitespace between the package prefixes.
          This setting only applies when UseJBossWebLoader=false.
       -->
-      <attribute name="FilteredPackages">javax.servlet,org.apache.commons.logging</attribute>
+      <attribute name="FilteredPackages">javax.servlet</attribute>
 
       <attribute name="LenientEjbLink">true</attribute>
 
+      <!--Flag to delete the Work Dir on Context Destroy -->
+      <attribute name="DeleteWorkDirOnContextDestroy">false</attribute>
+
       <!--
           Class of the session manager (used if context is marked as 'distributable'. Currently allowed values:
-          - org.jboss.web.tomcat.tc5.session.JBossCacheManager
+          - org.jboss.web.tomcat.service.session.JBossCacheManager
       -->
-      <attribute name="ManagerClass">org.jboss.web.tomcat.tc5.session.JBossCacheManager</attribute>
+      <attribute name="ManagerClass">org.jboss.web.tomcat.service.session.JBossCacheManager</attribute>
 
       <!-- The name of the request attribute under with the authenticated JAAS
       Subject is stored on successful authentication. If null or empty then
@@ -55,48 +91,44 @@
       -->
 
       <!--
-        *******************************************************
-        ****************** CLUSTERING *************************
-        *******************************************************
-        In order to activate HTTP Session clustering for Tomcat
-        make sure you run JBoss's "all" configuration i.e.
-        "run -c all"
-        (the default configuration doesn't contain clustering)
+      *******************************************************
+      ****************** CLUSTERING *************************
+      *******************************************************
+      In order to activate HTTP Session clustering for Tomcat
+      make sure you run JBoss's "all" configuration i.e.
+      "run -c all"
+      (the default configuration doesn't contain clustering)
+ 
+      Furthermore, you may change SnapshotMode and
+      SnapshotInterval attributes below to indicate when to
+      synchronize changes with the other node(s).   
 
-        Furthermore, you may change SnapshotMode and
-        SnapshotInterval attributes below to indicate when to
-        synchronize changes with the other node(s).
+      If you use Apache+mod_jk(2) you will most probably use
+      the AJP1.3 connector below. Thus, if you so wish,
+      you may comment (i.e. deactivate) the HTTP connector
+      as it won't be used anymore.
 
-        If you use Apache+mod_jk(2) you will most probably use
-        the AJP1.3 connector below. Thus, if you so wish,
-        you may comment (i.e. deactivate) the HTTP connector
-        as it won't be used anymore.
-
-        *******************************************************
-        *******************************************************
-        *******************************************************
-       -->
-
+      *******************************************************
+      *******************************************************
+      *******************************************************
+      --> 
+		
       <!--
-        If you are using clustering, the following two attributes
-        define when the sessions are replicated to the other nodes.
-        The default value, "instant", synchronously replicates changes
-        to the other nodes. In this case, the "SnapshotInterval" attribute
-        is not used.
-        The "interval" mode, in association with the "SnapshotInterval"
-        attribute, indicates that Tomcat will only replicates modified
-        sessions every "SnapshotInterval" miliseconds at most.
-      -->
+      If you are using clustering, the following two attributes
+      define when the sessions are replicated to the other nodes.
+      The default value, "instant", synchronously replicates changes
+      to the other nodes at the end of requests. In this case, the 
+      "SnapshotInterval" attribute is not used.
+      The "interval" mode, in association with the "SnapshotInterval"
+      attribute, indicates that modified sessions will only be replicated
+      every "SnapshotInterval" milliseconds at most.
+		
+      Note that this attribute is not in effect if the replication-granularity
+      is set to FIELD. If it is FIELD, it will be per http request (that is, 
+      "instant" mode.)
+      --> 
       <attribute name="SnapshotMode">instant</attribute> <!-- you may switch to "interval" -->
       <attribute name="SnapshotInterval">2000</attribute>
-      <!-- A flag indicating if the local vm session value should be used if
-      it exists. When true, the existing vm local session values are used and
-      updates are replicated, but updates to the same session on other nodes
-      do not update the local session value. This mode is only useful for
-      failover. When false, the session value is obtained from the distributed
-      cache. This mode can be used with load balancing.
-      -->
-      <attribute name="UseLocalCache">true</attribute>
 
       <!--
       Whether to use MOD_JK(2) for load balancing with sticky session 
@@ -111,6 +143,35 @@
       -->
       <attribute name="UseJK">true</attribute>
 
+      <!--
+       Clustering only: Determines the maximum interval between requests, in 
+       seconds, after which a request will trigger replication of the session's 
+       timestamp and other metadata regardless of whether the request has otherwise 
+       made the session dirty.  Such replication ensures that other nodes in the 
+       cluster are aware of the most recent value for the session's timestamp 
+       and won't incorrectly expire an unreplicated session upon failover. It also
+       results in correct values for HttpSession.getLastAccessedTime() calls 
+       following failover.
+
+       The cost of this metadata replication depends on the configured
+       replication-granularity. With <code>SESSION</code>, the session's 
+       attribute map is replicated along with the metadata, so it can be fairly 
+       costly.  With other granularities, the metadata object is replicated 
+       separately from the attributes and only contains a String, and a few longs, 
+       ints and booleans.
+   
+       A value of 0 means the metadata will be replicated whenever the session is
+       accessed.  A value of -1 means the metadata will be replicated only if some
+       other activity during the request (e.g. modifying an attribute) has
+       resulted in other replication work involving the session. A positive value
+       greater than the HttpSession.getMaxInactiveInterval() value will be treated 
+       as a likely misconfiguration and converted to 0; i.e. replicate the 
+       metadata on every request.
+    
+       Default value if unconfigured is 60 seconds.
+      -->
+      <attribute name="MaxUnreplicatedInterval">60</attribute>
+
       <attribute name="Domain">jboss.web</attribute>
 
       <!-- A mapping to the server security manager service which must be
@@ -124,17 +185,20 @@
       </depends>
 
       <!--
-         Configuration for HTTP Session Clustering using JBossCache
+         Needed if using HTTP Session Clustering or if the
+         ClusteredSingleSignOn valve is enabled in the tomcat server.xml file
       -->
       <!--
       <depends>jboss.cache:service=TomcatClusteringCache</depends>
       -->
+      
       <depends>jboss:service=TransactionManager</depends>
-      <!-- Only needed if the org.jboss.web.tomcat.tc5.jca.CachedConnectionValve
-      is enabled in the tomcat server.xml file
-      <depends>jboss.jca:service=CachedConnectionManager</depends>
+      
+      <!-- Only needed if the org.jboss.web.tomcat.service.jca.CachedConnectionValve
+      is enabled in the tomcat server.xml file.
       -->
+      <depends>jboss.jca:service=CachedConnectionManager</depends>
+      
    </mbean>
 
 </server>
-
