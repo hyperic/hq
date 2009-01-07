@@ -1736,7 +1736,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         for (int i = 0; i < entIds.length; i++) {            
             Integer[] eid = new Integer[] { entIds[i].getId() };
             // Now get the aggregate data, keyed by template ID's
-            Map datamap = getDataMan().getAggregateData(tmpls, eid, begin, end);
+            Map datamap = getDataMan().getAggregateData(tmpls, eid, begin, end,
+                                                        true);
     
             // For each template, add a new summary
             for (Iterator it = datamap.entrySet().iterator(); it.hasNext(); ) {

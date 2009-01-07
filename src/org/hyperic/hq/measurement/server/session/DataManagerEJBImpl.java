@@ -1844,7 +1844,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public Map getAggregateData(List templates, Integer[] iids,
-                                long begin, long end)
+                                long begin, long end, boolean count)
     {
         ArrayList availTempls = new ArrayList();
         ArrayList dataTempls = new ArrayList();
@@ -1864,18 +1864,18 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             (Integer[])dataTempls.toArray(new Integer[dataTempls.size()]);
 
         Map rtn = getAvailMan().getAggregateData(availIds, iids, begin, end);
-        rtn.putAll(getAggData(dataIds, iids, begin, end));
+        rtn.putAll(getAggData(dataIds, iids, begin, end, count));
         return rtn;
     }
 
-    private Map getAggData(Integer[] tids, Integer[] iids,
-                           long begin, long end)
+    private Map getAggData(Integer[] tids, Integer[] iids, long begin, long end,
+                           boolean count)
     {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
 
         // Result set
-        HashMap resMap = new HashMap();
+        Map resMap = new HashMap();
 
         if (tids.length == 0 || iids.length == 0)
             return resMap;
@@ -1897,15 +1897,20 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
 
         try {
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            conn = DBUtil.getConnByContext(getInitialContext(),
+                                           DATASOURCE_NAME);
             HQDialect dialect = Util.getHQDialect();
             List measids = MeasTabManagerUtil.getMeasIds(conn, tids, iids);
             String table = getDataTable(begin, end, measids.toArray());
             Map lastMap = dialect.getAggData(conn, minMax, resMap, tids,
                                              iids, begin, end, table);
-            return dialect.getLastData(conn, minMax, resMap, lastMap,
-                                       iids, begin, end, table);
+            if (count) {
+                resMap = dialect.getCountData(conn, minMax, resMap, tids, iids,
+                                              begin, end, table);
+                return dialect.getLastData(conn, minMax, resMap, lastMap,
+                                           iids, begin, end, table);
+            }
+            return resMap;
         } catch (SQLException e) {
             _log.warn("getAggregateData()", e);
             throw new SystemException(e);

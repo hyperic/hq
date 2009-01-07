@@ -164,7 +164,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
         }
             
         // Now get the aggregate data, keyed by template ID's
-        Map datamap = getDataMan().getAggregateData(templates, eids, begin, end);
+        Map datamap = getDataMan().getAggregateData(templates, eids, begin, end,
+                                                    showNoCollect != null);
 
         // Get the intervals, keyed by template ID's as well
         Map intervals = showNoCollect == null ? new HashMap() :

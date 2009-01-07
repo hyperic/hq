@@ -62,7 +62,6 @@ public class MySQL5InnoDBDialect
     private static final int IND_MIN       = MeasurementConstants.IND_MIN;
     private static final int IND_AVG       = MeasurementConstants.IND_AVG;
     private static final int IND_MAX       = MeasurementConstants.IND_MAX;
-    private static final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
     private static final int IND_LAST_TIME = MeasurementConstants.IND_LAST_TIME;
 
     public MySQL5InnoDBDialect() {
@@ -277,6 +276,15 @@ public class MySQL5InnoDBDialect
         return rtn;
     }
 
+    public Map getCountData(Connection conn, String minMax, Map resMap,
+                          Integer[] tids, Integer[] iids,
+                          long begin, long end, String table)
+        throws SQLException
+    {
+        return HQDialectUtil.getCountData(conn, minMax, resMap, tids, iids,
+                                          begin, end, table);
+    }
+    
     public Map getAggData(Connection conn, String minMax, Map resMap,
                           Integer[] tids, Integer[] iids,
                           long begin, long end, String table)
@@ -307,8 +315,7 @@ public class MySQL5InnoDBDialect
         }
 
         final String aggregateSQL =
-            "SELECT COUNT(DISTINCT id)," + minMax +
-                   "MAX(timestamp), template_id " +
+            "SELECT template_id," + minMax + "MAX(timestamp) " +
             " FROM " + table + "," + TAB_MEAS +
             " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id AND " +
                     iidsConj + " AND " + tidsConj + " GROUP BY template_id";
@@ -328,14 +335,9 @@ public class MySQL5InnoDBDialect
             rs = astmt.executeQuery();
             while (rs.next()) {
                 Integer tid = new Integer(rs.getInt("template_id"));
-                double[] data =
-                    new double[IND_LAST_TIME + 1];
+                double[] data = new double[IND_LAST_TIME + 1];
                 // data[0] = min, data[1] = avg, data[2] = max,
                 // data[3] = last, data[4] = count of measurement ID's
-                data[IND_CFG_COUNT] = rs.getInt(1);
-                // If there are no metrics, then forget it
-                if (data[IND_CFG_COUNT] == 0)
-                    continue;
                 data[IND_MIN] = rs.getDouble(2);
                 data[IND_AVG] = rs.getDouble(3);
                 data[IND_MAX] = rs.getDouble(4);

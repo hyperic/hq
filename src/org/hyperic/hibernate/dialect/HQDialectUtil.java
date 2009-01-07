@@ -95,12 +95,6 @@ public class HQDialectUtil {
                 DBUtil.composeConjunctions("template_id", tids.length));
         DBUtil.replacePlaceHolders(tidsConj, tids);
         
-        final String countSQL =
-            "SELECT template_id, COUNT(id) as count FROM " + TAB_MEAS +
-            " WHERE " + iidsConj + " AND " + tidsConj +
-            " AND EXISTS (SELECT measurement_id FROM " + table  +
-            " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id) " +
-            " GROUP BY template_id";
         final String aggregateSQL =
             "SELECT template_id," + minMax + " MAX(timestamp) " +
             " FROM " + table + "," + TAB_MEAS +
@@ -108,54 +102,101 @@ public class HQDialectUtil {
             iidsConj + " AND " + tidsConj + " GROUP BY template_id";
         
         try {
-            astmt = conn.prepareStatement(countSQL);
-            int ind = 1;
-            astmt.setLong(ind++, begin);
-            astmt.setLong(ind++, end);
-            rs = astmt.executeQuery();
-            while (rs.next()) {
-                Integer tid = new Integer(rs.getInt("template_id"));
-                double[] data = new double[IND_LAST_TIME + 1];
-                data[IND_CFG_COUNT] = rs.getInt("count");
-                // Put it into the result map
-                resMap.put(tid, data);
-            }
-            
-            // Close JDBC objects
-            DBUtil.closeJDBCObjects(logCtx, null, astmt, rs);
-
             // Prepare aggregate SQL
             astmt = conn.prepareStatement(aggregateSQL);
             // First set the time range
-            ind = 1;
+            int ind = 1;
             astmt.setLong(ind++, begin);
             astmt.setLong(ind++, end);
 
             if (_log.isTraceEnabled())
                 _log.trace("getAggregateData() for begin=" + begin +
                            " end = " + end + ": " + aggregateSQL);
+            timer.markTimeBegin("aggregateSQL");
             // First get the min, max, average
             rs = astmt.executeQuery();
             while (rs.next()) {
-                Integer tid = new Integer(rs.getInt("template_id"));
+                Integer tid = new Integer(rs.getInt(1));
                 // data[0] = min, data[1] = avg, data[2] = max,
                 // data[3] = last, data[4] = count of measurement ID's
                 double[] data = (double[]) resMap.get(tid);
+                if (data == null) {
+                    data = new double[IND_LAST_TIME + 1];
+                    resMap.put(tid, data);
+                }
+                
                 data[IND_MIN] = rs.getDouble(2);
                 data[IND_AVG] = rs.getDouble(3);
                 data[IND_MAX] = rs.getDouble(4);
                 // Put it into the last map
                 lastMap.put(tid, new Long(rs.getLong(5)));
             }
-            if (_log.isTraceEnabled())
-                _log.trace("getAggregateData(): Statements query elapsed: " +
-                        timer.getElapsed());
+            timer.markTimeEnd("aggregateSQL");
+            if (_log.isDebugEnabled())
+                _log.debug("getAggData(): Statement query elapsed: " + timer);
         } finally {
             DBUtil.closeResultSet(logCtx, rs);
             DBUtil.closeStatement(logCtx, astmt);
         }
         return lastMap;
     }
+
+    public static Map getCountData(Connection conn, String minMax, Map resMap,
+                                   Integer[] tids, Integer[] iids,
+                                   long begin, long end, String table)
+        throws SQLException {
+        ResultSet rs            = null;
+        PreparedStatement astmt = null;
+        StopWatch timer         = new StopWatch();
+    
+        StringBuffer iidsConj = new StringBuffer(
+                DBUtil.composeConjunctions("instance_id", iids.length));
+        DBUtil.replacePlaceHolders(iidsConj, iids);
+    
+        StringBuffer tidsConj = new StringBuffer(
+                DBUtil.composeConjunctions("template_id", tids.length));
+        DBUtil.replacePlaceHolders(tidsConj, tids);
+        
+        final String countSQL =
+            "SELECT template_id, COUNT(id) FROM " + TAB_MEAS +
+            " WHERE " + iidsConj + " AND " + tidsConj +
+            " AND EXISTS (SELECT measurement_id FROM " + table  +
+            " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id) " +
+            " GROUP BY template_id";
+        try {
+            astmt = conn.prepareStatement(countSQL);
+            int ind = 1;
+            astmt.setLong(ind++, begin);
+            astmt.setLong(ind++, end);
+            timer.markTimeBegin("countSQL");
+            rs = astmt.executeQuery();
+            while (rs.next()) {
+                Integer tid = new Integer(rs.getInt(1));
+                int count = rs.getInt(2);
+                if (count > 0) {
+                    // Put it into the result map
+                    double[] data = (double[]) resMap.get(tid);
+                    if (data == null) {
+                        data = new double[IND_LAST_TIME + 1];
+                        resMap.put(tid, data);
+                    }
+                    data[IND_CFG_COUNT] = count;
+                }
+                else {
+                    resMap.remove(tid);
+                }
+            }
+            timer.markTimeEnd("countSQL");
+    
+            if (_log.isDebugEnabled())
+                _log.debug("countSQL(): Statement query elapsed: " + timer);
+        } finally {
+            DBUtil.closeResultSet(logCtx, rs);
+            DBUtil.closeStatement(logCtx, astmt);
+        }
+        return resMap;
+    }
+
 
     public static Map getLastData(Connection conn, String minMax,
                                   Map resMap, Map lastMap, Integer[] iids,

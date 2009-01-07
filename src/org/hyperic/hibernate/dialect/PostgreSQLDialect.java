@@ -135,6 +135,15 @@ public class PostgreSQLDialect
                                         iids, begin, end, table);
     }
     
+    public Map getCountData(Connection conn, String minMax, Map resMap,
+                          Integer[] tids, Integer[] iids,
+                          long begin, long end, String table)
+        throws SQLException
+    {
+        return HQDialectUtil.getCountData(conn, minMax, resMap, tids, iids,
+                                          begin, end, table);
+    }
+    
     public boolean usesSequenceGenerator() {
         return true;
     }
