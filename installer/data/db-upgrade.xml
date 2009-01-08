@@ -9538,6 +9538,23 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.133">
+    <schema-directSQL>
+      <statement desc="Drop EAM_SERVER column NAME." fail="false">
+        ALTER TABLE EAM_SERVER DROP COLUMN NAME
+      </statement>
+      <statement desc="Drop EAM_SERVER column SORT_NAME." fail="false">
+        ALTER TABLE EAM_SERVER DROP COLUMN SORT_NAME
+      </statement>
+      <statement desc="Drop EAM_SERVICE column NAME." fail="false">
+        ALTER TABLE EAM_SERVICE DROP COLUMN NAME
+      </statement>
+      <statement desc="Drop EAM_SERVICE column SORT_NAME." fail="false">
+        ALTER TABLE EAM_SERVICE DROP COLUMN SORT_NAME
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2009], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -120,7 +120,7 @@ public class ServerDAO extends HibernateDAO
     {
         String sql="from Server s join fetch s.serverType st " +
                    "where st.virtual=false " +
-                   "order by s.sortName " + (asc ? "asc" : "desc");
+                   "order by s.resource.sortName " + (asc ? "asc" : "desc");
         return getSession()
             .createQuery(sql)
             .setCacheable(true)
@@ -139,7 +139,7 @@ public class ServerDAO extends HibernateDAO
     public List findByPlatform_orderName(Integer id)
     {
         String sql="from Server where platform.id=? " +
-                   "order by sortName";
+                   "order by resource.sortName";
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .list();
@@ -149,7 +149,7 @@ public class ServerDAO extends HibernateDAO
     {
         String sql="from Server where platform.id=? and " +
                    "serverType.virtual=? " +
-                   "order by sortName";
+                   "order by resource.sortName";
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .setBoolean(1, virtual.booleanValue())
@@ -162,7 +162,7 @@ public class ServerDAO extends HibernateDAO
     {
         String sql="from Server where platform.id=? and " +
                    "serverType.id=? " +
-                   "order by sortName";
+                   "order by resource.sortName";
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .setInteger(1, tid.intValue())
@@ -176,7 +176,7 @@ public class ServerDAO extends HibernateDAO
                    "where s.platform.id=? and " +
                    "st.id=? and " +
                    "st.virtual=? " +
-                   "order by s.sortName";
+                   "order by s.resource.sortName";
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .setInteger(1, tid.intValue())

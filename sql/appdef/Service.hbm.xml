@@ -40,14 +40,6 @@
       <column name="LOCATION" not-null="false" length="100"/>
     </property>
 
-    <property name="name" type="string">
-      <column name="NAME" length="200" unique-key="EAM_SERVER_SERVICE_IDX" index="EAM_SERVICE_NAME_IDX"/>
-    </property>
-
-    <property name="sortName" type="string">
-      <column name="SORT_NAME" not-null="false" length="200"/>
-    </property>
-
     <property name="autodiscoveryZombie" type="boolean">
       <column name="AUTODISCOVERY_ZOMBIE" not-null="false"/>
     </property>

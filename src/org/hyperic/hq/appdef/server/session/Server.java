@@ -80,6 +80,42 @@ public class Server extends ServerBase
         setId(id);
     }
 
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.server.session.AppdefResource#getName()
+     */
+    public String getName() {
+        if (getResource() != null)
+            return getResource().getName();
+        return super.getName();
+    }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.server.session.AppdefResource#setName(java.lang.String)
+     */
+    public void setName(String name) {
+        if (getResource() != null)
+            getResource().setName(name);
+        super.setName(name);
+    }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.server.session.AppdefResource#getSortName()
+     */
+    public String getSortName() {
+        if (getResource() != null)
+            return getResource().getSortName();
+        return super.getSortName();
+    }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.server.session.AppdefResource#setSortName(java.lang.String)
+     */
+    public void setSortName(String sortName) {
+        if (getResource() != null)
+            getResource().setSortName(sortName);
+        super.setSortName(sortName);
+    }
+
     public Platform getPlatform() {
         return _platform;
     }

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2009], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -144,7 +144,7 @@ public class ServiceDAO extends HibernateDAO
     public Collection findAll_orderName(boolean asc)
     {
         return getSession()
-            .createQuery("from Service order by sortName " +
+            .createQuery("from Service order by resource.sortName " +
                          (asc ? "asc" : "desc"))
             .setCacheable(true)
             .setCacheRegion("Service.findAll_orderName")
@@ -159,8 +159,8 @@ public class ServiceDAO extends HibernateDAO
 
     public Collection findByType(Integer st, boolean asc)
     {
-        String sql = "from Service where serviceType.id=? order by sortName " +
-                     (asc ? "asc" : "desc");
+        String sql = "from Service where serviceType.id=? " +
+        		     "order by resource.sortName " + (asc ? "asc" : "desc");
         return createQuery(sql)
             .setInteger(0, st.intValue())
             .list();
@@ -190,7 +190,7 @@ public class ServiceDAO extends HibernateDAO
                    " join fetch sv.server s " +
                    " join fetch s.platform p "+
                    "where p.id=?" +
-                   "order by s.sortName " +
+                   "order by s.resource.sortName " +
                    (asc ? "asc" : "desc");
         return createQuery(sql)
             .setInteger(0, id.intValue())
@@ -219,7 +219,7 @@ public class ServiceDAO extends HibernateDAO
                   " where " +  
                   "     p = :platform " + 
                   " and v.serviceType = :serviceType " + 
-                  " order by v.sortName";
+                  " order by v.resource.sortName";
         
         return createQuery(sql)
             .setParameter("platform", p)
@@ -236,7 +236,7 @@ public class ServiceDAO extends HibernateDAO
                    " join fetch s.platform p " +
                    "where p.id=? " +
                    " and st.virtual=? " +
-                   "order by sv.sortName " +
+                   "order by sv.resource.sortName " +
                    (asc ? "asc" : "desc");
         return createQuery(sql)
             .setInteger(0, platId.intValue())
@@ -248,7 +248,7 @@ public class ServiceDAO extends HibernateDAO
 
     public List findByServer_orderName(Integer id)
     {
-        String sql="from Service where server.id=? order by sortName";
+        String sql="from Service where server.id=? order by resource.sortName";
         return createQuery(sql)
             .setInteger(0, id.intValue())
             .list();
@@ -268,7 +268,7 @@ public class ServiceDAO extends HibernateDAO
     public List findByServerAndType_orderName(Integer id, Integer tid)
     {
         String sql="from Service where server.id=? and serviceType.id=? " +
-                   "order by sortName";
+                   "order by resource.sortName";
         return createQuery(sql)
             .setInteger(0, id.intValue())
             .setInteger(1, tid.intValue())
@@ -290,7 +290,7 @@ public class ServiceDAO extends HibernateDAO
     public Collection findAllClusterUnassigned_orderName(boolean asc)
     {
         String sql="from Service where serviceCluster is null " +
-                   "order by sortName " +
+                   "order by resource.sortName " +
                    (asc ? "asc" : "desc");
         return createQuery(sql).list();
     }
@@ -299,7 +299,7 @@ public class ServiceDAO extends HibernateDAO
     {
         String sql="from Service where serviceCluster is null and " +
                    "appServices.size=0 " +
-                   "order by sortName " +
+                   "order by resource.sortName " +
                    (asc ? "asc" : "desc");
         return createQuery(sql).list();
     }
