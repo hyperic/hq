@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.ui.action.resource.group.inventory;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -40,7 +41,6 @@ import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
@@ -50,6 +50,7 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.exception.ParameterNotFoundException;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.pager.PageList;
 
 /**
  * Action which saves the general properties for a group
@@ -101,9 +102,12 @@ public class EditGeneralAction extends BaseAction {
             
             // See if this is a private group
             boolean isPrivate = true;
-            for (Iterator it = group.getRoles().iterator(); it.hasNext(); ) {
-                Role role = (Role) it.next();
-                isPrivate = role.getId() == AuthzConstants.rootResourceGroupId;
+            Collection groups = 
+                boss.getGroupsForResource(sessionId, group.getResource());
+            for (Iterator it = groups.iterator(); it.hasNext(); ) {
+                ResourceGroup g = (ResourceGroup) it.next();
+                isPrivate =
+                    !g.getId().equals(AuthzConstants.rootResourceGroupId);
                 if (!isPrivate)
                     break;
             }

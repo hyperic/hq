@@ -2104,6 +2104,16 @@ public class AppdefBossEJBImpl
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public Collection getGroupsForResource(int sessionId, Resource r)
+        throws SessionNotFoundException, SessionTimeoutException {
+        manager.authenticate(sessionId);
+        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        return groupMan.getGroups(r);
+    }
+    
+    /**
      * Lookup and return a list of group value objects by their identifiers.
      * @return PageList of AppdefGroupValue objects
      * @throws AppdefGroupNotFoundException when group cannot be found.
