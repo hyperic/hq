@@ -189,7 +189,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public Resource findResourceByInstanceId(ResourceType type,
                                              Integer instanceId) {
-        Resource resource = findResourcePojoByInstanceId(type, instanceId);
+        Resource resource = findResourceByInstanceId(type.getId(), instanceId);
         
         if (resource == null) {
             throw new RuntimeException("Unable to find resourceType=" + 
@@ -202,17 +202,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     /**
      * @ejb:interface-method
      */
-    public Resource findResourcePojoByInstanceId(ResourceType type,
-                                                 Integer instanceId)
+    public Resource findResourceByInstanceId(Integer typeId, Integer instanceId)
     {
-        return findResourcePojoByInstanceId(type.getId(), instanceId);
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public Resource findResourcePojoByInstanceId(Integer typeId,
-                                                 Integer instanceId) {
         return getResourceDAO().findByInstanceId(typeId, instanceId);
     }
 
@@ -227,7 +218,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     /**
      * @ejb:interface-method
      */
-    public Resource findResourcePojoById(Integer id) {
+    public Resource findResourceById(Integer id) {
         return getResourceDAO().findById(id);
     }
 

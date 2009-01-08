@@ -152,7 +152,7 @@ class ResourceHelper extends BaseHelper {
     }
     
     public Resource findById(id) {
-        rman.findResourcePojoById(id)
+        rman.findResourceById(id)
     }
     
     private Resource findPrototype(Map args) {
@@ -364,7 +364,7 @@ class ResourceHelper extends BaseHelper {
     }
     
     Resource findResource(int id) {
-        rman.findResourcePojoById(id)
+        rman.findResourceById(id)
     }
 
     List findViewableInstances(user, type, name) {

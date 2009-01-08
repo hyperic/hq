@@ -55,7 +55,7 @@ public class ServerConfigAudit extends Audit {
 
     private static Resource getSystemResource() {
         return ResourceManagerEJBImpl.getOne()
-                    .findResourcePojoById(AuthzConstants.authzHQSystem);
+                .findResourceById(AuthzConstants.authzHQSystem);
     }
     
     private static ServerConfigAudit createAudit(AuthzSubject user,

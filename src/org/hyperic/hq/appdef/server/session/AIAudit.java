@@ -62,7 +62,7 @@ public class AIAudit extends Audit {
 
     private static Resource getSystemResource() {
         return ResourceManagerEJBImpl.getOne()
-                .findResourcePojoById(AuthzConstants.authzHQSystem);
+            .findResourceById(AuthzConstants.authzHQSystem);
     }
     
     public static AIAudit newImportAudit(AuthzSubject user) {

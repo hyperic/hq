@@ -55,7 +55,7 @@ class ResourceGroupCategory {
             assert "Unknown group ent type ${g.groupEntType} for compat groups"
         }
             
-        rsrcMan.findResourcePojoByInstanceId(resourceTypeId, g.groupEntResType)
+        rsrcMan.findResourceByInstanceId(resourceTypeId, g.groupEntResType)
     }
     
     static void updateGroupType(ResourceGroup g, AuthzSubject subject,

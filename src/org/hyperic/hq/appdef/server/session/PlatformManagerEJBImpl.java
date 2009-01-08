@@ -175,7 +175,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
         } catch (FinderException e) {
             throw new SystemException(e);
         }
-        return rman.findResourcePojoByInstanceId(rType, pt.getId());
+        return rman.findResourceByInstanceId(rType, pt.getId());
     }
 
     /**
@@ -1318,10 +1318,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
 
         ResourceType platProtoType = getPlatformPrototypeResourceType();
         Resource proto = ResourceManagerEJBImpl.getOne()
-                .findResourcePojoByInstanceId(
-                                              platProtoType,
-                                              platform.getPlatformType()
-                                                      .getId());
+                .findResourceByInstanceId(platProtoType,
+                                          platform.getPlatformType().getId());
         _log.debug("User has permission to create platform. "
                 + "Adding AuthzResource");
         Resource resource = createAuthzResource(subject,
@@ -1342,10 +1340,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
         ResourceGroupManagerLocal resGroupMan = ResourceGroupManagerEJBImpl
                 .getOne();
         ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
-        Resource proto = resMan
-                .findResourcePojoByInstanceId(
-                                              AuthzConstants.authzPlatformProto,
-                                              pt.getId());
+        Resource proto = 
+            resMan.findResourceByInstanceId(AuthzConstants.authzPlatformProto,
+                                            pt.getId());
         AuthzSubject overlord = getOverlord();
 
         try {

@@ -177,8 +177,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
             ResourceManagerLocal rman = getResourceManager();
             ResourceType serviceProto = getServicePrototypeResourceType();
-            Resource prototype = rman
-                .findResourcePojoByInstanceId(serviceProto,
+            Resource prototype = 
+                rman.findResourceByInstanceId(serviceProto,
                                               service.getServiceType().getId());
         
             Resource parent = rman.findResource(server.getEntityId());
@@ -1314,8 +1314,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                   ResourceManagerLocal resMan)
         throws VetoException, RemoveException {
         Resource proto = 
-            resMan.findResourcePojoByInstanceId(AuthzConstants.authzServiceProto,
-                                                serviceType.getId());
+            resMan.findResourceByInstanceId(AuthzConstants.authzServiceProto,
+                                            serviceType.getId());
         
         try {
             // Delete compatible groups of this type.

@@ -128,7 +128,7 @@ public class DashboardPortletBossEJBImpl
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
         long intv = (end - begin) / 60;
         JSONObject jObj = new JSONObject();
-        Resource res = resMan.findResourcePojoById(resId);
+        Resource res = resMan.findResourceById(resId);
         AppdefEntityID aeid = new AppdefEntityID(res);
         try {
             jObj.put("resourceName", res.getName());

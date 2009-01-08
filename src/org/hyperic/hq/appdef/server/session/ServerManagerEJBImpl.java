@@ -1323,7 +1323,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         log.debug("Removing ServerType: " + serverType.getName());
         Integer typeId = AuthzConstants.authzServerProto;
         Resource proto = 
-            resMan.findResourcePojoByInstanceId(typeId, serverType.getId());
+            resMan.findResourceByInstanceId(typeId, serverType.getId());
         
         try {
             resGroupMan.removeGroupsCompatibleWith(proto);
@@ -1390,7 +1390,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         ResourceType serverProto = getServerPrototypeResourceType();
         ServerType serverType = server.getServerType();
         Resource proto = ResourceManagerEJBImpl.getOne()
-            .findResourcePojoByInstanceId(serverProto, serverType.getId());
+            .findResourceByInstanceId(serverProto, serverType.getId());
         Resource parent = getResourceManager().findResource(platId);
 
         if (parent == null) {

@@ -64,7 +64,7 @@ public class PluginAudit extends Audit {
 
     private static Resource getSystemResource() {
         return ResourceManagerEJBImpl.getOne()
-                .findResourcePojoById(AuthzConstants.authzHQSystem);
+                .findResourceById(AuthzConstants.authzHQSystem);
     }
     
     public static PluginAudit deployAudit(String pluginName, long start, 

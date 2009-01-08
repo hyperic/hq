@@ -62,7 +62,7 @@ public class SystemAudit extends Audit {
 
     private static Resource getSystemResource() {
         return ResourceManagerEJBImpl.getOne()
-                .findResourcePojoById(AuthzConstants.authzHQSystem);
+                .findResourceById(AuthzConstants.authzHQSystem);
     }
     
     public static AuthzSubject getOverlord() {

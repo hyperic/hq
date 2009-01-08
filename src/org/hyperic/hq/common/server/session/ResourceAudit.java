@@ -77,7 +77,7 @@ public class ResourceAudit extends Audit {
     
     private static Resource getSystemResource() {
         return ResourceManagerEJBImpl.getOne()
-                .findResourcePojoById(AuthzConstants.authzHQSystem);
+                .findResourceById(AuthzConstants.authzHQSystem);
     }
     
     public static ResourceAudit deleteResource(Resource r, AuthzSubject creator,

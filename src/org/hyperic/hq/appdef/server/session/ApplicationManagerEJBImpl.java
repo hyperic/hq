@@ -754,8 +754,8 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         
         ResourceType appProto = getApplicationPrototypeResourceType();
         Resource proto = ResourceManagerEJBImpl.getOne()
-            .findResourcePojoByInstanceId(appProto,
-                                          app.getApplicationType().getId());
+            .findResourceByInstanceId(appProto,
+                                      app.getApplicationType().getId());
         Resource resource = createAuthzResource(subject,
                                                 getApplicationResourceType(),
                                                 proto, app.getId(),

@@ -13,7 +13,7 @@ class AppdefCategory {
     }
 
     static Resource getResource(AppdefResourceType r) {
-		ResourceMan.one.findResourcePojoByInstanceId(r.authzType, r.id)
+		ResourceMan.one.findResourceByInstanceId(r.authzType, r.id)
     }
     
     /**
