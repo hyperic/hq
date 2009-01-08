@@ -479,7 +479,7 @@ class HealthController
              name: localeBundle['queryOrphanedAlertDefs'],
              query: "SELECT COUNT(*) FROM EAM_ALERT_DEFINITION " +
                    "WHERE RESOURCE_ID IS NULL AND PARENT_ID IS NOT NULL " +
-                   "AND APPDEF_ID IS NOT NULL AND NOT PARENT_ID=0"],
+                   "AND NOT PARENT_ID=0"],
           orphanedAuditRows: [
              name: localeBundle['queryOrphanedAuditRows'],
              query: "SELECT COUNT(*) FROM EAM_AUDIT WHERE NOT EXISTS " +
