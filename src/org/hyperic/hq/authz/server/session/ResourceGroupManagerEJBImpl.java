@@ -279,10 +279,6 @@ public class ResourceGroupManagerEJBImpl
         checkGroupPermission(whoami, group.getId(),
                              AuthzConstants.perm_removeResourceGroup);
         ResourceGroupDAO dao = getResourceGroupDAO();
-
-        ResourceEdgeDAO edgeDao =
-            new ResourceEdgeDAO(DAOFactory.getDAOFactory());
-        edgeDao.deleteEdges(group.getResource());
         
         // TODO scottmf, this should be invoking a pre-transaction callback
         EventLogManagerLocal logMan = EventLogManagerEJBImpl.getOne();
