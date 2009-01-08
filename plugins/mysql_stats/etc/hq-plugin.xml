@@ -46,6 +46,13 @@
     <property name="showDatabases"
               value="query=show databases"/>
 
+    <config name="mysql_stats_table_config">
+        <option name="table"
+                description="Table Name"/>
+        <option name="database"
+                description="Database Name"/>
+    </config>
+
     <config name="mysql_stats_config">
         <option name="jdbcUrl"
                 default="jdbc:mysql://localhost:3306"
@@ -60,6 +67,8 @@
         <option name="process.query"
                 description="Process query"
                 default="State.Name.eq=mysqld"/>
+        <option name="tableRegex"
+                description="Regex of tables to monitor (blank for none)"/>
     </config>
 
     <config name="repl_slave_config">
@@ -1963,35 +1972,35 @@
                 units="percentage"
                 collectionType="dynamic"/>
         <metric name="Number of Rows"
-                alias="Rows"
+                alias="TABLE_ROWS"
                 category="UTILIZATION"
                 indicator="true"
                 units="none"
                 collectionType="dynamic"/>
         <metric name="Average Row Length"
-                alias="Avg_row_length"
+                alias="AVG_ROW_LENGTH"
                 category="UTILIZATION"
                 units="B"
                 collectionType="dynamic"/>
         <metric name="Data Length"
-                alias="Data_length"
+                alias="DATA_LENGTH"
                 category="UTILIZATION"
                 indicator="true"
                 units="B"
                 collectionType="dynamic"/>
         <metric name="Max Data Length"
-                alias="Max_data_length"
+                alias="MAX_DATA_LENGTH"
                 category="UTILIZATION"
                 units="B"
                 collectionType="dynamic"/>
         <metric name="Index Length"
-                alias="Index_length"
+                alias="INDEX_LENGTH"
                 category="UTILIZATION"
                 indicator="true"
                 units="B"
                 collectionType="dynamic"/>
         <metric name="Data Free"
-                alias="Data_free"
+                alias="DATA_FREE"
                 category="UTILIZATION"
                 units="B"
                 collectionType="dynamic"/>
@@ -2039,17 +2048,10 @@
         <service name="Table">
             <plugin type="measurement"
                     class="MySqlStatsMeasurementPlugin"/>
-<!-- TODO scottmf need to add index level stats
             <plugin type="control"
                     class="MySqlStatsControlPlugin"/>
             <actions include="Analyze,Check,Optimize,Repair"/>
--->
-            <config>
-              <option name="table"
-                      description="Table Name"/>
-              <option name="database"
-                      description="Database Name"/>
-            </config>
+            <config include="mysql_stats_table_config"/>
             <metrics include="mysql-table"/>
         </service>
     </server>

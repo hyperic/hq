@@ -57,6 +57,7 @@ public class MySqlServerDetector
 {
     private static final String _logCtx = MySqlServerDetector.class.getName();
     private final Log _log = LogFactory.getLog(_logCtx);
+    private Connection _conn;
     // mysqld process name for unix systems
     private static String PROCESS_NAME = "mysqld";
     static {
@@ -72,6 +73,7 @@ public class MySqlServerDetector
                                 VERSION_4_1_x = "4.1.x",
                                 VERSION_5_0_x = "5.0.x",
                                 VERSION_5_1_x = "4.1.x",
+                                TABLE_SERVICE = "Table",
                                 SLAVE_STATUS  = "Slave Status",
                                 SHOW_SLAVE_STATUS  = "Show Slave Status";
     private static final Pattern REGEX_VER_4_0 = Pattern.compile("Ver 4.0.[0-9]+"),
@@ -98,11 +100,69 @@ public class MySqlServerDetector
         throws PluginException
     {
         final List rtn = new ArrayList();
-        setSlaveStatusService(rtn, serverConfig);
-        setMasterSlaveStatusService(rtn, serverConfig);
+        String url  = serverConfig.getValue(JDBCMeasurementPlugin.PROP_URL);
+        String user = serverConfig.getValue(JDBCMeasurementPlugin.PROP_USER);
+        String pass = serverConfig.getValue(JDBCMeasurementPlugin.PROP_PASSWORD);
+        try {
+            _conn = getConnection(url, user, pass, serverConfig);
+            setTableServices(rtn, serverConfig);
+            setSlaveStatusService(rtn, serverConfig);
+            setMasterSlaveStatusService(rtn, serverConfig);
+        } catch (SQLException e) {
+            throw new PluginException(e);
+        } finally {
+            DBUtil.closeConnection(_logCtx, _conn);
+        }
         return rtn;
     }
     
+    private void setTableServices(List services, ConfigResponse serverConfig) {
+        final String tableRegex = serverConfig.getValue("tableRegex", "");
+        if (tableRegex.trim().length() <= 0) {
+            _log.debug("Table config is blank, skipping table AI");
+            return;
+        }
+        _log.debug("Discovering tables with regex " + tableRegex);
+        final Pattern regex =
+            Pattern.compile(tableRegex, Pattern.CASE_INSENSITIVE);
+        Statement stmt = null;
+        ResultSet rs = null;
+        final String sql =
+            "SELECT table_name, table_schema " +
+            "FROM information_schema.tables " +
+            "WHERE engine is not null";
+        try {
+            stmt = _conn.createStatement();
+            rs = stmt.executeQuery(sql);
+            final int tableNameCol = rs.findColumn("table_name"),
+                      dbNameCol    = rs.findColumn("table_schema");
+            final boolean debug = _log.isDebugEnabled();
+            while (rs.next()) {
+                final String table = rs.getString(tableNameCol);
+                final String dbName = rs.getString(dbNameCol);
+                if (regex.matcher(table).find()) {
+                    if (debug) {
+                        _log.debug("Adding table " + table);
+                    }
+                    ServiceResource service = new ServiceResource();
+                    service.setType(this, TABLE_SERVICE);
+                    service.setServiceName(dbName + "/" + table);
+                    ConfigResponse productConfig = new ConfigResponse();
+                    productConfig.setValue("table", table);
+                    productConfig.setValue("database", dbName);
+                    service.setProductConfig(productConfig);
+                    service.setMeasurementConfig(serverConfig);
+                    service.setControlConfig(productConfig);
+                    services.add(service);
+                }
+            }
+        } catch (SQLException e) {
+            _log.warn(e.getMessage(), e);
+        } finally {
+            DBUtil.closeJDBCObjects(_logCtx, null, stmt, rs);
+        }
+    }
+
     private static final Connection getConnection(String url, String user,
                                                   String pass,
                                                   ConfigResponse config)
@@ -126,15 +186,10 @@ public class MySqlServerDetector
 
     private void setSlaveStatusService(List services,
                                        ConfigResponse serverConfig) {
-        String url  = serverConfig.getValue(JDBCMeasurementPlugin.PROP_URL);
-        String user = serverConfig.getValue(JDBCMeasurementPlugin.PROP_USER);
-        String pass = serverConfig.getValue(JDBCMeasurementPlugin.PROP_PASSWORD);
-        Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            conn = getConnection(url, user, pass, serverConfig);
-            stmt = conn.createStatement();
+            stmt = _conn.createStatement();
             rs = stmt.executeQuery(SHOW_SLAVE_STATUS.toLowerCase());
             if (rs.next()) {
                 ServiceResource service = new ServiceResource();
@@ -152,7 +207,7 @@ public class MySqlServerDetector
             // Therefore just return and ignore service.
             return;
         } finally {
-            DBUtil.closeJDBCObjects(_logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(_logCtx, null, stmt, rs);
         }
     }
 

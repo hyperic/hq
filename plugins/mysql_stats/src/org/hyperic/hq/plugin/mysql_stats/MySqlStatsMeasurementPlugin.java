@@ -62,7 +62,6 @@ public class MySqlStatsMeasurementPlugin
                            SHOW_DATABASES     = "show databases",
                            SLAVE_STATUS       = "slavestatus",
                            TABLE_SERVICE      = "type=table",
-                           SHOW_TABLE_STATUS  = "show table status",
                            SHOW_SLAVE_STATUS  = "show slave status",
                            SHOW_GLOBAL_STATUS = "show /*!50002 global */ status",
                            // computed for mysql replication
@@ -113,6 +112,7 @@ public class MySqlStatsMeasurementPlugin
                JDBCQueryCacheException,
                MetricUnreachableException {
         final String table = metric.getObjectProperty("table");
+        final String dbname = metric.getObjectProperty("database");
         String alias = metric.getAttributeName();
         JDBCQueryCache tableCache =
             (JDBCQueryCache)_tableStatusCacheMap.get(table);
@@ -122,13 +122,16 @@ public class MySqlStatsMeasurementPlugin
         // over the old mysql plugin since the query only has to be run once for
         // all the individual table metrics.
         if (tableCache == null) {
-            final String query = new StringBuilder(SHOW_TABLE_STATUS)
-                .append(" like '").append(table).append("'").toString();
-            tableCache = new JDBCQueryCache(query, "Name", 10000);
+            final String sql = new StringBuilder()
+                .append("SELECT * FROM information_schema.tables")
+                .append(" WHERE table_name = '").append(table).append('\'')
+                .append(" AND table_schema = '").append(dbname).append('\'')
+                .append(" AND engine is not null").toString();
+            tableCache = new JDBCQueryCache(sql, "table_name", 10000);
             _tableStatusCacheMap.put(table, tableCache);
         }
         if (metric.isAvail()) {
-            alias = "Rows";
+            alias = "TABLE_ROWS";
         }
         Connection conn = getCachedConnection(metric);
         Object cachedVal = tableCache.get(conn, table, alias);
@@ -223,7 +226,7 @@ public class MySqlStatsMeasurementPlugin
         } else {
             Connection conn = getCachedConnection(metric);
             Double val = Double.valueOf(
-                _replStatus.get(conn, "master", valColumn).toString());
+                _replStatus.getOnlyRow(conn, valColumn).toString());
             return val.doubleValue();
         }
     }
@@ -236,15 +239,15 @@ public class MySqlStatsMeasurementPlugin
         Connection conn = getCachedConnection(metric);
         double slaveLogPos = -1d;
         try {
-            slaveLogPos = Double.valueOf(_replStatus.get(
-                conn, "master", "Exec_Master_Log_Pos").toString()).doubleValue();
+            slaveLogPos = Double.valueOf(_replStatus.getOnlyRow(
+                conn, "Exec_Master_Log_Pos").toString()).doubleValue();
         } catch (Exception e) {
             // for 4.0 replication, the cases are different
-            slaveLogPos = Double.valueOf(_replStatus.get(
-                conn, "master", "Exec_master_log_pos").toString()).doubleValue();
+            slaveLogPos = Double.valueOf(_replStatus.getOnlyRow(
+                conn, "Exec_master_log_pos").toString()).doubleValue();
         }
-        double masterLogPos = Double.valueOf(_replStatus.get(
-            conn, "master", "Read_Master_Log_Pos").toString()).doubleValue();
+        double masterLogPos = Double.valueOf(_replStatus.getOnlyRow(
+            conn, "Read_Master_Log_Pos").toString()).doubleValue();
         return masterLogPos - slaveLogPos;
     }
 
@@ -252,10 +255,10 @@ public class MySqlStatsMeasurementPlugin
         throws SQLException,
                JDBCQueryCacheException {
         Connection conn = getCachedConnection(metric);
-        String masterLogFile =  _replStatus.get(
-                conn, "master", "Master_Log_File").toString();
-        String slaveLogFile =  _replStatus.get(
-                conn, "master", "Relay_Master_Log_File").toString();
+        String masterLogFile =  _replStatus.getOnlyRow(
+                conn, "Master_Log_File").toString();
+        String slaveLogFile =  _replStatus.getOnlyRow(
+                conn, "Relay_Master_Log_File").toString();
         if (masterLogFile.equals(slaveLogFile)) {
             return 0d;
         }

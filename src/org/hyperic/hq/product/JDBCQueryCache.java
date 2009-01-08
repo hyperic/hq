@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -74,6 +75,44 @@ public class JDBCQueryCache {
         _query = query;
         _queryKey = queryKey;
         _cacheTimeout = cacheTimeout;
+    }
+
+    /**
+     * @return Object representation of the *only* row and column value
+     *  or null if it does not exist
+     * @throws JDBCQueryCacheException if there are 0 or > 1 rows in the cache.
+     */
+    public Object getOnlyRow(Connection conn, String column)
+        throws SQLException, JDBCQueryCacheException {
+        long now = System.currentTimeMillis();
+        if (_cache.size() == 0 || (now - _cacheTimeout) > _last) {
+            repopulateCache(conn);
+        }
+        Set keys = _cache.keySet();
+        if (keys.size() > 1) {
+            throw new JDBCQueryCacheException(
+                "cache contains more than one row");
+        } else if (keys.size() <= 0) {
+            throw new JDBCQueryCacheException(
+                "cache does not contain any results");
+        }
+        List list = null;
+        for (Iterator it = _cache.entrySet().iterator(); it.hasNext();) {
+            Map.Entry entry = (Map.Entry)it.next();
+            list = (List)entry.getValue();
+            break;
+        }
+        if (list == null) {
+            return null;
+        }
+        for (Iterator it = list.iterator(); it.hasNext();) {
+            NameValuePair pair = (NameValuePair) it.next();
+            if (pair.getName().equals(column)) {
+                return pair.getValue();
+            }
+        }
+        throw new JDBCQueryCacheException(
+            "column " + column + " not found.");
     }
 
     /**
