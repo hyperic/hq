@@ -1704,6 +1704,7 @@
     <jar basedir="${build.dir}/installer-classes" 
          jarfile="${installer.dir}/lib/hq-boot.jar">
       <include name="org/hyperic/*.class"/>
+      <include name="org/hyperic/util/ArrayUtil.class"/>
     </jar>
   </target>
 

@@ -33,6 +33,8 @@ import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import org.hyperic.util.ArrayUtil;
+
 /**
  * Bootstraps the JBoss environment by:
  * <ol>
@@ -241,7 +243,15 @@ public class HQMain {
             Class mclass = Class.forName(mainClass);
             Method mmethod
                 = mclass.getMethod("main", new Class[] {args.getClass()});
-            mmethod.invoke(null, new Object[] {args});
+            
+            // HHQ-2744: JBoss 4.2.3.GA binds to localhost by default
+            String addr = System.getProperty("hq.listen.address", "0.0.0.0");
+            
+            mmethod.invoke(
+                 null, 
+                 new Object[] {
+                         ArrayUtil.combine(new String[] {"-b", addr}, args)}
+            );
         }
     }
 
