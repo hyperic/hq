@@ -255,7 +255,7 @@ JBOSSHOME=${ENGINE_HOME} \
     -Djava.awt.headless=true \
     -Djava.net.preferIPv4Stack=true \
     -classpath ${ENGINE_HOME}/bin/run.jar \
-    org.jboss.Main > ${SERVER_LOG} 2>&1 &
+    org.jboss.Main -b 0.0.0.0 > ${SERVER_LOG} 2>&1 &
 
   # Save the pid to a pidfile
   HQPID=$!
