@@ -38,8 +38,8 @@
 	<div id="AddToGroupDataDiv" style="width:250px; height: 100px;">
 		<fieldset>
 			<legend><fmt:message key="resource.group.AddToGroup.Title"/></legend>
-			<label style="padding:2px; white-space: nowrap"><input type="radio" value="addNewGroup" name="radioAction" checked="checked" /> <fmt:message key="resource.group.AddToGroup.NewGroup"/></label><br />
-			<label style="padding:2px; white-space: nowrap"><input type="radio" value="addToGroup" name="radioAction" /> <fmt:message key="resource.group.AddToGroup.ExistingGroup"/></label>
+			<label style="padding:2px; white-space: nowrap"><input type="radio" id="AddToNewGroupRadioAction" value="addNewGroup" name="radioAction" /> <fmt:message key="resource.group.AddToGroup.NewGroup"/></label><br />
+			<label style="padding:2px; white-space: nowrap"><input type="radio" id="AddToGroupRadionAction" value="addToGroup" name="radioAction" /> <fmt:message key="resource.group.AddToGroup.ExistingGroup"/></label>
 		</fieldset>	
 	</div>
     <div id="AddToGroupButtonDiv">
@@ -66,6 +66,10 @@
 
     var AddToGroupMenuLink = dojo11.byId("AddToGroupMenuLink");
     if (AddToGroupMenuLink) {
-    	AddToGroupMenuLink.onclick = function() { MyGroupManager.dialogs.AddToGroup.show(); return false; };
+    	AddToGroupMenuLink.onclick = function() { 
+			dojo11.byId("AddToNewGroupRadioAction").checked = "checked";
+        	MyGroupManager.dialogs.AddToGroup.show(); 
+        	return false; 
+        };
     }
 </script>
