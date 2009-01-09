@@ -197,7 +197,7 @@ public class ServerDAO extends HibernateDAO
 
     public Server findByName(Platform plat, String name) {
         String sql = "select s from Server s " + 
-            "where s.platform = :plat and s.sortName=:name";
+            "where s.platform = :plat and s.resource.sortName=:name";
         
         return (Server)getSession().createQuery(sql)
             .setParameter("plat", plat)
@@ -207,7 +207,7 @@ public class ServerDAO extends HibernateDAO
     
     public List findByName(String name)
     {
-        String sql="from Server where sortName=?";
+        String sql="from Server where resource.sortName=?";
         return getSession().createQuery(sql)
             .setString(0, name.toUpperCase())
             .list();
