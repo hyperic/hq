@@ -422,9 +422,9 @@
         <include name="commons-pool.jar" />
         <include name="commons-services.jar" />
         <include name="log4j-1.2.14.jar" />
-        <include name="quartz-1.6.3.jar" />
-        <include name="quartz-oracle-1.6.3.jar" />
-        <include name="quartz-jboss-1.6.3.jar" />
+        <include name="quartz-1.6.4.jar" />
+        <include name="quartz-oracle-1.6.4.jar" />
+        <include name="quartz-jboss-1.6.4.jar" />
         <include name="snmp4j.jar" />
         <include name="dnsjava-2.0.3.jar" />
         <include name="ehcache-1.5.0.jar" />

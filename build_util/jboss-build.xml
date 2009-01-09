@@ -78,7 +78,7 @@
         <include name="commons-modeler.jar" />
         <include name="jgroups-all.jar" />
         <include name="commons-collections-3.2.jar" />
-        <include name="quartz-1.6.3.jar" />
+        <include name="quartz-1.6.4.jar" />
       </fileset>
       <fileset dir="${thirdparty.lib}/oracle_jdbc" includes="ojdbc14.jar"/>
       <fileset dir="${thirdparty.lib}/postgresql">
@@ -104,6 +104,7 @@
     <!-- remove obsolete jars -->
     <delete file="${jboss.home}/server/default/lib/antlr-2.7.5H3.jar" />
     <delete file="${jboss.home}/server/default/lib/quartz.jar"/>
+    <delete file="${jboss.home}/server/default/lib/quartz-1.6.3.jar"/>
 
     <!-- Remove stuff we don't need to deploy -->
     <property name="jboss-deploy-dir"
