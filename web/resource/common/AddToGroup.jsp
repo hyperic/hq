@@ -38,7 +38,7 @@
 	<div id="AddToGroupDataDiv" style="width:250px; height: 100px;">
 		<fieldset>
 			<legend><fmt:message key="resource.group.AddToGroup.Title"/></legend>
-			<div style="padding:2px"><input type="radio" id="AddToNewGroupRadioAction" value="addNewGroup" name="radioAction" /><label style="white-space: nowrap"><fmt:message key="resource.group.AddToGroup.NewGroup"/></label></div>
+			<div style="padding:2px"><input type="radio" id="AddToNewGroupRadioAction" value="addNewGroup" name="radioAction" checked="checked" /><label style="white-space: nowrap"><fmt:message key="resource.group.AddToGroup.NewGroup"/></label></div>
 			<div style="padding:2px"><input type="radio" id="AddToGroupRadionAction" value="addToGroup" name="radioAction" /><label style="white-space: nowrap"><fmt:message key="resource.group.AddToGroup.ExistingGroup"/></label></div>
 		</fieldset>	
 	</div>
