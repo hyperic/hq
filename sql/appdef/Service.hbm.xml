@@ -57,7 +57,7 @@
     </many-to-one>
 
     <many-to-one name="server" class="Server">
-      <column name="SERVER_ID" not-null="false" index="EAM_SERVICE_SERVER_IDX" unique-key="EAM_SERVER_SERVICE_IDX"/>
+      <column name="SERVER_ID" not-null="false" index="EAM_SERVICE_SERVER_IDX"/>
     </many-to-one>
 
     <many-to-one name="serviceType" class="ServiceType">

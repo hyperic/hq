@@ -9555,6 +9555,20 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.134">
+    <schema-directSQL>
+      <statement targetDB="oracle">
+        drop index EAM_SERVICE_SERVER_IDX
+      </statement>
+      <statement targetDB="postgresql">
+        drop index EAM_SERVICE_SERVER_IDX
+      </statement>
+      <statement targetDB="mysql">
+        drop index EAM_SERVICE_SERVER_IDX on EAM_SERVICE
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
