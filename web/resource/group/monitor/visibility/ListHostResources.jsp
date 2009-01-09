@@ -11,7 +11,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -102,7 +102,9 @@
 
     <td class="ListCell"><a href="<c:out value="${url}"/>"><c:out value="${summary.resourceName}"/></a></td>
     <td class="ListCellCheckbox">
-      <html:img page="/resource/Availability?eid=${summary.resourceTypeId}:${summary.resourceId}" width="12" height="12" alt="" border="0"/>
+    <tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
+        <tiles:put name="availability" beanName="summary" beanProperty="availability" />
+    </tiles:insert>
     </td>
     <td class="ListCellCheckbox">
       <!--<a href="<c:out value="${url}"/>">-->

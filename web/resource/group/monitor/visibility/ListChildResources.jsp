@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -139,28 +139,9 @@
         <html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}"><c:out value="${summary.resourceName}"/></html:link>
       </td>
       <td class="ListCellCheckbox">
-      <c:choose>
-        <c:when test="${summary.availability == 0}">
-          <html:img page="/images/icon_available_red.gif" border="0"
-                    width="12" height="12"/>
-        </c:when>
-        <c:when test="${summary.availability == 1}">
-          <html:img page="/images/icon_available_green.gif" border="0"
-                    width="12" height="12"/>
-        </c:when>
-        <c:when test="${summary.availability == -0.01}">
-          <html:img page="/images/icon_available_orange.gif" border="0"
-                    width="12" height="12"/>
-        </c:when>
-        <c:when test="${summary.availability < 1 && summary.availability > 0}">
-          <html:img page="/images/icon_available_yellow.gif" border="0"
-                    width="12" height="12"/>
-        </c:when>
-        <c:otherwise>
-          <html:img page="/images/icon_available_error.gif" border="0"
-                    width="12" height="12"/>
-        </c:otherwise>
-      </c:choose>
+    <tiles:insert page="/resource/common/monitor/visibility/AvailIcon.jsp">
+        <tiles:put name="availability" beanName="summary" beanProperty="availability" />
+    </tiles:insert>
       </td>
       <td class="ListCellCheckbox">
         <!--<html:link page="/resource/${summary.resourceEntityTypeName}/monitor/Visibility.do?mode=${mode}&eid=${summary.resourceTypeId}:${summary.resourceId}">-->
