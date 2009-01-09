@@ -147,5 +147,12 @@ class AlertHelper extends BaseHelper {
      */
     def deleteDefinition(AlertDefinition definition) {
         defMan.deleteAlertDefinitions(user, [ definition.id ] as Integer[])
+    } 
+
+    /**
+     * Get an AlertDefinition by id
+     */
+    def getById(Integer id) {
+        return defMan.getById(user, id)
     }
 }
