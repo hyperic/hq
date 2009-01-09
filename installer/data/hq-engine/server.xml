@@ -27,10 +27,13 @@
     <!-- SSL/TLS Connector configuration using the hyperic keystore -->
     <Connector port="@@@server.webapp.secure.port@@@" address="${jboss.bind.address}"
          maxThreads="500" strategy="ms" maxHttpHeaderSize="8192"
-         emptySessionPath="true"
+         emptySessionPath="true" protocol="HTTP/1.1" SSLEnabled="true"
          scheme="https" secure="true" clientAuth="false" 
          keystoreFile="${jboss.server.home.dir}/conf/hyperic.keystore"
-         keystorePass="hyperic" sslProtocol = "TLS" />
+         keystorePass="hyperic"
+         truststoreFile="${jboss.server.home.dir}/conf/hyperic.keystore"
+         truststorePass="hyperic" 
+         sslProtocol = "TLS" />
 
       <Engine name="jboss.web" defaultHost="localhost" jvmRoute="node1">
 
