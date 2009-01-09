@@ -168,7 +168,7 @@ public class ServiceDAO extends HibernateDAO
 
     public List findByName(String name)
     {
-        String sql="from Service where sortName=?";
+        String sql="from Service where resource.sortName=?";
         return createQuery(sql)
             .setString(0, name.toUpperCase())
             .list();
@@ -176,7 +176,7 @@ public class ServiceDAO extends HibernateDAO
     
     public Service findByName(Server server, String serviceName) {
         String sql = "select v from Service v " +
-            "where v.server = :server and v.sortName = :name";
+            "where v.server = :server and v.resource.sortName = :name";
         
         return (Service) createQuery(sql)
             .setParameter("server", server)
