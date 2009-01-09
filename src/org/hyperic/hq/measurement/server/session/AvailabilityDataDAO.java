@@ -69,35 +69,38 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     List findLastAvail(List mids, long after) {
+        // sort so that the cache has the best opportunity use the query 
+        // multiple times
+        mids = Collections.unmodifiableList(mids);
+        Collections.sort(mids);
         List rtn = new ArrayList(mids.size());
-        if (mids.isEmpty())
+        if (mids.isEmpty()) {
             return rtn;
-        
+        }
         String hql = new StringBuilder()
-                     .append("from AvailabilityDataRLE")
-                     .append(" WHERE endtime > :endtime")
-                     .append(" AND availabilityDataId.measurement in (:ids)")
-                     .append(" ORDER BY endtime desc").toString();
-        List tmp = new ArrayList(BATCH_SIZE);
-        for (Iterator it = mids.iterator(); it.hasNext(); ) {
-            tmp.add(it.next());
-            if (tmp.size() == BATCH_SIZE || !it.hasNext()) {
-                rtn.addAll(getSession()
-                           .createQuery(hql)
-                           .setLong("endtime", after)
-                           .setParameterList("ids", tmp, new IntegerType())
-                           .list());
-                tmp.clear();
-            }
+            .append("from AvailabilityDataRLE")
+            .append(" WHERE endtime > :endtime")
+            .append(" AND availabilityDataId.measurement in (:ids)")
+            .append(" ORDER BY endtime desc").toString();
+        Query query = getSession().createQuery(hql).setLong("endtime", after);
+        for (int i=0; i<mids.size(); i+=BATCH_SIZE) {
+            int end = Math.min(i + BATCH_SIZE, mids.size());
+            query.setParameterList(
+                "ids", mids.subList(i, end), new IntegerType());
+            rtn.addAll(query.list());
         }
         return rtn;
     }
 
     List findLastAvail(List mids) {
+        // sort so that the cache has the best opportunity use the query 
+        // multiple times
+        mids = Collections.unmodifiableList(mids);
+        Collections.sort(mids);
         List rtn = new ArrayList(mids.size());
-        if (mids.isEmpty())
+        if (mids.isEmpty()) {
             return rtn;
-        
+        }
         String hql = new StringBuilder()
 			         .append("from AvailabilityDataRLE")
                      .append(" WHERE endtime = :endtime")
@@ -105,17 +108,14 @@ public class AvailabilityDataDAO extends HibernateDAO {
                      .toString();
         // need to do this because of hibernate bug
         // http://opensource.atlassian.com/projects/hibernate/browse/HHH-1985
-        List tmp = new ArrayList(BATCH_SIZE);
-        for (Iterator it = mids.iterator(); it.hasNext(); ) {
-            tmp.add(it.next());
-            if (tmp.size() == BATCH_SIZE || !it.hasNext()) {
-                rtn.addAll(getSession()
-                           .createQuery(hql)
-                           .setLong("endtime", MAX_TIMESTAMP)
-                           .setParameterList("ids", tmp, new IntegerType())
-                           .list());
-                tmp.clear();
-            }
+        Query query = getSession()
+            .createQuery(hql)
+            .setLong("endtime", MAX_TIMESTAMP);
+        for (int i=0; i<mids.size(); i+=BATCH_SIZE) {
+            int end = Math.min(i + BATCH_SIZE, mids.size());
+            query.setParameterList(
+                "ids", mids.subList(i, end), new IntegerType());
+            rtn.addAll(query.list());
         }
         return rtn;
     }

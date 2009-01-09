@@ -348,9 +348,10 @@ public class MetricSessionEJB extends BizappSessionEJB {
     }
     
     protected double[] getAvailability(AuthzSubject subject,
-                                       AppdefEntityID[] ids)
-        throws AppdefEntityNotFoundException, PermissionException {
-        long current = System.currentTimeMillis();
+                                       AppdefEntityID[] ids,
+                                       Map availCache)
+        throws AppdefEntityNotFoundException,
+               PermissionException {
     
         // Allow for the maximum window based on collection interval
         Map midMap = new HashMap(ids.length);        
@@ -363,13 +364,16 @@ public class MetricSessionEJB extends BizappSessionEJB {
             }
         }
         
-        return getAvailability(subject, ids, midMap);
+        return getAvailability(subject, ids, midMap, availCache);
     }
 
     private double[] getAvailability(AuthzSubject subject,
-                                     AppdefEntityID[] ids, Map midMap)
-        throws ApplicationNotFoundException, AppdefEntityNotFoundException,
-        PermissionException {
+                                     AppdefEntityID[] ids,
+                                     Map midMap,
+                                     Map availCache)
+        throws ApplicationNotFoundException,
+               AppdefEntityNotFoundException,
+               PermissionException {
         final AgentManagerLocal agentMan = AgentManagerEJBImpl.getOne();
         
         double[] result = new double[ids.length];
@@ -377,9 +381,17 @@ public class MetricSessionEJB extends BizappSessionEJB {
         
         Map data = new HashMap(0);
         if (midMap.size() > 0) {
-            Integer[] mids = (Integer[]) midMap.values().
-                toArray(new Integer[midMap.values().size()]);
-            data = getAvailManager().getLastAvail(mids);
+            if (availCache != null) {
+                data = new HashMap();
+                for (Iterator it=midMap.values().iterator(); it.hasNext(); ) {
+                    Integer mid = (Integer)it.next();
+                    data.put(mid, (MetricValue)availCache.get(mid));
+                }
+            } else {
+                Integer[] mids =
+                    (Integer[])midMap.values().toArray(new Integer[0]);
+                data = getAvailManager().getLastAvail(mids);
+            }
         }
     
         // Organize by agent
@@ -482,7 +494,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 subids[i - ind] = ids[i];
             }
             
-            double[] avails = getAvailability(subject, subids);
+            double[] avails = getAvailability(subject, subids, null);
             
             for (int i = 0; i < avails.length; i++) {
                  if (avails[i] == MeasurementConstants.AVAIL_UNKNOWN) {
