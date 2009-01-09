@@ -154,10 +154,6 @@ socket.outputStream.withWriter { out ->
                         value(HQUtil.baseURL + resource.urlFor('inventory'))
                     }
                     parm {
-                        parmName("resource.resourceType.cid")
-                        value("${resource.resourceType.cid}")
-                    }
-                    parm {
                         parmName("resource.resourceType.name")
                         value("${resource.resourceType.name}")
                     }
