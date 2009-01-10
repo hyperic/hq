@@ -71,7 +71,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     List findLastAvail(List mids, long after) {
         // sort so that the cache has the best opportunity use the query 
         // multiple times
-        mids = Collections.unmodifiableList(mids);
+        mids = new ArrayList(mids);
         Collections.sort(mids);
         List rtn = new ArrayList(mids.size());
         if (mids.isEmpty()) {
@@ -95,7 +95,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     List findLastAvail(List mids) {
         // sort so that the cache has the best opportunity use the query 
         // multiple times
-        mids = Collections.unmodifiableList(mids);
+        mids = new ArrayList(mids);
         Collections.sort(mids);
         List rtn = new ArrayList(mids.size());
         if (mids.isEmpty()) {
