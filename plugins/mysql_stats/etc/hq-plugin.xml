@@ -68,6 +68,7 @@
                 description="Process query"
                 default="State.Name.eq=mysqld"/>
         <option name="tableRegex"
+                optional="true"
                 description="Regex of tables to monitor (blank for none)"/>
     </config>
 

@@ -359,11 +359,11 @@ public class MySqlStatsMeasurementPlugin
         }
         else if (url.indexOf('?') > 0) {
             return url + "&socketTimeout=" + TIMEOUT_VALUE + "&connectTimeout="
-                    + TIMEOUT_VALUE;
+                    + TIMEOUT_VALUE + "&autoReconnect=true";
         }
         else {
             return url + "?socketTimeout=" + TIMEOUT_VALUE + "&connectTimeout="
-                    + TIMEOUT_VALUE;
+                    + TIMEOUT_VALUE + "&autoReconnect=true";
         }
     }
 
