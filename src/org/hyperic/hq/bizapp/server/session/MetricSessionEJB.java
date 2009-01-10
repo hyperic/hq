@@ -29,9 +29,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
@@ -382,15 +384,29 @@ public class MetricSessionEJB extends BizappSessionEJB {
         Map data = new HashMap(0);
         if (midMap.size() > 0) {
             if (availCache != null) {
-                data = new HashMap();
+                data = new HashMap(midMap.size());
                 for (Iterator it=midMap.values().iterator(); it.hasNext(); ) {
                     Integer mid = (Integer)it.next();
                     data.put(mid, (MetricValue)availCache.get(mid));
                 }
-            } else {
+            }
+            // already tried a quick lookup via availCache, need to make sure
+            // it returned all the values
+            if (data.size() == 0) {
                 Integer[] mids =
                     (Integer[])midMap.values().toArray(new Integer[0]);
                 data = getAvailManager().getLastAvail(mids);
+            } else if (data.size() < midMap.size()) {
+                Set mids = new HashSet(midMap.values());
+                List midsToGet = new ArrayList();
+                for (Iterator it=data.values().iterator(); it.hasNext(); ) {
+                    Integer mid = (Integer)it.next();
+                    if (!mids.contains(mid)) {
+                        midsToGet.add(mid);
+                    }
+                }
+                data.putAll(getAvailManager().getLastAvail(
+                    (Integer[])midsToGet.toArray(new Integer[0])));
             }
         }
     
@@ -567,7 +583,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 subids[i - ind] = ids[i];
             }
             
-            double[] avails = getAvailability(subject, ids, midMap);
+            double[] avails = getAvailability(subject, ids, midMap, null);
 
             for (i = 0; i < avails.length; i++) {
                  if (avails[i] == MeasurementConstants.AVAIL_UNKNOWN) {
