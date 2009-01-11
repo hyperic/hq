@@ -39,6 +39,7 @@ public class SystemConfigForm extends BaseValidatorForm {
 
     private String senderEmail = "";
     private String baseUrl = "";
+    private String arcURL = "";
     private String helpUserId = "";
     private String helpPassword = "";
     private String deleteUnitsVal = "0";
@@ -58,6 +59,7 @@ public class SystemConfigForm extends BaseValidatorForm {
 
         buf.append(" senderEmail=").append(senderEmail);
         buf.append(" baseUrl=").append(baseUrl);
+        buf.append(" arcURL=").append(arcURL);
         buf.append(" helpUserId=").append(helpUserId);
         buf.append(" helpPassword=").append(helpPassword);
         buf.append(" deleteUnits=").append(deleteUnits);
@@ -92,6 +94,7 @@ public class SystemConfigForm extends BaseValidatorForm {
     public void loadConfigProperties (Properties prop){
         senderEmail = prop.getProperty(HQConstants.EmailSender);
         baseUrl = prop.getProperty(HQConstants.BaseURL);
+        arcURL = prop.getProperty(Constants.CONFIG_PROP_ARC_SERVER_URL);
         helpUserId = prop.getProperty(HQConstants.HelpUser);
         helpPassword = prop.getProperty(HQConstants.HelpUserPassword);
         
@@ -173,6 +176,7 @@ public class SystemConfigForm extends BaseValidatorForm {
     {
         prop.setProperty(HQConstants.EmailSender, senderEmail);
         prop.setProperty(HQConstants.BaseURL, baseUrl);
+        prop.setProperty(Constants.CONFIG_PROP_ARC_SERVER_URL, arcURL);
         prop.setProperty(HQConstants.HelpUser, helpUserId);
         prop.setProperty(HQConstants.HelpUserPassword, helpPassword);
 
@@ -277,6 +281,14 @@ public class SystemConfigForm extends BaseValidatorForm {
 
     public void setBaseUrl(String string) {
         baseUrl = string;
+    }
+
+    public String getArcURL() {
+        return arcURL;
+    }
+
+    public void setArcURL(String arcURL) {
+        this.arcURL = arcURL;
     }
 
     public void setSenderEmail(String string) {
