@@ -181,7 +181,11 @@
 		
 		<!-- Agent upgrade settings -->
         <data ID="60" PROPKEY="AGENT_BUNDLE_REPOSITORY_DIR" PROPVALUE="hq-agent-bundles" 
-              DEFAULT_PROPVALUE="" FREAD_ONLY="FALSE"/>      
+              DEFAULT_PROPVALUE="" FREAD_ONLY="FALSE"/>
+
+        <!-- ARC Reporting Server URL -->
+        <data ID="61" PROPKEY="ARC_SERVER_URL" DEFAULT_PROPVALUE="" PROPVALUE="" FREAD_ONLY="FALSE"/>
+       
     </table>
 
 </Covalent.DBSetup>

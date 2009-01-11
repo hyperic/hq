@@ -30,6 +30,10 @@ package org.hyperic.hq.ui;
  * Constant values used as keys in maps
  */
 public interface KeyConstants {
+
+    public static final String ARC_REPORTS_URL = "arcURL";
+
+    public static final String CONFIG_PROP_ARC_SERVER_URL = "ARC_SERVER_URL";
 	
 	public static final String DASHBOARD_NAME = ".dashboard.name";
 	
