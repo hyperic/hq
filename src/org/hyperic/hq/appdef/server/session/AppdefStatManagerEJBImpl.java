@@ -743,15 +743,15 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
 
             buf = new StringBuffer();
             buf.append("SELECT svc_svct_svr_plat.platform_id, ")
-                .append(      "svc_svct_svr_plat.platform_name, ")
+               .append(      "svc_svct_svr_plat.platform_name, ")
                .append("       svc_svct_svr_plat.platform_type_id, ")
-                .append(      "svc_svct_svr_plat.platform_type_name, ")
+               .append(      "svc_svct_svr_plat.platform_type_name, ")
                .append("       svc_svct_svr_plat.service_id, ")
-                .append(      "svc_svct_svr_plat.service_name, ")
+               .append(      "svc_svct_svr_plat.service_name, ")
                .append("       svc_svct_svr_plat.service_type_id, ")
-                .append(      "svc_svct_svr_plat.service_type_name ")
+               .append(      "svc_svct_svr_plat.service_type_name ")
                .append("FROM (SELECT app.id as application_id, ")
-                .append(            "appsvc.service_id as service_id ")
+               .append(            "appsvc.service_id as service_id ")
                .append("        FROM EAM_APP_SERVICE appsvc ");
             if(isOracle()) {
                 buf.append(" , ")
@@ -803,8 +803,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             }
             buf.append(TBL_PLATFORM).append("_TYPE platt, ")
                .append(TBL_PLATFORM)
-               .append(" plat JOIN plat.resource_id = res0.id ")
-               .append(TBL_RES).append(" res0 ON ")
+               .append(" plat JOIN ")
+               .append(TBL_RES).append(" res0 ON plat.resource_id = res0.id")
                .append(" WHERE svr.id=")
                .append(server.getId())
                .append("   AND platt.id=plat.platform_type_id ")
