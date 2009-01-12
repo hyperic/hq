@@ -1426,6 +1426,14 @@ select {
     bottom: 10px;
 }
 
+.widget .hidelegend_btn {
+   display:none
+}
+
+.widget .legend {
+   display:none
+}
+
 .widget .content select, .widget input {
     width: 120px;
     margin: 10px 0px;
