@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -418,6 +419,14 @@ public class ResourceGroupManagerEJBImpl
      */
     public Collection getMembers(ResourceGroup g) {
         return getResourceGroupDAO().getMembers(g);
+    }
+    
+    /**
+     * Get the member type counts of a group
+     * @ejb:interface-method
+     */
+    public Map getMemberTypes(ResourceGroup g) {
+        return getResourceGroupDAO().getMemberTypes(g);
     }
 
     /**

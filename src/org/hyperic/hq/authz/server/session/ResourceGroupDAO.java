@@ -28,9 +28,11 @@ package org.hyperic.hq.authz.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -249,6 +251,27 @@ public class ResourceGroupDAO extends HibernateDAO
                            "where g.group = :group order by g.resource.name")
             .setParameter("group", g)
             .list();
+    }
+    
+    /**
+     * Get counts of resources mapped by type name.
+     * 
+     * @return {@link Resource}s
+     */
+    Map getMemberTypes(ResourceGroup g) {
+        List counts =
+            createQuery("select p.name, count(r) from GroupMember g " +
+                        "join g.resource r " +
+                        "join r.prototype p " +
+                         "where g.group = :group group by p.name")
+            .setParameter("group", g)
+            .list();
+        Map types = new HashMap();
+        for (Iterator it = counts.iterator(); it.hasNext(); ) {
+            Object[] objs = (Object[]) it.next();
+            types.put(objs[0], objs[1]);
+        }
+        return types;
     }
     
     public ResourceGroup findById(Integer id) {

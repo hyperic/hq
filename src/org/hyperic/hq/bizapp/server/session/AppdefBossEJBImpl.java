@@ -2090,6 +2090,15 @@ public class AppdefBossEJBImpl
         return getResourceGroupManager().findResourceGroupById(subject,
                                                                groupId);
     }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public Map getResourceTypeCountMap(int sessionId, Integer groupId)
+        throws PermissionException, SessionException {
+        ResourceGroup g = findGroupById(sessionId, groupId);
+        return getResourceGroupManager().getMemberTypes(g);
+    }
 
     /**
      * @ejb:interface-method

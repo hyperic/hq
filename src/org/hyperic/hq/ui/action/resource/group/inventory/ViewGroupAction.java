@@ -83,13 +83,16 @@ public class ViewGroupAction extends TilesAction {
             BizappUtils.buildGroupResources(boss, sessionId, group, pc);
 
         if (group.getGroupType() ==
-                AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP ||
-            group.getGroupType() ==
-                AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS)
-        {
+                AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_GRP) {
             Map typeMap =
                 AppdefResourceValue.getResourceTypeCountMap(appdefValues);
             request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR, typeMap);
+        }
+        else if (group.getGroupType() ==
+                AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS) {
+            request.setAttribute(Constants.RESOURCE_TYPE_MAP_ATTR,
+                                 boss.getResourceTypeCountMap(sessionId,
+                                                              group.getId()));
         }
 
         request.setAttribute(Constants.APPDEF_ENTRIES_ATTR, appdefValues);
