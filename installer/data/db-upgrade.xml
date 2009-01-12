@@ -9540,6 +9540,20 @@ has already been defined.
 
   <schemaSpec version="3.133">
     <schema-directSQL>
+      <statement targetDB="oracle">
+        drop index EAM_SERVICE_SERVER_IDX
+      </statement>
+      <statement targetDB="postgresql">
+        drop index EAM_SERVICE_SERVER_IDX
+      </statement>
+      <statement targetDB="mysql">
+        drop index EAM_SERVICE_SERVER_IDX on EAM_SERVICE
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
+  <schemaSpec version="3.134">
+    <schema-directSQL>
       <statement desc="Drop EAM_SERVER column NAME." fail="false">
         ALTER TABLE EAM_SERVER DROP COLUMN NAME
       </statement>
@@ -9551,20 +9565,6 @@ has already been defined.
       </statement>
       <statement desc="Drop EAM_SERVICE column SORT_NAME." fail="false">
         ALTER TABLE EAM_SERVICE DROP COLUMN SORT_NAME
-      </statement>
-    </schema-directSQL>
-  </schemaSpec>
-
-  <schemaSpec version="3.134">
-    <schema-directSQL>
-      <statement targetDB="oracle">
-        drop index EAM_SERVICE_SERVER_IDX
-      </statement>
-      <statement targetDB="postgresql">
-        drop index EAM_SERVICE_SERVER_IDX
-      </statement>
-      <statement targetDB="mysql">
-        drop index EAM_SERVICE_SERVER_IDX on EAM_SERVICE
       </statement>
     </schema-directSQL>
   </schemaSpec>
