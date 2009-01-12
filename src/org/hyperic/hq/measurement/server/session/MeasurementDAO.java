@@ -27,6 +27,7 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -51,7 +52,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 
 public class MeasurementDAO extends HibernateDAO {
-    private static Log _log = LogFactory.getLog(MeasurementDAO.class);
+    private final Log _log = LogFactory.getLog(MeasurementDAO.class);
 
     private static final String ALIAS_CLAUSE = " upper(t.alias) = '" +
     				MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
@@ -448,8 +449,7 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     Measurement findAvailMeasurement(Resource resource) {
-        List list = new ArrayList();
-        list.add(resource);
+        List list = Collections.singletonList(resource);
         list = findAvailMeasurements(list);
         if (list.size() == 0) {
             return null;
@@ -458,20 +458,29 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     List findAvailMeasurements(Collection resources) {
-        String sql = new StringBuilder()
+        if (resources.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+        List resList = new ArrayList(resources);
+        // sort to give the query cache best chance of reuse
+        Collections.sort(resList);
+        List rtn = new ArrayList(resList.size());
+        final String sql = new StringBuilder()
             .append("select m from Measurement m ")
             .append("join m.template t ")
             .append("where m.resource in (:resources) AND ")
             .append(ALIAS_CLAUSE).toString();
-        Query query = getSession().createQuery(sql)
-            .setParameterList("resources", resources)
+        final Query query = getSession().createQuery(sql)
             .setCacheable(true)
             .setCacheRegion("Measurement.findAvailMeasurements");
+        for (int i=0; i<resList.size(); i+=BATCH_SIZE) {
+            int end = Math.min(i + BATCH_SIZE, resList.size());
+            query.setParameterList("resources", resList.subList(i, end));
+            rtn.addAll(query.list());
+        }
         // should be a unique result if only one resource is being examined
         if (resources.size() == 1) {
-            List rtn = new ArrayList(1);
-            rtn.add(query.uniqueResult());
-            return rtn;
+            return Collections.singletonList(query.uniqueResult());
         }
         return query.list();
     }

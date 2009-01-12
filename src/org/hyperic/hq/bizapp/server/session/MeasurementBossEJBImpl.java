@@ -67,6 +67,7 @@ import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
@@ -314,11 +315,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             " does not contain designated measurements");
     }
 
+    /**
+     * @param measCache Map<Integer, Measurement> may be null.
+     * Integer represents the AppdefEntityID.getId()
+     */
     private MeasurementTemplate getAvailabilityMetricTemplate(
-        AuthzSubject subj, AppdefEntityID aeid)
-        throws AppdefEntityNotFoundException, PermissionException,
-               MeasurementNotFoundException
-    {
+        AuthzSubject subj, AppdefEntityID aeid, Map measCache)
+        throws AppdefEntityNotFoundException,
+               PermissionException,
+               MeasurementNotFoundException {
         Measurement dm = null;
         if (aeid.isApplication()) {
             // Get the appointed front-end service
@@ -345,10 +350,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     aeid = appSvc.getService().getEntityId();
                 }
     
-                dm = findAvailabilityMetric(subj, aeid);
-                
-                if (dm != null)
+                dm = (measCache != null) ?
+                    (Measurement)measCache.get(aeid.getId()) : null;
+                dm = (dm == null) ? findAvailabilityMetric(subj, aeid) : dm;
+                if (dm != null) {
                     break;
+                }
             }
         }
         else if (aeid.isGroup())
@@ -366,14 +373,18 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // that we find
             for (Iterator it = grpMembers.iterator(); it.hasNext(); ) {
                 aeid = (AppdefEntityID) it.next();
-                dm = findAvailabilityMetric(subj, aeid);
-                
-                if (dm != null)
+                dm = (measCache != null) ?
+                    (Measurement)measCache.get(aeid.getId()) : null;
+                dm = (dm == null) ? findAvailabilityMetric(subj, aeid) : dm;
+                if (dm != null) {
                     break;
+                }
             }
         }
         else {
-            dm = findAvailabilityMetric(subj, aeid);
+            dm = (measCache != null) ?
+                (Measurement)measCache.get(aeid.getId()) : null;
+            dm = (dm == null) ? findAvailabilityMetric(subj, aeid) : dm;
         }
         
         if (dm != null)
@@ -394,7 +405,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                SessionTimeoutException, AppdefEntityNotFoundException,
                PermissionException {
         final AuthzSubject subject = manager.getSubject(sessionId);
-        return getAvailabilityMetricTemplate(subject, aeid);
+        return getAvailabilityMetricTemplate(subject, aeid, null);
     }
 
     /**
@@ -2334,10 +2345,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             entry.setValue(mmap);
         }
         
-        StopWatch watch = new StopWatch();
-        PageList summaries = new PageList();
-        for (Iterator it = resGrpMgr.getMembers(group).iterator();
-             it.hasNext(); ) {
+        final StopWatch watch = new StopWatch();
+        final PageList summaries = new PageList();
+        final Collection members = resGrpMgr.getMembers(group);
+        final Map measCache = getMeasCacheMap(members);
+        final Map availCache = getAllAppdefAvailabilities(subject, members);
+        for (Iterator it = members.iterator(); it.hasNext(); ) {
             Resource res = (Resource) it.next();
             AppdefEntityID aeid = new AppdefEntityID(res);
             ResourceDisplaySummary summary = new ResourceDisplaySummary();
@@ -2346,12 +2359,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             AppdefResourceValue parent = null;
             switch (aeid.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-                    parent = platMan
-                        .getPlatformByServer(subject, aeid.getId());
+                    parent = platMan.getPlatformByServer(subject, aeid.getId());
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    setResourceDisplaySummaryValueForCategories(subject, res,
-                                                                summary, cats);
+                    setResourceDisplaySummaryValueForCategories(
+                        subject, res, summary, cats, availCache);
                     summary.setMonitorable(Boolean.TRUE);
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
@@ -2359,12 +2371,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     summary.setMonitorable(Boolean.TRUE);
                     // Set the availability now
                     summary.setAvailability(
-                        new Double(getAvailability(subject, aeid)));
+                        new Double(getAvailability(subject, aeid, availCache)));
                     
                     try {
                         // Get the availability template
-                        MeasurementTemplate tmpl =
-                            getAvailabilityMetricTemplate(subject, aeid);
+                        MeasurementTemplate tmpl = getAvailabilityMetricTemplate(
+                            subject, aeid, measCache);
                         summary.setAvailTempl(tmpl.getId());
                     } catch (MeasurementNotFoundException e) {
                         // No availability metric, don't set it
@@ -2383,6 +2395,34 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         summaries.setTotalSize(summaries.size());
         return summaries;
+    }
+
+    private Map getMeasCacheMap(final Collection members) {
+        final ResourceManagerLocal rMan = getResourceManager();
+        Collection mems = new ArrayList(members.size());
+        for (Iterator it = members.iterator(); it.hasNext(); ) {
+            Object o = it.next();
+            if (o instanceof Resource) {
+                // should mean that all members are of type Resource
+                break;
+            } else if (o instanceof AppdefEntityID) {
+                AppdefEntityID aeid = (AppdefEntityID)o;
+                mems.add(rMan.findResource(aeid));
+            } else if (o instanceof AppdefResourceValue) {
+                AppdefResourceValue arVal = (AppdefResourceValue)o;
+                mems.add(rMan.findResource(arVal.getEntityId()));
+            }
+        }
+        if (mems.size() == 0) {
+            mems = members;
+        }
+        final List avMeas = getMetricManager().getAvailabilityMeasurements(mems);
+        final Map measCache = new HashMap(avMeas.size());
+        for (Iterator it = avMeas.iterator(); it.hasNext(); ) {
+            Measurement m = (Measurement)it.next();
+            measCache.put(m.getResource().getInstanceId(), m);
+        }
+        return measCache;
     }
 
     /**
@@ -2463,6 +2503,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         StopWatch watch = new StopWatch();
         PageList summaries = new PageList();
         final Map availCache = getAllAppdefAvailabilities(subject, resources);
+        final Map measCache = getMeasCacheMap(resources);
         for (Iterator it = resources.iterator(); it.hasNext(); ) {
             Object o = it.next();
             
@@ -2518,8 +2559,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     
                     try {
                         // Get the availability template
-                        MeasurementTemplate tmpl =
-                            getAvailabilityMetricTemplate(subject, aeid);
+                        MeasurementTemplate tmpl = getAvailabilityMetricTemplate(
+                            subject, aeid, measCache);
                         summary.setAvailTempl(tmpl.getId());
                     } catch (MeasurementNotFoundException e) {
                         // No availability metric, don't set it
@@ -2617,7 +2658,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     private void setResourceDisplaySummaryValueForCategories(
                                             AuthzSubject subject, Resource res,
                                             ResourceDisplaySummary summary,
-                                            Map categories)
+                                            Map categories, Map availCache)
         throws AppdefEntityNotFoundException, PermissionException {        
         StopWatch watch = new StopWatch();
         List resMetrics = new ArrayList(categories.size());
@@ -2639,7 +2680,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
             if (category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
                 summary.setAvailability(
-                    new Double(getAvailability(subject, id)));
+                    new Double(getAvailability(subject, id, availCache)));
                 summary.setAvailTempl(templ.getId());
                 continue;
             }
@@ -3153,7 +3194,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return result;
     }
     
-    private Map getAllAppdefAvailabilities(AuthzSubject subj, PageList resources) {
+    private Map getAllAppdefAvailabilities(AuthzSubject subj, Collection resources) {
         List avails = new ArrayList(resources.size());
         for (Iterator it = resources.iterator(); it.hasNext();) {
             Object o = it.next();
@@ -3165,6 +3206,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             } else if (o instanceof AppdefEntityID) {
                 aeid = (AppdefEntityID) o;
                 rv = new AppdefEntityValue(aeid, subj);
+            } else if (o instanceof Resource) {
+                Resource res = (Resource) o;
+                aeid = new AppdefEntityID(res);
             } else {
                 AppdefResourceValue resource = (AppdefResourceValue) o;
                 aeid = resource.getEntityId();

@@ -49,6 +49,7 @@ import org.hyperic.util.pager.PageList;
 public abstract class HibernateDAO {
     private Class      _persistentClass;
     private DAOFactory _daoFactory;
+    protected static final int BATCH_SIZE = 500;
 
     protected HibernateDAO(Class persistentClass, DAOFactory f) {
         _persistentClass = persistentClass;

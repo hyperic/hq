@@ -48,7 +48,6 @@ public class AvailabilityDataDAO extends HibernateDAO {
     private static final String logCtx = AvailabilityDataDAO.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
     
-    private final int BATCH_SIZE = 500;
     private static final long MAX_TIMESTAMP =
         AvailabilityDataRLE.getLastTimestamp();
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
