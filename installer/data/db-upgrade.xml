@@ -9423,15 +9423,6 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
-  <schemaSpec version="3.130">
-    <schema-directSQL>
-      <statement>
-        alter table EAM_SERVICE add constraint eam_server_service_idx
-              unique (server_id, name)
-      </statement>    	
-    </schema-directSQL>
-  </schemaSpec>
-
   <schemaSpec version="3.131">
     <schema-alterColumn table="QRTZ_BLOB_TRIGGERS" column="TRIGGER_NAME"
                         precision="200" columnType="VARCHAR2" />
@@ -9540,14 +9531,14 @@ has already been defined.
 
   <schemaSpec version="3.133">
     <schema-directSQL>
-      <statement targetDB="oracle">
-        drop index EAM_SERVER_SERVICE_IDX
+      <statement targetDB="oracle" fail="false">
+        drop index EAM_SERVICE_SERVER_IDX
       </statement>
-      <statement targetDB="postgresql">
-        drop index EAM_SERVER_SERVICE_IDX
+      <statement targetDB="postgresql" fail="false">
+        drop index EAM_SERVICE_SERVER_IDX
       </statement>
-      <statement targetDB="mysql">
-        drop index EAM_SERVER_SERVICE_IDX on EAM_SERVICE
+      <statement targetDB="mysql" fail="false">
+        drop index EAM_SERVICE_SERVER_IDX on EAM_SERVICE
       </statement>
     </schema-directSQL>
   </schemaSpec>
