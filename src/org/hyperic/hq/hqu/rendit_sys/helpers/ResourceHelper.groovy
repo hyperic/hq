@@ -305,7 +305,7 @@ class ResourceHelper extends BaseHelper {
 
     ResourceGroup createGroup(String name, String description, String location,
                               Resource prototype, Collection roles,
-                              Collection resources) {        
+                              Collection resources, boolean isPrivate) {
         int groupType
         if (!prototype) {
             groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS
@@ -319,7 +319,7 @@ class ResourceHelper extends BaseHelper {
 
         ResourceGroupCreateInfo info =
             new ResourceGroupCreateInfo(name, description, groupType, prototype,
-                                        location, 0, false);
+                                        location, 0, false, isPrivate);
         groupMan.createResourceGroup(user, info, roles, resources)
     }
 

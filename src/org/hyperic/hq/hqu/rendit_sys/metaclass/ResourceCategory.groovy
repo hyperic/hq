@@ -547,7 +547,8 @@ class ResourceCategory {
                                         r,      
                                         location,
                                         0,         // clusterId 
-                                        false)     // system
+                                        false,     // sytstem
+                                        false)     // private
 
         // No roles or resources
         groupMan.createResourceGroup(user, cInfo, [], [])
