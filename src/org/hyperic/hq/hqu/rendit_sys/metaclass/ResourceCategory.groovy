@@ -493,8 +493,19 @@ class ResourceCategory {
             Platform platform = toPlatform(parent)
             ServerValue sv = new ServerValue()
             sv.name        = name
-            sv.description = "desc: ${name}"
-            sv.installPath = 'dummy install path'
+
+            if (cfg['installpath']) {
+                sv.installPath = cfg['installpath']
+            } else {
+                sv.installPath = ""
+            }
+
+            if (cfg['description']) {
+                sv.description = cfg['description']
+            } else {
+                sv.description = ""
+            }
+            
             def res = svrMan.createServer(subject, platform.id,
                                           proto.instanceId, sv).resource
             setConfig(res, cfg, subject)
