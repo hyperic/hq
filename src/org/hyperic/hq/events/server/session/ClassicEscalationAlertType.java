@@ -28,8 +28,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.ResourceBundle;
 
-import javax.ejb.FinderException;
-
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -87,36 +85,27 @@ public final class ClassicEscalationAlertType
     }
 
     public PerformsEscalations findDefinition(Integer defId) {
-        try {
-            return getDefMan().getByIdNoCheck(defId);
-        } catch(FinderException e) {
-            return null;
-        }
+        return getDefMan().getByIdNoCheck(defId);
     }
     
     protected void setEscalation(Integer defId, Escalation escalation) {
-        try {
-        	EscalationManagerLocal escMan = EscalationManagerEJBImpl.getOne();
-        	AlertDefinition def = getDefMan().getByIdNoCheck(defId);
+        EscalationManagerLocal escMan = EscalationManagerEJBImpl.getOne();
+        AlertDefinition def = getDefMan().getByIdNoCheck(defId);
+        // End any escalation we were previously doing.
+        escMan.endEscalation(def);
+            
+        def.setEscalation(escalation);
+        long mtime = System.currentTimeMillis();
+        def.setMtime(mtime);
+
+        Collection children = def.getChildren();
+        for (Iterator it = children.iterator(); it.hasNext(); ) {
+            def = (AlertDefinition) it.next();
             // End any escalation we were previously doing.
             escMan.endEscalation(def);
-            
-        	def.setEscalation(escalation);
-            long mtime = System.currentTimeMillis();
-            def.setMtime(mtime);
-
-            Collection children = def.getChildren();
-            for (Iterator it = children.iterator(); it.hasNext(); ) {
-                def = (AlertDefinition) it.next();
-                // End any escalation we were previously doing.
-                escMan.endEscalation(def);
                 
-                def.setEscalation(escalation);
-                def.setMtime(mtime);
-            }
-
-        } catch(FinderException e) {
-            throw new SystemException(e);
+            def.setEscalation(escalation);
+            def.setMtime(mtime);
         }
     }
 

@@ -40,7 +40,6 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
@@ -204,8 +203,8 @@ public class AlertDefinitionManagerEJBImpl
      */
     public AlertDefinitionValue createAlertDefinition(AuthzSubject subj,
                                                       AlertDefinitionValue a)
-        throws AlertDefinitionCreateException, ActionCreateException,
-               FinderException, PermissionException 
+        throws AlertDefinitionCreateException,
+               PermissionException
     {
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(a.getParentId())) {
             canManageAlerts(subj, new AppdefEntityTypeID(a.getAppdefType(),
@@ -328,7 +327,7 @@ public class AlertDefinitionManagerEJBImpl
      */
     public AlertDefinitionValue updateAlertDefinition(AlertDefinitionValue adval)
         throws AlertConditionCreateException, ActionCreateException,
-               FinderException, RemoveException 
+               RemoveException
     {
         AlertDefinitionDAO dao = getAlertDefDAO();
         ActionDAO actDao = getActionDAO();
@@ -415,12 +414,12 @@ public class AlertDefinitionManagerEJBImpl
     public void updateAlertDefinitionsActiveStatus(AuthzSubject subj,
                                                    Integer[] ids, 
                                                    boolean activate)
-        throws FinderException, PermissionException 
+        throws PermissionException
     {
         List alertdefs = new ArrayList();
-        
+        AlertDefinitionDAO dao = getAlertDefDAO();
         for (int i = 0; i < ids.length; i++) {
-            alertdefs.add(badFindById(ids[i]));
+            alertdefs.add((dao.get(ids[i])));
         }
 
         for (Iterator i = alertdefs.iterator(); i.hasNext(); ) {
@@ -485,7 +484,7 @@ public class AlertDefinitionManagerEJBImpl
                                                        boolean enable)
         throws FinderException, PermissionException {
         
-        AlertDefinition def = badFindById(defId);
+        AlertDefinition def = getAlertDefDAO().get(defId);
         
         return updateAlertDefinitionInternalEnable(subj, def, enable);
     }
@@ -663,23 +662,13 @@ public class AlertDefinitionManagerEJBImpl
         }
     }
 
-    private AlertDefinition badFindById(Integer id) 
-        throws FinderException
-    {
-        try {
-            return getAlertDefDAO().findById(id);
-        } catch(ObjectNotFoundException e) {
-            throw new FinderException("Couldn't find AlertDefinition#" + id);
-        }
-    }
-    
     /** Find an alert definition and return a value object
      * @throws PermissionException if user does not have permission to manage
      * alerts
      * @ejb:interface-method
      */
     public AlertDefinitionValue getById(AuthzSubject subj, Integer id) 
-        throws FinderException, PermissionException
+        throws PermissionException
     {
         return getByIdAndCheck(subj, id).getAlertDefinitionValue();
     }
@@ -690,10 +679,12 @@ public class AlertDefinitionManagerEJBImpl
      * @ejb:interface-method
      */
     public AlertDefinition getByIdAndCheck(AuthzSubject subj, Integer id)
-        throws FinderException, PermissionException
+        throws PermissionException
     {
-        AlertDefinition ad = badFindById(id);
-        canManageAlerts(subj, getAppdefEntityID(ad));
+        AlertDefinition ad = getAlertDefDAO().get(id);
+        if (ad != null) {
+            canManageAlerts(subj, getAppdefEntityID(ad));
+        }
         return ad;
     }
     
@@ -703,9 +694,8 @@ public class AlertDefinitionManagerEJBImpl
      * @param id The alert def Id.
      * @ejb:interface-method
      */
-    public AlertDefinition getByIdNoCheck(Integer id) 
-        throws FinderException {
-        return badFindById(id);
+    public AlertDefinition getByIdNoCheck(Integer id) {
+        return getAlertDefDAO().get(id);
     }
     
     /**
@@ -717,8 +707,8 @@ public class AlertDefinitionManagerEJBImpl
      * @throws FinderException
      * @ejb:interface-method
      */
-    public boolean isResourceTypeAlertDefinition(Integer id) throws FinderException {
-        AlertDefinition ad = badFindById(id);
+    public boolean isResourceTypeAlertDefinition(Integer id) {
+        AlertDefinition ad = getAlertDefDAO().get(id);
         return ad.isResourceTypeDefinition();
     }
     
@@ -743,24 +733,14 @@ public class AlertDefinitionManagerEJBImpl
             return null;
         }
     }
-    
-    /** 
-     * Get an alert definition's appdef entity ID
-     * @ejb:interface-method
-     */
-    public AppdefEntityID getAppdefEntityIdById(Integer id)
-        throws FinderException
-    {
-        return badFindById(id).getAppdefEntityId();
-    }
-    
+
     /** Get an alert definition's name
      * @ejb:interface-method
      */
     public String getNameById(Integer id)
         throws FinderException 
     {
-        return badFindById(id).getName();
+        return getAlertDefDAO().get(id).getName();
     }
 
     /** Get an alert definition's conditions
@@ -769,7 +749,7 @@ public class AlertDefinitionManagerEJBImpl
     public AlertConditionValue[] getConditionsById(Integer id)
         throws FinderException 
     {
-        AlertDefinition def = badFindById(id);
+        AlertDefinition def = getAlertDefDAO().get(id);
         Collection conds = def.getConditions();
         AlertConditionValue[] condVals = new AlertConditionValue[conds.size()];
 
@@ -1035,7 +1015,7 @@ public class AlertDefinitionManagerEJBImpl
     }
     
     /**
-     * @see alertsAllowed()
+     * @see #areAlertsAllowed()
      * @ejb:interface-method
      */
     public void setAlertsAllowed(boolean allowed) {

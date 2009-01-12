@@ -563,17 +563,12 @@ public class EventsBossEJBImpl
             // Create a measurement AlertLogAction if necessary
             setMetricAlertAction(adval);
 
-            try {
-                // Now create the alert definition
-                AlertDefinitionValue created =
-                    adm.createAlertDefinition(subject, adval);
+            // Now create the alert definition
+            AlertDefinitionValue created =
+                adm.createAlertDefinition(subject, adval);
                 
-                if (parent == null)
-                    parent = created;
-                    
-            } catch (FinderException e) {
-                throw new AlertDefinitionCreateException(e.getMessage());
-            }
+            if (parent == null)
+                parent = created;
         }
 
         return parent;
@@ -605,12 +600,8 @@ public class EventsBossEJBImpl
         adval.setAppdefId(aetid.getID());
         adval.setParentId(EventConstants.TYPE_ALERT_DEF_ID);
         
-        try {
-            // Now create the alert definition
-            parent = getADM().createAlertDefinition(subject, adval);
-        } catch (FinderException e) {
-            throw new AlertDefinitionCreateException(e.getMessage());
-        }
+        // Now create the alert definition
+        parent = getADM().createAlertDefinition(subject, adval);
 
         adval.setParentId(parent.getId());
 
@@ -671,12 +662,8 @@ public class EventsBossEJBImpl
             // Create a measurement AlertLogAction if necessary
             setMetricAlertAction(adval);
 
-            try {
-                // Now create the alert definition
-                adm.createAlertDefinition(subject, adval);
-            } catch (FinderException e) {
-                throw new AlertDefinitionCreateException(e.getMessage());
-            }
+            // Now create the alert definition
+            adm.createAlertDefinition(subject, adval);
         }
 
         return parent;
@@ -770,12 +757,8 @@ public class EventsBossEJBImpl
             // Create a measurement AlertLogAction if necessary
             setMetricAlertAction(adval);
     
-            try {
-                // Now create the alert definition
-                adm.createAlertDefinition(subject, adval);
-            } catch (FinderException e) {
-                throw new AlertDefinitionCreateException(e.getMessage());
-            }
+            // Now create the alert definition
+            adm.createAlertDefinition(subject, adval);
         }
     }
 

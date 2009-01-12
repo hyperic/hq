@@ -27,7 +27,6 @@ package org.hyperic.hq.events.ext;
 
 import java.util.Date;
 
-import javax.ejb.FinderException;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -152,10 +151,6 @@ public class DefaultTriggerFireStrategy implements TriggerFireStrategy {
             } else {
                 creator.createEscalatable();
             }
-
-        } catch (FinderException e) {
-            throw new ActionExecuteException(
-                    "Alert Definition not found for trigger: " + _trigger.getId());
         } catch (PermissionException e) {
             throw new ActionExecuteException(
                     "Overlord does not have permission to disable definition");
