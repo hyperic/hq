@@ -66,20 +66,35 @@ public class NotReadyManager
      * We start them early to avoid long server startup times.
      */
     public void postRegister(Boolean registrationDone) {
-        _log.info("Starting WebServer connectors");
-
-        try {
-            ObjectName service = 
-                new ObjectName("jboss.web:service=WebServer");
-
-            _server.invoke(service, "startConnectors",
-                           new Object[0], new String[0]);
-        } catch (Exception e) {
-            _log.error("Unable to start WebServer connectors: " + e);
-        }
+        Runnable r = new WebServerConnectorStarter();
+        Thread t = new Thread(r);
+        t.start();
     }
 
     public void preDeregister() throws Exception {}
 
     public void postDeregister() {}
+    
+    private class WebServerConnectorStarter implements Runnable {
+        public void run() {
+            try {
+                // HHQ-2739: Short-term hack for JBoss 4.2.3.GA
+                // Execute in new thread and sleep for 10 seconds so that
+                // the jboss.web service has time to start first
+                Thread.sleep(10 * 1000);
+
+                _log.info("Starting WebServer connectors");
+
+                ObjectName service = 
+                    new ObjectName("jboss.web:service=WebServer");
+
+                _server.invoke(service, "startConnectors",
+                               new Object[0], new String[0]);
+            } catch (Exception e) {
+                _log.error("Unable to start WebServer connectors: " 
+                            + e.getClass().getName() + " - " + e.getMessage());
+                e.printStackTrace();
+            }            
+        }
+    }
 }
