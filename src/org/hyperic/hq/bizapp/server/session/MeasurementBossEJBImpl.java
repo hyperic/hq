@@ -2397,6 +2397,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return summaries;
     }
 
+    /**
+     * @return Map<Integer, Measurement> Integer => resource.getInstanceId()
+     */
     private Map getMeasCacheMap(final Collection members) {
         final ResourceManagerLocal rMan = getResourceManager();
         Collection mems = new ArrayList(members.size());
@@ -2546,7 +2549,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     categories.add(MeasurementConstants.CAT_THROUGHPUT);
                 
                     setResourceDisplaySummaryValueForCategory(
-                        subject, aeid, summary, categories, availCache);
+                        subject, aeid, summary, categories, availCache,
+                        measCache);
                     
                     summary.setMonitorable(Boolean.TRUE);
                     break;
@@ -2584,12 +2588,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * @param id the AppdefEntityID of the resource our ResourceDisplaySummary is for
      * @param summary a ResourceDisplaySummary
+     * @param availCache Map<Integer, MetricValue> Integer => resource.getInstanceId()
+     * @param measCache Map<Integer, Measurement> Integer => resource.getInstanceId()
      * @throws PermissionException
      * @throws AppdefEntityNotFoundException
      */
-    private void setResourceDisplaySummaryValueForCategory(
-        AuthzSubject subject, AppdefEntityID id,
-        ResourceDisplaySummary summary, Set categories, Map availCache)
+    private void setResourceDisplaySummaryValueForCategory(AuthzSubject subject,
+            AppdefEntityID aeid, ResourceDisplaySummary summary,
+            Set categories, Map availCache, Map measCache)
         throws AppdefEntityNotFoundException, PermissionException {
 
         // Maybe we're not doing anything
@@ -2599,19 +2605,21 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         StopWatch watch = new StopWatch();
         
         if (categories.remove(MeasurementConstants.CAT_AVAILABILITY)) {
-            Measurement dm = findAvailabilityMetric(subject, id);
+            Measurement dm = null;
+            dm = (measCache != null) ?
+                (Measurement)measCache.get(aeid.getId()) : null;
+            dm = (dm == null) ? findAvailabilityMetric(subject, aeid) : dm;
             if (dm != null) {
                 summary.setAvailability(
-                    new Double(getAvailability(subject, id, availCache)));
+                    new Double(getAvailability(subject, aeid, availCache)));
                 summary.setAvailTempl(dm.getTemplate().getId());
             }
         }
         
         watch.markTimeBegin("findDesignatedMetrics");
-        List measurements = findDesignatedMetrics(subject, id, categories);
+        List measurements = findDesignatedMetrics(subject, aeid, categories);
         watch.markTimeEnd("findDesignatedMetrics");
         
-        long now = System.currentTimeMillis();
         watch.markTimeBegin("get designated metrics data");
 
         // Optimization for the fact that we can have multiple indicator
@@ -3194,6 +3202,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return result;
     }
     
+    /**
+     * @return Map<Integer, MetricValue> Integer => Measurement.getId()
+     */
     private Map getAllAppdefAvailabilities(AuthzSubject subj, Collection resources) {
         List avails = new ArrayList(resources.size());
         for (Iterator it = resources.iterator(); it.hasNext();) {
