@@ -99,7 +99,7 @@ class ResourceConfig {
                svrMan.updateServer(subject, serverVal)
             },
             populateAllCfg: { allCfg, server ->
-                allCfg.enableRuntimeAIScan = server.getRuntimeAutodiscovery() 
+                allCfg.enableRuntimeAIScan = server.isRuntimeAutodiscovery() 
             },
         ],
         'service': [
