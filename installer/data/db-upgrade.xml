@@ -9541,13 +9541,13 @@ has already been defined.
   <schemaSpec version="3.133">
     <schema-directSQL>
       <statement targetDB="oracle">
-        drop index EAM_SERVICE_SERVER_IDX
+        drop index EAM_SERVER_SERVICE_IDX
       </statement>
       <statement targetDB="postgresql">
-        drop index EAM_SERVICE_SERVER_IDX
+        drop index EAM_SERVER_SERVICE_IDX
       </statement>
       <statement targetDB="mysql">
-        drop index EAM_SERVICE_SERVER_IDX on EAM_SERVICE
+        drop index EAM_SERVER_SERVICE_IDX on EAM_SERVICE
       </statement>
     </schema-directSQL>
   </schemaSpec>
