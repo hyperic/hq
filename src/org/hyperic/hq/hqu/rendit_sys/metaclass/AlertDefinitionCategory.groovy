@@ -79,5 +79,9 @@ class AlertDefinitionCategory {
     
     static boolean getTypeBased(AlertDefinition d) {
         return d.parent != null && d.parent.id == 0;
-    }    
+    }
+
+    static void delete(AlertDefinition d, AuthzSubject user) {
+        AdefMan.one.deleteAlertDefinitions(user, [ d.id ] as Integer[])
+    }
 }
