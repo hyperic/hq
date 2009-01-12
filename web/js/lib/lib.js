@@ -1215,6 +1215,135 @@ hyperic.selectBox = function(select, data) {
 };
 
 /**
+ *
+ */
+hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
+    var that = this;
+
+    that.args = kwArgs;
+    that.url = kwArgs.arcURL;
+    that.container = {};
+    that.currentReport = {};
+    that.queryParams = { get: "", list: "?id=" };
+
+    // the dom containers
+    that.container.loading = dojo11.query('.loading',node)[0];
+    that.container.error_loading = dojo11.query('.error_loading',node)[0];
+    that.container.content = dojo11.query('.content',node)[0];
+
+    // the buttons and form elements
+    that.remove_btn = dojo11.query('.remove_btn',node)[0];
+    that.refrest_btn = dojo11.query('.refresh_btn',node)[0];  
+    that.select_btn = dojo11.query('.reportSelect',node)[0];
+
+    // the report stuff
+    that.report_img = dojo11.query('.content',node)[0];;
+    that.report_legend = dojo11.query('.content',node)[0];;
+    that.showLeg_btn = dojo11.query('.showlegend_btn',node)[0];
+    that.hideLeg_btn = dojo11.query('.hidelegend_btn',node)[0];
+    that.legend = dojo11.query('.legend',node)[0];;
+    that.arcLink = dojo11.query('.arcLink',node)[0];
+
+    that.iframe;
+    
+    /**
+     * The widget remove callback
+     * @param e the click event
+     */
+    this.click_remove_btn = function(e)
+    {
+        hyperic.dashboard.widget.click_remove_btn.apply(that);
+    };
+
+    /**
+     * The widget refresh callback
+     * @param e the click event
+     */
+    this.click_refresh_btn = function(e) {
+        that.updateIframe(that.url, that.queryParams.get);
+    };
+
+    this.select_change = function(e) {
+        
+
+    };
+
+    /**
+     * The callback for the get of the report details given an id
+     */
+    this.getReportInfoCallback = function() {
+        //get the text and eval
+        var list = this.iframe.document.innerHTML;
+        //fetch config
+
+        //if there are portlets then configure the select box
+    };
+
+    /**
+     *
+     */
+    this.getReportsCallback = function() {
+        var list = this.iframe.document.innerHTML;
+        if(list.length > 1) {
+            
+        }
+
+    }
+
+    /**
+     *
+     * @param url the arc server url
+     * @param connectionParam the POST param for the api call
+     */
+    this.updateIframe = function(url, connectionParam) {
+        if(connectionParam == that.queryParams.get) {
+            that.iframe = dojo11.io.iframe.setSrc("arcframe", function(){
+                that.getReportsCallback();
+            }, uri);
+        } else {
+            that.iframe = dojo11.io.iframe.setSrc("arcframe", function(){
+                that.getReportInfoCallback();
+            }, uri);
+        }
+    }
+
+    /**
+     * initialize the portlet
+     */
+    this.init() = function(kwArgs) {
+        var isInError = false;
+        //the refresh is showing
+        //set the arc link
+        if(arcLink == "") {
+            that.container.loading.style.display = "none";
+            that.container.error_loading.style.display = "";
+            that.container.error_loading.innerHTML = that.args.notFound;
+        } else {
+            that.arcLink.href = kwArgs.arcURL;
+            that.init_connection(kwArgs.arcURL, that.queryParams.get);
+            //set up the click listener
+            dojo11.connect(that.remove_btn,'onclick',that.click_remove_btn);
+            dojo11.connect(that.refresh_btn,'onclick',that.click_refresh_btn);
+            dojo11.connect(that.select_btn,'onchange',that.select_change);
+        }
+    };
+
+    /**
+     * Creates the iFrame, only to be called by init()
+     * @param uri the arc server uri
+     */
+    this.init_connection = function (uri, param) {
+        that.iframe = dojo11.io.iframe.create("arcframe", function(){
+            that.getReportsCallback();
+        }, uri);
+    };
+
+    this.init(kwArgs);
+};
+
+hyperic.dashboard.arcWidget.prototype = hyperic.dashboard.widget;
+
+/**
  * chartWidget is a widget that displays a chart slideshow
  * 
  * @author Anton Stroganov <anton@hyperic.com>
