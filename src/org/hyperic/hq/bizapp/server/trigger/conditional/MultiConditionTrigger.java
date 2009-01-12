@@ -545,13 +545,20 @@ public class MultiConditionTrigger
             // Clean up unused event
             if (toDelete != null) {
                 // Only need to update reference if event may expire
-                if (getTimeRange() > 0)
-                    etracker.updateReference(toDelete.getId(), event);
+                if (getTimeRange() > 0) {
+                    try {
+                        etracker.updateReference(toDelete.getId(), event);
+                    } catch (SQLException e) {
+                        log.debug("Failed to update event reference for " +
+                                  "trigger id=" + getId(), e);
+                        etracker.addReference(getId(), event, getTimeRange());
+                    }
+                }
             } else {
                 etracker.addReference(getId(), event, getTimeRange());
             }          
         } catch (SQLException e) {
-            log.error("Failed to update event references for trigger id=" +
+            log.error("Failed to add event reference for trigger id=" +
                       getId(), e);
         }
         
