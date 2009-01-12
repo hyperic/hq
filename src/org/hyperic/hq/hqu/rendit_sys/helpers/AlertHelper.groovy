@@ -143,7 +143,7 @@ class AlertHelper extends BaseHelper {
 
     /**
      * Delete an Alert Definition.
-     * @deprecated This needs to be moved into the AlertDefinitionCategory.
+     * @deprecated Use AlertDefinitionCategory.delete() instead.
      */
     def deleteDefinition(AlertDefinition definition) {
         defMan.deleteAlertDefinitions(user, [ definition.id ] as Integer[])
@@ -153,6 +153,6 @@ class AlertHelper extends BaseHelper {
      * Get an AlertDefinition by id
      */
     def getById(Integer id) {
-        return defMan.getById(user, id)
+        return defMan.getByIdAndCheck(user, id)
     }
 }
