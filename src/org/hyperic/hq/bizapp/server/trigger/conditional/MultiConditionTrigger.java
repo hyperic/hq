@@ -538,23 +538,31 @@ public class MultiConditionTrigger
             return Collections.EMPTY_LIST;
         }
         
-        try {
-            long expire = getTimeRange() > 0 ?
-                    System.currentTimeMillis() - getTimeRange() : 0;
-                        
-            // Clean up unused event
-            if (toDelete != null && toDelete.getTimestamp() > expire) {
-                // Only need to update reference if event may expire or if
-                // we haven't fired since we started evaluating
-                if (getTimeRange() > 0 && !lastFulfillingEvents.isEmpty())
-                    etracker.updateReference(toDelete.getId(), event);
-            } else {
+        long expire = getTimeRange() > 0 ?
+                System.currentTimeMillis() - getTimeRange() : 
+                Long.MAX_VALUE;
+                    
+        // Clean up unused event
+        if (toDelete != null && toDelete.getTimestamp() > expire) {
+            // Only need to update reference if event may expire or if
+            // we haven't fired since we started evaluating
+            if (getTimeRange() > 0 && !lastFulfillingEvents.isEmpty()) {
+                try {
+                    etracker.updateReference(getId(), toDelete.getId(), event,
+                                             getTimeRange());
+                } catch (SQLException e) {
+                    log.error("Failed to update event reference for event id=" +
+                              toDelete.getId(), e);
+                }
+            }
+        } else {
+            try {
                 etracker.addReference(getId(), event, getTimeRange());
-            }          
-        } catch (SQLException e) {
-            log.error("Failed to update event references for trigger id=" +
-                      getId(), e);
-        }
+            } catch (SQLException e) {
+                log.error("Failed to add event reference for trigger id=" +
+                          getId(), e);
+            }
+        }          
         
         return new ArrayList(fulfilled.values());
     }

@@ -79,7 +79,8 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @return The id for the newly created trigger event (also the eventObject id).                  
      * @ejb:interface-method
      */
-    public Long addReference(Integer tid, AbstractEvent eventObject, long expiration) 
+    public Long addReference(Integer tid, AbstractEvent eventObject,
+                             long expiration) 
         throws SQLException {
 
         if (log.isDebugEnabled())
@@ -94,7 +95,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         } else {
             expire = expiration + System.currentTimeMillis();
         }
-                
+
         TriggerEvent triggerEvent = new TriggerEvent(eventObject, 
                                                      tid, 
                                                      eventObject.getTimestamp(), 
@@ -130,7 +131,8 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @param eventObject The new event object.
      * @ejb:interface-method
      */
-    public void updateReference(Long teid, AbstractEvent eventObject) 
+    public void updateReference(Integer tid, Long teid,
+                                AbstractEvent eventObject, long expiration) 
         throws SQLException {        
         if (log.isDebugEnabled())
             log.debug("Updating the event object for trigger event id: " + teid);            
@@ -140,14 +142,33 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
         try {
             TriggerEvent triggerEvent = triggerEventDAO.findById(teid);
-            triggerEvent.setEventObject(eventObject);
-            triggerEvent.setCtime(eventObject.getTimestamp());
+            
+            long expire = 0;
+            
+            if (expiration == 0) {
+                expire = Long.MAX_VALUE;
+            } else {
+                expire = expiration + System.currentTimeMillis();
+            }
+    
+            if (triggerEvent == null) {
+                // Need to create it
+                triggerEvent = new TriggerEvent(eventObject, 
+                                                tid, 
+                                                eventObject.getTimestamp(), 
+                                                expire);
+            }
+            else {
+                triggerEvent.setEventObject(eventObject);
+                triggerEvent.setCtime(eventObject.getTimestamp());
+                triggerEvent.setExpiration(expire);
+            }
             triggerEventDAO.save(triggerEvent);
         } catch (Exception e) {
             log.error("Failed to update event object for trigger event id=" +
                       teid, e);     
-            throw new SQLException("Failed to update event object for trigger " +
-                                   "event id=" + teid);
+            throw new SQLException("Failed to update event object for trigger "+
+                                   "event id=" + teid + ": " + e.getMessage());
         }
                 
         eventObject.setId(teid);

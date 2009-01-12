@@ -212,7 +212,7 @@ public class ValueChangeTrigger extends AbstractTrigger
                 myEvent.setMessage( sb.toString() );
 
                 try {
-                    eTracker.updateReference(last.getId(), me);                    
+                    eTracker.updateReference(getId(), last.getId(), me, 0);                    
                 } catch (SQLException e) {
                     throw new ActionExecuteException(
                             "Failed to update event reference for trigger id="+getId(), e);                    
