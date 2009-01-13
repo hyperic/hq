@@ -53,6 +53,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AppdefManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
@@ -84,6 +85,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefInventorySummary;
+import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -206,6 +208,10 @@ public class AppdefBossEJBImpl
     protected final int APPDEF_GROUP_TYPE_UNDEFINED = -1;
 
     public AppdefBossEJBImpl() {}
+
+    private AppdefManagerLocal getAppdefManager() {
+        return AppdefManagerEJBImpl.getOne();
+    }
 
     /**
      * Find a common appdef resource type among the appdef entities
@@ -1890,8 +1896,8 @@ public class AppdefBossEJBImpl
             }
             
             AppdefEntityValue aev = new AppdefEntityValue(eid, caller);
-            getPlatformManager().changeOwner(caller, aev.getResourcePOJO(),
-                                             newOwner);
+            getAppdefManager().changeOwner(caller, aev.getResourcePOJO(),
+                                           newOwner);
             return aev.getResourceValue();
         } catch (PermissionException e) {
             throw e;
@@ -1900,7 +1906,7 @@ public class AppdefBossEJBImpl
             throw new SystemException(e);
         }
     }
-    
+
     private List getResources(String[] resources) {
         if (resources == null)
             return Collections.EMPTY_LIST;
@@ -3016,7 +3022,7 @@ public class AppdefBossEJBImpl
                FinderException 
     {
         AuthzSubject who = manager.getSubject(sessionId);
-        return getPlatformManager().getResourcePermissions(who, id);
+        return getAppdefManager().getResourcePermissions(who, id);
     }
 
     /**
