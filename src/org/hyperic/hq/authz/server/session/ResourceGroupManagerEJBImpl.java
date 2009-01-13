@@ -778,6 +778,12 @@ public class ResourceGroupManagerEJBImpl
         return gResource.getOwner();
     }
 
+    /**
+     * @ejb:interface-method
+     */
+    public ResourceGroup getResourceGroupByResource(Resource resource) {
+        return getResourceGroupDAO().findResourceGroup(resource);
+    }
 
     /**
      * Set a ResourceGroup modifiedBy attribute

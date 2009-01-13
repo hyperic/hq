@@ -79,6 +79,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
@@ -2348,8 +2349,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         final StopWatch watch = new StopWatch();
         final PageList summaries = new PageList();
         final Collection members = resGrpMgr.getMembers(group);
-        final Map measCache = getMeasCacheMap(members);
-        final Map availCache = getAllAppdefAvailabilities(subject, members);
+        final Map measCache = getMetricManager().getAvailMeasurements(members);
+        final Map availCache = getAvailManager().getLastAvail(
+            members, measCache);
         for (Iterator it = members.iterator(); it.hasNext(); ) {
             Resource res = (Resource) it.next();
             AppdefEntityID aeid = new AppdefEntityID(res);
@@ -2395,37 +2397,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         summaries.setTotalSize(summaries.size());
         return summaries;
-    }
-
-    /**
-     * @return Map<Integer, Measurement> Integer => resource.getInstanceId()
-     */
-    private Map getMeasCacheMap(final Collection members) {
-        final ResourceManagerLocal rMan = getResourceManager();
-        Collection mems = new ArrayList(members.size());
-        for (Iterator it = members.iterator(); it.hasNext(); ) {
-            Object o = it.next();
-            if (o instanceof Resource) {
-                // should mean that all members are of type Resource
-                break;
-            } else if (o instanceof AppdefEntityID) {
-                AppdefEntityID aeid = (AppdefEntityID)o;
-                mems.add(rMan.findResource(aeid));
-            } else if (o instanceof AppdefResourceValue) {
-                AppdefResourceValue arVal = (AppdefResourceValue)o;
-                mems.add(rMan.findResource(arVal.getEntityId()));
-            }
-        }
-        if (mems.size() == 0) {
-            mems = members;
-        }
-        final List avMeas = getMetricManager().getAvailabilityMeasurements(mems);
-        final Map measCache = new HashMap(avMeas.size());
-        for (Iterator it = avMeas.iterator(); it.hasNext(); ) {
-            Measurement m = (Measurement)it.next();
-            measCache.put(m.getResource().getInstanceId(), m);
-        }
-        return measCache;
     }
 
     /**
@@ -2505,8 +2476,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws AppdefEntityNotFoundException, PermissionException {
         StopWatch watch = new StopWatch();
         PageList summaries = new PageList();
-        final Map availCache = getAllAppdefAvailabilities(subject, resources);
-        final Map measCache = getMeasCacheMap(resources);
+        final Map measCache = getMetricManager().getAvailMeasurements(resources);
+        final Map availCache = getAvailManager().getLastAvail(
+            resources, measCache);
         for (Iterator it = resources.iterator(); it.hasNext(); ) {
             Object o = it.next();
             
@@ -3200,37 +3172,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
 
         return result;
-    }
-    
-    /**
-     * @return Map<Integer, MetricValue> Integer => Measurement.getId()
-     */
-    private Map getAllAppdefAvailabilities(AuthzSubject subj, Collection resources) {
-        List avails = new ArrayList(resources.size());
-        for (Iterator it = resources.iterator(); it.hasNext();) {
-            Object o = it.next();
-            AppdefEntityValue rv;
-            AppdefEntityID aeid;
-            if (o instanceof AppdefEntityValue) {
-                rv = (AppdefEntityValue) o;
-                aeid = rv.getID();
-            } else if (o instanceof AppdefEntityID) {
-                aeid = (AppdefEntityID) o;
-                rv = new AppdefEntityValue(aeid, subj);
-            } else if (o instanceof Resource) {
-                Resource res = (Resource) o;
-                aeid = new AppdefEntityID(res);
-            } else {
-                AppdefResourceValue resource = (AppdefResourceValue) o;
-                aeid = resource.getEntityId();
-                rv = new AppdefEntityValue(aeid, subj);
-            }
-            Integer aId = getMetricManager().getAvailabilityMeasurement(subj,
-                aeid).getId();
-            avails.add(aId);
-        }
-        return getAvailManager().getLastAvail(
-            (Integer[]) avails.toArray(new Integer[0]));
     }
 
     /**

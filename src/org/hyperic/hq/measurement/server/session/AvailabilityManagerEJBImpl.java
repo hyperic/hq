@@ -45,7 +45,12 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
@@ -59,6 +64,7 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerUtil;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
@@ -429,16 +435,56 @@ public class AvailabilityManagerEJBImpl
         for (Iterator it = rtn.values().iterator(); it.hasNext(); ) {
             double[] data = (double[]) it.next();
             data[IND_AVG] += data[IND_UP_TIME] / data[IND_TOTAL_TIME];
-
         }
         return rtn;
     }
-
+    
+    /**
+     * @param resources Collection may be of type {@link Resource},
+     *  {@link AppdefEntityId}, {@link AppdefEntityValue}, or
+     *  {@link AppdefResourceValue}
+     * @param measCache Map<Integer, List> optional arg (may be null) to supply
+     * measurement id(s) of ResourceIds. Integer => Resource.getId()
+     * @return Map<Integer, MetricValue> Integer => Measurement.getId()
+     * @ejb:interface-method
+     */
+    public Map getLastAvail(Collection resources, Map measCache) {
+        final MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
+        final List midsToGet = new ArrayList(resources.size());
+        final ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
+        for (Iterator it=resources.iterator(); it.hasNext(); ) {
+            final Object o = it.next();
+            Resource resource = null;
+            if (o instanceof AppdefEntityValue) {
+                AppdefEntityValue rv = (AppdefEntityValue) o;
+                AppdefEntityID aeid = rv.getID();
+                resource = resMan.findResource(aeid);
+            } else if (o instanceof AppdefEntityID) {
+                AppdefEntityID aeid = (AppdefEntityID) o;
+                resource = resMan.findResource(aeid);
+            } else if (o instanceof Resource) {
+                resource = (Resource) o;
+            } else {
+                AppdefResourceValue res = (AppdefResourceValue) o;
+                AppdefEntityID aeid = res.getEntityId();
+                resource = resMan.findResource(aeid);
+            }
+            final List measIds = (measCache != null) ?
+                (List)measCache.get(resource.getId()) :
+                (List)mMan.getAvailMeasurements(
+                    Collections.singletonList(resource)).get(resource.getId());
+            for (Iterator iter=measIds.iterator(); iter.hasNext(); ) {
+                final Measurement m = (Measurement)iter.next();
+                midsToGet.add(m.getId());
+            }
+        }
+        return getLastAvail((Integer[])midsToGet.toArray(new Integer[0]));
+    }
+    
     /**
      * @ejb:interface-method
      */
     public MetricValue getLastAvail(Measurement m) {
-
         Map map = getLastAvail(new Integer[] { m.getId() }, MAX_AVAIL_TIMESTAMP - 1);
         MetricValue mv = (MetricValue)map.get(m.getId());
         if (mv == null) {

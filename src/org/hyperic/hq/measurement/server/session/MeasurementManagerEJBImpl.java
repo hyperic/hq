@@ -53,6 +53,7 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
@@ -60,10 +61,13 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
@@ -731,6 +735,56 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             }
         }
         return midMap;
+    }
+
+    /**
+     * TODO: scottmf, need to do some more work to handle other authz resource
+     *  types other than platform, server, service, and group
+     * 
+     * @return Map<Integer, List<Measurement>>, Integer => Resource.getId(),
+     * @ejb:interface-method
+     */
+    public Map getAvailMeasurements(Collection resources) {
+        final Map rtn = new HashMap(resources.size());
+        final List res = new ArrayList(resources.size());
+        final ResourceGroupManagerLocal resGrpMan =
+            ResourceGroupManagerEJBImpl.getOne();
+        final ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
+        final MeasurementDAO dao = getMeasurementDAO();
+        for (Iterator it=resources.iterator(); it.hasNext(); ) {
+            Object o = it.next();
+            Resource resource = null;
+            if (o instanceof AppdefEntityValue) {
+                AppdefEntityValue rv = (AppdefEntityValue) o;
+                AppdefEntityID aeid = rv.getID();
+                resource = resMan.findResource(aeid);
+            } else if (o instanceof AppdefEntityID) {
+                AppdefEntityID aeid = (AppdefEntityID) o;
+                resource = resMan.findResource(aeid);
+            } else if (o instanceof Resource) {
+                resource = (Resource) o;
+            } else {
+                AppdefResourceValue r = (AppdefResourceValue) o;
+                AppdefEntityID aeid = r.getEntityId();
+                resource = resMan.findResource(aeid);
+            }
+            // XXX scottmf, need to check read permission
+            Integer type = resource.getResourceType().getId();
+            if (type.equals(AuthzConstants.authzGroup)) {
+                ResourceGroup grp =
+                    resGrpMan.getResourceGroupByResource(resource);
+                Collection members = resGrpMan.getMembers(grp);
+                rtn.put(resource.getId(), dao.findAvailMeasurements(members));
+            } else {
+                res.add(resource);
+            }
+        }
+        List ids = getMeasurementDAO().findAvailMeasurements(res);
+        for (Iterator it=ids.iterator(); it.hasNext(); ) {
+            Measurement m = (Measurement)it.next();
+            rtn.put(m.getResource().getId(), Collections.singletonList(m));
+        }
+        return rtn;
     }
 
     /**

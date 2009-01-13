@@ -144,6 +144,13 @@ public class ResourceGroupDAO extends HibernateDAO
         return resGrp;
     }
     
+    ResourceGroup findResourceGroup(Resource resource) {
+        final String hql = "from ResourceGroup where resource = :resource";
+        return (ResourceGroup)createQuery(hql)
+                .setParameter("resource", resource)
+                .uniqueResult();
+    }
+    
     void removeAllMembers(ResourceGroup group) {
         // Don't want to mark the Root Resource Group dirty to avoid optimistic
         // locking issues.  Since the root group is associated with all
