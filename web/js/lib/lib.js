@@ -1220,31 +1220,37 @@ hyperic.selectBox = function(select, data) {
 hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     var that = this;
 
+    that.config = {
+        portletName: portletName,
+        portletLabel: portletLabel
+    };
+    
     that.args = kwArgs;
-    that.url = kwArgs.arcURL;
+    that.url = kwArgs.url;
     that.container = {};
     that.currentReport = {};
-    that.queryParams = { get: "", list: "?id=" };
+    that.queryParams = { get: "getReport.jsp", list: "getReport.jsp?id=" };
 
     // the dom containers
     that.container.loading = dojo11.query('.loading',node)[0];
     that.container.error_loading = dojo11.query('.error_loading',node)[0];
-    that.container.content = dojo11.query('.content',node)[0];
+    that.container.content = dojo11.query('.contents',node)[0];
 
     // the buttons and form elements
     that.remove_btn = dojo11.query('.remove_btn',node)[0];
-    that.refrest_btn = dojo11.query('.refresh_btn',node)[0];  
+    that.refresh_btn = dojo11.query('.refresh_btn',node)[0];
     that.select_btn = dojo11.query('.reportSelect',node)[0];
 
     // the report stuff
-    that.report_img = dojo11.query('.content',node)[0];;
-    that.report_legend = dojo11.query('.content',node)[0];;
+    that.report_img = dojo11.query('.reportImage',node)[0];
+    that.report_legend = dojo11.query('.reportLegend',node)[0];
     that.showLeg_btn = dojo11.query('.showlegend_btn',node)[0];
     that.hideLeg_btn = dojo11.query('.hidelegend_btn',node)[0];
-    that.legend = dojo11.query('.legend',node)[0];;
+    that.legend = dojo11.query('.legend',node)[0];
+    that.report_title = dojo11.query('.reportTitle',node)[0];
     that.arcLink = dojo11.query('.arcLink',node)[0];
 
-    that.iframe;
+    that.iframe = "";
     
     /**
      * The widget remove callback
@@ -1256,39 +1262,68 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     };
 
     /**
-     * The widget refresh callback
+     * The widget refresh callback - updates the report list
      * @param e the click event
      */
     this.click_refresh_btn = function(e) {
         that.updateIframe(that.url, that.queryParams.get);
-    };
 
-    this.select_change = function(e) {
-        
-
-    };
-
-    /**
-     * The callback for the get of the report details given an id
-     */
-    this.getReportInfoCallback = function() {
-        //get the text and eval
-        var list = this.iframe.document.innerHTML;
-        //fetch config
-
-        //if there are portlets then configure the select box
     };
 
     /**
      *
+     * @param e
+     */
+    this.select_change = function(e) {
+        alert("change fired");
+        var f = e;
+        //TODO set the changes here
+        that.report_img.src = that.arcLink + that.select_btn.options[that.select_btn.selectedId].value;
+        that.report_title.innerHTML = that.select_btn.options[that.select_btn.selectedId].getAttribute("title");
+    };
+
+    /**
+     * Callback to process the creation or update of the iframe
      */
     this.getReportsCallback = function() {
-        var list = this.iframe.document.innerHTML;
-        if(list.length > 1) {
-            
-        }
+        var list = that.iframe.contentDocument.body.innerHTML;
+        var otherlist = dojo11.io.iframe.doc(that.iframe);
+        var response = that._evalResponse(list);
+        if (response !== null) {
+            var options = "";
+            that.select_btn.innerHTML = "";
+            for (d in response) {
+                if (response[d].label !== undefined) {
+                    options += "<option value='" + response[d].URI + "' title ='" + response[d].Description + "'>" + response[d].label + "</option>";
 
-    }
+                }
+            }
+            that.select_btn.innerHTML = options;
+            //set selected index and set the image to the first one
+        }
+        that.currentReport = response[0];
+        that.report_img.src = that.arcLink + that.currentReport.URI;
+        that.report_title.innerHTML = that.currentReport.Description;
+        that.container.loading.style.display = "none";
+        that.container.content.style.display = "";
+    };
+
+    /**
+     * Evaluates the string specified by the response and returns the object evaluated or null
+     * @param url
+     */
+    this._evalResponse = function(response) {
+        if (response === undefined || response.length < 1) {
+            return;
+        }
+        document.arcReportList = null;
+        try {
+            eval("document.arcReportList = " + response + "");
+        } catch(e) {
+            console.log("Error extracting the available reports");
+        }
+        return document.arcReportList;
+    };
 
     /**
      *
@@ -1296,32 +1331,30 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      * @param connectionParam the POST param for the api call
      */
     this.updateIframe = function(url, connectionParam) {
-        if(connectionParam == that.queryParams.get) {
-            that.iframe = dojo11.io.iframe.setSrc("arcframe", function(){
-                that.getReportsCallback();
-            }, uri);
-        } else {
-            that.iframe = dojo11.io.iframe.setSrc("arcframe", function(){
-                that.getReportInfoCallback();
-            }, uri);
-        }
-    }
+        that.container.loading.style.display = "";
+        that.container.content.style.display = "none";
+        that.iframe = dojo11.io.iframe.setSrc("arcframe", function() {
+            that.getReportsCallback();
+        }, url + connectionParam + "");
+    };
 
     /**
      * initialize the portlet
      */
-    this.init() = function(kwArgs) {
+    this.init = function(kwArgs) {
         var isInError = false;
         //the refresh is showing
         //set the arc link
-        if(arcLink == "") {
+        if(that.arcLink == "") {
             that.container.loading.style.display = "none";
             that.container.error_loading.style.display = "";
             that.container.error_loading.innerHTML = that.args.notFound;
         } else {
-            that.arcLink.href = kwArgs.arcURL;
-            that.init_connection(kwArgs.arcURL, that.queryParams.get);
+            that.arcLink.href = kwArgs.url;
+            that.init_connection(kwArgs.url, that.queryParams.get);
             //set up the click listener
+            window.setTimeout(that.getReportsCallback,2000);
+            console.log("connecting the buttons");
             dojo11.connect(that.remove_btn,'onclick',that.click_remove_btn);
             dojo11.connect(that.refresh_btn,'onclick',that.click_refresh_btn);
             dojo11.connect(that.select_btn,'onchange',that.select_change);
@@ -1333,9 +1366,11 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      * @param uri the arc server uri
      */
     this.init_connection = function (uri, param) {
-        that.iframe = dojo11.io.iframe.create("arcframe", function(){
+        console.log("creating the iFrame");
+        that.iframe = dojo11.io.iframe.create("arcframe", null, /*function(){
             that.getReportsCallback();
-        }, uri);
+           },*/
+           uri+param+"");
     };
 
     this.init(kwArgs);
