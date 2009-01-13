@@ -432,4 +432,13 @@ public class AlertDefinitionDAO extends HibernateDAO {
             .uniqueResult();
     }
 
+    int setChildrenEscalation(AlertDefinition def, Escalation esc) {
+        return createQuery("update AlertDefinition set escalation = :esc, " +
+                           "mtime = :mtime where parent = :def")
+            .setParameter("esc", esc)
+            .setLong("mtime", System.currentTimeMillis())
+            .setParameter("def", def)
+            .executeUpdate();
+    }
+
 }
