@@ -535,13 +535,21 @@ public class AlertDefinitionManagerEJBImpl
         canManageAlerts(subj, def);
 
     	EscalationManagerLocal escMan = EscalationManagerEJBImpl.getOne();
-        Escalation escl = escMan.findById(escId);
+        Escalation esc = escMan.findById(escId);
 
         // End any escalation we were previously doing.
         escMan.endEscalation(def);
         
-        def.setEscalation(escl);
+        def.setEscalation(esc);
         def.setMtime(System.currentTimeMillis());
+        
+        // End all children's escalation
+        for (Iterator it = def.getChildren().iterator(); it.hasNext(); ) {
+            AlertDefinition child = (AlertDefinition) it.next();
+            escMan.endEscalation(child);
+        }
+        
+        getAlertDefDAO().setChildrenEscalation(def, esc);
     }
 
     /**
