@@ -2774,7 +2774,12 @@ hyperic.alert_center = function(title_name) {
 		
 	that.startAutoRefresh = function() {
 		var subgroup = that.dialogs.FixAlert.data.subgroup;
-		eval("if (window._hqu_" + subgroup + "_autoRefresh) { window._hqu_" + subgroup + "_autoRefresh(); }");		
+		var adhocScript = "if (window._hqu_" + subgroup + "_autoRefresh) { ";
+		adhocScript += "window._hqu_" + subgroup + "_autoRefresh(); ";
+		adhocScript += " }";
+		
+		that.stopAutoRefresh(subgroup);
+		eval(adhocScript);		
 	}
 
 	that.stopAutoRefresh = function(mySubgroup) {
@@ -2786,7 +2791,10 @@ hyperic.alert_center = function(title_name) {
 		}
 		
 		if (subgroup != null) {
-			eval("if (window._hqu_" + subgroup + "_refreshTimeout) { clearTimeout(window._hqu_" + subgroup + "_refreshTimeout); }");
+			var adhocScript = "if (window._hqu_" + subgroup + "_refreshTimeout) { ";
+			adhocScript += "clearTimeout(window._hqu_" + subgroup + "_refreshTimeout); ";
+			adhocScript += " }";
+			eval(adhocScript);
 		}
 	}
 
@@ -2887,11 +2895,11 @@ hyperic.alert_center = function(title_name) {
 		var subgroup = myForm.id.substring(0, myForm.id.indexOf("_FixForm"));
 		var checkAllBox = dojo11.byId(subgroup + "_CheckAllBox");
 		checkAllBox.checked = false;
-		that.toggleAll(checkAllBox);
+		that.toggleAll(checkAllBox, false);
 		myForm.fixedNote.value = "";
 	}
 	
-	that.toggleAll = function(checkAllBox) {
+	that.toggleAll = function(checkAllBox, doDelay) {
 		var checkedState = checkAllBox.checked;
 		var uList = checkAllBox.form;
 	    var len = uList.elements.length;
@@ -2910,10 +2918,13 @@ hyperic.alert_center = function(title_name) {
 	        	}
 			}
 		}
-		that.toggleAlertButtons(checkAllBox);
+		that.toggleAlertButtons(checkAllBox, doDelay);
 	}
 
-	that.toggleAlertButtons = function(myCheckBox) {
+	that.toggleAlertButtons = function(myCheckBox, doDelay) {
+		if (doDelay == null) {
+			doDelay = true;
+		}
 		var myList = myCheckBox.form;
 		var subgroup = myList.id.substring(0, myList.id.indexOf("_FixForm"));
 		var checkAllBox = dojo11.byId(subgroup + "_CheckAllBox");
@@ -2921,7 +2932,9 @@ hyperic.alert_center = function(title_name) {
 		var ackButton = dojo11.byId(subgroup + "_AckButton");
 
 		// delay refresh for X milliseconds if checkbox is clicked
-		that.delayAutoRefresh(subgroup);
+		if (doDelay) {
+			that.delayAutoRefresh(subgroup);
+		}
 
 		if (myCheckBox.id != checkAllBox.id) {
 			checkAllBox.checked = false;
