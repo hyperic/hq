@@ -27,8 +27,10 @@ package org.hyperic.util.timer;
 
 import org.hyperic.util.StringUtil;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class StopWatch {
@@ -42,19 +44,20 @@ public class StopWatch {
     }
 
     public void markTimeBegin (String marker) {
-        if (_markerMap.containsKey(marker)) {
-            TimeSlice ts = (TimeSlice)_markerMap.get(marker);
-            ts.cont();
-        } else {
-            _markerMap.put(marker, new TimeSlice(marker));
+        List list;
+        if (null == (list = (List)_markerMap.get(marker))) {
+            list = new ArrayList();
+            _markerMap.put(marker, list);
         }
+        list.add(new TimeSlice(marker));
     }
 
     public void markTimeEnd (String marker) {
         if (!_markerMap.containsKey(marker)) {
             throw new IllegalArgumentException("Invalid marker");
         }
-        TimeSlice ts = (TimeSlice)_markerMap.get(marker);
+        List list = (List)_markerMap.get(marker);
+        TimeSlice ts = (TimeSlice)list.get(list.size()-1);
         ts.setFinished();
     }
 
@@ -67,31 +70,48 @@ public class StopWatch {
         try {
             return this.getElapsed();
         } finally {
-            _start = System.currentTimeMillis();
+            _start = now();
             _markerMap = new HashMap();
         }
     }
     
+    private final long now() {
+        return System.currentTimeMillis();
+    }
+    
     public long getElapsed() {
-        _end = System.currentTimeMillis();
+        _end = now();
         return _end - _start;
     }
 
     public String toString() {
         long elap = this.getElapsed();
 
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append(StringUtil.formatDuration(elap, 2, true));
 
         if (_markerMap.size() > 0) {
             buf.append(" { Markers: ");
-            for (Iterator i=_markerMap.values().iterator();i.hasNext();) {
-                TimeSlice ts = (TimeSlice)i.next();
-                ts.writeBuf(buf);
+            for (Iterator i=_markerMap.entrySet().iterator();i.hasNext();) {
+                Map.Entry entry = (Map.Entry)i.next();
+                final String marker = (String)entry.getKey();
+                final List list = (List)entry.getValue();
+                writeBuf(marker, list, buf);
             }
             buf.append(" } ");
         }
         return buf.toString();
+    }
+
+    private void writeBuf(String marker, List tsList, StringBuilder buf) {
+        long total = 0l;
+        for (Iterator it=tsList.iterator();it.hasNext();) {
+            TimeSlice ts = (TimeSlice)it.next();
+            total += ts.getElapsed();
+        }
+        buf.append(" [").append(marker).append("=")
+           .append(StringUtil.formatDuration(total, 2, true))
+           .append("]");
     }
 
     class TimeSlice {
@@ -101,22 +121,16 @@ public class StopWatch {
 
         public TimeSlice (String marker) {
             _marker = marker;
-            _begin = _end=System.currentTimeMillis();
+            _begin = _end=now();
         }
 
         public void setFinished () {
-            _end= System.currentTimeMillis();
+            _end= now();
         }
-
-        public void cont () {
-            _begin -= (_end - _begin);
-        }
-
-        public void writeBuf(StringBuffer buf) {
-            long elap = _end - _begin;
-            buf.append(" [").append(_marker).append("=")
-               .append(StringUtil.formatDuration(elap, 2, true))
-               .append("]");
+        
+        public long getElapsed() {
+            final long end = (_end == 0) ? now() : _end;
+            return end - _begin;
         }
     }
 }
