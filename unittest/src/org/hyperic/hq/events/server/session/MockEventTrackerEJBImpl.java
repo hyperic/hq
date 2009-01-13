@@ -186,12 +186,12 @@ public class MockEventTrackerEJBImpl
     /**
      * @see org.hyperic.hq.events.shared.EventTrackerLocal#updateReference(java.lang.Long, org.hyperic.hq.events.AbstractEvent)
      */
-    public void updateReference(Long teid, AbstractEvent eventObject)
+    public void updateReference(Integer tid, Long teid,
+                                AbstractEvent eventObject,
+                                long expiration)
             throws SQLException {
         
         _expectedNumCalls.inc();
-        
-        Integer tid = (Integer)_triggerEventId2triggerId.get(teid);
         
         if (tid == null) {
             throw new SQLException("Can't update object that doesn't exist, teid="+teid);
