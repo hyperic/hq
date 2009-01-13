@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,23 +25,32 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+
+import javax.ejb.CreateException;
+import javax.ejb.FinderException;
+import javax.ejb.RemoveException;
+import javax.ejb.SessionBean;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
-import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.autoinventory.AICompare;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.product.PlatformTypeInfo;
@@ -49,19 +58,9 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.autoinventory.AICompare;
-import org.hyperic.hq.zevents.ZeventManager;
-
-import javax.ejb.CreateException;
-import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-import javax.ejb.SessionBean;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
 
 /**
  * @ejb:bean name="ConfigManager"

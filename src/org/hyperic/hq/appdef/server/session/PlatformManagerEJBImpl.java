@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -43,7 +43,6 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AIIpValue;
@@ -57,7 +56,6 @@ import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.IpValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -114,8 +112,8 @@ import org.hibernate.NonUniqueResultException;
  * @ejb:util generate="physical"
  * @ejb:transaction type="Required"
  */
-public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
-        SessionBean {
+public class PlatformManagerEJBImpl extends AppdefSessionEJB
+    implements SessionBean {
     private String ctx = PlatformManagerEJBImpl.class.getName();
 
     private final Log _log = LogFactory.getLog(ctx);
