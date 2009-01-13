@@ -1263,26 +1263,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB implements
     }
 
     /**
-     * Change Platform owner
-     * 
-     * @ejb:interface-method
-     */
-    public void changePlatformOwner(AuthzSubject who, Integer platformId,
-                                    AuthzSubject newOwner)
-        throws PermissionException {
-        // first lookup the platform
-        Platform platform = getPlatformDAO().findById(platformId);
-        // check if the caller can modify this platform
-        checkModifyPermission(who, platform.getEntityId());
-        // now get its authz resource
-        Resource authzRes = platform.getResource();
-        // change the authz owner
-        getResourceManager().setResourceOwner(who, authzRes, newOwner);
-        // update the modified field in the appdef table -- YUCK
-        platform.setModifiedBy(who.getName());
-    }
-
-    /**
      * Private method to validate a new PlatformValue object
      * 
      * @throws ValidationException

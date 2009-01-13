@@ -1174,26 +1174,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * Change Service owner.
-     *
-     * @ejb:interface-method
-     */
-    public void changeServiceOwner(AuthzSubject who, Integer serviceId,
-                                   AuthzSubject newOwner)
-        throws PermissionException {
-        // first lookup the service
-        Service service = getServiceDAO().findById(serviceId);
-        // check if the caller can modify this service
-        checkModifyPermission(who, service.getEntityId());
-        // now get its authz resource
-        Resource authzRes = service.getResource();
-        // change the authz owner
-        getResourceManager().setResourceOwner(who, authzRes, newOwner);
-        // update the modified field in the appdef table -- YUCK
-        service.setModifiedBy(who.getName());
-    }
-
-    /**
      * @ejb:interface-method
      */
     public void updateServiceTypes(String plugin, ServiceTypeInfo[] infos)

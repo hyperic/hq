@@ -25,21 +25,15 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.hq.appdef.AppdefBean;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.authz.server.session.Resource;
 
 /**
  * abstract base class for all appdef resources
  */
-public abstract class AppdefResource extends AppdefBean
+public abstract class AppdefResource extends AppdefNamedBean
 {
-    protected String name;
-    protected String sortName;
-    protected String description;
-    protected String modifiedBy;
-    protected String location;
-
+    private Resource _resource;
+    
     /**
      * default constructor
      */
@@ -48,80 +42,49 @@ public abstract class AppdefResource extends AppdefBean
         super();
     }
 
-    public String getDescription()
-    {
-        return this.description;
+    public Resource getResource() {
+        return _resource;
     }
 
-    public void setDescription(String description)
-    {
-        this.description = description;
+    protected void setResource(Resource resource) {
+        _resource = resource;
     }
 
-    public String getModifiedBy()
-    {
-        return this.modifiedBy;
-    }
-
-    public void setModifiedBy(String modifiedBy)
-    {
-        this.modifiedBy = modifiedBy;
-    }
-
-    public String getLocation()
-    {
-        return this.location;
-    }
-
-    public void setLocation(String location)
-    {
-        this.location = location;
-    }
-
-    // Property accessors
-    public String getName()
-    {
-        return this.name;
-    }
-
-    public void setName(String name)
-    {
-        this.name = name;
-        setSortName(name);
-    }
-
-    public String getSortName()
-    {
-        return this.sortName;
-    }
-
-    public void setSortName(String sortName)
-    {
-        if (sortName != null) {
-            this.sortName = sortName.toUpperCase();
-        } else {
-            this.sortName = null;
-        }
-    }
-
-    /**
-     * Get the appdefEntityId for this platform
-     * legacy code from EJB entity bean
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.server.session.AppdefNamedBean#getName()
      */
-    public abstract AppdefEntityID getEntityId();
-    
-    public abstract AppdefResourceType getAppdefResourceType();
-    public abstract AppdefResourceValue getAppdefResourceValue();
-    
+    public String getName() {
+        if (_resource != null)
+            return _resource.getName();
+        return super.getName();
+    }
 
-    protected abstract String _getAuthzOp(String op);
-    
-    public String getAuthzOp(String op) {
-        String res = _getAuthzOp(op);
-        
-        if (res == null) {
-            throw new IllegalArgumentException("Unsupported op, [" + op + "]");
-        }
-        return res;
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.server.session.AppdefNamedBean#setName(java.lang.String)
+     */
+    public void setName(String name) {
+        if (_resource != null)
+            _resource.setName(name);
+        else
+            super.setName(name);
+    }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.server.session.AppdefNamedBean#getSortName()
+     */
+    public String getSortName() {
+        if (_resource != null)
+            return _resource.getSortName();
+        return super.getSortName();
+    }
+
+    /* (non-Javadoc)
+     * @see org.hyperic.hq.appdef.server.session.AppdefNamedBean#setSortName(java.lang.String)
+     */
+    public void setSortName(String sortName) {
+        if (_resource != null)
+            _resource.setSortName(sortName);
+        else
+            super.setSortName(sortName);
     }
 }

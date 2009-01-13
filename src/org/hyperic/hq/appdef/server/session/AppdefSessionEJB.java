@@ -52,6 +52,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceLocal;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Operation;
@@ -1080,9 +1081,8 @@ public abstract class AppdefSessionEJB
      * Map a ResourceGroup to ServiceCluster, just temporary,
      * should be able to remove when done with the
      * ServiceCluster to ResourceGroup Migration
-     * @ejb:interface-method
      */
-    public ServiceCluster getServiceCluster(ResourceGroup group) {
+    protected ServiceCluster getServiceCluster(ResourceGroup group) {
         if (group == null) {
             return null;
         }
@@ -1122,5 +1122,23 @@ public abstract class AppdefSessionEJB
             sc.setServiceType(st);
         }
         return sc;
+    }
+
+    /**
+     * Change appdef entity owner
+     *
+     * @ejb:interface-method
+     */
+    public void changeOwner(AuthzSubject who, AppdefResource res,
+                            AuthzSubject newOwner)
+        throws PermissionException, ServerNotFoundException {
+        // check if the caller can modify this server
+        checkModifyPermission(who, res.getEntityId());
+        // now get its authz resource
+        Resource authzRes = res.getResource();
+        // change the authz owner
+        getResourceManager().setResourceOwner(who, authzRes, newOwner);
+        // update the modified field in the appdef table -- YUCK
+        res.setModifiedBy(who.getName());
     }
 }

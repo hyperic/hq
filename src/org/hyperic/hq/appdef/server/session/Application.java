@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2009], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -37,7 +37,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.authz.HasAuthzOperations;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 
 public class Application extends AppdefResource
@@ -61,8 +60,6 @@ public class Application extends AppdefResource
     private String _businessContact;
     private ApplicationType _applicationType;
     private Collection _appServices;
-    private Resource _resource;
-
     /**
      * default constructor
      */
@@ -75,44 +72,6 @@ public class Application extends AppdefResource
     {
         super();
         setId(id);
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefResource#getName()
-     */
-    public String getName() {
-        if (_resource != null)
-            return _resource.getName();
-        return super.getName();
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefResource#setName(java.lang.String)
-     */
-    public void setName(String name) {
-        if (_resource != null)
-            _resource.setName(name);
-        else
-            super.setName(name);
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefResource#getSortName()
-     */
-    public String getSortName() {
-        if (_resource != null)
-            return _resource.getSortName();
-        return super.getSortName();
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefResource#setSortName(java.lang.String)
-     */
-    public void setSortName(String sortName) {
-        if (_resource != null)
-            _resource.setSortName(sortName);
-        else
-            super.setSortName(sortName);
     }
 
     public AppdefEntityID getEntityId()
@@ -158,20 +117,6 @@ public class Application extends AppdefResource
     void setApplicationType(ApplicationType applicationType)
     {
         _applicationType = applicationType;
-    }
-
-    /**
-     * @return the resource
-     */
-    public Resource getResource() {
-        return _resource;
-    }
-
-    /**
-     * @param resource the resource to set
-     */
-    void setResource(Resource resource) {
-        _resource = resource;
     }
 
     public Collection getAppServices()

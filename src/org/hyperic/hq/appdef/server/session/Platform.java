@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004-2008], Hyperic, Inc. 
+ * Copyright (C) [2004-2009], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -65,46 +65,8 @@ public class Platform extends PlatformBase
     private Agent _agent;
     private Collection _ips = new ArrayList();
     private Collection _servers =  new ArrayList();
-    private Resource _resource;
-
     public Platform() {
         super();
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefResource#getName()
-     */
-    public String getName() {
-        if (getResource() != null)
-            return getResource().getName();
-        return super.getName();
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefResource#setName(java.lang.String)
-     */
-    public void setName(String name) {
-        if (getResource() != null)
-            getResource().setName(name);
-        super.setName(name);
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefResource#getSortName()
-     */
-    public String getSortName() {
-        if (getResource() != null)
-            return getResource().getSortName();
-        return super.getSortName();
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefResource#setSortName(java.lang.String)
-     */
-    public void setSortName(String sortName) {
-        if (getResource() != null)
-            getResource().setSortName(sortName);
-        super.setSortName(sortName);
     }
 
     public String getCommentText() {
@@ -343,19 +305,5 @@ public class Platform extends PlatformBase
 
     protected String _getAuthzOp(String op) {
         return (String)_authOps.get(op);
-    }
-
-    /**
-     * @return the resource
-     */
-    public Resource getResource() {
-        return _resource;
-    }
-
-    /**
-     * @param resource the resource to set
-     */
-    void setResource(Resource resource) {
-        _resource = resource;
     }
 }

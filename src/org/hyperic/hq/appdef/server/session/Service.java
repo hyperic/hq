@@ -34,7 +34,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.authz.HasAuthzOperations;
-import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 
@@ -63,49 +62,11 @@ public class Service extends AppdefResource
     private ResourceGroup _resourceGroup;
     private ConfigResponseDB _configResponse;
     private Collection _appServices;
-    private Resource _resource;
-
     public Service() {
     }
 
     public AppdefEntityID getEntityId() {
         return AppdefEntityID.newServiceID(getId());
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefResource#getName()
-     */
-    public String getName() {
-        if (getResource() != null)
-            return getResource().getName();
-        return super.getName();
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefResource#setName(java.lang.String)
-     */
-    public void setName(String name) {
-        if (getResource() != null)
-            getResource().setName(name);
-        super.setName(name);
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefResource#getSortName()
-     */
-    public String getSortName() {
-        if (getResource() != null)
-            return getResource().getSortName();
-        return super.getSortName();
-    }
-
-    /* (non-Javadoc)
-     * @see org.hyperic.hq.appdef.server.session.AppdefResource#setSortName(java.lang.String)
-     */
-    public void setSortName(String sortName) {
-        if (getResource() != null)
-            getResource().setSortName(sortName);
-        super.setSortName(sortName);
     }
 
     public boolean isAutodiscoveryZombie() {
@@ -184,20 +145,6 @@ public class Service extends AppdefResource
 
     void setConfigResponse(ConfigResponseDB configResponse) {
         _configResponse = configResponse;
-    }
-
-    /**
-     * @return the resource
-     */
-    public Resource getResource() {
-        return _resource;
-    }
-
-    /**
-     * @param resource the resource to set
-     */
-    void setResource(Resource resource) {
-        this._resource = resource;
     }
 
     public Collection getAppServices() {

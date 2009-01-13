@@ -1881,30 +1881,18 @@ public class AppdefBossEJBImpl
             AuthzSubject caller = manager.getSubject(sessionId);
             AuthzSubject newOwner =
                 getAuthzSubjectManager().findSubjectById(newOwnerId);
-            Integer id = eid.getId();
-            switch(eid.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                getPlatformManager().changePlatformOwner(caller, id, newOwner);
-                return findPlatformById(sessionId, id);
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                getServerManager().changeServerOwner(caller, id, newOwner);
-                return findServerById(sessionId, id);
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                getServiceManager().changeServiceOwner(caller, id, newOwner);
-                return findServiceById(sessionId, id);
-            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                getApplicationManager()
-                    .changeApplicationOwner(caller, id, newOwner);
-                return findApplicationById(sessionId, id);
-            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                ResourceGroup g = 
-                    getResourceGroupManager().findResourceGroupById(caller, id);
+           
+            if (eid.isGroup()) {
+                ResourceGroup g = getResourceGroupManager()
+                    .findResourceGroupById(caller, eid.getId());
                 getResourceGroupManager().changeGroupOwner(caller, g, newOwner);
                 return findGroup(sessionId, eid.getId());
-            default:
-                throw new InvalidAppdefTypeException("Unknown type: " +
-                                                     eid.getType());
             }
+            
+            AppdefEntityValue aev = new AppdefEntityValue(eid, caller);
+            getPlatformManager().changeOwner(caller, aev.getResourcePOJO(),
+                                             newOwner);
+            return aev.getResourceValue();
         } catch (PermissionException e) {
             throw e;
         } catch (Exception e) {
@@ -2971,47 +2959,27 @@ public class AppdefBossEJBImpl
         throws UpdateException, PermissionException,
                AppdefEntityNotFoundException
     {
-        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        final ResourceGroupManagerLocal groupMan = getResourceGroupManager();
         
         // first look up the appdef resources by owner
-        Collection resources
-            = getResourceManager().findResourceByOwner(currentOwner);
+        final ResourceManagerLocal resMan = getResourceManager();
+        Collection resources = resMan.findResourceByOwner(currentOwner);
         AuthzSubject overlord = getAuthzSubjectManager().getOverlordPojo();
         for(Iterator it = resources.iterator(); it.hasNext(); ) {
             Resource aRes = (Resource) it.next();
-            String resType = aRes.getResourceType().getName();
-            // platforms
-            if(resType.equals(AuthzConstants.platformResType)) {
-                // change platform owner
-                getPlatformManager()
-                    .changePlatformOwner(overlord,
-                                         aRes.getInstanceId(),
-                                         overlord);
-            }
-            // servers
-            if(resType.equals(AuthzConstants.serverResType)) {
-                // change server owner
-                getServerManager()
-                    .changeServerOwner(overlord, aRes.getInstanceId(),
-                                       overlord);
-            }
-            if(resType.equals(AuthzConstants.serviceResType)) {
-                // change service owner
-                getServiceManager()
-                    .changeServiceOwner(overlord, aRes.getInstanceId(),
-                                        overlord);
-            }
-            if(resType.equals(AuthzConstants.applicationResType)) {
-                // change app owner
-                getApplicationManager()
-                    .changeApplicationOwner(overlord, aRes.getInstanceId(),
-                                            overlord);
-            }
-            if(resType.equals(AuthzConstants.groupResType)) {
+            AppdefEntityID aeid = new AppdefEntityID(aRes);
+
+            if (aeid.isGroup()) {
                 ResourceGroup g = 
                     groupMan.findResourceGroupById(overlord, 
                                                    aRes.getInstanceId());
                 groupMan.changeGroupOwner(overlord, g, overlord);
+            }
+            else {
+                resMan.setResourceOwner(overlord, aRes, overlord);
+                AppdefEntityValue aev = new AppdefEntityValue(aeid, overlord);
+                AppdefResource appdef = aev.getResourcePOJO();
+                appdef.setModifiedBy(overlord.getName());
             }
         }
     }

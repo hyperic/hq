@@ -43,7 +43,6 @@ import javax.ejb.SessionBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
@@ -62,7 +61,6 @@ import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
@@ -1175,26 +1173,6 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException(existing.getId(), e);
         }
-    }
-
-    /**
-     * Change Server owner
-     *
-     * @ejb:interface-method
-     */
-    public void changeServerOwner(AuthzSubject who, Integer serverId,
-                                  AuthzSubject newOwner)
-        throws PermissionException, ServerNotFoundException {
-        // first lookup the server
-        Server server = getServerDAO().findById(serverId);
-        // check if the caller can modify this server
-        checkModifyPermission(who, server.getEntityId());
-        // now get its authz resource
-        Resource authzRes = server.getResource();
-        // change the authz owner
-        getResourceManager().setResourceOwner(who, authzRes, newOwner);
-        // update the modified field in the appdef table -- YUCK
-        server.setModifiedBy(who.getName());
     }
 
     /**

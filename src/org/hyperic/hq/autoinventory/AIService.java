@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2009], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -25,15 +25,14 @@
 
 package org.hyperic.hq.autoinventory;
 
-import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.AppdefNamedBean;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 
-public class AIService extends AppdefResource
+public class AIService extends AppdefNamedBean
 {
     private String serviceTypeName;
     private Integer queueStatus;
