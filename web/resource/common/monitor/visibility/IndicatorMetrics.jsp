@@ -115,6 +115,10 @@
         <c:url var="chartLink" value="/resource/common/monitor/Visibility.do">
           <c:param name="m" value="${metric.templateId}"/>
           <c:choose>
+            <c:when test="${Resource.entityId.group}">
+              <c:param name="mode" value="chartSingleMetricMultiResource"/>
+              <c:param name="eid" value="${Resource.entityId}"/>
+            </c:when>
             <c:when test="${metric.single}">
               <c:param name="mode" value="chartSingleMetricSingleResource"/>
               <c:param name="eid" value="${metric.appdefKey}"/>
