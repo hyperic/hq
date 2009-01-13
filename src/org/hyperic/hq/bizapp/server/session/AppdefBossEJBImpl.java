@@ -1495,7 +1495,9 @@ public class AppdefBossEJBImpl
         throws VetoException, PermissionException
     {
         try {
-            for (Iterator it = server.getServices().iterator(); it.hasNext();) {
+            // Service manager will update the collection, so we need to copy
+            Collection services = new ArrayList(server.getServices());
+            for (Iterator it = services.iterator(); it.hasNext();) {
                 Service service = (Service) it.next();
                 removeService(subject, service);
             }
