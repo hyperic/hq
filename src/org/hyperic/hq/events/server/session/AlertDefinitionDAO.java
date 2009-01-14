@@ -330,7 +330,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
     {
         String sql = PermissionManagerFactory.getInstance().getAlertDefsHQL();
         
-        sql += " and d.deleted = false";
+        sql += " and d.deleted = false and d.resource is not null ";
         if (enabled != null) {
             sql += " and d.enabled = " + 
                    (enabled.booleanValue() ? "true" : "false");
