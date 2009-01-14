@@ -504,7 +504,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         double sum = 0;
         int count = 0;
         int unknownCount = 0;
-        final Map midMap = getMidMap(measCache);
+        final Map midMap = getMidMap(ids, measCache);
         for (int ind = 0; ind < ids.length; ind += length) {
             
             if (ids.length - ind < length)
@@ -537,9 +537,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return sum / count;
     }
     
-    protected final Map getMidMap(Map measCache) {
-        final Map rtn = new HashMap(measCache.size());
+    protected final Map getMidMap(AppdefEntityID[] ids, Map measCache) {
         if (measCache != null) {
+            final Map rtn = new HashMap(measCache.size());
             final ResourceManagerLocal rMan = getResourceManager();
             for (Iterator it=measCache.entrySet().iterator(); it.hasNext(); ) {
                 final Map.Entry entry = (Map.Entry)it.next();
@@ -551,8 +551,22 @@ public class MetricSessionEJB extends BizappSessionEJB {
                     rtn.put(id, ((Measurement)list.get(0)).getId());
                 }
             }
+            return rtn;
+        } else {
+            final Map rtn = new HashMap(ids.length);
+            final MeasurementManagerLocal mMan = getMetricManager();
+            final ResourceManagerLocal rMan = getResourceManager();
+            for (int i=0; i<ids.length; i++) {
+                AppdefEntityID id = ids[i];
+                if (id == null) {
+                    continue;
+                }
+                Measurement m =
+                    mMan.getAvailabilityMeasurement(rMan.findResource(id));
+                rtn.put(id, m.getId());
+            }
+            return rtn;
         }
-        return rtn;
     }
 
     /**

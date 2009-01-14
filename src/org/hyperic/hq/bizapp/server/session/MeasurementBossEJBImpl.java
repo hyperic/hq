@@ -3032,7 +3032,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             
             AppdefEntityID[] ids = new AppdefEntityID[] { id };
             return getAvailability(
-                subject, ids, getMidMap(measCache), availCache)[0];
+                subject, ids, getMidMap(ids, measCache), availCache)[0];
         } finally {
             if (_log.isDebugEnabled())
                 _log.debug("END getAvailability() -- " + watch);
