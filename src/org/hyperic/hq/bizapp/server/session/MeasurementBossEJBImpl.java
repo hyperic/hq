@@ -1938,8 +1938,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     "Requested group (" + entId +
                     ") is not a compatible type");
             }
-        } else
-        if (entId.isApplication()) {
+        } else if (entId.isApplication()) {
             AppdefEntityValue aev = new AppdefEntityValue(entId, subject);
             resources = aev.getAssociatedServices(typeId, PageControl.PAGE_ALL);
             if (typeId != null) {
@@ -1971,8 +1970,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
 
         AppdefEntityID[] resourceArray = toAppdefEntityIDArray(resources);
-        double[] data = getAvailability(subject, resourceArray, null, null);
-    
+        double[] data = getAvailability(subject, resourceArray);
+
         // Availability counts **this calls getLiveMeasurement
         int availCnt = 0;
         int unavailCnt = 0;
