@@ -348,10 +348,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
         }
         return res;
     }
-    
+
     protected double[] getAvailability(AuthzSubject subject,
-                                       AppdefEntityID[] ids,
-                                       Map availCache)
+                                       AppdefEntityID[] ids)
         throws AppdefEntityNotFoundException,
                PermissionException {
     
@@ -366,10 +365,10 @@ public class MetricSessionEJB extends BizappSessionEJB {
             }
         }
         
-        return getAvailability(subject, ids, midMap, availCache);
+        return getAvailability(subject, ids, midMap, null);
     }
 
-    private double[] getAvailability(AuthzSubject subject,
+    protected double[] getAvailability(AuthzSubject subject,
                                      AppdefEntityID[] ids,
                                      Map midMap,
                                      Map availCache)
@@ -445,11 +444,12 @@ public class MetricSessionEJB extends BizappSessionEJB {
                         AppdefEntityID[] services =
                             appVal.getFlattenedServiceIds();
     
-                        result[i] = getAggregateAvailability(subject, services);
+                        result[i] = getAggregateAvailability(
+                            subject, services, null, availCache);
                         break;
                     case AppdefEntityConstants.APPDEF_TYPE_GROUP :
-                        result[i] = getGroupAvailability(subject,
-                                                         ids[i].getId());
+                        result[i] = getGroupAvailability(
+                            subject, ids[i].getId(), null, null);
                         break;
                     default :
                         break;
@@ -480,6 +480,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
     }
 
     /**
+     * @param availCache Map<Integer, MetricValue>
+     *  Integer => Measurement.getId(), may be null.
+     * 
      * Given an array of AppdefEntityID's, disqulifies their aggregate
      * availability (with the disqualifying status) for all of them if any are
      * down or unknown, otherwise the aggregate is deemed available
@@ -489,7 +492,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
      * representation
      */
     protected double getAggregateAvailability(AuthzSubject subject,
-                                              AppdefEntityID[] ids)
+                                              AppdefEntityID[] ids,
+                                              Map measCache,
+                                              Map availCache)
         throws AppdefEntityNotFoundException, PermissionException {
         if (ids.length == 0)
             return MeasurementConstants.AVAIL_UNKNOWN;
@@ -499,6 +504,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         double sum = 0;
         int count = 0;
         int unknownCount = 0;
+        final Map midMap = getMidMap(measCache);
         for (int ind = 0; ind < ids.length; ind += length) {
             
             if (ids.length - ind < length)
@@ -509,8 +515,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
             for (int i = ind; i < ind + length; i++) {
                 subids[i - ind] = ids[i];
             }
-            
-            double[] avails = getAvailability(subject, subids, null);
+
+            double[] avails = getAvailability(
+                subject, subids, midMap, availCache);
             
             for (int i = 0; i < avails.length; i++) {
                  if (avails[i] == MeasurementConstants.AVAIL_UNKNOWN) {
@@ -529,8 +536,31 @@ public class MetricSessionEJB extends BizappSessionEJB {
         
         return sum / count;
     }
+    
+    protected final Map getMidMap(Map measCache) {
+        final Map rtn = new HashMap(measCache.size());
+        if (measCache != null) {
+            final ResourceManagerLocal rMan = getResourceManager();
+            for (Iterator it=measCache.entrySet().iterator(); it.hasNext(); ) {
+                final Map.Entry entry = (Map.Entry)it.next();
+                Integer resId = (Integer)entry.getKey();
+                List list = (List)entry.getValue();
+                Resource resource = rMan.findResourceById(resId);
+                AppdefEntityID id = new AppdefEntityID(resource);
+                if (list.size() == 1) {
+                    rtn.put(id, ((Measurement)list.get(0)).getId());
+                }
+            }
+        }
+        return rtn;
+    }
 
     /**
+     * @param measCache Map<Integer, List<Measurement>> 
+     *  Integer => Resource.getId(), may be null.
+     * @param availCache Map<Integer, MetricValue>
+     *  Integer => Measurement.getId(), may be null.
+     * 
      * Given a group, disqualifies their aggregate availability (with the
      * disqualifying status) for all of them if any are down or unknown,
      * otherwise the aggregate is deemed available
@@ -539,8 +569,10 @@ public class MetricSessionEJB extends BizappSessionEJB {
      * the availability shall be disqualified as unknown i.e. the (?)
      * representation
      */
-    protected double getGroupAvailability(AuthzSubject subject, Integer gid)
-        throws AppdefEntityNotFoundException, PermissionException {
+    protected double getGroupAvailability(AuthzSubject subject, Integer gid,
+                                          Map measCache, Map availCache)
+        throws AppdefEntityNotFoundException,
+               PermissionException {
         final ResourceGroupManagerLocal resGrpMgr = getResourceGroupManager();
         final ResourceGroup group =
             resGrpMgr.findResourceGroupById(subject, gid);
@@ -553,10 +585,15 @@ public class MetricSessionEJB extends BizappSessionEJB {
             ids[i++] = new AppdefEntityID(r);
         }
         
-        MeasurementManagerLocal mman = getMetricManager();
-        List metrics =
-            mman.findDesignatedMeasurements(subject, group,
-                                            MeasurementConstants.CAT_AVAILABILITY);
+        List metrics = null;
+        if (measCache != null) {
+            final Resource resource = group.getResource();
+            metrics = (List)measCache.get(resource.getId());
+        } else {
+            MeasurementManagerLocal mman = getMetricManager();
+            metrics = mman.findDesignatedMeasurements(
+                subject, group, MeasurementConstants.CAT_AVAILABILITY);
+        }
 
         // Allow for the maximum window based on collection interval
         Map midMap = new HashMap(metrics.size());
@@ -583,7 +620,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 subids[i - ind] = ids[i];
             }
             
-            double[] avails = getAvailability(subject, ids, midMap, null);
+            double[] avails = getAvailability(subject, ids, midMap, availCache);
 
             for (i = 0; i < avails.length; i++) {
                  if (avails[i] == MeasurementConstants.AVAIL_UNKNOWN) {

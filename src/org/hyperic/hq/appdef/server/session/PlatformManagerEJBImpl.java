@@ -915,9 +915,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      */
     public PageList getPlatformsByServers(AuthzSubject subject, List sIDs)
         throws PlatformNotFoundException, PermissionException {
-        List authzPks;
+        Set authzPks;
         try {
-            authzPks = getViewablePlatformPKs(subject);
+            authzPks = new HashSet(getViewablePlatformPKs(subject));
         } catch (FinderException exc) {
             return new PageList();
         }
