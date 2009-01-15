@@ -2245,7 +2245,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         Map cats = new HashMap(2);
         cats.put(MeasurementConstants.CAT_AVAILABILITY, null);
-        cats.put(MeasurementConstants.CAT_THROUGHPUT, null);
+        // XXX scottmf need to review this, perf is bad and metric
+        // is not very useful
+        //cats.put(MeasurementConstants.CAT_THROUGHPUT, null);
 
         // Look up metrics by group first
         MeasurementManagerLocal mman = getMetricManager();
@@ -2465,7 +2467,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
                     categories.add(MeasurementConstants.CAT_AVAILABILITY);
-                    categories.add(MeasurementConstants.CAT_THROUGHPUT);
+                    // XXX scottmf need to review this, perf is bad and metric
+                    // is not very useful
+                    //categories.add(MeasurementConstants.CAT_THROUGHPUT);
                 
                     watch.markTimeBegin("setResourceDisplaySummaryValueForCategory");
                     setResourceDisplaySummaryValueForCategory(
@@ -2521,38 +2525,40 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     private void setResourceDisplaySummaryValueForCategory(AuthzSubject subject,
             AppdefEntityID aeid, ResourceDisplaySummary summary,
             Set categories, Map measCache, Map availCache)
-        throws AppdefEntityNotFoundException, PermissionException {
-
-        final boolean debug = _log.isDebugEnabled();
+        throws AppdefEntityNotFoundException,
+               PermissionException {
         // Maybe we're not doing anything
-        if (categories.size() == 0)
+        if (categories.size() == 0) {
             return;
-        
-        StopWatch watch = new StopWatch();
-        
+        }
         final Resource resource = getResourceManager().findResource(aeid);
+        MetricValue mv = null;
         if (categories.remove(MeasurementConstants.CAT_AVAILABILITY)) {
             Measurement dm = null;
+            // try to use prefetched caches
             if (measCache != null) {
                 List list = (List)measCache.get(resource.getId());
                 if (list.size() == 1) {
                     dm = (Measurement)list.get(0);
+                    mv = (MetricValue)availCache.get(dm.getId());
+                    if (mv != null) {
+                        summary.setAvailability(mv.getObjectValue());
+                        summary.setAvailTempl(dm.getTemplate().getId());
+                    }
                 }
             }
+            // check if prefetched caches didn't contain values
             dm = (dm == null) ? findAvailabilityMetric(subject, aeid) : dm;
-            if (dm != null) {
+            if (dm != null && mv == null) {
                 summary.setAvailability(new Double(
                     getAvailability(subject, aeid, measCache, availCache)));
                 summary.setAvailTempl(dm.getTemplate().getId());
             }
         }
-        
-        List measurements = null;
-        if (measCache != null) {
-            measurements = (List)measCache.get(resource.getId());
-        } else {
-            measurements = findDesignatedMetrics(subject, aeid, categories);
+        if (categories.size() == 0) {
+            return;
         }
+        List measurements = findDesignatedMetrics(subject, aeid, categories);
         // Optimization for the fact that we can have multiple indicator
         // metrics for each category
         HashSet done = new HashSet();
@@ -2566,9 +2572,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             if (done.contains(category)) {
                 continue;
             }
-            // XXX scottmf, this need to be looked at for perf reasons
-            MetricValue mv = new MetricValue();
-// XXX            MetricValue mv = getDataMan().getLastHistoricalData(m);
+            // XXX scottmf need to review this, perf is bad and metrics
+            // are not very useful
+            mv = new MetricValue();
+            // XXX mv = getDataMan().getLastHistoricalData(m);
             if (mv == null) {
                 continue;
             }
@@ -2584,9 +2591,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
 
             done.add(category);
-        }
-        if (debug) {
-            _log.debug("setResourceDisplaySummaryValueForCategory: " + watch);
         }
     }
 
