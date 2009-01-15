@@ -747,8 +747,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     public Map getAvailMeasurements(Collection resources) {
         final Map rtn = new HashMap(resources.size());
         final List res = new ArrayList(resources.size());
-        final ResourceGroupManagerLocal resGrpMan =
-            ResourceGroupManagerEJBImpl.getOne();
         final ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
         final MeasurementDAO dao = getMeasurementDAO();
         for (Iterator it=resources.iterator(); it.hasNext(); ) {
@@ -766,8 +764,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             } else if (o instanceof ResourceGroup) {
                 ResourceGroup grp = (ResourceGroup) o;
                 resource = grp.getResource();
-                Collection members = resGrpMan.getMembers(grp);
-                rtn.put(resource.getId(), dao.findAvailMeasurements(members));
+                rtn.put(resource.getId(), dao.findAvailMeasurements(grp));
                 continue;
             } else {
                 AppdefResourceValue r = (AppdefResourceValue) o;
@@ -776,10 +773,11 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             }
             final Integer type = resource.getResourceType().getId();
             if (type.equals(AuthzConstants.authzGroup)) {
+                final ResourceGroupManagerLocal resGrpMan =
+                    ResourceGroupManagerEJBImpl.getOne();
                 ResourceGroup grp =
                     resGrpMan.getResourceGroupByResource(resource);
-                Collection members = resGrpMan.getMembers(grp);
-                rtn.put(resource.getId(), dao.findAvailMeasurements(members));
+                rtn.put(resource.getId(), dao.findAvailMeasurements(grp));
                 continue;
             }
 
