@@ -367,7 +367,17 @@ public class DBUtil {
      */
     public static String getBooleanValue(boolean bool, Connection conn)
         throws SQLException {
-        return bool ? "'1'" : "'0'";
+        int type = DBUtil.getDBType(conn);
+        switch (type) {
+            case DBUtil.DATABASE_ORACLE_8:
+            case DBUtil.DATABASE_ORACLE_9:
+            case DBUtil.DATABASE_ORACLE_10:
+            case DBUtil.DATABASE_ORACLE_11:
+            case DBUtil.DATABASE_MYSQL5:
+                return bool ? "1" : "0";
+            default:
+                return bool ? "'1'" : "'0'";
+        }
     }
 
     /**
