@@ -51,7 +51,7 @@ public abstract class BaseService implements IEngineService {
     public static final String PARAM_INTERVAL = "ivl";
     
     public static final String PARAM_SCHEDULE = "sched";
-    
+        
     public static final String PARAM_CLONE = "clone";
     
     public static final String PARAM_DELETE = "remove";
@@ -66,6 +66,8 @@ public abstract class BaseService implements IEngineService {
     public static final String SERVICE_ID_MAINTENANCE_WINDOW_WIDGET = "maint_win";
     
     public static final String SERVICE_ID_CLONE_PLATFORM_WIDGET = "clone_platform";
+    
+    public static final String SERVICE_ID_GROUP_MANAGER_WIDGET = "group_manager";
     
     /**
      * Error Codes

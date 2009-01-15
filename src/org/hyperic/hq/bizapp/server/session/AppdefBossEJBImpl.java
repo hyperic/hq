@@ -2263,6 +2263,47 @@ public class AppdefBossEJBImpl
     }
 
     /**
+     * Produce list of all groups where caller is authorized
+     * to modify. Exclude any groups that contain the appdef entity id. Filter
+     * out any unwanted groups specified by groupId array.
+     * @param entity for use in group member filtering.
+     * @return List containing AppdefGroupValue.
+     * @ejb:interface-method
+     * */
+    public PageList findAllGroupsMemberExclusive(int sessionId, PageControl pc,
+                                                 AppdefEntityID[] entities, 
+                                                 Integer[] removeIds)
+        throws PermissionException, SessionTimeoutException,
+               SessionNotFoundException 
+    {
+        List commonList = new ArrayList();
+        ResourceManagerLocal resourceMan = ResourceManagerEJBImpl.getOne();
+        
+        for (int i=0; i<entities.length; i++) {
+            Resource resource = resourceMan.findResource(entities[i]);
+            List result = findAllGroupsMemberExclusive(
+                                sessionId, 
+                                pc, 
+                                entities[i], 
+                                removeIds, 
+                                resource.getPrototype());
+            
+            if (i==0) {
+                commonList.addAll(result);
+            } else {
+                commonList.retainAll(result);
+            }
+
+            if (commonList.isEmpty()) {
+                // no groups in common, so exit
+                break;                
+            }
+        }
+        
+        return new PageList(commonList, commonList.size());
+    }
+    
+    /**
      * Produce list of all group pojos where caller is authorized
      * @return List containing AppdefGroup.
      * @ejb:interface-method

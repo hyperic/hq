@@ -2632,16 +2632,31 @@ hyperic.dashboard.summaryWidget.prototype = hyperic.dashboard.widget;
 hyperic.group_manager = function() {
 	var that = this;
 	that.dialogs = {};
+	that.message_area = {};
+	that.button_area = {};
 	
 	that.init = function() {
-		if(!that.dialogs.AddToGroup){
-	    	var pane = dojo11.byId("add_to_group_dialog");
-			that.dialogs.AddToGroup = new dijit11.Dialog({
-				id: "Add_to_Group_Dialog",
+		if(!that.dialogs.AddToGroupMenu){
+	    	var pane = dojo11.byId("add_to_group_menu_dialog");
+			that.dialogs.AddToGroupMenu = new dijit11.Dialog({
+				id: "Add_to_Group_Menu_Dialog",
 				refocus: true,
 				autofocus: false,
 				title: "Group Manager"
 				}, pane);			
+		}
+		
+		if(!that.dialogs.AddToExistingGroup){
+	    	var pane = dojo11.byId("add_to_existing_group_dialog");
+			that.dialogs.AddToExistingGroup = new dijit11.Dialog({
+				id: "Add_to_Existing_Group_Dialog",
+				refocus: true,
+				autofocus: false,
+				title: "Group Manager"
+				}, pane);
+			
+			that.message_area.AddToExistingGroup = dojo11.byId("AddToExistingGroupStatus");
+			that.button_area.AddToExistingGroup = dojo11.byId("AddToExistingGroupButton");
 		}
 	}
 	
@@ -2654,29 +2669,47 @@ hyperic.group_manager = function() {
 		} else if (formArray.resources) {
 			// from Browse Resources page
 			if (typeof formArray.resources == "string") {
-				// the AddToGroup dialog requires that only one resource is selected
-				document.AddToGroupForm.eid.value = formArray.resources;
-				that.dialogs.AddToGroup.show();
-				return false;
+				// one resource selected
+				document.AddToExistingGroupForm.eid.value = formArray.resources;
 			} else {
 				// multiple resources selected
-				return true;
+				document.AddToExistingGroupForm.eid.value = formArray.resources.join();
 			}
+			that.prepareAddResourcesToGroups(formArray.resources.toString().split(","));
+			return false;
 		}
 
 		return false;
 	}
 	
 	that.addNewGroup = function(eid) {
-		var entityType = eid.split(":")[0];
+		var eidArray = eid.split(",");
+		var entityType = eidArray[0].split(":")[0];
 		var url = "/resource/hub/RemoveResource.do";
-		url += "?resources=" + escape(eid);
+		
+		url += "?group.x=1";
 		url += "&ff=" + entityType;
-		url += "&group.x=1&preventCache=" + new Date().getTime();
-		document.location = url;
+
+		for (var i=0; i<eidArray.length; i++) {
+			url += "&resources=" + escape(eidArray[i]);
+		}
+		
+		url += "&preventCache=" + new Date().getTime();
+
+		window.location.href = url;
 	}
 	
 	that.addToGroup = function(eid) {
+		var eidArray = eid.split(",");
+		
+		if (eidArray.length > 1) {
+			that.prepareAddResourcesToGroups(eidArray);
+		} else {
+			that.addResourceToGroup(eid);
+		}
+	}
+	
+	that.addResourceToGroup = function(eid) {
 		var entityType = parseInt(eid.split(":")[0]);
 		var entityId = parseInt(eid.split(":")[1]);
 		var url = "/resource/{0}/Inventory.do";
@@ -2702,14 +2735,96 @@ hyperic.group_manager = function() {
 				url = url.replace("{0}", "group").replace("addGroups", "addResources");
 				break;
 			default:
-				alert("Unable to process your request");
-				that.dialogs.AddToGroup.hide();
+				alert("Unable to process your request.");
+				that.dialogs.AddToGroupMenu.hide();
 				return;
 		}
 				
-		document.location = url;
+		window.location.href = url;
+	}
+
+	that.prepareAddResourcesToGroups = function(eidArray) {
+		that.message_area.AddToExistingGroup.style.display = "none";
+		that.button_area.AddToExistingGroup.className = "CompactButtonInactive";
+		that.button_area.AddToExistingGroup.disabled = true;
+		dojo11.byId("AddToExistingGroupTableBodyDiv").innerHTML = "";
+		that.dialogs.AddToExistingGroup.show();
+		that.getGroupsNotContaining(eidArray);	
 	}
 	
+	that.addResourcesToGroups = function(myForm) {
+		var formArray = Form.serialize(myForm, true);
+
+		dojo11.xhrPost( {
+            url: "/api.shtml",
+            content: {v: "1.0", 
+					  s_id: "group_manager", 
+					  mode: "addGroups",
+					  eid: "['" + formArray.eid.split(",").join("','") + "']",
+					  groupId: "['" + formArray.group.toString().split(",").join("','") + "']"},
+            handleAs: 'json',
+            load: function(data) {
+			    var successText = "The requested groups have been assigned.";
+			    that.displayConfirmation(that.message_area.AddToExistingGroup, successText);
+	        	setTimeout('MyGroupManager.dialogs.AddToExistingGroup.hide()', 2000);
+			},
+            error: function(data) {
+	    		var errorText = "An error occurred processing your request.";
+            	console.debug(errorText, data);
+            	that.displayError(that.message_area.AddToExistingGroup, errorText);
+            }
+        });
+	}
+	
+	that.getGroupsNotContaining = function(eids) {		
+        dojo11.xhrGet( {
+            url: "/api.shtml",
+            content: {v: "1.0", s_id: "group_manager", eid: "['" + eids.join("','") + "']"},
+            handleAs: 'json',
+            preventCache: true,
+            load: function(data) {            	
+            	var tbody = dojo11.byId("AddToExistingGroupTableBodyDiv");
+            	var newTbody = "";
+            	
+            	for (var i=0; i<data.groups.length; i++) {
+            		newTbody += "<tr class='" + ((i%2 == 0) ? "tableRowOdd" : "tableRowEven") + "'>";
+            		newTbody += "<td class='ListCellCheckbox'><input type='checkbox' name='group' value='" + data.groups[i].id + "' /></td>";
+            		newTbody += "<td class='tableCell'>" + data.groups[i].name + "&nbsp;</td>";
+            		newTbody += "<td class='tableCell'>" + data.groups[i].description + "&nbsp;</td>";
+            		newTbody += "</tr>"; 
+            	}
+            	tbody.innerHTML = newTbody;
+            	
+            	if (data.groups.length > 0) {
+        			that.button_area.AddToExistingGroup.className = "CompactButton";
+        			that.button_area.AddToExistingGroup.disabled = false;
+            	}
+            },
+            error: function(data) {
+	    		var errorText = "An error occurred processing your request.";
+            	console.debug(errorText, data);
+            	that.displayError(that.message_area.AddToExistingGroup, errorText);
+            }
+        });
+		
+	}
+
+	that.toggleAll = function(checkAllBox) {
+		// TO DO
+	}
+
+	that.displayConfirmation = function(msg_area, msg) {
+		msg_area.className = 'confirmationPanel';
+		msg_area.innerHTML = msg;
+		msg_area.style.display = '';   	
+    }
+    
+    that.displayError = function(msg_area, msg) {
+    	msg_area.className = 'errorPanel';
+    	msg_area.innerHTML = msg;
+    	msg_area.style.display = '';
+    }
+    
 	that.init();
 }
 

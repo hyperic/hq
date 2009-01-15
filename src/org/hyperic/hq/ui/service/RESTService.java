@@ -22,6 +22,7 @@ import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.CloningBossInterface;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
@@ -111,6 +112,8 @@ public class RESTService extends BaseService {
             	_response.getWriter().write(serviceMaintenanceWindowWidget(cycle));
             } else if (SERVICE_ID_CLONE_PLATFORM_WIDGET.equalsIgnoreCase(servicePointId)) {
             	_response.getWriter().write(serviceClonePlatformWidget(cycle));
+            } else if (SERVICE_ID_GROUP_MANAGER_WIDGET.equalsIgnoreCase(servicePointId)) {
+                _response.getWriter().write(serviceGroupManagerWidget(cycle));                
             }
         }
     }
@@ -502,6 +505,83 @@ public class RESTService extends BaseService {
             }
         }
         return res;
+    }
+
+    /**
+     * Service for the Group Manager Widget 
+     * 
+     * @param cycle the service parameters
+     * @return the service JSON response
+     */
+    private String serviceGroupManagerWidget(IRequestCycle cycle) {
+        // Get the AuthzSubject
+        WebUser user = (WebUser) _request.getSession()
+                .getAttribute(Constants.WEBUSER_SES_ATTR);
+        AuthzBoss boss = ContextUtils.getAuthzBoss(_servletContext);
+        AuthzSubject me = getAuthzSubject(user, boss);
+        if (me == null)
+            return ERROR_GENERIC;
+        
+        JSONObject jRes = new JSONObject();
+
+        try {
+            String mode = cycle.getParameter(Constants.MODE_PARAM);
+            JSONArray aeidJArray = new JSONArray(cycle.getParameter(Constants.ENTITY_ID_PARAM));
+            
+            if (Constants.MODE_ADD_GROUPS.equals(mode)) {
+                JSONArray groupJArray = new JSONArray(cycle.getParameter("groupId"));
+                Integer[] groupIds = new Integer[groupJArray.length()];
+                
+                for (int j=0; j<groupJArray.length(); j++) {
+                    groupIds[j] = new Integer(groupJArray.getString(j));
+                }
+                
+                for (int i=0; i<aeidJArray.length(); i++) {
+                    AppdefEntityID aeid = new AppdefEntityID(aeidJArray.getString(i));
+                    Resource resource = ResourceManagerEJBImpl.getOne()
+                                            .findResource(aeid);                   
+                    
+                    AppdefBossEJBImpl.getOne()
+                                 .batchGroupAdd(
+                                         user.getSessionId(),
+                                         aeid,
+                                         groupIds);
+                }
+            } else {
+                AppdefEntityID[] aeids = new AppdefEntityID[aeidJArray.length()];
+                
+                for (int k=0; k<aeidJArray.length(); k++) {
+                    aeids[k] = new AppdefEntityID(aeidJArray.getString(k));
+                }
+
+                PageList availableGroups = 
+                    AppdefBossEJBImpl.getOne().findAllGroupsMemberExclusive(
+                                                    user.getSessionId(),
+                                                    PageControl.PAGE_ALL,
+                                                    aeids,
+                                                    new Integer[] {});
+                
+                JSONArray jarr = new JSONArray();
+                AppdefGroupValue group = null;
+                for (Iterator<AppdefGroupValue> it = availableGroups.iterator(); it.hasNext();) {
+                    group = it.next();
+                    jarr.put(new JSONObject()
+                                .put("id", group.getId())
+                                .put("name", group.getName())
+                                .put("description", group.getDescription()));
+                }
+                jRes.put("groups", jarr);
+            }
+        } catch (Exception e) {
+            log.debug(e.getLocalizedMessage());
+            
+            try {
+                jRes.put("error", true)
+                    .put("error_message", e.getLocalizedMessage());
+            } catch (Exception e2) {}
+        }
+        
+        return (jRes.length() > 0) ? jRes.toString() : ERROR_GENERIC;        
     }
     
     /**
