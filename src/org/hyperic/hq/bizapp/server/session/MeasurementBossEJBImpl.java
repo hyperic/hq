@@ -2419,11 +2419,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws AppdefEntityNotFoundException, PermissionException {
         StopWatch watch = new StopWatch();
         PageList summaries = new PageList();
-        watch.markTimeBegin("getAvailMeasurements && getLastAvail");
+        watch.markTimeBegin("getAvailMeasurements");
         final Map measCache = getMetricManager().getAvailMeasurements(resources);
+        watch.markTimeEnd("getAvailMeasurements");
+        watch.markTimeBegin("getLastAvail");
         final Map availCache = getAvailManager().getLastAvail(
             resources, measCache);
-        watch.markTimeEnd("getAvailMeasurements && getLastAvail");
+        watch.markTimeEnd("getLastAvail");
         for (Iterator it = resources.iterator(); it.hasNext(); ) {
             Object o = it.next();
             
@@ -2510,9 +2512,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param id the AppdefEntityID of the resource our ResourceDisplaySummary is for
      * @param summary a ResourceDisplaySummary
      * @param availCache Map<Integer, MetricValue>
-     *  Integer => resource.getInstanceId(), may be null
+     *  Integer => Measurement.getId(), may be null
      * @param measCache Map<Integer, List<Measurement>>
-     *  Integer => resource.getInstanceId(), may be null
+     *  Integer => Resource.getId(), may be null
      * @throws PermissionException
      * @throws AppdefEntityNotFoundException
      */
@@ -2591,6 +2593,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * @param id the AppdefEntityID of the resource our ResourceDisplaySummary is for
      * @param summary a ResourceDisplaySummary
+     * @param availCache Map<Integer, MetricValue>
+     *  Integer => Measurement.getId(), may be null
+     * @param measCache Map<Integer, List<Measurement>>
+     *  Integer => Resource.getId(), may be null
      * @throws PermissionException
      * @throws AppdefEntityNotFoundException
      */
@@ -2611,16 +2617,26 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
         }
 
-        AppdefEntityID id = new AppdefEntityID(res);
+        final AppdefEntityID id = new AppdefEntityID(res);
         for (Iterator it = resMetrics.iterator(); it.hasNext(); ) {
-            Measurement m = (Measurement) it.next();
-            MeasurementTemplate templ = m.getTemplate();
-            String category = templ.getCategory().getName();
+            final Measurement m = (Measurement) it.next();
+            final MeasurementTemplate templ = m.getTemplate();
+            final String category = templ.getCategory().getName();
     
             if (category.equals(MeasurementConstants.CAT_AVAILABILITY)) {
-                summary.setAvailability(new Double(
-                    getAvailability(subject, id, measCache, availCache)));
+                watch.markTimeBegin("getAvailability");
+                MetricValue mv = null;;
+                if (availCache != null) {
+                    Integer mid = m.getId();
+                    mv = (MetricValue)availCache.get(mid);
+                }
+                Double val = (mv == null) ?
+                    new Double(
+                        getAvailability(subject, id, measCache, availCache)) :
+                    mv.getObjectValue();
+                summary.setAvailability(val);
                 summary.setAvailTempl(templ.getId());
+                watch.markTimeEnd("getAvailability");
                 continue;
             }
             
