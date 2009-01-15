@@ -31,6 +31,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
@@ -46,6 +47,7 @@ import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.TypeInfo;
+import org.hyperic.util.TimeUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.jdbc.DBUtil;
@@ -72,6 +74,8 @@ public class MySqlStatsMeasurementPlugin
                            _replStatus   = null;
     private final Map _tableStatusCacheMap = new HashMap();
     private static final int TIMEOUT_VALUE = 60000;
+    private int _consecutiveErrors = 0;
+    private static final int MAX_ERRORS = 3;
     
     protected double getQueryValue(Metric metric)
         throws MetricNotFoundException,
@@ -81,6 +85,7 @@ public class MySqlStatsMeasurementPlugin
         String objectName = metric.getObjectName().toLowerCase();
         // will look like "availability"
         String alias = metric.getAttributeName();
+        boolean sqlException = false;
         try {
             setDriver(metric);
             setGlobalStatus(metric, SHOW_GLOBAL_STATUS);
@@ -98,12 +103,40 @@ public class MySqlStatsMeasurementPlugin
             }
         } catch (MetricUnreachableException e) {
             throw e;
+        } catch (SQLException e) {
+            sqlException = true;
+            throw new MetricNotFoundException(
+                "Service "+objectName+":"+alias+" not found", e);
         } catch (Exception e) {
             throw new MetricNotFoundException(
                 "Service "+objectName+":"+alias+" not found", e);
+        } finally {
+            setErrorState(sqlException);
         }
         throw new MetricNotFoundException(
             "Service "+objectName+":"+alias+" not found");
+    }
+    
+    private void setErrorState(final boolean sqlExeceptionOccured) {
+        if (sqlExeceptionOccured) {
+            _consecutiveErrors++;
+            if (_consecutiveErrors > MAX_ERRORS) {
+                setCacheExpireTime(System.currentTimeMillis() + 60000);
+            }
+        } else {
+            _consecutiveErrors = 0;
+        }
+    }
+
+    private void setCacheExpireTime(long expireTime) {
+        Iterator it;
+        _log.info("Received more than " + MAX_ERRORS + " SQLExceptions, " +
+            "disabling all JDBCQueryCaches until " +
+            TimeUtil.toString(expireTime));
+        for (it=_tableStatusCacheMap.values().iterator(); it.hasNext(); ) {
+            JDBCQueryCache cache = (JDBCQueryCache)it.next();
+            cache.setExpireTime(expireTime);
+        }
     }
 
     private double getTableMetric(Metric metric)

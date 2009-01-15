@@ -76,6 +76,14 @@ public class JDBCQueryCache {
         _queryKey = queryKey;
         _cacheTimeout = cacheTimeout;
     }
+    
+    /**
+     * Explicitly sets the expire time of the cache to expireTime.  Cache will
+     * not repopulate until System.currentTimeMillis() <= expireTime.
+     */
+    public void setExpireTime(long expireTime) {
+        _last = expireTime - _cacheTimeout;
+    }
 
     /**
      * @return Object representation of the *only* row and column value
@@ -120,7 +128,7 @@ public class JDBCQueryCache {
      * does not exist
      */
     public Object get(Connection conn, String key, String column)
-        throws SQLException, JDBCQueryCacheException {
+        throws JDBCQueryCacheException, SQLException {
         long now = System.currentTimeMillis();
         if (_cache.size() == 0 || (now - _cacheTimeout) > _last) {
             repopulateCache(conn);
@@ -135,8 +143,8 @@ public class JDBCQueryCache {
                 return pair.getValue();
             }
         }
-        throw new JDBCQueryCacheException(
-            "key " + key + ", column " + column + " not found.");
+        throw new JDBCQueryCacheException("key " + key + ", column "
+            + column + " not found.");
     }
 
     private void repopulateCache(Connection conn)
@@ -172,9 +180,15 @@ public class JDBCQueryCache {
                 }
                 _cache.put(key, vals);
             }
-            _last = System.currentTimeMillis();
+        } catch (SQLException e) {
+            throw e;
         } finally {
             DBUtil.closeJDBCObjects(_logCtx, null, stmt, rs);
+            // even if a failure occurs we want to set the _last update time.
+            // this will alleviate the situation where there are a bunch
+            // of subsequent failures.  These failures could potentially hold
+            // up the ScheduleThread
+            _last = System.currentTimeMillis();
         }
     }
 
