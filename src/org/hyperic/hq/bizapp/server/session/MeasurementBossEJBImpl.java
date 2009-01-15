@@ -137,16 +137,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 {
     protected static Log _log = LogFactory.getLog(MeasurementBossEJBImpl.class);
 
-    private AppdefEntityID[] getGroupMemberIDs(AuthzSubject subject,
-                                               AppdefEntityID gid)
-        throws AppdefEntityNotFoundException, GroupNotCompatibleException,
-               PermissionException {
-
-        final List members = getResourceIds(subject, gid, null);
-        return (AppdefEntityID[])
-            members.toArray(new AppdefEntityID[members.size()]);
-    }
-    
     private List findDesignatedMetrics(AuthzSubject subject, AppdefEntityID id,
                                        Set cats) {
         final List metrics;
@@ -362,14 +352,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         else if (aeid.isGroup())
         {
-            List grpMembers;
-            try {
-                grpMembers = getResourceIds(subj, aeid, null);
-            } catch (GroupNotCompatibleException e) {
-                throw new MeasurementNotFoundException(
-                    "Incompatible group " + aeid +
-                    " cannot have a common designated measurement");
-            }
+            List grpMembers = getResourceIds(subj, aeid, null);
             
             // Go through the group members and return the first measurement
             // that we find
@@ -684,14 +667,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
         }
         else if (id.isGroup()) {
-            List grpMembers;
-            try {
-                grpMembers = getResourceIds(subj, id, null);
-            } catch (GroupNotCompatibleException e) {
-                throw new MeasurementNotFoundException(
-                    "Incompatible group " + id +
-                    " cannot have a common designated measurement");
-            }
+            List grpMembers = getResourceIds(subj, id, null);
             
             // Go through the group members and return the first measurement
             // that we find
@@ -984,14 +960,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 throw new MeasurementNotFoundException("Entity type != " +type);
             
             if (entIds[i].isGroup()) {
-                try {
-                    AppdefEntityID[] memberIds = getGroupMemberIDs(subject, entIds[i]);
-                    ids.addAll(Arrays.asList(memberIds));
-                } catch (GroupNotCompatibleException e) {
-                    throw new MeasurementNotFoundException(
-                        "Incompatible group " + entIds[i] +
-                        " cannot have a common designated measurement");
-                }
+                AppdefEntityID[] memberIds =
+                    getGroupMemberIDs(subject, entIds[i].getId());
+                ids.addAll(Arrays.asList(memberIds));
             }
             else {
                 ids.add(entIds[i].getId());
@@ -1436,14 +1407,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefCompatException, MeasurementNotFoundException {
         final AuthzSubject subject = manager.getSubject(sessionId);
         
-        List resources;
-        try {
-            resources = getResourceIds(subject, aeid, ctype);
-        } catch (GroupNotCompatibleException e) {
-            throw new MeasurementNotFoundException(
-                "Incompatible group " + aeid +
-                " cannot have a common measurement" + tid);
-        }
+        List resources = getResourceIds(subject, aeid, ctype);
     
         // Just one metric
         final List mtids = Collections.singletonList(tid);
@@ -1597,32 +1561,28 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             throw new MeasurementNotFoundException("No entry point found: " +
                                                    aid);
         } else if (aid.isGroup()) {
-            try {
-                if (tmpl.isAvailability()) {
-                    // Find the group
-                    final ResourceGroup group = getResourceGroupManager()
-                        .findResourceGroupById(subject, aid.getId());
-                    List metrics = getMetricManager()
-                        .findDesignatedMeasurements(subject, group, 
-                                         MeasurementConstants.CAT_AVAILABILITY);
-                    for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                        Measurement m =  (Measurement) it.next();
-                        if (!m.getTemplate().equals(tmpl))
-                            it.remove();
-                    }
-                    return metrics;
+            if (tmpl.isAvailability()) {
+                // Find the group
+                final ResourceGroup group = getResourceGroupManager()
+                    .findResourceGroupById(subject, aid.getId());
+                final Map mmap = getMetricManager()
+                    .getAvailMeasurements(Collections.singleton(group));
+                List metrics = (List) mmap.get(group.getResource().getId());
+                for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+                    Measurement m =  (Measurement) it.next();
+                    if (!m.getTemplate().equals(tmpl))
+                        it.remove();
                 }
-                else {
-                    AppdefEntityID[] ids = getGroupMemberIDs(subject, aid);
-                
-                    // Get the list of measurements
-                    return getMetricManager().findMeasurements(subject,
-                                                               tmpl.getId(),
-                                                               ids);
-                }
-            } catch (GroupNotCompatibleException e) {
-                throw new MeasurementNotFoundException(
-                    "Incompatible group members: " + aid);
+                return metrics;
+            }
+            else {
+                AppdefEntityID[] ids =
+                    getGroupMemberIDs(subject, aid.getId());
+            
+                // Get the list of measurements
+                return getMetricManager().findMeasurements(subject,
+                                                           tmpl.getId(),
+                                                           ids);
             }
         } else {
             AppdefEntityID[] aids = { aid };
@@ -1664,36 +1624,6 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return summary;
     }
 
-    /**
-     * Get a List of AppdefEntityIDs for the given resource.
-     * @param subject The user to use for searches.
-     * @param aeid The entity in question.
-     * @param ctype The entity type in question.
-     * @return A List of AppdefEntityIDs for the given resource.
-     */
-    private List getResourceIds(AuthzSubject subject, AppdefEntityID aeid,
-                                AppdefEntityTypeID ctype)
-        throws AppdefEntityNotFoundException, GroupNotCompatibleException,
-               PermissionException {
-        final List resources;
-        if (ctype == null) {
-            if (aeid.isGroup()) {
-                resources =
-                    GroupUtil.getCompatGroupMembers(subject, aeid, null,
-                                                    PageControl.PAGE_ALL);
-            }
-            else {
-                // Just one
-                resources = Collections.singletonList(aeid);
-            }
-        }
-        else {
-            // Autogroup
-            resources = getAGMemberIds(subject, aeid, ctype);
-        }
-        return resources;
-    }
-    
     /**
      * Method findResourceMetricSummary.
      * 
@@ -1935,15 +1865,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
         List resources;
         if (entId.isGroup()) {
-            // we don't use AppdefEntityValue for groups but GroupUtil
-            // will give us what we need
-            try {
-                resources = getResourceIds(subject, entId, null);
-            } catch (GroupNotCompatibleException e) {
-                throw new InvalidOptionException(
-                    "Requested group (" + entId +
-                    ") is not a compatible type");
-            }
+            resources = getResourceIds(subject, entId, null);
         } else if (entId.isApplication()) {
             AppdefEntityValue aev = new AppdefEntityValue(entId, subject);
             resources = aev.getAssociatedServices(typeId, PageControl.PAGE_ALL);
@@ -2052,19 +1974,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 cds.setEntityName(agval.getName());
                 int size = agval.getTotalSize();
                 cds.setNumResources(new Integer(size));
-                try {
-                    // Replace the IDs with all of the members
-                    List memberIds = getResourceIds(subject, aid, null);
-                    AppdefEntityID[] ids = (AppdefEntityID[])
-                        memberIds.toArray(new AppdefEntityID[0]);
-                    setResourceTypeDisplaySummary(subject, cds,
-                                                  agval.getAppdefResourceTypeValue(),
-                                                  ids);
-                    summaries.add(cds);
-                } catch (GroupNotCompatibleException e) {
-                    _log.error("Group not compatible: " + aid);
-                    throw new IllegalArgumentException("Invalid appdef state");
-                }
+                // Replace the IDs with all of the members
+                List memberIds = getResourceIds(subject, aid, null);
+                AppdefEntityID[] ids = (AppdefEntityID[])
+                    memberIds.toArray(new AppdefEntityID[0]);
+                setResourceTypeDisplaySummary(subject, cds,
+                                              agval.getAppdefResourceTypeValue(),
+                                              ids);
+                summaries.add(cds);
             } else {
                 // all of the non-clusters get organized in here
                 resourcemap.put(resources[i].getEntityId(), resources[i]);
@@ -2354,7 +2271,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         final PageList summaries = new PageList();
         watch.markTimeBegin("getAvailMeasurements");
         final Map measCache = getMetricManager()
-            .getAvailMeasurements(Collections.singletonList(group));
+                .getAvailMeasurements(Collections.singleton(group));
         watch.markTimeEnd("getAvailMeasurements");
         
         // Remap from list to map of metrics

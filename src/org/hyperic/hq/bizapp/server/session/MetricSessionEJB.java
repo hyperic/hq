@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -28,6 +28,7 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -593,67 +594,34 @@ public class MetricSessionEJB extends BizappSessionEJB {
         final ResourceGroup group =
             resGrpMgr.findResourceGroupById(subject, gid);
 
-        Collection members = resGrpMgr.getMembers(group);
-        AppdefEntityID[] ids = new AppdefEntityID[members.size()];
-        int i = 0;
-        for (Iterator it = members.iterator(); it.hasNext(); ) {
-            Resource r = (Resource) it.next();
-            ids[i++] = new AppdefEntityID(r);
+        final Resource resource = group.getResource();
+        if (measCache == null) {
+            measCache = getMetricManager()
+                .getAvailMeasurements(Collections.singleton(group));
         }
-        
-        List metrics = null;
-        if (measCache != null) {
-            final Resource resource = group.getResource();
-            metrics = (List)measCache.get(resource.getId());
-        } else {
-            MeasurementManagerLocal mman = getMetricManager();
-            metrics = mman.findDesignatedMeasurements(
-                subject, group, MeasurementConstants.CAT_AVAILABILITY);
-        }
+        final List metrics = (List) measCache.get(resource.getId());
 
         // Allow for the maximum window based on collection interval
         Map midMap = new HashMap(metrics.size());
         for (Iterator it = metrics.iterator(); it.hasNext(); ) {
             Measurement m =  (Measurement) it.next();
-            if (!m.getTemplate().isAvailability())
-                continue;
             midMap.put(new AppdefEntityID(m.getResource()), m.getId());
         }
         
-        // Break them up and do 10 at a time
-        int length = 10;
+        AppdefEntityID[] ids = getGroupMemberIDs(subject, gid);
+        
         double sum = 0;
         int count = 0;
-        int unknownCount = 0;
-        for (int ind = 0; ind < ids.length; ind += length) {
-            
-            if (ids.length - ind < length)
-                length = ids.length - ind;
-    
-            AppdefEntityID[] subids = new AppdefEntityID[length];
-            
-            for (i = ind; i < ind + length; i++) {
-                subids[i - ind] = ids[i];
-            }
-            
-            double[] avails = getAvailability(subject, ids, midMap, availCache);
+        double[] avails = getAvailability(subject, ids, midMap, availCache);
 
-            for (i = 0; i < avails.length; i++) {
-                 if (avails[i] == MeasurementConstants.AVAIL_UNKNOWN) {
-                     unknownCount++;
-                 }
-                 else {
-                     sum += avails[i];
-                     count++;
-                 }
+        for (int i = 0; i < avails.length; i++) {
+             if (avails[i] != MeasurementConstants.AVAIL_UNKNOWN) {
+                 sum += avails[i];
+                 count++;
              }
-        }
+         }
         
-        if (unknownCount == ids.length)
-            // All resources are unknown
-            return MeasurementConstants.AVAIL_UNKNOWN;
-        
-        return sum / count;
+        return count == 0 ? MeasurementConstants.AVAIL_UNKNOWN : sum / count;
     }
 
     protected Map findMetrics(int sessionId, AppdefEntityID entId, long begin,
@@ -924,5 +892,53 @@ public class MetricSessionEJB extends BizappSessionEJB {
         // Look up the metric summaries of associated servers
         return getResourceMetrics(subject, group, resourceType, filters,
                                   keyword, begin, end, showAll);
+    }
+
+    protected AppdefEntityID[] getGroupMemberIDs(AuthzSubject subject,
+                                                 Integer gid)
+        throws AppdefEntityNotFoundException, PermissionException {
+        final List members = getResourceIds(subject,
+                                            AppdefEntityID.newGroupID(gid),
+                                            null);
+        return (AppdefEntityID[])
+            members.toArray(new AppdefEntityID[members.size()]);
+    }
+
+    /**
+     * Get a List of AppdefEntityIDs for the given resource.
+     * @param subject The user to use for searches.
+     * @param aeid The entity in question.
+     * @param ctype The entity type in question.
+     * @return A List of AppdefEntityIDs for the given resource.
+     */
+    protected List getResourceIds(AuthzSubject subject, AppdefEntityID aeid,
+                                  AppdefEntityTypeID ctype)
+        throws AppdefEntityNotFoundException, PermissionException {
+        final List resources;
+        if (ctype == null) {
+            if (aeid.isGroup()) {
+                final ResourceGroupManagerLocal resGrpMgr =
+                    getResourceGroupManager();
+                final ResourceGroup group =
+                    resGrpMgr.findResourceGroupById(subject, aeid.getId());
+        
+                final Collection members = resGrpMgr.getMembers(group);
+                resources = new ArrayList(members.size());
+                int i = 0;
+                for (Iterator it = members.iterator(); it.hasNext(); ) {
+                    Resource r = (Resource) it.next();
+                    resources.add(new AppdefEntityID(r));
+                }
+            }
+            else {
+                // Just one
+                resources = Collections.singletonList(aeid);
+            }
+        }
+        else {
+            // Autogroup
+            resources = getAGMemberIds(subject, aeid, ctype);
+        }
+        return resources;
     }
 }
