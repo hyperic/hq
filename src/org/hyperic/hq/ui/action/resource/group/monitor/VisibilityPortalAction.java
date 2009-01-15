@@ -167,7 +167,7 @@ public class VisibilityPortalAction extends ResourceVisibilityPortalAction {
         
         StopWatch watch = new StopWatch();
         watch.markTimeBegin("findGroupCurrentHealth");
-        List healths = boss.findGroupCurrentHealth(sessionId, entityId);
+        List healths = boss.findGroupCurrentHealth(sessionId, entityId.getId());
         watch.markTimeEnd("findGroupCurrentHealth");
 
         if (log.isDebugEnabled()) {

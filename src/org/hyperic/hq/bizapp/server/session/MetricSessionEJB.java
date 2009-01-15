@@ -369,9 +369,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
     }
 
     protected double[] getAvailability(AuthzSubject subject,
-                                     AppdefEntityID[] ids,
-                                     Map midMap,
-                                     Map availCache)
+                                       AppdefEntityID[] ids,
+                                       Map midMap,
+                                       Map availCache)
         throws ApplicationNotFoundException,
                AppdefEntityNotFoundException,
                PermissionException {

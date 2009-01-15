@@ -763,21 +763,18 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 resource = resMan.findResource(aeid);
             } else if (o instanceof Resource) {
                 resource = (Resource) o;
+            } else if (o instanceof ResourceGroup) {
+                ResourceGroup grp = (ResourceGroup) o;
+                resource = grp.getResource();
+                rtn.put(resource.getId(), dao.findAvailMeasurements(grp));
+                continue;
             } else {
                 AppdefResourceValue r = (AppdefResourceValue) o;
                 AppdefEntityID aeid = r.getEntityId();
                 resource = resMan.findResource(aeid);
             }
-            // XXX scottmf, need to check read permission
-            Integer type = resource.getResourceType().getId();
-            if (type.equals(AuthzConstants.authzGroup)) {
-                ResourceGroup grp =
-                    resGrpMan.getResourceGroupByResource(resource);
-                Collection members = resGrpMan.getMembers(grp);
-                rtn.put(resource.getId(), dao.findAvailMeasurements(members));
-            } else {
-                res.add(resource);
-            }
+
+            res.add(resource);
         }
         List ids = getMeasurementDAO().findAvailMeasurements(res);
         for (Iterator it=ids.iterator(); it.hasNext(); ) {

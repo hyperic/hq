@@ -485,6 +485,18 @@ public class MeasurementDAO extends HibernateDAO {
         return query.list();
     }
     
+    List findAvailMeasurements(ResourceGroup g) {
+        String hql = "select m from GroupMember gm, " +
+        		     "Measurement m join m.template t " +
+        		     "where m.resource = gm.resource and gm.group = :group and "
+        		     + ALIAS_CLAUSE;
+        return createQuery(hql)
+            .setParameter("group", g)
+            .setCacheable(true)
+            .setCacheRegion("Measurement.findAvailMeasurementsForGroup")
+            .list();
+    }
+    
     List findAvailMeasurements(Integer[] tids, Integer[] iids) {
         String sql = new StringBuilder()
             .append("select m from Measurement m ")

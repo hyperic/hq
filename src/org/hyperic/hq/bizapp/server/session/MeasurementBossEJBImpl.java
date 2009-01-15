@@ -353,9 +353,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     aeid = appSvc.getService().getEntityId();
                 }
     
-                dm = (measCache != null) ?
-                    (Measurement)measCache.get(aeid.getId()) : null;
-                dm = (dm == null) ? findAvailabilityMetric(subj, aeid) : dm;
+                dm = findAvailabilityMetric(subj, aeid, measCache);
+
                 if (dm != null) {
                     break;
                 }
@@ -376,18 +375,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // that we find
             for (Iterator it = grpMembers.iterator(); it.hasNext(); ) {
                 aeid = (AppdefEntityID) it.next();
-                dm = (measCache != null) ?
-                    (Measurement)measCache.get(aeid.getId()) : null;
-                dm = (dm == null) ? findAvailabilityMetric(subj, aeid) : dm;
+                dm = findAvailabilityMetric(subj, aeid, measCache);
                 if (dm != null) {
                     break;
                 }
             }
         }
         else {
-            dm = (measCache != null) ?
-                (Measurement)measCache.get(aeid.getId()) : null;
-            dm = (dm == null) ? findAvailabilityMetric(subj, aeid) : dm;
+            dm = findAvailabilityMetric(subj, aeid, measCache);
         }
         
         if (dm != null)
@@ -395,6 +390,17 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         else
             throw new MeasurementNotFoundException(
                 "Availability metric not found for " + aeid);
+    }
+
+    private Measurement findAvailabilityMetric(AuthzSubject subj,
+                                               AppdefEntityID aeid,
+                                               Map measCache) {
+        Measurement dm = null;
+        if (measCache != null)
+            dm = (Measurement) measCache.get(aeid.getId());
+        if (dm == null)
+            dm = findAvailabilityMetric(subj, aeid);
+        return dm;
     }
     
     /**
@@ -1969,9 +1975,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
         }
 
-        AppdefEntityID[] resourceArray = toAppdefEntityIDArray(resources);
-        double[] data = getAvailability(subject, resourceArray);
-
+        final AppdefEntityID[] resourceArray = toAppdefEntityIDArray(resources);
+        final double[] data = getAvailability(subject, resourceArray);
+    
         // Availability counts **this calls getLiveMeasurement
         int availCnt = 0;
         int unavailCnt = 0;
@@ -2136,7 +2142,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             siblings.add(resource);
         }
         
-        // first deal with the autogroubz and singletons (singletons
+        // first deal with the autogroups and singletons (singletons
         // are just the degenerative case of an autogroup, why it's
         // its own type is... silly)
         for (Iterator it = resTypeMap.entrySet().iterator(); it.hasNext();) {
@@ -2198,12 +2204,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         // Availability
         try {
-            Map midMap = getMetricManager()
-                .findDesignatedMeasurements(
-                    subject, ids, MeasurementConstants.CAT_AVAILABILITY);
-            
-            if (midMap.size() > 0) {
-                double[] data = getAvailability(subject, ids, null, null);
+            double[] data = getAvailability(subject, ids);
+            if (data.length > 0) {
 
                 double sum = 0;
                 for (int i = 0; i < data.length; i++) {
@@ -2211,7 +2213,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 }
                 
                 summary.setAvailability(
-                    new Double(sum / (double) midMap.size()));
+                    new Double(sum / (double) data.length));
             }
         } catch (Exception e) {
             // No Availability data
@@ -2312,7 +2314,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @return List of ResourceDisplaySummary beans
      * @ejb:interface-method
      */
-    public List findGroupCurrentHealth(int sessionId, AppdefEntityID entId)
+    public List findGroupCurrentHealth(int sessionId, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
         final AuthzSubject subject = manager.getSubject(sessionId);
@@ -2322,7 +2324,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // Find the group
         final ResourceGroupManagerLocal resGrpMgr = getResourceGroupManager();
         final ResourceGroup group =
-            resGrpMgr.findResourceGroupById(subject, entId.getId());
+            resGrpMgr.findResourceGroupById(subject, id);
 
         Map cats = new HashMap(2);
         cats.put(MeasurementConstants.CAT_AVAILABILITY, null);
@@ -2350,12 +2352,25 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         final StopWatch watch = new StopWatch();
         final PageList summaries = new PageList();
+        watch.markTimeBegin("getAvailMeasurements");
+        final Map measCache = getMetricManager()
+            .getAvailMeasurements(Collections.singletonList(group));
+        watch.markTimeEnd("getAvailMeasurements");
+        
+        // Remap from list to map of metrics
+        List metrics = (List) measCache.remove(group.getResource().getId());
+        for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+            Measurement meas = (Measurement) it.next();
+            measCache.put(meas.getResource().getId(),
+                          Collections.singletonList(meas));
+        }
+
+        // Members are sorted
         final Collection members = resGrpMgr.getMembers(group);
-        watch.markTimeBegin("getAvailMeasurements && getLastAvail");
-        final Map measCache = getMetricManager().getAvailMeasurements(members);
+        watch.markTimeBegin("getLastAvail");
         final Map availCache = getAvailManager().getLastAvail(
             members, measCache);
-        watch.markTimeEnd("getAvailMeasurements && getLastAvail");
+        watch.markTimeEnd("getLastAvail");
         for (Iterator it = members.iterator(); it.hasNext(); ) {
             Resource res = (Resource) it.next();
             AppdefEntityID aeid = new AppdefEntityID(res);
