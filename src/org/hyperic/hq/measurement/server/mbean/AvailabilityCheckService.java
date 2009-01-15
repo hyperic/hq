@@ -139,18 +139,17 @@ public class AvailabilityCheckService
                     continue;
                 }
                 if (!meas.isEnabled()) {
-                    long t = last.getValue() != AVAIL_DOWN ?
-                        lastTimestamp + interval :
-                        TimingVoodoo.roundDownTime(now - interval, interval);
+                    long t = TimingVoodoo.roundDownTime(now - interval, interval);
                     DataPoint point = new DataPoint(
                         meas.getId(), new MetricValue(AVAIL_PAUSED, t));
                     rtn.add(new ResourceDataPoint(meas.getResource(), point));
                 } else if (last.getValue() == AVAIL_DOWN ||
-                    (now - lastTimestamp) > interval*2)
-                {
-                    long t = last.getValue() != AVAIL_DOWN ?
+                           (now - lastTimestamp) > interval*2) {
+                    long t = (last.getValue() != AVAIL_DOWN) ?
                         lastTimestamp + interval :
                         TimingVoodoo.roundDownTime(now - interval, interval);
+                    t = (last.getValue() == AVAIL_PAUSED) ?
+                        TimingVoodoo.roundDownTime(now, interval) : t;
                     DataPoint point = new DataPoint(
                         meas.getId(), new MetricValue(AVAIL_DOWN, t));
                     rtn.add(new ResourceDataPoint(meas.getResource(), point));
@@ -231,7 +230,9 @@ public class AvailabilityCheckService
             Resource platform = rdp.getResource();
             if (debug) {
                 _log.debug("platform measurement id " + rdp.getMetricId() +
-                           " is being marked down");
+                           " is being marked " + rdp.getValue() +
+                           " with timestamp = " +
+                           TimeUtil.toString(rdp.getTimestamp()));
             }
             rtn.add(rdp);
             List associatedResources =
