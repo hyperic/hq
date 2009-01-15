@@ -766,12 +766,21 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             } else if (o instanceof ResourceGroup) {
                 ResourceGroup grp = (ResourceGroup) o;
                 resource = grp.getResource();
-                rtn.put(resource.getId(), dao.findAvailMeasurements(grp));
+                Collection members = resGrpMan.getMembers(grp);
+                rtn.put(resource.getId(), dao.findAvailMeasurements(members));
                 continue;
             } else {
                 AppdefResourceValue r = (AppdefResourceValue) o;
                 AppdefEntityID aeid = r.getEntityId();
                 resource = resMan.findResource(aeid);
+            }
+            final Integer type = resource.getResourceType().getId();
+            if (type.equals(AuthzConstants.authzGroup)) {
+                ResourceGroup grp =
+                    resGrpMan.getResourceGroupByResource(resource);
+                Collection members = resGrpMan.getMembers(grp);
+                rtn.put(resource.getId(), dao.findAvailMeasurements(members));
+                continue;
             }
 
             res.add(resource);
