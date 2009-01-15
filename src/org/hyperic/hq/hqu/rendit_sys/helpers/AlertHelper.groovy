@@ -150,9 +150,15 @@ class AlertHelper extends BaseHelper {
     } 
 
     /**
-     * Get an AlertDefinition by id
+     * Get an AlertDefinition by id.
+     * @return The AlertDefinition with the given id, or null if it's not
+     * found or has been deleted.
      */
     def getById(Integer id) {
-        return defMan.getByIdAndCheck(user, id)
+        def definition = defMan.getByIdAndCheck(user, id)
+        if (definition?.deleted) {
+            return null
+        }
+        return definition
     }
 }
