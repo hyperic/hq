@@ -38,8 +38,21 @@ import javax.ejb.SessionBean;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerNotFoundException;
+import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
@@ -238,9 +251,52 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     /**
      * @ejb:interface-method
      */
-    public Resource findResource(AppdefEntityID id) {
-        return getResourceDAO().findByInstanceId(id.getAuthzTypeId(),
-                                                 id.getId());
+    public Resource findResource(AppdefEntityID aeid) {
+        try {
+            final Integer id = aeid.getId();
+            switch (aeid.getType()) {
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER :
+                    ServerManagerLocal sMan = ServerManagerEJBImpl.getOne();
+                    return sMan.findServerById(id).getResource();
+                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                    PlatformManagerLocal pMan = PlatformManagerEJBImpl.getOne();
+                    return pMan.findPlatformById(id).getResource();
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
+                    ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
+                    return svcMan.findServiceById(id).getResource();
+                case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                    // XXX not sure about appdef group mapping since 4.0
+                    return getResourceDAO().findByInstanceId(
+                        aeid.getAuthzTypeId(), id);
+                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                    ApplicationManagerLocal appMan =
+                        ApplicationManagerEJBImpl.getOne();
+                    return appMan.findApplicationById(null, id).getResource();
+                default:
+                    return getResourceDAO().findByInstanceId(
+                        aeid.getAuthzTypeId(), id);
+            }
+        } catch (ServerNotFoundException e) {
+            throw new SystemException(
+                "entity type " + aeid.getType() + ", id " + aeid.getID() +
+                " not found", e);
+        } catch (PlatformNotFoundException e) {
+            throw new SystemException(
+                "entity type " + aeid.getType() + ", id " + aeid.getID() +
+                " not found", e);
+        } catch (ServiceNotFoundException e) {
+            throw new SystemException(
+                "entity type " + aeid.getType() + ", id " + aeid.getID() +
+                " not found", e);
+        } catch (ApplicationNotFoundException e) {
+            throw new SystemException(
+                "entity type " + aeid.getType() + ", id " + aeid.getID() +
+                " not found", e);
+        } catch (PermissionException e) {
+            throw new SystemException(
+                "entity type " + aeid.getType() + ", id " + aeid.getID() +
+                " not found", e);
+        }
     }
 
     /**
