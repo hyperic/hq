@@ -117,7 +117,11 @@ public class PageInfo {
     }
     
     public static PageInfo create(PageControl pc, SortField sort) {
-        return new PageInfo(pc.getPagenum(), pc.getPagesize(),
-                            sort, pc.isAscending());
+        if (pc.equals(PageControl.PAGE_ALL)) {
+            return getAll(sort, pc.isAscending());
+        } else {
+            return new PageInfo(pc.getPagenum(), pc.getPagesize(),
+                                sort, pc.isAscending());
+        }
     }
 }
