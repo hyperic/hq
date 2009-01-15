@@ -271,7 +271,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                 case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                     ApplicationManagerLocal appMan =
                         ApplicationManagerEJBImpl.getOne();
-                    return appMan.findApplicationById(null, id).getResource();
+                    AuthzSubject overlord =
+                        AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+                    return appMan.findApplicationById(overlord, id).getResource();
                 default:
                     return getResourceDAO().findByInstanceId(
                         aeid.getAuthzTypeId(), id);
