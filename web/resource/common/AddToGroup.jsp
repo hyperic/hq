@@ -68,16 +68,17 @@
 					<table width="100%" cellpadding="0" cellspacing="0" border="0">
 						<thead>
 							<tr class="tableRowHeader">
-								<th class="ListHeaderCheckbox" style="width:20px"><input type="checkbox" id="AddToExistingGroup_CheckAllBox" onclick="MyGroupManager.toggleAll(this)" /></td>
+								<th class="ListHeaderCheckbox" style="width:20px"><input type="checkbox" id="AddToExistingGroup_CheckAllBox" onclick="MyGroupManager.dialogs.AddToExistingGroup.toggleAll(this);" /></td>
 								<th class="tableRowInactive" style="width:52%">Group</td>
 								<th class="tableRowInactive">Description</td>
 							</tr>
 						</thead>
-						<tbody id="AddToExistingGroupTableBodyDiv">
+						<tfoot id="AddToExistingGroupTableFooter">
 							<tr>
-								<td></td><td></td><td></td>
+								<td colspan="3" style="font-style:italic; text-align:center; padding-top:10px;">Loading...</td>
 							</tr>
-						</tbody>
+						</tfoot>
+						<tbody id="AddToExistingGroupTableBody"></tbody>
 					</table>
 				</div>
 			</fieldset>

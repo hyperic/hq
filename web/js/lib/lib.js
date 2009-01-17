@@ -2657,6 +2657,50 @@ hyperic.group_manager = function() {
 			
 			that.message_area.AddToExistingGroup = dojo11.byId("AddToExistingGroupStatus");
 			that.button_area.AddToExistingGroup = dojo11.byId("AddToExistingGroupButton");
+			
+			that.dialogs.AddToExistingGroup.toggleAll = function(checkAllBox) {
+				var checkedState = checkAllBox.checked;
+				var uList = checkAllBox.form;
+			    var len = uList.elements.length;
+
+				for (var i = 0; i < len; i++) {
+			        var e = uList.elements[i];
+			       
+			        if (e.className.indexOf("selectableGroup") >= 0) {
+			        	e.checked = checkedState;
+			        	
+			        	if (e.checked) {
+			        		highlight(e);
+			        	} else {
+			        		unhighlight(e);
+			        	}
+					}
+				}
+				that.dialogs.AddToExistingGroup.toggleButtons(checkAllBox);
+			}
+
+			that.dialogs.AddToExistingGroup.toggleButtons = function(myCheckBox) {
+				var myList = myCheckBox.form;
+				var checkAllBox = dojo11.byId("AddToExistingGroup_CheckAllBox");
+
+				if (myCheckBox.id != checkAllBox.id) {
+					checkAllBox.checked = false;
+					
+					if (myCheckBox.checked) {
+						highlight(myCheckBox);
+					} else {
+						unhighlight(myCheckBox);
+					}
+				}
+				
+				if (getNumCheckedByClass(myList, "selectableGroup") > 0) {
+					that.button_area.AddToExistingGroup.className = "CompactButton";
+					that.button_area.AddToExistingGroup.disabled = false;	
+				} else {	
+					that.button_area.AddToExistingGroup.className = "CompactButtonInactive";	
+					that.button_area.AddToExistingGroup.disabled = true;
+				}
+			}
 		}
 	}
 	
@@ -2675,7 +2719,7 @@ hyperic.group_manager = function() {
 				// multiple resources selected
 				document.AddToExistingGroupForm.eid.value = formArray.resources.join();
 			}
-			that.prepareAddResourcesToGroups(formArray.resources.toString().split(","));
+			that.prepareAddResourcesToGroups(document.AddToExistingGroupForm.eid.value.split(","));
 			return false;
 		}
 
@@ -2747,13 +2791,24 @@ hyperic.group_manager = function() {
 		that.message_area.AddToExistingGroup.style.display = "none";
 		that.button_area.AddToExistingGroup.className = "CompactButtonInactive";
 		that.button_area.AddToExistingGroup.disabled = true;
-		dojo11.byId("AddToExistingGroupTableBodyDiv").innerHTML = "";
+		
+		var tbody = dojo11.byId("AddToExistingGroupTableBody");
+        for (var i = tbody.childNodes.length-1; i >= 0; i--) {
+            tbody.removeChild(tbody.childNodes[i]);
+        }
+        
+		dojo11.byId("AddToExistingGroupTableFooter").style.display = "";
 		that.dialogs.AddToExistingGroup.show();
 		that.getGroupsNotContaining(eidArray);	
 	}
 	
 	that.addResourcesToGroups = function(myForm) {
 		var formArray = Form.serialize(myForm, true);
+
+		that.button_area.AddToExistingGroup.className = "CompactButtonInactive";	
+		that.button_area.AddToExistingGroup.disabled = true;
+		that.displayConfirmation(that.message_area.AddToExistingGroup,
+								'Please wait. Processing your request...');
 
 		dojo11.xhrPost( {
             url: "/api.shtml",
@@ -2776,28 +2831,44 @@ hyperic.group_manager = function() {
         });
 	}
 	
-	that.getGroupsNotContaining = function(eids) {		
-        dojo11.xhrGet( {
+	that.getGroupsNotContaining = function(eids) {    
+		dojo11.xhrGet( {
             url: "/api.shtml",
             content: {v: "1.0", s_id: "group_manager", eid: "['" + eids.join("','") + "']"},
             handleAs: 'json',
             preventCache: true,
             load: function(data) {            	
-            	var tbody = dojo11.byId("AddToExistingGroupTableBodyDiv");
-            	var newTbody = "";
-            	
+            	var tbody = dojo11.byId("AddToExistingGroupTableBody");
+            	var tfoot = dojo11.byId("AddToExistingGroupTableFooter");
+
+            	tfoot.style.display = "none";
+            	            	
             	for (var i=0; i<data.groups.length; i++) {
-            		newTbody += "<tr class='" + ((i%2 == 0) ? "tableRowOdd" : "tableRowEven") + "'>";
-            		newTbody += "<td class='ListCellCheckbox'><input type='checkbox' name='group' value='" + data.groups[i].id + "' /></td>";
-            		newTbody += "<td class='tableCell'>" + data.groups[i].name + "&nbsp;</td>";
-            		newTbody += "<td class='tableCell'>" + data.groups[i].description + "&nbsp;</td>";
-            		newTbody += "</tr>"; 
-            	}
-            	tbody.innerHTML = newTbody;
-            	
-            	if (data.groups.length > 0) {
-        			that.button_area.AddToExistingGroup.className = "CompactButton";
-        			that.button_area.AddToExistingGroup.disabled = false;
+            		var tr = document.createElement("tr");
+            		var td1 = document.createElement("td");
+            		var td2 = document.createElement("td");
+            		var td3 = document.createElement("td");
+            		var checkBox = document.createElement("input");
+            		
+            		tr.className = (i%2 == 0) ? "tableRowOdd" : "tableRowEven";
+            		td1.className = "ListCellCheckbox";
+            		checkBox.type = "checkbox";
+            		checkBox.className = "selectableGroup";
+            		checkBox.name = "group";
+            		checkBox.id = "group_" + data.groups[i].id;
+            		checkBox.value = data.groups[i].id;
+            		checkBox.onclick = new Function("MyGroupManager.dialogs.AddToExistingGroup.toggleButtons(this);");
+            		
+            		td2.className = "tableCell";
+            		td2.innerHTML = data.groups[i].name + "&nbsp;";
+            		td3.className = "tableCell";
+            		td3.innerHTML = data.groups[i].description + "&nbsp;";
+            		
+            		td1.appendChild(checkBox);
+            		tr.appendChild(td1);
+            		tr.appendChild(td2);
+            		tr.appendChild(td3);
+            		tbody.appendChild(tr);
             	}
             },
             error: function(data) {
@@ -2807,10 +2878,6 @@ hyperic.group_manager = function() {
             }
         });
 		
-	}
-
-	that.toggleAll = function(checkAllBox) {
-		// TO DO
 	}
 
 	that.displayConfirmation = function(msg_area, msg) {
