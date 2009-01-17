@@ -236,7 +236,9 @@ function highlight(e) {
 	var parent = getParent(e);
 
 	if (parent) {
-	    parent.origColor = parent.style.backgroundColor;
+	    if (parent.origColor == null) {
+	    	parent.origColor = parent.style.backgroundColor;
+	    }
 		parent.style.backgroundColor = "#EBEDF2";
 	}
 }
