@@ -42,6 +42,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 /**
  * This class has the knowledge to create an {@link Escalatable} object
@@ -108,6 +109,8 @@ public class ClassicEscalatableCreator
     
         // Regardless of whether or not the actions succeed, we will send an
         // AlertFiredEvent
+        ConcurrentStatsCollector.getInstance().addStat(
+            1, ConcurrentStatsCollector.ALERT_FIRED_EVENT);
         Messenger.enqueueMessage(new AlertFiredEvent(_event, alert.getId(), _def));
         
         String shortReason = alertMan.getShortReason(alert);

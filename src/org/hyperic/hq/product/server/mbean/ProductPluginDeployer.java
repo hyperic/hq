@@ -71,6 +71,7 @@ import org.hyperic.hq.product.server.session.ProductStartupListener;
 import org.hyperic.hq.product.shared.ProductManagerLocal;
 import org.hyperic.hq.product.shared.ProductManagerUtil;
 import org.hyperic.util.file.FileUtil;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 import org.jboss.deployment.DeploymentException;
 import org.jboss.deployment.DeploymentInfo;
 import org.jboss.deployment.SubDeployerSupport;
@@ -225,6 +226,11 @@ public class ProductPluginDeployer
             .getPluginsDeployedCaller().pluginsDeployed(_plugins);
         
         _plugins.clear();
+        try {
+            ConcurrentStatsCollector.getInstance().startCollector();
+        } catch (Exception e) {
+            _log.error("Could not start Concurrent Stats Collector", e);
+        }
 
         //generally means we are done deploying plugins at startup.
         //but we are not "done" since a plugin can be dropped into

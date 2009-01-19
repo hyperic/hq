@@ -27,6 +27,7 @@ package org.hyperic.hq.events.ext;
 
 import java.util.Date;
 
+import javax.ejb.FinderException;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -54,6 +55,7 @@ import org.hyperic.hq.events.server.session.ClassicEscalatableCreator;
 import org.hyperic.hq.events.server.session.TriggerTrackerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.TriggerTrackerLocal;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 /**
  * The default trigger fire strategy.
@@ -146,11 +148,14 @@ public class DefaultTriggerFireStrategy implements TriggerFireStrategy {
 
             // Now start escalation
             if (alertDef.getEscalation() != null) {
+                ConcurrentStatsCollector.getInstance().addStat(
+                    1, ConcurrentStatsCollector.GALERT_FIRED_EVENT);
                 EscalationManagerEJBImpl.getOne()
                                     .startEscalation(alertDef, creator); 
             } else {
                 creator.createEscalatable();
             }
+
         } catch (PermissionException e) {
             throw new ActionExecuteException(
                     "Overlord does not have permission to disable definition");

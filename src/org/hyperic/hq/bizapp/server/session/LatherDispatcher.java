@@ -118,6 +118,7 @@ import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.security.SecurityUtil;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 public class LatherDispatcher
     extends BizappSessionEJB
@@ -131,6 +132,12 @@ public class LatherDispatcher
     private final Object    tConnLock       = new Object();
     private TopicConnection tConn;
     private TopicSession    tSession;
+    
+    private static final ConcurrentStatsCollector _stats =
+        ConcurrentStatsCollector.getInstance();
+    private static final String LATHER_NUMBER_OF_CONNECTIONS =
+        ConcurrentStatsCollector.LATHER_NUMBER_OF_CONNECTIONS;
+
 
     public LatherDispatcher(){
         for(int i=0; i<CommandInfo.SECURE_COMMANDS.length; i++){
@@ -785,7 +792,9 @@ public class LatherDispatcher
         AgentManagerLocal agentMan = getAgentManager();
         Integer agentId = null;
         
-        log.debug("Request for " + method + "() from " + ctx.getCallerIP());
+        if (log.isDebugEnabled()) {
+            log.debug("Request for " + method + "() from " + ctx.getCallerIP());
+        }
         
         if(secureCommands.contains(method)){
             if(!(arg instanceof SecureAgentLatherValue)){
@@ -807,7 +816,9 @@ public class LatherDispatcher
         AgentConnection conn = null;
         try {
             conn = agentMan.getAgentConnection(method, ctx.getCallerIP(), agentId);             
-            return _dispatch(ctx, method, arg);
+            LatherValue rtn = _dispatch(ctx, method, arg);
+            _stats.addStat(1, LATHER_NUMBER_OF_CONNECTIONS);
+            return rtn;
         } finally {
             if (conn != null)
                 agentMan.disconnectAgent(conn);
