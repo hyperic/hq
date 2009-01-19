@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -59,6 +60,7 @@ import net.sf.ehcache.CacheManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.server.MBeanUtil;
 
 public final class ConcurrentStatsCollector {
@@ -134,6 +136,7 @@ public final class ConcurrentStatsCollector {
             return;
         }
         _currFilename = getFilename(false);
+        cleanupFilename(_currFilename);
         File file = new File(_currFilename);
         try {
             if (file.exists()) {
@@ -155,6 +158,29 @@ public final class ConcurrentStatsCollector {
         _log.info("ConcurrentStatsCollector has started");
     }
     
+    private final void cleanupFilename(String filename) {
+        final File file = new File(filename);
+        final File path = file.getParentFile();
+        final String name = file.getName();
+        final FilenameFilter filter = new FilenameFilter() {
+            final String _filename = name;
+            public boolean accept(File dir, String name) {
+                if (dir.equals(path) && name.startsWith(_filename)) {
+                    return true;
+                }
+                return false;
+            }
+        };
+        final File[] files = path.listFiles(filter);
+        final long oneWeekAgo =
+            System.currentTimeMillis() - (7*MeasurementConstants.DAY);
+        for (int i=0; i<files.length; i++) {
+            if (files[i].lastModified() < oneWeekAgo) {
+                files[i].delete();
+            }
+        }
+    }
+
     private final void printHeader() {
         final StringBuilder buf = new StringBuilder("timestamp,");
         final String countAppend = "_COUNT";
@@ -234,6 +260,7 @@ public final class ConcurrentStatsCollector {
                 _file = new FileWriter(filename, true);
                 printHeader();
                 _currFilename = filename;
+                cleanupFilename(_currFilename);
             }
             return _file;
         }
