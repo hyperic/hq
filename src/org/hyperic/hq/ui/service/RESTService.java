@@ -538,14 +538,16 @@ public class RESTService extends BaseService {
                 
                 for (int i=0; i<aeidJArray.length(); i++) {
                     AppdefEntityID aeid = new AppdefEntityID(aeidJArray.getString(i));
-                    Resource resource = ResourceManagerEJBImpl.getOne()
-                                            .findResource(aeid);                   
+                    if (!aeid.isGroup()) {
+                        Resource resource = ResourceManagerEJBImpl.getOne()
+                                                .findResource(aeid);                   
                     
-                    AppdefBossEJBImpl.getOne()
+                        AppdefBossEJBImpl.getOne()
                                  .batchGroupAdd(
                                          user.getSessionId(),
                                          aeid,
                                          groupIds);
+                    }
                 }
             } else {
                 AppdefEntityID[] aeids = new AppdefEntityID[aeidJArray.length()];
@@ -558,8 +560,7 @@ public class RESTService extends BaseService {
                     AppdefBossEJBImpl.getOne().findAllGroupsMemberExclusive(
                                                     user.getSessionId(),
                                                     PageControl.PAGE_ALL,
-                                                    aeids,
-                                                    new Integer[] {});
+                                                    aeids);
                 
                 JSONArray jarr = new JSONArray();
                 AppdefGroupValue group = null;

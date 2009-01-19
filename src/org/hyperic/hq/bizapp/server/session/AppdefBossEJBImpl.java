@@ -2271,21 +2271,23 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      * */
     public PageList findAllGroupsMemberExclusive(int sessionId, PageControl pc,
-                                                 AppdefEntityID[] entities, 
-                                                 Integer[] removeIds)
-        throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException 
+                                                 AppdefEntityID[] entities)
+        throws PermissionException, SessionException 
     {
         List commonList = new ArrayList();
+        List result = null;
+        AppdefEntityID eid = null;
+        Resource resource = null;
         ResourceManagerLocal resourceMan = ResourceManagerEJBImpl.getOne();
         
         for (int i=0; i<entities.length; i++) {
-            Resource resource = resourceMan.findResource(entities[i]);
-            List result = findAllGroupsMemberExclusive(
+            eid = entities[i];
+            resource = resourceMan.findResource(eid);
+            result = findAllGroupsMemberExclusive(
                                 sessionId, 
                                 pc, 
-                                entities[i], 
-                                removeIds, 
+                                eid, 
+                                new Integer[] {}, 
                                 resource.getPrototype());
             
             if (i==0) {

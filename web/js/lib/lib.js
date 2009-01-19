@@ -2709,17 +2709,34 @@ hyperic.group_manager = function() {
 
 		if (formArray.radioAction) {
 			// from Resource Tools menu
+			// using the old AddToGroupMenu dialog
 			eval("that." + formArray.radioAction + "('" + formArray.eid + "')");
-		} else if (formArray.resources) {
-			// from Browse Resources page
-			if (typeof formArray.resources == "string") {
-				// one resource selected
-				document.AddToExistingGroupForm.eid.value = formArray.resources;
+		} else {
+			var eidArray = null;
+			if (formArray.resources) {
+				// from Browse Resources page
+				if (typeof formArray.resources == "string") {
+					// one resource selected
+					document.AddToExistingGroupForm.eid.value = formArray.resources;
+				} else {
+					// multiple resources selected
+					document.AddToExistingGroupForm.eid.value = formArray.resources.join();
+				}
+				eidArray = document.AddToExistingGroupForm.eid.value.split(",");
 			} else {
-				// multiple resources selected
-				document.AddToExistingGroupForm.eid.value = formArray.resources.join();
+				// from Resource Tools menu
+				// using the new AddToExistingGroup dialog
+				eidArray = formArray.eid.split(",");			
 			}
-			that.prepareAddResourcesToGroups(document.AddToExistingGroupForm.eid.value.split(","));
+
+			var entityType = parseInt(eidArray[0].split(":")[0]);
+			if (entityType == 5) {
+				// adding existing groups to existing groups not supported,
+				// so send directly to the Add New Group page
+				that.addNewGroup(eidArray.join());
+			} else {
+				that.prepareAddResourcesToGroups(eidArray);
+			}
 			return false;
 		}
 
