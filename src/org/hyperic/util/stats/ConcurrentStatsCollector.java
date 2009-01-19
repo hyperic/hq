@@ -108,13 +108,13 @@ public final class ConcurrentStatsCollector {
         // started due to the need for consistent ordering in the csv output file
         if (_hasStarted.get()) {
             _log.warn(stat.getId() +
-                " attempted to register in stat collector althought it has " +
+                " attempted to register in stat collector although it has " +
                 " already been started, not allowing");
             return;
         }
         if (_statKeys.containsKey(stat.getId())) {
             _log.warn(stat.getId() +
-                " attempted to register in stat collector althought it has " +
+                " attempted to register in stat collector although it has " +
                 " already been registered, not allowing");
             return;
         }
