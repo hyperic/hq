@@ -718,8 +718,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     }
 
     private boolean isOracle() {
-        return isOracle8() || DB_TYPE == DBUtil.DATABASE_ORACLE_9 ||
-                DB_TYPE == DBUtil.DATABASE_ORACLE_10;
+        return isOracle8() || DB_TYPE == DBUtil.DATABASE_ORACLE_9;
     }
 
     /**<p>Return directly connected resource tree for node level server</p>
