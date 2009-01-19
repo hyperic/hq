@@ -158,7 +158,7 @@
               default="/usr/sbin/ntpdc"/>
       <option name="process.query"
               description="Process query for NTPd"
-              default="State.Name.eq=ntpd"/>
+              default="State.Name.re=(xntpd|ntpd)"/>
       <option name="timeout"
               description="Timeout for peer connections in seconds"
               default="1"/>
