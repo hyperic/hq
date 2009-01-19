@@ -60,14 +60,13 @@ import net.sf.ehcache.CacheManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.server.MBeanUtil;
-import org.hyperic.sigar.SigarException;
 
 public final class ConcurrentStatsCollector {
-    private static final Log _log =
-        LogFactory.getLog(ConcurrentStatsCollector.class);
+    private final Log _log = LogFactory.getLog(ConcurrentStatsCollector.class);
     private static final String BASE_FILENAME = "hqstats";
     private String _currFilename;
     private FileWriter _file;
+    private final String _baseDir;
     private final ConcurrentLinkedQueue _queue = new ConcurrentLinkedQueue();
     private final ScheduledThreadPoolExecutor _executor =
         new ScheduledThreadPoolExecutor(1);
@@ -82,12 +81,21 @@ public final class ConcurrentStatsCollector {
             EHCACHE_TOTAL_OBJECTS        = "EHCACHE_TOTAL_OBJECTS",
             CONCURRENT_STATS_COLLECTOR   = "CONCURRENT_STATS_COLLECTOR",
             LATHER_NUMBER_OF_CONNECTIONS = "LATHER_NUMBER_OF_CONNECTIONS";
+    private static final String ENGINE_HOME = "engine.home";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
     private final MBeanServer _mbeanServer = MBeanUtil.getMBeanServer();
 
     private ConcurrentStatsCollector() {
+        final char fs = File.separatorChar;
+        final String jbossLogSuffix =
+            "server" + fs + "default" + fs + "log" + fs + "hqstats" + fs;
+        _baseDir = System.getProperty(ENGINE_HOME, "..") + fs + jbossLogSuffix;
+        final File dir = new File(_baseDir);
+        if (!dir.exists()) {
+            dir.mkdir();
+        }
         registerInternalStats();
     }
 
@@ -187,7 +195,7 @@ public final class ConcurrentStatsCollector {
             final String secStr = (sec < 10) ? "0"+sec : String.valueOf(sec);
             rtn = rtn+"-"+hourStr+":"+minStr+":"+secStr;
         }
-        return rtn;
+        return _baseDir + rtn;
     }
 
     public static final ConcurrentStatsCollector getInstance() {
@@ -209,7 +217,6 @@ public final class ConcurrentStatsCollector {
     private class StatsWriter implements Runnable {
         public synchronized void run() {
             try {
-                addAllPeriodicStats();
                 Map stats = getStatsByKey();
                 StringBuilder buf = getCSVBuf(stats);
                 final FileWriter fw = getFileWriter();
@@ -229,8 +236,6 @@ public final class ConcurrentStatsCollector {
                 _currFilename = filename;
             }
             return _file;
-        }
-        private final void addAllPeriodicStats() throws SigarException {
         }
         private final StringBuilder getCSVBuf(Map stats) {
             final StringBuilder rtn = new StringBuilder();
