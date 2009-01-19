@@ -2635,17 +2635,7 @@ hyperic.group_manager = function() {
 	that.message_area = {};
 	that.button_area = {};
 	
-	that.init = function() {
-		if(!that.dialogs.AddToGroupMenu){
-	    	var pane = dojo11.byId("add_to_group_menu_dialog");
-			that.dialogs.AddToGroupMenu = new dijit11.Dialog({
-				id: "Add_to_Group_Menu_Dialog",
-				refocus: true,
-				autofocus: false,
-				title: "Group Manager"
-				}, pane);			
-		}
-		
+	that.init = function() {		
 		if(!that.dialogs.AddToExistingGroup){
 	    	var pane = dojo11.byId("add_to_existing_group_dialog");
 			that.dialogs.AddToExistingGroup = new dijit11.Dialog({
@@ -2657,6 +2647,7 @@ hyperic.group_manager = function() {
 			
 			that.message_area.AddToExistingGroup = dojo11.byId("AddToExistingGroupStatus");
 			that.button_area.AddToExistingGroup = dojo11.byId("AddToExistingGroupButton");
+			that.button_area.AddToNewGroup = dojo11.byId("AddToNewGroupButton");
 			
 			that.dialogs.AddToExistingGroup.toggleAll = function(checkAllBox) {
 				var checkedState = checkAllBox.checked;
@@ -2695,10 +2686,14 @@ hyperic.group_manager = function() {
 				
 				if (getNumCheckedByClass(myList, "selectableGroup") > 0) {
 					that.button_area.AddToExistingGroup.className = "CompactButton";
-					that.button_area.AddToExistingGroup.disabled = false;	
+					that.button_area.AddToExistingGroup.disabled = false;
+					that.button_area.AddToNewGroup.className = "CompactButtonInactive";
+					that.button_area.AddToNewGroup.disabled = true;
 				} else {	
 					that.button_area.AddToExistingGroup.className = "CompactButtonInactive";	
 					that.button_area.AddToExistingGroup.disabled = true;
+					that.button_area.AddToNewGroup.className = "CompactButton";
+					that.button_area.AddToNewGroup.disabled = false;
 				}
 			}
 		}
@@ -2706,40 +2701,31 @@ hyperic.group_manager = function() {
 	
 	that.processAction = function(myForm) {
 		var formArray = Form.serialize(myForm, true);
-
-		if (formArray.radioAction) {
-			// from Resource Tools menu
-			// using the old AddToGroupMenu dialog
-			eval("that." + formArray.radioAction + "('" + formArray.eid + "')");
+		var eidArray = null;
+			
+		if (formArray.resources) {
+			// from Browse Resources page
+			if (typeof formArray.resources == "string") {
+				// one resource selected
+				document.AddToExistingGroupForm.eid.value = formArray.resources;
+			} else {
+				// multiple resources selected
+				document.AddToExistingGroupForm.eid.value = formArray.resources.join();
+			}
+			eidArray = document.AddToExistingGroupForm.eid.value.split(",");
 		} else {
-			var eidArray = null;
-			if (formArray.resources) {
-				// from Browse Resources page
-				if (typeof formArray.resources == "string") {
-					// one resource selected
-					document.AddToExistingGroupForm.eid.value = formArray.resources;
-				} else {
-					// multiple resources selected
-					document.AddToExistingGroupForm.eid.value = formArray.resources.join();
-				}
-				eidArray = document.AddToExistingGroupForm.eid.value.split(",");
-			} else {
-				// from Resource Tools menu
-				// using the new AddToExistingGroup dialog
-				eidArray = formArray.eid.split(",");			
-			}
-
-			var entityType = parseInt(eidArray[0].split(":")[0]);
-			if (entityType == 5) {
-				// adding existing groups to existing groups not supported,
-				// so send directly to the Add New Group page
-				that.addNewGroup(eidArray.join());
-			} else {
-				that.prepareAddResourcesToGroups(eidArray);
-			}
-			return false;
+			// from Resource Tools menu
+			eidArray = formArray.eid.split(",");			
 		}
 
+		var entityType = parseInt(eidArray[0].split(":")[0]);
+		if (entityType == 5) {
+			// adding existing groups to existing groups not supported,
+			// so send directly to the Add New Group page
+			that.addNewGroup(eidArray.join());
+		} else {
+			that.prepareAddResourcesToGroups(eidArray);
+		}
 		return false;
 	}
 	
@@ -2808,6 +2794,8 @@ hyperic.group_manager = function() {
 		that.message_area.AddToExistingGroup.style.display = "none";
 		that.button_area.AddToExistingGroup.className = "CompactButtonInactive";
 		that.button_area.AddToExistingGroup.disabled = true;
+		that.button_area.AddToNewGroup.className = "CompactButton";
+		that.button_area.AddToNewGroup.disabled = false;
 		
 		var tbody = dojo11.byId("AddToExistingGroupTableBody");
         for (var i = tbody.childNodes.length-1; i >= 0; i--) {

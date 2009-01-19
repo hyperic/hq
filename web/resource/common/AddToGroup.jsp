@@ -32,30 +32,6 @@
 
 <tiles:importAttribute name="resource" ignore="true" />
 
-<div id="add_to_group_menu_dialog" style="display:none;">
-    <form name="AddToGroupMenuForm" action="" onsubmit="return false;">
-	<input type="hidden" name="eid" value="<c:if test="${not empty resource.entityId}"><c:out value="${resource.entityId}"/></c:if>" />
-	<div id="AddToGroupMenuDiv" style="width:250px; height:110px;">
-		<div id="AddToGroupMenuDataDiv">
-			<fieldset>
-				<legend><fmt:message key="resource.group.AddToGroup.Title"/></legend>
-				<div style="padding:2px"><input type="radio" id="AddToNewGroupRadioAction" value="addNewGroup" name="radioAction" checked="checked" /><label style="white-space: nowrap"><fmt:message key="resource.group.AddToGroup.NewGroup"/></label></div>
-				<div style="padding:2px"><input type="radio" id="AddToGroupRadionAction" value="addToGroup" name="radioAction" /><label style="white-space: nowrap"><fmt:message key="resource.group.AddToGroup.ExistingGroup"/></label></div>
-			</fieldset>	
-		</div>
-    	<div id="AddToGroupMenuButtonDiv" style="padding-top:10px">
-			<table cellspacing="0" cellpadding="0">
-				<tr>
-					<td class="buttonLeft"></td>
-					<td class="buttonRight " valign="middle" nowrap="true">
-  						<span id="button"><a href="#" onclick="javascript:MyGroupManager.processAction(document.AddToGroupMenuForm);"><fmt:message key="resource.group.AddToGroup.Continue"/></a></span>
-					</td>
-				</tr>
-			</table>
-		</div>
-	</div>
-	</form>
-</div>
 <div id="add_to_existing_group_dialog" style="display:none;">
     <form name="AddToExistingGroupForm" action="" onsubmit="return false;">
 	<input type="hidden" name="eid" value="<c:if test="${not empty resource.entityId}"><c:out value="${resource.entityId}"/></c:if>" />
