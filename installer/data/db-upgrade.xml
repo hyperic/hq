@@ -9500,30 +9500,30 @@ has already been defined.
 
   <schemaSpec version="3.132">
     <schema-directSQL>
-      <statement targetDB="postgresql" desc="Drop constraing FKD1FCB6C0A2BF2D92 for Postgres">
-        alter table EAM_RESOURCE_EDGE drop constraint FKD1FCB6C0A2BF2D92 
+      <statement targetDB="postgresql" desc="Drop constraing fkd1fcb6c0a2bf2d92 for Postgres">
+        alter table EAM_RESOURCE_EDGE drop constraint fkd1fcb6c0a2bf2d92 
       </statement>
-      <statement targetDB="oracle" desc="Drop constraing FKE5B6292DC81F5938 for Oracle">
-        alter table EAM_RESOURCE_EDGE drop constraint FKD1FCB6C0A2BF2D92 
+      <statement targetDB="oracle" desc="Drop constraing fkd1fcb6c0a2bf2d92 for Oracle">
+        alter table EAM_RESOURCE_EDGE drop constraint fkd1fcb6c0a2bf2d92 
       </statement>
-      <statement targetDB="mysql" desc="Drop foreign key FKE5B6292DC81F5938 for MySQL">
-        alter table EAM_RESOURCE_EDGE drop foreign key FKD1FCB6C0A2BF2D92 
+      <statement targetDB="mysql" desc="Drop foreign key fkd1fcb6c0a2bf2d92 for MySQL">
+        alter table EAM_RESOURCE_EDGE drop foreign key fkd1fcb6c0a2bf2d92 
       </statement>
       <statement>
-        alter table EAM_RESOURCE_EDGE add constraint FKD1FCB6C0A2BF2D92 foreign key
+        alter table EAM_RESOURCE_EDGE add constraint fkd1fcb6c0a2bf2d92 foreign key
             (FROM_ID) REFERENCES EAM_RESOURCE (ID) on delete cascade
       </statement>
-      <statement targetDB="postgresql" desc="Drop constraing FKD1FCB6C0CCC27921 for Postgres">
-        alter table EAM_RESOURCE_EDGE drop constraint FKD1FCB6C0CCC27921  
+      <statement targetDB="postgresql" desc="Drop constraing fkd1fcb6c0ccc27921 for Postgres">
+        alter table EAM_RESOURCE_EDGE drop constraint fkd1fcb6c0ccc27921  
       </statement>
-      <statement targetDB="oracle" desc="Drop constraing FKD1FCB6C0CCC27921 for Oracle">
-        alter table EAM_RESOURCE_EDGE drop constraint FKD1FCB6C0CCC27921  
+      <statement targetDB="oracle" desc="Drop constraing fkd1fcb6c0ccc27921 for Oracle">
+        alter table EAM_RESOURCE_EDGE drop constraint fkd1fcb6c0ccc27921  
       </statement>
-      <statement targetDB="mysql" desc="Drop foreign key FKD1FCB6C0CCC27921 for MySQL">
-        alter table EAM_RESOURCE_EDGE drop foreign key FKD1FCB6C0CCC27921  
+      <statement targetDB="mysql" desc="Drop foreign key fkd1fcb6c0ccc27921 for MySQL">
+        alter table EAM_RESOURCE_EDGE drop foreign key fkd1fcb6c0ccc27921  
       </statement>
       <statement>
-        alter table EAM_RESOURCE_EDGE add constraint FKD1FCB6C0CCC27921 foreign key
+        alter table EAM_RESOURCE_EDGE add constraint fkd1fcb6c0ccc27921 foreign key
             (TO_ID) REFERENCES EAM_RESOURCE (ID) on delete cascade
       </statement>
     </schema-directSQL>
