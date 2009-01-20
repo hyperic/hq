@@ -34,10 +34,15 @@ import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 
 public class ShortenTextTag extends TagSupport {
 
+    private static String LEFT_POSITION = "left";
+    private static String MIDDLE_POSITION = "middle";
+    private static String RIGHT_POSITION = "right";
+    
     private int maxlength;
     private String value = null;
     private String property = null;
     private String styleClass = "listcellpopup4";
+    private String position = RIGHT_POSITION;
     private boolean shorten = false;
     
     public ShortenTextTag () { super(); }
@@ -72,16 +77,27 @@ public class ShortenTextTag extends TagSupport {
                     StringBuffer text =
                         new StringBuffer("<a href=\"#\" class=\"")
                         .append(styleClass)
-                        .append("\">")
-                        .append(value.substring(0, maxlength))
-                        .append("...")
-                        .append("<span>")
+                        .append("\">");
+                    
+                    if (LEFT_POSITION.equalsIgnoreCase(getPosition())) {
+                        text.append("...")
+                            .append(value.substring(value.length()-maxlength));
+                    } else if (MIDDLE_POSITION.equalsIgnoreCase(getPosition())) {
+                        text.append(value.substring(0, maxlength/2))
+                            .append("...")
+                            .append(value.substring(value.length()-((maxlength+1)/2)));
+                    } else {
+                        text.append(value.substring(0, maxlength))
+                            .append("...");
+                    }
+                        
+                    text.append("<span>")
                         .append(value)
                         .append("</span></a>");
                     pageContext.getOut().println(text.toString());
-                }
-                else
+                } else {
                     pageContext.getOut().println(value);
+                }
             }
         } catch (java.io.IOException e) {
             throw new JspException(e);
@@ -115,5 +131,12 @@ public class ShortenTextTag extends TagSupport {
     }
     public void setStyleClass(String styleClass) {
         this.styleClass = styleClass;
+    }
+    
+    public String getPosition() {
+        return this.position;
+    }    
+    public void setPosition(String position) {
+        this.position = position;
     }
 }
