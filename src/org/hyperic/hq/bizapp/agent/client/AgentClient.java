@@ -718,8 +718,8 @@ public class AgentClient {
                 				agentPort + "," +
                                            " Stop the agent," +
                                            " Update agent properties" +
-                                           " for "+ QPROP_AGENTPORT +
-                                           " and start the agent again");
+                                           " for agent.listenPort and start" +
+                                           " the agent again");
                         SYSTEM_OUT.println("- Now Agent uses the default port:"
                                             +listenPort);
                         agentPort = listenPort;
