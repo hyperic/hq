@@ -106,14 +106,14 @@ function skipResources() {
         <html:form action="/dashboard/ProcessAutoDiscovery">
         <html:hidden property="queueAction"/>
         <tr>
-          <td nowrap class="ListHeaderInactive">&nbsp;</td>
+          <td class="ListHeaderInactive">&nbsp;</td>
           <td colspan="2" class="ListHeaderInactiveSorted"><fmt:message key="dash.home.TableHeader.ResourceName"/><html:img page="/images/tb_sortup_inactive.gif" width="9" height="9" border="0"/></td>
           <td class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.Status"/></td>
           <td class="ListHeaderInactive"><fmt:message key="dash.home.TableHeader.Changes"/></td>
         </tr>
         <c:forEach items="${resources}" var="resource">
           <tr class="ListRow">
-            <td nowrap class="ListCell"><html:radio property="platformsToProcess" value="${resource.id}"/></td>
+            <td class="ListCell" nowrap="nowrap"><html:radio property="platformsToProcess" value="${resource.id}"/></td>
             <td colspan="2" class="ListCell">
               <html:link page="/resource/platform/AutoDiscovery.do?mode=results&aiPid=${resource.id}">
                 <c:out value="${resource.name}"/></html:link>
@@ -132,21 +132,13 @@ function skipResources() {
             <hq:skipIfAutoApproved aiserver="${server}">
               <c:if test="${server.queueStatus != 0 && !server.ignored}">
                 <tr class="ListRow">
-                  <hq:shortenPath property="shortenedInstallPath" value="${server.installPath}" preChars="20" postChars="25"/>
-                  <td nowrap class="ListCell">&nbsp;&nbsp;&nbsp;<html:multibox property="serversToProcess" value="${server.id}"/></td>
-                  <td nowrap class="ListCell"><hq:removePrefix prefix="${resource.name}" value="${server.name}"/></td>
-                  <td nowrap class="ListCell">
-                    <c:choose>
-                      <c:when test="${wasShortened}">
-                        <a href="." onclick="return false;" class="ListCellPopup2">
-                          <c:out value="${shortenedInstallPath}"/>
-                          <span><c:out value="${server.installPath}"/></span>
-                        </a>
-                      </c:when>
-                      <c:otherwise>
-                        <c:out value="${server.installPath}"/>
-                      </c:otherwise>
-                    </c:choose>
+                  <td class="ListCell" nowrap="nowrap">&nbsp;&nbsp;&nbsp;<html:multibox property="serversToProcess" value="${server.id}"/></td>
+                  <td class="ListCell">
+                  	<hq:removePrefix property="serverNameNoPrefix" prefix="${resource.name}" value="${server.name}"/>
+      				<hq:shortenText maxlength="32" value="${serverNameNoPrefix}" position="middle" styleClass="ListCellPopup5 "/>
+				  </td>
+                  <td class="ListCell">
+                  	<hq:shortenPath value="${server.installPath}" preChars="20" postChars="25" styleClass="ListCellPopup5" />
                   </td>
                   <td class="ListCell"><c:out value="${server.queueStatusStr}"/></td>
                   <td class="ListCell"><hq:autoInventoryServerDiff resource="${server}"/></td>
@@ -162,8 +154,8 @@ function skipResources() {
              <tr>
                 <td style="padding-right:10px;">
                 <input type="hidden" name="temp" value="true" id="buttonActionHidden"/>
-                <a class="buttonGreen" href="javascript:setImportCheckboxes(AIQueueForm); addInventory(); hyperic.form.mockLinkSubmit('buttonAction','Add to Inventory','buttonActionHidden')"><span><fmt:message key="common.label.AddtoInventory"/></span></a>
-                <a class="buttonGreen" href="javascript:skipResources(); hyperic.form.mockLinkSubmit('buttonAction','Skip Checked Resources','buttonActionHidden');"><span><fmt:message key="common.label.SkipResources"/></span></a>
+                <a class="buttonGreen" href="javascript:setImportCheckboxes(AIQueueForm); addInventory(); hyperic.form.mockLinkSubmit('buttonAction','Add to Inventory','buttonActionHidden')"><span style="white-space: nowrap"><fmt:message key="common.label.AddtoInventory"/></span></a>
+                <a class="buttonGreen" href="javascript:skipResources(); hyperic.form.mockLinkSubmit('buttonAction','Skip Checked Resources','buttonActionHidden');"><span style="white-space: nowrap"><fmt:message key="common.label.SkipResources"/></span></a>
                 </td>
             </tr>
            </table>
