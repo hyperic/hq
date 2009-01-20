@@ -154,8 +154,8 @@ public class TransportUtils {
      */
     public static Class tryLoadUnidirectionalTransportPollerClient() 
         throws ClassNotFoundException {
-        return Thread.currentThread().getContextClassLoader().loadClass(
-                "com.hyperic.hq.transport.PollerClientImpl");          
+    	
+    	return Class.forName("com.hyperic.hq.transport.PollerClientImpl");
     }
     
 }
