@@ -485,6 +485,10 @@ getpid() {
                     'macosx')
                         pidtest=`$PSEXE -ww -p $pid -o command | grep "$WRAPPER_CMD_PS" | tail -1`
                         ;;
+                    'solaris')
+                        PSEXE="/usr/ucb/ps" 
+                        pidtest=`$PSEXE ww $pid | grep "$WRAPPER_CMD" | tail -1` 
+                        ;;
                     *)
                         pidtest=`$PSEXE -p $pid -o args | grep "$WRAPPER_CMD_PS" | tail -1`
                         ;;
