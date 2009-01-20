@@ -233,8 +233,42 @@ public class AlertDefinitionDAO extends HibernateDAO {
         ActionDAO actDAO = new ActionDAO(DAOFactory.getDAOFactory());
         TriggerDAO tDAO = new TriggerDAO(DAOFactory.getDAOFactory());
         
+        // Set parent alert definition
+        if (val.parentIdHasBeenSet() && val.getParentId() != null) {
+            def.setParent(findById(val.getParentId()));
+        }
+        
         setAlertDefinitionValueNoRels(def, val);
     
+        // def.set the resource based on the entity ID
+        ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
+        // Don't need to synch the Resource with the db since changes 
+        // to the Resource aren't cascaded on saving the AlertDefinition.
+        Integer authzTypeId;
+        if (EventConstants.TYPE_ALERT_DEF_ID.equals(val.getParentId())) {
+            switch(val.getAppdefType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                authzTypeId = AuthzConstants.authzPlatformProto;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                authzTypeId = AuthzConstants.authzServerProto;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                authzTypeId = AuthzConstants.authzServiceProto;
+                break;
+            default:
+                throw new IllegalArgumentException("Type " + val.getAppdefType()
+                                                   + " is not a valid type");
+            }
+        }
+        else {
+            AppdefEntityID aeid = new AppdefEntityID(val.getAppdefType(),
+                                                     val.getAppdefId());
+            authzTypeId = aeid.getAuthzTypeId();
+        }
+        def.setResource(rDao.findByInstanceId(authzTypeId, val.getAppdefId(),
+                                              true));
+
         for (Iterator i=val.getAddedTriggers().iterator(); i.hasNext(); ) {
             RegisteredTriggerValue tVal = (RegisteredTriggerValue) i.next();
             def.addTrigger(tDAO.findById(tVal.getId()));
@@ -268,14 +302,10 @@ public class AlertDefinitionDAO extends HibernateDAO {
 
     void setAlertDefinitionValueNoRels(AlertDefinition def,
                                        AlertDefinitionValue val) {
-        AlertDefinitionDAO aDAO = DAOFactory.getDAOFactory().getAlertDefDAO();
-        TriggerDAO tDAO = DAOFactory.getDAOFactory().getTriggerDAO();
+        TriggerDAO tDAO = new TriggerDAO(DAOFactory.getDAOFactory());
         
         def.setName(val.getName());
         def.setCtime(val.getCtime());
-        if (val.parentIdHasBeenSet() && val.getParentId() != null) {
-            def.setParent(aDAO.findById(val.getParentId()));
-        }
         def.setDescription(val.getDescription());
         
         def.setActiveStatus(val.getEnabled());
@@ -285,42 +315,13 @@ public class AlertDefinitionDAO extends HibernateDAO {
         def.setControlFiltered(val.getControlFiltered() );
         def.setPriority(val.getPriority());
         
-        // def.set the resource based on the entity ID
-        ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
-        // Don't need to synch the Resource with the db since changes 
-        // to the Resource aren't cascaded on saving the AlertDefinition.
-        Integer authzTypeId;
-        if (EventConstants.TYPE_ALERT_DEF_ID.equals(val.getParentId())) {
-            switch(val.getAppdefType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                authzTypeId = AuthzConstants.authzPlatformProto;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                authzTypeId = AuthzConstants.authzServerProto;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                authzTypeId = AuthzConstants.authzServiceProto;
-                break;
-            default:
-                throw new IllegalArgumentException("Type " + val.getAppdefType()
-                                                   + " is not a valid type");
-            }
-        }
-        else {
-            AppdefEntityID aeid = new AppdefEntityID(val.getAppdefType(),
-                                                     val.getAppdefId());
-            authzTypeId = aeid.getAuthzTypeId();
-        }
-        def.setResource(rDao.findByInstanceId(authzTypeId,
-                                              new Integer(val.getAppdefId()),
-                                              true));
-
         def.setFrequencyType(val.getFrequencyType());
         def.setCount(new Long(val.getCount()));
         def.setRange(new Long(val.getRange()));
         def.setDeleted(val.getDeleted());
         if (val.actOnTriggerIdHasBeenSet()) {
-            def.setActOnTrigger(tDAO.findById(new Integer(val.getActOnTriggerId())));
+            def.setActOnTrigger(
+                tDAO.findById(new Integer(val.getActOnTriggerId())));
         }
     }
     

@@ -278,7 +278,6 @@ public class AlertDefinitionManagerEJBImpl
         if (esclId != null) {
             Escalation escalation = 
                 EscalationManagerEJBImpl.getOne().findById(esclId);
-            adDAO.setAlertDefinitionValueNoRels(res, a);
             res.setEscalation(escalation);
         }
         // Alert definitions are the root of the cascade relationship, so

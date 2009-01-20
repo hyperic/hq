@@ -518,7 +518,7 @@ public class EventsBossEJBImpl
             AppdefGroupValue group;
             try {
                 group = getAppdefBoss().findGroup(sessionID,
-                                             new Integer(adval.getAppdefId()));
+                                                  adval.getAppdefId());
             } catch (InvalidAppdefTypeException e) {
                 throw new AlertDefinitionCreateException(e);
             }
@@ -536,7 +536,7 @@ public class EventsBossEJBImpl
 
             // Reset the value object with this entity ID
             adval.setAppdefType(id.getType());
-            adval.setAppdefId(id.getID());
+            adval.setAppdefId(id.getId());
             
             // Scrub the triggers just in case
             adval.removeAllTriggers();
@@ -597,7 +597,7 @@ public class EventsBossEJBImpl
         
         // Create the parent alert definition
         adval.setAppdefType(aetid.getType());
-        adval.setAppdefId(aetid.getID());
+        adval.setAppdefId(aetid.getId());
         adval.setParentId(EventConstants.TYPE_ALERT_DEF_ID);
         
         // Now create the alert definition
@@ -634,7 +634,7 @@ public class EventsBossEJBImpl
             AppdefEntityID id = new AppdefEntityID(aetid.getType(), entIds[ei]);
 
             // Reset the value object with this entity ID
-            adval.setAppdefId(id.getID());
+            adval.setAppdefId(id.getId());
             
             // Scrub the triggers just in case
             adval.removeAllTriggers();
@@ -733,7 +733,7 @@ public class EventsBossEJBImpl
             adval.setParentId(adval.getId());
 
             // Reset the value object with this entity ID
-            adval.setAppdefId(id.getID());
+            adval.setAppdefId(id.getId());
             
             try {
                 boolean succeeded = 

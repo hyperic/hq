@@ -103,7 +103,7 @@ public class NewDefinitionAction extends BaseAction {
         defForm.exportConditionsEnablement(adv, request, sessionID, mb,
                                            adeId instanceof AppdefEntityTypeID);
         adv.setAppdefType( adeId.getType() );
-        adv.setAppdefId( adeId.getID() );
+        adv.setAppdefId( adeId.getId() );
         log.trace("adv="+adv);
         
         if (adeId instanceof AppdefEntityTypeID)

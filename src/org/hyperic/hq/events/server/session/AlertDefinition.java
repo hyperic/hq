@@ -223,8 +223,8 @@ public class AlertDefinition
         _priority = priority;
     }
 
-    public int getAppdefId() {
-        return getResource().getInstanceId().intValue();
+    public Integer getAppdefId() {
+        return getResource().getInstanceId();
     }
 
     public int getAppdefType() {

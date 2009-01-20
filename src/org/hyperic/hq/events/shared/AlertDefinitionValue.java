@@ -60,7 +60,7 @@ public class AlertDefinitionValue
    private boolean controlFilteredHasBeenSet = false;
    private int priority;
    private boolean priorityHasBeenSet = false;
-   private int appdefId;
+   private Integer appdefId;
    private boolean appdefIdHasBeenSet = false;
    private int appdefType;
    private boolean appdefTypeHasBeenSet = false;
@@ -326,12 +326,12 @@ public class AlertDefinitionValue
    public boolean priorityHasBeenSet(){
 	  return priorityHasBeenSet;
    }
-   public int getAppdefId()
+   public Integer getAppdefId()
    {
 	  return this.appdefId;
    }
 
-   public void setAppdefId( int appdefId )
+   public void setAppdefId( Integer appdefId )
    {
 	  this.appdefId = appdefId;
 	  appdefIdHasBeenSet = true;
@@ -701,7 +701,7 @@ public class AlertDefinitionValue
 		 lEquals = lEquals && this.notifyFiltered == that.notifyFiltered;
 		 lEquals = lEquals && this.controlFiltered == that.controlFiltered;
 		 lEquals = lEquals && this.priority == that.priority;
-		 lEquals = lEquals && this.appdefId == that.appdefId;
+		 lEquals = lEquals && this.appdefId.equals(that.appdefId);
 		 lEquals = lEquals && this.appdefType == that.appdefType;
 		 lEquals = lEquals && this.frequencyType == that.frequencyType;
 		 lEquals = lEquals && this.count == that.count;
@@ -782,7 +782,7 @@ public class AlertDefinitionValue
 
       result = 37*result + (int) priority;
 
-      result = 37*result + (int) appdefId;
+      result = 37*result + appdefId.intValue();
 
       result = 37*result + (int) appdefType;
 
