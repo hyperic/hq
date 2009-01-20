@@ -202,13 +202,13 @@ public class RegisteredDispatcherEJBImpl
 
             for (Iterator it = visitedMCTriggers.iterator(); it.hasNext();) {
                 MultiConditionTrigger trigger = (MultiConditionTrigger) it.next();
-                it.remove();
 
                 if (trigger.triggeringConditionsFulfilled()) {
                     tryFlushState(event, trigger);
                 } else {
                     trigger.releaseSharedLock();
                 }
+                it.remove();
             }
 
         } finally {
@@ -219,8 +219,8 @@ public class RegisteredDispatcherEJBImpl
             if (!visitedMCTriggers.isEmpty()) {
                 for (Iterator it = visitedMCTriggers.iterator(); it.hasNext();) {
                     MultiConditionTrigger trigger = (MultiConditionTrigger) it.next();
-                    it.remove();
                     trigger.releaseSharedLock();
+                    it.remove();
                 }
             }
         }
@@ -265,17 +265,19 @@ public class RegisteredDispatcherEJBImpl
         if (enqueuedEvents.isEmpty()) {
             return;
         }
-        
+        /*
         if (debug) {
             log.debug("Registering events publishing handler");
         }
             
         EventsHandler eventsPublishHandler = 
             new EventsHandler() {
-            public void handleEvents(List events) {
+            public void handleEvents(List enqueuedEvents) {
+        */
                 Messenger sender = new Messenger();
                 sender.publishMessage(EventConstants.EVENTS_TOPIC, 
-                                      (Serializable)events);
+                                      (Serializable) enqueuedEvents);
+        /*
             }
         };
         
@@ -286,6 +288,7 @@ public class RegisteredDispatcherEJBImpl
         if (debug) {
             log.debug("Finished registering events publishing handler");
         }
+        */
     }
         
     /**
