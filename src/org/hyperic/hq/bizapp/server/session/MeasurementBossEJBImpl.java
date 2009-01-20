@@ -2538,7 +2538,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // try to use prefetched caches
             if (measCache != null) {
                 List list = (List)measCache.get(resource.getId());
-                if (list.size() == 1) {
+                if (list == null) {
+                    // nothing to do
+                } else if (list.size() == 1) {
                     dm = (Measurement)list.get(0);
                     mv = (MetricValue)availCache.get(dm.getId());
                     if (mv != null) {

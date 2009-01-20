@@ -784,6 +784,10 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             res.add(resource);
         }
         List ids = getMeasurementDAO().findAvailMeasurements(res);
+        // may be null if measurements have not been configured
+        if (ids == null) {
+            return Collections.EMPTY_MAP;
+        }
         for (Iterator it=ids.iterator(); it.hasNext(); ) {
             Measurement m = (Measurement)it.next();
             rtn.put(m.getResource().getId(), Collections.singletonList(m));

@@ -480,7 +480,11 @@ public class MeasurementDAO extends HibernateDAO {
         }
         // should be a unique result if only one resource is being examined
         if (resources.size() == 1) {
-            return Collections.singletonList(query.uniqueResult());
+            Object result = query.uniqueResult();
+            if (result != null) {
+                return Collections.singletonList(query.uniqueResult());
+            }
+            return Collections.EMPTY_LIST;
         }
         return query.list();
     }

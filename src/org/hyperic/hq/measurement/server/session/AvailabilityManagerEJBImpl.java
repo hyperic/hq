@@ -469,10 +469,18 @@ public class AvailabilityManagerEJBImpl
                 AppdefEntityID aeid = res.getEntityId();
                 resource = resMan.findResource(aeid);
             }
-            final List measIds = (measCache != null) ?
-                (List)measCache.get(resource.getId()) :
-                (List)mMan.getAvailMeasurements(
+            List measIds = null;
+            if (measCache != null) {
+                measIds = (List)measCache.get(resource.getId());
+            }
+            if (measIds == null) {
+                measIds = (List)mMan.getAvailMeasurements(
                     Collections.singletonList(resource)).get(resource.getId());
+            }
+            // may still be null if the Resource has not been configured
+            if (measIds == null) {
+                continue;
+            }
             for (Iterator iter=measIds.iterator(); iter.hasNext(); ) {
                 final Measurement m = (Measurement)iter.next();
                 midsToGet.add(m.getId());

@@ -416,8 +416,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
         for (int i = 0; i < ids.length; i++) {
             if (midMap.containsKey(ids[i])) {
                 Integer mid = (Integer) midMap.get(ids[i]);
-                if (data.containsKey(mid)) {
-                    MetricValue mval = (MetricValue) data.get(mid);
+                MetricValue mval = null;
+                if (null != (mval = (MetricValue)data.get(mid))) {
                     result[i] = mval.getValue();
                 } else {
                     // First figure out if the agent of this appdef entity
