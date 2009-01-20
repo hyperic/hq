@@ -60,6 +60,7 @@ import net.sf.ehcache.CacheManager;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.server.MBeanUtil;
 
@@ -93,7 +94,8 @@ public final class ConcurrentStatsCollector {
         final char fs = File.separatorChar;
         final String jbossLogSuffix =
             "server" + fs + "default" + fs + "log" + fs + "hqstats" + fs;
-        _baseDir = System.getProperty(ENGINE_HOME, "..") + fs + jbossLogSuffix;
+        final String d = HQApp.getInstance().getRestartStorageDir().getName();
+        _baseDir = System.getProperty(ENGINE_HOME, d) + fs + jbossLogSuffix;
         final File dir = new File(_baseDir);
         if (!dir.exists()) {
             dir.mkdir();
