@@ -605,7 +605,11 @@ public class MetricSessionEJB extends BizappSessionEJB {
         Map midMap = new HashMap(metrics.size());
         for (Iterator it = metrics.iterator(); it.hasNext(); ) {
             Measurement m =  (Measurement) it.next();
-            midMap.put(new AppdefEntityID(m.getResource()), m.getId());
+            try {
+                midMap.put(new AppdefEntityID(m.getResource()), m.getId());
+            } catch (IllegalArgumentException e) {
+                // Resource has been deleted, waiting for purging.  Ignore.
+            }
         }
         
         AppdefEntityID[] ids = getGroupMemberIDs(subject, gid);
