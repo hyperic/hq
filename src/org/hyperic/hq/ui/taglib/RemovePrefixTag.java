@@ -39,6 +39,7 @@ public class RemovePrefixTag extends TagSupport {
 
     private String prefix = null;
     private String value = null;
+    private String property = null;
 
     public RemovePrefixTag () { super(); }
 
@@ -66,14 +67,24 @@ public class RemovePrefixTag extends TagSupport {
         }
 
         value = StringUtil.removePrefix(realValue, realPrefix);
-        try {
-            pageContext.getOut().println(value);
-        } catch(IOException e){
-            throw new JspException(e);        
-        }
+        
         return SKIP_BODY;
     }
 
+    public int doEndTag() throws JspException {
+        try {
+            if (property == null) {
+                pageContext.getOut().println(value);
+            } else {
+                pageContext.setAttribute(property, value);                
+            }
+        } catch (IOException e) {
+            throw new JspException(e);
+        }
+        
+        return super.doEndTag();
+    }
+    
     public String getValue() {
         return this.value;
     }    
@@ -86,5 +97,12 @@ public class RemovePrefixTag extends TagSupport {
     }    
     public void setPrefix(String prefix) {
         this.prefix = prefix;
+    }
+    
+    public String getProperty() {
+        return this.property;
+    }    
+    public void setProperty(String property) {
+        this.property = property;
     }
 }
