@@ -12,7 +12,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -102,7 +102,7 @@
 <!--  /  -->
 
 <!--  GENERAL PROPERTIES TOOLBAR -->
-<c:if test="${useroperations['modifySubject']}">
+<c:if test="${webUser.id == User.id || useroperations['modifySubject']}">
 <tiles:insert definition=".toolbar.edit">
   <tiles:put name="editUrl" value="/admin/user/UserAdmin.do?mode=edit"/>
   <tiles:put name="editParamName" value="u"/>
