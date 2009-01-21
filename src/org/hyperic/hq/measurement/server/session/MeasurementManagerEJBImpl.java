@@ -63,6 +63,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -771,8 +772,13 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 AppdefEntityID aeid = r.getEntityId();
                 resource = resMan.findResource(aeid);
             }
-            final Integer type = resource.getResourceType().getId();
-            if (type.equals(AuthzConstants.authzGroup)) {
+            final ResourceType type = resource.getResourceType();
+            if (type == null) {
+                // if type is null that means the resource was asynchronously
+                // deleted.  Just ignore.
+                continue;
+            }
+            if (type.getId().equals(AuthzConstants.authzGroup)) {
                 final ResourceGroupManagerLocal resGrpMan =
                     ResourceGroupManagerEJBImpl.getOne();
                 ResourceGroup grp =
