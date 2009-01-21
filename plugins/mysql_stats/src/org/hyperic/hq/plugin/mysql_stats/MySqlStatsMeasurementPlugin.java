@@ -105,9 +105,15 @@ public class MySqlStatsMeasurementPlugin
             throw e;
         } catch (SQLException e) {
             sqlException = true;
+            if (metric.isAvail()) {
+                return Metric.AVAIL_DOWN;
+            }
             throw new MetricNotFoundException(
                 "Service "+objectName+":"+alias+" not found", e);
         } catch (Exception e) {
+            if (metric.isAvail()) {
+                return Metric.AVAIL_DOWN;
+            }
             throw new MetricNotFoundException(
                 "Service "+objectName+":"+alias+" not found", e);
         } finally {
@@ -131,19 +137,19 @@ public class MySqlStatsMeasurementPlugin
     private void setCacheExpireTime(long expireTime) {
         Iterator it;
         _log.info("Received more than " + MAX_ERRORS + " SQLExceptions, " +
-            "disabling all JDBCQueryCaches until " +
-            TimeUtil.toString(expireTime));
+            "disabling all " + _tableStatusCacheMap.size() +
+            " JDBCQueryCaches until " + TimeUtil.toString(expireTime));
         for (it=_tableStatusCacheMap.values().iterator(); it.hasNext(); ) {
             JDBCQueryCache cache = (JDBCQueryCache)it.next();
             cache.setExpireTime(expireTime);
+            cache.clearCache();
         }
     }
 
     private double getTableMetric(Metric metric)
         throws NumberFormatException,
                SQLException,
-               JDBCQueryCacheException,
-               MetricUnreachableException {
+               JDBCQueryCacheException {
         final String table = metric.getObjectProperty("table");
         final String dbname = metric.getObjectProperty("database");
         String alias = metric.getAttributeName();
@@ -157,8 +163,10 @@ public class MySqlStatsMeasurementPlugin
         if (tableCache == null) {
             final String sql = new StringBuilder()
                 .append("SELECT * FROM information_schema.tables")
-                .append(" WHERE table_name = '").append(table).append('\'')
-                .append(" AND table_schema = '").append(dbname).append('\'')
+                .append(" WHERE lower(table_name) = '")
+                    .append(table.toLowerCase()).append('\'')
+                .append(" AND lower(table_schema) = '")
+                	.append(dbname.toLowerCase()).append('\'')
                 .append(" AND engine is not null").toString();
             tableCache = new JDBCQueryCache(sql, "table_name", 10000);
             _tableStatusCacheMap.put(table, tableCache);
@@ -167,13 +175,14 @@ public class MySqlStatsMeasurementPlugin
             alias = "TABLE_ROWS";
         }
         Connection conn = getCachedConnection(metric);
-        Object cachedVal = tableCache.get(conn, table, alias);
+        Object cachedVal = null;
+        cachedVal = tableCache.get(conn, table, alias);
         if (cachedVal == null) {
             if (metric.isAvail()) {
                 return Metric.AVAIL_DOWN;
             } else {
                 final String msg = "Could not get metric for table " + table;
-                throw new MetricUnreachableException(msg);
+                throw new SQLException(msg);
             }
         }
         Double val = Double.valueOf(cachedVal.toString());
@@ -195,8 +204,7 @@ public class MySqlStatsMeasurementPlugin
         Connection conn = getCachedConnection(metric);
         Statement stmt = null;
         ResultSet rs = null;
-        final boolean isAvail =
-            metric.getAttributeName().equals(Metric.ATTR_AVAIL);
+        final boolean isAvail = metric.isAvail();
         final String slaveAddr = metric.getObjectProperty("slaveAddress");
         try {
             stmt = conn.createStatement();
@@ -232,7 +240,7 @@ public class MySqlStatsMeasurementPlugin
                JDBCQueryCacheException {
         String valColumn = metric.getObjectProperty("value");
         String alias = metric.getAttributeName();
-        if (alias.trim().equalsIgnoreCase(Metric.ATTR_AVAIL)) {
+        if (metric.isAvail()) {
             return getAvailability(metric).getValue();
         } else {
             Connection conn = getCachedConnection(metric);

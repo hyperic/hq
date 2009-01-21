@@ -78,6 +78,13 @@ public class JDBCQueryCache {
     }
     
     /**
+     * Explicitly clears any cached value
+     */
+    public void clearCache() {
+        _cache.clear();
+    }
+    
+    /**
      * Explicitly sets the expire time of the cache to expireTime.  Cache will
      * not repopulate until System.currentTimeMillis() <= expireTime.
      */
@@ -130,7 +137,7 @@ public class JDBCQueryCache {
     public Object get(Connection conn, String key, String column)
         throws JDBCQueryCacheException, SQLException {
         long now = System.currentTimeMillis();
-        if (_cache.size() == 0 || (now - _cacheTimeout) > _last) {
+        if ((now - _cacheTimeout) > _last) {
             repopulateCache(conn);
         }
         List list = (List) _cache.get(key);
