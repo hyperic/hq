@@ -36,6 +36,7 @@ import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.server.session.EventTrackerEJBImpl;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
@@ -202,9 +203,10 @@ public class CounterTrigger extends AbstractTrigger
                             
                 myEvent = new TriggerFiredEvent(getId(), event);
 
-                myEvent.setMessage("Event " + triggerId + " occurred " +
-                                   (prevCount + 1) + " times within " +
-                                   timeRange / 1000 + " seconds");
+                myEvent.setMessage("Occurred " + (prevCount + 1) +
+                                   " times in the span of " +
+                                   timeRange / MeasurementConstants.MINUTE +
+                                   " minutes");
             } else {
                 // Throw it into the event tracker
                 try {
