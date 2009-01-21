@@ -93,8 +93,10 @@ public final class ConcurrentStatsCollector {
         final char fs = File.separatorChar;
         final String jbossLogSuffix =
             "server" + fs + "default" + fs + "log" + fs + "hqstats" + fs;
-        final String d = HQApp.getInstance().getRestartStorageDir().getName();
+        final String d =
+            HQApp.getInstance().getRestartStorageDir().getAbsolutePath();
         _baseDir = d + fs + jbossLogSuffix;
+        _log.info("using hqstats baseDir " + _baseDir);
         final File dir = new File(_baseDir);
         if (!dir.exists()) {
             dir.mkdir();
