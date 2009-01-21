@@ -84,7 +84,6 @@ public final class ConcurrentStatsCollector {
             EHCACHE_TOTAL_OBJECTS        = "EHCACHE_TOTAL_OBJECTS",
             CONCURRENT_STATS_COLLECTOR   = "CONCURRENT_STATS_COLLECTOR",
             LATHER_NUMBER_OF_CONNECTIONS = "LATHER_NUMBER_OF_CONNECTIONS";
-    private static final String ENGINE_HOME = "engine.home";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
@@ -95,7 +94,7 @@ public final class ConcurrentStatsCollector {
         final String jbossLogSuffix =
             "server" + fs + "default" + fs + "log" + fs + "hqstats" + fs;
         final String d = HQApp.getInstance().getRestartStorageDir().getName();
-        _baseDir = System.getProperty(ENGINE_HOME, d) + fs + jbossLogSuffix;
+        _baseDir = d + fs + jbossLogSuffix;
         final File dir = new File(_baseDir);
         if (!dir.exists()) {
             dir.mkdir();
