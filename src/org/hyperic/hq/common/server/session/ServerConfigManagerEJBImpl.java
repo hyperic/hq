@@ -312,13 +312,11 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                 Table t = (Table)i.next();
 
                 if (t.getName().toUpperCase().startsWith("EAM_MEASUREMENT_DATA") ||
-                    t.getName().toUpperCase().startsWith("HQ_METRIC_DATA") ||
-                    t.getName().toUpperCase().startsWith("HQ_SEQUENCE")) {
+                    t.getName().toUpperCase().startsWith("HQ_METRIC_DATA")) {
                     continue;
                 }
                 
-                String sql = dialect.getOptimizeStmt(t.getName(),
-                                                     DEFAULT_COST);
+                String sql = dialect.getOptimizeStmt(t.getName(), 0);
                 duration += doCommand(conn, sql, null);
             }
         } catch(SQLException e){
