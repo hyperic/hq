@@ -131,16 +131,16 @@ public class DataCompressEJBImpl
         // we can't get any accurate metric tablenames if truncateBefore
         // is less than the base point in time which is used for the
         // tablename calculations
-        if (truncateBefore < MeasTabManagerUtil.getBaseTime())
+        if (truncateBefore < MeasTabManagerUtil.getBaseTime()) {
             return;
+        }
         long currtime = System.currentTimeMillis();
         String currTable = MeasTabManagerUtil.getMeasTabname(currtime);
         long currTruncTime = truncateBefore;
         //just in case truncateBefore is in the middle of a table
         currTruncTime = MeasTabManagerUtil.getPrevMeasTabTime(currTruncTime);
         String delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
-        if (delTable.equals(currTable))
-        {
+        if (delTable.equals(currTable)) {
             currTruncTime = MeasTabManagerUtil.getPrevMeasTabTime(currTruncTime);
             delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
         }
@@ -148,31 +148,35 @@ public class DataCompressEJBImpl
                  TimeUtil.toString(truncateBefore));
         Connection conn = null;
         Statement stmt = null;
-        try
-        {
-            conn = DBUtil.getConnByContext(getInitialContext(),
-                                           DATASOURCE_NAME);
+        try {
+            conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            // check out HHQ-2789 for more info on why setAutoCommit(false)
+            // was added
+            conn.setAutoCommit(false);
             stmt = conn.createStatement();
             StopWatch watch = new StopWatch();
             log.debug("Truncating tables, starting with -> "+delTable+
                       " (currTable -> "+currTable+")\n");
             HQDialect dialect = Util.getHQDialect();
             while (!currTable.equals(delTable) &&
-                   truncateBefore > currTruncTime)
-            {
-                log.debug("Truncating table "+delTable);
-                stmt.executeUpdate("truncate table "+delTable);
-                String sql = dialect.getOptimizeStmt(delTable, 0);
-                stmt.execute(sql);
-                currTruncTime = MeasTabManagerUtil.getPrevMeasTabTime(
-                                                              currTruncTime);
-                delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
+                   truncateBefore > currTruncTime) {
+                try {
+                    log.debug("Truncating table "+delTable);
+                    stmt.execute("truncate table "+delTable);
+                    String sql = dialect.getOptimizeStmt(delTable, 0);
+                    stmt.execute(sql);
+                } catch (SQLException e) {
+                    log.error(e.getMessage(), e);
+                } finally {
+                    currTruncTime =
+                        MeasTabManagerUtil.getPrevMeasTabTime(currTruncTime);
+                    delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
+                }
             }
-
+            conn.commit();
             log.info("Done Purging Raw Measurement Data (" +
                      ((watch.getElapsed()) / 1000) + " seconds)");
-        }
-        finally {
+        } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
         }
     }
