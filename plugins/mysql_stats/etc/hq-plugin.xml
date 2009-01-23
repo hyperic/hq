@@ -8,7 +8,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004-2008], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -2096,7 +2096,7 @@
   monitoring are:
   </p>
   <ul>
-    <li>The configured mysql has the ability to connect to the MySQL server ${hostname}:${port}</li>
+    <li>The configured mysql has the ability to connect to the MySQL server specified by the ${jdbcUrl}</li>
     <li>The user ${jdbcUser} is able to execute the following statements:
         'SHOW GLOBAL STATUS', 'SHOW SLAVE STATUS' (minimal privileges needed:
         SELECT, REPLICATION CLIENT)</li>
@@ -2114,10 +2114,8 @@
     <li><strong>jdbcPassword</strong> - Password for MySQL login</li>
   </ul>
   <p>Monitoring properties affect log tracking, described below.</p>
+  <p>The Table Service is specified by a regular expression see the <a href='http://java.sun.com/j2se/1.4.2/docs/api/java/util/regex/Pattern.html'>java.util.Pattern</a> class for more info on java regular expressions.  To monitor multiple tables use the | (or) delimiter, to monitor all tables use the &quot;.*&quot; regex.  To ignore Table Services leave the field blank.</p>
   <p>Check <strong>Auto-Discover Global Statuses and Replications?</strong> if you want these child services auto-discovered.
-     Note that currently this will create a superfluous Replication service resource for a monitored instance that is not
-     a replication slave.  Leave this check box off to prevent this, especially if you're relying on external automation
-     to create and configure resources.</p>
   ]]>
     </help>
 
