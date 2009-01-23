@@ -9506,11 +9506,14 @@ has already been defined.
       <statement targetDB="oracle" desc="Drop constraing fkd1fcb6c0a2bf2d92 for Oracle">
         alter table EAM_RESOURCE_EDGE drop constraint fkd1fcb6c0a2bf2d92 
       </statement>
-      <statement targetDB="mysql" desc="Drop foreign key fkd1fcb6c0a2bf2d92 for MySQL">
+      <statement targetDB="mysql" desc="Drop foreign key fkd1fcb6c0a2bf2d92 for MySQL" fail="false">
         alter table EAM_RESOURCE_EDGE drop foreign key fkd1fcb6c0a2bf2d92 
       </statement>
+      <statement targetDB="mysql" desc="Drop foreign key fkd1fcb6c0a2bf2d92 for MySQL" fail="false">
+        alter table EAM_RESOURCE_EDGE drop foreign key FKD1FCB6C0A2BF2D92 
+      </statement>
       <statement>
-        alter table EAM_RESOURCE_EDGE add constraint fkd1fcb6c0a2bf2d92 foreign key
+        alter table EAM_RESOURCE_EDGE add constraint FKD1FCB6C0A2BF2D92  foreign key
             (FROM_ID) REFERENCES EAM_RESOURCE (ID) on delete cascade
       </statement>
       <statement targetDB="postgresql" desc="Drop constraing fkd1fcb6c0ccc27921 for Postgres">
@@ -9519,11 +9522,14 @@ has already been defined.
       <statement targetDB="oracle" desc="Drop constraing fkd1fcb6c0ccc27921 for Oracle">
         alter table EAM_RESOURCE_EDGE drop constraint fkd1fcb6c0ccc27921  
       </statement>
-      <statement targetDB="mysql" desc="Drop foreign key fkd1fcb6c0ccc27921 for MySQL">
+      <statement targetDB="mysql" desc="Drop foreign key fkd1fcb6c0ccc27921 for MySQL" fail="false">
         alter table EAM_RESOURCE_EDGE drop foreign key fkd1fcb6c0ccc27921  
       </statement>
+      <statement targetDB="mysql" desc="Drop foreign key fkd1fcb6c0ccc27921 for MySQL" fail="false">
+        alter table EAM_RESOURCE_EDGE drop foreign key FKD1FCB6C0CCC27921  
+      </statement>
       <statement>
-        alter table EAM_RESOURCE_EDGE add constraint fkd1fcb6c0ccc27921 foreign key
+        alter table EAM_RESOURCE_EDGE add constraint FKD1FCB6C0CCC27921 foreign key
             (TO_ID) REFERENCES EAM_RESOURCE (ID) on delete cascade
       </statement>
     </schema-directSQL>
@@ -9557,6 +9563,27 @@ has already been defined.
       <statement desc="Drop EAM_SERVICE column SORT_NAME." fail="false">
         ALTER TABLE EAM_SERVICE DROP COLUMN SORT_NAME
       </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
+  <schemaSpec version="3.135">
+    <schema-directSQL>
+        <statement targetDB="oracle">
+            ALTER TABLE EAM_RESOURCE DISABLE UNIQUE (RESOURCE_TYPE_ID, INSTANCE_ID)
+        </statement>
+        <statement targetDB="postgresql">
+            ALTER TABLE EAM_RESOURCE DROP CONSTRAINT EAM_RESOURCE_RESOURCE_TYPE_ID_KEY
+        </statement>
+        <statement targetDB="mysql">
+            ALTER TABLE EAM_RESOURCE DROP FOREIGN KEY FK7AC0E15C9E309B2B
+        </statement>
+        <statement targetDB="mysql">
+            ALTER TABLE EAM_RESOURCE DROP INDEX RESOURCE_TYPE_ID
+        </statement>
+        <statement targetDB="mysql">
+            ALTER TABLE EAM_RESOURCE ADD FOREIGN KEY FK7AC0E15C9E309B2B (RESOURCE_TYPE_ID)
+              REFERENCES EAM_RESOURCE_TYPE(ID)
+        </statement>
     </schema-directSQL>
   </schemaSpec>
 
