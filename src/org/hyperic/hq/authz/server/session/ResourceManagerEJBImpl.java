@@ -279,26 +279,12 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                         aeid.getAuthzTypeId(), id);
             }
         } catch (ServerNotFoundException e) {
-            throw new SystemException(
-                "entity type " + aeid.getType() + ", id " + aeid.getID() +
-                " not found", e);
         } catch (PlatformNotFoundException e) {
-            throw new SystemException(
-                "entity type " + aeid.getType() + ", id " + aeid.getID() +
-                " not found", e);
         } catch (ServiceNotFoundException e) {
-            throw new SystemException(
-                "entity type " + aeid.getType() + ", id " + aeid.getID() +
-                " not found", e);
         } catch (ApplicationNotFoundException e) {
-            throw new SystemException(
-                "entity type " + aeid.getType() + ", id " + aeid.getID() +
-                " not found", e);
         } catch (PermissionException e) {
-            throw new SystemException(
-                "entity type " + aeid.getType() + ", id " + aeid.getID() +
-                " not found", e);
         }
+        return null;
     }
 
     /**
