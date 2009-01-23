@@ -11,7 +11,7 @@
         <property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.oracle.OracleDelegate"/>
       </case>
       <case value="Oracle9i">
-        <echo>dbsetup-init: Oracle9i</echo>
+        <echo>dbsetup-init: Oracle</echo>
         <property name="using.oracle8.db" value="true"/>
         <property name="quartz.delegate" value="org.quartz.impl.jdbcjobstore.oracle.OracleDelegate"/>
       </case>

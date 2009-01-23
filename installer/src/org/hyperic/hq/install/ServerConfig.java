@@ -59,7 +59,7 @@ public class ServerConfig extends BaseConfig {
     public static final String PN = PRODUCT;
 
     // database names that appear in the select list
-    public static final String DBC_ORA9    = "Oracle 9i/10g";
+    public static final String DBC_ORA10    = "Oracle 10g/11g";
     public static final String DBC_PGSQL   = "PostgreSQL";
     public static final String DBC_BUILTIN = "HQ Built-in Database";
     public static final String DBC_MYSQL   = "MySQL 5.x";
@@ -301,7 +301,7 @@ public class ServerConfig extends BaseConfig {
             if (installMode.isOracle()) {
                 schema.addOption(
                     new HiddenConfigOption("server.database.choice",
-                                           DBC_ORA9));
+                                           DBC_ORA10));
             } else if (installMode.isPostgres()) {
                 schema.addOption(
                     new HiddenConfigOption("server.database.choice",
@@ -315,11 +315,11 @@ public class ServerConfig extends BaseConfig {
                     new HiddenConfigOption("server.database.choice",
                                            DBC_BUILTIN));
             } else {
-                String defaultDB = haveBuiltinDB ? DBC_BUILTIN : DBC_ORA9;
+                String defaultDB = haveBuiltinDB ? DBC_BUILTIN : DBC_ORA10;
                 String[] dbs = haveBuiltinDB
-                    ? new String[] { DBC_BUILTIN, DBC_ORA9, 
+                    ? new String[] { DBC_BUILTIN, DBC_ORA10, 
                                      DBC_PGSQL, DBC_MYSQL }
-                    : new String[] { DBC_ORA9, DBC_PGSQL, DBC_MYSQL };
+                    : new String[] { DBC_ORA10, DBC_PGSQL, DBC_MYSQL };
                 schema.addOption(
                     new EnumerationConfigOption("server.database.choice",
                                                 Q_DATABASE,
@@ -331,7 +331,7 @@ public class ServerConfig extends BaseConfig {
         case 6:
             // determine server.database from server.database.choice...
             dbChoiceStr = previous.getValue("server.database.choice");
-            if (dbChoiceStr.equals(DBC_ORA9))
+            if (dbChoiceStr.equals(DBC_ORA10))
                 dbChoice = DB_ORA9;
             else if (dbChoiceStr.startsWith(DBC_PGSQL))
                 dbChoice = DB_PGSQL;
