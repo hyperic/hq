@@ -601,22 +601,30 @@ public class EscalationManagerEJBImpl
     {
         Escalatable esc = type.findEscalatable(alertId);
         EscalationState state = _stateDAO.find(esc);
+        if (moreInfo == null || moreInfo.trim().length() == 0) {
+            moreInfo = "";
+        }
         if (pause > 0) {
         	long nextTime;
         	if (pause == Long.MAX_VALUE) {
         		nextTime = pause;
-                moreInfo = " and paused escalation until fixed";
+                moreInfo = " and paused escalation until fixed. " + moreInfo;
         	} else {
         		nextTime = System.currentTimeMillis() + pause;
                 FormattedNumber fmtd =
                     UnitsFormat.format(new UnitNumber(pause,
                                                       UnitsConstants.UNIT_DURATION,
                                                       UnitsConstants.SCALE_MILLI));
-                moreInfo = " and paused escalation for " + fmtd;
+                moreInfo = " and paused escalation for " + fmtd 
+                                + ". " + moreInfo;
         	}
             if (nextTime > state.getNextActionTime()) {
                 state.setNextActionTime(nextTime);
                 EscalationRuntime.getInstance().scheduleEscalation(state);
+            }
+        } else {
+            if (moreInfo.length() > 0) {
+                moreInfo = ". " + moreInfo;
             }
         }
         fixOrNotify(subject, esc, state, type, false, moreInfo);
@@ -725,8 +733,9 @@ public class EscalationManagerEJBImpl
             if (state != null)
                 endEscalation(state);
         } else {
-            if (moreInfo == null)
+            if (moreInfo == null || moreInfo.trim().length() == 0) {
                 moreInfo = "";
+            }
             
             if (state.getAcknowledgedBy() != null) {
                 _log.warn(subject.getFullName() + " attempted to acknowledge "+

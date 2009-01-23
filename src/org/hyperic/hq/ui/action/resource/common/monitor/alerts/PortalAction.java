@@ -205,6 +205,7 @@ public class PortalAction extends ResourceController {
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
 
         Integer alertId = new Integer( request.getParameter("a") );
+        String ackNote = RequestUtils.getStringParameter(request, "ackNote", "");
         
         long pause = 0;
         try {
@@ -223,7 +224,7 @@ public class PortalAction extends ResourceController {
             
             if (aeid.isGroup()) {
                 eb.acknowledgeAlert(sessionID, GalertEscalationAlertType.GALERT,
-                                    alertId, pause, null);
+                                    alertId, pause, ackNote);
             }
         } catch (ParameterNotFoundException e) {
             // not a problem, this can be null
@@ -233,7 +234,7 @@ public class PortalAction extends ResourceController {
             // Classic alerts
             eb.acknowledgeAlert(sessionID, 
                                 ClassicEscalationAlertType.CLASSIC,
-                                alertId, pause, null);
+                                alertId, pause, ackNote);
         }
         
         RequestUtils.setConfirmation(request,
