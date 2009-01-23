@@ -1170,8 +1170,10 @@
     <plugin type="measurement"
             class="MySQLMeasurementPlugin"/>
 
+<!-- scottmf Disabled.  Users should now use the MySQL Stats plugin.
     <plugin type="autoinventory"
             class="MySQLServerDetector"/>
+-->
 
     <!-- Only filescan on 3.x for now -->
     <scan type="file">
@@ -1239,8 +1241,10 @@
     <plugin type="measurement"
             class="MySQLMeasurementPlugin"/>
 
+<!-- scottmf Disabled.  Users should now use the MySQL Stats plugin.
     <plugin type="autoinventory"
             class="MySQLServerDetector"/>
+-->
 
     <scan type="file">
       <include name="/**/bin/mysqld_safe"/>
