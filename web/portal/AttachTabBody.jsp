@@ -12,10 +12,10 @@
 <c:forEach var="attachment" items="${resourceViewTabAttachments}">
     <c:choose>
     <c:when test="${param.id eq attachment.attachment.id}">
-    <div style="padding:1px;border:1px solid rgb(255, 114, 20);margin-right:2px;width: 100px; float: left;text-align: center;"><a href="<html:rewrite page="/TabBodyAttach.do?id=${attachment.attachment.id}&mode=${param.mode}&eid=${param.eid}"/>"><c:out value="${attachment.HTML}"/></a></div>
+    <div style="padding:1px;border:1px solid rgb(255, 114, 20);margin:2px;width: 100px; float: left;text-align: center;"><a href="<html:rewrite page="/TabBodyAttach.do?id=${attachment.attachment.id}&mode=${param.mode}&eid=${param.eid}"/>"><c:out value="${attachment.HTML}"/></a></div>
     </c:when>
     <c:otherwise>
-    <div style="padding:1px;border:1px solid gray;margin-right:2px;width: 100px; float: left;text-align: center;"><a href="<html:rewrite page="/TabBodyAttach.do?id=${attachment.attachment.id}&mode=${param.mode}&eid=${param.eid}"/>"><c:out value="${attachment.HTML}"/></a></div>
+    <div style="padding:1px;border:1px solid gray;margin:2px;width: 100px; float: left;text-align: center;"><a href="<html:rewrite page="/TabBodyAttach.do?id=${attachment.attachment.id}&mode=${param.mode}&eid=${param.eid}"/>"><c:out value="${attachment.HTML}"/></a></div>
     </c:otherwise>
     </c:choose>
 </c:forEach>

@@ -89,8 +89,9 @@
   </c:forEach>
    <td width="100%" class="TabCell"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
   </tr>
-  <c:if test="${subTabList != null}">
   <tr> 
+  <c:choose>
+  <c:when test="${subTabList != null}">
    <td colspan="7">
     <table width="100%" border="0" cellspacing="0" cellpadding="0">
      <tr>
@@ -139,7 +140,11 @@
      </tr>
     </table>
    </td>
+  </c:when>
+  <c:otherwise>
+       <td colspan="7" class="SubTabCell" id="SubTabTarget" style="border-left: 1px solid gray; padding-left: 5px;"><html:img page="/images/spacer.gif" width="1" height="1" alt="" border="0"/></td>
+  </c:otherwise>
+  </c:choose>
   </tr>
-  </c:if>
  </table>
 
