@@ -125,6 +125,7 @@
 			<input type="button" id="<c:out value="${widgetInstanceName}${portletToken}"/>_AckButton" value="<fmt:message key="resource.common.alert.action.acknowledge.label"/>" class="CompactButtonInactive" disabled="disabled" onclick="MyAlertCenter.processButtonAction(this)" />
 			<input type="hidden" name="buttonAction" value="" />
           	<input type="hidden" name="fixedNote" value="" />
+          	<input type="hidden" name="ackNote" value="" />
 		</div>
 	</td>
 </c:if>

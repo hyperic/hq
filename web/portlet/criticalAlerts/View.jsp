@@ -145,8 +145,8 @@ dojo11.addOnLoad(function(){
       </tfoot>
   </table>
   <script type="text/javascript">
-  	if (dojo11.byId("AlertCenterFixedNoteDialog") == null) {
-  		document.write('<div id="AlertCenterFixedNoteDialog" style="display:none;"></div>');
+  	if (dojo11.byId("HQAlertCenterDialog") == null) {
+  		document.write('<div id="HQAlertCenterDialog" style="display:none;"></div>');
   	}
   </script>
   </html:form>

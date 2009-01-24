@@ -133,7 +133,7 @@ dojo.addOnLoad( function(){
           	<input type="hidden" name="buttonAction" value="" />
           	<input type="hidden" name="output" value="json" />
           	<input type="hidden" name="fixedNote" value="" />
-          	<input type="hidden" name="pauseTime" value="" />          	
+          	<input type="hidden" name="ackNote" value="" />          	
           </div>
           </form>
         </div>
@@ -152,12 +152,12 @@ dojo.addOnLoad( function(){
           	<input type="hidden" name="buttonAction" value="" />
           	<input type="hidden" name="output" value="json" />
           	<input type="hidden" name="fixedNote" value="" />
-          	<input type="hidden" name="pauseTime" value="" />          	
+          	<input type="hidden" name="ackNote" value="" />          	
           </div>          
           </form>
         </div>
       </div>
-      <div id="AlertCenterFixedNoteDialog" style="display:none;"></div>
+      <div id="HQAlertCenterDialog" style="display:none;"></div>
       <script type="text/javascript">
           	dojo11.require("dijit.dijit");
           	dojo11.require("dijit.Dialog");

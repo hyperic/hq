@@ -366,7 +366,7 @@ title="alerts.alert.AlertList.ListHeader.ActualValue" />
   <tiles:put name="defaultSortColumn" value="2"/>
   <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
 </tiles:insert>
-<div id="AlertCenterFixedNoteDialog" style="display:none;"></div>
+<div id="HQAlertCenterDialog" style="display:none;"></div>
 <tiles:insert definition=".page.footer">
 </tiles:insert>
 </html:form>

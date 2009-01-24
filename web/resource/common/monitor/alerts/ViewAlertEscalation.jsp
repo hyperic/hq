@@ -73,9 +73,17 @@
     </td>
   </tr>
   </c:forEach>
+  <c:if test="${escalation.pauseAllowed && alert.acknowledgeable}">
   <tr>
-    <td rowspan="2" width="20%" class="BlockLabel" style="border-top: solid #D5D8DE 1px; border-bottom: solid #D5D8DE 1px;">&nbsp;</td>
-    <td nowrap="true" class="BlockContent" style="padding: 10px; border-top: solid #D5D8DE 1px;">
+    <td width="20%" class="BlockLabel" style="padding: 10px; border-top: solid #D5D8DE 1px;">&nbsp;</td>
+    <td colspan="2" nowrap="true" class="BlockContent" style="padding: 10px; border-top: solid #D5D8DE 1px;">
+        <span class="BoldText"><fmt:message key="resource.common.alert.ackNote"/></span><br><html:textarea property="ackNote" cols="70" rows="4"/>	  
+    </td>
+  </tr>
+  </c:if>
+  <tr>
+    <td rowspan="2" width="20%" class="BlockLabel">&nbsp;</td>
+    <td nowrap="true" class="BlockContent" style="padding: 10px;">
   <c:if test="${escalation.pauseAllowed && alert.acknowledgeable}">
       <input type=checkbox name="pause" value="true"/>
       <fmt:message key="alert.escalation.pause"/>
@@ -111,7 +119,7 @@
       </select>
   </c:if>&nbsp;
     </td>
-    <td rowspan="2" width="60%" class="BlockLabel" style="border-top: solid #D5D8DE 1px;">
+    <td rowspan="2" width="60%" class="BlockLabel">
         <div style="text-align:left;">
 <tiles:insert page="/common/components/ActionButton.jsp">
   <tiles:put name="labelKey" value="resource.common.alert.action.acknowledge.label"/>

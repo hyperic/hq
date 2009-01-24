@@ -2903,14 +2903,63 @@ hyperic.group_manager = function() {
 hyperic.alert_center = function(title_name) {
 	var that = this;
 	that.title_name = title_name;
+	that.current = {dialog: null};
 	that.dialogs = {};
-	that.button_area = {};
-	that.message_area = {};
 	
-	that.init = function(myForm) {
-	    if(!that.dialogs.FixAlert){
-	    	var pane = dojo11.byId("AlertCenterFixedNoteDialog");
-			pane.innerHTML = 
+	that.initDialog = function() {
+    	var alertCenterDiv = dojo11.byId("HQAlertCenterDialog");
+
+    	if (!that.dialogs.AckAlert) {
+	    	var ackDiv = document.createElement("div");
+	    	ackDiv.innerHTML =
+	          	'<div id="AlertCenterAckStatus" style="display:none"></div>' +
+				'<table cellspacing="0" cellpadding="0">' +
+				'<tr><td colspan="2">' +
+      	        '	<span class="BoldText">Reason for Acknowledgement for Selected Alerts (Optional):</span><br/>' +
+      	        '	<textarea id="AckNoteTextArea" cols="70" rows="4"></textarea>' +
+      	        '</td></tr>' +
+      	        '<tr id="AlertCenterAckButtonActive"><td class="buttonLeft"></td>' +
+      	    	'<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
+      	    	'	<span id="button"><a href="javascript:MyAlertCenter.acknowledgeAlerts();">ACKNOWLEDGE</a></span>' +
+      	    	'	<span style="padding-left: 3px;"><img src="/images/icon_ack.gif" align="middle" alt="Click to Acknowledge"></span>' +
+      	    	'</td></tr>' +
+      	        '<tr id="AlertCenterAckButtonInActive" style="display:none"><td class="buttonLeft"></td>' +
+      	    	'<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
+      	    	'   <span class="InactiveText">ACKNOWLEDGE</span>' +
+      	    	'   <span style="filter: alpha(opacity=50); opacity: 0.5;">' + 
+      	    	'		<span style="padding-left: 3px;"><img src="/images/icon_ack.gif" align="middle" alt="Click to Acknowledge"></span>' +
+      	    	'	</span>' +    	    	
+      	    	'</td></tr>' +
+      	    	'</table>';
+	    	alertCenterDiv.appendChild(ackDiv);
+	    	
+	    	that.dialogs.AckAlert = new dijit11.Dialog({
+				id: "Alert_Center_Ack_Alert_Dialog",
+				refocus: true,
+				autofocus: false,
+				title: that.title_name
+				}, ackDiv);
+
+	    	that.dialogs.AckAlert.data = {
+		    	form: null,
+		    	subgroup: null,
+	    		button_area: {
+	    			active: dojo11.byId("AlertCenterAckButtonActive"),
+	    			inactive: dojo11.byId("AlertCenterAckButtonInActive")
+	    		},
+	    		message_area: {
+	    			request_status: dojo11.byId("AlertCenterAckStatus")
+	    		},
+		    	note: dojo11.byId("AckNoteTextArea")
+		    }
+	    	
+	    	// restart auto refresh after dialog closes
+	    	dojo11.connect(that.dialogs.AckAlert, "hide", this, "delayAutoRefresh");
+    	}
+	    
+		if (!that.dialogs.FixAlert) {
+			var fixedDiv = document.createElement("div");
+			fixedDiv.innerHTML = 
 	          	'<div id="AlertCenterFixedStatus" style="display:none"></div>' +
 				'<table cellspacing="0" cellpadding="0">' +
 				'<tr><td colspan="2">' +
@@ -2919,7 +2968,7 @@ hyperic.alert_center = function(title_name) {
       	        '</td></tr>' +
       	        '<tr id="AlertCenterFixedButtonActive"><td class="buttonLeft"></td>' +
       	    	'<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
-      	    	'	<span id="button"><a href="javascript:MyAlertCenter.fixAlert();">FIXED</a></span>' +
+      	    	'	<span id="button"><a href="javascript:MyAlertCenter.fixAlerts();">FIXED</a></span>' +
       	    	'	<span style="padding-left: 3px;"><img src="/images/icon_fixed.gif" align="middle" alt="Click to mark as Fixed"></span>' +
       	    	'	<span>Click the "Fixed" button to mark alert condition as fixed</span>' +
       	    	'</td></tr>' +
@@ -2931,50 +2980,54 @@ hyperic.alert_center = function(title_name) {
       	    	'	</span>' +
       	    	'</td></tr>' +
       	    	'</table>';
+			alertCenterDiv.appendChild(fixedDiv);
 	    	
 	    	that.dialogs.FixAlert = new dijit11.Dialog({
 				id: "Alert_Center_Fix_Alert_Dialog",
 				refocus: true,
 				autofocus: false,
 				title: that.title_name
-				}, pane);
+				}, fixedDiv);
 	    	
 	    	that.dialogs.FixAlert.data = {
 	    		form: null,
 	    		subgroup: null,
-	    		fixedNote: dojo11.byId("FixedNoteTextArea")
+	    		button_area: {
+	    			active: dojo11.byId("AlertCenterFixedButtonActive"),
+	    			inactive: dojo11.byId("AlertCenterFixedButtonInActive")
+	    		},
+	    		message_area: {
+	    			request_status: dojo11.byId("AlertCenterFixedStatus")
+	    		},
+	    		note: dojo11.byId("FixedNoteTextArea")
 	    	}
 	    	
 	    	// restart auto refresh after dialog closes
-	    	dojo11.connect(that.dialogs.FixAlert, "hide", this, "delayAutoRefresh");
-	    	
-	        that.message_area.request_status = dojo11.byId("AlertCenterFixedStatus");
-	        that.button_area.fixed_active = dojo11.byId("AlertCenterFixedButtonActive");
-	        that.button_area.fixed_inactive = dojo11.byId("AlertCenterFixedButtonInActive");
+	    	dojo11.connect(that.dialogs.FixAlert, "hide", this, "delayAutoRefresh");	    	
 		}
-	    
-	    if (myForm) {
-	    	that.dialogs.FixAlert.data.form = myForm;
-	    	that.dialogs.FixAlert.data.subgroup = that.dialogs.FixAlert.data.form.id.substring(0, that.dialogs.FixAlert.data.form.id.indexOf("_FixForm"));
-	    }
 	}
-		
-	that.startAutoRefresh = function() {
-		var subgroup = that.dialogs.FixAlert.data.subgroup;
-		var adhocScript = "if (window._hqu_" + subgroup + "_autoRefresh) { ";
-		adhocScript += "window._hqu_" + subgroup + "_autoRefresh(); ";
+
+	that.initData = function(myDialog, myForm) {
+		that.current.dialog = myDialog;
+		myDialog.data.form = myForm;
+		myDialog.data.subgroup = myDialog.data.form.id.substring(0, myDialog.data.form.id.indexOf("_FixForm"));
+	}
+	
+	that.startAutoRefresh = function(mySubgroup) {
+		var adhocScript = "if (window._hqu_" + mySubgroup + "_autoRefresh) { ";
+		adhocScript += "window._hqu_" + mySubgroup + "_autoRefresh(); ";
 		adhocScript += " }";
 		
-		that.stopAutoRefresh(subgroup);
+		that.stopAutoRefresh(mySubgroup);
 		eval(adhocScript);		
 	}
 
-	that.stopAutoRefresh = function(mySubgroup) {
+	that.stopAutoRefresh = function(mySubgroup) {		
 		var subgroup = null;
 		if (typeof mySubgroup == "string") {
 			subgroup = mySubgroup;
 		} else {
-			subgroup = that.dialogs.FixAlert.data.subgroup;
+			subgroup = that.current.dialog.data.subgroup;
 		}
 		
 		if (subgroup != null) {
@@ -2990,7 +3043,7 @@ hyperic.alert_center = function(title_name) {
 		if (typeof mySubgroup == "string") {
 			subgroup = mySubgroup;
 		} else {
-			subgroup = that.dialogs.FixAlert.data.subgroup;
+			subgroup = that.current.dialog.data.subgroup;
 		}
 		
 		if (subgroup != null) {
@@ -3004,38 +3057,40 @@ hyperic.alert_center = function(title_name) {
 		}
 	}
 
-	that.confirmFixAlert = function() {
-		that.stopAutoRefresh();
-		that.message_area.request_status.style.display = "none";
-		that.button_area.fixed_active.style.display = "";
-		that.button_area.fixed_inactive.style.display = "none";
-		that.dialogs.FixAlert.data.fixedNote.value = "";
-		that.dialogs.FixAlert.show();
-	}
-	
-	that.fixAlert = function() {
-		var myForm = that.dialogs.FixAlert.data.form;
-		myForm.fixedNote.value = that.dialogs.FixAlert.data.fixedNote.value;
-		that.button_area.fixed_active.style.display = "none";
-		that.button_area.fixed_inactive.style.display = "";
-		that.displayConfirmation('Please wait. Processing your request...');
+	that.fixOrAckAlert = function(myDialog, myNote) {
+		var myForm = myDialog.data.form;
+		myNote.value = myDialog.data.note.value;
+		myDialog.data.button_area.active.style.display = "none";
+		myDialog.data.button_area.inactive.style.display = "";
+		that.displayConfirmation(
+				myDialog.data.message_area.request_status, 
+				'Please wait. Processing your request...');
 
 		if (myForm.output && myForm.output.value == "json") {
 			that.xhrSubmit(myForm);
 		} else {
 			myForm.submit();
-		}
+		}	
+	}
+	
+	that.showDialog = function(myDialog) {
+		that.current.dialog = myDialog;
+		that.stopAutoRefresh();
+		myDialog.data.message_area.request_status.style.display = "none";
+		myDialog.data.button_area.active.style.display = "";
+		myDialog.data.button_area.inactive.style.display = "none";
+		myDialog.data.note.value = "";
+		myDialog.show();	
+	}
+	
+	that.fixAlerts = function() {
+		that.fixOrAckAlert(that.dialogs.FixAlert, 
+						   that.dialogs.FixAlert.data.form.fixedNote);
 	}
 	
 	that.acknowledgeAlerts = function() {
-		that.stopAutoRefresh();
-
-		var myForm = that.dialogs.FixAlert.data.form;
-		if (myForm.output && myForm.output.value == "json") {
-			that.xhrSubmit(myForm);
-		} else {
-			myForm.submit();
-		}
+		that.fixOrAckAlert(that.dialogs.AckAlert, 
+						   that.dialogs.AckAlert.data.form.ackNote);
 	}
 
 	that.acknowledgeAlert = function(inputId) {		
@@ -3043,7 +3098,7 @@ hyperic.alert_center = function(title_name) {
 		var myParam = {buttonAction: "ACKNOWLEDGE", output: "json"}
 		
 		myParam[myInput.name] = myInput.value;
-		that.init(myInput.form);
+		that.initData(that.dialogs.AckAlert, myInput.form);
 		that.stopAutoRefresh();
 
 		dojo11.xhrPost( {
@@ -3051,28 +3106,28 @@ hyperic.alert_center = function(title_name) {
 	    	content: myParam,
 	    	handleAs: 'json',
 	    	load: function(data) {
-	    		that.startAutoRefresh();
+	    		that.startAutoRefresh(that.dialogs.AckAlert.data.subgroup);
 	    	},
 	    	error: function(data){
 	    		var errorText = "An error occurred processing your request.";
-	    		that.displayError(errorText);
+	    		alert(errorText);
 	    		console.debug(errorText, data);
 			}
 		});
 	}
 	
-	that.xhrSubmit = function(myForm) {
-	    dojo11.xhrPost( {
+	that.xhrSubmit = function(myForm) {				
+		dojo11.xhrPost( {
 	    	url: myForm.action,
 	    	content: Form.serialize(myForm,true),
 	    	handleAs: 'json',
 	    	load: function(data){
-	    		that.dialogs.FixAlert.hide();
-	    		that.startAutoRefresh();
+				that.current.dialog.hide();
+	    		that.startAutoRefresh(that.current.dialog.data.subgroup);
 	    	},
 	    	error: function(data){
 	    		var errorText = "An error occurred processing your request.";
-	    		that.displayError(errorText);
+	    		that.displayError(that.current.dialog.data.message_area.request_status, errorText);
 	    		console.debug(errorText, data);
 			}
 		});	    
@@ -3084,6 +3139,7 @@ hyperic.alert_center = function(title_name) {
 		checkAllBox.checked = false;
 		that.toggleAll(checkAllBox, false);
 		myForm.fixedNote.value = "";
+		myForm.ackNote.value = "";
 	}
 	
 	that.toggleAll = function(checkAllBox, doDelay) {
@@ -3153,28 +3209,29 @@ hyperic.alert_center = function(title_name) {
 
 	that.processButtonAction = function(myButton) {
 		myButton.form.buttonAction.value = myButton.value;
-		that.init(myButton.form);
 		
 		if (myButton.value == "FIXED") {
-			that.confirmFixAlert();
+			that.initData(that.dialogs.FixAlert, myButton.form);
+			that.showDialog(that.dialogs.FixAlert);
 		} else if (myButton.value == "ACKNOWLEDGE") {
-			that.acknowledgeAlerts();
+			that.initData(that.dialogs.AckAlert, myButton.form);
+			that.showDialog(that.dialogs.AckAlert);
 		}
 	}
 
-	that.displayConfirmation = function(msg) {
-		that.message_area.request_status.className = 'confirmationPanel';
-		that.message_area.request_status.innerHTML = msg;
-		that.message_area.request_status.style.display = '';   	
+	that.displayConfirmation = function(msg_area, msg) {
+		msg_area.className = 'confirmationPanel';
+		msg_area.innerHTML = msg;
+		msg_area.style.display = '';   	
     }
     
-    that.displayError = function(msg) {
-		that.message_area.request_status.className = 'errorPanel';
-		that.message_area.request_status.innerHTML = msg;
-		that.message_area.request_status.style.display = '';
+    that.displayError = function(msg_area, msg) {
+    	msg_area.className = 'errorPanel';
+    	msg_area.innerHTML = msg;
+    	msg_area.style.display = '';
     }
 	
-	that.init();
+	that.initDialog();
 }
 
 hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
