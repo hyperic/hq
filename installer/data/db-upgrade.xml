@@ -9587,6 +9587,38 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.136">
+    <schema-directSQL>
+      <statement targetDB="oracle">
+        drop index AVAIL_RLE_MEASID_IDX
+      </statement>
+      <statement targetDB="postgresql">
+        drop index AVAIL_RLE_MEASID_IDX
+      </statement>
+      <statement targetDB="mysql">
+        drop index AVAIL_RLE_MEASID_IDX on HQ_AVAIL_DATA_RLE
+      </statement>
+      <statement targetDB="oracle">
+        drop index AVAIL_RLE_VAL_IDX
+      </statement>
+      <statement targetDB="postgresql">
+        drop index AVAIL_RLE_VAL_IDX
+      </statement>
+      <statement targetDB="mysql">
+        drop index AVAIL_RLE_VAL_IDX on HQ_AVAIL_DATA_RLE
+      </statement>
+      <statement targetDB="oracle">
+        drop index AVAIL_RLE_ENDTIME_IDX
+      </statement>
+      <statement targetDB="postgresql">
+        drop index AVAIL_RLE_ENDTIME_IDX
+      </statement>
+      <statement targetDB="mysql">
+        drop index AVAIL_RLE_ENDTIME_IDX on HQ_AVAIL_DATA_RLE
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
