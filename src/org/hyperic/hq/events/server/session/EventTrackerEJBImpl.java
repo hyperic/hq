@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -104,32 +104,13 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         
         TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
         
-        Session session = triggerEventDAO.getNewSession();
-        
-        // NOTE: Explicit txn management is not strictly necessary, since the 
-        // container actually begins/commits/rollsback the txn. Effectively, 
-        // the Hibernate txn is flushing the session when the operation succeeds 
-        // (commit) and marking the txn for rollback when the operation fails 
-        // (rollback). If we let the container manage the txn (and not use 
-        // the Hibernate txn), we would need to flush the session and make sure 
-        // a SystemException is thrown on operation failure so the container 
-        // knows to rollback the txn.
-        Transaction txn = null;
+        Session session = triggerEventDAO.getSession();
         
         try {
-            txn = session.beginTransaction();
             triggerEventDAO.save(triggerEvent, session);
-            txn.commit();
         } catch (Exception e) {
-            if (txn != null) {
-                txn.rollback();
-            }
-            
             log.error("Failed to add referenced event for trigger id="+tid, e);     
             throw new SQLException("Failed to add referenced event for trigger id="+tid);
-            
-        } finally {
-            session.close();
         }
                         
         Long teid = triggerEvent.getId();
@@ -156,41 +137,25 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
     public void updateReference(Long teid, AbstractEvent eventObject) 
         throws SQLException {        
         if (log.isDebugEnabled())
-            log.debug("Updating the event object for trigger event id: " + teid);            
+            log.debug("Updating the event object for trigger event id: " + teid);
+        
+        if (teid == null)
+            return;
 
         _diagnostic.startUpdateReference();
         
         TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
                 
-        Session session = triggerEventDAO.getNewSession();
-        
-        // NOTE: Explicit txn management is not strictly necessary, since the 
-        // container actually begins/commits/rollsback the txn. Effectively, 
-        // the Hibernate txn is flushing the session when the operation succeeds 
-        // (commit) and marking the txn for rollback when the operation fails 
-        // (rollback). If we let the container manage the txn (and not use 
-        // the Hibernate txn), we would need to flush the session and make sure 
-        // a SystemException is thrown on operation failure so the container 
-        // knows to rollback the txn.
-        Transaction txn = null;
+        Session session = triggerEventDAO.getSession();
         
         try {
-            txn = session.beginTransaction();
             TriggerEvent triggerEvent = triggerEventDAO.findById(teid, session);
             triggerEvent.setEventObject(eventObject);
             triggerEvent.setCtime(eventObject.getTimestamp());
             triggerEventDAO.save(triggerEvent, session);
-            txn.commit();
         } catch (Exception e) {
-            if (txn != null) {
-                txn.rollback();
-            }
-            
-            log.debug("Failed to update event object for trigger event id="+teid, e);     
+            log.error("Failed to update event object for trigger event id="+teid, e);     
             throw new SQLException("Failed to update event object for trigger event id="+teid);
-            
-        } finally {
-            session.close();
         }
                 
         eventObject.setId(teid);
@@ -213,20 +178,9 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         
         TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
                 
-        Session session = triggerEventDAO.getNewSession();
-        
-        // NOTE: Explicit txn management is not strictly necessary, since the 
-        // container actually begins/commits/rollsback the txn. Effectively, 
-        // the Hibernate txn is flushing the session when the operation succeeds 
-        // (commit) and marking the txn for rollback when the operation fails 
-        // (rollback). If we let the container manage the txn (and not use 
-        // the Hibernate txn), we would need to flush the session and make sure 
-        // a SystemException is thrown on operation failure so the container 
-        // knows to rollback the txn.
-        Transaction txn = null;
+        Session session = triggerEventDAO.getSession();
         
         try {
-            txn = session.beginTransaction();
             triggerEventDAO.deleteByTriggerId(tid, session);        
             
             // To reduce contention on the trigger_event table we are going to reduce 
@@ -235,18 +189,9 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
                         .shouldDeleteExpiredEvents()) {
                 triggerEventDAO.deleteExpired(session);
             }
-            
-            txn.commit();
         } catch (Exception e) {
-            if (txn != null) {
-                txn.rollback();
-            }
-            
             log.error("Failed to delete expired and referenced events for trigger id="+tid, e);     
             throw new SQLException("Failed to delete expired and referenced events for trigger id="+tid);
-            
-        } finally {
-            session.close();
         }
         
         _diagnostic.endDeleteReference();
@@ -278,7 +223,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         
         TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
 
-        Session session = triggerEventDAO.getNewSession();
+        Session session = triggerEventDAO.getSession();
         
         LinkedList eventObjectDeserializers = new LinkedList();
         
@@ -298,8 +243,6 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         } catch (Exception e) {
             log.error("Failed to get referenced events for trigger id="+tid, e);     
             throw new SQLException("Failed to get referenced events for trigger id="+tid);            
-        } finally {
-            session.close();
         }
         
         _diagnostic.endGetReferencedEventStreams();
