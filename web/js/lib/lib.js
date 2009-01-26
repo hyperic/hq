@@ -2867,7 +2867,11 @@ hyperic.group_manager = function() {
             		td2.className = "tableCell";
             		td2.innerHTML = data.groups[i].name + "&nbsp;";
             		td3.className = "tableCell";
-            		td3.innerHTML = data.groups[i].description + "&nbsp;";
+            		
+            		if (data.groups[i].description) {
+            			td3.innerHTML = data.groups[i].description;
+            		}
+            		td3.innerHTML += "&nbsp;";
             		
             		td1.appendChild(checkBox);
             		tr.appendChild(td1);
