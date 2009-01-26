@@ -25,6 +25,7 @@
 package org.hyperic.hq.events.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
@@ -40,6 +41,8 @@ public class AlertAudit extends Audit {
         new AlertAuditPurpose(0x5000, "alert enable", "audit.alert.enable");
     public static final AlertAuditPurpose ALERT_DISABLE = 
         new AlertAuditPurpose(0x5001, "alert disable", "audit.alert.disable");
+    public static final AlertAuditPurpose ALERT_DELETE = 
+        new AlertAuditPurpose(0x5002, "alert delete", "audit.alert.delete");
 
     public static class AlertAuditPurpose extends AuditPurpose {
         AlertAuditPurpose(int code, String desc, String localeProp) { 
@@ -58,7 +61,7 @@ public class AlertAudit extends Audit {
     }
 
     public static AlertAudit enableAlert(AlertDefinition def,
-                                         AuthzSubject modifier, long time)
+                                         AuthzSubject modifier)
     {
         final boolean enabled = def.isActive();
         String msg = enabled ?
@@ -70,7 +73,20 @@ public class AlertAudit extends Audit {
                                                   AuditImportance.HIGH, 
                                         enabled ? AuditNature.ENABLE :
                                                   AuditNature.DISABLE,
-                                        msg, time);  
+                                        msg, System.currentTimeMillis());  
+        
+        AuditManagerEJBImpl.getOne().saveAudit(res);
+        return res;
+    }
+
+    public static AlertAudit deleteAlert(AlertDefinition def,
+                                         AuthzSubject modifier)
+    {
+        String msg = MSGS.format("auditMsg.alert.delete", def.getName());
+        AlertAudit res = new AlertAudit(def, modifier, ALERT_DELETE,
+                                        AuditImportance.HIGH, 
+                                        AuditNature.DELETE,
+                                        msg, System.currentTimeMillis());  
         
         AuditManagerEJBImpl.getOne().saveAudit(res);
         return res;

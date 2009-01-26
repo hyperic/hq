@@ -314,7 +314,7 @@ public class AlertDefinitionManagerEJBImpl
             
             if (def.isActive() != activate || def.isEnabled() != activate) {
                 def.setActiveStatus(activate);
-                AlertAudit.enableAlert(def, subj, System.currentTimeMillis());
+                AlertAudit.enableAlert(def, subj);
             }
             def.setMtime(System.currentTimeMillis());
         }
@@ -442,7 +442,7 @@ public class AlertDefinitionManagerEJBImpl
         if (def.isActive() != activate || def.isEnabled() != activate) {
             def.setActiveStatus(activate);
             def.setMtime(System.currentTimeMillis());
-            AlertAudit.enableAlert(def, subj, System.currentTimeMillis());
+            AlertAudit.enableAlert(def, subj);
         }
         
         getAlertDefDAO().setChildrenActive(def, activate);
@@ -578,7 +578,7 @@ public class AlertDefinitionManagerEJBImpl
             }
             
             canManageAlerts(subj, alertdef);
-            
+            AlertAudit.deleteAlert(alertdef, subj);
             deleteAlertDefinition(subj, alertdef, false);
         }
     }
