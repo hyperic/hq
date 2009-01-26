@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -42,6 +42,9 @@ import javax.jms.ObjectMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.HibernateException;
+import org.hibernate.SessionFactory;
+import org.hyperic.hibernate.Util;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
@@ -53,6 +56,7 @@ import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.FlushStateEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
+import org.hyperic.hq.hibernate.SessionManager;
 
 
 /** The RegisteredDispatcher Message-Drive Bean registers Triggers and
@@ -78,7 +82,18 @@ public class RegisteredDispatcherEJBImpl
     private final Log log =
         LogFactory.getLog(RegisteredDispatcherEJBImpl.class);
     
-    
+    private void ensureSessionOpen() {
+        try {
+            if (Util.getSessionFactory().getCurrentSession() != null)
+                return;
+        } catch (HibernateException e) {
+        }
+
+        log.debug("[" + Thread.currentThread().getName()
+                + "] Session not found, create new: ");
+        SessionManager.setupSession("onMessage");
+    }
+
     /**
      * Dispatch the event to interested triggers.
      * 
@@ -97,6 +112,8 @@ public class RegisteredDispatcherEJBImpl
 
         // Dispatch to each trigger
         for (Iterator i = triggers.iterator(); i.hasNext(); ) {
+            ensureSessionOpen();
+            
             TriggerInterface trigger = (TriggerInterface) i.next();
             try {
                 updateVisitedMCTriggersSet(visitedMCTriggers, trigger);
@@ -200,40 +217,55 @@ public class RegisteredDispatcherEJBImpl
         try {
             FlushStateEvent event = new FlushStateEvent();
 
+            if (log.isDebugEnabled()) {
+                log.debug("Flushing states for " + visitedMCTriggers.size() +
+                          " triggers");
+            }
+            
+            int i = 1;
+            
             for (Iterator it = visitedMCTriggers.iterator(); it.hasNext();) {
                 MultiConditionTrigger trigger = (MultiConditionTrigger) it.next();
-                it.remove();
 
                 if (trigger.triggeringConditionsFulfilled()) {
                     tryFlushState(event, trigger);
                 } else {
                     trigger.releaseSharedLock();
                 }
+                it.remove();
+                
+                if (log.isDebugEnabled()) {
+                    log.debug("Release lock: " + i++);
+                }
             }
-
         } finally {
             // The visitedMCTriggers list may not be empty if an exception occurs. 
             // Need to release the shared lock on all remaining list elements.   
             // If the shared lock isn't released then the multicondition trigger 
             // may never fire again until the server is rebooted!
             if (!visitedMCTriggers.isEmpty()) {
+                if (log.isDebugEnabled()) {
+                    log.debug("Releasing locks for " + visitedMCTriggers.size()
+                              + " triggers");
+                }
+            
                 for (Iterator it = visitedMCTriggers.iterator(); it.hasNext();) {
                     MultiConditionTrigger trigger = (MultiConditionTrigger) it.next();
-                    it.remove();
                     trigger.releaseSharedLock();
+                    it.remove();
                 }
             }
         }
-        
     }
 
     private void tryFlushState(FlushStateEvent event, MultiConditionTrigger trigger) 
         throws InterruptedException, EventTypeException, ActionExecuteException {
         
         boolean lockAcquired = false;
-
         try {
             lockAcquired = trigger.upgradeSharedLockToExclusiveLock();
+
+            ensureSessionOpen();
 
             if (lockAcquired) {
                 trigger.processEvent(event);                    
@@ -265,17 +297,19 @@ public class RegisteredDispatcherEJBImpl
         if (enqueuedEvents.isEmpty()) {
             return;
         }
-        
+        /*
         if (debug) {
             log.debug("Registering events publishing handler");
         }
             
         EventsHandler eventsPublishHandler = 
             new EventsHandler() {
-            public void handleEvents(List events) {
+            public void handleEvents(List enqueuedEvents) {
+        */
                 Messenger sender = new Messenger();
                 sender.publishMessage(EventConstants.EVENTS_TOPIC, 
-                                      (Serializable)events);
+                                      (Serializable) enqueuedEvents);
+        /*
             }
         };
         
@@ -286,6 +320,7 @@ public class RegisteredDispatcherEJBImpl
         if (debug) {
             log.debug("Finished registering events publishing handler");
         }
+        */
     }
         
     /**
