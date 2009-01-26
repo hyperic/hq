@@ -485,6 +485,13 @@ class HealthController
              query: "SELECT COUNT(*) FROM EAM_AUDIT WHERE NOT EXISTS " +
                    "(SELECT RESOURCE_GROUP_ID FROM EAM_RES_GRP_RES_MAP " +
                    "WHERE EAM_AUDIT.RESOURCE_ID = EAM_RES_GRP_RES_MAP.RESOURCE_ID)"],
+          orphanedEscalationState: [
+             name: localeBundle['queryOrphanedEscalationState'],
+             query: "SELECT COUNT(*) FROM EAM_ESCALATION_STATE WHERE " +
+                    "(ALERT_TYPE = 559038737 AND NOT EXISTS " +
+                    "(SELECT 1 FROM EAM_ALERT WHERE ALERT_ID = EAM_ALERT.ID)) OR " +
+                    "(ALERT_TYPE = 195934910 AND NOT EXISTS " +
+                    "(SELECT 1 FROM EAM_GALERT_LOGS WHERE ALERT_ID = EAM_GALERT_LOGS.ID))"],
           resourceAlertsActiveButDisabled: [ 
              name: localeBundle['queryResourceAlertDefsActiveButDisabled'], 
              query: {conn -> "select id, name, description, resource_id from EAM_ALERT_DEFINITION where "+
@@ -524,6 +531,15 @@ class HealthController
                       "DELETE FROM EAM_AIQ_SERVICE",
                       "DELETE FROM EAM_AIQ_SERVER",
                       "DELETE FROM EAM_AIQ_PLATFORM",
+                    ]
+          ],
+          escStatePurge: [ 
+             name: localeBundle['actionPurgeEscState'], 
+             query: [ "DELETE FROM EAM_ESCALATION_STATE WHERE " +
+                      "(ALERT_TYPE = 559038737 AND NOT EXISTS " +
+                      "(SELECT 1 FROM EAM_ALERT WHERE ALERT_ID = EAM_ALERT.ID)) OR " +
+                      "(ALERT_TYPE = 195934910 AND NOT EXISTS " +
+                      "(SELECT 1 FROM EAM_GALERT_LOGS WHERE ALERT_ID = EAM_GALERT_LOGS.ID))",
                     ]
           ],
         ]
