@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -136,38 +136,6 @@ public class Portal {
                 addPortlet(new Portlet((String) o), column);
             }
         }
-    }
-
-    /**
-     * Add a column of portlets to the portal. A new column will be
-     * created, rather than adding the portlets to an existing
-     * column.
-     *
-     * @param definitions the <code>List</code> of either
-     * <code>Portlet</code> instances or <code>String</code> instances
-     * representing portlet definitions
-     */
-    public void addPortletColumn(List definitions) {
-        // if we have a null or empty column list, use that column,
-        // use that one. otherwise, make a new column.
-        int nextColIndex = 1;
-        Iterator i = _portlets.iterator();
-        int colcnt = 1;
-        while (i.hasNext()) {
-            List col = (List) i.next();
-            if (col != null) {
-                if (col.size() == 0) {
-                    nextColIndex = colcnt;
-                    break;
-                }
-                colcnt++;
-                continue;
-            }
-            nextColIndex = colcnt;
-            break;
-        }
-
-        addPortlets(definitions, nextColIndex);
     }
 
     public String toString() {
