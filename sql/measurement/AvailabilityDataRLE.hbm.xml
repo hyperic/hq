@@ -5,7 +5,7 @@
 
     <composite-id name="availabilityDataId" class="AvailabilityDataId">
       <key-many-to-one name="measurement" class="Measurement">
-        <column name="MEASUREMENT_ID" not-null="true" index="AVAIL_RLE_MEASID_IDX"/>
+        <column name="MEASUREMENT_ID" not-null="true"/>
       </key-many-to-one>
 
       <key-property name="startime" type="long">
@@ -15,11 +15,11 @@
 
     <!-- default value is Long.MAX_VALUE -->
     <property name="endtime" type="long">
-      <column name="ENDTIME" not-null="true" default="9223372036854775807" index="AVAIL_RLE_ENDTIME_IDX,AVAIL_RLE_ENDTIME_VAL_IDX"/>
+      <column name="ENDTIME" not-null="true" default="9223372036854775807" index="AVAIL_RLE_ENDTIME_VAL_IDX"/>
     </property>
 
     <property name="availVal" type="double">
-      <column name="AVAILVAL" not-null="true" index="AVAIL_RLE_VAL_IDX,AVAIL_RLE_ENDTIME_VAL_IDX"/>
+      <column name="AVAILVAL" not-null="true" index="AVAIL_RLE_ENDTIME_VAL_IDX"/>
     </property>
 
   </class>
