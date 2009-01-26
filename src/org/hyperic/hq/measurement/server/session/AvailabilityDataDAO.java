@@ -187,14 +187,6 @@ public class AvailabilityDataDAO extends HibernateDAO {
         return (AvailabilityDataRLE)list.get(0);
     }
 
-    List findLastDownAvailability() {
-        String sql = "from AvailabilityDataRLE where availval=?";
-        return getSession()
-            .createQuery(sql)
-            .setDouble(0, AVAIL_DOWN)
-            .list();
-    }
-
     /**
      * @return List of AvailabilityDataRLE objs
      */
