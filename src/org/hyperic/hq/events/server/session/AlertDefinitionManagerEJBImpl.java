@@ -696,7 +696,7 @@ public class AlertDefinitionManagerEJBImpl
      */
     public AlertDefinition getByIdNoCheck(Integer id) 
         throws FinderException {
-        return badFindById(id);
+        return getAlertDefDAO().get(id);
     }
     
     /**
