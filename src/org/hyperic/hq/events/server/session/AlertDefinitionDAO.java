@@ -305,7 +305,6 @@ public class AlertDefinitionDAO extends HibernateDAO {
         TriggerDAO tDAO = new TriggerDAO(DAOFactory.getDAOFactory());
         
         def.setName(val.getName());
-        def.setCtime(val.getCtime());
         def.setDescription(val.getDescription());
         
         def.setActiveStatus(val.getEnabled());
