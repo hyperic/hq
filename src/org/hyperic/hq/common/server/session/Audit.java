@@ -226,7 +226,8 @@ public abstract class Audit
     }
     
     public String toString() {
-        return "Audit[purpose=" + _purpose + ",time=" + _startTime +
+        return "Audit[user=" + _subject.getName() + ",purpose=" + _purpose +
+               ",time=" + _startTime +
                ",resource=" + (_resource != null ? _resource.getName() : "N/A")+
                ",msg=" + _message + "]";
     }
