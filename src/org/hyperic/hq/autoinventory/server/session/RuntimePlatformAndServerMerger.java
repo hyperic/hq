@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -34,11 +34,16 @@ import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 public class RuntimePlatformAndServerMerger implements ZeventListener {
     
     private final Log _log =
         LogFactory.getLog(RuntimePlatformAndServerMerger.class);
+    private static final ConcurrentStatsCollector _stats =
+        ConcurrentStatsCollector.getInstance();
+    private static final String RUNTIME_PLATFORM_AND_SERVER_MERGER =
+        ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER;
 
     public void processEvents(List events) {
         AutoinventoryManagerLocal aMan = AutoinventoryManagerEJBImpl.getOne();
@@ -46,6 +51,7 @@ public class RuntimePlatformAndServerMerger implements ZeventListener {
             MergePlatformAndServersZevent event =
                 (MergePlatformAndServersZevent)it.next();
             try {
+                _stats.addStat(1, RUNTIME_PLATFORM_AND_SERVER_MERGER);
                 aMan._reportAIRuntimeReport(event.getAgentToken(), event.getCrrr());
             } catch (Exception e) {
                 _log.error("Error merging platform and servers with " +

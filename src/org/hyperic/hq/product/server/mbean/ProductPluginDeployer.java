@@ -224,10 +224,13 @@ public class ProductPluginDeployer
 
         ProductStartupListener
             .getPluginsDeployedCaller().pluginsDeployed(_plugins);
-        
+
         _plugins.clear();
         try {
-            ConcurrentStatsCollector.getInstance().startCollector();
+            ConcurrentStatsCollector c = ConcurrentStatsCollector.getInstance();
+            c.register(
+                ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER);
+            c.startCollector();
         } catch (Exception e) {
             _log.error("Could not start Concurrent Stats Collector", e);
         }

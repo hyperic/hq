@@ -77,13 +77,14 @@ public final class ConcurrentStatsCollector {
         new ConcurrentStatsCollector();
     private static final int WRITE_PERIOD = 15;
     public static final String JVM_TOTAL_MEMORY = "JVM_TOTAL_MEMORY",
-            JVM_FREE_MEMORY              = "JVM_FREE_MEMORY",
-            JVM_MAX_MEMORY               = "JVM_MAX_MEMORY",
-            ALERT_FIRED_EVENT            = "ALERT_FIRED_EVENT",
-            GALERT_FIRED_EVENT           = "GALERT_FIRED_EVENT",
-            EHCACHE_TOTAL_OBJECTS        = "EHCACHE_TOTAL_OBJECTS",
-            CONCURRENT_STATS_COLLECTOR   = "CONCURRENT_STATS_COLLECTOR",
-            LATHER_NUMBER_OF_CONNECTIONS = "LATHER_NUMBER_OF_CONNECTIONS";
+        JVM_FREE_MEMORY              = "JVM_FREE_MEMORY",
+        JVM_MAX_MEMORY               = "JVM_MAX_MEMORY",
+        ALERT_FIRED_EVENT            = "ALERT_FIRED_EVENT",
+        GALERT_FIRED_EVENT           = "GALERT_FIRED_EVENT",
+        EHCACHE_TOTAL_OBJECTS        = "EHCACHE_TOTAL_OBJECTS",
+        CONCURRENT_STATS_COLLECTOR   = "CONCURRENT_STATS_COLLECTOR",
+        LATHER_NUMBER_OF_CONNECTIONS = "LATHER_NUMBER_OF_CONNECTIONS",
+        RUNTIME_PLATFORM_AND_SERVER_MERGER = "RUNTIME_PLATFORM_AND_SERVER_MERGER";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
