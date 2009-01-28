@@ -511,19 +511,21 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
                 m = mb.findMeasurement(sessionId,
                                        chartedMetrics[i].getTemplateId(),
                                        aeid);
-                Baseline baselineValue = m.getBaseline();
-                if (null != baselineValue) {
-                    if (null != baselineValue.getMean())
-                        chartedMetrics[i].setBaselineRaw(
-                            baselineValue.getMean());
+                if (null != m) {
+                    Baseline baselineValue = m.getBaseline();
+                    if (null != baselineValue) {
+                        if (null != baselineValue.getMean())
+                            chartedMetrics[i].setBaselineRaw(
+                                    baselineValue.getMean());
                     
-                    if (null != baselineValue.getMaxExpectedVal())
-                        chartedMetrics[i].setHighRangeRaw(
-                            baselineValue.getMaxExpectedVal());
+                        if (null != baselineValue.getMaxExpectedVal())
+                            chartedMetrics[i].setHighRangeRaw(
+                                    baselineValue.getMaxExpectedVal());
 
-                    if (null != baselineValue.getMinExpectedVal())
-                        chartedMetrics[i].setLowRangeRaw(
-                            baselineValue.getMinExpectedVal());
+                        if (null != baselineValue.getMinExpectedVal())
+                            chartedMetrics[i].setLowRangeRaw(
+                                    baselineValue.getMinExpectedVal());
+                    }
                 }
             }
         }
