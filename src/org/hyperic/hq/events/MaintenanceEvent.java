@@ -67,6 +67,11 @@ public class MaintenanceEvent extends ResourceLogEvent
     private long _endTime;
     private long _modifiedTime;
     private String _authzName;
+
+    // Stats
+    public long alertCount;
+    public long resourceCount;
+    public long errorCount;
     
     public MaintenanceEvent(Integer groupId) {
         super(new TrackEvent(AppdefEntityID.newGroupID(groupId),
@@ -76,6 +81,7 @@ public class MaintenanceEvent extends ResourceLogEvent
         ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE);
         setSource(bundle.getString("maintenance.window"));
         setState(STATE_NEW);
+        resetStats();
     }
     
     public Integer getGroupId() {
@@ -120,6 +126,16 @@ public class MaintenanceEvent extends ResourceLogEvent
     
     public void setModifiedBy(String authzName) {
     	_authzName = authzName;
+    }
+    
+    public boolean activate() {
+        return STATE_RUNNING.equals(getState());
+    }
+    
+    public void resetStats() {
+        alertCount = 0;
+        resourceCount = 0;
+        errorCount = 0;
     }
     
     /**
