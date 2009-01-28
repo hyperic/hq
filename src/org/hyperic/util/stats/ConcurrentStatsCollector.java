@@ -63,6 +63,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.server.MBeanUtil;
+import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarException;
 
 public final class ConcurrentStatsCollector {
     private final Log _log = LogFactory.getLog(ConcurrentStatsCollector.class);
@@ -76,6 +78,8 @@ public final class ConcurrentStatsCollector {
     private static final ConcurrentStatsCollector _instance =
         new ConcurrentStatsCollector();
     private static final int WRITE_PERIOD = 15;
+    private final Sigar _sigar = new Sigar();
+    private Long _pid;
     public static final String JVM_TOTAL_MEMORY = "JVM_TOTAL_MEMORY",
         JVM_FREE_MEMORY              = "JVM_FREE_MEMORY",
         JVM_MAX_MEMORY               = "JVM_MAX_MEMORY",
@@ -84,7 +88,16 @@ public final class ConcurrentStatsCollector {
         EHCACHE_TOTAL_OBJECTS        = "EHCACHE_TOTAL_OBJECTS",
         CONCURRENT_STATS_COLLECTOR   = "CONCURRENT_STATS_COLLECTOR",
         LATHER_NUMBER_OF_CONNECTIONS = "LATHER_NUMBER_OF_CONNECTIONS",
-        RUNTIME_PLATFORM_AND_SERVER_MERGER = "RUNTIME_PLATFORM_AND_SERVER_MERGER";
+        RUNTIME_PLATFORM_AND_SERVER_MERGER = "RUNTIME_PLATFORM_AND_SERVER_MERGER",
+        SIGAR_1MLOAD                 = "SIGAR_1MLOAD",
+        SIGAR_CPU                    = "SIGAR_CPU",
+        AVAIL_MANAGER_METRICS_INSERTED = "AVAIL_MANAGER_METRICS_INSERTED",
+        DATA_MANAGER_METRICS_INSERTED  = "DATA_MANAGER_METRICS_INSERTED",
+        SIGAR_PROC_RES_MEM           = "SIGAR_PROC_RES_MEM",
+        SIGAR_TCP_INERRS             = "SIGAR_TCP_INERRS",
+	    SIGAR_TCP_RETRANS            = "SIGAR_TCP_RETRANS",
+	    SIGAR_PAGEOUT                = "SIGAR_PAGEOUT",
+	    SIGAR_PAGEIN                 = "SIGAR_PAGEIN";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
@@ -406,6 +419,106 @@ public final class ConcurrentStatsCollector {
                 return Runtime.getRuntime().maxMemory();
             }
         });
+        register(new StatCollector() {
+            public String getId() {
+                return SIGAR_1MLOAD;
+            }
+            public long getVal() throws StatUnreachableException {
+                try {
+                    return (long)_sigar.getLoadAverage()[0];
+                } catch (SigarException e) {
+                    throw new StatUnreachableException(e.getMessage(), e);
+                }
+            }
+        });
+        register(new StatCollector() {
+            public String getId() {
+                return SIGAR_CPU;
+            }
+            public long getVal() throws StatUnreachableException {
+                try {
+                    return (long)_sigar.getProcCpu(getProcPid()).getPercent();
+                } catch (SigarException e) {
+                    throw new StatUnreachableException(e.getMessage(), e);
+                }
+            }
+        });
+        register(new StatCollector() {
+            public String getId() {
+                return SIGAR_PROC_RES_MEM;
+            }
+            public long getVal() throws StatUnreachableException {
+                try {
+                    return (long)_sigar.getProcMem(getProcPid()).getResident();
+                } catch (SigarException e) {
+                    throw new StatUnreachableException(e.getMessage(), e);
+                }
+            }
+        });
+        register(new StatCollector() {
+            private long last = 0;
+            public String getId() {
+                return SIGAR_TCP_INERRS;
+            }
+            public long getVal() throws StatUnreachableException {
+                try {
+                    long curr = _sigar.getTcp().getInErrs();
+                    long rtn =  curr - last;
+                    last = curr;
+                    return rtn;
+                } catch (SigarException e) {
+                    throw new StatUnreachableException(e.getMessage(), e);
+                }
+            }
+        });
+        register(new StatCollector() {
+            private long last = 0;
+            public String getId() {
+                return SIGAR_TCP_RETRANS;
+            }
+            public long getVal() throws StatUnreachableException {
+                try {
+                    long curr = _sigar.getTcp().getRetransSegs();
+                    long rtn =  curr - last;
+                    last = curr;
+                    return rtn;
+                } catch (SigarException e) {
+                    throw new StatUnreachableException(e.getMessage(), e);
+                }
+            }
+        });
+        register(new StatCollector() {
+            private long last = 0;
+            public String getId() {
+                return SIGAR_PAGEOUT;
+            }
+            public long getVal() throws StatUnreachableException {
+                try {
+                    long curr = _sigar.getSwap().getPageOut();
+                    long rtn =  curr - last;
+                    last = curr;
+                    return rtn;
+                } catch (SigarException e) {
+                    throw new StatUnreachableException(e.getMessage(), e);
+                }
+            }
+        });
+        register(new StatCollector() {
+            private long last = 0;
+            public String getId() {
+                return SIGAR_PAGEIN;
+            }
+            public long getVal() throws StatUnreachableException {
+                try {
+                    long curr = _sigar.getSwap().getPageIn();
+                    long rtn =  curr - last;
+                    last = curr;
+                    return rtn;
+                } catch (SigarException e) {
+                    throw new StatUnreachableException(e.getMessage(), e);
+                }
+            }
+        });
 
         register(new MBeanCollector("HIBERNATE_2ND_LEVEL_CACHE_HITS",
             "Hibernate:type=statistics,application=hq",
@@ -476,6 +589,14 @@ public final class ConcurrentStatsCollector {
         register(ALERT_FIRED_EVENT);
     	register(GALERT_FIRED_EVENT);
         register(CONCURRENT_STATS_COLLECTOR);
+    }
+    
+    private long getProcPid() {
+        if (_pid != null) {
+            return _pid.longValue();
+        }
+        _pid = new Long(_sigar.getPid());
+        return _pid.longValue();
     }
 
     private class MBeanCollector implements StatCollector {

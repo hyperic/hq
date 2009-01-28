@@ -230,6 +230,10 @@ public class ProductPluginDeployer
             ConcurrentStatsCollector c = ConcurrentStatsCollector.getInstance();
             c.register(
                 ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER);
+            c.register(
+                ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
+            c.register(
+                ConcurrentStatsCollector.DATA_MANAGER_METRICS_INSERTED);
             c.startCollector();
         } catch (Exception e) {
             _log.error("Could not start Concurrent Stats Collector", e);

@@ -79,6 +79,7 @@ import org.hyperic.util.TimeUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 import org.hyperic.util.timer.StopWatch;
 
 /** The DataManagerEJB class is a stateless session bean that can be
@@ -113,6 +114,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
     private final String TAB_MEAS    = MeasurementConstants.TAB_MEAS;
     private final String TAB_NUMS    = "EAM_NUMBERS";
+    private static final String DATA_MANAGER_METRICS_INSERTED =
+        ConcurrentStatsCollector.DATA_MANAGER_METRICS_INSERTED;
     
     // Error strings
     private final String ERR_DB    = "Cannot look up database instance";
@@ -281,6 +284,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                         _log.debug("Data Insertion process took " +
                             (end-start) + " ms");
                     }
+                    ConcurrentStatsCollector.getInstance().addStat(
+                        data.size(), DATA_MANAGER_METRICS_INSERTED);
                     sendMetricEvents(data);
                 } else {
                     if (debug) {
@@ -439,7 +444,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
         _log.debug("Inserting/Updating data outside a transaction finished.");
         
-        sendMetricEvents(removeMetricsFromList(data, failedToSaveMetrics));
+        List inserted = removeMetricsFromList(data, failedToSaveMetrics);
+        ConcurrentStatsCollector.getInstance().addStat(
+            inserted.size(), DATA_MANAGER_METRICS_INSERTED);
+        sendMetricEvents(inserted);
     }
     
     private boolean shouldAbortDataInsertion(List data) {

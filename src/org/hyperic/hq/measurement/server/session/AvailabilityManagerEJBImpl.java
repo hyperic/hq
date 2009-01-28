@@ -69,6 +69,7 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 /** The AvailabityManagerEJBImpl class is a stateless session bean that can be
  *  used to retrieve Availability Data RLE points
@@ -104,6 +105,8 @@ public class AvailabilityManagerEJBImpl
         "org.hq.triggers.all.events.interesting";
     private final int DEFAULT_INTERVAL = 60;
     private final AvailabilityDataDAO _dao = getAvailabilityDataDAO();
+    private static final String AVAIL_MANAGER_METRICS_INSERTED =
+        ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED;
     private Map _createMap = null;
     private Map _removeMap = null;
     private Map _currAvails = null;
@@ -643,6 +646,8 @@ public class AvailabilityManagerEJBImpl
                 _currAvails = null;
             }
         }
+        ConcurrentStatsCollector.getInstance().addStat(
+            availPoints.size(), AVAIL_MANAGER_METRICS_INSERTED);
         sendDataToEventHandlers(availPoints);
     }
 
