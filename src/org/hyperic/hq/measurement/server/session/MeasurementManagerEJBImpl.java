@@ -936,14 +936,20 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         throws PermissionException {
         AppdefEntityID appId = new AppdefEntityID(r);
         checkModifyPermission(subj.getId(), appId);
+        boolean sendToAgent = false;
 
         List metrics = getMeasurementDAO().findDefaultsByResource(r);
         for (Iterator it = metrics.iterator(); it.hasNext(); ) {
             Measurement dm = (Measurement)it.next();
-            dm.setEnabled(true);
+            if (!dm.isEnabled()) {
+                dm.setEnabled(true);
+                sendToAgent = true;
+            }
         }
 
-        sendAgentSchedule(appId);
+        if (sendToAgent) {
+            sendAgentSchedule(appId);
+        }
     }
 
     /**
