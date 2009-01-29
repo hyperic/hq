@@ -45,12 +45,12 @@ import org.jboss.jmx.adaptor.rmi.RMIAdaptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
+import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.Log4JLogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.FileServerDetector;
-import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.hq.plugin.jboss.jmx.ServerQuery;
@@ -59,7 +59,7 @@ import org.hyperic.hq.plugin.jboss.jmx.ServiceQuery;
 import org.hyperic.util.config.ConfigResponse;
 
 public class JBossDetector
-    extends ServerDetector
+    extends DaemonDetector
     implements AutoServerDetector, FileServerDetector {
 
     private static final Log log =
@@ -249,7 +249,7 @@ public class JBossDetector
 
             installPath = root.getAbsolutePath();
 
-            servers.add(new JBossInstance(installPath, configPath));
+            servers.add(new JBossInstance(installPath, configPath, pids[i]));
         }
     }
 
@@ -284,7 +284,7 @@ public class JBossDetector
             String configPath =
                 getServerConfigPath(root, "default");
 
-            servers.add(new JBossInstance(root.getPath(), configPath));
+            servers.add(new JBossInstance(root.getPath(), configPath, pids[i]));
         }
     }
 
@@ -329,7 +329,7 @@ public class JBossDetector
             String configPath =
                 getServerConfigPath(root, "default");
 
-            servers.add(new JBossInstance(root.getPath(), configPath));
+            servers.add(new JBossInstance(root.getPath(), configPath, pid));
         }
     }
 
@@ -410,9 +410,8 @@ public class JBossDetector
         List paths = getServerProcessList(this);
 
         for (int i=0; i<paths.size(); i++) {
-            String dir = 
-                ((JBossInstance)paths.get(i)).getConfigPath();
-            List found = getServerList(dir);
+            JBossInstance inst = (JBossInstance)paths.get(i);
+            List found = getServerList(inst.getConfigPath(), inst.getPid());
             if (found != null) {
                 servers.addAll(found);
             }
@@ -456,7 +455,12 @@ public class JBossDetector
      */
     public List getServerList(String installpath)
         throws PluginException {
+    
+        return getServerList(installpath, 0);
+    }
 
+    public List getServerList(String installpath, long pid)
+        throws PluginException {
         File configDir = new File(installpath);
         File serviceXML = new File(configDir, JBOSS_SERVICE_XML);
         File distDir = configDir.getParentFile().getParentFile();
@@ -572,7 +576,12 @@ public class JBossDetector
         noteEmbeddedTomcat(installpath, cfg.getHttpPort());
 
         List servers = new ArrayList();
+        //apply externally defined AUTOINVENTORY_NAME, etc.
+        if (pid > 0) {
+            discoverServerConfig(server, pid);
+        }
         servers.add(server);
+
         return servers;
     }
     

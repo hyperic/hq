@@ -34,10 +34,16 @@ public class JBossInstance {
 
     private String _homePath;
     private String _configPath;
+    private long _pid;
 
     public JBossInstance(String homePath, String configPath) {
+        this(homePath, configPath, 0);
+    }
+
+    public JBossInstance(String homePath, String configPath, long pid) {
         _homePath = homePath;
         _configPath = configPath;
+        _pid = pid;
     }
 
     public void setHomePath(String homePath) {
@@ -54,5 +60,13 @@ public class JBossInstance {
 
     public String getConfigPath() {
         return _configPath;
+    }
+
+    public long getPid() {
+        return _pid;
+    }
+
+    public void setPid(long pid) {
+        _pid = pid;
     }
 }
