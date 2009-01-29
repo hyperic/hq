@@ -9447,7 +9447,11 @@ has already been defined.
     <schema-alterColumn table="QRTZ_FIRED_TRIGGERS" column="JOB_GROUP"
                         precision="200" columnType="VARCHAR2" />
     <schema-addColumn table="QRTZ_FIRED_TRIGGERS" column="PRIORITY"
-                      columnType="INTEGER"/>
+                      	columnType="INTEGER">
+        <initializer>
+          UPDATE QRTZ_FIRED_TRIGGERS SET PRIORITY = 5
+        </initializer>
+    </schema-addColumn>
     <schema-alterColumn table="QRTZ_FIRED_TRIGGERS" column="PRIORITY"
                         nullable="NOT NULL"/>
     <schema-alterColumn table="QRTZ_JOB_DETAILS" column="JOB_NAME"
@@ -9490,7 +9494,14 @@ has already been defined.
                         precision="250" columnType="VARCHAR2" />
     <schema-alterColumn table="QRTZ_TRIGGERS" column="CALENDAR_NAME"
                         precision="200" columnType="VARCHAR2" />
-    <schema-addColumn table="QRTZ_TRIGGERS" column="PRIORITY" columnType="INTEGER"/>
+    <schema-addColumn table="QRTZ_TRIGGERS" column="PRIORITY" 
+    					columnType="INTEGER">
+        <initializer>
+          UPDATE QRTZ_TRIGGERS SET PRIORITY = 5
+        </initializer>
+    </schema-addColumn>
+    <schema-alterColumn table="QRTZ_TRIGGERS" column="PRIORITY"
+                        nullable="NOT NULL"/>
     <schema-directSQL>
       <statement fail="false">
         ALTER TABLE QRTZ_SCHEDULER_STATE DROP COLUMN RECOVERER
