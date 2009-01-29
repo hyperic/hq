@@ -684,30 +684,15 @@ hyperic.widget = hyperic.widget || {};
             }     		
     	}
     	
-        if(kwArgs.url)
-        {
-            var template = '<div class="chartCont"> <h3 class="cTitle"><a href="' + kwArgs.url + '" style="color: #FFF">' + chartDisplayName + '</a></h3><div id="widget_chart"></div><div class="xlegend"></div></div>';
-        }
-        else
-        {
-            var template = '<div class="chartCont"> <h3 class="cTitle">' + chartDisplayName + '</h3><div id="widget_chart"></div><div class="xlegend"></div></div>';
-        }
+        var template = '<div class="chartCont"> <h3 class="cTitle">'
+							+ getShortLink(chartDisplayName, kwArgs.maxTitleLength, kwArgs.url) 
+							+ '</h3><div id="widget_chart"></div><div class="xlegend"></div></div>';
         
         that.template = template;
-        // that.tabid = tabid;
         that.node = dojo11.byId(node);
         that.name = kwArgs.name;
-        //console.log("created chart: "+kwArgs.name);
         that.node.innerHTML = template;
-        // dojo11.byId(node).appendChild(f.firstChild);
-        // that.url = kwArgs.url;
         that.data = kwArgs.data;
-        // that.chartPos = chartPos;
-        //chartObjs[tabid] = that;
-        // that.node = dojo11.byId(tabid);
-        // that.subscriptions[0] = dojo11.subscribe('tabchange', that, 'showChart');
-        //TODO check if the tab that is currently selected is the one that is getting the chart.
-        // f=null;
         };
     that.showChart = function() {
         // if(arg == that.tabid){
@@ -1586,7 +1571,6 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             that.currentChartId = next;
             chartId = null;
             that.last_updated_div.innerHTML = 'Updated: ' + that.charts[next].last_updated.formatDate('h:mm t');
-            that.truncateChartTitle();
         }
         else
         {
@@ -1610,7 +1594,6 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                     }
                     that.last_updated_div.innerHTML = 'Updated: ' + that.charts[next].last_updated.formatDate('h:mm t');
                     that.currentChartId = next;
-                    that.truncateChartTitle();
                     chartId = null;
                 });
         }
@@ -1737,6 +1720,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 	that.charts[chart].data = data[0].data;
                 	that.charts[chart].measurementName = data[0].measurementName;
                 	that.charts[chart].last_updated = new Date();
+                    that.charts[chart].maxTitleLength = (that.sheets.content.offsetWidth - 150) * 1.5;
                 }
             },
             error: function(data){
@@ -1798,7 +1782,6 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             }
             that.chartContainerResize();
             that.chart = new hyperic.widget.Chart('chart_container', that.charts[that.currentChartId]);
-            that.truncateChartTitle();
             that.needsResize = false;
         }
         else
@@ -1814,12 +1797,6 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
             dojo11.query('#chart_container',that.sheets.content)[0].style.width = that.sheets.content.offsetWidth - 150;
         }
     };
-    
-    that.truncateChartTitle = function()
-    {
-        var width = (that.sheets.content.offsetWidth - 150) * 1.5;
-        dojo11.query('.cTitle',that.sheets.content)[0].innerHTML = getShortLink(that.charts[that.currentChartId].name, width, that.charts[that.currentChartId].url);
-    }
 
     if(that.chartsearch && that.chartselect)
     {
