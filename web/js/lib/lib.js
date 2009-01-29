@@ -2902,14 +2902,10 @@ hyperic.alert_center = function(title_name) {
       	        '<tr id="AlertCenterAckButtonActive"><td class="buttonLeft"></td>' +
       	    	'<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
       	    	'	<span id="button"><a href="javascript:MyAlertCenter.acknowledgeAlerts();">ACKNOWLEDGE</a></span>' +
-      	    	'	<span style="padding-left: 3px;"><img src="/images/icon_ack.gif" align="middle" alt="Click to Acknowledge"></span>' +
       	    	'</td></tr>' +
       	        '<tr id="AlertCenterAckButtonInActive" style="display:none"><td class="buttonLeft"></td>' +
       	    	'<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
       	    	'   <span class="InactiveText">ACKNOWLEDGE</span>' +
-      	    	'   <span style="filter: alpha(opacity=50); opacity: 0.5;">' + 
-      	    	'		<span style="padding-left: 3px;"><img src="/images/icon_ack.gif" align="middle" alt="Click to Acknowledge"></span>' +
-      	    	'	</span>' +    	    	
       	    	'</td></tr>' +
       	    	'</table>';
 	    	alertCenterDiv.appendChild(ackDiv);

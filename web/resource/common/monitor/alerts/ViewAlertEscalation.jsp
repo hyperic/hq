@@ -73,7 +73,7 @@
     </td>
   </tr>
   </c:forEach>
-  <c:if test="${escalation.pauseAllowed && alert.acknowledgeable}">
+  <c:if test="${alert.acknowledgeable}">
   <tr>
     <td width="20%" class="BlockLabel" style="padding: 10px; border-top: solid #D5D8DE 1px;">&nbsp;</td>
     <td colspan="2" nowrap="true" class="BlockContent" style="padding: 10px; border-top: solid #D5D8DE 1px;">
@@ -133,7 +133,6 @@
       <tiles:put name="disabled" value="true"/>
     </c:otherwise>
   </c:choose>
-  <tiles:put name="icon"><html:img page="/images/icon_ack.gif" alt="Click to Acknowledge" align="middle"/></tiles:put>
 </tiles:insert>
             </div>
     </td>
