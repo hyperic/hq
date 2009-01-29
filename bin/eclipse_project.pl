@@ -123,7 +123,7 @@ sub write_project {
     print PROJ <<EOF;
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>spider</name>
+	<name>HQ</name>
 	<comment></comment>
 	<projects>
 	</projects>
