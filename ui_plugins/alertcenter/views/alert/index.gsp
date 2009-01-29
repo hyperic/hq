@@ -126,6 +126,9 @@ dojo.addOnLoad( function(){
                         schema:alertSchema, numRows:15) %>
           </div>
           <hr/>
+          <div id="Alerts_AckInstruction" style="font-style:italic; float:right;">
+          	Click the <img src="/images/icon_ack.gif"/> icon to acknowledge an alert
+          </div>
           <div id="Alerts_FixedButtonDiv" style="margin-top:6px">
           	<input type="button" id="Alerts_FixButton" value="FIXED" class="CompactButtonInactive" disabled="disabled" onclick="MyAlertCenter.processButtonAction(this)" />
           	&nbsp;&nbsp;
@@ -145,6 +148,9 @@ dojo.addOnLoad( function(){
                         schema:galertSchema, numRows:15) %>
           </div>
           <hr/>
+          <div id="GroupAlerts_AckInstruction" style="font-style:italic; float:right;">
+          	Click the <img src="/images/icon_ack.gif"/> icon to acknowledge an alert
+          </div>
           <div id="GroupAlerts_FixedButtonDiv" style="margin-top:6px">
           	<input type="button" id="GroupAlerts_FixButton" value="FIXED" class="CompactButtonInactive" disabled="disabled" onclick="MyAlertCenter.processButtonAction(this)" />
           	&nbsp;&nbsp;
