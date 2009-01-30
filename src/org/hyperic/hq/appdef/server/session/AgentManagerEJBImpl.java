@@ -70,6 +70,7 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
@@ -97,6 +98,7 @@ public class AgentManagerEJBImpl
     private final String JBOSS_SERVER_HOME_DIR_PROP = "jboss.server.home.dir";
     private final String HQ_PLUGINS_DIR ="/deploy/hq.ear/hq-plugins";
     private final String PLUGINS_EXTENSION = "-plugin";
+    private static final int UNIDIRECTIONAL_PORT = -1;
     
     private Log log = LogFactory.getLog(AgentManagerEJBImpl.class.getName());
 
@@ -235,8 +237,20 @@ public class AgentManagerEJBImpl
             throw new SystemException("Unable to find agent type '" +
                                         HQ_AGENT_REMOTING_TYPE + "'");
         }
-        Agent agent = getAgentDAO().create(type, address, port, unidirectional, 
-                                           authToken, agentToken, version);
+        Agent agent;
+        try {
+            agent = getAndCleanupAgent(address, port.intValue(), unidirectional);
+            if (agent != null) {
+                agent.setAuthToken(authToken);
+                agent.setAgentToken(agentToken);
+                agent.setVersion(version);
+                enableMeasurementsPostCommit(agent.getPlatforms());
+                return agent;
+            }
+        } catch (AgentNotFoundException e1) {
+        }
+        agent = getAgentDAO().create(
+            type, address, port, unidirectional, authToken, agentToken, version);
         
         try {
             AppdefStartupListener.getAgentCreateCallback().agentCreated(agent);
@@ -263,9 +277,20 @@ public class AgentManagerEJBImpl
             throw new SystemException("Unable to find agent type '" +
                                       CAM_AGENT_TYPE + "'");
         }
-        Agent agent = getAgentDAO().create(type, address, port, false, authToken,
-                                           agentToken, version);
-        
+        Agent agent = null;
+        try {
+            agent = getAndCleanupAgent(address, port.intValue(), false);
+            if (agent != null) {
+                agent.setAuthToken(authToken);
+                agent.setAgentToken(agentToken);
+                agent.setVersion(version);
+                enableMeasurementsPostCommit(agent.getPlatforms());
+                return agent;
+            }
+        } catch (AgentNotFoundException e1) {
+        }
+        agent = getAgentDAO().create(
+            type, address, port, false, authToken, agentToken, version);
         try {
             AppdefStartupListener.getAgentCreateCallback().agentCreated(agent);
         } catch(VetoException e) {
@@ -366,9 +391,7 @@ public class AgentManagerEJBImpl
                                         HQ_AGENT_REMOTING_TYPE + "'");
         }
         
-        Agent agent;
-
-        agent = this.getAgentInternal(ip, port);
+        Agent agent = getAndCleanupAgent(ip, port, unidirectional);
         agent.setAuthToken(authToken);
         agent.setAgentToken(agentToken);
         agent.setVersion(version);
@@ -397,9 +420,7 @@ public class AgentManagerEJBImpl
                                       CAM_AGENT_TYPE + "'");
         }
         
-        Agent agent;
-
-        agent = this.getAgentInternal(ip, port);
+        Agent agent = getAndCleanupAgent(ip, port, false);
         agent.setAuthToken(authToken);
         agent.setAgentToken(agentToken);
         agent.setVersion(version);
@@ -407,6 +428,97 @@ public class AgentManagerEJBImpl
         agent.setUnidirectional(false);
         agent.setModifiedTime(new Long(System.currentTimeMillis()));
         return agent;
+    }
+    
+    /**
+     * Ensures that the agent does not already exist as a bi/uni-directional.
+     * Since this is new check, want to make sure that the db is in a good state
+     * by cleaning up unwanted uni/bi-directional agents
+     */
+    private Agent getAndCleanupAgent(String ip, int port, boolean unidirectional)
+        throws AgentNotFoundException
+    {
+        Agent uniAgent = null;
+        Agent biAgent = null;
+        Agent rtn = null;
+        final AgentType agentType = (unidirectional) ?
+            getAgentTypeDAO().findByName(HQ_AGENT_REMOTING_TYPE) :
+            getAgentTypeDAO().findByName(CAM_AGENT_TYPE);
+        List agents = getAgentDAO().findByIP(ip);
+        for (Iterator it=agents.iterator(); it.hasNext(); ) {
+            Agent agent = (Agent)it.next();
+            if (agent.isUnidirectional()) {
+                if (uniAgent == null) {
+                    uniAgent = agent;
+                } else {
+                    removeAgent(agent);
+                }
+            } else {
+                if (biAgent == null) {
+                    biAgent = agent;
+                } else {
+                    removeAgent(agent);
+                }
+            }
+        }
+        if (uniAgent != null && biAgent != null) {
+            Agent toRemove;
+            if (unidirectional) {
+                rtn = uniAgent;
+                toRemove = biAgent;
+                rtn.setAgentType(uniAgent.getAgentType());
+            } else {
+                rtn = biAgent;
+                toRemove = uniAgent;
+                rtn.setAgentType(biAgent.getAgentType());
+            }
+            Collection platforms = toRemove.getPlatforms();
+            for (Iterator it=platforms.iterator(); it.hasNext(); ) {
+                Platform platform = (Platform)it.next();
+                platform.setAgent(rtn);
+            }
+            removeAgent(toRemove);
+        } else if (uniAgent != null) {
+            rtn = uniAgent;
+            rtn.setPort(port);
+            rtn.setUnidirectional(unidirectional);
+            rtn.setAgentType(agentType);
+        } else if (biAgent != null) {
+            rtn = biAgent;
+            rtn.setPort(port);
+            rtn.setUnidirectional(unidirectional);
+            rtn.setAgentType(agentType);
+        } else { // both are null
+            throw new AgentNotFoundException(
+                "Agent at " + ip + ":" + port + " not found");
+        }
+        return rtn;
+    }
+    
+    private void enableMeasurementsPostCommit(Collection platforms) {
+        for (Iterator it=platforms.iterator(); it.hasNext(); ) {
+            enableMeasurementsPostCommit((Platform)it.next());
+        }
+    }
+
+    private void enableMeasurementsPostCommit(Platform platform) {
+        AgentScheduleSyncZevent event =
+            new AgentScheduleSyncZevent(platform.getEntityId());
+        List events = new ArrayList();
+        events.add(event);
+        Collection servers = platform.getServers();
+        for (Iterator it=servers.iterator(); it.hasNext(); ) { 
+            Server server = (Server)it.next();
+            event = new AgentScheduleSyncZevent(server.getEntityId());
+            events.add(event);
+            Collection services = server.getServices();
+            for (Iterator xit=services.iterator(); xit.hasNext(); ) { 
+                Service service = (Service)xit.next();
+                event = new AgentScheduleSyncZevent(service.getEntityId());
+                events.add(event);
+            }
+        }
+        ZeventManager.getInstance().enqueueEventsAfterCommit(events);
     }
     
     /**
