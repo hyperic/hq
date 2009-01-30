@@ -15,15 +15,13 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <properties name="resourceTypeInstance" unique="true">
-      <many-to-one name="resourceType" class="ResourceType">
-        <column name="RESOURCE_TYPE_ID" not-null="false"/>
-      </many-to-one>
+    <many-to-one name="resourceType" class="ResourceType">
+      <column name="RESOURCE_TYPE_ID" not-null="false"/>
+    </many-to-one>
 
-      <property name="instanceId" type="integer">
-        <column name="INSTANCE_ID" not-null="false" index="EAM_RESOURCE_INSTANCE_ID_IDX"/>
-      </property>
-    </properties>
+    <property name="instanceId" type="integer">
+      <column name="INSTANCE_ID" not-null="false" index="EAM_RESOURCE_INSTANCE_ID_IDX"/>
+    </property>
 
     <many-to-one name="owner" class="AuthzSubject">
       <column name="SUBJECT_ID" not-null="false" index="EAM_RESOURCE_OWNER_ID_IDX"/>
