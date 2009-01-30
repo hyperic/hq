@@ -493,9 +493,11 @@ public class ResourceGroupManagerEJBImpl
         // Add the group members
         for (Iterator i = members.iterator(); i.hasNext();) {
             Resource r= (Resource) i.next();
-            GroupEntry ge = new GroupEntry(r.getInstanceId(),
-                                           r.getResourceType().getName());
-            retVal.addEntry(ge);
+            if (r.getResourceType() != null) {
+                GroupEntry ge = new GroupEntry(r.getInstanceId(),
+                                               r.getResourceType().getName());
+                retVal.addEntry(ge);
+            }
         }
 
         retVal.setAppdefResourceTypeValue(getAppdefResourceTypeValue(subj, g));
