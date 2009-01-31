@@ -56,25 +56,25 @@ public class CritterTranslator {
     {
         PageList rtn = new PageList();
         rtn.ensureCapacity(pc.getPagesize());
-        Query query = translate(ctx, cList, false)
+        Query query = translate(ctx, cList, false, pc.isDescending())
                         .setFirstResult(pc.getPageEntityIndex());
         if (PageControl.SIZE_UNLIMITED != pc.getPagesize()) {
             query.setMaxResults(pc.getPagesize());
         }
         rtn.addAll(query.list());
         rtn.setTotalSize(
-            ((Number)translate(ctx, cList, true).uniqueResult()).intValue());
+            ((Number)translate(ctx, cList, true, false).uniqueResult()).intValue());
         return rtn;
     }
 
     public SQLQuery translate(CritterTranslationContext ctx, CritterList cList)
     {
-        return translate(ctx,cList,false);
+        return translate(ctx, cList, false, false);
     }
     
-    public SQLQuery translate(CritterTranslationContext ctx,
-                              CritterList cList,
-                              boolean issueCount) {
+    private SQLQuery translate(CritterTranslationContext ctx,
+                               CritterList cList, boolean issueCount,
+                               boolean desc) {
         StringBuilder sql = new StringBuilder();
         Map txContexts = new HashMap(cList.getCritters().size());
         if (issueCount) {
@@ -92,7 +92,9 @@ public class CritterTranslator {
         sql.append(PermissionManagerFactory.getInstance()
                 .getSQLWhere(ctx.getSubject().getId()));
         if (!issueCount) {
-            sql.append(" ORDER BY res.name");
+            sql.append(" ORDER BY res.name ");
+            if (desc)
+                sql.append("DESC");
         }
         if (_log.isDebugEnabled()) {
             _log.debug("Created SQL: [" + sql + "]");
