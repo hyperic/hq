@@ -30,7 +30,6 @@
   USA.
  --%>
 
-
 <hq:constant classname="org.hyperic.hq.ui.Constants" symbol="MODE_REGISTER" var="MODE_REGISTER"/>
 
 <c:set var="User" value="${webUser}"/>
@@ -41,11 +40,9 @@
   <tiles:put name="titleKey" value="admin.user.RegisterUserPageTitle"/>  
 </tiles:insert>
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0" class="monitorBlockContainer">
-  <tr>
-    <td><fmt:message key="admin.user.generalProperties.WelcomeEtc"/></td>
-  </tr>
-</table>
+<div class="monitorBlockContainer" style="padding: 2px; border: 1px solid gray;">
+  <fmt:message key="admin.user.generalProperties.WelcomeEtc"/>
+</div>
 
 &nbsp;<br>
 

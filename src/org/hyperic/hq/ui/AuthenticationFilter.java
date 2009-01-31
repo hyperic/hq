@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -70,8 +70,9 @@ public final class AuthenticationFilter extends BaseFilter {
         HttpSession session = request.getSession();
         ServletContext ctx = session.getServletContext();
         WebUser webUser = SessionUtils.getWebUser(session);
-        String servletPath = request.getServletPath(), contextPath = request
-                .getContextPath(), queryString = request.getQueryString();
+        String servletPath = request.getServletPath(),
+               contextPath = request.getContextPath(),
+               queryString = request.getQueryString();
 
         if (webUser == null) {
             // See if there is authentication information
@@ -107,6 +108,9 @@ public final class AuthenticationFilter extends BaseFilter {
             webUser = SignIn.loginGuest(ctx, request);
         }
 
+        String callbackURL = (String) session
+                .getAttribute(Constants.POST_AUTH_CALLBACK_URL);
+
         if (webUser == null) {
             // if the user is requesting the login page continue
             if (PageListing.SIGN_IN_URL.equals(servletPath)
@@ -130,33 +134,39 @@ public final class AuthenticationFilter extends BaseFilter {
                 return;
             }
         }
-        
-        String callbackURL = (String) session
-                .getAttribute(Constants.POST_AUTH_CALLBACK_URL);
-        if (webUser != null && !PageListing.SIGN_IN_URL.equals(servletPath)
-                && callbackURL != null) {
-            session.removeAttribute(Constants.POST_AUTH_CALLBACK_URL);
-            response.sendRedirect(callbackURL);
-        } else if (webUser != null
-                && (PageListing.SIGN_IN_URL.equals(servletPath) || "/j_security_check.do"
-                        .equals(servletPath))) {
-            response.sendRedirect(contextPath + PageListing.DASHBOARD_URL);
-            return;
-        } else {
-            try {
-                chain.doFilter(request, response);
-            } catch (ServletException e) {
-                Throwable trace = e;
-                if (e.getRootCause() != null) {
-                    trace = e.getRootCause();
-                }
-                log.error("Caught ServletException from client "
-                        + request.getRemoteAddr() + ": "
-                        + e.getMessage(), trace);
-            } catch (Exception e) {
-                log.warn("Caught Exception from client "
-                        + request.getRemoteAddr() + ": " + e.getMessage());
+        else {
+            if (session.getAttribute(Constants.NEEDS_REGISTRATION) != null) {
+                // Needs to register, do this only once
+                response.sendRedirect(contextPath + PageListing.REGISTRATION_URL);
+                session.removeAttribute(Constants.NEEDS_REGISTRATION);
+                return;
             }
+            else if (!PageListing.SIGN_IN_URL.equals(servletPath)
+                    && callbackURL != null) {
+                session.removeAttribute(Constants.POST_AUTH_CALLBACK_URL);
+                response.sendRedirect(callbackURL);
+                return;
+            } else if (PageListing.SIGN_IN_URL.equals(servletPath) ||
+                       "/j_security_check.do".equals(servletPath)) {
+                response.sendRedirect(contextPath + PageListing.DASHBOARD_URL);
+                return;
+            }
+        
+        } 
+
+        try {
+            chain.doFilter(request, response);
+        } catch (ServletException e) {
+            Throwable trace = e;
+            if (e.getRootCause() != null) {
+                trace = e.getRootCause();
+            }
+            log.error("Caught ServletException from client "
+                    + request.getRemoteAddr() + ": "
+                    + e.getMessage(), trace);
+        } catch (Exception e) {
+            log.warn("Caught Exception from client "
+                    + request.getRemoteAddr() + ": " + e.getMessage());
         }
     }
 

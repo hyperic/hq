@@ -15,7 +15,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006, 2007, 2008], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -78,6 +78,7 @@
 
       function showRecentAlertResponse(originalRequest) {
         if (originalRequest.responseText.indexOf('recentAlertsText') > 0) {
+          $('headerAlerts').style.display = '';
           $('recentAlerts').innerHTML = originalRequest.responseText;
         }
         else {
@@ -133,7 +134,7 @@
     <div class="ajaxLoading" style="display:none;" id="loading">
         <html:img page="/images/4.0/icons/ajax-loader.gif" border="0" width="16" height="16"/>
     </div>
-    <div id="headerAlerts">
+    <div id="headerAlerts" style="display:none;">
       <div class="headAlertWrapper">
         <div class="recentText">
           <fmt:message key="header.RecentAlerts"/>

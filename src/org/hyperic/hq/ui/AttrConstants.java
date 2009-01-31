@@ -50,6 +50,7 @@ public interface AttrConstants {
      * is stored during registration.
      */
     public static final String PASSWORD_SES_ATTR = "password";
+    public static final String NEEDS_REGISTRATION = "registerUser";
 
     /**
      * The session scope attribute under which the <code>List</code>

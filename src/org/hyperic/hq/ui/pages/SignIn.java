@@ -108,13 +108,16 @@ public abstract class SignIn extends BasePage {
         HttpSession session = getRequest().getSession(true);
         WebUser webUser;
         Map userOpsMap = new HashMap();
-        boolean needsRegistration = false;
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
         try {
             webUser = loginUser(ctx, getUserName(), getPassword());
 
-            needsRegistration = webUser.getPreferences().getKeys().size() == 0;
-            if (!needsRegistration) {
+            if (webUser.getPreferences().getKeys().size() == 0) {
+                // will be cleaned out during registration
+                session.setAttribute(Constants.PASSWORD_SES_ATTR, getPassword());
+                session.setAttribute(Constants.NEEDS_REGISTRATION, Boolean.TRUE);
+            }
+            else {
                 userOpsMap = loadUserPermissions(webUser.getSessionId(),
                         authzBoss);
             }
@@ -128,11 +131,6 @@ public abstract class SignIn extends BasePage {
             else
                 setMessage(this.getMessages().getMessage("serverError"));
             return getSigninLink().getLink(cycle);
-        }
-
-        if (needsRegistration) {
-            // will be cleaned out during registration
-            session.setAttribute(Constants.PASSWORD_SES_ATTR, getPassword());
         }
 
         getBaseSessionBean().setWebUser(webUser);

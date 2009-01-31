@@ -42,7 +42,8 @@ public class PageListing {
      * Struts representations of tapestry pages
      */
     public static final String SIGN_IN_URL = "/SignIn.html";
-    public static final String REGISTRATION_URL = "/admin/Register.html";
+    public static final String REGISTRATION_URL =
+        "/admin/user/UserAdmin.do?mode=register";
 
     /*
      * Struts pages 
