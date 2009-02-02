@@ -23,19 +23,19 @@
     </property>
 
     <many-to-one name="escalation">
-      <column name="ESCALATION_ID" not-null="true" unique-key="eam_escalation_state_escalation_id_key"/>
+      <column name="ESCALATION_ID" not-null="true" />
     </many-to-one>
 
     <property name="alertDefinitionId">
-      <column name="ALERT_DEF_ID" not-null="true" index="state_idx" unique-key="eam_escalation_state_escalation_id_key"/>
+      <column name="ALERT_DEF_ID" not-null="true" index="state_idx" unique-key="alert_def_id_key"/>
     </property>	  
 	  
     <property name="alertId">
-      <column name="ALERT_ID" not-null="true" unique-key="eam_escalation_state_escalation_id_key"/>
+      <column name="ALERT_ID" not-null="true" />
     </property>
 
     <property name="alertTypeEnum">
-      <column name="ALERT_TYPE" not-null="true" index="state_idx" unique-key="eam_escalation_state_escalation_id_key" />
+      <column name="ALERT_TYPE" not-null="true" index="state_idx" unique-key="alert_def_id_key" />
     </property>	  
 	  
     <many-to-one name="acknowledgedBy">
