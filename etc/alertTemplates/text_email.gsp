@@ -24,7 +24,7 @@
   if (alertDef.performsEscalations()) {
        def lastFix = EscalationManagerEJBImpl.one.getLastFix(alertDef)
        if (lastFix) 
-           lastFixStr = "\n- Previous Fix:            ${lastFix}"
+           lastFixStr = "\n- Previous Resolution:            ${lastFix}"
   }
 
   def addAuxLogs(prefix, logs, buf) {
