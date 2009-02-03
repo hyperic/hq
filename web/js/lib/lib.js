@@ -1213,12 +1213,13 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     that.args = kwArgs;
     that.url = kwArgs.url;
     that.container = {};
-    that.currentReport = {};
-    that.queryParams = { get: "getReport.jsp", list: "getReport.jsp?id=" };
+    that.currentReport = null;
+    that.queryParams = { get: "dashboard.html?_flowId=dashboardIntegrationFlow" };
 
     // the dom containers
     that.container.loading = dojo11.query('.loading',node)[0];
-    that.container.error_loading = dojo11.query('.error_loading',node)[0];
+    that.container.progress = dojo11.query('.progress',node)[0];
+    that.container.error_loading = dojo11.query('.notfound',node)[0];
     that.container.content = dojo11.query('.contents',node)[0];
 
     // the buttons and form elements
@@ -1235,7 +1236,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     that.report_title = dojo11.query('.reportTitle',node)[0];
     that.arcLink = dojo11.query('.arcLink',node)[0];
 
-    that.iframe = "";
+    //that.iframe = "";
     
     /**
      * The widget remove callback
@@ -1251,7 +1252,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      * @param e the click event
      */
     this.click_refresh_btn = function(e) {
-        that.updateIframe(that.url, that.queryParams.get);
+        that.updateIframe(that.url+that.queryParams.get);
 
     };
 
@@ -1260,37 +1261,54 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      * @param e
      */
     this.select_change = function(e) {
-        alert("change fired");
+        console.info("select changed");
         var f = e;
         //TODO set the changes here
-        that.report_img.src = that.arcLink + that.select_btn.options[that.select_btn.selectedId].value;
-        that.report_title.innerHTML = that.select_btn.options[that.select_btn.selectedId].getAttribute("title");
+        that.report_img.src = that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value;
+        that.report_title.innerHTML = that.select_btn.options[that.select_btn.selectedIndex].getAttribute("title");
     };
 
     /**
      * Callback to process the creation or update of the iframe
      */
-    this.getReportsCallback = function() {
-        var list = that.iframe.contentDocument.body.innerHTML;
-        var otherlist = dojo11.io.iframe.doc(that.iframe);
-        var response = that._evalResponse(list);
+    this.getReportsCallback = function(data) {
+        var response = that._evalResponse(data.body.innerHTML);
         if (response !== null) {
             var options = "";
             that.select_btn.innerHTML = "";
-            for (d in response) {
-                if (response[d].label !== undefined) {
+            for (var d in response) {
+                if (response[d] !== undefined && response[d].label !== undefined) {
+                    if(that.currentReport == null) {
+                        that.currentReport = response[d];
+                    }
                     options += "<option value='" + response[d].URI + "' title ='" + response[d].Description + "'>" + response[d].label + "</option>";
-
                 }
             }
             that.select_btn.innerHTML = options;
-            //set selected index and set the image to the first one
         }
-        that.currentReport = response[0];
-        that.report_img.src = that.arcLink + that.currentReport.URI;
-        that.report_title.innerHTML = that.currentReport.Description;
-        that.container.loading.style.display = "none";
-        that.container.content.style.display = "";
+        console.info("completed select box");
+        if(response.length > 0) {
+            that.report_img.src = that.arcLink + that.currentReport.URI;
+            that.report_title.innerHTML = that.currentReport.Description;
+
+            that.container.loading.style.display = "none";
+            that.container.error_loading.style.display = "none";
+            that.container.progress.style.display = "none";
+
+            that.container.content.style.display = "block";
+        } else {
+            that.container.loading.style.display = "block";
+            that.container.error_loading.style.display = "block";
+            that.container.progress.style.display = "none";
+        }
+        
+        console.info("completed callback");
+    };
+
+    this.errorRemotingCallback = function(data){
+        that.container.loading.style.display = "block";
+        that.container.error_loading.style.display = "block";
+        that.container.progress.style.display = "none";
     };
 
     /**
@@ -1315,12 +1333,26 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      * @param url the arc server url
      * @param connectionParam the POST param for the api call
      */
-    this.updateIframe = function(url, connectionParam) {
-        that.container.loading.style.display = "";
+    this.updateIframe = function(url) {
+        that.container.loading.style.display = "block";
+        that.container.progress.style.display = "block";
+        that.container.error_loading.style.display = "none";
         that.container.content.style.display = "none";
-        that.iframe = dojo11.io.iframe.setSrc("arcframe", function() {
-            that.getReportsCallback();
-        }, url + connectionParam + "");
+        dojo11.io.iframe.send({
+            handleAs : "html",
+            method : "POST",
+            url : url,
+            timeout : 2000,
+            load : function(data){
+
+                that.getReportsCallback(data);
+                console.info("completed iframe remote");
+            },
+            error : function(data) {
+                that.errorRemotingCallback(data);
+            }
+
+        });
     };
 
     /**
@@ -1330,15 +1362,15 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         var isInError = false;
         //the refresh is showing
         //set the arc link
+        //that.container.error_loading.innerHTML = that.args.notFound;
         if(that.arcLink == "") {
-            that.container.loading.style.display = "none";
-            that.container.error_loading.style.display = "";
-            that.container.error_loading.innerHTML = that.args.notFound;
+            that.container.loading.style.display = "block";
+            that.container.error_loading.style.display = "block";
+            that.container.progress.style.display = "none";
         } else {
-            that.arcLink.href = kwArgs.url;
-            that.init_connection(kwArgs.url, that.queryParams.get);
-            //set up the click listener
-            window.setTimeout(that.getReportsCallback,2000);
+            if(that.arcLink.href)
+                that.arcLink.href = kwArgs.url;
+            that.init_connection(kwArgs.url+that.queryParams.get);
             console.log("connecting the buttons");
             dojo11.connect(that.remove_btn,'onclick',that.click_remove_btn);
             dojo11.connect(that.refresh_btn,'onclick',that.click_refresh_btn);
@@ -1350,12 +1382,24 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      * Creates the iFrame, only to be called by init()
      * @param uri the arc server uri
      */
-    this.init_connection = function (uri, param) {
+    this.init_connection = function (uri) {
         console.log("creating the iFrame");
-        that.iframe = dojo11.io.iframe.create("arcframe", null, /*function(){
-            that.getReportsCallback();
-           },*/
-           uri+param+"");
+        dojo11.io.iframe.send({
+            handleAs : "html",
+            method : "POST",
+            url : uri,
+            timeout : 2000,
+            load : function(data){
+
+                that.getReportsCallback(data);
+                console.info("completed iframe remote");
+            },
+            error : function(data) {
+                that.errorRemotingCallback(data);
+            }
+
+
+        });
     };
 
     this.init(kwArgs);
@@ -1481,7 +1525,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 that.config.rotation = data.rot || that.config.rotation;
             },
             error: function(data){
-                console.debug("An error occurred saving charts config... ", data);
+                console.info("An error occurred saving charts config... ", data);
             },
             timeout: 2000
         });
@@ -1605,7 +1649,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 load: function(data){
                     if(data.error)
                     {
-                        console.debug('An server error occurred deleting chart: ' + data);
+                        console.info('An server error occurred deleting chart: ' + data);
                     }
                     else
                     {
@@ -1647,7 +1691,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                     }
                 },
                 error: function(data){
-                    console.debug("A connection error occurred deleting chart: ", data);
+                    console.info("A connection error occurred deleting chart: ", data);
                 },
                 timeout: 30000
             });
@@ -1892,7 +1936,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                         // try again after a minute.
                         that.fetchChartsCycleId = setInterval(that.fetchAndPlayCharts, 60000);
                     });
-                console.debug("An error occurred fetching charts: ", data);
+                console.info("An error occurred fetching charts: ", data);
             },
             timeout: 30000
         });
@@ -1930,7 +1974,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 }
             },
             error: function(data){
-                console.debug("An error occurred fetching charts config ", data);
+                console.info("An error occurred fetching charts config ", data);
             },
             timeout: 30000
         });
@@ -1956,7 +2000,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                 that.config.rotation = data.rot || that.config.rotation;
             },
             error: function(data){
-                console.debug("An error occurred fetching charts config ", data);
+                console.info("An error occurred fetching charts config ", data);
             },
             timeout: 20000
         });
@@ -2290,7 +2334,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
                 });
             },
             error: function(data){
-                console.debug("An error occurred saving alerts config... " + data);
+                console.info("An error occurred saving alerts config... " + data);
 
                 if(that.selected_alert_groups.length > 0)
                 {
@@ -2427,7 +2471,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
     //             that.fetchAlertGroupStatus();
     //         },
     //         error: function(data){
-    //             console.debug("An error occurred fetching alert groups... ", data);
+    //             console.info("An error occurred fetching alert groups... ", data);
     //         },
     //         timeout: 2000
     //     });
@@ -2482,7 +2526,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             },
             error: function(data){
             	that.swapSheets('error_loading');
-                console.debug("An error occurred fetching alert groups status... ", data);
+                console.info("An error occurred fetching alert groups status... ", data);
             },
             timeout: 45000
         });
@@ -2545,7 +2589,7 @@ hyperic.dashboard.summaryWidget = function(node, portletName, portletLabel) {
             },
             error: function(data){
             	that.swapSheets('error_loading');
-                console.debug("An error occurred fetching alert group config... ", data);
+                console.info("An error occurred fetching alert group config... ", data);
             },
             timeout: 45000
         });
@@ -3088,7 +3132,7 @@ hyperic.alert_center = function(title_name) {
 	    	error: function(data){
 	    		var errorText = "An error occurred processing your request.";
 	    		alert(errorText);
-	    		console.debug(errorText, data);
+	    		console.info(errorText, data);
 			}
 		});
 	}
@@ -3105,7 +3149,7 @@ hyperic.alert_center = function(title_name) {
 	    	error: function(data){
 	    		var errorText = "An error occurred processing your request.";
 	    		that.displayError(that.current.dialog.data.message_area.request_status, errorText);
-	    		console.debug(errorText, data);
+	    		console.info(errorText, data);
 			}
 		});	    
 	}
@@ -3352,12 +3396,12 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
                     else
                     {
                     	that.displayError(hyperic.data.maintenance_schedule.error.serverError);
-                        console.debug(data.error);
+                        console.info(data.error);
                     }                    	
                 },
                 error: function(data){
                 	that.displayError(hyperic.data.maintenance_schedule.error.serverError);
-                	console.debug("An error occurred setting maintenance schedule for group " + that.group_id, data);
+                	console.info("An error occurred setting maintenance schedule for group " + that.group_id, data);
                 },
                 timeout: 5000
             });
@@ -3386,7 +3430,7 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
             },
             error: function(data){
             	that.displayError(hyperic.data.maintenance_schedule.error.serverError);
-            	console.debug("An error occurred clearing maintenance schedule for group " + that.group_id, data);
+            	console.info("An error occurred clearing maintenance schedule for group " + that.group_id, data);
             },
             timeout: 5000
         });
@@ -3436,7 +3480,7 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
                 that.resetSchedule();
             	that.redraw(true, "&nbsp;");
             	that.displayError(hyperic.data.maintenance_schedule.error.serverError);
-            	console.debug("An error occurred fetching maintenance schedule for group " + that.group_id, data);
+            	console.info("An error occurred fetching maintenance schedule for group " + that.group_id, data);
             },
             timeout: 5000
         });
@@ -3723,7 +3767,7 @@ hyperic.clone_resource_dialog = function(title_name, platform_id) {
                 }
             },
             error: function(data){
-                console.debug("An error occurred fetching alert groups status... ", data);
+                console.info("An error occurred fetching alert groups status... ", data);
             },
             timeout: 2000
         });
@@ -3782,7 +3826,7 @@ hyperic.clone_resource_dialog = function(title_name, platform_id) {
                 load: function(data){
                 },
                 error: function(data){
-                    console.debug("An error occurred queueing platforms for cloning " + that.platform_id, data);
+                    console.info("An error occurred queueing platforms for cloning " + that.platform_id, data);
                 }
             });
         	that.buttons.create_btn.disabled = true;
@@ -4020,8 +4064,8 @@ hyperic.MetricsUpdater = function(eid,ctype,messages) {
                     }
                 },
                 error: function(data){
-                    console.debug("An error occurred refreshing metrics:");
-                    console.debug(data);
+                    console.info("An error occurred refreshing metrics:");
+                    console.info(data);
                 }
             });
         }
