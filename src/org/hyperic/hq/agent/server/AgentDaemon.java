@@ -416,7 +416,6 @@ public class AgentDaemon
         throws AgentRunningException, AgentConfigException
     {
         DefaultConnectionListener defListener;
-
         if(this.isRunning()){
             throw new AgentRunningException("Agent cannot be configured while"+
                                             " running");
@@ -516,6 +515,10 @@ public class AgentDaemon
     private void loadAgentServerHandlerJars(File[] libJars)
             throws AgentConfigException {
         AgentServerHandler loadedHandler;
+        
+        // Save the current context loader, and reset after we load plugin jars
+        ClassLoader currentContext = Thread.currentThread().getContextClassLoader();
+        
         for (int i=0; i<libJars.length; i++) {
             try {
                 JarFile jarFile = new JarFile(libJars[i]);
@@ -536,6 +539,9 @@ public class AgentDaemon
                                                e.getMessage());
             }
         }
+        
+        // Restore the class loader
+        Thread.currentThread().setContextClassLoader(currentContext);
     }
 
     /**
@@ -767,7 +773,6 @@ public class AgentDaemon
     public void start() 
         throws AgentStartException 
     {
-        
         this.running = true;
         boolean agentStarted = false;
         
@@ -805,7 +810,7 @@ public class AgentDaemon
                 "org.hyperic.hq.agent.server.AgentTransportLifecycleImpl";
 
             try {
-                Class clazz = this.handlerClassLoader.loadClass(agentTransportLifecycleClass);
+            	Class clazz = this.handlerClassLoader.loadClass(agentTransportLifecycleClass);
                 Constructor constructor = clazz.getConstructor(
                                     new Class[]{AgentDaemon.class, 
                                                 AgentConfig.class, 

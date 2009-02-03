@@ -66,7 +66,6 @@ public class ServerTransport implements ShutdownCallback {
         _asyncInvoker = new AsynchronousInvoker(asyncThreadPoolSize);
         
         _agentProxy = createAgentProxyFactory(_asyncInvoker);
-        
         _pollerServer = null;
         
         // TODO - need a server for the bidirectional transport as well
@@ -101,8 +100,7 @@ public class ServerTransport implements ShutdownCallback {
         Class clazz;
         
         try {
-            clazz = Thread.currentThread().getContextClassLoader().loadClass(
-                    "com.hyperic.hq.transport.AgentProxyFactoryImpl");
+            clazz = Class.forName("com.hyperic.hq.transport.AgentProxyFactoryImpl");
         } catch (Exception e) {
             // We must have a .ORG instance
             return new AgentProxyFactoryImpl(asyncInvoker);
@@ -110,7 +108,6 @@ public class ServerTransport implements ShutdownCallback {
 
         Constructor constructor = clazz.getConstructor(
                                 new Class[]{AsynchronousInvoker.class});
-        
         AgentProxyFactory agentProxyFactory = 
             (AgentProxyFactory)constructor.newInstance(new Object[]{asyncInvoker});
         
@@ -127,12 +124,10 @@ public class ServerTransport implements ShutdownCallback {
      */
     private PollerServer createPollerServer(InetSocketAddress pollerServerBindAddr) 
          throws Exception {
-        
         Class clazz;
         
         try {
-            clazz = Thread.currentThread().getContextClassLoader().loadClass(
-                                    "com.hyperic.hq.transport.PollerServerImpl");
+            clazz = Class.forName("com.hyperic.hq.transport.PollerServerImpl");
         } catch (ClassNotFoundException e) {
             // We must have a .ORG instance
             _log.info("Unidirectional transport poller server is not enabled. " +

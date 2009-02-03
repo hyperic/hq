@@ -1110,8 +1110,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                 getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
 
         } catch (Exception e) {
-            _log.error("Unable to initialize session beans: " +
-                           e.getMessage());
+            _log.error("Unable to initialize session beans.", e);
         }
         // Get a reference to the control scheduler ejb
         try {
