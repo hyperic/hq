@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -26,7 +26,6 @@
 package org.hyperic.hq.common.server.session;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -128,11 +127,22 @@ public class CrispoManagerEJBImpl implements SessionBean {
      *
      * @param key The key to search for
      * @return A list of CrispoOptions that have a key that matches in whole
-     * @ejb:interface-method
      * or part the given key parameter.
+     * @ejb:interface-method
      */
     public List findOptionByKey(String key) {
         return getCrispoOptionDAO().findOptionsByKey(key);    
+    }
+
+    /**
+     * Find a List of CrispoOptions given the search value.
+     *
+     * @param val The value to search for
+     * @return A list of CrispoOptions that have a value (in the array) that matches
+     * @ejb:interface-method
+     */
+    public List findOptionByValue(String val) {
+        return getCrispoOptionDAO().findOptionsByValue(val);    
     }
 
     /**

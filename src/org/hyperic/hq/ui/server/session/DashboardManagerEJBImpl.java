@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -240,21 +239,20 @@ public class DashboardManagerEJBImpl implements SessionBean {
     /**
      * Update dashboard and user configs to account for resource deletion
      * 
-     * @param opts The set of user or dashboard properties to check
      * @param ids An array of ID's of removed resources
      * @ejb:interface-method
      */
-    public void handleResourceDelete(Set opts, AppdefEntityID[] ids) {
+    public void handleResourceDelete(AppdefEntityID[] ids) {
         CrispoManagerLocal cm = CrispoManagerEJBImpl.getOne();
 
-        for (Iterator i = opts.iterator(); i.hasNext(); ) {
-            String opt = (String)i.next();
-            List copts = cm.findOptionByKey(opt);
+        for (int i = 0; i < ids.length; i++) {
+            String appdefKey = ids[i].getAppdefKey();
+            List copts = cm.findOptionByValue(appdefKey);
 
             for (Iterator j = copts.iterator(); j.hasNext(); ) {
                 CrispoOption o = (CrispoOption)j.next();
                 String val = o.getValue();
-                String newVal = removeResources(ids, val);
+                String newVal = removeResource(val, appdefKey);
 
                 if (!val.equals(newVal)) {
                     cm.updateOption(o, newVal);
@@ -294,13 +292,17 @@ public class DashboardManagerEJBImpl implements SessionBean {
      */
     private String removeResources(AppdefEntityID[] ids, String val) {
 	    for (int i = 0; i < ids.length; i++) {
-	        String resource = ids[i].getAppdefKey();
-	        val = StringUtil.remove(val, resource);
-	        val = StringUtil.replace(val, Constants.EMPTY_DELIMITER,
-                                     Constants.DASHBOARD_DELIMITER);
+	        val = removeResource(val, ids[i].getAppdefKey());
 	    }
 
 	    return val;
+    }
+    
+    private String removeResource(String val, String resource) {
+        val = StringUtil.remove(val, resource);
+        val = StringUtil.replace(val, Constants.EMPTY_DELIMITER,
+                                 Constants.DASHBOARD_DELIMITER);
+        return val;
     }
 
     /**

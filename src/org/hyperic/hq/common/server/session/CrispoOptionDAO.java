@@ -31,4 +31,12 @@ public class CrispoOptionDAO extends HibernateDAO {
         return createCriteria().add(Restrictions.like("key",
                                                       "%" + key + "%")).list();
     }
+    
+    List findOptionsByValue(String val) {
+        String hql = "from CrispoOption o join o.array a where " +
+        		     "o.optionValue = :val or a = :val";
+        return createQuery(hql)
+            .setString("val", val)
+            .list();
+    }
 }
