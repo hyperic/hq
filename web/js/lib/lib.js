@@ -1274,7 +1274,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      * Callback to process the creation or update of the iframe
      */
     this.getReportsCallback = function(data) {
-        var response = that._evalResponse(data.body.innerHTML);
+        var response = document.arcReportList;
         if (response !== null) {
             var options = [];
             that.select_btn.innerHTML = "";
@@ -1344,20 +1344,16 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         that.container.progress.style.display = "block";
         that.container.error_loading.style.display = "none";
         that.container.content.style.display = "none";
-        dojo11.io.iframe.send({
+        dojo11.io.script.get({
             handleAs : "html",
-            method : "POST",
-            url : url,
-            timeout : 2000,
-            load : function(data){
-
+            url : uri,
+            checkString : "document.arcReportList",
+            load: function(data) {
                 that.getReportsCallback(data);
-                console.info("completed iframe remote");
             },
             error : function(data) {
                 that.errorRemotingCallback(data);
             }
-
         });
     };
 
@@ -1390,25 +1386,20 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      */
     this.init_connection = function (uri) {
         console.log("creating the iFrame");
-        dojo11.io.iframe.send({
+        dojo11.io.script.get({
             handleAs : "html",
-            method : "POST",
             url : uri,
-            timeout : 2000,
-            load : function(data){
-
+            checkString : "document.arcReportList",
+            load: function(data) {
                 that.getReportsCallback(data);
-                console.info("completed iframe remote");
             },
             error : function(data) {
                 that.errorRemotingCallback(data);
             }
-
-
         });
     };
-
     this.init(kwArgs);
+    return that;
 };
 
 hyperic.dashboard.arcWidget.prototype = hyperic.dashboard.widget;
