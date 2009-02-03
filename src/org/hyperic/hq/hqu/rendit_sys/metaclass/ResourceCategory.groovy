@@ -99,6 +99,11 @@ class ResourceCategory {
     }
     
     static AppdefEntityID getEntityId(Resource r) {
+        if (r.resourceType == null) { // Possible that resource has been deleted
+            // Assume it's a platform
+            return AppdefEntityID.newPlatformID(r.instanceId)
+        }
+        
         def typeId = r.resourceType.id
         
         if (typeId == AuthzConstants.authzPlatform) {
