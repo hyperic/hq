@@ -53,7 +53,12 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.UnitsConvert;
+import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.util.jdbc.IDGenerator;
+import org.hyperic.util.units.FormattedNumber;
 
 /** Session class superclass, which provides generic utility functions
  */
@@ -207,6 +212,69 @@ public abstract class SessionBase {
         checkPermission(who.getId(), rtName, id.getId(), opName);
     }
     
+    protected String describeCondition(AlertCondition cond, Measurement dm) {
+        StringBuffer text = new StringBuffer();
+        switch (cond.getType()) {
+        case EventConstants.TYPE_THRESHOLD:
+        case EventConstants.TYPE_BASELINE:
+            text.append(cond.getName()).append(" ")
+                .append(cond.getComparator()).append(" ");
+    
+            if (cond.getType() == EventConstants.TYPE_BASELINE) {
+                text.append(cond.getThreshold());
+                text.append("% of ");
+    
+                if (MeasurementConstants.BASELINE_OPT_MAX.equals(cond
+                        .getOptionStatus())) {
+                    text.append("Max Value");
+                } else if (MeasurementConstants.BASELINE_OPT_MIN
+                        .equals(cond.getOptionStatus())) {
+                    text.append("Min Value");
+                } else {
+                    text.append("Baseline");
+                }
+            } else {
+                FormattedNumber th =
+                    UnitsConvert.convert(cond.getThreshold(),
+                                         dm.getTemplate().getUnits());
+                text.append(th.toString());
+            }
+            break;
+        case EventConstants.TYPE_CONTROL:
+            text.append(cond.getName());
+            break;
+        case EventConstants.TYPE_CHANGE:
+            text.append(cond.getName()).append(" value changed");
+            break;
+        case EventConstants.TYPE_CUST_PROP:
+            text.append(cond.getName()).append(" value changed");
+            break;
+        case EventConstants.TYPE_LOG:
+            text.append("Event/Log Level(")
+                    .append(ResourceLogEvent.getLevelString(Integer
+                                    .parseInt(cond.getName())))
+                    .append(")");
+            if (cond.getOptionStatus() != null
+                    && cond.getOptionStatus().length() > 0) {
+                text.append(" and matching substring ").append('"')
+                    .append(cond.getOptionStatus()).append('"');
+            }
+            break;
+        case EventConstants.TYPE_CFG_CHG:
+            text.append("Config changed");
+            if (cond.getOptionStatus() != null
+                    && cond.getOptionStatus().length() > 0) {
+                text.append(": ")
+                    .append(cond.getOptionStatus());
+            }
+            break;
+        default:
+            break;
+        }
+        
+        return text.toString();
+    }
+
     private static void checkEscalation(Integer subjectId,
                                         String operation) 
         throws PermissionException {

@@ -40,8 +40,7 @@
   <tr valign="top">
     <%-- name --%>
     <td width="20%" class="BlockLabel">
-      <html:img page="/images/icon_required.gif" width="9" height="9"
-      border="0"/><fmt:message key="common.label.Name"/>
+      <fmt:message key="common.label.Name"/>
     </td>
     <logic:messagesPresent property="name">
     <td width="30%" class="ErrorField">

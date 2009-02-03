@@ -66,6 +66,8 @@ import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementDAO;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -239,6 +241,17 @@ public class AlertDefinitionManagerEJBImpl
                 tDAO.findById(conds[i].getTriggerId()) : null;
 
             AlertCondition cond = res.createCondition(conds[i], trigger);
+            
+            if (res.getName() == null || res.getName().length() == 0) {
+                Measurement dm = null;
+                if (cond.getType() == EventConstants.TYPE_THRESHOLD ||
+                    cond.getType() == EventConstants.TYPE_BASELINE) {
+                    MeasurementDAO dmDao =
+                        new MeasurementDAO(DAOFactory.getDAOFactory());
+                    dm = dmDao.findById(new Integer(cond.getMeasurementId()));
+                }
+                res.setName(describeCondition(cond, dm));
+            }
             acDAO.save(cond);
         }
                 

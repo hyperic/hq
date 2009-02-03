@@ -59,12 +59,10 @@ import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertSortField;
-import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementDAO;
-import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.util.NumberUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -593,78 +591,41 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 //            TriggerFiredEvent event = (TriggerFiredEvent)
 //            eventMap.get( cond.getTriggerId() );
 
-            Measurement dm;
+            Measurement dm = null;
             
             switch (cond.getType()) {
             case EventConstants.TYPE_THRESHOLD:
             case EventConstants.TYPE_BASELINE:
-                text.append(cond.getName()).append(" ")
-                    .append(cond.getComparator()).append(" ");
-
                 dm = dmDao.findById(new Integer(cond.getMeasurementId()));
-
-                if (cond.getType() == EventConstants.TYPE_BASELINE) {
-                    text.append(cond.getThreshold());
-                    text.append("% of ");
-
-                    if (MeasurementConstants.BASELINE_OPT_MAX.equals(cond
-                            .getOptionStatus())) {
-                        text.append("Max Value");
-                    } else if (MeasurementConstants.BASELINE_OPT_MIN
-                            .equals(cond.getOptionStatus())) {
-                        text.append("Min Value");
-                    } else {
-                        text.append("Baseline");
-                    }
-                } else {
-                    FormattedNumber th =
-                        UnitsConvert.convert(cond.getThreshold(),
-                                             dm.getTemplate().getUnits());
-                    text.append(th.toString());
-                }
+                text.append(describeCondition(cond, dm));
 
                 // Format the number
-                String actualValue = safeGetAlertConditionLogNumericValue(logs[i], dm);
+                String actualValue =
+                    safeGetAlertConditionLogNumericValue(logs[i], dm);
                 text.append(" (actual value = ").append(actualValue).append(")");
                 break;
             case EventConstants.TYPE_CONTROL:
-                text.append(cond.getName());
+                text.append(describeCondition(cond, dm));
                 break;
             case EventConstants.TYPE_CHANGE:
-                dm = dmDao.findById(new Integer(cond.getMeasurementId()));
-                text.append(cond.getName()).append(" value changed");
-                text.append(" (New value: ")
+                text.append(describeCondition(cond, dm))
+                    .append(" (New value: ")
                     .append(logs[i].getValue())
                     .append(")");
                 break;
             case EventConstants.TYPE_CUST_PROP:
-                text.append(cond.getName()).append(" value changed");
-                text.append("\n").append(indent).append(logs[i].getValue());
+                text.append(describeCondition(cond, dm))
+                    .append("\n").append(indent).append(logs[i].getValue());
                 break;
             case EventConstants.TYPE_LOG:
-                text.append("Event/Log Level(")
-                        .append(ResourceLogEvent.getLevelString(Integer
-                                        .parseInt(cond.getName())))
-                        .append(")");
-                if (cond.getOptionStatus() != null
-                        && cond.getOptionStatus().length() > 0) {
-                    text.append(" and matching substring ").append('"')
-                        .append(cond.getOptionStatus()).append('"');
-                }
-
-                text.append("\n").append(indent).append("Log: ")
-                        .append(logs[i].getValue());
+                text.append(describeCondition(cond, dm))
+                    .append("\n").append(indent).append("Log: ")
+                    .append(logs[i].getValue());
                 break;
             case EventConstants.TYPE_CFG_CHG:
-                text.append("Config changed");
-                if (cond.getOptionStatus() != null
-                        && cond.getOptionStatus().length() > 0) {
-                    text.append(": ")
-                        .append(cond.getOptionStatus());
-                }
-
-                text.append("\n").append(indent).append("Details: ")
-                        .append(logs[i].getValue());
+                text.append(describeCondition(cond, dm))
+                    .append("\n").append(indent).append("Details: ")
+                    .append(logs[i].getValue());
                 break;
             default:
                 break;
@@ -673,7 +634,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
         return text.toString();
     }
-    
+
     /**
      * @ejb:interface-method
      */

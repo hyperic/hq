@@ -733,8 +733,8 @@
 
      <!-- alert definition forms -->
      <form name="NewAlertDefinitionForm">
-       <field property="name" depends="required,maxlength">
-         <arg0 name="required" key="common.label.Name"/>
+       <field property="name" depends="maxlength">
+         <arg0 name="maxlength" key="common.label.Name"/>
          <arg1 name="maxlength" key="${var:maxlength}" resource="false" />
          <var>
            <var-name>maxlength</var-name>
