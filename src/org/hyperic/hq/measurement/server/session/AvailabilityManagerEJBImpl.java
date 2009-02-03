@@ -184,10 +184,10 @@ public class AvailabilityManagerEJBImpl
     public PageList getHistoricalAvailData(Measurement m, long begin, long end,
                                            PageControl pc,
                                            boolean prependUnknowns) {
-        List availInfo = _dao.getHistoricalAvails(m, begin,
-                                                 end, pc.isDescending());
-        return getPageList(availInfo, begin, end, (end-begin)/DEFAULT_INTERVAL,
-            prependUnknowns);
+        List availInfo = _dao.getHistoricalAvails(
+            m, begin, end, pc.isDescending());
+        return getPageList(
+            availInfo, begin, end, m.getInterval(), prependUnknowns);
     }
 
     /**
