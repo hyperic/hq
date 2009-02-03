@@ -1487,14 +1487,9 @@ select {
 }
 
 .widget .contents {
-   padding: 0px 10px 10px 10px;
-   margin: 0px;
    display: none;
-   opacity: 0;
+   padding: 0px 10px 10px 10px;
 
-   /* magic for IE to ensure the .content block hasLayout property gets triggered so
-   that the widget doesn't become wider than the page but is scaled properly (fixes bug #HQ-1402) */
-   zoom: 1;
 }
 
 .widget .config {
