@@ -1209,7 +1209,9 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         portletName: portletName,
         portletLabel: portletLabel
     };
-    
+
+    that.desc = {};
+
     that.args = kwArgs;
     that.url = kwArgs.url;
     that.container = {};
@@ -1242,8 +1244,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      * The widget remove callback
      * @param e the click event
      */
-    this.click_remove_btn = function(e)
-    {
+    this.click_remove_btn = function(e) {
         hyperic.dashboard.widget.click_remove_btn.apply(that);
     };
 
@@ -1265,7 +1266,8 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         var f = e;
         //TODO set the changes here
         that.report_img.src = that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value;
-        that.report_title.innerHTML = that.select_btn.options[that.select_btn.selectedIndex].getAttribute("title");
+        //that.report_title.innerHTML = that.select_btn.options[that.select_btn.selectedIndex].getAttribute("title");
+        that.report_title.innerHTML = that.desc[that.select_btn.options[that.select_btn.selectedIndex].value];
     };
 
     /**
@@ -1274,17 +1276,21 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     this.getReportsCallback = function(data) {
         var response = that._evalResponse(data.body.innerHTML);
         if (response !== null) {
-            var options = "";
+            var options = [];
             that.select_btn.innerHTML = "";
+            var index = 0;
             for (var d in response) {
                 if (response[d] !== undefined && response[d].label !== undefined) {
                     if(that.currentReport == null) {
                         that.currentReport = response[d];
                     }
-                    options += "<option value='" + response[d].URI + "' title ='" + response[d].Description + "'>" + response[d].label + "</option>";
+                    options[index] = { value: response[d].URI, text : response[d].label };
+                    that.desc[response[d].URI] = response[d].Description;
+                    index++;
                 }
             }
-            that.select_btn.innerHTML = options;
+            new hyperic.selectBox(that.select_btn, options);
+
         }
         console.info("completed select box");
         if(response.length > 0) {
