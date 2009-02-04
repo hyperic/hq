@@ -317,7 +317,8 @@ public class MeasurementDAO extends HibernateDAO {
     List findDefaultsByResource(Resource resource) {
         return getSession()
             .createQuery("select m from Measurement m join m.template t " +
-                         "where t.defaultOn = true and m.resource = ?")
+                         "where t.defaultOn = true and m.resource = ? " +
+                         "order by m.id ")
             .setParameter(0, resource)
             .list();
     }
