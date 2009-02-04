@@ -8353,7 +8353,7 @@ has already been defined.
            DROP TABLE EAM_MEASUREMENT_TMP
         </statement>
         <statement desc="Create TMP update Table" targetDB="mysql">
-            CREATE TABLE EAM_MEASUREMENT_TEMPL_TMP AS SELECT (ID+1) ID, TEMPLATE FROM EAM_MEASUREMENT_TEMPL WHERE DEFAULT_INTERVAL=0
+            CREATE TABLE EAM_MEASUREMENT_TEMPL_TMP AS SELECT MEASUREMENT_TEMPLATE_ID ID, TEMPLATE FROM EAM_MEASUREMENT_TEMPL t, EAM_MEASUREMENT_ARG a WHERE t.ID = MEASUREMENT_TEMPLATE_ARG_ID
         </statement>
         <statement desc="Index TMP table for performance on update" targetDB="mysql">
             ALTER TABLE EAM_MEASUREMENT_TEMPL_TMP ADD PRIMARY KEY (ID)
