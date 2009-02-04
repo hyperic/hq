@@ -1392,7 +1392,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
             dojo11.connect(that.refresh_btn,'onclick',that.click_refresh_btn);
             dojo11.connect(that.select_btn,'onchange',that.select_change);
             dojo11.connect(that.showLeg_btn,'onclick',that.toggleLegend);
-            dojo11.connect(that.showLeg_btn,'onclick',that.toggleLegend);
+            dojo11.connect(that.hideLeg_btn,'onclick',that.toggleLegend);
         }
     };
 
