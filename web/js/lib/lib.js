@@ -1277,7 +1277,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     this.select_change = function(e) {
         console.info("select changed");
         that.report_title.innerHTML = that.desc[that.select_btn.options[that.select_btn.selectedIndex].value];
-        this.getImageURL(that.args.url+that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
+        that.getImageURL(that.args.url+that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
     };
 
     this.getImageURLCallback = function(data) {
@@ -1332,7 +1332,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         }
         
         console.info("completed callback");
-        this.getImageURL(that.args.url+that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
+        that.getImageURL(that.args.url+that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
     };
 
     this.errorRemotingCallback = function(data){
