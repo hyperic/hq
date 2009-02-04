@@ -74,9 +74,11 @@
 
     <!-- Copy JGroups and JDBC drivers and Hibernate -->
     <copy toDir="${jboss.home}/server/default/lib" flatten="true">
+      <fileset dir="${jboss.home}/server/all/lib">
+        <include name="jgroups.jar" />
+      </fileset>
       <fileset dir="${thirdparty.lib}">
         <include name="commons-modeler.jar" />
-        <include name="jgroups-all.jar" />
         <include name="commons-collections-3.2.jar" />
         <include name="quartz-1.6.4.jar" />
       </fileset>
