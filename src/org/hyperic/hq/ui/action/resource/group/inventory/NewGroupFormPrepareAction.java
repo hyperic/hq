@@ -78,6 +78,10 @@ public class NewGroupFormPrepareAction
             Integer ff = (Integer)
                 session.getAttribute(Constants.RESOURCE_TYPE_ATTR);
 
+            // HHQ-2839: Cleanup from new group session
+            session.removeAttribute(Constants.ENTITY_IDS_ATTR);
+            session.removeAttribute(Constants.RESOURCE_TYPE_ATTR);
+
             if (ff != null) {
                 // Only check if resource type is platform, server, or service
                 switch (ff.intValue()) {
@@ -149,7 +153,7 @@ public class NewGroupFormPrepareAction
         newForm.setServiceTypes(serviceTypes);
         newForm.setApplicationTypes(applicationTypes);
         newForm.setGroupTypes(groupTypes);
-
+        
         return null;
     }
 }
