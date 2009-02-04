@@ -1238,7 +1238,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     that.report_title = dojo11.query('.reportTitle',node)[0];
     that.arcLink = dojo11.query('.arcLink',node)[0];
 
-    //that.iframe = "";
+    that.isLegendShowing = false;
     
     /**
      * The widget remove callback
@@ -1257,17 +1257,40 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
 
     };
 
+    this.toggleLegend = function() {
+        if(that.isLegendShowing) {
+            that.showLeg_btn.style.display = "";
+            that.hideLeg_btn.style.display = "none" ;
+            that.legend.style.display = "none" ;
+            that.isLegendShowing = !that.isLegendShowing;
+        } else {
+            that.showLeg_btn.style.display = "none";
+            that.hideLeg_btn.style.display = "" ;
+            that.legend.style.display = "" ;
+            that.isLegendShowing = !that.isLegendShowing;
+        }
+    };
     /**
      *
      * @param e
      */
     this.select_change = function(e) {
         console.info("select changed");
-        var f = e;
-        //TODO set the changes here
-        that.report_img.src = that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value;
-        //that.report_title.innerHTML = that.select_btn.options[that.select_btn.selectedIndex].getAttribute("title");
         that.report_title.innerHTML = that.desc[that.select_btn.options[that.select_btn.selectedIndex].value];
+        this.getImageURL(that.args.url+that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
+    };
+
+    this.getImageURLCallback = function(data) {
+        var response = document.arcImageData;
+        //assign the urls to the img src prepending the base url
+        if(response && response.length >= 0) {
+            if(response[0].reportImageURL) {
+                that.report_img.src = that.url + response[0].reportImageURL;
+            }
+            if(response[0].reportLegendURL) {
+                 that.that.report_legend.src = that.url + response[0].reportLegendURL;
+            }
+        }
     };
 
     /**
@@ -1309,6 +1332,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         }
         
         console.info("completed callback");
+        this.getImageURL(that.args.url+that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
     };
 
     this.errorRemotingCallback = function(data){
@@ -1344,17 +1368,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         that.container.progress.style.display = "block";
         that.container.error_loading.style.display = "none";
         that.container.content.style.display = "none";
-        dojo11.io.script.get({
-            handleAs : "html",
-            url : uri,
-            checkString : "document.arcReportList",
-            load: function(data) {
-                that.getReportsCallback(data);
-            },
-            error : function(data) {
-                that.errorRemotingCallback(data);
-            }
-        });
+        that.init_connection(that.url+that.queryParams.get);
     };
 
     /**
@@ -1371,12 +1385,14 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
             that.container.progress.style.display = "none";
         } else {
             if(that.arcLink.href)
-                that.arcLink.href = kwArgs.url;
-            that.init_connection(kwArgs.url+that.queryParams.get);
+                that.arcLink.href = that.url;
+            that.init_connection(that.url+that.queryParams.get);
             console.log("connecting the buttons");
             dojo11.connect(that.remove_btn,'onclick',that.click_remove_btn);
             dojo11.connect(that.refresh_btn,'onclick',that.click_refresh_btn);
             dojo11.connect(that.select_btn,'onchange',that.select_change);
+            dojo11.connect(that.showLeg_btn,'onchange',that.toggleLegend);
+            dojo11.connect(that.showLeg_btn,'onchange',that.toggleLegend);
         }
     };
 
@@ -1385,7 +1401,6 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      * @param uri the arc server uri
      */
     this.init_connection = function (uri) {
-        console.log("creating the iFrame");
         dojo11.io.script.get({
             handleAs : "html",
             url : uri,
@@ -1398,6 +1413,21 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
             }
         });
     };
+
+    this.getImageURL = function (uri, checkString) {
+        dojo11.io.script.get({
+            handleAs : "html",
+            url : uri,
+            checkString : "document.arcImageData",
+            load: function(data) {
+                that.getImageURLCallback(data);
+            },
+            error : function(data) {
+                that.errorRemotingCallback(data);
+            }
+        });
+    };
+
     this.init(kwArgs);
     return that;
 };
