@@ -172,6 +172,7 @@ public class MySqlServerDetector
         try {
             Driver driver = (Driver)Class.forName(d).newInstance();
             final Properties props = new Properties();
+            pass = (pass == null) ? "" : pass;
             props.put("user", user);
             props.put("password", pass);
             return driver.connect(url, props);
