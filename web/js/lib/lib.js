@@ -1259,14 +1259,14 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
 
     this.toggleLegend = function() {
         if(that.isLegendShowing) {
-            that.showLeg_btn.style.display = "";
+            that.showLeg_btn.style.display = "block";
             that.hideLeg_btn.style.display = "none" ;
             that.legend.style.display = "none" ;
             that.isLegendShowing = !that.isLegendShowing;
         } else {
             that.showLeg_btn.style.display = "none";
-            that.hideLeg_btn.style.display = "" ;
-            that.legend.style.display = "" ;
+            that.hideLeg_btn.style.display = "block" ;
+            that.legend.style.display = "block" ;
             that.isLegendShowing = !that.isLegendShowing;
         }
     };
@@ -1391,8 +1391,8 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
             dojo11.connect(that.remove_btn,'onclick',that.click_remove_btn);
             dojo11.connect(that.refresh_btn,'onclick',that.click_refresh_btn);
             dojo11.connect(that.select_btn,'onchange',that.select_change);
-            dojo11.connect(that.showLeg_btn,'onchange',that.toggleLegend);
-            dojo11.connect(that.showLeg_btn,'onchange',that.toggleLegend);
+            dojo11.connect(that.showLeg_btn,'onclick',that.toggleLegend);
+            dojo11.connect(that.showLeg_btn,'onclick',that.toggleLegend);
         }
     };
 
