@@ -1286,9 +1286,10 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         if(response && response.length >= 0) {
             if(response[0].reportImageURL) {
                 that.report_img.src = that.url + response[0].reportImageURL;
+                that.report_img.style.height = "auto";
             }
             if(response[0].reportLegendURL) {
-                 that.that.report_legend.src = that.url + response[0].reportLegendURL;
+                 that.report_legend.src = that.url + response[0].reportLegendURL;
             }
         }
     };
