@@ -420,10 +420,10 @@ public class AvailabilityManagerEJBImpl
                 rtn.put(key, data);
             }
 
-            data[IND_MIN] = Math.min(data[IND_MIN],
-                                     ((Double)objs[1]).doubleValue());
-            data[IND_MAX] += Math.max(data[IND_MAX],
-                                      ((Double)objs[3]).doubleValue());
+            data[IND_MIN] =
+                Math.min(data[IND_MIN], ((Double)objs[1]).doubleValue());
+            data[IND_MAX] =
+                Math.max(data[IND_MAX], ((Double)objs[3]).doubleValue());
             
             // Expect data to be sorted by end time, so that the last value
             // returned is the final count and the last value
