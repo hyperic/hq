@@ -103,4 +103,83 @@
             defaultOn="true"/>
             
   </service>
+  <service name="HQ Internals"
+           server="JBoss"
+           version="4.2">
+
+    <property name="OBJECT_NAME"
+              value="hyperic.jmx:name=HQInternal"/>
+
+    <plugin type="autoinventory"/>
+
+    <properties>
+    </properties>
+
+    <filter name="template" value="${OBJECT_NAME}:${alias}"/>
+
+    <metric name="Availability"
+            indicator="true"/>
+
+    <metric name="Metric Inserts Per Minute"
+            indicator="true" 
+            interval="60000"
+            category="THROUGHPUT"
+            defaultOn="true"/>
+            
+    <metric name="Metrics Collected Per Minute"
+            indicator="true" 
+            interval="600000"
+            defaultOn="true"/>
+
+    <metric name="Platform Count"
+            indicator="false" 
+            interval="600000"
+            defaultOn="true"/>
+
+    <metric name="Agent Count"
+            indicator="false" 
+            interval="600000"
+            defaultOn="true"/>
+
+    <metric name="Transaction Count"
+            indicator="true" 
+            interval="60000"
+            collectionType="trendsup"
+            defaultOn="true"/>
+
+    <metric name="Transaction Failure Count"
+            indicator="true" 
+            interval="60000"
+            collectionType="trendsup"
+            defaultOn="true"/>
+
+    <metric name="Agent Connections"
+            indicator="false" 
+            interval="60000"
+            defaultOn="true"/>
+            
+    <metric name="Agent Requests"
+            indicator="false" 
+            interval="60000"
+            collectionType="trendsup"
+            defaultOn="true"/>
+            
+    <metric name="Zevent Max Wait"
+            indicator="false" 
+            interval="60000"
+            units="ms"
+            defaultOn="true"/>
+
+    <metric name="Zevents Processed"
+            indicator="false" 
+            interval="60000"
+            collectionType="trendsup"
+            defaultOn="true"/>
+
+    <metric name="Zevent Queue Size"
+            indicator="false" 
+            interval="60000"
+            defaultOn="true"/>
+            
+  </service>
 </plugin>
