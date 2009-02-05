@@ -99,6 +99,14 @@
         <option value="1800000">30 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
         <c:if test="${escalation.maxPauseTime >= 3600000}">
         <option value="3600000">60 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
+        <c:if test="${escalation.maxPauseTime >= 7200000}">
+        <option value="7200000">2 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
+        <c:if test="${escalation.maxPauseTime >= 14400000}">
+        <option value="14400000">4 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
+        <c:if test="${escalation.maxPauseTime >= 28800000}">
+        <option value="28800000">8 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
+        <c:if test="${escalation.maxPauseTime >= 43200000}">
+        <option value="43200000">12 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
         <c:if test="${escalation.maxPauseTime >= 86400000}">
         <option value="86400000">24 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
         <c:if test="${escalation.maxPauseTime >= 172800000}">
@@ -107,6 +115,10 @@
         <option value="259200000">72 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
         <c:if test="${escalation.maxPauseTime > 259200000}">
         <option value="<%= Long.MAX_VALUE %>"><fmt:message key="alert.config.props.CB.Enable.UntilFixed"/></option>
+        </c:if>
+        </c:if>
+        </c:if>
+        </c:if>
         </c:if>
         </c:if>
         </c:if>
