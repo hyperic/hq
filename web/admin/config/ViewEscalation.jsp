@@ -1406,6 +1406,22 @@ function saveAddEscalation() {
                                 <fmt:message
                                         key="alert.config.props.CB.Enable.TimeUnit.1"/>
                             </option>
+                            <option value="7200000">2
+                                <fmt:message
+                                        key="alert.config.props.CB.Enable.TimeUnit.2"/>
+                            </option>
+                            <option value="14400000">4
+                                <fmt:message
+                                        key="alert.config.props.CB.Enable.TimeUnit.2"/>
+                            </option>
+                            <option value="28800000">8
+                                <fmt:message
+                                        key="alert.config.props.CB.Enable.TimeUnit.2"/>
+                            </option>
+                            <option value="43200000">12
+                                <fmt:message
+                                        key="alert.config.props.CB.Enable.TimeUnit.2"/>
+                            </option>
                             <option value="86400000">24
                                 <fmt:message
                                         key="alert.config.props.CB.Enable.TimeUnit.2"/>
