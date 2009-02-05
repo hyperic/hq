@@ -2046,6 +2046,9 @@
             <config include="repl_slave_config"/>
             <metrics include="master-slave-metrics"/>
         </service>
+    </server>
+
+    <server name="MySQL Stats" version="baseWithTable" include="base">
         <service name="Table">
             <plugin type="measurement"
                     class="MySqlStatsMeasurementPlugin"/>
@@ -2071,14 +2074,14 @@
         </service>
     </server>
 
-    <server name="MySQL Stats" version="5.0.x" include="base">
+    <server name="MySQL Stats" version="5.0.x" include="baseWithTable">
         <metrics include="global-5.0"/>
         <service name="Show Slave Status">
             <metrics include="MySQL Status 5.0.x Replication"/>
         </service>
     </server>
 
-    <server name="MySQL Stats" version="5.1.x" include="base">
+    <server name="MySQL Stats" version="5.1.x" include="baseWithTable">
         <metrics include="global-5.1"/>
         <service name="Show Slave Status">
             <metrics include="MySQL Status 5.1.x Replication"/>
