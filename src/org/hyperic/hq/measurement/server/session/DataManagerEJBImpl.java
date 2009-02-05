@@ -496,10 +496,17 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         
         // Finally, for all the data which we put into the system, make sure
         // we update our internal cache, kick off the events, etc.
+        final boolean debug = _log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
+        if (debug) watch.markTimeBegin("analyzeMetricData");
         analyzeMetricData(data);
+        if (debug) watch.markTimeEnd("analyzeMetricData");
         
         Collection cachedData = updateMetricDataCache(data);
         sendDataToEventHandlers(cachedData);        
+        if (debug) {
+            _log.debug(watch);
+        }
     }  
     
     private void analyzeMetricData(List data)
@@ -752,7 +759,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         final boolean supportsPLSQL = dialect.supportsPLSQL();
         final String plSQL = 
             "BEGIN " +
-            "INSERT /*+ APPEND */ INTO :table (measurement_id, timestamp, value) " +
+            "INSERT INTO :table (measurement_id, timestamp, value) " +
             "VALUES(?, ?, ?); " +
             "EXCEPTION WHEN DUP_VAL_ON_INDEX THEN " +
                 "UPDATE :table SET VALUE = ? " +
@@ -771,7 +778,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             {
                 if (supportsDupInsStmt) {
                     stmt = conn.prepareStatement(
-                        buf.append("INSERT /*+ APPEND */ INTO ").append(table)
+                        buf.append("INSERT INTO ").append(table)
                            .append(" (measurement_id, timestamp, value) VALUES (?, ?, ?)")
                            .append(" ON DUPLICATE KEY UPDATE value = ?")
                            .toString());
@@ -782,7 +789,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 }
                 else {
                     stmt = conn.prepareStatement(
-                        buf.append("INSERT /*+ APPEND */ INTO ").append(table)
+                        buf.append("INSERT INTO ").append(table)
                            .append(" (measurement_id, timestamp, value) VALUES (?, ?, ?)")
                            .toString());
                 }
