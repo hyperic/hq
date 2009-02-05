@@ -263,6 +263,9 @@ public class MySqlStatsMeasurementPlugin
             return getLogFilesBehindMaster(metric);
         } else if (metric.isAvail()) {
             // XXX need to figure out how to determine if repl is down from slave
+            // For now just call another method that will throw an exception
+            // if the server is down
+            getLogFilesBehindMaster(metric);
             return Metric.AVAIL_UP;
         } else {
             Connection conn = getCachedConnection(metric);
@@ -308,6 +311,15 @@ public class MySqlStatsMeasurementPlugin
         toks = slaveLogFile.split("\\.");
         int slaveNum = Integer.valueOf(toks[1]).intValue();
         return masterNum - slaveNum;
+    }
+    
+    protected Connection getCachedConnection(Metric metric) throws SQLException {
+        Connection conn = super.getCachedConnection(metric);
+        final boolean autocommit = conn.getAutoCommit();
+        if (!autocommit) {
+            conn.setAutoCommit(true);
+        }
+        return conn;
     }
 
     /**
