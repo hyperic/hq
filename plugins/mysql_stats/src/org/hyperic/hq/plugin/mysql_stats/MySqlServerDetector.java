@@ -34,7 +34,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
@@ -76,20 +79,23 @@ public class MySqlServerDetector
                                 TABLE_SERVICE = "Table",
                                 SLAVE_STATUS  = "Slave Status",
                                 SHOW_SLAVE_STATUS  = "Show Slave Status";
-    private static final Pattern REGEX_VER_4_0 = Pattern.compile("Ver 4.0.[0-9]+"),
-                                 REGEX_VER_4_1 = Pattern.compile("Ver 4.1.[0-9]+"),
-                                 REGEX_VER_5_0 = Pattern.compile("Ver 5.0.[0-9]+"),
-                                 REGEX_VER_5_1 = Pattern.compile("Ver 5.1.[0-9]+");
+    private static final Pattern
+        REGEX_VER_4_0 = Pattern.compile("Ver 4.0.[0-9]+"),
+        REGEX_VER_4_1 = Pattern.compile("Ver 4.1.[0-9]+"),
+        REGEX_VER_5_0 = Pattern.compile("Ver 5.0.[0-9]+"),
+        REGEX_VER_5_1 = Pattern.compile("Ver 5.1.[0-9]+");
 
     public List getServerResources(ConfigResponse platformConfig)
         throws PluginException
     {
         List servers = new ArrayList();
-        List paths = getServerProcessList();
-        for (int i=0; i<paths.size(); i++)
-        {
-            String dir = (String)paths.get(i);
-            List found = getServerList(dir);
+        Map paths = getServerProcessMap();
+        for (Iterator it=paths.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)it.next();
+            Long pid = (Long)entry.getKey();
+            String dir = (String)entry.getValue();
+            String[] args = getProcArgs(pid.longValue());
+            List found = getServerList(dir, args);
             if (!found.isEmpty())
                 servers.addAll(found);
         }
@@ -249,9 +255,9 @@ public class MySqlServerDetector
         }
     }
 
-    private static List getServerProcessList()
+    private static Map getServerProcessMap()
     {
-        List servers = new ArrayList();
+        Map servers = new HashMap();
         long[] pids = getPids(PTQL_QUERY);
         for (int i=0; i<pids.length; i++)
         {
@@ -260,14 +266,15 @@ public class MySqlServerDetector
                 continue;
             }
             File binary = new File(exe);
-            if (!binary.isAbsolute())
+            if (!binary.isAbsolute()) {
                 continue;
-            servers.add(binary.getAbsolutePath());
+            }
+            servers.put(new Long(pids[i]), binary.getAbsolutePath());
         }
         return servers;
     }
 
-    private List getServerList(String path)
+    private List getServerList(String path, String[] args)
         throws PluginException
     {
         List servers = new ArrayList();
@@ -284,13 +291,28 @@ public class MySqlServerDetector
         cprop.setValue("version", version);
         server.setCustomProperties(cprop);
         ConfigResponse productConfig = new ConfigResponse();
-        productConfig.setValue("process.query", PTQL_QUERY);
+        productConfig.setValue("process.query", PTQL_QUERY + getPtqlArgs(args));
         setProductConfig(server, productConfig);
         // sets a default Measurement Config property with no values
         setMeasurementConfig(server, new ConfigResponse());
         server.setName(getPlatformName() + " MySQL Stats "+version);
         servers.add(server);
         return servers;
+    }
+    
+    private String getPtqlArgs(String[] args) {
+        StringBuffer rtn = new StringBuffer();
+        for (int i=0; i<args.length; i++) {
+            if (args[i] == null) {
+                continue;
+            }
+            String[] toks = args[i].split("=", 2);
+            if (toks.length < 2) {
+                continue;
+            }
+            rtn.append(",Args.*.ct=" + toks[1]);
+        }
+        return rtn.toString();
     }
     
     private String getVersion(String executable) {
@@ -303,11 +325,9 @@ public class MySqlServerDetector
             if (res != 0) {
                 return null;
             }
-            String[] toks = output.toString().split("\n");
-            String out = toks[0];
+            String out = output.toString();
             if (_log.isDebugEnabled()) {
-                _log.debug("first output line of " + executable +
-                           " --help: " + out);
+                _log.debug("output of " + executable + " --help:\n" + out);
             }
             // 12/17/2008, did not test with 4.0.x.  Can't download from mysql
             // archives anymore
