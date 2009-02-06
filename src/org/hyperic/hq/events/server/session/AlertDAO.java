@@ -60,11 +60,15 @@ public class AlertDAO extends HibernateDAO {
     }
 
     int deleteByCreateTime(long begin, long end) {
-        String sql = "delete Alert where ctime between :timeStart and :timeEnd";
+        String sql = "delete Alert where " +
+        		     "ctime between :timeStart and :timeEnd and " +
+        		     "not id in (select alertId from EscalationState es " +
+        		                "where alertTypeEnum = :type)";
 
         return getSession().createQuery(sql)
             .setLong("timeStart", begin)
             .setLong("timeEnd", end)
+            .setInteger("type", ClassicEscalationAlertType.CLASSIC.getCode())
             .executeUpdate();
     }
     
