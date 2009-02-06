@@ -50,7 +50,6 @@ import org.quartz.SchedulerException;
  *
  */
 public class MaintenanceEventManagerEJBImpl 
-    extends SessionBase
     implements MaintenanceEventManagerInterface, SessionBean
 {
 	/**
