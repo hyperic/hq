@@ -27,6 +27,8 @@ package org.hyperic.hq.transport;
 
 import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hyperic.hq.transport.util.TransportUtils;
 import org.jboss.remoting.InvokerLocator;
@@ -213,7 +215,13 @@ public class AgentTransport {
     }
     
     private InvokerLocator getLocalInvokerLocator() {
-        return new InvokerLocator("local", "localhost", -1, null, null);
+    	// Suspected bug in JBoss: it looks like the stop() method of TransportServer doesn't
+    	// internally shut down its Connector in a timely synchronous fashion.  This is mostly
+    	// harmless, except in unittests, which create and destroy AgentTransports one after
+    	// another.  Putting in params with a timestamp is a cheesy workaround.
+    	Map params = new HashMap(1);
+    	params.put("timestamp", String.valueOf(System.currentTimeMillis()));
+        return new InvokerLocator("local", "localhost", -1, null, params);
     }
     
     private void verifyServiceImplementsInterface(Class serviceInterface, Object serviceImpl) {
