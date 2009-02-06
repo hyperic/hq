@@ -597,7 +597,7 @@ public class EscalationManagerEJBImpl
      */
     public void acknowledgeAlert(AuthzSubject subject, EscalationAlertType type, 
                                  Integer alertId, String moreInfo, long pause)  
-                                 
+        throws PermissionException
     {
         Escalatable esc = type.findEscalatable(alertId);
         EscalationState state = _stateDAO.find(esc);
@@ -660,7 +660,8 @@ public class EscalationManagerEJBImpl
      * @ejb:interface-method
      */
     public boolean fixAlert(AuthzSubject subject, PerformsEscalations def,
-                            String moreInfo) 
+                            String moreInfo)
+        throws PermissionException
     {
         EscalationState state = _stateDAO.find(def);
         Escalatable e;
@@ -695,6 +696,7 @@ public class EscalationManagerEJBImpl
      */
     public void fixAlert(AuthzSubject subject, EscalationAlertType type, 
                          Integer alertId, String moreInfo)
+        throws PermissionException
     { 
         Escalatable esc = type.findEscalatable(alertId);
         EscalationState state = _stateDAO.find(esc);
@@ -703,10 +705,15 @@ public class EscalationManagerEJBImpl
     
     private void fixOrNotify(AuthzSubject subject, Escalatable esc,
                              EscalationState state, EscalationAlertType type,
-                             boolean fixed, String moreInfo) 
-    {
+                             boolean fixed, String moreInfo)
+        throws PermissionException
+    {        
         Integer alertId = esc.getAlertInfo().getId();
         boolean acknowledged = !fixed;
+
+        // HQ-1295: Does user have sufficient permissions?
+        SessionBase.canManageAlerts(subject, 
+                                    esc.getDefinition().getDefinitionInfo());
         
         if (esc.getAlertInfo().isFixed()) {
             _log.warn(subject.getFullName() + " attempted to fix or " +

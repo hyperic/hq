@@ -34,6 +34,8 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
@@ -80,7 +82,12 @@ public abstract class GalertDefPartition
             GalertDef def = gman.findById(id);
             String fixedMessage = ResourceBundle.getBundle(BUNDLE)
                                                 .getString(GALERT_FIXED_PROP);
-            eman.fixAlert(overlord, def, fixedMessage);
+            try {
+                eman.fixAlert(overlord, def, fixedMessage);
+            } catch (PermissionException e) {
+                // this should never happen to the overlord
+                throw new SystemException(e);
+            }
         }
     };
     
