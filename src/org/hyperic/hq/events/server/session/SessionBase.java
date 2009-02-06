@@ -52,6 +52,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -108,11 +109,16 @@ public abstract class SessionBase {
         }
     }
 
-    protected AppdefEntityID getAppdefEntityID(AlertDefinition ad) {
+    public static AppdefEntityID getAppdefEntityID(AlertDefinitionInterface adi) {
         try {
-            return new AppdefEntityID(ad.getResource());
+            return new AppdefEntityID(adi.getResource());
         } catch (IllegalArgumentException e) {
-            return new AppdefEntityTypeID(ad.getAppdefType(), ad.getAppdefId());
+            if (adi instanceof AlertDefinition) {
+                AlertDefinition ad = (AlertDefinition) adi;
+                return new AppdefEntityTypeID(ad.getAppdefType(), ad.getAppdefId());
+            } else {
+                throw e;
+            }
         }
     }
 
@@ -155,21 +161,25 @@ public abstract class SessionBase {
         return ResourceManagerEJBImpl.getOne().findResource(id);
     }
 
-    protected void canManageAlerts(AuthzSubject who, AlertDefinition ad)
+    public static void canManageAlerts(AuthzSubject who, AlertDefinitionInterface adi)
         throws PermissionException {
-        if (ad.isDeleted())     // Don't need to check deleted alert defs
+        if (adi.isDeleted())     // Don't need to check deleted alert defs
             return;
         
-        Integer parentId = ad.getParent() != null ? ad.getParent().getId()
-                : null;
+        Integer parentId = null;      
+        if (adi instanceof AlertDefinition) {
+            AlertDefinition ad = (AlertDefinition) adi;
+            parentId = ad.getParent() != null ? ad.getParent().getId() : null;
+        }
+        
         if (!EventConstants.TYPE_ALERT_DEF_ID.equals(parentId))
-            canManageAlerts(who, getAppdefEntityID(ad));
+            canManageAlerts(who, getAppdefEntityID(adi));
     }
 
     /**
      * Check for manage alerts permission for a given resource
      */
-    protected void canManageAlerts(AuthzSubject who, AppdefEntityID id)
+    public static void canManageAlerts(AuthzSubject who, AppdefEntityID id)
         throws PermissionException {
         if (id instanceof AppdefEntityTypeID) {
             // Make sure the user is a super user

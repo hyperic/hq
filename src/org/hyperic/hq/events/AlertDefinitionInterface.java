@@ -33,6 +33,7 @@ public interface AlertDefinitionInterface {
     public String getDescription();
     public int getPriority();
     public boolean isNotifyFiltered();
+    public boolean isDeleted();
     public boolean performsEscalations();
     public Resource getResource();
 }
