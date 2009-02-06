@@ -1553,7 +1553,6 @@
       </copy>
 	    
       <echo message="Copying hq-plugins to 'unittest' configuration..."/>
-	  
       <copy todir="${jboss.home}/server/unittest/deploy/hq.ear/hq-plugins">
           <fileset dir="${server.plugin.dir}"/>
       </copy>
@@ -1565,6 +1564,7 @@
       <copy todir="${jboss.home}/server/unittest/lib">
           <fileset dir="${thirdparty.lib}">
 			  <include name="mockejb.jar"/>
+			  <include name="jmock-core-1.2.0.jar"/>
 			  <include name="dbunit*.jar"/>
 			  <include name="junit*.jar"/>
 		  </fileset>	  
