@@ -1023,14 +1023,6 @@ public class EventsBossEJBImpl
                RemoveException, PermissionException 
     {
         manager.authenticate(sessionID);
-        /* incorrect to use alert IDs as alert definition IDs
-        try {
-            // check security
-            canManageAlerts(subject, ids);
-        } catch (FinderException e) {
-            throw new RemoveException("Alert Definition not found.");
-        }
-        */
         getAM().deleteAlerts(ids);
     }
     
