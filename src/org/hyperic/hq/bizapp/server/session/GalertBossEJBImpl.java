@@ -36,6 +36,7 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -49,6 +50,7 @@ import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.events.AlertSeverity;
+import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo;
@@ -200,10 +202,20 @@ public class GalertBossEJBImpl
         AuthzSubject subj = _sessMan.getSubject(sessionId);
         
         // Find the ResourceGroup
-        ResourceGroup g;
-        g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj, 
-                                                                       gid);
-        return _galertMan.findAlertDefs(g, pc);
+        ResourceGroup g = ResourceGroupManagerEJBImpl
+                                .getOne().findResourceGroupById(subj, gid);
+        PageList defList = null;
+        try {
+            SessionBase.canManageAlerts(subj,
+                                        new AppdefEntityID(g.getResource()));        
+            
+            defList = _galertMan.findAlertDefs(g, pc);
+        } catch (PermissionException e) {
+            // user does not have sufficient permissions, so display no definitions
+            defList = new PageList();
+        }
+        
+        return defList;
     }
 
     /**
@@ -244,10 +256,16 @@ public class GalertBossEJBImpl
      * @ejb:interface-method
      */
     public Escalatable findEscalatableAlert(int sessionId, Integer id)
-        throws SessionException
+        throws SessionException, PermissionException
     {
-        _sessMan.authenticate(sessionId);
-        return _galertMan.findEscalatableAlert(id);
+        AuthzSubject subject = _sessMan.getSubject(sessionId);        
+        Escalatable esc = _galertMan.findEscalatableAlert(id);
+        
+        // HQ-1295: Does user have sufficient permissions?
+        SessionBase.canManageAlerts(subject, 
+                                    esc.getDefinition().getDefinitionInfo());
+
+        return esc;
     }    
 
     /**
@@ -298,13 +316,22 @@ public class GalertBossEJBImpl
         ResourceGroup g;
         g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj,
                                                                        gid);
+        PageList alertLogs = null;
         
-        // Don't need to have any results
-        PageControl pc = new PageControl();
-        pc.setPagesize(0);
+        try {
+            SessionBase.canManageAlerts(subj,
+                                        new AppdefEntityID(g.getResource()));
         
-        PageList alertLogs =
-            _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
+            // Don't need to have any results
+            PageControl pc = new PageControl();
+            pc.setPagesize(0);
+        
+            alertLogs =
+                _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
+        } catch (PermissionException e) {
+            // user does not have sufficient permissions, so display no alerts
+            alertLogs = new PageList();
+        }
         
         return alertLogs.getTotalSize();
     }
@@ -327,30 +354,38 @@ public class GalertBossEJBImpl
         ResourceGroup g;
         g = ResourceGroupManagerEJBImpl.getOne().findResourceGroupById(subj,
                                                                        gid);
+        PageList alertLogs = null;
+        JSONArray jarr = new JSONArray(); 
         
-        PageList alertLogs =
-            _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
+        try {
+            SessionBase.canManageAlerts(subj,
+                                        new AppdefEntityID(g.getResource()));
+            alertLogs =
+                _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
         
-        JSONArray jarr = new JSONArray();
-        for (Iterator i = alertLogs.iterator(); i.hasNext(); ) {
-            GalertLog alert = (GalertLog) i.next();
+            for (Iterator i = alertLogs.iterator(); i.hasNext(); ) {
+                GalertLog alert = (GalertLog) i.next();
             
-            // Format the alertTime
-            SimpleDateFormat df =
-                new SimpleDateFormat(TimeUtil.DISPLAY_DATE_FORMAT);
-            String date =
-                df.format(new Date(alert.getTimestamp()));
+                // Format the alertTime
+                SimpleDateFormat df =
+                    new SimpleDateFormat(TimeUtil.DISPLAY_DATE_FORMAT);
+                String date =
+                    df.format(new Date(alert.getTimestamp()));
             
-            jarr.put(new JSONObject()
-                .put("id", alert.getId())
-                .put("time", date)
-                .put("name", alert.getAlertDefinitionInterface().getName())
-                .put("defId", alert.getAlertDefinitionInterface().getId())
-                .put("priority",
-                     alert.getAlertDefinitionInterface().getPriority())
-                .put("reason", alert.getShortReason())
-                .put("fixed", alert.isFixed())
-                .put("acknowledgeable", alert.isAcknowledgeable()));
+                jarr.put(new JSONObject()
+                    .put("id", alert.getId())
+                    .put("time", date)
+                    .put("name", alert.getAlertDefinitionInterface().getName())
+                    .put("defId", alert.getAlertDefinitionInterface().getId())
+                    .put("priority",
+                        alert.getAlertDefinitionInterface().getPriority())
+                    .put("reason", alert.getShortReason())
+                    .put("fixed", alert.isFixed())
+                    .put("acknowledgeable", alert.isAcknowledgeable()));
+            }
+        } catch (PermissionException e) {
+            // user does not have sufficient permissions, so display no alerts
+            alertLogs = new PageList();
         }
         
         JSONObject jobj = new JSONObject();
