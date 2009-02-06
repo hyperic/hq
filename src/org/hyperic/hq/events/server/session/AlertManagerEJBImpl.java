@@ -444,6 +444,10 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
         for (Iterator i=alerts.iterator(); i.hasNext(); ) {
             Alert a = (Alert)i.next();
+            // due to async deletes this could be null.  just ignore and continue
+            if (a.getAlertDefinition().getResource().getResourceType() == null) {
+                continue;
+            }
             Escalatable e = 
                 ClassicEscalatableCreator.createEscalatable(a, 
                                                             getShortReason(a),
