@@ -1276,8 +1276,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      */
     this.select_change = function(e) {
         console.info("select changed");
-        that.report_title.innerHTML = that.desc[that.select_btn.options[that.select_btn.selectedIndex].value];
-        that.getImageURL(that.args.url+that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
+        that.getImageURL(that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
     };
 
     this.getImageURLCallback = function(data) {
@@ -1285,6 +1284,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         //assign the urls to the img src prepending the base url
         if(response && response.length >= 0) {
             if(response[0].reportImageURL) {
+                that.report_title.innerHTML = that.desc[that.select_btn.options[that.select_btn.selectedIndex].value];
                 that.report_img.src = that.url + response[0].reportImageURL;
                 that.report_img.style.height = "auto";
             }
@@ -1299,7 +1299,8 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      */
     this.getReportsCallback = function(data) {
         var response = document.arcReportList;
-        if (response !== null) {
+        if (response !== null && 
+            that.select_btn.options[0].value == "No Reports Available") {
             var options = [];
             that.select_btn.innerHTML = "";
             var index = 0;
@@ -1318,9 +1319,6 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         }
         console.info("completed select box");
         if(response.length > 0) {
-            that.report_img.src = that.arcLink + that.currentReport.URI;
-            that.report_title.innerHTML = that.currentReport.Description;
-
             that.container.loading.style.display = "none";
             that.container.error_loading.style.display = "none";
             that.container.progress.style.display = "none";
@@ -1333,7 +1331,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         }
         
         console.info("completed callback");
-        that.getImageURL(that.args.url+that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
+        that.getImageURL(that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
     };
 
     this.errorRemotingCallback = function(data){
@@ -1416,6 +1414,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     };
 
     this.getImageURL = function (uri, checkString) {
+        console.info(uri);
         dojo11.io.script.get({
             handleAs : "html",
             url : uri,
