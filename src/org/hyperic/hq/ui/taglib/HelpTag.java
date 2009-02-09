@@ -44,6 +44,7 @@ import org.hyperic.util.ConfigPropertyException;
  * return the link to the help system.
  */
 public class HelpTag extends VarSetterBaseTag {
+    private static String INTERNAL_HELP_BASE_URL = "/ui_docs/DOC/";
     private boolean context = true;
     
     //----------------------------------------------------public methods
@@ -83,7 +84,7 @@ public class HelpTag extends VarSetterBaseTag {
         else {
             helpURL =
                 ((HttpServletRequest) pageContext.getRequest()).getContextPath()
-                + "/ui_docs/DOC/";
+                + INTERNAL_HELP_BASE_URL;
         }
 
         if (context) {
@@ -95,6 +96,9 @@ public class HelpTag extends VarSetterBaseTag {
         }
         
         if (!external) {
+            if (INTERNAL_HELP_BASE_URL.equals(helpURL)) {
+                helpURL += "index";
+            }
             helpURL += ".html";
         }
 
