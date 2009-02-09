@@ -1216,7 +1216,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     that.url = kwArgs.url;
     that.container = {};
     that.currentReport = null;
-    that.queryParams = { get: "dashboard.html?_flowId=dashboardIntegrationFlow" };
+    that.queryParams = { get: "dashboard.html?action=listReports" };
 
     // the dom containers
     that.container.loading = dojo11.query('.loading',node)[0];
@@ -1283,6 +1283,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         var response = document.arcImageData;
         //assign the urls to the img src prepending the base url
         if(response && response.length >= 0) {
+         // alert(response[0].reportImageURL);
             if(response[0].reportImageURL) {
                 that.report_title.innerHTML = that.desc[that.select_btn.options[that.select_btn.selectedIndex].value];
                 that.report_img.src = that.url + response[0].reportImageURL;
@@ -1414,6 +1415,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     };
 
     this.getImageURL = function (uri, checkString) {
+        // alert(uri);
         console.info(uri);
         dojo11.io.script.get({
             handleAs : "html",
