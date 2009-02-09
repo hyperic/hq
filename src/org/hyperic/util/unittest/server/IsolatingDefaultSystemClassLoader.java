@@ -130,12 +130,18 @@ public class IsolatingDefaultSystemClassLoader extends URLClassLoader {
      */
     protected synchronized Class loadClass(String className, boolean resolveClass) 
         throws ClassNotFoundException  {
-        
+    	
         boolean isolate = ((Boolean)SHOULD_ISOLATE.get()).booleanValue();
 
+        Class loadedClass = null;
+
         // Ask the VM to look in its cache.
-        Class loadedClass = findLoadedClass(className);
+        /*Class*/ loadedClass = findLoadedClass(className);
         
+    	if (isolate && loadedClass != null && loadedClass.getClassLoader().equals(_defaultSystemClassLoader)) {
+    		// Toss it, we don't wan't classes from the default loader if we're isolating
+    		loadedClass = null;
+    	}
         
         if (loadedClass == null) {
             if (isolate) {
@@ -149,14 +155,14 @@ public class IsolatingDefaultSystemClassLoader extends URLClassLoader {
 
                 // not findLoadedClass or by getParent().loadClass, try locally
                 if (loadedClass == null) {
-                    loadedClass = findClass(className);
+                	loadedClass = findClass(className);
                 }
             } else {
                 // Delegate to the default system classloader
                 loadedClass = _defaultSystemClassLoader.loadClass(className);
             }    
         }
-                
+  
         // resolve if required
         if (resolveClass) {
             resolveClass(loadedClass);
