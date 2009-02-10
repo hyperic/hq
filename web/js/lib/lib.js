@@ -1301,7 +1301,9 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         if (response !== null && 
             that.select_btn.options[0].value == "No Reports Available") {
             var options = [];
-            that.select_btn.innerHTML = "";
+            while (that.select_btn.length > 0) {
+                that.select_btn.remove(0);
+            }
             var index = 0;
             for (var d in response) {
                 if (response[d] !== undefined && response[d].label !== undefined) {
