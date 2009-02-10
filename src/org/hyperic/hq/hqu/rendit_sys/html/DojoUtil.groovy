@@ -334,6 +334,7 @@ class DojoUtil {
         def lastPageVar  = "${idVar}_lastPage"
         def sortOrderVar = "${idVar}_sortOrder"
         def urlXtraVar   = "${idVar}_urlXtra"
+        def postRefreshVar = "${idVar}_postRefresh"
         def ajaxCountVar = "${idVar}_ajaxCountVar"
         def refreshTimeoutVar = "${idVar}_refreshTimeout"
         def pageControlStyle = 'display:none'
@@ -356,6 +357,7 @@ class DojoUtil {
         var ${lastPageVar} = false;
         var ${sortOrderVar};
         var ${urlXtraVar} = [];
+        var ${postRefreshVar} = [];
         var ${ajaxCountVar} = 0;
         var ${refreshTimeoutVar};
 
@@ -372,6 +374,12 @@ class DojoUtil {
         // additional query parameters (in the form of a map)
         function ${id}_addUrlXtraCallback(fn) {
             ${urlXtraVar}.push(fn);
+        }
+
+        // Allows the caller to register callbacks to operate on the data
+        // returned by the table refresh
+        function ${id}_addRefreshCallback(fn) {
+            ${postRefreshVar}.push(fn);
         }
 
         function ${idVar}_makeQueryStr(kwArgs) {
@@ -470,13 +478,22 @@ class DojoUtil {
                     ${idVar}_setupPager();
                     ${idVar}_highlightRow(data.data);
                     ${ajaxCountVar}--;
+
+                    // Handle any registered refresh callbacks
+                    var callbacks = ${postRefreshVar};
+                    for (var i=0; i<callbacks.length; i++) {
+                        var cb = callbacks[i];
+                        cb(data);
+                    }
+
                     if (${ajaxCountVar} == 0) {
                         dojo.byId("${idVar}_loadMsg").style.visibility = 'hidden';
                     }
                     if (data.data == '') {
                         dojo.event.topic.publish("XHRComplete", "NO_DATA_RETURNED");                        
-                    }else
+                    } else {
                         dojo.event.topic.publish("XHRComplete", "DATA_RETURNED");
+                    }
                 }
             });
         }
