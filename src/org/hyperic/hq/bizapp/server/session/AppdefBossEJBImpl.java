@@ -147,6 +147,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.server.session.EventLog;
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
@@ -183,6 +184,8 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
+
+import org.quartz.SchedulerException;
 
 /**
  * @ejb:bean name="AppdefBoss"
@@ -1310,6 +1313,20 @@ public class AppdefBossEJBImpl
         final AuthzSubject subject = manager.getSubject(sessionId);
         final Resource res = resMan.findResource(aeid);
         
+        if (aeid.isGroup()) {
+            // HQ-1577: Do not delete group if downtime schedule exists
+            try {
+                MaintenanceEvent event = 
+                    getEventsBoss().getMaintenanceEvent(sessionId, aeid.getId());
+                
+                if (event != null && event.getStartTime() != 0) {
+                    throw new VetoException("Could not remove resource " + aeid +
+                                            " because a downtime schedule exists.");
+                }
+            } catch (SchedulerException se) {
+                throw new ApplicationException(se);
+            }
+        }
         resMan.removeResourcePerms(subject, res);
         if (log.isDebugEnabled()) {
             log.debug("removeAppdefEntity() for " + aeid + " executed in " +

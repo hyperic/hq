@@ -61,7 +61,7 @@ public class MaintenanceEventManagerEJBImpl
     											Integer groupId)
         throws PermissionException, SchedulerException 
     {
-        throw new UnsupportedOperationException();
+        return null;
     }
         
     /**

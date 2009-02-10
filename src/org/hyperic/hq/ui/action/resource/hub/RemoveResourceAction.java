@@ -132,6 +132,7 @@ public class RemoveResourceAction extends BaseAction {
             BizappUtils.buildAppdefEntityIds(resourceList);
         if (resourceItems != null && resourceItems.length > 0) {
             int deleted = 0;
+            int vetoed = 0;
             // about the exception handling:
             // if someone either deleted the entity out from under our user
             // or the user hit the back button, a derivative of 
@@ -148,9 +149,16 @@ public class RemoveResourceAction extends BaseAction {
                 } catch (AppdefEntityNotFoundException e) {
                     log.error("Removing resource " + resourceId +
                                "failed.");
+                } catch (VetoException v) {
+                    vetoed++;
+                    log.info(v.getMessage(), v);
                 }
             }
-            if (deleted > 0) {
+            if (vetoed > 0) {
+                RequestUtils
+                    .setError(request,
+                             "resource.common.inventory.groups.error.RemoveVetoed");
+            } else if (deleted > 0) {
                 RequestUtils
                     .setConfirmation(request,
                                     "resource.common.confirm.ResourcesRemoved");
