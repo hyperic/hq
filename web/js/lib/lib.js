@@ -1308,7 +1308,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     this.getReportsCallback = function(data) {
         var response = document.arcReportList;
         if (response !== null && 
-            that.select_btn.options[0].value == "No Reports Available") {
+            that.select_btn.options[0].text == "No Reports Available") {
             var options = [];
             while (that.select_btn.length > 0) {
                 that.select_btn.remove(0);
