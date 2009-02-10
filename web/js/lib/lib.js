@@ -1287,9 +1287,18 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
                 that.report_img.src = that.url + response[0].reportImageURL;
                 that.report_img.style.height = "auto";
             }
+
+            // Hide the legend
+            that.hideLeg_btn.style.display = "none" ;
+            that.legend.style.display = "none" ;
             if(response[0].reportLegendURL) {
-                 that.report_legend.src = that.url + response[0].reportLegendURL;
+                that.report_legend.src = that.url + response[0].reportLegendURL;
+                that.showLeg_btn.style.display = "block";
             }
+            else {
+                that.showLeg_btn.style.display = "none";
+            }
+            that.isLegendShowing = false;
         }
     };
 
