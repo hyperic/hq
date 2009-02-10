@@ -27,6 +27,7 @@ package org.hyperic.hq.hqu.rendit;
 import groovy.lang.GroovyClassLoader;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -43,6 +44,7 @@ import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.util.Runnee;
+import org.hyperic.util.file.FileUtil;
 
 /**
  * Basically a wrapper around the classloader and associated groovy 
@@ -63,6 +65,27 @@ public class PluginWrapper {
     private final GroovyClassLoader _loader;
     private       IDispatcher       _dispatcher;
 
+    /**
+     * @return A unique temporary directory for embedded jar deployments.
+     */
+    private File getTempDir() {
+        String tmp = System.getProperty("jboss.server.temp.dir");
+        if (tmp == null) {
+            tmp = System.getProperty("java.io.tmpdir");
+        }
+
+        File tmpHquDir = new File(tmp, "hqu");
+
+        if (!tmpHquDir.exists()) {
+            if (!tmpHquDir.mkdirs()) {
+                throw new RuntimeException("Unable to create temporary directory " +
+                                           tmpHquDir.getAbsolutePath());
+            }
+        }
+
+        return tmpHquDir;
+    }
+
     PluginWrapper(File pluginDir, File sysDir, ClassLoader parentLoader) {
         URLClassLoader urlLoader;
         List urls = new ArrayList();
@@ -72,6 +95,7 @@ public class PluginWrapper {
         _pluginDir = pluginDir;
 
         try {
+            File tmpDir = getTempDir();
             File libDir = new File(_pluginDir, "lib");
             
             if (libDir.isDirectory()) {
@@ -81,7 +105,12 @@ public class PluginWrapper {
                     if (files[i].isFile() && 
                         files[i].getName().endsWith(".jar"))
                     {
-                        urls.add(files[i].toURL());
+                        String prefix = pluginDir.getName() + "-" + files[i].getName().
+                                substring(0, files[i].getName().length() - 4);
+                        File tmpJar = File.createTempFile(prefix, ".jar", tmpDir);
+                        FileUtil.copyFile(files[i], tmpJar);
+                        tmpJar.deleteOnExit();
+                        urls.add(tmpJar.toURL());
                     }
                 }
             }
@@ -89,6 +118,8 @@ public class PluginWrapper {
             urls.add(sysDir.toURL());
             u = (URL[])urls.toArray(new URL[urls.size()]);
         } catch(MalformedURLException e) {
+            throw new RuntimeException(e);
+        } catch(IOException e) {
             throw new RuntimeException(e);
         }
 
