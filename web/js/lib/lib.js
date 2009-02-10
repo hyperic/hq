@@ -1254,7 +1254,6 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      */
     this.click_refresh_btn = function(e) {
         that.updateIframe(that.url+that.queryParams.get);
-
     };
 
     this.toggleLegend = function() {
@@ -1279,11 +1278,16 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         that.getImageURL(that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
     };
 
-    this.getImageURLCallback = function(data) {
+    this.getImageURLCallback = function() {
+        if (document.arcImageData == null) {
+            console.info("waiting to load document.arcImageData");
+            setTimeout("document.arcPortlet.getImageURLCallback()", 800);
+            return;
+        }
+
         var response = document.arcImageData;
         //assign the urls to the img src prepending the base url
         if(response && response.length >= 0) {
-         // alert(response[0].reportImageURL);
             if(response[0].reportImageURL) {
                 that.report_title.innerHTML = that.desc[that.select_btn.options[that.select_btn.selectedIndex].value];
                 that.report_img.src = that.url + response[0].reportImageURL;
@@ -1415,14 +1419,14 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     };
 
     this.getImageURL = function (uri, checkString) {
-        // alert(uri);
         console.info(uri);
+        document.arcImageData = null;
         dojo11.io.script.get({
             handleAs : "html",
             url : uri,
             checkString : "document.arcImageData",
             load: function(data) {
-                that.getImageURLCallback(data);
+                that.getImageURLCallback();
             },
             error : function(data) {
                 that.errorRemotingCallback(data);
