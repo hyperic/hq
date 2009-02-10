@@ -1279,12 +1279,6 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     };
 
     this.getImageURLCallback = function() {
-        if (document.arcImageData == null) {
-            console.info("waiting to load document.arcImageData");
-            setTimeout("document.arcPortlet.getImageURLCallback()", 800);
-            return;
-        }
-
         var response = document.arcImageData;
         //assign the urls to the img src prepending the base url
         if(response && response.length >= 0) {
@@ -1425,9 +1419,6 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
             handleAs : "html",
             url : uri,
             checkString : "document.arcImageData",
-            load: function(data) {
-                that.getImageURLCallback();
-            },
             error : function(data) {
                 that.errorRemotingCallback(data);
             }
