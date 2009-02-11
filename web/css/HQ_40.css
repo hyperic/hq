@@ -1805,6 +1805,15 @@ visibility: hidden;*/
     color: #444
 }
 
+.reportTitle {
+    padding-top: 3px;
+}
+
+.report img {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
 /*GroupManager*/
 
 .panelContainer {
@@ -2288,3 +2297,4 @@ button span{
 .ToolbarContent td a img {
     margin-left:5px;
 }
+
