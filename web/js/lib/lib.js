@@ -1275,22 +1275,8 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      */
     this.select_change = function(e) {
         console.info("select changed");
+        that.report_img.src = "";
         that.getImageURL(that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
-    };
-
-    this.getImageURLCallback = function() {
-        var response = document.arcImageData;
-        //assign the urls to the img src prepending the base url
-        if(response && response.length >= 0) {
-            if(response[0].reportImageURL) {
-                that.report_title.innerHTML = that.desc[that.select_btn.options[that.select_btn.selectedIndex].value];
-                that.report_img.src = that.url + response[0].reportImageURL;
-                that.report_img.style.height = "auto";
-            }
-            if(response[0].reportLegendURL) {
-                 that.report_legend.src = that.url + response[0].reportLegendURL;
-            }
-        }
     };
 
     /**
@@ -1425,6 +1411,30 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
                 that.errorRemotingCallback(data);
             }
         });
+    };
+
+    this.getImageURLCallback = function() {
+        var response = document.arcImageData;
+        //assign the urls to the img src prepending the base url
+        if(response && response.length >= 0) {
+            if(response[0].reportImageURL) {
+                that.report_title.innerHTML = that.desc[that.select_btn.options[that.select_btn.selectedIndex].value];
+                that.report_img.src = that.url + response[0].reportImageURL;
+                that.report_img.style.height = "auto";
+            }
+
+            // Hide the legend
+            that.hideLeg_btn.style.display = "none" ;
+            that.legend.style.display = "none" ;
+            if(response[0].reportLegendURL) {
+                that.report_legend.src = that.url + response[0].reportLegendURL;
+                that.showLeg_btn.style.display = "block";
+            }
+            else {
+                that.showLeg_btn.style.display = "none";
+            }
+            that.isLegendShowing = false;
+        }
     };
 
     this.init(kwArgs);
