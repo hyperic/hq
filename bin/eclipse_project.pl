@@ -88,7 +88,7 @@ if ($jboss_home) {
 
     #for NotReadyValve
     my $catalina =
-      "$jboss_home/server/default/deploy/jbossweb-tomcat55.sar/catalina.jar";
+        "$jboss_home/server/default/deploy/jboss-web.deployer/jbossweb.jar";
     if (-e $catalina) {
         add_lib($catalina);
     }
