@@ -930,6 +930,18 @@ public class AlertDefinitionManagerEJBImpl
         return _valuePager.seek(adefs, pc.getPagenum(), pc.getPagesize());
     }
 
+    /**
+     * Get list of alert definitions for a resource type.
+     * @ejb:interface-method
+     */
+    public List findAlertDefinitions(AuthzSubject subject, Resource prototype)
+        throws PermissionException
+    {
+        AlertDefinitionDAO aDao = getAlertDefDAO();
+        // TODO: Check admin permission?
+        return aDao.findAllByResource(prototype);
+    }
+
     /** 
      * Get list of alert conditions for a resource or resource type
      * @ejb:interface-method
