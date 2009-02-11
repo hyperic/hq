@@ -45,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.CollectorExecutor;
@@ -326,11 +327,15 @@ public class PluginDumper {
                            
         this.config.init();
 
-        if (!new File(this.config.pdkDir).exists()) {
+        File pdkDir = new File(this.config.pdkDir);
+        if (!pdkDir.exists()) {
             System.out.println(this.config.pdkDir + " does not exist");
             System.exit(1);
         }
-
+        final String bh = AgentConfig.AGENT_BUNDLE_HOME;
+        if (System.getProperty(bh) == null) {
+        	System.setProperty(bh, pdkDir.getParent());
+        }
         this.ppm = new ProductPluginManager(this.config.props);
         this.ppm.setRegisterTypes(this.config.registerTypes);
         this.ppm.init();
