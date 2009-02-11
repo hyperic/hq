@@ -110,9 +110,10 @@ public class AlertDAO extends HibernateDAO {
         q = getSession().createQuery(sql)
             .setLong("begin", begin)
             .setLong("end", end)
-            .setInteger("priority", priority)
-            .setCacheable(true)
-            .setCacheRegion("Alert.findByCreateTime");
+            .setInteger("priority", priority);
+            // HHQ-2781: acknowledgeable state is stale from query cache
+            //.setCacheable(true)
+            //.setCacheRegion("Alert.findByCreateTime");
 
         if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subj.intValue())
