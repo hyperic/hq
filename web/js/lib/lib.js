@@ -1276,7 +1276,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     this.select_change = function(e) {
         console.info("select changed");
         that.report_img.src = "";
-        that.getImageURL(that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
+        that.getImageURL(that.url + that.select_btn.options[that.select_btn.selectedIndex].value);
     };
 
     /**
@@ -1318,7 +1318,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         }
         
         console.info("completed callback");
-        that.getImageURL(that.arcLink + that.select_btn.options[that.select_btn.selectedIndex].value);
+        that.getImageURL(that.url + that.select_btn.options[that.select_btn.selectedIndex].value);
     };
 
     this.errorRemotingCallback = function(data){
@@ -1365,13 +1365,12 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         //the refresh is showing
         //set the arc link
         //that.container.error_loading.innerHTML = that.args.notFound;
-        if(that.arcLink == "") {
+        if(that.url == "") {
             that.container.loading.style.display = "block";
             that.container.error_loading.style.display = "block";
             that.container.progress.style.display = "none";
         } else {
-            if(that.arcLink.href)
-                that.arcLink.href = that.url;
+            that.arcLink.href = that.url;
             that.init_connection(that.url+that.queryParams.get);
             console.log("connecting the buttons");
             dojo11.connect(that.remove_btn,'onclick',that.click_remove_btn);
