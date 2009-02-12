@@ -54,6 +54,8 @@ public class DataPurgeJob implements Job {
 
     static long HOUR = MeasurementConstants.HOUR;
     static long MINUTE = MeasurementConstants.MINUTE;
+    private static long _lastAnalyze = 0l;
+    private static long ANALYZE_INTERVAL = 6*HOUR;
 
     // We create a private static class, in case the DataPurgeJob is 
     // dynamically proxied (which would result in multiple instances of
@@ -148,15 +150,20 @@ public class DataPurgeJob implements Job {
     private static void runDBAnalyze(ServerConfigManagerLocal serverConfig)
     {
         // First check if we are already running
+        long analyzeStart = System.currentTimeMillis();
         synchronized (DataPurgeLockHolder.ANALYZE_RUNNING_LOCK) {
             if (DataPurgeLockHolder.analyzeRunning) {
                 _log.info("Not starting db analyze. (Already running)");
                 return;
+            } else if ((_lastAnalyze + ANALYZE_INTERVAL) > analyzeStart) {
+                _log.info("Not starting db analyze. Last run at " +
+                    TimeUtil.toString(_lastAnalyze));
+                return;
             } else {
                 DataPurgeLockHolder.analyzeRunning = true;
             }
-        } try {
-            long analyzeStart = System.currentTimeMillis();
+        }
+        try {
             _log.info("Performing database analyze");
             // Analyze the current and previous hq_metric_data table
             serverConfig.analyzeHqMetricTables();
@@ -167,6 +174,7 @@ public class DataPurgeJob implements Job {
         } finally {
             synchronized (DataPurgeLockHolder.ANALYZE_RUNNING_LOCK) {
                 DataPurgeLockHolder.analyzeRunning = false;
+                _lastAnalyze = analyzeStart;
             }
         }
     }
