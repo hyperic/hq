@@ -109,7 +109,7 @@
     <fileset dir="${hibernate.lib}" includes="*.jar" />
     <fileset dir="${jboss.home}/server/default/lib"
              includes="*.jar"
-             excludes="antlr-*.jar,txsnatch.jar" />
+             excludes="antlr-*.jar,txsnatch.jar,jbossjta.jar" />
     <fileset dir="${jboss.home}/lib" includes="*.jar" />
     <fileset dir="${jboss.home}/client" includes="*.jar" />
     <fileset dir="${tomcat.home}" includes="*.jar" />

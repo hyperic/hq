@@ -136,11 +136,13 @@ public class IsolatingDefaultSystemClassLoader extends URLClassLoader {
         Class loadedClass = null;
 
         // Ask the VM to look in its cache.
-        /*Class*/ loadedClass = findLoadedClass(className);
+        loadedClass = findLoadedClass(className);
         
-    	if (isolate && loadedClass != null && loadedClass.getClassLoader().equals(_defaultSystemClassLoader)) {
+        if (isolate && loadedClass != null &&
+            loadedClass.getClassLoader() != null &&
+            loadedClass.getClassLoader().equals(_defaultSystemClassLoader)) {
     		// Toss it, we don't wan't classes from the default loader if we're isolating
-    		loadedClass = null;
+            loadedClass = null;
     	}
         
         if (loadedClass == null) {

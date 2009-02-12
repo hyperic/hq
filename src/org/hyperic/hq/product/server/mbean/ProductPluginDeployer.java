@@ -226,18 +226,7 @@ public class ProductPluginDeployer
             .getPluginsDeployedCaller().pluginsDeployed(_plugins);
 
         _plugins.clear();
-        try {
-            ConcurrentStatsCollector c = ConcurrentStatsCollector.getInstance();
-            c.register(
-                ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER);
-            c.register(
-                ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
-            c.register(
-                ConcurrentStatsCollector.DATA_MANAGER_METRICS_INSERTED);
-            c.startCollector();
-        } catch (Exception e) {
-            _log.error("Could not start Concurrent Stats Collector", e);
-        }
+        startConcurrentStatsCollector();
 
         //generally means we are done deploying plugins at startup.
         //but we are not "done" since a plugin can be dropped into
@@ -252,6 +241,26 @@ public class ProductPluginDeployer
         
         if (n != null && n.getType().equals("org.jboss.system.server.started")) {
             SystemAudit.createUpAudit(((Number)n.getUserData()).longValue());
+        }
+    }
+    
+    private void startConcurrentStatsCollector() {
+        String prop = System.getProperty("hq.unittest.run");
+        System.out.println(prop);
+        if (prop != null && prop.equals("true")) {
+            return;
+        }
+        try {
+            ConcurrentStatsCollector c = ConcurrentStatsCollector.getInstance();
+            c.register(
+                ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER);
+            c.register(
+                ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
+            c.register(
+                ConcurrentStatsCollector.DATA_MANAGER_METRICS_INSERTED);
+            c.startCollector();
+        } catch (Exception e) {
+            _log.error("Could not start Concurrent Stats Collector", e);
         }
     }
     
