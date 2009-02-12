@@ -1239,6 +1239,8 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     that.arcLink = dojo11.query('.arcLink',node)[0];
 
     that.isLegendShowing = false;
+    that.legendDia = '';
+    that.legendDiv = 'legend_dialog';
     
     /**
      * The widget remove callback
@@ -1263,10 +1265,17 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
             that.legend.style.display = "none" ;
             that.isLegendShowing = !that.isLegendShowing;
         } else {
+            /*
             that.showLeg_btn.style.display = "none";
             that.hideLeg_btn.style.display = "block" ;
             that.legend.style.display = "block" ;
             that.isLegendShowing = !that.isLegendShowing;
+            */
+
+            that.legendDia.show();
+            var underlayId = that.legendDiv + '_underlay'
+            dojo11.byId(underlayId).style.background = '#707070';
+            dojo11.byId(underlayId).style.opacity = '0.1';
         }
     };
     /**
@@ -1378,6 +1387,14 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
             dojo11.connect(that.select_btn,'onchange',that.select_change);
             dojo11.connect(that.showLeg_btn,'onclick',that.toggleLegend);
             dojo11.connect(that.hideLeg_btn,'onclick',that.toggleLegend);
+            var pane = that.legend;
+			that.legendDia = new dijit11.Dialog({
+				id: that.legendDiv,
+				refocus: true,
+				autofocus: false,
+                opacity: 0,
+				title: "Report Legend"
+			},pane);
         }
     };
 
