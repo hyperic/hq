@@ -53,6 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.AvailabilityManager_testLocal;
@@ -81,7 +82,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
     private final Log _log = LogFactory.getLog(_logCtx);
     private static final String AVAIL_TAB = "HQ_AVAIL_DATA_RLE";
     private static final Integer PLAT_MEAS_ID = new Integer(10100);
-    private static final Integer SERVICE_MEAS_ID = new Integer(13678);
+    private static final Integer SERVICE_MEAS_ID = new Integer(10224);
     private final List _list = new ArrayList();
     private static final String BACKFILLER_SERVICE =
         "hyperic.jmx:type=Service,name=AvailabilityCheck";
@@ -206,7 +207,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
 
         long interval = meas.getInterval();
         long now = System.currentTimeMillis();
-        long baseTime = TimingVoodoo.roundDownTime(now, 600000);
+        long baseTime = TimingVoodoo.roundDownTime(now, 60000);
         DataPoint pt;
         invokeBackfiller(baseTime);
 
@@ -217,7 +218,7 @@ public class AvailabilityManager_testEJBImpl implements SessionBean {
         list.add(pt);
         avail.addData(list);
         // want to invoke backfiller slightly offset from the regular interval
-        invokeBackfiller(baseTime+(interval*5)-5000);
+        invokeBackfiller(baseTime+(interval*6)-5000);
         List avails = avail.getHistoricalAvailData(meas.getResource(), baseTime,
                                                    baseTime+(interval*100));
         if (avails.size() != 2) {
