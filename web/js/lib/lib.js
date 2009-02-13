@@ -1293,8 +1293,8 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      */
     this.getReportsCallback = function(data) {
         var response = document.arcReportList;
-        if (response !== null && 
-            that.select_btn.options[0].text == "No Reports Available") {
+        if (response !== null) {
+            var curSel = that.select_btn.options[that.select_btn.selectedIndex].value;
             var options = [];
             while (that.select_btn.length > 0) {
                 that.select_btn.remove(0);
@@ -1312,6 +1312,12 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
             }
             new hyperic.selectBox(that.select_btn, options);
 
+            for (var i = 0; i < that.select_btn.options.length; i++) {
+                if (that.select_btn.options[i].value == curSel) {
+                    that.select_btn.options[i].selected = true;
+                    break;
+                }
+            }
         }
         console.info("completed select box");
         if(response.length > 0) {
@@ -1403,6 +1409,9 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
      * @param uri the arc server uri
      */
     this.init_connection = function (uri) {
+        var now = new Date();
+        uri = uri + '&' + now.getTime();
+        console.info(uri);
         dojo11.io.script.get({
             handleAs : "html",
             url : uri,
