@@ -66,7 +66,7 @@ public class Tomcat40ServerDetector
 
     private static final String EMBEDDED_TOMCAT = "jbossweb-tomcat";
 
-    private static final String HQ_SERVER_TOMCAT = "HQ Tomcat 5.5";
+    private static final String HQ_SERVER_TOMCAT = "HQ Tomcat 6.0";
 
     private static final String[] PTQL_QUERIES = {
         "State.Name.eq=java,Args.*.eq=" + TOMCAT_MAIN,
