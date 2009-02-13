@@ -331,6 +331,7 @@ class DojoUtil {
         def tableVar     = "${idVar}_table" 
         def sortFieldVar = "${idVar}_sortField"
         def pageNumVar   = "${idVar}_pageNum"
+        def pageSizeVar  = "${idVar}_pageSize"
         def lastPageVar  = "${idVar}_lastPage"
         def sortOrderVar = "${idVar}_sortOrder"
         def urlXtraVar   = "${idVar}_urlXtra"
@@ -354,6 +355,7 @@ class DojoUtil {
 
         var ${sortFieldVar};
         var ${pageNumVar}  = 0;
+        var ${pageSizeVar} = ${params.numRows};
         var ${lastPageVar} = false;
         var ${sortOrderVar};
         var ${urlXtraVar} = [];
@@ -387,7 +389,7 @@ class DojoUtil {
             if (kwArgs && kwArgs.numRows)
                 res += '&pageSize='+ kwArgs.numRows;
             else
-                res += '&pageSize=${params.numRows}';
+                res += '&pageSize=' + ${pageSizeVar};
             if(kwArgs && kwArgs.typeId)
                 res += '&typeId='+ kwArgs.typeId;
 
