@@ -151,7 +151,7 @@ public class RemoveResourceAction extends BaseAction {
                                "failed.");
                 } catch (VetoException v) {
                     vetoed++;
-                    log.info(v.getMessage(), v);
+                    log.info(v.getMessage());
                 }
             }
             if (vetoed > 0) {
