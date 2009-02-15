@@ -559,6 +559,22 @@ public class AvailabilityManagerEJBImpl
     }
 
     /**
+     * Get the number of up Resources
+     * @ejb:interface-method
+     */
+    public int getAvailableResourceCount() {
+        return _dao.getAvailableResourceCount();
+    }
+
+    /**
+     * Get the number of up Platforms
+     * @ejb:interface-method
+     */
+    public int getAvailablePlatformCount() {
+        return _dao.getAvailablePlatformCount();
+    }
+
+    /**
      * @param includes List<Integer> of mids.  If includes is null then all
      * unavail entities will be returned.
      * @ejb:interface-method

@@ -51,6 +51,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
     private static final long MAX_TIMESTAMP =
         AvailabilityDataRLE.getLastTimestamp();
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
+    private static final double AVAIL_UP = MeasurementConstants.AVAIL_UP;
+    
     private static final String ALIAS_CLAUSE = " upper(t.alias) = '" +
     				MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
     // TOTAL_TIME and TOTAL_UPTIME are used to anchor the start and end values to
@@ -392,6 +394,39 @@ public class AvailabilityDataDAO extends HibernateDAO {
             new AvailabilityDataRLE(meas, startime, endtime, availVal);
         save(availObj);
         return availObj;
+    }
+
+    /**
+     * @return The number of total available resources.
+     */
+    int getAvailableResourceCount() {
+        StringBuilder sql = new StringBuilder()
+                     .append("SELECT count(rle) FROM AvailabilityDataRLE rle")
+                     .append(" JOIN rle.availabilityDataId.measurement m")
+                     .append(" JOIN m.template t")
+				     .append(" WHERE rle.endtime = ").append(MAX_TIMESTAMP)
+                     .append(" AND m.resource is not null ")
+                     .append(" AND rle.availVal = ").append(AVAIL_UP)
+                     .append(" AND ").append(ALIAS_CLAUSE);
+        Query query = getSession().createQuery(sql.toString());
+        return ((Integer)query.uniqueResult()).intValue();
+    }
+
+    /**
+     * @return The number of total available platforms
+     */
+    int getAvailablePlatformCount() {
+        StringBuilder sql = new StringBuilder()
+                     .append("SELECT count(rle) FROM AvailabilityDataRLE rle")
+                     .append(" JOIN rle.availabilityDataId.measurement m")
+                     .append(" JOIN m.template t")
+				     .append(" WHERE rle.endtime = ").append(MAX_TIMESTAMP)
+                     .append(" AND m.resource is not null ")
+                     .append(" AND m.resource.resourceType.id = 301")
+                     .append(" AND rle.availVal = ").append(AVAIL_UP)
+                     .append(" AND ").append(ALIAS_CLAUSE);
+        Query query = getSession().createQuery(sql.toString());
+        return ((Integer)query.uniqueResult()).intValue();
     }
 
     /**
