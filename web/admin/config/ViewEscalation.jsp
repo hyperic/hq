@@ -109,6 +109,12 @@ function showViewEscResponse(originalRequest) {
             	dojo11.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.pause" /> ' + maxWaitTime;
             }
             dojo11.byId('allowPauseTrue').checked = "true";
+
+            var sel = dojo11.byId('maxWaitTime');
+            for (var i = 0; sel.selectedIndex == 0 && i < sel.length; i++) {
+                sel.options[i].selected =
+                    (sel.options[i].value == tmp.escalation.maxWaitTime);
+            }
         }
         else {
             dojo11.byId('acknowledged').innerHTML = '<fmt:message key="alert.config.escalation.allow.continue" />';
@@ -1380,7 +1386,7 @@ function saveAddEscalation() {
                             onClick="this.value=true;"/>
                         <fmt:message
                                 key="alert.config.escalation.allow.pause"/>
-                        <select
+                        <select class="maxWaitTime"
                                 id="maxWaitTime" name="maxWaitTime">
                             <option value="300000">5
                                 <fmt:message
