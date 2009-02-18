@@ -92,12 +92,14 @@ public final class ConcurrentStatsCollector {
         SIGAR_1MLOAD                 = "SIGAR_1MLOAD",
         SIGAR_CPU                    = "SIGAR_CPU",
         AVAIL_MANAGER_METRICS_INSERTED = "AVAIL_MANAGER_METRICS_INSERTED",
-        DATA_MANAGER_METRICS_INSERTED  = "DATA_MANAGER_METRICS_INSERTED",
+        DATA_MANAGER_INSERT_TIME     = "DATA_MANAGER_INSERT_TIME",
         SIGAR_PROC_RES_MEM           = "SIGAR_PROC_RES_MEM",
         SIGAR_TCP_INERRS             = "SIGAR_TCP_INERRS",
-	    SIGAR_TCP_RETRANS            = "SIGAR_TCP_RETRANS",
-	    SIGAR_PAGEOUT                = "SIGAR_PAGEOUT",
-	    SIGAR_PAGEIN                 = "SIGAR_PAGEIN";
+        SIGAR_TCP_RETRANS            = "SIGAR_TCP_RETRANS",
+        SIGAR_PAGEOUT                = "SIGAR_PAGEOUT",
+        SIGAR_PAGEIN                 = "SIGAR_PAGEIN",
+        JMS_QUEUE_PUBLISH_TIME       = "JMS_QUEUE_PUBLISH_TIME",
+        JMS_TOPIC_PUBLISH_TIME       = "JMS_TOPIC_PUBLISH_TIME";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
