@@ -257,7 +257,11 @@ public class ProductPluginDeployer
             c.register(
                 ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
             c.register(
-                ConcurrentStatsCollector.DATA_MANAGER_METRICS_INSERTED);
+                ConcurrentStatsCollector.DATA_MANAGER_INSERT_TIME);
+            c.register(
+                ConcurrentStatsCollector.JMS_TOPIC_PUBLISH_TIME);
+            c.register(
+                ConcurrentStatsCollector.JMS_QUEUE_PUBLISH_TIME);
             c.startCollector();
         } catch (Exception e) {
             _log.error("Could not start Concurrent Stats Collector", e);

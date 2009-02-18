@@ -47,6 +47,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 public class Messenger {
     private static Log _log = LogFactory.getLog(Messenger.class);
@@ -149,10 +150,14 @@ public class Messenger {
                                                   Session.AUTO_ACKNOWLEDGE);
 
             // Create a sender and send the message
+            final long start = System.currentTimeMillis();
             QueueSender sender = session.createSender(queue);
             ObjectMessage msg = session.createObjectMessage();
             msg.setObject(sObj);
             sender.send(msg);
+            final long now = System.currentTimeMillis();
+            ConcurrentStatsCollector.getInstance().addStat(
+                (now - start), ConcurrentStatsCollector.JMS_QUEUE_PUBLISH_TIME);
         } catch (NamingException e) {
             _log.error("Naming error for " + name + ": " + e.toString());
         } catch (Exception e) {
@@ -170,11 +175,14 @@ public class Messenger {
      * Send a List to a Topic.
      */
     public void publishMessage(String name, List msgList, int maxSize) {
+        final boolean debug = _log.isDebugEnabled();
         for (int i = 0; i < msgList.size(); i += maxSize) {
             int end = Math.min(i + maxSize, msgList.size());
             ArrayList msgObj = new ArrayList(msgList.subList(i, end));
             publishMessage(name, msgObj);
-            _log.debug("Sent " + (end - i) + " batched events to " + name);
+            if (debug) {
+                _log.debug("Sent " + (end - i) + " batched events to " + name);
+            }
         }
     }
     
@@ -217,10 +225,14 @@ public class Messenger {
                                                   Session.AUTO_ACKNOWLEDGE);
 
             // Create a publisher and publish the message
+            final long start = System.currentTimeMillis();
             TopicPublisher publisher = session.createPublisher(topic);
             ObjectMessage msg = session.createObjectMessage();
             msg.setObject(sObj);
             publisher.publish(msg);
+            final long now = System.currentTimeMillis();
+            ConcurrentStatsCollector.getInstance().addStat(
+                (now - start), ConcurrentStatsCollector.JMS_TOPIC_PUBLISH_TIME);
         } catch (NamingException e) {
             _log.error("Naming error for " + name + ": " + e.toString());
         } catch (Exception e) {

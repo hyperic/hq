@@ -114,8 +114,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
     private final String TAB_MEAS    = MeasurementConstants.TAB_MEAS;
     private final String TAB_NUMS    = "EAM_NUMBERS";
-    private static final String DATA_MANAGER_METRICS_INSERTED =
-        ConcurrentStatsCollector.DATA_MANAGER_METRICS_INSERTED;
+    private static final String DATA_MANAGER_INSERT_TIME =
+        ConcurrentStatsCollector.DATA_MANAGER_INSERT_TIME;
     
     // Error strings
     private final String ERR_DB    = "Cannot look up database instance";
@@ -264,10 +264,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             boolean autocommit = conn.getAutoCommit();
             
             try {
-                long start = -1l;
-                if (debug) {
-                    start = System.currentTimeMillis();
-                }
+                final long start = System.currentTimeMillis();
                 conn.setAutoCommit(false);
                 if (dialect.supportsMultiInsertStmt()) {
                     succeeded = insertDataWithOneInsert(data, conn);
@@ -277,15 +274,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
                 if (succeeded) {
                     conn.commit();
+                    final long end = System.currentTimeMillis();
                     if (debug) {
-                        long end = System.currentTimeMillis();
                         _log.debug("Inserting data in a single transaction " +
                             "succeeded");
                         _log.debug("Data Insertion process took " +
                             (end-start) + " ms");
                     }
                     ConcurrentStatsCollector.getInstance().addStat(
-                        data.size(), DATA_MANAGER_METRICS_INSERTED);
+                        end-start, DATA_MANAGER_INSERT_TIME);
                     sendMetricEvents(data);
                 } else {
                     if (debug) {
@@ -294,9 +291,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     }
                     conn.rollback();
                     conn.setAutoCommit(true);
-                    addDataWithCommits(data, true, conn);
+                    List processed = addDataWithCommits(data, true, conn);
+                    final long end = System.currentTimeMillis();
+                    ConcurrentStatsCollector.getInstance().addStat(
+                        end-start, DATA_MANAGER_INSERT_TIME);
+                    sendMetricEvents(processed);
                     if (debug) {
-                        long end = System.currentTimeMillis();
                         _log.debug("Data Insertion process took " +
                             (end-start) + " ms");
                     }
@@ -382,7 +382,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    private void addDataWithCommits(List data, boolean overwrite,
+    private List addDataWithCommits(List data, boolean overwrite,
                                     Connection conn)
     {
         Set failedToSaveMetrics = new HashSet();
@@ -444,10 +444,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
         _log.debug("Inserting/Updating data outside a transaction finished.");
         
-        List inserted = removeMetricsFromList(data, failedToSaveMetrics);
-        ConcurrentStatsCollector.getInstance().addStat(
-            inserted.size(), DATA_MANAGER_METRICS_INSERTED);
-        sendMetricEvents(inserted);
+        return removeMetricsFromList(data, failedToSaveMetrics);
     }
     
     private boolean shouldAbortDataInsertion(List data) {
