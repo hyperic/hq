@@ -1298,7 +1298,11 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
             that.isLegendShowing = !that.isLegendShowing;
             */
 
+            // Reload the image
+            that.report_legend.src = that.report_legend.src;
             that.legendDia.show();
+
+            // Dim the underlay less
             var underlayId = that.legendDiv + '_underlay'
             dojo11.byId(underlayId).style.background = '#707070';
             dojo11.byId(underlayId).style.opacity = '0.1';
