@@ -428,6 +428,7 @@
         <include name="snmp4j.jar" />
         <include name="dnsjava-2.0.3.jar" />
         <include name="ehcache-1.5.0.jar" />
+        <include name="jsr107cache-1.0.jar" /> <!-- EHCache 1.5 dep -->
         <include name="json.jar" />
         <include name="jug-asl-2.0.0.jar" />
         <include name="commons-httpclient-3.1.jar" />
