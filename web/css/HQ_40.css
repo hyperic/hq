@@ -1420,6 +1420,10 @@ select {
     bottom: 10px;
 }
 
+.widget .refresh_btn {
+    cursor: pointer;
+}
+
 .widget .last_updated {
     position: absolute;
     right: 10px;
