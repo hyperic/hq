@@ -405,8 +405,8 @@ public class AvailabilityManagerEJBImpl
             }
             if (null == (data = (double[])rtn.get(key))) {
                 data = new double[IND_TOTAL_TIME + 1];
-                data[IND_MIN] = Double.MAX_VALUE;
-                data[IND_MAX] = Double.MIN_VALUE;
+                data[IND_MIN] = MeasurementConstants.AVAIL_UP;
+                data[IND_MAX] = MeasurementConstants.AVAIL_PAUSED;
                 rtn.put(key, data);
             }
 
