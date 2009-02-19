@@ -198,9 +198,6 @@ class ResourceConfig {
             props.each { key, val ->
                 if (res[key]) { 
                     res[key].value = val
-                } else {
-                    // Not contained in the config schema?
-                    res[key] = [value: val, type: 'configResponse'] 
                 }
             }
         }
