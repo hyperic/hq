@@ -38,7 +38,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -76,7 +75,6 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.StringUtil;
-import org.hyperic.util.TimeUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -166,31 +164,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
         }
         return new HighLowMetricValue(value, timestamp);
-    }
-    
-    private void mergeMetricValues(HighLowMetricValue existing,
-                                   HighLowMetricValue additional) {
-        if (Double.isNaN(additional.getValue()))
-            return;
-        
-        if (Double.isNaN(existing.getValue())) {
-            existing.setHighValue(additional.getHighValue());
-            existing.setLowValue(additional.getLowValue());
-            existing.setValue(additional.getValue());
-            existing.setCount(additional.getCount());
-            return;
-        }
-        
-        existing.setHighValue(Math.max(existing.getHighValue(),
-                                       additional.getHighValue()));
-        existing.setLowValue(Math.min(existing.getLowValue(),
-                                      additional.getLowValue()));
-        
-        // Average the two values
-        double total = existing.getCount() + additional.getCount();
-        existing.setValue(existing.getValue() / total * existing.getCount() +
-                        additional.getValue() / total * additional.getCount());
-        existing.setCount((int) total);
     }
 
     // Returns the next index to be used
@@ -1038,31 +1011,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             Collections.singletonList(m), begin, end, m.getInterval(),
             m.getTemplate().getCollectionType(), false, pc);
     }
-    
-    private int getMeasTableCount(Connection conn, long begin, long end,
-                                  int measurementId, String measView)
-    {
-        Statement stmt = null;
-        ResultSet rs   = null;
-        String sql;
-        try {
-            stmt = conn.createStatement();
-            sql =  "SELECT count(*) FROM " + measView +
-                   " WHERE timestamp BETWEEN "+begin+" AND "+end+
-                   " AND measurement_id="+measurementId;
-            rs = stmt.executeQuery(sql);
-            if (rs.next()) {
-                return rs.getInt(1);
-            } else {
-                return 0;
-            }
-        } catch (SQLException e) {
-            throw new SystemException("Can't count historical data for " +
-                                      measurementId, e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
-        }
-    }
 
     private String getSelectType(int type, long begin)
     {
@@ -1425,7 +1373,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     if (_log.isDebugEnabled())
                         _log.debug("arg" + (j+1) + ": " + subids[j]);
                 }
-                setDataPoints(data, length, timestamp, subids, stmt);
+                setDataPoints(data, timestamp, subids, stmt);
             }
         } catch (SQLException e) {         
             throw new SystemException("Cannot get last values", e);
@@ -1467,15 +1415,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return nodata;
     }
 
-    private void setDataPoints(Map data, int length, long timestamp,
+    private void setDataPoints(Map data, long timestamp,
                                Integer[] measIds, Statement stmt)
         throws SQLException
     {
         ResultSet rs = null;
         try
         {
-            StringBuilder sqlBuf =
-                getLastDataPointsSQL(length, timestamp, measIds);
+            StringBuilder sqlBuf = getLastDataPointsSQL(timestamp, measIds);
             if (_log.isTraceEnabled()) {
                 _log.trace("getLastDataPoints(): " + sqlBuf);
             }
@@ -1496,8 +1443,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    private StringBuilder getLastDataPointsSQL(int len, long timestamp,
-                                              Integer[] measIds)
+    private StringBuilder getLastDataPointsSQL(long timestamp, Integer[] measIds)
     {
         String tables = (timestamp != MeasurementConstants.TIMERANGE_UNLIMITED) ?
             MeasTabManagerUtil.getUnionStatement(
