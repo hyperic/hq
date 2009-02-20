@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -38,6 +38,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -505,7 +506,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             _log.debug(watch);
         }
     }  
-    
+
     private void analyzeMetricData(List data)
     {
         if (analyzer != null)
@@ -516,12 +517,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
         }
     }
-    
+
     private Collection updateMetricDataCache(List data) {
         MetricDataCache cache = MetricDataCache.getInstance();
         return cache.bulkAdd(data);
     }
-    
+
     private void sendDataToEventHandlers(Collection data) {
         ArrayList events  = new ArrayList();
         List zevents = new ArrayList();
@@ -944,8 +945,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private boolean usesMetricUnion(long begin)
     {
         long now = System.currentTimeMillis();
-        if (MeasTabManagerUtil.getMeasTabStartTime(now - getPurgeRaw()) < begin)
+        if (MeasTabManagerUtil.getMeasTabStartTime(now - getPurgeRaw()) < begin) {
             return true;
+        }
         return false;
     }
 
@@ -953,8 +955,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                                     boolean useAggressiveRollup)
     {
         if (!useAggressiveRollup && usesMetricUnion(begin) ||
-            (useAggressiveRollup && ((end-begin)/HOUR) < HOURS_PER_MEAS_TAB))
+            (useAggressiveRollup && ((end-begin)/HOUR) < HOURS_PER_MEAS_TAB)) {
             return true;
+        }
         return false;
     }
 
@@ -963,7 +966,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return getDataTable(begin, end, measIds, false);
     }
 
-    /*
+    /**
      * @param begin beginning of the time range
      * @param end end of the time range
      * @param measIds the measurement_ids associated with the query.
@@ -973,12 +976,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      *      metric data table
      */
     private String getDataTable(long begin, long end, Object[] measIds,
-                                boolean useAggressiveRollup)
-    {
+                                boolean useAggressiveRollup) {
         long now = System.currentTimeMillis();
 
-        if (!confDefaultsLoaded)
+        if (!confDefaultsLoaded) {
             loadConfigDefaults();
+        }
 
         if (usesMetricUnion(begin, end, useAggressiveRollup)) {
             return MeasTabManagerUtil.getUnionStatement(begin, end, measIds);
@@ -1012,7 +1015,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             return getAvailMan().getHistoricalAvailData(m, begin, end, pc,
                 prependAvailUnknowns);
         } else {
-            return getHistData(m, begin, end, pc);
+            return getHistoricalData(
+                Collections.singletonList(m), begin, end, m.getInterval(),
+                m.getTemplate().getCollectionType(), false, pc);
         }
     }
 
@@ -1029,116 +1034,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public PageList getHistoricalData(Measurement m, long begin, long end,
                                       PageControl pc)
     {
-        return getHistoricalData(m, begin, end, pc, true);
+        return getHistoricalData(
+            Collections.singletonList(m), begin, end, m.getInterval(),
+            m.getTemplate().getCollectionType(), false, pc);
     }
-
-    private PageList getHistData(Measurement m, long begin, long end,
-                                 PageControl pc) {
-        // Check the begin and end times
-        this.checkTimeArguments(begin, end);
-        begin = TimingVoodoo.roundDownTime(begin, MINUTE);
-        end = TimingVoodoo.roundDownTime(end, MINUTE);
-        long current = System.currentTimeMillis();
-
-        ArrayList history = new ArrayList();
-
-        //Get the data points and add to the ArrayList
-        Connection        conn = null;
-        PreparedStatement stmt = null;
-        ResultSet         rs   = null;
-
-        // The table to query from
-        String table = getDataTable(begin, end, m.getId().intValue());
-        try {
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            int total =
-                getMeasTableCount(conn, begin, end, m.getId().intValue(), table);
-            if (total == 0)
-                return new PageList();
-
-            try {
-                // The index
-                int i = 1;
-
-                StringBuilder sqlBuf;
-                // Now get the page that user wants
-                boolean sizeLimit =
-                    pc.getPagesize() != PageControl.SIZE_UNLIMITED;
-
-                if (sizeLimit) {
-                    // This query dynamically counts the number of rows to 
-                    // return the correct paged ResultSet
-                    sqlBuf = new StringBuilder(
-                        "SELECT timestamp, value FROM " + table + " d1 " +
-                        "WHERE timestamp BETWEEN ? AND ? AND" +
-                             " measurement_id = ? AND" +
-                             " ? <= (SELECT count(*) FROM " + table + " d2 "+
-                               "WHERE d1.measurement_id = d2.measurement_id " +
-                                     "AND d2.timestamp ")
-                        .append(pc.isAscending() ? "<" : ">")
-                        .append(" d1.timestamp) ORDER BY timestamp ")
-                        .append(pc.isAscending() ? "" : "DESC");
-                }
-                else {
-                    sqlBuf = new StringBuilder(
-                        "SELECT value, timestamp FROM " + table +
-                        " WHERE timestamp BETWEEN ? AND ? AND" +
-                              " measurement_id=? ORDER BY timestamp ")
-                        .append(pc.isAscending() ? "" : "DESC");
-                }
-
-                stmt = conn.prepareStatement(sqlBuf.toString());
-                stmt.setLong(i++, begin);
-                stmt.setLong(i++, end - 1);
-                stmt.setInt(i++, m.getId().intValue());
-
-                if ( _log.isDebugEnabled() ) {
-                    _log.debug("getHistoricalData(): " + sqlBuf);
-                    _log.debug("arg1 = " + m.getId());
-                    _log.debug("arg2 = " + begin);
-                    _log.debug("arg3 = " + end);
-                }
-
-                if (sizeLimit) {
-                    stmt.setInt(i++, pc.getPageEntityIndex() + 1);
-                    if ( _log.isDebugEnabled() )
-                        _log.debug("arg4 = " + (pc.getPageEntityIndex() + 1));
-                }
-
-                StopWatch timer = new StopWatch(current);
-
-                rs = stmt.executeQuery();
-
-                if ( _log.isTraceEnabled() ) {
-                    _log.trace("getHistoricalData() execute time: " +
-                              timer.getElapsed());
-                }
-
-                for (i = 1; rs.next(); i++) {
-                    history.add(getMetricValue(rs));
-
-                    if (sizeLimit && (i == pc.getPagesize()))
-                        break;
-                }
-
-                // Now return a PageList
-                return new PageList(history, total);
-            } catch (SQLException e) {
-                throw new SystemException("Can't lookup historical data for " +
-                                          m, e);
-            } finally {
-                DBUtil.closeJDBCObjects(logCtx, null, stmt, rs);
-            }
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
-        } catch (SQLException e) {
-            throw new SystemException("Can't open connection", e);
-        } finally {
-            DBUtil.closeConnection(logCtx, conn);
-        }
-    }
-
+    
     private int getMeasTableCount(Connection conn, long begin, long end,
                                   int measurementId, String measView)
     {
@@ -1170,16 +1070,16 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         {
             case MeasurementConstants.COLL_TYPE_DYNAMIC:
                 if (usesMetricUnion(begin))
-                    return "AVG(value) AS value, " +
-                           "MAX(value) AS peak, MIN(value) AS low";
+                    return "AVG(value) AS value, MAX(value) AS peak, " +
+                        "MIN(value) AS low, count(*) as points";
                 else
-                    return "AVG(value) AS value, " +
-                           "MAX(maxvalue) AS peak, MIN(minvalue) AS low";
+                    return "AVG(value) AS value, MAX(maxvalue) AS peak, " +
+                        "MIN(minvalue) AS low, count(*) as points";
             case MeasurementConstants.COLL_TYPE_TRENDSUP:
             case MeasurementConstants.COLL_TYPE_STATIC:
-                return "MAX(value) AS value";
+                return "MAX(value) AS value, count(*) as points";
             case MeasurementConstants.COLL_TYPE_TRENDSDOWN:
-                return "MIN(value) AS value";
+                return "MIN(value) AS value, count(*) as points";
             default:
                 throw new IllegalArgumentException(
                     "No collection type specified in historical metric query.");
@@ -1207,7 +1107,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                                       PageControl pc) {
         List availIds = new ArrayList();
         List measIds = new ArrayList();
-
         for (Iterator i = measurements.iterator(); i.hasNext(); ) {
             Measurement m = (Measurement)i.next();
             if (m.getTemplate().isAvailability()) {
@@ -1216,213 +1115,132 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 measIds.add(m.getId());
             }
         }
-
-        Integer[] avIds =
-            (Integer[])availIds.toArray(new Integer[availIds.size()]);
-        Integer[] mids =
-            (Integer[])measIds.toArray(new Integer[measIds.size()]);
-
-        PageList rtn = getAvailMan().
-            getHistoricalAvailData(avIds, begin, end, interval, pc, true);
-
-        rtn.addAll(getHistData(mids, begin, end, interval,
-                               type, returnMetricNulls, pc));
+        Integer[] avIds = (Integer[])availIds.toArray(
+            new Integer[availIds.size()]);
+        Integer[] mids = (Integer[])measIds.toArray(
+            new Integer[measIds.size()]);
+        PageList rtn = getAvailMan().getHistoricalAvailData(
+            avIds, begin, end, interval, pc, true);
+        rtn.addAll(getHistData(mids, begin, end, interval, type,
+                   returnMetricNulls, pc));
         return rtn;
     }
 
-    private PageList getHistData(Integer[] ids, long begin, long end,
+    private PageList getHistData(Integer[] ids, long start, long finish,
                                  long interval, int type,
-                                 boolean returnNulls, PageControl pc)
-    {
-        final int    MAX_IDS  = 30;
-        
+                                 boolean returnNulls, PageControl pc) {
         if (ids == null || ids.length < 1) {
             return new PageList();
         }
-        
-        // Always return NULLs if there are more IDs than we can handle
-        if (ids.length > MAX_IDS)
-            returnNulls = true;
-        
+        final boolean debug = _log.isDebugEnabled();
         // Check the begin and end times
-        this.checkTimeArguments(begin, end, interval);
-        begin = TimingVoodoo.roundDownTime(begin, MINUTE);
-        end = TimingVoodoo.roundDownTime(end, MINUTE);
-        long current = System.currentTimeMillis();
-
-        ArrayList history = new ArrayList();
-    
-        //Get the data points and add to the ArrayList
+        checkTimeArguments(start, finish, interval);
+        final long begin = TimingVoodoo.roundDownTime(start, MINUTE);
+        final long end = TimingVoodoo.roundDownTime(finish, MINUTE);
+        final long current = System.currentTimeMillis();
+        ArrayList rtn = new ArrayList();
         Connection conn = null;
         Statement  stmt = null;
         ResultSet  rs   = null;
-
         try {
-            StopWatch timer = new StopWatch(current);
-            
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            stmt = conn.createStatement();
-    
-            if(_log.isDebugEnabled())
-            {
-                _log.debug("GetHistoricalData: ID: " +
-                          StringUtil.arrayToString(ids) + ", Begin: " +
-                          TimeUtil.toString(begin) + ", End: " +
-                          TimeUtil.toString(end) + ", Interval: " + interval +
-                          '(' + (interval / 60000) + "m " + (interval % 60000) +
-                          "s)" );
-            }
-
-            // Construct SQL command
-            String selectType = getSelectType(type, begin);
-
-            final int pagesize =
-                (int) Math.min(Math.max(pc.getPagesize(),
-                                        (end - begin) / interval), 60);
+            final StopWatch watch = new StopWatch(current);
+            final String selectType = getSelectType(type, begin);
+            final int pagesize = (int) Math.min(
+                Math.max(pc.getPagesize(), (end - begin) / interval),
+                60);
             final long intervalWnd = interval * pagesize;
-
-            int idsCnt = 0;
-            
-            for (int index = 0; index < ids.length; index += idsCnt)
-            {
-                if (idsCnt != Math.min(MAX_IDS, ids.length - index)) {
-                    idsCnt = Math.min(MAX_IDS, ids.length - index);
-                }
-
-                long beginTrack = begin;
-                do
-                {
-                    // Adjust the begin and end to query only the rows for the
-                    // specified page.
-                    long beginWnd;
-                    long endWnd;
-
-                    if(_log.isDebugEnabled())
-                        _log.debug(pc.toString());
-                    
-                    if(pc.isDescending()) {
-                        endWnd   = end - (pc.getPagenum() * intervalWnd);
-                        beginWnd = Math.max(beginTrack, endWnd - intervalWnd);
-                    } else {
-                        beginWnd = beginTrack + (pc.getPagenum() * intervalWnd); 
-                        endWnd   = Math.min(end, beginWnd + intervalWnd);
-                    }
-
-                    int ind = index;
-                    int endIdx = ind + idsCnt;
-                    Integer[] measids = new Integer[idsCnt];
-                    int i=0;
-                    for (; ind < endIdx; ind++) {
-                        if (_log.isDebugEnabled())
-                            _log.debug("arg " + i + " = " + ids[ind]);
-
-                        measids[i++] = ids[ind];
-                    }
-
-                    String sql;
-                    sql = getHistoricalSQL(selectType, begin, end, interval,
-                                           beginWnd, endWnd, measids,
-                                           pc.isDescending());
-                    if(_log.isDebugEnabled())
-                    {
-                        _log.debug(
-                            "Page Window: Begin: " + TimeUtil.toString(beginWnd)
-                            + ", End: " + TimeUtil.toString(endWnd) );
-                        _log.debug("SQL Command: " + sql);
-                        _log.debug("arg 1 = " + beginWnd);
-                        _log.debug("arg 2 = " + interval);
-                        _log.debug("arg 3 = " + (endWnd - beginWnd) / interval);
-                        _log.debug("arg 4 = " + interval);
-                    }
-                    rs = stmt.executeQuery(sql);
-                    
-                    long curTime = beginWnd;
-                    
-                    Iterator it = null;
-                    if (history.size() > 0)
-                        it = history.iterator();
-                    
-                    for (int row = 0; row < pagesize; row++)
-                    {
-                        long fillEnd;
-                        
-                        if (rs.next()) {
-                            fillEnd = rs.getLong("timestamp");
-                        }
-                        else if (returnNulls) {
-                            fillEnd = endWnd;
-                        }
-                        else {
-                            break;
-                        }
-                        
-                        if (returnNulls) {
-                            for (; curTime < fillEnd; row++) {
-                                if (it != null) {
-                                    it.next();
-                                }
-                                else
-                                    history.add(
-                                        new HighLowMetricValue(Double.NaN,
-                                                               curTime));
-                                curTime += interval;
-                            }
-                        }
-                        
-                        if (row < pagesize) {
-                            HighLowMetricValue val = this.getMetricValue(rs);
-                            if (returnNulls || !Double.isNaN(val.getValue())) {
-                                val.setCount(idsCnt);
-                                
-                                if (it != null) {
-                                    HighLowMetricValue existing =
-                                        (HighLowMetricValue) it.next();
-                                    mergeMetricValues(existing, val);
-                                }
-                                else
-                                    history.add(val);
-                            }
-                            curTime = val.getTimestamp() + interval;
-                        }
-                    }
-                    
-                    if (_log.isDebugEnabled()) {
-                        _log.debug("getHistoricalData() for " + ids.length +
-                                  " metric IDS: " +
-                                  StringUtil.arrayToString(ids));
-                    }
-
-                    DBUtil.closeResultSet(logCtx, rs);
-
-                    // If there was no result loop back, until we hit the end of
-                    // the time range. Otherwise, break out of the loop.
-                    if(history.size() >= pagesize)
-                        break;
-                        
-                    // Move foward a page
-                    pc.setPagenum(pc.getPagenum() + 1);
-                    beginTrack += intervalWnd;
-                } while(beginTrack < end);
-
-                if(_log.isDebugEnabled()) {
-                    _log.debug("GetHistoricalData: ElapsedTime: " + timer +
-                              " seconds");
-                }
+            conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            stmt = conn.createStatement();
+            long endWnd, beginWnd;
+            if(pc.isDescending()) {
+                endWnd   = end - (pc.getPagenum() * intervalWnd);
+                beginWnd = Math.max(begin, endWnd - intervalWnd);
+            } else {
+                beginWnd = begin + (pc.getPagenum() * intervalWnd); 
+                endWnd   = Math.min(end, beginWnd + intervalWnd);
             }
-
-            // Now return a PageList
-            return new PageList(history,
-                                pc.getPageEntityIndex() + history.size());
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
+            final String sql = getHistoricalSQL(selectType, begin, end, interval,
+                                                beginWnd, endWnd, ids,
+                                                pc.isDescending());
+            if (debug) watch.markTimeBegin("getHistoricalSQL");
+            rs = stmt.executeQuery(sql);
+            if (debug) watch.markTimeEnd("getHistoricalSQL");
+            List vals = processHistoricalRS(rs);
+            rtn.addAll(vals);
+            DBUtil.closeResultSet(logCtx, rs);
+            if (debug) _log.debug(watch);
+            return getPageList(begin, end, interval, rtn, returnNulls, pc);
         } catch (SQLException e) {
-            throw new SystemException(
-                "Can't lookup historical data for " +
-                StringUtil.arrayToString(ids), e);
+            throw new SystemException(e);
+        } catch (NamingException e) {
+            throw new SystemException(e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
+    }
+
+    private PageList getPageList(long begin, long end, long interval,
+                                 List points, boolean returnNulls,
+                                 PageControl pc) {
+        List rtn = new ArrayList();
+        Iterator it=points.iterator();
+        HighLowMetricValue curr = null;
+        for (long i=begin; i<end; i+=interval) {
+            if (curr == null && !it.hasNext()) {
+                if (returnNulls) {
+                    rtn.add(new HighLowMetricValue(Double.NaN, i));
+                }
+                continue;
+            }
+            if (curr == null) {
+                curr = (HighLowMetricValue)it.next();
+            }
+            final long currTimestamp = curr.getTimestamp();
+            if (currTimestamp == i) {
+                rtn.add(curr);
+                curr = (it.hasNext()) ? (HighLowMetricValue)it.next() : null;
+            } else if (returnNulls) {
+                rtn.add(new HighLowMetricValue(Double.NaN, i));
+            }
+        }
+        return new PageList(rtn, pc.getPageEntityIndex() + rtn.size());
+    }
+
+    private List processHistoricalRS(ResultSet rs) throws SQLException {
+        List rtn = new ArrayList();
+        boolean tmp = true;
+        int peakCol = -1,
+            lowCol  = -1;
+        try {
+            peakCol = rs.findColumn("peak");
+            lowCol  = rs.findColumn("low");
+        } catch (SQLException e) {
+            // peak and low may not exist
+            tmp = false;
+        }
+        final boolean peakLowExist = tmp;
+        final int timeCol = rs.findColumn("timestamp"),
+                  valCol  = rs.findColumn("value"),
+                  ptsCol  = rs.findColumn("points");
+        while (rs.next()) {
+            final int count = rs.getInt(ptsCol);
+            final long timestamp = rs.getLong(timeCol);
+            double value = rs.getDouble(valCol);
+            if(rs.wasNull()) {
+                value = Double.NaN;
+            }
+            HighLowMetricValue val;
+            if (peakLowExist) {
+                final double high = rs.getDouble(peakCol),
+            	             low  = rs.getDouble(lowCol);
+                val = new HighLowMetricValue(value, high, low, timestamp);
+            } else {
+                val = new HighLowMetricValue(value, timestamp);
+            }
+            val.setCount(count);
+            rtn.add(val);
+        }
+        return rtn;
     }
 
     private String getHistoricalSQL(String selectType, long begin, long end,
@@ -1445,17 +1263,17 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             .append(interval-1).append(" ")
             .append(measInStmt)
             .append(" GROUP BY begin ORDER BY begin");
-
-        if (descending)
+        if (descending) {
             sqlbuf.append(" DESC");
-
+        }
         return sqlbuf.toString();
     }
 
     private long getPurgeRaw()
     {
-        if (!confDefaultsLoaded)
+        if (!confDefaultsLoaded) {
             loadConfigDefaults();
+        }
         return purgeRaw;
     }
 
@@ -1469,7 +1287,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public MetricValue getLastHistoricalData(Measurement m)
     {
-
         if (m.getTemplate().isAvailability()) {
             return getAvailMan().getLastAvail(m);
         } else {
@@ -1484,7 +1301,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         if (mval != null) {
             return mval;
         }
-        
         //Get the data points and add to the ArrayList
         Connection conn = null;
         Statement  stmt = null;
@@ -1524,65 +1340,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (SQLException e) {
             _log.error("Unable to look up historical data for " + m, e);
             throw new SystemException(e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-        }
-    }
-
-    /**
-     * Fetch an array of timestamps for which there is missing data
-     *
-     * @param id the id of the Measurement
-     * @param begin the start of the time range
-     * @param end the end of the time range
-     * @return the list of data points
-     * @ejb:interface-method
-     */
-    public long[] getMissingDataTimestamps(Integer id, long interval,
-                                           long begin, long end) {
-        this.checkTimeArguments(begin, end);
-        
-        Connection conn = null;
-        Statement  stmt = null;
-        ResultSet  rs   = null;
-    
-        try {
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-            
-            stmt = conn.createStatement();
-            // First, figure out how many i's we need
-            int totalIntervals = (int) Math.min((end - begin) / interval, 60);
-            // The SQL that we will use
-            String metricUnion =
-                MeasTabManagerUtil.getUnionStatement(begin, end, id.intValue());
-            String sql =
-                "SELECT ("+begin+" + ("+interval+" * i)) FROM " + TAB_NUMS +
-                " WHERE i < "+totalIntervals+" AND" +
-                " NOT EXISTS (SELECT timestamp FROM " + metricUnion +
-                " WHERE timestamp = ("+begin+" + ("+interval+" * i)) AND " +
-                " measurement_id = "+id.intValue()+")";
-            rs = stmt.executeQuery(sql);
-
-            // Start with temporary array
-            long[] temp = new long[totalIntervals];
-            int i;
-            for (i = 0; rs.next(); i++) {
-                temp[i] = rs.getLong(1);
-            }
-
-            // Now shrink the array
-            long[] missing = new long[i];
-            for (i = 0; i < missing.length; i++) {
-                missing[i] = temp[i];
-            }
-                    
-            return missing;
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
-        } catch (SQLException e) {
-            throw new SystemException("Can't lookup historical data for " +
-                                      id, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
