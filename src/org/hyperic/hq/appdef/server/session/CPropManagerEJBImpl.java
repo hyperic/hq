@@ -284,16 +284,16 @@ public class CPropManagerEJBImpl
                     .append("INSERT INTO ").append(CPROP_TABLE);
 
                 Cprop nprop = new Cprop();
-                sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES (")
-                   .append(Util.generateId("org.hyperic.hq.appdef.server.session.Cprop", nprop))
-                   .append(", ?, ?, ?, ?)");
+                sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES ")
+                   .append("(?, ?, ?, ?, ?)");
                 
                 pstmt = conn.prepareStatement(sql.toString());
-                pstmt.setInt(1, keyId);
-                pstmt.setInt(2, aID.getID());
+                pstmt.setInt(2, keyId);
+                pstmt.setInt(3, aID.getID());
                 for(int i=0; i<chunks.length; i++){
-                    pstmt.setInt(3, i);
-                    pstmt.setString(4, chunks[i]);
+                    pstmt.setInt(1, Util.generateId("org.hyperic.hq.appdef.server.session.Cprop", nprop));
+                    pstmt.setInt(4, i);
+                    pstmt.setString(5, chunks[i]);
                     pstmt.addBatch();
                 }
                 pstmt.executeBatch();
