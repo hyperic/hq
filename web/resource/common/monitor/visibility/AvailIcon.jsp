@@ -28,8 +28,12 @@
   USA.
  --%>
 
-<tiles:importAttribute name="availability" />
+<tiles:importAttribute name="availability" ignore="true"/>
   <c:choose>
+    <c:when test="${empty availability}">
+      <html:img page="/images/icon_available_error.gif" border="0"
+                width="12" height="12"/>
+    </c:when>
     <c:when test="${availability == 0}">
       <html:img page="/images/icon_available_red.gif" border="0"
                 width="12" height="12"/>
