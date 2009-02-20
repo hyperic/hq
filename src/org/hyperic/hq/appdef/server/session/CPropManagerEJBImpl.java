@@ -291,7 +291,10 @@ public class CPropManagerEJBImpl
                 pstmt.setInt(2, keyId);
                 pstmt.setInt(3, aID.getID());
                 for(int i=0; i<chunks.length; i++){
-                    pstmt.setInt(1, Util.generateId("org.hyperic.hq.appdef.server.session.Cprop", nprop));
+                    int id = Util.generateId(
+                        "org.hyperic.hq.appdef.server.session.Cprop",
+                        nprop).intValue();
+                    pstmt.setInt(1, id);
                     pstmt.setInt(4, i);
                     pstmt.setString(5, chunks[i]);
                     pstmt.addBatch();
