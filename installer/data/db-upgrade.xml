@@ -9548,9 +9548,11 @@ has already been defined.
 
   <schemaSpec version="3.133">
     <schema-directSQL>
+      <!-- Don't see this index on oracle not sure why, but the upgrade seems
+           to work fine
       <statement targetDB="oracle" fail="false">
-        ALTER TABLE EAM_SERVICE DROP (NAME, SERVER_ID)
       </statement>
+      -->
       <statement targetDB="postgresql" fail="false">
         drop index EAM_SERVER_SERVICE_IDX
       </statement>
