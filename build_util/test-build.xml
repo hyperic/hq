@@ -55,6 +55,7 @@
                <exclude name="**/AuthzSubjectManager_test.java"/>
                <exclude name="**/ResourceGroupManager_test.java"/>
                <exclude name="**/InputStreamService_test.java"/>
+               <exclude name="**/ProblemMetricManager_test.java"/>
 
                <!-- Need to figure out why this test is failing -->
                <exclude name="**/SignIn_test.java"/>
