@@ -28,14 +28,16 @@ package org.hyperic.hq.plugin.sqlquery;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.JDBCMeasurementPlugin;
+import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricInvalidException;
 import org.hyperic.hq.product.MetricNotFoundException;
@@ -44,7 +46,6 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.TypeInfo;
-
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
@@ -54,6 +55,7 @@ import org.hyperic.util.config.EnumerationConfigOption;
 public class SQLQueryMeasurementPlugin
     extends JDBCMeasurementPlugin {
 
+    private final Log _log = LogFactory.getLog(SQLQueryMeasurementPlugin.class);
     private static final String DOMAIN = "sql";
     private static final String PROP_DRIVER = "jdbcDriver";
     private static final String EXEC_TIME_ATTR = "QueryExecTime";
@@ -224,8 +226,7 @@ public class SQLQueryMeasurementPlugin
             return true;
         }
         try {
-            loadedDrivers.put(driver,
-                              Class.forName(driver));
+            loadedDrivers.put(driver, Class.forName(driver));
             return true;
         } catch (ClassNotFoundException e) {
             // Ignore, will fail in getConnection()
@@ -341,10 +342,8 @@ public class SQLQueryMeasurementPlugin
         throws PluginException,
                MetricUnreachableException,
                MetricInvalidException,
-               MetricNotFoundException
-
-    {
-        String attr = metric.getAttributeName();
+               MetricNotFoundException {
+        final String attr = metric.getAttributeName();
         MetricValue val;
         Properties props = metric.getProperties();
         if (!loadDriver(props)) {
@@ -359,7 +358,20 @@ public class SQLQueryMeasurementPlugin
             }
         }
         long startTime = System.currentTimeMillis();
-        val = super.getValue(metric);
+        double d;
+        if (!attr.replaceAll("\\s+", "").equalsIgnoreCase("queryexectime")
+            && !metric.isAvail()) {
+            d = super.getQueryValue(metric, true);
+            if (_sqlLog != null) {
+                getManager().reportEvent(
+                    metric, now(), LogTrackPlugin.LOGLEVEL_ANY, attr, _sqlLog);
+                _sqlLog = null;
+            }
+        } else {
+            d = super.getQueryValue(metric, false);
+        }
+
+        val = new MetricValue(d, System.currentTimeMillis());
 
         // Not exact, but close enough
         long totalTime = System.currentTimeMillis() - startTime;
@@ -369,5 +381,9 @@ public class SQLQueryMeasurementPlugin
         } else {
             return val;
         }
+    }
+    
+    private final long now() {
+        return System.currentTimeMillis();
     }
 }

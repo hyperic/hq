@@ -71,6 +71,9 @@
   <!-- Server Type -->
   <server name="SQL Query">
 
+    <plugin type="log_track"
+            class="org.hyperic.hq.plugin.sqlquery.SQLQueryLogTrackPlugin"/>
+
     <plugin type="measurement"
             class="org.hyperic.hq.plugin.sqlquery.SQLQueryMeasurementPlugin"/>
 
@@ -82,11 +85,11 @@
               default="org.postgresql.Driver">
         <!-- jdbcUrl option overridden in SQLMeasurementPlugin -->
         <include name="org.postgresql.Driver"/>
-	<include name="oracle.jdbc.driver.OracleDriver"/> 	 
-	<include name="com.microsoft.jdbc.sqlserver.SQLServerDriver"/> 	 
-	<include name="com.mysql.jdbc.Driver"/> 	 
-	<include name="com.ibm.db2.jcc.DB2Driver"/> 	 
-	<include name="com.sybase.jdbc2.jdbc.SybDriver"/>
+        <include name="oracle.jdbc.driver.OracleDriver"/> 	 
+        <include name="com.microsoft.jdbc.sqlserver.SQLServerDriver"/> 	 
+        <include name="com.mysql.jdbc.Driver"/> 	 
+        <include name="com.ibm.db2.jcc.DB2Driver"/> 	 
+        <include name="com.sybase.jdbc2.jdbc.SybDriver"/>
       </option>
 
       <option name="jdbcUrl"
