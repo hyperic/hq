@@ -453,7 +453,7 @@ public class AvailabilityManagerEJBImpl
      */
     public Map getLastAvail(Collection resources, Map measCache) {
         final MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
-        final List midsToGet = new ArrayList(resources.size());
+        final Set midsToGet = new HashSet(resources.size());
         final ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
         for (Iterator it=resources.iterator(); it.hasNext(); ) {
             final Object o = it.next();
@@ -543,8 +543,9 @@ public class AvailabilityManagerEJBImpl
             if (null == (tmp = (MetricValue)rtn.get(mid)) ||
                     endtime > tmp.getTimestamp()) {
                 MetricValue mVal = new MetricValue(avail.getAvailVal(), endtime);
-                rtn.put(avail.getMeasurement().getId(), mVal);
-                midList.remove(avail.getMeasurement().getId());
+                rtn.put(mid, mVal);
+                // HQ-1600: remove all in case there are duplicates
+                midList.removeAll(Collections.singleton(mid));
             }
         }
         // fill in missing measurements
