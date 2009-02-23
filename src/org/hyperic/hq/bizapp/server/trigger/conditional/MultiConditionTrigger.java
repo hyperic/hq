@@ -47,6 +47,7 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.velocity.runtime.parser.node.GetExecutor;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
@@ -547,7 +548,8 @@ public class MultiConditionTrigger
                 // Only need to update reference if event may expire
                 if (getTimeRange() > 0) {
                     try {
-                        etracker.updateReference(toDelete.getId(), event);
+                        etracker.updateReference(getId(), toDelete.getId(),
+                                                 event, getTimeRange());
                     } catch (SQLException e) {
                         log.debug("Failed to update event reference for " +
                                   "trigger id=" + getId(), e);
