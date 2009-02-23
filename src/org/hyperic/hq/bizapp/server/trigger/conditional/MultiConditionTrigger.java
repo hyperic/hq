@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -44,11 +44,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.velocity.runtime.parser.node.GetExecutor;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
@@ -59,11 +58,10 @@ import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
-import org.hyperic.hq.events.server.session.EventTrackerEJBImpl;
 import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
+import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
-import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.config.BooleanConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -73,15 +71,15 @@ import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.config.LongConfigOption;
 import org.hyperic.util.config.StringConfigOption;
 
+import EDU.oswego.cs.dl.util.concurrent.ReadWriteLock;
+import EDU.oswego.cs.dl.util.concurrent.ReentrantWriterPreferenceReadWriteLock;
+
 /** The MultiConditionTrigger is a specialized trigger that can combine multiple
  * conditions and only fire actions when all conditions have been met
  *
  */
 public class MultiConditionTrigger
     extends AbstractTrigger {
-    private static final long EVENT_CACHE_TIME =
-        30 * MeasurementConstants.MINUTE;
-
     private final Log log = LogFactory.getLog(MultiConditionTrigger.class);
 
     public static final String CFG_TRIGGER_IDS = "triggerIds";
@@ -95,11 +93,10 @@ public class MultiConditionTrigger
     
     private final Object lastFulfillingEventsLock = new Object();
 
-    private final Map currentSharedLockHolders =
-        Collections.synchronizedMap(new HashMap());
+    private final Map currentSharedLockHolders = Collections.synchronizedMap(new HashMap());
         
     // make the lock reentrant just to be safe in preventing deadlocks
-    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
+    private final ReadWriteLock rwLock = new ReentrantWriterPreferenceReadWriteLock();
     
     private static final ThreadLocal IGNORE_NEXT_EXCLUSIVE_LOCK_RELEASE = 
         new ThreadLocal() {
@@ -143,7 +140,7 @@ public class MultiConditionTrigger
         
         while (!acquired && counter < 10) {
             try {
-                rwLock.readLock().lockInterruptibly();
+                rwLock.readLock().acquire();
                 acquired = true;
             } catch (InterruptedException e) {
                 // interrupted state is cleared - retry
@@ -169,7 +166,7 @@ public class MultiConditionTrigger
      */
     public void releaseSharedLock() {
         try {
-            rwLock.readLock().unlock();            
+            rwLock.readLock().release();            
         } finally {
             currentSharedLockHolders.remove(Thread.currentThread());
             
@@ -268,7 +265,7 @@ public class MultiConditionTrigger
      * @throws InterruptedException
      */
     public boolean attemptExclusiveLock() throws InterruptedException {
-        return rwLock.writeLock().tryLock();        
+        return rwLock.writeLock().attempt(0);        
     }
     
     /**
@@ -278,7 +275,7 @@ public class MultiConditionTrigger
         if (ignoreNextExclusiveLockRelease()) {
             resetIgnoreNextExclusiveLockRelease();
         } else {
-            rwLock.writeLock().unlock();            
+            rwLock.writeLock().release();            
         }
     }
     
@@ -404,11 +401,10 @@ public class MultiConditionTrigger
         EventTrackerLocal etracker = null;
         
         try {
-            etracker = EventTrackerEJBImpl.getOne();
+            etracker = EventTrackerUtil.getLocalHome().create();
         } catch (Exception e) {
-            throw new ActionExecuteException("Failed to evaluate multi" +
-                                             "condition trigger id=" + getId(),
-                                             e);
+            throw new ActionExecuteException("Failed to evaluate multi condition " +
+                                              "trigger id="+getId(), e);
         }
         
         TriggerFiredEvent target = prepareTargetEventOnFlush(event, etracker);
@@ -429,39 +425,47 @@ public class MultiConditionTrigger
                 throw new ActionExecuteException(e);
             } catch (SystemException e) {
                 throw new ActionExecuteException(e);
-            }
-        }
+            }            
+        }        
+
     }
 
     private TriggerFiredEvent prepareTargetEventOnFlush(AbstractEvent event,
                                                         EventTrackerLocal etracker)
-        throws ActionExecuteException {
+            throws ActionExecuteException {
         
         TriggerFiredEvent target = null;
         
         synchronized (lock) {
             if (event instanceof FlushStateEvent) {
                 if (triggeringConditionsFulfilled()) {
-                    // Since prepareTargetEvent iterates through the
-                    // lastFulfillingEvents, make a copy so we don't
-                    // have to synchronize on the list iteration.
-                    List copyOfLastFulfillingEvents = null;
+                    try {
+                        // Since prepareTargetEvent iterates through the 
+                        // lastFulfillingEvents, make a copy so we don't 
+                        // have to synchronize on the list iteration.                        
+                        List copyOfLastFulfillingEvents = null;
+                        
+                        synchronized (lastFulfillingEventsLock) {
+                            copyOfLastFulfillingEvents = 
+                                new ArrayList(lastFulfillingEvents);
+                        }     
+                        
+                        target = prepareTargetEvent(copyOfLastFulfillingEvents, etracker);                        
 
-                    synchronized (lastFulfillingEventsLock) {
-                        copyOfLastFulfillingEvents =
-                            new ArrayList(lastFulfillingEvents);
-                        lastFulfillingEvents.clear();
+                    } finally {
+                        if (target != null) {
+                            synchronized (lastFulfillingEventsLock) {
+                                lastFulfillingEvents.clear();                                                            
+                            }
+                        }
                     }
-
-                    target = prepareTargetEvent(copyOfLastFulfillingEvents,
-                                                etracker);
-                }
+                }                            
             } else {
-                List priorEvents = getPriorEventsForTrigger(etracker);
+                List tempLastFulfillingEvents = 
+                    addNewEvent(event, etracker);
                 
                 synchronized (lastFulfillingEventsLock) {
-                    lastFulfillingEvents = addNewEvent(priorEvents, event,
-                                                       etracker);
+                    lastFulfillingEvents = tempLastFulfillingEvents;                    
                 }
             }            
         }
@@ -478,9 +482,10 @@ public class MultiConditionTrigger
      *          be thread-safe!
      * @throws ActionExecuteException
      */    
-    private List addNewEvent(List events, AbstractEvent event,
-                             EventTrackerLocal etracker)
+    private List addNewEvent(AbstractEvent event, EventTrackerLocal etracker)
         throws ActionExecuteException {        
+                              
+        List events = getPriorEventsForTrigger(etracker);
 
         // Now add the new event, too
         events.add(event);
@@ -537,31 +542,27 @@ public class MultiConditionTrigger
             return Collections.EMPTY_LIST;
         }
         
-        long expire = getTimeRange() > 0 ?
-                System.currentTimeMillis() - getTimeRange() : 
-                Long.MAX_VALUE;
-                    
-        // Clean up unused event
-        if (toDelete != null && toDelete.getTimestamp() > expire) {
-            // Only need to update reference if event may expire or if
-            // we haven't fired since we started evaluating
-            if (getTimeRange() > 0 && !lastFulfillingEvents.isEmpty()) {
-                try {
-                    etracker.updateReference(getId(), toDelete.getId(), event,
-                                             getTimeRange());
-                } catch (SQLException e) {
-                    log.error("Failed to update event reference for event id=" +
-                              toDelete.getId(), e);
+        try {
+            // Clean up unused event
+            if (toDelete != null) {
+                // Only need to update reference if event may expire
+                if (getTimeRange() > 0) {
+                    try {
+                        etracker.updateReference(getId(), toDelete.getId(),
+                                                 event, getTimeRange());
+                    } catch (SQLException e) {
+                        log.debug("Failed to update event reference for " +
+                                  "trigger id=" + getId(), e);
+                        etracker.addReference(getId(), event, getTimeRange());
+                    }
                 }
-            }
-        } else {
-            try {
+            } else {
                 etracker.addReference(getId(), event, getTimeRange());
-            } catch (SQLException e) {
-                log.error("Failed to add event reference for trigger id=" +
-                          getId(), e);
-            }
-        }          
+            }          
+        } catch (SQLException e) {
+            log.error("Failed to add event reference for trigger id=" +
+                      getId(), e);
+        }
         
         return new ArrayList(fulfilled.values());
     }
@@ -569,40 +570,13 @@ public class MultiConditionTrigger
     private List getPriorEventsForTrigger(EventTrackerLocal etracker) 
         throws ActionExecuteException {
         List events = new ArrayList();
-        
-        synchronized (lastFulfillingEventsLock) {
-            if (!lastFulfillingEvents.isEmpty()) {
-                long expire =  System.currentTimeMillis() -
-                    (getTimeRange() > 0 ? getTimeRange() : EVENT_CACHE_TIME);
-                        
-                for (Iterator it = lastFulfillingEvents.iterator();
-                     it.hasNext(); ) {
-                    AbstractEvent event = (AbstractEvent) it.next();
-                    // If we know we have old events, then look up from DB
-                    if (event.getTimestamp() < expire) {
-                        events.clear();
-                        break;
-                    }
-                    else {
-                        events.add(event);
-                    }
-                }
-                
-                if (log.isDebugEnabled())
-                    log.debug("Get " + events.size() +
-                              " events from cache for trigger id=" + getId());
 
-            }
-        }
-
-        // Look up events in database
-        if (events.isEmpty()) {
+        if (lastFulfillingEvents.isEmpty()) {
             try {
                 Collection eventObjectDesers =
                     etracker.getReferencedEventStreams(getId());
                 if (log.isDebugEnabled())
-                    log.debug("Get prior events from database for trigger id=" +
-                              getId());
+                    log.debug("Get prior events for trigger id="+getId());
             
                 for (Iterator iter = eventObjectDesers.iterator();
                      iter.hasNext(); ) {
@@ -610,14 +584,23 @@ public class MultiConditionTrigger
                         (EventObjectDeserializer) iter.next();
                     events.add(deserializeEvent(deser, true));
                 }
-                
-                synchronized (lastFulfillingEventsLock) {
-                    lastFulfillingEvents = events;
-                }
             } catch(Exception exc) {
                 throw new ActionExecuteException(
                     "Failed to get referenced streams for trigger id=" +getId(),
                     exc);
+            }
+        }
+        else {
+            synchronized (lastFulfillingEventsLock) {
+                long expire = getTimeRange() > 0 ?
+                        System.currentTimeMillis() - getTimeRange() : 0;
+                        
+                for (Iterator it = lastFulfillingEvents.iterator();
+                     it.hasNext(); ) {
+                    AbstractEvent event = (AbstractEvent) it.next();
+                    if (event.getTimestamp() > expire)
+                        events.add(event);
+                }
             }
         }
         
