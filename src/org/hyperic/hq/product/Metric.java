@@ -372,9 +372,7 @@ public class Metric {
     }
 
     public void setId(int type, int id) {
-        if (this.id == null) {
-            this.id = type + ":" + id;
-        }
+        this.id = type + ":" + id;
     }
 
     public String getCategory() {

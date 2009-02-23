@@ -26,12 +26,15 @@
 package org.hyperic.hq.product;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Statement;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
@@ -62,6 +65,15 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
     private static HashMap connectionCache = new HashMap();
     
     public static final int COL_INVALID = 0;
+
+    protected String _sqlLog;
+    
+    private Double _data;
+
+    private HashMap _colMap = new HashMap(),
+                    _valMap = new HashMap();
+
+    private int _numRows, _updateRows;
 
     /**
      * Config schema includes jdbc URL, database username and password.
@@ -221,6 +233,12 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
      */
     protected double getQueryValue(Metric jdsn)
         throws MetricNotFoundException, PluginException,
+               MetricUnreachableException {
+        return getQueryValue(jdsn, false);
+    }
+
+    protected double getQueryValue(Metric jdsn, boolean logSql)
+        throws MetricNotFoundException, PluginException,
                MetricUnreachableException
     {
         initQueries();
@@ -242,14 +260,13 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
             pass = props.getProperty(PROP_PASSWORD);
 
         Connection conn = null;
-        PreparedStatement ps = null;
+        Statement stmt = null;
         ResultSet rs = null;
 
         try {
             conn = getCachedConnection(url, user, pass);
-            //XXX cache prepared statements
-            ps = conn.prepareStatement(query);
-            rs = ps.executeQuery();
+            stmt = conn.createStatement();
+            stmt.execute(query);
 
             // If the query executed without error, we don't care if any 
             // results were returned.
@@ -257,15 +274,22 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
                 return Metric.AVAIL_UP;
             }
 
-            if (rs != null && rs.next()) {
-                int column = getColumn(jdsn);
-                if (column != COL_INVALID)
+            int column = getColumn(jdsn);
+            if (logSql) {
+                _data = null;
+                _sqlLog = getSqlRow(stmt);
+            } else if (column != COL_INVALID) {
+                rs = stmt.getResultSet();
+                if (rs != null && rs.next()) {
                     return rs.getDouble(column);
-                
-                return rs.getDouble(getColumnName(jdsn));
-            } else {
-                throw new MetricNotFoundException(attr);
+                } else {
+                    throw new MetricNotFoundException(attr);
+                }
             }
+            if (_data != null) {
+                return _data.doubleValue();
+            }
+            return rs.getDouble(getColumnName(jdsn));
         } catch (SQLException e) {
 
             if (isAvail) {
@@ -295,10 +319,114 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
                 
             throw new MetricNotFoundException(msg, e);
         } finally {
-            DBUtil.closeJDBCObjects(getLog(), null, ps, rs);
+            DBUtil.closeJDBCObjects(getLog(), null, stmt, rs);
         }
     }
     
+    private String getSqlRow(Statement stmt) throws SQLException {
+        StringBuffer buf = new StringBuffer();
+        do {
+            _updateRows = stmt.getUpdateCount();
+            ResultSet rs = stmt.getResultSet();
+            if (stmt.getUpdateCount() != -1) {
+                continue;
+            }
+            if (rs == null) {
+                break;
+            }
+            setData(rs);
+            buf.append(getOutput(rs.getMetaData()));
+        } while (stmt.getMoreResults() == true);
+        return buf.toString();
+    }
+
+    
+    protected void setData(ResultSet rs) throws SQLException
+    {
+        clearObjects();
+        ResultSetMetaData md = rs.getMetaData();
+        processColumnHeader(md);
+        processColumns(rs);
+    }
+    
+    private void clearObjects()
+    {
+        _numRows = 0;
+        _colMap.clear();
+        _valMap.clear();
+    }
+
+    protected void processColumnHeader(ResultSetMetaData md) throws SQLException
+    {
+        for (int i=1; i<=md.getColumnCount(); i++)
+        {
+            Integer ind = new Integer(i);
+            int length = md.getColumnName(i).trim().length();
+            length = (length == 0) ? 1 : length;
+            _colMap.put(ind, new Integer(length));
+            _valMap.put(ind, new ArrayList());
+        }
+    }
+
+    protected void processColumns(ResultSet rs) throws SQLException
+    {
+        while (rs.next())
+        {
+            _numRows++;
+            ResultSetMetaData rsmd = rs.getMetaData();
+            for (int i=1; i<=rsmd.getColumnCount(); i++)
+            {
+                Integer ind = new Integer(i);
+                String val = null;
+                if (rs.getObject(i) == null) {
+                    val = "()";
+                }
+                else
+                {
+                    try
+                    {
+                        // XXX ignoring BLOBs for now
+                        if (rsmd.getColumnType(i) == -2) {
+                        }
+                        else {
+                            val = rs.getString(i).trim();
+                        }
+                        if (_data == null) {
+                            _data = new Double(val);
+                        }
+                    }
+                    catch (Exception e) {
+                        val = "";
+                    }
+                }
+                ((List)_valMap.get(ind)).add(val);
+                if (val.length() > ((Integer)_colMap.get(ind)).intValue()) {
+                    _colMap.put(ind, new Integer(val.length()));
+                }
+            }
+        }
+    }
+    
+    private String getOutput(ResultSetMetaData md) throws SQLException {
+        StringBuffer rtn = new StringBuffer();
+        for (int i=1; i<=md.getColumnCount(); i++) {
+            rtn.append(md.getColumnName(i)).append("=");
+            for (int j=0; j<_numRows; j++) {
+                Integer jnd = new Integer(i);
+                String val = "";
+                if (((List)_valMap.get(jnd)).size() > 0) {
+                    val = (String)((List)_valMap.get(jnd)).remove(0);
+                }
+                rtn.append(val);
+                if (j < (_numRows-1)) {
+                    rtn.append(",");
+                }
+            }
+            rtn.append("::");
+        }
+        return rtn.toString();
+    }
+
     /**
      * Utility method that returns an instance of Properties containing the given
      * user and password keys. The Properties instance returned can be passed in 

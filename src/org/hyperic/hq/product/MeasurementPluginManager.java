@@ -357,8 +357,10 @@ public class MeasurementPluginManager extends PluginManager {
     public void reportEvent(Metric metric,
                             long time, int level,
                             String source, String message) {
-        LogTrackPlugin plugin =
-            this.ltpm.getLogTrackPlugin(metric.getId());
+        LogTrackPlugin plugin = null;
+        if (metric.getId() != null) {
+            plugin = ltpm.getLogTrackPlugin(metric.getId());
+        }
 
         if (plugin != null) {
             if (message == null) {
