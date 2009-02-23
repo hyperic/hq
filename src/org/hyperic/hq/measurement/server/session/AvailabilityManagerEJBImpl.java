@@ -514,6 +514,9 @@ public class AvailabilityManagerEJBImpl
     }
 
     /**
+     * Only unique measurement ids should be passed in. Duplicate measurement
+     * ids will be filtered out from the returned Map if present.
+     * 
      * @return Map<Integer, MetricValue> Integer is the measurementId
      * @ejb:interface-method
      */
