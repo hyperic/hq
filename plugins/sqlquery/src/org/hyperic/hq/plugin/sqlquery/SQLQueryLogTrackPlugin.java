@@ -25,9 +25,6 @@
 
 package org.hyperic.hq.plugin.sqlquery;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.hyperic.hq.product.LogTrackPlugin;
 
 /**
@@ -37,10 +34,8 @@ import org.hyperic.hq.product.LogTrackPlugin;
 public class SQLQueryLogTrackPlugin extends LogTrackPlugin {
     
     private static final String[] LOG_LEVELS = new String[0];
-    private static List _inst = new ArrayList();
     
     public SQLQueryLogTrackPlugin() {
-        _inst.add(this);
     }
 
     public String[] getLogLevelAliases() {
