@@ -159,18 +159,4 @@
             </putList>
   </definition>
 
-  <definition name=".dashContent.addContent.narrow"
-              controllerUrl="/dashboard/AddContent.do"
-              extends=".dash.portlets.multi"
-              path="/portlet/AddContentControl.jsp">
-              <put name="wide"      value="false" />
-              <putList name="portlets">
-                <add value=".dashContent.availSummary"/>
-                <add value=".dashContent.recentlyApproved"/>
-                <add value=".dashContent.savedCharts"/>
-                <add value=".dashContent.searchResources"/>
-                <add value=".dashContent.summaryCounts"/>
-              </putList>           
-  </definition>  
-
 </tiles-definitions>
