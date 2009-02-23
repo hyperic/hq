@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -262,6 +262,14 @@ public class ProductPluginDeployer
                 ConcurrentStatsCollector.JMS_TOPIC_PUBLISH_TIME);
             c.register(
                 ConcurrentStatsCollector.JMS_QUEUE_PUBLISH_TIME);
+            c.register(
+                ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
+            c.register(
+                ConcurrentStatsCollector.DB_ANALYZE_TIME);
+            c.register(
+                ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
+            c.register(
+                ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
             c.startCollector();
         } catch (Exception e) {
             _log.error("Could not start Concurrent Stats Collector", e);
