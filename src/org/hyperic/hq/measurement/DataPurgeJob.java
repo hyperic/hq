@@ -44,6 +44,7 @@ import org.hyperic.hq.measurement.shared.DataCompressLocal;
 import org.hyperic.hq.measurement.shared.DataCompressUtil;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.util.TimeUtil;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -121,16 +122,23 @@ public class DataPurgeJob implements Job {
             }
         }
 
-        long time_start = System.currentTimeMillis();
+        final long time_start = now();
         
         try {
             // Announce
             _log.info("Data compression starting at " +
                       TimeUtil.toString(time_start));
 
+            ConcurrentStatsCollector stats =
+                ConcurrentStatsCollector.getInstance();
             runDBAnalyze(serverConfig);
+            stats.addStat((now() - time_start),
+                ConcurrentStatsCollector.DB_ANALYZE_TIME);
 
+            final long start = now();
             dataCompress.compressData();
+            stats.addStat((now() - start),
+                ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
             
         } catch (SQLException e) {
             _log.error("Unable to compress data: " + e, e);
@@ -145,6 +153,10 @@ public class DataPurgeJob implements Job {
                   ((time_end - time_start)/1000) +
                   " seconds.");
         runDBMaintenance(serverConfig);
+    }
+    
+    private static final long now() {
+        return System.currentTimeMillis();
     }
 
     private static void runDBAnalyze(ServerConfigManagerLocal serverConfig)
@@ -224,8 +236,15 @@ public class DataPurgeJob implements Job {
 
     protected void purge(Properties conf, long now)
         throws CreateException, NamingException {
+        ConcurrentStatsCollector stats = ConcurrentStatsCollector.getInstance();
+        long start = now();
         DataPurgeJob.purgeEventLogs(conf, now);
+        stats.addStat((now() - start),
+            ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
+        start = now();
         DataPurgeJob.purgeMeasurements();
+        stats.addStat((now() - start),
+            ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
     }
 
     /**

@@ -99,7 +99,11 @@ public final class ConcurrentStatsCollector {
         SIGAR_PAGEOUT                = "SIGAR_PAGEOUT",
         SIGAR_PAGEIN                 = "SIGAR_PAGEIN",
         JMS_QUEUE_PUBLISH_TIME       = "JMS_QUEUE_PUBLISH_TIME",
-        JMS_TOPIC_PUBLISH_TIME       = "JMS_TOPIC_PUBLISH_TIME";
+        JMS_TOPIC_PUBLISH_TIME       = "JMS_TOPIC_PUBLISH_TIME",
+        METRIC_DATA_COMPRESS_TIME    = "METRIC_DATA_COMPRESS_TIME",
+        DB_ANALYZE_TIME              = "DB_ANALYZE_TIME",
+        PURGE_EVENT_LOGS_TIME        = "PURGE_EVENT_LOGS_TIME",
+        PURGE_MEASUREMENTS_TIME      = "PURGE_MEASUREMENTS_TIME";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
