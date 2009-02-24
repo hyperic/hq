@@ -28,7 +28,6 @@
  --%>
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/footer.js"/>" type="text/javascript"></script>
-<script src="<html:rewrite page="/js/window.js"/>" type="text/javascript"></script>
 
 <img src="/images/spacer.gif" width="1" height="60" alt="" border="0" class="footerSpacer" style="clear: both;" id="footerSpacer">
 
@@ -37,7 +36,7 @@
 		<td class="FooterBold" style="padding-left: 30px;"><tiles:insert definition=".footer.current.time" /></td>
 		<td class="FooterRegular" nowrap="nowrap" align="center">
 			<div id="aboutAnchor">
-			  <a name="aboutLink" href="javascript:about('<html:rewrite page="/common/"/>')"><fmt:message key="footer.HQ" /> <fmt:message key="footer.version" /> <c:out value="${HQVersion}" /></a> <c:out value="${HQBuild}" />
+			  <a name="aboutLink" href="javascript:aboutDia.show()"><fmt:message key="footer.HQ" /> <fmt:message key="footer.version" /> <c:out value="${HQVersion}" /></a> <c:out value="${HQBuild}" />
 			</div>
 		</td>
 		<td class="FooterRegular" align="right"><fmt:message key="footer.Copyright" /></td>
@@ -45,13 +44,8 @@
 	</tr>
 </table>
 
-<div id="about" class="dialog" style="position: absolute; top: 0px; left: 0px; display: none;">
+<div id="about" class="dialog" style="display: none;">
   <table cellpadding="2" cellspacing="0" border="0" width="305">
-  	<tr class="PageTitleBar">
-  		<td width="1%" class="PageTitle"><html:img page="/images/spacer.gif" width="1" height="32" alt="" border="0"/></td>
-  		<td width="66%" class="PageTitle"><fmt:message key="about.Title" /></td>
-  		<td class="PageTitle"></td>
-  	</tr>
   	<tr>
   		<td class="DisplayLabel" rowspan="3">&nbsp;</td>
   		<td valign="top" class="DisplaySubhead" colspan="2"><html:img
@@ -83,4 +77,13 @@
 
 <script type="text/javascript">
   setFoot();
+
+  var pane = dojo11.byId('about');
+  var aboutDia = new dijit11.Dialog({
+                id: 'about_popup',
+                refocus: true,
+                autofocus: false,
+                opacity: 0,
+                title: "<fmt:message key="about.Title" />"
+            },pane);
 </script>
