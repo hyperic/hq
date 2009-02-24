@@ -1238,7 +1238,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
     that.desc = {};
 
     that.args = kwArgs;
-    that.url = kwArgs.url;
+    that.url = kwArgs.url + '/';
     that.error = kwArgs.error;
     that.container = {};
     that.currentReport = null;
