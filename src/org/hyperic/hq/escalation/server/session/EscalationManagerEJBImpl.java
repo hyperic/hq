@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import javax.ejb.SessionBean;
@@ -505,7 +506,8 @@ public class EscalationManagerEJBImpl
 
         // Always make sure that we increase the state offset of the
         // escalation so we don't loop fo-eva 
-        long offset = 65000 + (long) (25000 * Math.random());
+        Random random = new Random();
+        long offset = 65000 + random.nextInt(25000);
         long nextTime = System.currentTimeMillis() + 
             Math.max(offset, eAction.getWaitTime());
             
