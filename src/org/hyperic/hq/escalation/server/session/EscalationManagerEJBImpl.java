@@ -505,8 +505,9 @@ public class EscalationManagerEJBImpl
 
         // Always make sure that we increase the state offset of the
         // escalation so we don't loop fo-eva 
+        long offset = 65000 + (long) (25000 * Math.random());
         long nextTime = System.currentTimeMillis() + 
-            Math.max(60000, eAction.getWaitTime());
+            Math.max(offset, eAction.getWaitTime());
             
         _log.debug("Moving onto next state of escalation, but chillin' for "
                    + eAction.getWaitTime() + " ms");
