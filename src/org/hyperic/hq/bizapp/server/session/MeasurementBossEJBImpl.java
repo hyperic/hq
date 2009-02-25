@@ -379,10 +379,24 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                                                AppdefEntityID aeid,
                                                Map measCache) {
         Measurement dm = null;
-        if (measCache != null)
-            dm = (Measurement) measCache.get(aeid.getId());
-        if (dm == null)
+        if (measCache != null) {
+            Object obj = measCache.get(aeid.getId());
+
+            // HHQ-2884: Short-term fix for groups
+            // XXX Need to refactor. Not originally designed for groups
+            if (obj instanceof List) {
+                List list = (List) obj;                
+                if (list.size() == 1) {
+                    dm = (Measurement) list.get(0);
+                }
+            } else if (obj instanceof Measurement) {
+                dm = (Measurement) obj;
+            }
+        }
+
+        if (dm == null) {
             dm = findAvailabilityMetric(subj, aeid);
+        }
         return dm;
     }
     
