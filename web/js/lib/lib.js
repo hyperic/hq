@@ -1413,7 +1413,7 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
         //the refresh is showing
         //set the arc link
         //that.container.error_loading.innerHTML = that.args.notFound;
-        if(that.url == "") {
+        if(that.url == "/") {
             that.container.loading.style.display = "block";
             that.container.error_loading.style.display = "block";
             that.container.progress.style.display = "none";
