@@ -76,6 +76,8 @@
 </div>
 
 <script type="text/javascript">
+  dojo11.require("dijit.Dialog");
+
   setFoot();
 
   var pane = dojo11.byId('about');
