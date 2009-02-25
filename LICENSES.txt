@@ -149,3 +149,8 @@ Use: Chart graphing
 Information: http://code.google.com/p/simile-widgets/
 License: http://www.opensource.org/licenses/bsd-license.php
 Use: Event/Log display
+
+- Tapestry -
+Information: http://tapestry.apache.org/
+License: http://www.apache.org/licenses/LICENSE-2.0
+Use: UI Framework
