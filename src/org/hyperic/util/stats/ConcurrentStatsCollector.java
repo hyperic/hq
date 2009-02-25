@@ -568,16 +568,19 @@ public final class ConcurrentStatsCollector {
 
         register(new MBeanCollector(
             "EDEN_MEMORY_USED", "java.lang:type=MemoryPool,name=",
-            new String[] {"PS Eden Space", "Eden Space"}, "Usage", "used"));
+            new String[] {"Par Eden Space", "PS Eden Space", "Eden Space"},
+            "Usage", "used"));
 
         register(new MBeanCollector(
             "SURVIVOR_MEMORY_USED", "java.lang:type=MemoryPool,name=",
-            new String[] {"PS Survivor Space", "Survivor Space"}, "Usage",
-            "used"));
+            new String[] {"Par Survivor Space", "PS Survivor Space",
+                          "Survivor Space"},
+            "Usage", "used"));
 
         register(new MBeanCollector(
             "TENURED_MEMORY_USED", "java.lang:type=MemoryPool,name=",
-            new String[] {"PS Old Gen", "Tenured Gen"}, "Usage", "used"));
+            new String[] {"CMS Old Gen", "PS Old Gen", "Tenured Gen"},
+            "Usage", "used"));
 
         register(new MBeanCollector(
             "HEAP_MEMORY_USED", "java.lang:type=Memory",
