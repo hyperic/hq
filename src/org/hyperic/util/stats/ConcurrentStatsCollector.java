@@ -548,9 +548,6 @@ public final class ConcurrentStatsCollector {
         register(new MBeanCollector("ZEVENT_QUEUE_SIZE",
             "hyperic.jmx:name=HQInternal", "ZeventQueueSize", false));
 
-        register(new MBeanCollector("AGENT_CONN_COUNT",
-            "hyperic.jmx:name=HQInternal", "AgentConnections", false));
-
         register(new MBeanCollector("PLATFORM_COUNT",
             "hyperic.jmx:name=HQInternal", "PlatformCount", false));
 
@@ -587,12 +584,14 @@ public final class ConcurrentStatsCollector {
             new String[] {""}, "HeapMemoryUsage", "used"));
 
         register(new MBeanCollector(
-            "JVM_COPY_GC", "java.lang:type=GarbageCollector,name=Copy",
+            "JVM_MARKSWEEP_GC", "java.lang:type=GarbageCollector,name=",
+            new String[] {"ConcurrentMarkSweep", "PS MarkSweep"},
             "CollectionTime", true));
 
-        register(new MBeanCollector("JVM_MARKSWEEP_COMPACT",
-            "java.lang:type=GarbageCollector,name=MarkSweepCompact",
-            "CollectionTime", true));
+        register(new MBeanCollector(
+            "JVM_COPY_GC", "java.lang:type=GarbageCollector,name=",
+            new String[] {"Copy", "ParNew", "PS Scavenge"}, "CollectionTime",
+            true));
 
         register(LATHER_NUMBER_OF_CONNECTIONS);
         register(ALERT_FIRED_EVENT);
@@ -619,6 +618,17 @@ public final class ConcurrentStatsCollector {
         private final boolean _isComposite,
                               _isTrend;
         private long _last = 0l;
+
+        MBeanCollector(String id, String objectName, String[] names,
+                       String attrName, boolean trend) {
+            _id = id;
+            _objectName = objectName;
+            _attrName = attrName;
+            _names = names;
+            _valProp = null;
+            _isComposite = false;
+            _isTrend = trend;
+        }
 
         MBeanCollector(String id, String objectName, String attrName,
                        boolean trend) {
