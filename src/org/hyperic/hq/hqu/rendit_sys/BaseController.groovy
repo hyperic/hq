@@ -182,8 +182,10 @@ abstract class BaseController {
 	        return
 	    }
 	    
-	    if (!action.equals("HealthController") &&
-	        !action.equals("SystemsdownController")) {
+	    if (!lowestClass.name.equals("HealthController") &&
+	        !lowestClass.name.equals("SystemsdownController") &&
+	        !lowestClass.name.equals("EventController") &&
+	        !lowestClass.name.equals("AlertController")) {
 	       log.info "Invoking method: ${action} with ${params}"
 	    } else if (log.debugEnabled) {
 	       log.debug "Invoking method: ${action} with ${params}"
