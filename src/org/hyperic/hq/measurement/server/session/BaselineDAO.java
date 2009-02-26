@@ -67,7 +67,8 @@ public class BaselineDAO extends HibernateDAO {
     /*
      * @return List of Measurement
      */
-    public List findMeasurementsForBaselines(boolean enabled, long computeTime) {
+    public List findMeasurementsForBaselines(boolean enabled, long computeTime,
+                                             int maxResults) {
         String sql = new StringBuffer()
             .append("SELECT {m.*}")
         	.append(" FROM EAM_MEASUREMENT m")
@@ -85,7 +86,9 @@ public class BaselineDAO extends HibernateDAO {
             .addEntity("m", Measurement.class)
             .setBoolean("enabled", enabled)
             .setInteger("collType", collType)
-            .setLong("computeTime", computeTime).list();
+            .setLong("computeTime", computeTime)
+            .setMaxResults(maxResults)
+            .list();
     }
 
     public List findByInstance(int appdefType, int appdefId) {
