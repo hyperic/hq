@@ -182,7 +182,12 @@ abstract class BaseController {
 	        return
 	    }
 	    
-	    log.info "Invoking method: ${action} with ${params}"
+	    if (!action.equals("HealthController") &&
+	        !action.equals("SystemsdownController")) {
+	       log.info "Invoking method: ${action} with ${params}"
+	    } else if (log.debugEnabled) {
+	       log.debug "Invoking method: ${action} with ${params}"
+	    }
 	    
 	    try {
 	        for (f in beforeFilters) {
