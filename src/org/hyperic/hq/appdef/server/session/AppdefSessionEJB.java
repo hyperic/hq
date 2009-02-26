@@ -843,11 +843,7 @@ public abstract class AppdefSessionEJB
         List idList = 
             pm.findOperationScopeBySubject(whoami, op.getId());
         
-        List keyList = new ArrayList(idList.size());
-        for(int i=0; i < idList.size(); i++) {
-            keyList.add(idList.get(i));
-        }
-        return keyList;
+        return new ArrayList(idList);
     }
 
     /* Return a list of appdef entity ids that represent the total set of
