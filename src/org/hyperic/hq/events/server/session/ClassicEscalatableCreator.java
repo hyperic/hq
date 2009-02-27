@@ -37,6 +37,7 @@ import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.events.ActionExecutionInfo;
+import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerFiredEvent;
@@ -137,6 +138,10 @@ public class ClassicEscalatableCreator
         }
         
         return createEscalatable(alert, shortReason, longReason);
+    }
+    
+    public AlertDefinitionInterface getAlertDefinition() {
+        return _def;
     }
     
     public static Escalatable createEscalatable(Alert alert, String shortReason,

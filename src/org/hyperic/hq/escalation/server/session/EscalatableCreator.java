@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.escalation.server.session;
 
+import org.hyperic.hq.events.AlertDefinitionInterface;
+
 /**
  * Implementors of this interface can create escalatable objects.  
  * 
@@ -38,4 +40,5 @@ package org.hyperic.hq.escalation.server.session;
  */
 public interface EscalatableCreator {
     Escalatable createEscalatable();
+    AlertDefinitionInterface getAlertDefinition();
 }

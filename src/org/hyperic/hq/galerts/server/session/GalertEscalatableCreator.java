@@ -26,6 +26,7 @@ package org.hyperic.hq.galerts.server.session;
 
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
+import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 
 class GalertEscalatableCreator 
@@ -48,5 +49,9 @@ class GalertEscalatableCreator
     
     static Escalatable createEscalatable(GalertLog log) {
         return new GalertEscalatable(log);
+    }
+
+    public AlertDefinitionInterface getAlertDefinition() {
+        return _def;
     }
 }
