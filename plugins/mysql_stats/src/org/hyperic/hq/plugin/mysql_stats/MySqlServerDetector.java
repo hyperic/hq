@@ -136,7 +136,8 @@ public class MySqlServerDetector
         final String sql =
             "SELECT table_name, table_schema " +
             "FROM information_schema.tables " +
-            "WHERE engine is not null";
+            "WHERE lower(table_schema) != 'information_schema' " +
+            "AND engine is not null";
         try {
             stmt = _conn.createStatement();
             rs = stmt.executeQuery(sql);
