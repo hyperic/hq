@@ -1299,7 +1299,8 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
             */
 
             // Reload the image
-            that.report_legend.src = that.report_legend.src;
+            var now = new Date();
+            that.report_legend.src = that.report_legend.src + '&' + now.getTime();
             that.legendDia.show();
 
             // Dim the underlay less
