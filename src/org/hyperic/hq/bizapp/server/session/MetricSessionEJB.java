@@ -595,7 +595,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
             resGrpMgr.findResourceGroupById(subject, gid);
 
         final Resource resource = group.getResource();
-        if (resource == null || resource.getResourceType() == null) {
+        if (resource == null || resource.isInAsyncDeleteState()) {
             return MeasurementConstants.AVAIL_UNKNOWN;
         }
         if (measCache == null) {
@@ -933,7 +933,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 resources = new ArrayList(members.size());
                 for (Iterator it = members.iterator(); it.hasNext(); ) {
                     Resource r = (Resource) it.next();
-                    if (r == null || r.getResourceType() == null) {
+                    if (r == null || r.isInAsyncDeleteState()) {
                         continue;
                     }
                     resources.add(new AppdefEntityID(r));

@@ -33,6 +33,8 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
@@ -79,7 +81,11 @@ public class ClassicEscalatableCreator
      * Here, we generate the alert and also execute the old-skool actions.
      * May or may not be the right place to do that.
      */
-    public Escalatable createEscalatable() {
+    public Escalatable createEscalatable() throws ResourceDeletedException {
+        Resource r = _def.getResource();
+        if (r == null || r.isInAsyncDeleteState()) {
+            throw ResourceDeletedException.newInstance(r);
+        }
         AlertManagerLocal alertMan = AlertManagerEJBImpl.getOne();
         
         // Create the trigger event map

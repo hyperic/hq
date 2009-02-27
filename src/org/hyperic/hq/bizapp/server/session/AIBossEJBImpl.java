@@ -52,6 +52,7 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
@@ -480,8 +481,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefEntityNotFoundException,
                AppdefGroupNotFoundException, GroupNotCompatibleException,
-               UpdateException, ConfigFetchException, EncodingException 
-    {
+               UpdateException, ConfigFetchException, EncodingException {
         if (!id.isServer()) {
             log.warn("toggleRuntimeScan called for non-server type=" + id);
             return;
@@ -490,6 +490,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         AutoinventoryManagerLocal aiManager = getAutoInventoryManager();
         try {
             aiManager.toggleRuntimeScan(subject, id, doEnable);
+        } catch (ResourceDeletedException e) {
+            log.debug(e);
         } catch (Exception e) {
             log.error("Unable to disable runtime auto-discovery:" +
                       e.getMessage(), e);

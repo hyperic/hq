@@ -80,9 +80,13 @@ import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
@@ -109,7 +113,6 @@ import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
 import org.hyperic.hq.product.shared.ProductManagerLocal;
-import org.hyperic.hq.product.shared.ProductManagerUtil;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.hq.dao.AIHistoryDAO;
@@ -298,8 +301,15 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      */
     public void toggleRuntimeScan(AuthzSubject subject,
                                   AppdefEntityID id, boolean enable)
-        throws PermissionException, AutoinventoryException
-    {
+        throws PermissionException, AutoinventoryException,
+               ResourceDeletedException {
+        ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+        Resource res = rMan.findResource(id);
+        // if resource is asynchronously deleted ignore
+        if (res == null || res.isInAsyncDeleteState()) {
+            final String m = id + " is asynchronously deleted";
+            throw new ResourceDeletedException(m);
+        }
         if (!id.isServer()) {
             _log.warn("toggleRuntimeScan() called for non-server type=" + id);
             return;
@@ -1070,6 +1080,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                 _log.info("Toggling Runtime-AI for " + id);
                 try {
                     toggleRuntimeScan(subj, id, s.isRuntimeAutodiscovery());
+                } catch (ResourceDeletedException e) {
+                    _log.debug(e);
                 } catch (Exception e) {
                     _log.warn("Error toggling runtime-ai for server [" +
                               id + "]", e);
@@ -1078,6 +1090,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                 _log.info("Enabling Runtime-AI for " + id);
                 try {
                     toggleRuntimeScan(subj, id, true);
+                } catch (ResourceDeletedException e) {
+                    _log.debug(e);
                 } catch (Exception e) {
                     _log.warn("Error enabling runtime-ai for server [" +
                               id + "]", e);

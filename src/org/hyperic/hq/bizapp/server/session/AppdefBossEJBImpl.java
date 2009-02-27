@@ -129,6 +129,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.MixedGroupType;
@@ -1526,6 +1527,8 @@ public class AppdefBossEJBImpl
                 getAutoInventoryManager().toggleRuntimeScan(getOverlord(),
                                                             server.getEntityId(),
                                                             false);
+            } catch (ResourceDeletedException e) {
+                log.debug(e);
             } catch (Exception e) {
                 log.error("Error turning off RuntimeScan for: " + server, e);
             }

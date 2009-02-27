@@ -39,6 +39,7 @@ import javax.jms.ObjectMessage;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.LoggableInterface;
 import org.hyperic.hq.events.server.session.EventLog;
@@ -99,10 +100,14 @@ public class LoggingDispatcherEJBImpl
     private void logEvent(AbstractEvent event) {
         EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
         
-        if (event.isLoggingSupported()) {
-            LoggableInterface le = (LoggableInterface) event;            
-            elMan.createLog(event, le.getSubject(), le.getLevelString(), true);
-        }        
+        try {
+            if (event.isLoggingSupported()) {
+                LoggableInterface le = (LoggableInterface) event;            
+                elMan.createLog(event, le.getSubject(), le.getLevelString(), true);
+            }        
+        } catch (ResourceDeletedException e) {
+            log.debug(e);
+        }
     }
     
     private void logEvents(Collection events) {
@@ -112,13 +117,17 @@ public class LoggingDispatcherEJBImpl
         for (Iterator it = events.iterator(); it.hasNext();) {
             AbstractEvent event = (AbstractEvent) it.next();
             
-            if (event.isLoggingSupported()) {
-                LoggableInterface le = (LoggableInterface) event;
-                EventLog eventLog = elMan.createLog(event, 
-                                                    le.getSubject(), 
-                                                    le.getLevelString(), 
-                                                    false);
-                loggableEvents.add(eventLog);
+            try {
+                if (event.isLoggingSupported()) {
+                    LoggableInterface le = (LoggableInterface) event;
+                    EventLog eventLog = elMan.createLog(event, 
+                                                        le.getSubject(), 
+                                                        le.getLevelString(), 
+                                                        false);
+                    loggableEvents.add(eventLog);
+                }
+            } catch (ResourceDeletedException e) {
+                log.debug(e);
             }
         }
         

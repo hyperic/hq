@@ -41,6 +41,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
@@ -87,6 +88,7 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
                               String subject,
                               String status, 
                               boolean save)
+        throws ResourceDeletedException
     {
         String detail = event.toString();
         if (detail.length() > MSGMAX) {
@@ -104,6 +106,10 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
             AppdefEntityID aeId =
                 ((ResourceEventInterface) event).getResource();
             r = ResourceManagerEJBImpl.getOne().findResource(aeId);
+            if (r == null || r.isInAsyncDeleteState()) {
+                final String m = aeId + " has already been deleted";
+                throw new ResourceDeletedException(m);
+            }
         }
 
         EventLog e = new EventLog(r, subject, event.getClass().getName(),

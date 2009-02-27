@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * 
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- *
+ * 
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,30 +16,36 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
 
-package org.hyperic.hq.escalation.server.session;
+package org.hyperic.hq.authz.server.shared;
 
-import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
-import org.hyperic.hq.events.AlertDefinitionInterface;
+import org.hyperic.hq.authz.server.session.Resource;
 
-/**
- * Implementors of this interface can create escalatable objects.  
- * 
- * This abstraction is needed because of the following problem:
- * 
- * Group Alert System -[starts escalation] -> Escalation System
- * 
- * The Escalation system must create an escalatable object ONLY if the
- * escalation has not already been started.  So we essentially need to call
- * back into caller to create that object for us.  
- */
-public interface EscalatableCreator {
-    Escalatable createEscalatable() throws ResourceDeletedException;
-    AlertDefinitionInterface getAlertDefinition();
+public class ResourceDeletedException extends Exception {
+    public ResourceDeletedException(String m, Throwable t) {
+        super(m, t);
+    }
+
+    public static ResourceDeletedException newInstance(Resource r) {
+        final String m = "Resource with id " + r.getId() + " not found";
+        return new ResourceDeletedException(m);
+    }
+
+    public ResourceDeletedException(String m) {
+        super(m);
+    }
+
+    public ResourceDeletedException(Throwable t) {
+        super(t);
+    }
+
+    public ResourceDeletedException() {
+        super();
+    }
 }

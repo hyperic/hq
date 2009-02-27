@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.galerts.server.session;
 
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.events.AlertDefinitionInterface;
@@ -43,7 +44,7 @@ class GalertEscalatableCreator
         _reason = reason;
     }
     
-    public Escalatable createEscalatable() {
+    public Escalatable createEscalatable() throws ResourceDeletedException {
         return new GalertEscalatable(_gMan.createAlertLog(_def, _reason));
     }
     

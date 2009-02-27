@@ -37,6 +37,7 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
@@ -164,8 +165,14 @@ public class ReportProcessorEJBImpl
             // because we don't know the interval to normalize those old
             // points for.  This is still a problem for people who change their
             // collection period, but the instances should be low.
-            if (m == null || !m.isEnabled())
+            if (m == null || !m.isEnabled()) {
                 continue;
+            }
+            // Need to check if resource was asynchronously deleted (type == null)
+            final Resource res = m.getResource();
+            if (res == null || res.isInAsyncDeleteState()) {
+                continue;
+            }
 
             boolean isAvail = m.getTemplate().isAvailability();
             ValueList[] valLists = dsnLists[i].getDsns();

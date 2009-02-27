@@ -67,7 +67,11 @@ public class Resource extends AuthzNamedBean implements Comparable {
     protected void setGroupBag(Collection b) {
         _groupBag = b;
     }
-    
+
+    public boolean isInAsyncDeleteState() {
+        return _resourceType == null;
+    }
+
     public ResourceType getResourceType() {
         return _resourceType;
     }
