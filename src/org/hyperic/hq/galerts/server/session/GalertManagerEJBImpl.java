@@ -44,9 +44,11 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.GroupChangeCallback;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
 import org.hyperic.hq.common.SystemException;
@@ -280,7 +282,13 @@ public class GalertManagerEJBImpl
      * 
      * @ejb:interface-method  
      */
-    public GalertLog createAlertLog(GalertDef def, ExecutionReason reason) { 
+    public GalertLog createAlertLog(GalertDef def, ExecutionReason reason)
+        throws ResourceDeletedException
+    { 
+        Resource r = def.getResource();
+        if (r == null || r.isInAsyncDeleteState()) {
+            throw ResourceDeletedException.newInstance(r);
+        }
         Map gAuxLogToAuxLog = new HashMap(); // Stores real logs to auxType logs
         GalertLog newLog = new GalertLog(def, reason, 
                                          System.currentTimeMillis());

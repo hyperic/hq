@@ -43,6 +43,7 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
@@ -148,7 +149,7 @@ public class DefaultTriggerFireStrategy implements TriggerFireStrategy {
                 new ClassicEscalatableCreator(alertDef, event);
 
             Resource res = creator.getAlertDefinition().getResource();
-            if (res == null || res.getResourceType() == null) {
+            if (res == null || res.isInAsyncDeleteState()) {
                 return;
             }
 
@@ -165,6 +166,8 @@ public class DefaultTriggerFireStrategy implements TriggerFireStrategy {
         } catch (PermissionException e) {
             throw new ActionExecuteException(
                     "Overlord does not have permission to disable definition");
+        } catch (ResourceDeletedException e) {
+            _log.debug(e);
         }        
     }
     

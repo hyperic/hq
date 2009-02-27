@@ -40,6 +40,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
@@ -344,6 +346,8 @@ public class EscalationManagerEJBImpl
 	                EscalationRuntime.getInstance().scheduleEscalation(curState);    
 	                started = true;
                 }
+            } catch (ResourceDeletedException e) {
+                _log.debug(e);
             } finally {
                 if (!started) {
                     EscalationRuntime.getInstance()
