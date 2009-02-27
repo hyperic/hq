@@ -42,6 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
@@ -145,6 +146,11 @@ public class DefaultTriggerFireStrategy implements TriggerFireStrategy {
 
             EscalatableCreator creator = 
                 new ClassicEscalatableCreator(alertDef, event);
+
+            Resource res = creator.getAlertDefinition().getResource();
+            if (res == null || res.getResourceType() == null) {
+                return;
+            }
 
             // Now start escalation
             if (alertDef.getEscalation() != null) {

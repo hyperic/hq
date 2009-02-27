@@ -126,6 +126,9 @@ public class DashboardPortletBossEJBImpl
         long intv = (end - begin) / 60;
         JSONObject jObj = new JSONObject();
         Resource res = resMan.findResourceById(resId);
+        if (res.getResourceType() == null) {
+            return rtn;
+        }
         AppdefEntityID aeid = new AppdefEntityID(res);
         try {
             jObj.put("resourceName", res.getName());
