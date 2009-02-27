@@ -380,16 +380,15 @@ public class PermissionManagerImpl
         };
     }
                                                                    
-    
     public String getAlertsHQL(boolean inEscalation, boolean notFixed,
                                Integer groupId, boolean count) {
         // Join with Resource for sorting
         return "select " + (count ? "count(a)" : "a") + " from " +
                 (inEscalation ? "EscalationState es, " : "") +
-        		"Alert a " +
+                "Alert a " +
                 "join a.alertDefinition d " +
                 "join d.resource r " +
-          "where " +
+          "where r.resourceType is not null and " +
                 (groupId == null ? "" :
                     "exists (select rg from r.groupBag rg " +
                              "where rg.group.id = " + groupId + ") and ") +
@@ -397,13 +396,13 @@ public class PermissionManagerImpl
                 (notFixed ? " a.fixed = false and " : "") +
                 "d.priority >= :priority " +
                 (inEscalation ? "and a.id = es.alertId and " +
-                		            "es.alertDefinitionId = d.id " : "");
+                                    "es.alertDefinitionId = d.id " : "");
     }
 
     public String getAlertDefsHQL() {
         return "select d from AlertDefinition d " +
                "join d.resource r " +
-         "where d.priority >= :priority";
+          "where r.resourceType is not null and d.priority >= :priority";
     }
 
     public String getGroupAlertsHQL(boolean inEscalation, boolean notFixed,
