@@ -389,7 +389,7 @@ public class PermissionManagerImpl
         		"Alert a " +
                 "join a.alertDefinition d " +
                 "join d.resource r " +
-          "where " +
+          "where r.resourceType is not null and " +
                 (groupId == null ? "" :
                     "exists (select rg from r.groupBag rg " +
                              "where rg.group.id = " + groupId + ") and ") +
@@ -403,7 +403,7 @@ public class PermissionManagerImpl
     public String getAlertDefsHQL() {
         return "select d from AlertDefinition d " +
                "join d.resource r " +
-         "where d.priority >= :priority";
+          "where r.resourceType is not null and d.priority >= :priority";
     }
 
     public String getGroupAlertsHQL(boolean inEscalation, boolean notFixed,
