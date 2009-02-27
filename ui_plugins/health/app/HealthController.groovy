@@ -104,7 +104,7 @@ class HealthController
     
     private getAgentCProp(Agent a, Server s, String prop) {
         def overlord = subMan.one.overlordPojo
-        def aev = new AppdefEntityValue(new AppdefEntityID(s.resource), overlord)
+        def aev = new AppdefEntityValue(AppdefEntityID.newServerID(s.id), overlord)
         def cprop = "N/A"
         try {
             cprop = cpropMan.one.getValue(aev, prop)
