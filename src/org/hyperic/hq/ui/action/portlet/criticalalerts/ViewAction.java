@@ -64,7 +64,7 @@ import org.json.JSONObject;
  */
 public class ViewAction extends BaseAction {
 
-    static final String RESOURCES_KEY = ".dashContent.criticalalerts.resources";
+    static final String RESOURCES_KEY = Constants.USERPREF_KEY_CRITICAL_ALERTS_RESOURCES;
 
     public ActionForward execute(ActionMapping mapping,
                                  ActionForm form,
