@@ -397,7 +397,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
             } else if (data.size() < midMap.size()) {
                 Set mids = new HashSet(midMap.values());
                 List midsToGet = new ArrayList();
-                for (Iterator it=data.values().iterator(); it.hasNext(); ) {
+                for (Iterator it=data.keySet().iterator(); it.hasNext(); ) {
                     Integer mid = (Integer)it.next();
                     if (!mids.contains(mid)) {
                         midsToGet.add(mid);
