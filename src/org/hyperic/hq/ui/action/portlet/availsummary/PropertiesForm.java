@@ -25,12 +25,13 @@
 
 package org.hyperic.hq.ui.action.portlet.availsummary;
 
+import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.portlet.DashboardBaseForm;
 
 public class PropertiesForm extends DashboardBaseForm  {
 
     public final static String RESOURCES =
-        ".dashContent.availsummary.resources";
+        Constants.USERPREF_KEY_AVAILABITY_RESOURCES;
     public final static String NUM_TO_SHOW =
         ".dashContent.availsummary.numToShow";
     public final static String TITLE =

@@ -57,6 +57,16 @@ public interface KeyConstants {
     public static final String USERPREF_KEY_FAVORITE_RESOURCES = ".dashContent.resourcehealth.resources";
 
     /**
+     * The key that holds the user's critical alerts resources
+     */
+    public static final String USERPREF_KEY_CRITICAL_ALERTS_RESOURCES = ".dashContent.criticalalerts.resources";
+    
+    /**
+     * The key that holds the user's availability summary resources
+     */
+    public static final String USERPREF_KEY_AVAILABITY_RESOURCES = ".dashContent.availsummary.resources";
+    
+    /**
      * The key that holds the user's recent resources
      */
     public static final String USERPREF_KEY_RECENT_RESOURCES = ".userPref.recent.resources";
