@@ -242,7 +242,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         ResourceManagerLocal resMan = getResourceManager();
         for (int i = 0; i < entities.length; i++) {
             Resource res = resMan.findResource(entities[i]);
-            if (res != null) {
+            if (res != null && !res.isInAsyncDeleteState()) {
                 try {
                     appdefMap.put(new AppdefEntityID(res), res);
                 } catch (IllegalArgumentException e) {

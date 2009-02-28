@@ -810,7 +810,7 @@ public class AppdefBossEJBImpl
         for (int i = 0; i < entities.length; i++) {
             if (pc != null) {
                 Resource res = resMan.findResource(entities[i]);
-                if (res != null)
+                if (res != null && !res.isInAsyncDeleteState())
                     appdefList.add(res);
             }
             else {
