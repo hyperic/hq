@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.action.resource.hub;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -43,14 +44,21 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
 import org.hyperic.hq.ui.util.BizappUtils;
+import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.util.config.ConfigResponse;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
@@ -131,7 +139,7 @@ public class RemoveResourceAction extends BaseAction {
         List entities =
             BizappUtils.buildAppdefEntityIds(resourceList);
         if (resourceItems != null && resourceItems.length > 0) {
-            int deleted = 0;
+            List deleted = new ArrayList();
             int vetoed = 0;
             // about the exception handling:
             // if someone either deleted the entity out from under our user
@@ -145,7 +153,7 @@ public class RemoveResourceAction extends BaseAction {
                 AppdefEntityID resourceId = (AppdefEntityID) i.next();
                 try {
                     boss.removeAppdefEntity(sessionId.intValue(), resourceId);
-                    deleted++;
+                    deleted.add(resourceId.getAppdefKey());
                 } catch (AppdefEntityNotFoundException e) {
                     log.error("Removing resource " + resourceId +
                                "failed.");
@@ -154,15 +162,51 @@ public class RemoveResourceAction extends BaseAction {
                     log.info(v.getMessage());
                 }
             }
+            
+            removeResourcesFromDashboard(request, 
+                    (String[]) deleted.toArray(new String[0]));
+            
             if (vetoed > 0) {
                 RequestUtils
                     .setError(request,
                              "resource.common.inventory.groups.error.RemoveVetoed");
-            } else if (deleted > 0) {
+            } else if (deleted.size() > 0) {
                 RequestUtils
                     .setConfirmation(request,
                                     "resource.common.confirm.ResourcesRemoved");
             }        
         }
+    }
+    
+    /**
+     * HHQ-2854: Remove deleted resources from dashboard preferences
+     */
+    private void removeResourcesFromDashboard(HttpServletRequest request,
+                                              String[] resourcesToRemove) {
+        try {
+            ServletContext ctx = getServlet().getServletContext();
+            AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
+            HttpSession session = request.getSession();
+            WebUser user = RequestUtils.getWebUser(session);                                                
+            DashboardConfig dashConfig = 
+                    DashboardUtils.findDashboard(
+                            (Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+                            user, aBoss);                
+            ConfigResponse dashPrefs = dashConfig.getConfig();
+
+            for (Iterator it=dashPrefs.getKeys().iterator(); it.hasNext(); ) {
+                String key = (String) it.next();
+                if (key.indexOf(Constants.USERPREF_KEY_FAVORITE_RESOURCES) > -1
+                        || key.indexOf(Constants.USERPREF_KEY_AVAILABITY_RESOURCES) > -1
+                        || key.indexOf(Constants.USERPREF_KEY_CRITICAL_ALERTS_RESOURCES) > -1) {
+                    DashboardUtils.removeResources(resourcesToRemove, key, dashPrefs);
+                }
+            }
+            ConfigurationProxy.getInstance().setDashboardPreferences(
+                                                    session, user, aBoss, dashPrefs);
+        } catch (Exception e) {
+            log.info("Unable to remove deleted resources from dashboard preferences: " 
+                        + e.getMessage());
+        }        
     }
 }
