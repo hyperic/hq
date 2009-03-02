@@ -78,14 +78,16 @@
 <script type="text/javascript">
   dojo11.require("dijit.Dialog");
 
-  setFoot();
-
-  var pane = dojo11.byId('about');
-  var aboutDia = new dijit11.Dialog({
+  var aboutDia = null;
+  dojo11.addOnLoad(function(){
+  	aboutDia = new dijit11.Dialog({
                 id: 'about_popup',
                 refocus: true,
                 autofocus: false,
                 opacity: 0,
                 title: "<fmt:message key="about.Title" />"
-            },pane);
+            }, dojo11.byId('about'));
+  });
+
+  setFoot();
 </script>
