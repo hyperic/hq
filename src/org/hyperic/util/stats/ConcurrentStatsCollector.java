@@ -234,7 +234,7 @@ public final class ConcurrentStatsCollector {
         final String monthStr = (month < 10) ? "0"+month : String.valueOf(month);
         final int day = cal.get(Calendar.DAY_OF_MONTH);
         final String dayStr = (day < 10) ? "0"+day : String.valueOf(day);
-        String rtn = BASE_FILENAME+"-"+monthStr+"-"+dayStr+".csv";
+        String rtn = BASE_FILENAME+"-"+monthStr+"-"+dayStr;
         if (withTimestamp) {
             final int hour = cal.get(Calendar.HOUR_OF_DAY);
             final String hourStr = (hour < 10) ? "0"+hour : String.valueOf(hour);
@@ -242,9 +242,9 @@ public final class ConcurrentStatsCollector {
             final String minStr = (min < 10) ? "0"+min : String.valueOf(min);
             final int sec = cal.get(Calendar.SECOND);
             final String secStr = (sec < 10) ? "0"+sec : String.valueOf(sec);
-            rtn = rtn+"-"+hourStr+":"+minStr+":"+secStr;
+            rtn = rtn+"-"+hourStr+"."+minStr+"."+secStr;
         }
-        return _baseDir + rtn;
+        return _baseDir + rtn + ".csv";
     }
 
     public static final ConcurrentStatsCollector getInstance() {
