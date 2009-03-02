@@ -9664,11 +9664,22 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.138">
+    <schema-alterColumn table="EAM_MEASUREMENT"
+                        column="DSN"
+                        precision="2048"
+                        columnType="VARCHAR2" />
+    <schema-alterColumn table="EAM_GALERT_ACTION_LOG"
+                        column="DETAIL"
+                        precision="1024"
+                        columnType="VARCHAR2" />
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
 
 <!-- !!NOTE: Make sure you add the DEFERRABLE keyword when adding constraints 
-	         in Postgres or Oracle. Without this the unit testing framework 
-	         may not work correctly -->
+             in Postgres or Oracle. Without this the unit testing framework 
+             may not work correctly -->
 
