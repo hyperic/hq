@@ -2207,3 +2207,11 @@ a.black:link,a.black:visited {
     background-color: #fff;
     margin-top: -4px;
 }
+
+.wait {
+    background: #000 url('/images/widget_bg.jpg') repeat-x;
+    color: #fff;
+    padding: 5px;
+    position: absolute;
+    line-height: 12pt;
+}

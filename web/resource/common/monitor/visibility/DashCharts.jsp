@@ -216,10 +216,10 @@
 </c:forEach>
 </ul>
 
-<div id="slowScreenSplash" align="center" class="dialog" style="top:20%;left:22%;padding:5px;line-height: 12pt">
+<div id="slowScreenSplash" align="center" class="wait" style="top:20%;left:22%;">
 <c:choose>
 <c:when test="${not empty chartDataKeys}">
-  <fmt:message key="resource.common.monitor.visibility.request.wait"/>
+  <fmt:message key="resource.common.monitor.visibility.request.wait"/><img src="/images/4.0/icons/ajax-loader.gif" alt="">
 </c:when>
 <c:otherwise>
   <!-- Some weird tag bug that forces me to use the single tag syntax, rather than open/close -->
