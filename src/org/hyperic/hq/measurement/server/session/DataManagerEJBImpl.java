@@ -1008,8 +1008,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public PageList getHistoricalData(Measurement m, long begin, long end,
                                       PageControl pc)
     {
+        long interval = (m.getInterval() > 0) ? m.getInterval() : end-begin;
         return getHistoricalData(
-            Collections.singletonList(m), begin, end, m.getInterval(),
+            Collections.singletonList(m), begin, end, interval,
             m.getTemplate().getCollectionType(), false, pc);
     }
 
@@ -1276,8 +1277,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             final StopWatch watch = new StopWatch(current);
             final String selectType = getSelectType(type, begin);
+            final long wndSize = (interval > 0) ?
+                ((end - begin) / interval) : (end - begin);
             final int pagesize = (int) Math.min(
-                Math.max(pc.getPagesize(), (end - begin) / interval),
+                Math.max(pc.getPagesize(), wndSize),
                 60);
             final long intervalWnd = interval * pagesize;
             conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
