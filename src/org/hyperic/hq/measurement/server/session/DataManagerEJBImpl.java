@@ -1381,6 +1381,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                                     long interval, long beginWnd, long endWnd,
                                     Integer[] measids, boolean descending)
     {
+        final long wndSize = (interval > 0) ?
+            ((endWnd - beginWnd) / interval) : (endWnd - beginWnd);
         final String metricUnion = getDataTable(begin, end, measids);
         final StringBuilder sqlbuf = new StringBuilder()
             .append("SELECT begin AS timestamp, ")
@@ -1389,8 +1391,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
              .append("(SELECT ").append(beginWnd)
              .append(" + (").append(interval).append(" * i) AS begin FROM ")
              .append(TAB_NUMS)
-             .append(" WHERE i < ").append( ((endWnd - beginWnd) / interval) )
-             .append(") n, ")
+             .append(" WHERE i < ").append(wndSize).append(") n, ")
             .append(metricUnion)
             .append(" WHERE timestamp BETWEEN begin AND begin + ")
             .append(interval-1)
