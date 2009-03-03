@@ -35,6 +35,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1034,6 +1035,151 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
+    private class MeasurementComparator implements Comparator {
+        public int compare(Object arg0, Object arg1) {
+            if (arg0 == arg1) {
+                return 0;
+            }
+            if (!(arg0 instanceof Measurement) ||
+                !(arg1 instanceof Measurement)) {
+                throw new ClassCastException();
+            }
+            Measurement meas0 = (Measurement)arg0,
+                        meas1 = (Measurement)arg0;
+            return meas0.getId().compareTo(meas1.getId());
+        }
+    }
+
+    /**
+     * Aggregate data across the given metric IDs, returning max, min, avg, and
+     * count of number of unique metric IDs
+     *
+     * @param measurements {@link List} of {@link Measurement}s
+     * @param begin The start of the time range
+     * @param end The end of the time range
+     * @return the An array of aggregate values
+     * @ejb:interface-method
+     */
+    public double[] getAggregateData(final List measurements,
+                                     final long begin,
+                                     final long end) {
+        final long interval = end-begin;
+        final List pts = getHistoricalData(measurements, begin, end, interval,
+            MeasurementConstants.COLL_TYPE_DYNAMIC, false, PageControl.PAGE_ALL);
+        return getAggData(pts);
+    }
+
+    /**
+     * Fetch the list of historical data points, grouped by template, given
+     * a begin and end time range.  Does not return an entry for templates
+     * with no associated data.
+     * PLEASE NOTE:  The {@link MeasurementConstants.IND_LAST_TIME} index in the
+     * {@link double[]} part of the returned map does not contain the real last
+     * value.  Instead it is an averaged value calculated from the last 1/60 of 
+     * the specified time range.  If this becomes an issue the best way I can
+     * think of to solve is to pass in a boolean "getRealLastTime" and issue
+     * another query to get the last value if this is set.  It is much
+     * better than the alternative of always querying the last metric time
+     * because not all pages require this value.
+     *
+     * @param measurements The List of {@link Measurement}s to query
+     * @param begin The start of the time range
+     * @param end The end of the time range
+     * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl#getHistoricalData()
+     * @return the {@link Map} of {@link Integer} to {@link double[]} which
+     * represents templateId to data points
+     * @ejb:interface-method
+     */
+    public Map getAggregateDataByTemplate(final List measurements,
+                                          final long begin,
+                                          final long end) {
+        // the idea here is to try and match the exact query executed by
+        // getHistoricalData() when viewing the metric indicators page.
+        // By issuing the same query we are hoping that the db's query
+        // cache will optimize performance.
+        final long interval = (end - begin)/60;
+        final List availIds = new ArrayList();
+        final Map measIdsByTempl = new HashMap();
+        setMeasurementObjects(measurements, availIds, measIdsByTempl);
+        final Integer[] avIds = (Integer[])availIds.toArray(new Integer[0]);
+        final Map rtn = getAvailMan().getAggregateData(avIds, begin, end);
+        rtn.putAll(getAggDataByTempl(measIdsByTempl, begin, end, interval));
+        return rtn;
+    }
+
+    private final Map getAggDataByTempl(final Map measIdsByTempl,
+                                        final long begin,
+                                        final long end,
+                                        final long interval) {
+        final HashMap rtn = new HashMap(measIdsByTempl.size());
+        for (Iterator it=measIdsByTempl.entrySet().iterator(); it.hasNext(); ) {
+            final Map.Entry entry = (Map.Entry)it.next();
+            final Integer tid = (Integer)entry.getKey();
+            final List meas = (List)entry.getValue();
+            final List pts = getHistoricalData(meas, begin, end, interval,
+                MeasurementConstants.COLL_TYPE_DYNAMIC, false,
+                PageControl.PAGE_ALL);
+            final double[] aggData = getAggData(pts);
+            if (aggData == null) {
+                continue;
+            }
+            rtn.put(tid, aggData);
+        }
+        return rtn;
+    }
+
+    private final void setMeasurementObjects(final List measurements,
+                                             final List availIds,
+                                             final Map measIdsByTempl) {
+        for (Iterator i = measurements.iterator(); i.hasNext(); ) {
+            final Measurement m = (Measurement)i.next();
+            final MeasurementTemplate t = m.getTemplate();
+            if (m.getTemplate().isAvailability()) {
+                availIds.add(m.getId());
+            } else {
+                final Integer tid = t.getId();
+                List list;
+                if (null == (list = (List)measIdsByTempl.get(tid))) {
+                    list = new ArrayList();
+                    measIdsByTempl.put(tid, list);
+                }
+                list.add(m);
+            }
+        }
+    }
+
+    private final double[] getAggData(final List historicalData) {
+        if (historicalData.size() == 0) {
+            return null;
+        }
+        double high  = Double.MIN_VALUE,
+               low   = Double.MAX_VALUE,
+               total = 1;
+        Double lastVal = null;
+        int count = 0;
+        long last = Long.MIN_VALUE;
+        for (Iterator it=historicalData.iterator(); it.hasNext(); ) {
+            final HighLowMetricValue mv = (HighLowMetricValue)it.next();
+            low  = Math.min(mv.getLowValue(), low);
+            high = Math.max(mv.getHighValue(), high);
+            if (mv.getTimestamp() > last) {
+                lastVal = new Double(mv.getValue());
+            }
+            final int c = mv.getCount();
+            count = count + c;
+            total = (double)((mv.getValue() * c) + total);
+        }
+        final double[] data = new double[MeasurementConstants.IND_LAST_TIME + 1];
+        data[MeasurementConstants.IND_MIN] = low;
+        data[MeasurementConstants.IND_AVG] = (double)total/count;
+        data[MeasurementConstants.IND_MAX] = high;
+        data[MeasurementConstants.IND_CFG_COUNT] = count;
+        if (lastVal != null) {
+            data[MeasurementConstants.IND_LAST_TIME] = lastVal.doubleValue();
+        }
+        return data;
+    }
+
     /**
      * Fetch the list of historical data points given
      * a start and stop time range and interval
@@ -1053,8 +1199,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                                       long interval, int type,
                                       boolean returnMetricNulls,
                                       PageControl pc) {
-        List availIds = new ArrayList();
-        List measIds = new ArrayList();
+        final List availIds = new ArrayList();
+        final List measIds = new ArrayList();
+        // Want to sort in an attempt to make use of db query cache
+        final Comparator comparator = new MeasurementComparator();
+        Collections.sort(measurements, comparator);
         for (Iterator i = measurements.iterator(); i.hasNext(); ) {
             Measurement m = (Measurement)i.next();
             if (m.getTemplate().isAvailability()) {
@@ -1063,20 +1212,52 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 measIds.add(m.getId());
             }
         }
-        Integer[] avIds = (Integer[])availIds.toArray(
-            new Integer[availIds.size()]);
-        Integer[] mids = (Integer[])measIds.toArray(
-            new Integer[measIds.size()]);
-        PageList rtn = getAvailMan().getHistoricalAvailData(
+        final Integer[] avIds = (Integer[])availIds.toArray(new Integer[0]);
+        final PageList rtn = getAvailMan().getHistoricalAvailData(
             avIds, begin, end, interval, pc, true);
-        rtn.addAll(getHistData(mids, begin, end, interval, type,
-                   returnMetricNulls, pc));
+        final HQDialect dialect = Util.getHQDialect();
+        final int maxExprs = (dialect.getMaxExpressions() == -1) ?
+            Integer.MAX_VALUE : dialect.getMaxExpressions();
+        for (int i=0; i<measIds.size(); i+=maxExprs) {
+            final int last = Math.min(i + maxExprs, measIds.size());
+            final List sublist = measIds.subList(i, last);
+            final Integer[] mids = (Integer[])sublist.toArray(new Integer[0]);
+            final PageList pList = getHistData(mids, begin, end, interval, type,
+                                               returnMetricNulls, pc);
+            merge(rtn, pList);
+        }
         return rtn;
     }
 
+    private void merge(PageList master, PageList toMerge) {
+        if (master.size() == 0) {
+            master.addAll(toMerge);
+            return;
+        }
+        for (int i=0; i<master.size(); i++) {
+            if (toMerge.size() < (i+1)) {
+                break;
+            }
+            final HighLowMetricValue val = (HighLowMetricValue)master.get(i);
+            final HighLowMetricValue mval = (HighLowMetricValue)toMerge.get(i);
+            final int mcount = mval.getCount();
+            final int count = val.getCount();
+            final int tot = count+mcount;
+            final double high = 
+                ((val.getHighValue()*count) + (mval.getHighValue()*mcount))/tot;
+            val.setHighValue(high);
+            final double low = 
+                ((val.getLowValue()*count) + (mval.getLowValue()*mcount))/tot;
+            val.setLowValue(low);
+            final double value = 
+                ((val.getValue()*count) + (mval.getValue()*mcount))/tot;
+            val.setValue(value);
+        }
+    }
+
     private PageList getHistData(Integer[] ids, long start, long finish,
-                                 long interval, int type,
-                                 boolean returnNulls, PageControl pc) {
+                                 long interval, int type, boolean returnNulls,
+                                 PageControl pc) {
         if (ids == null || ids.length < 1) {
             return new PageList();
         }
@@ -1086,7 +1267,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         final long begin = TimingVoodoo.roundDownTime(start, MINUTE);
         final long end = TimingVoodoo.roundDownTime(finish, MINUTE);
         final long current = System.currentTimeMillis();
-        ArrayList rtn = new ArrayList();
+        final ArrayList rtn = new ArrayList();
         Connection conn = null;
         Statement  stmt = null;
         ResultSet  rs   = null;
@@ -1195,9 +1376,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                                     long interval, long beginWnd, long endWnd,
                                     Integer[] measids, boolean descending)
     {
-        String metricUnion = getDataTable(begin, end, measids),
-               measInStmt = MeasTabManagerUtil.getMeasInStmt(measids, true);
-        StringBuilder sqlbuf = new StringBuilder()
+        final String metricUnion = getDataTable(begin, end, measids);
+        final StringBuilder sqlbuf = new StringBuilder()
             .append("SELECT begin AS timestamp, ")
             .append(selectType)
             .append(" FROM ")
@@ -1208,8 +1388,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
              .append(") n, ")
             .append(metricUnion)
             .append(" WHERE timestamp BETWEEN begin AND begin + ")
-            .append(interval-1).append(" ")
-            .append(measInStmt)
+            .append(interval-1)
             .append(" GROUP BY begin ORDER BY begin");
         if (descending) {
             sqlbuf.append(" DESC");
@@ -1548,189 +1727,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * Fetch a map of aggregate data values keyed by metric templates given
-     * a start and stop time range
-     *
-     * @param templates The List of MeasurementTemplates
-     * @param iids The array of instance ids to look up
-     * @param begin the start of the time range
-     * @param end the end of the time range
-     * @return the map of data points
-     * 
-     * @ejb:interface-method
-     */
-    public Map getAggregateData(List templates, Integer[] iids,
-                                long begin, long end, boolean count)
-    {
-        ArrayList availTempls = new ArrayList();
-        ArrayList dataTempls = new ArrayList();
-
-        for (Iterator i = templates.iterator(); i.hasNext(); ) {
-            MeasurementTemplate t = (MeasurementTemplate)i.next();
-            if (t.isAvailability()) {
-                availTempls.add(t.getId());
-            } else {
-                dataTempls.add(t.getId());
-            }
-        }
-
-        Integer[] availIds =
-            (Integer[])availTempls.toArray(new Integer[availTempls.size()]);
-        Integer[] dataIds =
-            (Integer[])dataTempls.toArray(new Integer[dataTempls.size()]);
-
-        Map rtn = getAvailMan().getAggregateData(availIds, iids, begin, end);
-        rtn.putAll(getAggData(dataIds, iids, begin, end, count));
-        return rtn;
-    }
-
-    private Map getAggData(Integer[] tids, Integer[] iids, long begin, long end,
-                           boolean count)
-    {
-        // Check the begin and end times
-        this.checkTimeArguments(begin, end);
-
-        // Result set
-        Map resMap = new HashMap();
-
-        if (tids.length == 0 || iids.length == 0)
-            return resMap;
-        
-        // Get the data points and add to the ArrayList
-        Connection conn = null;
-
-        // Help database if previous query was cached
-        begin = TimingVoodoo.roundDownTime(begin, MINUTE);
-        end = TimingVoodoo.roundDownTime(end, MINUTE);
-
-        // Use the already calculated min, max and average on
-        // compressed tables.
-        String minMax;
-        if (usesMetricUnion(begin)) {
-            minMax = " MIN(value), AVG(value), MAX(value), ";
-        } else {
-            minMax = " MIN(minvalue), AVG(value), MAX(maxvalue), ";
-        }
-
-        try {
-            conn = DBUtil.getConnByContext(getInitialContext(),
-                                           DATASOURCE_NAME);
-            List measids = MeasTabManagerUtil.getMeasIds(conn, tids, iids);
-            String table = getDataTable(begin, end, measids.toArray());
-            Map lastMap = HQDialectUtil.getAggData(conn, minMax, resMap, begin,
-                                                   end, table);
-            if (count) {
-                resMap = HQDialectUtil.getCountData(conn, minMax, resMap, begin,
-                                                    end, table);
-                HQDialect dialect = Util.getHQDialect();
-                return dialect.getLastData(conn, minMax, resMap, lastMap,
-                                           iids, begin, end, table);
-            }
-            return resMap;
-        } catch (SQLException e) {
-            _log.warn("getAggregateData()", e);
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
-        } finally {
-            DBUtil.closeConnection(logCtx, conn);
-        }
-    }
-
-    /**
-     * Aggregate data across the given metric IDs, returning max, min, avg, and
-     * count of number of unique metric IDs
-     *
-     * @param mids The id's of the Measurement
-     * @param begin The start of the time range
-     * @param end The end of the time range
-     * @return the An array of aggregate values
-     * @ejb:interface-method
-     */
-    public double[] getAggregateData(Integer[] mids, long begin, long end) {
-        // Check the begin and end times
-        this.checkTimeArguments(begin, end);
-        begin = TimingVoodoo.roundDownTime(begin, MINUTE);
-        end = TimingVoodoo.roundDownTime(end, MINUTE);
-
-        double[] result = new double[IND_CFG_COUNT + 1];
-        if (mids.length == 0)
-            return result;
-        
-        //Get the data points and add to the ArrayList
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        // The table to query from
-        String table = getDataTable(begin, end, mids);
-        StopWatch timer = new StopWatch();    
-    
-        try {
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-    
-            StringBuffer mconj = new StringBuffer(
-                DBUtil.composeConjunctions("measurement_id", mids.length));
-            DBUtil.replacePlaceHolders(mconj, mids);
-
-            // Use the already calculated min, max and average on
-            // compressed tables.
-            String minMax;
-            if (usesMetricUnion(begin)) {
-                minMax = " MIN(value), AVG(value), MAX(value), ";
-            } else {
-                minMax = " MIN(minvalue), AVG(value), MAX(maxvalue), ";
-            }
-
-            StringBuffer sqlBuf = new StringBuffer()
-                .append("SELECT ")
-                .append(minMax)
-                .append(" COUNT(DISTINCT(measurement_id)) FROM ")
-                .append(table)
-                .append(" WHERE timestamp BETWEEN ? AND ? AND ")
-                .append(mconj);
-
-            stmt = conn.prepareStatement(sqlBuf.toString());
-
-            int i = 1;
-            stmt.setLong(i++, begin);
-            stmt.setLong(i++, end);
-
-            if (_log.isTraceEnabled()) {
-                DBUtil.replacePlaceHolder(sqlBuf, String.valueOf(begin));
-                DBUtil.replacePlaceHolder(sqlBuf, String.valueOf(end));
-                _log.trace("double[] getAggregateData(): " + sqlBuf);
-            }
-            
-            rs = stmt.executeQuery();
-            
-            if (rs.next()) {
-                result[IND_MIN] = rs.getDouble(1);
-                result[IND_AVG] = rs.getDouble(2);
-                result[IND_MAX] = rs.getDouble(3);
-                result[IND_CFG_COUNT] = rs.getDouble(4);
-            }
-            else {
-                return result;    
-            }
-            
-        } catch (SQLException e) {
-            throw new SystemException("Can't get aggregate data for "+ 
-                                      StringUtil.arrayToString(mids), e);
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
-        } finally {
-            if (_log.isTraceEnabled()) {
-                _log.trace("double[] getAggregateData(): query elapsed time: " +
-                          timer.getElapsed());
-            }
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-        }
-        return result;
-    }
-
-    /**
      * Fetch a map of aggregate data values keyed by metrics given
      * a start and stop time range
      *
@@ -1763,8 +1759,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     private Map getAggDataByMetric(Integer[] tids, Integer[] iids,
-                                        long begin, long end,
-                                        boolean useAggressiveRollup) {
+                                   long begin, long end,
+                                   boolean useAggressiveRollup) {
         // Check the begin and end times
         this.checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
@@ -1884,10 +1880,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
         }
         Map rtn = getAggDataByMetric(
-            (Integer[]) mids.toArray(new Integer[mids.size()]), begin, end,
+            (Integer[]) mids.toArray(new Integer[0]), begin, end,
             useAggressiveRollup);
         rtn.putAll(getAvailMan().getAggregateData(
-            (Integer[]) avids.toArray(new Integer[avids.size()]), begin, end));
+            (Integer[]) avids.toArray(new Integer[0]), begin, end));
         return rtn;
     }
 
@@ -1980,127 +1976,6 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             throw new SystemException(ERR_DB, e);
         } finally {
             DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
-        }
-    }
-
-    /**
-     * Fetch the list of instance ID's that have data in the given
-     * start and stop time range and template IDs
-     *
-     * @param tids the template IDs
-     * @param begin the start of the time range
-     * @param end the end of the time range
-     * @return the list of data points
-     * @ejb:interface-method
-     */
-    public Integer[] getInstancesWithData(Integer[] tids, long begin, long end)
-    {
-        // Check the begin and end times
-        this.checkTimeArguments(begin, end);
-        begin = TimingVoodoo.roundDownTime(begin, MINUTE);
-        end = TimingVoodoo.roundDownTime(end, MINUTE);
-
-        if (tids.length == 0)
-            return new Integer[0];
-
-        //Get the valid ids
-        Connection        conn = null;
-        PreparedStatement stmt = null;
-        ResultSet         rs   = null;
-
-        try {
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-
-            // The table to query from
-            List measids = MeasTabManagerUtil
-                .getMeasIdsFromTemplateIds(conn, tids);
-            String table = getDataTable(begin, end, measids.toArray());
-    
-            StringBuilder sqlBuf = new StringBuilder();
-            sqlBuf.append("SELECT DISTINCT(instance_id)")
-                  .append(" FROM ").append(TAB_MEAS).append(" m, ")
-                  .append(table).append(" d")
-                  .append(" WHERE timestamp BETWEEN ? AND ?")
-                  .append(" AND measurement_id = m.id AND ")
-                  .append(DBUtil.composeConjunctions("template_id", tids.length));
-    
-            stmt = conn.prepareStatement(sqlBuf.toString());
-    
-            // Template ID's
-            int i = this.setStatementArguments(stmt, 1, tids);
-            
-            // Time ranges
-            stmt.setLong(i++, begin);
-            stmt.setLong(i++, end);
-            rs = stmt.executeQuery();
-    
-            ArrayList validList = new ArrayList();
-            for (i = 1; rs.next(); i++) {
-                validList.add(new Integer(rs.getInt(1)));
-            }
-
-            return (Integer[]) validList.toArray(new Integer[validList.size()]);
-        } catch (SQLException e) {
-            throw new SystemException(
-                "Can't get time data for " + StringUtil.arrayToString(tids) +
-                " between " + begin + " " + end, e);
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
-        }
-    }
-
-    /**
-     * Fetch the list of measurement ID's that have no data in the given time
-     * range
-     *
-     * @param current the current time
-     * @param cycles the number of intervals to use as time buffer
-     * @return the list of measurement IDs
-     * @ejb:interface-method
-     */
-    public Integer[] getIdsWithoutData(long current, int cycles) {
-        Connection        conn = null;
-        PreparedStatement stmt = null;
-        ResultSet         rs   = null;
-    
-        try {
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-
-            // select id from EAM_MEASUREMENT where enabled = true
-            // and interval is not null and
-            // and 0 = (SELECT COUNT(*) FROM EAM_MEASUREMENT_DATA WHERE
-            // ID = measurement_id and timestamp > (105410357766 -3 * interval));
-            String metricUnion =
-                MeasTabManagerUtil.getUnionStatement(getPurgeRaw());
-            stmt = conn.prepareStatement(
-                "SELECT ID FROM " + TAB_MEAS +
-                " WHERE enabled = ? AND NOT interval IS NULL AND " +
-                      " NOT EXISTS (SELECT timestamp FROM " + metricUnion +
-                                  " WHERE timestamp > (? - ? * interval) AND " +
-                                  " WHERE id = measurement_id)");
-    
-            int i = 1;
-            stmt.setBoolean(i++, true);
-            stmt.setLong   (i++, current);
-            stmt.setInt    (i++, cycles);
-            
-            rs = stmt.executeQuery();
-    
-            ArrayList validList = new ArrayList();
-            for (i = 1; rs.next(); i++) {
-                validList.add(new Integer(rs.getInt(1)));
-            }
-            return (Integer[]) validList.toArray(new Integer[validList.size()]);
-        } catch (SQLException e) {
-            throw new SystemException("Can't look up missing data", e);
-        } catch (NamingException e) {
-            throw new SystemException(ERR_DB, e);
-        } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
     }
 

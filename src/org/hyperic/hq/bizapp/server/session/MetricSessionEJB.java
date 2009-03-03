@@ -76,7 +76,9 @@ import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
@@ -103,7 +105,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         throws AppdefCompatException
     {
         List templates;
-        Integer[] templateIds;
+        Integer[] tids;
 
         // Create Map of all resources
         HashMap resmap = new HashMap(MeasurementConstants.VALID_CATEGORIES.length);
@@ -113,17 +115,17 @@ public class MetricSessionEJB extends BizappSessionEJB {
             
         if (tmpls.get(0) instanceof MeasurementTemplate) {
             templates = tmpls;
-            templateIds = new Integer[templates.size()];
+            tids = new Integer[templates.size()];
             for (int i = 0; i < templates.size(); i++ ) {
                 MeasurementTemplate t = (MeasurementTemplate)templates.get(i);
-                templateIds[i] = t.getId();
+                tids[i] = t.getId();
             }
         }
         else {
             // If templates are just ID's, we have to look them up
-            templateIds = (Integer[])tmpls.toArray(new Integer[tmpls.size()]);
+            tids = (Integer[])tmpls.toArray(new Integer[tmpls.size()]);
             try {
-                templates = getTemplateManager().getTemplates(templateIds,
+                templates = getTemplateManager().getTemplates(tids,
                                                               PageControl.PAGE_ALL);
             } catch (TemplateNotFoundException e) {
                 templates = new ArrayList(0);
@@ -165,12 +167,15 @@ public class MetricSessionEJB extends BizappSessionEJB {
         }
             
         // Now get the aggregate data, keyed by template ID's
-        Map datamap = getDataMan().getAggregateData(templates, eids, begin, end,
-                                                    showNoCollect != null);
+        final MeasurementManagerLocal mMan = getMetricManager();
+        final DataManagerLocal dMan = getDataMan();
+        final List measurements = mMan.getMeasurements(tids, eids);
+        final Map datamap =
+            dMan.getAggregateDataByTemplate(measurements, begin, end);
 
         // Get the intervals, keyed by template ID's as well
-        Map intervals = showNoCollect == null ? new HashMap() :
-            getMetricManager().findMetricIntervals(subject, aeids, templateIds);
+        final Map intervals = (showNoCollect == null) ?
+            new HashMap() : mMan.findMetricIntervals(subject, aeids, tids);
 
         for (it = templates.iterator(); it.hasNext(); ) {
             MeasurementTemplate tmpl = (MeasurementTemplate) it.next();
@@ -397,7 +402,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
             } else if (data.size() < midMap.size()) {
                 Set mids = new HashSet(midMap.values());
                 List midsToGet = new ArrayList();
-                for (Iterator it=data.keySet().iterator(); it.hasNext(); ) {
+                for (Iterator it=data.values().iterator(); it.hasNext(); ) {
                     Integer mid = (Integer)it.next();
                     if (!mids.contains(mid)) {
                         midsToGet.add(mid);

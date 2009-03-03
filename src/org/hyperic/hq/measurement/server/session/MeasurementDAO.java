@@ -26,6 +26,7 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +49,7 @@ import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 
@@ -501,7 +503,26 @@ public class MeasurementDAO extends HibernateDAO {
             .setCacheRegion("Measurement.findAvailMeasurementsForGroup")
             .list();
     }
-    
+
+    List findMeasurements(Integer[] tids, Integer[] iids) {
+        // sort to take advantage of query cache
+        final List iidList = Arrays.asList(iids);
+        final List tidList = Arrays.asList(tids);
+        Collections.sort(tidList);
+        Collections.sort(iidList);
+        final String sql = new StringBuilder()
+            .append("select m from Measurement m ")
+            .append("join m.template t ")
+            .append("where m.instanceId in (:iids) AND t.id in (:tids)")
+            .toString();
+        return getSession().createQuery(sql)
+            .setParameterList("iids", iidList, new IntegerType())
+            .setParameterList("tids", tidList, new IntegerType())
+            .setCacheable(true)
+            .setCacheRegion("Measurement.findMeasurements")
+            .list();
+    }
+
     List findAvailMeasurements(Integer[] tids, Integer[] iids) {
         String sql = new StringBuilder()
             .append("select m from Measurement m ")

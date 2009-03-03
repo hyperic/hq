@@ -1350,6 +1350,14 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
+     * @return List {@link Measurement} of MeasurementIds
+     * @ejb:interface-method
+     */
+    public List getMeasurements(Integer[] tids, Integer[] aeids) {
+        return getMeasurementDAO().findMeasurements(tids, aeids);
+    }
+
+    /**
      * Get live measurement values for a series of DSNs
      *
      * NOTE:  Since this routine allows callers to pass in arbitrary

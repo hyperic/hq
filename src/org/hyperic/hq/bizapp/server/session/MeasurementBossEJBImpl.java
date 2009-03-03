@@ -76,6 +76,7 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.VirtualManagerLocal;
 import org.hyperic.hq.appdef.shared.VirtualManagerUtil;
 import org.hyperic.hq.auth.shared.SessionException;
+import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -110,8 +111,10 @@ import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.Baseline;
+import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
@@ -1684,9 +1687,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
         // Keep the templates in a map        
         IntHashMap tmplMap = new IntHashMap();
+        Integer[] tids = new Integer[tmpls.size()];
+        int idx = 0;
         for (Iterator i = tmpls.iterator(); i.hasNext(); ) {
             MeasurementTemplate tmpl = (MeasurementTemplate) i.next();
-            tmplMap.put(tmpl.getId().intValue(), tmpl);
+            final Integer tid = tmpl.getId();
+            tmplMap.put(tid.intValue(), tmpl);
+            tids[idx++] = tid;
         }
     
         IntHashMap templateMetrics = new IntHashMap();
@@ -1696,11 +1703,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         // Now, iterate through each AppdefEntityID
         ResourceManagerLocal resMan = getResourceManager();
+        final DataManagerLocal dMan = DataManagerEJBImpl.getOne();
         for (int i = 0; i < entIds.length; i++) {            
-            Integer[] eid = new Integer[] { entIds[i].getId() };
+            Integer[] eids = new Integer[] { entIds[i].getId() };
             // Now get the aggregate data, keyed by template ID's
-            Map datamap = getDataMan().getAggregateData(tmpls, eid, begin, end,
-                                                        true);
+            List measurements =
+                getMetricManager().getMeasurements(tids, eids);
+            Map datamap =
+                dMan.getAggregateDataByTemplate(measurements, begin, end);
     
             // For each template, add a new summary
             for (Iterator it = datamap.entrySet().iterator(); it.hasNext(); ) {
