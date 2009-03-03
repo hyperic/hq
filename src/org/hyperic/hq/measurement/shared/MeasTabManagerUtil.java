@@ -32,11 +32,14 @@ import java.sql.Statement;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -68,14 +71,17 @@ public class MeasTabManagerUtil {
      * @param end The end of the time range
      * @return The UNION SQL statement.
      */
-    public static String getUnionStatement(long begin, long end) {
-        StringBuffer sql = new StringBuffer();
+    public static final String getUnionStatement(final long begin, long end) {
+        final StringBuilder sql = new StringBuilder();
+        final MeasRangeObj measRangeObj = MeasRangeObj.getInstance();
+        final HQDialect dialect = Util.getHQDialect();
+        final List ranges = (dialect.useMetricUnion()) ?
+            Collections.singletonList(new MeasRange(TAB_DATA, begin, end)) :
+            measRangeObj.getRanges();
         sql.append("(");
-        List ranges = MeasRangeObj.getInstance().getRanges();
-        for (Iterator i=ranges.iterator(); i.hasNext(); )
-        {
-            MeasRange range = (MeasRange)i.next();
-            String table = MeasRangeObj.getInstance().getTable(ranges, end);
+        for (final Iterator i=ranges.iterator(); i.hasNext(); ) {
+            final MeasRange range = (MeasRange)i.next();
+            final String table = measRangeObj.getTable(ranges, end);
             sql.append("SELECT * FROM ").
                 append(table).
                 append(getTimeInStmt(begin, end));
@@ -87,7 +93,6 @@ public class MeasTabManagerUtil {
                 break;
             }
         }
-
         sql.append(") ").append(TAB_DATA);
         return sql.toString();
     }
@@ -129,31 +134,33 @@ public class MeasTabManagerUtil {
      * @param measId The array of measurement ids to set the where clause against
      * @return The UNION SQL statement.
      */
-    public static String getUnionStatement(long begin, long end, Object[] measIds)
-    {
-        String measInStmt = (measIds.length == 0) ? "" :
-                                getMeasInStmt(measIds, true);
-        StringBuffer sql = new StringBuffer();
-        sql.append("(");
-        List ranges = MeasRangeObj.getInstance().getRanges();
+    public static final String getUnionStatement(final long begin,
+                                                 final long end,
+                                                 final Object[] measIds) {
+        final String measInStmt = (measIds.length == 0) ?
+            "" : getMeasInStmt(measIds, true);
+        final StringBuffer sql = new StringBuffer();
+        final MeasRangeObj measRangeObj = MeasRangeObj.getInstance();
+        final HQDialect dialect = Util.getHQDialect();
+        final List ranges = (dialect.useMetricUnion()) ?
+            Collections.singletonList(new MeasRange(TAB_DATA, begin, end)) :
+            measRangeObj.getRanges();
         int joins = 0;
-        for (Iterator i=ranges.iterator(); i.hasNext(); )
-        {
-            MeasRange range = (MeasRange)i.next();
-            long rBegin = range.getMinTimestamp(),
-                 rEnd   = range.getMaxTimestamp();
-
+        sql.append("(");
+        for (final Iterator i=ranges.iterator(); i.hasNext(); ) {
+            final MeasRange range = (MeasRange)i.next();
+            final long rBegin = range.getMinTimestamp(),
+                       rEnd   = range.getMaxTimestamp();
             boolean outOfRange = (begin > rEnd || end < rBegin);
             if (outOfRange && joins == 0) {
                 continue;
             } else if (outOfRange && joins > 0) {
                 break;
             }
-
             String table = range.getTable();
-            if (joins > 0)
+            if (joins > 0) {
                 sql.append(" UNION ALL ");
-
+            }
             joins++;
             sql.append("SELECT * FROM ")
                .append(table)

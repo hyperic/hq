@@ -32,7 +32,7 @@ import java.util.Map;
 
 public interface HQDialect
 {
-    /*
+    /**
      * Returns the table optimize statement for
      * a particular database
      *
@@ -42,26 +42,32 @@ public interface HQDialect
      */
     public String getOptimizeStmt(String table, int cost);
 
-    /*
+    /**
+     * Returns true if using the EAM_MEASUREMENT_DATA view instead of
+     * constructing it dynamically is optimal
+     */
+    public boolean useMetricUnion();
+
+    /**
      * Returns true if using the EAM_NUMBERS table to iterate over a
      * certain amount of time ranges is optimal for the database
      */
     public boolean useEamNumbers();
 
-    /*
+    /**
      * Returns -1 if Max Expressions supported in the db is unlimited.
      * This applies mainly to SQL in statements e.g. where ids in (0, 1, 2,...)
      * Or a sequence of SQL 'and' or 'or' statements in one statement
      */
     public int getMaxExpressions();
 
-    /*
+    /**
      * Returns true if the database supports a multi insert stmt.
      */
     public boolean supportsMultiInsertStmt();
     
 
-    /*
+    /**
      * Returns a db specific SQL syntax for a POSIX style Regular Expression.
      * @param column - the column to match against
      * @param regex - the POSIX style regex.  The param passed in allows for
@@ -73,13 +79,13 @@ public interface HQDialect
     public String getRegExSQL(String column, String regex, boolean ignoreCase,
                               boolean invertMatch);
 
-    /*
+    /**
      * Returns true if the database supports an insert stmt which
      * updates when the unique key is violated
      */
     public boolean supportsDuplicateInsertStmt();
 
-    /*
+    /**
      * Returns true if the database contains the specified tableName
      */
     public boolean tableExists(Statement stmt, String tableName)
@@ -93,13 +99,13 @@ public interface HQDialect
      */
     public String getLimitString(int num);
 
-    /*
+    /**
      * Returns true if the database contains the specified viewName
      */
     public boolean viewExists(Statement stmt, String viewName)
         throws SQLException;
 
-    /*
+    /**
      * Needed mainly for MySQL support.
      * Kind of messy, hopefully it will be cleaned up
      * at some point.

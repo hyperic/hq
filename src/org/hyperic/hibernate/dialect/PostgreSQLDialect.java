@@ -158,4 +158,8 @@ public class PostgreSQLDialect
     public boolean supportsPLSQL() {
         return false;
     }
+
+    public boolean useMetricUnion() {
+        return false;
+    }
 }

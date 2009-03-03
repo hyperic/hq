@@ -159,4 +159,8 @@ public class Oracle9Dialect
     public boolean supportsPLSQL() {
         return true;
     }
+
+    public boolean useMetricUnion() {
+        return true;
+    }
 }
