@@ -185,6 +185,8 @@ public final class AuthzConstants {
     public static final Integer     authzServiceProto   =  new Integer(603);
     public static final Integer     authzApplicationProto  =  new Integer(604);
     
+    public static final String ResourceEdgeContainmentRelation = "containment";
+    
     public static boolean isOverlord(Integer subject) {
         return subject.equals(AuthzConstants.overlordId);
     }

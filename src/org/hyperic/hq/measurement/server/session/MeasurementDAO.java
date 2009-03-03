@@ -518,22 +518,25 @@ public class MeasurementDAO extends HibernateDAO {
      * Measurements which are children of the resourceIds
      */
     List findRelatedAvailMeasurements(List resourceIds) {
-       String sql = new StringBuffer()
+       final String sql = new StringBuilder()
            .append("select m from Measurement m ")
            .append("join m.resource.toEdges e ")
            .append("join m.template t ")
+           .append("join e.relation r ")
            .append("where m.resource is not null ")
            .append("and e.distance > 0 ")
+           .append("and r.name = :relationType ")
            .append("and e.from in (:ids) and ")
            .append(ALIAS_CLAUSE).toString();
        return getSession()
            .createQuery(sql)
            .setParameterList("ids", resourceIds, new IntegerType())
+           .setParameter(
+               "relationType", AuthzConstants.ResourceEdgeContainmentRelation)
            .setCacheable(true)
            .setCacheRegion("Measurement.findRelatedAvailMeasurements")
            .list();
     }
-
 
     List findAvailMeasurementsByInstances(int type, Integer[] ids) {
         boolean checkIds = (ids != null && ids.length > 0);
