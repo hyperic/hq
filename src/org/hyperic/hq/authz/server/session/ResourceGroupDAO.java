@@ -255,7 +255,9 @@ public class ResourceGroupDAO extends HibernateDAO
      */
     Collection getMembers(ResourceGroup g) {
         return createQuery("select g.resource from GroupMember g " +
-                           "where g.group = :group order by g.resource.name")
+                           "where g.group = :group " +
+                           "and g.resource.resourceType is not null " +
+                           "order by g.resource.name")
             .setParameter("group", g)
             .list();
     }
