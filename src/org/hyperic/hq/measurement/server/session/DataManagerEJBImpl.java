@@ -1203,6 +1203,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         final List measIds = new ArrayList();
         // Want to sort in an attempt to make use of db query cache
         final Comparator comparator = new MeasurementComparator();
+        // ensure List may be modified
+        measurements = new ArrayList(measurements);
         Collections.sort(measurements, comparator);
         for (Iterator i = measurements.iterator(); i.hasNext(); ) {
             Measurement m = (Measurement)i.next();
