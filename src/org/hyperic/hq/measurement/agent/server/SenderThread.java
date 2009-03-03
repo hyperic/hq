@@ -199,14 +199,40 @@ public class SenderThread
     // Use a small class which holds a bunch of the data we need, just so
     // we can pass it back in 1 method call
     private static class Record {
-        int              dsnId;
-        MetricValue data;
-        int              derivedID;
+        final int dsnId,
+                  derivedID;
+        final MetricValue data;
+        private Integer hashCode = null;
 
         private Record(int dsnId, MetricValue data, int derivedID){
             this.dsnId     = dsnId;
             this.data      = data;
             this.derivedID = derivedID;
+        }
+        public int hashCode() {
+            if (hashCode != null) {
+                return hashCode.intValue();
+            }
+            final Long timestamp = new Long(data.getTimestamp()*71);
+            final Integer mId = new Integer(derivedID*71);
+            hashCode =
+                new Integer(7 + (timestamp.hashCode()*71) + (mId.hashCode()*71));
+            return hashCode.intValue();
+        }
+        public boolean equals(Object rhs) {
+            if (this == rhs) {
+                return true;
+            }
+            if (rhs instanceof Record) {
+                Record r = (Record)rhs;
+                return (r.derivedID           == derivedID &&
+                        r.data.getTimestamp() == data.getTimestamp());
+            }
+            return false;
+        }
+        public String toString() {
+            return "mId="+derivedID+",timestamp="+data.getTimestamp()+
+                ",value="+data.getValue();
         }
     }
 
@@ -342,24 +368,32 @@ public class SenderThread
         numUsed         = 0;
         numDebuggedSent = 0;
         constructor     = new MeasurementReportConstructor();
-
-        for(Iterator i=this.storage.getListIterator(DATA_LISTNAME);
-            i != null && i.hasNext() && numUsed < this.maxBatchSize;
-            numUsed++)
-        {                
-            Record rec;
-            
-            if(numUsed == 0){  // Only on the first loop iteration
-                this.log.debug("Sending batch to server:");
-            }
-
+        
+        final boolean debug = log.isDebugEnabled();
+        log.debug("Sending batch to server:");
+        Iterator it=this.storage.getListIterator(DATA_LISTNAME);
+        Set records = new HashSet();
+        // first we are going to ensure that all the data points that
+        // we send over to the server are unique
+        for(; it != null && it.hasNext() && numUsed < this.maxBatchSize; numUsed++)
+        {
             try {
-                rec = SenderThread.decodeRecord((String)i.next());
+                Record r = SenderThread.decodeRecord((String)it.next());
+                if (!records.contains(r)) {
+                    records.add(r);
+                } else {
+                    if (debug) log.debug("Dropping duplicate entry for " + r);
+                    numUsed--;
+                }
             } catch(IOException exc){
                 this.log.error("Error accessing record -- deleting: " +
                                exc);
                 continue;
             }
+        }
+
+        for (it=records.iterator(); it.hasNext(); ) {                
+            Record rec = (Record)it.next();
 
             lastMetricTime = rec.data.getTimestamp();
             
