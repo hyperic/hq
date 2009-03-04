@@ -31,6 +31,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -1578,65 +1579,62 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
 
     private ResourceTreeNode[] getNavMapDataForGroup(AuthzSubject subject,
                                                      AppdefGroupValue groupVo)
-        throws PermissionException, SQLException {
+        throws PermissionException, SQLException
+    {
+        ResourceTreeNode grpNode = new ResourceTreeNode(groupVo.getName(),
+                getAppdefTypeLabel(APPDEF_TYPE_GROUP,
+                                   groupVo.getAppdefResourceTypeValue()
+                                           .getName()),
+                                   groupVo.getEntityId(),
+                                   ResourceTreeNode.CLUSTER);
+        final Collection agEntries = groupVo.getAppdefGroupEntries();
+        if (agEntries.size() == 0) {
+            return new ResourceTreeNode[] {grpNode};
+        }
         ResourceTreeNode[] retVal;
-        PreparedStatement    stmt;
+        Statement            stmt;
         ResultSet            rs;
-        final String         grpSqlStmt;
+        final StringBuilder  grpSqlStmt = new StringBuilder();
         int                  entityType;
-        String               bindMarkerStr;
-        ResourceTreeNode     grpNode;
         Set                  entitySet;
+        final boolean debug = log.isDebugEnabled();
         
         stmt = null;
         rs = null;
         retVal = null;
-        bindMarkerStr = "";
         entityType = groupVo.getGroupEntType();
 
         try {
-            int size = groupVo.getTotalSize();
-            for (int x = 0; x < size; x++) {
-                bindMarkerStr += (x<size-1) ? "?," : "?";
-            }
+            final Connection conn = getDBConn();
 
-            Connection conn = getDBConn();
-
-            final String resname =
+            final String resJoin =
                 " JOIN " + TBL_RES + " res on resource_id = res.id ";
             
             switch (entityType) {
             case APPDEF_TYPE_PLATFORM :
-                grpSqlStmt = 
-                    "SELECT p.id as platform_id, res.name as platform_name " +
-                    "FROM " + TBL_PLATFORM + " p " + resname +
-                    "WHERE p.id IN (" + bindMarkerStr + ")";
+                grpSqlStmt.append("SELECT p.id as platform_id, res.name as platform_name ")
+                          .append(" FROM ").append(TBL_PLATFORM).append(" p ")
+                          .append(resJoin)
+                          .append("WHERE p.id IN (");
                 break;
             case APPDEF_TYPE_SERVER :
-                grpSqlStmt =
-                    "SELECT s.id as server_id, res.name as server_name " +
-                    "FROM " + TBL_SERVER + " s " + resname +
-                    "WHERE s.id IN (" + bindMarkerStr + ") ";
+                grpSqlStmt.append("SELECT s.id as server_id, res.name as server_name ")
+                          .append("FROM ").append(TBL_SERVER).append(" s ")
+                          .append(resJoin)
+                          .append("WHERE s.id IN (");
                 break;
             case APPDEF_TYPE_SERVICE:
-                grpSqlStmt =
-                    "SELECT s.id as service_id, res.name as service_name " +
-                    "FROM " + TBL_SERVICE + " s  " + resname +
-                    "WHERE s.id IN (" + bindMarkerStr + ") ";
+                grpSqlStmt.append("SELECT s.id as service_id, res.name as service_name ")
+                          .append("FROM ").append(TBL_SERVICE).append(" s  ")
+                          .append(resJoin)
+                          .append("WHERE s.id IN (");
                 break;
             default:
                 throw new IllegalArgumentException("No group support " +
                                                    "for specified type");
             }
 
-            if (log.isDebugEnabled())
-                log.debug(grpSqlStmt);
-            grpNode = new ResourceTreeNode(groupVo.getName(),
-                    getAppdefTypeLabel(APPDEF_TYPE_GROUP,
-                                       groupVo.getAppdefResourceTypeValue()
-                                               .getName()),
-                                       groupVo.getEntityId(),
-                                       ResourceTreeNode.CLUSTER);
+            if (debug) log.debug(grpSqlStmt);
             entitySet = new HashSet();
 
             int x;
@@ -1644,27 +1642,26 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             Map entNameMap = new HashMap();
             if (groupVo.getTotalSize() > 0) {
                 try {
-                    stmt = conn.prepareStatement(grpSqlStmt);
-                    
-                    if (log.isDebugEnabled())
-                        log.debug("SQL: " + grpSqlStmt);
-                    
-                    for (x=1,i=groupVo.getAppdefGroupEntries().iterator();
-                         i.hasNext();x++) {
-                        AppdefEntityID mem = (AppdefEntityID) i.next();
-                        stmt.setInt (x, mem.getID());
+                    stmt = conn.createStatement();
 
-                        if (log.isDebugEnabled())
-                            log.debug("Arg " + x + ": " + mem.getID());
+                    for (x=1,i=agEntries.iterator(); i.hasNext(); x++) {
+                        final AppdefEntityID mem = (AppdefEntityID) i.next();
+                        grpSqlStmt.append(((x==1) ? "" : ","))
+                                  .append(mem.getID());
+
+                        if (debug) log.debug("Arg " + x + ": " + mem.getID());
                     }
 
+                    grpSqlStmt.append(")");
                     StopWatch timer = new StopWatch();
                     
-                    rs = stmt.executeQuery();
+                    if (debug) log.debug("SQL: " + grpSqlStmt);
                     
-                    if (log.isDebugEnabled())
-                        log.debug("getNavMapDataForGroup() executed in: " +
-                                  timer);
+                    rs = stmt.executeQuery(grpSqlStmt.toString());
+                    
+                    if (debug) {
+                        log.debug("getNavMapDataForGroup() executed in: " + timer);
+                    }
 
                     while (rs.next()) {
                         int     thisEntityId       = rs.getInt(1);
