@@ -26,11 +26,14 @@
 package org.hyperic.hq.authz.server.session;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -295,20 +298,24 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
 
     /**
+     * @return AppdefEntityID[] - an array of the resources (including children) deleted
      * @ejb:interface-method
      */
-    public void removeResourcePerms(AuthzSubject subject, Resource r)
+    public AppdefEntityID[] removeResourcePerms(AuthzSubject subject, Resource r)
         throws VetoException, PermissionException
     {
+        final ResourceType resourceType = r.getResourceType();
+
+        // Possible this resource has already been marked for deletion
+        if (resourceType == null) {
+            return new AppdefEntityID[0];
+        }
+        
         // Make sure user has permission to remove this resource
         final PermissionManager pm = PermissionManagerFactory.getInstance();
-        final ResourceType resourceType = r.getResourceType();
         String opName = null;
-        
-        // Possible this resource has already been marked for deletion
-        if (resourceType == null)
-            return;
-        
+        Set removed = new HashSet();
+
         if (resourceType.getId().equals(AuthzConstants.authzPlatform)) {
             opName = AuthzConstants.platformOpRemovePlatform;
         }
@@ -339,9 +346,11 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         for (Iterator it = edges.iterator(); it.hasNext(); ) {
             ResourceEdge edge = (ResourceEdge) it.next();
             // Remove descendents' permissions
-            removeResourcePerms(subject, edge.getTo());
+            removed.addAll(Arrays.asList(removeResourcePerms(subject, edge.getTo())));
         }
 
+        removed.add(new AppdefEntityID(r));
+        
         // Delete the edges and resource groups
         edgeDao.deleteEdges(r);
         
@@ -350,7 +359,9 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         r.setResourceType(null);
 
         final long now = System.currentTimeMillis();
-        ResourceAudit.deleteResource(r, subject, now, now);        
+        ResourceAudit.deleteResource(r, subject, now, now);
+        
+        return (AppdefEntityID[]) removed.toArray(new AppdefEntityID[0]);
     }
 
     /**

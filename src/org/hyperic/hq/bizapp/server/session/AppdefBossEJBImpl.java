@@ -1303,10 +1303,11 @@ public class AppdefBossEJBImpl
     
     /**
      * Remove an appdef entity
+     * @return AppdefEntityID[] - an array of the resources (including children) deleted
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */
-    public void removeAppdefEntity(int sessionId, AppdefEntityID aeid)
+    public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid)
         throws SessionNotFoundException, SessionTimeoutException,
                ApplicationException, VetoException {
         final StopWatch timer = new StopWatch();
@@ -1328,13 +1329,15 @@ public class AppdefBossEJBImpl
                 throw new ApplicationException(se);
             }
         }
-        resMan.removeResourcePerms(subject, res);
+        AppdefEntityID[] removed = resMan.removeResourcePerms(subject, res);
         if (log.isDebugEnabled()) {
             log.debug("removeAppdefEntity() for " + aeid + " executed in " +
                       timer.getElapsed());
         }
         
         ZeventManager.getInstance().enqueueEventAfterCommit(new ResourcesCleanupZevent());
+        
+        return removed;
     }
     
     /**
