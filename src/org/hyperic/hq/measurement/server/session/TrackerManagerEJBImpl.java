@@ -101,11 +101,11 @@ public class TrackerManagerEJBImpl
             throw new PluginException("Entity not found: " +
                                       e.getMessage());
         } catch (AgentNotFoundException e) {
-            throw new PluginException("Agent error: " + e.getMessage());
+            throw new PluginException("Agent error: " + e.getMessage(), e);
         } catch (AgentConnectionException e) {
-            throw new PluginException("Agent error: " + e.getMessage());
+            throw new PluginException("Agent error: " + e.getMessage(), e);
         } catch (AgentRemoteException e) {
-            throw new PluginException("Agent error: " + e.getMessage());
+            throw new PluginException("Agent error: " + e.getMessage(), e);
         }
     }
 
@@ -120,11 +120,11 @@ public class TrackerManagerEJBImpl
             MeasurementCommandsClient client = getClient(id);
             client.removeTrackPlugin(id.getAppdefKey(), pluginType);
         } catch (AgentNotFoundException e) {
-            throw new PluginException("Agent error: " + e.getMessage());
+            throw new PluginException("Agent error: " + e.getMessage(), e);
         } catch (AgentConnectionException e) {
-            throw new PluginException("Agent error: " + e.getMessage());
+            throw new PluginException("Agent error: " + e.getMessage(), e);
         } catch (AgentRemoteException e) {
-            throw new PluginException("Agent error: " + e.getMessage());
+            throw new PluginException("Agent error: " + e.getMessage(), e);
         }
     }
 
