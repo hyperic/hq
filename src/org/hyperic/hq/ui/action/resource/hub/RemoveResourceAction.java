@@ -27,9 +27,12 @@ package org.hyperic.hq.ui.action.resource.hub;
 
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.FinderException;
 import javax.servlet.ServletContext;
@@ -139,7 +142,7 @@ public class RemoveResourceAction extends BaseAction {
         List entities =
             BizappUtils.buildAppdefEntityIds(resourceList);
         if (resourceItems != null && resourceItems.length > 0) {
-            List deleted = new ArrayList();
+            Set deleted = new HashSet();
             int vetoed = 0;
             // about the exception handling:
             // if someone either deleted the entity out from under our user
@@ -152,8 +155,8 @@ public class RemoveResourceAction extends BaseAction {
             for (Iterator i = entities.iterator(); i.hasNext();) {
                 AppdefEntityID resourceId = (AppdefEntityID) i.next();
                 try {
-                    boss.removeAppdefEntity(sessionId.intValue(), resourceId);
-                    deleted.add(resourceId.getAppdefKey());
+                    deleted.addAll(Arrays.asList(
+                            boss.removeAppdefEntity(sessionId.intValue(), resourceId)));
                 } catch (AppdefEntityNotFoundException e) {
                     log.error("Removing resource " + resourceId +
                                "failed.");
@@ -163,8 +166,7 @@ public class RemoveResourceAction extends BaseAction {
                 }
             }
             
-            removeResourcesFromDashboard(request, 
-                    (String[]) deleted.toArray(new String[0]));
+            removeResourcesFromDashboard(request, deleted);
             
             if (vetoed > 0) {
                 RequestUtils
@@ -182,7 +184,7 @@ public class RemoveResourceAction extends BaseAction {
      * HHQ-2854: Remove deleted resources from dashboard preferences
      */
     private void removeResourcesFromDashboard(HttpServletRequest request,
-                                              String[] resourcesToRemove) {
+                                              Set resourcesToRemove) {
         try {
             ServletContext ctx = getServlet().getServletContext();
             AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
@@ -193,13 +195,23 @@ public class RemoveResourceAction extends BaseAction {
                             (Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
                             user, aBoss);                
             ConfigResponse dashPrefs = dashConfig.getConfig();
-
+            
             for (Iterator it=dashPrefs.getKeys().iterator(); it.hasNext(); ) {
                 String key = (String) it.next();
                 if (key.indexOf(Constants.USERPREF_KEY_FAVORITE_RESOURCES) > -1
                         || key.indexOf(Constants.USERPREF_KEY_AVAILABITY_RESOURCES) > -1
                         || key.indexOf(Constants.USERPREF_KEY_CRITICAL_ALERTS_RESOURCES) > -1) {
-                    DashboardUtils.removeResources(resourcesToRemove, key, dashPrefs);
+                    
+                    List prefResources = DashboardUtils.preferencesAsEntityIds(key, dashPrefs);
+                    prefResources.retainAll(resourcesToRemove);
+                    
+                    if (!prefResources.isEmpty()) {
+                        String[] appdefKeyToRemove = new String[prefResources.size()]; 
+                        for (int i=0; i<prefResources.size(); i++) {
+                            appdefKeyToRemove[i] = ((AppdefEntityID)prefResources.get(i)).getAppdefKey();
+                        }
+                        DashboardUtils.removeResources(appdefKeyToRemove, key, dashPrefs);
+                    }
                 }
             }
             ConfigurationProxy.getInstance().setDashboardPreferences(
