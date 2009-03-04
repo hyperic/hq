@@ -1064,12 +1064,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public double[] getAggregateData(final List measurements,
                                      final long begin,
                                      final long end) {
-        final long interval = end-begin;
+        checkTimeArguments(begin, end);
+        long interval = end-begin;
+        interval = (interval == 0) ? 1 : interval;
         final List pts = getHistoricalData(measurements, begin, end, interval,
             MeasurementConstants.COLL_TYPE_DYNAMIC, false, PageControl.PAGE_ALL);
         return getAggData(pts);
     }
-
+    
     /**
      * Fetch the list of historical data points, grouped by template, given
      * a begin and end time range.  Does not return an entry for templates
@@ -1098,6 +1100,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         // getHistoricalData() when viewing the metric indicators page.
         // By issuing the same query we are hoping that the db's query
         // cache will optimize performance.
+        checkTimeArguments(begin, end);
         final long interval = (end - begin)/60;
         final List availIds = new ArrayList();
         final Map measIdsByTempl = new HashMap();
@@ -1202,6 +1205,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                                       PageControl pc) {
         final List availIds = new ArrayList();
         final List measIds = new ArrayList();
+        checkTimeArguments(begin, end, interval);
+        interval = (interval == 0) ? 1 : interval;
         // Want to sort in an attempt to make use of db query cache
         final Comparator comparator = new MeasurementComparator();
         // ensure List may be modified
@@ -1748,6 +1753,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public Map getAggregateDataByMetric(Integer[] tids, Integer[] iids,
                                         long begin, long end,
                                         boolean useAggressiveRollup) {
+        checkTimeArguments(begin, end);
         Map rtn =
             getAggDataByMetric(tids, iids, begin, end, useAggressiveRollup);
         Collection metrics =
@@ -1874,6 +1880,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     public Map getAggregateDataByMetric(List measurements, long begin,
                                         long end, boolean useAggressiveRollup)
     {
+        checkTimeArguments(begin, end);
         List avids = new ArrayList();
         List mids = new ArrayList();
         for (Iterator i=measurements.iterator(); i.hasNext(); ) {
