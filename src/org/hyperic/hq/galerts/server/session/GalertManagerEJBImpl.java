@@ -459,6 +459,9 @@ public class GalertManagerEJBImpl
         for (Iterator i=alerts.iterator(); i.hasNext(); ) {
             GalertLog l = (GalertLog)i.next();
             GalertDef def = l.getAlertDef();
+            if (def.getResource().isInAsyncDeleteState()) {
+                continue;
+            }
             
             // Filter by appdef entity
             AppdefEntityID aeid = def.getAppdefID();
