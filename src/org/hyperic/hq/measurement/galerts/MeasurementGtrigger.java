@@ -527,7 +527,7 @@ public class MeasurementGtrigger
         
         for (Iterator iter = trackedResources.entrySet().iterator(); iter.hasNext();) {      
             Map.Entry entry = (Map.Entry) iter.next();
-            MeasurementZeventSource srcId = (MeasurementZeventSource)entry.getKey();
+            MeasurementZeventSource src = (MeasurementZeventSource)entry.getKey();
             ResourceMetricTracker tracker = (ResourceMetricTracker)entry.getValue();
             
             // Remove resources that are not scheduled to collect and don't 
@@ -535,10 +535,10 @@ public class MeasurementGtrigger
             // consider them violating the trigger conditions (if non reporting 
             // resources are considered violating).
             if (tracker.getNumberOfTrackedMetrics()==0 && 
-                !_srcId2CollectionInterval.containsKey(srcId)) {
+                !_srcId2CollectionInterval.containsKey(src)) {
                 if (debug) {
                     _log.debug("Stopped tracking unscheduled measurement for trigger ["+
-                               getTriggerNameWithPartitionDesc()+"]: "+srcId);                        
+                               getTriggerNameWithPartitionDesc()+"]: "+src);                        
                 }
                 
                 iter.remove();
@@ -549,11 +549,19 @@ public class MeasurementGtrigger
                 tracker.searchForViolatingMetricInWindow(startTime, endTime);
             
             if (val != null) {
-                srcId2MetricValue.put(srcId, val);
+                // Make sure the resource hasn't been deleted
+                Measurement metric =
+                    getDMMan().getMeasurement(new Integer(src.getId()));
+                if (metric.getResource().isInAsyncDeleteState()) {
+                    iter.remove();
+                    continue;
+                }
+
+                srcId2MetricValue.put(src, val);
                 
                 if (debug) {
                     _log.debug("Found violating measurement for trigger ["+
-                               getTriggerNameWithPartitionDesc()+"]: "+srcId+
+                               getTriggerNameWithPartitionDesc()+"]: "+src+
                                ", "+val+", timestamp="+val.getTimestamp());                 
                 }
             }
