@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -46,6 +46,7 @@ import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -78,6 +79,9 @@ public class PrepareAction extends TilesAction {
             numKey += token;
             titleKey += token;
         }
+        
+        // Clean up session attributes
+        SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
 
         // We set defaults here rather than in DefaultUserPreferences.properites
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
