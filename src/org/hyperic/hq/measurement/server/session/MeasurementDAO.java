@@ -301,6 +301,9 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     public List findEnabledByResource(Resource resource) {
+        if (resource.isInAsyncDeleteState()) {
+            return Collections.EMPTY_LIST;
+        }
         String sql =
             "select m from Measurement m " +
             "join m.template t " +
