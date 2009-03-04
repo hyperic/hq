@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -99,18 +99,23 @@ public class AgentDAO extends HibernateDAO
     }
 
     public List findAgents(PageInfo pInfo) {
-        AgentSortField sort = (AgentSortField)pInfo.getSort();
-        String sql = "select distinct a from Platform p " + 
-                     "join p.agent a" +
-                     " order by " + sort.getSortString("a") + 
-                     (pInfo.isAscending() ? "" : " DESC");
+        final AgentSortField sort = (AgentSortField)pInfo.getSort();
+        final StringBuilder sql = new StringBuilder()
+            .append("select distinct a from Platform p ")
+            .append(" JOIN p.agent a")
+            .append(" JOIN p.resource r")
+            .append(" WHERE r.resourceType is not null")
+            .append(" ORDER BY ").append(sort.getSortString("a"))
+            .append((pInfo.isAscending() ? "" : " DESC"));
     
         // Secondary sort by CTime
         if (!sort.equals(AgentSortField.CTIME)) {
-            sql += ", " + AgentSortField.CTIME.getSortString("a") + " DESC"; 
+            sql.append(", ")
+               .append(AgentSortField.CTIME.getSortString("a"))
+               .append(" DESC"); 
         }
         
-        Query q = getSession().createQuery(sql);
+        final Query q = getSession().createQuery(sql.toString());
         
         return pInfo.pageResults(q).list();
     }
