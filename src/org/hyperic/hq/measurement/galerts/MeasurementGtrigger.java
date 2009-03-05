@@ -552,7 +552,9 @@ public class MeasurementGtrigger
                 // Make sure the resource hasn't been deleted
                 Measurement metric =
                     getDMMan().getMeasurement(new Integer(src.getId()));
-                if (metric.getResource().isInAsyncDeleteState()) {
+                if (metric == null ||
+                    metric.getResource() == null ||
+                    metric.getResource().isInAsyncDeleteState()) {
                     iter.remove();
                     continue;
                 }
