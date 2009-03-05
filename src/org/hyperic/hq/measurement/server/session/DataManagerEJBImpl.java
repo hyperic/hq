@@ -112,6 +112,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
     private final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
     private final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
+    private final String TAB_DATA    = MeasurementConstants.TAB_DATA;
     private final String TAB_MEAS    = MeasurementConstants.TAB_MEAS;
     private final String TAB_NUMS    = "EAM_NUMBERS";
     private static final String DATA_MANAGER_INSERT_TIME =
@@ -935,7 +936,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return false;
     }
 
-    private String getDataTable(long begin, long end, Object[] measIds)
+    private String getDataTable(long begin, long end, Integer[] measIds)
     {
         return getDataTable(begin, end, measIds, false);
     }
@@ -949,7 +950,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      *      the timerange represents the same timerange as one
      *      metric data table
      */
-    private String getDataTable(long begin, long end, Object[] measIds,
+    private String getDataTable(long begin, long end, Integer[] measIds,
                                 boolean useAggressiveRollup) {
         long now = System.currentTimeMillis();
 
@@ -1384,11 +1385,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
     private String getHistoricalSQL(String selectType, long begin, long end,
                                     long interval, long beginWnd, long endWnd,
-                                    Integer[] measids, boolean descending)
-    {
+                                    Integer[] measids, boolean descending) {
         final long wndSize = (interval > 0) ?
             ((endWnd - beginWnd) / interval) : (endWnd - beginWnd);
         final String metricUnion = getDataTable(begin, end, measids);
+        // measInStmt is not needed for the dynamic EAM_MEASUREMENT_DATA view,
+        // but is needed for the rollup tables
+        final String measInStmt = (metricUnion.endsWith(TAB_DATA)) ?
+            "" :
+            MeasTabManagerUtil.getMeasInStmt(measids, true);
         final StringBuilder sqlbuf = new StringBuilder()
             .append("SELECT begin AS timestamp, ")
             .append(selectType)
@@ -1399,7 +1404,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
              .append(" WHERE i < ").append(wndSize).append(") n, ")
             .append(metricUnion)
             .append(" WHERE timestamp BETWEEN begin AND begin + ")
-            .append(interval-1)
+            .append(interval-1).append(" ")
+            .append(measInStmt)
             .append(" GROUP BY begin ORDER BY begin");
         if (descending) {
             sqlbuf.append(" DESC");
@@ -1797,15 +1803,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         StringBuilder tconj = new StringBuilder(
             DBUtil.composeConjunctions("template_id", tids.length));
 
-        try
-        {
-            conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
-
+        try {
+            conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
             // The table to query from
             List measids = MeasTabManagerUtil.getMeasIds(conn, tids, iids);
-            String table = getDataTable(begin, end, measids.toArray(),
-                                        useAggressiveRollup);
+            String table = getDataTable(begin, end,
+                (Integer[])measids.toArray(new Integer[0]), useAggressiveRollup);
             // Use the already calculated min, max and average on
             // compressed tables.
             String minMax;
@@ -1814,18 +1817,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             } else {
                 minMax = " MIN(minvalue), AVG(value), MAX(maxvalue) ";
             }
-            
             final String aggregateSQL =
                 "SELECT id, " + minMax + 
                 " FROM " + table + "," + TAB_MEAS +
                 " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id " +
                 " AND " + iconj + " AND " + tconj + " GROUP BY id";
-        
-            if (_log.isTraceEnabled())
+            if (_log.isTraceEnabled()) {
                 _log.trace("getAggregateDataByMetric(): " + aggregateSQL);
-    
+            }
             stmt = conn.prepareStatement(aggregateSQL);
-            
             int i = 1;
             stmt.setLong(i++, begin);
             stmt.setLong(i++, end);
@@ -1849,11 +1849,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             } finally {
                 DBUtil.closeResultSet(logCtx, rs);
             }
-    
-            if (_log.isTraceEnabled())
+            if (_log.isTraceEnabled()) {
                 _log.trace("getAggregateDataByMetric(): Statement query elapsed "
                           + "time: " + timer.getElapsed());
-    
+            }
             return resMap;
         } catch (SQLException e) {
             _log.debug("getAggregateDataByMetric()", e);

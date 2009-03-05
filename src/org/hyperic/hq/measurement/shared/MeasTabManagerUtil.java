@@ -136,10 +136,10 @@ public class MeasTabManagerUtil {
      */
     public static final String getUnionStatement(final long begin,
                                                  final long end,
-                                                 final Object[] measIds) {
+                                                 final Integer[] measIds) {
         final String measInStmt = (measIds.length == 0) ?
             "" : getMeasInStmt(measIds, true);
-        final StringBuffer sql = new StringBuffer();
+        final StringBuilder sql = new StringBuilder();
         final MeasRangeObj measRangeObj = MeasRangeObj.getInstance();
         final HQDialect dialect = Util.getHQDialect();
         final List ranges = (dialect.useMetricUnion()) ?
@@ -180,8 +180,8 @@ public class MeasTabManagerUtil {
      * @param measId The array of measurement ids to set the where clause against
      * @return The UNION SQL statement.
      */
-    public static String getUnionStatement(Object[] measIds, long timestamp) {
-        StringBuffer sql = new StringBuffer();
+    public static String getUnionStatement(Integer[] measIds, long timestamp) {
+        StringBuilder sql = new StringBuilder();
         String measInStmt = getMeasInStmt(measIds, true);
         sql.append("(SELECT * FROM ").
             append(MeasRangeObj.getInstance().getTable(timestamp)).
@@ -191,29 +191,29 @@ public class MeasTabManagerUtil {
         return sql.toString();
     }
 
-    private static String getTimeInStmt(long begin, long end)
-    {
-        return " WHERE timestamp between "+begin+" and "+end;
+    private static String getTimeInStmt(long begin, long end) {
+        return new StringBuilder()
+            .append(" WHERE timestamp between ")
+            .append(begin).append(" and ").append(end)
+            .toString();
     }
 
-    public static String getMeasInStmt(Object[] measIds, boolean withAnd)
-    {
+    public static String getMeasInStmt(Integer[] measIds, boolean prependAnd) {
         if (measIds.length == 0) {
             return "";
         }
-        StringBuffer rtn = new StringBuffer();
-        rtn.append(" "+((withAnd) ? "AND" : "")+" measurement_id");
+        StringBuilder rtn = new StringBuilder();
+        rtn.append(" "+((prependAnd) ? "AND" : "")+" measurement_id");
         // mysql gets a perf boost from using "=" as apposed to "in"
         if (measIds.length == 1) {
             rtn.append(" = "+measIds[0]);
             return rtn.toString();
         }
         rtn.append(" in (");
-        for (int i=0; i<measIds.length; i++)
-        {
-            if (measIds[i] == null)
-//                !(measIds[i] instanceof Number))
+        for (int i=0; i<measIds.length; i++) {
+            if (measIds[i] == null) {
                 continue;
+            }
             rtn.append(measIds[i]+",");
         }
         rtn.deleteCharAt(rtn.length()-1);
@@ -361,7 +361,7 @@ public class MeasTabManagerUtil {
         return getUnionStatement(begin, timeNow);
     }
 
-    public static String getUnionStatement(long millisBack, Object[] measIds) {
+    public static String getUnionStatement(long millisBack, Integer[] measIds) {
         long timeNow = System.currentTimeMillis(),
              begin   = (timeNow - millisBack);
         return getUnionStatement(begin, timeNow, measIds);
