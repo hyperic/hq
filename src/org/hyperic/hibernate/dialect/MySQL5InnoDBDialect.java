@@ -194,7 +194,8 @@ public class MySQL5InnoDBDialect
                 Integer tid = (Integer) entry.getKey();
                 LongListObj obj = (LongListObj) entry.getValue();
                 Long lastTime = obj.getLong();
-                Object[] measIds = obj.getList().toArray();
+                Integer[] measIds =
+                    (Integer[])obj.getList().toArray(new Integer[0]);
                 if (table.endsWith(TAB_DATA))
                 {
                     table = MeasTabManagerUtil.getUnionStatement(measIds,
@@ -295,14 +296,14 @@ public class MySQL5InnoDBDialect
                 DBUtil.composeConjunctions("template_id", tids.length));
         DBUtil.replacePlaceHolders(tidsConj, tids);
 
-        if (table.endsWith(TAB_DATA))
-        {
+        if (table.endsWith(TAB_DATA)) {
             List measIds = getMeasIds(conn, tids, iids);
-            table = MeasTabManagerUtil.getUnionStatement(begin, end,
-                                                measIds.toArray());
+            table = MeasTabManagerUtil.getUnionStatement(
+                begin, end, (Integer[])measIds.toArray(new Integer[0]));
             //if there are 0 measurement ids there is no need to go forward
-            if (measIds.size() == 0)
+            if (measIds.size() == 0) {
                 return lastMap;
+            }
         }
 
         final String aggregateSQL =
