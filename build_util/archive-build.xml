@@ -3,11 +3,33 @@
 <project name="archive-build" basedir="..">
 
   <!-- Common targets for rolling release archives -->
-
-  <target name="roll-archives">
+  <target name="roll-nojre-archives">
     <property name="archive-dir" 
               location="${archive.build.dir}/${archive.basename}" />
 
+    <antcall target="roll-platform-agent-bundle">
+      <param name="jre-file" value=""/>
+      <param name="archive-suffix" value="noJRE"/>
+      <param name="compress-mode" value="zip"/>
+    </antcall>
+    <antcall target="roll-platform-specific-archive">
+      <param name="jre-file" value=""/>
+      <param name="archive-suffix" value="noJRE"/>
+      <param name="compress-mode" value="zip"/>
+    </antcall>
+    <antcall target="roll-platform-agent-bundle">
+      <param name="jre-file" value=""/>
+      <param name="archive-suffix" value="noJRE"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+    <antcall target="roll-platform-specific-archive">
+      <param name="jre-file" value=""/>
+      <param name="archive-suffix" value="noJRE"/>
+      <param name="compress-mode" value="tgz"/>
+    </antcall>
+  </target>
+
+  <target name="roll-archives" depends="roll-nojre-archives">
     <!-- Copy jres out, repack with one jre at a time -->
     <delete dir="${archive-dir}/installer-${version}/jres"/>
     <mkdir dir="${archive-dir}/installer-${version}/jres"/>
@@ -67,26 +89,6 @@
       <param name="jre-file" value="x86-win32-jre-1_5.exe"/>
       <param name="archive-suffix" value="win32"/>
       <param name="compress-mode" value="zip"/>
-    </antcall>
-    <antcall target="roll-platform-agent-bundle">
-      <param name="jre-file" value=""/>
-      <param name="archive-suffix" value="noJRE"/>
-      <param name="compress-mode" value="zip"/>
-    </antcall>
-    <antcall target="roll-platform-specific-archive">
-      <param name="jre-file" value=""/>
-      <param name="archive-suffix" value="noJRE"/>
-      <param name="compress-mode" value="zip"/>
-    </antcall>
-    <antcall target="roll-platform-agent-bundle">
-      <param name="jre-file" value=""/>
-      <param name="archive-suffix" value="noJRE"/>
-      <param name="compress-mode" value="tgz"/>
-    </antcall>
-    <antcall target="roll-platform-specific-archive">
-      <param name="jre-file" value=""/>
-      <param name="archive-suffix" value="noJRE"/>
-      <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-agent-bundle">
       <param name="jre-file" value="ppc-aix-jre-1_5.tar.gz"/>
