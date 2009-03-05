@@ -1578,7 +1578,14 @@
  	  
       <echo message="Before running unit tests DON'T FORGET to set the connectionURL in the 'unittest' configuration hq-ds.xml to point at the unit test database."/>
   </target>
-	  
+  	
+  <target name="pack-jres">
+    <!-- include zip'ed JREs in our final package -->
+    <copy toDir="${installer.dir}/jres">
+      <fileset dir="${jre.dir}" includes="*" />
+    </copy>
+  </target>
+  	
   <target name="pack-installer" description="Pack the installer" 
           depends="dbsetup-uncombine,dbsetup-combine">
 
@@ -1592,11 +1599,6 @@
 
     <!-- Pack installer jar -->
     <antcall target="installer-jar"/>
-
-    <!-- include zip'ed JREs in our final package -->
-    <copy toDir="${installer.dir}/jres">
-      <fileset dir="${jre.dir}" includes="*" />
-    </copy>
 
     <!-- Unpack and cleanup ant -->
     <antcall target="unpack-ant"/>
@@ -1710,6 +1712,17 @@
   </target>
 
   <!-- Target to check release components before building -->
+  <target name="check-jboss">
+
+    <available property="jboss.zip.available" file="${jboss.zip}"/>
+    <fail unless="jboss.zip.available">
+        JBoss distribution not found at ${jboss.zip}.  Define this property
+        in your ~/.hq/build.properties to point to a vaild JBoss binary
+        release
+    </fail>
+
+  </target>
+  
   <target name="check-release">
 
     <available property="jre.dir.available" file="${jre.dir}"/>
@@ -1732,13 +1745,6 @@
         in your ~/.hq/build.properties to point to a vaild ant bz2 binary
         release.
     </fail>   
-
-    <available property="jboss.zip.available" file="${jboss.zip}"/>
-    <fail unless="jboss.zip.available">
-        JBoss distribution not found at ${jboss.zip}.  Define this property
-        in your ~/.hq/build.properties to point to a vaild JBoss binary
-        release
-    </fail>
 
   </target>
 
@@ -1779,7 +1785,7 @@
   <!-- Bring in tasks for rolling the archives -->
   <import file="${hq.home}/build_util/archive-build.xml"/>
 
-  <target name="archive-full" depends="init,check-release,all,precompile-jsp,pdk-javadoc,unpack-jboss,dbsetup-combine,jboss-version,pack-installer,precompile-jsp-check,remove-tests">
+  <target name="archive-prep" depends="init,check-jboss,all,precompile-jsp,pdk-javadoc,unpack-jboss,dbsetup-combine,jboss-version,pack-installer,precompile-jsp-check,remove-tests">
 
     <property name="archive-dir" 
               location="${archive.build.dir}/${archive.basename}-installer" />
@@ -1908,8 +1914,14 @@
       <param name="archive-file" value="${archive-dir}/server-${version}.tgz"/>
       <param name="remove-archive-dir" value="true"/>
     </antcall>
-
+  </target>
+	
+  <target name="archive-full" depends="init,check-release,archive-prep,pack-jres">
     <antcall target="roll-archives"/>
+  </target>
+
+  <target name="archive-nojre" depends="archive-prep">
+    <antcall target="roll-nojre-archives"/>
   </target>
 
   <target name="extract-jboss" depends="jboss-version">
