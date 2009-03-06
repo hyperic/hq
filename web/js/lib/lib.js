@@ -3753,7 +3753,11 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
         }
     };
     
-	that.init();
+	try {
+		that.init();
+	} catch (e) {
+		alert('The Schedule Downtime feature has been disabled because of the following error:\n\n' + e.message);
+	}
 };
 
 hyperic.clone_resource_dialog = function(title_name, platform_id) {
@@ -4244,6 +4248,72 @@ hyperic.MetricsUpdater = function(eid,ctype,messages) {
     // set default refresh rate and initialize the refresh rate links.
     that.setRefresh(120);
 };
+
+hyperic.MetricChart = function(formObj) {
+	var that = this;
+	that.chartForm = formObj;
+	
+	that.refresh = function() {
+		that.chartForm.submit();
+	}
+	
+	that.saveToDashboard = function() {
+		that.chartForm.saveChart.value='true'; 
+		var saveChartUrl = that.chartForm.action + "?";
+		var inputList = that.chartForm.elements;
+		var first = true;
+		for (var i = 0; i < inputList.length; i++) {
+			if (inputList[i].type == 'checkbox') {
+				if (!inputList[i].checked) {
+					continue;
+				}
+			}
+
+			if (first) {
+				first = false;
+			}
+			else {
+				saveChartUrl += '&';
+			}
+
+			saveChartUrl += inputList[i].name + '=' + escape(inputList[i].value);
+		}
+		new Ajax.Request(saveChartUrl , {method: 'get'});
+		alert(hyperic.data.metric_chart.message.chartSaved);
+		return false;
+	}
+
+	that.exportData = function(params) {
+		var url = "/resource/MetricData?hq=" + new Date().getTime();
+		
+		for (var x in params) {
+			url += "&" + x + "=" + params[x]; 
+		}
+		
+		var instanceIds = "";
+		var inputList = that.chartForm.elements;
+		var numOfResources = 0;
+		var numOfResourcesChecked = 0;
+		for (var i = 0; i < inputList.length; i++) {
+			if (inputList[i].type == "checkbox"
+					&& inputList[i].name == "resourceIds") {
+				numOfResources++;
+				if (inputList[i].checked) {
+					if (numOfResourcesChecked > 0) {
+						instanceIds += ",";
+					}
+					instanceIds += inputList[i].value;
+					numOfResourcesChecked++;
+				}
+			}
+		}
+		// only add this parameter if user has deselected some resources
+		if (numOfResourcesChecked < numOfResources) {
+			url += "&instanceIds=[" + instanceIds + "]";
+		}
+		window.location.href = url;
+    }	
+}
 
 // see http://ejohn.org/blog/javascript-array-remove/ for explanation
 Array.prototype.remove = function(from, to){

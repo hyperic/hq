@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -56,6 +56,8 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.MonitorUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.pager.PageControl;
+import org.json.JSONArray;
+import org.json.JSONException;
 
 /**
  * The MetricDataServlet generates raw metric data in CVS format
@@ -118,13 +120,36 @@ public class MetricDataServlet extends HttpServlet {
             }
         } else if (id.isGroup()) {
             List entities;
+            AppdefGroupValue gval;
             try {
-                AppdefGroupValue gval = _aboss.findGroup(sessionId, id.getId());
+                gval = _aboss.findGroup(sessionId, id.getId());
                 entities = gval.getAppdefGroupEntries();
             } catch (Exception e) {
                 throw new ServletException("Error finding group=" + id, e);
             }
 
+            // HHQ-2865: Get list of checked resources to export.
+            // The instanceIds request parameter is in javascript array format --> [...]
+            String instanceIds = RequestUtils.getStringParameter(request, "instanceIds", "");            
+            if (instanceIds.length() > 2) {
+                try {
+                    List requestedEntityIds = new ArrayList();
+                    JSONArray arr = new JSONArray(instanceIds);
+                    
+                    for (int i = 0; i < arr.length(); i++) {                    
+                        requestedEntityIds.add(
+                            new AppdefEntityID(gval.getGroupEntType(),
+                                               Integer.valueOf(arr.getInt(i))));
+                    }
+                    // Filter requested resource ids in case of invalid parameters
+                    if (!requestedEntityIds.isEmpty()) {
+                        entities.retainAll(requestedEntityIds);
+                    }
+                } catch (JSONException e) {
+                    throw new ServletException("Error finding group resources.", e);
+                }
+            }
+            
             for (Iterator i = entities.iterator(); i.hasNext();) {
                 try {
                     resources.add(_aboss.findById(sessionId,
@@ -134,7 +159,6 @@ public class MetricDataServlet extends HttpServlet {
                                                e);
                 }
             }
-
         } else if (id.isPlatform() || id.isServer() || id.isService()) {
             AppdefResourceValue val;
             try {

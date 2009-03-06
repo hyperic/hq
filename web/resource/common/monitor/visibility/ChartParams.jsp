@@ -87,35 +87,6 @@
     </td>
     <td rowspan="2" valign="top">
 
-<script  type="text/javascript">
-    function saveToDashboard() {
-        ViewChartForm.saveChart.value='true'; 
-        var saveChartUrl = ViewChartForm.action + "?";
-        var inputList = ViewChartForm.elements;
-        var first = true;
-        for (var i = 0; i < inputList.length; i++) {
-            if (inputList[i].type == 'checkbox') {
-                if (!inputList[i].checked) {
-                    continue;
-                }
-            }
-
-            if (first) {
-                first = false;
-            }
-            else {
-                saveChartUrl += '&';
-            }
-
-            saveChartUrl += inputList[i].name + '=' + escape(inputList[i].value);
-        }
-        new Ajax.Request(saveChartUrl , {method: 'get'});
-        alert('<fmt:message key="resource.common.monitor.visibility.chart.confirm.ChartSaved"/>');
-        return false;
-    }
-
-</script>
-
 <table border="0"><tr><td class="LinkBox">
     <c:if test="${not multiResource}">
       <c:url var="alertLink" value="/alerts/Config.do">
@@ -130,21 +101,14 @@
       <html:link href="${alertLink}"><fmt:message key="resource.common.monitor.visibility.NewAlertLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
     </c:if>
       <html:hidden property="saveChart" value="false"/>
-      <html:link href="#" onclick="return saveToDashboard();"><fmt:message key="resource.common.monitor.visibility.SaveChartToDash"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
+      <html:link href="#" onclick="return MyMetricChart.saveToDashboard();"><fmt:message key="resource.common.monitor.visibility.SaveChartToDash"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
 
     <c:if test="${not empty back}">
         <html:link page="${back}"><fmt:message key="resource.common.monitor.visibility.Back2Resource"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
     </c:if>
 
     <c:if test="${not empty metric}">
-      <c:url var="exportLink" value="/resource/MetricData">
-        <c:param name="eid" value="${Resource.entityId.type}:${Resource.id}"/>
-        <c:param name="metricId" value="${metric.id}"/>
-        <c:if test="${not empty param.ctype}">
-          <c:param name="ctype" value="${param.ctype}"/>
-        </c:if>
-      </c:url>
-      <html:link href="${exportLink}"><fmt:message key="resource.common.monitor.visibility.ExportLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
+      <a href="#" onclick="javascript:MyMetricChart.exportData(exportParam);"><fmt:message key="resource.common.monitor.visibility.ExportLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></a><br>
     </c:if>
     
 </td></tr></table>
@@ -165,7 +129,7 @@
   </tr>
 </table>
 <script  type="text/javascript">
-  <!--
-    document.forms["ViewChartForm"].elements["showValuesCB"].focus();
-  // -->
+<!--
+	document.forms["ViewChartForm"].elements["showValuesCB"].focus();
+// -->
 </script>

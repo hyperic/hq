@@ -11,7 +11,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -67,19 +67,7 @@
                  var="MODE_MON_CHART_SMMR"/>
 
 <script  src="<html:rewrite page="/js/chart.js"/>" type="text/javascript"></script>
-<script type="text/javascript">
-    function RefreshChartForm() {
-        var forms = document.getElementsByTagName('form');
 
-          for (i = 0; i < forms.length; i++) {
-           //alert(forms[i].name)
-          document.forms[0].submit();
-    }
-
- }
-
-setInterval("RefreshChartForm()",300000); // 5 minute page refresh  300000
-</script>
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
   <tr>
     <td colspan="4">
@@ -154,5 +142,29 @@ setInterval("RefreshChartForm()",300000); // 5 minute page refresh  300000
     </td>
   </tr>
 </table>
+
+<script type="text/javascript">
+	hyperic.data.metric_chart = {
+		message: {
+			chartSaved: '<fmt:message key="resource.common.monitor.visibility.chart.confirm.ChartSaved"/>'
+		}
+	};
+
+	var MyMetricChart = new hyperic.MetricChart(document.forms["ViewChartForm"]);
+
+	<c:if test="${not empty metric}">
+		var exportParam = {};
+
+		exportParam.eid = "<c:out value="${Resource.entityId.type}:${Resource.id}" />";
+		exportParam.metricId = "<c:out value="${metric.id}" />";
+
+      	<c:if test="${not empty param.ctype}">
+      		exportParam.ctype = "<c:out value="${param.ctype}" />";
+      	</c:if>
+	</c:if>
+
+	setInterval("MyMetricChart.refresh()",300000); // 5 minute page refresh  300000
+</script>
+
 </c:otherwise>
 </c:choose>
