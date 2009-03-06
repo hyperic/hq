@@ -1342,6 +1342,10 @@ public class AppdefBossEJBImpl
     
     /**
      * Remove all delete resources
+     * Method is "NotSupported" since all the resource deletes may take longer
+     * than the jboss transaction timeout.  No need for a transaction in this
+     * context.
+     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public void removeDeletedResources()
@@ -1355,9 +1359,10 @@ public class AppdefBossEJBImpl
             getApplicationManager().findDeletedApplications();
         for (Iterator it = applications.iterator(); it.hasNext(); ) {
             try {
-                removeApplication(subject, (Application) it.next());
+                getOne()._removeApplicationInNewTran(
+                    subject, (Application)it.next());
             } catch (Exception e) {
-                log.error("Unable to remove application: " + e);
+                log.error("Unable to remove application: " + e, e);
             }
         }
         watch.markTimeEnd("removeApplications");
@@ -1369,9 +1374,9 @@ public class AppdefBossEJBImpl
         Collection groups = getResourceGroupManager().findDeletedGroups();
         for (Iterator it = groups.iterator(); it.hasNext(); ) {
             try {
-                removeGroup(subject, (ResourceGroup) it.next());
+                getOne()._removeGroupInNewTran(subject, (ResourceGroup)it.next());
             } catch (Exception e) {
-                log.error("Unable to remove group: " + e);
+                log.error("Unable to remove group: " + e, e);
             }
         }
         watch.markTimeEnd("removeResourceGroups");
@@ -1384,9 +1389,9 @@ public class AppdefBossEJBImpl
         Collection services = getServiceManager().findDeletedServices();
         for (Iterator it = services.iterator(); it.hasNext(); ) {
             try {
-                removeService(subject, (Service) it.next());
+                getOne()._removeServiceInNewTran(subject, (Service)it.next());
             } catch (Exception e) {
-                log.error("Unable to remove service: " + e);
+                log.error("Unable to remove service: " + e, e);
             }
         }
         watch.markTimeEnd("removeServices");
@@ -1398,9 +1403,9 @@ public class AppdefBossEJBImpl
         Collection servers = getServerManager().findDeletedServers();
         for (Iterator it = servers.iterator(); it.hasNext(); ) {
             try {
-                removeServer(subject, (Server) it.next());
+                getOne()._removeServerInNewTran(subject, (Server)it.next());
             } catch (Exception e) {
-                log.error("Unable to remove server: " + e);
+                log.error("Unable to remove server: " + e, e);
             }
         }
         watch.markTimeEnd("removeServers");
@@ -1412,9 +1417,9 @@ public class AppdefBossEJBImpl
         Collection platforms = getPlatformManager().findDeletedPlatforms();
         for (Iterator it = platforms.iterator(); it.hasNext(); ) {
             try {
-                removePlatform(subject, (Platform) it.next());
+                getOne()._removePlatformInNewTran(subject, (Platform)it.next());
             } catch (Exception e) {
-                log.error("Unable to remove platform: " + e);
+                log.error("Unable to remove platform: " + e, e);
             }
         }
         watch.markTimeEnd("removePlatforms");
@@ -1464,14 +1469,18 @@ public class AppdefBossEJBImpl
         }
     }
 
-    private void removePlatform(AuthzSubject subject, Platform platform)
+    /**
+     * @ejb:transaction type="RequiresNew"
+     * @ejb:interface-method
+     */
+    public void _removePlatformInNewTran(AuthzSubject subject, Platform platform)
         throws ApplicationException, VetoException 
     {
         try {
             for (Iterator it = platform.getServers().iterator(); it.hasNext(); )
             {
                 Server server = (Server) it.next();
-                removeServer(subject, server);
+                getOne()._removeServerInNewTran(subject, server);
             }
             
             // Disable all measurements for this platform.  We don't actually
@@ -1481,7 +1490,6 @@ public class AppdefBossEJBImpl
 
             // Remove from AI queue
             try {
-                AIBossLocal aiBoss = getAIBoss();
                 List aiplatformList = new ArrayList();
                 Integer platformID = platform.getId();
                 final AIQueueManagerLocal aiMan = getAIManager();
@@ -1512,6 +1520,15 @@ public class AppdefBossEJBImpl
         }
     }
 
+    /**
+     * @ejb:transaction type="RequiresNew"
+     * @ejb:interface-method
+     */
+    public void _removeServerInNewTran(AuthzSubject subject, Server server)
+        throws VetoException, PermissionException {
+        removeServer(subject, server);
+    }
+
     private void removeServer(AuthzSubject subject, Server server)
         throws VetoException, PermissionException
     {
@@ -1520,7 +1537,7 @@ public class AppdefBossEJBImpl
             Collection services = new ArrayList(server.getServices());
             for (Iterator it = services.iterator(); it.hasNext();) {
                 Service service = (Service) it.next();
-                removeService(subject, service);
+                getOne()._removeServiceInNewTran(subject, service);
             }
     
             // now remove the measurements
@@ -1549,7 +1566,11 @@ public class AppdefBossEJBImpl
         }
     }
 
-    private void removeService(AuthzSubject subject, Service service)
+    /**
+     * @ejb:transaction type="RequiresNew"
+     * @ejb:interface-method
+     */
+    public void _removeServiceInNewTran(AuthzSubject subject, Service service)
         throws VetoException, PermissionException, RemoveException 
     {
         try {    
@@ -1566,16 +1587,25 @@ public class AppdefBossEJBImpl
         }
     }
 
-    private void removeGroup(AuthzSubject subject, ResourceGroup group)
+    /**
+     * @ejb:transaction type="RequiresNew"
+     * @ejb:interface-method
+     */
+    public void _removeGroupInNewTran(AuthzSubject subject, ResourceGroup group)
         throws SessionException, PermissionException, VetoException
     {
         getResourceGroupManager().removeResourceGroup(subject, group);
     }
 
-    private void removeApplication(AuthzSubject subject, Application app)
-        throws ApplicationException, PermissionException, SessionException,
-               VetoException
-    {
+    /**
+     * @ejb:transaction type="RequiresNew"
+     * @ejb:interface-method
+     */
+    public void _removeApplicationInNewTran(AuthzSubject subject, Application app)
+        throws ApplicationException,
+               PermissionException,
+               SessionException,
+               VetoException {
         try {
             getApplicationManager().removeApplication(subject, app.getId());
         } catch (PermissionException e) {
@@ -3849,8 +3879,6 @@ public class AppdefBossEJBImpl
     public void startup() {
         log.info("AppdefBoss Boss starting up!");
         
-        HQApp app = HQApp.getInstance();
-        
         // Add listener to remove alert definition and alerts after resources
         // are deleted.
         HashSet events = new HashSet();
@@ -3859,8 +3887,6 @@ public class AppdefBossEJBImpl
             new ZeventListener() {
                 public void processEvents(List events) {
                     for (Iterator i = events.iterator(); i.hasNext();) {
-                        ResourcesCleanupZevent z =
-                            (ResourcesCleanupZevent) i.next();
                         try {
                             getOne().removeDeletedResources();
                         } catch (Exception e) {
