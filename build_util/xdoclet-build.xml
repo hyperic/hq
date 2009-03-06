@@ -7,6 +7,12 @@
   <target name="xdoclet-check" >
     <uptodate property="xdoclet.notrequired"
               targetfile="${build.dir}/dd/tstamp">
+      <srcfiles dir="unittest/src">
+        <include name="**/entity/*.java"/>
+        <include name="**/session/*.java"/>
+        <include name="**/mdb/*.java"/>
+        <include name="**/mbean/*.java"/>
+      </srcfiles>
       <srcfiles dir="src">
         <include name="**/entity/*.java"/>
         <include name="**/session/*.java"/>
@@ -43,8 +49,8 @@
                verbose="true">
       <packageSubstitution packages="server.session" substituteWith="shared"/>
       <fileset dir="src">
-		  <include name="**/session/*EJBImpl.java"/>
-	  </fileset>
+        <include name="**/session/*EJBImpl.java"/>
+      </fileset>
       <valueobject/>
       <remoteinterface pattern="{0}"/>
       <localinterface pattern="{0}Local"/>
@@ -68,9 +74,9 @@
                verbose="true">
       <packageSubstitution packages="server.session" substituteWith="shared"/>
       <fileset dir="unittest/src">
-		  <include name="**/session/*EJBImpl.java"/>
-                  <include name="**/ExampleInContainer_testEJBImpl.java"/>
-	  </fileset>
+        <include name="**/session/*EJBImpl.java"/>
+        <include name="**/ExampleInContainer_testEJBImpl.java"/>
+      </fileset>
       <valueobject/>
       <remoteinterface pattern="{0}"/>
       <localinterface pattern="{0}Local"/>
