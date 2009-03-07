@@ -223,8 +223,7 @@ public class ConfigManagerEJBImpl
                                                   AppdefEntityID id,
                                                   boolean required)
         throws AppdefEntityNotFoundException, ConfigFetchException,
-               EncodingException, PermissionException
-    {
+               EncodingException, PermissionException {
         ConfigResponseDB configValue;
         AppdefEntityID platformId = null, serverId = null, serviceId = null;
         byte[][] responseList; // List of config responses to merge
@@ -232,7 +231,7 @@ public class ConfigManagerEJBImpl
         int responseIdx;
         byte[] data;
         ServerConfigStuff server = null;
-        PlatformConfigStuff platform;
+        PlatformConfigStuff platform = null;
         boolean origReq = required;
         boolean isServerOrService = false;
         boolean isProductType = productType.equals(ProductPlugin.TYPE_PRODUCT);
@@ -251,20 +250,26 @@ public class ConfigManagerEJBImpl
 
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
             server = getServerStuffForService(id.getId());
-            serverId = AppdefEntityID.newServerID(new Integer(server.id));
-            platform = getPlatformStuffForServer(serverId.getId());
-            platformId = AppdefEntityID.newPlatformID(new Integer(platform.id));
-            serviceId = id;
-            
-            origReq = required;
-            required = false;
-            isServerOrService = true;
+            if (server != null) {
+                serverId = AppdefEntityID.newServerID(new Integer(server.id));
+                platform = getPlatformStuffForServer(serverId.getId());
+                if (platform != null) {
+                    platformId = AppdefEntityID.newPlatformID(new Integer(platform.id));
+                }
+                serviceId = id;
+                origReq = required;
+                required = false;
+                isServerOrService = true;
+            }
         } else if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
             platform = getPlatformStuffForServer(id.getId());
-            platformId = AppdefEntityID.newPlatformID(new Integer(platform.id));
-            serverId = id;
-            server = getServerStuffForServer(serverId.getId());
-            isServerOrService = true;
+            if (platform != null) {
+                platformId =
+                    AppdefEntityID.newPlatformID(new Integer(platform.id));
+                serverId = id;
+                server = getServerStuffForServer(serverId.getId());
+                isServerOrService = true;
+            }
         } else {
             // Just the platform
             platformId = id;
@@ -347,18 +352,20 @@ public class ConfigManagerEJBImpl
 
         // Set platform attributes for all resources
         try {
-            res.setValue(ProductPlugin.PROP_PLATFORM_NAME, platform.name);
-            res.setValue(ProductPlugin.PROP_PLATFORM_FQDN, platform.fqdn);
-            res.setValue(ProductPlugin.PROP_PLATFORM_TYPE, platform.typeName);
-            res.setValue(ProductPlugin.PROP_PLATFORM_IP,   platform.ip);
-            res.setValue(ProductPlugin.PROP_PLATFORM_ID,
-                         String.valueOf(platform.id));
+            if (platform != null) {
+                res.setValue(ProductPlugin.PROP_PLATFORM_NAME, platform.name);
+                res.setValue(ProductPlugin.PROP_PLATFORM_FQDN, platform.fqdn);
+                res.setValue(ProductPlugin.PROP_PLATFORM_TYPE, platform.typeName);
+                res.setValue(ProductPlugin.PROP_PLATFORM_IP,   platform.ip);
+                res.setValue(ProductPlugin.PROP_PLATFORM_ID,
+                             String.valueOf(platform.id));
+            }
         } catch (Exception exc) {
             log.warn("Error setting platform properies: " + exc, exc);
         }
 
         // Set installpath attribute for server and service types.
-        if(isServerOrService) {
+        if(isServerOrService && server != null) {
             try {
                 res.setValue(ProductPlugin.PROP_INSTALLPATH,
                              server.installPath);
@@ -665,6 +672,9 @@ public class ConfigManagerEJBImpl
         ServiceDAO dao = DAOFactory.getDAOFactory().getServiceDAO();
         Service service = dao.findById(id);
         Server server = service.getServer();
+        if (server == null) {
+            return null;
+        }
         return new ServerConfigStuff(server.getId().intValue(),
                                      server.getInstallPath());
     }
@@ -685,6 +695,9 @@ public class ConfigManagerEJBImpl
         ServerDAO dao = DAOFactory.getDAOFactory().getServerDAO();
         Server server = dao.findById(id);
         Platform platform = server.getPlatform();
+        if (platform == null) {
+            return null;
+        }
 
         PlatformConfigStuff pConfig =
             new PlatformConfigStuff(platform.getId().intValue(),

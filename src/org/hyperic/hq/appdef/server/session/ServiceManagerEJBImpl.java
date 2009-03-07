@@ -1330,7 +1330,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
         // Remove service from parent Server's Services collection
         Server server = service.getServer();
-        server.getServices().remove(service);
+        if (server != null) {
+            server.getServices().remove(service);
+        }
 
         final ConfigResponseDB config = service.getConfigResponse();
 

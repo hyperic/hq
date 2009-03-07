@@ -318,23 +318,13 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 
         if (resourceType.getId().equals(AuthzConstants.authzPlatform)) {
             opName = AuthzConstants.platformOpRemovePlatform;
-        }
-        else if (resourceType.getId().equals(AuthzConstants.authzServer))
-        {
+        } else if (resourceType.getId().equals(AuthzConstants.authzServer)) {
             opName = AuthzConstants.serverOpRemoveServer;
-        }
-        else if (resourceType.getId()
-                    .equals(AuthzConstants.authzService))
-        {
+        } else if (resourceType.getId().equals(AuthzConstants.authzService)) {
             opName = AuthzConstants.serviceOpRemoveService;
-        }
-        else if (resourceType.getId()
-                    .equals(AuthzConstants.authzApplication))
-        {
+        } else if (resourceType.getId().equals(AuthzConstants.authzApplication)) {
             opName = AuthzConstants.appOpRemoveApplication;
-        }
-        else if (resourceType.getId().equals(AuthzConstants.authzGroup))
-        {
+        } else if (resourceType.getId().equals(AuthzConstants.authzGroup)) {
             opName = AuthzConstants.groupOpRemoveResourceGroup;
         }
 

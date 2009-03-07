@@ -29,10 +29,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.CreateException;
@@ -289,13 +291,25 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // keep the configresponseId so we can remove it later
             ConfigResponseDB config = platform.getConfigResponse();
 
-            ServerManagerLocal srvMgr = getServerManager();
             // Remove servers
-            for (Iterator i = platform.getServers().iterator(); i.hasNext();) {
-                srvMgr.removeServer(subject, (Server) i.next());
+            final ServerManagerLocal sMan = getServerManager();
+            for (Iterator i=platform.getServers().iterator(); i.hasNext();) {
+                try {
+                    // this looks funky but the idea is to pull the server obj
+                    // into the session so that it is updated when flushed
+                    Server server =
+                        sMan.findServerById(((Server)i.next()).getId());
+                    server.setPlatform(null);
+                    i.remove();
+                } catch (ServerNotFoundException e) {
+                    log.warn(e.getMessage());
+                }
             }
-
             final PlatformDAO dao = getPlatformDAO();
+            // this flush ensures that the server's platform_id is set to null
+            // before the platform is deleted and the servers cascaded
+            dao.getSession().flush();
+
             dao.remove(platform);
 
             // remove the config response

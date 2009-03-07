@@ -101,6 +101,7 @@ import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
@@ -1330,6 +1331,37 @@ public class AppdefBossEJBImpl
             }
         }
         AppdefEntityID[] removed = resMan.removeResourcePerms(subject, res);
+        try {
+            final Integer id = aeid.getId();
+            switch (aeid.getType()) {
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER :
+                    final ServerManagerLocal sMan = getServerManager();
+                    sMan.removeServer(subject, sMan.findServerById(id));
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                    final PlatformManagerLocal pMan = getPlatformManager();
+                    pMan.removePlatform(subject, pMan.findPlatformById(id));
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
+                    final ServiceManagerLocal svcMan = getServiceManager();
+                    svcMan.removeService(subject, svcMan.findServiceById(id));
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                    final ResourceGroupManagerLocal rgMan =
+                        getResourceGroupManager();
+                    rgMan.removeResourceGroup(
+                        subject, rgMan.findResourceGroupById(id));
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                    final ApplicationManagerLocal aMan = getApplicationManager();
+                    aMan.removeApplication(subject, id);
+                    break;
+                default:
+                    break;
+            }
+        } catch (RemoveException e) {
+            throw new ApplicationException(e);
+        }
         if (log.isDebugEnabled()) {
             log.debug("removeAppdefEntity() for " + aeid + " executed in " +
                       timer.getElapsed());
@@ -1474,11 +1506,18 @@ public class AppdefBossEJBImpl
      * @ejb:interface-method
      */
     public void _removePlatformInNewTran(AuthzSubject subject, Platform platform)
+        throws ApplicationException, VetoException {
+        removePlatform(subject, platform);
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void removePlatform(AuthzSubject subject, Platform platform)
         throws ApplicationException, VetoException 
     {
         try {
-            for (Iterator it = platform.getServers().iterator(); it.hasNext(); )
-            {
+            for (Iterator it=platform.getServers().iterator(); it.hasNext(); ) {
                 Server server = (Server) it.next();
                 getOne()._removeServerInNewTran(subject, server);
             }
@@ -1529,7 +1568,10 @@ public class AppdefBossEJBImpl
         removeServer(subject, server);
     }
 
-    private void removeServer(AuthzSubject subject, Server server)
+    /**
+     * @ejb:interface-method
+     */
+    public void removeServer(AuthzSubject subject, Server server)
         throws VetoException, PermissionException
     {
         try {
