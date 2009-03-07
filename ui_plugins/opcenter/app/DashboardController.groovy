@@ -377,7 +377,8 @@ class DashboardController extends BaseController
 
                     def acked = escState.getAcknowledgedBy()
                     if (acked) {
-                        def ackedBy = "Acknowledged by " + acked.name + ". "
+                        def ackedBy = DF.format(lastLog.timeStamp) +
+                                      ": " + lastLog.detail + ". "
                         it["State"] << getIconUrl("ack.gif", ackedBy, null)
                     }
                 }
