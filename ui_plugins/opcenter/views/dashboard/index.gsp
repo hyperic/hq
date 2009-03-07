@@ -80,8 +80,8 @@
                 <td valign="top">
                     <table border="1">
                         <tr><td colspan="2" style="text-align:center;font-weight:bold">Resources</td></tr>
-                        <tr><td>Down Platforms</td><td class="OpStyleRed" style="width:50px"><div id="DownPlatforms">&nbsp;</div></td></tr>
-                        <tr><td>Down Resources</td><td class="OpStyleRed" style="width:50px"><div id="DownResources">&nbsp;</div></td></tr>
+                        <tr><td>Down Platforms</td><td class="OpStyleGray" style="width:50px"><div id="DownPlatforms">&nbsp;</div></td></tr>
+                        <tr><td>Down Resources</td><td class="OpStyleGray" style="width:50px"><div id="DownResources">&nbsp;</div></td></tr>
                     </table>
                 </td>
                 <td valign="top">

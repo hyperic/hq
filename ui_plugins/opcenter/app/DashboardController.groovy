@@ -413,7 +413,11 @@ class DashboardController extends BaseController
                 } else if (it.Priority.equals(2)) {
                     return "OpStyleOrange"
                 } else if (it.Priority.equals(3)) {
-                    return "OpStyleRed"
+                    if (it.StatusType == "Resource Down") {
+                        return "OpStyleGray"
+                    } else {
+                        return "OpStyleRed"
+                    }
                 } else {
                     return ""
                 }
