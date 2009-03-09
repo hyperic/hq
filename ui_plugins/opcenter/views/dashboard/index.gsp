@@ -185,6 +185,7 @@
             <input type="hidden" name="fixedNote" value="" />
             <input type="hidden" name="ackNote" value="" />
             <input type="hidden" name="fixAll" value="false" />
+            <input type="hidden" name="pauseTime" value="" />
         </div>
     </div>
 </form>
