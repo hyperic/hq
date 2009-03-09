@@ -452,7 +452,8 @@ public class GalertManagerEJBImpl
             alerts = _logDAO.findByCreateTimeAndPriority(subj.getId(),
                                                          endTime - timeRange,
                                                          endTime, s, false,
-                                                         false, null, pInfo);
+                                                         false, null, null,
+                                                         pInfo);
         }
             
         List result = new ArrayList();
@@ -473,7 +474,7 @@ public class GalertManagerEJBImpl
             
         return result;
     }
-    
+
     /**
      * @ejb:interface-method
      */
@@ -481,10 +482,23 @@ public class GalertManagerEJBImpl
                            long timeRange, long endTime, boolean inEsc,
                            boolean notFixed, Integer groupId, PageInfo pInfo)
     {
+        return findAlerts(subj, severity, timeRange, endTime,
+                          inEsc, notFixed, groupId, null, pInfo);
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public List findAlerts(AuthzSubject subj, AlertSeverity severity,
+                           long timeRange, long endTime, boolean inEsc,
+                           boolean notFixed, Integer groupId, Integer galertDefId,
+                           PageInfo pInfo)
+    {
         return _logDAO.findByCreateTimeAndPriority(subj.getId(), 
                                                    endTime - timeRange, endTime, 
                                                    severity, inEsc, notFixed,
-                                                   groupId, pInfo);
+                                                   groupId, galertDefId,
+                                                   pInfo);
     }
 
     /**
