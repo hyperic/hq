@@ -184,6 +184,7 @@
             <input type="hidden" name="output" value="json" />
             <input type="hidden" name="fixedNote" value="" />
             <input type="hidden" name="ackNote" value="" />
+            <input type="hidden" name="fixAll" value="false" />
         </div>
     </div>
 </form>

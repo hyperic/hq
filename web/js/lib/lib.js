@@ -2958,7 +2958,7 @@ hyperic.group_manager = function() {
 	}
 	
 	that.getGroupsNotContaining = function(eids) {    
-		dojo11.xhrGet( {
+		dojo11.xhrPost( {
             url: "/api.shtml",
             content: {v: "1.0", s_id: "group_manager", eid: "['" + eids.join("','") + "']"},
             handleAs: 'json',
@@ -3087,19 +3087,24 @@ hyperic.alert_center = function(title_name) {
       	        '	<span class="BoldText">Resolution for Fix for Selected Alerts (Optional):</span><br/>' +
       	        '	<textarea id="FixedNoteTextArea" cols="70" rows="5"></textarea>' +
       	        '</td></tr>' +
-      	        '<tr id="AlertCenterFixedButtonActive"><td class="buttonLeft"></td>' +
-      	    	'<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
-      	    	'	<span id="button"><a href="javascript:MyAlertCenter.fixAlerts();">FIXED</a></span>' +
-      	    	'	<span style="padding-left: 3px;"><img src="/images/icon_fixed.gif" align="middle" alt="Click to mark as Fixed"></span>' +
-      	    	'	<span>Click the "Fixed" button to mark alert condition as fixed</span>' +
-      	    	'</td></tr>' +
-      	        '<tr id="AlertCenterFixedButtonInActive" style="display:none"><td class="buttonLeft"></td>' +
-      	    	'<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
-      	    	'   <span class="InactiveText">FIXED</span>' +
-      	    	'   <span style="filter: alpha(opacity=50); opacity: 0.5;">' +
-      	    	'   	<span style="padding-left: 3px;"><img src="/images/icon_fixed.gif" align="middle" alt="Click to mark as Fixed"></span>' +
-      	    	'	</span>' +
-      	    	'</td></tr>' +
+      	        '<tr id="AlertCenterFixedButtonActive">' +
+      	        '	<td><input type="checkbox" id="FixAllCheckbox" value="true" />&nbsp;Fix all previous alerts</td>' +
+      	    	'	<td align="right">' +
+      	    	'		<table border="0" cellspacing="0" cellpadding="0"><tr>'+
+      	    	'			<td class="buttonLeft"></td>' +
+      	    	'			<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
+      	    	'				<span id="button"><a href="javascript:MyAlertCenter.fixAlerts();">FIXED</a></span>' +
+      	    	'			</td></tr></table>' +
+      	    	'	</td></tr>' +
+      	        '<tr id="AlertCenterFixedButtonInActive" style="display:none">' +
+      	        '	<td></td>' +
+      	        '	<td align="right">' +
+      	    	'		<table border="0" cellspacing="0" cellpadding="0"><tr>'+
+      	        '			<td class="buttonLeft"></td>' +
+      	    	'			<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
+      	    	'				<span class="InactiveText">FIXED</span>' +
+      	    	'			</td></tr></table>' +
+      	    	'	</td></tr>' +
       	    	'</table>';
 			alertCenterDiv.appendChild(fixedDiv);
 	    	
@@ -3120,7 +3125,8 @@ hyperic.alert_center = function(title_name) {
 	    		message_area: {
 	    			request_status: dojo11.byId("AlertCenterFixedStatus")
 	    		},
-	    		note: dojo11.byId("FixedNoteTextArea")
+	    		note: dojo11.byId("FixedNoteTextArea"),
+	    		fixAll: dojo11.byId("FixAllCheckbox")
 	    	}
 	    	
 	    	// restart auto refresh after dialog closes
@@ -3178,9 +3184,13 @@ hyperic.alert_center = function(title_name) {
 		}
 	}
 
-	that.fixOrAckAlert = function(myDialog, myNote) {
+	that.fixOrAckAlert = function(myDialog, myNote, fixAll) {
 		var myForm = myDialog.data.form;
 		myNote.value = myDialog.data.note.value;
+		if (fixAll != null
+				&& myDialog.data.fixAll.checked) {
+			fixAll.value = myDialog.data.fixAll.value;
+		}
 		myDialog.data.button_area.active.style.display = "none";
 		myDialog.data.button_area.inactive.style.display = "";
 		that.displayConfirmation(
@@ -3201,12 +3211,16 @@ hyperic.alert_center = function(title_name) {
 		myDialog.data.button_area.active.style.display = "";
 		myDialog.data.button_area.inactive.style.display = "none";
 		myDialog.data.note.value = "";
+		if (myDialog.data.fixAll != null) {
+			myDialog.data.fixAll.checked = false;
+		}
 		myDialog.show();	
 	}
 	
 	that.fixAlerts = function() {
 		that.fixOrAckAlert(that.dialogs.FixAlert, 
-						   that.dialogs.FixAlert.data.form.fixedNote);
+						   that.dialogs.FixAlert.data.form.fixedNote,
+						   that.dialogs.FixAlert.data.form.fixAll);
 	}
 	
 	that.acknowledgeAlerts = function() {
@@ -3261,6 +3275,7 @@ hyperic.alert_center = function(title_name) {
 		that.toggleAll(checkAllBox, false);
 		myForm.fixedNote.value = "";
 		myForm.ackNote.value = "";
+		myForm.fixAll.value = "false";
 	}
 	
 	that.toggleAll = function(checkAllBox, doDelay) {

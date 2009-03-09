@@ -161,7 +161,8 @@ public class RemoveAction extends BaseAction {
                         
                         boss.fixAlert(sessionId.intValue(),
                                       EscalationAlertType.findByCode(code),
-                                      alert,  nwForm.getFixedNote());
+                                      alert,  nwForm.getFixedNote(),
+                                      nwForm.isFixAll());
                     }
                 }
             }

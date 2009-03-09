@@ -45,6 +45,7 @@ public class RemoveForm extends ResourceForm  {
     private String _output;
     private String _ackNote;
     private String _fixedNote;
+    private boolean _fixAll;
 
     public RemoveForm() {
     }
@@ -119,6 +120,14 @@ public class RemoveForm extends ResourceForm  {
     public void setFixedNote(String fixedNote) {
         this._fixedNote = fixedNote;
     }
+    
+    public boolean isFixAll() {
+        return _fixAll;
+    }
+    
+    public void setFixAll(boolean fixAll) {
+        _fixAll = fixAll;
+    }
 
     public void reset(ActionMapping mapping, HttpServletRequest request) {
         super.reset(mapping, request);
@@ -129,5 +138,6 @@ public class RemoveForm extends ResourceForm  {
         _output = null;
         _ackNote = null;
         _fixedNote = null;
+        _fixAll = false;
     }
 }

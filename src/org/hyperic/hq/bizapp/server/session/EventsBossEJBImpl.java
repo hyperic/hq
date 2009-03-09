@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -34,6 +35,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.ejb.FinderException;
@@ -44,6 +46,7 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
@@ -95,16 +98,21 @@ import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.AlertDefinitionInterface;
+import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.AlertNotFoundException;
+import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertSortField;
+import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionValue;
@@ -117,6 +125,8 @@ import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.galerts.server.session.GalertDef;
+import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
+import org.hyperic.hq.galerts.server.session.GalertLogSortField;
 import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
 import org.hyperic.hq.galerts.shared.GalertManagerLocal;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -156,6 +166,7 @@ public class EventsBossEJBImpl
     implements SessionBean 
 {
     private Log _log = LogFactory.getLog(EventsBossEJBImpl.class);
+    private final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
     
     private SessionManager manager;
 
@@ -1699,9 +1710,86 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ActionExecuteException
     {
+        fixAlert(sessionID, alertType, alertID, moreInfo, false);
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void fixAlert(int sessionID, EscalationAlertType alertType,
+                         Integer alertID, String moreInfo,
+                         boolean fixAllPrevious)
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException, ActionExecuteException
+    {
         AuthzSubject subject = manager.getSubject(sessionID);
+        long fixCount = 0;
         
-        getEscMan().fixAlert(subject, alertType, alertID, moreInfo);
+        if (fixAllPrevious) {
+            AlertInterface alert = null;
+            List alertsToFix = null;
+            
+            // Get all previous unfixed alerts.
+            if (alertType.equals(ClassicEscalationAlertType.CLASSIC)) {
+                alert = getAM().findAlertById(alertID);
+                alertsToFix = getAM().findAlerts(
+                                           subject.getId(), 0,
+                                           alert.getTimestamp(), alert.getTimestamp(),
+                                           false, true, null, 
+                                           alert.getAlertDefinitionInterface().getId(),
+                                           PageInfo.getAll(AlertSortField.DATE,
+                                                           true));
+                
+            } else if (alertType.equals(GalertEscalationAlertType.GALERT)) {
+                GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
+                alert = gMan.findAlertLog(alertID);
+                alertsToFix = gMan.findAlerts(
+                                        subject, AlertSeverity.LOW,
+                                        alert.getTimestamp(), alert.getTimestamp(),
+                                        false, true, null,
+                                        alert.getAlertDefinitionInterface().getId(),
+                                        PageInfo.getAll(GalertLogSortField.DATE,
+                                                        true));
+            } else {
+                alertsToFix = Collections.EMPTY_LIST;
+            }
+                        
+            for (Iterator it = alertsToFix.iterator(); it.hasNext(); ) {
+                alert = (AlertInterface) it.next();
+                
+                try {
+                    // Only send fixed notification for the selected alert
+                    // and suppress notifications for all previous alerts.
+                    // Process the selected alert outside this loop.
+                    if (!alert.getId().equals(alertID)) {
+                        getEscMan().fixAlert(subject, alertType, alert.getId(), moreInfo, true);
+                        fixCount++;
+                    }
+                } catch (PermissionException pe) {
+                    throw pe;
+                } catch (Exception e) {
+                    // continue with next alert
+                    _log.warn("Could not fix alert id " 
+                                + alert.getId() + ": " + e.getMessage(), e);
+                }
+            }
+        }
+
+        if (fixCount > 0) {
+            if (moreInfo == null) {
+                moreInfo = "";
+            }
+            StringBuffer sb = new StringBuffer();
+            MessageFormat messageFormat = 
+                new MessageFormat(ResourceBundle.getBundle(BUNDLE)
+                                    .getString("events.alert.fixAllPrevious"));
+            messageFormat.format(
+                    new String[] {Long.toString(fixCount)},
+                    sb, null);
+            moreInfo = sb.toString() + moreInfo;
+        }
+        // fix the selected alert
+        getEscMan().fixAlert(subject, alertType, alertID, moreInfo, false);
     }
     
     /**
