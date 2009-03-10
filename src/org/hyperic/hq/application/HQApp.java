@@ -472,7 +472,7 @@ public class HQApp {
             Method meth           = v.getMethod();
             String methName       = meth.getName();
             Class c               = meth.getDeclaringClass();
-            String className      = c.getName();
+            String className      = meth.getClass().getName();
             boolean readWrite     = false;
             boolean flush         = true;
             boolean sessCreated   = SessionManager.setupSession(methName);
