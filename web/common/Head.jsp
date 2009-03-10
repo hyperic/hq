@@ -45,7 +45,7 @@
 <![endif]-->
 
 <script type="text/javascript">
-djConfig = { isDebug: false }
+djConfig = { isDebug: false, locale: 'en-us' }
 </script>
 <script type="text/javascript" src="<html:rewrite page='/js/dojo/0.4.3/dojo.js.uncompressed.js'/>"></script> 
 <script type="text/javascript">
