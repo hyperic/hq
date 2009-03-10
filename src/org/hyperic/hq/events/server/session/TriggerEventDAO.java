@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -64,7 +64,7 @@ public class TriggerEventDAO extends HibernateDAO {
     
     int countUnexpiredByTriggerId(Integer tid, Session session) {
         String hql = "select count(te) from TriggerEvent te " +
-        		     "where te.triggerId= :tid and te.expiration > :exp";
+                     "where te.triggerId= :tid and te.expiration > :exp";
         
         return ((Number) session.createQuery(hql)
                         .setInteger("tid", tid.intValue())
@@ -73,12 +73,22 @@ public class TriggerEventDAO extends HibernateDAO {
     }
     
     void deleteByTriggerId(Integer tid) {
-        String hql = "delete from TriggerEvent te where te.triggerId= :tid " +
-        		     "or te.expiration < :exp";
+        String hql = "delete from TriggerEvent te where te.triggerId = :tid " +
+                     "or te.expiration < :exp";
 
         createQuery(hql)
                 .setInteger("tid", tid.intValue())
                 .setLong("exp", System.currentTimeMillis())
+                .executeUpdate();
+    }
+
+    void deleteByAlertDefinition(AlertDefinition def) {
+        String hql = "delete from TriggerEvent te where te.triggerId in " +
+                     "(select r.id from RegisteredTrigger r " +
+                     "where r.alertDefinition = :def)";
+
+        createQuery(hql)
+                .setParameter("def", def)
                 .executeUpdate();
     }
 }

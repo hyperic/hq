@@ -35,6 +35,7 @@ import javax.ejb.SessionContext;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.dao.HibernateDAOFactory;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -129,6 +130,9 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      */
     public void deleteAlertDefinitionTriggers(Integer adId) {
         AlertDefinition def = getAlertDefDAO().findById(adId);
+        TriggerEventDAO dao =
+            new TriggerEventDAO(HibernateDAOFactory.getDAOFactory());
+        dao.deleteByAlertDefinition(def);
         getTriggerDAO().removeTriggers(def);
     }
 
