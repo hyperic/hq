@@ -54,8 +54,23 @@ public abstract class BaseAction extends Action
                                  HttpServletRequest request,
                                  HttpServletResponse response) throws Exception
     {
-        JsonActionContext context =
-                JsonActionContext.newInstance(map, form, request, response);
+    	final String JAVASCRIPT_CONTENT_TYPE = "text/javascript";
+    	final String PRAGMA_HEADER = "Pragma";
+    	final String CACHE_CONTROL_HEADER = "Cache-Control";
+    	final String EXPIRES_HEADER = "Expires";
+    	final String NO_CACHE = "no-cache";
+    	
+    	// Set content type to text/javascript
+    	response.setContentType(JAVASCRIPT_CONTENT_TYPE);
+    	
+    	// IE will cache these responses, so we need make sure this doesn't happen
+    	// by setting the appropriate response headers.
+    	response.addHeader(PRAGMA_HEADER, NO_CACHE);
+    	response.addHeader(CACHE_CONTROL_HEADER, NO_CACHE);
+    	response.addIntHeader(EXPIRES_HEADER, -1);
+    	
+        JsonActionContext context = JsonActionContext.newInstance(map, form, request, response);
+        
         execute(context);
         streamResult(context);
         return null;
