@@ -149,7 +149,7 @@ public class ViewAction extends BaseAction {
                 df.format(new Date(alert.getAlertInfo().getTimestamp()));
             def = alert.getDefinition().getDefinitionInfo();
             escalation = alert.getDefinition().getEscalation();
-            if (escalation != null) {
+            if (escalation != null && escalation.isPauseAllowed()) {
                 maxPauseTime = escalation.getMaxPauseTime();
             }
             eid = new AppdefEntityID(def.getResource());

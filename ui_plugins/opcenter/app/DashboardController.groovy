@@ -429,11 +429,19 @@ class DashboardController extends BaseController
                  width:'3%',
                  label: {
                      if (it.Alert) {
+                     	def esc = it.Alert.definition.escalation
+                     	def pause = (esc == null ? "0" : (esc.pauseAllowed ? esc.maxPauseTime : "0"))
+                     	// checkbox id is in the format: {portalName}|{appdefKey}|{alertId}|{maxPauseTime}
+                     	def id = "dashboardTable|" + it.Alert.alertDefinition.appdefEntityId.appdefKey + "|" + it.Alert.id + "|" + pause
                         def member = (it.Alert.ackable ? "ackableAlert" : "fixableAlert")
-                        return "<input type='checkbox' name='ealerts' id='dashboardTable_" + it.Alert.id + "' class='" + member + "' value='-559038737:" + it.Alert.id +"' onclick='MyAlertCenter.toggleAlertButtons(this)' />"
+                        return "<input type='checkbox' name='ealerts' id='" + id + "' class='" + member + "' value='-559038737:" + it.Alert.id +"' onclick='MyAlertCenter.toggleAlertButtons(this)' />"
                      } else if (it.GroupAlert) {
+                     	def esc = it.GroupAlert.definition.escalation
+                     	def pause = (esc == null ? "0" : (esc.pauseAllowed ? esc.maxPauseTime : "0"))
+                     	// checkbox id is in the format: {portalName}|{appdefKey}|{alertId}|{maxPauseTime}
+                     	def id = "dashboardTable|" + it.GroupAlert.alertDef.appdefID.appdefKey + "|" + it.GroupAlert.id + "|" + pause
                    	    def member = (it.GroupAlert.acknowledgeable ? "ackableAlert" : "fixableAlert")
-             	        return it.fixed ? "" : "<input type='checkbox' name='ealerts' id='dashboardTable_" + it.GroupAlert.id + "' class='" + member + "' value='195934910:" + it.GroupAlert.id +"' onclick='MyAlertCenter.toggleAlertButtons(this)' />"
+             	        return it.fixed ? "" : "<input type='checkbox' name='ealerts' id='" + id + "' class='" + member + "' value='195934910:" + it.GroupAlert.id +"' onclick='MyAlertCenter.toggleAlertButtons(this)' />"
                      } else {
                          return ""
                      }

@@ -316,6 +316,7 @@ type=\"checkbox\" onclick=\"MyAlertCenter.toggleAll(this)\"
 id=\"${widgetInstanceName}_CheckAllBox\">" isLocalizedTitle="false"
 styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
 <display:alertcheckboxdecorator name="alerts"
+elementId="${widgetInstanceName}|${Resource.entityId.appdefKey}|${Alert.id}|${Alert.maxPauseTime}"
 onclick="MyAlertCenter.toggleAlertButtons(this)"
 fixable="${!Alert.fixed}" acknowledgeable="${Alert.acknowledgeable}"
 styleClass="listMember"/> </display:column>

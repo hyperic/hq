@@ -47,6 +47,9 @@ public class AlertBean implements Serializable {
     private boolean _multiCondition;
     private boolean _fixed;
     private boolean _acknowledgeable;
+    
+    // escalation fields
+    private long _maxPauseTime;
 
     // resource fields
     private Integer _rid;
@@ -193,6 +196,14 @@ public class AlertBean implements Serializable {
     public void setAcknowledgeable(boolean acknowledgeable) {
         this._acknowledgeable = acknowledgeable;
     }
+    
+    public long getMaxPauseTime() {
+        return _maxPauseTime;
+    }
+    
+    public void setMaxPauseTime(long maxPauseTime) {
+        _maxPauseTime = maxPauseTime;
+    }
 
     public String toString() {
         StringBuffer str = new StringBuffer();
@@ -218,6 +229,8 @@ public class AlertBean implements Serializable {
             .append( isFixed() )
             .append(" acknowledgeable=")
             .append( isAcknowledgeable() )
+            .append(" maxPauseTime=")
+            .append( getMaxPauseTime() )
             .append('}');
 
         return str.toString();

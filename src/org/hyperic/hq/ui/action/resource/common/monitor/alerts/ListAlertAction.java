@@ -40,6 +40,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
+import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -141,6 +142,13 @@ public class ListAlertAction extends TilesAction {
                                            new Integer(appEntId.getType()),
                                            av.isFixed(), av.isAcknowledgeable());
 
+            if (adv.getEscalationId() != null) {
+                Escalation esc = eb.findEscalationById(sessionId, adv.getEscalationId());
+                if (esc != null && esc.isPauseAllowed()) {
+                    bean.setMaxPauseTime(esc.getMaxPauseTime());
+                }
+            }
+            
             AlertConditionLogValue[] condLogs = av.getConditionLogs();
             if (condLogs.length > 1) {
                 _setupMultiCondition(bean, request);
