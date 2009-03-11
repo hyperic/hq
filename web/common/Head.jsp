@@ -10,7 +10,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006, 2007, 2008], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -45,7 +45,7 @@
 <![endif]-->
 
 <script type="text/javascript">
-djConfig = { isDebug: false }
+djConfig = { isDebug: false, locale: 'en-us' }
 </script>
 <script type="text/javascript" src="<html:rewrite page='/js/dojo/0.4.3/dojo.js.uncompressed.js'/>"></script> 
 <script type="text/javascript">
