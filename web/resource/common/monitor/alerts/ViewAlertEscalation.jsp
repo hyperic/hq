@@ -36,17 +36,6 @@
   <tiles:put name="tabKey" value="monitoring.events.MiniTabs.Escalation"/>
 </tiles:insert>
 
-<script  type="text/javascript">
-  var isButtonClicked = false;
-  
-  function checkSubmit() {
-    if (isButtonClicked) {
-      alert('<fmt:message key="error.PreviousRequestEtc"/>');
-      return false;
-    }
-  }
-</script>
-
 <table cellpadding="0" cellspacing="0" border="0" width="100%" class="TableBottomLine" style="margin-bottom: 10px;">
   <tr>
     <td width="20%" class="BlockLabel"><fmt:message key="common.header.EscalationName"/></td>
@@ -85,50 +74,7 @@
     <td rowspan="2" width="20%" class="BlockLabel">&nbsp;</td>
     <td nowrap="true" class="BlockContent" style="padding: 10px;">
   <c:if test="${escalation.pauseAllowed && alert.acknowledgeable}">
-      <input type=checkbox name="pause" value="true"/>
-      <fmt:message key="alert.escalation.pause"/>
-      <select name="pauseTime">
-        <option value="300000">5 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
-        <c:if test="${escalation.maxPauseTime >= 600000}">
-        <option value="600000">10 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
-        <c:if test="${escalation.maxPauseTime >= 900000}">
-        <option value="900000">15 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
-        <c:if test="${escalation.maxPauseTime >= 1200000}">
-        <option value="1200000">20 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
-        <c:if test="${escalation.maxPauseTime >= 1800000}">
-        <option value="1800000">30 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
-        <c:if test="${escalation.maxPauseTime >= 3600000}">
-        <option value="3600000">60 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/></option>
-        <c:if test="${escalation.maxPauseTime >= 7200000}">
-        <option value="7200000">2 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
-        <c:if test="${escalation.maxPauseTime >= 14400000}">
-        <option value="14400000">4 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
-        <c:if test="${escalation.maxPauseTime >= 28800000}">
-        <option value="28800000">8 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
-        <c:if test="${escalation.maxPauseTime >= 43200000}">
-        <option value="43200000">12 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
-        <c:if test="${escalation.maxPauseTime >= 86400000}">
-        <option value="86400000">24 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
-        <c:if test="${escalation.maxPauseTime >= 172800000}">
-        <option value="172800000">48 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
-        <c:if test="${escalation.maxPauseTime >= 259200000}">
-        <option value="259200000">72 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/></option>
-        <c:if test="${escalation.maxPauseTime > 259200000}">
-        <option value="<%= Long.MAX_VALUE %>"><fmt:message key="alert.config.props.CB.Enable.UntilFixed"/></option>
-        </c:if>
-        </c:if>
-        </c:if>
-        </c:if>
-        </c:if>
-        </c:if>
-        </c:if>
-        </c:if>
-        </c:if>
-        </c:if>
-        </c:if>
-        </c:if>
-        </c:if>
-      </select>
+	  <span id="AlertEscalationOption"><input type="checkbox" name="pause" value="true"/>&nbsp;<fmt:message key="alert.escalation.pause"/>&nbsp;</span>	  
   </c:if>&nbsp;
     </td>
     <td rowspan="2" width="60%" class="BlockLabel">
@@ -150,4 +96,21 @@
     </td>
   </tr>
 </table>
+
+<script type="text/javascript">
+  var isButtonClicked = false;
+  
+  function checkSubmit() {
+    if (isButtonClicked) {
+      alert('<fmt:message key="error.PreviousRequestEtc"/>');
+      return false;
+    }
+  }
+
+  var escalationSpan = dojo11.byId("AlertEscalationOption");
+  if (escalationSpan != null) {
+	  escalationSpan.appendChild(hyperic.form.createEscalationPauseOptions({name: "pauseTime"}, <c:out value="${escalation.maxPauseTime}"/>));
+  }
+</script>
+
 </c:if>
