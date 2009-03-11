@@ -602,17 +602,29 @@ public class EscalationManagerEJBImpl
      * 
      * @ejb:interface-method  
      */
-    public void acknowledgeAlert(AuthzSubject subject, EscalationAlertType type, 
+    public boolean acknowledgeAlert(AuthzSubject subject, EscalationAlertType type, 
                                  Integer alertId, String moreInfo, long pause)  
         throws PermissionException
     {
         Escalatable esc = type.findEscalatable(alertId);
-        EscalationState state = _stateDAO.find(esc);
+        PerformsEscalations def = esc.getDefinition();
+        
+        if (!isAlertAcknowledgeable(alertId, def)) {
+            return false;
+        }
+                
         if (moreInfo == null || moreInfo.trim().length() == 0) {
             moreInfo = "";
         }
-        if (pause > 0) {
-        	long nextTime;
+
+        EscalationState state = _stateDAO.find(esc);
+        Escalation escalation = def.getEscalation();
+
+        if (pause > 0 && escalation.isPauseAllowed()) {
+        	long nextTime;    	
+        	if (pause > escalation.getMaxPauseTime()) {
+        	    pause = escalation.getMaxPauseTime();
+        	}
         	if (pause == Long.MAX_VALUE) {
         		nextTime = pause;
                 moreInfo = " and paused escalation until fixed. " + moreInfo;
@@ -635,6 +647,7 @@ public class EscalationManagerEJBImpl
             }
         }
         fixOrNotify(subject, esc, state, type, false, moreInfo, false);
+        return true;
     }
     
     /**
