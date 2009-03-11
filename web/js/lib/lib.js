@@ -2949,7 +2949,7 @@ hyperic.group_manager = function() {
 	}
 	
 	that.getGroupsNotContaining = function(eids) {    
-		dojo11.xhrGet( {
+		dojo11.xhrPost( {
             url: "/api.shtml",
             content: {v: "1.0", s_id: "group_manager", eid: "['" + eids.join("','") + "']"},
             handleAs: 'json',
