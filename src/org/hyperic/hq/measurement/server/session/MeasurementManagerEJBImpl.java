@@ -210,6 +210,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         throws MeasurementCreateException, TemplateNotFoundException
     {
         Resource resource = getResource(id);
+        if (resource == null || resource.isInAsyncDeleteState()) {
+            return Collections.EMPTY_LIST;
+        }
         ArrayList dmList   = new ArrayList();
 
         if(intervals.length != templates.length){
@@ -1231,6 +1234,10 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             ResourceZevent z = (ResourceZevent)i.next();
             AuthzSubject subject = aman.findSubjectById(z.getAuthzSubjectId());
             AppdefEntityID id = z.getAppdefEntityID();
+            final Resource r = getResource(id);
+            if (r == null || r.isInAsyncDeleteState()) {
+                continue;
+            }
             boolean isCreate, isRefresh;
     
             isCreate = z instanceof ResourceCreatedZevent;
