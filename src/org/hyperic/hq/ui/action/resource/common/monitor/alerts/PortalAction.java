@@ -219,12 +219,13 @@ public class PortalAction extends ResourceController {
         
         // pass pause escalation time
         AppdefEntityID aeid = null;
+        boolean ackOk = false;
         try {
             aeid = RequestUtils.getEntityId(request);
             
             if (aeid.isGroup()) {
-                eb.acknowledgeAlert(sessionID, GalertEscalationAlertType.GALERT,
-                                    alertId, pause, ackNote);
+                ackOk = eb.acknowledgeAlert(sessionID, GalertEscalationAlertType.GALERT,
+                                            alertId, pause, ackNote);
             }
         } catch (ParameterNotFoundException e) {
             // not a problem, this can be null
@@ -232,13 +233,18 @@ public class PortalAction extends ResourceController {
 
         if (aeid == null || !aeid.isGroup()) {
             // Classic alerts
-            eb.acknowledgeAlert(sessionID, 
-                                ClassicEscalationAlertType.CLASSIC,
-                                alertId, pause, ackNote);
+            ackOk = eb.acknowledgeAlert(sessionID, 
+                                        ClassicEscalationAlertType.CLASSIC,
+                                        alertId, pause, ackNote);
         }
         
-        RequestUtils.setConfirmation(request,
-                                     "alert.view.confirm.acknowledged");
+        if (ackOk) {
+            RequestUtils.setConfirmation(request,
+                                         "alert.view.confirm.acknowledged");
+        } else {
+            RequestUtils.setError(request,
+                                  "alert.view.error.acknowledged");
+        }
         return viewAlert(mapping, form, request, response);
     }
 
