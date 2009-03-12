@@ -487,8 +487,11 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @ejb:interface-method
      */
     public int getEnabledMetricsCount(AuthzSubject subject, AppdefEntityID id) {
-        List mcol = 
-            getMeasurementDAO().findEnabledByResource(getResource(id));
+        final Resource res = getResource(id);
+        if (res == null || res.isInAsyncDeleteState()) {
+            return 0;
+        }
+        final List mcol = getMeasurementDAO().findEnabledByResource(res);
         return mcol.size();
     }
 
@@ -772,12 +775,10 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 AppdefEntityID aeid = r.getEntityId();
                 resource = resMan.findResource(aeid);
             }
-            final ResourceType type = resource.getResourceType();
-            if (type == null) {
-                // if type is null that means the resource was asynchronously
-                // deleted.  Just ignore.
+            if (resource == null || resource.isInAsyncDeleteState()) {
                 continue;
             }
+            final ResourceType type = resource.getResourceType();
             if (type.getId().equals(AuthzConstants.authzGroup)) {
                 final ResourceGroupManagerLocal resGrpMan =
                     ResourceGroupManagerEJBImpl.getOne();
