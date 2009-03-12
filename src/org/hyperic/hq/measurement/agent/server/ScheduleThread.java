@@ -472,7 +472,7 @@ public class ScheduleThread
                     //        bizapp?
                     try {
                         data    = getValue(meas);
-                        if (data != null) {
+                        if (data == null) {
                             this.log.warn("Plugin returned null value for DSN=" +
                                           meas.getDSN());
                             data = MetricValue.NONE;
