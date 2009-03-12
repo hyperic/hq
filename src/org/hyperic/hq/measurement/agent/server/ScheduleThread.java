@@ -406,8 +406,9 @@ public class ScheduleThread
                                 if (itemsMap.containsKey(dsnId))
                                     continue;
                                 items.add(meas);
-                                if (debug);
+                                if (debug) {
                                     log.debug("retrying -> "+meas);
+                                }
                             }
                             retry.clear();
                         }
@@ -471,6 +472,11 @@ public class ScheduleThread
                     //        bizapp?
                     try {
                         data    = getValue(meas);
+                        if (data != null) {
+                            this.log.warn("Plugin returned null value for DSN=" +
+                                          meas.getDSN());
+                            data = MetricValue.NONE;
+                        }
                         success = true;
                         this.clearLogCache(dsn);
                     } catch(PluginNotFoundException exc){
