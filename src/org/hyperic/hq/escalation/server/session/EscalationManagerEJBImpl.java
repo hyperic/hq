@@ -634,7 +634,7 @@ public class EscalationManagerEJBImpl
                 moreInfo = ". " + moreInfo;
             }
         }
-        fixOrNotify(subject, esc, state, type, false, moreInfo);
+        fixOrNotify(subject, esc, state, type, false, moreInfo, false);
     }
     
     /**
@@ -689,10 +689,10 @@ public class EscalationManagerEJBImpl
             return false;
         }
         
-        fixOrNotify(subject, e, state, state.getAlertType(), true, moreInfo);
+        fixOrNotify(subject, e, state, state.getAlertType(), true, moreInfo, false);
         return true;
     }
-    
+
     /**
      * Fix an alert, potentially sending out notifications.  The state of
      * the escalation will be terminated and the alert will be marked fixed.
@@ -704,23 +704,36 @@ public class EscalationManagerEJBImpl
     public void fixAlert(AuthzSubject subject, EscalationAlertType type, 
                          Integer alertId, String moreInfo)
         throws PermissionException
+    {
+        fixAlert(subject, type, alertId, moreInfo, false);
+    }
+    
+    /**
+     * Fix an alert, potentially sending out notifications.  The state of
+     * the escalation will be terminated and the alert will be marked fixed.
+     * 
+     * @param subject Person who fixed the alert
+     * 
+     * @ejb:interface-method  
+     */
+    public void fixAlert(AuthzSubject subject, EscalationAlertType type, 
+                         Integer alertId, String moreInfo,
+                         boolean suppressNotification)
+        throws PermissionException
     { 
         Escalatable esc = type.findEscalatable(alertId);
         EscalationState state = _stateDAO.find(esc);
-        fixOrNotify(subject, esc, state, type, true, moreInfo);
-    } 
-    
+        fixOrNotify(subject, esc, state, type, true, moreInfo, suppressNotification);
+    }
+
     private void fixOrNotify(AuthzSubject subject, Escalatable esc,
                              EscalationState state, EscalationAlertType type,
-                             boolean fixed, String moreInfo)
+                             boolean fixed, String moreInfo,
+                             boolean suppressNotification)
         throws PermissionException
     {        
         Integer alertId = esc.getAlertInfo().getId();
         boolean acknowledged = !fixed;
-
-        // HQ-1295: Does user have sufficient permissions?
-        SessionBase.canManageAlerts(subject, 
-                                    esc.getDefinition().getDefinitionInfo());
         
         if (esc.getAlertInfo().isFixed()) {
             _log.warn(subject.getFullName() + " attempted to fix or " +
@@ -736,7 +749,11 @@ public class EscalationManagerEJBImpl
                        "Button Masher?");
             return;
         }
-        
+
+        // HQ-1295: Does user have sufficient permissions?
+        SessionBase.canManageAlerts(subject, 
+                                    esc.getDefinition().getDefinitionInfo());
+
         if (fixed) {  
             if (moreInfo == null || moreInfo.trim().length() == 0)
                 moreInfo = "(Fixed by " + subject.getFullName() + ")";
@@ -769,19 +786,22 @@ public class EscalationManagerEJBImpl
             state.setAcknowledgedBy(subject);
         }
 
-        if (state != null)
-            sendNotifications(state, esc, subject, 
-                              state.getEscalation().isNotifyAll(), fixed,
-                              moreInfo);
-        else if (fixed)         // The alert's escalation chain has completed
-            sendFixedNotifications(subject, esc, moreInfo);
+        if (!suppressNotification) {
+            if (state != null) {
+                sendNotifications(state, esc, subject, 
+                                  state.getEscalation().isNotifyAll(), fixed,
+                                  moreInfo);
+            } else if (fixed) {         // The alert's escalation chain has completed
+                sendFixedNotifications(subject, esc, moreInfo);
+            }
+        }
     }
 
     private String getNotificationMessage(AuthzSubject subject, boolean fixed,
                                           Escalatable alert, String moreInfo) {
         return subject.getFullName() + " has " + 
             (fixed ? "fixed" : "acknowledged") + " the alert raised by [" +
-            alert.getDefinition().getName() + "] " + moreInfo;
+            alert.getDefinition().getName() + "]. " + moreInfo;
     }
     
     /**
