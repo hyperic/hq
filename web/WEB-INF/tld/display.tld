@@ -549,7 +549,7 @@
     <attribute>
       <name>elementId</name>
       <required>false</required>
-      <rtexprvalue>true</rtexprvalue>
+      <rtexprvalue>false</rtexprvalue>
       <type>String</type>
     </attribute>    
     <attribute>

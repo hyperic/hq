@@ -175,8 +175,12 @@
                   td1.innerHTML = "&nbsp;";
                 }
                 else {
-                  var checkboxId = "alert" + (token == null ? "" : token) + "_" + aList[i].appdefKey + "_" + aList[i].alertId;
-                  checkbox.id = checkboxId.replace(":", "_");
+      	          // checkbox id is in the format: {portalName}|{appdefKey}|{alertId}|{maxPauseTime}
+                  var checkboxId = "alert" + (token == null ? "" : token) 
+                    					+ "|" + aList[i].appdefKey 
+                    					+ "|" + aList[i].alertId 
+                    					+ "|" + aList[i].maxPauseTime;
+                  checkbox.id = checkboxId;
                   checkbox.setAttribute("type", "checkbox");
                   checkbox.setAttribute("name", "ealerts");
                   checkbox.onclick = new Function("MyAlertCenter.toggleAlertButtons(this)");
