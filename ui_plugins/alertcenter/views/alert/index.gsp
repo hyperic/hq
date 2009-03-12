@@ -207,7 +207,7 @@ dojo.addOnLoad( function(){
             <div id="excludeTypeBasedInput" class="fieldSetStacked" 
                  style="margin-bottom:8px;">
               <input id="excludeTypeBased" type="checkbox" name="excludeTypeBased" 
-                     value="true"  onchange="Defs_refreshTable();"/>
+                     value="true"  onclick="Defs_refreshTable();"/>
               <label for="excludeTypeBased">${l.ExcludeTypeBased}</label>
             </div>
             <% } %>
@@ -215,7 +215,7 @@ dojo.addOnLoad( function(){
             <div id="onlyShowDisabledInput" class="fieldSetStacked" 
                  style="margin-bottom:8px;">
               <input id="onlyShowDisabled" type="checkbox" name="onlyShowDisabled" 
-                     value="true"  onchange="refreshDefTables();"/>
+                     value="true"  onclick="refreshDefTables();"/>
               <label for="onlyShowDisabled">${l.OnlyShowDisabled}</label>
             </div>
             
