@@ -381,7 +381,8 @@ public class PermissionManagerImpl
     }
                                                                    
     public String getAlertsHQL(boolean inEscalation, boolean notFixed,
-                               Integer groupId, boolean count) {
+                               Integer groupId, Integer alertDefId, 
+                               boolean count) {
         // Join with Resource for sorting
         return "select " + (count ? "count(a)" : "a") + " from " +
                 (inEscalation ? "EscalationState es, " : "") +
@@ -394,6 +395,7 @@ public class PermissionManagerImpl
                              "where rg.group.id = " + groupId + ") and ") +
                "a.ctime between :begin and :end and " +
                 (notFixed ? " a.fixed = false and " : "") +
+                (alertDefId == null ? "" : "d.id = " + alertDefId + " and ") +
                 "d.priority >= :priority " +
                 (inEscalation ? "and a.id = es.alertId and " +
                                     "es.alertDefinitionId = d.id " : "");
@@ -406,7 +408,7 @@ public class PermissionManagerImpl
     }
 
     public String getGroupAlertsHQL(boolean inEscalation, boolean notFixed,
-                                    Integer groupId) {
+                                    Integer groupId, Integer galertDefId) {
         return "select a from " +
                 (inEscalation ? "EscalationState es, " : "") +
                 "GalertLog a " +
@@ -415,6 +417,7 @@ public class PermissionManagerImpl
           (groupId != null ? " g.id = " + groupId + " and " : "") + 
           "a.timestamp between :begin and :end " + 
            (notFixed ? " and a.fixed = false " : "") +
+           (galertDefId == null ? "" : "and d.id = " + galertDefId + " ") +
            "and d.severityEnum >= :priority " +
                 (inEscalation ? "and a.id = es.alertId and " +
                                     "es.alertDefinitionId = d.id " : "");

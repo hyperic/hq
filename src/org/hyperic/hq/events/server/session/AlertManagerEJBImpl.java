@@ -336,6 +336,20 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                            Integer groupId, PageInfo pageInfo) 
         throws PermissionException 
     {
+        return findAlerts(subj, priority, timeRange, endTime,
+                          inEsc, notFixed, groupId, null, pageInfo);
+    }
+    
+    /**
+     * A more optimized look up which includes the permission checking
+     * @ejb:interface-method
+     */
+    public List findAlerts(Integer subj, int priority, long timeRange,
+                           long endTime, boolean inEsc, boolean notFixed,
+                           Integer groupId, Integer alertDefId,
+                           PageInfo pageInfo) 
+        throws PermissionException 
+    {
         // Time voodoo the end time to the nearest minute so that we might
         // be able to use cached results
         endTime = TimingVoodoo.roundUpTime(endTime, 60000);
@@ -343,7 +357,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                                                          endTime - timeRange,
                                                          endTime, priority,
                                                          inEsc, notFixed,
-                                                         groupId, pageInfo);
+                                                         groupId, alertDefId,
+                                                         pageInfo);
     }
     
     /**
@@ -432,7 +447,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                                                          endTime - timeRange,
                                                          endTime, 0,
                                                          false, true,
-                                                         groupId);
+                                                         groupId, null);
         if (count != null)
             return count.intValue();
             
