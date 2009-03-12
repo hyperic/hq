@@ -1690,7 +1690,7 @@ public class EventsBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public void acknowledgeAlert(int sessionID, EscalationAlertType alertType, 
+    public boolean acknowledgeAlert(int sessionID, EscalationAlertType alertType, 
                                  Integer alertID, long pauseWaitTime,
                                  String moreInfo)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -1698,8 +1698,8 @@ public class EventsBossEJBImpl
     {
         AuthzSubject subject = manager.getSubject(sessionID);
 
-        getEscMan().acknowledgeAlert(subject, alertType, alertID, moreInfo,
-                                     pauseWaitTime);
+        return getEscMan().acknowledgeAlert(subject, alertType, alertID,
+                                            moreInfo, pauseWaitTime);
     }
 
     /**
