@@ -142,10 +142,16 @@ public class Platform extends PlatformBase
         return null;
     }
     
+    /**
+     * @return the readonly collection of servers
+     */
     public Collection getServers() {
         return Collections.unmodifiableCollection(_servers);
     }
 
+    /**
+     * @return the persisted hibernate Bag of servers
+     */
     public Collection getServersBag() {
         return _servers;
     }

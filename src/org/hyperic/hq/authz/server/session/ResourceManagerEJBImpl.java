@@ -298,6 +298,13 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
 
     /**
+     * Removes the specified resource by nulling out its resourceType
+     * These resources need to be cleaned up eventually by
+     * {@link AppdefBossEJBImpl.removeDeletedResources}.  This may be done in 
+     * the background via zevent by issuing a {@link ResourcesCleanupZevent}.
+     * @see {@link AppdefBossEJBImpl.removeDeletedResources}
+     * @see {@link ResourcesCleanupZevent}
+     * @param r {@link Resource} resource to be removed.
      * @return AppdefEntityID[] - an array of the resources (including children) deleted
      * @ejb:interface-method
      */
@@ -318,23 +325,13 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 
         if (resourceType.getId().equals(AuthzConstants.authzPlatform)) {
             opName = AuthzConstants.platformOpRemovePlatform;
-        }
-        else if (resourceType.getId().equals(AuthzConstants.authzServer))
-        {
+        } else if (resourceType.getId().equals(AuthzConstants.authzServer)) {
             opName = AuthzConstants.serverOpRemoveServer;
-        }
-        else if (resourceType.getId()
-                    .equals(AuthzConstants.authzService))
-        {
+        } else if (resourceType.getId().equals(AuthzConstants.authzService)) {
             opName = AuthzConstants.serviceOpRemoveService;
-        }
-        else if (resourceType.getId()
-                    .equals(AuthzConstants.authzApplication))
-        {
+        } else if (resourceType.getId().equals(AuthzConstants.authzApplication)) {
             opName = AuthzConstants.appOpRemoveApplication;
-        }
-        else if (resourceType.getId().equals(AuthzConstants.authzGroup))
-        {
+        } else if (resourceType.getId().equals(AuthzConstants.authzGroup)) {
             opName = AuthzConstants.groupOpRemoveResourceGroup;
         }
 
