@@ -221,6 +221,14 @@ public class AgentConnection {
             }
         }
     }
+    
+    public void closeSocket() {
+        try {
+            getSocket().close();
+        } catch (AgentConnectionException e) {
+        } catch (IOException e) {
+        }
+    }
 
     public boolean equals(Object o) {
         return o instanceof AgentConnection &&

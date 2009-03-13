@@ -51,6 +51,10 @@ import org.hyperic.util.config.ConfigResponse;
 public class LegacyMeasurementCommandsClientImpl implements MeasurementCommandsClient {
     private AgentConnection        agentConn;
     private MeasurementCommandsAPI verAPI;
+    
+    public void closeConnection() throws AgentRemoteException {
+        agentConn.closeSocket();
+    }
 
     /**
      * Creates a new MeasurementCommandsClient object which should communicate

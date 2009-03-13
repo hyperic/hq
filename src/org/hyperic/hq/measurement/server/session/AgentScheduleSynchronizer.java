@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -22,8 +22,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
+
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -34,6 +36,7 @@ import net.sf.ehcache.Element;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -64,30 +67,24 @@ public class AgentScheduleSynchronizer {
     private AgentScheduleSynchronizer() {
     }
 
-
-    public static void scheduleSynchronous(AppdefEntityID eid) {
-        try {
-            SRNManagerEJBImpl.getOne().reschedule(eid);
-        } catch(Exception e) {
-            _log.warn("Exception scheduling [" + eid + "]: " + e.getMessage());
-        }
-    }
-
     void initialize() {
         ZeventListener l = new ZeventListener() {
             public void processEvents(List events) {
+                final MeasurementProcessorLocal mProc =
+                    MeasurementProcessorEJBImpl.getOne();
+                List eids = new ArrayList();
                 for (Iterator i=events.iterator(); i.hasNext(); ) {
                     AgentScheduleSyncZevent z = 
                         (AgentScheduleSyncZevent)i.next();
                     
-                    if (!_inQueueCache.remove(z.getEntityId())) {
-                        _log.warn("Received eid=[" + z.getEntityId() + 
+                    eids.addAll(z.getEntityIds());
+                    if (!_inQueueCache.remove(z.getEntityIds())) {
+                        _log.warn("Received eid=[" + z.getEntityIds() + 
                                   "] but was not found in cache");
                     }
-                    scheduleSynchronous(z.getEntityId());
                 }
+                mProc.scheduleSynchronous(eids);
             }
-            
             public String toString() {
                 return "AgentScheduleSyncListener";
             }
@@ -97,7 +94,10 @@ public class AgentScheduleSynchronizer {
             .addBufferedListener(AgentScheduleSyncZevent.class, l);
     }
     
-    private void _scheduleBuffered(AppdefEntityID eid) {
+    /**
+     * @param eids List<AppdefEntityID>
+     */
+    private void _scheduleBuffered(List eids) {
         /**
          * The following is done immediately (not in a tx listener), since
          * otherwise we will need to make sure that the entire thing behaves
@@ -105,23 +105,34 @@ public class AgentScheduleSynchronizer {
          * is that we have excess things in the queue.
          */
         synchronized (_inQueueCache) {
-            if (_inQueueCache.get(eid) != null)
-                return;
-    
-            Element e = new Element(eid, eid);
-            _inQueueCache.put(e);
+            for (Iterator it=eids.iterator(); it.hasNext(); ) {
+                AppdefEntityID eid = (AppdefEntityID)it.next();
+                if (_inQueueCache.get(eid) != null) {
+                    continue;
+                }
+                Element e = new Element(eid, eid);
+                _inQueueCache.put(e);
+            }
         }
-        
-        Zevent z = new AgentScheduleSyncZevent(eid);
+        Zevent z = new AgentScheduleSyncZevent(eids);
         try {
             ZeventManager.getInstance().enqueueEvent(z);
         } catch(InterruptedException e) {
-            _inQueueCache.remove(eid);
-            _log.warn("Interrupted while trying to enqueue event");
+            synchronized (_inQueueCache) {
+                for (Iterator it=eids.iterator(); it.hasNext(); ) {
+                    AppdefEntityID eid = (AppdefEntityID)it.next();
+                    _inQueueCache.remove(eid);
+                }
+            }
+            _log.warn("Interrupted while trying to enqueue event for eids: ["
+                + eids + "]");
         }
     }
     
-    public static void scheduleBuffered(AppdefEntityID eid) {
-        AgentScheduleSynchronizer.SINGLETON._scheduleBuffered(eid);
+    /**
+     * @param eids List<AppdefEntityID>
+     */
+    public static void scheduleBuffered(List eids) {
+        AgentScheduleSynchronizer.SINGLETON._scheduleBuffered(eids);
     }
 }

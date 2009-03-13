@@ -25,10 +25,14 @@
 
 package org.hyperic.hq.measurement.server.mbean;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import javax.ejb.CreateException;
 import javax.naming.NamingException;
@@ -120,6 +124,7 @@ public class ScheduleVerificationService
         
         HashSet downAgents = new HashSet();
         HashSet upAgents   = new HashSet();
+        Map aeids = new HashMap();
 
         for (Iterator iter = toResched.iterator(); iter.hasNext();) {
             AppdefEntityID entId = (AppdefEntityID) iter.next();
@@ -143,8 +148,12 @@ public class ScheduleVerificationService
                     }
                 }
 
-                // Now reschedule all metrics for this entity
-                srnMan.reschedule(entId);
+                List list;
+                if (null == (list = (List)aeids.get(agent.getId()))) {
+                    list = new ArrayList();
+                    aeids.put(agent.getId(), list);
+                }
+                list.add(entId);
             } catch (AgentNotFoundException e) {
                 _log.debug("Measurement Schedule Verification: " +
                            "Agent not found for " + entId);
@@ -153,14 +162,24 @@ public class ScheduleVerificationService
             } catch (PermissionException e) {
                 _log.debug("Measurement Schedule Verification: " +
                            "No permission to look up " + entId);
+            }
+        }
+        // Now reschedule all metrics for these entities per agent
+        for (Iterator it=aeids.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)it.next();
+            Integer agentId = (Integer)entry.getKey();
+            List eids = (List)entry.getValue();
+            try {
+                srnMan.reschedule(eids);
+            } catch (MeasurementScheduleException e) {
+                _log.debug("Scheduling error during rescheduling of agentId " +
+                    agentId);
+            } catch (MeasurementUnscheduleException e) {
+                _log.debug("Scheduling error during unscheduling of agentId " +
+                    agentId);
             } catch (MonitorAgentException e) {
                 _log.debug("Measurement Schedule Verification: " +
-                           "Could not connect to agent " + agent);
-                downAgents.add(agent);
-            } catch (MeasurementScheduleException e) {
-                _log.debug("Scheduling error during rescheduling of " + entId);
-            } catch (MeasurementUnscheduleException e) {
-                _log.debug("Scheduling error during unscheduling of " + entId);
+                           "Could not connect to agent " + agentId);
             }
         }
     }

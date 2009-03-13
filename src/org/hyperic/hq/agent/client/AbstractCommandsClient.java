@@ -53,7 +53,7 @@ public abstract class AbstractCommandsClient {
         _factory = factory;
     }
     
-    protected final Agent getAgent() {
+    public Agent getAgent() {
         return _agent;
     }
 

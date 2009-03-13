@@ -47,7 +47,7 @@ public class MeasurementCommandsClientImpl
     public MeasurementCommandsClientImpl(Agent agent, AgentProxyFactory factory) {
         super(agent, factory);
     }
-
+    
     /**
      * @see org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient#addTrackPlugin(java.lang.String, java.lang.String, java.lang.String, org.hyperic.util.config.ConfigResponse)
      */
@@ -162,6 +162,11 @@ public class MeasurementCommandsClientImpl
         } finally {
             safeDestroyService(proxy);
         }
+    }
+
+    public void closeConnection() throws AgentRemoteException {
+        // nothing to do here since it is all handled through jboss remoting
+        // via safeDestroyService()
     }
 
 }

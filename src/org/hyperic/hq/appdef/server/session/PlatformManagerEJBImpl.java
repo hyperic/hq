@@ -1495,21 +1495,20 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     private void enableMeasurements(AuthzSubject subj, Platform platform) {
-        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(platform
-                .getEntityId());
-        ZeventManager.getInstance().enqueueEventAfterCommit(event);
+        List eids = new ArrayList();
+        eids.add(platform.getEntityId());
         Collection servers = platform.getServers();
         for (Iterator it = servers.iterator(); it.hasNext();) {
             Server server = (Server) it.next();
-            event = new AgentScheduleSyncZevent(server.getEntityId());
-            ZeventManager.getInstance().enqueueEventAfterCommit(event);
+            eids.add(server.getEntityId());
             Collection services = server.getServices();
             for (Iterator xit = services.iterator(); xit.hasNext();) {
                 Service service = (Service) xit.next();
-                event = new AgentScheduleSyncZevent(service.getEntityId());
-                ZeventManager.getInstance().enqueueEventAfterCommit(event);
+                eids.add(service.getEntityId());
             }
         }
+        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
+        ZeventManager.getInstance().enqueueEventAfterCommit(event);
     }
 
     /**

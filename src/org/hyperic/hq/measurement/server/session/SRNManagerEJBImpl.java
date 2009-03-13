@@ -40,7 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
@@ -51,6 +50,7 @@ import org.hyperic.hq.measurement.server.session.SRN;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerUtil;
+import org.hyperic.util.pager.PageControl;
 
 /**
  * The tracker manager handles sending agents add and remove operations
@@ -257,7 +257,9 @@ public class SRNManagerEJBImpl extends SessionEJB
                                    " but cached is " + srn.getSrn() +
                                    " rescheduling metrics..");
                     }
-                    AgentScheduleSynchronizer.scheduleBuffered(srns[i].getEntity());
+                    List eids = new ArrayList();
+                    eids.add(srns[i].getEntity());
+                    AgentScheduleSynchronizer.scheduleBuffered(eids);
                 } 
                 srn.setLastReported(current);
             }
@@ -352,49 +354,37 @@ public class SRNManagerEJBImpl extends SessionEJB
         return srn;
     }
     
-    private AuthzSubject getOverlord() {
-        return AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-    }
-
-    private MeasurementManagerLocal getMgr() {
-        return MeasurementManagerEJBImpl.getOne();
-    }
-
-    private void reschedule(AppdefEntityID entId, List dms)
-        throws PermissionException,
-               MeasurementScheduleException, MonitorAgentException
-    {
-        MeasurementProcessorEJBImpl.getOne().schedule(entId, dms);
-    }
-    
-    private void unschedule(AppdefEntityID eid)
-        throws MeasurementUnscheduleException, PermissionException 
-    {
-        if (_log.isDebugEnabled())
-            _log.debug("Unschedule metrics for " + eid);
-        MeasurementProcessorEJBImpl.getOne().unschedule(eid);
-    }
-
     /**
      * Reschedule metrics for an appdef entity.  Generally should only
      * be called from the {@link AgentScheduleSynchronizer}
+     * @param List of {@link AppdefEntityId}
      *
      * @ejb:interface-method
      */
-    public void reschedule(AppdefEntityID eid)
+    public void reschedule(List aeids)
         throws MeasurementScheduleException,
-               MonitorAgentException, PermissionException,
+               MonitorAgentException,
                MeasurementUnscheduleException
     {
-        List dms = getMgr().findEnabledMeasurements(getOverlord(), eid, null);
-
-        if (_log.isDebugEnabled())
-            _log.debug("Reschedule " + dms.size() + " metrics for " + eid);
-
-        if (dms.size() > 0)
-            reschedule(eid, dms);
-        else
-            unschedule(eid);
+        AuthzSubject subj = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
+        List toReschedule = new ArrayList();
+        List toUnschedule = new ArrayList();
+        for (Iterator it=aeids.iterator(); it.hasNext(); ) {
+            AppdefEntityID aeid = (AppdefEntityID)it.next();
+            // will return only enabled measurements
+            List meas =
+                mMan.findMeasurements(subj, aeid, null, PageControl.PAGE_ALL);
+            if (meas.size() > 0) {
+                toReschedule.add(aeid);
+            } else {
+                // if size() == 0 then resource was probably deleted
+                // no measurements should be enabled
+                toUnschedule.add(aeid);
+            }
+        }
+        MeasurementProcessorEJBImpl.getOne().scheduleSynchronous(toReschedule);
+        MeasurementProcessorEJBImpl.getOne().unschedule(toUnschedule);
     }
     
     

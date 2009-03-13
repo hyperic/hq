@@ -67,8 +67,8 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
@@ -116,19 +116,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             return tmpl;
         }
     }
-
-    private Measurement updateMeasurement(Measurement m, ConfigResponse props,
-                                          long interval) {
-        m.setEnabled(interval != 0);
-        m.setInterval(interval);
-        
-        String dsn = translate(m.getTemplate().getTemplate(), props);
-        m.setDsn(dsn);
-
-        enqueueZeventForMeasScheduleChange(m, interval);
-
-        return m;
-    }
     
     /**
      * Enqueue a {@link MeasurementScheduleZevent} on the zevent queue 
@@ -175,13 +162,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         return getMeasurementDAO().create(instanceId, mt, dsn, interval);
     }
 
-    private void sendAgentSchedule(AppdefEntityID appID) {
-        // Sending of the agent schedule should only occur once the current
-        // transaction is completed.
-        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(appID);
-        ZeventManager.getInstance().enqueueEventAfterCommit(event);
-    }
-
     /**
      * Remove Measurements that have been deleted from the DataCache
      * @param mids
@@ -216,8 +196,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         ArrayList dmList   = new ArrayList();
 
         if(intervals.length != templates.length){
-            throw new IllegalArgumentException("The templates and intervals " +
-                                               " lists must be the same size");
+            throw new IllegalArgumentException(
+                "The templates and intervals lists must be the same size");
         }
 
         try {
@@ -234,13 +214,20 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
             for (int i = 0; i < templates.length; i++) {
                 MeasurementTemplate t = tDao.get(templates[i]);
+                if (t == null) {
+                    continue;
+                }
                 Measurement m = (Measurement) lookup.get(templates[i]);
                 
                 if (m == null) {
                     // No measurement, create it
                     m = createMeasurement(resource, t, props, intervals[i]);
                 } else {
-                    updateMeasurement(m, props, intervals[i]);
+                    m.setEnabled(intervals[i] != 0);
+                    m.setInterval(intervals[i]);
+                    String dsn = translate(m.getTemplate().getTemplate(), props);
+                    m.setDsn(dsn);
+                    enqueueZeventForMeasScheduleChange(m, intervals[i]);
                 }
                 dmList.add(m);
             }
@@ -252,6 +239,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
+     * Create Measurements and enqueue for scheduling after commit
      * @ejb:interface-method
      */
     public List createMeasurements(AuthzSubject subject, AppdefEntityID id,
@@ -264,9 +252,11 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         super.checkModifyPermission(subject.getId(), id);        
 
         // Call back into ourselves to force a new transaction to be created.
-        List dmList = getOne().createMeasurements(id, templates, intervals,
-                                                  props);
-        sendAgentSchedule(id);
+        List dmList = getOne().createMeasurements(
+            id, templates, intervals, props);
+        List eids = Collections.singletonList(id);
+        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
+        ZeventManager.getInstance().enqueueEventAfterCommit(event);
         return dmList;
     }
 
@@ -499,6 +489,47 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
+     * @param subject {@link AuthzSubject}
+     * @param resIdsToTemplIds {@link Map} of {@link Integer} of resourceIds to
+     * {@link List} of templateIds
+     * @return {@link Map} of {@link Resource} to {@link List} of
+     * {@link Measurement}s
+     * @throws PermissionException
+     * @ejb:interface-method
+     */
+    public Map findMeasurements(AuthzSubject subject, Map resIdsToTemplIds)
+        throws PermissionException
+    {
+        Map rtn = new HashMap();
+        MeasurementDAO dao = getMeasurementDAO();
+        ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+        ResourceGroupManagerLocal gMan = ResourceGroupManagerEJBImpl.getOne();
+        for (Iterator i=resIdsToTemplIds.entrySet().iterator(); i.hasNext(); ) {
+            Map.Entry entry = (Map.Entry)i.next();
+            Integer resId = (Integer)entry.getKey();
+            List templs = (List)entry.getValue();
+            Integer[] tids = (Integer[])templs.toArray(new Integer[0]);
+            Resource resource = rMan.findResourceById(resId);
+            // checkModifyPermission(subject.getId(), appId);
+            Integer resTypeId = resource.getResourceType().getId();
+            if (resTypeId.equals(AuthzConstants.authzGroup)) {
+                ResourceGroup grp = gMan.findResourceGroupById(
+                    subject, resource.getInstanceId());
+                Collection mems = gMan.getMembers(grp);
+                for (Iterator it=mems.iterator(); it.hasNext(); ) {
+                    Resource res = (Resource)it.next();
+                    rtn.put(
+                        res, dao.findByTemplatesForInstance(tids, res));
+                }
+            } else {
+                rtn.put(
+                    resource, dao.findByTemplatesForInstance(tids, resource));
+            }
+        }
+        return rtn;
+    }
+
+    /**
      * Find the Measurement corresponding to the given MeasurementTemplate id
      * and instance id.
      *
@@ -682,13 +713,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     public Measurement getAvailabilityMeasurement(Resource r) {
         return getMeasurementDAO().findAvailMeasurement(r);
     }
-
-    /**
-     * @ejb:interface-method
-     */
-    public List getAvailabilityMeasurements(Collection resources) {
-        return getMeasurementDAO().findAvailMeasurements(resources);
-    }
     
     /**
      * Look up a list of Measurement objects by category
@@ -778,10 +802,12 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 AppdefEntityID aeid = r.getEntityId();
                 resource = resMan.findResource(aeid);
             }
-            if (resource == null || resource.isInAsyncDeleteState()) {
+            final ResourceType type = resource.getResourceType();
+            if (type == null) {
+                // if type is null that means the resource was asynchronously
+                // deleted.  Just ignore.
                 continue;
             }
-            final ResourceType type = resource.getResourceType();
             if (type.getId().equals(AuthzConstants.authzGroup)) {
                 final ResourceGroupManagerLocal resGrpMan =
                     ResourceGroupManagerEJBImpl.getOne();
@@ -790,7 +816,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 rtn.put(resource.getId(), dao.findAvailMeasurements(grp));
                 continue;
             }
-
             res.add(resource);
         }
         List ids = getMeasurementDAO().findAvailMeasurements(res);
@@ -823,7 +848,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         Map intervals = new HashMap(tids.length);
         
         ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
-        
+
         for (int ind = 0; ind < aeids.length; ind++) {
             Resource res = resMan.findResource(aeids[ind]);
             List metrics = ddao.findByTemplatesForInstance(tids, res);
@@ -870,7 +895,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
         return intervals;
     }
-
+    
     /**
      * @return List<Object[]> - [0] = Measurement, [1] MeasurementTemplate
      * @ejb:interface-method
@@ -882,6 +907,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Set the interval of Measurements based their template ID's
+     * Enable Measurements and enqueue for scheduling after commit
      *
      * @ejb:interface-method
      */
@@ -908,11 +934,14 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         
         // Update the agent schedule
         for (int i = 0; i < aeids.length; i++) {
-            sendAgentSchedule(aeids[i]);
+            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(
+                Arrays.asList(aeids));
+            ZeventManager.getInstance().enqueueEventAfterCommit(event);
         }
     } 
     
     /**
+     * Enable the Measurement and enqueue for scheduling after commit
      * @ejb:interface-method
      */
     public void enableMeasurement(AuthzSubject subject, Integer mId,
@@ -929,11 +958,14 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         checkModifyPermission(subject.getId(), appId);
         MeasurementDAO dao = getMeasurementDAO();
         dao.updateInterval(mids, interval);
-        sendAgentSchedule(appId);
+        List eids = Collections.singletonList(appId);
+        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
+        ZeventManager.getInstance().enqueueEventAfterCommit(event);
     }
     
     /**
-     * Enable the default on metrics for a given resource
+     * Enable the default on metrics for a given resource, enqueue for scheduling 
+     * after commit
      * @ejb:interface-method
      */
     public void enableDefaultMeasurements(AuthzSubject subj, Resource r)
@@ -950,9 +982,10 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 sendToAgent = true;
             }
         }
-
         if (sendToAgent) {
-            sendAgentSchedule(appId);
+            List eids = Collections.singletonList(appId);
+            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
+            ZeventManager.getInstance().enqueueEventAfterCommit(event);
         }
     }
 
@@ -978,12 +1011,11 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         checkModifyPermission(subject.getId(), appId);
         removeMeasurementsFromCache(mids);
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-        AppdefEntityID[] ids = new AppdefEntityID[1];
-        ids[0] = appId;
         // Unscheduling of all metrics for a resource could indicate that
         // the resource is getting removed.  Send the unschedule synchronously
         // so that all the necessary plumbing is in place.
-        MeasurementProcessorEJBImpl.getOne().unschedule(appId);
+        MeasurementProcessorEJBImpl.getOne().unschedule(
+            Collections.singletonList(appId));
     }
 
     /**
@@ -1091,7 +1123,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         // the resource is getting removed.  Send the unschedule synchronously
         // so that all the necessary plumbing is in place.
         try {
-            MeasurementProcessorEJBImpl.getOne().unschedule(aeid);
+            MeasurementProcessorEJBImpl.getOne().unschedule(
+                Collections.singletonList(aeid));
         } catch (MeasurementUnscheduleException e) {
             log.error("Unable to disable measurements", e);
         }
@@ -1108,6 +1141,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Disable measurements for an instance
+     * Enqueues reschedule events after commit
      *
      * @ejb:interface-method
      */
@@ -1143,7 +1177,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
         
-        sendAgentSchedule(id);
+        List eids = Collections.singletonList(id);
+        AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
+        ZeventManager.getInstance().enqueueEventAfterCommit(event);
     }
 
     /**
@@ -1229,6 +1265,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         ConfigManagerLocal cm = ConfigManagerEJBImpl.getOne();
         TrackerManagerLocal tm = TrackerManagerEJBImpl.getOne();
         AuthzSubjectManagerLocal aman = AuthzSubjectManagerEJBImpl.getOne();
+        List eids = new ArrayList();
         
         for (Iterator i=events.iterator(); i.hasNext(); ) {
             ResourceZevent z = (ResourceZevent)i.next();
@@ -1247,7 +1284,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 // Handle reschedules for when agents are updated.
                 if (isRefresh) {
                     log.info("Refreshing metric schedule for [" + id + "]");
-                    AgentScheduleSynchronizer.scheduleBuffered(id);
+                    eids.add(id);
                     continue;
                 }
     
@@ -1280,6 +1317,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 log.warn("Unable to enable default metrics for [" + id + "]", e);
             }
         }
+        AgentScheduleSynchronizer.scheduleBuffered(eids);
     }
 
     // XXX scottmf, need to re-evalutate why SAMPLE_SIZE is used
@@ -1356,7 +1394,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                                              exc.getMessage(), exc);
         }
     }
-
+    
     /**
      * @return List {@link Measurement} of MeasurementIds
      * @ejb:interface-method
@@ -1412,7 +1450,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         String mtype;
     
         try {
-            if (id.isPlatform() || id.isServer() | id.isService()) {
+            if (id.isPlatform() || id.isServer() || id.isService()) {
                 AppdefEntityValue av = new AppdefEntityValue(id, subj);
                 try {
                     mtype = av.getMonitorableType();

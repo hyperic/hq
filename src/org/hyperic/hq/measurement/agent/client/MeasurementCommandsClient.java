@@ -36,6 +36,8 @@ import org.hyperic.hq.measurement.agent.commands.UnscheduleMeasurements_args;
 import org.hyperic.util.config.ConfigResponse;
 
 public interface MeasurementCommandsClient {
+    
+    void closeConnection() throws AgentRemoteException;
 
     /**
      * Schedule a group of measurements on the agent.  This routine cannot
@@ -92,5 +94,5 @@ public interface MeasurementCommandsClient {
 
     void removeTrackPlugin(String id, String pluginType)
             throws AgentRemoteException, AgentConnectionException;
-
+    
 }

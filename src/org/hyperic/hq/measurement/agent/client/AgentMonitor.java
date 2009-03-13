@@ -94,44 +94,20 @@ public class AgentMonitor
      * @param srn      The entity associated with the schedule
      * @param schedule Information about the schedule of metrics to collect
      */
-    public void schedule(Agent agent, SRN srn,
+    public void schedule(MeasurementCommandsClient client, SRN srn,
                          Measurement[] schedule)
-        throws MonitorAgentException
+        throws AgentRemoteException, AgentConnectionException
     {
-        try {
-            ScheduleMeasurements_args args = new ScheduleMeasurements_args();
-            
-            MeasurementCommandsClient client = 
-                MeasurementCommandsClientFactory.getInstance().getClient(agent);
-            
-            args.setSRN(srn);
-
-            for(int i=0; i<schedule.length; i++){
-                Measurement m = schedule[i];
-
-                String category =
-                    m.getTemplate().getCategory().getName();
-                args.addMeasurement(m.getDsn(),
-                                    m.getInterval(),
-                                    m.getId().intValue(),
-                                    m.getId().intValue(),
-                                    category);
-            }
-
-            client.scheduleMeasurements(args);
-        } catch (AgentConnectionException e) {
-            final String emsg = ERR_REMOTE + agent.connectionString() + 
-                                ": " + e.getMessage();
-
-            this.log.warn(emsg);
-            throw new MonitorAgentException(e.getMessage(), e);
-        } catch (AgentRemoteException e) {
-            final String emsg = ERR_REMOTE + agent.connectionString() + 
-                                ": " + e.getMessage();
-
-            this.log.warn(emsg);
-            throw new MonitorAgentException(emsg, e);
+        ScheduleMeasurements_args args = new ScheduleMeasurements_args();
+        args.setSRN(srn);
+        for(int i=0; i<schedule.length; i++){
+            Measurement m = schedule[i];
+            String category = m.getTemplate().getCategory().getName();
+            args.addMeasurement(m.getDsn(), m.getInterval(),
+                                m.getId().intValue(), m.getId().intValue(),
+                                category);
         }
+        client.scheduleMeasurements(args);
     }
 
     /** 

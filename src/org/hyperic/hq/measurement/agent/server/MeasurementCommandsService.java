@@ -140,9 +140,9 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
                 manager.createPlugin(id, resourceName, response);
             }
         } catch (PluginNotFoundException e) {
-            _log.error(e.getMessage());
+            _log.error(e.getMessage(), e);
         } catch (PluginExistsException e) {
-            _log.error(e.getMessage());
+            _log.error(e.getMessage(), e);
         } catch (PluginException e) {
             _log.error(e.getMessage(), e);
             throw new AgentRemoteException(e.getMessage());
@@ -394,6 +394,10 @@ public class MeasurementCommandsService implements MeasurementCommandsClient {
     private void unscheduleMeasurements(AppdefEntityID id)
         throws UnscheduledItemException {
         _scheduleObject.unscheduleMeasurements(id);
+    }
+
+    public void closeConnection() {
+        // nothing to close here
     }
 
 }
