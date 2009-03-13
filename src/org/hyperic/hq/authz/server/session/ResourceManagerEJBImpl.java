@@ -298,6 +298,13 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
 
     /**
+     * Removes the specified resource by nulling out its resourceType
+     * These resources need to be cleaned up eventually by
+     * {@link AppdefBossEJBImpl.removeDeletedResources}.  This may be done in 
+     * the background via zevent by issuing a {@link ResourcesCleanupZevent}.
+     * @see {@link AppdefBossEJBImpl.removeDeletedResources}
+     * @see {@link ResourcesCleanupZevent}
+     * @param r {@link Resource} resource to be removed.
      * @return AppdefEntityID[] - an array of the resources (including children) deleted
      * @ejb:interface-method
      */
