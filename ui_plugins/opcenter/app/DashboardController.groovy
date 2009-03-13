@@ -334,14 +334,9 @@ class DashboardController extends BaseController
 
             def resource = it["Resource"]
             if (resource) {
-                def logs = resource.getLogs(user, (start - (60 * 60 * 1000)), start)
-                for (log in logs.reverse()) {
-                    // No need to include alert fired events, we already show the long reason
-                    if (log.type != AlertFiredEvent.class.name &&
-                        log.type != EscalationEvent.class.name) {
-                        it["StatusInfo"] << "Last event: " + log.detail + " "
-                        break
-                    }
+                def log = OpCenterDAO.getLastLog(resource)
+                if (log) {
+                    it["StatusInfo"] << "Last event: " + log.detail
                 }
 
                 def availMetric = it.Resource.getAvailabilityMeasurement()
