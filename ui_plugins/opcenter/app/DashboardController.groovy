@@ -128,7 +128,7 @@ class DashboardController extends BaseController
                 result["StatusType"] = "Alert"
                 result["Duration"]   = System.currentTimeMillis() - alert.getCtime()
                 result["StatusInfo"] = new StringBuffer()
-                result["StatusInfo"] << count + " unfixed. "
+                result["StatusInfo"] << count + " occurrences. "
                 result["LastCheck"] = alert.ctime
                 result["Escalation"] = esc
 
