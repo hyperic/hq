@@ -57,6 +57,7 @@ import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.file.FileUtil;
 
 import org.hyperic.sigar.NetFlags;
+import org.hyperic.sigar.ProcExe;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.SigarProxy;
@@ -699,12 +700,13 @@ public abstract class ServerDetector
      * @return The process executable name.
      */
     protected static String getProcExe(long pid, String name) {
+        ProcExe pexe = null;
         try {
-            String exe = getSigar().getProcExe(pid).getName();
-            //possible to be "" on solaris
-            if (exe.length() > 0) {
+            pexe = getSigar().getProcExe(pid);
+            String exe = pexe.getName();
+            if (new File(exe).exists()) {
                 return exe;
-            } //else fallthru
+            }
         } catch (SigarException e) {
             //likely permission denied
         }
@@ -717,6 +719,17 @@ public abstract class ServerDetector
             File bin = new File(argv0);
             if (bin.exists() && bin.isAbsolute()) {
                 return argv0;
+            }
+            if (pexe != null) {
+                //try exe.name relative to exe.cwd
+                bin = new File(pexe.getCwd(), argv0);
+                if (bin.exists() && bin.isAbsolute()) {
+                    try {
+                        return bin.getCanonicalPath();
+                    } catch (IOException e) {
+                        return bin.getPath();
+                    }
+                }
             }
         }
 
