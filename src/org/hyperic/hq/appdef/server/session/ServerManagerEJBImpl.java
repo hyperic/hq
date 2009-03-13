@@ -379,18 +379,20 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
 
             // Service manager will update the collection, so we need to copy
-            Collection services = server.getServices();
             final ServiceManagerLocal sMan = getServiceManager();
-            for (Iterator i = services.iterator(); i.hasNext(); ) {
-                try {
-                    // this looks funky but the idea is to pull the service obj
-                    // into the session so that it is updated when flushed
-                    Service service =
-                        sMan.findServiceById(((Service)i.next()).getId());
-                    service.setServer(null);
-                    i.remove();
-                } catch (ServiceNotFoundException e) {
-                    log.warn(e);
+            Collection services = server.getServices();
+            synchronized(services) {
+                for (Iterator i = services.iterator(); i.hasNext(); ) {
+                    try {
+                        // this looks funky but the idea is to pull the service
+                        // obj into the session so that it is updated when flushed
+                        Service service =
+                            sMan.findServiceById(((Service)i.next()).getId());
+                        service.setServer(null);
+                        i.remove();
+                    } catch (ServiceNotFoundException e) {
+                        log.warn(e);
+                    }
                 }
             }
 

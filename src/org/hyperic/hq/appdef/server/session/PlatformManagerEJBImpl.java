@@ -293,16 +293,21 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
             // Remove servers
             final ServerManagerLocal sMan = getServerManager();
-            for (Iterator i=platform.getServers().iterator(); i.hasNext();) {
-                try {
-                    // this looks funky but the idea is to pull the server obj
-                    // into the session so that it is updated when flushed
-                    Server server =
-                        sMan.findServerById(((Server)i.next()).getId());
-                    server.setPlatform(null);
-                    i.remove();
-                } catch (ServerNotFoundException e) {
-                    log.warn(e.getMessage());
+            final Collection servers = platform.getServersBag();
+            // since we are using the hibernate collection
+            // we need to synchronize
+            synchronized(servers) {
+                for (Iterator i=servers.iterator(); i.hasNext();) {
+                    try {
+                        // this looks funky but the idea is to pull the server
+                        // obj into the session so that it is updated when flushed
+                        Server server =
+                            sMan.findServerById(((Server)i.next()).getId());
+                        server.setPlatform(null);
+                        i.remove();
+                    } catch (ServerNotFoundException e) {
+                        log.warn(e.getMessage());
+                    }
                 }
             }
             final PlatformDAO dao = getPlatformDAO();

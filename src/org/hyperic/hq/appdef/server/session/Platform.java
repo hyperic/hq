@@ -27,6 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -141,10 +142,16 @@ public class Platform extends PlatformBase
         return null;
     }
     
+    /**
+     * @return the readonly collection of servers
+     */
     public Collection getServers() {
-        return _servers;
+        return Collections.unmodifiableCollection(_servers);
     }
 
+    /**
+     * @return the persisted hibernate Bag of servers
+     */
     public Collection getServersBag() {
         return _servers;
     }
