@@ -354,7 +354,29 @@ class DashboardController extends BaseController
                 alert = it["Alert"]
                 def reason = alertMan.getLongReason(alert)
                 it["StatusInfo"] << reason + ". "
-                it["LastCheck"] = alert.ctime
+
+                def lastCheck = 0
+                for (condition in alert.definition.conditions) {
+                    int condType = condition.type
+                    // Search conditions that have measurement ids.
+                    if (condType == 1 || condType == 2 || condType == 4) {
+                        def condMetric = metricHelper.findMeasurementById(condition.measurementId)
+                        def last = condMetric.getLastDataPoint()
+                        if (last && last.timestamp > lastCheck) {
+                            lastCheck = last.timestamp
+                            it["StatusInfo"] << " Current value = " +
+                                condMetric.template.renderWithUnits(last.value) + ". "
+                        }
+                    }
+                }
+
+                // Fall back to last alert evaluation if no metric check is
+                // available.
+                if (lastCheck == 0) {
+                    lastCheck = alert.ctime
+                }
+                it["LastCheck"] = lastCheck
+
             } else if (it["GroupAlert"]) {
                 alert = it["GroupAlert"]
             }
