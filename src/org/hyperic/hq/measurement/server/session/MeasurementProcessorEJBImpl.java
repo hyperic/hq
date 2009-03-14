@@ -57,6 +57,7 @@ import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 import org.hyperic.util.timer.StopWatch;
 
 /**
@@ -150,9 +151,12 @@ public class MeasurementProcessorEJBImpl
         AgentMonitor monitor = new AgentMonitor();
         MeasurementCommandsClient client = null;
         try {
+            final ConcurrentStatsCollector stats =
+                ConcurrentStatsCollector.getInstance();
             client = MeasurementCommandsClientFactory.getInstance()
                                                      .getClient(agent);
             for (Iterator it=eids.iterator(); it.hasNext(); ) {
+                final long begin = now();
                 AppdefEntityID eid = (AppdefEntityID)it.next();
                 List measurements =
                     mMan.findEnabledMeasurements(overlord, eid, null);
@@ -163,6 +167,8 @@ public class MeasurementProcessorEJBImpl
                     Measurement[] meas =
                         (Measurement[])measurements.toArray(new Measurement[0]);
                     monitor.schedule(client, srn, meas);
+                    stats.addStat((now()-begin),
+                        ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
                 } catch (AgentConnectionException e) {
                     final String emsg = "Error reported by agent @ "
                         + agent.connectionString() 
@@ -186,6 +192,10 @@ public class MeasurementProcessorEJBImpl
                 }
             }
         }
+    }
+
+    private final long now() {
+        return System.currentTimeMillis();
     }
 
     private void unschedule(Agent a, AppdefEntityID[] entIds)

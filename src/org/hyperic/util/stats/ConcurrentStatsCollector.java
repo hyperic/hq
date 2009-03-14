@@ -103,7 +103,8 @@ public final class ConcurrentStatsCollector {
         METRIC_DATA_COMPRESS_TIME    = "METRIC_DATA_COMPRESS_TIME",
         DB_ANALYZE_TIME              = "DB_ANALYZE_TIME",
         PURGE_EVENT_LOGS_TIME        = "PURGE_EVENT_LOGS_TIME",
-        PURGE_MEASUREMENTS_TIME      = "PURGE_MEASUREMENTS_TIME";
+        PURGE_MEASUREMENTS_TIME      = "PURGE_MEASUREMENTS_TIME",
+        MEASUREMENT_SCHEDULE_TIME    = "MEASUREMENT_SCHEDULE_TIME";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);

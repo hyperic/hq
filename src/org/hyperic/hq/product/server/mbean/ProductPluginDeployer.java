@@ -270,6 +270,8 @@ public class ProductPluginDeployer
                 ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
             c.register(
                 ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
+            c.register(
+                ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
             c.startCollector();
         } catch (Exception e) {
             _log.error("Could not start Concurrent Stats Collector", e);
