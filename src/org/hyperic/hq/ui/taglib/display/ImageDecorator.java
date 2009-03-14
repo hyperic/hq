@@ -48,16 +48,21 @@ public class ImageDecorator extends BaseDecorator {
     private String onmouseout_el;
     private String src_el;
     private String border_el;
+    private String title_el;
+    
     // attrs are optional
     private boolean borderIsSet = false;
     private boolean onmouseoverIsSet = false;
     private boolean onmouseoutIsSet = false;
-
+    private boolean titleIsSet = false;
+    
     // values post evaluation by el engine
     private String onmouseover_val;
     private String onmouseout_val;
     private String src_val;
     private String border_val;
+    private String title_val;
+    
     /* (non-Javadoc)
      * @see org.hyperic.hq.ui.taglib.display.ColumnDecorator#decorate(java.lang.Object)
      */
@@ -93,6 +98,16 @@ public class ImageDecorator extends BaseDecorator {
             }
         }
 
+        if (titleIsSet) {
+	        try {
+	            setTitleVal(contextPath + (String) evalAttr("title", getTitle(), String.class));
+	        } catch (NullAttributeException e) {
+	            error.append(generateErrorComment(e.getClass().getName(), "title_el", getTitle(), e));
+	        } catch (JspException e) {
+	            error.append(generateErrorComment(e.getClass().getName(), "title_el", getTitle(), e));
+	        }
+        }
+        
         try {
             setSrcVal(contextPath + (String) evalAttr("src", getSrc(), String.class));
         } catch (NullAttributeException e) {
@@ -125,13 +140,16 @@ public class ImageDecorator extends BaseDecorator {
         onmouseout_el = null;
         src_el = null;
         border_el = null;
+        title_el = null;
         onmouseover_val = null;
         onmouseout_val = null;
         src_val = null;
         border_val = null;
+        title_val = null;
         borderIsSet = false;
         onmouseoverIsSet = false;
         onmouseoutIsSet = false;
+        titleIsSet = false;
     }
         
     private String generateOutput() {
@@ -153,6 +171,11 @@ public class ImageDecorator extends BaseDecorator {
               .append(getOnmouseoutVal()).append("\"");
         }
                 
+        if (titleIsSet) {
+        	sb.append(" title=\"")
+        	  .append(getTitleVal()).append("\"");
+        }
+        
         sb.append("\">");
         return sb.toString();
     }
@@ -189,6 +212,14 @@ public class ImageDecorator extends BaseDecorator {
         return src_el;
     }
 
+    /** 
+     * Returns the title_el
+     * @return String
+     */
+    public String getTitle() {
+    	return title_el;
+    }
+    
     /**
      * Sets the border_el.
      * @param border_el The border_el to set
@@ -225,6 +256,15 @@ public class ImageDecorator extends BaseDecorator {
     }
 
     /**
+     * Sets the title_el
+     * @param title_el The title_el to set
+     */
+    public void setTitle(String title_el) {
+    	titleIsSet = true;
+    	this.title_el = title_el;
+    }
+    
+    /**
      * Returns the border_val.
      * @return String
      */
@@ -257,6 +297,14 @@ public class ImageDecorator extends BaseDecorator {
     }
 
     /**
+     * Returns the title_val.
+     * @return String
+     */
+    private String getTitleVal() {
+        return title_val;
+    }
+
+    /**
      * Sets the border_val.
      * @param border_val The border_val to set
      */
@@ -286,6 +334,14 @@ public class ImageDecorator extends BaseDecorator {
      */
     private void setSrcVal(String src_val) {
         this.src_val = src_val;
+    }
+
+    /**
+     * Sets the title_val.
+     * @param title_val The title_val to set
+     */
+    private void setTitleVal(String title_val) {
+        this.title_val = title_val;
     }
 
 }

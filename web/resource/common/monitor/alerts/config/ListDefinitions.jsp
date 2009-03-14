@@ -218,11 +218,11 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 
 <tiles:insert definition=".portlet.confirm"/>
 <display:table cellspacing="0" cellpadding="0" width="100%"
-               action="${sortAction}" items="${Definitions}" >
+               action="${sortAction}" items="${Definitions}" var="def" >
   <display:column width="1%" property="id" 
                   title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"listToggleAll\">"  
                    isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" >
-  <display:checkboxdecorator name="definitions" onclick="ToggleSelection(this,widgetProperties)" styleClass="listMember"/>
+    <display:checkboxdecorator name="definitions" onclick="ToggleSelection(this,widgetProperties)" styleClass="listMember"/>
   </display:column>
   <display:column width="1%" property="parentId"
                   title="nbsp" styleClass="redTableCell">
@@ -245,9 +245,10 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <display:datedecorator/>
   </display:column>
                   
-  <display:column width="10%" property="enabled"
-                  title="alerts.config.DefinitionList.ListHeader.Active">
-    <display:booleandecorator flagKey="yesno"/>
+  <display:column width="10%" property="active" title="alerts.config.DefinitionList.ListHeader.Active">
+	
+	<display:alertdefstatedecorator active="${def.active}" disabled="${def.active && !def.enabled}" />
+
   </display:column>
 
 </display:table>
