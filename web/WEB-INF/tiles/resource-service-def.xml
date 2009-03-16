@@ -162,7 +162,7 @@
             height="25" width="104"
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Configure" mode="list"
-            link="/alerts/Alerts.do"
+            link="/alerts/Config.do"
             height="25" width="104"
             classtype="org.hyperic.hq.ui.util.Tab"/>
     </putList>
@@ -178,7 +178,7 @@
             height="25" width="104"
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Configure" mode="list"
-            link="/alerts/Alerts.do"
+            link="/alerts/Config.do"
             height="25" width="104"
             classtype="org.hyperic.hq.ui.util.Tab"/>
     </putList>
