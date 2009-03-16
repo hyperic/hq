@@ -9665,6 +9665,35 @@ has already been defined.
   </schemaSpec>
 
   <schemaSpec version="3.138">
+    <schema-directSQL>
+      <statement targetDB="mysql">
+        alter table EAM_CPROP drop foreign key FKE5D04798CCF47F9F
+      </statement>
+      <statement targetDB="mysql">
+        drop index KEYID on EAM_CPROP
+      </statement>
+      <statement targetDB="mysql">
+        alter table EAM_CPROP add constraint FKE5D04798CCF47F9F foreign key (KEYID) REFERENCES EAM_CPROP_KEY (ID)
+      </statement>
+      <statement targetDB="mysql">
+        create unique index APPDEF_ID on EAM_CPROP(APPDEF_ID, KEYID, VALUE_IDX)
+      </statement>
+      <statement targetDB="oracle">
+        alter table EAM_CPROP drop unique (KEYID, APPDEF_ID, VALUE_IDX)
+      </statement>
+      <statement targetDB="oracle">
+        alter table EAM_CPROP add unique (APPDEF_ID, KEYID, VALUE_IDX)
+      </statement>
+      <statement targetDB="postgresql">
+        alter table EAM_CPROP drop constraint eam_cprop_keyid_key
+      </statement>
+      <statement targetDB="postgresql">
+        alter table EAM_CPROP add unique (APPDEF_ID, KEYID, VALUE_IDX)
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
+  <schemaSpec version="3.139">
     <schema-alterColumn table="EAM_MEASUREMENT"
                         column="DSN"
                         precision="2048"
