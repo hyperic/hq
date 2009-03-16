@@ -49,7 +49,7 @@
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Alert" mode="list"
-            link="/alerts/Config.do"
+            link="/alerts/Alerts.do"
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Control" link="/resource/service/Control.do"
@@ -72,7 +72,7 @@
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Alert" mode="list"
-            link="/alerts/Config.do"
+            link="/alerts/Alerts.do"
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Views" mode="list"
@@ -162,7 +162,7 @@
             height="25" width="104"
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Configure" mode="list"
-            link="/alerts/Config.do"
+            link="/alerts/Alerts.do"
             height="25" width="104"
             classtype="org.hyperic.hq.ui.util.Tab"/>
     </putList>
@@ -178,7 +178,7 @@
             height="25" width="104"
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Configure" mode="list"
-            link="/alerts/Config.do"
+            link="/alerts/Alerts.do"
             height="25" width="104"
             classtype="org.hyperic.hq.ui.util.Tab"/>
     </putList>
