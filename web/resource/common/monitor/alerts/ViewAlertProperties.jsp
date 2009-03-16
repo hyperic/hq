@@ -1,10 +1,11 @@
-<%@ page language="java" %>
-<%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="hq" prefix="hq" %>
+<%@ page language="java"%>
+<%@ page errorPage="/common/Error.jsp"%>
+<%@ taglib uri="struts-html-el" prefix="html"%>
+<%@ taglib uri="struts-tiles" prefix="tiles"%>
+<%@ taglib uri="jstl-fmt" prefix="fmt"%>
+<%@ taglib uri="jstl-c" prefix="c"%>
+<%@ taglib uri="hq" prefix="hq"%>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -30,41 +31,90 @@
   USA.
  --%>
 
-
-
 <!-- Content Block Title: Properties -->
 <tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="alert.current.detail.props.Title"/>
+	<tiles:put name="tabKey" value="alert.current.detail.props.Title" />
 </tiles:insert>
 
 <!-- Properties Content -->
-<table width="100%" cellpadding="0" cellspacing="0" class="TableBottomLine">
-  <tr valign="top">
-    <td width="20%" class="BlockLabel"><fmt:message key="common.label.Name"/></td>
-    <td width="30%" class="BlockContent"><c:out value="${alertDef.name}"/>
-    <c:if test="${not empty Resource}"><br>
-      <html:link page="/alerts/Config.do?mode=viewDefinition&eid=${Resource.entityId.appdefKey}&ad=${alertDef.id}"><fmt:message key="alert.config.props.PB.ViewDef"/></html:link></c:if></td>
-    <td width="20%" class="BlockLabel"><fmt:message key="alert.config.props.PB.Priority"/></td>
-    <td width="30%" class="BlockContent" colspan="2">
-      <fmt:message key="${'alert.config.props.PB.Priority.'}${alertDef.priority}"/>
-    </td>
-  </tr>
-  <tr valign="top">
-    <td class="BlockLabel">&nbsp;<c:if test="${not empty Resource}"><fmt:message key="common.label.Resource"/></c:if></td>
-    <td class="BlockContent">
-      <c:if test="${not empty Resource}">
-        <html:link action="/Resource" paramId="eid" paramName="Resource" paramProperty="entityId"><c:out value="${Resource.name}"/></html:link>
-      </c:if>
-      &nbsp;</td>
-    <td class="BlockLabel"><fmt:message key="alert.current.detail.props.AlertDate"/></td>
-    <td class="BlockContent"><hq:dateFormatter time="false" value="${alert.ctime}"/></td>
-  </tr>
-  <tr valign="top">
-    <td width="20%" class="BlockLabel"><c:if test="${not empty alertDef.description}"><fmt:message key="common.label.Description"/></c:if>&nbsp;</td>
-    <td width="30%" class="BlockContent"><c:out value="${alertDef.description}"/>&nbsp;</td>
-    <td width="20%" class="BlockLabel"><fmt:message key="alert.config.props.PB.AlertDefinitionActive"/></td>
-    <tiles:insert page="/resource/common/monitor/alerts/config/AlertDefinitionActive.jsp">
-    <tiles:put name="alertDef" beanName="alertDef"/>
-    </tiles:insert>
-  </tr>
+<table width="100%" cellpadding="0" cellspacing="0"	class="TableBottomLine">
+	<tr valign="top">
+		<td width="20%" class="BlockLabel">
+			<fmt:message key="common.label.Name" />
+		</td>
+		<td width="30%" class="BlockContent">
+			<c:choose>
+				<c:when test="${not empty Resource}">
+					<html:link page="/alerts/Config.do?mode=viewDefinition&eid=${Resource.entityId.appdefKey}&ad=${alertDef.id}"
+					           titleKey="alert.config.props.PB.ViewDef">
+						<c:out value="${alertDef.name}" />
+					</html:link>
+				</c:when>
+				<c:otherwise>
+					<c:out value="${alertDef.name}" />
+				</c:otherwise>
+			</c:choose>
+		</td>
+		<td width="20%" class="BlockLabel">
+			<fmt:message key="alert.config.props.PB.Priority" />
+		</td>
+		<td width="30%" class="BlockContent">
+			<fmt:message key="${'alert.config.props.PB.Priority.'}${alertDef.priority}" />
+		</td>
+	</tr>
+	<tr valign="top">
+		<td class="BlockLabel">
+			<c:if test="${not empty Resource}">
+				<fmt:message key="common.label.Resource" />
+			</c:if>
+		</td>
+		<td class="BlockContent">
+			<c:if test="${not empty Resource}">
+				<html:link action="/Resource" 
+				           paramId="eid" 
+				           paramName="Resource"
+						   paramProperty="entityId">
+					<c:out value="${Resource.name}" />
+				</html:link>
+			</c:if>
+		</td>
+		<td class="BlockLabel">
+			<fmt:message key="alert.current.detail.props.AlertDate" />
+		</td>
+		<td class="BlockContent">
+			<hq:dateFormatter time="false" value="${alert.ctime}" />
+		</td>
+	</tr>
+	<tr valign="top">
+		<td width="20%" class="BlockLabel">
+			<c:if test="${not empty alertDef.description}">
+				<fmt:message key="common.label.Description" />
+			</c:if>
+		</td>
+		<td width="30%" class="BlockContent">
+			<c:out value="${alertDef.description}" />
+		</td>
+		<td width="20%" class="BlockLabel">
+			<fmt:message key="alert.config.props.PB.AlertStatus" />
+		</td>
+		<td width="30%" class="BlockContent">
+			<c:choose>
+				<!-- For now, the alert is fixed, or not fixed -->
+				<c:when test="${alert.fixed}">
+					<html:img page="/images/icon_fixed.gif" 
+					          width="12" 
+					          height="12"
+						      border="0" />
+					<fmt:message key="resource.common.alert.action.fixed.label" />
+				</c:when>
+				<c:otherwise>
+					<html:img page="/images/icon_available_red.gif" 
+					          width="12"
+						      height="12" 
+						      border="0" />
+					<fmt:message key="resource.common.alert.action.notfixed.label" />
+				</c:otherwise>
+			</c:choose>
+		</td>
+	</tr>
 </table>

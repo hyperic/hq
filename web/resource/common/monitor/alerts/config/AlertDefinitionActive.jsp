@@ -31,14 +31,22 @@
 <tiles:importAttribute name="alertDef"/>
 
 <td width="30%" class="BlockContent">
-<c:choose>
-  <c:when test="${alertDef.enabled}">
-      <html:img page="/images/icon_available_green.gif" width="12" height="12" border="0"/>
-      <fmt:message key="alert.config.props.PB.ActiveYes"/>
-  </c:when>
-  <c:otherwise>
-      <html:img page="/images/icon_available_red.gif" width="12" height="12" border="0"/>
-      <fmt:message key="alert.config.props.PB.ActiveNo"/>
-  </c:otherwise>
-</c:choose>
+	<span style="whitespace:nowrap">
+	<c:choose>
+  		<c:when test="${alertDef.active}">
+      		<fmt:message key="alert.config.props.PB.ActiveYes"/>
+      		<c:if test="${not alertDef.enabled}">
+				&nbsp;<html:img page="/images/flag_yellow.gif" 
+				                width="14" 
+				                height="14" 
+				                border="0" 
+				                align="absmiddle"
+				                titleKey="alert.config.props.PB.ActiveButDisabled" />
+      		</c:if>
+  		</c:when>
+  		<c:otherwise>
+      		<fmt:message key="alert.config.props.PB.ActiveNo"/>
+  		</c:otherwise>
+	</c:choose>
+	</span>
 </td>

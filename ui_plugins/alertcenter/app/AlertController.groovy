@@ -159,7 +159,19 @@ class AlertController
             [field:AlertDefSortField.MTIME, width:'13%',
              label:{df.format(it.mtime)}],
             [field:AlertDefSortField.ACTIVE, width:'5%',
-             label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
+             label:{
+             	def markUp = "<span style='whitespace:nowrap:'>"
+             	 
+            	if (it.active && !it.enabled) {
+	             	def imgUrl = urlFor(asset:'images') + "/flag_yellow.gif"
+	             	
+        			markUp += YesOrNo.valueFor(it.active).value.capitalize() + "&nbsp;<img align='absmiddle' src='${imgUrl}' width='16' height='16' border='0' class='severityIcon' title='$localeBundle.ActiveButDisabled'/>"
+             	} else {
+             		markUp += YesOrNo.valueFor(it.active).value.capitalize()
+             	} 
+             	
+             	return markUp + "</span>"
+			}],
             [field:AlertDefSortField.LAST_FIRED, width:'13%',
              label:{
                 if (it.lastFired)
@@ -198,7 +210,9 @@ class AlertController
             [field:AlertDefSortField.MTIME, width:'13%',
              label:{df.format(it.mtime)}], 
             [field:AlertDefSortField.ACTIVE, width:'7%',
-             label:{YesOrNo.valueFor(it.enabled).value.capitalize()}],
+             label:{
+             	
+             }],
             [field:[getValue: {localeBundle.ResourceType },
                     description:'resourceType', sortable:false], width:'19%',
              label:{it.resourceType.name}],
