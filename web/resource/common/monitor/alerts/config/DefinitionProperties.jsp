@@ -113,7 +113,15 @@
     <td width="30%" class="BlockContent">
       <html:radio property="active" value="true"/>
       <fmt:message key="alert.config.props.PB.ActiveYes"/><br>
-      <html:radio property="active" value="false"/>
+      <c:choose>
+      	<c:when test="${alertDef.enabled}">
+	      <html:radio property="active" value="false"/>
+      	</c:when>
+      	<c:otherwise>
+      	  <fmt:message var="activeButDisabledWarningMsg" key="alert.config.props.PB.ActiveButDisabledWarning" />
+	      <html:radio property="active" value="false" onchange="if (this.checked) { alert('${activeButDisabledWarningMsg}'); }" />
+      	</c:otherwise>
+      </c:choose>
       <fmt:message key="alert.config.props.PB.ActiveNo"/>
     </td>
     </logic:messagesNotPresent>
