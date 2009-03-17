@@ -169,7 +169,9 @@ class DashboardController extends BaseController
 
         for (it in unfixedGroupAlerts) {
 
-            if (typefilter != TYPEFILTER_ALERTSESC) {
+            if (typefilter == TYPEFILTER_DOWN || typefilter == TYPEFILTER_ALERTSNOESC) {
+                // Don't show group alerts in down resources or if filtering
+                // by alerts without escalations. (All group alerts require an escalation)
                 continue
             }
 
