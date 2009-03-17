@@ -19,7 +19,7 @@
         <column name="APPDEF_ID" not-null="true"/>
       </property>
       <many-to-one name="key" class="CpropKey">
-        <column name="KEYID" not-null="true"/>
+        <column name="KEYID" not-null="true" index="KEYID_IDX"/>
       </many-to-one>
       <property name="valueIdx" type="integer">
         <column name="VALUE_IDX" not-null="true"/>

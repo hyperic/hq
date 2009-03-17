@@ -9690,6 +9690,9 @@ has already been defined.
       <statement targetDB="postgresql">
         alter table EAM_CPROP add unique (APPDEF_ID, KEYID, VALUE_IDX)
       </statement>
+      <statement>
+        create index KEYID_IDX on EAM_CPROP (KEYID)
+      </statement>
     </schema-directSQL>
   </schemaSpec>
 
