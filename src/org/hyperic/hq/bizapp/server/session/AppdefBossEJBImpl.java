@@ -1308,7 +1308,6 @@ public class AppdefBossEJBImpl
      * in the zevent queue by issuing a {@link ResourcesCleanupZevent}
      * @return AppdefEntityID[] - an array of the resources (including children)
      * deleted
-     * @return AppdefEntityID[] - an array of the resources (including children) deleted
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */
@@ -3944,6 +3943,8 @@ public class AppdefBossEJBImpl
                 }
             }
         );
+        ZeventManager.getInstance().enqueueEventAfterCommit(
+            new ResourcesCleanupZevent());
     }
 
     public static AppdefBossLocal getOne() {
