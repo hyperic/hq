@@ -63,13 +63,19 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
+import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
@@ -366,6 +372,31 @@ public class AIQueueManagerEJBImpl
         }
 
         return aiserver.getAIServerValue();
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public void startup() {
+        HQApp.getInstance().registerCallbackListener(
+            ResourceDeleteCallback.class, new ResourceDeleteCallback() {
+                public void preResourceDelete(Resource r) throws VetoException {
+                    if (r == null || r.isInAsyncDeleteState()) {
+                        return;
+                    }
+                    final ResourceType type = r.getResourceType();
+                    if (!type.getId().equals(AuthzConstants.authzPlatform)) {
+                        return;
+                    }
+                    AIPlatform aiPlat =
+                        getAIPlatformByPlatformID(r.getInstanceId());
+                    if (aiPlat == null) {
+                        return;
+                    }
+                    getAIPlatformDAO().remove(aiPlat);
+                }
+            }
+        );
     }
 
     /**

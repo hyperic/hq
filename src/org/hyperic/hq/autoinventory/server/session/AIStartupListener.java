@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
@@ -60,6 +61,7 @@ public class AIStartupListener
         events.add(MergePlatformAndServersZevent.class);
         zMan.addBufferedListener(events, new RuntimePlatformAndServerMerger());
         AutoinventoryManagerEJBImpl.getOne().startup();
+        AIQueueManagerEJBImpl.getOne().startup();
     }
 
     /**
