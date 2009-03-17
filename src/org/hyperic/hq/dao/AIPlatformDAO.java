@@ -137,12 +137,12 @@ public class AIPlatformDAO extends HibernateDAO
         return getSession().createQuery(sql).list();
     }
 
-    public Collection findByFQDN(String fqdn)
+    public AIPlatform findByFQDN(String fqdn)
     {
         String sql="from AIPlatform where fqdn=?";
-        return getSession().createQuery(sql)
+        return (AIPlatform)getSession().createQuery(sql)
             .setString(0, fqdn)
-            .list();
+            .uniqueResult();
     }
 
     public AIPlatform findByCertDN(String dn)

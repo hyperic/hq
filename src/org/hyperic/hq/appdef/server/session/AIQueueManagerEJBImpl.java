@@ -337,16 +337,8 @@ public class AIQueueManagerEJBImpl
         AIPlatformValue aiplatformValue = null;
 
         // XXX Do authz check
-        Collection aiplatforms = getAIPlatformDAO().findByFQDN(fqdn);
-
-        Iterator i = aiplatforms.iterator();
-        while (i.hasNext()) {
-            if (aiplatform != null) {
-                throw new SystemException("Multiple platforms matched fqdn.");
-            }
-            aiplatform = (AIPlatform) i.next();
-            aiplatformValue = aiplatform.getAIPlatformValue();
-        }
+        AIPlatform aiPlatform = getAIPlatformDAO().findByFQDN(fqdn);
+        aiplatformValue = aiPlatform.getAIPlatformValue();
 
         if (aiplatformValue == null) {
             return null;
@@ -681,7 +673,11 @@ public class AIQueueManagerEJBImpl
      * @ejb:interface-method
      */
     public AIPlatformValue getAIPlatformByPlatformID(AuthzSubject subject,
-                                                     Integer platformID)
+                                                     Integer platformID) {
+        return getAIPlatformByPlatformID(platformID).getAIPlatformValue();
+    }
+
+    private AIPlatform getAIPlatformByPlatformID(Integer platformID)
     {
         Platform pLocal = getPlatformDAO().get(platformID);
 
@@ -703,7 +699,7 @@ public class AIQueueManagerEJBImpl
                 if (addrs.size() > 0) {
                     AIPlatform aiplatform =
                         ((AIIp) addrs.get(0)).getAIPlatform();
-                    return aiplatform.getAIPlatformValue();
+                    return aiplatform;
                 }
             }
 
@@ -723,7 +719,7 @@ public class AIQueueManagerEJBImpl
             List addrs = getAIIpDAO().findByAddress(address);
             if (addrs.size() > 0) {
                 AIPlatform aiplatform = ((AIIp) addrs.get(0)).getAIPlatform();
-                return aiplatform.getAIPlatformValue();
+                return aiplatform;
             }
         }
 

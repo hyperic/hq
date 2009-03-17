@@ -127,23 +127,14 @@ public class AIQSynchronizer {
         AIPlatform aiPlatform;
         String certdn = aiPlatformValue.getCertdn();
         String fqdn = aiPlatformValue.getFqdn();
-        Collection fqdnMatches;
         // Try FQDN first
-        fqdnMatches = aiPlatformLH.findByFQDN(fqdn);
+        AIPlatform fqdnMatch = aiPlatformLH.findByFQDN(fqdn);
 
-        if (fqdnMatches.size() != 1) {
+        if (fqdnMatch == null) {
             aiPlatform = aiPlatformLH.findByCertDN(certdn);
-            if (aiPlatform == null) {
-                if (fqdnMatches.size() > 1) {
-                    _log.warn("Multiple platforms matched FQDN: " +
-                              fqdn + " [" + fqdnMatches + "]");
-                }
-                return null;
-            }
             return aiPlatform;
+        } else {
+            return fqdnMatch;
         }
-
-        Iterator i = fqdnMatches.iterator();
-        return (AIPlatform) i.next();
     }
 }
