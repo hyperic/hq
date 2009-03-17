@@ -11,7 +11,7 @@ body {
 }
 
 #wrapper {
-    min-width: 1038px
+    width: 100%;
 }
 
 a:visited,a:hover,a {
