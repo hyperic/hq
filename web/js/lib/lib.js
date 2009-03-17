@@ -105,7 +105,7 @@ hyperic.form = {
 	
 		for (var i = myPauseSelect.length-1; i >= 0; i--) {
 			var optionChild = myPauseSelect[i];
-			if (optionChild.value > maxPauseTime) {
+			if (parseFloat(optionChild.value) > parseFloat(maxPauseTime)) {
 				myPauseSelect.removeChild(optionChild);
 			} else {
 				break;
@@ -3409,7 +3409,7 @@ hyperic.alert_center = function(title_name) {
 	        if (e.className.indexOf("ackableAlert") >= 0 && e.checked) {
 	        	// checkbox id is in the format: {portalName}|{appdefKey}|{alertId}|{maxPauseTime}
 	        	var alertParams = e.id.split("|");
-	        	var maxPauseTime = parseInt(alertParams[alertParams.length-1]);
+	        	var maxPauseTime = parseFloat(alertParams[alertParams.length-1]);
 	        	if (maxPauseTime < commonMaxPauseTime) {
 	        		commonMaxPauseTime = maxPauseTime;
 	        	}
