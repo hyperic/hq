@@ -28,38 +28,39 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
   USA.
  --%>
+ 
+<tiles:importAttribute name="labelKey" />
+<tiles:importAttribute name="buttonHref" ignore="true" /> <%-- This attribute has been deprecated --%>
+<tiles:importAttribute name="buttonClick" />
+<tiles:importAttribute name="icon" ignore="true" />
+<tiles:importAttribute name="disabled" ignore="true" />
 
-<tiles:importAttribute name="labelKey"/>
-<tiles:importAttribute name="buttonHref"/>
-<tiles:importAttribute name="buttonClick"/>
-<tiles:importAttribute name="icon" ignore="true"/>
-<tiles:importAttribute name="disabled" ignore="true"/>
-
-<table cellspacing="0" cellpadding="0">
-<tr><td class="buttonLeft">
-</td>
-<td class="buttonRight " valign="middle" nowrap="true">
-<c:choose>
-<c:when test="${disabled}">
-  <span class="InactiveText"><fmt:message key="${labelKey}"/></span>
-</c:when>
-<c:otherwise>
-  <span id="button"><a href="<c:out value="${buttonHref}" escapeXml="false"/>" onclick="<c:out value="${buttonClick}" escapeXml="false"/>"><fmt:message key="${labelKey}"/></a></span>
-</c:otherwise>
-</c:choose>
-
-<c:if test="${not empty icon}">
-<c:if test="${disabled}">
-  <span style="filter: alpha(opacity=50); opacity: 0.5;">
-</c:if>
-    <span style="padding-left: 3px;"><c:out value="${icon}" escapeXml="false"/></span>
-<c:if test="${disabled}">
-  </span>
-</c:if>
-
-</c:if>
-</td>
-
-</tr>
-</table>
-
+<div style="white-space:nowrap; text-align: left;">
+	<c:choose>
+		<c:when test="${disabled}">
+			<span class="InactiveText"><fmt:message key="${labelKey}" /></span>
+		</c:when>
+		<c:otherwise>
+			<input type="button" 
+				   id="button" 
+				   value="<fmt:message key="${labelKey}"/>" 
+				   onclick="<c:out value="${buttonClick}" escapeXml="false"/>" 
+				   style="color:#fff;font-weight:700;width:auto;overflow:visible;" />
+			
+			<c:if test="${not empty buttonHref}">
+				<!-- the buttonHref attribute has been deprecated, use buttonClick attribute instead -->
+			</c:if>
+		</c:otherwise>
+	</c:choose> 
+	<c:if test="${not empty icon}">
+		<c:if test="${disabled}">
+			<span style="filter: alpha(opacity = 50); opacity: 0.5;">
+		</c:if>
+		<span style="padding-left: 3px;">
+			<c:out value="${icon}" escapeXml="false" />
+		</span>
+		<c:if test="${disabled}">
+			</span>
+		</c:if>
+	</c:if>
+</div>

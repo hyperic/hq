@@ -44,7 +44,6 @@
     <td nowrap style="font-size:10px" width="90">
     <tiles:insert page="/common/components/ActionButton.jsp">
           <tiles:put name="labelKey" value="common.label.ViewMetrics"/>
-          <tiles:put name="buttonHref" value="."/>
           <tiles:put name="buttonClick" value="document.ProblemMetricsDisplayForm.submit(); return false;"/>
         </tiles:insert>
         <html:hidden property="fresh" value="false"/>

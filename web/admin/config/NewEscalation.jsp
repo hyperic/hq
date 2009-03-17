@@ -996,7 +996,6 @@ function editEscalation (row) {
       <td>
         <tiles:insert page="/common/components/ActionButton.jsp">
           <tiles:put name="labelKey" value="common.label.Next"/>
-          <tiles:put name="buttonHref" value="."/>
           <tiles:put name="buttonClick" value="return saveNewEscalation();"/>
         </tiles:insert>
       </td>

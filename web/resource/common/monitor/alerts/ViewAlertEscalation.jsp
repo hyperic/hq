@@ -81,8 +81,7 @@
         <div style="text-align:left;">
 <tiles:insert page="/common/components/ActionButton.jsp">
   <tiles:put name="labelKey" value="resource.common.alert.action.acknowledge.label"/>
-  <tiles:put name="buttonHref" value="javascript:document.forms[0].submit();"/>
-  <tiles:put name="buttonClick">dojo.byId('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.acknowledge.label"/>')</tiles:put>
+  <tiles:put name="buttonClick">dojo.byId('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.acknowledge.label"/>'); document.forms[0].submit();</tiles:put>
   <c:choose>
     <c:when test="${alert.acknowledgeable}">
       <tiles:put name="disabled" value="false"/>
