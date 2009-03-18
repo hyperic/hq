@@ -394,7 +394,8 @@ class DashboardController extends BaseController
                     long next = escState.nextActionTime
                     if (next != Long.MAX_VALUE) {
                         it["StatusInfo"] << "Next escalation at " +
-                            DF.format(new Date(escState.nextActionTime)) + ". "                    }
+                            DF.format(new Date(escState.nextActionTime)) + ". "
+                    }
 
                     def acked = escState.getAcknowledgedBy()
                     if (acked) {
