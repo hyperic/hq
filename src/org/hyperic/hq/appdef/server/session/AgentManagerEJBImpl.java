@@ -635,6 +635,9 @@ public class AgentManagerEJBImpl
                                               "entity which can return " +
                                               "multiple agents");
             }
+            if (platform == null) {
+                throw new AgentNotFoundException("No agent found for " + aID);
+            }
             return platform.getAgent();
 
         } catch (ObjectNotFoundException exc) {

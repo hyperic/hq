@@ -895,7 +895,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         throws PlatformNotFoundException, PermissionException {
         Server server = getServerDAO().get(serverId);
 
-        if (server == null) {
+        if (server == null || server.getPlatform() == null) {
             // This should throw server not found. Servers always have
             // platforms..
             throw new PlatformNotFoundException("platform for server "
