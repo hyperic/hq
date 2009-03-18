@@ -502,7 +502,13 @@ class DashboardController extends BaseController
                 [field:  priorityCol,
                  width:  '3%',
                  nowrap: false,
-                 label:  { if (it.Priority) { PRIORITIES[it.Priority] } } ],
+                 label:  {
+                     if (it.Priority) {
+                         return "<div style=\"text-align:center\">${PRIORITIES[it.Priority]}</div>"
+                     } else {
+                         return ""
+                     }
+                 }],
                 [field:  statusTypeCol,
                  width:  '5%',
                  nowrap: false,
