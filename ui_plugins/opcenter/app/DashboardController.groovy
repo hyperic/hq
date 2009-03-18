@@ -66,6 +66,10 @@ class DashboardController extends BaseController
     private canView(resource) {
         def appdefRes
 
+        if (resource.isInAsyncDeleteState()) {
+            return false
+        }
+
         if (resource.isPlatform()) {
             appdefRes = resource.toPlatform()
         } else if (resource.isServer()) {
