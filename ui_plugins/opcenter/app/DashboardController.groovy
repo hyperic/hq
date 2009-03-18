@@ -38,14 +38,10 @@ class DashboardController extends BaseController
         setJSONMethods(['updateDashboard']) 
     }
 
-    private getIconUrl(String img, String title, String fn) {
+    private getIconUrl(String img, String title) {
         def imgUrl = urlFor(asset:'images') + "/" + img
-        def onClick = ""
-        if (fn) {
-            onClick = "onclick=\"${fn}\""
-        }
 
-        """<img src="${imgUrl}" title="${title}" ${onClick}">"""
+        """<img src="/${imgUrl}" title="${title}">"""
     }
 
     /**
@@ -384,7 +380,7 @@ class DashboardController extends BaseController
 
             def esc = it["Escalation"]
             if (alert && esc) {
-                it["State"] << getIconUrl("notify.gif", "Alert In Escalation", null)
+                it["State"] << getIconUrl("notify.gif", "Alert In Escalation")
 
                 // TODO: There must be a better way to get this..
                 def actionLogs = alert.getActionLog().asList()
@@ -402,7 +398,7 @@ class DashboardController extends BaseController
                     if (acked) {
                         def ackedBy = DF.format(lastLog.timeStamp) +
                                       ": " + lastLog.detail + ". "
-                        it["State"] << getIconUrl("ack.gif", ackedBy, null)
+                        it["State"] << getIconUrl("ack.gif", ackedBy)
                     }
                 }
             }                    
