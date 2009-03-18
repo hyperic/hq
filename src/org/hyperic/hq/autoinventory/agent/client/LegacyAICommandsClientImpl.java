@@ -131,12 +131,12 @@ public class LegacyAICommandsClientImpl implements AICommandsClient {
         try {
             agentConn.sendCommand(AICommandsAPI.command_pushRuntimeDiscoveryConfig,
                                   verAPI.getVersion(), arv); 
-        } catch (AgentConnectionException ace) {
+        } catch (AgentConnectionException e) {
             log.error("Error connecting to agent to push runtime discovery "
-                      + "config: " + ace.getMessage());
-        } catch (AgentRemoteException are) {
+                      + "config: " + e.getMessage(), e);
+        } catch (AgentRemoteException e) {
             log.error("Error sending runtime discover configuration to agent: "
-                      + are.getMessage());
+                      + e.getMessage(), e);
         }
     }
 
