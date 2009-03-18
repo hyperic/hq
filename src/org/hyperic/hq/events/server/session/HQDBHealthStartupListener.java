@@ -99,7 +99,7 @@ public class HQDBHealthStartupListener
         private long healthOkStartTime = 0; // time of first OK health check
         private long lastHealthOkTime = 0; // time of last OK health check
         private int numOfHealthCheckFailures = 0;   
-        private final String HQADMIN_EMAIL_SQL = "SELECT email_address FROM eam_subject WHERE id = " 
+        private final String HQADMIN_EMAIL_SQL = "SELECT email_address FROM EAM_SUBJECT WHERE id = " 
                                                     + AuthzConstants.rootSubjectId;
         private String hqadminEmail = null;
 
