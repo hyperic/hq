@@ -391,8 +391,10 @@ class DashboardController extends BaseController
                 def definition = alert?.definition
                 def escState = escMan.findEscalationState(definition)
                 if (escState) {
-                    it["StatusInfo"] << "Next escalation at " +
-                        DF.format(new Date(escState.nextActionTime)) + ". "
+                    long next = escState.nextActionTime
+                    if (next != Long.MAX_VALUE) {
+                        it["StatusInfo"] << "Next escalation at " +
+                            DF.format(new Date(escState.nextActionTime)) + ". "                    }
 
                     def acked = escState.getAcknowledgedBy()
                     if (acked) {
