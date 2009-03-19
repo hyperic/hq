@@ -357,19 +357,46 @@ public class MetricSessionEJB extends BizappSessionEJB {
                                        AppdefEntityID[] ids)
         throws AppdefEntityNotFoundException,
                PermissionException {
-    
         // Allow for the maximum window based on collection interval
-        Map midMap = new HashMap(ids.length);        
-        for (int i = 0; i < ids.length; i++) {
-            Measurement m =  getMetricManager()
-                .getAvailabilityMeasurement(subject, ids[i]);
+        return getAvailability(subject, ids, getMidMap(getResources(ids)), null);
+    }
     
-            if (m != null) {
-                midMap.put(ids[i], m.getId());
+    private final List getResources(AppdefEntityID[] ids) {
+        final List resources = new ArrayList(ids.length);
+        final ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+        for (int i = 0; i < ids.length; i++) {
+            final Resource r = rMan.findResource(ids[i]);
+            if (r == null || r.isInAsyncDeleteState()) {
+                continue;
             }
+            resources.add(rMan.findResource(ids[i]));
         }
-        
-        return getAvailability(subject, ids, midMap, null);
+        return resources;
+    }
+    
+    private final Map getMidMap(Collection resources) {
+        final Map midMap = new HashMap(resources.size());
+        final Map measurements =
+            getMetricManager().getAvailMeasurements(resources);
+        final ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+        for (Iterator it=measurements.entrySet().iterator(); it.hasNext(); ) {
+            final Map.Entry entry = (Map.Entry)it.next();
+            final Integer resourceId = (Integer)entry.getKey();
+            final List measList = (List)entry.getValue();
+            final Resource r = rMan.findResourceById(resourceId);
+            if (r == null || r.isInAsyncDeleteState()) {
+                continue;
+            }
+            if (measList.size() > 1) {
+                log.warn("resourceId " + r.getId() +
+                    " has more than one availability measurement assigned to it");
+            } else if (measList.size() <= 0) {
+                continue;
+            }
+            final Measurement m = (Measurement)measList.get(0);
+            midMap.put(new AppdefEntityID(r), m.getId());
+        }
+        return midMap;
     }
 
     protected double[] getAvailability(AuthzSubject subject,
@@ -557,21 +584,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
             }
             return rtn;
         } else {
-            final Map rtn = new HashMap(ids.length);
-            final MeasurementManagerLocal mMan = getMetricManager();
-            final ResourceManagerLocal rMan = getResourceManager();
-            for (int i=0; i<ids.length; i++) {
-                AppdefEntityID id = ids[i];
-                if (id == null) {
-                    continue;
-                }
-                final Resource resource = rMan.findResource(id);
-                Measurement m = mMan.getAvailabilityMeasurement(resource);
-                if (m != null) {
-                    rtn.put(id, m.getId());
-                }
-            }
-            return rtn;
+            return getMidMap(getResources(ids));
         }
     }
 
