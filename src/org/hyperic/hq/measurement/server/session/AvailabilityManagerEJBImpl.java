@@ -758,8 +758,12 @@ public class AvailabilityManagerEJBImpl
             // nothing to do
         } else  if (dup.getAvailVal() != AVAIL_DOWN) {
             String msg = "New DataPoint and current DB value for " +
-             "MeasurementId " + state.getMetricId() + " / timestamp " +
-             state.getTimestamp() + " have conflicting states, no update";
+            "MeasurementId " + state.getMetricId() + " / timestamp " +
+            state.getTimestamp() + " have conflicting states.  " +
+            "Since a non-zero rle value cannot be overridden, no update." +
+            "\ncurrent rle value -> " + dup +
+            // ask Juilet Sierra why (js) is here
+            ":(js):\npoint trying to override current rle -> " + state;
             throw new BadAvailStateException(msg);
         } else {
             Measurement meas = dup.getMeasurement();
