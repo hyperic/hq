@@ -3238,7 +3238,11 @@ hyperic.alert_center = function(title_name) {
 				'Please wait. Processing your request...');
 
 		if (myForm.output && myForm.output.value == "json") {
-			that.xhrSubmit(myForm);
+			if (fixAll != null && myDialog.data.fixAll.checked) {
+				that.xhrBatchSubmit(myDialog);
+			} else {
+				that.xhrSubmit(myForm);
+			}
 		} else {
 			myForm.submit();
 		}	
@@ -3317,6 +3321,65 @@ hyperic.alert_center = function(title_name) {
 	    		console.info(errorText, data);
 			}
 		});	    
+	}
+	
+	that.xhrBatchSubmit = function(myDialog) {
+		var success = true;
+		var myForm = myDialog.data.form;
+		var formObj = Form.serialize(myForm,true);
+		var batchFormObj = Form.serialize(myForm,true);
+		var ealerts = formObj["ealerts"];
+		
+		if (typeof ealerts == "undefined") {
+			that.xhrSubmit(myForm);
+			return;
+		}
+		
+		if (typeof ealerts == "string") {
+			// convert to array if single alert selected
+			ealerts = [ealerts];
+		}
+				
+		// build progress bar
+		var currentProgress = 0;
+		var progressBarDiv = document.createElement("div");						
+		myDialog.data.message_area.request_status.appendChild(progressBarDiv);
+			
+		var progressBar = new dijit11.ProgressBar({
+								maximum: ealerts.length*2,
+								progress: currentProgress
+								}, progressBarDiv);
+			
+		// submit each alert fix separately
+		for (var i=0; i<ealerts.length; i++) {
+			// update progress bar
+			progressBar.update({progress: ++currentProgress});
+			
+			batchFormObj["ealerts"] = ealerts[i];
+			
+			dojo11.xhrPost( {
+				url: myForm.action,
+				content: batchFormObj,
+				sync: true,
+				handleAs: 'json',
+				load: function(data){
+					// update progress bar
+					progressBar.update({progress: ++currentProgress});
+				},
+	    		error: function(data){
+	    			success = false;
+	    		}
+			});
+		}
+		
+		if (success) {
+			that.current.dialog.hide();
+			that.startAutoRefresh(that.current.dialog.data.subgroup);
+		} else {
+			var errorText = "An error occurred processing your request.";
+			that.displayError(that.current.dialog.data.message_area.request_status, errorText);
+			console.info(errorText, data);
+		}
 	}
 
 	that.resetAlertTable = function(myForm) {

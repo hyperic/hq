@@ -194,6 +194,7 @@
 
     dojo11.require("dijit.dijit");
     dojo11.require("dijit.Dialog");
+    dojo11.require("dijit.ProgressBar");
 
     var MyAlertCenter = null;
     dojo11.addOnLoad(function(){
