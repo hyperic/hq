@@ -144,6 +144,7 @@ import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.util.timer.StopWatch;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -1703,6 +1704,11 @@ public class EventsBossEJBImpl
     }
 
     /**
+     * Fix a single alert.
+     * Method is "NotSupported" since all the alert fixes may take longer
+     * than the jboss transaction timeout.  No need for a transaction in this
+     * context.
+     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public void fixAlert(int sessionID, EscalationAlertType alertType,
@@ -1714,6 +1720,11 @@ public class EventsBossEJBImpl
     }
 
     /**
+     * Fix a batch of alerts.
+     * Method is "NotSupported" since all the alert fixes may take longer
+     * than the jboss transaction timeout.  No need for a transaction in this
+     * context.
+     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public void fixAlert(int sessionID, EscalationAlertType alertType,
@@ -1723,44 +1734,83 @@ public class EventsBossEJBImpl
                PermissionException, ActionExecuteException
     {
         AuthzSubject subject = manager.getSubject(sessionID);
-        long fixCount = 0;
         
         if (fixAllPrevious) {
-            AlertInterface alert = null;
-            List alertsToFix = null;
-            
-            // Get all previous unfixed alerts.
-            if (alertType.equals(ClassicEscalationAlertType.CLASSIC)) {
-                alert = getAM().findAlertById(alertID);
-                alertsToFix = getAM().findAlerts(
-                                           subject.getId(), 0,
-                                           alert.getTimestamp(), alert.getTimestamp(),
-                                           false, true, null, 
-                                           alert.getAlertDefinitionInterface().getId(),
-                                           PageInfo.getAll(AlertSortField.DATE,
-                                                           true));
-                
-            } else if (alertType.equals(GalertEscalationAlertType.GALERT)) {
-                GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
-                alert = gMan.findAlertLog(alertID);
-                alertsToFix = gMan.findAlerts(
-                                        subject, AlertSeverity.LOW,
-                                        alert.getTimestamp(), alert.getTimestamp(),
-                                        false, true, null,
-                                        alert.getAlertDefinitionInterface().getId(),
-                                        PageInfo.getAll(GalertLogSortField.DATE,
-                                                        true));
-            } else {
-                alertsToFix = Collections.EMPTY_LIST;
+            long fixCount = fixPreviousAlerts(sessionID, alertType,
+                                              alertID, moreInfo);
+            if (fixCount > 0) {
+                if (moreInfo == null) {
+                    moreInfo = "";
+                }
+                StringBuffer sb = new StringBuffer();
+                MessageFormat messageFormat = 
+                    new MessageFormat(ResourceBundle.getBundle(BUNDLE)
+                                        .getString("events.alert.fixAllPrevious"));
+                messageFormat.format(
+                    new String[] {Long.toString(fixCount)},
+                    sb, null);
+                moreInfo = sb.toString() + moreInfo;
             }
-                        
+        }
+        // fix the selected alert
+        getEscMan().fixAlert(subject, alertType, alertID, moreInfo, false);
+    }
+
+    /**
+     * Fix all previous alerts.
+     * Method is "NotSupported" since all the alert fixes may take longer
+     * than the jboss transaction timeout.  No need for a transaction in this
+     * context.
+     */
+    private long fixPreviousAlerts(int sessionID, EscalationAlertType alertType,
+                                   Integer alertID, String moreInfo)
+        throws SessionTimeoutException, SessionNotFoundException,
+               PermissionException, ActionExecuteException
+    {
+        StopWatch watch = new StopWatch();
+        AuthzSubject subject = manager.getSubject(sessionID);
+        long fixCount = 0;
+        AlertInterface alert = null;
+        List alertsToFix = null;
+
+        // Get all previous unfixed alerts.
+        watch.markTimeBegin("fixPreviousAlerts: findAlerts");
+        if (alertType.equals(ClassicEscalationAlertType.CLASSIC)) {
+            alert = getAM().findAlertById(alertID);
+            alertsToFix = getAM().findAlerts(
+                                       subject.getId(), 0,
+                                       alert.getTimestamp(), alert.getTimestamp(),
+                                       false, true, null, 
+                                       alert.getAlertDefinitionInterface().getId(),
+                                       PageInfo.getAll(AlertSortField.DATE,
+                                                       false));
+        } else if (alertType.equals(GalertEscalationAlertType.GALERT)) {
+            GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
+            alert = gMan.findAlertLog(alertID);
+            alertsToFix = gMan.findAlerts(
+                                    subject, AlertSeverity.LOW,
+                                    alert.getTimestamp(), alert.getTimestamp(),
+                                    false, true, null,
+                                    alert.getAlertDefinitionInterface().getId(),
+                                    PageInfo.getAll(GalertLogSortField.DATE,
+                                                    false));
+        } else {
+            alertsToFix = Collections.EMPTY_LIST;
+        }
+        watch.markTimeEnd("fixPreviousAlerts: findAlerts");
+        
+        _log.debug("fixPreviousAlerts: alertId = " + alertID 
+                        + ", previous alerts to fix = " + (alertsToFix.size()-1) 
+                        + ", time = " + watch);            
+       
+        try {
+            watch.markTimeBegin("fixPreviousAlerts: fixAlert");
+            
             for (Iterator it = alertsToFix.iterator(); it.hasNext(); ) {
                 alert = (AlertInterface) it.next();
-                
+            
                 try {
-                    // Only send fixed notification for the selected alert
-                    // and suppress notifications for all previous alerts.
-                    // Process the selected alert outside this loop.
+                    // Suppress notifications for all previous alerts.
                     if (!alert.getId().equals(alertID)) {
                         getEscMan().fixAlert(subject, alertType, alert.getId(), moreInfo, true);
                         fixCount++;
@@ -1769,27 +1819,18 @@ public class EventsBossEJBImpl
                     throw pe;
                 } catch (Exception e) {
                     // continue with next alert
-                    _log.warn("Could not fix alert id " 
-                                + alert.getId() + ": " + e.getMessage(), e);
+                    _log.error("Could not fix alert id " 
+                                    + alert.getId() + ": " + e.getMessage(), e);
                 }
             }
+        } finally {
+            watch.markTimeEnd("fixPreviousAlerts: fixAlert");
+            _log.debug("fixPreviousAlerts: alertId = " + alertID 
+                            + ", previous alerts fixed = " + fixCount 
+                            + ", time = " + watch);
+            
+            return fixCount;
         }
-
-        if (fixCount > 0) {
-            if (moreInfo == null) {
-                moreInfo = "";
-            }
-            StringBuffer sb = new StringBuffer();
-            MessageFormat messageFormat = 
-                new MessageFormat(ResourceBundle.getBundle(BUNDLE)
-                                    .getString("events.alert.fixAllPrevious"));
-            messageFormat.format(
-                    new String[] {Long.toString(fixCount)},
-                    sb, null);
-            moreInfo = sb.toString() + moreInfo;
-        }
-        // fix the selected alert
-        getEscMan().fixAlert(subject, alertType, alertID, moreInfo, false);
     }
     
     /**
