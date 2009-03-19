@@ -3,6 +3,8 @@
 use Getopt::Long;
 use File::Basename;
 use Sys::Hostname;
+use FileHandle;
+use IPC::Open2;
 use strict;
 
 my $debug = 0;
@@ -18,7 +20,6 @@ sub main
 {
     getArgs();
     @Output = getSysmonOutput();
-    print "Availability=1\n";
     printDeadLocks();
     printAvgLockContention();
     printTotalLockReqs();
@@ -170,13 +171,21 @@ sub printOutput
 
 sub getSysmonOutput
 {
-    my $cmd = "isql -Usa -P $Passwd -S $Server <<-EOF1\n".
-              "use master\n".
-              "go\n".
-              "sp_sysmon '$Interval'\n".
-              "go\n".
-              "EOF1\n";
-    return execCmd("$cmd");
+    my $cmd = "isql -Usa -P $Passwd -S $Server";
+    print "$cmd\n" if $debug;
+    my $pid = open2(*READER, *WRITER, "$cmd") or die $!;
+    print WRITER "use master\n";
+    print WRITER "go\n";
+    print WRITER "sp_sysmon '$Interval'\n";
+    print WRITER "go\n";
+    print WRITER "quit\n";
+    my @lines;
+    while (<READER>) {
+        push @lines, $_;
+    }
+    close(READER);
+    close(WRITER);
+    return @lines;
 }
 
 sub execCmd
@@ -212,6 +221,9 @@ sub getArgs
   if ($bool_help) {
     printUsage();
     exit(0);
+  }
+  if ($Passwd eq "''") {
+      $Passwd = "";
   }
 }
 

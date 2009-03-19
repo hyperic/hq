@@ -91,7 +91,12 @@ public class SybaseMeasurementPlugin
     {
         String pass = (password == null) ? "" : password;
         pass = (pass.matches("^\\s*$")) ? "" : pass;
-        return DriverManager.getConnection(url, user, pass);
+        java.util.Properties props = new java.util.Properties();
+        props.put("CHARSET_CONVERTER_CLASS",
+            "com.sybase.jdbc3.utils.TruncationConverter");
+        props.put("user", user);
+        props.put("password", pass);
+        return DriverManager.getConnection(url, props);
     }
 
     protected String getDefaultURL() {
@@ -278,18 +283,22 @@ public class SybaseMeasurementPlugin
                alias      = metric.getAttributeName();
         if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) == -1
             && objectName.indexOf(TYPE_STORAGE) == -1
-            && !alias.equalsIgnoreCase(AVAIL_ATTR))
+            && !metric.isAvail()) {
             return super.getValue(metric);
+        }
 
         try
         {
+            // do not close cached connection
             Connection conn = getCachedConnection(metric);
-            if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) != -1)
+            if (objectName.indexOf(TYPE_SP_MONITOR_CONFIG) != -1) {
                 return getSP_MonitorConfigValue(metric, alias, conn);
-            else if (objectName.indexOf(TYPE_STORAGE) != -1)
+            } else if (objectName.indexOf(TYPE_STORAGE) != -1) {
                 return getStorageValue(metric, alias, conn);
-            else //if (alias.equalsIgnoreCase(AVAIL_ATTR))
-                return getAvailability(metric, alias, conn);
+            } else if (metric.isAvail()) {
+                return getAvailability(conn);
+            }
+            throw new MetricNotFoundException("cannot find metric " + metric);
         }
         catch (SQLException e) {
             String msg = "Query failed for "+alias+": "+e.getMessage();
@@ -297,9 +306,7 @@ public class SybaseMeasurementPlugin
         }
     }
 
-    private MetricValue getAvailability(Metric metric,
-                                        String attr,
-                                        Connection conn)
+    private MetricValue getAvailability(Connection conn)
         throws MetricUnreachableException
     {
         Statement stmt = null;
@@ -458,14 +465,16 @@ public class SybaseMeasurementPlugin
         {
             stmt = conn.createStatement();
             rs = stmt.executeQuery("sp_monitorconfig '"+configOpt+"'");
-            try {
-                int col = rs.findColumn("Num_Reuse");
-                if (rs.next()) {
-                    return rs.getFloat(col);
+            ResultSetMetaData rsmd = rs.getMetaData();
+            // I have seen Num_Reuse, Reuse and Reuse_cnt so far for this
+            String reuseCol = "Num_Reuse";
+            for (int i=1; i<=rsmd.getColumnCount(); i++) {
+                String name = rsmd.getColumnName(i);
+                if (name.indexOf("Reuse") != -1) {
+                    reuseCol = name;
                 }
-            } catch (SQLException e) {
             }
-            int col = rs.findColumn("Reuse");
+            int col = rs.findColumn(reuseCol);
             if (rs.next()) {
                 return rs.getFloat(col);
             }
