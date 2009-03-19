@@ -26,15 +26,16 @@
 package org.hyperic.hq.plugin.sybase;
 
 import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.PluginException;
@@ -42,22 +43,15 @@ import org.hyperic.hq.product.RegistryServerDetector;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.ServiceResource;
-
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.file.FileUtil;
-import org.hyperic.util.jdbc.DBUtil;
-
 import org.hyperic.sigar.win32.RegistryKey;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.jdbc.DBUtil;
 
 public class SybaseServerDetector
     extends ServerDetector
-    implements FileServerDetector, RegistryServerDetector, AutoServerDetector
-{
-    private static final boolean DEBUG = SybasePluginUtil.DEBUG;
-
+    implements FileServerDetector,
+               RegistryServerDetector,
+               AutoServerDetector {
     static final String JDBC_DRIVER        = SybasePluginUtil.JDBC_DRIVER,
                         DEFAULT_URL        = SybasePluginUtil.DEFAULT_URL,
                         PROP_ENGINE        = SybasePluginUtil.PROP_ENGINE,
@@ -77,9 +71,16 @@ public class SybaseServerDetector
 
     private static Log log = LogFactory.getLog("SybaseServerDetector");
 
-    private static final String SYBASE_VERSION = "(Sybase)";
-    private static final String PTQL_QUERY =
-        "State.Name.re=dataserver,State.Name.Pne=$1,Args.0.re=.*dataserver$";
+    private static String PTQL_QUERY;
+    static {
+        if (isWin32()) {
+            PTQL_QUERY = 
+                "State.Name.re=sqlsrvr,State.Name.Pne=$1,Args.0.re=.*sqlsrvr.exe$";
+        } else {
+            PTQL_QUERY =
+                "State.Name.re=dataserver,State.Name.Pne=$1,Args.0.re=.*dataserver$";
+        }
+    }
 
     // Config Value Usage Query
     private static final String SP_MONITOR_CONFIG = "sp_monitorconfig 'all'";
@@ -105,11 +106,13 @@ public class SybaseServerDetector
         for (int i=0; i<pids.length; i++)
         {
             String exe = getProcExe(pids[i]);
-            if (exe == null)
+            if (exe == null) {
                 continue;
+            }
             File binary = new File(exe);
-            if (!binary.isAbsolute())
+            if (!binary.isAbsolute()) {
                 continue;
+            }
             servers.add(binary.getAbsolutePath());
         }
         return servers;
@@ -154,24 +157,26 @@ public class SybaseServerDetector
         String version = "";
 
         // Only check the binaries if they match the path we expect
-        if (path.indexOf("dataserver") == -1)
+        if (path.indexOf("dataserver") == -1 && path.indexOf("sqlsrvr") == -1) {
             return servers;
+        }
 
-        if (path.indexOf("12_0") != -1)
+        if (path.indexOf("12_0") != -1) {
             version = VERSION_12_0;
-        else if (path.indexOf("12_5") != -1)
+        } else if (path.indexOf("12_5") != -1) {
             version = VERSION_12_5;
-        else if (path.indexOf("15_0") != -1)
+        } else if (path.indexOf("15_0") != -1) {
             version = VERSION_15;
-        else
+        } else {
             return servers;
+        }
 
         // need to check if we are discovering the appropriate
         // server since 12_0 does not include any of the newer
         // versions in the hq-plugin.xml descriptor
-        if (!version.equals(getTypeInfo().getVersion()))
+        if (!version.equals(getTypeInfo().getVersion())) {
             return servers;
-        
+        }
         String installdir = getParentDir(path, 3);
         ServerResource server = createServerResource(installdir);
         // Set custom properties
@@ -210,25 +215,46 @@ public class SybaseServerDetector
         ResultSet rs = null;
         try
         {
-            conn = DriverManager.getConnection(url, user, pass);
+            java.util.Properties props = new java.util.Properties();
+            props.put("CHARSET_CONVERTER_CLASS",
+                "com.sybase.jdbc3.utils.TruncationConverter");
+            props.put("user", user);
+            props.put("password", pass);
+            conn = DriverManager.getConnection(url, props);
             // Discover all Sybase DB tables.
             stmt = conn.createStatement();
-            setCacheServices(rtn, conn, stmt);
-            setSPMonitorConfigServices(rtn, conn, stmt);
-            setEngineServices(rtn, conn, stmt);
-            setSpaceAvailServices(rtn, conn, stmt);
+            setCacheServices(rtn, stmt);
+            setSPMonitorConfigServices(rtn, stmt);
+            setEngineServices(rtn, stmt);
+            setSpaceAvailServices(rtn, stmt);
+            setProcessService(rtn);
         }
         catch (SQLException e) {
             String msg = "Error querying for services: "+e.getMessage();
             throw new PluginException(msg, e);
         }
         finally {
-            DBUtil.closeJDBCObjects(this.log, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(log, conn, stmt, rs);
         }
         return rtn;
     }
 
-    private void setSpaceAvailServices(List services, Connection conn, Statement stmt)
+    private void setProcessService(List services) {
+        ServiceResource service = new ServiceResource();
+        service.setType(this, "DataServer Process Metrics");
+        service.setServiceName("DataServer Process Metrics");
+        ConfigResponse productConfig = new ConfigResponse();
+        if (isWin32()) {
+            productConfig.setValue("process.query", "State.Name.eq=sqlsrvr");
+        } else {
+            productConfig.setValue("process.query", "State.Name.eq=dataserver");
+        }
+        service.setProductConfig(productConfig);
+        service.setMeasurementConfig();
+        services.add(service);
+    }
+
+    private void setSpaceAvailServices(List services, Statement stmt)
         throws SQLException
     {
         ResultSet rs = null;
@@ -260,7 +286,6 @@ public class SybaseServerDetector
                     productConfig.setValue(PROP_PAGESIZE, pagesize);
                     service.setProductConfig(productConfig);
                     service.setMeasurementConfig();
-                    service.setControlConfig();
                     services.add(service);
                 }
             }
@@ -293,7 +318,7 @@ public class SybaseServerDetector
         return rtn;
     }
 
-    private void setEngineServices(List services, Connection conn, Statement stmt)
+    private void setEngineServices(List services, Statement stmt)
         throws SQLException
     {
         ResultSet rs = null;
@@ -312,7 +337,6 @@ public class SybaseServerDetector
                 productConfig.setValue(PROP_ENGINE, "engine"+engineNum);
                 service.setProductConfig(productConfig);
                 service.setMeasurementConfig();
-                service.setControlConfig();
                 services.add(service);
             }
         }
@@ -321,7 +345,7 @@ public class SybaseServerDetector
         }
     }
 
-    private void setCacheServices(List services, Connection conn, Statement stmt)
+    private void setCacheServices(List services, Statement stmt)
         throws SQLException
     {
         ResultSet rs = null;
@@ -339,7 +363,6 @@ public class SybaseServerDetector
                 productConfig.setValue("cachename", cacheName);
                 service.setProductConfig(productConfig);
                 service.setMeasurementConfig();
-                service.setControlConfig();
                 services.add(service);
             }
         }
@@ -348,7 +371,7 @@ public class SybaseServerDetector
         }
     }
 
-    private void setSPMonitorConfigServices(List services, Connection conn, Statement stmt)
+    private void setSPMonitorConfigServices(List services, Statement stmt)
         throws SQLException
     {
         ResultSet rs = null;
@@ -367,7 +390,6 @@ public class SybaseServerDetector
                 productConfig.setValue(PROP_CONFIG_OPTION, configOption);
                 service.setProductConfig(productConfig);
                 service.setMeasurementConfig();
-                service.setControlConfig();
                 services.add(service);
             }
         }

@@ -389,8 +389,12 @@
       the sp_sysmon procedure.
     </p>
     <p>
-      <b>NOTE:</b>  The jdbcUrl may not work using localhost.  Please 
-      specify the actual hostname.
+      <b>NOTES:</b>
+      <br>
+      The jdbcUrl may not work using localhost.  Please specify the actual hostname.
+      <br>
+      On Windows install <a href="http://www.activestate.com/activeperl">ActivePerl</a>
+      and bind the extension .pl to automatically execute perl when the file type is invoked.
     </p>
     ]]>
   </help>
