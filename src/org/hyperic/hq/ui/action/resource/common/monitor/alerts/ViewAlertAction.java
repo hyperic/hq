@@ -116,6 +116,7 @@ public class ViewAlertAction extends TilesAction {
         for (int i = 0; i < alertDefConditions.size(); i++) {
             AlertConditionBean ab =
                 (AlertConditionBean) alertDefConditions.get(i);
+            final String logVal = condLogs[i].getValue();
             switch ( conds[i].getType() ) {
             case EventConstants.TYPE_CONTROL:
                 ab.setActualValue
@@ -125,32 +126,43 @@ public class ViewAlertAction extends TilesAction {
             case EventConstants.TYPE_THRESHOLD:
             case EventConstants.TYPE_BASELINE:
             case EventConstants.TYPE_CHANGE:
-                // Let's actually format the value
-                double value = NumberUtil.stringAsNumber(
-							condLogs[i].getValue()).doubleValue();
-                if ( Double.isNaN(value) ) {
-                	ab.setActualValue(Constants.UNKNOWN);
-                }
-                else {
-                    // format threshold and value
-                    Integer mid =
-                        new Integer(condLogs[i].getCondition()
-                                               .getMeasurementId());
-                    Measurement m = mb.getMeasurement(sessionID, mid);
-                    FormatSpecifics precMax = new FormatSpecifics();
-                    precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
+                String last = logVal.substring(logVal.length() - 1);
+                try {
+                    Integer.parseInt(last);
+                    // Let's actually format the value
+                    double value =
+                        NumberUtil.stringAsNumber(logVal).doubleValue();
+                    if ( Double.isNaN(value) ) {
+                        ab.setActualValue(Constants.UNKNOWN);
+                    }
+                    else {
+                        // This is legacy code, used to format a comma delimited
+                        // number in the logs.  However, we should be storing
+                        // fully formatted values into logs now.  Remove post
+                        // 4.1
 
-                    FormattedNumber val =
-                        UnitsConvert.convert(value,
-                                             m.getTemplate().getUnits());
-                    ab.setActualValue( val.toString() );
+                        // format threshold and value
+                        Integer mid =
+                            new Integer(condLogs[i].getCondition()
+                                                   .getMeasurementId());
+                        Measurement m = mb.getMeasurement(sessionID, mid);
+                        FormatSpecifics precMax = new FormatSpecifics();
+                        precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
+    
+                        FormattedNumber val =
+                            UnitsConvert.convert(value,
+                                                 m.getTemplate().getUnits());
+                        ab.setActualValue( val.toString() );
+                    }
+                } catch (NumberFormatException e) {
+                    ab.setActualValue(logVal);
                 }
                 break;
 
             case EventConstants.TYPE_CUST_PROP:
             case EventConstants.TYPE_LOG:
             case EventConstants.TYPE_CFG_CHG:
-                ab.setActualValue(condLogs[i].getValue());
+                ab.setActualValue(logVal);
                 break;
 
             default:

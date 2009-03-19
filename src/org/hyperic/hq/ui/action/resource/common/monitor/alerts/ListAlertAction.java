@@ -208,40 +208,57 @@ public class ListAlertAction extends TilesAction {
         case EventConstants.TYPE_THRESHOLD:
         case EventConstants.TYPE_BASELINE:
         case EventConstants.TYPE_CHANGE:
-            // format threshold and value
-            Measurement m = mb.getMeasurement(sessionId, 
-                                              new Integer(cond.getMeasurementId()));
             FormatSpecifics precMax = new FormatSpecifics();
             precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
+
+            Measurement m = null;
+            if (cond.getType() == EventConstants.TYPE_THRESHOLD) {
+                m = mb.getMeasurement(sessionId,
+                                      new Integer(cond.getMeasurementId()));
+                bean.setComparator(cond.getComparator());
+                FormattedNumber th =
+                    UnitsConvert.convert(cond.getThreshold(),
+                                         m.getTemplate().getUnits(), precMax);
+                bean.setThreshold(th.toString());
+            } else if (cond.getType() == EventConstants.TYPE_BASELINE) {
+                bean.setComparator(cond.getComparator());
+                bean.setThreshold(cond.getThreshold() + "% of " +
+                                  cond.getOption());
+            } else if (cond.getType() == EventConstants.TYPE_CHANGE) {
+                bean.setComparator("");
+                bean.setThreshold(RequestUtils
+                        .message(request, "alert.current.list.ValueChanged"));
+            }
 
             // convert() can't handle Double.NaN -- just display ?? for the value
             if ( value == null || value.length() == 0 ) {
                 bean.setValue(Constants.UNKNOWN);
             } else {
-                double dval =
-                    NumberUtil.stringAsNumber( value ).doubleValue();
+                String last = value.substring(value.length() - 1);
+                try {
+                    // This is legacy code, used to format a comma delimited
+                    // number in the logs.  However, we should be storing
+                    // fully formatted values into logs now.  Remove post 4.1
+                    Integer.parseInt(last);
 
-                FormattedNumber val =
-                    UnitsConvert.convert(dval, m.getTemplate().getUnits());
-                
-                bean.setValue( val.toString() );
+                    // format threshold and value
+                    if (m == null) {
+                        m = mb.getMeasurement(sessionId,
+                                          new Integer(cond.getMeasurementId()));
+
+                    }
+                    double dval =
+                        NumberUtil.stringAsNumber( value ).doubleValue();
+
+                    FormattedNumber val =
+                        UnitsConvert.convert(dval, m.getTemplate().getUnits());
+
+                    bean.setValue( val.toString() );
+                } catch (NumberFormatException e) {
+                    bean.setValue(value);
+                }
             }
 
-            if ( cond.getType() == EventConstants.TYPE_THRESHOLD ) {
-                bean.setComparator( cond.getComparator() );
-                FormattedNumber th = UnitsConvert.convert(cond.getThreshold(),
-                        m.getTemplate().getUnits(),
-                        precMax);
-                bean.setThreshold( th.toString() );
-            }
-            else if ( cond.getType() == EventConstants.TYPE_BASELINE) {
-                bean.setComparator( cond.getComparator() );
-                bean.setThreshold( cond.getThreshold() + "% of " + cond.getOption());
-            } else if ( cond.getType() == EventConstants.TYPE_CHANGE) {
-                bean.setComparator("");
-                bean.setThreshold
-                    ( RequestUtils.message(request, "alert.current.list.ValueChanged") );
-            }
             break;
 
         case EventConstants.TYPE_CUST_PROP:

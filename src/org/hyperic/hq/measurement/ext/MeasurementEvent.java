@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -33,9 +33,13 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ResourceEventInterface;
+import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementDAO;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.util.units.FormattedNumber;
+import org.hyperic.util.units.UnitNumber;
+import org.hyperic.util.units.UnitsFormat;
 
 public class MeasurementEvent extends AbstractEvent
     implements Serializable, ResourceEventInterface {
@@ -95,6 +99,10 @@ public class MeasurementEvent extends AbstractEvent
     }
 
     public String toString() {
-        return _value.toString();
+        int unit  = UnitsConvert.getUnitForUnit(getUnits());
+        int scale = UnitsConvert.getScaleForUnit(getUnits());
+        UnitNumber un = new UnitNumber(_value.getValue(), unit, scale);
+        FormattedNumber fn = UnitsFormat.format(un);
+        return fn.toString();
     }    
 }
