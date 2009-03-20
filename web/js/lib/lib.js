@@ -3063,11 +3063,12 @@ hyperic.alert_center = function(title_name) {
     	if (!that.dialogs.AckAlert) {
 	    	var ackDiv = document.createElement("div");
 	    	ackDiv.innerHTML =
+	          	'<div style="width:400px">' +
 	          	'<div id="AlertCenterAckStatus" style="display:none"></div>' +
 				'<table cellspacing="0" cellpadding="0">' +
 				'<tr><td colspan="2">' +
       	        '	<span class="BoldText">Reason for Acknowledgement for Selected Alerts:</span><br/>' +
-      	        '	<textarea id="AckNoteTextArea" cols="70" rows="5"></textarea>' +
+      	        '	<textarea id="AckNoteTextArea" style="width:400px; height:100px"></textarea>' +
       	        '</td></tr>' +
       	        '<tr id="AlertCenterAckButtonActive">' +
       	        '	<td><span id="AlertCenterEscalationOption"><input type="checkbox" id="AlertCenterPauseCheckbox" value="true" />'+
@@ -3087,7 +3088,8 @@ hyperic.alert_center = function(title_name) {
       	    	'   			<span class="InactiveText">ACKNOWLEDGE</span>' +
       	    	'			</td></tr></table>' +
       	    	'	</td></tr>' +
-      	    	'</table>';
+      	    	'</table>' +
+      	    	'</div>';
 	    	alertCenterDiv.appendChild(ackDiv);
 	    	
 	    	that.dialogs.AckAlert = new dijit11.Dialog({
@@ -3119,11 +3121,15 @@ hyperic.alert_center = function(title_name) {
 		if (!that.dialogs.FixAlert) {
 			var fixedDiv = document.createElement("div");
 			fixedDiv.innerHTML = 
-	          	'<div id="AlertCenterFixedStatus" style="display:none"></div>' +
+	          	'<div style="width:400px">' +
+				'<div id="AlertCenterFixedStatus" style="display:none"></div>' +
+				'<div id="AlertCenterProgressStatus" style="display:none; margin-top:-5px; margin-bottom:10px">' +
+				'	<div id="AlertCenterProgressBar"></div>' +
+				'</div>' +
 				'<table cellspacing="0" cellpadding="0">' +
 				'<tr><td colspan="2">' +
       	        '	<span class="BoldText">Resolution for Fix for Selected Alerts:</span><br/>' +
-      	        '	<textarea id="FixedNoteTextArea" cols="70" rows="5"></textarea>' +
+      	        '	<textarea id="FixedNoteTextArea" style="width:400px; height:100px"></textarea>' +
       	        '</td></tr>' +
       	        '<tr id="AlertCenterFixedButtonActive">' +
       	        '	<td><input type="checkbox" id="FixAllCheckbox" value="true" />&nbsp;Fix all previous alerts</td>' +
@@ -3143,7 +3149,8 @@ hyperic.alert_center = function(title_name) {
       	    	'				<span class="InactiveText">FIXED</span>' +
       	    	'			</td></tr></table>' +
       	    	'	</td></tr>' +
-      	    	'</table>';
+      	    	'</table>' +
+      	    	'</div>';
 			alertCenterDiv.appendChild(fixedDiv);
 	    	
 	    	that.dialogs.FixAlert = new dijit11.Dialog({
@@ -3161,14 +3168,18 @@ hyperic.alert_center = function(title_name) {
 	    			inactive: dojo11.byId("AlertCenterFixedButtonInActive")
 	    		},
 	    		message_area: {
-	    			request_status: dojo11.byId("AlertCenterFixedStatus")
+	    			request_status: dojo11.byId("AlertCenterFixedStatus"),
+	    			progress_status: dojo11.byId("AlertCenterProgressStatus")
 	    		},
 	    		note: dojo11.byId("FixedNoteTextArea"),
 	    		fixAll: dojo11.byId("FixAllCheckbox")
 	    	}
 	    	
 	    	// restart auto refresh after dialog closes
-	    	dojo11.connect(that.dialogs.FixAlert, "hide", this, "delayAutoRefresh");	    	
+	    	dojo11.connect(that.dialogs.FixAlert, "hide", this, "delayAutoRefresh");
+	    	
+	    	// create progress bar				
+			that.dialogs.FixAlert.data.progressBar = new dijit11.ProgressBar({}, dojo11.byId("AlertCenterProgressBar"));
 		}
 	}
 
@@ -3252,6 +3263,9 @@ hyperic.alert_center = function(title_name) {
 		that.current.dialog = myDialog;
 		that.stopAutoRefresh();
 		myDialog.data.message_area.request_status.style.display = "none";
+		if (myDialog.data.message_area.progress_status != null) {
+			myDialog.data.message_area.progress_status.style.display = "none";
+		}
 		myDialog.data.button_area.active.style.display = "";
 		myDialog.data.button_area.inactive.style.display = "none";
 		myDialog.data.note.value = "";
@@ -3340,20 +3354,15 @@ hyperic.alert_center = function(title_name) {
 			ealerts = [ealerts];
 		}
 				
-		// build progress bar
+		// show progress bar
 		var currentProgress = 0;
-		var progressBarDiv = document.createElement("div");						
-		myDialog.data.message_area.request_status.appendChild(progressBarDiv);
-			
-		var progressBar = new dijit11.ProgressBar({
-								maximum: ealerts.length*2,
-								progress: currentProgress
-								}, progressBarDiv);
+		myDialog.data.progressBar.update({maximum: ealerts.length*2, progress: currentProgress});
+		myDialog.data.message_area.progress_status.style.display = "";
 			
 		// submit each alert fix separately
 		for (var i=0; i<ealerts.length; i++) {
 			// update progress bar
-			progressBar.update({progress: ++currentProgress});
+			myDialog.data.progressBar.update({progress: ++currentProgress});
 			
 			batchFormObj["ealerts"] = ealerts[i];
 			
@@ -3364,14 +3373,13 @@ hyperic.alert_center = function(title_name) {
 				handleAs: 'json',
 				load: function(data){
 					// update progress bar
-					progressBar.update({progress: ++currentProgress});
+					myDialog.data.progressBar.update({progress: ++currentProgress});
 				},
 	    		error: function(data){
 	    			success = false;
 	    		}
 			});
 		}
-		
 		if (success) {
 			that.current.dialog.hide();
 			that.startAutoRefresh(that.current.dialog.data.subgroup);
