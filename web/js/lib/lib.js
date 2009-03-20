@@ -3337,8 +3337,7 @@ hyperic.alert_center = function(title_name) {
 		});	    
 	}
 	
-	that.xhrBatchSubmit = function(myDialog) {
-		var success = true;
+	that.xhrBatchSubmit = function(myDialog, alertIndex) {
 		var myForm = myDialog.data.form;
 		var formObj = Form.serialize(myForm,true);
 		var batchFormObj = Form.serialize(myForm,true);
@@ -3353,41 +3352,42 @@ hyperic.alert_center = function(title_name) {
 			// convert to array if single alert selected
 			ealerts = [ealerts];
 		}
+
+		if (alertIndex == null) {
+			alertIndex = 0;
+		}
 				
-		// show progress bar
-		var currentProgress = 0;
-		myDialog.data.progressBar.update({maximum: ealerts.length*2, progress: currentProgress});
+		// show and update progress bar
+		var currentProgress = alertIndex*2;
+		myDialog.data.progressBar.update({maximum: ealerts.length*2, progress: ++currentProgress});
 		myDialog.data.message_area.progress_status.style.display = "";
 			
-		// submit each alert fix separately
-		for (var i=0; i<ealerts.length; i++) {
-			// update progress bar
-			myDialog.data.progressBar.update({progress: ++currentProgress});
+		// submit each selection separately			
+		batchFormObj["ealerts"] = ealerts[alertIndex];
 			
-			batchFormObj["ealerts"] = ealerts[i];
-			
-			dojo11.xhrPost( {
-				url: myForm.action,
-				content: batchFormObj,
-				sync: true,
-				handleAs: 'json',
-				load: function(data){
-					// update progress bar
-					myDialog.data.progressBar.update({progress: ++currentProgress});
-				},
-	    		error: function(data){
-	    			success = false;
-	    		}
-			});
-		}
-		if (success) {
-			that.current.dialog.hide();
-			that.startAutoRefresh(that.current.dialog.data.subgroup);
-		} else {
-			var errorText = "An error occurred processing your request.";
-			that.displayError(that.current.dialog.data.message_area.request_status, errorText);
-			console.info(errorText, data);
-		}
+		dojo11.xhrPost( {
+			url: myForm.action,
+			content: batchFormObj,
+			sync: false,
+			handleAs: 'json',
+			load: function(data){
+				// update progress bar
+				myDialog.data.progressBar.update({progress: ++currentProgress});
+					
+				// submit next selection
+				if (++alertIndex < ealerts.length) {
+					that.xhrBatchSubmit(myDialog, alertIndex);
+				} else {
+					that.current.dialog.hide();
+					that.startAutoRefresh(that.current.dialog.data.subgroup);						
+				}
+			},
+	    	error: function(data){
+				var errorText = "An error occurred processing your request.";
+				that.displayError(that.current.dialog.data.message_area.request_status, errorText);
+				console.info(errorText, data);
+	    	}
+		});
 	}
 
 	that.resetAlertTable = function(myForm) {
