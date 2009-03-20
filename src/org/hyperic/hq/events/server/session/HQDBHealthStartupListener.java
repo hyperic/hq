@@ -29,6 +29,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Date;
@@ -62,7 +63,10 @@ public class HQDBHealthStartupListener
      * The period (in msec) at which heart beats are dispatched by the 
      * Heart Beat Service.
      */
-    public static final int HEALTH_CHECK_PERIOD_MILLIS = 15*1000;
+    private static final Object HEALTH_CHECK_LOCK = new Object();
+    private static final int HEALTH_CHECK_PERIOD_MILLIS = 15*1000;
+    private static final int FAILURE_CHECK_PERIOD_MILLIS = 1000;
+    private static final int MAX_NUM_OF_FAILURE_CHECKS = 10;
     
     private final Log _log = 
         LogFactory.getLog(HQDBHealthStartupListener.class);
@@ -108,54 +112,121 @@ public class HQDBHealthStartupListener
             Statement stmt = null;
             ResultSet rs = null;
             
-            try {
-                conn = DBUtil.getConnByContext(new InitialContext(), 
-                                               HQConstants.DATASOURCE);
-                stmt = conn.createStatement();
+            synchronized (HEALTH_CHECK_LOCK) {
+                try {
+                    conn = DBUtil.getConnByContext(new InitialContext(), 
+                                                   HQConstants.DATASOURCE);
+                    stmt = conn.createStatement();
                 
-                if (healthOkStartTime == 0) {
-                    // get timestamp to check overall db health
-                    Dialect dialect = HQDialectUtil.getDialect(conn);
-                    rs = stmt.executeQuery(dialect.getCurrentTimestampSelectString());
+                    if (healthOkStartTime == 0) {
+                        healthOkStartTime = pingDatabase(conn, stmt, rs);
+                    } else {
+                        // get latest email address to send to in case of db failures
+                        rs = stmt.executeQuery(HQADMIN_EMAIL_SQL);
+                
+                        if (rs.next()) {
+                            hqadminEmail = rs.getString(1);
+                        }
+                    }
+                    recordSuccess();
+                } catch (Throwable t) {
+                    recordFailure(t);
+                    performFailureCheck();
+                } finally {
+                    DBUtil.closeJDBCObjects(HQDBHealthTask.class, conn, stmt, rs);
+                }            
+            }
+        }
+        
+        /**
+         * Perform failure checks and shutdown HQ if necessary
+         */
+        private void performFailureCheck() {
+            Connection conn = null;
+            Statement stmt = null;
+            ResultSet rs = null;
+            
+            while (healthOkStartTime == 0) {
+                try {               
+                    // wait 1 second before trying
+                    Thread.sleep(FAILURE_CHECK_PERIOD_MILLIS);
+
+                    conn = DBUtil.getConnByContext(new InitialContext(), 
+                                                   HQConstants.DATASOURCE);
+                    stmt = conn.createStatement();
                     
-                    if (rs.next()) {
-                        rs.getString(1);
-                        healthOkStartTime = System.currentTimeMillis();
+                    healthOkStartTime = pingDatabase(conn, stmt, rs);
+                    recordSuccess();
+                } catch (Throwable t) {
+                    recordFailure(t);
+
+                    if (numOfHealthCheckFailures >= MAX_NUM_OF_FAILURE_CHECKS) {
+                        // shutdown HQ if the database health checks fails
+                        try {
+                            shutdownNotify(t);
+                        } catch (Throwable t2) {
+                            // catch all so that HQ can shutdown
+                        }
+                        System.exit(1);
                     }
-                } else {
-                    // get latest email address to send to in case of db failures
-                    rs = stmt.executeQuery(HQADMIN_EMAIL_SQL);
-                
-                    if (rs.next()) {
-                        hqadminEmail = rs.getString(1);
-                    }
+                } finally {
+                    DBUtil.closeJDBCObjects(HQDBHealthTask.class, conn, stmt, rs);
                 }
-                lastHealthOkTime = System.currentTimeMillis();
-                numOfHealthCheckFailures = 0;
-                _log.debug("HQ DB Health: OK since " + new Date(healthOkStartTime));                
-            } catch (Throwable t) {
-                numOfHealthCheckFailures++;
-                healthOkStartTime = 0;
-                
+            }
+            
+        } // end
+
+        /**
+         * Get database timestamp to check overall database health
+         */
+        private long pingDatabase(Connection conn, Statement stmt, ResultSet rs) 
+            throws SQLException {
+        
+            Dialect dialect = HQDialectUtil.getDialect(conn);
+            rs = stmt.executeQuery(dialect.getCurrentTimestampSelectString());
+        
+            if (rs.next()) {
+                rs.getString(1);
+            }
+            
+            return System.currentTimeMillis();
+        }
+
+        /**
+         * Set fields and log success status
+         */
+        private void recordSuccess() {
+            lastHealthOkTime = System.currentTimeMillis();
+            numOfHealthCheckFailures = 0;
+            logStatus(null);
+        }
+        
+        /**
+         * Set fields and log failure status
+         */
+        private void recordFailure(Throwable t) {
+            healthOkStartTime = 0;            
+            numOfHealthCheckFailures++;
+            logStatus(t);
+        }
+        
+        /**
+         * Log the status of the current health check
+         */
+        private void logStatus(Throwable t) {
+            if (numOfHealthCheckFailures == 0) {
+                _log.debug("HQ DB Health: OK since " + new Date(healthOkStartTime));
+            } else {
                 String status = "HQ DB Health: Failed. Attempt #" + numOfHealthCheckFailures
                                     + ". Last successful check at " + new Date(lastHealthOkTime);
-                                
-                if (numOfHealthCheckFailures < 8) {
+
+                if (numOfHealthCheckFailures < MAX_NUM_OF_FAILURE_CHECKS) {
                     _log.error(status + ". Checking again in "
-                                + (HEALTH_CHECK_PERIOD_MILLIS/1000) + " sec", t);
+                                  + (FAILURE_CHECK_PERIOD_MILLIS/1000) + " sec.", t);
                 } else {
-                    // shut down HQ if the database health check fails after 2 minutes
                     _log.error(status + ". Shutting down HQ.", t);
-                    try {
-                        shutdownNotify(t);
-                    } catch (Throwable t2) {
-                        // catch all so that HQ can shutdown
-                    }
-                    System.exit(1);
                 }
-            } finally {
-                DBUtil.closeJDBCObjects(HQDBHealthTask.class, conn, stmt, rs);
-            }            
+            }
         }
         
         /**
