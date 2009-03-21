@@ -189,7 +189,7 @@
 				<c:choose>
 					<c:when test="${DashboardForm.dashboardSelectable}">
 						<html:form method="post" action="/SetDashboard.do" styleId="DashboardForm">
-							<div class="dashboard" style="height: 29px; ">
+							<div class="dashboard">
 								<div style="display: table-cell; vertical-align: middle; float:left;">
 									<span style="font-weight: bold; margin-right: 4px;">
 										<fmt:message key="dash.home.SelectDashboard" />
