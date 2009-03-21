@@ -51,16 +51,19 @@ public class SetDashboardAction extends org.hyperic.hq.ui.action.BaseAction {
 				.getServletContext());
 		if (!isPropertyEmpty(dForm.getSelectedDashboardId())) {
 			//assign a selected dashboard
-			session.setAttribute(Constants.SELECTED_DASHBOARD_ID, 
-					new Integer(dForm.getSelectedDashboardId()));
+			session.setAttribute(Constants.SELECTED_DASHBOARD_ID, new Integer(dForm.getSelectedDashboardId()));
 		}
 		if (!isPropertyEmpty(dForm.getDefaultDashboard())) {
-			user.setPreference(Constants.DEFAULT_DASHBOARD_ID, dForm
-					.getDefaultDashboard());
-			session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
-					dForm.getDefaultDashboard());
-			authzBoss.setUserPrefs(user.getSessionId(), user.getSubject()
-					.getId(), user.getPreferences());
+			String currentDefaultDashboardId = user.getPreference(Constants.DEFAULT_DASHBOARD_ID, null);
+			String submittedDefaultDashboardId = dForm.getDefaultDashboard();
+			
+			// Compare the incoming default dashboard id with the one we had in our user preferences
+			// If they aren't equal it means the user is changing it, so update
+			if (!submittedDefaultDashboardId.equals(currentDefaultDashboardId)) {
+				user.setPreference(Constants.DEFAULT_DASHBOARD_ID, dForm.getDefaultDashboard());
+				session.setAttribute(Constants.SELECTED_DASHBOARD_ID, dForm.getDefaultDashboard());
+				authzBoss.setUserPrefs(user.getSessionId(), user.getSubject().getId(), user.getPreferences());
+			}
 		}
 		return mapping.findForward(Constants.SUCCESS_URL);
 	}

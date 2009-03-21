@@ -106,53 +106,45 @@ public class DisplayDashboardAction extends TilesAction {
 
 		// Check if there is a default dashboard, selected dashboard or none of
 		// the above
-		Integer selectedDashboard = SessionUtils.getIntegerAttribute(
-				session, Constants.SELECTED_DASHBOARD_ID, null);
-		String defaultDashboard = user.getPreference(
-				Constants.DEFAULT_DASHBOARD_ID, null);
+		Integer selectedDashboard = SessionUtils.getIntegerAttribute(session, Constants.SELECTED_DASHBOARD_ID, null);
+		String defaultDashboard = user.getPreference(Constants.DEFAULT_DASHBOARD_ID, null);
 		DashboardConfig dashboardConfig = null;
+		
 		if (defaultDashboard != null && selectedDashboard == null) {
-			// TODO grab the default dash by id
-			// if it doesn't exist pop dialog
-			dashboardConfig = DashboardUtils.findDashboard(dashboardCollection, Integer
-					.valueOf(defaultDashboard));
-			if (dashboardConfig == null) {
-				dForm.setPopDialog(true);
-				request.setAttribute(Constants.IS_DASHBOARD_REMOVED, new Boolean(true));
-				return null;
-			} else {
-				session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
-						dashboardConfig.getId());
-				dForm.setSelectedDashboardId(dashboardConfig.getId()
-						.toString());
-			}
+			// If this is a fresh session, selected dashboard id won't be set so we'll need to 
+			// initially set it to the default dashboard id.
+			dashboardConfig = DashboardUtils.findDashboard(dashboardCollection, Integer.valueOf(defaultDashboard));
         } else if (dashboardCollection.size() == 1) {
             // No need to select a default - only one available
             dashboardConfig = (DashboardConfig) dashboardCollection.get(0);
-            session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
-                    dashboardConfig.getId());
-            dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
+            defaultDashboard = dashboardConfig.getId().toString();
 		} else if (selectedDashboard != null) {
-			// TODO grab the selected dash by id
-			// if it doesn't exist pop dialog
+			// If we have a selected dashboard id, find it in the list of dashboards
+			// if it has been removed, inform the user
 			dashboardConfig = DashboardUtils.findDashboard(dashboardCollection, selectedDashboard);
-			if (dashboardConfig == null) {
-				dForm.setPopDialog(true);
-				request.setAttribute(Constants.IS_DASHBOARD_REMOVED, new Boolean(true));	
-				return null;
-			} else {
-				dForm.setSelectedDashboardId(dashboardConfig.getId()
-								.toString());
-			}
 		} else {
 			// many dashboards and no default or selected - pop default dialog
 			// set the background dashboard to the user dashboard
 			dashboardConfig = dashManager.getUserDashboard(me, me);
-			session.setAttribute(Constants.SELECTED_DASHBOARD_ID,
-					dashboardConfig.getId());
-			dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
+			
 			dForm.setPopDialog(true);
 		}
+
+		// Check if the dashboard still exists, if not inform the user and return
+		if (dashboardConfig == null) {
+			dForm.setPopDialog(true);
+			request.setAttribute(Constants.IS_DASHBOARD_REMOVED, new Boolean(true));
+			
+			return null;
+		}
+
+		// Update the sessions with the selected dashboard
+		session.setAttribute(Constants.SELECTED_DASHBOARD_ID, dashboardConfig.getId());
+
+		// Update the form with whatever values we figure out above
+		dForm.setSelectedDashboardId(dashboardConfig.getId().toString());
+		dForm.setDefaultDashboard(defaultDashboard);
+
 		if (dashManager.isEditable(me, dashboardConfig)) {
 			session.setAttribute(Constants.IS_DASH_EDITABLE, "true");
 		} else {

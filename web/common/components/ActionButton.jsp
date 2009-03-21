@@ -41,11 +41,9 @@
 			<span class="InactiveText"><fmt:message key="${labelKey}" /></span>
 		</c:when>
 		<c:otherwise>
-			<input type="button" 
-				   id="button" 
+			<input type="button" id="button" class="button42"  
 				   value="<fmt:message key="${labelKey}"/>" 
-				   onclick="<c:out value="${buttonClick}" escapeXml="false"/>" 
-				   style="color:#fff;font-weight:700;width:auto;overflow:visible;" />
+				   onclick="<c:out value="${buttonClick}" escapeXml="false"/>" />
 			
 			<c:if test="${not empty buttonHref}">
 				<!-- the buttonHref attribute has been deprecated, use buttonClick attribute instead -->

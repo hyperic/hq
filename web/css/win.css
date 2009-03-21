@@ -2081,11 +2081,12 @@ a.black:link,a.black:visited {
 }
 
 .dashboard {
-	background:transparent url(/images/4.0/backgrounds/titlebar_bg.png) repeat scroll 0 0;
+	background:transparent url(/images/4.0/backgrounds/titlebar_bg.png) repeat-x scroll 0 0;
 	border:1px solid gray;
 	font-size:12px;
 	margin:0 0 6px;
 	padding:4px;
+	height:29px;
 }
 #DashboardForm select{
 	padding:1px;

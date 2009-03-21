@@ -1326,7 +1326,9 @@ function saveAddEscalation() {
             <tr class="ToolbarContent">
                 <!-- EDIT TOOLBAR -->
                 <td colSpan="2">
-                	<input type="button" id="button" value="<fmt:message key="common.label.Edit"/>" onclick="editEscalation(); return false;" style="color:#fff;font-weight:700;width:auto;overflow:visible;" />
+                	<input type="button" id="button" class="button42" 
+                	       value="<fmt:message key="common.label.Edit"/>" 
+                	       onclick="editEscalation(); return false;" />
                 </td>
             </tr>
         </c:if>
@@ -1460,10 +1462,14 @@ function saveAddEscalation() {
         <table cellspacing="4" cellpadding="0">
             <tr>
                 <td>
-                	<input type="button" id="button" value="<fmt:message key="common.label.Save"/>" onclick="saveEscalation(); return false;" style="color:#fff;font-weight:700;width:auto;overflow:visible;" />
+                	<input type="button" id="button" class="button42" 
+                	       value="<fmt:message key="common.label.Save"/>" 
+                	       onclick="saveEscalation(); return false;" />
                 </td>
                 <td>
-                	<input type="button" id="button" value="<fmt:message key="common.label.Cancel"/>" onclick="cancelEditEscalation(); return false;" style="color:#fff;font-weight:700;width:auto;overflow:visible;" />
+                	<input type="button" id="button" class="button42" 
+                	       value="<fmt:message key="common.label.Cancel"/>" 
+                	       onclick="cancelEditEscalation(); return false;" />
                 </td>
             </tr>
         </table>
@@ -1545,15 +1551,21 @@ function saveAddEscalation() {
 		</div>
 		<c:if test="${useroperations['createEscalation'] || useroperations['modifyEscalation']}">
 			<div class="ToolbarContent" id="addRowButton">
-				<input type="button" id="button" value="<fmt:message key="common.label.AddAction"/>" onclick="addRow(); return false;" style="color:#fff;font-weight:700;width:auto;overflow:visible;" />
+				<input type="button" id="button" class="button42" 
+				       value="<fmt:message key="common.label.AddAction"/>" 
+				       onclick="addRow(); return false;" />
 			</div>
 		</c:if>
 		<div id="addEscButtons" class="ToolbarContent" style="display:none">
         	<span id="saveButton">
-				<input type="button" id="button" value="<fmt:message key="common.label.Save"/>" onclick="saveAddEscalation(); return false;" style="color:#fff;font-weight:700;width:auto;overflow:visible;" />
+				<input type="button" id="button" class="button42" 
+				       value="<fmt:message key="common.label.Save"/>" 
+				       onclick="saveAddEscalation(); return false;" />
             </span>
             <span>
-				<input type="button" id="button" value="<fmt:message key="common.label.Cancel"/>" onclick="cancelAddEscalation(); return false;" style="color:#fff;font-weight:700;width:auto;overflow:visible;" />
+				<input type="button" id="button" class="button42" 
+				       value="<fmt:message key="common.label.Cancel"/>" 
+				       onclick="cancelAddEscalation(); return false;" />
             </span>
 		</div>
 	</div>

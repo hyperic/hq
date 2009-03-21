@@ -356,7 +356,8 @@
 <!-- =================================== Action Mapping Definitions -->
 
   <action-mappings type="org.hyperic.hq.ui.action.BaseActionMapping">
-      <action path="/NoRights" 
+      
+	  <action path="/NoRights" 
               forward="/common/NoRights.jsp">
       </action>
                           
@@ -374,11 +375,6 @@
       <action path="/Logout" 
               type="org.hyperic.hq.ui.action.authentication.LogoutAction">              
               <forward name="success" path="/SignIn.html"/>
-      </action>
-      
-      <action path="/Login" 
-              forward="/common/Login.jsp">
-        <set-property property="title" value="Login"/>  
       </action>
       
       <action path="/Header"
@@ -1779,6 +1775,14 @@
             name="DashboardForm"
             scope="request"
             input="/Dashboard.do">
+        <forward name="success" path="/Dashboard.do" redirect="true"/>
+      </action>
+	  
+      <action path="/SetDefaultDashboard"
+              type="org.hyperic.hq.ui.action.portlet.SetDefaultDashboardAction"
+              name="DashboardForm"
+              scope="request"
+              input="/Dashboard.do">
         <forward name="success" path="/Dashboard.do" redirect="true"/>
       </action>
 
