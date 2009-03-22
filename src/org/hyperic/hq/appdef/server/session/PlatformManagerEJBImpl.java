@@ -275,7 +275,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public void removePlatform(AuthzSubject subject, Platform platform)
-        throws RemoveException, PlatformNotFoundException, PermissionException,
+        throws RemoveException,
+               PlatformNotFoundException,
+               PermissionException,
                VetoException {
         final AppdefEntityID aeid = platform.getEntityId();
         final Resource r = platform.getResource();
@@ -314,7 +316,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // this flush ensures that the server's platform_id is set to null
             // before the platform is deleted and the servers cascaded
             dao.getSession().flush();
-
+            
+            getAIQManagerLocal().removeAssociatedAIPlatform(platform);
             dao.remove(platform);
 
             // remove the config response
