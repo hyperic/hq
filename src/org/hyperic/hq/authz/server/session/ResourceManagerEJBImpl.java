@@ -73,6 +73,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * Use this session bean to manipulate Resources, ResourceTypes and
@@ -298,7 +299,8 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
 
     /**
-     * Removes the specified resource by nulling out its resourceType
+     * Removes the specified resource by nulling out its resourceType.
+     * Will not null the resourceType of the resource which is passed in.
      * These resources need to be cleaned up eventually by
      * {@link AppdefBossEJBImpl.removeDeletedResources}.  This may be done in 
      * the background via zevent by issuing a {@link ResourcesCleanupZevent}.
@@ -308,7 +310,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @return AppdefEntityID[] - an array of the resources (including children) deleted
      * @ejb:interface-method
      */
-    public AppdefEntityID[] removeResourcePerms(AuthzSubject subject, Resource r)
+    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r)
         throws VetoException, PermissionException
     {
         final ResourceType resourceType = r.getResourceType();
@@ -335,29 +337,38 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             opName = AuthzConstants.groupOpRemoveResourceGroup;
         }
 
-        pm.check(subject.getId(), resourceType, r.getInstanceId(),
-                 opName);
+        final boolean debug = log.isDebugEnabled();
+        final StopWatch watch = new StopWatch();
+        if (debug) watch.markTimeBegin("removeResourcePerms.pmCheck");
+        pm.check(subj.getId(), resourceType, r.getInstanceId(), opName);
+        if (debug) watch.markTimeEnd("removeResourcePerms.pmCheck");
 
         ResourceEdgeDAO edgeDao = getResourceEdgeDAO();
+        if (debug) watch.markTimeBegin("removeResourcePerms.findEdges");
         Collection edges = edgeDao.findDescendantEdges(r);
+        if (debug) watch.markTimeEnd("removeResourcePerms.findEdges");
         for (Iterator it = edges.iterator(); it.hasNext(); ) {
             ResourceEdge edge = (ResourceEdge) it.next();
             // Remove descendents' permissions
-            removed.addAll(Arrays.asList(removeResourcePerms(subject, edge.getTo())));
+            removed.addAll(
+                Arrays.asList(removeResourcePerms(subj, edge.getTo())));
         }
 
         removed.add(new AppdefEntityID(r));
         
+        if (debug) watch.markTimeBegin("removeResourcePerms.removeEdges");
         // Delete the edges and resource groups
         edgeDao.deleteEdges(r);
+        if (debug) watch.markTimeEnd("removeResourcePerms.removeEdges");
         
-        // Null out the instance_id and resource type so that the resource
-        // does not appear in queries
-        r.setResourceType(null);
-
         final long now = System.currentTimeMillis();
-        ResourceAudit.deleteResource(r, subject, now, now);
+        if (debug) watch.markTimeBegin("removeResourcePerms.audit");
+        ResourceAudit.deleteResource(r, subj, now, now);
+        if (debug) watch.markTimeEnd("removeResourcePerms.audit");
         
+        if (debug) {
+            log.debug(watch);
+        }
         return (AppdefEntityID[]) removed.toArray(new AppdefEntityID[0]);
     }
 

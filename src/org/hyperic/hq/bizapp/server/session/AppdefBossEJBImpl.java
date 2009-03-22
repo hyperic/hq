@@ -1370,7 +1370,8 @@ public class AppdefBossEJBImpl
                       timer.getElapsed());
         }
         
-        ZeventManager.getInstance().enqueueEventAfterCommit(new ResourcesCleanupZevent());
+        ZeventManager.getInstance().enqueueEventAfterCommit(
+            new ResourcesCleanupZevent());
         
         return removed;
     }
@@ -1419,40 +1420,20 @@ public class AppdefBossEJBImpl
             log.debug("Removed " + groups.size() + " resource groups");
         }
 
-        watch.markTimeBegin("removeServices");
         // Look through services, servers, platforms, applications, and groups
         Collection services = getServiceManager().findDeletedServices();
-        for (Iterator it = services.iterator(); it.hasNext(); ) {
-            try {
-                getOne()._removeServiceInNewTran(subject, (Service)it.next());
-            } catch (Exception e) {
-                log.error("Unable to remove service: " + e, e);
-            }
-        }
-        watch.markTimeEnd("removeServices");
-        if (log.isDebugEnabled()) {
-            log.debug("Removed " + services.size() + " services");
-        }
+        removeServices(subject, services);
 
-        watch.markTimeBegin("removeServers");
         Collection servers = getServerManager().findDeletedServers();
-        for (Iterator it = servers.iterator(); it.hasNext(); ) {
-            try {
-                getOne()._removeServerInNewTran(subject, (Server)it.next());
-            } catch (Exception e) {
-                log.error("Unable to remove server: " + e, e);
-            }
-        }
-        watch.markTimeEnd("removeServers");
-        if (log.isDebugEnabled()) {
-            log.debug("Removed " + servers.size() + " servers");
-        }
+        removeServers(subject, servers);
 
         watch.markTimeBegin("removePlatforms");
         Collection platforms = getPlatformManager().findDeletedPlatforms();
-        for (Iterator it = platforms.iterator(); it.hasNext(); ) {
+        for (final Iterator it = platforms.iterator(); it.hasNext(); ) {
+            final Platform platform = (Platform)it.next();
             try {
-                getOne()._removePlatformInNewTran(subject, (Platform)it.next());
+                removeServers(subject, platform.getServers());
+                getOne()._removePlatformInNewTran(subject, platform);
             } catch (Exception e) {
                 log.error("Unable to remove platform: " + e, e);
             }
@@ -1461,6 +1442,53 @@ public class AppdefBossEJBImpl
         if (log.isDebugEnabled()) {
             log.debug("Removed " + platforms.size() + " platforms");
             log.debug("removeDeletedResources() timing: " + watch);
+        }
+    }
+
+    private final void removeServers(AuthzSubject subject, Collection servers) {
+        final StopWatch watch = new StopWatch();
+        watch.markTimeBegin("removeServers");
+        final List svrs = new ArrayList(servers);
+        // can't use iterator for loop here.  Since we are modifying the
+        // internal hibernate collection, which this collection is based on,
+        // it will throw a ConcurrentModificationException
+        // This occurs even if you disassociate the Collection by trying
+        // something like new ArrayList(servers).  Not sure why.
+        for (int i=0; i<svrs.size(); i++) {
+            try {
+                final Server server = (Server)svrs.get(i);
+                removeServices(subject, server.getServices());
+                getOne()._removeServerInNewTran(subject, server);
+            } catch (Exception e) {
+                log.error("Unable to remove server: " + e, e);
+            }
+        }
+        watch.markTimeEnd("removeServers");
+        if (log.isDebugEnabled()) {
+            log.debug("Removed " + servers.size() + " services");
+        }
+    }
+
+    private final void removeServices(AuthzSubject subject, Collection services) {
+        final StopWatch watch = new StopWatch();
+        watch.markTimeBegin("removeServices");
+        final List svcs = new ArrayList(services);
+        // can't use iterator for loop here.  Since we are modifying the
+        // internal hibernate collection, which this collection is based on,
+        // it will throw a ConcurrentModificationException
+        // This occurs even if you disassociate the Collection by trying
+        // something like new ArrayList(services).  Not sure why.
+        for (int i=0; i<svcs.size(); i++) {
+            try {
+                final Service service = (Service)svcs.get(i);
+                getOne()._removeServiceInNewTran(subject, service);
+            } catch (Exception e) {
+                log.error("Unable to remove service: " + e, e);
+            }
+        }
+        watch.markTimeEnd("removeServices");
+        if (log.isDebugEnabled()) {
+            log.debug("Removed " + services.size() + " services");
         }
     }
 
@@ -1520,11 +1548,6 @@ public class AppdefBossEJBImpl
         throws ApplicationException, VetoException 
     {
         try {
-            for (Iterator it=platform.getServers().iterator(); it.hasNext(); ) {
-                Server server = (Server) it.next();
-                getOne()._removeServerInNewTran(subject, server);
-            }
-            
             // Disable all measurements for this platform.  We don't actually
             // remove the measurements here to avoid delays in deleting
             // resources.
@@ -1563,28 +1586,20 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
-    public void _removeServerInNewTran(AuthzSubject subject, Server server)
-        throws VetoException, PermissionException {
+    public void removeServer(AuthzSubject subject, Server server) {
         removeServer(subject, server);
     }
 
     /**
+     * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
-    public void removeServer(AuthzSubject subject, Server server)
-        throws VetoException, PermissionException
-    {
+    public void _removeServerInNewTran(AuthzSubject subject, Server server)
+        throws VetoException,
+               PermissionException {
         try {
-            // Service manager will update the collection, so we need to copy
-            Collection services = new ArrayList(server.getServices());
-            for (Iterator it = services.iterator(); it.hasNext();) {
-                Service service = (Service) it.next();
-                getOne()._removeServiceInNewTran(subject, service);
-            }
-    
             // now remove the measurements
             disableMeasurements(subject, server.getResource());
     

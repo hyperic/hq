@@ -63,13 +63,8 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
-import org.hyperic.hq.authz.server.session.ResourceType;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
@@ -373,30 +368,18 @@ public class AIQueueManagerEJBImpl
 
         return aiserver.getAIServerValue();
     }
-    
+
     /**
      * @ejb:interface-method
      */
-    public void startup() {
-        HQApp.getInstance().registerCallbackListener(
-            ResourceDeleteCallback.class, new ResourceDeleteCallback() {
-                public void preResourceDelete(Resource r) throws VetoException {
-                    if (r == null || r.isInAsyncDeleteState()) {
-                        return;
-                    }
-                    final ResourceType type = r.getResourceType();
-                    if (!type.getId().equals(AuthzConstants.authzPlatform)) {
-                        return;
-                    }
-                    AIPlatform aiPlat =
-                        getAIPlatformByPlatformID(r.getInstanceId());
-                    if (aiPlat == null) {
-                        return;
-                    }
-                    getAIPlatformDAO().remove(aiPlat);
-                }
-            }
-        );
+    public void removeAssociatedAIPlatform(Platform platform)
+        throws VetoException
+    {
+        AIPlatform aiPlat = getAIPlatformByPlatform(platform);
+        if (aiPlat == null) {
+            return;
+        }
+        getAIPlatformDAO().remove(aiPlat);
     }
 
     /**
@@ -708,10 +691,11 @@ public class AIQueueManagerEJBImpl
         return getAIPlatformByPlatformID(platformID).getAIPlatformValue();
     }
 
-    private AIPlatform getAIPlatformByPlatformID(Integer platformID)
-    {
-        Platform pLocal = getPlatformDAO().get(platformID);
+    private AIPlatform getAIPlatformByPlatformID(Integer platformID) {
+        return getAIPlatformByPlatform(getPlatformDAO().findById(platformID));
+    }
 
+    private AIPlatform getAIPlatformByPlatform(Platform pLocal) {
         Collection ips = pLocal.getIps();
         // We can't use the FQDN to find a platform, because
         // the FQDN can change too easily.  Instead we use the
@@ -728,8 +712,7 @@ public class AIQueueManagerEJBImpl
                 !mac.equals(NetFlags.NULL_HWADDR)) {
                 List addrs = getAIIpDAO().findByMACAddress(qip.getMacAddress());
                 if (addrs.size() > 0) {
-                    AIPlatform aiplatform =
-                        ((AIIp) addrs.get(0)).getAIPlatform();
+                    AIPlatform aiplatform = ((AIIp)addrs.get(0)).getAIPlatform();
                     return aiplatform;
                 }
             }
