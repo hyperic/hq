@@ -106,6 +106,7 @@ public class JMXFilterInitServlet extends HttpServlet {
     public void registerServletMBean( String contextName, String servletPath,
                                       ServletInfo bean ) 
     {
+        String objNameStr = null;
         try {
             //ClassLoader cl = Thread.currentThread().getContextClassLoader();
             //JMXContextInfo ci = (JMXContextInfo)contextInfoByCL.get(cl);
@@ -124,16 +125,18 @@ public class JMXFilterInitServlet extends HttpServlet {
                     JMXFilter.replace(servletPath, escape[i], "_");
             }
 
-            ObjectName oname = new ObjectName(DOMAIN + 
-                                              ":type=Servlet,name="
-                                              + servletPath + 
-                                              ",context=" + contextName);
+            objNameStr = DOMAIN + 
+                         ":type=Servlet,name=" +
+                         servletPath + 
+                         ",context=" +
+                         contextName;
+            ObjectName oname = new ObjectName(objNameStr);
             if (mServer.isRegistered(oname)) {
                 mServer.unregisterMBean(oname);
             }
             mServer.registerMBean(bean, oname);
         } catch(Exception ex) {
-            log("Error registering servlet mbean: " + ex.toString(), ex);
+            log("Error registering servlet mbean for name " + objNameStr, ex);
         }
     }
     
