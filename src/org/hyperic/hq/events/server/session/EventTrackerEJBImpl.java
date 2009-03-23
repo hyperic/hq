@@ -141,7 +141,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         
         TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
         try {
-            TriggerEvent triggerEvent = triggerEventDAO.findById(teid);
+            TriggerEvent triggerEvent = triggerEventDAO.get(teid);
             
             long expire = 0;
             

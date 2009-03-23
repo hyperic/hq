@@ -52,6 +52,10 @@ public class TriggerEventDAO extends HibernateDAO {
         return (TriggerEvent) super.findById(id);            
     }
     
+    TriggerEvent get(Long id) {
+        return (TriggerEvent) super.get(id);
+    }
+    
     List findUnexpiredByTriggerId(Integer tid, Session session) {
         String hql = "from TriggerEvent te where te.triggerId= :tid and " +
                       "te.expiration > :exp order by te.ctime";
