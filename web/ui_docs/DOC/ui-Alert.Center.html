@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 Documentation : ui-Alert.Center</title>
+        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.Center</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,15 +12,14 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 Documentation : ui-Alert.Center
+                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.Center
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 19, 2009 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Mar 23, 2009 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <p><a name="ui-Alert.Center-top"></a></p>
-
 
 <h1><a name="ui-Alert.Center-AlertCenter"></a>Alert Center</h1>
 
@@ -42,7 +41,7 @@
 
 <p><b>To refresh the list:</b></p>
 <ul>
-	<li>Click <img src="download/attachments/61440478/arrow_refresh.gif" align="absmiddle" border="0"/> at the top right.</li>
+	<li>Click <img src="download/attachments/59375874/arrow_refresh.gif" align="absmiddle" border="0"/> at the top right.</li>
 </ul>
 
 
@@ -53,15 +52,17 @@ When viewing triggered alerts, the sort will apply to all alert data from the da
 </ul>
 
 
+<p>As of HQ 4.1, you can acknowledge and fix alerts on the Alert Center page:</p>
+
 <p><b>To acknowledge alerts</b></p>
 <ul>
-	<li>Check-mark the alert(s) you wish to acknowledge and click <b>Acknowledge</b>.</li>
+	<li>Check-mark the alert(s) you wish to acknowledge and click <b>Acknowledge</b>.  As of HQ 4.1.1, if the escalation has pause options, you are offered the option to pause the escalation.</li>
 </ul>
 
 
 <p><b>To fix alerts</b></p>
 <ul>
-	<li>Check-mark the alert(s) you wish to fix and click <b>Fixed</b>. A pop-up will prompt you to enter a comment about the fix.</li>
+	<li>Check-mark the alert(s) you wish to fix and click <b>Fixed</b>. A pop-up will prompt you to enter a comment about the fix. As of HQ 4.1.1, if there are other unfixed alerts with the same definition, you are offered the option to "Fix all previous alerts".</li>
 </ul>
 
 
@@ -133,7 +134,6 @@ The list at the right is automatically filtered.</li>
 
 <h3><a name="ui-Alert.Center-SectionsonThisScreen"></a>Sections on This Screen</h3>
 
-
 <h4><a name="ui-Alert.Center-AlertsTab"></a>Alerts Tab</h4>
 
 <p>This section lists all the alerts (<a href="http://support.hyperic.com/confluence/display/DOC/Defining+Alerts" title="Defining Alerts">resource alerts</a> and <a href="http://support.hyperic.com/confluence/display/DOC/Group+Alerts" title="Group Alerts">group alerts</a>) triggered across the HQ deployment, in a flat hierarchy, sorted by triggered date and time, in backwards chronological order. (Alerts that get generated from resource-type alert definitions are considered resource alerts.) In the "Alert Filter" section, users can filter the list of triggered alerts displayed at the right.</p>
@@ -160,7 +160,7 @@ The list at the right is automatically filtered.</li>
 	<li><ins>Name</ins>: The alert definition's name</li>
 	<li><ins>Created</ins>: Date and time the alert was defined</li>
 	<li><ins>Modified</ins>: Date and time the alert was modified (if at all)</li>
-	<li><ins>Enabled</ins>: Whether or not the alert definition is enabled (able to generate alerts) or not</li>
+	<li><ins>Active</ins>: Whether or not the alert definition is configured to generate alerts) or not.  Starting in HQ 4.1.1, if the alert is defined to fire once, and not again until after it is fixed, an icon will be displayed in this column if the the alert is not fixed.  unfixed alerts will</li>
 	<li><ins>Last Alert</ins>: Date and time the alert was last triggered</li>
 	<li><ins>Resource</ins> or <ins>Resource Type</ins> or <ins>Group</ins>: The resource, resource type, or group for which the alert was defined, respectively</li>
 	<li><ins>Escalation</ins>: The name of the <a href="http://support.hyperic.com/confluence/display/DOC/Escalation" title="Escalation">escalation scheme</a> assigned to the alert definition</li>
@@ -177,7 +177,7 @@ The list at the right is automatically filtered.</li>
 <table class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> <b>Dashboard</b> </td>
-<td class='confluenceTd'> Displays the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Dashboard" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
+<td class='confluenceTd'> Displays the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Resources</b> </td>
@@ -185,7 +185,7 @@ The list at the right is automatically filtered.</li>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Analyze</b> </td>
-<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Report.Center" title="ui-Report.Center">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Alert.Center" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Event.Center" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br clear="all" /> </td>
+<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Report.Center" title="ui-Report.Center">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Event.Center" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br clear="all" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Administration</b> </td>
@@ -193,17 +193,17 @@ The list at the right is automatically filtered.</li>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Search</b> <br clear="all" /> </td>
-<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search the HQ inventory for resources of any type. <br clear="all" />
+<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search for HQ resources of any type and HQ users. <br clear="all" />
 <br clear="all" />
 Search results appear after four characters are entered in the text box. Results will include the first 10 platforms, servers, services, and groups whose name includes the search string. <br clear="all" />  <br clear="all" />
 Double-click a resource in the list to navigate to its Resource page. </td>
 </tr>
 </tbody></table>
-<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Alert.Detail" title="ui-Alert.Detail">alert detail</a>.</p>
+<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
 <p><em><a href="#ui-Alert.Center-top"><em>back to top</em></a></em></p>
 <table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
 <div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Next Steps</b></div><div class="panelContent">
-<p><a href="http://support.hyperic.com/confluence/display/DOC/ui-Alert.Detail" title="ui-Alert.Detail">View the triggered alert</a>, where the alert can be fixed and acknowledged</p>
+<p><a href="ui-Alert.Detail.html" title="ui-Alert.Detail">View the triggered alert</a>, where the alert can be fixed and acknowledged</p>
 </div></div>
 <div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
 <p><a href="http://support.hyperic.com/confluence/display/DOC/Alerts+Overview" title="Alerts Overview">Alerts Overview</a><br/>
@@ -219,7 +219,7 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/61440478/arrow_refresh.gif">arrow_refresh.gif</a> (image/gif)
+                                <a href="download/attachments/59375874/arrow_refresh.gif">arrow_refresh.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -231,7 +231,7 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Mar 02, 2009 13:37</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Mar 23, 2009 15:19</font></td>
 		    </tr>
 	    </table>
     </body>
