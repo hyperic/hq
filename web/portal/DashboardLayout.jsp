@@ -131,15 +131,6 @@
 	}
 	
 	onloads.push(refreshPortlets);
-	dojo.require("dojo.widget.Dialog");
-	    dojo.event.connect(window, "onload", function(){
-	    <c:if test="${DashboardForm.dashboardSelectable}">
-	        var dialogWidget = dojo.widget.createWidget("Dialog", {}, dojo.byId("dashboardSelectDialog"));
-	    if(<c:out value="${DashboardForm.popDialog}"/>){
-	       dialogWidget.show();
-	    }
-	 </c:if>
-	});
 </script>
 <html:link page="/Resource.do?eid=" linkName="viewResUrl" styleId="viewResUrl" style="display:none;"></html:link>
 
@@ -222,46 +213,6 @@
 										</c:when>
 									</c:choose>
 								</div>								
-							</div>
-							<div id="dashboardSelectDialog" class="hidden">
-								<div class="dojoDialog">
-									<div class="dojoDialogTitle">
-										<fmt:message key="dash.home.DashboardSelectionDialog"></fmt:message>
-									</div>
-									<div class="dojoDialogBody">
-										<c:if test="${requestScope.isDashRemoved}">
-											<div class="dojoDialogMessage">
-												<fmt:message key="dash.home.DefalutDashboardRemoved" />
-											</div>
-										</c:if>
-										<div id="dashboardSelectionErrorPanel" class="hidden">
-											<span class="ErrorBlock">
-												<img width="10" height="11" border="0" alt="" src="/images/tt_error.gif" />
-											</span> 
-											<span class="ErrorBlock">
-												<fmt:message key="dash.home.DashboardSelectionDialogError" />
-											</span>
-										</div>
-										<div class="fieldSetStacked" style="margin-bottom: 8px;">
-											<span class="DashboardSelectBoxLabel">
-												<fmt:message key="dash.home.DashboardSelectBoxLabel" />
-											</span> 
-											<html:select property="defaultDashboard" name="defaultDashboard" value="defaultDashboard" size="9" style="width: 268px;border:1px solid #aaa" styleId="defaultDash">
-												<html:optionsCollection property="dashboards" value="id" label="name"></html:optionsCollection>
-											</html:select>
-										</div>
-									</div>
-									<div class="dojoDialogFooter">
-										<div class="right">
-											<input type="hidden" name="temp" value="temp" id="dashboardSubmitButton" /> 
-											<a class="buttonGreen" href="javascript:selectDefaultDashboard(); hyperic.form.mockLinkSubmit('ok.x', '1', 'dashboardSubmitButton');">
-												<span>
-													<fmt:message key="button.ok" />
-												</span>
-											</a>
-										</div>
-									</div>
-								</div>
 							</div>
 						</html:form>
 					</c:when>

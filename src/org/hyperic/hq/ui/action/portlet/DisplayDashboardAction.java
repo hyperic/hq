@@ -122,20 +122,17 @@ public class DisplayDashboardAction extends TilesAction {
 			// If we have a selected dashboard id, find it in the list of dashboards
 			// if it has been removed, inform the user
 			dashboardConfig = DashboardUtils.findDashboard(dashboardCollection, selectedDashboard);
-		} else {
-			// many dashboards and no default or selected - pop default dialog
-			// set the background dashboard to the user dashboard
-			dashboardConfig = dashManager.getUserDashboard(me, me);
-			
-			dForm.setPopDialog(true);
-		}
-
-		// Check if the dashboard still exists, if not inform the user and return
+		} 
+		
 		if (dashboardConfig == null) {
-			dForm.setPopDialog(true);
-			request.setAttribute(Constants.IS_DASHBOARD_REMOVED, new Boolean(true));
+			// Either no default/selected dashboard or default dashboard no longer exists
+			// in both cases, we'll set default dashboard to the user dashboard
+			dashboardConfig = dashManager.getUserDashboard(me, me);
+			defaultDashboard = dashboardConfig.getId().toString();
 			
-			return null;
+			// update preferences
+			user.setPreference(Constants.DEFAULT_DASHBOARD_ID, defaultDashboard);
+			boss.setUserPrefs(user.getSessionId(), user.getSubject().getId(), user.getPreferences());
 		}
 
 		// Update the sessions with the selected dashboard
