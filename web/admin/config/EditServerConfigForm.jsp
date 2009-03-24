@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -120,22 +120,35 @@
   </tr>
 <!--  /  -->
 
-<!--  MAINTENANCE WINDOW CONFIG TITLE -->
+<!--  GLOBAL ALERT CONFIG TITLE -->
   <tr>
     <td colspan="4" class="BlockHeader">
 <tiles:insert definition=".header.tab">  
-  <tiles:put name="tabKey" value="admin.settings.MaintenanceConfigTab"/>  
+  <tiles:put name="tabKey" value="admin.settings.AlertConfigTab"/>  
 </tiles:insert>
     </td>
   </tr>
 <!--  /  -->
 
-<!--  MAINTENANCE WINDOW CONFIG CONTENTS -->
+<!--  GLOBAL ALERT CONFIG CONTENTS -->
+  <tr>
+    <td colspan="4" class="BlockContent"><fmt:message key="admin.settings.RestartNote.Alert"/></td>
+  </tr>
+  <tr>
+    <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+  </tr>
   <tr>
     <td class="BlockLabel"><fmt:message key="admin.settings.AlertsEnabled"/></td>
     <td class="BlockContent" colspan="3">
-    <html:radio property="alertsAllowed" value="true"/><fmt:message key="yesno.true"/>
-    <html:radio property="alertsAllowed" value="false"/><fmt:message key="yesno.false"/>
+    <html:radio property="alertsAllowed" value="true"/><fmt:message key="ON"/>
+    <html:radio property="alertsAllowed" value="false"/><fmt:message key="OFF"/>
+    </td>
+  </tr>
+  <tr>
+    <td class="BlockLabel"><fmt:message key="admin.settings.AlertNotificationsEnabled"/></td>
+    <td class="BlockContent" colspan="3">
+    <html:radio property="alertNotificationsAllowed" value="true"/><fmt:message key="ON"/>
+    <html:radio property="alertNotificationsAllowed" value="false"/><fmt:message key="OFF"/>
     </td>
   </tr>
 <!--  /  -->

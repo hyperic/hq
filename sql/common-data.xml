@@ -185,6 +185,10 @@
 
         <!-- ARC Reporting Server URL -->
         <data ID="61" PROPKEY="ARC_SERVER_URL" DEFAULT_PROPVALUE="" PROPVALUE="" FREAD_ONLY="FALSE"/>
+
+        <!-- Global Alert Properties -->
+        <data ID="62" PROPKEY="HQ_ALERTS_ENABLED" DEFAULT_PROPVALUE="true" PROPVALUE="true" FREAD_ONLY="FALSE"/>
+        <data ID="63" PROPKEY="HQ_ALERT_NOTIFICATIONS_ENABLED" DEFAULT_PROPVALUE="true" PROPVALUE="true" FREAD_ONLY="FALSE"/>
        
     </table>
 

@@ -178,7 +178,19 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             int newPurge = (int)(Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
             ServerConfigAudit.updateEventPurgeInterval(subject, newPurge,
                                                        oldPurge);
-        }
+        } else if (key.equals(HQConstants.AlertsEnabled)) {
+            boolean oldEnabled = oldVal.equals("true");
+            boolean newEnabled = newVal.equals("true");
+            ServerConfigAudit.updateAlertsEnabled(subject,
+                                                  newEnabled,
+                                                  oldEnabled);            
+        } else if (key.equals(HQConstants.AlertNotificationsEnabled)) {
+            boolean oldEnabled = oldVal.equals("true");
+            boolean newEnabled = newVal.equals("true");
+            ServerConfigAudit.updateAlertNotificationsEnabled(subject,
+                                                              newEnabled,
+                                                              oldEnabled);
+        }        
     }
     
     private void createChangeAudits(AuthzSubject subject, Collection allProps, 
@@ -239,6 +251,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                           Properties newProps)
         throws ApplicationException, ConfigPropertyException 
     {
+        ServerConfigCache cache = ServerConfigCache.getInstance();
         Collection allProps;
         String key;
         String propValue;
@@ -263,9 +276,11 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                     if ( prefix != null &&
                          (propValue == null || propValue.equals("NULL")) ) {
                         ccLH.remove(ejb);
+                        cache.remove(key);
                     } else {
                         // non-prefixed properties never get deleted.
                         ejb.setValue(propValue);
+                        cache.put(key, propValue);
                     }
                 } else if ( prefix == null ) {
                     // Bomb out if props are missing for non-prefixed properties
@@ -282,6 +297,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                     propValue = tempProps.getProperty(key);
                     // create the new property
                     ccLH.create(prefix, key, propValue, propValue);
+                    cache.put(key, propValue);
                 }
             }
         } catch (FinderException e) {

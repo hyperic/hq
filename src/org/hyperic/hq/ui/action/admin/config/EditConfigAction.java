@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -38,7 +38,6 @@ import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
-import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -84,11 +83,7 @@ public class EditConfigAction extends BaseAction {
             // Set the update mode
             UpdateBoss uboss = ContextUtils.getUpdateBoss(ctx);
             uboss.setUpdateMode(sessionId,
-                UpdateStatusMode.findByCode(cForm.getUpdateMode()));
-            
-            // Get the alert enablement status
-            EventsBoss eboss = ContextUtils.getEventsBoss(ctx);
-            eboss.setAlertsAllowed(sessionId, cForm.isAlertsAllowed());
+                UpdateStatusMode.findByCode(cForm.getUpdateMode()));            
         }
 
         RequestUtils.setConfirmation(request,

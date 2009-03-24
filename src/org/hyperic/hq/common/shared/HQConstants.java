@@ -64,6 +64,10 @@ public class HQConstants {
 
     // How long do we keep alerts
     public static final String AlertPurge      = "ALERT_PURGE";
+    // Are alerts globally enabled?
+    public static final String AlertsEnabled = "HQ_ALERTS_ENABLED";
+    // Are alert notifications globally enabled?
+    public static final String AlertNotificationsEnabled = "HQ_ALERT_NOTIFICATIONS_ENABLED";
 
     // email related
     public static final String EmailSender = "CAM_EMAIL_SENDER";

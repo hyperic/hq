@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -40,7 +40,6 @@ import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
-import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -70,11 +69,6 @@ public class EditConfigPrepAction extends TilesAction {
         UpdateBoss uboss = ContextUtils.getUpdateBoss(ctx);
         UpdateStatusMode upMode = uboss.getUpdateMode();
         cForm.setUpdateMode(upMode.getCode());
-        
-        // Get the alert enablement status
-        EventsBoss eboss = ContextUtils.getEventsBoss(ctx);
-        cForm.setAlertsAllowed(
-            eboss.areAlertsAllowed(RequestUtils.getSessionIdInt(request)));
         
         return null;
     }

@@ -53,6 +53,7 @@ public class SystemConfigForm extends BaseValidatorForm {
     private String elPurgeVal = "0";
     private boolean externDocs = true;
     private boolean _alertsAllowed = true;
+    private boolean _alertNotificationsAllowed = true;
 
     public String toString() {
         StringBuffer buf = new StringBuffer(super.toString());
@@ -66,6 +67,7 @@ public class SystemConfigForm extends BaseValidatorForm {
         buf.append(" updateMode=").append(updateMode);
         buf.append(" externDocs=").append(externDocs);
         buf.append(" alertsAllowed=").append(_alertsAllowed);
+        buf.append(" alertNotificationsAllowed=").append(_alertNotificationsAllowed);
 
         return buf.toString();
     }
@@ -125,6 +127,12 @@ public class SystemConfigForm extends BaseValidatorForm {
         if (externDocsStr != null) {
             externDocs = Boolean.valueOf(externDocsStr).booleanValue();
         }
+        
+        String alertsAllowedStr = prop.getProperty(HQConstants.AlertsEnabled, "true");
+        _alertsAllowed = Boolean.valueOf(alertsAllowedStr).booleanValue();
+        
+        String alertNotificationsAllowedStr = prop.getProperty(HQConstants.AlertNotificationsEnabled, "true");
+        _alertNotificationsAllowed = Boolean.valueOf(alertNotificationsAllowedStr).booleanValue();
     }
     
     /**
@@ -203,6 +211,11 @@ public class SystemConfigForm extends BaseValidatorForm {
         prop.setProperty(HQConstants.EventLogPurge,
                          String.valueOf(elPurgeLong));
         prop.setProperty(HQConstants.ExternalHelp, String.valueOf(externDocs));
+        
+        prop.setProperty(HQConstants.AlertsEnabled,
+                         String.valueOf(_alertsAllowed));
+        prop.setProperty(HQConstants.AlertNotificationsEnabled, 
+                         String.valueOf(_alertNotificationsAllowed));
 
         return prop;
     }
@@ -333,6 +346,14 @@ public class SystemConfigForm extends BaseValidatorForm {
 
     public void setAlertsAllowed(boolean alertsAllowed) {
         _alertsAllowed = alertsAllowed;
+    }
+    
+    public boolean isAlertNotificationsAllowed() {
+        return _alertNotificationsAllowed;
+    }
+    
+    public void setAlertNotificationsAllowed(boolean alertNotificationsAllowed) {
+        _alertNotificationsAllowed = alertNotificationsAllowed;
     }
 
     /* (non-Javadoc)
