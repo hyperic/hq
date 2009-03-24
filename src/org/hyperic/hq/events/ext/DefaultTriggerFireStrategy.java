@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -53,6 +53,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.events.server.session.ClassicEscalatableCreator;
 import org.hyperic.hq.events.server.session.TriggerTrackerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
@@ -99,10 +100,7 @@ public class DefaultTriggerFireStrategy implements TriggerFireStrategy {
         if (!isSystemReady())
             return;
 
-        AlertDefinitionManagerLocal aman =
-            AlertDefinitionManagerEJBImpl.getOne();
-
-        if (!aman.areAlertsAllowed()) {
+        if (!AlertRegulator.getInstance().alertsAllowed()) {
             _log.debug("Alert not firing because they are not allowed");
             return;
         }
@@ -112,6 +110,9 @@ public class DefaultTriggerFireStrategy implements TriggerFireStrategy {
         _trigger.publishEvent(event);
 
         try {
+            AlertDefinitionManagerLocal aman =
+                AlertDefinitionManagerEJBImpl.getOne();
+
             Integer adId = aman.getIdFromTrigger(_trigger.getId());
             if (adId == null)
                 return;

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -1037,23 +1037,7 @@ public class AlertDefinitionManagerEJBImpl
     public Object[] getEnabledAndTriggerId(Integer id) {
         return getAlertDefDAO().getEnabledAndTriggerId(id);
     }
-
-    /**
-     * Returns true if alerts are allowed.
-     * @ejb:interface-method
-     */
-    public boolean areAlertsAllowed() {
-        return AlertRegulator.getInstance().alertsAllowed();
-    }
     
-    /**
-     * @see #areAlertsAllowed()
-     * @ejb:interface-method
-     */
-    public void setAlertsAllowed(boolean allowed) {
-        AlertRegulator.getInstance().setAlertsAllowed(allowed);
-    }
-
     public static AlertDefinitionManagerLocal getOne() {
         try {
             return AlertDefinitionManagerUtil.getLocalHome().create(); 

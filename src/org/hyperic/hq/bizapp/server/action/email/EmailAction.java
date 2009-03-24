@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.Set;
 
 import javax.mail.internet.AddressException;
@@ -59,6 +60,7 @@ import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
+import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.hqu.rendit.RenditServer;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.util.config.ConfigResponse;
@@ -72,8 +74,10 @@ public class EmailAction extends EmailActionConfig
     protected static String baseUrl = null;
 
     private Log _log = LogFactory.getLog(EmailAction.class);
+    private final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
 
     private AuthzSubjectManagerLocal subjMan;
+    private ResourceBundle resourceBundle;
 
     public EmailAction() {
     }
@@ -83,6 +87,13 @@ public class EmailAction extends EmailActionConfig
             subjMan = AuthzSubjectManagerEJBImpl.getOne();
         }
         return subjMan;
+    }
+    
+    private ResourceBundle getResourceBundle() {
+        if (resourceBundle == null) {
+            resourceBundle = ResourceBundle.getBundle(BUNDLE);
+        }
+        return resourceBundle;
     }
 
     private String renderTemplate(String filename, Map params) {
@@ -140,10 +151,16 @@ public class EmailAction extends EmailActionConfig
         throws ActionExecuteException 
     {
         try {
+            if (!AlertRegulator.getInstance().alertNotificationsAllowed()) {
+                return getResourceBundle()
+                            .getString("action.email.error.notificationDisabled");
+            }
+            
             Map addrs = lookupEmailAddr();
             
             if (addrs.isEmpty()) {
-                return "No valid users or emails found to send alert";
+                return getResourceBundle()
+                            .getString("action.email.error.noEmailAddress");
             }
 
             EmailFilter filter = new EmailFilter();

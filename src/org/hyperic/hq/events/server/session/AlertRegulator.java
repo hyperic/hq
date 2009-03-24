@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of 
  * "derived work". 
  *  
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc. 
+ * Copyright (C) [2004-2009], Hyperic, Inc. 
  * This file is part of HQ.         
  *  
  * HQ is free software; you can redistribute it and/or modify 
@@ -28,6 +28,9 @@ package org.hyperic.hq.events.server.session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.hyperic.hq.common.server.session.ServerConfigCache;
+import org.hyperic.hq.common.shared.HQConstants;
+
 /**
  * The {@link AlertRegulator} has the responsibility of limiting the 
  * generation of alerts.
@@ -35,25 +38,33 @@ import org.apache.commons.logging.LogFactory;
 public class AlertRegulator {
     private static final AlertRegulator INSTANCE = new AlertRegulator();
     private static final Log _log = LogFactory.getLog(AlertRegulator.class);
-    
-    private final Object LOCK = new Object();
-    private boolean _alertsAllowed = true;
+        
+    private AlertRegulator() {
+        // prevent other classes from instantiating this class
+    }
     
     public boolean alertsAllowed() {
-        synchronized (LOCK) {
-            return _alertsAllowed;
+        boolean allowed = true;
+        Boolean prop = ServerConfigCache.getInstance()
+                                .getBooleanProperty(HQConstants.AlertsEnabled);
+        try {
+            allowed = prop.booleanValue();
+        } catch (NullPointerException e) {
+            //
         }
+        return allowed;
     }
-
-    public void setAlertsAllowed(boolean allowed) {
-        synchronized (LOCK) {
-            if (!allowed)
-                _log.warn("Alerts have been globally disabled until the " +
-                          "next server re-start");
-            else
-                _log.warn("Alerts have been globally re-enabled");
-            _alertsAllowed = allowed;
+    
+    public boolean alertNotificationsAllowed() {
+        boolean allowed = true;
+        Boolean prop = ServerConfigCache.getInstance()
+                                .getBooleanProperty(HQConstants.AlertNotificationsEnabled);
+        try {
+            allowed = prop.booleanValue();
+        } catch (NullPointerException e) {
+            //
         }
+        return allowed;
     }
     
     public static AlertRegulator getInstance() {

@@ -1848,26 +1848,6 @@ public class EventsBossEJBImpl
     }
     
     /**
-     * See if alerts are enabled
-     * @ejb:interface-method
-     */
-    public boolean areAlertsAllowed(int sessionId)
-        throws SessionNotFoundException, SessionTimeoutException {
-        manager.authenticate(sessionId);
-        return getADM().areAlertsAllowed();
-    }
-
-    /**
-     * Set to allow/disallow alerts
-     * @ejb:interface-method
-     */
-    public void setAlertsAllowed(int sessionId, boolean allowed)
-        throws SessionNotFoundException, SessionTimeoutException {
-        manager.authenticate(sessionId);
-        getADM().setAlertsAllowed(allowed);
-    }
-
-    /**
      * Get a maintenance event by group id
      *
      * @ejb:interface-method
