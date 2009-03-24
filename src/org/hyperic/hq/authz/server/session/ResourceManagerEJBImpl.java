@@ -307,10 +307,12 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @see {@link AppdefBossEJBImpl.removeDeletedResources}
      * @see {@link ResourcesCleanupZevent}
      * @param r {@link Resource} resource to be removed.
+     * @param nullResourceType tells the method to null out the resourceType
      * @return AppdefEntityID[] - an array of the resources (including children) deleted
      * @ejb:interface-method
      */
-    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r)
+    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
+                                                boolean nullResourceType)
         throws VetoException, PermissionException
     {
         final ResourceType resourceType = r.getResourceType();
@@ -351,7 +353,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             ResourceEdge edge = (ResourceEdge) it.next();
             // Remove descendents' permissions
             removed.addAll(
-                Arrays.asList(removeResourcePerms(subj, edge.getTo())));
+                Arrays.asList(removeResourcePerms(subj, edge.getTo(), true)));
         }
 
         removed.add(new AppdefEntityID(r));
@@ -360,6 +362,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         // Delete the edges and resource groups
         edgeDao.deleteEdges(r);
         if (debug) watch.markTimeEnd("removeResourcePerms.removeEdges");
+        
+        if (nullResourceType) {
+            r.setResourceType(null);
+        }
         
         final long now = System.currentTimeMillis();
         if (debug) watch.markTimeBegin("removeResourcePerms.audit");
