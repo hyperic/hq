@@ -131,4 +131,20 @@ public class ServerConfigAudit extends Audit {
         return createAudit(user, "auditMsg.serverConfig.eventPurge", 
                            newVal + "", old + "");  
     }
+    
+    public static ServerConfigAudit updateAlertsEnabled(AuthzSubject user,
+                                                        boolean newVal,
+                                                        boolean old)
+    {
+        return createAudit(user, "auditMsg.serverConfig.alertsEnabled", 
+                           newVal + "", old + ""); 
+    }
+
+    public static ServerConfigAudit updateAlertNotificationsEnabled(AuthzSubject user,
+                                                                    boolean newVal,
+                                                                    boolean old)
+    {
+        return createAudit(user, "auditMsg.serverConfig.alertNotificationsEnabled", 
+                           newVal + "", old + ""); 
+    }
 }
