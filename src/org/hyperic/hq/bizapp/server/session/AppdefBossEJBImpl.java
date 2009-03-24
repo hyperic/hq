@@ -1333,7 +1333,8 @@ public class AppdefBossEJBImpl
                 throw new ApplicationException(se);
             }
         }
-        AppdefEntityID[] removed = resMan.removeResourcePerms(subject, res);
+        AppdefEntityID[] removed = resMan.removeResourcePerms(
+            subject, res, false);
         try {
             final Integer id = aeid.getId();
             switch (aeid.getType()) {
