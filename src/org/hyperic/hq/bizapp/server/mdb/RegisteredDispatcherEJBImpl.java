@@ -123,7 +123,7 @@ public class RegisteredDispatcherEJBImpl
                 log.error("ProcessEvent failed to execute action", e);
             } catch (EventTypeException e) {
                 // The trigger was not meant to process this event
-                log.debug("dispatchEvent dispatched to trigger (" +
+                log.error("dispatchEvent dispatched to trigger (" +
                         trigger.getClass() + " that's not " +
                         "configured to handle this type of event: " +
                         event.getClass(), e);
