@@ -305,6 +305,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                         // obj into the session so that it is updated when flushed
                         Server server =
                             sMan.findServerById(((Server)i.next()).getId());
+                        // there are instances where we may have a duplicate
+                        // autoinventory identifier btwn platforms
+                        // (sendmail, ntpd, CAM Agent Server, etc...)
+                        final String uniqAiid =
+                            server.getPlatform().getId() +
+                            server.getAutoinventoryIdentifier();
+                        server.setAutoinventoryIdentifier(uniqAiid);
                         server.setPlatform(null);
                         i.remove();
                     } catch (ServerNotFoundException e) {
