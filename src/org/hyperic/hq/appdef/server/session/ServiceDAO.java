@@ -177,7 +177,7 @@ public class ServiceDAO extends HibernateDAO
     public Service findByName(Platform platform, String serviceName) {
         String sql = "select v from Service v join v.server s " +
                      "where s.platform = :platform and " +
-                           "v.resource.sortNam = :name";
+                           "v.resource.sortName = :name";
 
         return (Service) getSession().createQuery(sql)
                 .setParameter("platform", platform)
