@@ -91,7 +91,6 @@ class GroupController extends BaseController {
     def sync(xmlOut, params) {
         String s = getUpload('args') 
         def xmlDef = new XmlParser().parse(new StringReader(s))
-        //def deleteMissing = xmlDef.'@deleteMissing'?.toBoolean()
 
         if (xmlDef.group.size() != 1) {
             xmlOut.error("Only 1 group supported for sync")
@@ -210,6 +209,11 @@ class GroupController extends BaseController {
                 }
             }
 
+            def deleteMissing = groupDef.'@deleteMissing'?.toBoolean()
+            if (!deleteMissing) {
+                shouldContain = (shouldContain + group.resources) as Set
+            }
+            
             println("Groups: " + shouldContain)
             // Set the resources
             group.setResources(user, shouldContain)
