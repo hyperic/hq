@@ -185,7 +185,7 @@ public class SybaseServerDetector
         server.setCustomProperties(cprop);
         setProductConfig(server, productConfig);
         server.setMeasurementConfig();
-        server.setName(SERVER_NAME+" "+version);
+        server.setName(getPlatformName() + " " + SERVER_NAME + " " + version);
         servers.add(server);
 
         return servers;
