@@ -632,20 +632,29 @@ public abstract class ServerDetector
     protected String getListenAddress(long port) {
         String address = null;
 
-        try {
-            address =
-                getSigar().getNetListenAddress(port);
-        } catch (SigarException e) {
+        if (isNetStatEnabled()) {
+            try {
+                address =
+                    getSigar().getNetListenAddress(port);
+            } catch (SigarException e) {}
+        }
+        else {
+            getLog().debug("ListenAddress detection for port " + port + " is disabled");
         }
 
+        String type;
         if ((address == null) ||
             NetFlags.isLoopback(address) ||
             NetFlags.isAnyAddress(address))
         {
             address = "localhost";
+            type = "default";
         }
-
-        getLog().debug("ListenAddress for port " + port + "=" + address);
+        else {
+            type = "discovered";
+        }
+        getLog().debug("ListenAddress for port " + port + "=" + address +
+                       " (" + type + ")");
 
         return address;
     }
