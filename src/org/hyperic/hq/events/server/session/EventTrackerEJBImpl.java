@@ -84,7 +84,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         throws SQLException {
 
         if (log.isDebugEnabled())
-            log.debug("Add referenced event for trigger id: " + tid);      
+            log.debug("Add referenced event for trigger id: " + tid + " with expiration " + expiration);      
         
         _diagnostic.startAddReference();
         
@@ -135,7 +135,8 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
                                 AbstractEvent eventObject, long expiration) 
         throws SQLException {        
         if (log.isDebugEnabled())
-            log.debug("Updating the event object for trigger event id: " + teid);            
+            log.debug("Updating the event object for trigger event id: " + teid +
+                    " and trigger id" + tid + " and expiration " + expiration);            
 
         _diagnostic.startUpdateReference();
         
