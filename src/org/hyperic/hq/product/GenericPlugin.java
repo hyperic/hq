@@ -53,6 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public abstract class GenericPlugin {
+    private static final String PROP_NETSTAT = "netservices.netstat";
 
     /**
      * Key used to store value of XML resource name attribute.
@@ -137,7 +138,11 @@ public abstract class GenericPlugin {
 
         return absoluteFiles;
     }
-    
+
+    public boolean isNetStatEnabled() {
+        return !"false".equals(getManagerProperty(PROP_NETSTAT));
+    }
+
     /**
      * @return true if the current platform is in the Windows family.
      */
