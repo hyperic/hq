@@ -51,7 +51,6 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hibernate.dialect.HQDialectUtil;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
@@ -1912,14 +1911,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try {
             conn = DBUtil.getConnByContext(getInitialContext(),
                                            DATASOURCE_NAME);
+            HQDialect dialect = Util.getHQDialect();
             List measids = MeasTabManagerUtil.getMeasIds(conn, tids, iids);
             String table = getDataTable(begin, end, measids.toArray());
-            Map lastMap = HQDialectUtil.getAggData(conn, minMax, resMap, begin,
-                                                   end, table);
+            Map lastMap = dialect.getAggData(conn, minMax, resMap, tids,
+                                             iids, begin, end, table);
             if (count) {
-                resMap = HQDialectUtil.getCountData(conn, minMax, resMap, begin,
-                                                    end, table);
-                HQDialect dialect = Util.getHQDialect();
+                resMap = dialect.getCountData(conn, minMax, resMap, tids, iids,
+                                              begin, end, table);
                 return dialect.getLastData(conn, minMax, resMap, lastMap,
                                            iids, begin, end, table);
             }

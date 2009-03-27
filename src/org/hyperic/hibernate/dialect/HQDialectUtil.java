@@ -77,6 +77,7 @@ public class HQDialectUtil {
     }
     
     public static Map getAggData(Connection conn, String minMax, Map resMap,
+                                 Integer[] tids, Integer[] iids,
                                  long begin, long end, String table)
         throws SQLException {
         // Keep track of the "last" reported time
@@ -85,12 +86,20 @@ public class HQDialectUtil {
         ResultSet rs            = null;
         PreparedStatement astmt = null;
         StopWatch timer         = new StopWatch();
+
+        StringBuffer iidsConj = new StringBuffer(
+                DBUtil.composeConjunctions("instance_id", iids.length));
+        DBUtil.replacePlaceHolders(iidsConj, iids);
+
+        StringBuffer tidsConj = new StringBuffer(
+                DBUtil.composeConjunctions("template_id", tids.length));
+        DBUtil.replacePlaceHolders(tidsConj, tids);
         
         final String aggregateSQL =
             "SELECT template_id," + minMax + " MAX(timestamp) " +
             " FROM " + table + "," + TAB_MEAS +
-            " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id " +
-            " GROUP BY template_id";
+            " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id AND " +
+            iidsConj + " AND " + tidsConj + " GROUP BY template_id";
         
         try {
             // Prepare aggregate SQL
@@ -133,15 +142,25 @@ public class HQDialectUtil {
     }
 
     public static Map getCountData(Connection conn, String minMax, Map resMap,
+                                   Integer[] tids, Integer[] iids,
                                    long begin, long end, String table)
         throws SQLException {
         ResultSet rs            = null;
         PreparedStatement astmt = null;
         StopWatch timer         = new StopWatch();
     
+        StringBuffer iidsConj = new StringBuffer(
+                DBUtil.composeConjunctions("instance_id", iids.length));
+        DBUtil.replacePlaceHolders(iidsConj, iids);
+    
+        StringBuffer tidsConj = new StringBuffer(
+                DBUtil.composeConjunctions("template_id", tids.length));
+        DBUtil.replacePlaceHolders(tidsConj, tids);
+        
         final String countSQL =
             "SELECT template_id, COUNT(id) FROM " + TAB_MEAS +
-            " WHERE EXISTS (SELECT 1 FROM " + table  +
+            " WHERE " + iidsConj + " AND " + tidsConj +
+            " AND EXISTS (SELECT measurement_id FROM " + table  +
             " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id) " +
             " GROUP BY template_id";
         try {
@@ -193,8 +212,10 @@ public class HQDialectUtil {
         DBUtil.replacePlaceHolders(iidsConj, iids);
 
         final String lastSQL =
-            "SELECT value FROM " + table + ", " + TAB_MEAS +
-            " WHERE template_id = ? AND timestamp = ? AND id = measurement_id";
+            "SELECT value FROM " + table + ", " +
+            "(SELECT id FROM " + TAB_MEAS +
+            " WHERE template_id = ? AND " + iidsConj + ") ids " +
+            "WHERE id = measurement_id AND timestamp = ?";
 
         for (Iterator it = lastMap.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -203,8 +224,8 @@ public class HQDialectUtil {
             Long lastTime = (Long) entry.getValue();
 
             // Now get the last timestamp
-            if (_log.isDebugEnabled()) {
-                _log.debug("getAggregateData() for tid=" + tid + " lastTime=" +
+            if (_log.isTraceEnabled()) {
+                _log.trace("getAggregateData() for tid=" + tid + " lastTime=" +
                            lastTime + ": " + lastSQL);
             }
 
@@ -232,9 +253,9 @@ public class HQDialectUtil {
                 DBUtil.closeResultSet(logCtx, rs);
                 DBUtil.closeStatement(logCtx, lstmt);
             }
-            if (_log.isDebugEnabled()) {
-                _log.debug("getAggregateData(): Statement query elapsed " +
-                           "time: " + timer);
+            if (_log.isTraceEnabled()) {
+                _log.trace("getAggregateData(): Statement query elapsed " +
+                           "time: " + timer.getElapsed());
             }
         }
         return resMap;
