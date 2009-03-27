@@ -66,6 +66,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementDAO;
 import org.hyperic.util.pager.PageControl;
@@ -1036,6 +1037,61 @@ public class AlertDefinitionManagerEJBImpl
      */
     public Object[] getEnabledAndTriggerId(Integer id) {
         return getAlertDefDAO().getEnabledAndTriggerId(id);
+    }
+        
+    /**
+     * Check if an alert definition is configured for only availability.
+     * 
+     * @param id The alert definition to evaluate
+     * @param up Indicates where the availability condition is up (true) or down (false)
+     * @return <code>true</code> if the alert definition has an 
+     *         availability condition.         
+     * @ejb:interface-method
+     */
+    public boolean isAvailability(AlertDefinition def, boolean up) {
+        boolean isAvail = false;
+        Collection conds = def.getConditions();
+
+        // ignore multi-conditional alerts
+        if (conds.size() == 1) {
+            for (Iterator cit=conds.iterator(); cit.hasNext(); ) {
+                AlertCondition cond = (AlertCondition) cit.next();
+                
+                if (cond.getName().toUpperCase()
+                        .equals(MeasurementConstants.CAT_AVAILABILITY)) {
+                    if (cond.getComparator().equals("=")) {
+                        if (up) {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_UP) {
+                                isAvail = true;
+                                break;
+                            }
+                        } else {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_DOWN) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    } else if (cond.getComparator().equals("<")) {
+                        if (!up) {
+                            if (cond.getThreshold() <= MeasurementConstants.AVAIL_UP
+                                    && cond.getThreshold() > MeasurementConstants.AVAIL_DOWN) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    } else if (cond.getComparator().equals(">")) {
+                        if (up) {
+                            if (cond.getThreshold() >= MeasurementConstants.AVAIL_DOWN
+                                    && cond.getThreshold() < MeasurementConstants.AVAIL_UP) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }        
+        return isAvail;
     }
     
     public static AlertDefinitionManagerLocal getOne() {

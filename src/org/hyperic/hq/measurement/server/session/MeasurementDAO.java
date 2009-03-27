@@ -562,6 +562,33 @@ public class MeasurementDAO extends HibernateDAO {
            .list();
     }
 
+    /**
+     * Availability measurements which are parents of the resourceId
+     */
+    List findParentAvailMeasurements(Resource resource) {
+        // Needs to be ordered by DISTANCE in descending order so that
+        // it's immediate parent is the first record
+       final String sql = new StringBuilder()
+           .append("select m from Measurement m ")
+           .append("join m.resource.toEdges e ")
+           .append("join m.template t ")
+           .append("join e.relation r ")
+           .append("where m.resource is not null ")
+           .append("and e.distance < 0 ")
+           .append("and r.name = :relationType ")
+           .append("and e.from = :resourceId and ")
+           .append(ALIAS_CLAUSE)
+           .append("order by e.distance desc ").toString();
+       return getSession()
+           .createQuery(sql)
+           .setInteger("resourceId", resource.getId().intValue())
+           .setParameter(
+               "relationType", AuthzConstants.ResourceEdgeContainmentRelation)
+           .setCacheable(true)
+           .setCacheRegion("Measurement.findParentAvailMeasurements")
+           .list();
+    }
+    
     List findAvailMeasurementsByInstances(int type, Integer[] ids) {
         boolean checkIds = (ids != null && ids.length > 0);
         String sql = new StringBuilder()

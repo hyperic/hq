@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -48,13 +48,20 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
+import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TimingVoodoo;
@@ -1182,7 +1189,9 @@ public class AvailabilityManagerEJBImpl
 
             if (RegisteredTriggers.isTriggerInterested(event) ||
                     allEventsInteresting) {
-                events.add(event);
+                if (!suppressAvailabilityDataPoint(dp)) {
+                    events.add(event);
+                }
             }
 
             zevents.add(new MeasurementZevent(metricId.intValue(), val));
@@ -1196,6 +1205,94 @@ public class AvailabilityManagerEJBImpl
         if (!zevents.isEmpty()) {
             ZeventManager.getInstance().enqueueEventsAfterCommit(zevents);
         }
+    }
+
+    /**
+     * Determine whether the data point can be suppressed
+     * as part of inventory-based hierarchical alerting
+     */
+    private boolean suppressAvailabilityDataPoint(DataPoint dp) {
+        boolean suppress = false;
+        
+        // only suppress availability "DOWN" data point
+        if (dp.getMetricValue().getValue() != AVAIL_DOWN) {
+            return suppress;
+        }
+        
+        Measurement measurement = getMeasurement(dp.getMetricId());
+        Resource resource = measurement.getResource();
+        
+        try {
+            // platform is the root resource and has no parents, 
+            // so do not suppress
+            if (resource.getResourceType().getAppdefType()
+                    == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
+                return suppress;
+            }
+        } catch (NullPointerException npe) {
+            // resource type is null so resource has been asynchronously deleted
+        }
+        
+        AuthzSubject hqadmin = AuthzSubjectManagerEJBImpl.getOne()
+                                    .getSubjectById(AuthzConstants.rootSubjectId);;
+        AvailabilityCache cache = AvailabilityCache.getInstance();
+        
+        // get availability of parent resources
+        List availabilityMeasurements = getMeasurementDAO()
+                                            .findParentAvailMeasurements(resource);
+        
+        for (Iterator it=availabilityMeasurements.iterator(); it.hasNext(); ) {
+            Measurement m = (Measurement) it.next();
+            DataPoint last = cache.get(m.getId());
+            
+            if (last != null && last.getValue() == AVAIL_DOWN) {
+                _log.info("Parent resource [" + m.getResource().getName()
+                            + "] for resource [" + resource.getName() 
+                            + "] is unavailable. Last data point: " + last);
+                // parent resource is down, but check to see if an availability "down"
+                // alert definition exists for the parent resource
+                try {
+                    boolean availDownAlertDefExists =
+                                 availabilityAlertDefinitionExists(
+                                         hqadmin, 
+                                         new AppdefEntityID(m.getResource()), 
+                                         false); 
+                    if (availDownAlertDefExists) {
+                        suppress = true;
+                        break;
+                    }
+                } catch (PermissionException p) {
+                    // should not happen for hqadmin
+                }
+            }
+        }
+        
+        return suppress;
+    }
+    
+    /**
+     * XXX This method exists for functional completeness.
+     * It will eventually removed when refactoring to improve
+     * the performance of inventory-based hierarchical alerting.
+     */
+    private boolean availabilityAlertDefinitionExists(AuthzSubject subj,
+                                                      AppdefEntityID id,
+                                                      boolean up)
+        throws PermissionException {
+
+        boolean exists = false;        
+        AlertDefinitionManagerLocal adm = AlertDefinitionManagerEJBImpl.getOne();
+        Collection alertDefs = adm.findAlertDefinitions(subj, id);
+
+        for (Iterator it=alertDefs.iterator(); it.hasNext(); ) {
+            AlertDefinition def = (AlertDefinition) it.next();
+
+            if (def.isActive() && adm.isAvailability(def, up)) {
+                exists = true;
+                break;
+            }
+        }
+        return exists;
     }
     
     private Measurement getMeasurement(Integer mId) {
