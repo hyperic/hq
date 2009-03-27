@@ -73,7 +73,7 @@ public class ApacheBinaryInfo {
     public String errmsg = "";
     private long lastModified = 0;
 
-    private ApacheBinaryInfo() {}
+    ApacheBinaryInfo() {}
 
     //clone method..only want to cache the fields
     //extracted from the binary itself which are static.
