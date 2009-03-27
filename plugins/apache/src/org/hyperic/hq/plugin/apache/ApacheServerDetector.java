@@ -538,6 +538,7 @@ public class ApacheServerDetector
 
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
 
+        setPlatformConfig(platformConfig);
         String version = getTypeInfo().getVersion();
         List servers = new ArrayList();
         List binaries = getServerProcessList(version, getPtqlQueries());
