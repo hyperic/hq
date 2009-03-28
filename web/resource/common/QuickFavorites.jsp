@@ -33,12 +33,93 @@
 <tiles:importAttribute name="resource"/>
 
 <c:choose>
-  <c:when test="${isFavorite}">
-    <html:link page="/resource/common/QuickFavorites.do?eid=${resource.entityId.appdefKey}&mode=remove"><fmt:message key="resource.common.quickFavorites.remove"/><html:img width="11" height="9" border="0" page="/images/title_arrow.gif"/>
-    </html:link>
-  </c:when> 
-  <c:otherwise> 
-    <html:link page="/resource/common/QuickFavorites.do?eid=${resource.entityId.appdefKey}&mode=add"><fmt:message key="resource.common.quickFavorites.add"/><html:img width="11" height="9" border="0" page="/images/title_arrow.gif"/>
-    </html:link>
-  </c:otherwise> 
+  	<c:when test="${not hasMultipleDashboard && isFavorite}">
+    	<html:link page="/resource/common/QuickFavorites.do?eid=${resource.entityId.appdefKey}&mode=remove">
+    		<fmt:message key="resource.common.quickFavorites.remove"/><html:img width="11" height="9" border="0" page="/images/title_arrow.gif"/>
+    	</html:link>
+  	</c:when> 
+  	<c:otherwise>
+  		<c:choose>
+  			<c:when test="${not hasMultipleDashboard}">
+  				<html:link page="/resource/common/QuickFavorites.do?eid=${resource.entityId.appdefKey}&mode=add">
+    				<fmt:message key="resource.common.quickFavorites.add"/><html:img width="11" height="9" border="0" page="/images/title_arrow.gif"/>
+    			</html:link>
+    		</c:when>
+    		<c:otherwise>
+				<a id="AddToFavorites_Link" href="#">
+					<fmt:message key="resource.common.quickFavorites.addToMultipleDashboards"/><html:img width="11" height="9" border="0" page="/images/title_arrow.gif"/>
+				</a>
+				
+				<div id="AddToFavorites_Dialog" style="display:none;">
+					<input id="AddToFavorites_EID" type="hidden" name="eid" value="<c:out value="${resource.entityId.appdefKey}"/>" />
+					<input id="AddToFavorites_Mode" type="hidden" name="mode" value="add" />
+					<div id="AddToFavorites_MessageDiv" style="display:none"></div>
+					<div id="AddToFavorites_Div" style="width:400px;">
+						<div id="AddToFavorites_DataDiv">
+							<div style="height:240px; overflow-x:hidden; overflow-y:auto;background-color:#FEF;">
+								<table width="100%" cellpadding="0" cellspacing="0" border="0">
+									<thead>
+										<tr class="tableRowHeader">
+											<th class="ListHeaderCheckbox" style="width:20px"><input type="checkbox" id="AddToFavorites_CheckAllBox" onclick="" /></td>
+											<th class="ListHeader" style="width:99%"><fmt:message key="common.header.Name"/></td>
+										</tr>
+									</thead>
+									<tbody id="AddToFavorites_TableBody">
+										<c:forEach items="${editableDashboards}" var="dash" varStatus="iteration">
+											<tr style="background-color:<c:choose><c:when test="${(iteration.count % 2) == 0}">#EDEDED</c:when><c:otherwise>#FFF</c:otherwise></c:choose>;" >
+												<td style="padding: 3px; padding-left: 4px;">
+													<input type="checkbox" id="AddToFavorites_CheckBox<c:out value='${iteration.count}' />" name="dashboardId" value="<c:out value='${dash.id}' />" />
+												</td>
+												<td style="padding: 3px;">
+													<span><c:out value="${dash.name}" /></span>
+												</td>
+											</tr>
+										</c:forEach>
+									</tbody>
+								</table>
+							</div>
+						</div>
+						<div id="AddToFavorites_ButtonDiv" style="padding-top:5px">
+							<span style="whitespace:nowrap">
+								<input type="button" id="AddToFavorites_AddButton" 
+								       value="<fmt:message key='common.label.Add' />" class="CompactButton" />
+								&nbsp;
+		  						<input type="button" id="AddToFavorites_CancelButton" 
+		  						       value="<fmt:message key='common.label.Cancel' />" class="CompactButton" />
+		  					</span>
+		  					<span id="AddToFavorites_Progress" style="display:none">
+		  						<img src="/images/4.0/icons/ajax-loader-gray.gif" align="absMiddle" />
+		  					</span>
+		  					<span id="AddToFavorites_SuccessMsg" style="display:none;" class="successDialogMsg">
+		  						<fmt:message key="resource.common.DashboardUpdatedMessage" />
+		  					</span>
+		  					<span id="AddToFavorites_ErrorMsg" style="display:none;" class="failureDialogMsg">
+		  						<fmt:message key="resource.common.DashboardUpdatedError" />
+		  					</span>
+						</div>
+					</div>
+				</div>
+				<script src="/js/addtodashboard.js"></script>
+				<script type="text/javascript">
+				    dojo.addOnLoad(function() {
+					    var config = {
+					    	title : "<fmt:message key='resource.common.quickFavorites.addToMultipleDashboards' />",
+					    	dialogId : "AddToFavorites_Dialog",
+					    	callerId : "AddToFavorites_Link",
+					    	url : "<html:rewrite action='/resource/common/QuickFavorites' />",
+					    	addButtonId : "AddToFavorites_AddButton",
+					    	cancelButtonId : "AddToFavorites_CancelButton",
+					    	progressId : "AddToFavorites_Progress",
+			    			successMsgId : "AddToFavorites_SuccessMsg",
+			    			failureMsgId : "AddToFavorites_ErrorMsg",
+			    			checkboxAllId : "AddToFavorites_CheckAllBox",
+					    	checkboxIdPrefix : "AddToFavorites_CheckBox"
+					    };
+					    
+					    AddToDashboard.initDialog(config);
+					});
+				</script>
+    		</c:otherwise>
+    	</c:choose>
+  	</c:otherwise> 
 </c:choose>

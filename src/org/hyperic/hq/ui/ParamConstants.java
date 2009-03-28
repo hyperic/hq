@@ -477,5 +477,11 @@ public interface ParamConstants {
      */
     public static final String ACCORDION_PARAM = "accord";
 
-
+    /**
+     * Parameters used for QuickFavorites
+     */
+    public static final String IS_FAVORITE_PARAM = "isFavorite";
+    public static final String EDITABLE_DASHBOARDS_PARAM = "editableDashboards";
+    public static final String HAS_MULTIPLE_DASHBOARDS_PARAM = "hasMultipleDashboard";
+    public static final String DASHBOARD_ID_PARAM = "dashboardId";
 }

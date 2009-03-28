@@ -39,6 +39,10 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
+import org.hyperic.hq.ui.server.session.UserDashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
@@ -54,50 +58,75 @@ public class QuickFavoritesAction extends BaseAction {
         throws Exception {
 
     	WebUser user = RequestUtils.getWebUser(request);
-        AuthzBoss boss =
-            ContextUtils.getAuthzBoss(getServlet().getServletContext());
-        ConfigResponse dashPrefs =
-            DashboardUtils.findUserDashboardConfig(user, boss);
+        AuthzBoss boss = ContextUtils.getAuthzBoss(getServlet().getServletContext());
         AppdefEntityID aeid = RequestUtils.getEntityId(request);
-        String mode   = request.getParameter(Constants.MODE_PARAM);
-
+        String mode = request.getParameter(Constants.MODE_PARAM);
+        String[] dashboardIds = request.getParameterValues(Constants.DASHBOARD_ID_PARAM);
         HashMap forwardParams = new HashMap(2);
+
         forwardParams.put(Constants.ENTITY_ID_PARAM, aeid.getAppdefKey());
 
         if (mode == null) return returnFailure(request, mapping, forwardParams);
 
-        Boolean isFavorite = QuickFavoritesUtil.isFavorite(dashPrefs, aeid);
+        //Boolean isFavorite = QuickFavoritesUtil.isFavorite(dashPrefs, aeid);
+        DashboardManagerLocal dashManager = DashboardManagerEJBImpl.getOne();
+        
         if (mode.equals(Constants.MODE_ADD)) {
-            // Is this already in the favorites list?  Should not happen
-            if (isFavorite.booleanValue()) {
-                // Just return, it's already there
-                return returnSuccess(request, mapping, forwardParams, 
-                                     BaseAction.YES_RETURN_PATH);
-            }
-            // Add to favorites and save
-            DashboardUtils.addEntityToPreferences(
-                Constants.USERPREF_KEY_FAVORITE_RESOURCES, dashPrefs, aeid,
-                Integer.MAX_VALUE);
+        	if (dashboardIds != null) {
+        		for (int x = 0; x < dashboardIds.length; x++) {
+        			Integer dashId = Integer.valueOf(dashboardIds[x]);
+        			DashboardConfig dashboardConfig = DashboardUtils.findDashboard(dashId, user, boss);
+        			ConfigResponse configResponse = dashboardConfig.getConfig();
+        			Boolean isFavorite = QuickFavoritesUtil.isFavorite(configResponse, aeid);
+        			
+        			if (isFavorite.booleanValue()) continue;
+        			
+        			DashboardUtils.addEntityToPreferences(Constants.USERPREF_KEY_FAVORITE_RESOURCES, configResponse, aeid, Integer.MAX_VALUE);
+        			
+        			if (dashboardConfig instanceof RoleDashboardConfig) {
+        				RoleDashboardConfig roleDashboardConfig = (RoleDashboardConfig) dashboardConfig;
+         			
+        				ConfigurationProxy.getInstance().setRoleDashboardPreferences(configResponse, boss, user, roleDashboardConfig.getRole());
+        			} else if (dashboardConfig instanceof UserDashboardConfig) {
+        				ConfigurationProxy.getInstance().setUserDashboardPreferences(configResponse, boss, user);
+        			} else {
+        	            // Neither role or user dashboard. This shouldn't happen, but if it somehow does, treat it as an error.
+        	            return returnFailure(request, mapping, forwardParams);        				
+        			}
+        		}
+        	} else {
+        		ConfigResponse configResponse = DashboardUtils.findUserDashboardConfig(user, boss);
+                Boolean isFavorite = QuickFavoritesUtil.isFavorite(configResponse, aeid);
+        				
+        		// Is this already in the favorites list?  Should not happen
+        		if (isFavorite.booleanValue()) {
+        			// Just return, it's already there
+        			return returnSuccess(request, mapping, forwardParams, BaseAction.YES_RETURN_PATH);
+        		}
+            
+	            // Add to favorites and save
+	            DashboardUtils.addEntityToPreferences(Constants.USERPREF_KEY_FAVORITE_RESOURCES, configResponse, aeid, Integer.MAX_VALUE);
+	            ConfigurationProxy.getInstance().setUserDashboardPreferences(configResponse, boss, user);
+        	}
         } else if (mode.equals(Constants.MODE_REMOVE) ) {
+       		ConfigResponse configResponse = DashboardUtils.findUserDashboardConfig(user, boss);
+            Boolean isFavorite = QuickFavoritesUtil.isFavorite(configResponse, aeid);
+
             // Is this not in the favorites list?  Should not happen
             if (!isFavorite.booleanValue()) {
                 // Already removed, just return
-                return returnSuccess(request, mapping, forwardParams, 
-                                     BaseAction.YES_RETURN_PATH);
+                return returnSuccess(request, mapping, forwardParams, BaseAction.YES_RETURN_PATH);
             }
+            
             // Remove from favorites and save
-            DashboardUtils
-                .removeResources(new String[] { aeid.getAppdefKey() },
-                                 Constants.USERPREF_KEY_FAVORITE_RESOURCES,
-                                 dashPrefs);
+            DashboardUtils.removeResources(new String[] { aeid.getAppdefKey() }, Constants.USERPREF_KEY_FAVORITE_RESOURCES, configResponse);
+            ConfigurationProxy.getInstance().setUserDashboardPreferences(configResponse, boss, user);
         } else {
             // Not an add or remove, what the heck is it?  It's an error.
             return returnFailure(request, mapping, forwardParams);
         }
 
-        ConfigurationProxy.getInstance()
-            .setUserDashboardPreferences(dashPrefs, boss, user );
-        return returnSuccess(request, mapping, forwardParams, 
-                             BaseAction.YES_RETURN_PATH);
+        
+        return returnSuccess(request, mapping, forwardParams, BaseAction.YES_RETURN_PATH);
     }
 }

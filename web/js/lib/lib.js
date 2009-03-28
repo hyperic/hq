@@ -4422,29 +4422,38 @@ hyperic.MetricChart = function(formObj) {
 		that.chartForm.submit();
 	}
 	
+	that.generateChartParameters = function() {
+		var inputEls = that.chartForm.elements;
+		var params = {};
+		
+		for (var x = 0; x < inputEls.length; x++) {
+			var el = inputEls[x];
+			
+			if (el.type == 'checkbox' && !el.checked) continue;
+	
+			if (params[el.name]) {
+				params[el.name][params[el.name].length] = el.value;
+			} else {
+				params[el.name] = [el.value];
+			}
+		}
+		
+		return params;
+	}
+	
 	that.saveToDashboard = function() {
 		that.chartForm.saveChart.value='true'; 
-		var saveChartUrl = that.chartForm.action + "?";
-		var inputList = that.chartForm.elements;
-		var first = true;
-		for (var i = 0; i < inputList.length; i++) {
-			if (inputList[i].type == 'checkbox') {
-				if (!inputList[i].checked) {
-					continue;
-				}
+		var saveChartUrl = that.chartForm.action;
+		var saveChartParams = that.generateChartParameters();
+		
+		new Ajax.Request(saveChartUrl, {
+			method: 'post',
+			parameters: saveChartParams,
+			onSuccess: function(transport) {
+				alert(hyperic.data.metric_chart.message.chartSaved);
 			}
-
-			if (first) {
-				first = false;
-			}
-			else {
-				saveChartUrl += '&';
-			}
-
-			saveChartUrl += inputList[i].name + '=' + escape(inputList[i].value);
-		}
-		new Ajax.Request(saveChartUrl , {method: 'get'});
-		alert(hyperic.data.metric_chart.message.chartSaved);
+		});
+		
 		return false;
 	}
 

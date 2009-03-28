@@ -25,6 +25,10 @@
 
 package org.hyperic.hq.ui.action.resource.common;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -35,8 +39,10 @@ import org.apache.struts.tiles.ComponentContext;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.Dashboard;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.WorkflowPrepareAction;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -49,25 +55,24 @@ public class QuickFavoritesPrepareAction extends WorkflowPrepareAction {
                                   ActionForm form,
                                   HttpServletRequest request,
                                   HttpServletResponse response)
-        throws Exception {
-
+    throws Exception {
         WebUser user = RequestUtils.getWebUser(request);
 		Boolean isFavorite = Boolean.FALSE;
-		AppdefResourceValue arv = (AppdefResourceValue) context
-				.getAttribute("resource");
+		AppdefResourceValue arv = (AppdefResourceValue) context.getAttribute("resource");
 
-		// All we need to do is check our preferences to see if this resource 
-		// is in there.
-        AuthzBoss boss =
-            ContextUtils.getAuthzBoss(getServlet().getServletContext());
-        ConfigResponse dashConfig =
-            DashboardUtils.findUserDashboardConfig(user, boss);
-		isFavorite = QuickFavoritesUtil
-				.isFavorite(dashConfig, arv.getEntityId());
+		// check our preferences to see if this resource is in there.
+        AuthzBoss boss = ContextUtils.getAuthzBoss(getServlet().getServletContext());
+        ConfigResponse dashConfig = DashboardUtils.findUserDashboardConfig(user, boss);
+		isFavorite = QuickFavoritesUtil.isFavorite(dashConfig, arv.getEntityId());
 
-		request.setAttribute(Constants.ENTITY_ID_PARAM, arv.getEntityId()
-				.getAppdefKey());
-		request.setAttribute("isFavorite", isFavorite);
+		request.setAttribute(Constants.ENTITY_ID_PARAM, arv.getEntityId().getAppdefKey());
+		request.setAttribute(Constants.IS_FAVORITE_PARAM, isFavorite);
+	
+		List editableDashboards = DashboardUtils.findEditableDashboards(user, boss);
+		
+		request.setAttribute(Constants.EDITABLE_DASHBOARDS_PARAM, editableDashboards);
+		request.setAttribute(Constants.HAS_MULTIPLE_DASHBOARDS_PARAM, editableDashboards.size() > 1);
+		
 		return null;
     }
 }

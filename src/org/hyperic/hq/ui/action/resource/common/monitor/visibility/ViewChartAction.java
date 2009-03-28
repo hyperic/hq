@@ -52,6 +52,8 @@ import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SaveChartToDashboardUtil;
+import org.hyperic.hq.ui.util.SaveChartToDashboardUtil.ResultCode;
 import org.hyperic.util.config.ConfigResponse;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -72,66 +74,25 @@ public class ViewChartAction extends MetricDisplayRangeAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
     throws Exception {
-    
         ViewChartForm chartForm = (ViewChartForm)form;
-
-        AppdefEntityID adeId =
-            new AppdefEntityID( chartForm.getType().intValue(),
-                                chartForm.getRid());
-
-        HashMap forwardParams = new HashMap(3);
+        AppdefEntityID adeId = new AppdefEntityID( chartForm.getType().intValue(), chartForm.getRid());
+        Map<String, Object> forwardParams = new HashMap<String, Object>(3);
+        
         forwardParams.put( Constants.RESOURCE_PARAM, chartForm.getRid() );
         forwardParams.put( Constants.RESOURCE_TYPE_ID_PARAM, chartForm.getType() );
+        
         // The autogroup metrics pages pass the ctype to us, and we
         // need to pass it back.  If this happens, we don't need the
         // extra "mode" parameter.  See bug #7501. (2003/06/24 -- JW)
-        if ( null != chartForm.getCtype() &&
-             !chartForm.getCtype().equals(ViewChartForm.NO_CHILD_TYPE) ) {
+        if ( null != chartForm.getCtype() && !chartForm.getCtype().equals(ViewChartForm.NO_CHILD_TYPE) ) {
             forwardParams.put( Constants.CHILD_RESOURCE_TYPE_ID_PARAM, chartForm.getCtype() );
         } else {
             forwardParams.put( Constants.MODE_PARAM, chartForm.getMode() );
         }
 
         if ( chartForm.getSaveChart() ) {
-            ActionForward success = returnRedraw(request, mapping, forwardParams);
-
-            // build the chart URL
-            JSONObject obj = new JSONObject();
-            HashMap chartParams = new HashMap();
-            chartParams.put("m", chartForm.getM());
-            Integer[] mtids = chartForm.getM();
-            JSONArray mtid = new JSONArray();
-            for(int i = 0; i < mtids.length; i++){
-                mtid.put(mtids[i]);
-            }
-            obj.put("mtid", mtid);
-            chartParams.put("showPeak", new Boolean(chartForm.getShowPeak()));
-            chartParams.put("showValues", new Boolean(chartForm.getShowValues()));
-            chartParams.put("showAverage", new Boolean(chartForm.getShowAverage()));
-            chartParams.put("showLow", new Boolean(chartForm.getShowLow()));
-            chartParams.put("threshold", chartForm.getThreshold());
-
-            if(adeId.isGroup()){
-                chartParams.put( "mode", chartForm.getMode() );                
-                chartParams.put( "r", chartForm.getResourceIds() );
-                obj.put("rid", chartForm.getResourceIds());
-            }
-            
-            if (chartForm.getCtype() != null &&
-                chartForm.getCtype().length() > 0) {
-                chartParams.put( "mode", chartForm.getMode() );                
-                chartParams.put( "ctype", chartForm.getCtype() );                
-            }
-            
-            String url = ActionUtils.changeUrl(success.getPath(), chartParams);
-            obj.put("name",chartForm.getChartName());
-            _saveUserChart(url, chartForm.getChartName(), request, obj);
-
-            if ( log.isDebugEnabled() ) {
-                log.debug("Saving chart to dashboard ...\n\tchartName="+chartForm.getChartName()+"\n\turl="+url);
-            }
-
-            return success;
+            // isEE == false, bc this is the .org version of this action
+        	return saveChartToDashboard(mapping, request, forwardParams, chartForm, adeId, false);
         } else if ( chartForm.isPrevPageClicked() ) {
             return returnSuccess(request, mapping, forwardParams);
         } else {
@@ -184,129 +145,25 @@ public class ViewChartAction extends MetricDisplayRangeAction {
                                 params, false);
     }
 
-    //--------------------------------------------------------------------------------
-    //-- private helpers
-    //--------------------------------------------------------------------------------
-    //forHTMLTag is copy-n-pasted from: http://www.javapractices.com/Topic96.cjp
-    //used to be in our util.StringUtil, we should really use jakarta's
-    //StringEscapeUtils.escapeHTML()
-    /**
-     * Replace characters having special meaning <em>inside</em> HTML tags
-     * with their escaped equivalents, using character entities such as
-     * <tt>'&amp;'</tt>.
-     * 
-     * <P>
-     * The escaped characters are :
-     * <ul>
-     * <li><
-     * <li>>
-     * <li>"
-     * <li>'
-     * <li>\
-     * <li>&
-     * </ul>
-     * 
-     * <P>
-     * This method ensures that arbitrary text appearing inside a tag does not
-     * "confuse" the tag. For example, <tt>HREF='Blah.do?Page=1&Sort=ASC'</tt>
-     * does not comply with strict HTML because of the ampersand, and should be
-     * changed to <tt>HREF='Blah.do?Page=1&amp;Sort=ASC'</tt>. This is
-     * commonly seen in building query strings. (In JSTL, the c:url tag performs
-     * this task automatically.)
-     */
-    private static String forHTMLTag(String aTagFragment) {
-        final StringBuffer result = new StringBuffer();
+    protected ActionForward saveChartToDashboard(ActionMapping mapping, HttpServletRequest request, Map<String, Object> forwardParams, ViewChartForm chartForm, AppdefEntityID adeId, boolean isEE) 
+    throws Exception {
+        ActionForward success = returnRedraw(request, mapping, forwardParams);
 
-        final StringCharacterIterator iterator =
-            new StringCharacterIterator(aTagFragment);
-        
-        for (char character = iterator.current();
-             character != StringCharacterIterator.DONE;
-             character = iterator.next()) {
-            switch (character) {
-                case '<':
-                    result.append("&lt;");
-                    break;
-                case '>':
-                    result.append("&gt;");
-                    break;
-                case '\"':
-                    result.append("&quot;");
-                    break;
-                case '\'':
-                    result.append("&#039;");
-                    break;
-                case '\\':
-                    result.append("&#092;");
-                    break;
-                case '&':
-                    result.append("&amp;");
-                    break;
-                case '|':
-                    result.append("&#124;");
-                    break;
-                case ',':
-                    result.append("&#44;");
-                    break;
-                default:
-                    //the char is not a special one add it to the result as is
-                    result.append(character);
-                    break;
-            }
-        }
-        return result.toString();
-    }
+        ResultCode result = SaveChartToDashboardUtil.saveChartToDashboard(getServlet().getServletContext(), request, success, chartForm, adeId, chartForm.getChartName(), isEE);
 
-    protected void _saveUserChart(String url, String name,
-                                HttpServletRequest request, JSONObject jsonObj) 
-        throws Exception {
-        ServletContext ctx = getServlet().getServletContext();
-        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
-        HttpSession session = request.getSession();
-        WebUser user = RequestUtils.getWebUser(request);
-        AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
-        DashboardConfig dashConfig = DashboardUtils
-				.findDashboard((Integer) session
-						.getAttribute(Constants.SELECTED_DASHBOARD_ID), 
-						user, aBoss);
-		if (dashConfig == null) {
-			AuthzSubject me = boss.findSubjectById(user.getSessionId(), user
-					.getSubject().getId());
-			dashConfig = DashboardManagerEJBImpl.getOne().getUserDashboard(me, me);
-		}
-		ConfigResponse dashPrefs = dashConfig.getConfig();
-        String charts = dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS, "");
-        
-        // the name might be generated by user input, we need to make sure
-        // they don't use our delimiters when it's serialized into the preference
-        // system
-        name = forHTMLTag(name);
-        String origname = name;
-        
-        // make sure its not a duplicate chart
-        if (charts.indexOf(origname + "," + url) > -1) {
-            RequestUtils.setConfirmation(request,
-                "resource.common.monitor.visibility.chart.error.ChartDuplicated");
-            return;
+        switch (result) {
+        	case DUPLICATE:
+        		RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.chart.error.ChartDuplicated");
+        		break;
+        		
+        	case ERROR:
+        		RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.chart.error.ChartNotSaved");
+        		break;
+        		
+        	case SUCCESS:
+        		RequestUtils.setConfirmation(request, "resource.common.monitor.visibility.chart.confirm.ChartSaved");
         }
         
-        // Now see if the name is already used
-        String chartname = origname;
-        for (int i = 2; charts.indexOf(chartname + ",") > -1; i++) {
-            // Hard-code name to be a number in parenthesis to differentiate
-            chartname = origname + " (" + i + ")";
-        }
-        /**
-         * TODO set the json here
-         */
-        // If chart already exists, don't add it again
-        charts += Constants.DASHBOARD_DELIMITER + chartname + "," + url;
-
-        dashPrefs.setValue(Constants.USER_DASHBOARD_CHARTS, charts);
-        log.debug("ViewChartAction - saving chart: " + charts);
-        ConfigurationProxy.getInstance().setUserDashboardPreferences(dashPrefs, boss, user );
-        
-        RequestUtils.setConfirmation(request,
-            "resource.common.monitor.visibility.chart.confirm.ChartSaved");
+        return success;
     }
 }

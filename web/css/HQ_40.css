@@ -2318,3 +2318,15 @@ button span{
     padding: 0px 5px 0px 5px;
     cursor:pointer;
 }
+
+.successDialogMsg {
+	color:cornflowerblue; 
+	font-size:10pt; 
+	font-weight:bold;
+}
+
+.failureDialogMsg {
+	color:red; 
+	font-size:10pt; 
+	font-weight:bold;
+}

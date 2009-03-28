@@ -1,0 +1,212 @@
+package org.hyperic.hq.ui.util;
+
+import java.text.StringCharacterIterator;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.struts.action.ActionForward;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartForm;
+import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
+import org.hyperic.hq.ui.server.session.UserDashboardConfig;
+import org.hyperic.util.config.ConfigResponse;
+
+public class SaveChartToDashboardUtil {
+	private static Log log = LogFactory.getLog(SaveChartToDashboardUtil.class.getName());
+	
+	public enum ResultCode {
+		SUCCESS,
+		DUPLICATE,
+		ERROR
+	}
+	
+	// Moving this logic into a util method as it's being used by more than one class
+	public static ResultCode saveChartToDashboard(ServletContext ctx, HttpServletRequest request, ActionForward success, ViewChartForm chartForm, AppdefEntityID adeId, String chartName, boolean isEE)
+	throws Exception 
+	{
+        AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
+        WebUser user = RequestUtils.getWebUser(request);
+        String[] dashboardIds = request.getParameterValues(Constants.DASHBOARD_ID_PARAM);
+        String url = generateChartUrl(success, chartForm, adeId, isEE);
+        ResultCode result = ResultCode.ERROR; // Initialize as error, so that we can be proved wrong
+        
+        if (dashboardIds != null) {
+    		for (int x = 0; x < dashboardIds.length; x++) {
+    			Integer dashId = Integer.valueOf(dashboardIds[x]);
+    			DashboardConfig dashboardConfig = DashboardUtils.findDashboard(dashId, user, boss);
+    			
+    			result = addChartToDashboard(forHTMLTag(chartName), url, dashboardConfig, boss, user, request);
+    			
+    			// Something's wrong, break out
+    			if (result.equals(ResultCode.ERROR)) break;
+    		}
+    	} else {
+            AuthzSubject me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
+            DashboardConfig dashboardConfig = DashboardManagerEJBImpl.getOne().getUserDashboard(me, me);
+    		
+    		result = addChartToDashboard(forHTMLTag(chartName), url, dashboardConfig, boss, user, request);
+    	}
+
+        return result;
+	}
+	
+	private static String generateChartUrl(ActionForward success, ViewChartForm chartForm, AppdefEntityID adeId, boolean isEE) 
+	throws Exception
+	{
+        // build the chart URL
+        Map<String, Object> chartParams = new HashMap<String, Object>();
+        
+        chartParams.put("m", chartForm.getM());
+        chartParams.put("showPeak", new Boolean(chartForm.getShowPeak()));
+        chartParams.put("showValues", new Boolean(chartForm.getShowValues()));
+        chartParams.put("showAverage", new Boolean(chartForm.getShowAverage()));
+        chartParams.put("showLow", new Boolean(chartForm.getShowLow()));
+        chartParams.put("threshold", chartForm.getThreshold());
+
+        if (isEE) {
+            chartParams.put("showHighRange", new Boolean(chartForm.getShowHighRange()));
+            chartParams.put("showLowRange", new Boolean(chartForm.getShowLowRange()));
+            chartParams.put("showEvents", new Boolean(chartForm.getShowEvents()));
+            chartParams.put("showBaseline", new Boolean(chartForm.getShowBaseline()));
+        }
+        
+        if(adeId.isGroup()) {
+            chartParams.put( "mode", chartForm.getMode() );                
+            chartParams.put( "r", chartForm.getResourceIds() );
+        }
+        
+        if (chartForm.getCtype() != null && chartForm.getCtype().length() > 0) {
+            chartParams.put( "mode", chartForm.getMode() );                
+            chartParams.put( "ctype", chartForm.getCtype() );                
+        }
+        
+        return ActionUtils.changeUrl(success.getPath(), chartParams);		
+	}
+	
+	private static ResultCode addChartToDashboard(String name, String url, DashboardConfig dashboardConfig, AuthzBoss boss, WebUser user, HttpServletRequest request) 
+	throws Exception
+	{	
+		ConfigResponse configResponse = dashboardConfig.getConfig();
+        String charts = configResponse.getValue(Constants.USER_DASHBOARD_CHARTS, "");
+        
+        // make sure its not a duplicate chart
+        if (charts.indexOf(name + "," + url) > -1) {
+        	// If it's a dup, it's already there and our work is done
+            return ResultCode.DUPLICATE;
+        }
+        
+        // Now see if the name is already used
+        String chartname = name;
+        
+        for (int i = 2; charts.indexOf(chartname + ",") > -1; i++) {
+            // Hard-code name to be a number in parenthesis to differentiate
+            chartname = name + " (" + i + ")";
+        }
+
+        charts += Constants.DASHBOARD_DELIMITER + chartname + "," + url;
+
+        configResponse.setValue(Constants.USER_DASHBOARD_CHARTS, charts);
+        
+		if (dashboardConfig instanceof RoleDashboardConfig) {
+			RoleDashboardConfig roleDashboardConfig = (RoleDashboardConfig) dashboardConfig;
+			
+			ConfigurationProxy.getInstance().setRoleDashboardPreferences(configResponse, boss, user, roleDashboardConfig.getRole());
+		} else if (dashboardConfig instanceof UserDashboardConfig) {
+			ConfigurationProxy.getInstance().setUserDashboardPreferences(configResponse, boss, user);
+		} else {
+            // Neither role or user dashboard. This shouldn't happen, but if it somehow does, treat it as an error.
+			return ResultCode.ERROR;
+		}
+		
+        if ( log.isDebugEnabled() ) {
+            log.debug("Saving chart to dashboard ...\n\tchartName="+ name +"\n\turl=" + url);
+        }
+
+		// success
+		return ResultCode.SUCCESS;
+	}
+	
+    //--------------------------------------------------------------------------------
+    //-- private helpers
+    //--------------------------------------------------------------------------------
+    //forHTMLTag is copy-n-pasted from: http://www.javapractices.com/Topic96.cjp
+    //used to be in our util.StringUtil, we should really use jakarta's
+    //StringEscapeUtils.escapeHTML()
+    /**
+     * Replace characters having special meaning <em>inside</em> HTML tags
+     * with their escaped equivalents, using character entities such as
+     * <tt>'&amp;'</tt>.
+     * 
+     * <P>
+     * The escaped characters are :
+     * <ul>
+     * <li><
+     * <li>>
+     * <li>"
+     * <li>'
+     * <li>\
+     * <li>&
+     * </ul>
+     * 
+     * <P>
+     * This method ensures that arbitrary text appearing inside a tag does not
+     * "confuse" the tag. For example, <tt>HREF='Blah.do?Page=1&Sort=ASC'</tt>
+     * does not comply with strict HTML because of the ampersand, and should be
+     * changed to <tt>HREF='Blah.do?Page=1&amp;Sort=ASC'</tt>. This is
+     * commonly seen in building query strings. (In JSTL, the c:url tag performs
+     * this task automatically.)
+     */
+    private static String forHTMLTag(String aTagFragment) {
+        final StringBuffer result = new StringBuffer();
+
+        final StringCharacterIterator iterator =
+            new StringCharacterIterator(aTagFragment);
+        
+        for (char character = iterator.current();
+             character != StringCharacterIterator.DONE;
+             character = iterator.next()) {
+            switch (character) {
+                case '<':
+                    result.append("&lt;");
+                    break;
+                case '>':
+                    result.append("&gt;");
+                    break;
+                case '\"':
+                    result.append("&quot;");
+                    break;
+                case '\'':
+                    result.append("&#039;");
+                    break;
+                case '\\':
+                    result.append("&#092;");
+                    break;
+                case '&':
+                    result.append("&amp;");
+                    break;
+                case '|':
+                    result.append("&#124;");
+                    break;
+                case ',':
+                    result.append("&#44;");
+                    break;
+                default:
+                    //the char is not a special one add it to the result as is
+                    result.append(character);
+                    break;
+            }
+        }
+        return result.toString();
+    }
+}
