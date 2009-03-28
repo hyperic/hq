@@ -8329,16 +8329,42 @@ has already been defined.
 
       <schema-directSQL>
         <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="postgresql">
-            UPDATE EAM_MEASUREMENT SET dsn = (SELECT m.dsn FROM EAM_MEASUREMENT m WHERE m.id = EAM_MEASUREMENT.id - 1) WHERE MEASUREMENT_CLASS = 'D'
+            UPDATE EAM_MEASUREMENT SET dsn = (
+                SELECT dsn from EAM_MEASUREMENT m, EAM_MEASUREMENT_ARG
+                where m.template_id = measurement_template_arg_id
+                and EAM_MEASUREMENT.template_id = measurement_template_id
+                and EAM_MEASUREMENT.instance_id = m.instance_id
+                and m.measurement_class = 'R'
+            ) where measurement_class = 'D'
         </statement>
         <statement desc="Replace pass-through ARG1 with actual Template" targetDB="postgresql">
-            UPDATE EAM_MEASUREMENT_TEMPL SET template = (SELECT template from EAM_MEASUREMENT_TEMPL t WHERE id = EAM_MEASUREMENT_TEMPL.id - 1) WHERE default_interval != 0
+            UPDATE EAM_MEASUREMENT_TEMPL SET template = (
+                SELECT template from EAM_MEASUREMENT_TEMPL t, EAM_MEASUREMENT_ARG
+                where measurement_template_arg_id = t.id
+                and measurement_template_id = EAM_MEASUREMENT_TEMPL.ID
+            ) where exists (
+                select measurement_template_id from eam_measurement_arg
+                where measurement_template_id = EAM_MEASUREMENT_TEMPL.ID
+            )
         </statement>
         <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="oracle">
-            UPDATE EAM_MEASUREMENT SET dsn = (SELECT m.dsn FROM EAM_MEASUREMENT m WHERE m.id = EAM_MEASUREMENT.id - 1) WHERE MEASUREMENT_CLASS = 'D'
+            UPDATE EAM_MEASUREMENT SET dsn = (
+                SELECT dsn from EAM_MEASUREMENT m, EAM_MEASUREMENT_ARG
+                where m.template_id = measurement_template_arg_id
+                and EAM_MEASUREMENT.template_id = measurement_template_id
+                and EAM_MEASUREMENT.instance_id = m.instance_id
+                and m.measurement_class = 'R'
+            ) where measurement_class = 'D'
         </statement>
         <statement desc="Replace pass-through ARG1 with actual Template" targetDB="oracle">
-            UPDATE EAM_MEASUREMENT_TEMPL SET template = (SELECT template from EAM_MEASUREMENT_TEMPL t WHERE id = EAM_MEASUREMENT_TEMPL.id - 1) WHERE default_interval != 0
+            UPDATE EAM_MEASUREMENT_TEMPL SET template = (
+                SELECT template from EAM_MEASUREMENT_TEMPL t, EAM_MEASUREMENT_ARG
+                where measurement_template_arg_id = t.id
+                and measurement_template_id = EAM_MEASUREMENT_TEMPL.ID
+            ) where exists (
+                SELECT measurement_template_id from eam_measurement_arg
+                where measurement_template_id = EAM_MEASUREMENT_TEMPL.ID
+            )
         </statement>
         <statement desc="Create TMP update Table" targetDB="mysql">
             CREATE TABLE EAM_MEASUREMENT_TMP AS SELECT (ID+1) ID, DSN FROM EAM_MEASUREMENT WHERE MEASUREMENT_CLASS='R'
