@@ -25,8 +25,9 @@
 
 package org.hyperic.hq.application;
 
+import java.util.concurrent.ScheduledFuture;
+
 import junit.framework.TestCase;
-import edu.emory.mathcs.backport.java.util.concurrent.ScheduledFuture;
 
 /**
  * Tests the Scheduler class.
