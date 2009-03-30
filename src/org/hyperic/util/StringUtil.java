@@ -56,7 +56,7 @@ public class StringUtil {
             return source;
         } 
 
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
         int idx, fromIndex;
                 
@@ -89,7 +89,7 @@ public class StringUtil {
         String retVal = null;
         int sourceLen = source.length();
         int findLen = find.length();
-        StringBuffer remove = new StringBuffer(source);
+        StringBuilder remove = new StringBuilder(source);
         
         try {
             if (source != null && sourceLen > 0 && find != null &&   
@@ -138,7 +138,7 @@ public class StringUtil {
     public static String iteratorToString(Iterator i, String delim,
                                           String quoteChar) { 
         Object elt = null;
-        StringBuffer rstr = new StringBuffer();
+        StringBuilder rstr = new StringBuilder();
         String s;
 
         while (i.hasNext()) {
@@ -260,7 +260,7 @@ public class StringUtil {
      * @return A string with objects in the list seperated by delim
      */
     public static String implode(List objs, String delim) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         int size = objs.size();
 
         for (int i=0; i<size - 1; i++) {
@@ -455,7 +455,7 @@ public class StringUtil {
 
         millis = (double)duration / 1000;
 
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         
         if (hours > 0 || minDigits == false) {
             buf.append(hours < 10 && minDigits == false ?
