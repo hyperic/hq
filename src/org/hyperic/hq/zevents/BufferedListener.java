@@ -26,14 +26,13 @@
 package org.hyperic.hq.zevents;
 
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.thread.ThreadGroupFactory;
-
-import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
-import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 class BufferedListener
     extends ThreadPoolExecutor
@@ -44,7 +43,7 @@ class BufferedListener
     private final ZeventListener _target;
     
     BufferedListener(ZeventListener target, ThreadGroupFactory fact) {
-        super(1, 1, 0, TimeUnit.DAYS, new LinkedBlockingQueue(), fact);
+        super(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue(), fact);
         ZeventManager.getInstance().registerBuffer(getQueue(), target);
         _target = target;
     }

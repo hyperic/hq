@@ -34,8 +34,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,11 +52,6 @@ import org.hyperic.util.thread.LoggingThreadGroup;
 import org.hyperic.util.thread.ThreadGroupFactory;
 import org.hyperic.util.thread.ThreadWatchdog;
 import org.hyperic.util.thread.ThreadWatchdog.InterruptToken;
-
-import edu.emory.mathcs.backport.java.util.Queue;
-import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
-import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 /**
  * The Zevent subsystem is an event system for fast, non-reliable transmission

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -28,11 +28,10 @@ package org.hyperic.hq.zevents;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import edu.emory.mathcs.backport.java.util.concurrent.BlockingQueue;
 
 /**
  * This class acts as the thread pulling data off the event queue and 

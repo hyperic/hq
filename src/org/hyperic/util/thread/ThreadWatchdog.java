@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -25,13 +25,13 @@
 
 package org.hyperic.util.thread;
 
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import edu.emory.mathcs.backport.java.util.concurrent.Future;
-import edu.emory.mathcs.backport.java.util.concurrent.ScheduledThreadPoolExecutor;
-import edu.emory.mathcs.backport.java.util.concurrent.ThreadFactory;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 /**
  * This class is able to interrupt threads after a certain interval -- useful

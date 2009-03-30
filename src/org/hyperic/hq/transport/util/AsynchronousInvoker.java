@@ -25,14 +25,13 @@
 
 package org.hyperic.hq.transport.util;
 
-import org.hyperic.hq.transport.util.AsynchronousInvocationHandler;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.hyperic.util.thread.LoggingThreadGroup;
 import org.hyperic.util.thread.ThreadGroupFactory;
-
-import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
-import edu.emory.mathcs.backport.java.util.concurrent.RejectedExecutionException;
-import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 /**
  * A helper class for performing asynchronous invocations within the HQ transport 

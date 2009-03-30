@@ -25,13 +25,13 @@
 
 package org.hyperic.hq.application;
 
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.hyperic.util.thread.LoggingThreadGroup;
 import org.hyperic.util.thread.ThreadGroupFactory;
-
-import edu.emory.mathcs.backport.java.util.concurrent.ScheduledFuture;
-import edu.emory.mathcs.backport.java.util.concurrent.ScheduledThreadPoolExecutor;
-import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 /**
  * A scheduler that internally uses a thread pool to permit concurrent execution 
@@ -66,10 +66,8 @@ public class Scheduler implements ShutdownCallback {
             new ThreadGroupFactory(threadGroup, "Scheduler-");
         tFactory.createDaemonThreads(true);      
         
-        _executor = 
-           new ScheduledThreadPoolExecutor(poolSize, 
-                                           tFactory, 
-                                           new ThreadPoolExecutor.DiscardPolicy());
+        _executor = new ScheduledThreadPoolExecutor(
+            poolSize, tFactory, new ThreadPoolExecutor.DiscardPolicy());
         
         // delayed tasks should not execute after shutdown
         _executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
@@ -94,8 +92,10 @@ public class Scheduler implements ShutdownCallback {
      * @param period The period (in msec) between successive executions.
      * @return A ScheduledFuture that may be used to cancel task execution.
      */
-    public ScheduledFuture scheduleAtFixedRate(Runnable task, long initialDelay, long period) {
-        return _executor.scheduleAtFixedRate(task, initialDelay, period, TimeUnit.MILLISECONDS);
+    public ScheduledFuture scheduleAtFixedRate(Runnable task, long initialDelay,
+                                               long period) {
+        return _executor.scheduleAtFixedRate(
+            task, initialDelay, period, TimeUnit.MILLISECONDS);
     }
     
     /**
@@ -112,8 +112,11 @@ public class Scheduler implements ShutdownCallback {
      *              and commencement of the next.
      * @return A ScheduledFuture that may be used to cancel task execution.
      */
-    public ScheduledFuture scheduleWithFixedDelay(Runnable task, long initialDelay, long delay) {
-        return _executor.scheduleWithFixedDelay(task, initialDelay, delay, TimeUnit.MILLISECONDS);
+    public ScheduledFuture scheduleWithFixedDelay(Runnable task,
+                                                  long initialDelay,
+                                                  long delay) {
+        return _executor.scheduleWithFixedDelay(
+            task, initialDelay, delay, TimeUnit.MILLISECONDS);
     }
         
     /**
