@@ -1229,7 +1229,6 @@ public class AvailabilityManagerEJBImpl
         }
         
         boolean suppress = false;
-        AvailabilityCache availCache = AvailabilityCache.getInstance();
         AvailabilityDownAlertDefinitionCache downMonitorCache = 
                 AvailabilityDownAlertDefinitionCache.getInstance();
         
@@ -1240,7 +1239,7 @@ public class AvailabilityManagerEJBImpl
         
         for (Iterator it=availabilityMeasurements.iterator(); it.hasNext(); ) {
             Measurement m = (Measurement) it.next();
-            DataPoint last = availCache.get(m.getId());
+            MetricValue last = getLastAvail(m);
             
             if (last != null && last.getValue() == AVAIL_DOWN) {
                 // parent resource is down, but check to see if an availability "down"
@@ -1249,7 +1248,8 @@ public class AvailabilityManagerEJBImpl
                     suppress = true;
                     _log.info("Parent resource [" + m.getResource().getName()
                             + "] of resource [" + childResource.getName() 
-                            + "] is unavailable and being monitored. Last data point: " + last);
+                            + "] is unavailable and being monitored. Last metric value=" 
+                            + last + " at time=" + last.getTimestamp());
                     break;
                 }
             }
