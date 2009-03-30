@@ -36,9 +36,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * Dynamic EhCache that is allowed to grow over time as needed.  At some point
- * this logic should be pushed into a base class so other Cache's managed
- * directly by HQ make use of this functionallity. (MetricDataCache, SRNCache)
+ * Dynamic EhCache that is allowed to grow over time as needed.
+ * AvailabilityCache should only be used in AvailabilityManager.addData()
+ * OR Backfiller operations.  In big environments it will be very contentious
+ * and due to its nature may not have the data being sought at any given time.
+ * Use AvailabilityManager.getLastAvail().
  */
 public class AvailabilityCache {
 
@@ -79,6 +81,9 @@ public class AvailabilityCache {
     }
 
     /**
+     * DO NOT USE THIS unless it is to maintain Availability RLE state as in
+     * AvailabilityManager.addData() OR Backfiller operations!!!
+     * Use {@link AvailabilityManager.getLastAvail}
      * @return The singleton instance of the AvailabilityCache.
      */
     public static AvailabilityCache getInstance() {
