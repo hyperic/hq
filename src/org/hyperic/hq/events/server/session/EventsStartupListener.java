@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -44,7 +44,8 @@ public class EventsStartupListener
     private static final Log _log = 
         LogFactory.getLog(EventsStartupListener.class);
     private static final Object LOCK = new Object();
-    private static TriggerChangeCallback _changeCallback;
+    private static TriggerChangeCallback _triggerChangeCallback;
+    private static AlertDefinitionChangeCallback _alertDefChangeCallback;
     
     public void hqStarted() {
         // Make sure the escalation enumeration is loaded and registered so 
@@ -55,9 +56,14 @@ public class EventsStartupListener
         HQApp app = HQApp.getInstance();
         
         synchronized (LOCK) {
-            _changeCallback = (TriggerChangeCallback)
+            _triggerChangeCallback = (TriggerChangeCallback)
                 app.registerCallbackCaller(TriggerChangeCallback.class);
+            
+            _alertDefChangeCallback = (AlertDefinitionChangeCallback)
+                app.registerCallbackCaller(AlertDefinitionChangeCallback.class);
         }
+        
+        AlertDefinitionManagerEJBImpl.getOne().startup();
 
         loadConfigProps("triggers");
         loadConfigProps("actions");
@@ -99,7 +105,13 @@ public class EventsStartupListener
     
     static TriggerChangeCallback getChangedTriggerCallback() {
         synchronized (LOCK) {
-            return _changeCallback;
+            return _triggerChangeCallback;
+        }
+    }
+    
+    static AlertDefinitionChangeCallback getAlertDefinitionChangeCallback() {
+        synchronized (LOCK) {
+            return _alertDefChangeCallback;
         }
     }
 }

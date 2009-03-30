@@ -45,6 +45,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
@@ -137,7 +138,10 @@ public class AlertDefinitionManagerEJBImpl
             escMan.endEscalation(alertdef);
         }
         watch.markTimeEnd("endEscalation");
-
+        
+        EventsStartupListener.getAlertDefinitionChangeCallback()
+            .postDelete(alertdef);
+        
         if (log.isDebugEnabled()) {
             log.debug("deleteAlertDefinitionStuff: " + watch);
         }
@@ -297,6 +301,10 @@ public class AlertDefinitionManagerEJBImpl
         // Alert definitions are the root of the cascade relationship, so
         // we must explicitly save them
         adDAO.save(res);
+        
+        EventsStartupListener.getAlertDefinitionChangeCallback()
+            .postCreate(res);
+
         return res.getAlertDefinitionValue();
     }
     
@@ -331,6 +339,9 @@ public class AlertDefinitionManagerEJBImpl
                 AlertAudit.enableAlert(def, subj);
             }
             def.setMtime(System.currentTimeMillis());
+            
+            EventsStartupListener.getAlertDefinitionChangeCallback()
+                .postUpdate(def);
         }
     }
 
@@ -416,6 +427,10 @@ public class AlertDefinitionManagerEJBImpl
         // Alert definitions are the root of the cascade relationship, so
         // we must explicitly save them
         dao.save(aldef);
+        
+        EventsStartupListener.getAlertDefinitionChangeCallback()
+            .postUpdate(aldef);
+
         return aldef.getAlertDefinitionValue();
     }
 
@@ -457,6 +472,9 @@ public class AlertDefinitionManagerEJBImpl
             def.setActiveStatus(activate);
             def.setMtime(System.currentTimeMillis());
             AlertAudit.enableAlert(def, subj);
+            
+            EventsStartupListener.getAlertDefinitionChangeCallback()
+                .postUpdate(def);
         }
         
         getAlertDefDAO().setChildrenActive(def, activate);
@@ -1092,6 +1110,33 @@ public class AlertDefinitionManagerEJBImpl
             }
         }        
         return isAvail;
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void startup() {
+        log.info("Alert Definition Manager starting up!");
+        
+        HQApp.getInstance().registerCallbackListener(AlertDefinitionChangeCallback.class, 
+                                                     new AlertDefinitionChangeCallback() {          
+            public void postCreate(AlertDefinition def) {
+                removeFromCache(def);
+            }
+            
+            public void postDelete(AlertDefinition def) {
+                removeFromCache(def);
+            }
+            
+            public void postUpdate(AlertDefinition def) {
+                removeFromCache(def);
+            }
+            
+            private void removeFromCache(AlertDefinition def) {
+                AvailabilityDownAlertDefinitionCache.getInstance()
+                    .remove(def.getAppdefEntityId());
+            }
+        });
     }
     
     public static AlertDefinitionManagerLocal getOne() {

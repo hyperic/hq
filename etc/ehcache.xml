@@ -666,6 +666,13 @@
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
 
+  <!-- Availability Down Alert Definition cache, used outside of hibernate -->
+  <cache name="AvailabilityDownAlertDefinitionCache"
+         maxElementsInMemory="10000"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
+
   <!-- Group alert caches -->
   <cache name="org.hyperic.hq.galerts.server.session.GalertDef"
          maxElementsInMemory="30"
