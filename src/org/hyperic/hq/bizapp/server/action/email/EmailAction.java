@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -28,11 +28,14 @@ package org.hyperic.hq.bizapp.server.action.email;
 import java.io.File;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 
@@ -44,12 +47,15 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
+import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
+import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
@@ -58,12 +64,16 @@ import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
+import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.hqu.rendit.RenditServer;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
+import org.hyperic.util.ConfigPropertyException;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 public class EmailAction extends EmailActionConfig
     implements ActionInterface, Notify
@@ -72,21 +82,63 @@ public class EmailAction extends EmailActionConfig
     public static final String RES_DESC_HOLDER = "RES_DESC_REPL";
 
     protected static String baseUrl = null;
+    private static final int _alertThreshold;
+    private static final List _emails = new ArrayList();
+    private static EmailRecipient[] _emailAddrs;
+    // Evaluate number of notifications each period when AlertThreshold is
+    // enabled to potentially toggle/block all notifications for 1 - Many
+    // THRESHOLD_WINDOW(s).  Notifications are only sent out after each period
+    // when mechanism is turned on.
+    // Matched it up with ConcurrentStatsCollector in order to obtain easy
+    // stats on a deployment's activity
+    private static final long EVALUATION_PERIOD =
+        ConcurrentStatsCollector.WRITE_PERIOD*1000;
+    private static final String EMAIL_ACTIONS =
+        ConcurrentStatsCollector.EMAIL_ACTIONS;
+    // evaluation window to continue and block notifications or
+    // toggle back to regular operation
+    private static final int THRESHOLD_WINDOW = 10*60*1000;
 
-    private Log _log = LogFactory.getLog(EmailAction.class);
-    private final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
+    private static final Log _log = LogFactory.getLog(EmailAction.class);
+    private static final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
 
-    private AuthzSubjectManagerLocal subjMan;
     private ResourceBundle resourceBundle;
+
+    static {
+        ServerConfigManagerLocal sConf = ServerConfigManagerEJBImpl.getOne();
+        int tmp = 0;
+        try {
+            final Properties props = sConf.getConfig();
+            tmp = Integer.parseInt(props.getProperty("HQ_ALERT_THRESHOLD", "0"));
+            String[] array =
+                props.getProperty("HQ_ALERT_THRESHOLD_EMAILS", "").split(",");
+            _emailAddrs = new EmailRecipient[array.length];
+            for (int i=0; i<array.length; i++) {
+                try {
+                    _emailAddrs[i] =
+                        new EmailRecipient(new InternetAddress(array[i]), false);
+                } catch (AddressException e) {
+                    _log.debug(e.getMessage(), e);
+                }
+            }
+        } catch (NumberFormatException e) {
+            _log.debug(e.getMessage(), e);
+        } catch (ConfigPropertyException e) {
+            _log.debug(e.getMessage(), e);
+        }
+        _alertThreshold = (_emailAddrs.length == 0) ? 0 : tmp;
+        if (_alertThreshold > 0) {
+            HQApp.getInstance().getScheduler().scheduleWithFixedDelay(
+                new ThresholdWorker(), Scheduler.NO_INITIAL_DELAY,
+                EVALUATION_PERIOD);
+        }
+    }
 
     public EmailAction() {
     }
 
-    protected AuthzSubjectManagerLocal getSubjMan() {
-        if (subjMan == null) {
-            subjMan = AuthzSubjectManagerEJBImpl.getOne();
-        }
-        return subjMan;
+    protected final AuthzSubjectManagerLocal getSubjMan() {
+        return AuthzSubjectManagerEJBImpl.getOne();
     }
     
     private ResourceBundle getResourceBundle() {
@@ -187,10 +239,9 @@ public class EmailAction extends EmailActionConfig
                                          "text_email.gsp", user);
             }
 
-            filter.sendAlert(appEnt, to,
-                             createSubject(alertDef, alert, resource, ""),
-                             body, htmlBody, alertDef.getPriority(),
-                             alertDef.isNotifyFiltered());
+            final String subject = createSubject(alertDef, alert, resource, "");
+            sendAlert(filter, appEnt, to, subject, body, htmlBody,
+                alertDef.getPriority(), alertDef.isNotifyFiltered());
 
             StringBuffer result = getLog(to);
             return result.toString();
@@ -286,7 +337,7 @@ public class EmailAction extends EmailActionConfig
     }
 
     public void send(Escalatable alert, EscalationStateChange change, 
-                           String message, Set notified)
+                     String message, Set notified)
         throws ActionExecuteException 
     {
         PerformsEscalations def = alert.getDefinition();
@@ -320,9 +371,266 @@ public class EmailAction extends EmailActionConfig
         Resource resource = rDao.findByInstanceId(appEnt.getAuthzTypeId(),
                                                   appEnt.getId());
 
-        filter.sendAlert(getResource(defInfo), to, 
-                         createSubject(defInfo, alert.getAlertInfo(), resource,
-                                       change.getDescription()), 
-                         messages, messages, defInfo.getPriority(), false);
+        final String subject = createSubject(
+            defInfo, alert.getAlertInfo(), resource, change.getDescription());
+        sendAlert(filter, getResource(defInfo), to, subject, messages, messages,
+            defInfo.getPriority(), false);
+    }
+
+    private void sendAlert(EmailFilter filter, AppdefEntityID appEnt,
+                           EmailRecipient[] to, String subject, String[] body,
+                           String[] htmlBody, int priority,
+                           boolean notifyFiltered) {
+        if (_alertThreshold <= 0) {
+            final boolean debug = _log.isDebugEnabled();
+            if (debug) {
+                EmailObj obj = new EmailObj(filter, appEnt, to, subject, body,
+                    htmlBody, priority, notifyFiltered);
+                debug(obj);
+            }
+            filter.sendAlert(
+                appEnt, to, subject, body, htmlBody, priority, notifyFiltered);
+            return;
+        }
+        synchronized (_emails) {
+            EmailObj obj = new EmailObj(filter, appEnt, to, subject, body,
+                htmlBody, priority, notifyFiltered);
+            _emails.add(obj);
+        }
+        ConcurrentStatsCollector.getInstance().addStat(1, EMAIL_ACTIONS);
+    }
+
+    private static final long now() {
+        return System.currentTimeMillis();
+    }
+
+    private static void debug(EmailObj obj) {
+        final boolean debug = _log.isDebugEnabled();
+        if (debug) {
+            final String msg = "Sending alert with info -> " +
+                obj.getAppEnt().getID() + ':' +
+                StringUtil.implode(Arrays.asList(obj.getTo()), ",") + ':' +
+                obj.getSubject() + ':' + obj.getPriority();
+            _log.debug(msg);
+        }
+    }
+
+    private static class ThresholdWorker implements Runnable {
+        private long _lastEmailTime = -1l;
+        private boolean _inThresholdWindow = false;
+        private String _endMsg = null,
+                       _beginMsg = null,
+                       _continueMsg = null,
+                       _endSubject = null,
+                       _beginSubject = null,
+                       _continueSubject = null;
+
+        public synchronized void run() {
+            try {
+                List toEmail = null;
+                final ConcurrentStatsCollector stats =
+                    ConcurrentStatsCollector.getInstance();
+                synchronized(_emails) {
+                    if (_emails.size() == 0) {
+                        stats.addStat(0, EMAIL_ACTIONS);
+                        return;
+                    }
+                    toEmail = new ArrayList(_emails);
+                    _emails.clear();
+                }
+                if (!_inThresholdWindow) {
+                    _inThresholdWindow = 
+                        (toEmail.size() >= _alertThreshold) ? true : false;
+                }
+                if (_inThresholdWindow && lastEmailWithinThresholdWindow()) {
+                    // if we are already in a threshold window then there is
+                    // nothing to do until the window has ended
+                    // just drop all emails
+                    if (_log.isDebugEnabled()) {
+                        _log.debug("In Threshold Window, dropping " +
+                            toEmail.size() + " email(s)");
+                    }
+                    return;
+                } else if (_inThresholdWindow && _lastEmailTime == -1l) {
+                    _lastEmailTime = now();
+                    sendRollupEmail(true, toEmail.size());
+                    stats.addStat(toEmail.size(), EMAIL_ACTIONS);
+                    return;
+                } else if (_inThresholdWindow &&
+                           !lastEmailWithinThresholdWindow()) {
+                    // this means that the threshold window has ended
+                    // Need to send an email notifying the users that it has
+                    // ended -OR- that it will continue
+                    _inThresholdWindow =
+                        (toEmail.size() >= _alertThreshold) ? true : false;
+                    sendRollupEmail(false, toEmail.size());
+                    _lastEmailTime = _inThresholdWindow ? now() : -1l;
+                    stats.addStat(toEmail.size(), EMAIL_ACTIONS);
+                    return;
+                } else {
+                    // send all emails, alert storm is not in affect
+                    for (final Iterator it=toEmail.iterator(); it.hasNext(); ) {
+                        final EmailObj obj = (EmailObj)it.next();
+                        final EmailFilter filter = obj.getFilter();
+                        debug(obj);
+                        filter.sendAlert(obj.getAppEnt(), obj.getTo(),
+                            obj.getSubject(), obj.getBody(), obj.getHtmlBody(),
+                            obj.getPriority(), obj.isNotifyFiltered());
+                    }
+                    return;
+                }
+            } catch (Throwable e) {
+                _log.error(e.getMessage(), e);
+                return;
+            }
+        }
+
+        private final boolean lastEmailWithinThresholdWindow() {
+            return (_lastEmailTime > (now() - THRESHOLD_WINDOW)) ? true : false;
+        }
+
+        private final void sendRollupEmail(boolean startWindow,
+                                           int notificationCount)
+            throws AddressException
+        {
+            String msg = "",
+                   subject = "";
+            if (startWindow) {
+                msg = getWindowStartMsg(notificationCount);
+                subject = getWindowStartSubject();
+            } else if (_inThresholdWindow) {
+                msg = getWindowContinueMsg(notificationCount);
+                subject = getWindowContinueSubject();
+            } else {
+                msg = getWindowEndMsg();
+                subject = getWindowEndSubject();
+            }
+            final EmailRecipient[] recipients = getEmailRecipients();
+            final String[] message = new String[recipients.length];
+            for (int i=0; i<recipients.length; i++) {
+                message[i] = msg;
+            }
+            if (_log.isDebugEnabled()) {
+                _log.debug("Sending Threshold Email to " +
+                    StringUtil.implode(Arrays.asList(recipients), ",") +
+                    ',' + " msg: " + msg);
+            }
+            EmailFilter.sendEmail(recipients, subject, message,
+                message, new Integer(EventConstants.PRIORITY_HIGH));
+        }
+
+        private final String getWindowEndSubject() {
+            if (_endSubject != null) {
+                return _endSubject;
+            }
+            _endSubject = ResourceBundle.getBundle(BUNDLE).getString(
+                "alert.threshold.subject.end.message");
+            return _endSubject;
+        }
+
+        private final String getWindowContinueSubject() {
+            if (_continueSubject != null) {
+                return _continueSubject;
+            }
+            _continueSubject = ResourceBundle.getBundle(BUNDLE).getString(
+                "alert.threshold.subject.end.message");
+            return _continueSubject;
+        }
+
+        private final String getWindowStartSubject() {
+            if (_beginSubject != null) {
+                return _beginSubject;
+            }
+            _beginSubject = ResourceBundle.getBundle(BUNDLE).getString(
+                "alert.threshold.subject.end.message");
+            return _beginSubject;
+        }
+
+        private final String getWindowEndMsg() {
+            if (_endMsg != null) {
+                return _endMsg;
+            }
+            _endMsg = ResourceBundle.getBundle(BUNDLE).getString(
+                "alert.threshold.end.message");
+            return _endMsg;
+        }
+
+        private final String getWindowContinueMsg(int notificationCount) {
+            if (_continueMsg != null) {
+                return _continueMsg.replaceAll("\\{0\\}", notificationCount+"");
+            }
+            _continueMsg = ResourceBundle.getBundle(BUNDLE).getString(
+                "alert.threshold.continue.message");
+            _continueMsg =
+                _continueMsg.replaceAll("\\{1\\}", EVALUATION_PERIOD/1000+"")
+                            .replaceAll("\\{2\\}", THRESHOLD_WINDOW/60000+"");
+            return _continueMsg;
+        }
+
+        private final String getWindowStartMsg(int notificationCount) {
+            if (_beginMsg != null) {
+                return _beginMsg.replaceAll("\\{0\\}", notificationCount+"")
+                                .replaceAll("\\{2\\}", _alertThreshold+"");
+            }
+            _beginMsg = ResourceBundle.getBundle(BUNDLE).getString(
+                "alert.threshold.begin.message");
+            _beginMsg =
+                _beginMsg.replaceAll("\\{1\\}", EVALUATION_PERIOD/1000+"")
+                         .replaceAll("\\{3\\}", THRESHOLD_WINDOW/60000+"");
+            return _beginMsg.replaceAll("\\{0\\}", notificationCount+"")
+                            .replaceAll("\\{2\\}", _alertThreshold+"");
+        }
+
+        private EmailRecipient[] getEmailRecipients() throws AddressException {
+            return _emailAddrs;
+        }
+    }
+
+    private class EmailObj {
+        private final EmailFilter _filter;
+        private final AppdefEntityID _appEnt;
+        private final EmailRecipient[] _to;
+        private final String _subject;
+        private final String[] _body;
+        private final String[] _htmlBody;
+        private final int _priority;
+        private final boolean _notifyFiltered;
+        public EmailObj(EmailFilter filter, AppdefEntityID appEnt,
+                        EmailRecipient[] to, String subject, String[] body,
+                        String[] htmlBody, int priority,
+                        boolean notifyFiltered) {
+            _filter = filter;
+            _appEnt = appEnt;
+            _to = to;
+            _subject = subject;
+            _body = body;
+            _htmlBody = htmlBody;
+            _priority = priority;
+            _notifyFiltered = notifyFiltered;
+        }
+        public EmailFilter getFilter() {
+            return _filter;
+        }
+        public AppdefEntityID getAppEnt() {
+            return _appEnt;
+        }
+        public EmailRecipient[] getTo() {
+            return _to;
+        }
+        public String getSubject() {
+            return _subject;
+        }
+        public String[] getBody() {
+            return _body;
+        }
+        public String[] getHtmlBody() {
+            return _htmlBody;
+        }
+        public int getPriority() {
+            return _priority;
+        }
+        public boolean isNotifyFiltered() {
+            return _notifyFiltered;
+        }
     }
 }

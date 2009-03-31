@@ -189,6 +189,9 @@
         <!-- Global Alert Properties -->
         <data ID="62" PROPKEY="HQ_ALERTS_ENABLED" DEFAULT_PROPVALUE="true" PROPVALUE="true" FREAD_ONLY="FALSE"/>
         <data ID="63" PROPKEY="HQ_ALERT_NOTIFICATIONS_ENABLED" DEFAULT_PROPVALUE="true" PROPVALUE="true" FREAD_ONLY="FALSE"/>
+        <!-- Alert Threshold Properties -->
+        <data ID="64" PROPKEY="HQ_ALERT_THRESHOLD" DEFAULT_PROPVALUE="0" PROPVALUE="0" FREAD_ONLY="FALSE"/>
+        <data ID="65" PROPKEY="HQ_ALERT_THRESHOLD_EMAILS" DEFAULT_PROPVALUE="" PROPVALUE="" FREAD_ONLY="FALSE"/>
        
     </table>
 

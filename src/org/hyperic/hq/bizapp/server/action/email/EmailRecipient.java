@@ -55,4 +55,8 @@ public class EmailRecipient {
     public int hashCode() {
         return _addr.hashCode();
     }
+    
+    public String toString() {
+        return _addr.getAddress();
+    }
 }

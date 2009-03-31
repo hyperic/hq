@@ -9741,6 +9741,19 @@ has already been defined.
                    dupFail="false"
                    insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (63, 'HQ_ALERT_NOTIFICATIONS_ENABLED', 'true', 'true', '0')"/>
   </schemaSpec>
+
+  <schemaSpec version="3.141">
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (64, 'HQ_ALERT_THRESHOLD', '0', '', %%FALSE%%)"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (65, 'HQ_ALERT_THRESHOLD_EMAILS', '', '', %%FALSE%%)"/>
+  </schemaSpec>
+    
+</dbupgrade>
+</target>
+</project>
     
 </dbupgrade>
 </target>
