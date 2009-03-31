@@ -9736,10 +9736,10 @@ has already been defined.
   <schemaSpec version="3.140">
     <schema-insert table="EAM_CONFIG_PROPS"
                    dupFail="false"
-                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (62, 'HQ_ALERTS_ENABLED', 'true', 'true', '0')"/>
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (62, 'HQ_ALERTS_ENABLED', 'true', 'true', %%FALSE%%)"/>
     <schema-insert table="EAM_CONFIG_PROPS"
                    dupFail="false"
-                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (63, 'HQ_ALERT_NOTIFICATIONS_ENABLED', 'true', 'true', '0')"/>
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (63, 'HQ_ALERT_NOTIFICATIONS_ENABLED', 'true', 'true', %%FALSE%%)"/>
   </schemaSpec>
 
   <schemaSpec version="3.141">
