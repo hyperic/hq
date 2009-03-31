@@ -77,7 +77,7 @@ public final class ConcurrentStatsCollector {
         new ScheduledThreadPoolExecutor(1);
     private static final ConcurrentStatsCollector _instance =
         new ConcurrentStatsCollector();
-    private static final int WRITE_PERIOD = 15;
+    public static final int WRITE_PERIOD = 15;
     private final Sigar _sigar = new Sigar();
     private Long _pid;
     public static final String JVM_TOTAL_MEMORY = "JVM_TOTAL_MEMORY",
@@ -104,7 +104,8 @@ public final class ConcurrentStatsCollector {
         DB_ANALYZE_TIME              = "DB_ANALYZE_TIME",
         PURGE_EVENT_LOGS_TIME        = "PURGE_EVENT_LOGS_TIME",
         PURGE_MEASUREMENTS_TIME      = "PURGE_MEASUREMENTS_TIME",
-        MEASUREMENT_SCHEDULE_TIME    = "MEASUREMENT_SCHEDULE_TIME";
+        MEASUREMENT_SCHEDULE_TIME    = "MEASUREMENT_SCHEDULE_TIME",
+        EMAIL_ACTIONS                = "EMAIL_ACTIONS";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
