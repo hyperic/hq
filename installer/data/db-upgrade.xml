@@ -9750,11 +9750,7 @@ has already been defined.
                    dupFail="false"
                    insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (65, 'HQ_ALERT_THRESHOLD_EMAILS', '', '', %%FALSE%%)"/>
   </schemaSpec>
-    
-</dbupgrade>
-</target>
-</project>
-    
+
 </dbupgrade>
 </target>
 </project>
