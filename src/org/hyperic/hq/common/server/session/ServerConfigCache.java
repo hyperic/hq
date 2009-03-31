@@ -43,6 +43,7 @@ import org.hyperic.util.ConfigPropertyException;
 public class ServerConfigCache {
     private Log log = LogFactory.getLog(ServerConfigCache.class);
     private final Cache _cache;
+    private static final Object _cacheLock = new Object();
 
     public static final String CACHENAME = "ServerConfigCache";
     private static final ServerConfigCache singleton = new ServerConfigCache();
@@ -79,11 +80,15 @@ public class ServerConfigCache {
     public void put(String key, String value) {
         Element el = new Element(key, value);
                                                           
-        _cache.put(el);
+        synchronized (_cacheLock) {
+            _cache.put(el);
+        }
     }
     
     public void remove(String key) {
-        _cache.remove(key);
+        synchronized (_cacheLock) {
+            _cache.remove(key);
+        }
     }
 
     private void loadConfig() {
@@ -91,9 +96,11 @@ public class ServerConfigCache {
             Properties config = ServerConfigManagerEJBImpl.getOne().getConfig();
             String key = null;
             
-            for (Enumeration e = config.propertyNames(); e.hasMoreElements() ;) {
-                key = (String) e.nextElement();
-                singleton.put(key, config.getProperty(key));
+            synchronized (_cacheLock) {
+                for (Enumeration e = config.propertyNames(); e.hasMoreElements() ;) {
+                    key = (String) e.nextElement();
+                    singleton.put(key, config.getProperty(key));
+                }
             }
         } catch (ConfigPropertyException e) {
             throw new SystemException(e);
