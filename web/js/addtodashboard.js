@@ -15,13 +15,13 @@ var AddToDashboard = {
 		// onSuccess() : additional logic to execute before hiding dialog. This is triggered on a successful response, a data parameter will also be available (optional),
 		// onFailure() : additional logic to execute before hiding dialog. This is triggered on a successful response, a data parameter will also be available (optional),
 	//}
-	
-	_dialogRegistry : {},
+	_selectCount : 0,
+	_dialog : null,
 	
 	initDialog : function (config) {
 		this._config = config;
 		
-		this._dialogRegistry[this._config.dialogId] = new dijit11.Dialog({
+		this._dialog = new dijit11.Dialog({
 			id : this._config.dialogId,
 			refocus : true,
 			autofocus : false,
@@ -33,13 +33,15 @@ var AddToDashboard = {
 		var self = this;
 
      	dojo11.byId(this._config.callerId).onclick = function() { 
-     		self._dialogRegistry[self._config.dialogId].show();        	 
+     		self._dialog.show();        	 
         };
     	
     	dojo11.byId(this._config.cancelButtonId).onclick = function() {
-    		self._dialogRegistry[self._config.dialogId].hide();
+    		self._dialog.hide();
+    		self._resetDialog();
     	};
     	
+    	dojo11.byId(this._config.addButtonId).disabled = true;
     	dojo11.byId(this._config.addButtonId).onclick = function() {
     		var xhrArgs = {
     			form : dojo11.byId(self._config.formId),
@@ -48,10 +50,10 @@ var AddToDashboard = {
     				if (self._config.onSuccess) {
     					self._config.onSuccess(data);
     				}
-    				dojo11.byId(self._config.progressId).hide();
-    				dojo11.byId(self._config.successMsgId).show();
+    				dojo11.style(self._config.progressId, "display", "none");
+					dojo11.style(self._config.successMsgId, "display", "");
     				setTimeout(function() {
-    					self._dialogRegistry[self._config.dialogId].hide();
+    					self._dialog.hide();
     					self._resetDialog();
     				}, 1500);
         		},
@@ -59,10 +61,10 @@ var AddToDashboard = {
         			if (self._config.onFailure) {
         				self._config.onFailure(data);
         			}
-        			dojo11.byId(self._config.progressId).hide();
-        			dojo11.byId(self._config.failureMsgId).show();
+    				dojo11.style(self._config.progressId, "display", "none");
+					dojo11.style(self._config.failureMsgId, "display", "");
     				setTimeout(function() {
-    					self._dialogRegistry[self._config.dialogId].hide();
+    					self._dialog.hide();
     					self._resetDialog();
     				}, 1500);
         		}
@@ -79,21 +81,48 @@ var AddToDashboard = {
     		if (self._config.passthroughParams) {
     			xhrArgs.content = self._config.passthroughParams();
     		}
-
-    		dojo11.byId(self._config.progressId).show();
+			
+			dojo11.style(self._config.progressId, "display", "");
+			
 			dojo11.xhrPost(xhrArgs);
     	};
     	
-    	dojo11.byId(this._config.checkboxAllId).onchange = function() {
+    	dojo11.byId(this._config.checkboxAllId).onclick = function() {
     		var checked = dojo11.byId(self._config.checkboxAllId).checked;
     		var count = 1;
     		var childCheckbox = dojo11.byId(self._config.checkboxIdPrefix + count);
     		
     		while (childCheckbox != null) {
     			childCheckbox.checked = checked;
+    			self._updateAddButtonState(childCheckbox);
     			childCheckbox = dojo11.byId(self._config.checkboxIdPrefix + ++count);
     		}
     	};
+   
+   		var count = 1;
+   		var childCheckbox = dojo11.byId(this._config.checkboxIdPrefix + count);
+    		
+   		while (childCheckbox != null) {
+   			childCheckbox.onchange = function() {
+   				self._updateAddButtonState(this);
+   			};
+   			
+    		childCheckbox = dojo11.byId(this._config.checkboxIdPrefix + ++count);
+    	}
+	},
+	
+	_updateAddButtonState : function(checkbox) {
+   		if (checkbox.checked) {
+   			this._selectCount++;
+   		} else {
+   			this._selectCount--;
+   		}
+   		
+   		if (this._selectCount == 0) {
+   			dojo11.byId(this._config.addButtonId).disabled = true;
+   		} else {
+   			dojo11.byId(this._config.addButtonId).disabled = false;   				
+   		}	
 	},
 	
 	_injectForm : function() {
@@ -121,7 +150,11 @@ var AddToDashboard = {
 			childCheckbox = dojo11.byId(this._config.checkboxIdPrefix + ++count);
 		}
 		
-		dojo11.byId(this._config.successMsgId).hide();
-		dojo11.byId(this._config.failureMsgId).hide();
+		dojo11.style(this._config.successMsgId, "display", "none");
+		dojo11.style(this._config.failureMsgId, "display", "none");
+		dojo11.byId(this._config.addButtonId).disabled = true;
+		
+		this._selectCount = 0;
+		
 	}
 }
