@@ -254,24 +254,16 @@ public class ProductPluginDeployer
             ConcurrentStatsCollector c = ConcurrentStatsCollector.getInstance();
             c.register(
                 ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER);
-            c.register(
-                ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
-            c.register(
-                ConcurrentStatsCollector.DATA_MANAGER_INSERT_TIME);
-            c.register(
-                ConcurrentStatsCollector.JMS_TOPIC_PUBLISH_TIME);
-            c.register(
-                ConcurrentStatsCollector.JMS_QUEUE_PUBLISH_TIME);
-            c.register(
-                ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
-            c.register(
-                ConcurrentStatsCollector.DB_ANALYZE_TIME);
-            c.register(
-                ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
-            c.register(
-                ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
-            c.register(
-                ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
+            c.register(ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED);
+            c.register(ConcurrentStatsCollector.DATA_MANAGER_INSERT_TIME);
+            c.register(ConcurrentStatsCollector.JMS_TOPIC_PUBLISH_TIME);
+            c.register(ConcurrentStatsCollector.JMS_QUEUE_PUBLISH_TIME);
+            c.register(ConcurrentStatsCollector.METRIC_DATA_COMPRESS_TIME);
+            c.register(ConcurrentStatsCollector.DB_ANALYZE_TIME);
+            c.register(ConcurrentStatsCollector.PURGE_EVENT_LOGS_TIME);
+            c.register(ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
+            c.register(ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
+            c.register(ConcurrentStatsCollector.EMAIL_ACTIONS);
             c.startCollector();
         } catch (Exception e) {
             _log.error("Could not start Concurrent Stats Collector", e);
