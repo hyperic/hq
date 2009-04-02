@@ -154,7 +154,9 @@ public class DataPurgeJob implements Runnable {
                 _log.info("Not starting db analyze. (Already running)");
                 return;
             } else if ((_lastAnalyze + ANALYZE_INTERVAL) > analyzeStart) {
-                _log.info("Not starting db analyze. Last run at " +
+                serverConfig.analyzeHqMetricTables(false);
+                _log.info("Only running analyze on current metric data table " +
+                    "since last full run was at " +
                     TimeUtil.toString(_lastAnalyze));
                 return;
             } else {
@@ -164,7 +166,7 @@ public class DataPurgeJob implements Runnable {
         try {
             _log.info("Performing database analyze");
             // Analyze the current and previous hq_metric_data table
-            serverConfig.analyzeHqMetricTables();
+            serverConfig.analyzeHqMetricTables(true);
             // Analyze all non-metric tables
             serverConfig.analyzeNonMetricTables();
             long secs = (System.currentTimeMillis()-analyzeStart)/1000;

@@ -347,14 +347,16 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * Run an analyze command on both the current measurement data slice as
-     * well as the previous data slice.
+     * Run an analyze command on both the current measurement data slice and
+     * the previous data slice if specified.
      *
+     * @param analyzePrevMetricDataTable tells method to analyze previous metric
+     * data table as well as the current.
      * @return The time taken in milliseconds to run the command.
      * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
-    public long analyzeHqMetricTables()
+    public long analyzeHqMetricTables(boolean analyzePrevMetricDataTable)
     {
         long systime = System.currentTimeMillis();
         String currMetricDataTable = MeasTabManagerUtil.getMeasTabname(systime);
@@ -366,14 +368,15 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
 
         Connection conn = null;
         try {
-            conn = DBUtil.getConnByContext(getInitialContext(),
-                                           HQConstants.DATASOURCE);
-            String sql = dialect.getOptimizeStmt(currMetricDataTable,
-                                                 DEFAULT_COST);
+            String sql;
+            conn = DBUtil.getConnByContext(
+                getInitialContext(), HQConstants.DATASOURCE);
+            sql = dialect.getOptimizeStmt(currMetricDataTable, DEFAULT_COST);
             duration += doCommand(conn, sql, null);
-            sql = dialect.getOptimizeStmt(prevMetricDataTable,
-                                          DEFAULT_COST);
-            duration += doCommand(conn, sql, null);
+            if (analyzePrevMetricDataTable) {
+                sql = dialect.getOptimizeStmt(prevMetricDataTable, DEFAULT_COST);
+                duration += doCommand(conn, sql, null);
+            }
         } catch (SQLException e) {
             log.error("Error analyzing metric tables", e);
             throw new SystemException(e);
