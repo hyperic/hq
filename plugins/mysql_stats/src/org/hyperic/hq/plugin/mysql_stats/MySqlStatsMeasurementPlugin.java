@@ -161,7 +161,7 @@ public class MySqlStatsMeasurementPlugin
         // over the old mysql plugin since the query only has to be run once for
         // all the individual table metrics.
         if (tableCache == null) {
-            final String sql = new StringBuilder()
+            final String sql = new StringBuffer()
                 .append("SELECT * FROM information_schema.tables")
                 .append(" WHERE lower(table_name) = '")
                     .append(table.toLowerCase()).append('\'')
