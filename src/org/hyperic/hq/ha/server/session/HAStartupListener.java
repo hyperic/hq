@@ -25,15 +25,16 @@
 
 package org.hyperic.hq.ha.server.session;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.common.server.mbean.ProductConfigService;
 import org.hyperic.hq.ha.server.mbean.HAService;
+import org.hyperic.hq.measurement.server.session.MeasurementStartupListener;
 import org.hyperic.hq.product.server.MBeanUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
 
 public class HAStartupListener
     implements StartupListener
@@ -48,6 +49,7 @@ public class HAStartupListener
         startConfigService(server);
         startScheduler(server);
         startHAService(server);
+        MeasurementStartupListener.startDataPurgeWorker();
     }
 
     private void startHAService(MBeanServer server)

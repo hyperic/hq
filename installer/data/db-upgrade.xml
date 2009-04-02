@@ -9722,6 +9722,20 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.142">
+    <schema-directSQL>
+      <statement>
+        delete from QRTZ_CRON_TRIGGERS where TRIGGER_NAME = 'Data Purge Trigger'
+      </statement>
+      <statement>
+        delete from QRTZ_JOB_DETAILS where JOB_NAME = 'Data Purge Job'
+      </statement>
+      <statement>
+        delete from QRTZ_TRIGGERS where TRIGGER_NAME = 'Data Purge Trigger'
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
