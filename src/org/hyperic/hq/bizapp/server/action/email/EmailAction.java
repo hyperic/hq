@@ -390,6 +390,7 @@ public class EmailAction extends EmailActionConfig
             }
             filter.sendAlert(
                 appEnt, to, subject, body, htmlBody, priority, notifyFiltered);
+            ConcurrentStatsCollector.getInstance().addStat(1, EMAIL_ACTIONS);
             return;
         }
         synchronized (_emails) {
@@ -428,11 +429,8 @@ public class EmailAction extends EmailActionConfig
         public synchronized void run() {
             try {
                 List toEmail = null;
-                final ConcurrentStatsCollector stats =
-                    ConcurrentStatsCollector.getInstance();
                 synchronized(_emails) {
                     if (_emails.size() == 0) {
-                        stats.addStat(0, EMAIL_ACTIONS);
                         return;
                     }
                     toEmail = new ArrayList(_emails);
@@ -454,7 +452,6 @@ public class EmailAction extends EmailActionConfig
                 } else if (_inThresholdWindow && _lastEmailTime == -1l) {
                     _lastEmailTime = now();
                     sendRollupEmail(true, toEmail.size());
-                    stats.addStat(toEmail.size(), EMAIL_ACTIONS);
                     return;
                 } else if (_inThresholdWindow &&
                            !lastEmailWithinThresholdWindow()) {
@@ -465,7 +462,6 @@ public class EmailAction extends EmailActionConfig
                         (toEmail.size() >= _alertThreshold) ? true : false;
                     sendRollupEmail(false, toEmail.size());
                     _lastEmailTime = _inThresholdWindow ? now() : -1l;
-                    stats.addStat(toEmail.size(), EMAIL_ACTIONS);
                     return;
                 } else {
                     // send all emails, alert storm is not in affect
