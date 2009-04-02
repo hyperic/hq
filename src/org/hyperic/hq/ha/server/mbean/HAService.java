@@ -55,7 +55,6 @@ public class HAService
 
         _log.info("Starting HA Services");
 
-        startDataPurgeService(server);
         startAvailCheckService(server);
         startAgentAIScanService(server);
     }
@@ -65,15 +64,6 @@ public class HAService
      */
     public void stopSingleton(String gracefulShutdown) {
         // XXX: shut down services
-    }
-
-    private void startDataPurgeService(MBeanServer server) {
-        try {
-            invoke(server, "hyperic.jmx:type=Service,name=DataPurge",
-                    "startPurgeService");
-        } catch (Exception e) {
-            _log.info("Unable to start service: " + e);
-        }
     }
 
     private void startAvailCheckService(MBeanServer server) {

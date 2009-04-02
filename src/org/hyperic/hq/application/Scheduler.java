@@ -118,6 +118,20 @@ public class Scheduler implements ShutdownCallback {
         return _executor.scheduleWithFixedDelay(
             task, initialDelay, delay, TimeUnit.MILLISECONDS);
     }
+    
+    /**
+     * Tries to remove from the work queue all {@link Future}
+     * tasks that have been cancelled. This method can be useful as a
+     * storage reclamation operation, that has no other impact on
+     * functionality. Cancelled tasks are never executed, but may
+     * accumulate in work queues until worker threads can actively
+     * remove them. Invoking this method instead tries to remove them now.
+     * However, this method may fail to remove tasks in
+     * the presence of interference by other threads.
+     */
+    public void purgeTasks() {
+        _executor.purge();
+    }
         
     /**
      * Shut down the scheduler in an orderly manner, allowing any currently 

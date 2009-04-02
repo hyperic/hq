@@ -25,16 +25,12 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-
-import net.sf.ehcache.Cache;
-import net.sf.ehcache.CacheManager;
-import net.sf.ehcache.Element;
+import java.util.concurrent.ScheduledFuture;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,9 +43,9 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.zevents.ZeventManager;
 
 public class MeasurementStartupListener
@@ -57,7 +53,7 @@ public class MeasurementStartupListener
 {
     private static final String PROP_REPSTATS_SIZE = "REPORT_STATS_SIZE";
     
-    private final Log _log = 
+    private static final Log _log = 
         LogFactory.getLog(MeasurementStartupListener.class);
     
     private static final Object LOCK = new Object();
@@ -65,6 +61,7 @@ public class MeasurementStartupListener
     private static DataInserter _availDataInserter;
     private static DefaultMetricEnableCallback _defEnableCallback;
     private static MetricDeleteCallback _delCallback;
+    private static ScheduledFuture _dataPurgeFuture;
     
     public void hqStarted() {
         // Make sure we have the aux-log provider loaded
@@ -128,6 +125,60 @@ public class MeasurementStartupListener
         prefetchEnabledMeasurementsAndTemplates();
         initReportsStats();
         AgentScheduleSynchronizer.getInstance().initialize();
+        startDataPurgeWorker();
+    }
+    
+    public static void stopDataPurgeWorker() {
+        if (_dataPurgeFuture != null) {
+            _log.info("Stopping Data Purge Worker");
+            _dataPurgeFuture.cancel(true);
+            HQApp.getInstance().getScheduler().purgeTasks();
+            _dataPurgeFuture = null;
+        }
+    }
+
+    /**
+     * Starts either the com.hyperic.hq.measurement.DataPurgeJob or
+     *  org.hyperic.hq.measurement.DataPurgeJob after stopping an existing
+     *  worker if one is already scheduled.  The worker is scheduled to run
+     *  at 10 past every hour.
+     */
+    public static void startDataPurgeWorker() {
+        stopDataPurgeWorker();
+        // want to schedule at 10 past the hour for legacy, nice to know
+        // when all of our DB maintenance occurs.
+        final Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(now());
+        if (cal.get(Calendar.MINUTE) >= 10) {
+            cal.add(Calendar.HOUR_OF_DAY, 1);
+        }
+        cal.set(Calendar.MINUTE, 10);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        final long initialDelay = cal.getTimeInMillis() - now();
+        _log.info("Starting Data Purge Worker");
+        Runnable dataPurgeJob;
+        try {
+            final String klazz = "com.hyperic.hq.measurement.DataPurgeJob";
+            dataPurgeJob = (Runnable)Class.forName(klazz).newInstance();
+            _log.info("Started DataPurgeWorker as " + klazz);
+        } catch (Exception e) {
+            try {
+                final String klazz = "org.hyperic.hq.measurement.DataPurgeJob";
+                dataPurgeJob = (Runnable)Class.forName(klazz).newInstance();
+                _log.info("Started DataPurgeWorker as " + klazz);
+            } catch (Exception e1) {
+                _log.fatal("Could not start DataPurgeWorker", e1);
+                return;
+            }
+        }
+        final HQApp app = HQApp.getInstance();
+        _dataPurgeFuture = app.getScheduler().scheduleAtFixedRate(
+            dataPurgeJob, initialDelay, MeasurementConstants.HOUR);
+    }
+
+    private static final long now() {
+        return System.currentTimeMillis();
     }
 
     private void prefetchEnabledMeasurementsAndTemplates() {

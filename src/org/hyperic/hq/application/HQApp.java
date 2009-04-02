@@ -105,7 +105,7 @@ public class HQApp {
         _watchdog = new ThreadWatchdog("ThreadWatchdog");
         _watchdog.initialize();
         
-        _scheduler = new Scheduler(4);
+        _scheduler = new Scheduler(10);
         this.registerCallbackListener(ShutdownCallback.class, _scheduler);
                 
         try {
