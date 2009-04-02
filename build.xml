@@ -156,14 +156,6 @@
     <path location="${build.dir}/classes" />
   </path>
 
-  <path id="jboss-aop.path">
-    <pathelement path="${thirdparty.lib}/aop/javassist.jar"/>
-      <pathelement path="${thirdparty.lib}/aop/jboss-aop.jar"/>
-      <pathelement path="${thirdparty.lib}/aop/jboss-common.jar"/>
-      <pathelement path="${thirdparty.lib}/aop/trove.jar"/>
-      <pathelement path="${thirdparty.lib}/aop/concurrent.jar"/>
-  </path>
-    
   <!-- Source common targets -->
   <import file="${hq.home}/build_util/util-build.xml"/>
   <import file="${hq.home}/build_util/test-build.xml"/>
