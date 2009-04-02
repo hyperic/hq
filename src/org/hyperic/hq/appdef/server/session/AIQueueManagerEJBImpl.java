@@ -683,20 +683,24 @@ public class AIQueueManagerEJBImpl
     }
 
     /**
-     * Find a platform given an AI platform 
+     * Get a platform given an AI platform, returns null if none found
      * @ejb:interface-method
      */
     public AIPlatformValue getAIPlatformByPlatformID(AuthzSubject subject,
                                                      Integer platformID) {
-        return getAIPlatformByPlatformID(platformID).getAIPlatformValue();
+        AIPlatform aip = getAIPlatformByPlatformID(platformID);
+        return (aip == null) ? null : aip.getAIPlatformValue();
     }
 
     private AIPlatform getAIPlatformByPlatformID(Integer platformID) {
         return getAIPlatformByPlatform(getPlatformDAO().findById(platformID));
     }
 
-    private AIPlatform getAIPlatformByPlatform(Platform pLocal) {
-        Collection ips = pLocal.getIps();
+    /**
+     * may return null if there are no associated AIPlatforms.
+     */
+    private AIPlatform getAIPlatformByPlatform(Platform platform) {
+        Collection ips = platform.getIps();
         // We can't use the FQDN to find a platform, because
         // the FQDN can change too easily.  Instead we use the
         // IP address now.  For now, if we get one IP address
