@@ -451,9 +451,6 @@
       <fileset dir="${lather.lib}" >
         <include name="lather.jar" />
       </fileset> 
-      <fileset dir="${db2monitor.dir}/lib" >
-        <include name="db2monitor.jar" />
-      </fileset>
       <fileset dir="${build.dir}/lib" >
         <include name="jxla.jar" />
       </fileset>
