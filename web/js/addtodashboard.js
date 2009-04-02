@@ -41,7 +41,8 @@ var AddToDashboard = {
     		self._resetDialog();
     	};
     	
-    	dojo11.byId(this._config.addButtonId).disabled = true;
+    	this._updateAddButtonState(false);
+    	
     	dojo11.byId(this._config.addButtonId).onclick = function() {
     		var xhrArgs = {
     			form : dojo11.byId(self._config.formId),
@@ -93,8 +94,11 @@ var AddToDashboard = {
     		var childCheckbox = dojo11.byId(self._config.checkboxIdPrefix + count);
     		
     		while (childCheckbox != null) {
-    			childCheckbox.checked = checked;
-    			self._updateAddButtonState(childCheckbox);
+    			if (childCheckbox.checked != checked) {
+    				childCheckbox.checked = checked;
+    				self._updateAddButtonState(childCheckbox.checked);
+    			}
+    			
     			childCheckbox = dojo11.byId(self._config.checkboxIdPrefix + ++count);
     		}
     	};
@@ -103,27 +107,33 @@ var AddToDashboard = {
    		var childCheckbox = dojo11.byId(this._config.checkboxIdPrefix + count);
     		
    		while (childCheckbox != null) {
-   			childCheckbox.onchange = function() {
-   				self._updateAddButtonState(this);
+   			childCheckbox.onclick = function() {
+   				self._updateAddButtonState(this.checked);
    			};
    			
     		childCheckbox = dojo11.byId(this._config.checkboxIdPrefix + ++count);
     	}
 	},
 	
-	_updateAddButtonState : function(checkbox) {
-   		if (checkbox.checked) {
+	_updateAddButtonState : function(isChecked) {
+   		if (isChecked) {
    			this._selectCount++;
    		} else {
-   			this._selectCount--;
+   			if (this._selectCount > 0) this._selectCount--;
    		}
    		
+   		var changeClass;
+   		
    		if (this._selectCount == 0) {
+   			changeClass = dojo11.addClass;
    			dojo11.byId(this._config.addButtonId).disabled = true;
    		} else {
-   			dojo11.byId(this._config.addButtonId).disabled = false;   				
-   		}	
-	},
+   			changeClass = dojo11.removeClass;
+   			dojo11.byId(this._config.addButtonId).disabled = false;
+   		}
+   		
+   		changeClass(this._config.addButtonId, "compactbuttoninactive");
+   	},
 	
 	_injectForm : function() {
 		var dialogContainer = dojo11.byId(this._config.dialogId);
@@ -156,5 +166,6 @@ var AddToDashboard = {
 		
 		this._selectCount = 0;
 		
+		this._updateAddButtonState(false);
 	}
 }
