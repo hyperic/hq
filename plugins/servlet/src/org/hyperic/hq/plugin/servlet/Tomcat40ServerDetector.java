@@ -97,7 +97,7 @@ public class Tomcat40ServerDetector
     public List getServerList(String installpath)
         throws PluginException
     {
-        return getServerList(installpath, null, false);
+        return getServerList(installpath, null, null, false);
     }
 
     private String getConfigPort(String installpath) {
@@ -124,7 +124,7 @@ public class Tomcat40ServerDetector
     }
 
     public List getServerList(String installpath,
-                              String port, boolean isEmbedded)
+                              String address, String port, boolean isEmbedded)
         throws PluginException
     {
         ServerResource server = createServerResource(installpath);
@@ -147,9 +147,8 @@ public class Tomcat40ServerDetector
 
         if (port != null) {
             ConfigResponse productConfig = new ConfigResponse();
-            String address = getListenAddress(port);
             if (address == null) {
-                address = "localhost";
+                address = getListenAddress(port);
             }
             String url = "http://" + address + ":" + port;
             productConfig.setValue(JMXRemote.PROP_JMX_URL, url);
@@ -212,6 +211,7 @@ public class Tomcat40ServerDetector
             }
             File dir = new File(installpath);
             String port = (String)config.get("port");
+            String address = (String)config.get("address");
 
             if (!ServletProductPlugin.isJBossEmbeddedVersion(getTypeInfo(),
                                                              dir.getName())) {
@@ -221,7 +221,7 @@ public class Tomcat40ServerDetector
             log.debug("Adding JBoss embedded server " + getName()
                       + " at " + dir);
 
-            List dirs = getServerList(dir.getAbsolutePath(), port, true);
+            List dirs = getServerList(dir.getAbsolutePath(), address, port, true);
             if (dirs != null) {
                 servers.addAll(dirs);
             }

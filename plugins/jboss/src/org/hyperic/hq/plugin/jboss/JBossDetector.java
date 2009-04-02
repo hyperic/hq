@@ -367,7 +367,7 @@ public class JBossDetector
      * if found drop a note of the installpath for
      * the Tomcat detector to pickup.
      */
-    private void noteEmbeddedTomcat(String path, String port) {
+    private void noteEmbeddedTomcat(String path, String address, String port) {
         File[] dirs = new File(path, "deploy").listFiles();
 
         for (int i=0; i<dirs.length; i++) {
@@ -396,6 +396,9 @@ public class JBossDetector
             config.put(JBossProductPlugin.PROP_INSTALLPATH, dir.getPath());
             if (port != null) {
                 config.put("port", port);
+            }
+            if (address != null) {
+                config.put("address", address);
             }
             tomcats.add(config);
 
@@ -573,7 +576,7 @@ public class JBossDetector
         //pickup any jars found relative to this installpath
         adjustClassPath(installpath);
 
-        noteEmbeddedTomcat(installpath, cfg.getHttpPort());
+        noteEmbeddedTomcat(installpath, address, cfg.getHttpPort());
 
         List servers = new ArrayList();
         //apply externally defined AUTOINVENTORY_NAME, etc.
