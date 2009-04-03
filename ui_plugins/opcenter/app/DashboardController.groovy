@@ -78,6 +78,7 @@ class DashboardController extends BaseController
 
         try {
             appdefRes.checkPerms(operation:'view', user:user)
+            appdefRes.checkPerms(operation:'modifyAlerts', user:user)
             return true
         } catch (PermissionException e) {
             return false
