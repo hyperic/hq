@@ -9765,6 +9765,41 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.143">
+    <schema-directSQL>
+        <statement targetDB="oracle" fail="false">
+          ALTER TABLE EAM_ESCALATION_STATE DISABLE UNIQUE (ALERT_DEF_ID, ALERT_ID)
+        </statement>
+        <statement targetDB="postgresql" fail="false">
+          ALTER TABLE EAM_ESCALATION_STATE DROP CONSTRAINT ALERT_DEF_ID_KEY CASCADE
+        </statement>
+        <statement targetDB="mysql" fail="false">
+          ALTER TABLE EAM_ESCALATION_STATE DROP INDEX ALERT_DEF_ID_KEY
+        </statement>
+        <statement>
+        DELETE FROM EAM_ESCALATION_STATE
+          WHERE NOT ALERT_ID = (SELECT MAX_ALERT_ID FROM
+            (SELECT ALERT_TYPE, ALERT_DEF_ID, MAX(ALERT_ID) AS MAX_ALERT_ID
+              FROM EAM_ESCALATION_STATE GROUP BY ALERT_TYPE, ALERT_DEF_ID) E
+              WHERE E.ALERT_DEF_ID = EAM_ESCALATION_STATE.ALERT_DEF_ID AND
+                    E.ALERT_TYPE = EAM_ESCALATION_STATE.ALERT_TYPE)
+        </statement>
+        <statement targetDB="oracle" fail="false">
+          ALTER TABLE EAM_ESCALATION_STATE DISABLE UNIQUE (ALERT_DEF_ID, ALERT_TYPE)
+        </statement>
+        <statement targetDB="postgresql" fail="false">
+          DROP INDEX IF EXISTS STATE_IDX
+        </statement>
+        <statement targetDB="mysql" fail="false">
+          ALTER TABLE EAM_ESCALATION_STATE DROP INDEX STATE_IDX
+        </statement>
+        <statement>
+          ALTER TABLE EAM_ESCALATION_STATE ADD CONSTRAINT ALERT_DEF_ID_KEY
+                UNIQUE (ALERT_DEF_ID, ALERT_TYPE)
+        </statement>    	
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
