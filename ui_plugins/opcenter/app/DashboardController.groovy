@@ -379,8 +379,15 @@ class DashboardController extends BaseController
             }
 
             def esc = it["Escalation"]
-            if (alert && esc) {
-                it["State"] << getIconUrl("notify.gif", "Alert In Escalation")
+            def definition = alert?.definition
+            def escState = null
+
+            if (definition) {
+                escState = escMan.findEscalationState(definition)
+            }
+
+            if (escState) {
+                it["State"] << getIconUrl("notify.gif", "In Escalation " + esc.name)
 
                 // TODO: There must be a better way to get this..
                 def actionLogs = alert.getActionLog().asList()
@@ -388,21 +395,17 @@ class DashboardController extends BaseController
                 it["LastEscalation"] = lastLog.timeStamp
                 it["StatusInfo"] << "Last action: " + lastLog.detail + ". "
 
-                def definition = alert?.definition
-                def escState = escMan.findEscalationState(definition)
-                if (escState) {
-                    long next = escState.nextActionTime
-                    if (next != Long.MAX_VALUE) {
-                        it["StatusInfo"] << "Next escalation at " +
-                            DF.format(new Date(escState.nextActionTime)) + ". "
-                    }
+                long next = escState.nextActionTime
+                if (next != Long.MAX_VALUE) {
+                    it["StatusInfo"] << "Next escalation at " +
+                        DF.format(new Date(escState.nextActionTime)) + ". "
+                }
 
-                    def acked = escState.getAcknowledgedBy()
-                    if (acked) {
-                        def ackedBy = DF.format(lastLog.timeStamp) +
-                                      ": " + lastLog.detail + ". "
-                        it["State"] << getIconUrl("ack.gif", ackedBy)
-                    }
+                def acked = escState.getAcknowledgedBy()
+                if (acked) {
+                    def ackedBy = DF.format(lastLog.timeStamp) +
+                                  ": " + lastLog.detail + ". "
+                    it["State"] << getIconUrl("ack.gif", ackedBy)
                 }
             }                    
         }
