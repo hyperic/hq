@@ -75,7 +75,7 @@
 
     <div id="OpsHeaderResourceTotals" style="float:left;margin-right:30px">
         <table>
-            <tr><td colspan="2" style="text-align:center;font-weight:bold">Current View Totals</td></tr>
+            <tr><td colspan="2" style="text-align:center;font-weight:bold">Current Filter Totals</td></tr>
             <tr>
                 <td valign="top">
                     <table border="1">
