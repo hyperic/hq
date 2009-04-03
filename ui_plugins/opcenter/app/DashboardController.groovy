@@ -130,7 +130,6 @@ class DashboardController extends BaseController
                 result["StatusInfo"] = new StringBuffer()
                 result["StatusInfo"] << count + " occurrences. "
                 result["LastCheck"] = alert.ctime
-                result["Escalation"] = esc
 
                 // States
                 result["State"] = new StringBuffer()
@@ -189,7 +188,6 @@ class DashboardController extends BaseController
             result["StatusInfo"] = new StringBuffer()
             result["StatusInfo"] << galerts.size() + " occurrences. "
             result["StatusInfo"] << galert.longReason + ". "
-            result["Escalation"] = galert.alertDef.escalation
             result["State"] = new StringBuffer()
             result["LastCheck"] = galert.timestamp
 
@@ -384,7 +382,6 @@ class DashboardController extends BaseController
                 alert = it["GroupAlert"]
             }
 
-            def esc = it["Escalation"]
             def definition = alert?.definition
             def escState = null
 
@@ -392,8 +389,10 @@ class DashboardController extends BaseController
                 escState = escMan.findEscalationState(definition)
             }
 
-            if (escState) {
-                it["State"] << getIconUrl("notify.gif", "In Escalation " + esc.name)
+            if (escState != null) {
+                def esc = escState.escalation
+
+                it["State"] << getIconUrl("notify.gif", "In Escalation: " + esc.name)
 
                 // TODO: There must be a better way to get this..
                 def actionLogs = alert.getActionLog().asList()
