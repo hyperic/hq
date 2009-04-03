@@ -165,9 +165,14 @@ class DashboardController extends BaseController
             alertHelper.findGroupAlerts(AlertSeverity.LOW, range, range, false,
                                         true, groupFilter,
                                         PageInfo.getAll(GalertLogSortField.SEVERITY, false))
-        log.info("Found " + unfixedGroupAlerts.size() + " unfixed group alerts")
 
-        for (it in unfixedGroupAlerts) {
+        Map groupedUnfixedGroupAlerts = unfixedGroupAlerts.groupBy { it.alertDef.id }
+
+        log.info("Found " + groupedUnfixedGroupAlerts.size() + " unfixed group alerts")
+
+        for (galerts in groupedUnfixedGroupAlerts.values()) {
+
+            def galert = galerts.get(0)
 
             if (typefilter == TYPEFILTER_DOWN || typefilter == TYPEFILTER_ALERTSNOESC) {
                 // Don't show group alerts in down resources or if filtering
@@ -176,18 +181,19 @@ class DashboardController extends BaseController
             }
 
             def result = [:]
-            result["Group"] = it.alertDef.group
-            result["GroupAlert"] = it
-            result["Priority"] = it.alertDef.severityEnum
+            result["Group"] = galert.alertDef.group
+            result["GroupAlert"] = galert
+            result["Priority"] = galert.alertDef.severityEnum
             result["StatusType"] = "Alert"
-            result["Duration"]   = System.currentTimeMillis() - it.timestamp
+            result["Duration"]   = System.currentTimeMillis() - galert.timestamp
             result["StatusInfo"] = new StringBuffer()
-            result["StatusInfo"] << it.longReason + ". "
-            result["Escalation"] = it.alertDef.escalation
+            result["StatusInfo"] << galerts.size() + " occurrences. "
+            result["StatusInfo"] << galert.longReason + ". "
+            result["Escalation"] = galert.alertDef.escalation
             result["State"] = new StringBuffer()
-            result["LastCheck"] = it.timestamp
+            result["LastCheck"] = galert.timestamp
 
-            switch (it.alertDef.severityEnum) {
+            switch (galert.alertDef.severityEnum) {
                 case 1:
                     unfixedLow++
                     inEscLow++
