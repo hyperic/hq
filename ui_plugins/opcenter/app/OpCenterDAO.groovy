@@ -24,13 +24,13 @@ class OpCenterDAO {
         }
 
         def hql = """
-            select a.alert_definition_id, s.id, count(a.id), max(a.id)
+            select a.alert_definition_id, count(s.id), count(a.id), max(a.id)
                 from EAM_ALERT_DEFINITION d,
                      EAM_ALERT a left outer join EAM_ESCALATION_STATE s on s.alert_id = a.id
                 where ${groupClause} d.id = a.alert_definition_id and
                       d.deleted = '0' and
                       a.fixed = '0'
-                group by a.alert_definition_id, s.id
+                group by a.alert_definition_id
         """
         
         sess.createSQLQuery(hql).list()

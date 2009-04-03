@@ -98,7 +98,7 @@ class DashboardController extends BaseController
 
         for (it in unfixed) {
 
-            def esc   = it[1]
+            def esc   = it[1] // > 0 means in escalation
             def count = it[2]
             def aid   = it[3]
 
@@ -111,7 +111,7 @@ class DashboardController extends BaseController
             def result = [:]
 
             def alert = alertMan.findAlertById(aid.toInteger())
-            def definition = alert?.definition
+            def definition = alert.definition
             def resource = definition?.resource
 
             // Check if alert definition has been removed
@@ -130,6 +130,10 @@ class DashboardController extends BaseController
                 result["StatusInfo"] = new StringBuffer()
                 result["StatusInfo"] << count + " occurrences. "
                 result["LastCheck"] = alert.ctime
+
+                if (esc) {
+                    result["EscalationState"] = escMan.findEscalationState(definition)
+                }
 
                 // States
                 result["State"] = new StringBuffer()
@@ -190,19 +194,26 @@ class DashboardController extends BaseController
             result["StatusInfo"] << galert.longReason + ". "
             result["State"] = new StringBuffer()
             result["LastCheck"] = galert.timestamp
+            result["EscalationState"] = escMan.findEscalationState(galert.alertDef)
 
             switch (galert.alertDef.severityEnum) {
                 case 1:
                     unfixedLow++
-                    inEscLow++
+                    if (result["EscalationState"]) {
+                        inEscLow++
+                    }
                     break;
                 case 2:
                     unfixedMed++
-                    inEscMed++
+                    if (result["EscalationState"]) {
+                        inEscMed++
+                    }
                     break;
                 case 3:
                     unfixedHigh++
-                    inEscHigh++
+                    if (result["EscalationState"]) {
+                        inEscHigh++
+                    }
                     break;
             }
 
@@ -382,13 +393,7 @@ class DashboardController extends BaseController
                 alert = it["GroupAlert"]
             }
 
-            def definition = alert?.definition
-            def escState = null
-
-            if (definition) {
-                escState = escMan.findEscalationState(definition)
-            }
-
+            def escState = it["EscalationState"]
             if (escState != null) {
                 def esc = escState.escalation
 
