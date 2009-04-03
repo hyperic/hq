@@ -68,7 +68,9 @@ public class HQConstants {
     public static final String AlertsEnabled = "HQ_ALERTS_ENABLED";
     // Are alert notifications globally enabled?
     public static final String AlertNotificationsEnabled = "HQ_ALERT_NOTIFICATIONS_ENABLED";
-
+    public static final String ALERT_THROTTLING_THRESHOLD = "HQ_ALERT_THRESHOLD";
+    public static final String ALERT_THROTTLING_EMAILS = "HQ_ALERT_THRESHOLD_EMAILS";
+    
     // email related
     public static final String EmailSender = "CAM_EMAIL_SENDER";
     

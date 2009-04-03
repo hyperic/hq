@@ -2330,3 +2330,11 @@ button span{
 	font-size:10pt; 
 	font-weight:bold;
 }
+
+.secondaryLabel {
+	font-weight: normal;
+}
+
+.labelDisabled {
+	color: #888;
+}
