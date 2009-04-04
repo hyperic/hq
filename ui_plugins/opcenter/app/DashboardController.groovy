@@ -66,19 +66,25 @@ class DashboardController extends BaseController
             return false
         }
 
+        // TODO: fix backend to be consistant here
+        String manageAlertsOp = ""
+
         if (resource.isPlatform()) {
             appdefRes = resource.toPlatform()
+            manageAlertsOp = "modifyAlerts"
         } else if (resource.isServer()) {
             appdefRes = resource.toServer()
+            manageAlertsOp = "modifyAlerts"
         } else if (resource.isService()) {
             appdefRes = resource.toService()
+            manageAlertsOp = "manageAlerts"
         } else {
             throw IllegalArgumentException("Unhandled type: " + resource)
         }
 
         try {
             appdefRes.checkPerms(operation:'view', user:user)
-            appdefRes.checkPerms(operation:'modifyAlerts', user:user)
+            appdefRes.checkPerms(operation:manageAlertsOp , user:user)
             return true
         } catch (PermissionException e) {
             return false
