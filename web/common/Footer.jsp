@@ -29,18 +29,16 @@
 <script src="<html:rewrite page="/js/effects.js"/>" type="text/javascript"></script>
 <script src="<html:rewrite page="/js/footer.js"/>" type="text/javascript"></script>
 
-<img src="/images/spacer.gif" width="1" height="60" alt="" border="0" class="footerSpacer" style="clear: both;" id="footerSpacer">
-
 <table width="100%" border="0" cellspacing="0" cellpadding="0">
 	<tr>
-		<td class="FooterBold" style="padding-left: 30px;"><tiles:insert definition=".footer.current.time" /></td>
-		<td class="FooterRegular" nowrap="nowrap" align="center">
+		<td class="FooterBold" nowrap="nowrap" style="padding-left: 30px;" width="20%"><tiles:insert definition=".footer.current.time" /></td>
+		<td class="FooterRegular" nowrap="nowrap" align="center" width="60%">
 			<div id="aboutAnchor">
 			  <a name="aboutLink" href="javascript:aboutDia.show()"><fmt:message key="footer.HQ" /> <fmt:message key="footer.version" /> <c:out value="${HQVersion}" /></a> <c:out value="${HQBuild}" />
 			</div>
 		</td>
-		<td class="FooterRegular" align="right"><fmt:message key="footer.Copyright" /></td>
-		<td class="FooterBold" nowrap="nowrap" style="padding-right: 30px;"><a href="http://www.hyperic.com" target="_blank">www.hyperic.com</a></td>
+		<td class="FooterRegular" nowrap="nowrap" width="10%"><fmt:message key="footer.Copyright" /></td>
+		<td class="FooterBold" nowrap="nowrap" style="padding-right: 30px;" width="10%"><a href="http://www.hyperic.com" target="_blank">www.hyperic.com</a></td>
 	</tr>
 </table>
 

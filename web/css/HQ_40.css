@@ -2338,3 +2338,12 @@ button span{
 .labelDisabled {
 	color: #888;
 }
+
+.licensewarning {
+	background-color: orange;
+	width: 100%;
+	padding: 5px 0;
+	font-weight: bold;
+	text-align: center;
+	margin-bottom: 20px;
+}

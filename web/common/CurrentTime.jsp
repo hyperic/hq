@@ -32,7 +32,6 @@
 <c:set var="owner"><%= java.lang.System.getProperty("user.name") %></c:set>
 </c:if>
 
-<c:out value="${warning}" escapeXml="false"/>
 <hq:dateFormatter value="${tmpTime}"/>
 &nbsp;&nbsp;
 <c:out value="${owner}"/>
