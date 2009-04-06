@@ -87,7 +87,7 @@ public class StopWatch {
     public String toString() {
         long elap = this.getElapsed();
 
-        StringBuilder buf = new StringBuilder();
+        StringBuffer buf = new StringBuffer();
         buf.append(StringUtil.formatDuration(elap, 2, true));
 
         if (_markerMap.size() > 0) {
@@ -103,7 +103,7 @@ public class StopWatch {
         return buf.toString();
     }
 
-    private void writeBuf(String marker, List tsList, StringBuilder buf) {
+    private void writeBuf(String marker, List tsList, StringBuffer buf) {
         long total = 0l;
         for (Iterator it=tsList.iterator();it.hasNext();) {
             TimeSlice ts = (TimeSlice)it.next();
