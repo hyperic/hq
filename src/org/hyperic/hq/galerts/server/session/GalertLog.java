@@ -43,9 +43,7 @@ import org.hyperic.hq.events.server.session.Action;
 public class GalertLog
     extends PersistedObject 
     implements AlertInterface
-{ 
-    private final Log _log = LogFactory.getLog(GalertLog.class);
-    
+{     
     public static int MAX_SHORT_REASON = 256;
     public static int MAX_LONG_REASON  = 2048;
 
