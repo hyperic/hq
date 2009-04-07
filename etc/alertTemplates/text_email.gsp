@@ -15,7 +15,7 @@
       def window = MeasurementConstants.ACCEPTABLE_LIVE_MILLIS
       for (i in resource.designatedMetrics.getLastDataPoints(window)) {
           if (i.value != null) {
-                indicatorStr << "    ${i.key.template.name}: ${i.key.template.formatValue(i.value)}\n"
+                indicatorStr << "    ${i.key.template.name} at ${df.format(new Date(i.value.timestamp))}: ${i.key.template.formatValue(i.value)}\n"
           }
       }
   }

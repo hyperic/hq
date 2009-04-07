@@ -90,7 +90,7 @@
            <td>
            <% for (i in resource.designatedMetrics.getLastDataPoints(MeasurementConstants.ACCEPTABLE_LIVE_MILLIS)) { %>
                <% if (i.value != null) { %>
-             &nbsp;&nbsp;&nbsp;${i.key.template.name}: <b>${i.key.template.formatValue(i.value)}</b><br>
+             &nbsp;&nbsp;&nbsp;${i.key.template.name} at ${df.format(new Date(i.value.timestamp))}: <b>${i.key.template.formatValue(i.value)}</b><br>
                <% } %>
            <% } %>
            </td>
