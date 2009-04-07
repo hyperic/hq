@@ -374,31 +374,27 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return resources;
     }
     
+    /**
+     * @param resources {@link List} of {@link Resource}
+     * @return {@link Map} of {@link AppdefEntityID} to {@link Measurement}.
+     */
     private final Map getMidMap(Collection resources) {
-        final Map midMap = new HashMap(resources.size());
-        final Map measurements =
-            getMetricManager().getAvailMeasurements(resources);
-        final ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
-        for (Iterator it=measurements.entrySet().iterator(); it.hasNext(); ) {
-            final Map.Entry entry = (Map.Entry)it.next();
-            final Integer resourceId = (Integer)entry.getKey();
-            final List measList = (List)entry.getValue();
-            final Resource r = rMan.findResourceById(resourceId);
+        final List aeids = new ArrayList();
+        for (final Iterator it=resources.iterator(); it.hasNext(); ) {
+            final Resource r = (Resource)it.next();
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
-            if (measList.size() > 1) {
-                log.warn("resourceId " + r.getId() +
-                    " has more than one availability measurement assigned to it");
-            } else if (measList.size() <= 0) {
-                continue;
-            }
-            final Measurement m = (Measurement)measList.get(0);
-            midMap.put(new AppdefEntityID(r), m.getId());
+            aeids.add(new AppdefEntityID(r));
         }
-        return midMap;
+        final AppdefEntityID[] ids =
+            (AppdefEntityID[])aeids.toArray(new AppdefEntityID[0]);
+        return getMidMap(ids, null);
     }
 
+    /**
+     * @param midMap {@link Map} of {@link AppdefEntityID} to {@link Measurement}
+     */
     protected double[] getAvailability(AuthzSubject subject,
                                        AppdefEntityID[] ids,
                                        Map midMap,
@@ -413,31 +409,20 @@ public class MetricSessionEJB extends BizappSessionEJB {
         
         Map data = new HashMap(0);
         if (midMap.size() > 0) {
-            if (availCache != null) {
-                data = new HashMap(midMap.size());
-                for (Iterator it=midMap.values().iterator(); it.hasNext(); ) {
-                    Integer mid = (Integer)it.next();
-                    data.put(mid, (MetricValue)availCache.get(mid));
+            data = new HashMap();
+            final List mids = new ArrayList();
+            for (final Iterator it=midMap.values().iterator(); it.hasNext(); ) {
+                final Measurement meas = (Measurement)it.next();
+                MetricValue mv;
+                if (null != availCache &&
+                    null != (mv = (MetricValue)availCache.get(meas.getId()))) {
+                    data.put(meas.getId(), mv);
+                } else {
+                    mids.add(meas.getId());
                 }
             }
-            // already tried a quick lookup via availCache, need to make sure
-            // it returned all the values
-            if (data.size() == 0) {
-                Integer[] mids =
-                    (Integer[])midMap.values().toArray(new Integer[0]);
-                data = getAvailManager().getLastAvail(mids);
-            } else if (data.size() < midMap.size()) {
-                Set mids = new HashSet(midMap.values());
-                List midsToGet = new ArrayList();
-                for (Iterator it=data.values().iterator(); it.hasNext(); ) {
-                    Integer mid = (Integer)it.next();
-                    if (!mids.contains(mid)) {
-                        midsToGet.add(mid);
-                    }
-                }
-                data.putAll(getAvailManager().getLastAvail(
-                    (Integer[])midsToGet.toArray(new Integer[0])));
-            }
+            data.putAll(getAvailManager().getLastAvail(
+                (Integer[])mids.toArray(new Integer[0])));
         }
     
         // Organize by agent
@@ -445,7 +430,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         
         for (int i = 0; i < ids.length; i++) {
             if (midMap.containsKey(ids[i])) {
-                Integer mid = (Integer) midMap.get(ids[i]);
+                Integer mid = ((Measurement)midMap.get(ids[i])).getId();
                 MetricValue mval = null;
                 if (null != (mval = (MetricValue)data.get(mid))) {
                     result[i] = mval.getValue();
@@ -454,7 +439,6 @@ public class MetricSessionEJB extends BizappSessionEJB {
                     // already has a list
                     try {
                         Agent agent = agentMan.getAgent(ids[i]);
-                        
                         List toGetLiveList;
                         if (null == (toGetLiveList = (List)toGetLive.get(agent))) {
                             toGetLiveList = new ArrayList();
@@ -537,24 +521,19 @@ public class MetricSessionEJB extends BizappSessionEJB {
         int unknownCount = 0;
         final Map midMap = getMidMap(ids, measCache);
         for (int ind = 0; ind < ids.length; ind += length) {
-            
-            if (ids.length - ind < length)
+            if (ids.length - ind < length) {
                 length = ids.length - ind;
-    
+            }
             AppdefEntityID[] subids = new AppdefEntityID[length];
-            
             for (int i = ind; i < ind + length; i++) {
                 subids[i - ind] = ids[i];
             }
-
-            double[] avails = getAvailability(
-                subject, subids, midMap, availCache);
-            
+            double[] avails =
+                getAvailability(subject, subids, midMap, availCache);
             for (int i = 0; i < avails.length; i++) {
                  if (avails[i] == MeasurementConstants.AVAIL_UNKNOWN) {
                      unknownCount++;
-                 }
-                 else {
+                 } else {
                      sum += avails[i];
                      count++;
                  }
@@ -568,32 +547,40 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return sum / count;
     }
     
+    /**
+     * @return {@link Map} of {@link AppdefEntityID} to {@link Measurement}
+     */
     protected final Map getMidMap(AppdefEntityID[] ids, Map measCache) {
-        if (measCache != null) {
-            final Map rtn = new HashMap(measCache.size());
-            final ResourceManagerLocal rMan = getResourceManager();
-            for (Iterator it=measCache.entrySet().iterator(); it.hasNext(); ) {
-                final Map.Entry entry = (Map.Entry)it.next();
-                Integer resId = (Integer)entry.getKey();
-                List list = (List)entry.getValue();
-                Resource resource = rMan.findResourceById(resId);
-                AppdefEntityID id = new AppdefEntityID(resource);
-                if (list.size() == 1) {
-                    rtn.put(id, ((Measurement)list.get(0)).getId());
-                }
+        final Map rtn = new HashMap(ids.length);
+        final ResourceManagerLocal rMan = getResourceManager();
+        final MeasurementManagerLocal mMan = getMetricManager();
+        for (final Iterator it=Arrays.asList(ids).iterator(); it.hasNext(); ) {
+            final AppdefEntityID id = (AppdefEntityID)it.next();
+            if (id == null) {
+                continue;
             }
-            return rtn;
-        } else {
-            return getMidMap(getResources(ids));
+            final Resource res = rMan.findResource(id);
+            List list;
+            if (null != measCache &&
+                null != (list = (List)measCache.get(res.getId()))) {
+                if (list.size() > 1) {
+                    log.warn("resourceId " + res.getId() +
+                             " has more than one availability measurement assigned to it");
+                } else if (list.size() <= 0) {
+                    continue;
+                }
+                final Measurement m = (Measurement)list.get(0);
+                rtn.put(id, m);
+            } else {
+                final Measurement m = mMan.getAvailabilityMeasurement(res);
+                mMan.getAvailabilityMeasurement(res);
+                rtn.put(id, m);
+            }
         }
+        return rtn;
     }
 
     /**
-     * @param measCache Map<Integer, List<Measurement>> 
-     *  Integer => Resource.getId(), may be null.
-     * @param availCache Map<Integer, MetricValue>
-     *  Integer => Measurement.getId(), may be null.
-     * 
      * Given a group, disqualifies their aggregate availability (with the
      * disqualifying status) for all of them if any are down or unknown,
      * otherwise the aggregate is deemed available
@@ -601,6 +588,11 @@ public class MetricSessionEJB extends BizappSessionEJB {
      * If there's nothing in the array, then aggregate is not populated. Ergo,
      * the availability shall be disqualified as unknown i.e. the (?)
      * representation
+     * 
+     * @param measCache {@link Map} of {@link Resource.getId} to
+     *  {@link List} of {@link Measurement}.  May be null.
+     * @param availCache {@link Map} of {@link Measurement.getId} to
+     *  {@link MetricValue}.  May be null.
      */
     protected double getGroupAvailability(AuthzSubject subject, Integer gid,
                                           Map measCache, Map availCache)
@@ -625,7 +617,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         for (Iterator it = metrics.iterator(); it.hasNext(); ) {
             Measurement m =  (Measurement) it.next();
             try {
-                midMap.put(new AppdefEntityID(m.getResource()), m.getId());
+                midMap.put(new AppdefEntityID(m.getResource()), m);
             } catch (IllegalArgumentException e) {
                 // Resource has been deleted, waiting for purging.  Ignore.
             }
