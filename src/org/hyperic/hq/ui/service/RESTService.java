@@ -46,6 +46,7 @@ import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
+import org.hyperic.hq.ui.util.CheckPermissionsUtil;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
@@ -459,42 +460,53 @@ public class RESTService extends BaseService {
                         {
                             List<String> chart =
                                 StringUtil.explode(chartCfg, ",");
-                            
-                            matcher = MTID_PATTERN.matcher(chart.get(1));
-                            JSONArray mtid = new JSONArray();
-                            if (matcher.matches()) {
-                                mtid.put(Integer.valueOf(matcher.group(1)));
-                            }                            
-                            
-                            // Extract the resource ID
-                            Integer resId = 0;
-                            matcher = AEID_PATTERN.matcher(chart.get(1));
-                            if (matcher.matches()) {
-                                AppdefEntityID aeid =
-                                    new AppdefEntityID(matcher.group(1) + ':' +
-                                                       matcher.group(2));
-                                try {
-                                    Resource resource =
-                                        resMan.findResource(aeid);
-                                    resId = resource.getId();
-                                } catch (Exception e) {
-                                    // Resource removed
-                                    continue;
-                                }
-                            }
-                            
-                            // Extract the ctype if exists
-                            String ctype = "";
-                            matcher = CTYPE_PATTERN.matcher(chart.get(1));
-                            if (matcher.matches()) {
-                                ctype = matcher.group(1) + ":" + matcher.group(2);
-                            }
-                            
-                            arr.put(new JSONObject().put("name", chart.get(0))
-                                                    .put("rid", resId)
-                                                    .put("mtid", mtid)
-                                                    .put("ctype", ctype)
-                                                    .put("url", chart.get(1)));
+                         
+
+            		        // Determine what entityIds can be viewed by this user
+            		        // This code probably should be in the boss somewhere but
+            		        // for now doing it here...
+            				if (CheckPermissionsUtil.canUserViewChart(RequestUtils.getSessionId(_request).intValue(),
+            						                                  (String) chart.get(1),
+            						                                  ContextUtils.getAppdefBoss(_servletContext))) 
+            				{
+	
+	                            
+	                            matcher = MTID_PATTERN.matcher(chart.get(1));
+	                            JSONArray mtid = new JSONArray();
+	                            if (matcher.matches()) {
+	                                mtid.put(Integer.valueOf(matcher.group(1)));
+	                            }                            
+	                            
+	                            // Extract the resource ID
+	                            Integer resId = 0;
+	                            matcher = AEID_PATTERN.matcher(chart.get(1));
+	                            if (matcher.matches()) {
+	                                AppdefEntityID aeid =
+	                                    new AppdefEntityID(matcher.group(1) + ':' +
+	                                                       matcher.group(2));
+	                                try {
+	                                    Resource resource =
+	                                        resMan.findResource(aeid);
+	                                    resId = resource.getId();
+	                                } catch (Exception e) {
+	                                    // Resource removed
+	                                    continue;
+	                                }
+	                            }
+	                            
+	                            // Extract the ctype if exists
+	                            String ctype = "";
+	                            matcher = CTYPE_PATTERN.matcher(chart.get(1));
+	                            if (matcher.matches()) {
+	                                ctype = matcher.group(1) + ":" + matcher.group(2);
+	                            }
+	                            
+	                            arr.put(new JSONObject().put("name", chart.get(0))
+	                                                    .put("rid", resId)
+	                                                    .put("mtid", mtid)
+	                                                    .put("ctype", ctype)
+	                                                    .put("url", chart.get(1)));
+            				}
                         }
                         
                         res = arr.toString();

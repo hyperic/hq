@@ -48,8 +48,10 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
+import org.hyperic.hq.ui.util.CheckPermissionsUtil;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.units.FormattedNumber;
@@ -80,12 +82,18 @@ public class ViewAction extends BaseAction {
         
         String key = Constants.USERPREF_KEY_FAVORITE_RESOURCES;
 
-        List entityIds =  DashboardUtils.preferencesAsEntityIds(key, dashPrefs);
-
+        // First determine what entityIds can be viewed by this user
+        // This code probably should be in the boss somewhere but
+        // for now doing it here...
+        List<AppdefEntityID> entityIds = CheckPermissionsUtil.filterEntityIdsByViewPermission(
+        											RequestUtils.getSessionId(request).intValue(), 
+        											DashboardUtils.preferencesAsEntityIds(key, dashPrefs), 
+        		                                    ContextUtils.getAppdefBoss(ctx));
+        
         AppdefEntityID[] arrayIds = new AppdefEntityID[entityIds.size()];
         arrayIds = (AppdefEntityID[]) entityIds.toArray(arrayIds);
 
-        List list;
+        List<ResourceDisplaySummary> list;
         int sessionID = user.getSessionId().intValue();
         try{
             list = boss.findResourcesCurrentHealth(sessionID, arrayIds);
@@ -101,11 +109,11 @@ public class ViewAction extends BaseAction {
         // JSON objects by hand.
         JSONObject favorites = new JSONObject();
 
-        List resources = new ArrayList();
+        List<JSONObject> resources = new ArrayList<JSONObject>();
         int count = 0;
-        for (Iterator i = list.iterator(); i.hasNext(); count++) {
+        for (Iterator<ResourceDisplaySummary> i = list.iterator(); i.hasNext(); count++) {
             JSONObject res = new JSONObject();
-            ResourceDisplaySummary bean = (ResourceDisplaySummary)i.next();
+            ResourceDisplaySummary bean = i.next();
             res.put("resourceName", bean.getResourceName());
             res.put("resourceTypeName", bean.getResourceTypeName());
             res.put("resourceTypeId", bean.getResourceTypeId());
@@ -129,7 +137,7 @@ public class ViewAction extends BaseAction {
 
         return null;
     }
-
+    
     private String getFormattedValue(Double value, String units) {
         if (value != null) {
             FormattedNumber fn = UnitsConvert.convert(value.doubleValue(),
