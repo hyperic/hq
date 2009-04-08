@@ -116,10 +116,9 @@ public class EmailFilter {
         }
     }
     
-    void sendAlert(AppdefEntityID appEnt, EmailRecipient[] addresses,
-                   String subject, String[] body, String[] htmlBody,
-                   int priority, boolean filter)
-    {
+    public void sendAlert(AppdefEntityID appEnt, EmailRecipient[] addresses,
+                          String subject, String[] body, String[] htmlBody,
+                          int priority, boolean filter) {
         if (appEnt == null) {
             // Go ahead and just send the alert
             sendEmail(addresses, subject, body, htmlBody,

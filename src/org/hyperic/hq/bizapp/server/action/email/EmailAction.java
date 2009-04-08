@@ -53,6 +53,8 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.bizapp.server.session.EmailManagerEJBImpl;
+import org.hyperic.hq.bizapp.shared.EmailManagerLocal;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
@@ -377,10 +379,11 @@ public class EmailAction extends EmailActionConfig
             defInfo.getPriority(), false);
     }
 
-    private void sendAlert(EmailFilter filter, AppdefEntityID appEnt,
+    private static void sendAlert(EmailFilter filter, AppdefEntityID appEnt,
                            EmailRecipient[] to, String subject, String[] body,
                            String[] htmlBody, int priority,
                            boolean notifyFiltered) {
+        ConcurrentStatsCollector.getInstance().addStat(1, EMAIL_ACTIONS);
         if (_alertThreshold <= 0) {
             final boolean debug = _log.isDebugEnabled();
             if (debug) {
@@ -388,17 +391,19 @@ public class EmailAction extends EmailActionConfig
                     htmlBody, priority, notifyFiltered);
                 debug(obj);
             }
-            filter.sendAlert(
-                appEnt, to, subject, body, htmlBody, priority, notifyFiltered);
-            ConcurrentStatsCollector.getInstance().addStat(1, EMAIL_ACTIONS);
-            return;
+            getEmailMan().sendAlert(filter, appEnt, to, subject, body, htmlBody,
+                priority, notifyFiltered);
+        } else {
+            synchronized (_emails) {
+                EmailObj obj = new EmailObj(filter, appEnt, to, subject, body,
+                    htmlBody, priority, notifyFiltered);
+                _emails.add(obj);
+            }
         }
-        synchronized (_emails) {
-            EmailObj obj = new EmailObj(filter, appEnt, to, subject, body,
-                htmlBody, priority, notifyFiltered);
-            _emails.add(obj);
-        }
-        ConcurrentStatsCollector.getInstance().addStat(1, EMAIL_ACTIONS);
+    }
+
+    private static final EmailManagerLocal getEmailMan() {
+        return EmailManagerEJBImpl.getOne();
     }
 
     private static final long now() {
@@ -468,10 +473,7 @@ public class EmailAction extends EmailActionConfig
                     for (final Iterator it=toEmail.iterator(); it.hasNext(); ) {
                         final EmailObj obj = (EmailObj)it.next();
                         final EmailFilter filter = obj.getFilter();
-                        debug(obj);
-                        filter.sendAlert(obj.getAppEnt(), obj.getTo(),
-                            obj.getSubject(), obj.getBody(), obj.getHtmlBody(),
-                            obj.getPriority(), obj.isNotifyFiltered());
+                        sendFilteredEmail(filter, obj);
                     }
                     return;
                 }
@@ -479,6 +481,13 @@ public class EmailAction extends EmailActionConfig
                 _log.error(e.getMessage(), e);
                 return;
             }
+        }
+
+        private void sendFilteredEmail(EmailFilter filter, EmailObj obj) {
+            debug(obj);
+            getEmailMan().sendAlert(filter, obj.getAppEnt(), obj.getTo(),
+                obj.getSubject(), obj.getBody(), obj.getHtmlBody(),
+                obj.getPriority(), obj.isNotifyFiltered());
         }
 
         private final boolean lastEmailWithinThresholdWindow() {
@@ -582,7 +591,7 @@ public class EmailAction extends EmailActionConfig
         }
     }
 
-    private class EmailObj {
+    private static class EmailObj {
         private final EmailFilter _filter;
         private final AppdefEntityID _appEnt;
         private final EmailRecipient[] _to;
