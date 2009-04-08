@@ -65,6 +65,36 @@
             dojo.byId('headerSearch').title = "<fmt:message key="header.searchTip.win"/>";
         }
     });
+    
+    <!--
+    var refreshCount = 0;
+                                                                                  
+    function refreshAlerts() {
+      refreshCount++;
+
+      new Ajax.Request('<html:rewrite page="/common/RecentAlerts.jsp"/>',
+                       {method: 'get', onSuccess:showRecentAlertResponse});
+    }
+
+    function showRecentAlertResponse(originalRequest) {
+      if (originalRequest.responseText.indexOf('recentAlertsText') > 0) {
+        $('headerAlerts').style.display = '';
+        $('recentAlerts').innerHTML = originalRequest.responseText;
+      }
+      else {
+        refreshCount = 31;
+      }
+
+      if (refreshCount < 30) {
+        setTimeout( "refreshAlerts()", 60*1000 );
+      } else if (autoLogout) {
+        top.location.href = "<html:rewrite action="/Logout"/>";
+      }
+    }
+
+    onloads.push( refreshAlerts );
+    
+    //-->
       </script>
     <div id="header">
     <div id="headerLogo" title="Home" onclick="location.href='/Dashboard.do'">&nbsp;</div>

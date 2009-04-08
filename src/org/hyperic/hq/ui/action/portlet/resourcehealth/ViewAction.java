@@ -111,24 +111,24 @@ public class ViewAction extends BaseAction {
 
         List<JSONObject> resources = new ArrayList<JSONObject>();
         int count = 0;
-        for (Iterator<ResourceDisplaySummary> i = list.iterator(); i.hasNext(); count++) {
+        
+        for (ResourceDisplaySummary bean : list) {
             JSONObject res = new JSONObject();
-            ResourceDisplaySummary bean = i.next();
+
             res.put("resourceName", bean.getResourceName());
             res.put("resourceTypeName", bean.getResourceTypeName());
             res.put("resourceTypeId", bean.getResourceTypeId());
             res.put("resourceId", bean.getResourceId());
-            res.put("performance",
-                    getFormattedValue(bean.getPerformance(),
-                                      bean.getPerformanceUnits()));
-            res.put("throughput",
-                    getFormattedValue(bean.getThroughput(),
-                                      bean.getThroughputUnits()));
+            res.put("performance", getFormattedValue(bean.getPerformance(),
+                                                     bean.getPerformanceUnits()));
+            res.put("throughput",  getFormattedValue(bean.getThroughput(),
+                                                     bean.getThroughputUnits()));
             res.put("availability", getAvailString(bean.getAvailability()));
             res.put("monitorable", bean.getMonitorable());
             res.put("alerts", alerts[count]);
 
             resources.add(res);
+            count++;
         }
         
         favorites.put("favorites", resources);
