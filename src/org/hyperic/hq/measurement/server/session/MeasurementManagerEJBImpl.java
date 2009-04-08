@@ -712,7 +712,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * Get an Availability Measurement by Resource
+     * Get an Availability Measurement by Resource.  May return null.
      * @ejb:interface-method
      */
     public Measurement getAvailabilityMeasurement(Resource r) {

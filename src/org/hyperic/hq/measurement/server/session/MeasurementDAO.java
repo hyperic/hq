@@ -454,6 +454,9 @@ public class MeasurementDAO extends HibernateDAO {
             .list();
     }
 
+    /**
+     * @return {@link Measurement}.  May return null.
+     */
     Measurement findAvailMeasurement(Resource resource) {
         List list = Collections.singletonList(resource);
         list = findAvailMeasurements(list);

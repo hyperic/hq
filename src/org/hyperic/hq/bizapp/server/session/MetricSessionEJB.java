@@ -573,7 +573,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 rtn.put(id, m);
             } else {
                 final Measurement m = mMan.getAvailabilityMeasurement(res);
-                mMan.getAvailabilityMeasurement(res);
+                if (m == null) {
+                    continue;
+                }
                 rtn.put(id, m);
             }
         }
