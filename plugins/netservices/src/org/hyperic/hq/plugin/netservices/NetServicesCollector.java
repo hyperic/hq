@@ -46,8 +46,6 @@ import org.hyperic.util.security.BogusTrustManager;
 
 public abstract class NetServicesCollector extends Collector {
 
-    private static final String PROP_NETSTAT = "netservices.netstat";
-
     private int port = -1;
     private int defaultPort, defaultSSLPort;
     private boolean isSSL, enableNetstat;
@@ -101,8 +99,7 @@ public abstract class NetServicesCollector extends Collector {
 
     protected void init() throws PluginException {
         Properties props = getProperties();
-        this.enableNetstat = 
-            !"false".equals(getPlugin().getManagerProperty(PROP_NETSTAT));
+        this.enableNetstat = getPlugin().isNetStatEnabled();
         if (this.enableNetstat) {
             if (sigar == null) {
                 sigar = new Sigar();
