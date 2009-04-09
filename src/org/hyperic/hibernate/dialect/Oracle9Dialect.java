@@ -25,12 +25,10 @@
 
 package org.hyperic.hibernate.dialect;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
-import java.util.Map;
 
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -121,15 +119,6 @@ public class Oracle9Dialect
         finally {
             DBUtil.closeResultSet(logCtx, rs);
         }
-    }
-
-    public Map getLastData(Connection conn, String minMax,
-                           Map resMap, Map lastMap, Integer[] iids,
-                           long begin, long end, String table) 
-        throws SQLException
-    {
-        return HQDialectUtil.getLastData(conn, minMax, resMap, lastMap,
-                                         iids, begin, end, table);
     }
 
     public boolean usesSequenceGenerator() {

@@ -25,12 +25,11 @@
 
 package org.hyperic.hibernate.dialect;
 
-import org.hyperic.util.jdbc.DBUtil;
-import java.util.Map;
-import java.sql.Connection;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.SQLException;
+import java.sql.Statement;
+
+import org.hyperic.util.jdbc.DBUtil;
 
 /**
  * This class must be public for Hibernate to access it.
@@ -115,15 +114,6 @@ public class PostgreSQLDialect
 
     public String getLimitString(int num) {
         return "LIMIT "+num;
-    }
-
-    public Map getLastData(Connection conn, String minMax,
-                           Map resMap, Map lastMap, Integer[] iids,
-                           long begin, long end, String table)
-        throws SQLException
-    {
-        return HQDialectUtil.getLastData(conn, minMax, resMap, lastMap,
-                                         iids, begin, end, table);
     }
 
     public boolean usesSequenceGenerator() {
