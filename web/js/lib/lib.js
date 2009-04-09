@@ -1448,7 +1448,6 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
             that.arcLink.href = that.url;
             that.init_connection(that.url+that.queryParams.get);
             console.log("connecting the buttons");
-            dojo11.connect(that.remove_btn,'onclick',that.click_remove_btn);
             dojo11.connect(that.refresh_btn,'onclick',that.click_refresh_btn);
             dojo11.connect(that.select_btn,'onchange',that.select_change);
             dojo11.connect(that.showLeg_btn,'onclick',that.toggleLegend);
@@ -1462,6 +1461,8 @@ hyperic.dashboard.arcWidget = function(node, portletName, portletLabel, kwArgs){
 				title: "Report Legend"
 			},pane);
         }
+
+        dojo11.connect(that.remove_btn,'onclick',that.click_remove_btn);
     };
 
     /**
