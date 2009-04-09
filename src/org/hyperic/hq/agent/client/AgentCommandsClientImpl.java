@@ -117,7 +117,7 @@ public class AgentCommandsClientImpl
             return muxer.sendData(outStream, destFiles, streams);
         } catch(IOException exc){
             throw new AgentRemoteException("IO Exception while sending " +
-                                           "file data: " + exc.getMessage());
+                                           "file data: " + exc.getMessage(), exc);
         } finally {
             if (outStream != null) {
                 try {
