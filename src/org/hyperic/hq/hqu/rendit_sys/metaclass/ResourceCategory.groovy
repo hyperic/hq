@@ -21,6 +21,7 @@ import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
+import org.hyperic.hq.common.VetoException
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl as DefMan
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl as AlertMan
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl as EventMan
@@ -581,6 +582,31 @@ class ResourceCategory {
         def mgr = SessionManager.instance
         def sessionId = mgr.put(user)
         boss.removeAppdefEntity(sessionId, r.entityId)
+    }
+
+    /**
+     * Move a Resource.
+     */
+    static void moveTo(Resource target, AuthzSubject user, Resource destination) {
+
+        if (target.isService() && destination.isServer()) {
+            // Normal service move
+            svcMan.moveService(user, target.toService(), destination.toServer())
+        } else if (target.isService() && destination.isPlatform()) {
+            // Platform service move
+            svcMan.moveService(user, target.toService(), destination.toPlatform())
+        } else if (target.isServer() && destination.isPlatform()) {
+            // Server move
+            svrMan.moveServer(user, target.toServer(), destination.toPlatform())
+        } else {
+            // TODO: This matches incompatible type exception thrown from
+            // the manager layer.  Should investigate what is thrown here, since
+            // it is important to handle this exception gracefully from the
+            // client.
+            throw new VetoException("Not implemented: " +
+                                    " target=" + target.getResourceType().getName() +
+                                    " dest=" + destination.getResourceType().getName())
+        }
     }
 
     private static getOverlord() {

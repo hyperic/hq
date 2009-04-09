@@ -86,6 +86,7 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 
 /**
  * This class is responsible for managing Server objects in appdef
@@ -133,6 +134,116 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             new ResourceCreatedZevent(subject, service.getEntityId());
         ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
         return service;
+    }
+
+    /**
+     * Move a Service from one Platform to another.
+     *
+     * @param subject The user initiating the move.
+     * @param target The target Service to move.
+     * @param destination The destination Platform to move this Service to.
+     *
+     * @throws org.hyperic.hq.authz.shared.PermissionException If the passed
+     * user does not have permission to move the Service.
+     * @throws org.hyperic.hq.common.VetoException If the operation canot be
+     * performed due to incompatible types.
+     *
+     * @ejb:interface-method
+     */
+    public void moveService(AuthzSubject subject, Service target,
+                            Platform destination)
+        throws VetoException, PermissionException
+    {
+        ServerType targetType = target.getServer().getServerType();
+
+        Server destinationServer = null;
+        for (Iterator i = destination.getServers().iterator(); i.hasNext();) {
+            Server s = (Server)i.next();
+            if (s.getServerType().equals(targetType)) {
+                destinationServer = s;
+                break;
+            }
+        }
+
+        if (destinationServer == null) {
+            throw new VetoException("Unable find applicable server on platform " +
+                                    destination.getName() + " as destination for " +
+                                    target.getName());
+        }
+
+        moveService(subject, target, destinationServer);
+    }
+
+    /**
+     * Move a Service from one Server to another.
+     *
+     * @param subject The user initiating the move.
+     * @param target The target Service to move.
+     * @param destination The destination Server to move this Service to.
+     *
+     * @throws org.hyperic.hq.authz.shared.PermissionException If the passed
+     * user does not have permission to move the Service.
+     * @throws org.hyperic.hq.common.VetoException If the operation canot be
+     * performed due to incompatible types.
+     *
+     * @ejb:interface-method
+     */
+    public void moveService(AuthzSubject subject, Service target,
+                            Server destination)
+        throws VetoException, PermissionException
+    {
+        try {
+            // Permission checking on destination
+            if (destination.getServerType().isVirtual()) {
+                checkPermission(subject, getPlatformResourceType(),
+                                destination.getPlatform().getId(),
+                                AuthzConstants.platformOpAddServer);
+            } else {
+                checkPermission(subject, getServerResourceType(),
+                                destination.getId(),
+                                AuthzConstants.serverOpAddService);
+            }
+
+            // Permission check on target
+            checkPermission(subject, getServiceResourceType(),
+                            target.getId(), AuthzConstants.serviceOpRemoveService);
+        } catch (FinderException e) {
+            // TODO: FinderException needs to be expelled from this class.
+            throw new VetoException("Caught FinderException checking permission: " +
+                                    e.getMessage()); // notgonnahappen
+        }
+
+        // Check arguments
+        if (!target.getServiceType().getServerType().equals(destination.getServerType())) {
+            throw new VetoException("Incompatible resources passed to move(), " +
+                                    "cannot move service of type " +
+                                    target.getServiceType().getName() + " to " +
+                                    destination.getServerType().getName());
+
+        }
+
+        // Unschedule measurements
+        MeasurementManagerEJBImpl.getOne().disableMeasurements(subject,
+                                                               target.getResource());
+
+        // Reset Service parent id
+        target.setServer(destination);
+
+        // Add/Remove Server from Server collections
+        target.getServer().getServices().remove(target);
+        destination.addService(target);
+
+        // Move Authz resource.
+        getResourceManager().moveResource(subject, target.getResource(),
+                                          destination.getResource());
+
+        // Flush to ensure the reschedule of metrics occurs
+        DAOFactory.getDAOFactory().getCurrentSession().flush();
+
+        // Reschedule metrics
+        // TODO: Where is MeasMan.enableMeasurements(subject, res)?
+        MeasurementManagerEJBImpl.getOne().enableDefaultMeasurements(subject,
+                                                                     target.getResource());
     }
 
     /**

@@ -48,7 +48,9 @@ public class AuditNature
         new AuditNature(5, "enable", "audit.nature.enable");
     public static AuditNature DISABLE = 
         new AuditNature(6, "disable", "audit.nature.disable");
-    
+    public static AuditNature MOVE =
+        new AuditNature(7, "move", "audit.nature.move");
+
     protected AuditNature(int code, String desc, String localeProp) {
         super(AuditNature.class, code, desc, localeProp, BUNDLE);
     }

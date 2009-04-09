@@ -88,6 +88,7 @@ import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 
 /**
  * This class is responsible for managing Server objects in appdef
@@ -268,6 +269,82 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         }
 
         return s;
+    }
+
+    /**
+     * Move a Server to the given Platform
+     *
+     * @param subject The user initiating the move.
+     * @param target The target {@link org.hyperic.hq.appdef.server.session.Server} to move.
+     * @param destination The destination {@link Platform}.
+     *
+     * @throws org.hyperic.hq.authz.shared.PermissionException If the passed
+     * user does not have permission to move the Server.
+     * @throws org.hyperic.hq.common.VetoException If the operation canot be
+     * performed due to incompatible types.
+     *
+     * @ejb:interface-method
+     */
+    public void moveServer(AuthzSubject subject, Server target,
+                           Platform destination)
+        throws VetoException, PermissionException
+    {
+        ResourceManagerLocal rMan = getResourceManager();
+
+        try {
+            // Permission checking on destination
+            checkPermission(subject, getPlatformResourceType(),
+                            destination.getId(),
+                            AuthzConstants.platformOpAddServer);
+
+            // Permission check on target
+            checkPermission(subject, getServerResourceType(),
+                            target.getId(), AuthzConstants.serverOpRemoveServer);
+        } catch (FinderException e) {
+            // TODO: FinderException needs to be expelled from this class.
+            throw new VetoException("Caught FinderException checking permission: " +
+                                    e.getMessage()); // notgonnahappen
+        }
+
+        // Ensure target can be moved to the destination
+        if (!destination.getPlatformType().getServerTypes().contains(target.getServerType())) {
+            throw new VetoException("Incompatible resources passed to move(), " +
+                                    "cannot move server of type " +
+                                    target.getServerType().getName() + " to " +
+                                    destination.getPlatformType().getName());
+
+        }
+
+        // Unschedule measurements
+        MeasurementManagerEJBImpl.getOne().disableMeasurements(subject,
+                                                               target.getResource());
+
+        // Reset Server parent id
+        target.setPlatform(destination);
+
+        // Add/Remove Server from Server collections
+        target.getPlatform().getServersBag().remove(target);
+        destination.getServersBag().add(target);
+
+        // Move Authz resource.
+        rMan.moveResource(subject, target.getResource(), destination.getResource());
+
+        // Flush server move
+        DAOFactory.getDAOFactory().getCurrentSession().flush();
+
+        // Reschedule metrics
+        MeasurementManagerEJBImpl.getOne().enableDefaultMeasurements(subject,
+                                                                     target.getResource());
+
+        // Must also move all dependent services so that ancestor edges are
+        // rebuilt and that service metrics are re-scheduled
+        ArrayList services = new ArrayList(); // copy list since the move will modify the server collection.
+        services.addAll(target.getServices());
+
+        for (Iterator i = services.iterator(); i.hasNext(); ) {
+            Service s = (Service)i.next();
+            getServiceManager().moveService(subject, s, target);
+        }
     }
 
     /**

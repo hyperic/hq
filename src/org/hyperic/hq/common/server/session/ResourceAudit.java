@@ -43,6 +43,9 @@ public class ResourceAudit extends Audit {
     public static final ResourceAuditPurpose RESOURCE_DELETE = 
         new ResourceAuditPurpose(0x2002, "resource delete", 
                                  "audit.resource.delete");
+    public static final ResourceAuditPurpose RESOURCE_MOVE =
+        new ResourceAuditPurpose(0x2003, "resource move",
+                                 "audit.resource.move");
 
     public static class ResourceAuditPurpose extends AuditPurpose {
         ResourceAuditPurpose(int code, String desc, String localeProp) { 
@@ -90,6 +93,20 @@ public class ResourceAudit extends Audit {
                                               AuditNature.DELETE,
                                               msg, start, end);  
         
+        AuditManagerEJBImpl.getOne().saveAudit(res);
+        return res;
+    }
+
+    public static ResourceAudit moveResource(Resource target, Resource destination,
+                                             AuthzSubject mover, long start,
+                                             long end)
+    {
+        String msg = MSGS.format("auditMsg.resource.move", destination.getName());
+        ResourceAudit res = new ResourceAudit(target, mover,
+                                              RESOURCE_MOVE,
+                                              AuditImportance.HIGH,
+                                              AuditNature.MOVE,
+                                              msg, start, end);
         AuditManagerEJBImpl.getOne().saveAudit(res);
         return res;
     }

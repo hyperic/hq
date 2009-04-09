@@ -172,6 +172,50 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
     }
 
     /**
+     * Move a resource.  It is the responsibility of the caller (AppdefManager) to
+     * ensure that this resource can be moved to the destination.
+     *
+     * It's also of note that this method only deals with relinking resource
+     * edges to the ancestors of the destination resource.  This means that in
+     * the case of Server moves, it's up to the caller to re-link dependent
+     * chilren.
+     *
+     * @ejb:interface-method
+     */
+    public void moveResource(AuthzSubject owner,
+                             Resource target, Resource destination) {
+
+        long start = System.currentTimeMillis();
+
+        ResourceEdgeDAO eDAO = getResourceEdgeDAO();
+        ResourceRelation relation = getContainmentRelation();
+
+        // Clean out edges for the current target
+        eDAO.deleteEdges(target);
+
+        // Self-edge
+        eDAO.create(target, target, 0, relation);
+
+        // Direct edges
+        eDAO.create(target, destination, -1, relation);
+        eDAO.create(destination, target, 1, relation);
+
+        // Ancestor edges to new destination resource
+        Collection ancestors = eDAO.findAncestorEdges(destination);
+        for (Iterator i = ancestors.iterator(); i.hasNext();) {
+            ResourceEdge ancestorEdge = (ResourceEdge)i.next();
+
+            int distance = ancestorEdge.getDistance() - 1;
+
+            eDAO.create(target, ancestorEdge.getTo(), distance, relation);
+            eDAO.create(ancestorEdge.getTo(), target, -distance, relation);
+        }
+
+        ResourceAudit.moveResource(target, destination, owner, start,
+                                   System.currentTimeMillis());
+    }
+
+    /**
      * Get the # of resources within HQ inventory
      * @ejb:interface-method
      */
