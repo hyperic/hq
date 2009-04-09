@@ -59,9 +59,6 @@ public class MySQL5InnoDBDialect
     private final Log _log = LogFactory.getLog(logCtx);
     private static final String TAB_MEAS   = MeasurementConstants.TAB_MEAS;
     private static final String TAB_DATA   = MeasurementConstants.TAB_DATA;
-    private static final int IND_MIN       = MeasurementConstants.IND_MIN;
-    private static final int IND_AVG       = MeasurementConstants.IND_AVG;
-    private static final int IND_MAX       = MeasurementConstants.IND_MAX;
     private static final int IND_LAST_TIME = MeasurementConstants.IND_LAST_TIME;
 
     public MySQL5InnoDBDialect() {
@@ -246,108 +243,6 @@ public class MySQL5InnoDBDialect
         Long getLong() {
             return longVal;
         }
-    }
-
-    private List getMeasIds(Connection conn, Integer[] tids, Integer[] iids)
-        throws SQLException
-    {
-        List rtn = new ArrayList();
-        StringBuffer iidsConj = new StringBuffer(
-                DBUtil.composeConjunctions("instance_id", iids.length));
-        DBUtil.replacePlaceHolders(iidsConj, iids);
-        StringBuffer tidsConj = new StringBuffer(
-                DBUtil.composeConjunctions("template_id", tids.length));
-        DBUtil.replacePlaceHolders(tidsConj, tids);
-        final String sql = "SELECT distinct id FROM " + TAB_MEAS +
-                           " WHERE " + iidsConj + " AND " + tidsConj;
-        Statement stmt = null;
-        ResultSet rs   = null;
-        try
-        {
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                rtn.add(new Integer(rs.getInt(1)));
-            }
-        }
-        finally {
-            DBUtil.closeResultSet(logCtx, rs);
-            DBUtil.closeStatement(logCtx, stmt);
-        }
-        return rtn;
-    }
-
-    public Map getAggData(Connection conn, String minMax, Map resMap,
-                          Integer[] tids, Integer[] iids,
-                          long begin, long end, String table)
-        throws SQLException
-    {
-        HashMap lastMap = new HashMap();
-
-        ResultSet rs            = null;
-        PreparedStatement astmt = null;
-        StopWatch timer         = new StopWatch();
-
-        StringBuffer iidsConj = new StringBuffer(
-                DBUtil.composeConjunctions("instance_id", iids.length));
-        DBUtil.replacePlaceHolders(iidsConj, iids);
-
-        StringBuffer tidsConj = new StringBuffer(
-                DBUtil.composeConjunctions("template_id", tids.length));
-        DBUtil.replacePlaceHolders(tidsConj, tids);
-
-        if (table.endsWith(TAB_DATA)) {
-            List measIds = getMeasIds(conn, tids, iids);
-            table = MeasTabManagerUtil.getUnionStatement(
-                begin, end, (Integer[])measIds.toArray(new Integer[0]));
-            //if there are 0 measurement ids there is no need to go forward
-            if (measIds.size() == 0) {
-                return lastMap;
-            }
-        }
-
-        final String aggregateSQL =
-            "SELECT template_id," + minMax + "MAX(timestamp) " +
-            " FROM " + table + "," + TAB_MEAS +
-            " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id AND " +
-                    iidsConj + " AND " + tidsConj + " GROUP BY template_id";
-
-        try {
-            // Prepare aggregate SQL
-            astmt = conn.prepareStatement(aggregateSQL);
-            // First set the time range
-            int ind = 1;
-            astmt.setLong(ind++, begin);
-            astmt.setLong(ind++, end);
-
-            if (_log.isTraceEnabled())
-                _log.trace("getAggregateData() for begin=" + begin +
-                          " end = " + end + ": " + aggregateSQL);
-            // First get the min, max, average
-            rs = astmt.executeQuery();
-            while (rs.next()) {
-                Integer tid = new Integer(rs.getInt("template_id"));
-                double[] data = new double[IND_LAST_TIME + 1];
-                // data[0] = min, data[1] = avg, data[2] = max,
-                // data[3] = last, data[4] = count of measurement ID's
-                data[IND_MIN] = rs.getDouble(2);
-                data[IND_AVG] = rs.getDouble(3);
-                data[IND_MAX] = rs.getDouble(4);
-                // Put it into the result map
-                resMap.put(tid, data);
-                // Get the time
-                Long lastTime = new Long(rs.getLong(5));
-                // Put it into the last map
-                lastMap.put(tid, lastTime);
-            }
-            if (_log.isTraceEnabled())
-                _log.trace("getAggregateData(): Statement query elapsed: " +
-                          timer.reset());
-        } finally {
-            DBUtil.closeResultSet(logCtx, rs);
-            DBUtil.closeStatement(logCtx, astmt);
-        }
-        return lastMap;
     }
 
     public String getAddForeignKeyConstraintString(String constraintName,
