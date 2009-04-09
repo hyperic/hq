@@ -7,6 +7,8 @@ PDK_LIB=./pdk/lib
 # for /proc/net/tcp mirror
 SIGAR_PROC_NET=./tmp
 
+export SIGAR_PROC_NET
+
 # ------------- 
 # Shouldn't need to change anything below this
 # -------------
