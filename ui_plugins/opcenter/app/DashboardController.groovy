@@ -184,9 +184,8 @@ class DashboardController extends BaseController
 
             def galert = galerts.get(0)
 
-            if (typefilter == TYPEFILTER_DOWN || typefilter == TYPEFILTER_ALERTSNOESC) {
-                // Don't show group alerts in down resources or if filtering
-                // by alerts without escalations. (All group alerts require an escalation)
+            if (typefilter == TYPEFILTER_DOWN) {
+                // Don't show group alerts in down resources
                 continue
             }
 
@@ -202,6 +201,18 @@ class DashboardController extends BaseController
             result["State"] = new StringBuffer()
             result["LastCheck"] = galert.timestamp
             result["EscalationState"] = escMan.findEscalationState(galert.alertDef)
+
+            if (result["EscalationState"]) {
+                // In escalation - skip if viewing alerts not in escalation
+                if (typefilter == TYPEFILTER_ALERTSNOESC) {
+                    continue
+                }
+            } else {
+                // Not in esclation - skip if in escalation
+                if (typefilter == TYPEFILTER_ALERTSESC) {
+                    continue
+                }
+            }
 
             switch (galert.alertDef.severityEnum) {
                 case 1:
