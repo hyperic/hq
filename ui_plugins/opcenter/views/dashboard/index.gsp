@@ -45,7 +45,7 @@
                             <option value="1">Down Resources</option>
                             <option value="2" selected="selected">All Alerts</option>
                             <option value="3">Alerts in Escalation</option>
-                            <option value="4">Alerts without Escalation</option>
+                            <option value="4">Alerts not in Escalation</option>
 
                         </select>
                     </td>
