@@ -48,11 +48,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
@@ -370,7 +367,8 @@ public class AvailabilityManagerEJBImpl
 	}
 
     /**
-     * @return Map<Measurement, double[]> Array is comprised of 5 elements
+     * @return {@link Map} of {@link Measurement} to {@link double[]}.
+     * Array is comprised of 5 elements:
      * [IND_MIN]
      * [IND_AVG]
      * [IND_MAX]
@@ -378,14 +376,31 @@ public class AvailabilityManagerEJBImpl
      * [IND_LAST_TIME]
      * @ejb:interface-method
      */
-    public Map getAggregateData(Integer[] mids, long begin, long end)
-    {
+    public Map getAggregateData(Integer[] mids, long begin, long end) {
         List avails = _dao.findAggregateAvailability(mids, begin, end);
-        return getAggData(avails, begin, end, false);
+        return getAggData(avails, false);
     }
 
     /**
-     * @return Map<Integer, double[]> Array is comprised of 5 elements
+     * @return {@link Map} of {@link MeasurementTemplate.getId} to
+     * {@link double[]}.
+     * Array is comprised of 5 elements:
+     * [IND_MIN]
+     * [IND_AVG]
+     * [IND_MAX]
+     * [IND_CFG_COUNT]
+     * [IND_LAST_TIME]
+     * @ejb:interface-method
+     */
+    public Map getAggregateDataByTemplate(Integer[] mids, long begin, long end) {
+        List avails = _dao.findAggregateAvailability(mids, begin, end);
+        return getAggData(avails, true);
+    }
+
+    /**
+     * @return {@link Map} of {@link MeasurementTemplate.getId} to
+     * {@link double[]}.
+     * Array is comprised of 5 elements:
      * [IND_MIN]
      * [IND_AVG]
      * [IND_MAX]
@@ -394,13 +409,12 @@ public class AvailabilityManagerEJBImpl
      * @ejb:interface-method
      */
     public Map getAggregateData(Integer[] tids, Integer[] iids,
-                                long begin, long end)
-    {
+                                long begin, long end) {
         List avails = _dao.findAggregateAvailability(tids, iids, begin, end);
-        return getAggData(avails, begin, end, true);
+        return getAggData(avails, true);
     }
 
-    private Map getAggData(List avails, long begin, long end, boolean useTidKey)
+    private Map getAggData(List avails, boolean useTidKey)
     {
         Map rtn = new HashMap();
         if (avails.size() == 0) {
@@ -413,7 +427,11 @@ public class AvailabilityManagerEJBImpl
             double[] data;
             Integer key = null;
             if (useTidKey) {
-                key = (Integer)objs[0];
+                if (objs[0] instanceof Measurement) {
+                    key = ((Measurement)objs[0]).getTemplate().getId();
+                } else {
+                    key = (Integer)objs[0];
+                }
             } else {
                 key = ((Measurement)objs[0]).getId();
             }

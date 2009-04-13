@@ -1107,7 +1107,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         final Map measIdsByTempl = new HashMap();
         setMeasurementObjects(measurements, availIds, measIdsByTempl);
         final Integer[] avIds = (Integer[])availIds.toArray(new Integer[0]);
-        final Map rtn = getAvailMan().getAggregateData(avIds, begin, end);
+        final Map rtn =
+            getAvailMan().getAggregateDataByTemplate(avIds, begin, end);
         rtn.putAll(getAggDataByTempl(measIdsByTempl, begin, end, interval));
         return rtn;
     }
