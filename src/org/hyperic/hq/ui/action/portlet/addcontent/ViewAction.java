@@ -62,13 +62,11 @@ public class ViewAction extends TilesAction {
                                  HttpServletResponse response)
         throws Exception {
 
-        List portlets = (List) context.getAttribute("portlets");
+        List<String> portlets = (List<String>) context.getAttribute("portlets");
         WebUser user = RequestUtils.getWebUser(request);
 		ServletContext ctx = getServlet().getServletContext();
-
-        ArrayList availablePortlets = new ArrayList();
+        List<String> availablePortlets = new ArrayList<String>();
         String userPortlets = new String();
-
         Boolean wide = new Boolean((String) context.getAttribute("wide"));
         HttpSession session = request.getSession();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
@@ -76,26 +74,32 @@ public class ViewAction extends TilesAction {
         		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
-        List multi;
-        if( wide.booleanValue() ){
-            userPortlets = dashPrefs.getValue( Constants.USER_PORTLETS_SECOND );
-            multi = (List) context.getAttribute("multi.wide");
-        }
-        else{
-            userPortlets = dashPrefs.getValue( Constants.USER_PORTLETS_FIRST );
-            multi = (List) context.getAttribute("multi.narrow");
-        }
-        
-        for( Iterator i = portlets.iterator(); i.hasNext(); ){
-            String portlet = (String) i.next();
+        List<String> multi;
 
-            if( userPortlets.indexOf(portlet) == -1 ||
-                (multi != null && multi.contains(portlet)))
+        if (wide.booleanValue()) {
+            userPortlets = dashPrefs.getValue( Constants.USER_PORTLETS_SECOND );
+            multi = (List<String>) context.getAttribute("multi.wide");
+        } else {
+            userPortlets = dashPrefs.getValue( Constants.USER_PORTLETS_FIRST );
+            multi = (List<String>) context.getAttribute("multi.narrow");
+        }
+        
+        // Populate available portlets list...
+        for (String portlet : portlets) {
+        	// Add portlet to the list if...
+        	// ...user doesn't have any portlets, or...
+            if (userPortlets == null || 
+           		// ...user doesn't have this particular portlet, or...
+            	userPortlets.indexOf(portlet) == -1 || 
+            	// ...this portlet can be added more than once
+                (multi != null && multi.contains(portlet))) 
+            {
                 availablePortlets.add(portlet);
+            }
         }
 
         context.putAttribute("availablePortlets", availablePortlets);
+        
         return null;
     }
 }

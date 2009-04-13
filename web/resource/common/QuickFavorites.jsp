@@ -56,7 +56,7 @@
 					<div id="AddToFavorites_MessageDiv" style="display:none"></div>
 					<div id="AddToFavorites_Div" style="width:400px;">
 						<div id="AddToFavorites_DataDiv">
-							<div style="height:240px; overflow-x:hidden; overflow-y:auto;background-color:#FEF;">
+							<div style="height:240px; overflow-x:hidden; overflow-y:auto;">
 								<table width="100%" cellpadding="0" cellspacing="0" border="0">
 									<thead>
 										<tr class="tableRowHeader">

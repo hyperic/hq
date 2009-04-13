@@ -126,12 +126,26 @@ public class DashboardUtils {
         }
     }
 
+    // TODO: It doesn't look like this method is being used in the app.  May want 
+    //       to yank it out or at least change the impl to call the other 
+    //       removePortlet method below
     public static void removePortlet(WebUser user, String portlet)
         throws InvalidOptionException, InvalidOptionValueException {
-        String first = user.getPreference(Constants.USER_PORTLETS_FIRST) +
-                       Constants.DASHBOARD_DELIMITER;
-        String second = user.getPreference(Constants.USER_PORTLETS_SECOND) +
-                       Constants.DASHBOARD_DELIMITER;
+		
+		// Get list of portlets from first column...
+		String portlets = user.getPreference(Constants.USER_PORTLETS_FIRST);
+		// ...make sure there's something there before assigning a value...
+		String first =  (portlets != null) ? 
+				        portlets + Constants.DASHBOARD_DELIMITER : 
+			        	// ...if portlet is null just assign the delimiter,
+				        //    otherwise, the dashboard will think it should assign defaults
+				        Constants.DASHBOARD_DELIMITER;
+	    // Do the same for portlets from second column...
+		portlets = user.getPreference(Constants.USER_PORTLETS_SECOND);
+	    // ...don't forget to check before assigning
+	    String second = (portlets != null) ? 
+	    		        portlets + Constants.DASHBOARD_DELIMITER :
+                        Constants.DASHBOARD_DELIMITER;
 
         first =
             StringUtil.remove(first,  portlet + Constants.DASHBOARD_DELIMITER);
@@ -172,10 +186,21 @@ public class DashboardUtils {
     
 	public static void removePortlet(ConfigResponse config, String portlet)
 	    throws InvalidOptionException, InvalidOptionValueException {
-	    String first = config.getValue(Constants.USER_PORTLETS_FIRST) +
-	                   Constants.DASHBOARD_DELIMITER;
-	    String second = config.getValue(Constants.USER_PORTLETS_SECOND) +
-	                   Constants.DASHBOARD_DELIMITER;
+		
+		// Get list of portlets from first column...
+		String portlets = config.getValue(Constants.USER_PORTLETS_FIRST);
+		// ...make sure there's something there before assigning a value...
+		String first =  (portlets != null) ? 
+				        portlets + Constants.DASHBOARD_DELIMITER : 
+			        	// ...if portlet is null just assign the delimiter,
+				        //    otherwise, the dashboard will think it should assign defaults
+				        "";
+	    // Do the same for portlets from second column...
+		portlets = config.getValue(Constants.USER_PORTLETS_SECOND);
+	    // ...don't forget to check before assigning
+	    String second = (portlets != null) ? 
+	    		        portlets + Constants.DASHBOARD_DELIMITER :
+                        "";
 	
 	    first =
 	        StringUtil.remove(first,  portlet + Constants.DASHBOARD_DELIMITER);

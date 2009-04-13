@@ -152,7 +152,10 @@ public class DisplayDashboardAction extends TilesAction {
 		ConfigResponse dashPrefs = dashboardConfig.getConfig();
 
 		// See if we need to initialize the dashboard (for Roles)
-		if (dashPrefs.getValue( Constants.USER_PORTLETS_FIRST) == null) {
+		// we now check both columns for null-ness, instead of only the first
+		if (dashPrefs.getValue(Constants.USER_PORTLETS_FIRST) == null && 
+			dashPrefs.getValue(Constants.USER_PORTLETS_SECOND) == null) 
+		{
 		    ConfigResponse defaultRoleDashPrefs = (ConfigResponse)
 		        ctx.getAttribute(Constants.DEF_ROLE_DASH_PREFS);
 		    try {

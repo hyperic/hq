@@ -96,7 +96,8 @@ public class AddPortletAction extends BaseAction {
         String userPrefs = dashPrefs.getValue(prefKey);
         
         String portlet = pForm.getPortlet();
-        while (userPrefs.indexOf(portlet) > -1) {
+        
+        while (userPrefs != null && userPrefs.indexOf(portlet) > -1) {
             // We need to add a multi portlet
             StringBuffer portletName = new StringBuffer(pForm.getPortlet());
             // 1. Generate random token
@@ -119,8 +120,15 @@ public class AddPortletAction extends BaseAction {
 				"Invoking setUserPrefs" + " in AddPortletAction " + " for "
 						+ user.getId() + " at " + System.currentTimeMillis()
 						+ " user.prefs = " + userPrefs);
+		
+		// If there are existing userprefs, prepend it to the string of preferences
+		// otherwise, this is the first preference in the list
+		if (userPrefs != null) {
+			preferences = userPrefs + preferences;
+		}
+		
 		ConfigurationProxy.getInstance().setPreference(session, user, boss,
-				prefKey, userPrefs + preferences);
+				prefKey, preferences);
         
 
         session.removeAttribute(Constants.USERS_SES_PORTAL);
