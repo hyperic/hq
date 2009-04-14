@@ -1006,7 +1006,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     public PageList getHistoricalData(Measurement m, long begin, long end,
                                       PageControl pc) {
-        return getHistData(m, begin, end, pc);
+        return getHistoricalData(m, begin, end, pc, false);
     }
 
     private PageList getHistData(final Measurement m,
