@@ -26,7 +26,6 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.math.BigDecimal;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -36,8 +35,15 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerNotFoundException;
+import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
@@ -149,11 +155,12 @@ public class ReportProcessorEJBImpl
     public void handleMeasurementReport(MeasurementReport report)
         throws DataInserterException
     {
-        DSNList[] dsnLists = report.getClientIdList();
+        final DSNList[] dsnLists = report.getClientIdList();
+        final String agentToken = report.getAgentToken();
 
-        List dataPoints = new ArrayList(dsnLists.length);
-        List availPoints = new ArrayList(dsnLists.length);
-        List priorityAvailPts = new ArrayList(dsnLists.length);
+        final List dataPoints = new ArrayList(dsnLists.length);
+        final List availPoints = new ArrayList(dsnLists.length);
+        final List priorityAvailPts = new ArrayList(dsnLists.length);
         
         for (int i = 0; i < dsnLists.length; i++) {
             Integer dmId = new Integer(dsnLists[i].getClientId());
@@ -170,6 +177,13 @@ public class ReportProcessorEJBImpl
             }
             // Need to check if resource was asynchronously deleted (type == null)
             final Resource res = m.getResource();
+            if (!resourceMatchesAgent(res, agentToken)) {
+                _log.warn("measurement (id=" + m.getId() + ") was sent to the " +
+                    "HQ server from agent (agentToken=" + agentToken + ")" +
+                    " but resource (id=" + res.getId() + ") is not associated " +
+                    " with that agent.  Dropping measurement.");
+                continue;
+            }
             if (res == null || res.isInAsyncDeleteState()) {
                 continue;
             }
@@ -209,6 +223,36 @@ public class ReportProcessorEJBImpl
                           StringUtil.arrayToString(entIds));
             }
         }
+    }
+
+    /**
+     * checks if the agentToken matches resource's agentToken
+     */
+    private boolean resourceMatchesAgent(Resource resource, String agentToken) {
+        final Integer resType = resource.getResourceType().getId();
+        final Integer aeid = resource.getInstanceId();
+        try {
+            if (resType.equals(AuthzConstants.authzPlatform)) {
+                String token = PlatformManagerEJBImpl.getOne().findPlatformById(
+                    aeid).getAgent().getAgentToken();
+                return token.equals(agentToken);
+            } else if (resType.equals(AuthzConstants.authzServer)) {
+                String token = ServerManagerEJBImpl.getOne().findServerById(
+                    aeid).getPlatform().getAgent().getAgentToken();
+                return token.equals(agentToken);
+            } else if (resType.equals(AuthzConstants.authzService)) {
+                String token = ServiceManagerEJBImpl.getOne().findServiceById(
+                    aeid).getServer().getPlatform().getAgent().getAgentToken();
+                return token.equals(agentToken);
+            }
+        } catch (PlatformNotFoundException e) {
+            _log.warn("Platform not found Id=" + aeid);
+        } catch (ServerNotFoundException e) {
+            _log.warn("Server not found Id=" + aeid);
+        } catch (ServiceNotFoundException e) {
+            _log.warn("Service not found Id=" + aeid);
+        }
+        return false;
     }
 
     /**
