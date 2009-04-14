@@ -9692,7 +9692,12 @@ has already been defined.
 
   <schemaSpec version="3.138">
     <schema-directSQL>
-      <statement targetDB="mysql">
+      <!-- Somewhere along the line the foreign key constraint names
+           on EAM_CPROP got screwed up. -->
+      <statement targetDB="mysql" fail="false">
+        alter table EAM_CPROP drop foreign key FKE5D047984EAEAB4A
+      </statement>
+      <statement targetDB="mysql" fail="false">
         alter table EAM_CPROP drop foreign key FKE5D04798CCF47F9F
       </statement>
       <statement targetDB="mysql">
