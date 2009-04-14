@@ -152,4 +152,33 @@ public class Oracle9Dialect
     public boolean useMetricUnion() {
         return true;
     }
+
+    public String getLimitBuf(String sql, int offset, int limit) {
+        sql = sql.trim();
+        final boolean hasOffset = offset > 0;
+        boolean isForUpdate = false;
+        if ( sql.toLowerCase().endsWith(" for update") ) {
+            sql = sql.substring( 0, sql.length()-11 );
+            isForUpdate = true;
+        }
+        final StringBuilder rtn = new StringBuilder();
+        if (hasOffset) {
+            rtn.append(
+                "select * from ( select row_.*, rownum rownum_ from ( ");
+        } else {
+            rtn.append("select * from ( ");
+        }
+        rtn.append(sql);
+        if (hasOffset) {
+            rtn.append(" ) row_ where rownum <= ")
+               .append(limit).append(") where rownum_ > ")
+               .append(offset);
+        } else {
+            rtn.append(" ) where rownum <= ").append(limit);
+        }
+        if ( isForUpdate ) {
+            rtn.append( " for update" );
+        }
+        return rtn.toString();
+    }
 }

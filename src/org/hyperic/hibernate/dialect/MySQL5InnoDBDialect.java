@@ -122,6 +122,16 @@ public class MySQL5InnoDBDialect
         }
     }
 
+    public String getLimitBuf(String sql, int offset, int limit) {
+        StringBuilder buf = new StringBuilder(sql);
+        buf.append(" LIMIT ");
+        if (offset > 0) {
+            buf.append(offset).append(',');
+        }
+        buf.append(limit);
+        return buf.toString();
+    }
+
     public String getLimitString(int num) {
         return "LIMIT "+num;
     }

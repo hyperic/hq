@@ -116,6 +116,16 @@ public class PostgreSQLDialect
         return "LIMIT "+num;
     }
 
+    public String getLimitBuf(String sql, int offset, int limit) {
+        StringBuilder buf = new StringBuilder(sql);
+        buf.append(" LIMIT ");
+        buf.append(limit);
+        if (offset > 0) {
+            buf.append(" offset ").append(offset);
+        }
+        return buf.toString();
+    }
+
     public boolean usesSequenceGenerator() {
         return true;
     }

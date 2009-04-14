@@ -970,8 +970,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     /**
-     * Fetch the list of historical data points given
-     * a start and stop time range
+     * Fetch the list of historical data points given a begin and end time range.
+     * Returns a PageList of DataPoints without begin rolled into time windows.
      *
      * @param m The Measurement
      * @param begin the start of the time range
@@ -990,15 +990,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             return getAvailMan().getHistoricalAvailData(m, begin, end, pc,
                 prependAvailUnknowns);
         } else {
-            return getHistoricalData(
-                Collections.singletonList(m), begin, end, m.getInterval(),
-                m.getTemplate().getCollectionType(), false, pc);
+            return getHistData(m, begin, end, pc);
         }
     }
 
     /**
-     * Fetch the list of historical data points given
-     * a start and stop time range
+     * Fetch the list of historical data points given a begin and end time range.
+     * Returns a PageList of DataPoints without begin rolled into time windows.
      *
      * @param m The Measurement
      * @param begin the start of the time range
@@ -1007,12 +1005,86 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public PageList getHistoricalData(Measurement m, long begin, long end,
-                                      PageControl pc)
-    {
-        long interval = (m.getInterval() > 0) ? m.getInterval() : end-begin;
-        return getHistoricalData(
-            Collections.singletonList(m), begin, end, interval,
-            m.getTemplate().getCollectionType(), false, pc);
+                                      PageControl pc) {
+        return getHistData(m, begin, end, pc);
+    }
+
+    private PageList getHistData(final Measurement m,
+                                 long begin, long end,
+                                 final PageControl pc) {
+        checkTimeArguments(begin, end);
+        begin = TimingVoodoo.roundDownTime(begin, MINUTE);
+        end = TimingVoodoo.roundDownTime(end, MINUTE);
+        final ArrayList history = new ArrayList();
+        // Get the data points and add to the ArrayList
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+        // The table to query from
+        final String table = getDataTable(begin, end, m.getId().intValue());
+        try {
+            conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            stmt = conn.createStatement();
+            try {
+                final boolean sizeLimit =
+                    (pc.getPagesize() != PageControl.SIZE_UNLIMITED);
+                final StringBuilder sqlBuf = new StringBuilder()
+                    .append("SELECT :fields FROM ").append(table)
+                    .append(" WHERE timestamp BETWEEN ")
+                    .append(begin).append(" AND ").append(end)
+                    .append(" AND measurement_id=").append(m.getId())
+                    .append(" ORDER BY timestamp ")
+                    .append(pc.isAscending() ? "ASC" : "DESC");
+                Integer total = null;
+                if (sizeLimit) {
+                    // need to get the total count if there is a limit on the
+                    // size.  Otherwise we can just take the size of the
+                    // resultset
+                    rs = stmt.executeQuery(
+                        sqlBuf.toString().replace(":fields", "count(*)"));
+                    total = (rs.next()) ?
+                        new Integer(rs.getInt(1)) : new Integer(1);
+                    rs.close();
+                    if (total.intValue() == 0) {
+                        return new PageList();
+                    }
+                    if (_log.isDebugEnabled()) {
+                        _log.debug("paging: offset= " + pc.getPageEntityIndex() +
+                            ", pagesize=" + pc.getPagesize());
+                    }
+                }
+                final HQDialect dialect = Util.getHQDialect();
+                final int offset = pc.getPageEntityIndex();
+                final int limit = pc.getPagesize();
+                final String sql = (sizeLimit) ?
+                    dialect.getLimitBuf(sqlBuf.toString(), offset, limit) :
+                    sqlBuf.toString();
+                if (_log.isDebugEnabled()) {
+                    _log.debug(sql);
+                }
+                final StopWatch timer = new StopWatch();
+                rs = stmt.executeQuery(
+                    sql.replace(":fields", "value, timestamp"));
+                if (_log.isTraceEnabled()) {
+                    _log.trace("getHistoricalData() execute time: "
+                        + timer.getElapsed());
+                }
+                while (rs.next()) {
+                    history.add(getMetricValue(rs));
+                }
+                total = (total == null) ? new Integer(history.size()) : total;
+                return new PageList(history, total.intValue());
+            } catch (SQLException e) {
+                throw new SystemException(
+                    "Can't lookup historical data for " + m, e);
+            }
+        } catch (NamingException e) {
+            throw new SystemException(ERR_DB, e);
+        } catch (SQLException e) {
+            throw new SystemException("Can't open connection", e);
+        } finally {
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+        }
     }
 
     private String getSelectType(int type, long begin)

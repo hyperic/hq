@@ -113,4 +113,9 @@ public interface HQDialect
      * true if the database supports PL/SQL
      */
     public boolean supportsPLSQL();
+    
+    /**
+     * @return the limit sql associated with the offset and limit params
+     */
+    public String getLimitBuf(String sql, int offset, int limit);
 }
