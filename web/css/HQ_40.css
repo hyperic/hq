@@ -2347,3 +2347,11 @@ button span{
 	text-align: center;
 	margin-bottom: 20px;
 }
+
+.importantNote {
+	color: blue;
+}
+
+.deprecated {
+	color: #888;
+}
