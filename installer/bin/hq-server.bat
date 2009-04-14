@@ -40,6 +40,8 @@ goto usage
 if not exist "%ANT_HOME%\bin\ant.bat" goto noAnt
 
 start /B cmd /C ""%ANT_HOME%\bin\ant" -q -Dserver.home="%SERVER_HOME%" -Dengine.home="%ENGINE_HOME%" -Dlog="%SERVER_LOG%" -logger org.hyperic.tools.ant.installer.InstallerLogger -f "%SERVER_HOME%\data\server.xml" %1"
+
+start /B cmd /C ""%ANT_HOME%\bin\ant" -q -Dserver.home="%SERVER_HOME%" -Dlog="%SERVER_LOG%" -logger org.hyperic.tools.ant.installer.InstallerLogger -f "%SERVER_HOME%\data\db-upgrade.xml" upgrade"
 goto done
 
 :noAnt

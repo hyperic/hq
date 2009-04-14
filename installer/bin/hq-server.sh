@@ -225,6 +225,12 @@ if [ -d "${SERVER_HOME}/hqdb" ] ; then
   debugOut "startBuiltinDB completed"
 fi
 
+infoOut "Verify HQ database schema..."
+ANT_OPTS="$ANT_OPTS -Djava.net.preferIPv4Stack=true" ANT_ARGS="" JAVA_HOME=${JAVA_HOME} ${ANT_HOME}/bin/ant --noconfig -q \
+  -Dserver.home=${SERVER_HOME} \
+  -logger org.hyperic.tools.ant.installer.InstallerLogger \
+  -f ${SERVER_HOME}/data/db-upgrade.xml upgrade
+
 # Setup HQ_JAVA_OPTS from hq-server.conf
 HQ_JAVA_OPTS=`loadJavaOpts`
 

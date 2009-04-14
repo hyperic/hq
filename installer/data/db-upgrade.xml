@@ -16,7 +16,21 @@ accepts are:
 This target assumes that the taskdefs for the dbupgrade ant task
 has already been defined.
 -->
-<target name="upgrade">
+
+<target name="load-server-properties" if="server.home">
+    <property file="${server.home}/conf/hq-server.conf"/>
+    <property name="jdbc.url" value="${server.database-url}"/>
+    <property name="jdbc.user" value="${server.database-user}"/>
+    <property name="jdbc.password" value="${server.database-password}"/>
+    <property name="typemap.file" value="common-dbsetup-typemap.xml"/>
+    <property name="schema.target" value="LATEST"/>
+    <echo>^^^DEBUG: Loading taskdefs...</echo>
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties" />
+    <taskdef resource="org/hyperic/tools/ant/ant-tools.properties" />
+    <echo>^^^DEBUG: Taskdefs loaded</echo>
+</target>
+
+<target name="upgrade" depends="load-server-properties">
 
 <dbupgrade
    jdbcUrl="${jdbc.url}" jdbcUser="${jdbc.user}" jdbcPassword="${jdbc.password}"

@@ -9,7 +9,6 @@
   <target name="load-basics">
     <property file="${install.dir}/data/version.properties"/>
     <echo>^^^INFO: Initializing Hyperic HQ ${version} Installation...</echo>
-    <property name="common-resources" value="${install.dir}/lib"/>
 
     <path id="alljars">
       <fileset dir="${install.dir}/lib" includes="*.jar"/>
@@ -113,7 +112,6 @@
                   path="${setup}" 
                   pwd="${install.dir}/.."
                   failOnMissing="false"/>
-    <dirname file="${setup.absolute}" property="data.dir"/>
     <available property="user-setup-properties.available"
                file="${setup.absolute}"/>
     <msgfail unless="user-setup-properties.available">^^^ERROR:\
@@ -146,7 +144,6 @@ Setup properties will be written to %WRITABLEFILE% instead.
     <absolutePath property="setup.absolute" 
                   path="${setup}" 
                   failOnMissing="true"/>
-    <dirname file="${setup.absolute}" property="data.dir"/>
     <echo>^^^DEBUG: Install configuration loaded.</echo>
   </target>
 
@@ -498,6 +495,14 @@ ${errMsg}
       </fileset>
     </copy>
 
+    <echo>^^^DEBUG: Copying server db-upgrade files...</echo>
+    <copy todir="${server.product.dir}/data">
+      <fileset dir="${install.dir}/data">
+        <include name="db-upgrade.xml"/>
+        <include name="common-dbsetup-typemap.xml"/>
+      </fileset>
+    </copy>
+
     <!-- Copy lib jars to server's lib dir -->
     <echo>^^^DEBUG: Copying server libs...</echo>
     <mkdir dir="${server.product.dir}/lib"/>
@@ -523,6 +528,11 @@ ${errMsg}
         <include name="sigar.jar"/>
         <include name="xercesImpl.jar"/>
         <include name="xml-apis.jar"/>
+        <include name="groovy-all-*.jar"/>
+        <include name="hibernate3.jar"/>
+        <include name="postgresql-*.jar"/>
+        <include name="mysql-connector-java-*.jar"/>
+        <include name="ojdbc*.jar"/>
       </fileset>
     </copy>
 
