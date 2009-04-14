@@ -288,6 +288,13 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         
         return createMeasurements(subject, id, templates, intervals, props);
     }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public Measurement findMeasurementById(Integer mid) {
+        return getMeasurementDAO().findById(mid);
+    }
 
     /**
      * Create Measurement objects for an appdef entity based on default
