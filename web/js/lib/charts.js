@@ -2061,7 +2061,7 @@ E();
 }else{var A=SimileAjax.History._currentIndex-SimileAjax.History._baseIndex-1;
 var D=(A>=0&&A<SimileAjax.History._actions.length)?SimileAjax.History.formatHistoryEntryTitle(SimileAjax.History._actions[A].label):SimileAjax.History._plainDocumentTitle;
 SimileAjax.History._iframe.contentWindow.document.title=D;
-document.title=D;
+//Fix for [HHQ-3031]: document.title=D;
 }}}catch(C){}};
 SimileAjax.History.getNextUndoAction=function(){try{var A=SimileAjax.History._currentIndex-SimileAjax.History._baseIndex-1;
 return SimileAjax.History._actions[A];
