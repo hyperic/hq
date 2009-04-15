@@ -44,10 +44,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.velocity.runtime.parser.node.GetExecutor;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
@@ -71,9 +72,6 @@ import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.config.LongConfigOption;
 import org.hyperic.util.config.StringConfigOption;
 
-import EDU.oswego.cs.dl.util.concurrent.ReadWriteLock;
-import EDU.oswego.cs.dl.util.concurrent.ReentrantWriterPreferenceReadWriteLock;
-
 /** The MultiConditionTrigger is a specialized trigger that can combine multiple
  * conditions and only fire actions when all conditions have been met
  *
@@ -96,7 +94,7 @@ public class MultiConditionTrigger
     private final Map currentSharedLockHolders = Collections.synchronizedMap(new HashMap());
         
     // make the lock reentrant just to be safe in preventing deadlocks
-    private final ReadWriteLock rwLock = new ReentrantWriterPreferenceReadWriteLock();
+    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
     
     private static final ThreadLocal IGNORE_NEXT_EXCLUSIVE_LOCK_RELEASE = 
         new ThreadLocal() {
@@ -140,7 +138,7 @@ public class MultiConditionTrigger
         
         while (!acquired && counter < 10) {
             try {
-                rwLock.readLock().acquire();
+                rwLock.readLock().lockInterruptibly();
                 acquired = true;
             } catch (InterruptedException e) {
                 // interrupted state is cleared - retry
@@ -166,7 +164,7 @@ public class MultiConditionTrigger
      */
     public void releaseSharedLock() {
         try {
-            rwLock.readLock().release();            
+            rwLock.readLock().unlock();            
         } finally {
             currentSharedLockHolders.remove(Thread.currentThread());
             
@@ -265,7 +263,7 @@ public class MultiConditionTrigger
      * @throws InterruptedException
      */
     public boolean attemptExclusiveLock() throws InterruptedException {
-        return rwLock.writeLock().attempt(0);        
+        return rwLock.writeLock().tryLock();        
     }
     
     /**
@@ -275,7 +273,7 @@ public class MultiConditionTrigger
         if (ignoreNextExclusiveLockRelease()) {
             resetIgnoreNextExclusiveLockRelease();
         } else {
-            rwLock.writeLock().release();            
+            rwLock.writeLock().unlock();            
         }
     }
     
@@ -555,10 +553,11 @@ public class MultiConditionTrigger
                             etracker.addReference(getId(), event, getTimeRange());
                         }
                     }
-                } else {
+                } else if (event instanceof TriggerFiredEvent) {
+                    // Only need track TriggerFiredEvent
                     if (event instanceof TriggerFiredEvent) {
-                        // Only add reference for TriggerFiredEvent, don't add
-                        // for TriggerNotFiredEvent.
+                        // Only want to add TriggerFiredEvent, don't add
+                        // TriggerNotFiredEvent
                         etracker.addReference(getId(), event, getTimeRange());
                     }
                 }          
