@@ -543,10 +543,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                            PageControl pc)
         throws FinderException, PermissionException {
         // build the server types from the visible list of servers
-        Collection servers = getViewableServers(subject, pc);
-
-        Collection serverTypes = filterResourceTypes(servers);
-
+        final List authzPks = getViewableServers(subject);
+        final Collection serverTypes =
+            getServerDAO().getServerTypes(authzPks, true);
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(serverTypes, pc);
@@ -800,21 +799,36 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         }
         switch(attr) {
             case SortAttribute.RESOURCE_NAME:
-                servers = getServerDAO().findAll_orderName(
-                    pc != null ? !pc.isDescending() : true);
+                servers = getServersFromIds(authzPks, pc.isAscending());
                 break;
             default:
-                servers = getServerDAO().findAll_orderName(true);
+                servers = getServersFromIds(authzPks, true);
                 break;
         }
-        for(Iterator i = servers.iterator(); i.hasNext();) {
-            Integer sPK = ((Server)i.next()).getId();
-            // remove server if its not viewable
-            if(!authzPks.contains(sPK)) {
-                i.remove();
+        return servers;
+    }
+    
+    /**
+     * @param serverIds {@link Collection} of {@link Server.getId}
+     * @return {@link Collection} of {@link Server}
+     */
+    private Collection getServersFromIds(Collection serverIds, boolean asc) {
+        final List rtn = new ArrayList(serverIds.size());
+        for (Iterator it=serverIds.iterator(); it.hasNext(); ) {
+            final Integer id = (Integer)it.next();
+            try {
+                final Server server = findServerById(id);
+                final Resource r = server.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
+                rtn.add(server);
+            } catch (ServerNotFoundException e) {
+                log.debug(e.getMessage(), e);
             }
         }
-        return servers;
+        Collections.sort(rtn, new AppdefNameComparator(asc));
+        return rtn;
     }
     
     /**

@@ -27,12 +27,18 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Expression;
+import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -126,6 +132,37 @@ public class ServerDAO extends HibernateDAO
             .setCacheable(true)
             .setCacheRegion("Server.findAll_orderName")
             .list();
+    }
+    
+    /**
+     * @param serverIds - {@link List} of {@link Integer}
+     * @return {@link Collection} of {@link ServerType}
+     */
+    Collection getServerTypes(final List serverIds, final boolean asc) {
+        final String hql = new StringBuilder()
+            .append("SELECT distinct s.serverType")
+            .append(" FROM Server s")
+            .append(" WHERE s.id in (:svrs)")
+            .toString();
+        final HQDialect dialect = Util.getHQDialect();
+        // can't go over 1000 due to the hibernate bug
+        // http://opensource.atlassian.com/projects/hibernate/browse/HHH-1985
+        final int max = dialect.getMaxExpressions();
+        final int maxExprs = (max == -1 || max > 1000) ? 1000 : max;
+        // need a Set to quickly ensure ServiceTypes are unique btwn queries
+        final Set set = new HashSet();
+        for (int i=0; i<serverIds.size(); i+=maxExprs) {
+            final int last = Math.min(i + maxExprs, serverIds.size());
+            final List sublist = serverIds.subList(i, last);
+            final List list = getSession().createQuery(hql)
+                .setParameterList("svrs", sublist, new IntegerType())
+                .list();
+            // ServerType hashCode is by name
+            set.addAll(list);
+        }
+        final List rtn = new ArrayList(set);
+        Collections.sort(rtn, new AppdefNameComparator(asc));
+        return rtn;
     }
 
     public Collection findByType(Integer sTypeId)

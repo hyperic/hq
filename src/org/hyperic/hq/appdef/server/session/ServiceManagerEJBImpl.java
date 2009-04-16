@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -442,8 +443,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                             PageControl pc)
         throws FinderException, PermissionException {
         // build the server types from the visible list of servers
-        Collection services = getViewableServices(subject, pc);
-        Collection serviceTypes = filterResourceTypes(services);
+        final List authzPks = getViewableServices(subject);
+        final Collection serviceTypes =
+            getServiceDAO().getServiceTypes(authzPks, true);
         
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
@@ -495,43 +497,74 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     private Collection getViewableServices(AuthzSubject subject, PageControl pc)
         throws FinderException, PermissionException {
-        Collection toBePaged = new ArrayList();
         // get list of pks user can view
-        Set authzPks = new HashSet(getViewableServices(subject));
-        Collection services = null;
+        final Collection authzPks = getViewableServices(subject);
+        List services;
         pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
-        
         switch( pc.getSortattribute() ) {
             case SortAttribute.RESOURCE_NAME:
-                if(pc != null) {
-                    services =
-                        getServiceDAO().findAll_orderName(pc.isAscending());
-                }
+                services = getServices(authzPks, pc);
+                Collections.sort(
+                    services, new AppdefNameComparator(pc.isAscending()));
                 break;
             case SortAttribute.SERVICE_NAME:
-                if(pc != null) {
-                    services =
-                        getServiceDAO().findAll_orderName(pc.isAscending());
-                }
+                services = getServices(authzPks, pc);
+                Collections.sort(
+                    services, new AppdefNameComparator(pc.isAscending()));
                 break;
             case SortAttribute.CTIME:
-                if(pc != null) {
-                    services =
-                        getServiceDAO().findAll_orderCtime(pc.isAscending());
-                }
+                services = getServices(authzPks, pc);
+                Collections.sort(
+                    services, new ServiceCtimeComparator(pc.isAscending()));
                 break;
             default:
-                services = getServiceDAO().findAll();
+                services = getServices(authzPks, pc);
                 break;
         }
-        for(Iterator i = services.iterator(); i.hasNext();) {
-            Service aService = (Service)i.next();
-            // remove service if its not viewable
-            if(authzPks.contains(aService.getId())) {
-                toBePaged.add(aService);
+        return services;
+    }
+
+    /**
+     * Note: This method pulls all services from the EHCache one by one.
+     * This should be faster than pulling everything from the DB since they
+     * are in memory.
+     */
+    private List getServices(Collection authzPks, PageControl pc) {
+        final List aeids = new ArrayList(authzPks);
+        final List rtn = new ArrayList(authzPks.size());
+        final int start = pc.getPageEntityIndex();
+        final int end = (pc.getPagesize() == PageControl.SIZE_UNLIMITED) ?
+            authzPks.size() : pc.getPagesize() + start;
+        for (int i=start; i<end; i++) {
+            final Integer aeid = (Integer)aeids.get(i);
+            try {
+                final Service s = findServiceById(aeid);
+                final Resource r = s.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
+                rtn.add(s);
+            } catch (ServiceNotFoundException e) {
+                log.debug(e.getMessage(), e);
             }
         }
-        return toBePaged;
+        return rtn;
+    }
+
+    private class ServiceCtimeComparator implements Comparator {
+        final boolean _asc;
+        ServiceCtimeComparator(boolean ascending) {
+            _asc = ascending;
+        }
+        public int compare(Object arg0, Object arg1) {
+            if (!(arg0 instanceof AppdefResource) ||
+                !(arg1 instanceof AppdefResource)) {
+                    throw new ClassCastException();
+            }
+            final Long c0 = new Long(((AppdefResource)arg0).getCreationTime());
+            final Long c1 = new Long(((AppdefResource)arg1).getCreationTime());
+            return (_asc) ? c0.compareTo(c1) : c1.compareTo(c0);
+        }
     }
 
     /**

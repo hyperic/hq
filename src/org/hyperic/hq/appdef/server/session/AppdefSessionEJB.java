@@ -74,6 +74,8 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.SortAttribute;
 
+import edu.emory.mathcs.backport.java.util.Collections;
+
 /**
  * Parent abstract class of all appdef session ejbs
  */
@@ -97,49 +99,34 @@ public abstract class AppdefSessionEJB
 
     /**
      * builds a list of resource types from the list of resources
-     * 
-     * XXX -- This code is completely rotten.  Needs to be fixed badly.  -- JMT 
+     * @param resources - {@link Collection} of {@link AppdefResource}
+     * @param {@link Collection} of {@link AppdefResourceType}
      */
     protected Collection filterResourceTypes(Collection resources) {
-        // Create TreeSet which sorts on the name
-        TreeSet resTypes = new TreeSet(
-            new Comparator() {
-                private String getName(Object obj) {
-                    if (obj instanceof AppdefResourceType)
-                        return ((AppdefResourceType) obj).getSortName();
-
-                    return "";
-                }
-                
-                public int compare(Object o1, Object o2) {
-                      return getName(o1).compareTo(getName(o2));
-                }
+        final Set resTypes = new HashSet();
+        for (final Iterator it=resources.iterator(); it.hasNext(); ) {
+            final AppdefResource o = (AppdefResource)it.next();
+            if (o == null) {
+                continue;
             }
-        );
-
-        Iterator iterator = resources.iterator();
-        while (iterator.hasNext()) {
-            Object o = iterator.next();
-            if (o instanceof AppdefResourceLocal) {
-                AppdefResourceLocal resource = (AppdefResourceLocal)o;
-                EJBLocalObject rTypeLocal = resource.getAppdefResourceType();
-                if (!resTypes.contains(rTypeLocal))
-                    resTypes.add(rTypeLocal);
-            } else if (o instanceof Platform) {
-                PlatformType st = ((Platform)o).getPlatformType();
-                if (!resTypes.contains(st))
-                    resTypes.add(st);
-            } else if (o instanceof Server) {
-                ServerType st = ((Server)o).getServerType();
-                if (!resTypes.contains(st))
-                    resTypes.add(st);
-            } else if (o instanceof Service) {
-                ServiceType st = ((Service)o).getServiceType();
-                if (!resTypes.contains(st))
-                    resTypes.add(st);
+            final AppdefResourceType rt = o.getAppdefResourceType();
+            if (rt != null) {
+                resTypes.add(rt);
             }
         }
-        return resTypes;
+        final List rtn = new ArrayList(resTypes);
+        Collections.sort(rtn, new Comparator() {
+            private String getName(Object obj) {
+                if (obj instanceof AppdefResourceType) {
+                    return ((AppdefResourceType) obj).getSortName();
+                }
+                return "";
+            }
+            public int compare(Object o1, Object o2) {
+                  return getName(o1).compareTo(getName(o2));
+            }
+        });
+        return rtn;
     }
 
     /**
@@ -846,9 +833,11 @@ public abstract class AppdefSessionEJB
         return new ArrayList(idList);
     }
 
-    /* Return a list of appdef entity ids that represent the total set of
-       service inventory that the subject is authorized to see. This includes
-       all services as well as all clusters */
+    /**
+     * @return {@link List} of {@link AppdefEntityID}s that represent the total
+     * set of service inventory that the subject is authorized to see. This
+     * includes all services as well as all clusters
+     */
     protected List getViewableServiceInventory (AuthzSubject whoami)
         throws FinderException, PermissionException
     {
