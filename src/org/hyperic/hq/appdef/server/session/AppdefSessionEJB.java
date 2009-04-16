@@ -27,14 +27,13 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 
-import javax.ejb.EJBLocalObject;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.ejb.SessionContext;
@@ -48,7 +47,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefResourceLocal;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
@@ -73,8 +71,6 @@ import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.SortAttribute;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 
 /**
  * Parent abstract class of all appdef session ejbs
@@ -946,6 +942,12 @@ public abstract class AppdefSessionEJB
      * @param whoami - the user
      * @return List of PlatformLocals for which subject has 
      * AuthzConstants.platformOpViewPlatform
+     * XXX scottmf, this needs to be completely rewritten.  It should not
+     * query all the platforms and mash that list together with the viewable
+     * resources.  This will potentially bloat the session with useless pojos,
+     * not to mention the poor performance implications.
+     * Instead it should get the viewable resources then select those platform
+     * where id in (:pids) OR look them up from cache.
      */
     protected Collection getViewablePlatforms(AuthzSubject whoami, 
                                               PageControl pc)
@@ -974,7 +976,7 @@ public abstract class AppdefSessionEJB
             }
         }
         // now get the list of PKs
-        List viewable = getViewablePlatformPKs(whoami);
+        Set viewable = new HashSet(getViewablePlatformPKs(whoami));
         // and iterate over the ejbList to remove any item not in the
         // viewable list
         for(Iterator i = platforms.iterator(); i.hasNext();) {
