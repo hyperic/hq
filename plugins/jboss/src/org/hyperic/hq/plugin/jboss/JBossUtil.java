@@ -504,8 +504,10 @@ public class JBossUtil {
         }
     }
 
-    public static Metric configureMetric(ControlPlugin plugin,
-                                         String template) {
+    public static Metric configureMetric(ControlPlugin plugin, String template) {
+        log.debug("[configureMetric] template = '"+template+"'");
+        template = JBoss5MeasurementPlugin.translateMetic(template, plugin.getConfig());
+        log.debug("[configureMetric] template = '"+template+"'");
         String metric = Metric.translate(template, plugin.getConfig());
 
         try {

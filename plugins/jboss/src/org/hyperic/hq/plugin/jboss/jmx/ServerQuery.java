@@ -22,7 +22,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.jboss.jmx;
 
 import java.io.IOException;
@@ -50,38 +49,28 @@ import org.jboss.jmx.adaptor.rmi.RMIAdaptor;
 public class ServerQuery extends JBossQuery {
 
     private static final Log log = LogFactory.getLog("JBossServerQuery");
-
     public static final String SERVER_NAME =
-        "jboss.system:type=Server";
-
+            "jboss.system:type=Server";
     private static final String SERVER_CONFIG_NAME =
-        "jboss.system:type=ServerConfig";
-    
+            "jboss.system:type=ServerConfig";
     private static final String SERVER_INFO_NAME =
-        "jboss.system:type=ServerInfo";
-
-    private static final String ATTR_HOMEDIR     = "HomeDir";
-    private static final String ATTR_SERVER_URL  = "ServerHomeURL";
+            "jboss.system:type=ServerInfo";
+    private static final String ATTR_HOMEDIR = "HomeDir";
+    private static final String ATTR_SERVER_URL = "ServerHomeURL";
     private static final String ATTR_SERVER_NAME = "ServerName";
-    public static final String ATTR_VERSION     = "Version";
-
+    public static final String ATTR_VERSION = "Version";
     private static final String[] ATTRS_SERVER = {
         ATTR_VERSION,
         "BuildDate",
-        "VersionName",
-    };
-
+        "VersionName",};
     private static final String[] ATTRS_SERVER_CONFIG = {
         ATTR_HOMEDIR,
         ATTR_SERVER_URL,
-        ATTR_SERVER_NAME,
-    };
-
+        ATTR_SERVER_NAME,};
     private static final String[] ATTRS_SERVER_INFO = {
         "JavaVersion",
         "JavaVendor"
     };
-
     private String installPath;
     private String version;
     private String type;
@@ -96,13 +85,12 @@ public class ServerQuery extends JBossQuery {
     }
 
     public void getAttributes(RMIAdaptor mServer)
-        throws PluginException {
+            throws PluginException {
         ObjectName name;
 
         try {
             name = new ObjectName(SERVER_NAME);
-        }
-        catch (MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
 
@@ -110,17 +98,15 @@ public class ServerQuery extends JBossQuery {
 
         try {
             name = new ObjectName(SERVER_CONFIG_NAME);
-        }
-        catch (MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
 
         getAttributes(mServer, name, ATTRS_SERVER_CONFIG);
-        
+
         try {
             name = new ObjectName(SERVER_INFO_NAME);
-        }
-        catch (MalformedObjectNameException e) {
+        } catch (MalformedObjectNameException e) {
             throw new IllegalArgumentException(e.getMessage());
         }
 
@@ -128,7 +114,7 @@ public class ServerQuery extends JBossQuery {
 
         //remove build id
         String fullVersion =
-            getAttribute(ATTR_VERSION).substring(0, 5);
+                getAttribute(ATTR_VERSION).substring(0, 5);
         setAttribute("version", fullVersion); //cprop defined in hq-plugin.xml
         String ver = fullVersion.substring(0, 3);
         setVersion(ver);
@@ -142,17 +128,16 @@ public class ServerQuery extends JBossQuery {
     }
 
     public void findServices(RMIAdaptor mServer)
-        throws PluginException {
-        
+            throws PluginException {
+
         ServiceQuery[] queries = {
             new StatelessSessionBeanQuery(),
             new StatefulSessionBeanQuery(),
             new EntityBeanQuery(),
             new MessageDrivenBeanQuery(),
-            new ConnectionPoolQuery(),
-        };
+            new ConnectionPoolQuery(),};
 
-        for (int i=0; i<queries.length; i++) {
+        for (int i = 0; i < queries.length; i++) {
             findServices(mServer, queries[i]);
         }
 
@@ -162,19 +147,18 @@ public class ServerQuery extends JBossQuery {
             return;
         }
 
-        for (Iterator it=servicePlugins.entrySet().iterator(); it.hasNext();) {
-            Map.Entry entry = (Map.Entry)it.next();
-            String type = (String)entry.getKey();
-            String name = (String)entry.getValue();
+        for (Iterator it = servicePlugins.entrySet().iterator(); it.hasNext();) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String type = (String) entry.getKey();
+            String name = (String) entry.getValue();
 
             GenericServiceQuery query;
             if (name == null) {
                 query = new GenericServiceQuery();
-            }
-            else {
+            } else {
                 try {
                     Class plugin = Class.forName(name);
-                    query = (GenericServiceQuery)plugin.newInstance();
+                    query = (GenericServiceQuery) plugin.newInstance();
                 } catch (Exception e) {
                     log.error("Creating " + name + ": " + e, e);
                     continue;
@@ -183,12 +167,13 @@ public class ServerQuery extends JBossQuery {
 
             query.setType(type);
             query.setParent(this);
+            log.debug("[findServices] type='" + type + "'");
             try {
                 findServices(mServer, query);
             } catch (IllegalArgumentException e) {
                 String msg =
-                    "Error running query for " + type + ": " +
-                    e.getMessage();
+                        "Error running query for " + type + ": " +
+                        e.getMessage();
                 e.printStackTrace();
                 System.out.println(msg);
             }
@@ -196,18 +181,22 @@ public class ServerQuery extends JBossQuery {
     }
 
     private void findServices(RMIAdaptor mServer, ServiceQuery query)
-        throws PluginException {
+            throws PluginException {
 
         query.initialize();
 
-        Set services;
+        Set _services;
         ObjectName name;
         String mbeanClass = null;
-        boolean isDebug = log.isDebugEnabled();
+
+        if (query instanceof GenericServiceQuery) {
+            mbeanClass = ((GenericServiceQuery) query).getMBeanClass();
+        }
 
         try {
             name = new ObjectName(query.getQueryName());
-            services = mServer.queryNames(name, null);
+            _services = mServer.queryNames(name, null);
+            log.debug("[findServices] " + name + " -> (" + mbeanClass + ") '" + _services.size() + "'");
         } catch (MalformedObjectNameException e) {
             String msg = query.getQueryName() + ": " + e.getMessage();
             throw new IllegalArgumentException(msg);
@@ -217,41 +206,39 @@ public class ServerQuery extends JBossQuery {
             throw new PluginException("Cannot connecto to JBoss", e);
         }
 
-        if (query instanceof GenericServiceQuery) {
-            mbeanClass =
-                ((GenericServiceQuery)query).getMBeanClass();
-        }
 
-        for (Iterator it=services.iterator(); it.hasNext();) {
-            name = (ObjectName)it.next();
-            if (!query.apply(name)) {
-                continue;
-            }
+        for (Iterator it = _services.iterator(); it.hasNext();) {
+            name = (ObjectName) it.next();
+            if (checkClass(mServer, name, mbeanClass)) {
+                boolean apply = query.apply(name);
+                log.debug("[findServices] " + (apply ? "+" : "-") + " name='" + name + "'");
+                if (apply) {
 
-            if (mbeanClass != null) {
-                try {
-                    MBeanInfo info = mServer.getMBeanInfo(name);
-                    if (!info.getClassName().matches(mbeanClass)) {
-                        if (isDebug) {
-                            log.debug("[" + name + "] " + info.getClassName() +
-                                      " !instanceof " + mbeanClass);
-                        }
-                        continue;
-                    }
-                } catch (Exception e) {
-                    log.error("mServer.getMBeanInfo(" + name + "): " + e);
-                    continue;
+                    ServiceQuery service = query.cloneInstance();
+                    service.setObjectName(name);
+
+                    this.services.add(service);
+                    service.setParent(this);
+                    service.setServerQuery(this);
+                    service.getAttributes(mServer);
                 }
             }
-
-            ServiceQuery service = query.cloneInstance();
-            service.setObjectName(name);
-
-            this.services.add(service);
-            service.setParent(this);
-            service.setServerQuery(this);
-            service.getAttributes(mServer);
         }
+        log.debug("***********************************************");
+    }
+
+    private boolean checkClass(RMIAdaptor mServer, ObjectName name, String mbeanClass) {
+        boolean res = true;
+        if (mbeanClass != null) {
+            try {
+                MBeanInfo info = mServer.getMBeanInfo(name);
+                res = info.getClassName().matches(mbeanClass);
+            } catch (Exception e) {
+                log.error("mServer.getMBeanInfo(" + name + "): " + e);
+                res = false;
+            }
+        }
+        return res;
     }
 
     public String getQualifiedName() {
@@ -274,7 +261,7 @@ public class ServerQuery extends JBossQuery {
     public Properties getControlConfig() {
         Properties config = new Properties();
         config.put(JBossServerControlPlugin.PROP_CONFIGSET,
-                   getName());
+                getName());
         return config;
     }
 

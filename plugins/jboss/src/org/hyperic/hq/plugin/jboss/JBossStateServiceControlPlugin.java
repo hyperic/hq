@@ -101,7 +101,7 @@ public class JBossStateServiceControlPlugin
 
     // control methods
 
-    private void start() {
+    void start() {
         if (isRunning()) {
             setResult(RESULT_FAILURE);
             setMessage("Service already started");
@@ -112,7 +112,7 @@ public class JBossStateServiceControlPlugin
         handleResult(getResult(), STATE_STARTED);
     }
 
-    private void stop() {
+    void stop() {
         if (!isRunning()) {
             setResult(RESULT_FAILURE);
             setMessage("Service already stopped");

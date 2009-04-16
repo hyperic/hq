@@ -22,7 +22,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.jboss.jmx;
 
 import java.util.ArrayList;
@@ -42,20 +41,21 @@ class GenericServiceQuery extends ServiceQuery {
     private Map props;
     private ArrayList names;
 
-    GenericServiceQuery() { }
+    GenericServiceQuery() {
+    }
 
     void setType(String type) {
-        this.type = type;        
+        this.type = type;
     }
 
     String getMBeanClass() {
         return getProperty("MBEAN_CLASS");
     }
-    
+
     public ServiceQuery cloneInstance() {
         GenericServiceQuery query =
-            (GenericServiceQuery)super.cloneInstance();
-        
+                (GenericServiceQuery) super.cloneInstance();
+
         query.type = this.type;
         query.props = this.props;
         query.names = this.names;
@@ -68,7 +68,7 @@ class GenericServiceQuery extends ServiceQuery {
     }
 
     private StringBuffer appendComma(StringBuffer buf) {
-        char c = buf.charAt(buf.length()-1); 
+        char c = buf.charAt(buf.length() - 1);
         if ((c != ',') && (c != ':')) {
             buf.append(',');
         }
@@ -76,16 +76,20 @@ class GenericServiceQuery extends ServiceQuery {
     }
 
     private boolean isAutoValue(String val) {
-        return val.startsWith("%") && val.endsWith("%");
+        return (val.startsWith("%") || val.startsWith("_%")) && val.endsWith("%");
+    }
+
+    private boolean isOptionalValue(String val) {
+        return val.startsWith("_");
     }
 
     private ObjectName getObjectNameProperty() {
         String name = getProperty(PROP_OBJECT_NAME);
         if (name == null) {
             String msg =
-                this.type +
-                " service did not define property " +
-                PROP_OBJECT_NAME;
+                    this.type +
+                    " service did not define property " +
+                    PROP_OBJECT_NAME;
             throw new IllegalArgumentException(msg);
         }
 
@@ -96,17 +100,17 @@ class GenericServiceQuery extends ServiceQuery {
             oName = new ObjectName(name);
         } catch (MalformedObjectNameException e) {
             String msg =
-                this.type +
-                " service defined malformed " +
-                PROP_OBJECT_NAME + "=" + name;
+                    this.type +
+                    " service defined malformed " +
+                    PROP_OBJECT_NAME + "=" + name + " (" + e.getMessage() + ")";
             throw new IllegalArgumentException(msg);
-        }        
+        }
 
         Map props = oName.getKeyPropertyList();
-        for (Iterator it=props.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)it.next();
-            String key = (String)entry.getKey();
-            String val = (String)entry.getValue();
+        for (Iterator it = props.entrySet().iterator(); it.hasNext();) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String key = (String) entry.getKey();
+            String val = (String) entry.getValue();
 
             if (isAutoValue(val)) {
                 this.names.add(key);
@@ -120,21 +124,25 @@ class GenericServiceQuery extends ServiceQuery {
         ObjectName name = getObjectNameProperty();
 
         StringBuffer buf = new StringBuffer();
-        
+
         buf.append(name.getDomain()).append(":");
 
         boolean isPattern = false;
         this.props = name.getKeyPropertyList();
-        for (Iterator it=props.entrySet().iterator(); it.hasNext();) {
-            Map.Entry entry = (Map.Entry)it.next();
-            String key = (String)entry.getKey();
-            String val = (String)entry.getValue();
+        for (Iterator it = props.entrySet().iterator(); it.hasNext();) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String key = (String) entry.getKey();
+            String val = (String) entry.getValue();
             if (isAutoValue(val)) {
-                this.props.put(key, "*");
+                if (isOptionalValue(val)) {
+                    this.props.put(key, "?");
+                } else {
+                    this.props.put(key, "*");
+                }
                 isPattern = true;
-                continue;
+            } else {
+                buf.append(key).append('=').append(val);
             }
-            buf.append(key).append('=').append(val);
             if (it.hasNext()) {
                 appendComma(buf);
             }
@@ -151,21 +159,17 @@ class GenericServiceQuery extends ServiceQuery {
     //can't use QueryExp either because that is applied to attributes
     //of the MBean, not the attributes of the ObjectName itself
     public boolean apply(ObjectName name) {
-        Map props = name.getKeyPropertyList();
-        if (this.props.size() != props.size()) {
-            return false;
-        }
-        for (Iterator it=this.props.entrySet().iterator();
-             it.hasNext();)
-        {
-            Map.Entry entry = (Map.Entry)it.next();
-            String key = (String)entry.getKey();
-            String val = (String)entry.getValue();
-            String compare = (String)props.get(key);
-            if (compare == null) {
+        Map _props = name.getKeyPropertyList();
+        for (Iterator it = this.props.entrySet().iterator(); it.hasNext();) {
+            Map.Entry entry = (Map.Entry) it.next();
+            String key = (String) entry.getKey();
+            String val = (String) entry.getValue();
+            String compare = (String) _props.get(key);
+            //System.out.println("-> compare='" + compare + "' val='" + val + "'");
+            if ((compare == null) && !val.equals("?")) {
                 return false;
             }
-            if (val.equals("*")) {
+            if (val.equals("*") || val.equals("?")) {
                 continue;
             }
             if (!val.equals(compare)) {
@@ -188,16 +192,13 @@ class GenericServiceQuery extends ServiceQuery {
         ObjectName name = getObjectName();
         Properties config = new Properties();
 
-        for (Iterator it=this.props.keySet().iterator();
-             it.hasNext(); )
-        {
-            String key = (String)it.next();
-            if (!this.props.get(key).equals("*")) {
-                continue;
-            }
-            String val = name.getKeyProperty(key);
-            if (val != null) {
-                config.setProperty(key, val);
+        for (Iterator it = this.props.keySet().iterator(); it.hasNext();) {
+            String key = (String) it.next();
+            if (this.props.get(key).equals("*") || this.props.get(key).equals("?")) {
+                String val = name.getKeyProperty(key);
+                if (val != null) {
+                    config.setProperty(key, val);
+                }
             }
         }
 
@@ -212,10 +213,13 @@ class GenericServiceQuery extends ServiceQuery {
 
         StringBuffer name = new StringBuffer();
 
-        for (Iterator it=this.names.iterator(); it.hasNext();) {
-            name.append(oName.getKeyProperty((String)it.next()));
-            if (it.hasNext()) {
-                name.append(' ');
+        for (Iterator it = this.names.iterator(); it.hasNext();) {
+            String n = oName.getKeyProperty((String) it.next());
+            if (n != null) {
+                name.append(n);
+                if (it.hasNext()) {
+                    name.append(' ');
+                }
             }
         }
 
@@ -225,7 +229,7 @@ class GenericServiceQuery extends ServiceQuery {
     public boolean hasControl() {
         //XXX this functionality should be elsewhere
         ProductPluginManager ppm =
-            (ProductPluginManager)getServerDetector().getManager().getParent();
+                (ProductPluginManager) getServerDetector().getManager().getParent();
         GenericPlugin plugin = ppm.getControlPlugin(this.type);
         return plugin != null;
     }

@@ -22,22 +22,27 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.jboss;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.naming.Context;
 
 import org.jboss.jmx.adaptor.rmi.RMIAdaptor;
@@ -59,42 +64,32 @@ import org.hyperic.hq.plugin.jboss.jmx.ServiceQuery;
 import org.hyperic.util.config.ConfigResponse;
 
 public class JBossDetector
-    extends DaemonDetector
-    implements AutoServerDetector, FileServerDetector {
+        extends DaemonDetector
+        implements AutoServerDetector, FileServerDetector {
 
     private static final Log log =
-        LogFactory.getLog(JBossDetector.class.getName()); 
-
+            LogFactory.getLog(JBossDetector.class.getName());
     private static final String JBOSS_SERVICE_XML =
-        "conf" + File.separator + "jboss-service.xml";
-
+            "conf" + File.separator + "jboss-service.xml";
     private static final String JBOSS_MAIN = "org.jboss.Main";
-
     private static final String PROP_CP = "-Djava.class.path=";
-
     private static final String PROP_AGENT = "-javaagent:";
 
     //command line options that may lead us to the home directory of 
     //the JBoss instance. Listed in the order we should search them.
     //Only if none of these is specified, we should resort to
     //the run.jar detection method for detection of the paths.
-
     private static final String PROP_SRV_CONFIG_URL =
-        "-Djboss.server.config.url=";
-   
+            "-Djboss.server.config.url=";
     private static final String PROP_SRV_HOME_URL =
-        "-Djboss.server.home.url=";
-
+            "-Djboss.server.home.url=";
     private static final String PROP_SRV_BASE_URL =
-        "-Djboss.server.base.url=";
-
+            "-Djboss.server.base.url=";
     private static final String EMBEDDED_TOMCAT = "jbossweb-tomcat";
 
     //use .sw=java to find both "java" and "javaw"
     private static final String[] PTQL_QUERIES = {
-        "State.Name.sw=java,Args.*.eq=" + JBOSS_MAIN,
-    };
-
+        "State.Name.sw=java,Args.*.eq=" + JBOSS_MAIN,};
     private static HashMap bindings = new HashMap();
 
     private static File getFileFromURL(String name) {
@@ -104,8 +99,7 @@ public class JBossDetector
             if (file.exists()) {
                 return file;
             }
-        }
-        catch(URISyntaxException e) {
+        } catch (URISyntaxException e) {
             //e.printStackTrace();
         }
         return null;
@@ -117,7 +111,7 @@ public class JBossDetector
 
         long[] pids = getPids(query);
 
-        for (int i=0; i<pids.length; i++) {
+        for (int i = 0; i < pids.length; i++) {
             String[] args = getProcArgs(pids[i]);
 
             String classpath = null;
@@ -131,33 +125,27 @@ public class JBossDetector
             String installPath = null;
             boolean mainArgs = false;
 
-            for (int j=0; j<args.length; j++) {
+            for (int j = 0; j < args.length; j++) {
                 String arg = args[j];
 
                 if (arg.equals("-classpath") ||
-                    arg.equals("-cp"))
-                {
-                    classpath = args[j+1];
+                        arg.equals("-cp")) {
+                    classpath = args[j + 1];
                     continue;
-                }
-                else if (arg.startsWith(PROP_CP)) {
+                } else if (arg.startsWith(PROP_CP)) {
                     classpath = arg.substring(PROP_CP.length());
                     continue;
-                }
-                else if (arg.startsWith(PROP_AGENT)) {
+                } else if (arg.startsWith(PROP_AGENT)) {
                     //.../bin/pluggable-instrumentor.jar
                     runJar = arg.substring(PROP_AGENT.length());
                     continue;
-                }
-                else if (arg.startsWith(PROP_SRV_CONFIG_URL)) {
+                } else if (arg.startsWith(PROP_SRV_CONFIG_URL)) {
                     srvConfigUrl = arg.substring(PROP_SRV_CONFIG_URL.length());
                     continue;
-                }
-                else if (arg.startsWith(PROP_SRV_HOME_URL)) {
+                } else if (arg.startsWith(PROP_SRV_HOME_URL)) {
                     srvHomeUrl = arg.substring(PROP_SRV_HOME_URL.length());
                     continue;
-                }
-                else if (arg.startsWith(PROP_SRV_BASE_URL)) {
+                } else if (arg.startsWith(PROP_SRV_BASE_URL)) {
                     srvBaseUrl = arg.substring(PROP_SRV_BASE_URL.length());
                     continue;
                 }
@@ -171,14 +159,13 @@ public class JBossDetector
                 if (mainArgs && arg.startsWith("-c")) {
                     config = arg.substring(2, arg.length());
                     if (config.equals("")) {
-                        config = args[j+1];
+                        config = args[j + 1];
                     }
                     continue;
-                }
-                else if (mainArgs && arg.startsWith("-b")) {
+                } else if (mainArgs && arg.startsWith("-b")) {
                     address = arg.substring(2, arg.length());
                     if (address.equals("")) {
-                        address = args[j+1];
+                        address = args[j + 1];
                     }
                     continue;
                 }
@@ -190,11 +177,9 @@ public class JBossDetector
                 if (configDir != null) {
                     configDir = configDir.getParentFile();
                 }
-            }
-            else if (srvHomeUrl != null) {
+            } else if (srvHomeUrl != null) {
                 configDir = getFileFromURL(srvHomeUrl);
-            }
-            else if ((srvBaseUrl != null) && (config != null)) {
+            } else if ((srvBaseUrl != null) && (config != null)) {
                 configDir = getFileFromURL(srvBaseUrl);
                 if (configDir != null) {
                     configDir = new File(configDir, config);
@@ -207,7 +192,7 @@ public class JBossDetector
 
             if (classpath != null) {
                 StringTokenizer tok =
-                    new StringTokenizer(classpath, File.pathSeparator);
+                        new StringTokenizer(classpath, File.pathSeparator);
 
                 while (tok.hasMoreTokens()) {
                     String jar = tok.nextToken();
@@ -228,8 +213,7 @@ public class JBossDetector
                 String cwd = getProcCwd(pids[i]);
                 if (cwd == null) {
                     continue;
-                }
-                else {
+                } else {
                     root = new File(cwd);
                 }
             }
@@ -255,17 +239,17 @@ public class JBossDetector
 
     private static String getServerConfigPath(File root, String config) {
         File configDir =
-            new File(root, "server" + File.separator + config);
+                new File(root, "server" + File.separator + config);
         return configDir.getAbsolutePath();
     }
 
     private static void findBrandedExe(GenericPlugin plugin, List servers) {
         String query =
-            "State.Name.eq=" + plugin.getPluginProperty("brand.exe");
+                "State.Name.eq=" + plugin.getPluginProperty("brand.exe");
 
         long[] pids = getPids(query);
 
-        for (int i=0; i<pids.length; i++) {
+        for (int i = 0; i < pids.length; i++) {
             String exe = getProcExe(pids[i]);
 
             if (exe == null) {
@@ -274,7 +258,7 @@ public class JBossDetector
 
             //strip bin\brand.exe
             File root =
-                new File(exe).getParentFile().getParentFile();
+                    new File(exe).getParentFile().getParentFile();
 
             String engine = plugin.getPluginProperty("brand.dir");
             if (engine != null) {
@@ -282,7 +266,7 @@ public class JBossDetector
             }
 
             String configPath =
-                getServerConfigPath(root, "default");
+                    getServerConfigPath(root, "default");
 
             servers.add(new JBossInstance(root.getPath(), configPath, pids[i]));
         }
@@ -294,7 +278,7 @@ public class JBossDetector
         String query = "State.Name.eq=jboss";
         long[] pids = getPids(query);
 
-        for (int i=0; i<pids.length; i++) {
+        for (int i = 0; i < pids.length; i++) {
             long pid = pids[i];
             String exe = getProcExe(pid);
 
@@ -310,13 +294,12 @@ public class JBossDetector
             if (root.getName().equals("bin")) {
                 root = root.getParentFile();
                 log.debug("installpath derived from exe=" + exe);
-            }
-            else {
+            } else {
                 String msg = exe + " outside installpath";
                 String cwd = getProcCwd(pids[i]);
                 if (cwd == null) {
                     log.debug(msg +
-                              ", unable to determine cwd for pid=" + pid); 
+                            ", unable to determine cwd for pid=" + pid);
                     continue;
                 }
                 root = new File(cwd).getParentFile();
@@ -327,7 +310,7 @@ public class JBossDetector
             //HKLM\SYSTEM\CurrentControlSet\Services\$service_name\Parameters
             //for -c serverName
             String configPath =
-                getServerConfigPath(root, "default");
+                    getServerConfigPath(root, "default");
 
             servers.add(new JBossInstance(root.getPath(), configPath, pid));
         }
@@ -336,14 +319,14 @@ public class JBossDetector
     private static List getServerProcessList(GenericPlugin plugin) {
         ArrayList servers = new ArrayList();
 
-        for (int i=0; i<PTQL_QUERIES.length; i++) {
+        for (int i = 0; i < PTQL_QUERIES.length; i++) {
             findServerProcess(servers, PTQL_QUERIES[i]);
         }
 
         //look for jboss within brand.exe on Win32 only
         if (isWin32()) {
             findBrandedExe(plugin, servers);
-            
+
             findServiceExe(plugin, servers);
         }
 
@@ -356,9 +339,9 @@ public class JBossDetector
         if (servers.size() == 0) {
             return null;
         }
-        
-        JBossInstance instance = 
-            (JBossInstance)servers.get(0);
+
+        JBossInstance instance =
+                (JBossInstance) servers.get(0);
         return instance.getHomePath();
     }
 
@@ -370,22 +353,21 @@ public class JBossDetector
     private void noteEmbeddedTomcat(String path, String address, String port) {
         File[] dirs = new File(path, "deploy").listFiles();
 
-        for (int i=0; i<dirs.length; i++) {
+        for (int i = 0; i < dirs.length; i++) {
             File dir = dirs[i];
             String name = dir.getName();
 
             if (!dir.isDirectory()) {
                 continue;
             }
-            
+
             if (!(name.startsWith(EMBEDDED_TOMCAT) ||
-                  name.startsWith("jboss-web.deployer")))
-            {
+                    name.startsWith("jboss-web.deployer"))) {
                 continue;
             }
 
             Map notes = getManager().getNotes();
-            List tomcats = (List)notes.get(EMBEDDED_TOMCAT);
+            List tomcats = (List) notes.get(EMBEDDED_TOMCAT);
 
             if (tomcats == null) {
                 tomcats = new ArrayList();
@@ -406,14 +388,14 @@ public class JBossDetector
         }
     }
 
-    public List getServerResources(ConfigResponse platformConfig) 
-        throws PluginException {
+    public List getServerResources(ConfigResponse platformConfig)
+            throws PluginException {
 
         List servers = new ArrayList();
         List paths = getServerProcessList(this);
 
-        for (int i=0; i<paths.size(); i++) {
-            JBossInstance inst = (JBossInstance)paths.get(i);
+        for (int i = 0; i < paths.size(); i++) {
+            JBossInstance inst = (JBossInstance) paths.get(i);
             List found = getServerList(inst.getConfigPath(), inst.getPid());
             if (found != null) {
                 servers.addAll(found);
@@ -431,24 +413,22 @@ public class JBossDetector
         //   since ${jboss.bind.address} is used by default and
         //    overridden by the -b address cmdline argument
         String where;
-        String address = (String)bindings.get(installpath);
+        String address = (String) bindings.get(installpath);
 
         if (address == null) {
             address = getListenAddress(cfg.getJnpPort());
             if ((address == null) || address.equals("localhost")) {
                 address = cfg.getJnpAddress();
                 where = "configuration";
-            }
-            else {
+            } else {
                 where = "TCP listen table";
             }
-        }
-        else {
+        } else {
             where = "-b argument";
         }
 
         getLog().debug("Bind address=" + address +
-                       " (determined from " + where + ")");
+                " (determined from " + where + ")");
 
         return address;
     }
@@ -457,14 +437,15 @@ public class JBossDetector
      * @param installpath Example: /usr/jboss-3.2.3/server/default
      */
     public List getServerList(String installpath)
-        throws PluginException {
-    
+            throws PluginException {
+
         return getServerList(installpath, 0);
     }
 
     public List getServerList(String installpath, long pid)
-        throws PluginException {
+            throws PluginException {
         File configDir = new File(installpath);
+        getLog().debug("[getServerList] configDir='" + configDir + "'");
         File serviceXML = new File(configDir, JBOSS_SERVICE_XML);
         File distDir = configDir.getParentFile().getParentFile();
 
@@ -475,11 +456,15 @@ public class JBossDetector
 
         String serverName = configDir.getName();
 
-        String fullVersion = getVersion(configDir);
-        
+        String fullVersion = getVersion(configDir, "jboss-j2ee.jar");
+
+        // 5.0
+        if (fullVersion == null) {
+            fullVersion = getVersion(configDir.getParentFile().getParentFile(), "jboss-j2se.jar");
+        }
         if (fullVersion == null) {
             getLog().debug("unable to determine JBoss version in: " +
-                           configDir);
+                    configDir);
             return null;
         }
 
@@ -487,12 +472,12 @@ public class JBossDetector
 
         if (!getTypeInfo().getVersion().equals(typeVersion)) {
             getLog().debug(configDir + " (" + fullVersion + ")" +
-                           " is not a " + getName());
+                    " is not a " + getName());
             return null;
         }
 
         getLog().debug("discovered JBoss server [" + serverName + "] in " +
-                       configDir);
+                configDir);
 
         ConfigResponse config = new ConfigResponse();
         ConfigResponse controlConfig = new ConfigResponse();
@@ -502,7 +487,7 @@ public class JBossDetector
 
         String address = getBindAddress(cfg, installpath);
 
-        String jnpUrl = "jnp://" + address + ":" + cfg.getJnpPort(); 
+        String jnpUrl = "jnp://" + address + ":" + cfg.getJnpPort();
         getLog().debug("JNP url=" + jnpUrl);
 
         config.setValue(Context.PROVIDER_URL, jnpUrl);
@@ -514,28 +499,28 @@ public class JBossDetector
             Context.SECURITY_PRINCIPAL,
             Context.SECURITY_CREDENTIALS
         };
-        for (int i=0; i<credProps.length; i++) {
+        for (int i = 0; i < credProps.length; i++) {
             String value =
-                props.getProperty(credProps[i]);
+                    props.getProperty(credProps[i]);
             if (value != null) {
                 config.setValue(credProps[i], value);
             }
         }
 
         String script =
-            distDir + File.separator +
-            JBossServerControlPlugin.getControlScript(isWin32());
+                distDir + File.separator +
+                JBossServerControlPlugin.getControlScript(isWin32());
 
         controlConfig.setValue(ServerControlPlugin.PROP_PROGRAM,
-                               getCanonicalPath(script));
+                getCanonicalPath(script));
 
         controlConfig.setValue(JBossServerControlPlugin.PROP_CONFIGSET,
-                               serverName);
+                serverName);
 
         String logDir =
-            ".." + File.separator +
-            ".." + File.separator +
-            ".." + File.separator + "logs";
+                ".." + File.separator +
+                ".." + File.separator +
+                ".." + File.separator + "logs";
         File brandedLogDir = new File(installpath, logDir);
 
         if (!brandedLogDir.exists()) {
@@ -543,26 +528,25 @@ public class JBossDetector
         }
 
         metricConfig.setValue(Log4JLogTrackPlugin.PROP_FILES_SERVER,
-                              logDir + File.separator + "server.log");
+                logDir + File.separator + "server.log");
 
         ServerResource server = createServerResource(installpath);
 
-        server.setConnectProperties(new String[] {
-            Context.PROVIDER_URL
-        });
+        server.setConnectProperties(new String[]{
+                    Context.PROVIDER_URL
+                });
 
         server.setProductConfig(config);
         server.setMeasurementConfig(metricConfig);
         server.setControlConfig(controlConfig);
 
-        if (JBossProductPlugin.isBrandedServer(configDir, 
-                                               getPluginProperty("brand.ear"))) {
+        if (JBossProductPlugin.isBrandedServer(configDir,
+                getPluginProperty("brand.ear"))) {
             // Branded JBoss
             String brandName = getPluginProperty("brand.name");
             server.setName(getPlatformName() + " " + brandName);
             server.setIdentifier(brandName);
-        }
-        else {
+        } else {
             server.setName(server.getName() + " " + serverName);
         }
 
@@ -587,35 +571,46 @@ public class JBossDetector
 
         return servers;
     }
-    
+
     public List getServerResources(ConfigResponse platformConfig, String path)
-        throws PluginException {
+            throws PluginException {
 
         //strip conf/jboss-service.xml
         return getServerList(getParentDir(path, 2));
     }
-    
+
     protected List discoverServices(ConfigResponse serverConfig)
-        throws PluginException {
-    
+            throws PluginException {
+
         try {
             return discoverJBossServices(serverConfig);
         } catch (SecurityException e) {
             throw new PluginException(e.getMessage(), e);
         }
     }
-    
+
     private List discoverJBossServices(ConfigResponse serverConfig)
-        throws PluginException {
+            throws PluginException {
 
         String url = serverConfig.getValue(Context.PROVIDER_URL);
         RMIAdaptor mServer;
-        
+
         try {
             mServer = JBossUtil.getMBeanServer(serverConfig.toProperties());
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
         }
+
+        // ******* A BORRAR ********** //
+        /*try {
+        Iterator res=mServer.queryNames(null, null).iterator();
+        while(res.hasNext()){
+        getLog().debug("---> "+res.next());
+        }
+        } catch (IOException ex) {
+        Logger.getLogger(JBossDetector.class.getName()).log(Level.SEVERE, null, ex);
+        }*/
+        // ***************** //
 
         configure(serverConfig); //for ServerQuery to use detector.getConfig()
         ServerQuery serverQuery = new ServerQuery(this);
@@ -629,21 +624,21 @@ public class JBossDetector
 
         List services = new ArrayList();
 
-        for (int i=0; i<queries.size(); i++) {
-            ServiceQuery query = (ServiceQuery)queries.get(i);
+        for (int i = 0; i < queries.size(); i++) {
+            ServiceQuery query = (ServiceQuery) queries.get(i);
             ServiceResource service = new ServiceResource();
             service.setName(query.getQualifiedName());
             service.setType(query.getResourceType());
 
             ConfigResponse config =
-                new ConfigResponse(query.getResourceConfig());
+                    new ConfigResponse(query.getResourceConfig());
 
-            if (query.hasControl()) { 
+            if (query.hasControl()) {
                 ConfigResponse controlConfig =
-                    new ConfigResponse(query.getControlConfig());
+                        new ConfigResponse(query.getControlConfig());
                 service.setControlConfig(controlConfig);
             }
-                
+
             service.setProductConfig(config);
             service.setMeasurementConfig();
 
@@ -656,7 +651,7 @@ public class JBossDetector
         //look for any cprop keys in the attributes
         ConfigResponse cprops = new ConfigResponse();
         String[] attrs = this.getCustomPropertiesSchema().getOptionNames();
-        for (int i=0; i<attrs.length; i++) {
+        for (int i = 0; i < attrs.length; i++) {
             String key = attrs[i];
             String val = serverQuery.getAttribute(key);
             if (val != null) {
@@ -668,46 +663,50 @@ public class JBossDetector
         return services;
     }
 
-    public static String getVersion(File installPath) {
+    public static String getVersion(File installPath, String jar) {
         File file =
-            new File(installPath,
-                     "lib" + File.separator + "jboss-j2ee.jar");
-    
+                new File(installPath,
+                "lib" + File.separator + jar);
+
         if (!file.exists()) {
+            log.debug("[getVersion] file '" + file + "' not found");
             return null;
         }
-    
+
         Attributes attributes;
         try {
             JarFile jarFile = new JarFile(file);
+            log.debug("[getVersion] jarFile='" + jarFile.getName() + "'");
             attributes = jarFile.getManifest().getMainAttributes();
         } catch (IOException e) {
+            log.debug(e, e);
             return null;
         }
-    
+
         //e.g. Implementation-Version:
         //3.0.6 Date:200301260037
         //3.2.1 (build: CVSTag=JBoss_3_2_1 date=200306201521)
         //3.2.2 (build: CVSTag=JBoss_3_2_2 date=200310182216)
         //3.2.3 (build: CVSTag=JBoss_3_2_3 date=200311301445)
         //4.0.0DR2 (build: CVSTag=JBoss_4_0_0_DR2 date=200307030107)
-        String version = 
-            attributes.getValue("Implementation-Version");
-    
+        //5.0.1.GA (build: SVNTag=JBoss_5_0_1_GA date=200902231221)
+        String version =
+                attributes.getValue("Implementation-Version");
+        log.debug("[getVersion] version='" + version + "'");
+
         if (version == null) {
             return null;
         }
         if (version.length() < 3) {
             return null;
         }
-    
+
         if (!(Character.isDigit(version.charAt(0)) &&
-              (version.charAt(1) == '.') &&
-              Character.isDigit(version.charAt(2))))
-        {
+                (version.charAt(1) == '.') &&
+                Character.isDigit(version.charAt(2)))) {
             return null;
         }
-    
+
         return version;
     }
 }
