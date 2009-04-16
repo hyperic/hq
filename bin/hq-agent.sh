@@ -31,7 +31,7 @@ if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
 elif [ -d jre ]; then
     HQ_JAVA_HOME=jre
     # Just in case
-    chmod -R +x jre/bin/*
+    chmod -R +x jre/bin/* > /dev/null 2>&1
 elif [ "x$JAVA_HOME" != "x" ] ; then
     HQ_JAVA_HOME=${JAVA_HOME}
 else
@@ -46,7 +46,7 @@ else
     esac
 fi
 
-chmod +x ./pdk/scripts/*
+chmod +x ./pdk/scripts/* >/dev/null 2>&1
 
 HQ_JAVA="${HQ_JAVA_HOME}/bin/java"
 
