@@ -52,7 +52,6 @@ import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorUtil;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
@@ -74,10 +73,6 @@ public class ReportProcessorEJBImpl
 {
     private final Log _log = LogFactory.getLog(ReportProcessorEJBImpl.class);
 
-    private final MeasurementManagerLocal _dmMan =
-        MeasurementManagerEJBImpl.getOne();
-    private final MeasurementProcessorLocal _measurementProc =
-        MeasurementProcessorEJBImpl.getOne();
     private final long MINUTE = MeasurementConstants.MINUTE;
     private final long PRIORITY_OFFSET = MINUTE*3;
     
@@ -87,8 +82,8 @@ public class ReportProcessorEJBImpl
         final boolean debug = _log.isDebugEnabled();
         for (int i=0; i<vals.length; i++)
         {
-            long now = System.currentTimeMillis();
-            now = TimingVoodoo.roundDownTime(now, MINUTE);
+            final long now =
+                TimingVoodoo.roundDownTime(System.currentTimeMillis(), MINUTE);
             try {
                 //this is just to check if the metricvalue is valid
                 //will throw a NumberFormatException if there is a problem
@@ -117,7 +112,7 @@ public class ReportProcessorEJBImpl
     }
 
     private void addData(List points, List priorityPts, Measurement m,
-                         int dsnId, MetricValue[] dpts)
+                         MetricValue[] dpts)
     {
         long interval = m.getInterval();
 
@@ -162,9 +157,11 @@ public class ReportProcessorEJBImpl
         final List availPoints = new ArrayList(dsnLists.length);
         final List priorityAvailPts = new ArrayList(dsnLists.length);
         
+        final MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
+        final boolean debug = _log.isDebugEnabled();
         for (int i = 0; i < dsnLists.length; i++) {
             Integer dmId = new Integer(dsnLists[i].getClientId());
-            Measurement m = _dmMan.getMeasurement(dmId);
+            Measurement m = mMan.getMeasurement(dmId);
             
             // Can't do much if we can't look up the derived measurement
             // If the measurement is enabled, we just throw away their data
@@ -177,6 +174,13 @@ public class ReportProcessorEJBImpl
             }
             // Need to check if resource was asynchronously deleted (type == null)
             final Resource res = m.getResource();
+            if (res == null || res.isInAsyncDeleteState()) {
+                if (debug) {
+                    _log.debug("dropping metricId=" + m.getId() +
+                        " since resource is in async delete state");
+                }
+                continue;
+            }
             if (!resourceMatchesAgent(res, agentToken)) {
                 _log.warn("measurement (id=" + m.getId() + ") was sent to the " +
                     "HQ server from agent (agentToken=" + agentToken + ")" +
@@ -184,20 +188,15 @@ public class ReportProcessorEJBImpl
                     " with that agent.  Dropping measurement.");
                 continue;
             }
-            if (res == null || res.isInAsyncDeleteState()) {
-                continue;
-            }
 
-            boolean isAvail = m.getTemplate().isAvailability();
-            ValueList[] valLists = dsnLists[i].getDsns();
+            final boolean isAvail = m.getTemplate().isAvailability();
+            final ValueList[] valLists = dsnLists[i].getDsns();
             for (int j = 0; j < valLists.length; j++) {
-                int dsnId = valLists[j].getDsnId();
-                MetricValue[] vals = valLists[j].getValues();
-
+                final MetricValue[] vals = valLists[j].getValues();
                 if (isAvail) {
-                    addData(availPoints, priorityAvailPts, m, dsnId, vals);
+                    addData(availPoints, priorityAvailPts, m, vals);
                 } else {
-                    addData(dataPoints, null, m, dsnId, vals);
+                    addData(dataPoints, null, m, vals);
                 }
             }
         }
@@ -217,7 +216,8 @@ public class ReportProcessorEJBImpl
             AppdefEntityID[] entIds = (AppdefEntityID[])
                 nonEntities.toArray(new AppdefEntityID[nonEntities.size()]);
             try {
-                _measurementProc.unschedule(report.getAgentToken(), entIds);
+                MeasurementProcessorEJBImpl.getOne().unschedule(
+                    report.getAgentToken(), entIds);
             } catch (MeasurementUnscheduleException e) {
                 _log.error("Cannot unschedule entities: " +
                           StringUtil.arrayToString(entIds));
