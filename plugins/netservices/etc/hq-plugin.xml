@@ -233,6 +233,13 @@
             type="port"
             default="161"/>
 
+    <option name="snmpTransport"
+            description="SNMP Transport"
+            type="enum">
+      <include name="udp"/>
+      <include name="tcp"/>
+    </option>
+
     <option name="snmpVersion"
             description="SNMP Version"
             type="enum">

@@ -107,6 +107,7 @@ class SNMPSession_v3 extends SNMPSession_v2c {
 
     void init(String host,
               String port,
+              String transport,
               String user,
               String password,
               int authmethod)
@@ -135,7 +136,7 @@ class SNMPSession_v3 extends SNMPSession_v2c {
         } 
         this.target = target;
 
-        initSession(host, port);
+        initSession(host, port, transport);
         USM usm = this.session.getUSM();
         if (usm.getUserTable().getUser(securityName) != null) {
             return;

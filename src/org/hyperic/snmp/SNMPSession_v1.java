@@ -41,10 +41,13 @@ import org.snmp4j.event.ResponseEvent;
 import org.snmp4j.mp.SnmpConstants;
 import org.snmp4j.smi.Address;
 import org.snmp4j.smi.GenericAddress;
+import org.snmp4j.smi.TcpAddress;
 import org.snmp4j.smi.UdpAddress;
 import org.snmp4j.smi.OID;
 import org.snmp4j.smi.OctetString;
 import org.snmp4j.smi.VariableBinding;
+import org.snmp4j.transport.AbstractTransportMapping;
+import org.snmp4j.transport.DefaultTcpTransportMapping;
 import org.snmp4j.transport.DefaultUdpTransportMapping;
 import org.snmp4j.util.DefaultPDUFactory;
 import org.snmp4j.util.TreeEvent;
@@ -63,8 +66,15 @@ class SNMPSession_v1 implements SNMPSession {
         throws IOException {
 
         if (sessionInstance == null) {
-            UdpAddress addr = new UdpAddress("0.0.0.0/0");
-            sessionInstance = new Snmp(new DefaultUdpTransportMapping(addr));
+            String listen = "0.0.0.0/0";
+            AbstractTransportMapping transport;
+            if (this.address instanceof TcpAddress) {
+              transport = new DefaultTcpTransportMapping(new TcpAddress(listen));
+            }
+            else {
+              transport = new DefaultUdpTransportMapping(new UdpAddress(listen));
+            }
+            sessionInstance = new Snmp(transport);
             sessionInstance.listen();
         }
 
@@ -75,7 +85,7 @@ class SNMPSession_v1 implements SNMPSession {
         this.version = SnmpConstants.version1;
     }
 
-    protected void initSession(String address, String port)
+    protected void initSession(String address, String port, String transport)
         throws SNMPException {
 
         if (address == null) {
@@ -87,7 +97,7 @@ class SNMPSession_v1 implements SNMPSession {
         }
 
         this.address =
-            GenericAddress.parse("udp:" + address + "/" + port);
+            GenericAddress.parse(transport + ":" + address + "/" + port);
         this.target.setAddress(this.address);
         this.target.setVersion(this.version);
         this.target.setRetries(1);
@@ -102,7 +112,8 @@ class SNMPSession_v1 implements SNMPSession {
 
     void init(String address,
               String port,
-              String community)
+              String community,
+              String transport)
         throws SNMPException {
 
         CommunityTarget target = new CommunityTarget();
@@ -111,7 +122,7 @@ class SNMPSession_v1 implements SNMPSession {
         }
         target.setCommunity(new OctetString(community));
         this.target = target;
-        initSession(address, port);
+        initSession(address, port, transport);
     }
 
     protected static OID getOID(String name)

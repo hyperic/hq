@@ -48,6 +48,7 @@ public class SNMPClient {
 
     public static final int DEFAULT_PORT = 161;
     public static final String DEFAULT_PORT_STRING = String.valueOf(DEFAULT_PORT);
+    public static final String DEFAULT_TRANSPORT = "udp";
     public static final String DEFAULT_COMMUNITY =
         System.getProperty("snmp.defaultCommunity", "public");
     public static final String DEFAULT_USERNAME  = "username";
@@ -63,6 +64,7 @@ public class SNMPClient {
 
     public static final String PROP_IP        = "snmpIp";
     public static final String PROP_PORT      = "snmpPort";
+    public static final String PROP_TRANSPORT = "snmpTransport";
     public static final String PROP_VERSION   = "snmpVersion";
     public static final String PROP_COMMUNITY = "snmpCommunity";
     public static final String PROP_USER      = "snmpUser";
@@ -213,6 +215,7 @@ public class SNMPClient {
         String port      = props.getProperty(PROP_PORT, DEFAULT_PORT_STRING);
         String version   = props.getProperty(PROP_VERSION, VALID_VERSIONS[1]);
         String community = props.getProperty(PROP_COMMUNITY, DEFAULT_COMMUNITY);
+        String transport = props.getProperty(PROP_TRANSPORT, DEFAULT_TRANSPORT);
 
         SNMPSession session = null;
 
@@ -220,7 +223,8 @@ public class SNMPClient {
             address.hashCode() ^
             port.hashCode() ^
             version.hashCode() ^
-            community.hashCode();
+            community.hashCode() ^
+            transport.hashCode();
 
         synchronized (sessionCache) {
             session = (SNMPSession)sessionCache.get(id);
@@ -237,7 +241,7 @@ public class SNMPClient {
             switch (snmpVersion) {
               case SNMPClient.VERSION_1:
               case SNMPClient.VERSION_2C:
-                ((SNMPSession_v1)session).init(address, port, community);
+                ((SNMPSession_v1)session).init(address, port, community, transport);
                 break;
               case SNMPClient.VERSION_3:
                 String user =
@@ -247,7 +251,7 @@ public class SNMPClient {
                 int authtype =
                     parseAuthMethod(props.getProperty(PROP_AUTHTYPE,
                                                       VALID_AUTHTYPES[0]));
-                ((SNMPSession_v3)session).init(address, port, user, pass, authtype);
+                ((SNMPSession_v3)session).init(address, port, transport, user, pass, authtype);
                 break;
               default:
                 throw new SNMPException("unsupported SNMP version");
