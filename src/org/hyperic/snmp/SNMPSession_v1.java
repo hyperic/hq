@@ -33,6 +33,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.snmp4j.AbstractTarget;
 import org.snmp4j.CommunityTarget;
 import org.snmp4j.PDU;
 import org.snmp4j.Snmp;
@@ -52,7 +53,7 @@ import org.snmp4j.util.TreeUtils;
 class SNMPSession_v1 implements SNMPSession {
 
     protected int version;
-    protected CommunityTarget target;
+    protected AbstractTarget target;
     protected Snmp session;
     private Address address;
     private static Snmp sessionInstance = null;
@@ -74,9 +75,7 @@ class SNMPSession_v1 implements SNMPSession {
         this.version = SnmpConstants.version1;
     }
 
-    void init(String address,
-              String port,
-              String community)
+    protected void initSession(String address, String port)
         throws SNMPException {
 
         if (address == null) {
@@ -87,18 +86,9 @@ class SNMPSession_v1 implements SNMPSession {
             port = SNMPClient.DEFAULT_PORT_STRING;
         }
 
-        if (community == null) {
-            community = SNMPClient.DEFAULT_COMMUNITY;
-        }
-        
         this.address =
             GenericAddress.parse("udp:" + address + "/" + port);
-
-        this.target =
-            new CommunityTarget();
-
         this.target.setAddress(this.address);
-        this.target.setCommunity(new OctetString(community));
         this.target.setVersion(this.version);
         this.target.setRetries(1);
         this.target.setTimeout(1500);
@@ -108,6 +98,20 @@ class SNMPSession_v1 implements SNMPSession {
         } catch (IOException e) {
             throw new SNMPException(e.getMessage(), e);
         }
+    }
+
+    void init(String address,
+              String port,
+              String community)
+        throws SNMPException {
+
+        CommunityTarget target = new CommunityTarget();
+        if (community == null) {
+            community = SNMPClient.DEFAULT_COMMUNITY;
+        }
+        target.setCommunity(new OctetString(community));
+        this.target = target;
+        initSession(address, port);
     }
 
     protected static OID getOID(String name)
@@ -128,11 +132,19 @@ class SNMPSession_v1 implements SNMPSession {
 
         return new OID(oid);
     }
-    
+
+    protected PDU newPDU() {
+        return newPDU();
+    }
+
     protected PDU getPDU(String oid, int type)
         throws MIBLookupException {
 
-        PDU pdu = new PDU();
+        return getPDU(getOID(oid), type);
+    }
+    
+    protected PDU getPDU(OID oid, int type) {
+        PDU pdu = newPDU();
         pdu.setType(type);
 
         if (type == PDU.GETBULK) {
@@ -140,7 +152,7 @@ class SNMPSession_v1 implements SNMPSession {
             pdu.setNonRepeaters(0);
         }
 
-        pdu.add(new VariableBinding(getOID(oid)));
+        pdu.add(new VariableBinding(oid));
 
         return pdu;
     }
@@ -285,9 +297,7 @@ class SNMPSession_v1 implements SNMPSession {
         oid.append(index);
         oid.append(leaf);
 
-        PDU request = new PDU();
-        request.setType(PDU.GET);
-        request.add(new VariableBinding(oid));
+        PDU request = getPDU(oid, PDU.GET);
 
         PDU response;
         ResponseEvent event = null;
