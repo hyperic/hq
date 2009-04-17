@@ -147,7 +147,7 @@ if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
 elif [ -d "${AGENT_INSTALL_HOME}/jre" ]; then
     HQ_JAVA_HOME="${AGENT_INSTALL_HOME}"/jre
     # Just in case
-    chmod -R +x "${AGENT_INSTALL_HOME}"/jre/bin/*
+    chmod -R +x "${AGENT_INSTALL_HOME}"/jre/bin/* > /dev/null 2>&1
 elif [ "x$JAVA_HOME" != "x" ] ; then
     HQ_JAVA_HOME=${JAVA_HOME}
 else
@@ -166,7 +166,7 @@ fi
 export HQ_JAVA_HOME
 export SIGAR_PROC_NET
 
-chmod +x "${AGENT_BUNDLE_HOME}"/pdk/scripts/*
+chmod +x "${AGENT_BUNDLE_HOME}"/pdk/scripts/* > /dev/null 2>&1
 
 HQ_JAVA="${HQ_JAVA_HOME}/bin/java"
 # verify that the java command actually exists
