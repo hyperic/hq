@@ -9787,7 +9787,7 @@ has already been defined.
   <schemaSpec version="3.143">
     <schema-directSQL>
         <statement targetDB="oracle" fail="false">
-          ALTER TABLE EAM_ESCALATION_STATE DISABLE UNIQUE (ALERT_DEF_ID, ALERT_ID)
+          ALTER TABLE EAM_ESCALATION_STATE DROP UNIQUE (ALERT_DEF_ID, ALERT_ID)
         </statement>
         <statement targetDB="postgresql" fail="false">
           ALTER TABLE EAM_ESCALATION_STATE DROP CONSTRAINT ALERT_DEF_ID_KEY CASCADE
