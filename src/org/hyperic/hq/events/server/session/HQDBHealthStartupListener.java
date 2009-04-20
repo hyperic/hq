@@ -31,9 +31,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.ResourceBundle;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.naming.InitialContext;
@@ -59,10 +61,7 @@ import org.hyperic.util.jdbc.DBUtil;
 public class HQDBHealthStartupListener 
     implements StartupListener, PluginsDeployedCallback {
 
-    /**
-     * The period (in msec) at which heart beats are dispatched by the 
-     * Heart Beat Service.
-     */
+    private static final String BUNDLE = "org.hyperic.hq.events.Resources";
     private static final Object HEALTH_CHECK_LOCK = new Object();
     private static final int HEALTH_CHECK_PERIOD_MILLIS = 15*1000;
     private static final int FAILURE_CHECK_PERIOD_MILLIS = 1000;
@@ -243,12 +242,22 @@ public class HQDBHealthStartupListener
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
                 t.printStackTrace(pw);
+
+                StringBuffer sb = new StringBuffer();
+                MessageFormat messageFormat = 
+                    new MessageFormat((ResourceBundle.getBundle(BUNDLE)
+                                            .getString("event.hqdbhealth.email.message")));
+                messageFormat.format(
+                        new String[] {
+                                new Date().toString(), 
+                                sw.toString()},
+                        sb, null);      
+
+                Arrays.fill(body, sb.toString());
                 
-                Arrays.fill(body, 
-                            "Hyperic HQ Shutdown was initiated because of the following error:\n\n"
-                                + sw.toString());
-                
-                EmailFilter.sendEmail(addresses, "Hyperic HQ Shutdown Notification", 
+                EmailFilter.sendEmail(addresses, 
+                                      ResourceBundle.getBundle(BUNDLE)
+                                          .getString("event.hqdbhealth.email.subject"), 
                                       body, null, null);
             } catch (AddressException e) {
                 _log.error("Invalid email address: " + hqadminEmail);
