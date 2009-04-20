@@ -75,7 +75,7 @@ public class MySqlServerDetector
     private static final String VERSION_4_0_x = "4.0.x",
                                 VERSION_4_1_x = "4.1.x",
                                 VERSION_5_0_x = "5.0.x",
-                                VERSION_5_1_x = "4.1.x",
+                                VERSION_5_1_x = "5.1.x",
                                 TABLE_SERVICE = "Table",
                                 SLAVE_STATUS  = "Slave Status",
                                 SHOW_SLAVE_STATUS  = "Show Slave Status";
@@ -116,6 +116,8 @@ public class MySqlServerDetector
         String url  = serverConfig.getValue(JDBCMeasurementPlugin.PROP_URL);
         String user = serverConfig.getValue(JDBCMeasurementPlugin.PROP_USER);
         String pass = serverConfig.getValue(JDBCMeasurementPlugin.PROP_PASSWORD);
+        pass = (pass == null) ? "" : pass;
+        pass = (pass.matches("^\\s*$")) ? "" : pass;
         try {
             _conn = getConnection(url, user, pass, serverConfig);
             setTableServices(rtn, serverConfig);
