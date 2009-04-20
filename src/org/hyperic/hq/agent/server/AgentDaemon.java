@@ -690,10 +690,6 @@ public class AgentDaemon
             this.ppm.registerCustomPlugins("..");
             
             logger.info("Product Plugin Manager initalized");
-        } catch(PluginExistsException exc){
-            logger.error("Plugin initialize > 1 time", exc);
-            throw new AgentStartException("Unable to initialize plugin " +
-                                          "manager: " + exc.getMessage());
         } catch(PluginException e){
             logger.error("Error initializing plugins ", e);
             throw new AgentStartException("Unable to initialize plugin " +

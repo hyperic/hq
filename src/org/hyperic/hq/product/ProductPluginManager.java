@@ -771,7 +771,11 @@ public class ProductPluginManager extends PluginManager {
         while (dir != null) {
             File customPluginDir = new File(dir, "hq-plugins");
             if (customPluginDir.exists()) {
-                return registerPlugins(customPluginDir.toString());
+            	try {
+            		return registerPlugins(customPluginDir.toString());
+            	} catch (PluginExistsException e) {
+            		continue;
+            	}
             }
             dir = dir.getParentFile();
         }
@@ -834,6 +838,8 @@ public class ProductPluginManager extends PluginManager {
                     log.info("Cannot load " + name + ": " +
                              unsupportedClassVersionMessage(e.getMessage()));
                     continue;
+                } catch (PluginExistsException e) {
+                	continue;
                 }
                 nplugins++;
             }
@@ -1008,7 +1014,13 @@ public class ProductPluginManager extends PluginManager {
 
             setPluginInfo(pluginName, info);
 
-            registerPlugin(plugin, null);
+            // Skip duplicate plugins
+            try {
+                registerPlugin(plugin, null);
+            } catch (PluginExistsException e) {
+         	   log.error("Unable to deploy plugin '" + jarName + "'", e);
+         	   throw e;
+            }
 
             TypeInfo[] types = plugin.getTypes();
 
