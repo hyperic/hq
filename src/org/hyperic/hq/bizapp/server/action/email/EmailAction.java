@@ -151,32 +151,47 @@ public class EmailAction extends EmailActionConfig
             AlertDefinitionInterface alertDef =
                 alert.getAlertDefinitionInterface();
             AppdefEntityID appEnt = getResource(alertDef);
-
-            Resource resource = alertDef.getResource();
-
-            String[] body = new String[addrs.size()];
-            String[] htmlBody = new String[addrs.size()];
-            EmailRecipient[] to = (EmailRecipient[])
-                addrs.keySet().toArray(new EmailRecipient[addrs.size()]);
             
-            for (int i = 0; i < to.length; i++) {
-                AuthzSubject user = (AuthzSubject) addrs.get(to[i]);
-                if (to[i].useHtml()) {
-                    htmlBody[i] = createText(alertDef, info, resource, alert,
-                                             "html_email.gsp", user);
-                }
-                body[i] = createText(alertDef, info, resource, alert, 
-                                     isSms() ? "sms_email.gsp" :
-                                         "text_email.gsp", user);
+            String logStr = "No notifications sent, see server log for details.";
+            if (appEnt != null) {
+
+            	Resource resource = alertDef.getResource();
+            	if (resource != null) {
+            		String[] body = new String[addrs.size()];
+            		String[] htmlBody = new String[addrs.size()];
+            		EmailRecipient[] to = (EmailRecipient[])
+            		addrs.keySet().toArray(new EmailRecipient[addrs.size()]);
+
+            		for (int i = 0; i < to.length; i++) {
+            			AuthzSubject user = (AuthzSubject) addrs.get(to[i]);
+            			if (to[i].useHtml()) {
+            				htmlBody[i] = createText(alertDef, info, resource, alert,
+            						"html_email.gsp", user);
+            			}
+            			body[i] = createText(alertDef, info, resource, alert, 
+            					isSms() ? "sms_email.gsp" :
+            						"text_email.gsp", user);
+            		}
+
+            		filter.sendAlert(appEnt, to,
+            				createSubject(alertDef, alert, resource, ""),
+            				body, htmlBody, alertDef.getPriority(),
+            				alertDef.isNotifyFiltered());
+
+            		StringBuffer result = getLog(to);
+            		logStr = result.toString();
+
+            	} else {
+            		_log.warn("No resource for alert definition " + alertDef.getId() +
+            				  ", perhaps the resource was deleted?  Email notification will not be sent.");
+            	}
+            } else {
+        		_log.warn("No appdef entity ID for alert definition " + alertDef.getId() +
+				  ", perhaps the related platform was deleted?  Email notification will not be sent.");
             }
-
-            filter.sendAlert(appEnt, to,
-                             createSubject(alertDef, alert, resource, ""),
-                             body, htmlBody, alertDef.getPriority(),
-                             alertDef.isNotifyFiltered());
-
-            StringBuffer result = getLog(to);
-            return result.toString();
+            
+            return logStr;
+            
         } catch (Exception e) {
             throw new ActionExecuteException(e);
         }
