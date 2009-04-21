@@ -156,7 +156,7 @@ public class EmailAction extends EmailActionConfig
             if (appEnt != null) {
 
             	Resource resource = alertDef.getResource();
-            	if (resource != null) {
+            	if (resource != null && !resource.isInAsyncDeleteState()) {
             		String[] body = new String[addrs.size()];
             		String[] htmlBody = new String[addrs.size()];
             		EmailRecipient[] to = (EmailRecipient[])
