@@ -258,7 +258,8 @@ public class MySqlStatsMeasurementPlugin
         String valColumn = metric.getObjectProperty("value");
         String alias = metric.getAttributeName();
         if (alias.equalsIgnoreCase(BYTES_BEHIND_MASTER)) {
-            return getBytesBehindMaster(metric);
+            final double tmp = getBytesBehindMaster(metric);
+            return (tmp >= 0) ? tmp : 0d;
         } else if (alias.equalsIgnoreCase(LOG_FILES_BEHIND_MASTER)) {
             return getLogFilesBehindMaster(metric);
         } else if (metric.isAvail()) {
