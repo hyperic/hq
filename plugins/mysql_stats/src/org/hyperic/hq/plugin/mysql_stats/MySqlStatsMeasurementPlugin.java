@@ -392,6 +392,8 @@ public class MySqlStatsMeasurementPlugin
     protected Connection getConnection(String url, String user, String password)
         throws SQLException {
         try {
+            password = (password == null) ? "" : password;
+            password = (password.matches("^\\s*$")) ? "" : password;
             Driver driver = (Driver)Class.forName(_driver).newInstance();
             final Properties props = new Properties();
             props.put("user", user);
