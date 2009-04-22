@@ -104,8 +104,6 @@ public class EmailAction extends EmailActionConfig
     private static final Log _log = LogFactory.getLog(EmailAction.class);
     private static final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
 
-    private ResourceBundle resourceBundle;
-
     static {
         ServerConfigManagerLocal sConf = ServerConfigManagerEJBImpl.getOne();
         int tmp = 0;
@@ -141,13 +139,6 @@ public class EmailAction extends EmailActionConfig
 
     protected final AuthzSubjectManagerLocal getSubjMan() {
         return AuthzSubjectManagerEJBImpl.getOne();
-    }
-    
-    private ResourceBundle getResourceBundle() {
-        if (resourceBundle == null) {
-            resourceBundle = ResourceBundle.getBundle(BUNDLE);
-        }
-        return resourceBundle;
     }
 
     private String renderTemplate(String filename, Map params) {
@@ -206,14 +197,14 @@ public class EmailAction extends EmailActionConfig
     {
         try {
             if (!AlertRegulator.getInstance().alertNotificationsAllowed()) {
-                return getResourceBundle()
+                return ResourceBundle.getBundle(BUNDLE)
                             .getString("action.email.error.notificationDisabled");
             }
             
             Map addrs = lookupEmailAddr();
             
             if (addrs.isEmpty()) {
-                return getResourceBundle()
+                return ResourceBundle.getBundle(BUNDLE)
                             .getString("action.email.error.noEmailAddress");
             }
 
@@ -554,7 +545,7 @@ public class EmailAction extends EmailActionConfig
                 return _continueSubject;
             }
             _continueSubject = ResourceBundle.getBundle(BUNDLE).getString(
-                "alert.threshold.subject.end.message");
+                "alert.threshold.subject.continue.message");
             return _continueSubject;
         }
 
@@ -563,7 +554,7 @@ public class EmailAction extends EmailActionConfig
                 return _beginSubject;
             }
             _beginSubject = ResourceBundle.getBundle(BUNDLE).getString(
-                "alert.threshold.subject.end.message");
+                "alert.threshold.subject.begin.message");
             return _beginSubject;
         }
 
