@@ -276,6 +276,16 @@ public class ApacheBinaryInfo {
         }
     }
 
+    public File serverRootRelative(String name) {
+        File file = new File(name);
+        if (!file.isAbsolute() && (this.root != null)) {
+            return new File(this.root, name);
+        }
+        else {
+            return file;
+        }
+    }
+
     private void getVersionCmdInfo(String binary) {
         ByteArrayOutputStream stdOut = new ByteArrayOutputStream();
         ByteArrayOutputStream stdErr = new ByteArrayOutputStream();
