@@ -329,7 +329,7 @@ public class ApacheServerDetector
     }
 
     private void setPidFile(ConfigResponse config, String file) {
-        config.setValue(ApacheControlPlugin.DEFAULT_PIDFILE, file);
+        config.setValue(ApacheControlPlugin.PROP_PIDFILE, file);
     }
 
     protected boolean configureServer(ServerResource server, ApacheBinaryInfo binary)
@@ -678,12 +678,15 @@ public class ApacheServerDetector
             }
             setConfigTrack(config, binary.conf);
             String log = (String)cfg.get("ErrorLog");
-            if (exists(log)) {
+            if (binary.serverRootRelative(log).exists()) {
                 setLogTrack(config, log);                        
             }
             String pid = (String)cfg.get("PidFile");
-            if (exists(pid)) {
-                setPidFile(config, log);
+            if (pid != null) {
+                File pidFile = binary.serverRootRelative(pid);
+                if (pidFile.exists()) {
+                    setPidFile(config, pidFile.getPath());    
+                }
             }
         }
         if (port == null) {
