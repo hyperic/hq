@@ -70,26 +70,18 @@ public class IDGeneratorFactory {
                NamingException,
                SequenceRetrievalException,
                SQLException {
-        if(!generatorMap.containsKey(sequenceName)) {
-            synchronized(generatorMap) {
-                createGenerator(ctx, sequenceName, dsName);
+    	
+    	IDGenerator result = null;
+    	synchronized (generatorMap) {
+    		result = (IDGenerator) generatorMap.get(sequenceName);
+    	
+    		if (result == null) {
+                result = new IDGenerator(ctx, sequenceName,
+                						DEFAULT_INTERVAL, dsName);
+                generatorMap.put(sequenceName, result); 
             }
         }
-        return (IDGenerator)generatorMap.get(sequenceName);                                                                    
-    }
-
-    private static synchronized void createGenerator(String ctx, String seq, 
-                                                     String dsName) 
-        throws ConfigPropertyException,
-               NamingException,
-               SequenceRetrievalException,
-               SQLException {
-        if (!generatorMap.containsKey(seq)) {                          
-            IDGenerator aGenerator = new IDGenerator(ctx,
-                                                 seq,
-                                                 DEFAULT_INTERVAL,
-                                                 dsName);
-            generatorMap.put(seq, aGenerator); 
-        }
+    	
+        return result;                                                                    
     }
 }
