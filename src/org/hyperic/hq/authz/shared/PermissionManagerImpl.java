@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -51,7 +51,9 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.events.server.session.HierarchicalAlertingManagerEJBImpl;
 import org.hyperic.hq.events.server.session.MaintenanceEventManagerEJBImpl;
+import org.hyperic.hq.events.shared.HierarchicalAlertingManagerInterface;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -495,5 +497,9 @@ public class PermissionManagerImpl
 
     public CloningBossInterface getCloningBoss() {
     	return CloningBossEJBImpl.getOne();
-    }    
+    }
+    
+    public HierarchicalAlertingManagerInterface getHierarchicalAlertingManager() {
+        return HierarchicalAlertingManagerEJBImpl.getOne();
+    }
 }

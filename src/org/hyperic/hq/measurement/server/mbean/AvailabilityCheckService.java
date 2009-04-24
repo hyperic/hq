@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -26,13 +26,18 @@
 package org.hyperic.hq.measurement.server.mbean;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
@@ -41,6 +46,7 @@ import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.AvailabilityCache;
 import org.hyperic.hq.measurement.server.session.MeasDataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.ResourceDataPoint;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.TimeUtil;
@@ -107,7 +113,7 @@ public class AvailabilityCheckService
         return TimingVoodoo.roundDownTime(begin, measInterval);
     }
 
-    private List getDownPlatforms(Date lDate) {
+    private Collection getDownPlatforms(Date lDate) {
         final boolean debug = _log.isDebugEnabled();
         AvailabilityCache cache = AvailabilityCache.getInstance();
         AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
@@ -115,7 +121,8 @@ public class AvailabilityCheckService
         final long now = TimingVoodoo.roundDownTime(
             lDate.getTime(), MeasurementConstants.MINUTE);
         final String nowTimestamp = TimeUtil.toString(now);
-        List rtn = new ArrayList(platformResources.size());
+        Map rtn = new HashMap(platformResources.size());
+        Resource resource = null;
         synchronized (cache) {
             for (Iterator i = platformResources.iterator(); i.hasNext();) {
                 Measurement meas = (Measurement)i.next();
@@ -142,7 +149,9 @@ public class AvailabilityCheckService
                     long t = TimingVoodoo.roundDownTime(now - interval, interval);
                     DataPoint point = new DataPoint(
                         meas.getId(), new MetricValue(AVAIL_PAUSED, t));
-                    rtn.add(new ResourceDataPoint(meas.getResource(), point));
+                    resource = meas.getResource();
+                    rtn.put(resource.getId(),
+                            new ResourceDataPoint(resource, point));
                 } else if (last.getValue() == AVAIL_DOWN ||
                            (now - lastTimestamp) > interval*2) {
                     long t = (last.getValue() != AVAIL_DOWN) ?
@@ -152,23 +161,17 @@ public class AvailabilityCheckService
                         TimingVoodoo.roundDownTime(now, interval) : t;
                     DataPoint point = new DataPoint(
                         meas.getId(), new MetricValue(AVAIL_DOWN, t));
-                    rtn.add(new ResourceDataPoint(meas.getResource(), point));
+                    resource = meas.getResource();
+                    rtn.put(resource.getId(),
+                            new ResourceDataPoint(resource, point));                    
                 }
             }
         }
-        return rtn;
-    }
-    
-    private class ResourceDataPoint extends DataPoint {
-        private Resource _resource;
-        public ResourceDataPoint(Resource resource, DataPoint point) {
-            super(point.getMetricId().intValue(), point.getValue(),
-                point.getTimestamp());
-            _resource = resource;
-        }
-        public Resource getResource() {
-            return _resource;
-        }
+        
+        PermissionManagerFactory.getInstance().getHierarchicalAlertingManager()
+                .performSecondaryAvailabilityCheck(rtn);
+
+        return rtn.values();
     }
 
     protected void hitInSession(Date lDate) {
@@ -194,7 +197,7 @@ public class AvailabilityCheckService
         }
         try {
             synchronized (cache) {
-                List downPlatforms = getDownPlatforms(lDate);
+                Collection downPlatforms = getDownPlatforms(lDate);
                 List backfillList = getBackfillPts(downPlatforms, current);
                 backfillAvails(backfillList);
             }
@@ -220,7 +223,7 @@ public class AvailabilityCheckService
         }
     }
 
-    private List getBackfillPts(List downPlatforms, long current) {
+    private List getBackfillPts(Collection downPlatforms, long current) {
         final boolean debug = _log.isDebugEnabled();
         AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
         final AvailabilityCache cache = AvailabilityCache.getInstance();
@@ -236,7 +239,9 @@ public class AvailabilityCheckService
             }
             rtn.add(rdp);
             List associatedResources =
-                availMan.getAvailMeasurementChildren(platform);
+                availMan.getAvailMeasurementChildren(
+                            platform,
+                            AuthzConstants.ResourceEdgeContainmentRelation);
             if (debug) {
                 _log.debug("platform id " + platform.getId() + " has " +
                     associatedResources.size() + " associated resources");

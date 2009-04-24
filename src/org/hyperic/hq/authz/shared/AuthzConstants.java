@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -184,8 +184,12 @@ public final class AuthzConstants {
     public static final Integer     authzServerProto    =  new Integer(602);
     public static final Integer     authzServiceProto   =  new Integer(603);
     public static final Integer     authzApplicationProto  =  new Integer(604);
-    
+ 
+    // Resource Relation constants
+    public static final Integer RELATION_CONTAINMENT_ID = new Integer(1);
+    public static final Integer RELATION_NETWORK_ID = new Integer(2);
     public static final String ResourceEdgeContainmentRelation = "containment";
+    public static final String ResourceEdgeNetworkRelation = "network";
     
     public static boolean isOverlord(Integer subject) {
         return subject.equals(AuthzConstants.overlordId);

@@ -50,12 +50,12 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
-import org.hyperic.hq.events.server.session.AvailabilityDownAlertDefinitionCache;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TimingVoodoo;
@@ -171,10 +171,21 @@ public class AvailabilityManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public List getAvailMeasurementChildren(Resource resource) {
-        List list = new ArrayList();
-        list.add(resource.getId());
-        return getMeasurementDAO().findRelatedAvailMeasurements(list);
+    public List getAvailMeasurementChildren(Resource resource,
+                                            String resourceRelationType) {
+        return getMeasurementDAO().findRelatedAvailMeasurements(
+                                        Collections.singletonList(resource.getId()),
+                                        resourceRelationType);
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public List getAvailMeasurementParent(Resource resource,
+                                          String resourceRelationType) {
+        return getMeasurementDAO().findParentAvailMeasurements(
+                                      resource,
+                                      resourceRelationType);
     }
     
     /**
@@ -1221,59 +1232,20 @@ public class AvailabilityManagerEJBImpl
             ZeventManager.getInstance().enqueueEventsAfterCommit(zevents);
         }
     }
-
+    
     /**
-     * Determine whether the data point can be suppressed
-     * as part of inventory-based hierarchical alerting
+     * Determine whether the availability data point can
+     * be suppressed as part of hierarchical alerting
      */
-    private boolean suppressAvailabilityDataPoint(DataPoint dp) {        
-        // only suppress availability "DOWN" data point
+    private boolean suppressAvailabilityDataPoint(DataPoint dp) {
+        // only consider availability "DOWN" data point for suppression
         if (dp.getMetricValue().getValue() != AVAIL_DOWN) {
             return false;
         }
         
-        Measurement measurement = getMeasurement(dp.getMetricId());
-        
-        try {
-            int appdefType = measurement.getAppdefType();
-            
-            // platform is the root resource and has no parents, 
-            // so do not suppress
-            if (appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-                return false;
-            }
-        } catch (NullPointerException npe) {
-            // resource type is null so resource has been asynchronously deleted
-        }
-        
-        boolean suppress = false;
-        AvailabilityDownAlertDefinitionCache downMonitorCache = 
-                AvailabilityDownAlertDefinitionCache.getInstance();
-        
-        // get availability of parent resources
-        Resource childResource = measurement.getResource();
-        List availabilityMeasurements = getMeasurementDAO()
-                                            .findParentAvailMeasurements(childResource);
-        
-        for (Iterator it=availabilityMeasurements.iterator(); it.hasNext(); ) {
-            Measurement m = (Measurement) it.next();
-            MetricValue last = getLastAvail(m);
-            
-            if (last != null && last.getValue() == AVAIL_DOWN) {
-                // parent resource is down, but check to see if an availability "down"
-                // alert definition exists for the parent resource                          
-                if (downMonitorCache.exists(m.getEntityId())) {
-                    suppress = true;
-                    _log.info("Parent resource [" + m.getResource().getName()
-                            + "] of resource [" + childResource.getName() 
-                            + "] is unavailable and being monitored. Last metric value=" 
-                            + last + " at time=" + last.getTimestamp());
-                    break;
-                }
-            }
-        }
-        
-        return suppress;
+        return PermissionManagerFactory.getInstance()
+                    .getHierarchicalAlertingManager()
+                        .suppressAvailabilityDataPoint(dp);
     }
     
     private Measurement getMeasurement(Integer mId) {

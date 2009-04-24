@@ -471,13 +471,13 @@ public class AlertDefinitionManagerEJBImpl
         if (def.isActive() != activate || def.isEnabled() != activate) {
             def.setActiveStatus(activate);
             def.setMtime(System.currentTimeMillis());
-            AlertAudit.enableAlert(def, subj);
-            
-            EventsStartupListener.getAlertDefinitionChangeCallback()
-                .postUpdate(def);
+            AlertAudit.enableAlert(def, subj);            
         }
         
         getAlertDefDAO().setChildrenActive(def, activate);
+        
+        EventsStartupListener.getAlertDefinitionChangeCallback()
+            .postUpdate(def);
     }
     
     /** 
@@ -1132,9 +1132,19 @@ public class AlertDefinitionManagerEJBImpl
                 removeFromCache(def);
             }
             
-            private void removeFromCache(AlertDefinition def) {
-                AvailabilityDownAlertDefinitionCache.getInstance()
-                    .remove(def.getAppdefEntityId());
+            private void removeFromCache(AlertDefinition def) {                
+                AvailabilityDownAlertDefinitionCache cache = 
+                        AvailabilityDownAlertDefinitionCache.getInstance();
+                
+                synchronized (cache) {
+                    cache.remove(def.getAppdefEntityId());
+                
+                    AlertDefinition childDef = null;
+                    for (Iterator it=def.getChildren().iterator(); it.hasNext(); ) {
+                        childDef = (AlertDefinition) it.next();
+                        cache.remove(childDef.getAppdefEntityId());
+                    }
+                }
             }
         });
     }

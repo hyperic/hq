@@ -87,6 +87,12 @@ public class AvailabilityDownAlertDefinitionCache {
             _cache.remove(key);
         }
     }
+
+    public void clear() {
+        synchronized (_cacheLock) {
+            _cache.removeAll();
+        }
+    }
     
     private Boolean load(AppdefEntityID key) {
         Boolean value = null;

@@ -544,7 +544,7 @@ public class MeasurementDAO extends HibernateDAO {
      * @param List<Integer> of resourceIds return List of Availability 
      * Measurements which are children of the resourceIds
      */
-    List findRelatedAvailMeasurements(List resourceIds) {
+    List findRelatedAvailMeasurements(List resourceIds, String resourceRelationType) {
        final String sql = new StringBuilder()
            .append("select m from Measurement m ")
            .append("join m.resource.toEdges e ")
@@ -559,7 +559,7 @@ public class MeasurementDAO extends HibernateDAO {
            .createQuery(sql)
            .setParameterList("ids", resourceIds, new IntegerType())
            .setParameter(
-               "relationType", AuthzConstants.ResourceEdgeContainmentRelation)
+               "relationType", resourceRelationType)
            .setCacheable(true)
            .setCacheRegion("Measurement.findRelatedAvailMeasurements")
            .list();
@@ -568,7 +568,7 @@ public class MeasurementDAO extends HibernateDAO {
     /**
      * Availability measurements which are parents of the resourceId
      */
-    List findParentAvailMeasurements(Resource resource) {
+    List findParentAvailMeasurements(Resource resource, String resourceRelationType) {
         // Needs to be ordered by DISTANCE in descending order so that
         // it's immediate parent is the first record
        final String sql = new StringBuilder()
@@ -586,7 +586,7 @@ public class MeasurementDAO extends HibernateDAO {
            .createQuery(sql)
            .setInteger("resourceId", resource.getId().intValue())
            .setParameter(
-               "relationType", AuthzConstants.ResourceEdgeContainmentRelation)
+               "relationType", resourceRelationType)
            .setCacheable(true)
            .setCacheRegion("Measurement.findParentAvailMeasurements")
            .list();

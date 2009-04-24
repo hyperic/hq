@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -38,6 +38,7 @@ import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
+import org.hyperic.hq.events.shared.HierarchicalAlertingManagerInterface;
 import org.hyperic.util.pager.PageControl;
 
 public abstract class PermissionManager extends AuthzSession {
@@ -307,5 +308,10 @@ public abstract class PermissionManager extends AuthzSession {
      * Return the CloningBoss implementation
      */
     public abstract CloningBossInterface getCloningBoss();
+    
+    /**
+     * Return the HierarchicalAlertingManager implementation
+     */
+    public abstract HierarchicalAlertingManagerInterface getHierarchicalAlertingManager();
     
 }
