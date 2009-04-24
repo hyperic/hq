@@ -53,7 +53,7 @@ import org.hyperic.hq.measurement.shared.MetricAuxLogManagerUtil;
  * @ejb:transaction type="Required"
  */
 public class MetricAuxLogManagerEJBImpl 
-    implements SessionBean, MetricAuxLogManager
+    implements SessionBean
 {
     private static final int CHUNKSIZE = 500;
 
