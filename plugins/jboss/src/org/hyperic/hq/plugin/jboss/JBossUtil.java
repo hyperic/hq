@@ -347,7 +347,9 @@ public class JBossUtil {
             //CommunicationException, NamingException, RemoteException, etc.
             if (cached) {
                 //retry once, in the event the cached connection was stale
-                serverCache.remove(url);
+            	synchronized (serverCache) {
+            		serverCache.remove(url);
+            	}
                 log.debug("MBeanServer cache cleared for " + url); 
                 return getRemoteMBeanValue(metric);
             }
