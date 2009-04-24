@@ -205,15 +205,17 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
         throws SQLException
     {
         String cacheKey = url + user + pass;
-        Connection conn = (Connection)connectionCache.get(cacheKey);
+        Connection conn = null;
+        
+        synchronized (connectionCache) {
+        	conn = (Connection)connectionCache.get(cacheKey);
 
-        if (conn == null) {
-            conn = getConnection(url, user, pass);
-            
-            synchronized (connectionCache) {
-                connectionCache.put(cacheKey, conn);
-            }
+        	if (conn == null) {
+        		conn = getConnection(url, user, pass);
+        		connectionCache.put(cacheKey, conn);
+        	}
         }
+        
         return conn;
     }
 
