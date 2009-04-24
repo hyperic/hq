@@ -86,7 +86,7 @@ public class UIStartupListener implements StartupListener {
 
             DirWatcherCallback cb = new DirWatcherCallback() {
                 public void fileAdded(File f) {
-                    if (f.getName().equals("public"))
+                    if (f.getName().equals("public") || !f.isDirectory())
                         return;
 
                     try {
