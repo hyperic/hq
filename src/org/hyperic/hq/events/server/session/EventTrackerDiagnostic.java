@@ -81,6 +81,10 @@ class EventTrackerDiagnostic implements DiagnosticObject {
         return "EventTrackerStats";
     }
 
+    public String toString() {
+        return getShortName();
+    }
+
     /**
      * @see org.hyperic.hq.common.DiagnosticObject#getStatus()
      */

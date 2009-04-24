@@ -52,6 +52,10 @@ public class ReportStatsCollector {
                 return "metricReportsStats";
             }
 
+            public String toString() {
+                return "ReportStatsCollector";
+            }
+
             public String getStatus() {
                 DateFormat fmt = 
                     DateFormat.getDateTimeInstance(DateFormat.LONG,  

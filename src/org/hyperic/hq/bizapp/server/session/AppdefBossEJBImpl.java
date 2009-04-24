@@ -3957,6 +3957,10 @@ public class AppdefBossEJBImpl
                         break;
                     }
                 }
+
+                public String toString() {
+                    return "AppdefBoss.removeDeletedResources";
+                }
             }
         );
         ZeventManager.getInstance().enqueueEventAfterCommit(

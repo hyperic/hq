@@ -67,4 +67,7 @@ public class RuntimePlatformAndServerMerger implements ZeventListener {
         ZeventManager.getInstance().enqueueEventAfterCommit(event);
     }
 
+    public String toString() {
+        return "RuntimePlatformAndServerMerger";
+    }
 }
