@@ -485,13 +485,14 @@ class ResourceCategory {
             def serverType  = serviceType.serverType
             
             Server server
-            if (serverType.isVirtual()) {
+            if (serverType.isVirtual() && parent.isPlatform()) {
                 // Parent points at the 'resource' version of the Platform, so
                 // we use the instanceId here, not the Resource.id
                 def servers = svrMan.getServersByPlatformServiceType(subject,
                                                                      parent.instanceId,
                                                                      proto.instanceId)
-                assert servers.size() == 1, "All virtual servers should be created for Platform ${parent.name}" 
+                assert servers.size() == 1, "Unable to find appropriate virtual server for " +
+                                            proto.name + " parent = " + parent.name
                 
                 server = svrMan.findServerById(servers[0].id) // value -> pojo
             } else {
