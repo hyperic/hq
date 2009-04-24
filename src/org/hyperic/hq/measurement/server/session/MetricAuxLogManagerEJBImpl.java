@@ -107,8 +107,8 @@ public class MetricAuxLogManagerEJBImpl
     		
             for (int i = 0; i < asList.size(); i += CHUNKSIZE) {
                 int end = Math.min(i + CHUNKSIZE, asList.size());
-            	dao.resetAuxType(asList.subList(1, end));
-            	dao.deleteByMetricIds(asList.subList(1, end));
+            	dao.resetAuxType(asList.subList(i, end));
+            	dao.deleteByMetricIds(asList.subList(i, end));
             }
     	}
     }
