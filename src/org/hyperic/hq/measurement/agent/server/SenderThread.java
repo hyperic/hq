@@ -425,7 +425,7 @@ public class SenderThread
             MeasurementReport report;
             SRN[] srnList;
 
-            srnList = (SRN[])this.schedule.getSRNs().toArray(new SRN[0]);
+            srnList = this.schedule.getSRNsAsArray();
             if (srnList.length == 0) {
                 log.error("Agent does not have valid SRNs, but has metric " +
                           "data to send, removing measurements");

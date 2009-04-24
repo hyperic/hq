@@ -290,9 +290,9 @@ class MeasurementSchedule {
         this.store.flush();
     }
 
-    List getSRNs(){
+    SRN[] getSRNsAsArray(){
         synchronized(this.srnList){
-            return this.srnList;
+            return (SRN[]) this.srnList.toArray(new SRN[0]);
         }
     }
 }
