@@ -31,7 +31,7 @@
           version="2.x">
 
   <property name="PROC_QUERY"
-            value="State.Name.eq=squid"/>
+            value="State.Name.eq=squid,State.Name.Pne=squid"/>
 
   <config>
       <option name="snmpIp"
