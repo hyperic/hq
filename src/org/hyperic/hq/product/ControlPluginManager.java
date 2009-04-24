@@ -107,7 +107,11 @@ public class ControlPluginManager extends PluginManager {
     public String getNextJob(String name)
         throws NoSuchElementException
     {
-        LinkedList list = (LinkedList)this.pluginQueue.get(name);
+        LinkedList list;
+        synchronized (this.pluginQueue) {
+        	list = (LinkedList) this.pluginQueue.get(name);
+        }
+        
         if (list == null)
             throw new NoSuchElementException();
 
