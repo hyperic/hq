@@ -25,7 +25,10 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -37,7 +40,6 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.measurement.galerts.MetricAuxLog;
-import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManagerLocal;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManagerUtil;
 
@@ -51,8 +53,10 @@ import org.hyperic.hq.measurement.shared.MetricAuxLogManagerUtil;
  * @ejb:transaction type="Required"
  */
 public class MetricAuxLogManagerEJBImpl 
-    implements SessionBean
+    implements SessionBean, MetricAuxLogManager
 {
+    private static final int CHUNKSIZE = 500;
+
     private final Log _log = 
         LogFactory.getLog(MetricAuxLogManagerEJBImpl.class);
     
@@ -68,9 +72,9 @@ public class MetricAuxLogManagerEJBImpl
         return new MetricAuxLogDAO(DAOFactory.getDAOFactory()); 
     }
     
-    /**
-     * @ejb:interface-method
-     */
+    /* (non-Javadoc)
+	 * @see org.hyperic.hq.measurement.server.session.MetricAuxLogManager#create(org.hyperic.hq.galerts.server.session.GalertAuxLog, org.hyperic.hq.measurement.galerts.MetricAuxLog)
+	 */
     public MetricAuxLogPojo create(GalertAuxLog log, MetricAuxLog logInfo) {  
         MetricAuxLogPojo metricLog = 
             new MetricAuxLogPojo(log, logInfo, log.getAlert().getAlertDef());
@@ -79,31 +83,34 @@ public class MetricAuxLogManagerEJBImpl
         return metricLog;
     }
     
-    /**
-     * @ejb:interface-method
-     */
+    /* (non-Javadoc)
+	 * @see org.hyperic.hq.measurement.server.session.MetricAuxLogManager#removeAll(org.hyperic.hq.galerts.server.session.GalertDef)
+	 */
     public void removeAll(GalertDef def) {
         getDAO().removeAll(def);
     }
 
-    /**
-     * @ejb:interface-method
-     */
+    /* (non-Javadoc)
+	 * @see org.hyperic.hq.measurement.server.session.MetricAuxLogManager#find(org.hyperic.hq.galerts.server.session.GalertAuxLog)
+	 */
     public MetricAuxLogPojo find(GalertAuxLog log) { 
         return getDAO().find(log);
     }
 
-    /**
-     * Callback, invoked when metrics are deleted.  Since we still want to keep
-     * the measurement around, we delete the value from the metric_aux_log and
-     * transform the entry in the galert_aux_log to a regular entry.
-     * 
-     * @ejb:interface-method
-     */
+    /* (non-Javadoc)
+	 * @see org.hyperic.hq.measurement.server.session.MetricAuxLogManager#metricsDeleted(java.util.Collection)
+	 */
     public void metricsDeleted(Collection mids) {
-        MetricAuxLogDAO dao = getDAO();
-        dao.resetAuxType(mids);
-        dao.deleteByMetricIds(mids);
+    	if (mids != null) {
+    		MetricAuxLogDAO dao = getDAO();
+    		List asList = (mids instanceof List ? (List) mids : new ArrayList(mids));
+    		
+            for (int i = 0; i < asList.size(); i += CHUNKSIZE) {
+                int end = Math.min(i + CHUNKSIZE, asList.size());
+            	dao.resetAuxType(asList.subList(1, end));
+            	dao.deleteByMetricIds(asList.subList(1, end));
+            }
+    	}
     }
 
     public void ejbCreate() { }
