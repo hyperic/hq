@@ -386,9 +386,20 @@ public class ApacheServerDetector
             }
             else if (configureURL(binary, productConfig)){
                 server.setMeasurementConfig();
+                if (binary.conf != null) {
+                    //ServerRoot location overrides compiled in HTTPD_ROOT
+                    ConfigResponse srControlConfig = getControlConfig(binary.root);
+                    if (srControlConfig != null) {
+                        controlConfig = srControlConfig;
+                    }
+                }
             }
             addTrackConfig(productConfig);
             if (controlConfig != null) {
+                String pidfile = productConfig.getValue(ApacheControlPlugin.PROP_PIDFILE);
+                if (pidfile != null) {
+                    setPidFile(controlConfig, pidfile); //propagate from httpd.conf
+                }
                 setControlConfig(server, controlConfig);
             }
             server.setDescription("mod_status monitor");
@@ -677,6 +688,10 @@ public class ApacheServerDetector
                 }
             }
             setConfigTrack(config, binary.conf);
+            String root = (String)cfg.get("ServerRoot");
+            if (root != null) {
+                binary.root = root;
+            }
             String log = (String)cfg.get("ErrorLog");
             if (binary.serverRootRelative(log).exists()) {
                 setLogTrack(config, log);                        
