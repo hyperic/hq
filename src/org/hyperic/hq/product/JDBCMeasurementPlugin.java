@@ -121,21 +121,33 @@ public abstract class JDBCMeasurementPlugin extends MeasurementPlugin {
         throws PluginException
     {
         super.shutdown();
+        
+        int nExceptions = 0;
+        SQLException lastException = null;
+        synchronized (connectionCache) {
 
-        try {
-            Iterator it = connectionCache.entrySet().iterator();
-            while(it.hasNext()) {
-                Map.Entry entry = (Map.Entry)it.next();
-                Connection conn = (Connection)entry.getValue();
-                if (conn != null) {
-                    conn.close();
-                }
-            }
-        } catch (SQLException e) {
-            throw new PluginException(e.getMessage(), e);
-        }       
+        	Iterator it = connectionCache.entrySet().iterator();
+        	while(it.hasNext()) {
+        		Map.Entry entry = (Map.Entry)it.next();
+        		Connection conn = (Connection)entry.getValue();
+        		if (conn != null) {
+        			try {
+        				conn.close();
+        			} catch (SQLException e) {
+        				nExceptions++;
+        				lastException = e;
+        			}
+        		}
+        	}
 
-        connectionCache.clear();
+        	connectionCache.clear();
+        }
+        
+        if (nExceptions > 0 && lastException != null) {
+        	throw new PluginException(nExceptions +
+        							  " exception(s), last message was "
+        							  + lastException.getMessage(), lastException);
+        }
     }
 
     /**
