@@ -171,7 +171,12 @@ public class JBossUtil {
     //we only cache RemoteMBeanServer handles for measurements.
     //jndi lookup won't have much impact for control or discovery
     private static HashMap serverCache = new HashMap();
+    // Maps attrNames to their lowercase equivalents.  After static initialization,
+    // get-only access.
     private static HashMap jsr77LowerCase = new HashMap();
+    // Maps urls to a Boolean indicating whether or not the jsr77 attrNames
+    // from the url are lowercase or not.  Needs synchronization.
+    private static HashMap lowerCaseURLMappings = new HashMap();
 
     //thanks JBoss, for changing the attribute case in 3.2.8
     static {
@@ -251,7 +256,11 @@ public class JBossUtil {
                 //<= 3.2.7
                 lc = false;
             }
-            jsr77LowerCase.put(url, lc ? Boolean.TRUE : Boolean.FALSE);
+            
+            synchronized (lowerCaseURLMappings) {
+            	lowerCaseURLMappings.put(url, lc ? Boolean.TRUE : Boolean.FALSE);
+            }
+            
             if (log.isDebugEnabled()) {
                 log.debug(url + " " + version + " jsr77LowerCase=" + lc);
             }
@@ -283,16 +292,21 @@ public class JBossUtil {
             } catch (RemoteException e) {
                 throw unreachable(metric, e);
             }
-            
+
+            determineJSR77Case(url, mServer);
             synchronized (serverCache) {
-                determineJSR77Case(url, mServer);
                 serverCache.put(url, mServer);
             }
         }
 
         String attrName = metric.getAttributeName();
         boolean lc;
-        Boolean jsr77Case = (Boolean)jsr77LowerCase.get(url);
+        
+        Boolean jsr77Case;
+        synchronized (lowerCaseURLMappings) {
+        	jsr77Case = (Boolean) lowerCaseURLMappings.get(url);
+		}
+
         if (jsr77Case != null) {
             lc = jsr77Case.booleanValue();
         }
