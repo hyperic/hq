@@ -145,7 +145,7 @@ class SNMPSession_v1 implements SNMPSession {
     }
 
     protected PDU newPDU() {
-        return newPDU();
+        return new PDU();
     }
 
     protected PDU getPDU(String oid, int type)
