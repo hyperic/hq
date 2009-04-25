@@ -98,6 +98,10 @@ public class MetricAuxLogManagerEJBImpl
     }
 
     /**
+     * Callback, invoked when metrics are deleted.  Since we still want to keep
+     * the measurement around, we delete the value from the metric_aux_log and
+     * transform the entry in the galert_aux_log to a regular entry.
+     * 
      * @ejb:interface-method
      */
     public void metricsDeleted(Collection mids) {
