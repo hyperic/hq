@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@
   USA.
  --%>
 
+<tiles:importAttribute name="resourceOwner" ignore="false"/>
 
 <!-- CONSTANT DEFINITIONS -->
 <hq:constant
@@ -115,10 +116,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   
 </div>
 <!--  /  -->
-
 <tiles:insert definition=".toolbar.addToList">
-  <tiles:put name="showAddToListBtn"><c:out value="${not empty useroperations['modifyResourceGroup']}"/></tiles:put>
-  <tiles:put name="showRemoveBtn"><c:out value="${not empty useroperations['modifyResourceGroup']}"/></tiles:put>
+  <tiles:put name="showAddToListBtn"><c:out value="${(webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']}"/></tiles:put>
+  <tiles:put name="showRemoveBtn"><c:out value="${(webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']}"/></tiles:put>
   <tiles:put name="addToListUrl" beanName="addToListUrl"/>
   <tiles:put name="widgetInstanceName" beanName="widgetInstanceName"/>
   <tiles:put name="pageSizeAction" beanName="psAction" />

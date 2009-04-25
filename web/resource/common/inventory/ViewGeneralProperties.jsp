@@ -12,7 +12,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -128,7 +128,7 @@
   </c:when>
   <c:when test="${resource.entityId.type == GROUP}">
     <c:set var="editUrl" value="/resource/group/Inventory.do?mode=edit&eid=${resource.entityId.appdefKey}"/>
-    <c:set var="canModify" value="${useroperations['modifyResourceGroup']}"/>
+    <c:set var="canModify" value="${(webUser.id == resourceOwner.id) || useroperations['modifyResourceGroup']}"/>
   </c:when>
 </c:choose>
 
