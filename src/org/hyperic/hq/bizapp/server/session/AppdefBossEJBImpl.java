@@ -1589,31 +1589,20 @@ public class AppdefBossEJBImpl
     /**
      * @ejb:interface-method
      */
-    public void removeServer(AuthzSubject subject, Server server) {
-        removeServer(subject, server);
-    }
-
-    /**
-     * @ejb:transaction type="RequiresNew"
-     * @ejb:interface-method
-     */
-    public void _removeServerInNewTran(AuthzSubject subject, Server server)
-        throws VetoException,
-               PermissionException {
+    public void removeServer(AuthzSubject subject, Server server)
+        throws PermissionException,
+               VetoException {
         try {
             // now remove the measurements
             disableMeasurements(subject, server.getResource());
-    
             try {
-                getAutoInventoryManager().toggleRuntimeScan(getOverlord(),
-                                                            server.getEntityId(),
-                                                            false);
+                getAutoInventoryManager().toggleRuntimeScan(
+                    getOverlord(), server.getEntityId(), false);
             } catch (ResourceDeletedException e) {
                 log.debug(e);
             } catch (Exception e) {
                 log.error("Error turning off RuntimeScan for: " + server, e);
             }
-    
             // finally, remove the server
             getServerManager().removeServer(subject, server);
         } catch (RemoveException e) {
@@ -1625,6 +1614,16 @@ public class AppdefBossEJBImpl
                     + "]");
             throw (PermissionException) e;
         }
+    }
+
+    /**
+     * @ejb:transaction type="RequiresNew"
+     * @ejb:interface-method
+     */
+    public void _removeServerInNewTran(AuthzSubject subject, Server server)
+        throws VetoException,
+               PermissionException {
+        removeServer(subject, server);
     }
 
     /**
