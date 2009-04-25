@@ -72,9 +72,9 @@ public class MetricAuxLogManagerEJBImpl
         return new MetricAuxLogDAO(DAOFactory.getDAOFactory()); 
     }
     
-    /* (non-Javadoc)
-	 * @see org.hyperic.hq.measurement.server.session.MetricAuxLogManager#create(org.hyperic.hq.galerts.server.session.GalertAuxLog, org.hyperic.hq.measurement.galerts.MetricAuxLog)
-	 */
+    /**
+     * @ejb:interface-method
+     */
     public MetricAuxLogPojo create(GalertAuxLog log, MetricAuxLog logInfo) {  
         MetricAuxLogPojo metricLog = 
             new MetricAuxLogPojo(log, logInfo, log.getAlert().getAlertDef());
@@ -83,23 +83,23 @@ public class MetricAuxLogManagerEJBImpl
         return metricLog;
     }
     
-    /* (non-Javadoc)
-	 * @see org.hyperic.hq.measurement.server.session.MetricAuxLogManager#removeAll(org.hyperic.hq.galerts.server.session.GalertDef)
-	 */
+    /**
+     * @ejb:interface-method
+     */
     public void removeAll(GalertDef def) {
         getDAO().removeAll(def);
     }
 
-    /* (non-Javadoc)
-	 * @see org.hyperic.hq.measurement.server.session.MetricAuxLogManager#find(org.hyperic.hq.galerts.server.session.GalertAuxLog)
-	 */
+    /**
+     * @ejb:interface-method
+     */
     public MetricAuxLogPojo find(GalertAuxLog log) { 
         return getDAO().find(log);
     }
 
-    /* (non-Javadoc)
-	 * @see org.hyperic.hq.measurement.server.session.MetricAuxLogManager#metricsDeleted(java.util.Collection)
-	 */
+    /**
+     * @ejb:interface-method
+     */
     public void metricsDeleted(Collection mids) {
     	if (mids != null) {
     		MetricAuxLogDAO dao = getDAO();
