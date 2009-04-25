@@ -300,27 +300,37 @@ public class AlertDefinitionDAO extends HibernateDAO {
         }
     }
 
-    void setAlertDefinitionValueNoRels(AlertDefinition def,
-                                       AlertDefinitionValue val) {
-        TriggerDAO tDAO = new TriggerDAO(DAOFactory.getDAOFactory());
+    /**
+     * duplicates all the values obtained from master into clone.
+     * the active and enabled fields are taken from master.getActive()
+     * @param clone {@link AlertDefinition} set all of clone's values obtained
+     * from master.
+     * @param master {@link AlertDefinitionValue} object to retrieve values from
+     * in order to update clone.  Object does not change.
+     */
+    void setAlertDefinitionValueNoRels(final AlertDefinition clone,
+                                       final AlertDefinitionValue master) {
+        final TriggerDAO tDAO = new TriggerDAO(DAOFactory.getDAOFactory());
         
-        def.setName(val.getName());
-        def.setDescription(val.getDescription());
+        clone.setName(master.getName());
+        clone.setDescription(master.getDescription());
         
-        def.setActiveStatus(val.getEnabled());
+        // from bug http://jira.hyperic.com/browse/HQ-1636
+        // setActiveStatus() should be governed by active NOT enabled field
+        clone.setActiveStatus(master.getActive());
         
-        def.setWillRecover(val.getWillRecover());
-        def.setNotifyFiltered(val.getNotifyFiltered() );
-        def.setControlFiltered(val.getControlFiltered() );
-        def.setPriority(val.getPriority());
+        clone.setWillRecover(master.getWillRecover());
+        clone.setNotifyFiltered(master.getNotifyFiltered() );
+        clone.setControlFiltered(master.getControlFiltered() );
+        clone.setPriority(master.getPriority());
         
-        def.setFrequencyType(val.getFrequencyType());
-        def.setCount(new Long(val.getCount()));
-        def.setRange(new Long(val.getRange()));
-        def.setDeleted(val.getDeleted());
-        if (val.actOnTriggerIdHasBeenSet()) {
-            def.setActOnTrigger(
-                tDAO.findById(new Integer(val.getActOnTriggerId())));
+        clone.setFrequencyType(master.getFrequencyType());
+        clone.setCount(new Long(master.getCount()));
+        clone.setRange(new Long(master.getRange()));
+        clone.setDeleted(master.getDeleted());
+        if (master.actOnTriggerIdHasBeenSet()) {
+            clone.setActOnTrigger(
+                tDAO.findById(new Integer(master.getActOnTriggerId())));
         }
     }
     
