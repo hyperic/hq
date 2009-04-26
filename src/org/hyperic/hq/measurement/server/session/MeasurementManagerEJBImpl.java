@@ -44,6 +44,9 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.server.session.Application;
+import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
@@ -54,6 +57,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
@@ -789,8 +794,10 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                     resGrpMan.getResourceGroupByResource(resource);
                 rtn.put(resource.getId(), dao.findAvailMeasurements(grp));
                 continue;
+            } else if (type.getId().equals(AuthzConstants.authzApplication)) {
+                rtn.putAll(getAvailMeas(resource));
+                continue;
             }
-
             res.add(resource);
         }
         List ids = getMeasurementDAO().findAvailMeasurements(res);
@@ -803,6 +810,38 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             rtn.put(m.getResource().getId(), Collections.singletonList(m));
         }
         return rtn;
+    }
+
+    private Map getAvailMeas(Resource application) {
+        final Integer typeId = application.getResourceType().getId();
+        if (!typeId.equals(AuthzConstants.authzApplication)) {
+            return Collections.EMPTY_MAP;
+        }
+        final ApplicationManagerLocal appMan =
+            ApplicationManagerEJBImpl.getOne();
+        final AuthzSubject overlord =
+            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        try {
+            Application app = appMan.findApplicationById(
+                overlord, application.getInstanceId());
+            Collection appServices = app.getAppServices();
+            final List resources = new ArrayList(appServices.size());
+            for (final Iterator it=appServices.iterator(); it.hasNext(); ) {
+                final AppService appService = (AppService)it.next();
+                final Resource resource = appService.getService().getResource();
+                if (resource == null || resource.isInAsyncDeleteState()) {
+                    continue;
+                }
+                resources.add(resource);
+            }
+            return getAvailMeasurements(resources);
+        } catch (ApplicationNotFoundException e) {
+            log.warn("cannot find Application by id = " +
+                application.getInstanceId());
+        } catch (PermissionException e) {
+            log.error("error finding application using overlord", e);
+        }
+        return Collections.EMPTY_MAP;
     }
 
     /**

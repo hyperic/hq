@@ -109,9 +109,11 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
+import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
@@ -2989,15 +2991,24 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             if (id.isGroup()) {
                 return getGroupAvailability(
                     subject, id.getId(), measCache, availCache);
-            }
-            else if (id.isApplication()) {
+            } else if (id.isApplication()) {
                 AppdefEntityValue appVal = new AppdefEntityValue(id, subject);
                 AppdefEntityID[] services = appVal.getFlattenedServiceIds();
-
+                final AvailabilityManagerLocal aMan = getAvailManager();
+                final List resources = new ArrayList();
+                final ResourceManagerLocal rMan =
+                    ResourceManagerEJBImpl.getOne();
+                for (int i=0; i<services.length; i++) {
+                    final AppdefEntityID aeid = services[i];
+                    if (aeid == null) {
+                        continue;
+                    }
+                    resources.add(rMan.findResource(aeid));
+                }
+                final Map avails = aMan.getLastAvail(resources, measCache);
                 return getAggregateAvailability(
-                    subject, services, measCache, availCache);
+                    subject, services, measCache, avails);
             }
-            
             AppdefEntityID[] ids = new AppdefEntityID[] { id };
             return getAvailability(
                 subject, ids, getMidMap(ids, measCache), availCache)[0];
