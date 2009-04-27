@@ -9622,7 +9622,7 @@ has already been defined.
   <schemaSpec version="3.135">
     <schema-directSQL>
         <statement targetDB="oracle">
-            ALTER TABLE EAM_RESOURCE DISABLE UNIQUE (RESOURCE_TYPE_ID, INSTANCE_ID)
+            ALTER TABLE EAM_RESOURCE DROP UNIQUE (RESOURCE_TYPE_ID, INSTANCE_ID)
         </statement>
         <statement targetDB="postgresql">
             ALTER TABLE EAM_RESOURCE DROP CONSTRAINT EAM_RESOURCE_RESOURCE_TYPE_ID_KEY
@@ -9675,7 +9675,7 @@ has already been defined.
   <schemaSpec version="3.137">
     <schema-directSQL>
         <statement targetDB="oracle" fail="false">
-          ALTER TABLE EAM_ESCALATION_STATE DISABLE UNIQUE (ESCALATION_ID, ALERT_DEF_ID, ALERT_ID, ALERT_TYPE)
+          ALTER TABLE EAM_ESCALATION_STATE DROP UNIQUE (ESCALATION_ID, ALERT_DEF_ID, ALERT_ID, ALERT_TYPE)
         </statement>
         <statement targetDB="postgresql" fail="false">
           ALTER TABLE EAM_ESCALATION_STATE DROP CONSTRAINT EAM_ESCALATION_STATE_ESCALATION_ID_KEY
@@ -9804,7 +9804,7 @@ has already been defined.
                     E.ALERT_TYPE = EAM_ESCALATION_STATE.ALERT_TYPE)
         </statement>
         <statement targetDB="oracle" fail="false">
-          ALTER TABLE EAM_ESCALATION_STATE DISABLE UNIQUE (ALERT_DEF_ID, ALERT_TYPE)
+          ALTER TABLE EAM_ESCALATION_STATE DROP UNIQUE (ALERT_DEF_ID, ALERT_TYPE)
         </statement>
         <statement targetDB="postgresql" fail="false">
           DROP INDEX IF EXISTS STATE_IDX
