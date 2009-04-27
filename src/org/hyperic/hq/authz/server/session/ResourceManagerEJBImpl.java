@@ -353,6 +353,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * @param r {@link Resource} resource to be removed.
      * @param nullResourceType tells the method to null out the resourceType
      * @return AppdefEntityID[] - an array of the resources (including children) deleted
+     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
@@ -401,25 +402,37 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         }
 
         removed.add(new AppdefEntityID(r));
-        
-        if (debug) watch.markTimeBegin("removeResourcePerms.removeEdges");
-        // Delete the edges and resource groups
-        edgeDao.deleteEdges(r);
-        if (debug) watch.markTimeEnd("removeResourcePerms.removeEdges");
-        
-        if (nullResourceType) {
-            r.setResourceType(null);
-        }
-        
-        final long now = System.currentTimeMillis();
-        if (debug) watch.markTimeBegin("removeResourcePerms.audit");
-        ResourceAudit.deleteResource(r, subj, now, now);
-        if (debug) watch.markTimeEnd("removeResourcePerms.audit");
-        
+        if (debug) watch.markTimeBegin("removeResource");
+        getOne()._removeResource(subj, r, nullResourceType);
+        if (debug) watch.markTimeBegin("removeResource");
         if (debug) {
             log.debug(watch);
         }
         return (AppdefEntityID[]) removed.toArray(new AppdefEntityID[0]);
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public void _removeResource(AuthzSubject subj, Resource r,
+                                boolean nullResourceType) {
+        final boolean debug = log.isDebugEnabled();
+        final ResourceEdgeDAO edgeDao = getResourceEdgeDAO();
+        final StopWatch watch = new StopWatch();
+        if (debug) watch.markTimeBegin("removeResourcePerms.removeEdges");
+        // Delete the edges and resource groups
+        edgeDao.deleteEdges(r);
+        if (debug) watch.markTimeEnd("removeResourcePerms.removeEdges");
+        if (nullResourceType) {
+            r.setResourceType(null);
+        }
+        final long now = System.currentTimeMillis();
+        if (debug) watch.markTimeBegin("removeResourcePerms.audit");
+        ResourceAudit.deleteResource(r, subj, now, now);
+        if (debug) watch.markTimeEnd("removeResourcePerms.audit");
+        if (debug) {
+            log.debug(watch);
+        }
     }
 
     /**
