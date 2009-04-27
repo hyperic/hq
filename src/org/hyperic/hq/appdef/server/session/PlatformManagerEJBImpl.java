@@ -1150,6 +1150,23 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                                Integer pType, String regEx) {
         return getPlatformDAO().findByTypeAndRegEx(pType, regEx);
     }
+    
+    /**
+     * @param subj
+     * @param platformTypeIds
+     *              List<Integer> of platform type ids
+     * @param hasChildren
+     *              indicates whether the platform is the parent of
+     *              a network hierarchy
+     * @return a list of {@link Platform}s
+     * @ejb:interface-method
+     */
+    public List findParentPlatformPojosByNetworkRelation(AuthzSubject subj,
+                                                         List platformTypeIds,
+                                                         Boolean hasChildren) {
+        return getPlatformDAO()
+                    .findParentByNetworkRelation(platformTypeIds, hasChildren);
+    }
 
     /**
      * Get the platforms that have an IP with the specified address.

@@ -33,6 +33,7 @@ import java.util.List;
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
@@ -236,6 +237,27 @@ public class PlatformDAO extends HibernateDAO {
             .addEntity("p", Platform.class)
             .setInteger("id", pType.intValue())
             .setString("regex", regex)
+            .list();
+    }
+    
+    public List findParentByNetworkRelation(List platformTypeIds,
+                                            Boolean hasChildren) {
+        String sql = "select {p.*} from EAM_PLATFORM p " +
+                     "join EAM_RESOURCE r on p.resource_id = r.id " +
+                     "where p.platform_type_id in (:ids) ";
+    
+        if (hasChildren != null) {
+            sql += "and " + (hasChildren.booleanValue() ? "" : "not") + " exists (" +
+                         " select id from EAM_RESOURCE_EDGE e " +
+                         " where p.resource_id = e.from_id " +
+                         " and e.rel_id = " + AuthzConstants.RELATION_NETWORK_ID +
+                         " and e.distance = 0) ";
+        }
+        
+        return getSession()
+            .createSQLQuery(sql)
+            .addEntity("p", Platform.class)
+            .setParameterList("ids", platformTypeIds, new IntegerType())
             .list();
     }
     
