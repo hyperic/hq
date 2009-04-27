@@ -82,23 +82,27 @@ public class ResourceEdgeDAO
         return res;
     }
     
-    Collection findDescendantEdges(Resource r) {
+    Collection findDescendantEdges(Resource r, ResourceRelation rel) {
         String sql = "from ResourceEdge e where e.from = :from " + 
-                     "and distance > :distance";
+                     "and distance > :distance " +
+                     "and rel_id = :rel_id ";
 
         return getSession().createQuery(sql)
                 .setParameter("from", r)
                 .setInteger("distance", 0)
+                .setInteger("rel_id", rel.getId().intValue())
                 .list();
     }
 
-    Collection findAncestorEdges(Resource r) {
+    Collection findAncestorEdges(Resource r, ResourceRelation rel) {
         String sql = "from ResourceEdge e where e.from = :from " + 
-                     "and distance < :distance";
+                     "and distance < :distance " +
+                     "and rel_id = :rel_id ";
 
         return getSession().createQuery(sql)
                 .setParameter("from", r)
                 .setInteger("distance", 0)
+                .setInteger("rel_id", rel.getId().intValue())
                 .list();
     }
     
@@ -107,6 +111,28 @@ public class ResourceEdgeDAO
         getSession().createQuery(sql)
                     .setParameter("to", r)
                     .setParameter("from", r)
+                    .executeUpdate();
+    }
+    
+    void deleteEdges(Resource r, ResourceRelation rel) {
+        String sql = "delete ResourceEdge where (to_id = :to or from_id = :from) " +
+                     "and rel_id = :rel_id ";
+        getSession().createQuery(sql)
+                    .setParameter("to", r)
+                    .setParameter("from", r)
+                    .setInteger("rel_id", rel.getId().intValue())
+                    .executeUpdate();
+    }
+    
+    void deleteEdge(Resource parent, Resource child,
+                    ResourceRelation rel) {
+        String sql = "delete ResourceEdge where from_id = :from " +
+                     "and to_id = :to " +
+                     "and rel_id = :rel_id ";
+        getSession().createQuery(sql)
+                    .setParameter("from", parent)
+                    .setParameter("to", child)
+                    .setInteger("rel_id", rel.getId().intValue())
                     .executeUpdate();
     }
 }

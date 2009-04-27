@@ -9819,6 +9819,20 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.144">
+    <schema-insert table="EAM_RESOURCE_RELATION"
+                   insertCmd="(ID, VERSION_COL, NAME, IS_HIER) VALUES (2, 0, 'network', %%TRUE%%)"/>
+    <schema-directSQL>
+        <statement>
+          ALTER TABLE EAM_RESOURCE_EDGE DROP CONSTRAINT eam_resource_edge_from_id_key CASCADE
+        </statement>
+        <statement>
+          ALTER TABLE EAM_RESOURCE_EDGE
+        		ADD CONSTRAINT EAM_RESOURCE_EDGE_FROM_ID_KEY UNIQUE (FROM_ID, TO_ID, REL_ID, DISTANCE)
+        </statement>
+    </schema-directSQL>
+  </schemaSpec>
+    
 </dbupgrade>
 </target>
 </project>

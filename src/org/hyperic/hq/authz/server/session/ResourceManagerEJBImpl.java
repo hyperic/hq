@@ -152,7 +152,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
             
         eDAO.create(res, res, 0, relation);  // Self-edge
         if (parent != null) {
-            Collection ancestors = eDAO.findAncestorEdges(parent);
+            Collection ancestors = eDAO.findAncestorEdges(parent, relation);
             eDAO.create(res, parent, -1, relation);
             eDAO.create(parent, res, 1, relation);
             
@@ -170,7 +170,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                      System.currentTimeMillis());
         return res;
     }
-
+    
     /**
      * Move a resource.  It is the responsibility of the caller (AppdefManager) to
      * ensure that this resource can be moved to the destination.
@@ -201,7 +201,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         eDAO.create(destination, target, 1, relation);
 
         // Ancestor edges to new destination resource
-        Collection ancestors = eDAO.findAncestorEdges(destination);
+        Collection ancestors = eDAO.findAncestorEdges(destination, relation);
         for (Iterator i = ancestors.iterator(); i.hasNext();) {
             ResourceEdge ancestorEdge = (ResourceEdge)i.next();
 
@@ -215,6 +215,64 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                                    System.currentTimeMillis());
     }
 
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public void associateResourceByNetworkRelation(AuthzSubject subject,
+                                                   AppdefEntityID parent,
+                                                   AppdefEntityID[] children)
+        throws PermissionException {
+        
+        ResourceRelation relation = getNetworkRelation();
+        Resource parentResource = findResource(parent);
+        Resource childResource = null;
+        
+        if (parentResource != null && !parentResource.isInAsyncDeleteState()) {
+            ResourceEdgeDAO eDAO = getResourceEdgeDAO();
+
+            if (findResourceByNetworkRelation(parentResource).isEmpty()) {
+                // create self-edge for parent of network hierarchy
+                eDAO.create(parentResource, parentResource, 0, relation);
+            }
+            for (int i=0; i< children.length; i++) {
+                childResource = findResource(children[i]);
+                
+                if (childResource != null && !childResource.isInAsyncDeleteState()) {
+                    eDAO.create(parentResource, childResource, 1, relation);
+                    eDAO.create(childResource, parentResource, -1, relation);
+                }
+            }
+        }
+    }
+    
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public void disassociateResourceByNetworkRelation(AuthzSubject subject,
+                                                      AppdefEntityID parent,
+                                                      AppdefEntityID[] children)
+        throws PermissionException {
+        
+        ResourceRelation relation = getNetworkRelation();
+        Resource parentResource = findResource(parent);
+        Resource childResource = null;
+        
+        if (parentResource != null && !parentResource.isInAsyncDeleteState()) {
+            ResourceEdgeDAO eDAO = getResourceEdgeDAO();
+
+            for (int i=0; i< children.length; i++) {
+                childResource = findResource(children[i]);
+                
+                if (childResource != null && !childResource.isInAsyncDeleteState()) {
+                    eDAO.deleteEdge(parentResource, childResource, relation);
+                    eDAO.deleteEdge(childResource, parentResource, relation);
+                }
+            }
+        }
+    }
+    
     /**
      * Get the # of resources within HQ inventory
      * @ejb:interface-method
@@ -392,7 +450,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 
         ResourceEdgeDAO edgeDao = getResourceEdgeDAO();
         if (debug) watch.markTimeBegin("removeResourcePerms.findEdges");
-        Collection edges = edgeDao.findDescendantEdges(r);
+        Collection edges = edgeDao.findDescendantEdges(r, getContainmentRelation());
         if (debug) watch.markTimeEnd("removeResourcePerms.findEdges");
         for (Iterator it = edges.iterator(); it.hasNext(); ) {
             ResourceEdge edge = (ResourceEdge) it.next();
@@ -663,6 +721,32 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      */
     public Collection findResourceByOwner(AuthzSubject owner) {
         return getResourceDAO().findByOwner(owner);
+    }
+    
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public Collection findResourceByNetworkRelation(Resource parent) {
+        return getResourceEdgeDAO()
+                    .findDescendantEdges(parent, getNetworkRelation());
+    }
+
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public void removeResourceNetworkRelation(AuthzSubject subject, Resource parent) 
+        throws PermissionException {
+        // Make sure user has permission to remove the network map
+        final PermissionManager pm = PermissionManagerFactory.getInstance();
+
+        pm.check(subject.getId(), 
+                 parent.getResourceType(), 
+                 parent.getInstanceId(), 
+                 AuthzConstants.platformOpModifyPlatform);
+        
+        getResourceEdgeDAO().deleteEdges(parent, getNetworkRelation());
     }
 
     public static ResourceManagerLocal getOne() {

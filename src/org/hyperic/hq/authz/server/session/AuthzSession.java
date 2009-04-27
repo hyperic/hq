@@ -54,8 +54,6 @@ public abstract class AuthzSession {
 
     protected SessionContext ctx;
 
-    private static final Integer RELATION_CONTAINMENT_ID = new Integer(1);
-
     protected ResourceTypeDAO getResourceTypeDAO() {
         return new ResourceTypeDAO(DAOFactory.getDAOFactory());
     }
@@ -66,6 +64,10 @@ public abstract class AuthzSession {
 
     protected ResourceGroupDAO getResourceGroupDAO() {
         return new ResourceGroupDAO(DAOFactory.getDAOFactory());
+    }
+
+    private ResourceRelationDAO getResourceRelationDAO() {
+        return new ResourceRelationDAO(DAOFactory.getDAOFactory());
     }
 
     protected AuthzSubjectDAO getSubjectDAO() {
@@ -79,7 +81,7 @@ public abstract class AuthzSession {
     protected OperationDAO getOperationDAO() {
         return new OperationDAO(DAOFactory.getDAOFactory());
     }
-
+    
     protected ResourceType getRootResourceType() {
        return getResourceTypeDAO().findTypeResourceType();
     }
@@ -170,11 +172,17 @@ public abstract class AuthzSession {
     protected SessionContext getSessionContext() {
         return this.ctx;
     }
-
+    
     protected ResourceRelation getContainmentRelation() {
-        ResourceRelationDAO rDAO = 
-            new ResourceRelationDAO(DAOFactory.getDAOFactory());
-        return rDAO.findById(RELATION_CONTAINMENT_ID); 
+        return getResourceRelation(AuthzConstants.RELATION_CONTAINMENT_ID);
+    }
+
+    protected ResourceRelation getNetworkRelation() {
+        return getResourceRelation(AuthzConstants.RELATION_NETWORK_ID);
+    }
+
+    private ResourceRelation getResourceRelation(Integer relationId) {
+        return getResourceRelationDAO().findById(relationId); 
     }
 
     protected Resource findPrototype(AppdefEntityTypeID id) {
