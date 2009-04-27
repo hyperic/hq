@@ -113,6 +113,10 @@ public class AvailabilityCheckService
         return TimingVoodoo.roundDownTime(begin, measInterval);
     }
 
+    /**
+     * Since this method is called from the synchronized block in hitInSession()
+     * please see the associated NOTE.
+     */
     private Collection getDownPlatforms(Date lDate) {
         final boolean debug = _log.isDebugEnabled();
         AvailabilityCache cache = AvailabilityCache.getInstance();
@@ -196,6 +200,13 @@ public class AvailabilityCheckService
             }
         }
         try {
+            // PLEASE NOTE: This synchronized block directly affects the
+            // throughput of the availability metrics, while this lock is
+            // active no availability metric will be inserted.  This is to
+            // ensure the backfilled points will not be inserted after the
+            // associated AVAIL_UP value from the agent.
+            // The code must be extremely efficient or else it will have
+            // a big impact on the performance of availability insertion.
             synchronized (cache) {
                 Collection downPlatforms = getDownPlatforms(lDate);
                 List backfillList = getBackfillPts(downPlatforms, current);
@@ -208,6 +219,10 @@ public class AvailabilityCheckService
         }
     }
     
+    /**
+     * Since this method is called from the synchronized block in hitInSession()
+     * please see the associated NOTE.
+     */
     private void backfillAvails(List backfillList) {
         final boolean debug = _log.isDebugEnabled();
         final AvailabilityManagerLocal availMan =
