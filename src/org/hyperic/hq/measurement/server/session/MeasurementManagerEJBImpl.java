@@ -53,6 +53,7 @@ import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -853,17 +854,13 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         final AuthzSubject overlord =
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
         try {
-            Application app = appMan.findApplicationById(
+            final Application app = appMan.findApplicationById(
                 overlord, application.getInstanceId());
-            Collection appServices = app.getAppServices();
+            final Collection appServices = app.getAppServices();
             final List resources = new ArrayList(appServices.size());
             for (final Iterator it=appServices.iterator(); it.hasNext(); ) {
                 final AppService appService = (AppService)it.next();
-                final Resource resource = appService.getService().getResource();
-                if (resource == null || resource.isInAsyncDeleteState()) {
-                    continue;
-                }
-                resources.add(resource);
+                resources.addAll(getAppResources(appService));
             }
             return getAvailMeasurements(resources);
         } catch (ApplicationNotFoundException e) {
@@ -873,6 +870,25 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             log.error("error finding application using overlord", e);
         }
         return Collections.EMPTY_MAP;
+    }
+
+    private final List getAppResources(AppService appService) {
+        if (!appService.isIsGroup()) {
+            final Service service = appService.getService();
+            if (service == null || service.getResource() == null ||
+                service.getResource().isInAsyncDeleteState()) {
+                return Collections.EMPTY_LIST;
+            }
+            return Collections.singletonList(service.getResource());
+        }
+        final ResourceGroup group = appService.getResourceGroup();
+        final Resource resource = group.getResource();
+        if (resource == null || resource.isInAsyncDeleteState()) {
+            return Collections.EMPTY_LIST;
+        }
+        final ResourceGroupManagerLocal rgMan =
+            ResourceGroupManagerEJBImpl.getOne();
+        return new ArrayList(rgMan.getMembers(group));
     }
 
     /**
