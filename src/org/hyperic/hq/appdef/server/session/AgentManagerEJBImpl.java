@@ -616,14 +616,19 @@ public class AgentManagerEJBImpl
         throws AgentNotFoundException
     {
         try {
-            Platform platform;
+            Platform platform = null;
             switch (aID.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                     Service service = getServiceDAO().findById(aID.getId());
-                    platform = service.getServer().getPlatform();
+                    Server server = service.getServer();
+                    // server may be null due to async delete
+                    if (server == null) {
+                        break;
+                    }
+                    platform = server.getPlatform();
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    Server server = getServerDAO().findById(aID.getId());
+                    server = getServerDAO().findById(aID.getId());
                     platform = server.getPlatform();
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
