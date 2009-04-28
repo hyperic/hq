@@ -52,7 +52,8 @@ public class Service extends AppdefResource
         _authOps.put("control",      AuthzConstants.serviceOpControlService);
         _authOps.put("manageAlerts", AuthzConstants.serviceOpManageAlerts);
     }
-    
+
+    private String _autoinventoryIdentifier;
     private boolean _autodiscoveryZombie;
     private boolean _serviceRt;
     private boolean _endUserRt;
@@ -272,5 +273,13 @@ public class Service extends AppdefResource
     
     protected String _getAuthzOp(String op) {
         return (String)_authOps.get(op);
+    }
+
+    public String getAutoinventoryIdentifier() {
+        return _autoinventoryIdentifier;
+    }
+
+    public void setAutoinventoryIdentifier(String aiid) {
+        _autoinventoryIdentifier = aiid;
     }
 }

@@ -9832,7 +9832,39 @@ has already been defined.
         </statement>
     </schema-directSQL>
   </schemaSpec>
-    
+
+  <schemaSpec version="3.145">
+    <schema-addColumn table="EAM_SERVICE" column="AUTOINVENTORYIDENTIFIER" 
+                      columnType="VARCHAR" precision="250"/>
+    <schema-directSQL>
+      <statement>
+        UPDATE EAM_SERVICE                                                                                      
+        SET autoinventoryidentifier = (
+            SELECT r.name
+            FROM EAM_RESOURCE r
+            WHERE EAM_SERVICE.resource_id = r.id
+        )
+      </statement>
+      <statement targetDB='oracle'>
+        DROP INDEX EAM_SERVICE_SERVER_IDX
+      </statement>
+      <statement targetDB='postgresql'>
+        DROP INDEX EAM_SERVICE_SERVER_IDX
+      </statement>
+      <statement targetDB='mysql'>
+        ALTER TABLE EAM_SERVICE DROP INDEX EAM_SERVICE_SERVER_IDX
+      </statement>
+      <statement targetDB='mysql'>
+        create unique index EAM_SERVICE_AIID_IDX on EAM_SERVICE(SERVER_ID, AUTOINVENTORYIDENTIFIER)
+      </statement>
+      <statement targetDB='oracle'>
+        ALTER TABLE EAM_SERVICE ADD UNIQUE(SERVER_ID, AUTOINVENTORYIDENTIFIER)
+      </statement>
+      <statement targetDB='postgresql'>
+        ALTER TABLE EAM_SERVICE ADD UNIQUE(SERVER_ID, AUTOINVENTORYIDENTIFIER)
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
 </dbupgrade>
 </target>
 </project>

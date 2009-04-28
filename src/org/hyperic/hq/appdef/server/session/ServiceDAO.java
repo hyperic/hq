@@ -68,6 +68,9 @@ public class ServiceDAO extends HibernateDAO
         super.remove(entity);
     }
 
+    /**
+     * NOTE: this method automatically sets the autoinventoryIdentifier = name
+     */
     public Service create(ServiceType type, Server server, String name, 
                           String desc, String modifiedBy, String location, 
                           String owner, Service parent)  
@@ -77,6 +80,7 @@ public class ServiceDAO extends HibernateDAO
 
         Service s = new Service();
         s.setName(name);
+        s.setAutoinventoryIdentifier(name);
         s.setAutodiscoveryZombie(false);
         s.setServiceRt(false);
         s.setEndUserRt(false);

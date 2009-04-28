@@ -459,12 +459,17 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             final ServiceManagerLocal sMan = getServiceManager();
             Collection services = server.getServices();
             synchronized(services) {
-                for (Iterator i = services.iterator(); i.hasNext(); ) {
+                for (final Iterator i = services.iterator(); i.hasNext(); ) {
                     try {
                         // this looks funky but the idea is to pull the service
                         // obj into the session so that it is updated when flushed
-                        Service service =
+                        final Service service =
                             sMan.findServiceById(((Service)i.next()).getId());
+                        final String currAiid =
+                            service.getAutoinventoryIdentifier();
+                        final Integer id = service.getId();
+                        // ensure aiid remains unique
+                        service.setAutoinventoryIdentifier(id + currAiid);
                         service.setServer(null);
                         i.remove();
                     } catch (ServiceNotFoundException e) {

@@ -58,6 +58,7 @@ import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -465,39 +466,48 @@ public class RuntimeReportProcessor {
             
             // Filter out and mark zombie services
             for (Iterator i=appdefServices.iterator(); i.hasNext(); ) {
-                ServiceValue appdefSvc = (ServiceValue)i.next();
+                ServiceValue tmp = (ServiceValue)i.next();
+                final Service service = _serviceMgr.getServiceById(tmp.getId());
+                if (service == null || service.getResource() == null ||
+                    service.getResource().isInAsyncDeleteState()) {
+                    continue;
+                }
+                final String aiid = service.getAutoinventoryIdentifier();
                 boolean found = false;
                 
                 AIServiceValue aiSvc = null;
-                for (Iterator j=aiServices.iterator(); j.hasNext(); ) {
+                for (final Iterator j=aiServices.iterator(); j.hasNext(); ) {
                     aiSvc = (AIServiceValue) j.next();
-                    String subname = aiSvc.getName();
-                    if (found = appdefSvc.getName().equals(subname)) {
+                    final String ainame = aiSvc.getName();
+                    if (found = aiid.equals(ainame)) {
                         break;
-                    }
-                    else if (aiSvc.getName().startsWith(fqdn)) {
-                     // Get rid of the FQDN
-                       subname = subname.substring(fqdn.length());
-                        
-                        if (found = appdefSvc.getName().endsWith(subname))
-                            break;
+                    } else if (aiid.startsWith(fqdn)) {
+                       // Get rid of the FQDN
+                       final String subname = ainame.substring(fqdn.length());
+                       if (found = aiid.endsWith(subname)) {
+                           break;
+                       }
                     }
                 }
                 
                 if (found) {
                     // Update name if FQDN changed
-                    if (aiSvc != null &&
-                        !appdefSvc.getName().equals(aiSvc.getName())) {
-                        Service svc =
-                            _serviceMgr.getServiceById(appdefSvc.getId());
-                        svc.setName(aiSvc.getName());
+                    final String svcName = service.getName();
+                    // only change the name if it hasn't been changed already
+                    // for example if !svcName.equals(aiid): this means that
+                    // the user has explicitly change the service's name
+                    if (aiSvc != null && svcName.equals(aiid)) {
+                        service.setName(aiSvc.getName());
                     }
-                }
-                else {
-                    Service svc = _serviceMgr.getServiceById(appdefSvc.getId());
-                    _log.info("Service id=" + svc.getId() + " name=" + 
-                              svc.getName() + " has become a zombie");
-                    _serviceMgr.updateServiceZombieStatus(_overlord, svc, true); 
+                    // this means that the fqdn changed
+                    if (aiSvc != null && !aiid.equals(aiSvc.getName())) {
+                        service.setAutoinventoryIdentifier(aiSvc.getName());
+                    }
+                } else {
+                    _log.info("Service id=" + service.getId() + " name=" + 
+                              service.getName() + " has become a zombie");
+                    _serviceMgr.updateServiceZombieStatus(
+                        _overlord, service, true); 
                 }
             }
             
