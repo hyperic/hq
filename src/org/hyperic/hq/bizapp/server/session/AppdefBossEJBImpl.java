@@ -1586,10 +1586,7 @@ public class AppdefBossEJBImpl
         }
     }
 
-    /**
-     * @ejb:interface-method
-     */
-    public void removeServer(AuthzSubject subject, Server server)
+    private void removeServer(AuthzSubject subject, Server server)
         throws PermissionException,
                VetoException {
         try {
