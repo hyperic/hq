@@ -155,6 +155,12 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
+   <cache name="Measurement.findParentAvailMeasurements"
+         maxElementsInMemory="1000"
+         eternal="true"
+         timeToIdleSeconds="0"
+         timeToLiveSeconds="0"
+         memoryStoreEvictionPolicy="LRU"/>
   <cache name="Measurement.findAvailMeasurementsByInstances"
          maxElementsInMemory="1000"
          eternal="true"
