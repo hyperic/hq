@@ -74,6 +74,7 @@ public class MxUtil {
     static final String PTQL_PREFIX = "ptql:";
 
     public static final String PROP_JMX_URL = "jmx.url";
+    public static final String PROP_JMX_PORT = "jmx.port";
     public static final String PROP_JMX_USERNAME = "jmx.username";
     public static final String PROP_JMX_PASSWORD = "jmx.password";
     public static final String PROP_JMX_PROVIDER_PKGS = "jmx.provider.pkgs";
