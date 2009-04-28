@@ -9823,13 +9823,13 @@ has already been defined.
     <schema-insert table="EAM_RESOURCE_RELATION"
                    insertCmd="(ID, VERSION_COL, NAME, IS_HIER) VALUES (2, 0, 'network', %%TRUE%%)"/>
     <schema-directSQL>
-        <statement targetDB="postgresql" fail="false">
+        <statement targetDB="postgresql">
           ALTER TABLE EAM_RESOURCE_EDGE DROP CONSTRAINT eam_resource_edge_from_id_key CASCADE
         </statement>
-        <statement targetDB="oracle" fail="false">
+        <statement targetDB="oracle">
           ALTER TABLE EAM_RESOURCE_EDGE DROP UNIQUE (FROM_ID, TO_ID, DISTANCE)
         </statement>
-        <statement targetDB="mysql" fail="false">
+        <statement targetDB="mysql">
           ALTER TABLE EAM_RESOURCE_EDGE DROP INDEX FROM_ID
         </statement>
         <statement>
