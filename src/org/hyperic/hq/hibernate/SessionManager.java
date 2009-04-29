@@ -156,7 +156,7 @@ public class SessionManager {
             if (s.getFlushMode().equals(FlushMode.MANUAL)) {
                 _log.debug("Completed read-only session for " +
                            Thread.currentThread().getName() + "]");
-            } else if (flush) {
+            } else if (flush && s.isDirty()) {
                 s.flush();
             }
             
