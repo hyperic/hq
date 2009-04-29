@@ -1167,6 +1167,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         return getPlatformDAO()
                     .findParentByNetworkRelation(platformTypeIds, hasChildren);
     }
+    
+    /**
+     * @return a list of {@link Platform}s
+     * @ejb:interface-method
+     */
+    public List findPlatformPojosByNoNetworkRelation() {
+        return getPlatformDAO().findByNoNetworkRelation();
+    }
 
     /**
      * Get the platforms that have an IP with the specified address.
