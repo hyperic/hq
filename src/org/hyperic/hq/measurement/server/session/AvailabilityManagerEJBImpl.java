@@ -169,13 +169,38 @@ public class AvailabilityManagerEJBImpl
     }
 
     /**
+     * @param resourceIds {@link List} of {@link Resource}
+     * @return {@link Map} of {@link Integer} to {@link List} of
+     * {@link Measurement}
+     * @ejb:interface-method
+     */
+    public Map getAvailMeasurementChildren(List resources,
+                                           String resourceRelationType) {
+        final List objects = getMeasurementDAO().findRelatedAvailMeasurements(
+            resources, resourceRelationType);
+        final Map rtn = new HashMap(objects.size());
+        for (final Iterator it=objects.iterator(); it.hasNext(); ) {
+            final Object[] o = (Object[])it.next();
+            final Integer rId = (Integer)o[0];
+            final Measurement m = (Measurement)o[1];
+            List tmp;
+            if (null == (tmp = (List)rtn.get(rId))) {
+                tmp = new ArrayList();
+                rtn.put(rId, tmp);
+            }
+            tmp.add(m);
+        }
+        return rtn;
+    }
+
+    /**
      * @ejb:interface-method
      */
     public List getAvailMeasurementChildren(Resource resource,
                                             String resourceRelationType) {
-        return getMeasurementDAO().findRelatedAvailMeasurements(
-                                        Collections.singletonList(resource.getId()),
-                                        resourceRelationType);
+        final List sList = Collections.singletonList(resource);
+        return (List)getAvailMeasurementChildren(
+            sList, resourceRelationType).get(resource.getId());
     }
     
     /**

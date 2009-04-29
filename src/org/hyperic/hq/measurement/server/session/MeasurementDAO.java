@@ -44,6 +44,7 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -541,28 +542,41 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     /**
-     * @param List<Integer> of resourceIds return List of Availability 
-     * Measurements which are children of the resourceIds
+     * @param {@link List} of {@link Resource} resources
+     * @return {@link Object[]}
+     * 0 = {@link Integer}
+     * 1 = {@link List} of Availability {@link Measurement}s
+     * Measurements which are children of the resource
      */
-    List findRelatedAvailMeasurements(List resourceIds, String resourceRelationType) {
+    final List findRelatedAvailMeasurements(final List resources,
+                                            final String resourceRelationType) {
+       if (resources.size() == 0) {
+           return Collections.EMPTY_LIST;
+       }
        final String sql = new StringBuilder()
-           .append("select m from Measurement m ")
+           .append("select e.from.id,m from Measurement m ")
            .append("join m.resource.toEdges e ")
            .append("join m.template t ")
            .append("join e.relation r ")
            .append("where m.resource is not null ")
            .append("and e.distance > 0 ")
            .append("and r.name = :relationType ")
-           .append("and e.from in (:ids) and ")
+           .append("and e.from in (:resources) and ")
            .append(ALIAS_CLAUSE).toString();
-       return getSession()
-           .createQuery(sql)
-           .setParameterList("ids", resourceIds, new IntegerType())
-           .setParameter(
-               "relationType", resourceRelationType)
-           .setCacheable(true)
-           .setCacheRegion("Measurement.findRelatedAvailMeasurements")
-           .list();
+       final HQDialect dialect = Util.getHQDialect();
+       final int max = (dialect.getMaxExpressions() <= 0) ?
+           Integer.MAX_VALUE : dialect.getMaxExpressions();
+       final List rtn = new ArrayList(resources.size());
+       for (int i=0; i<resources.size(); i+=max) {
+           final int end = Math.min(i+max, resources.size());
+           final List list = resources.subList(i, end);
+           rtn.addAll(getSession()
+               .createQuery(sql)
+               .setParameterList("resources", list)
+               .setParameter("relationType", resourceRelationType)
+               .list());
+       }
+       return rtn;
     }
 
     /**
