@@ -253,7 +253,7 @@
     </div>
     <div class="filterBoxFields">
         
-            <html:text property="keywords" size="15" maxlength="40" onfocus="ClearText(this)"
+            <html:text property="keywords" size="15" maxlength="40" onfocus="this.select();"
                 value="${initSearchVal}"/>
             <c:choose>
                 <c:when test="${empty allTypesKey}">
