@@ -100,6 +100,8 @@ public class MxServerDetector
         //remote access enabled via:
         //-Dcom.sun.management.jmxremote.port=xxxx
         config.setValue(MxUtil.PROP_JMX_URL, url);
+        //for use in name %jmx.port% template
+        config.setValue(MxUtil.PROP_JMX_PORT, port);
 
         return true;
     }
