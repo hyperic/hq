@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query; 
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
@@ -241,7 +242,9 @@ public class PlatformDAO extends HibernateDAO {
     }
     
     public List findParentByNetworkRelation(List platformTypeIds,
+                                            String platformName,
                                             Boolean hasChildren) {
+        String nameEx = null;
         String sql = "select {p.*} from EAM_PLATFORM p " +
                      "join EAM_RESOURCE r on p.resource_id = r.id " +
                      "where p.platform_type_id in (:ids) ";
@@ -253,15 +256,29 @@ public class PlatformDAO extends HibernateDAO {
                          " and e.rel_id = " + AuthzConstants.RELATION_NETWORK_ID +
                          " and e.distance = 0) ";
         }
+        if (platformName != null && platformName.trim().length() > 0) {
+            HQDialect dialect = Util.getHQDialect();
+            nameEx = dialect.getRegExSQL("r.sort_name", ":regex", true, false);
+            String fqdnEx = dialect.getRegExSQL("p.fqdn", ":regex", true, false);
+
+            sql += " and (" + fqdnEx + " or " + nameEx + ") ";
+        }
         
-        return getSession()
-            .createSQLQuery(sql)
-            .addEntity("p", Platform.class)
-            .setParameterList("ids", platformTypeIds, new IntegerType())
-            .list();
+        Query query = getSession()
+                        .createSQLQuery(sql)
+                        .addEntity("p", Platform.class)
+                        .setParameterList("ids", platformTypeIds, new IntegerType());
+        
+        if (nameEx != null) {
+            query.setString("regex", platformName);
+        }
+        
+        return query.list();
     }
     
-    public List findByNoNetworkRelation(List platformTypeIds) {
+    public List findByNoNetworkRelation(List platformTypeIds,
+                                        String platformName) {
+        String nameEx = null;
         String sql = "select {p.*} from EAM_PLATFORM p " +
                      "join EAM_RESOURCE r on p.resource_id = r.id " +
                      "where p.platform_type_id in (:ids) " +
@@ -270,11 +287,24 @@ public class PlatformDAO extends HibernateDAO {
                          " where e.rel_id = " + AuthzConstants.RELATION_NETWORK_ID +
                          " and e.to_id = p.resource_id ) ";
 
-        return getSession()
-            .createSQLQuery(sql)
-            .addEntity("p", Platform.class)
-            .setParameterList("ids", platformTypeIds, new IntegerType())
-            .list();
+        if (platformName != null && platformName.trim().length() > 0) {
+            HQDialect dialect = Util.getHQDialect();
+            nameEx = dialect.getRegExSQL("r.sort_name", ":regex", true, false);
+            String fqdnEx = dialect.getRegExSQL("p.fqdn", ":regex", true, false);
+
+            sql += " and (" + fqdnEx + " or " + nameEx + ") ";
+        }
+        
+        Query query = getSession()
+                        .createSQLQuery(sql)
+                        .addEntity("p", Platform.class)
+                        .setParameterList("ids", platformTypeIds, new IntegerType());
+
+        if (nameEx != null) {
+            query.setString("regex", platformName);
+        }
+        
+        return query.list();
     }
     
     public List findByType(Integer pid)

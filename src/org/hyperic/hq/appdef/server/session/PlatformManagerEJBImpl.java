@@ -1163,9 +1163,11 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      */
     public List findParentPlatformPojosByNetworkRelation(AuthzSubject subj,
                                                          List platformTypeIds,
+                                                         String platformName,
                                                          Boolean hasChildren) {
         return getPlatformDAO()
-                    .findParentByNetworkRelation(platformTypeIds, hasChildren);
+                    .findParentByNetworkRelation(
+                            platformTypeIds, platformName, hasChildren);
     }
     
     /**
@@ -1176,8 +1178,10 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public List findPlatformPojosByNoNetworkRelation(AuthzSubject subj,
-                                                     List platformTypeIds) {
-        return getPlatformDAO().findByNoNetworkRelation(platformTypeIds);
+                                                     List platformTypeIds,
+                                                     String platformName) {
+        return getPlatformDAO().findByNoNetworkRelation(
+                                    platformTypeIds, platformName);
     }
 
     /**
