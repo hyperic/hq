@@ -270,6 +270,10 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                     eDAO.deleteEdge(childResource, parentResource, relation);
                 }
             }
+            if (findResourceByNetworkRelation(parentResource).isEmpty()) {
+                // remove self-edge for parent of network hierarchy
+                eDAO.deleteEdges(parentResource, relation);
+            }
         }
     }
     

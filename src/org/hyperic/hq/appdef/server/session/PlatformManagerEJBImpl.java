@@ -1169,11 +1169,15 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
     
     /**
+     * @param subj
+     * @param platformTypeIds
+     *              List<Integer> of platform type ids
      * @return a list of {@link Platform}s
      * @ejb:interface-method
      */
-    public List findPlatformPojosByNoNetworkRelation() {
-        return getPlatformDAO().findByNoNetworkRelation();
+    public List findPlatformPojosByNoNetworkRelation(AuthzSubject subj,
+                                                     List platformTypeIds) {
+        return getPlatformDAO().findByNoNetworkRelation(platformTypeIds);
     }
 
     /**

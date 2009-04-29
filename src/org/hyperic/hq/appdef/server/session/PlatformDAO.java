@@ -261,9 +261,11 @@ public class PlatformDAO extends HibernateDAO {
             .list();
     }
     
-    public List findByNoNetworkRelation() {
+    public List findByNoNetworkRelation(List platformTypeIds) {
         String sql = "select {p.*} from EAM_PLATFORM p " +
-                     "where not exists (" + 
+                     "join EAM_RESOURCE r on p.resource_id = r.id " +
+                     "where p.platform_type_id in (:ids) " +
+                     "and not exists (" + 
                          " select from_id from EAM_RESOURCE_EDGE e " +
                          " where e.rel_id = " + AuthzConstants.RELATION_NETWORK_ID +
                          " and e.to_id = p.resource_id ) ";
@@ -271,6 +273,7 @@ public class PlatformDAO extends HibernateDAO {
         return getSession()
             .createSQLQuery(sql)
             .addEntity("p", Platform.class)
+            .setParameterList("ids", platformTypeIds, new IntegerType())
             .list();
     }
     
