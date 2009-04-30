@@ -54,7 +54,6 @@ public class HierarchicalAlertingManagerEJBImpl
      * Determine whether the availability data point can
      * be suppressed as part of hierarchical alerting
      *
-     * @ejb:transaction type="Supports"
      * @ejb:interface-method
      */
     public boolean suppressAvailabilityDataPoint(DataPoint dp) {
@@ -64,7 +63,6 @@ public class HierarchicalAlertingManagerEJBImpl
     /**
      * Perform a simple "secondary" availability check for down platforms.
      * 
-     * @ejb:transaction type="Supports"
      * @ejb:interface-method
      */
     public void performSecondaryAvailabilityCheck(Map downPlatforms) {

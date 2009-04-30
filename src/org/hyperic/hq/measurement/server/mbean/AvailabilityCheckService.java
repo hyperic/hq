@@ -116,8 +116,9 @@ public class AvailabilityCheckService
     /**
      * Since this method is called from the synchronized block in hitInSession()
      * please see the associated NOTE.
+     * @return {@link Map} of {@link Integer} to {@link ResourceDataPoint}
      */
-    private List getDownPlatforms(Date lDate) {
+    private Map getDownPlatforms(Date lDate) {
         final boolean debug = _log.isDebugEnabled();
         AvailabilityCache cache = AvailabilityCache.getInstance();
         AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
@@ -172,10 +173,12 @@ public class AvailabilityCheckService
             }
         }
         
-        PermissionManagerFactory.getInstance().getHierarchicalAlertingManager()
+        if (!rtn.isEmpty()) {
+            PermissionManagerFactory.getInstance().getHierarchicalAlertingManager()
                 .performSecondaryAvailabilityCheck(rtn);
+        }
 
-        return new ArrayList(rtn.values());
+        return rtn;
     }
 
     protected void hitInSession(Date lDate) {
@@ -208,7 +211,7 @@ public class AvailabilityCheckService
             // The code must be extremely efficient or else it will have
             // a big impact on the performance of availability insertion.
             synchronized (cache) {
-                List downPlatforms = getDownPlatforms(lDate);
+                Map downPlatforms = getDownPlatforms(lDate);
                 List backfillList = getBackfillPts(downPlatforms, current);
                 backfillAvails(backfillList);
             }
@@ -238,21 +241,16 @@ public class AvailabilityCheckService
         }
     }
 
-    private List getBackfillPts(List downPlatforms, long current) {
+    private List getBackfillPts(Map downPlatforms, long current) {
         final boolean debug = _log.isDebugEnabled();
         final AvailabilityManagerLocal availMan =
             AvailabilityManagerEJBImpl.getOne();
         final AvailabilityCache cache = AvailabilityCache.getInstance();
         final List rtn = new ArrayList();
-        final List resources = new ArrayList(downPlatforms.size());
-        for (final Iterator i=downPlatforms.iterator(); i.hasNext(); ) {
-            final ResourceDataPoint rdp = (ResourceDataPoint)i.next();
-            final Resource platform = rdp.getResource();
-            resources.add(platform);
-        }
+        final List resourceIds = new ArrayList(downPlatforms.keySet());
         final Map rHierarchy = availMan.getAvailMeasurementChildren(
-            resources, AuthzConstants.ResourceEdgeContainmentRelation);
-        for (final Iterator i=downPlatforms.iterator(); i.hasNext(); ) {
+            resourceIds, AuthzConstants.ResourceEdgeContainmentRelation);
+        for (final Iterator i=downPlatforms.values().iterator(); i.hasNext(); ) {
             final ResourceDataPoint rdp = (ResourceDataPoint)i.next();
             final Resource platform = rdp.getResource();
             if (debug) {

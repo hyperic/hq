@@ -542,15 +542,15 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     /**
-     * @param {@link List} of {@link Resource} resources
+     * @param {@link List} of {@link Integer} resource ids
      * @return {@link Object[]}
      * 0 = {@link Integer}
      * 1 = {@link List} of Availability {@link Measurement}s
      * Measurements which are children of the resource
      */
-    final List findRelatedAvailMeasurements(final List resources,
+    final List findRelatedAvailMeasurements(final List resourceIds,
                                             final String resourceRelationType) {
-       if (resources.size() == 0) {
+       if (resourceIds.isEmpty()) {
            return Collections.EMPTY_LIST;
        }
        final String sql = new StringBuilder()
@@ -561,18 +561,18 @@ public class MeasurementDAO extends HibernateDAO {
            .append("where m.resource is not null ")
            .append("and e.distance > 0 ")
            .append("and r.name = :relationType ")
-           .append("and e.from in (:resources) and ")
+           .append("and e.from in (:resourceIds) and ")
            .append(ALIAS_CLAUSE).toString();
        final HQDialect dialect = Util.getHQDialect();
        final int max = (dialect.getMaxExpressions() <= 0) ?
            Integer.MAX_VALUE : dialect.getMaxExpressions();
-       final List rtn = new ArrayList(resources.size());
-       for (int i=0; i<resources.size(); i+=max) {
-           final int end = Math.min(i+max, resources.size());
-           final List list = resources.subList(i, end);
+       final List rtn = new ArrayList(resourceIds.size());
+       for (int i=0; i<resourceIds.size(); i+=max) {
+           final int end = Math.min(i+max, resourceIds.size());
+           final List list = resourceIds.subList(i, end);
            rtn.addAll(getSession()
                .createQuery(sql)
-               .setParameterList("resources", list)
+               .setParameterList("resourceIds", list, new IntegerType())
                .setParameter("relationType", resourceRelationType)
                .list());
        }
@@ -580,30 +580,49 @@ public class MeasurementDAO extends HibernateDAO {
     }
 
     /**
+     * @param {@link List} of {@link Integer} resource ids
+     * @return {@link Object[]}
+     * 0 = {@link Integer}
+     * 1 = {@link List} of Availability {@link Measurement}s
      * Availability measurements which are parents of the resourceId
      */
-    List findParentAvailMeasurements(Resource resource, String resourceRelationType) {
+    List findParentAvailMeasurements(List resourceIds, 
+                                     String resourceRelationType) {
+        if (resourceIds.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+        
         // Needs to be ordered by DISTANCE in descending order so that
         // it's immediate parent is the first record
        final String sql = new StringBuilder()
-           .append("select m from Measurement m ")
+           .append("select e.from.id, m from Measurement m ")
            .append("join m.resource.toEdges e ")
            .append("join m.template t ")
            .append("join e.relation r ")
            .append("where m.resource is not null ")
            .append("and e.distance < 0 ")
            .append("and r.name = :relationType ")
-           .append("and e.from = :resourceId and ")
+           .append("and e.from in (:resourceIds) and ")
            .append(ALIAS_CLAUSE)
-           .append("order by e.distance desc ").toString();
-       return getSession()
-           .createQuery(sql)
-           .setInteger("resourceId", resource.getId().intValue())
-           .setParameter(
-               "relationType", resourceRelationType)
-           .setCacheable(true)
-           .setCacheRegion("Measurement.findParentAvailMeasurements")
-           .list();
+           .append("order by e.from.id, e.distance desc ").toString();
+
+       final List rtn = new ArrayList(resourceIds.size());
+       final HQDialect dialect = Util.getHQDialect();
+       final int max = (dialect.getMaxExpressions() <= 0) ?
+                           Integer.MAX_VALUE : dialect.getMaxExpressions();
+       
+       for (int i=0; i<resourceIds.size(); i+=max) {
+           final int end = Math.min(i+max, resourceIds.size());
+           final List list = resourceIds.subList(i, end);
+           rtn.addAll(getSession()
+                       .createQuery(sql)
+                       .setParameterList("resourceIds", list, new IntegerType())
+                       .setParameter("relationType", resourceRelationType)
+                       .setCacheable(true)
+                       .setCacheRegion("Measurement.findParentAvailMeasurements")
+                       .list());
+       }
+       return rtn;
     }
     
     List findAvailMeasurementsByInstances(int type, Integer[] ids) {

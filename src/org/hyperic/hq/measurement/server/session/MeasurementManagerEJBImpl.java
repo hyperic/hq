@@ -810,10 +810,12 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 resource = grp.getResource();
                 rtn.put(resource.getId(), dao.findAvailMeasurements(grp));
                 continue;
-            } else {
+            } else if (o instanceof AppdefResourceValue){
                 AppdefResourceValue r = (AppdefResourceValue) o;
                 AppdefEntityID aeid = r.getEntityId();
                 resource = resMan.findResource(aeid);
+            } else {
+                resource = resMan.findResourceById((Integer) o);
             }
             if (resource == null || resource.isInAsyncDeleteState()) {
                 continue;

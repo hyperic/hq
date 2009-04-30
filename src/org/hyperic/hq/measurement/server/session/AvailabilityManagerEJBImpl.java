@@ -169,15 +169,46 @@ public class AvailabilityManagerEJBImpl
     }
 
     /**
-     * @param resourceIds {@link List} of {@link Resource}
+     * @param {@link List} of {@link Integer} resource ids
      * @return {@link Map} of {@link Integer} to {@link List} of
      * {@link Measurement}
      * @ejb:interface-method
      */
-    public Map getAvailMeasurementChildren(List resources,
+    public Map getAvailMeasurementChildren(List resourceIds,
                                            String resourceRelationType) {
         final List objects = getMeasurementDAO().findRelatedAvailMeasurements(
-            resources, resourceRelationType);
+            resourceIds, resourceRelationType);
+
+        return convertAvailMeasurementListToMap(objects);
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public List getAvailMeasurementParent(Resource resource,
+                                          String resourceRelationType) {
+        final List sList = Collections.singletonList(resource.getId());
+        List rtn = (List) getAvailMeasurementParent(sList, resourceRelationType)
+                                    .get(resource.getId());
+        if (rtn == null) {
+            rtn = Collections.EMPTY_LIST;
+        }
+        return rtn;
+    }
+    
+    /**
+     * @ejb:interface-method
+     */
+    public Map getAvailMeasurementParent(List resourceIds,
+                                         String resourceRelationType) {
+        final List objects = getMeasurementDAO().findParentAvailMeasurements(
+                                      resourceIds,
+                                      resourceRelationType);
+        
+        return convertAvailMeasurementListToMap(objects);
+    }
+
+    private Map convertAvailMeasurementListToMap(List objects) {
         final Map rtn = new HashMap(objects.size());
         for (final Iterator it=objects.iterator(); it.hasNext(); ) {
             final Object[] o = (Object[])it.next();
@@ -191,26 +222,6 @@ public class AvailabilityManagerEJBImpl
             tmp.add(m);
         }
         return rtn;
-    }
-
-    /**
-     * @ejb:interface-method
-     */
-    public List getAvailMeasurementChildren(Resource resource,
-                                            String resourceRelationType) {
-        final List sList = Collections.singletonList(resource);
-        return (List)getAvailMeasurementChildren(
-            sList, resourceRelationType).get(resource.getId());
-    }
-    
-    /**
-     * @ejb:interface-method
-     */
-    public List getAvailMeasurementParent(Resource resource,
-                                          String resourceRelationType) {
-        return getMeasurementDAO().findParentAvailMeasurements(
-                                      resource,
-                                      resourceRelationType);
     }
     
     /**
@@ -502,8 +513,8 @@ public class AvailabilityManagerEJBImpl
     
     /**
      * @param resources Collection may be of type {@link Resource},
-     *  {@link AppdefEntityId}, {@link AppdefEntityValue}, or
-     *  {@link AppdefResourceValue}
+     *  {@link AppdefEntityId}, {@link AppdefEntityValue},
+     *  {@link AppdefResourceValue} or {@link Integer}
      * @param measCache Map<Integer, List> optional arg (may be null) to supply
      * measurement id(s) of ResourceIds. Integer => Resource.getId()
      * @return Map<Integer, MetricValue> Integer => Measurement.getId()
@@ -525,10 +536,12 @@ public class AvailabilityManagerEJBImpl
                 resource = resMan.findResource(aeid);
             } else if (o instanceof Resource) {
                 resource = (Resource) o;
-            } else {
+            } else if (o instanceof AppdefResourceValue){
                 AppdefResourceValue res = (AppdefResourceValue) o;
                 AppdefEntityID aeid = res.getEntityId();
                 resource = resMan.findResource(aeid);
+            } else {
+                resource = resMan.findResourceById((Integer) o);
             }
             List measIds = null;
             if (measCache != null) {
@@ -710,7 +723,9 @@ public class AvailabilityManagerEJBImpl
         }
         ConcurrentStatsCollector.getInstance().addStat(
             availPoints.size(), AVAIL_MANAGER_METRICS_INSERTED);
+        begin = getDebugTime(debug);
         sendDataToEventHandlers(availPoints);
+        debugTimes(begin, "sendDataToEventHandlers", availPoints.size());
     }
 
     private void flushCreateAndRemoves() {
