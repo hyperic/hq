@@ -100,7 +100,7 @@
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Alert" mode="list"
-            link="/alerts/Config.do"
+            link="/alerts/Alerts.do"
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Control" link="/resource/server/Control.do"
@@ -124,7 +124,7 @@
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Alert" mode="list"
-            link="/alerts/Config.do"
+            link="/alerts/Alerts.do"
             height="21" width="102"
             classtype="org.hyperic.hq.ui.util.Tab"/>
       <item value="Views" mode="list"
@@ -254,11 +254,6 @@
     </putList>
   </definition>  
 
-  <definition name=".tabs.resource.server.alert"
-              extends=".tabs.resource.server">
-     <put name="selectedIndex"  value="4" />
-  </definition>
-    
   <definition name=".tabs.resource.server.alert"
               extends=".tabs.resource.server">
     <put name="selectedIndex"  value="2" />

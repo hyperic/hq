@@ -140,7 +140,7 @@ AGENT_INSTALL_HOME_PROP=agent.install.home
 AGENT_LIB=$AGENT_BUNDLE_HOME/lib
 PDK_LIB=$AGENT_BUNDLE_HOME/pdk/lib
 # for /proc/net/tcp mirror
-SIGAR_PROC_NET=./tmp
+SIGAR_PROC_NET=$AGENT_BUNDLE_HOME/tmp
 
 if [ "x${HQ_JAVA_HOME}" != "x" ] ; then
     HQ_JAVA_HOME=${HQ_JAVA_HOME}
@@ -162,9 +162,9 @@ else
     esac
 fi
 
-# export the resolved HQ_JAVA_HOME so that it can be picked up by 
-# the Java Service Wrapper process
+# export environment variables to be picked up by the Java Service Wrapper process
 export HQ_JAVA_HOME
+export SIGAR_PROC_NET
 
 chmod +x "${AGENT_BUNDLE_HOME}"/pdk/scripts/*
 

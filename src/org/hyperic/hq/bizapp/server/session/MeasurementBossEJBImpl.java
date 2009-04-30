@@ -2443,81 +2443,82 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             resources, measCache);
         watch.markTimeEnd("getLastAvail");
         for (Iterator it = resources.iterator(); it.hasNext(); ) {
-            Object o = it.next();
-            
-            AppdefEntityValue rv;
-            AppdefEntityID aeid;
-            if (o instanceof AppdefEntityValue) {
-                rv = (AppdefEntityValue) o;
-                aeid = rv.getID();
+            try {
+                Object o = it.next();
+                AppdefEntityValue rv;
+                AppdefEntityID aeid;
+                if (o instanceof AppdefEntityValue) {
+                    rv = (AppdefEntityValue) o;
+                    aeid = rv.getID();
+                }
+                else if (o instanceof AppdefEntityID) {
+                    aeid = (AppdefEntityID) o;
+                    rv = new AppdefEntityValue(aeid, subject);
+                }
+                else {
+                    AppdefResourceValue resource = (AppdefResourceValue) o;
+                    aeid = resource.getEntityId();
+                    rv = new AppdefEntityValue(aeid, subject);
+                }
+                ResourceDisplaySummary summary = new ResourceDisplaySummary();
+                // Set the resource
+                AppdefResourceValue parent = null;
+                HashSet categories = new HashSet(4);
+                switch (aeid.getType()) {
+                    case AppdefEntityConstants.APPDEF_TYPE_SERVER :
+                        try {
+                            List platforms =
+                                rv.getAssociatedPlatforms(PageControl.PAGE_ALL);
+                            if (platforms != null && platforms.size() > 0) {
+                                parent = (AppdefResourceValue) platforms.get(0);
+                            }
+                        } catch (PermissionException e) {
+                            // Can't get the parent, leave parent = null
+                        }
+                        // Fall through to set the monitorable and metrics
+                    case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                    case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
+                        categories.add(MeasurementConstants.CAT_AVAILABILITY);
+                        // XXX scottmf need to review this, perf is bad and metric
+                        // is not very useful
+                        //categories.add(MeasurementConstants.CAT_THROUGHPUT);
+                        watch.markTimeBegin(
+                            "setResourceDisplaySummaryValueForCategory");
+                        setResourceDisplaySummaryValueForCategory(
+                            subject, aeid, summary, categories, measCache,
+                            availCache);
+                        watch.markTimeEnd("setResourceDisplaySummaryValueForCategory");
+                        
+                        summary.setMonitorable(Boolean.TRUE);
+                        break;
+                    case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                    case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                        watch.markTimeBegin("Group Type");
+                        summary.setMonitorable(Boolean.TRUE);
+                        // Set the availability now
+                        double avail = getAvailability(
+                            subject, aeid, measCache, availCache);
+                        summary.setAvailability(new Double(avail));
+                        try {
+                            // Get the availability template
+                            MeasurementTemplate tmpl = getAvailabilityMetricTemplate(
+                                subject, aeid, measCache);
+                            summary.setAvailTempl(tmpl.getId());
+                        } catch (MeasurementNotFoundException e) {
+                            // No availability metric, don't set it
+                        }
+                        watch.markTimeEnd("Group Type");
+                        break;
+                    default:
+                        throw new InvalidAppdefTypeException(
+                            "entity type is not monitorable, id type: " +
+                            aeid.getType());
+                }            
+                setResourceDisplaySummary(summary, rv, parent);
+                summaries.add(summary);
+            } catch (AppdefEntityNotFoundException e) {
+                _log.debug(e.getMessage(), e);
             }
-            else if (o instanceof AppdefEntityID) {
-                aeid = (AppdefEntityID) o;
-                rv = new AppdefEntityValue(aeid, subject);
-            }
-            else {
-                AppdefResourceValue resource = (AppdefResourceValue) o;
-                aeid = resource.getEntityId();
-                rv = new AppdefEntityValue(aeid, subject);
-            }
-            
-            ResourceDisplaySummary summary = new ResourceDisplaySummary();
-        
-            // Set the resource
-            AppdefResourceValue parent = null;
-            HashSet categories = new HashSet(4);
-            switch (aeid.getType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-                    try {
-                        List platforms =
-                            rv.getAssociatedPlatforms(PageControl.PAGE_ALL);
-                            
-                        if (platforms != null && platforms.size() > 0)
-                            parent = (AppdefResourceValue) platforms.get(0);
-                    } catch (PermissionException e) {
-                        // Can't get the parent, leave parent = null
-                    }
-                    // Fall through to set the monitorable and metrics
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
-                    categories.add(MeasurementConstants.CAT_AVAILABILITY);
-                    // XXX scottmf need to review this, perf is bad and metric
-                    // is not very useful
-                    //categories.add(MeasurementConstants.CAT_THROUGHPUT);
-                
-                    watch.markTimeBegin("setResourceDisplaySummaryValueForCategory");
-                    setResourceDisplaySummaryValueForCategory(
-                        subject, aeid, summary, categories, measCache,
-                        availCache);
-                    watch.markTimeEnd("setResourceDisplaySummaryValueForCategory");
-                    
-                    summary.setMonitorable(Boolean.TRUE);
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                    watch.markTimeBegin("Group Type");
-                    summary.setMonitorable(Boolean.TRUE);
-                    // Set the availability now
-                    summary.setAvailability(new Double(
-                        getAvailability(subject, aeid, measCache, availCache)));
-                    
-                    try {
-                        // Get the availability template
-                        MeasurementTemplate tmpl = getAvailabilityMetricTemplate(
-                            subject, aeid, measCache);
-                        summary.setAvailTempl(tmpl.getId());
-                    } catch (MeasurementNotFoundException e) {
-                        // No availability metric, don't set it
-                    }
-                    watch.markTimeEnd("Group Type");
-                    break;
-                default:
-                    throw new InvalidAppdefTypeException(
-                        "entity type is not monitorable, id type: " +
-                        aeid.getType());
-            }            
-            setResourceDisplaySummary(summary, rv, parent);
-            summaries.add(summary);
         }
         if (_log.isDebugEnabled()) {
             _log.debug("getResourcesCurrentHealth: " + watch);

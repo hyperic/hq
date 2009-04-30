@@ -382,7 +382,7 @@ public class AppdefEntityValue {
     }
 
     public PageList getAssociatedPlatforms(PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException {
+        throws PermissionException, AppdefEntityNotFoundException {
         Integer iId = _id.getId();
 
         PlatformManagerLocal pManager = getPlatformManager();

@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -139,12 +139,12 @@ class GalertLogDAO
     List findByCreateTimeAndPriority(Integer subjectId, long begin, long end, 
                                      AlertSeverity severity, boolean inEsc,
                                      boolean notFixed, Integer groupId,
-                                     PageInfo pageInfo) 
+                                     Integer galertDefId, PageInfo pageInfo) 
     {
         GalertLogSortField sort = (GalertLogSortField)pageInfo.getSort();
         String op = AuthzConstants.groupOpManageAlerts;
         String sql =  PermissionManagerFactory.getInstance()
-                .getGroupAlertsHQL(inEsc, notFixed, groupId) +
+                .getGroupAlertsHQL(inEsc, notFixed, groupId, galertDefId) +
             " order by " + sort.getSortString("a", "d", "g") + 
             (pageInfo.isAscending() ? "" : " DESC");
 

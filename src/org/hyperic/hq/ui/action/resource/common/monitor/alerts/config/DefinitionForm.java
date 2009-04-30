@@ -476,15 +476,7 @@ public class DefinitionForm extends ResourceForm  {
         setName( adv.getName() );
         setDescription( adv.getDescription() );
         setPriority( adv.getPriority() );
-        
-        // HHQ-1396: When we expose the difference between 
-        // active and enabled states in the UI, need to 
-        // set active correctly on the form bean.
-        // Uncomment this code at this point and remove 
-        // the other setActive().
-        // setActive( adv.getActive() );
-        setActive( adv.getEnabled() );
-        
+        setActive( adv.getActive() );
         setEnabled( adv.getEnabled() );
     }
 
@@ -496,15 +488,7 @@ public class DefinitionForm extends ResourceForm  {
         adv.setId( getAd() );
         adv.setName( getName() );
         adv.setDescription( getDescription() );
-        
-        // HHQ-1396: When we expose the difference between 
-        // active and enabled states in the UI, need to 
-        // set enabled correctly on the value object.
-        // Uncomment this code at this point and remove 
-        // the other adv.setEnabled().
-        // adv.setEnabled( this.isEnabled() );      
-        adv.setEnabled( this.isActive() );
-        
+        adv.setEnabled( this.isEnabled() );      
         adv.setActive( this.isActive() );
         adv.setPriority( getPriority() );
     }

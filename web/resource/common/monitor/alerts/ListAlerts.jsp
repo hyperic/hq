@@ -15,7 +15,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004-2008], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -280,6 +280,7 @@
 <script type="text/javascript">
 	dojo11.require("dijit.dijit");
 	dojo11.require("dijit.Dialog");
+  	dojo11.require("dijit.ProgressBar");
           	
 	var MyAlertCenter = null;
 	dojo11.addOnLoad(function(){
@@ -316,6 +317,7 @@ type=\"checkbox\" onclick=\"MyAlertCenter.toggleAll(this)\"
 id=\"${widgetInstanceName}_CheckAllBox\">" isLocalizedTitle="false"
 styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
 <display:alertcheckboxdecorator name="alerts"
+elementId="${widgetInstanceName}|${Resource.entityId.appdefKey}|${Alert.id}|${Alert.maxPauseTime}"
 onclick="MyAlertCenter.toggleAlertButtons(this)"
 fixable="${!Alert.fixed}" acknowledgeable="${Alert.acknowledgeable}"
 styleClass="listMember"/> </display:column>
@@ -343,12 +345,12 @@ title="alerts.alert.AlertList.ListHeader.AlertCondition"/>
 <display:column width="12%" property="value"
 title="alerts.alert.AlertList.ListHeader.ActualValue" />
 
-<display:column width="7%" property="fixed" align="center"
+<display:column width="7%" property="fixed"
                 title="alerts.alert.AlertList.ListHeader.Fixed">
   <display:booleandecorator flagKey="yesno"/>
 </display:column>
 
-<display:column width="11%" property="acknowledgeable" align="center"
+<display:column width="11%" property="acknowledgeable"
                 title="alerts.alert.AlertList.ListHeader.Acknowledge"
                 href="/alerts/RemoveAlerts.do?eid=${Resource.entityId.appdefKey}&alerts=${Alert.id}&buttonAction=ACKNOWLEDGE">
   <display:booleandecorator flagKey="acknowledgeable"/>

@@ -385,6 +385,12 @@ public class ScheduleThread
                     continue; //avoid dups
                 }
                 data = getValue(dsn);
+                if (data == null) {
+                    // Don't allow plugins to return null from getValue(),
+                    // convert these to MetricValue.NONE
+                    _log.warn("Plugin returned null value for metric: " + dsn);
+                    data = MetricValue.NONE;
+                }
                 rs._collected.put(mid, Boolean.TRUE);
                 success = true;
                 clearLogCache(dsn);

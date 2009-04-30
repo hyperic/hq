@@ -14,7 +14,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
 
-  Copyright (C) [2004-2008], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
 
   HQ is free software; you can redistribute it and/or modify
@@ -34,8 +34,7 @@
   type="text/javascript"></script>
 <script src='<html:rewrite page="/js/dashboard.js"/>' type="text/javascript"></script>
 <script src='<html:rewrite page="/js/effects.js"/>' type="text/javascript"></script>
-
-
+<script src='<html:rewrite page="/js/window.js"/>' type="text/javascript"></script>
 
 <script type="text/javascript">
 
@@ -934,39 +933,10 @@ function editEscalation (row) {
       <table width="100%" cellpadding="0" cellspacing="0" border="0">
         <tbody>
           <tr>
-            <td style="padding-top:2px;padding-bottom:2px;"><input
-              type="radio" name="allowPause" value="true" /> <fmt:message
-              key="alert.config.escalation.allow.pause" /> <select
-              id="maxWaitTime" name="maxWaitTime">
-              <option value="300000">5 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="600000">10 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="1200000">20 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="1800000">30 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="2700000">45 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="3600000">60 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="7200000">2 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.2" /></option>
-              <option value="14400000">4 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.2" /></option>                
-              <option value="28800000">8 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.2" /></option>
-              <option value="43200000">12 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.2" /></option>
-              <option value="86400000">24 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.2" /></option>
-              <option value="172800000">48 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.2" /></option>
-              <option value="259200000">72 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.2" /></option>
-              <option value="<%= Long.MAX_VALUE %>"><fmt:message
-                key="alert.config.props.CB.Enable.UntilFixed" /></option>
-            </select></td>
+            <td style="padding-top:2px;padding-bottom:2px;">
+				<span id="AlertEscalationOption"><input type="radio" name="allowPause" value="true" />
+				<fmt:message key="alert.config.escalation.allow.pause" />&nbsp;</span>
+			</td>
           </tr>
           <tr>
             <td style="padding-top:2px;padding-bottom:2px;"><input
@@ -1034,9 +1004,6 @@ function editEscalation (row) {
   </tbody>
 </table>
 
-
-
-
 <div id="usersList" style="display:none;">
 <div class="ListHeader">Select Users</div>
 <ul class="boxy">
@@ -1087,30 +1054,7 @@ function editEscalation (row) {
             <div id="pauseTimeText"></div>
             <div id="pauseTimeEdit" style="display:none;"><input
               type="radio" name="allowPause" value="true" /> <fmt:message
-              key="alert.config.escalation.allow.pause" /> <select
-              id="maxWaitTime_<c:out value="${alertDef.id}"/>"
-              name="maxWaitTime">
-              <option value="300000">5 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="600000">10 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="1200000">20 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="1800000">30 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="2700000">45 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="3600000">60 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.1" /></option>
-              <option value="86400000">24 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.2" /></option>
-              <option value="172800000">48 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.2" /></option>
-              <option value="259200000">72 <fmt:message
-                key="alert.config.props.CB.Enable.TimeUnit.2" /></option>
-              <option value="<%= Long.MAX_VALUE %>"><fmt:message
-                key="alert.config.props.CB.Enable.UntilFixed" /></option>
-            </select></div>
+              key="alert.config.escalation.allow.pause" /> </div>
             </td>
           </tr>
         </tbody>
@@ -1119,6 +1063,18 @@ function editEscalation (row) {
     </tr>
   </tbody>
 </table>
+
+<script type="text/javascript">
+  var escalationSpan = dojo11.byId("AlertEscalationOption");
+  if (escalationSpan != null) {
+	  escalationSpan.appendChild(hyperic.form.createEscalationPauseOptions({id: "maxWaitTime", name: "maxWaitTime"}));
+  }
+
+  var pauseTimeEditDiv = dojo11.byId("pauseTimeEdit");
+  if (pauseTimeEditDiv != null) {
+	  pauseTimeEditDiv.appendChild(hyperic.form.createEscalationPauseOptions({id: "maxWaitTime_<c:out value="${alertDef.id}"/>", name: "maxWaitTime"}));
+  }
+</script>
 
 <br>
 <br>

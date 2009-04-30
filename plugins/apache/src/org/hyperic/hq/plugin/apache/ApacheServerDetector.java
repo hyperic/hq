@@ -215,6 +215,38 @@ public class ApacheServerDetector
         }
     }
 
+    //if httpd is started with a relative path, try to find it
+    //using the -d or -f flags if given
+    private String findAbsoluteExe(String httpd, String[] args) {
+        //e.g. ./bin/httpd
+        ApacheBinaryInfo info = new ApacheBinaryInfo();
+        getServerInfo(info, args);
+        String[] paths = { info.root, info.conf };
+        for (int i=0; i<paths.length; i++) {
+            String path = paths[i];
+            if (path == null) {
+                continue;
+            }
+            log.debug("Attempting to resolve '" + httpd +
+                      "' relative to '" + path + "'");
+            File dir = new File(path);
+            while (dir != null) {
+                File exe = new File(dir, httpd);
+                if (exe.exists()) {
+                    log.debug("Relative '" + httpd +
+                              "' resolved to '" + exe + "'");
+                    try {
+                        return exe.getCanonicalPath();
+                    } catch (IOException e) {
+                        return exe.getPath();
+                    }
+                }
+                dir = dir.getParentFile();
+            }                    
+        }
+        return null;
+    }
+
     private void findServerProcess(List servers, String query,
                                    String version) {
         long[] pids = getPids(query);
@@ -229,6 +261,21 @@ public class ApacheServerDetector
                 continue;
             }
 
+            String[] args = getProcArgs(pids[i]);
+            if (!new File(httpd).isAbsolute()) {
+                String exe = findAbsoluteExe(httpd, args);
+                if (exe == null) {
+                    log.warn("Unable to get absolute path for pid=" + pids[i] +
+                             ", args=" + java.util.Arrays.asList(args));
+                    if (!new File(httpd).exists()) {
+                        continue;
+                    } //else fallthru.. unlikely, but permit an ln -s workaround
+                }
+                else {
+                    httpd = exe;
+                }
+            }
+
             ApacheBinaryInfo info = ApacheBinaryInfo.getInfo(httpd, version);
 
             if (info == null) {
@@ -236,7 +283,7 @@ public class ApacheServerDetector
             }
 
             info.pid = pids[i];
-            getServerInfo(info, getProcArgs(pids[i]));
+            getServerInfo(info, args);
 
             if (info.root == null) {
                 continue;
@@ -538,6 +585,7 @@ public class ApacheServerDetector
 
     public List getServerResources(ConfigResponse platformConfig) throws PluginException {
 
+        setPlatformConfig(platformConfig);
         String version = getTypeInfo().getVersion();
         List servers = new ArrayList();
         List binaries = getServerProcessList(version, getPtqlQueries());

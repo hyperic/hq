@@ -101,6 +101,7 @@ import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
@@ -1302,8 +1303,11 @@ public class AppdefBossEJBImpl
     }
     
     /**
-     * Remove an appdef entity
-     * @return AppdefEntityID[] - an array of the resources (including children) deleted
+     * Removes an appdef entity by nulling out any reference from its children
+     * and then deleting it synchronously.  The children are then cleaned up
+     * in the zevent queue by issuing a {@link ResourcesCleanupZevent}
+     * @return AppdefEntityID[] - an array of the resources (including children)
+     * deleted
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */
@@ -1329,19 +1333,56 @@ public class AppdefBossEJBImpl
                 throw new ApplicationException(se);
             }
         }
-        AppdefEntityID[] removed = resMan.removeResourcePerms(subject, res);
+        AppdefEntityID[] removed = resMan.removeResourcePerms(
+            subject, res, false);
+        try {
+            final Integer id = aeid.getId();
+            switch (aeid.getType()) {
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER :
+                    final ServerManagerLocal sMan = getServerManager();
+                    sMan.removeServer(subject, sMan.findServerById(id));
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                    final PlatformManagerLocal pMan = getPlatformManager();
+                    pMan.removePlatform(subject, pMan.findPlatformById(id));
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
+                    final ServiceManagerLocal svcMan = getServiceManager();
+                    svcMan.removeService(subject, svcMan.findServiceById(id));
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                    final ResourceGroupManagerLocal rgMan =
+                        getResourceGroupManager();
+                    rgMan.removeResourceGroup(
+                        subject, rgMan.findResourceGroupById(id));
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                    final ApplicationManagerLocal aMan = getApplicationManager();
+                    aMan.removeApplication(subject, id);
+                    break;
+                default:
+                    break;
+            }
+        } catch (RemoveException e) {
+            throw new ApplicationException(e);
+        }
         if (log.isDebugEnabled()) {
             log.debug("removeAppdefEntity() for " + aeid + " executed in " +
                       timer.getElapsed());
         }
         
-        ZeventManager.getInstance().enqueueEventAfterCommit(new ResourcesCleanupZevent());
+        ZeventManager.getInstance().enqueueEventAfterCommit(
+            new ResourcesCleanupZevent());
         
         return removed;
     }
     
     /**
      * Remove all delete resources
+     * Method is "NotSupported" since all the resource deletes may take longer
+     * than the jboss transaction timeout.  No need for a transaction in this
+     * context.
+     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public void removeDeletedResources()
@@ -1355,9 +1396,10 @@ public class AppdefBossEJBImpl
             getApplicationManager().findDeletedApplications();
         for (Iterator it = applications.iterator(); it.hasNext(); ) {
             try {
-                removeApplication(subject, (Application) it.next());
+                getOne()._removeApplicationInNewTran(
+                    subject, (Application)it.next());
             } catch (Exception e) {
-                log.error("Unable to remove application: " + e);
+                log.error("Unable to remove application: " + e, e);
             }
         }
         watch.markTimeEnd("removeApplications");
@@ -1369,9 +1411,9 @@ public class AppdefBossEJBImpl
         Collection groups = getResourceGroupManager().findDeletedGroups();
         for (Iterator it = groups.iterator(); it.hasNext(); ) {
             try {
-                removeGroup(subject, (ResourceGroup) it.next());
+                getOne()._removeGroupInNewTran(subject, (ResourceGroup)it.next());
             } catch (Exception e) {
-                log.error("Unable to remove group: " + e);
+                log.error("Unable to remove group: " + e, e);
             }
         }
         watch.markTimeEnd("removeResourceGroups");
@@ -1379,48 +1421,75 @@ public class AppdefBossEJBImpl
             log.debug("Removed " + groups.size() + " resource groups");
         }
 
-        watch.markTimeBegin("removeServices");
         // Look through services, servers, platforms, applications, and groups
         Collection services = getServiceManager().findDeletedServices();
-        for (Iterator it = services.iterator(); it.hasNext(); ) {
-            try {
-                removeService(subject, (Service) it.next());
-            } catch (Exception e) {
-                log.error("Unable to remove service: " + e);
-            }
-        }
-        watch.markTimeEnd("removeServices");
-        if (log.isDebugEnabled()) {
-            log.debug("Removed " + services.size() + " services");
-        }
+        removeServices(subject, services);
 
-        watch.markTimeBegin("removeServers");
         Collection servers = getServerManager().findDeletedServers();
-        for (Iterator it = servers.iterator(); it.hasNext(); ) {
-            try {
-                removeServer(subject, (Server) it.next());
-            } catch (Exception e) {
-                log.error("Unable to remove server: " + e);
-            }
-        }
-        watch.markTimeEnd("removeServers");
-        if (log.isDebugEnabled()) {
-            log.debug("Removed " + servers.size() + " servers");
-        }
+        removeServers(subject, servers);
 
         watch.markTimeBegin("removePlatforms");
         Collection platforms = getPlatformManager().findDeletedPlatforms();
-        for (Iterator it = platforms.iterator(); it.hasNext(); ) {
+        for (final Iterator it = platforms.iterator(); it.hasNext(); ) {
+            final Platform platform = (Platform)it.next();
             try {
-                removePlatform(subject, (Platform) it.next());
+                removeServers(subject, platform.getServers());
+                getOne()._removePlatformInNewTran(subject, platform);
             } catch (Exception e) {
-                log.error("Unable to remove platform: " + e);
+                log.error("Unable to remove platform: " + e, e);
             }
         }
         watch.markTimeEnd("removePlatforms");
         if (log.isDebugEnabled()) {
             log.debug("Removed " + platforms.size() + " platforms");
             log.debug("removeDeletedResources() timing: " + watch);
+        }
+    }
+
+    private final void removeServers(AuthzSubject subject, Collection servers) {
+        final StopWatch watch = new StopWatch();
+        watch.markTimeBegin("removeServers");
+        final List svrs = new ArrayList(servers);
+        // can't use iterator for loop here.  Since we are modifying the
+        // internal hibernate collection, which this collection is based on,
+        // it will throw a ConcurrentModificationException
+        // This occurs even if you disassociate the Collection by trying
+        // something like new ArrayList(servers).  Not sure why.
+        for (int i=0; i<svrs.size(); i++) {
+            try {
+                final Server server = (Server)svrs.get(i);
+                removeServices(subject, server.getServices());
+                getOne()._removeServerInNewTran(subject, server);
+            } catch (Exception e) {
+                log.error("Unable to remove server: " + e, e);
+            }
+        }
+        watch.markTimeEnd("removeServers");
+        if (log.isDebugEnabled()) {
+            log.debug("Removed " + servers.size() + " services");
+        }
+    }
+
+    private final void removeServices(AuthzSubject subject, Collection services) {
+        final StopWatch watch = new StopWatch();
+        watch.markTimeBegin("removeServices");
+        final List svcs = new ArrayList(services);
+        // can't use iterator for loop here.  Since we are modifying the
+        // internal hibernate collection, which this collection is based on,
+        // it will throw a ConcurrentModificationException
+        // This occurs even if you disassociate the Collection by trying
+        // something like new ArrayList(services).  Not sure why.
+        for (int i=0; i<svcs.size(); i++) {
+            try {
+                final Service service = (Service)svcs.get(i);
+                getOne()._removeServiceInNewTran(subject, service);
+            } catch (Exception e) {
+                log.error("Unable to remove service: " + e, e);
+            }
+        }
+        watch.markTimeEnd("removeServices");
+        if (log.isDebugEnabled()) {
+            log.debug("Removed " + services.size() + " services");
         }
     }
 
@@ -1464,16 +1533,22 @@ public class AppdefBossEJBImpl
         }
     }
 
-    private void removePlatform(AuthzSubject subject, Platform platform)
+    /**
+     * @ejb:transaction type="RequiresNew"
+     * @ejb:interface-method
+     */
+    public void _removePlatformInNewTran(AuthzSubject subject, Platform platform)
+        throws ApplicationException, VetoException {
+        removePlatform(subject, platform);
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public void removePlatform(AuthzSubject subject, Platform platform)
         throws ApplicationException, VetoException 
     {
         try {
-            for (Iterator it = platform.getServers().iterator(); it.hasNext(); )
-            {
-                Server server = (Server) it.next();
-                removeServer(subject, server);
-            }
-            
             // Disable all measurements for this platform.  We don't actually
             // remove the measurements here to avoid delays in deleting
             // resources.
@@ -1481,7 +1556,6 @@ public class AppdefBossEJBImpl
 
             // Remove from AI queue
             try {
-                AIBossLocal aiBoss = getAIBoss();
                 List aiplatformList = new ArrayList();
                 Integer platformID = platform.getId();
                 final AIQueueManagerLocal aiMan = getAIManager();
@@ -1512,17 +1586,21 @@ public class AppdefBossEJBImpl
         }
     }
 
-    private void removeServer(AuthzSubject subject, Server server)
-        throws VetoException, PermissionException
-    {
+    /**
+     * @ejb:interface-method
+     */
+    public void removeServer(AuthzSubject subject, Server server) {
+        removeServer(subject, server);
+    }
+
+    /**
+     * @ejb:transaction type="RequiresNew"
+     * @ejb:interface-method
+     */
+    public void _removeServerInNewTran(AuthzSubject subject, Server server)
+        throws VetoException,
+               PermissionException {
         try {
-            // Service manager will update the collection, so we need to copy
-            Collection services = new ArrayList(server.getServices());
-            for (Iterator it = services.iterator(); it.hasNext();) {
-                Service service = (Service) it.next();
-                removeService(subject, service);
-            }
-    
             // now remove the measurements
             disableMeasurements(subject, server.getResource());
     
@@ -1549,7 +1627,11 @@ public class AppdefBossEJBImpl
         }
     }
 
-    private void removeService(AuthzSubject subject, Service service)
+    /**
+     * @ejb:transaction type="RequiresNew"
+     * @ejb:interface-method
+     */
+    public void _removeServiceInNewTran(AuthzSubject subject, Service service)
         throws VetoException, PermissionException, RemoveException 
     {
         try {    
@@ -1566,16 +1648,25 @@ public class AppdefBossEJBImpl
         }
     }
 
-    private void removeGroup(AuthzSubject subject, ResourceGroup group)
+    /**
+     * @ejb:transaction type="RequiresNew"
+     * @ejb:interface-method
+     */
+    public void _removeGroupInNewTran(AuthzSubject subject, ResourceGroup group)
         throws SessionException, PermissionException, VetoException
     {
         getResourceGroupManager().removeResourceGroup(subject, group);
     }
 
-    private void removeApplication(AuthzSubject subject, Application app)
-        throws ApplicationException, PermissionException, SessionException,
-               VetoException
-    {
+    /**
+     * @ejb:transaction type="RequiresNew"
+     * @ejb:interface-method
+     */
+    public void _removeApplicationInNewTran(AuthzSubject subject, Application app)
+        throws ApplicationException,
+               PermissionException,
+               SessionException,
+               VetoException {
         try {
             getApplicationManager().removeApplication(subject, app.getId());
         } catch (PermissionException e) {
@@ -3849,8 +3940,6 @@ public class AppdefBossEJBImpl
     public void startup() {
         log.info("AppdefBoss Boss starting up!");
         
-        HQApp app = HQApp.getInstance();
-        
         // Add listener to remove alert definition and alerts after resources
         // are deleted.
         HashSet events = new HashSet();
@@ -3859,8 +3948,6 @@ public class AppdefBossEJBImpl
             new ZeventListener() {
                 public void processEvents(List events) {
                     for (Iterator i = events.iterator(); i.hasNext();) {
-                        ResourcesCleanupZevent z =
-                            (ResourcesCleanupZevent) i.next();
                         try {
                             getOne().removeDeletedResources();
                         } catch (Exception e) {
@@ -3872,6 +3959,8 @@ public class AppdefBossEJBImpl
                 }
             }
         );
+        ZeventManager.getInstance().enqueueEventAfterCommit(
+            new ResourcesCleanupZevent());
     }
 
     public static AppdefBossLocal getOne() {

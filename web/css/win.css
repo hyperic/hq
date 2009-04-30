@@ -1205,7 +1205,6 @@ div.overlay {
     top: 200px;
     visibility: hidden;
     width: 9px;
-    z-index: 200
 }
 
 div.timepopup {

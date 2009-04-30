@@ -281,6 +281,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         return getServiceDAO().findByName(server, name);
     }
     
+    /**
+     * @ejb:interface-method
+     */
+    public Service getServiceByName(Platform platform, String name) {
+        return getServiceDAO().findByName(platform, name);
+    }
     
     /**
      * Find a ServiceType by id
@@ -1330,7 +1336,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
         // Remove service from parent Server's Services collection
         Server server = service.getServer();
-        server.getServices().remove(service);
+        if (server != null) {
+            server.getServices().remove(service);
+        }
 
         final ConfigResponseDB config = service.getConfigResponse();
 

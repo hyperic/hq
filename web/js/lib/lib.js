@@ -86,7 +86,33 @@ hyperic.form = {
         } else {
         	myForm.submit();
         }
-    }
+	},
+	createEscalationPauseOptions : function(selectAttributes, maxPauseTime) {
+		var myPauseSelect = dojo11.clone(hyperic.data.escalation.pauseSelect);
+
+		if (selectAttributes.id != null) {
+			myPauseSelect.id = selectAttributes.id;
+		}
+		if (selectAttributes.name != null) {
+			myPauseSelect.name = selectAttributes.name;
+		}
+		if (selectAttributes.className != null) {
+			myPauseSelect.className = selectAttributes.className;
+		}
+		if (maxPauseTime == null) {
+			maxPauseTime = Number.MAX_VALUE;
+		}
+	
+		for (var i = myPauseSelect.length-1; i >= 0; i--) {
+			var optionChild = myPauseSelect[i];
+			if (parseFloat(optionChild.value) > parseFloat(maxPauseTime)) {
+				myPauseSelect.removeChild(optionChild);
+			} else {
+				break;
+			}
+		}
+		return myPauseSelect;
+	}
 };
 
 /**
@@ -2949,7 +2975,7 @@ hyperic.group_manager = function() {
 	}
 	
 	that.getGroupsNotContaining = function(eids) {    
-		dojo11.xhrGet( {
+		dojo11.xhrPost( {
             url: "/api.shtml",
             content: {v: "1.0", s_id: "group_manager", eid: "['" + eids.join("','") + "']"},
             handleAs: 'json',
@@ -3028,21 +3054,33 @@ hyperic.alert_center = function(title_name) {
     	if (!that.dialogs.AckAlert) {
 	    	var ackDiv = document.createElement("div");
 	    	ackDiv.innerHTML =
-	          	'<div id="AlertCenterAckStatus" style="display:none"></div>' +
+	          	'<div style="width:400px">' +
+	    		'<div id="AlertCenterAckStatus" style="display:none"></div>' +
 				'<table cellspacing="0" cellpadding="0">' +
 				'<tr><td colspan="2">' +
-      	        '	<span class="BoldText">Reason for Acknowledgement for Selected Alerts (Optional):</span><br/>' +
-      	        '	<textarea id="AckNoteTextArea" cols="70" rows="4"></textarea>' +
+      	        '	<span class="BoldText">Reason for Acknowledgement for Selected Alerts:</span><br/>' +
+      	        '	<textarea id="AckNoteTextArea" style="width:400px; height:100px"></textarea>' +
       	        '</td></tr>' +
-      	        '<tr id="AlertCenterAckButtonActive"><td class="buttonLeft"></td>' +
-      	    	'<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
-      	    	'	<span id="button"><a href="javascript:MyAlertCenter.acknowledgeAlerts();">ACKNOWLEDGE</a></span>' +
-      	    	'</td></tr>' +
-      	        '<tr id="AlertCenterAckButtonInActive" style="display:none"><td class="buttonLeft"></td>' +
-      	    	'<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
-      	    	'   <span class="InactiveText">ACKNOWLEDGE</span>' +
-      	    	'</td></tr>' +
-      	    	'</table>';
+      	        '<tr id="AlertCenterAckButtonActive">' +
+      	        '	<td><span id="AlertCenterEscalationOption"><input type="checkbox" id="AlertCenterPauseCheckbox" value="true" />'+
+      	        '		Pause escalation for&nbsp;<select id="AlertCenterPauseSelect"></select></span></td>' +
+      	        '	<td align="right">' +
+      	    	'		<table border="0" cellspacing="0" cellpadding="0"><tr>'+
+      	        '			<td class="buttonLeft"></td>' +
+      	    	'			<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
+      	    	'				<span id="button"><a href="javascript:MyAlertCenter.acknowledgeAlerts();">ACKNOWLEDGE</a></span>' +
+      	    	'			</td></tr></table>' +
+      	    	'	</td></tr>' +
+      	        '<tr id="AlertCenterAckButtonInActive" style="display:none">' +
+      	        '	<td align="center">' +
+      	    	'		<table border="0" cellspacing="0" cellpadding="0"><tr>'+
+      	        '			<td class="buttonLeft"></td>' +
+      	    	'			<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
+      	    	'   			<span class="InactiveText">ACKNOWLEDGE</span>' +
+      	    	'			</td></tr></table>' +
+      	    	'	</td></tr>' +
+      	    	'</table>' +
+      	    	'</div>';
 	    	alertCenterDiv.appendChild(ackDiv);
 	    	
 	    	that.dialogs.AckAlert = new dijit11.Dialog({
@@ -3062,8 +3100,10 @@ hyperic.alert_center = function(title_name) {
 	    		message_area: {
 	    			request_status: dojo11.byId("AlertCenterAckStatus")
 	    		},
-		    	note: dojo11.byId("AckNoteTextArea")
-		    }
+		    	note: dojo11.byId("AckNoteTextArea"),
+		    	pause: dojo11.byId("AlertCenterPauseCheckbox"),
+		    	pauseTime: dojo11.byId("AlertCenterPauseSelect")
+	    	}
 	    	
 	    	// restart auto refresh after dialog closes
 	    	dojo11.connect(that.dialogs.AckAlert, "hide", this, "delayAutoRefresh");
@@ -3072,26 +3112,36 @@ hyperic.alert_center = function(title_name) {
 		if (!that.dialogs.FixAlert) {
 			var fixedDiv = document.createElement("div");
 			fixedDiv.innerHTML = 
-	          	'<div id="AlertCenterFixedStatus" style="display:none"></div>' +
+	          	'<div style="width:400px">' +
+				'<div id="AlertCenterFixedStatus" style="display:none"></div>' +
+				'<div id="AlertCenterProgressStatus" style="display:none; margin-top:-5px; margin-bottom:10px">' +
+				'	<div id="AlertCenterProgressBar"></div>' +
+				'</div>' +
 				'<table cellspacing="0" cellpadding="0">' +
 				'<tr><td colspan="2">' +
-      	        '	<span class="BoldText">Resolution for Fix for Selected Alerts (Optional):</span><br/>' +
-      	        '	<textarea id="FixedNoteTextArea" cols="70" rows="5"></textarea>' +
+      	        '	<span class="BoldText">Resolution for Fix for Selected Alerts:</span><br/>' +
+      	        '	<textarea id="FixedNoteTextArea" style="width:400px; height:100px"></textarea>' +
       	        '</td></tr>' +
-      	        '<tr id="AlertCenterFixedButtonActive"><td class="buttonLeft"></td>' +
-      	    	'<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
-      	    	'	<span id="button"><a href="javascript:MyAlertCenter.fixAlerts();">FIXED</a></span>' +
-      	    	'	<span style="padding-left: 3px;"><img src="/images/icon_fixed.gif" align="middle" alt="Click to mark as Fixed"></span>' +
-      	    	'	<span>Click the "Fixed" button to mark alert condition as fixed</span>' +
-      	    	'</td></tr>' +
-      	        '<tr id="AlertCenterFixedButtonInActive" style="display:none"><td class="buttonLeft"></td>' +
-      	    	'<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
-      	    	'   <span class="InactiveText">FIXED</span>' +
-      	    	'   <span style="filter: alpha(opacity=50); opacity: 0.5;">' +
-      	    	'   	<span style="padding-left: 3px;"><img src="/images/icon_fixed.gif" align="middle" alt="Click to mark as Fixed"></span>' +
-      	    	'	</span>' +
-      	    	'</td></tr>' +
-      	    	'</table>';
+      	        '<tr id="AlertCenterFixedButtonActive">' +
+      	        '	<td><input type="checkbox" id="FixAllCheckbox" value="true" />&nbsp;Fix all previous alerts</td>' +
+      	    	'	<td align="right">' +
+      	    	'		<table border="0" cellspacing="0" cellpadding="0"><tr>'+
+      	    	'			<td class="buttonLeft"></td>' +
+      	    	'			<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
+      	    	'				<span id="button"><a href="javascript:MyAlertCenter.fixAlerts();">FIXED</a></span>' +
+      	    	'			</td></tr></table>' +
+      	    	'	</td></tr>' +
+      	        '<tr id="AlertCenterFixedButtonInActive" style="display:none">' +
+      	        '	<td></td>' +
+      	        '	<td align="center">' +
+      	    	'		<table border="0" cellspacing="0" cellpadding="0"><tr>'+
+      	        '			<td class="buttonLeft"></td>' +
+      	    	'			<td class="buttonRight" valign="middle" nowrap="nowrap" style="padding-top: 6px; padding-bottom: 6px;">' +
+      	    	'				<span class="InactiveText">FIXED</span>' +
+      	    	'			</td></tr></table>' +
+      	    	'	</td></tr>' +
+      	    	'</table>' +
+      	    	'</div>';
 			alertCenterDiv.appendChild(fixedDiv);
 	    	
 	    	that.dialogs.FixAlert = new dijit11.Dialog({
@@ -3109,13 +3159,18 @@ hyperic.alert_center = function(title_name) {
 	    			inactive: dojo11.byId("AlertCenterFixedButtonInActive")
 	    		},
 	    		message_area: {
-	    			request_status: dojo11.byId("AlertCenterFixedStatus")
+	    			request_status: dojo11.byId("AlertCenterFixedStatus"),
+	    			progress_status: dojo11.byId("AlertCenterProgressStatus")
 	    		},
-	    		note: dojo11.byId("FixedNoteTextArea")
+	    		note: dojo11.byId("FixedNoteTextArea"),
+	    		fixAll: dojo11.byId("FixAllCheckbox")
 	    	}
 	    	
 	    	// restart auto refresh after dialog closes
-	    	dojo11.connect(that.dialogs.FixAlert, "hide", this, "delayAutoRefresh");	    	
+	    	dojo11.connect(that.dialogs.FixAlert, "hide", this, "delayAutoRefresh");
+	    	
+	    	// create progress bar				
+			that.dialogs.FixAlert.data.progressBar = new dijit11.ProgressBar({}, dojo11.byId("AlertCenterProgressBar"));
 		}
 	}
 
@@ -3169,9 +3224,15 @@ hyperic.alert_center = function(title_name) {
 		}
 	}
 
-	that.fixOrAckAlert = function(myDialog, myNote) {
+	that.fixOrAckAlert = function(myDialog, myNote, fixAll, pauseTime) {
 		var myForm = myDialog.data.form;
 		myNote.value = myDialog.data.note.value;
+		if (fixAll != null && myDialog.data.fixAll.checked) {
+			fixAll.value = myDialog.data.fixAll.value;
+		}
+		if (pauseTime != null && myDialog.data.pause.checked) {
+			pauseTime.value = myDialog.data.pauseTime.value;
+		}
 		myDialog.data.button_area.active.style.display = "none";
 		myDialog.data.button_area.inactive.style.display = "";
 		that.displayConfirmation(
@@ -3179,7 +3240,11 @@ hyperic.alert_center = function(title_name) {
 				'Please wait. Processing your request...');
 
 		if (myForm.output && myForm.output.value == "json") {
-			that.xhrSubmit(myForm);
+			if (fixAll != null && myDialog.data.fixAll.checked) {
+				that.xhrBatchSubmit(myDialog);
+			} else {
+				that.xhrSubmit(myForm);
+			}
 		} else {
 			myForm.submit();
 		}	
@@ -3189,20 +3254,38 @@ hyperic.alert_center = function(title_name) {
 		that.current.dialog = myDialog;
 		that.stopAutoRefresh();
 		myDialog.data.message_area.request_status.style.display = "none";
+		if (myDialog.data.message_area.progress_status != null) {
+			myDialog.data.message_area.progress_status.style.display = "none";
+		}
 		myDialog.data.button_area.active.style.display = "";
 		myDialog.data.button_area.inactive.style.display = "none";
 		myDialog.data.note.value = "";
+		if (myDialog.data.fixAll != null) {
+			myDialog.data.fixAll.checked = false;
+		}
+		if (myDialog.data.pause != null) {
+			var escalationSpan = dojo11.byId("AlertCenterEscalationOption");		
+			myDialog.data.pause.checked = false;
+			if (myDialog.data.pauseTime.options.length == 0) {
+				escalationSpan.style.display = "none";
+			} else {
+				escalationSpan.style.display = "";
+			}
+		}
 		myDialog.show();	
 	}
 	
 	that.fixAlerts = function() {
 		that.fixOrAckAlert(that.dialogs.FixAlert, 
-						   that.dialogs.FixAlert.data.form.fixedNote);
+						   that.dialogs.FixAlert.data.form.fixedNote,
+						   that.dialogs.FixAlert.data.form.fixAll);
 	}
 	
 	that.acknowledgeAlerts = function() {
 		that.fixOrAckAlert(that.dialogs.AckAlert, 
-						   that.dialogs.AckAlert.data.form.ackNote);
+						   that.dialogs.AckAlert.data.form.ackNote,
+						   null,
+						   that.dialogs.AckAlert.data.form.pauseTime);
 	}
 
 	that.acknowledgeAlert = function(inputId) {		
@@ -3244,6 +3327,59 @@ hyperic.alert_center = function(title_name) {
 			}
 		});	    
 	}
+	
+	that.xhrBatchSubmit = function(myDialog, alertIndex) {
+		var myForm = myDialog.data.form;
+		var formObj = Form.serialize(myForm,true);
+		var batchFormObj = Form.serialize(myForm,true);
+		var ealerts = formObj["ealerts"];
+		
+		if (typeof ealerts == "undefined") {
+			that.xhrSubmit(myForm);
+			return;
+		}
+		
+		if (typeof ealerts == "string") {
+			// convert to array if single alert selected
+			ealerts = [ealerts];
+		}
+
+		if (alertIndex == null) {
+			alertIndex = 0;
+		}
+				
+		// show and update progress bar
+		var currentProgress = alertIndex*2;
+		myDialog.data.progressBar.update({maximum: ealerts.length*2, progress: ++currentProgress});
+		myDialog.data.message_area.progress_status.style.display = "";
+			
+		// submit each selection separately			
+		batchFormObj["ealerts"] = ealerts[alertIndex];
+			
+		dojo11.xhrPost( {
+			url: myForm.action,
+			content: batchFormObj,
+			sync: false,
+			handleAs: 'json',
+			load: function(data){
+				// update progress bar
+				myDialog.data.progressBar.update({progress: ++currentProgress});
+					
+				// submit next selection
+				if (++alertIndex < ealerts.length) {
+					that.xhrBatchSubmit(myDialog, alertIndex);
+				} else {
+					that.current.dialog.hide();
+					that.startAutoRefresh(that.current.dialog.data.subgroup);						
+				}
+			},
+	    	error: function(data){
+				var errorText = "An error occurred processing your request.";
+				that.displayError(that.current.dialog.data.message_area.request_status, errorText);
+				console.info(errorText, data);
+	    	}
+		});
+	}
 
 	that.resetAlertTable = function(myForm) {
 		var subgroup = myForm.id.substring(0, myForm.id.indexOf("_FixForm"));
@@ -3252,6 +3388,8 @@ hyperic.alert_center = function(title_name) {
 		that.toggleAll(checkAllBox, false);
 		myForm.fixedNote.value = "";
 		myForm.ackNote.value = "";
+		myForm.fixAll.value = "false";
+		myForm.pauseTime.value = "";
 	}
 	
 	that.toggleAll = function(checkAllBox, doDelay) {
@@ -3327,7 +3465,34 @@ hyperic.alert_center = function(title_name) {
 			that.showDialog(that.dialogs.FixAlert);
 		} else if (myButton.value == "ACKNOWLEDGE") {
 			that.initData(that.dialogs.AckAlert, myButton.form);
+			that.redrawEscalationOptions(that.dialogs.AckAlert);
 			that.showDialog(that.dialogs.AckAlert);
+		}
+	}
+	
+	that.redrawEscalationOptions = function(myDialog) {
+	    var commonMaxPauseTime = Number.MAX_VALUE;
+	    var myForm = myDialog.data.form;
+
+		for (var i = 0; i < myForm.elements.length; i++) {
+	        var e = myForm.elements[i];
+	       
+	        if (e.className.indexOf("ackableAlert") >= 0 && e.checked) {
+	        	// checkbox id is in the format: {portalName}|{appdefKey}|{alertId}|{maxPauseTime}
+	        	var alertParams = e.id.split("|");
+	        	var maxPauseTime = parseFloat(alertParams[alertParams.length-1]);
+	        	if (maxPauseTime < commonMaxPauseTime) {
+	        		commonMaxPauseTime = maxPauseTime;
+	        	}
+			}
+		}
+
+		myDialog.data.pauseTime.options.length = 0;
+		if (commonMaxPauseTime > 0 && commonMaxPauseTime < Number.MAX_VALUE) {			
+			var tempSelect = hyperic.form.createEscalationPauseOptions({name: "tempName"}, commonMaxPauseTime);
+			for (var i = 0; i < tempSelect.options.length; i++) {
+				myDialog.data.pauseTime.options[i] = new Option(tempSelect.options[i].text, tempSelect.options[i].value);
+			}
 		}
 	}
 
@@ -3744,7 +3909,11 @@ hyperic.maintenance_schedule = function(title_name, group_id, group_name) {
         }
     };
     
-	that.init();
+	try {
+		that.init();
+	} catch (e) {
+		alert('The Schedule Downtime feature has been disabled because of the following error:\n\n' + e.message);
+	}
 };
 
 hyperic.clone_resource_dialog = function(title_name, platform_id) {

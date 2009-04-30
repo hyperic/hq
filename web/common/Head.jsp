@@ -2,6 +2,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" %>
 <%@ page errorPage="/common/Error.jsp" %>
 <%@ taglib uri="struts-html" prefix="html" %>
+<%@ taglib uri="jstl-fmt" prefix="fmt" %>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -10,7 +11,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006, 2007, 2008], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -45,7 +46,7 @@
 <![endif]-->
 
 <script type="text/javascript">
-djConfig = { isDebug: false }
+djConfig = { isDebug: false, locale: 'en-us' }
 </script>
 <script type="text/javascript" src="<html:rewrite page='/js/dojo/0.4.3/dojo.js.uncompressed.js'/>"></script> 
 <script type="text/javascript">
@@ -68,3 +69,21 @@ djConfig.scopeMap = [
 <script src="<html:rewrite page='/js/functions.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/lib/lib.js'/>" type="text/javascript"></script>
 <script src="<html:rewrite page='/js/lib/charts.js'/>" type="text/javascript"></script>
+<script type="text/javascript">
+	hyperic.data.escalation = {};
+	hyperic.data.escalation.pauseSelect = document.createElement("select");
+	hyperic.data.escalation.pauseSelect.options[0] = new Option("5 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>", "300000");
+	hyperic.data.escalation.pauseSelect.options[1] = new Option("10 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>", "600000");
+	hyperic.data.escalation.pauseSelect.options[2] = new Option("20 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>", "1200000");
+	hyperic.data.escalation.pauseSelect.options[3] = new Option("30 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>", "1800000");
+	hyperic.data.escalation.pauseSelect.options[4] = new Option("45 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>", "2700000");
+	hyperic.data.escalation.pauseSelect.options[5] = new Option("60 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.1"/>", "3600000");
+	hyperic.data.escalation.pauseSelect.options[6] = new Option("2 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>", "7200000");
+	hyperic.data.escalation.pauseSelect.options[7] = new Option("4 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>", "14400000");
+	hyperic.data.escalation.pauseSelect.options[8] = new Option("8 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>", "28800000");
+	hyperic.data.escalation.pauseSelect.options[9] = new Option("12 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>", "43200000");
+	hyperic.data.escalation.pauseSelect.options[10] = new Option("24 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>", "86400000");
+	hyperic.data.escalation.pauseSelect.options[11] = new Option("48 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>", "172800000");
+	hyperic.data.escalation.pauseSelect.options[12] = new Option("72 <fmt:message key="alert.config.props.CB.Enable.TimeUnit.2"/>", "259200000");
+	hyperic.data.escalation.pauseSelect.options[13] = new Option("<fmt:message key="alert.config.props.CB.Enable.UntilFixed"/>", "<%= Long.MAX_VALUE %>");
+</script>

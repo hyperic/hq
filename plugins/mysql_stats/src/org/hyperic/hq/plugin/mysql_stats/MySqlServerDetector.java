@@ -94,7 +94,14 @@ public class MySqlServerDetector
             Map.Entry entry = (Map.Entry)it.next();
             Long pid = (Long)entry.getKey();
             String dir = (String)entry.getValue();
-            String[] args = getProcArgs(pid.longValue());
+            // no need to create unique ptql if there is only one mysqld process
+            // TODO scottmf, need to augment this to automatically find
+            // uniqueness in the process args and apply only one or two of them
+            // to the ptql instead of the brute force approach of appending all
+            // args to the query
+            String[] args = (paths.size() == 1) ?
+                new String[0] :
+                getProcArgs(pid.longValue());
             List found = getServerList(dir, args);
             if (!found.isEmpty())
                 servers.addAll(found);

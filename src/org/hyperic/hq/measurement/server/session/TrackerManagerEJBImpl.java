@@ -114,13 +114,14 @@ public class TrackerManagerEJBImpl
      */
     private void trackPluginRemove(AuthzSubject subject, AppdefEntityID id,
                                    String pluginType)
-        throws PermissionException, PluginException
-    {
+        throws PermissionException,
+               PluginException {
         try {
             MeasurementCommandsClient client = getClient(id);
             client.removeTrackPlugin(id.getAppdefKey(), pluginType);
         } catch (AgentNotFoundException e) {
-            throw new PluginException("Agent error: " + e.getMessage(), e);
+            log.warn("Agent not found while removing track plugins " +
+                "(this is ok).  Exception Message:" + e.getMessage());
         } catch (AgentConnectionException e) {
             throw new PluginException("Agent error: " + e.getMessage(), e);
         } catch (AgentRemoteException e) {

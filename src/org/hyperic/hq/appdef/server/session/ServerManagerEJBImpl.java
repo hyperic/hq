@@ -379,19 +379,37 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
 
             // Service manager will update the collection, so we need to copy
-            Collection services = new ArrayList(server.getServices());
-            for (Iterator i = services.iterator(); i.hasNext(); ) {
-                getServiceManager().removeService(subject, (Service)i.next());
+            final ServiceManagerLocal sMan = getServiceManager();
+            Collection services = server.getServices();
+            synchronized(services) {
+                for (Iterator i = services.iterator(); i.hasNext(); ) {
+                    try {
+                        // this looks funky but the idea is to pull the service
+                        // obj into the session so that it is updated when flushed
+                        Service service =
+                            sMan.findServiceById(((Service)i.next()).getId());
+                        service.setServer(null);
+                        i.remove();
+                    } catch (ServiceNotFoundException e) {
+                        log.warn(e);
+                    }
+                }
             }
+
+            final ServerDAO dao = getServerDAO();
+            // this flush ensures that the service's server_id is set to null
+            // before the server is deleted and the services cascaded
+            dao.getSession().flush();
 
             // Remove server from parent Platform Server collection.
             Platform platform = server.getPlatform();
-            platform.getServersBag().remove(server);
+            if (platform != null) {
+                platform.getServersBag().remove(server);
+            }
             
             // Keep config response ID so it can be deleted later.
             final ConfigResponseDB config = server.getConfigResponse();
 
-            final ServerDAO dao = getServerDAO();
             dao.remove(server);
 
             // Remove the config response

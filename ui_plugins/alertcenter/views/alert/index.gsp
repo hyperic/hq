@@ -136,7 +136,9 @@ dojo.addOnLoad( function(){
           	<input type="hidden" name="buttonAction" value="" />
           	<input type="hidden" name="output" value="json" />
           	<input type="hidden" name="fixedNote" value="" />
-          	<input type="hidden" name="ackNote" value="" />          	
+          	<input type="hidden" name="ackNote" value="" />
+          	<input type="hidden" name="fixAll" value="false" />
+          	<input type="hidden" name="pauseTime" value="" />
           </div>
           </form>
         </div>
@@ -158,7 +160,9 @@ dojo.addOnLoad( function(){
           	<input type="hidden" name="buttonAction" value="" />
           	<input type="hidden" name="output" value="json" />
           	<input type="hidden" name="fixedNote" value="" />
-          	<input type="hidden" name="ackNote" value="" />          	
+          	<input type="hidden" name="ackNote" value="" />
+          	<input type="hidden" name="fixAll" value="false" />          	
+          	<input type="hidden" name="pauseTime" value="" />
           </div>          
           </form>
         </div>
@@ -167,6 +171,7 @@ dojo.addOnLoad( function(){
       <script type="text/javascript">
           	dojo11.require("dijit.dijit");
           	dojo11.require("dijit.Dialog");
+          	dojo11.require("dijit.ProgressBar");
           	
           	var MyAlertCenter = null;
           	dojo11.addOnLoad(function(){
@@ -203,7 +208,7 @@ dojo.addOnLoad( function(){
             <div id="excludeTypeBasedInput" class="fieldSetStacked" 
                  style="margin-bottom:8px;">
               <input id="excludeTypeBased" type="checkbox" name="excludeTypeBased" 
-                     value="true"  onchange="Defs_refreshTable();"/>
+                     value="true"  onclick="Defs_refreshTable();"/>
               <label for="excludeTypeBased">${l.ExcludeTypeBased}</label>
             </div>
             <% } %>
@@ -211,7 +216,7 @@ dojo.addOnLoad( function(){
             <div id="onlyShowDisabledInput" class="fieldSetStacked" 
                  style="margin-bottom:8px;">
               <input id="onlyShowDisabled" type="checkbox" name="onlyShowDisabled" 
-                     value="true"  onchange="refreshDefTables();"/>
+                     value="true"  onclick="refreshDefTables();"/>
               <label for="onlyShowDisabled">${l.OnlyShowDisabled}</label>
             </div>
             

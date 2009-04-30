@@ -174,6 +174,17 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
     
+    public Service findByName(Platform platform, String serviceName) {
+        String sql = "select v from Service v join v.server s " +
+                     "where s.platform = :platform and " +
+                           "v.resource.sortName = :name";
+
+        return (Service) getSession().createQuery(sql)
+                .setParameter("platform", platform)
+                .setParameter("name", serviceName.toUpperCase())
+                .uniqueResult();
+    }
+
     public Service findByName(Server server, String serviceName) {
         String sql = "select v from Service v " +
             "where v.server = :server and v.resource.sortName = :name";

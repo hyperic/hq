@@ -13,7 +13,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -55,6 +55,7 @@ function _hqu_<c:out value="${widgetInstanceName}${portlet.token}"/>_autoRefresh
 
 dojo11.require("dijit.dijit");
 dojo11.require("dijit.Dialog");
+dojo11.require("dijit.ProgressBar");
 
 var MyAlertCenter = null;
 dojo11.addOnLoad(function(){

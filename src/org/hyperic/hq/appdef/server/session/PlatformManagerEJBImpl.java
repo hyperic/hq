@@ -29,10 +29,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.CreateException;
@@ -273,7 +275,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public void removePlatform(AuthzSubject subject, Platform platform)
-        throws RemoveException, PlatformNotFoundException, PermissionException,
+        throws RemoveException,
+               PlatformNotFoundException,
+               PermissionException,
                VetoException {
         final AppdefEntityID aeid = platform.getEntityId();
         final Resource r = platform.getResource();
@@ -289,13 +293,38 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // keep the configresponseId so we can remove it later
             ConfigResponseDB config = platform.getConfigResponse();
 
-            ServerManagerLocal srvMgr = getServerManager();
             // Remove servers
-            for (Iterator i = platform.getServers().iterator(); i.hasNext();) {
-                srvMgr.removeServer(subject, (Server) i.next());
+            final ServerManagerLocal sMan = getServerManager();
+            final Collection servers = platform.getServersBag();
+            // since we are using the hibernate collection
+            // we need to synchronize
+            synchronized(servers) {
+                for (Iterator i=servers.iterator(); i.hasNext();) {
+                    try {
+                        // this looks funky but the idea is to pull the server
+                        // obj into the session so that it is updated when flushed
+                        Server server =
+                            sMan.findServerById(((Server)i.next()).getId());
+                        // there are instances where we may have a duplicate
+                        // autoinventory identifier btwn platforms
+                        // (sendmail, ntpd, CAM Agent Server, etc...)
+                        final String uniqAiid =
+                            server.getPlatform().getId() +
+                            server.getAutoinventoryIdentifier();
+                        server.setAutoinventoryIdentifier(uniqAiid);
+                        server.setPlatform(null);
+                        i.remove();
+                    } catch (ServerNotFoundException e) {
+                        log.warn(e.getMessage());
+                    }
+                }
             }
-
             final PlatformDAO dao = getPlatformDAO();
+            // this flush ensures that the server's platform_id is set to null
+            // before the platform is deleted and the servers cascaded
+            dao.getSession().flush();
+            
+            getAIQManagerLocal().removeAssociatedAIPlatform(platform);
             dao.remove(platform);
 
             // remove the config response
@@ -876,7 +905,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         throws PlatformNotFoundException, PermissionException {
         Server server = getServerDAO().get(serverId);
 
-        if (server == null) {
+        if (server == null || server.getPlatform() == null) {
             // This should throw server not found. Servers always have
             // platforms..
             throw new PlatformNotFoundException("platform for server "

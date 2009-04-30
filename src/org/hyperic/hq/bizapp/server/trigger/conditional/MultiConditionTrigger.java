@@ -557,7 +557,11 @@ public class MultiConditionTrigger
                     }
                 }
             } else {
-                etracker.addReference(getId(), event, getTimeRange());
+            	if (event instanceof TriggerFiredEvent) {
+            		// Only add reference for TriggerFiredEvent, don't add
+            		// for TriggerNotFiredEvent.
+            		etracker.addReference(getId(), event, getTimeRange());
+            	}
             }          
         } catch (SQLException e) {
             log.error("Failed to add event reference for trigger id=" +

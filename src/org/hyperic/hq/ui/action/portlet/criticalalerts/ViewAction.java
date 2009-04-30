@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006, 2007], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -46,6 +46,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -141,13 +142,19 @@ public class ViewAction extends BaseAction {
             AlertDefinitionInterface def;
             AppdefEntityValue aVal;
             AppdefEntityID eid;
+            Escalation escalation;
+            long maxPauseTime = 0;
             
             String date = 
                 df.format(new Date(alert.getAlertInfo().getTimestamp()));
             def = alert.getDefinition().getDefinitionInfo();
+            escalation = alert.getDefinition().getEscalation();
+            if (escalation != null && escalation.isPauseAllowed()) {
+                maxPauseTime = escalation.getMaxPauseTime();
+            }
             eid = new AppdefEntityID(def.getResource());
-
             aVal = new AppdefEntityValue(eid, subject);
+            
             JSONObject jAlert = new JSONObject();
             jAlert.put("alertId", alert.getId());
             jAlert.put("appdefKey", eid.getAppdefKey());
@@ -158,6 +165,7 @@ public class ViewAction extends BaseAction {
             jAlert.put("acknowledgeable", alert.isAcknowledgeable());
             jAlert.put("alertType",
                        alert.getDefinition().getAlertType().getCode());
+            jAlert.put("maxPauseTime", maxPauseTime);
 
             a.add(jAlert);
         }

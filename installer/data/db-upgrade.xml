@@ -8329,16 +8329,42 @@ has already been defined.
 
       <schema-directSQL>
         <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="postgresql">
-            UPDATE EAM_MEASUREMENT SET dsn = (SELECT m.dsn FROM EAM_MEASUREMENT m WHERE m.id = EAM_MEASUREMENT.id - 1) WHERE MEASUREMENT_CLASS = 'D'
+            UPDATE EAM_MEASUREMENT SET dsn = (
+                SELECT dsn from EAM_MEASUREMENT m, EAM_MEASUREMENT_ARG
+                where m.template_id = measurement_template_arg_id
+                and EAM_MEASUREMENT.template_id = measurement_template_id
+                and EAM_MEASUREMENT.instance_id = m.instance_id
+                and m.measurement_class = 'R'
+            ) where measurement_class = 'D'
         </statement>
         <statement desc="Replace pass-through ARG1 with actual Template" targetDB="postgresql">
-            UPDATE EAM_MEASUREMENT_TEMPL SET template = (SELECT template from EAM_MEASUREMENT_TEMPL t WHERE id = EAM_MEASUREMENT_TEMPL.id - 1) WHERE default_interval != 0
+            UPDATE EAM_MEASUREMENT_TEMPL SET template = (
+                SELECT template from EAM_MEASUREMENT_TEMPL t, EAM_MEASUREMENT_ARG
+                where measurement_template_arg_id = t.id
+                and measurement_template_id = EAM_MEASUREMENT_TEMPL.ID
+            ) where exists (
+                select measurement_template_id from eam_measurement_arg
+                where measurement_template_id = EAM_MEASUREMENT_TEMPL.ID
+            )
         </statement>
         <statement desc="Replace pass-through ARG1 with actual DSN" targetDB="oracle">
-            UPDATE EAM_MEASUREMENT SET dsn = (SELECT m.dsn FROM EAM_MEASUREMENT m WHERE m.id = EAM_MEASUREMENT.id - 1) WHERE MEASUREMENT_CLASS = 'D'
+            UPDATE EAM_MEASUREMENT SET dsn = (
+                SELECT dsn from EAM_MEASUREMENT m, EAM_MEASUREMENT_ARG
+                where m.template_id = measurement_template_arg_id
+                and EAM_MEASUREMENT.template_id = measurement_template_id
+                and EAM_MEASUREMENT.instance_id = m.instance_id
+                and m.measurement_class = 'R'
+            ) where measurement_class = 'D'
         </statement>
         <statement desc="Replace pass-through ARG1 with actual Template" targetDB="oracle">
-            UPDATE EAM_MEASUREMENT_TEMPL SET template = (SELECT template from EAM_MEASUREMENT_TEMPL t WHERE id = EAM_MEASUREMENT_TEMPL.id - 1) WHERE default_interval != 0
+            UPDATE EAM_MEASUREMENT_TEMPL SET template = (
+                SELECT template from EAM_MEASUREMENT_TEMPL t, EAM_MEASUREMENT_ARG
+                where measurement_template_arg_id = t.id
+                and measurement_template_id = EAM_MEASUREMENT_TEMPL.ID
+            ) where exists (
+                SELECT measurement_template_id from eam_measurement_arg
+                where measurement_template_id = EAM_MEASUREMENT_TEMPL.ID
+            )
         </statement>
         <statement desc="Create TMP update Table" targetDB="mysql">
             CREATE TABLE EAM_MEASUREMENT_TMP AS SELECT (ID+1) ID, DSN FROM EAM_MEASUREMENT WHERE MEASUREMENT_CLASS='R'
@@ -9661,6 +9687,52 @@ has already been defined.
           ALTER TABLE EAM_ESCALATION_STATE ADD CONSTRAINT ALERT_DEF_ID_KEY
                 UNIQUE (ALERT_DEF_ID, ALERT_ID)
         </statement>    	
+    </schema-directSQL>
+  </schemaSpec>
+
+  <schemaSpec version="3.138">
+    <schema-directSQL>
+      <statement targetDB="mysql">
+        alter table EAM_CPROP drop foreign key FKE5D04798CCF47F9F
+      </statement>
+      <statement targetDB="mysql">
+        drop index KEYID on EAM_CPROP
+      </statement>
+      <statement targetDB="mysql">
+        alter table EAM_CPROP add constraint FKE5D04798CCF47F9F foreign key (KEYID) REFERENCES EAM_CPROP_KEY (ID)
+      </statement>
+      <statement targetDB="mysql">
+        create unique index APPDEF_ID on EAM_CPROP(APPDEF_ID, KEYID, VALUE_IDX)
+      </statement>
+      <statement targetDB="oracle">
+        alter table EAM_CPROP drop unique (KEYID, APPDEF_ID, VALUE_IDX)
+      </statement>
+      <statement targetDB="oracle">
+        alter table EAM_CPROP add unique (APPDEF_ID, KEYID, VALUE_IDX)
+      </statement>
+      <statement targetDB="postgresql">
+        alter table EAM_CPROP drop constraint eam_cprop_keyid_key
+      </statement>
+      <statement targetDB="postgresql">
+        alter table EAM_CPROP add unique (APPDEF_ID, KEYID, VALUE_IDX)
+      </statement>
+      <statement>
+        create index KEYID_IDX on EAM_CPROP (KEYID)
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
+  <schemaSpec version="3.142">
+    <schema-directSQL>
+      <statement>
+        delete from QRTZ_CRON_TRIGGERS where TRIGGER_NAME = 'Data Purge Trigger'
+      </statement>
+      <statement>
+        delete from QRTZ_JOB_DETAILS where JOB_NAME = 'Data Purge Job'
+      </statement>
+      <statement>
+        delete from QRTZ_TRIGGERS where TRIGGER_NAME = 'Data Purge Trigger'
+      </statement>
     </schema-directSQL>
   </schemaSpec>
 

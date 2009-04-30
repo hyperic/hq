@@ -70,6 +70,7 @@ import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
@@ -377,6 +378,19 @@ public class AIQueueManagerEJBImpl
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public void removeAssociatedAIPlatform(Platform platform)
+        throws VetoException
+    {
+        AIPlatform aiPlat = getAIPlatformByPlatform(platform);
+        if (aiPlat == null) {
+            return;
+        }
+        getAIPlatformDAO().remove(aiPlat);
+    }
+
+    /**
      * Get an AIServerValue by name.
      *
      * @ejb:interface-method
@@ -677,15 +691,24 @@ public class AIQueueManagerEJBImpl
     }
 
     /**
-     * Find a platform given an AI platform 
+     * Get a platform given an AI platform, returns null if none found
      * @ejb:interface-method
      */
     public AIPlatformValue getAIPlatformByPlatformID(AuthzSubject subject,
-                                                     Integer platformID)
-    {
-        Platform pLocal = getPlatformDAO().get(platformID);
+                                                     Integer platformID) {
+        AIPlatform aip = getAIPlatformByPlatformID(platformID);
+        return (aip == null) ? null : aip.getAIPlatformValue();
+    }
 
-        Collection ips = pLocal.getIps();
+    private AIPlatform getAIPlatformByPlatformID(Integer platformID) {
+        return getAIPlatformByPlatform(getPlatformDAO().findById(platformID));
+    }
+
+    /**
+     * may return null if there are no associated AIPlatforms.
+     */
+    private AIPlatform getAIPlatformByPlatform(Platform platform) {
+        Collection ips = platform.getIps();
         // We can't use the FQDN to find a platform, because
         // the FQDN can change too easily.  Instead we use the
         // IP address now.  For now, if we get one IP address
@@ -701,9 +724,8 @@ public class AIQueueManagerEJBImpl
                 !mac.equals(NetFlags.NULL_HWADDR)) {
                 List addrs = getAIIpDAO().findByMACAddress(qip.getMacAddress());
                 if (addrs.size() > 0) {
-                    AIPlatform aiplatform =
-                        ((AIIp) addrs.get(0)).getAIPlatform();
-                    return aiplatform.getAIPlatformValue();
+                    AIPlatform aiplatform = ((AIIp)addrs.get(0)).getAIPlatform();
+                    return aiplatform;
                 }
             }
 
@@ -723,7 +745,7 @@ public class AIQueueManagerEJBImpl
             List addrs = getAIIpDAO().findByAddress(address);
             if (addrs.size() > 0) {
                 AIPlatform aiplatform = ((AIIp) addrs.get(0)).getAIPlatform();
-                return aiplatform.getAIPlatformValue();
+                return aiplatform;
             }
         }
 

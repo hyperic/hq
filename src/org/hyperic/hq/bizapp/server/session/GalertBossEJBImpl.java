@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -371,7 +371,13 @@ public class GalertBossEJBImpl
                     new SimpleDateFormat(TimeUtil.DISPLAY_DATE_FORMAT);
                 String date =
                     df.format(new Date(alert.getTimestamp()));
-            
+
+                long maxPauseTime = 0;
+                Escalation esc = alert.getDefinition().getEscalation();
+                if (esc != null && esc.isPauseAllowed()) {
+                    maxPauseTime = esc.getMaxPauseTime();
+                }
+                
                 jarr.put(new JSONObject()
                     .put("id", alert.getId())
                     .put("time", date)
@@ -381,7 +387,8 @@ public class GalertBossEJBImpl
                         alert.getAlertDefinitionInterface().getPriority())
                     .put("reason", alert.getShortReason())
                     .put("fixed", alert.isFixed())
-                    .put("acknowledgeable", alert.isAcknowledgeable()));
+                    .put("acknowledgeable", alert.isAcknowledgeable())
+                    .put("maxPauseTime", maxPauseTime));
             }
         } catch (PermissionException e) {
             // user does not have sufficient permissions, so display no alerts

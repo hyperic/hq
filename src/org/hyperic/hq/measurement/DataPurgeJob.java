@@ -35,21 +35,19 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.EventLogManagerUtil;
 import org.hyperic.hq.measurement.shared.DataCompressLocal;
-import org.hyperic.hq.measurement.shared.DataCompressUtil;
+import org.hyperic.hq.measurement.server.session.DataCompressEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 
-public class DataPurgeJob implements Job {
+public class DataPurgeJob implements Runnable {
 
     private static final Log _log = LogFactory.getLog(DataPurgeJob.class);
 
@@ -68,35 +66,24 @@ public class DataPurgeJob implements Job {
         private static boolean compressRunning = false;
     }
     
-    /**
-     * Public interface for quartz 
-     */
-    public void execute(JobExecutionContext context)
-        throws JobExecutionException {
-
+    public synchronized void run() {
         try {
-            DataPurgeJob.compressData();
-
-            Properties conf; 
+            compressData();
+            Properties conf = null; 
             try { 
-                conf =
-                    ServerConfigManagerUtil.getLocalHome().create().getConfig(); 
+                conf = ServerConfigManagerEJBImpl.getOne().getConfig(); 
             } catch (Exception e) { 
                 throw new SystemException(e); 
             }
-
-            long now = System.currentTimeMillis();
-            
+            final long now = System.currentTimeMillis();
             // need to do this because of the Sun JVM bug
             // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5102804
             Introspector.flushCaches();
-            purge(conf, now);
-        } catch (CreateException e) {
-            throw new JobExecutionException(
-                "Unable to create instance of DataManager.", e, false);
-        } catch (NamingException e) {
-            throw new JobExecutionException(
-                "Unable to look up DataManager.", e, false);
+            if (conf != null) {
+                purge(conf, now);
+            }
+        } catch (Throwable e) {
+            _log.error(e.getMessage(), e);
         }
     }
     
@@ -106,11 +93,10 @@ public class DataPurgeJob implements Job {
     public static void compressData()
         throws CreateException, NamingException
     {
-        ServerConfigManagerLocal serverConfig =
-            ServerConfigManagerUtil.getLocalHome().create();
+        final ServerConfigManagerLocal serverConfig =
+            ServerConfigManagerEJBImpl.getOne();
 
-        DataCompressLocal dataCompress = 
-            DataCompressUtil.getLocalHome().create();
+        final DataCompressLocal dataCompress = DataCompressEJBImpl.getOne();
 
         // First check if we are already running
         synchronized (DataPurgeLockHolder.COMPRESS_RUNNING_LOCK) {
