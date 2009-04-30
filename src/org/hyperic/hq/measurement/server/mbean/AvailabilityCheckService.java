@@ -116,7 +116,7 @@ public class AvailabilityCheckService
     /**
      * Since this method is called from the synchronized block in hitInSession()
      * please see the associated NOTE.
-     * @return {@link Map} of {@link Integer} to {@link ResourceDataPoint}
+     * @return {@link Map} of {@link Integer} to {@link ResourceDataPoint}, Integer -> resource id
      */
     private Map getDownPlatforms(Date lDate) {
         final boolean debug = _log.isDebugEnabled();
