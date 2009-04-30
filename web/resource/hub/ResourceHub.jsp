@@ -267,23 +267,18 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
   </c:otherwise>
 </c:choose>
 
-<div class="FilterImage" style="padding: 4px; text-align: right;">
+<div class="FilterImage" style="padding: 4px;text-align: right;">
 	<c:choose>
-	  <c:when test="${ResourceHubForm.view == CHART}">
-	    <html:img page="/images/SubHub_ChartView_on.gif" alt="Chart View" border="0"/>
-	  </c:when>
-	  <c:otherwise>
-	    <html:link page="/ResourceHub.do" onclick="ResourceHubForm.view.value = 'chart'; ResourceHubForm.submit(); return false;"><html:img page="/images/SubHub_ChartView_off.gif" alt="Chart View" border="0" onmouseover="imageSwap (this, imagePath + 'SubHub_ChartView', '_over')" onmouseout="imageSwap (this, imagePath + 'SubHub_ChartView', '_off')"/></html:link>
-	  </c:otherwise>
-	</c:choose>
-
-	<c:choose>
-	  <c:when test="${ResourceHubForm.view == LIST}">
-	    <html:img page="/images/SubHub_ListView_on.gif" alt="List View" border="0"/>
-	  </c:when>
-	  <c:otherwise>
-	    <html:link page="/ResourceHub.do" onclick="ResourceHubForm.view.value = 'list'; ResourceHubForm.submit(); return false;"><html:img page="/images/SubHub_ListView_off.gif" alt="List View" border="0" onmouseover="imageSwap (this, imagePath + 'SubHub_ListView', '_over')" onmouseout="imageSwap (this, imagePath + 'SubHub_ListView', '_off')"/></html:link>
-	  </c:otherwise>
+		<c:when test="${ResourceHubForm.view == LIST}">
+	    	<input type="button" id="showChartBtn" class="button42"  
+				       value="<fmt:message key='resource.view.chart' />" 
+				       onclick="ResourceHubForm.view.value = 'chart'; ResourceHubForm.submit(); return false;" />
+		</c:when>
+	  	<c:when test="${ResourceHubForm.view == CHART}">
+	    	<input type="button" id="showChartBtn" class="button42"  
+				       value="<fmt:message key='resource.view.list' />" 
+				       onclick="ResourceHubForm.view.value = 'list'; ResourceHubForm.submit(); return false;" />
+	  	</c:when>
 	</c:choose>
 </div>
 <!--  /  -->

@@ -2319,6 +2319,13 @@ button span{
     cursor:pointer;
 }
 
+.button42disabled {
+	color: #888;
+	background-color: #ccc;
+	border-color: #aaa;	
+	cursor: default
+}
+
 .successDialogMsg {
 	color:cornflowerblue; 
 	font-size:10pt; 
@@ -2355,4 +2362,8 @@ button span{
 
 .deprecated {
 	color: #888;
+}
+
+.dijitDialogUnderlay {
+	background-color: #000;
 }
