@@ -111,6 +111,12 @@ hyperic.form = {
 				break;
 			}
 		}
+		
+		// Select the longest available pause time in the list
+		if (myPauseSelect.options && myPauseSelect.options.length > 1) {
+			myPauseSelect.options[myPauseSelect.options.length - 1].selected = true;
+		}
+		
 		return myPauseSelect;
     }
 };
@@ -3275,7 +3281,11 @@ hyperic.alert_center = function(title_name) {
 		}
 		if (myDialog.data.pause != null) {
 			var escalationSpan = dojo11.byId("AlertCenterEscalationOption");		
-			myDialog.data.pause.checked = false;
+			myDialog.data.pause.checked = true;
+			myDialog.data.pause.onclick = function() { 
+				dojo11.byId("AlertCenterPauseSelect").disabled = !this.checked; 
+			};
+
 			if (myDialog.data.pauseTime.options.length == 0) {
 				escalationSpan.style.display = "none";
 			} else {
@@ -3502,6 +3512,7 @@ hyperic.alert_center = function(title_name) {
 			var tempSelect = hyperic.form.createEscalationPauseOptions({name: "tempName"}, commonMaxPauseTime);
 			for (var i = 0; i < tempSelect.options.length; i++) {
 				myDialog.data.pauseTime.options[i] = new Option(tempSelect.options[i].text, tempSelect.options[i].value);
+				myDialog.data.pauseTime.options[i].selected = tempSelect.options[i].selected;
 			}
 		}
 	}
