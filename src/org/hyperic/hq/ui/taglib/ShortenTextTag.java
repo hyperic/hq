@@ -74,27 +74,26 @@ public class ShortenTextTag extends TagSupport {
         try {
             if (property == null) {
                 if (shorten) {
-                    StringBuffer text =
-                        new StringBuffer("<a href=\"#\" class=\"")
-                        .append(styleClass)
-                        .append("\">");
+                    StringBuffer text = new StringBuffer("<abbr");
                     
-                    if (LEFT_POSITION.equalsIgnoreCase(getPosition())) {
-                        text.append("...")
-                            .append(value.substring(value.length()-maxlength));
-                    } else if (MIDDLE_POSITION.equalsIgnoreCase(getPosition())) {
-                        text.append(value.substring(0, maxlength/2))
-                            .append("...")
-                            .append(value.substring(value.length()-((maxlength+1)/2)));
-                    } else {
-                        text.append(value.substring(0, maxlength))
-                            .append("...");
-                    }
-                        
-                    text.append("<span>")
-                        .append(value)
-                        .append("</span></a>");
-                    pageContext.getOut().println(text.toString());
+                    text.append(" class=\"").append(styleClass).append("\"")
+                        .append(" title=\"").append(value).append("\">");
+                
+	                if (LEFT_POSITION.equalsIgnoreCase(getPosition())) {
+	                    text.append("...")
+	                        .append(value.substring(value.length()-maxlength));
+	                } else if (MIDDLE_POSITION.equalsIgnoreCase(getPosition())) {
+	                    text.append(value.substring(0, maxlength/2))
+	                        .append("...")
+	                        .append(value.substring(value.length()-((maxlength+1)/2)));
+	                } else {
+	                    text.append(value.substring(0, maxlength))
+	                        .append("...");
+	                }
+
+	                text.append("</abbr>");
+	                
+	                pageContext.getOut().println(text.toString());                	
                 } else {
                     pageContext.getOut().println(value);
                 }
