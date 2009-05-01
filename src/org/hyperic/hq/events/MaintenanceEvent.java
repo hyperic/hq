@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -26,7 +26,9 @@
 package org.hyperic.hq.events;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.common.SystemException;
@@ -69,8 +71,8 @@ public class MaintenanceEvent extends ResourceLogEvent
     private String _authzName;
 
     // Stats
+    private Set _resourcesProcessed = new HashSet();
     public long alertCount;
-    public long resourceCount;
     public long errorCount;
     
     public MaintenanceEvent(Integer groupId) {
@@ -132,10 +134,14 @@ public class MaintenanceEvent extends ResourceLogEvent
         return STATE_RUNNING.equals(getState());
     }
     
+    public Set getResourcesProcessed() {
+        return _resourcesProcessed;
+    }
+    
     public void resetStats() {
         alertCount = 0;
-        resourceCount = 0;
         errorCount = 0;
+        _resourcesProcessed.clear();
     }
     
     /**
