@@ -377,7 +377,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
     
     /**
      * @param resources {@link List} of {@link Resource}
-     * @return {@link Map} of {@link AppdefEntityID} to {@link Measurement}.
+     * @return {@link Map} of {@link Integer} to {@link Measurement}.
+     * Integer = Resource.getId()
      */
     private final Map getMidMap(Collection resources) {
         final List aeids = new ArrayList();
@@ -439,8 +440,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
         HashMap toGetLive = new HashMap();
         
         for (int i = 0; i < ids.length; i++) {
-            if (midMap.containsKey(ids[i])) {
-                Integer mid = ((Measurement)midMap.get(ids[i])).getId();
+            final Resource r = rMan.findResource(ids[i]);
+            if (midMap.containsKey(r.getId())) {
+                Integer mid = ((Measurement)midMap.get(r.getId())).getId();
                 MetricValue mval = null;
                 if (null != (mval = (MetricValue)data.get(mid))) {
                     result[i] = mval.getValue();
@@ -589,12 +591,14 @@ public class MetricSessionEJB extends BizappSessionEJB {
     }
     
     /**
-     * @return {@link Map} of {@link AppdefEntityID} to {@link Measurement}
+     * @return {@link Map} of {@link Integer} to {@link Measurement}
+     * Integer = Resource.getId()
      */
     protected final Map getMidMap(AppdefEntityID[] ids, Map measCache) {
         final Map rtn = new HashMap(ids.length);
         final ResourceManagerLocal rMan = getResourceManager();
         final MeasurementManagerLocal mMan = getMetricManager();
+        final List toGet = new ArrayList();
         for (final Iterator it=Arrays.asList(ids).iterator(); it.hasNext(); ) {
             final AppdefEntityID id = (AppdefEntityID)it.next();
             if (id == null) {
@@ -606,19 +610,33 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 null != (list = (List)measCache.get(res.getId()))) {
                 if (list.size() > 1) {
                     log.warn("resourceId " + res.getId() +
-                             " has more than one availability measurement assigned to it");
+                             " has more than one availability measurement " +
+                             " assigned to it");
                 } else if (list.size() <= 0) {
                     continue;
                 }
                 final Measurement m = (Measurement)list.get(0);
-                rtn.put(id, m);
+                rtn.put(res.getId(), m);
             } else {
-                final Measurement m = mMan.getAvailabilityMeasurement(res);
-                if (m == null) {
-                    continue;
-                }
-                rtn.put(id, m);
+                toGet.add(res);
             }
+        }
+        final Map measMap = mMan.getAvailMeasurements(toGet);
+        for (final Iterator it=measMap.entrySet().iterator(); it.hasNext(); ) {
+            final Map.Entry entry = (Map.Entry)it.next();
+            final Integer id = (Integer)entry.getKey();
+            final Resource r = rMan.findResourceById(id);
+            final List vals = (List)entry.getValue();
+            if (vals.size() == 0) {
+                continue;
+            }
+            final Measurement m = (Measurement)vals.get(0);
+            if (vals.size() > 1) {
+                log.warn("resourceId " + r.getId() +
+                         " has more than one availability measurement " +
+                         " assigned to it");
+            }
+            rtn.put(r.getId(), m);
         }
         return rtn;
     }
@@ -660,7 +678,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         for (Iterator it = metrics.iterator(); it.hasNext(); ) {
             Measurement m =  (Measurement) it.next();
             try {
-                midMap.put(new AppdefEntityID(m.getResource()), m);
+                midMap.put(m.getResource().getId(), m);
             } catch (IllegalArgumentException e) {
                 // Resource has been deleted, waiting for purging.  Ignore.
             }
