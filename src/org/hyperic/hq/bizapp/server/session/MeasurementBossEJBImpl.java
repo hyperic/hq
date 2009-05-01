@@ -1972,18 +1972,21 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException 
     {
-        List summaries = new ArrayList();
+        final List summaries = new ArrayList();
     
         // Create Map of auto-group'd/singleton resources and a List of clusters
         // since their current health summarizations are not flattened        
     
         // auto-group'd entities are kept track of in here where keys are the
         // type id's and the values are lists of resources
-        HashMap resTypeMap = new HashMap(); 
+        final HashMap resTypeMap = new HashMap(); 
         // to avoid looking up singleton/autogroup resources again later, we
         // keep them here where keys are AppdefEntityID's and values are the
         // AppdefResourceValues
-        HashMap resourcemap = new HashMap();
+        final HashMap resourcemap = new HashMap();
+        final List appdefVals = Arrays.asList(resources);
+        final Map tmp = getMetricManager().getAvailMeasurements(appdefVals);
+        final Map midMap = getMidMap(getAeids(appdefVals), tmp);
         // keys are type id's and the values are AppdefResourceTypeValues
         for (int i = 0; i < resources.length; i++) {
             if (resources[i] instanceof ServiceClusterValue) {
@@ -2004,7 +2007,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     memberIds.toArray(new AppdefEntityID[0]);
                 setResourceTypeDisplaySummary(subject, cds,
                                               agval.getAppdefResourceTypeValue(),
-                                              ids);
+                                              ids, midMap);
                 summaries.add(cds);
             } else {
                 // all of the non-clusters get organized in here
@@ -2047,7 +2050,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
             setResourceTypeDisplaySummary(subject, summary,
                                           resource.getAppdefResourceTypeValue(),
-                                          ids);
+                                          ids, midMap);
             summaries.add(summary);
         }
     
@@ -2069,7 +2072,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         HashMap resTypeMap = new HashMap(); 
         
         // keys are type id's and the values are AppdefResources
-        for (Iterator it = resources.iterator(); it.hasNext(); ) {
+        for (final Iterator it = resources.iterator(); it.hasNext(); ) {
             AppdefResource resource = (AppdefResource) it.next();
             AppdefResourceType type = resource.getAppdefResourceType();
             Integer typeId = type.getId();
@@ -2082,13 +2085,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // Add resource to list
             siblings.add(resource);
         }
+        final Map measCache = getMetricManager().getAvailMeasurements(resources);
+        final Map midMap = getMidMap(getAeids(resources), measCache);
         
         // first deal with the autogroups and singletons (singletons
         // are just the degenerative case of an autogroup, why it's
         // its own type is... silly)
         for (Iterator it = resTypeMap.entrySet().iterator(); it.hasNext();) {
-            Map.Entry entry = (Map.Entry) it.next();
-            Collection siblings = (Collection) entry.getValue();
+            final Map.Entry entry = (Map.Entry) it.next();
+            final Collection siblings = (Collection) entry.getValue();
             // Make sure we have valid IDs
             if (siblings == null || siblings.size() == 0)
                 continue;                    
@@ -2119,7 +2124,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
             setResourceTypeDisplaySummary(subject, summary,
                                           type.getAppdefResourceTypeValue(),
-                                          ids);
+                                          ids, midMap);
             summaries.add(summary);
         }
 
@@ -2127,12 +2132,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return summaries;
     }
 
-    private void 
-        setResourceTypeDisplaySummary(AuthzSubject subject,
+    private void setResourceTypeDisplaySummary(AuthzSubject subject,
                                       ResourceTypeDisplaySummary summary, 
                                       AppdefResourceTypeValue resType,
-                                      AppdefEntityID[] ids) 
-    {
+                                      AppdefEntityID[] ids, Map midMap) {
         // Now get each category of measurements
         long end = System.currentTimeMillis();
         
@@ -2145,14 +2148,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         // Availability
         try {
-            double[] data = getAvailability(subject, ids);
+            double[] data = getAvailability(subject, ids, midMap, null);
             if (data.length > 0) {
-
                 double sum = 0;
                 for (int i = 0; i < data.length; i++) {
                     sum += data[i];
                 }
-                
                 summary.setAvailability(
                     new Double(sum / (double) data.length));
             }

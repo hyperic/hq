@@ -41,6 +41,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -393,26 +394,35 @@ public class MetricSessionEJB extends BizappSessionEJB {
     }
 
     /**
-     * @param midMap {@link Map} of {@link AppdefEntityID} to {@link Measurement}
+     * @param midMap {@link Map} of {@link Integer} to {@link Measurement}
+     * Integer = Resource.getId()
+     * @param availCache {@link Map} of {@link Integer} to {@link MetricValue}
+     * Integer = Measurement.getId()
      */
-    protected double[] getAvailability(AuthzSubject subject,
-                                       AppdefEntityID[] ids,
-                                       Map midMap,
-                                       Map availCache)
+    protected double[] getAvailability(final AuthzSubject subject,
+                                       final AppdefEntityID[] ids,
+                                       final Map midMap,
+                                       final Map availCache)
         throws ApplicationNotFoundException,
                AppdefEntityNotFoundException,
                PermissionException {
         final AgentManagerLocal agentMan = AgentManagerEJBImpl.getOne();
-        
-        double[] result = new double[ids.length];
+        final double[] result = new double[ids.length];
         Arrays.fill(result, MeasurementConstants.AVAIL_UNKNOWN);
-        
-        Map data = new HashMap(0);
+        final Map data = new HashMap();
+        final MeasurementManagerLocal mMan = getMetricManager();
+        final ResourceManagerLocal rMan = getResourceManager();
         if (midMap.size() > 0) {
-            data = new HashMap();
             final List mids = new ArrayList();
-            for (final Iterator it=midMap.values().iterator(); it.hasNext(); ) {
-                final Measurement meas = (Measurement)it.next();
+            final List aeids = Arrays.asList(ids);
+            for (final Iterator it=aeids.iterator(); it.hasNext(); ) {
+                final AppdefEntityID aeid = (AppdefEntityID)it.next();
+                final Resource r = rMan.findResource(aeid);
+                Measurement meas;
+                if (null == midMap ||
+                    null == (meas = (Measurement)midMap.get(r.getId()))) {
+                    meas = mMan.getAvailabilityMeasurement(r);
+                }
                 MetricValue mv;
                 if (null != availCache &&
                     null != (mv = (MetricValue)availCache.get(meas.getId()))) {
@@ -495,7 +505,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
     }
 
     /**
-     * @param availCache Map<Integer, MetricValue>
+     * @param availCache {@link Map} of {@link Integer} to {@link MetricValue}
      *  Integer => Measurement.getId(), may be null.
      * 
      * Given an array of AppdefEntityID's, disqulifies their aggregate
@@ -545,6 +555,37 @@ public class MetricSessionEJB extends BizappSessionEJB {
             return MeasurementConstants.AVAIL_UNKNOWN;
         
         return sum / count;
+    }
+
+    protected final AppdefEntityID[] getAeids(final Collection resources) {
+        final AppdefEntityID[] aeids = new AppdefEntityID[resources.size()];
+        int i = 0;
+        for (final Iterator it=resources.iterator(); it.hasNext(); i++) {
+            final Object o = it.next();
+            AppdefEntityID aeid = null;
+            if (o instanceof AppdefEntityValue) {
+                final AppdefEntityValue rv = (AppdefEntityValue) o;
+                aeid = rv.getID();
+            } else if (o instanceof AppdefEntityID) {
+                aeid = (AppdefEntityID) o;
+            } else if (o instanceof AppdefResource) {
+                final AppdefResource r = (AppdefResource)o;
+                aeid = r.getEntityId();
+            } else if (o instanceof Resource) {
+                final Resource resource = (Resource) o;
+                aeid = new AppdefEntityID(resource);
+            } else if (o instanceof ResourceGroup) {
+                final ResourceGroup grp = (ResourceGroup) o;
+                final Resource resource = grp.getResource();
+                aeid = new AppdefEntityID(resource);
+            } else {
+                final AppdefResourceValue r = (AppdefResourceValue) o;
+                aeid = r.getEntityId();
+            }
+            aeids[i] = aeid;
+        }
+        return aeids;
+        
     }
     
     /**

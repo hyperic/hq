@@ -45,6 +45,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
@@ -785,7 +786,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * TODO: scottmf, need to do some more work to handle other authz resource
      *  types other than platform, server, service, and group
      * 
-     * @return Map<Integer, List<Measurement>>, Integer => Resource.getId(),
+     * @return {@link Map} of {@link Integer} to {@link List} of
+     * {@link Measurement}s, Integer => Resource.getId(),
      * @ejb:interface-method
      */
     public Map getAvailMeasurements(Collection resources) {
@@ -803,6 +805,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             } else if (o instanceof AppdefEntityID) {
                 AppdefEntityID aeid = (AppdefEntityID) o;
                 resource = resMan.findResource(aeid);
+            } else if (o instanceof AppdefResource) {
+                AppdefResource r = (AppdefResource)o;
+                resource = resMan.findResource(r.getEntityId());
             } else if (o instanceof Resource) {
                 resource = (Resource) o;
             } else if (o instanceof ResourceGroup) {
