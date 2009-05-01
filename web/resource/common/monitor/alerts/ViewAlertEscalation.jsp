@@ -87,7 +87,7 @@
       <tiles:put name="disabled" value="false"/>
     </c:when>
     <c:otherwise>
-      <tiles:put name="disabled" value="true"/>
+      <tiles:put name="hidden" value="true"/>
     </c:otherwise>
   </c:choose>
 </tiles:insert>

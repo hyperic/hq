@@ -34,31 +34,34 @@
 <tiles:importAttribute name="buttonClick" />
 <tiles:importAttribute name="icon" ignore="true" />
 <tiles:importAttribute name="disabled" ignore="true" />
+<tiles:importAttribute name="hidden" ignore="true" />
 
 <div style="white-space:nowrap; text-align: left;">
-	<c:choose>
-		<c:when test="${disabled}">
-			<span class="InactiveText"><fmt:message key="${labelKey}" /></span>
-		</c:when>
-		<c:otherwise>
-			<input type="button" id="button" class="button42"  
-				   value="<fmt:message key="${labelKey}"/>" 
-				   onclick="<c:out value="${buttonClick}" escapeXml="false"/>" />
-			
-			<c:if test="${not empty buttonHref}">
-				<!-- the buttonHref attribute has been deprecated, use buttonClick attribute instead -->
+	<c:if test="${not hidden}">
+		<c:choose>
+			<c:when test="${disabled}">
+				<span class="InactiveText"><fmt:message key="${labelKey}" /></span>
+			</c:when>
+			<c:otherwise>
+				<input type="button" id="button" class="button42"  
+					   value="<fmt:message key="${labelKey}"/>" 
+					   onclick="<c:out value="${buttonClick}" escapeXml="false"/>" />
+				
+				<c:if test="${not empty buttonHref}">
+					<!-- the buttonHref attribute has been deprecated, use buttonClick attribute instead -->
+				</c:if>
+			</c:otherwise>
+		</c:choose> 
+		<c:if test="${not empty icon}">
+			<c:if test="${disabled}">
+				<span style="filter: alpha(opacity = 50); opacity: 0.5;">
 			</c:if>
-		</c:otherwise>
-	</c:choose> 
-	<c:if test="${not empty icon}">
-		<c:if test="${disabled}">
-			<span style="filter: alpha(opacity = 50); opacity: 0.5;">
-		</c:if>
-		<span style="padding-left: 3px;">
-			<c:out value="${icon}" escapeXml="false" />
-		</span>
-		<c:if test="${disabled}">
+			<span style="padding-left: 3px;">
+				<c:out value="${icon}" escapeXml="false" />
 			</span>
+			<c:if test="${disabled}">
+				</span>
+			</c:if>
 		</c:if>
 	</c:if>
 </div>
