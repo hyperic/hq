@@ -79,7 +79,7 @@ public class ViewAction extends BaseAction {
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		Integer.valueOf(String.valueOf(session.getAttribute(Constants.SELECTED_DASHBOARD_ID))),
         		user, authzBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         

@@ -86,7 +86,7 @@ public class PrepareAction extends TilesAction {
         // We set defaults here rather than in DefaultUserPreferences.properites
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		Integer.valueOf(String.valueOf(session.getAttribute(Constants.SELECTED_DASHBOARD_ID))),
         		user, aBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         Integer numberToShow = new Integer(dashPrefs.getValue(numKey, "10"));

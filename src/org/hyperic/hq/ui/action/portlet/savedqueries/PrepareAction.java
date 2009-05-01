@@ -74,8 +74,9 @@ public class PrepareAction extends TilesAction {
         WebUser user = RequestUtils.getWebUser(request);
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)request.getSession().getAttribute(
-        				Constants.SELECTED_DASHBOARD_ID), user, aBoss);
+        		Integer.valueOf(String.valueOf(request.getSession()
+        				                              .getAttribute(Constants.SELECTED_DASHBOARD_ID))),
+        		user, aBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         List chartList = StringUtil.explode(
         		dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS), 

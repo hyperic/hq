@@ -78,7 +78,7 @@ public class ViewAction extends TilesAction {
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         WebUser user = SessionUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		Integer.valueOf(String.valueOf(session.getAttribute(Constants.SELECTED_DASHBOARD_ID))),
         		user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         

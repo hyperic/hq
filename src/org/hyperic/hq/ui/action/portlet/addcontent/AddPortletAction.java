@@ -77,7 +77,9 @@ public class AddPortletAction extends BaseAction {
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(request);
-        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID), user, boss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard(
+        		Integer.valueOf(String.valueOf(session.getAttribute(Constants.SELECTED_DASHBOARD_ID))),
+        		user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         PropertiesForm pForm = (PropertiesForm) form;
 

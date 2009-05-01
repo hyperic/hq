@@ -79,7 +79,7 @@ public class PrepareAction extends BaseAction {
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		Integer.valueOf(String.valueOf(session.getAttribute(Constants.SELECTED_DASHBOARD_ID))),
         		user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
 

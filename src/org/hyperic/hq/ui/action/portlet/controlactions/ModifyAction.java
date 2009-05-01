@@ -94,8 +94,9 @@ public class ModifyAction extends BaseAction {
         String past             = String.valueOf(pForm.getPast());
 
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
+        		Integer.valueOf(String.valueOf(session.getAttribute(Constants.SELECTED_DASHBOARD_ID))),
         		user, boss);
+
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
         dashPrefs.setValue(".dashContent.controlActions.lastCompleted", lastCompleted );
