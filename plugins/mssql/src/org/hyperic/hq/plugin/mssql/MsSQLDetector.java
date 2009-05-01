@@ -22,7 +22,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
 package org.hyperic.hq.plugin.mssql;
 
 import java.io.File;
@@ -45,25 +44,25 @@ import org.hyperic.sigar.win32.ServiceConfig;
 import org.hyperic.sigar.win32.Win32Exception;
 
 public class MsSQLDetector
-    extends ServerDetector
-    implements AutoServerDetector {
+        extends ServerDetector
+        implements AutoServerDetector {
 
-    static final String PROP_DB      = "db.name";
-    private static final String DB_NAME      = "Database";
+    static final String PROP_DB = "db.name";
+    private static final String DB_NAME = "Database";
     private static final String DEFAULT_NAME = "MSSQL";
     static final String DEFAULT_SERVICE_NAME =
-        DEFAULT_NAME + "SERVER";
+            DEFAULT_NAME + "SERVER";
 
     public List getServerResources(ConfigResponse platformConfig)
-        throws PluginException {
+            throws PluginException {
 
         String versionFile =
-            getTypeProperty("mssql.version.file");
+                getTypeProperty("mssql.version.file");
 
         List configs;
         try {
             configs =
-                Service.getServiceConfigs("sqlservr.exe");
+                    Service.getServiceConfigs("sqlservr.exe");
         } catch (Win32Exception e) {
             return null;
         }
@@ -72,20 +71,22 @@ public class MsSQLDetector
         }
 
         List servers = new ArrayList();
-        for (int i=0; i<configs.size(); i++) {
+        for (int i = 0; i < configs.size(); i++) {
             ServiceConfig serviceConfig =
-                (ServiceConfig)configs.get(i);
+                    (ServiceConfig) configs.get(i);
             String name = serviceConfig.getName();
+            getLog().debug("[getServerResources] --> "+i+".name = " + name);
             File dir = new File(serviceConfig.getExe()).getParentFile();
             File dll = new File(dir, versionFile);
-            if (!dll.exists()) {
+             getLog().debug("[getServerResources] --> "+i+".dll = " + dll);
+           if (!dll.exists()) {
                 continue;
             }
             dir = dir.getParentFile(); //strip "Binn"
 
             ServerResource server =
-                createServerResource(dir.getAbsolutePath(),
-                                     name, false);
+                    createServerResource(dir.getAbsolutePath(),
+                    name, false);
             servers.add(server);
         }
 
@@ -93,17 +94,16 @@ public class MsSQLDetector
     }
 
     private ServerResource createServerResource(String installpath,
-                                                String name,
-                                                boolean isDefault) {
+            String name,
+            boolean isDefault) {
         ServerResource server =
-            createServerResource(installpath);
+                createServerResource(installpath);
 
         if (!isDefault) {
             String instance;
             if (name.startsWith("MSSQL$")) {
                 instance = name.substring(6);
-            }
-            else {
+            } else {
                 instance = name;
             }
             server.setName(server.getName() + " " + instance);
@@ -124,9 +124,9 @@ public class MsSQLDetector
         ArrayList services = new ArrayList();
 
         String serviceName =
-            serverConfig.getValue(Win32ControlPlugin.PROP_SERVICENAME,
-                                  DEFAULT_SERVICE_NAME);
-        
+                serverConfig.getValue(Win32ControlPlugin.PROP_SERVICENAME,
+                DEFAULT_SERVICE_NAME);
+
         if (serviceName.equals(DEFAULT_SERVICE_NAME)) {
             // not sure why they drop the 'MS' from the service name
             // in the default case.
@@ -135,14 +135,14 @@ public class MsSQLDetector
 
         try {
             String[] instances =
-                Pdh.getInstances(serviceName + ":Databases");
+                    Pdh.getInstances(serviceName + ":Databases");
 
-            for (int i=0; i<instances.length; i++) {
+            for (int i = 0; i < instances.length; i++) {
                 String name = instances[i];
                 if (name.equals("_Total")) {
                     continue;
                 }
-                
+
                 ServiceResource service = new ServiceResource();
                 service.setType(this, DB_NAME);
                 service.setServiceName(name);
@@ -158,11 +158,14 @@ public class MsSQLDetector
             }
         } catch (Win32Exception e) {
             String msg =
-                "Error getting pdh data for '" +
-                serviceName + "': " + e.getMessage();
+                    "Error getting pdh data for '" +
+                    serviceName + "': " + e.getMessage();
             throw new PluginException(msg, e);
         }
 
         return services;
+    }
+
+    public static void main(String argv[]) {
     }
 }
