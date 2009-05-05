@@ -1,42 +1,39 @@
 #!/bin/sh
 
-DB=hq
 USER=hqadmin
-PG_DUMP=/Users/jtravis/dev/postgres/bin/pg_dump
+PASSWD=hqadmin
+MYSQLDUMP=/usr/local/mysql/bin/mysqldump
 
-if [ $# -ne 1 ] ; then
-	echo "Syntax:  $0 outDir"
+if [ $# -ne 2 ] ; then
+	echo "Syntax:  $0 outDir database"
 	exit 1
 fi
 
 OUTDIR="$1"
+DB="$2"
 FULL_SCHEMA="$OUTDIR/full_schema.sql"
 TABLE_LIST="$OUTDIR/table_list"
 SEQUENCE_LIST="$OUTDIR/sequence_list"
 
 mkdir "$OUTDIR"
-$PG_DUMP -U$USER -s $DB > "$FULL_SCHEMA"
+$MYSQLDUMP -u${USER} -p${PASSWD} -d $DB > "$FULL_SCHEMA"
 
 # Dump full schema
 cat "$FULL_SCHEMA" | grep "CREATE TABLE" | awk '{ print $3 }' \
-	| sort > "$TABLE_LIST"
-
-# Dump sequences
-cat "$FULL_SCHEMA" | grep "CREATE SEQUENCE" | awk '{ print $3 }' \
-	| sort > "$SEQUENCE_LIST"
+	| sed "s/\`//g" | sort > "$TABLE_LIST"
 
 # Dump individual tables
 echo Found `cat "$TABLE_LIST" | wc -l` tables
 for table in `cat "$TABLE_LIST"` ; do
 	echo " ... Dumping $table"
-	$PG_DUMP -U$USER -s $DB -t $table | egrep -v -- "^--" > "$OUTDIR/${table}_tbl.sql"
+	$MYSQLDUMP -u${USER} -p${PASSWD} -d $DB $table | egrep -v -- "^--" > "$OUTDIR/${table}_tbl.sql"
 done
 
 # Dump individual sequences
 echo Found `cat "$SEQUENCE_LIST" | wc -l` sequences
 for seq in `cat "$SEQUENCE_LIST"` ; do
 	echo " ... Dumping $seq"
-	$PG_DUMP -U$USER -s $DB -t $seq | egrep -v -- "^--" > "$OUTDIR/${seq}.sql"
+	$MYSQLDUMP -U$USER -s $DB -t $seq | egrep -v -- "^--" > "$OUTDIR/${seq}.sql"
 
 	cat "$OUTDIR/${seq}.sql" | awk '
 		{ 
