@@ -369,9 +369,9 @@ class DashboardController extends BaseController
 
             def resource = it["Resource"]
             if (resource) {
-                def log = OpCenterDAO.getLastLog(resource)
-                if (log) {
-                    it["StatusInfo"] << "Last event: " + log.detail
+                def lastLog = OpCenterDAO.getLastLog(resource)
+                if (lastLog) {
+                    it["StatusInfo"] << "Last event: " + lastLog.detail
                 }
 
                 def availMetric = it.Resource.getAvailabilityMeasurement()
