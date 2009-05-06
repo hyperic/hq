@@ -597,7 +597,7 @@ public class AvailabilityManagerEJBImpl
             return rtn;
         }
         List list;
-        List midList = new ArrayList(Arrays.asList(mids));
+        List midList = Arrays.asList(mids);
         if (after != -1) {
             list = _dao.findLastAvail(midList, after);
         } else {
