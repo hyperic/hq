@@ -94,7 +94,7 @@ class MetricCategory {
      * Get the last data point collected for a measurement.
      */
     static MetricValue getLastDataPoint(Measurement m) {
-        m.getLastDataPoint(0)
+        m.getLastDataPoint(-1)
     }
 
     /**
