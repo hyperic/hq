@@ -574,6 +574,8 @@ public class MeasurementDAO extends HibernateDAO {
                .createQuery(sql)
                .setParameterList("resourceIds", list, new IntegerType())
                .setParameter("relationType", resourceRelationType)
+               .setCacheable(true)
+               .setCacheRegion("Measurement.findRelatedAvailMeasurements")
                .list());
        }
        return rtn;
