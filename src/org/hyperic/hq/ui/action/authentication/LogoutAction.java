@@ -74,6 +74,12 @@ public class LogoutAction extends Action {
         session.removeAttribute(Constants.WEBUSER_SES_ATTR);        
         session.invalidate();            
 
+        final String casURL = authBoss.getCasURL();
+        if (casURL != null) {
+            response.sendRedirect(casURL + "/logout");
+            return null;
+        }
+        
         return mapping.findForward("success");        
         
     }
