@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004 - 2008], Hyperic, Inc.
+ * Copyright (C) [2004 - 2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -154,9 +154,9 @@ public abstract class SignIn extends BasePage {
     }
     
     //clone ConfigResponse.merge - cannot change its method signature
-    private boolean mergeValues(ConfigResponse config,
-                                ConfigResponse other,
-                                boolean overWrite) {
+    private static boolean mergeValues(ConfigResponse config,
+                                       ConfigResponse other,
+                                       boolean overWrite) {
         boolean updated = true;
         Set entrySet = other.toProperties().entrySet();
         for (Iterator i = entrySet.iterator(); i.hasNext();) {
@@ -172,8 +172,8 @@ public abstract class SignIn extends BasePage {
         return updated;
     }
 
-    private void loadDashboard(ServletContext ctx, WebUser webUser,
-                               AuthzBoss authzBoss) {
+    private static void loadDashboard(ServletContext ctx, WebUser webUser,
+                                      AuthzBoss authzBoss) {
         try {
             DashboardManagerLocal dashManager =
                 DashboardManagerEJBImpl.getOne();
@@ -274,6 +274,58 @@ public abstract class SignIn extends BasePage {
         return new WebUser(subject, sessionId, preferences, hasPrincipal);
     }
     
+    public static WebUser loginUser(ServletContext ctx, HttpSession session,
+                                    String ticket, String service) {
+        try {
+            AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);
+            AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
+            boolean needsRegistration = false;
+            // authenticate the credentials
+            int sid = authBoss.loginCAS(ticket, service);
+            Integer sessionId = new Integer(sid);
+            if (log.isTraceEnabled()) {
+                log.trace("Logged in as with session id [" + sessionId + "]");
+            }
+            // look up the subject record
+            AuthzSubject subjPojo = authzBoss.getCurrentSubject(sid);
+            AuthzSubjectValue subject = subjPojo.getAuthzSubjectValue();
+            needsRegistration = subjPojo.getEmailAddress() == null ||
+                                subjPojo.getEmailAddress().length() == 0;
+
+            // figure out if the user has a principal
+            boolean hasPrincipal = authBoss.isUser(sessionId.intValue(),
+                                                   subject.getName());
+
+            ConfigResponse preferences =
+                needsRegistration ? new ConfigResponse() :
+                    getUserPrefs(ctx, sessionId, subject.getId(), authzBoss);
+
+            WebUser webUser = new WebUser(subject, sessionId, preferences,
+                                          hasPrincipal);
+            Map userOpsMap = new HashMap();            
+
+            if (webUser.getPreferences().getKeys().size() == 0) {
+                // will be cleaned out during registration
+                session.setAttribute(Constants.PASSWORD_SES_ATTR, "");
+                session.setAttribute(Constants.NEEDS_REGISTRATION, Boolean.TRUE);
+            }
+            else {
+                userOpsMap = loadUserPermissions(webUser.getSessionId(),
+                        authzBoss);
+            }
+
+            session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
+    
+            loadDashboard(ctx, webUser, authzBoss);
+            setXlibFlag(session);
+
+            return webUser;
+        } catch (Exception e) {
+            // No user account available
+            return null;
+        }
+
+    }
     public static WebUser loginGuest(ServletContext ctx,
                                      HttpServletRequest request) {
         AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
