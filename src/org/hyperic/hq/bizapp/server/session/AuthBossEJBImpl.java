@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -25,17 +25,19 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.ejb.AccessLocalException;
+import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.security.auth.login.LoginException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.server.session.UserAudit;
 import org.hyperic.hq.auth.server.session.UserLoginZevent;
 import org.hyperic.hq.auth.shared.SessionException;
@@ -44,16 +46,21 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AuthBossLocal;
+import org.hyperic.hq.bizapp.shared.AuthBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.zevents.ZeventListener;
-import org.hyperic.hq.bizapp.shared.AuthBossUtil;
-import org.hyperic.hq.bizapp.shared.AuthBossLocal;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.jasig.cas.client.authentication.AttributePrincipal;
+import org.jasig.cas.client.validation.Assertion;
+import org.jasig.cas.client.validation.Cas20ServiceTicketValidator;
+import org.jasig.cas.client.validation.TicketValidationException;
 
 /** 
  * The BizApp's interface to the Auth Subsystem
@@ -141,6 +148,63 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
             ZeventManager.getInstance().enqueueEventAfterCommit(evt);
 
             return res;
+        } catch (AccessLocalException e) {
+            throw new LoginException(e.getMessage());
+        }
+    }
+
+    /**
+     * Login a user via CAS.
+     * @param ticket The CAS ticket.
+     * @param service The name of the service.
+     * @return An int representing the session ID of the logged-in user
+     * @ejb:interface-method
+     */
+    public int loginCAS (String ticket, String service) 
+        throws LoginException, ApplicationException {
+        try {
+            Cas20ServiceTicketValidator sv =
+                new Cas20ServiceTicketValidator(getCasURL());
+            AttributePrincipal principal = null;
+            try {
+                Assertion a = sv.validate(ticket, service);
+                principal = a.getPrincipal();
+            } catch (TicketValidationException e) {
+                _log.error("Invalid ticket " + ticket + e.getMessage(), e);
+            }
+
+            final AuthzSubjectManagerLocal subjMan = getAuthzSubjectManager();
+            if (principal != null) {
+                AuthzSubject s = subjMan.findSubjectByName(principal.getName());
+
+                if (s != null) {
+                    if (s.getActive()) {
+                        UserLoginZevent evt = new UserLoginZevent(s.getId());
+                        ZeventManager.getInstance().enqueueEventAfterCommit(evt);
+            
+                    }
+                    else {
+                        throw new LoginException(s.getName() + " not active");
+                    }
+                }
+                else {
+                    // Valid ticket, but user not yet registered
+                    try {
+                        AuthzSubject overlord = subjMan.getOverlordPojo();
+                        s = subjMan.createSubject(overlord, principal.getName(),
+                                                  true,
+                                                  HQConstants.ApplicationName,
+                                                  "", "", "", "", "", "", false);
+                    } catch (CreateException e) {
+                        throw new ApplicationException("Unable to add user to" +
+                                                       " authorization system",
+                                                       e);
+                    }
+                }
+                return manager.put(s);
+            }
+
+            throw new LoginException(ticket + " CAS ticket invalid");
         } catch (AccessLocalException e) {
             throw new LoginException(e.getMessage());
         }
@@ -244,6 +308,19 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
         return getAuthManager().isUser(subject, username);
     }
 
+    /**
+     * Get CAS URL
+     * @ejb:interface-method
+     */
+    public String getCasURL() {
+        try {
+            return ServerConfigManagerEJBImpl.getOne().getConfig()
+                .getProperty(HQConstants.CAS_URL);
+        } catch (ConfigPropertyException e) {
+            return null;
+        }
+    }
+
     public static AuthBossLocal getOne() {
         try {
             return AuthBossUtil.getLocalHome().create();
@@ -251,7 +328,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
             throw new SystemException(e);
         }
     }
-
+    
     /**
      * @ejb:create-method
      */
