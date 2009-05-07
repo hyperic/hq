@@ -518,7 +518,11 @@ class ResourceCategory {
             } else {
                 sv.description = ""
             }
-            
+
+            if (cfg['autoinventoryIdentifier']) {
+                sv.autoinventoryIdentifier = cfg['autoinventoryIdentifier']
+            }
+
             def res = svrMan.createServer(subject, platform.id,
                                           proto.instanceId, sv).resource
             setConfig(res, cfg, subject)
