@@ -21,6 +21,7 @@
 
     <table name="EAM_RESOURCE_RELATION">
         <data ID="1" NAME="containment" IS_HIER="TRUE"/>
+        <data ID="2" NAME="network" IS_HIER="TRUE"/>
     </table>
 
     <table name="EAM_SUBJECT">

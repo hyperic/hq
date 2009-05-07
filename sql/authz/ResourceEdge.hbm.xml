@@ -28,7 +28,8 @@
     </many-to-one>
 
     <many-to-one name="relation">
-      <column name="REL_ID" not-null="true" index="REL_ID_IDX"/>
+      <column name="REL_ID" not-null="true" unique-key="EAM_RESOURCE_EDGE_IDX"
+      		  index="REL_ID_IDX"/>
     </many-to-one>
 
     <property name="distance">
