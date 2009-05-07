@@ -154,3 +154,11 @@ Use: Event/Log display
 Information: http://tapestry.apache.org/
 License: http://www.apache.org/licenses/LICENSE-2.0
 Use: UI Framework
+
+- CAS -
+Copyright (c) 2007, JA-SIG, Inc.
+All rights reserved.
+Information: http://www.jasig.org/cas
+License: http://developer.jasig.org/source/browse/jasigsvn/cas3/trunk/license.txt
+Use: Single Sign-on
+
