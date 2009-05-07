@@ -672,13 +672,30 @@ public class AvailabilityManagerEJBImpl
 
     /**
      * Process Availability data.
+     * The default behavior is to send the data points
+     * to the event handlers.
      *
      * @param availPoints List of DataPoints
+     * 
+     * @ejb:interface-method
+     */
+    public void addData(List availPoints) {
+        addData(availPoints, true);
+    }
+        
+    /**
+     * Process Availability data.
+     *
+     * @param availPoints List of DataPoints
+     * @param sendData 
+     *          Indicates whether to send the data to event handlers.
+     *          The default behavior is true. If false, the calling method
+     *          should call sendDataToEventHandlers directly afterwards.
      * 
      * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
-    public void addData(List availPoints)
+    public void addData(List availPoints, boolean sendData)
     {
         if (availPoints == null || availPoints.size() == 0) {
             return;
@@ -724,9 +741,11 @@ public class AvailabilityManagerEJBImpl
         }
         ConcurrentStatsCollector.getInstance().addStat(
             availPoints.size(), AVAIL_MANAGER_METRICS_INSERTED);
-        begin = getDebugTime(debug);
-        sendDataToEventHandlers(availPoints);
-        debugTimes(begin, "sendDataToEventHandlers", availPoints.size());
+        if (sendData) {
+            begin = getDebugTime(debug);
+            sendDataToEventHandlers(availPoints);
+            debugTimes(begin, "sendDataToEventHandlers", availPoints.size());
+        }
     }
 
     private void flushCreateAndRemoves() {
@@ -1240,7 +1259,7 @@ public class AvailabilityManagerEJBImpl
 	        }
         }
     }
-    
+
     private void sendDataToEventHandlers(List data) {
         ArrayList events  = new ArrayList();
         List zevents = new ArrayList();
@@ -1254,11 +1273,9 @@ public class AvailabilityManagerEJBImpl
             MetricValue val = dp.getMetricValue();
             MeasurementEvent event = new MeasurementEvent(metricId, val);
 
-            if (RegisteredTriggers.isTriggerInterested(event) ||
-                    allEventsInteresting) {
-                if (!suppressAvailabilityDataPoint(dp)) {
-                    events.add(event);
-                }
+            if (RegisteredTriggers.isTriggerInterested(event)
+                    || allEventsInteresting) {
+                events.add(event);
             }
 
             zevents.add(new MeasurementZevent(metricId.intValue(), val));
@@ -1273,20 +1290,57 @@ public class AvailabilityManagerEJBImpl
             ZeventManager.getInstance().enqueueEventsAfterCommit(zevents);
         }
     }
-    
+
     /**
-     * Determine whether the availability data point can
-     * be suppressed as part of hierarchical alerting
+     * This method should only be called by the AvailabilityCheckService
+     * and is used to filter availability data points based on
+     * hierarchical alerting rules.
+     * 
+     * @ejb:interface-method
      */
-    private boolean suppressAvailabilityDataPoint(DataPoint dp) {
-        // only consider availability "DOWN" data point for suppression
-        if (dp.getMetricValue().getValue() != AVAIL_DOWN) {
-            return false;
-        }
+    public void sendDataToEventHandlers(Map data) {
+        Map events  = new HashMap();
+        List zevents = new ArrayList();
+
+        boolean allEventsInteresting = 
+            Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
+
+        Integer resourceIdKey = null;
+        DataPoint dp = null;
+        Integer metricId = null;
+        MetricValue val = null;
+        MeasurementEvent event = null;
         
-        return PermissionManagerFactory.getInstance()
-                    .getHierarchicalAlertingManager()
-                        .suppressAvailabilityDataPoint(dp);
+        for (Iterator i = data.keySet().iterator(); i.hasNext();) {
+            resourceIdKey = (Integer) i.next();
+            dp = (DataPoint) data.get(resourceIdKey);
+            metricId = dp.getMetricId();
+            val = dp.getMetricValue();
+            event = new MeasurementEvent(metricId, val);
+
+            if (RegisteredTriggers.isTriggerInterested(event)
+                    || allEventsInteresting) {
+                events.put(resourceIdKey, event);
+            }
+
+            zevents.add(new MeasurementZevent(metricId.intValue(), val));
+        }
+
+        if (!events.isEmpty()) {
+            // Determine whether the measurement events can
+            // be suppressed as part of hierarchical alerting
+            PermissionManagerFactory.getInstance()
+                .getHierarchicalAlertingManager()
+                    .suppressMeasurementEvents(events);
+
+            Messenger sender = new Messenger();
+            sender.publishMessage(EventConstants.EVENTS_TOPIC, 
+                                  new ArrayList(events.values()));
+        }
+
+        if (!zevents.isEmpty()) {
+            ZeventManager.getInstance().enqueueEventsAfterCommit(zevents);
+        }
     }
     
     private Measurement getMeasurement(Integer mId) {

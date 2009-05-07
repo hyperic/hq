@@ -210,11 +210,15 @@ public class AvailabilityCheckService
             // associated AVAIL_UP value from the agent.
             // The code must be extremely efficient or else it will have
             // a big impact on the performance of availability insertion.
+            Map backfillPoints = null;
             synchronized (cache) {
                 Map downPlatforms = getDownPlatforms(lDate);
-                List backfillList = getBackfillPts(downPlatforms, current);
-                backfillAvails(backfillList);
+                backfillPoints = getBackfillPts(downPlatforms, current);
+                backfillAvails(new ArrayList(backfillPoints.values()));
             }
+            // send data to event handlers outside of synchronized block
+            AvailabilityManagerEJBImpl.getOne()
+                .sendDataToEventHandlers(backfillPoints);
         } finally {
             synchronized (IS_RUNNING_LOCK) {
                 _isRunning = false;
@@ -237,16 +241,18 @@ public class AvailabilityCheckService
                     (backfillList.size() - i) + " remaining");
             }
             int end = Math.min(i + batchSize, backfillList.size());
-            availMan.addData(backfillList.subList(i, end));
+            // use this method signature to not send data to event handlers from here.
+            // send it outside the synchronized cache block from the calling method
+            availMan.addData(backfillList.subList(i, end), false);
         }
     }
 
-    private List getBackfillPts(Map downPlatforms, long current) {
+    private Map getBackfillPts(Map downPlatforms, long current) {
         final boolean debug = _log.isDebugEnabled();
         final AvailabilityManagerLocal availMan =
             AvailabilityManagerEJBImpl.getOne();
         final AvailabilityCache cache = AvailabilityCache.getInstance();
-        final List rtn = new ArrayList();
+        final Map rtn = new HashMap();
         final List resourceIds = new ArrayList(downPlatforms.keySet());
         final Map rHierarchy = availMan.getAvailMeasurementChildren(
             resourceIds, AuthzConstants.ResourceEdgeContainmentRelation);
@@ -259,11 +265,11 @@ public class AvailabilityCheckService
                            " with timestamp = " +
                            TimeUtil.toString(rdp.getTimestamp()));
             }
-            rtn.add(rdp);
+            rtn.put(platform.getId(), rdp);
             final List associatedResources =
                 (List)rHierarchy.get(platform.getId());
             if (debug) {
-                _log.debug("platform id " + platform.getId() + " has " +
+                _log.debug("platform [resource id " + platform.getId() + "] has " +
                     associatedResources.size() + " associated resources");
             }
             for (final Iterator j=associatedResources.iterator(); j.hasNext(); ) {
@@ -288,7 +294,7 @@ public class AvailabilityCheckService
                     new MetricValue(AVAIL_DOWN, backfillTime);
                 final MeasDataPoint point = new MeasDataPoint(
                     meas.getId(), val, meas.getTemplate().isAvailability());
-                rtn.add(point);
+                rtn.put(meas.getResource().getId(), point);
             }
         }
         return rtn;
