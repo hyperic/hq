@@ -49,15 +49,15 @@ import org.hyperic.hq.measurement.server.session.DataPoint;
  */
 public class HierarchicalAlertingManagerEJBImpl 
     implements HierarchicalAlertingManagerInterface, SessionBean
-{
+{   
     /**
-     * Determine whether the availability data point can
+     * Determine whether the measurement events can
      * be suppressed as part of hierarchical alerting
-     *
+     * 
      * @ejb:interface-method
      */
-    public boolean suppressAvailabilityDataPoint(DataPoint dp) {
-        return false;
+    public void suppressMeasurementEvents(Map events) {
+        //
     }
 
     /**

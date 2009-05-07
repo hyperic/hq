@@ -27,16 +27,13 @@ package org.hyperic.hq.events.shared;
 
 import java.util.Map;
 
-import org.hyperic.hq.events.shared.HierarchicalAlertingManagerInterface;
-import org.hyperic.hq.measurement.server.session.DataPoint;
-
 public interface HierarchicalAlertingManagerInterface {
 
     /**
-     * Determine whether the availability data point can
-     * be suppressed as part of hierarchical alerting 
+     * Determine whether the measurement events can
+     * be suppressed as part of hierarchical alerting
      */
-    public boolean suppressAvailabilityDataPoint(DataPoint dp);
+    public void suppressMeasurementEvents(Map events);
     
     /**
      * Perform a simple "secondary" availability check for down platforms.
