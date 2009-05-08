@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -40,7 +40,6 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
@@ -390,15 +389,6 @@ public class AI2AppdefDiff {
                     // Push changes up to platform
                     revisedAIplatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
                     addDiff(revisedAIplatform, AIQueueConstants.Q_PLATFORM_SERVERS_CHANGED);
-                }
-                if (!scannedServer.getName().equals(appdefServer.getName())) {
-                    // Name has changed
-                    scannedServer.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
-                    addDiff(scannedServer, AIQueueConstants.Q_SERVER_NAME_CHANGED);
-
-                    // Push changes up to platform
-                    revisedAIplatform.setQueueStatus(AIQueueConstants.Q_STATUS_CHANGED);
-                    addDiff(revisedAIplatform, AIQueueConstants.Q_PLATFORM_SERVERS_CHANGED);   
                 }
 
                 AppdefEntityID aID =
