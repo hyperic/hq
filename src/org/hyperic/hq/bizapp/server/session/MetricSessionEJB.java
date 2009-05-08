@@ -30,11 +30,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
@@ -77,8 +75,8 @@ import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
@@ -413,16 +411,23 @@ public class MetricSessionEJB extends BizappSessionEJB {
         final Map data = new HashMap();
         final MeasurementManagerLocal mMan = getMetricManager();
         final ResourceManagerLocal rMan = getResourceManager();
+        final AvailabilityManagerLocal aMan = getAvailManager();
         if (midMap.size() > 0) {
             final List mids = new ArrayList();
             final List aeids = Arrays.asList(ids);
             for (final Iterator it=aeids.iterator(); it.hasNext(); ) {
                 final AppdefEntityID aeid = (AppdefEntityID)it.next();
                 final Resource r = rMan.findResource(aeid);
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
                 Measurement meas;
                 if (null == midMap ||
                     null == (meas = (Measurement)midMap.get(r.getId()))) {
                     meas = mMan.getAvailabilityMeasurement(r);
+                }
+                if (meas == null) {
+                    continue;
                 }
                 MetricValue mv;
                 if (null != availCache &&
@@ -432,8 +437,8 @@ public class MetricSessionEJB extends BizappSessionEJB {
                     mids.add(meas.getId());
                 }
             }
-            data.putAll(getAvailManager().getLastAvail(
-                (Integer[])mids.toArray(new Integer[0])));
+            data.putAll(
+                aMan.getLastAvail((Integer[])mids.toArray(new Integer[0])));
         }
     
         // Organize by agent
