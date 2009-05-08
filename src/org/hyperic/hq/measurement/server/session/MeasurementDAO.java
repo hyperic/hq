@@ -553,6 +553,7 @@ public class MeasurementDAO extends HibernateDAO {
        if (resourceIds.isEmpty()) {
            return Collections.EMPTY_LIST;
        }
+       
        final String sql = new StringBuilder()
            .append("select e.from.id,m from Measurement m ")
            .append("join m.resource.toEdges e ")
@@ -563,13 +564,19 @@ public class MeasurementDAO extends HibernateDAO {
            .append("and r.name = :relationType ")
            .append("and e.from in (:resourceIds) and ")
            .append(ALIAS_CLAUSE).toString();
+
+       // create a new list so that the original list is not modified
+       // and sort the resource ids so that the results are more cacheable
+       final List sortedResourceIds = new ArrayList(resourceIds);
+       Collections.sort(sortedResourceIds);
+
        final HQDialect dialect = Util.getHQDialect();
        final int max = (dialect.getMaxExpressions() <= 0) ?
            Integer.MAX_VALUE : dialect.getMaxExpressions();
-       final List rtn = new ArrayList(resourceIds.size());
-       for (int i=0; i<resourceIds.size(); i+=max) {
-           final int end = Math.min(i+max, resourceIds.size());
-           final List list = resourceIds.subList(i, end);
+       final List rtn = new ArrayList(sortedResourceIds.size());
+       for (int i=0; i<sortedResourceIds.size(); i+=max) {
+           final int end = Math.min(i+max, sortedResourceIds.size());
+           final List list = sortedResourceIds.subList(i, end);
            rtn.addAll(getSession()
                .createQuery(sql)
                .setParameterList("resourceIds", list, new IntegerType())
@@ -608,14 +615,19 @@ public class MeasurementDAO extends HibernateDAO {
            .append(ALIAS_CLAUSE)
            .append("order by e.from.id, e.distance desc ").toString();
 
-       final List rtn = new ArrayList(resourceIds.size());
+       // create a new list so that the original list is not modified
+       // and sort the resource ids so that the results are more cacheable
+       final List sortedResourceIds = new ArrayList(resourceIds);
+       Collections.sort(sortedResourceIds);
+
+       final List rtn = new ArrayList(sortedResourceIds.size());
        final HQDialect dialect = Util.getHQDialect();
        final int max = (dialect.getMaxExpressions() <= 0) ?
                            Integer.MAX_VALUE : dialect.getMaxExpressions();
        
-       for (int i=0; i<resourceIds.size(); i+=max) {
-           final int end = Math.min(i+max, resourceIds.size());
-           final List list = resourceIds.subList(i, end);
+       for (int i=0; i<sortedResourceIds.size(); i+=max) {
+           final int end = Math.min(i+max, sortedResourceIds.size());
+           final List list = sortedResourceIds.subList(i, end);
            rtn.addAll(getSession()
                        .createQuery(sql)
                        .setParameterList("resourceIds", list, new IntegerType())
