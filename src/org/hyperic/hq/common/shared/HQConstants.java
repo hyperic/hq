@@ -78,6 +78,10 @@ public class HQConstants {
     // Are alert notifications globally enabled?
     public static final String AlertNotificationsEnabled =
         "HQ_ALERT_NOTIFICATIONS_ENABLED";
+    
+    // Is hierarchical alerting enabled?
+    public static final String HIERARCHICAL_ALERTING_ENABLED =
+        "HQ_HIERARCHICAL_ALERTING_ENABLED";
 
     public static final String ALERT_THROTTLING_THRESHOLD =
         "HQ_ALERT_THRESHOLD";

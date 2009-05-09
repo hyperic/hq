@@ -147,4 +147,12 @@ public class ServerConfigAudit extends Audit {
         return createAudit(user, "auditMsg.serverConfig.alertNotificationsEnabled", 
                            newVal + "", old + ""); 
     }
+    
+    public static ServerConfigAudit updateHierarchicalAlertingEnabled(AuthzSubject user,
+                                                                      boolean newVal,
+                                                                      boolean old)
+    {
+        return createAudit(user, "auditMsg.serverConfig.hierarchicalAlertingEnabled",
+                           newVal + "", old + "");
+    }
 }

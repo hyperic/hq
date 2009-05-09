@@ -120,39 +120,6 @@
   </tr>
 <!--  /  -->
 
-<!--  GLOBAL ALERT CONFIG TITLE -->
-  <tr>
-    <td colspan="4" class="BlockHeader">
-<tiles:insert definition=".header.tab">  
-  <tiles:put name="tabKey" value="admin.settings.AlertConfigTab"/>  
-</tiles:insert>
-    </td>
-  </tr>
-<!--  /  -->
-
-<!--  GLOBAL ALERT CONFIG CONTENTS -->
-  <tr>
-    <td colspan="4" class="BlockContent"><fmt:message key="admin.settings.RestartNote.Alert"/></td>
-  </tr>
-  <tr>
-    <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
-  </tr>
-  <tr>
-    <td class="BlockLabel"><fmt:message key="admin.settings.AlertsEnabled"/></td>
-    <td class="BlockContent" colspan="3">
-    <html:radio property="alertsAllowed" value="true"/><fmt:message key="ON"/>
-    <html:radio property="alertsAllowed" value="false"/><fmt:message key="OFF"/>
-    </td>
-  </tr>
-  <tr>
-    <td class="BlockLabel"><fmt:message key="admin.settings.AlertNotificationsEnabled"/></td>
-    <td class="BlockContent" colspan="3">
-    <html:radio property="alertNotificationsAllowed" value="true"/><fmt:message key="ON"/>
-    <html:radio property="alertNotificationsAllowed" value="false"/><fmt:message key="OFF"/>
-    </td>
-  </tr>
-<!--  /  -->
-
 <!--  DATA MANAGER CONFIG TITLE -->
   <tr>
     <td colspan="4" class="BlockHeader">
@@ -362,5 +329,42 @@
     </td>
     <td class="BlockLabel" colspan="2" width="30%"></td>
   </tr>
+</table>
+
+<!--  GLOBAL ALERT PROPERTIES SHOULD BE THE LAST SECTION IN THE ORG FORM -->
+
+<table width="100%" cellpadding="0" cellspacing="0" border="0">
+<!--  GLOBAL ALERT CONFIG TITLE -->
+  <tr>
+    <td class="BlockHeader" colspan="2">
+		<tiles:insert definition=".header.tab">  
+  			<tiles:put name="tabKey" value="admin.settings.AlertConfigTab"/>  
+		</tiles:insert>
+    </td>
+  </tr>
+  <tr>
+    <td class="BlockContent" colspan="2"><fmt:message key="admin.settings.RestartNote.Alert"/></td>
+  </tr>
+  <tr>
+    <td class="BlockBottomLine" colspan="2"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>
+  </tr>
+<!--  /  -->
+
+<!--  GLOBAL ALERT CONFIG CONTENTS -->
+  <tr>
+    <td class="BlockLabel" width="30%"><fmt:message key="admin.settings.AlertsEnabled"/></td>
+    <td class="BlockContent" width="70%" style="padding-left: 6px;">
+    	<html:radio property="alertsAllowed" value="true"/><fmt:message key="ON"/>
+    	<html:radio property="alertsAllowed" value="false"/><fmt:message key="OFF"/>
+    </td>
+  </tr>
+  <tr>
+    <td class="BlockLabel" width="30%"><fmt:message key="admin.settings.AlertNotificationsEnabled"/></td>
+    <td class="BlockContent" width="70%" style="padding-left: 6px;">
+    	<html:radio property="alertNotificationsAllowed" value="true"/><fmt:message key="ON"/>
+    	<html:radio property="alertNotificationsAllowed" value="false"/><fmt:message key="OFF"/>
+    </td>
+  </tr>
+<!--  /  -->
 </table>
 

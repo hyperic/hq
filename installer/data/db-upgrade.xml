@@ -9877,6 +9877,12 @@ has already been defined.
       </statement>
     </schema-directSQL>
   </schemaSpec>
+  
+  <schemaSpec version="3.146">
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (66, 'HQ_HIERARCHICAL_ALERTING_ENABLED', 'true', 'true', %%FALSE%%)"/>
+  </schemaSpec>
 </dbupgrade>
 </target>
 </project>

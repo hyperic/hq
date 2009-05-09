@@ -190,7 +190,13 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             ServerConfigAudit.updateAlertNotificationsEnabled(subject,
                                                               newEnabled,
                                                               oldEnabled);
-        }        
+        } else if (key.equals(HQConstants.HIERARCHICAL_ALERTING_ENABLED)) {
+            boolean oldEnabled = oldVal.equals("true");
+            boolean newEnabled = newVal.equals("true");
+            ServerConfigAudit.updateHierarchicalAlertingEnabled(subject,
+                                                                newEnabled,
+                                                                oldEnabled);
+        }
     }
     
     private void createChangeAudits(AuthzSubject subject, Collection allProps, 
