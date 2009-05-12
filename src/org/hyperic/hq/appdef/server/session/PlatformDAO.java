@@ -259,10 +259,10 @@ public class PlatformDAO extends HibernateDAO {
         if (platformName != null && platformName.trim().length() > 0) {
             HQDialect dialect = Util.getHQDialect();
             nameEx = dialect.getRegExSQL("r.sort_name", ":regex", true, false);
-            String fqdnEx = dialect.getRegExSQL("p.fqdn", ":regex", true, false);
 
-            sql += " and (" + fqdnEx + " or " + nameEx + ") ";
+            sql += " and (" + nameEx + ") ";
         }
+        sql += " order by r.sort_name ";
         
         Query query = getSession()
                         .createSQLQuery(sql)
