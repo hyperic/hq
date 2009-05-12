@@ -32,8 +32,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.Query; 
+import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class ResourceEdgeDAO 
@@ -92,6 +97,36 @@ public class ResourceEdgeDAO
                 .setInteger("distance", 0)
                 .setInteger("rel_id", rel.getId().intValue())
                 .list();
+    }
+    
+    Collection findDescendantEdgesByNetworkRelation(List platformTypeIds,
+                                                    String platformName) {
+        String nameEx = null;
+        String sql = "select {e.*} from EAM_RESOURCE_EDGE e " +
+                     " join EAM_RESOURCE r on e.to_id = r.id " +
+                     " join EAM_PLATFORM p on p.resource_id = r.id " +
+                     " where e.rel_id = " + AuthzConstants.RELATION_NETWORK_ID +
+                     " and e.distance != 0 " +
+                     " and p.platform_type_id in (:ids) ";
+
+        if (platformName != null && platformName.trim().length() > 0) {
+            HQDialect dialect = Util.getHQDialect();
+            nameEx = dialect.getRegExSQL("r.sort_name", ":regex", true, false);
+            String fqdnEx = dialect.getRegExSQL("p.fqdn", ":regex", true, false);
+
+            sql += " and (" + fqdnEx + " or " + nameEx + ") ";
+        }
+
+        Query query = getSession()
+                        .createSQLQuery(sql)
+                        .addEntity("e", ResourceEdge.class)
+                        .setParameterList("ids", platformTypeIds, new IntegerType());
+
+        if (nameEx != null) {
+            query.setString("regex", platformName);
+        }
+
+        return query.list();
     }
 
     Collection findAncestorEdges(Resource r, ResourceRelation rel) {

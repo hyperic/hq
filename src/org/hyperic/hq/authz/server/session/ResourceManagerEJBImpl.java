@@ -740,6 +740,17 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * 
      * @ejb:interface-method
      */
+    public Collection findResourceByNetworkRelation(List platformTypeIds,
+                                                    String platformName) {
+        return getResourceEdgeDAO()
+                    .findDescendantEdgesByNetworkRelation(
+                                platformTypeIds, platformName);
+    }
+    
+    /**
+     * 
+     * @ejb:interface-method
+     */
     public void removeResourceNetworkRelation(AuthzSubject subject, Resource parent) 
         throws PermissionException {
         // Make sure user has permission to remove the network map
