@@ -51,6 +51,7 @@ import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
@@ -75,7 +76,7 @@ public class ViewAction extends TilesAction {
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		Integer.valueOf(String.valueOf(session.getAttribute(Constants.SELECTED_DASHBOARD_ID))),
+        		SessionUtils.getIntegerAttribute(session, Constants.SELECTED_DASHBOARD_ID, null),
         		user, aBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         

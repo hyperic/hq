@@ -170,7 +170,7 @@ public class ViewChartFormPrepareAction extends MetricDisplayRangeFormPrepareAct
         WebUser user = SessionUtils.getWebUser(session);
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		Integer.valueOf(String.valueOf(session.getAttribute(Constants.SELECTED_DASHBOARD_ID))),
+        		SessionUtils.getIntegerAttribute(session, Constants.SELECTED_DASHBOARD_ID, null),
         		user, aBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         String userCharts = dashPrefs.getValue(Constants.USER_DASHBOARD_CHARTS);
