@@ -86,10 +86,7 @@
 <c:when test="${resource.entityId.type == SERVICE && resource.server.runtimeAutodiscovery == true}">
 <logic:messagesNotPresent property="name">
     <td width="30%" class="BlockContent">
-      <html:text disabled="${not modifiableName}" size="30" property="name"/><br>
-      <c:if test="${not modifiableName}">
-        <html:hidden property="name"/>
-      </c:if>
+      <html:text size="30" property="name"/><br>
     </td>
 </logic:messagesNotPresent>
 </c:when>

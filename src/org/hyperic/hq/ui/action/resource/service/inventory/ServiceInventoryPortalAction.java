@@ -140,10 +140,6 @@ public class ServiceInventoryPortalAction extends ResourceInventoryPortalAction 
         ServerValue server = ContextUtils.getAppdefBoss(ctx)
             .findServerByService(sessionId.intValue(), service.getId());
         
-        request.setAttribute("modifiableName",
-                             new Boolean(server.getServerType().getVirtual()));
-        
-        
         return null;
     }
 
