@@ -26,7 +26,7 @@
 package org.hyperic.hq.ui;
 
 import java.io.IOException;
-import java.net.URLEncoder;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.servlet.FilterChain;
@@ -41,11 +41,20 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.pages.SignIn;
+import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.ui.server.session.UserDashboardConfig;
+import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
+import org.hyperic.image.widget.ResourceTree;
 import org.hyperic.ui.tapestry.page.PageListing;
+import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.encoding.Base64;
 
 public final class AuthenticationFilter extends BaseFilter {
@@ -64,7 +73,6 @@ public final class AuthenticationFilter extends BaseFilter {
         String servletPath = request.getServletPath(),
                contextPath = request.getContextPath(),
                queryString = request.getQueryString();
-        StringBuffer reqUrl = request.getRequestURL();
 
         if (webUser == null) {
             // See if there is authentication information
@@ -84,28 +92,13 @@ public final class AuthenticationFilter extends BaseFilter {
                     try {
                         webUser = SignIn.loginUser(ctx, user, pass);
                         session.setAttribute(Constants.WEBUSER_SES_ATTR,
-                                             webUser);
+                                webUser);
                     } catch (Exception e) {
                         // Unsuccessful login
                         log.error("Unsuccessful login from " + user);
                         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                         return;
                     }
-                }
-            } else if (queryString != null && queryString.contains("ticket")) {
-                // Parse the query for the ticket
-                String[] tokens = queryString.split("[=&]");
-                String ticket = null;
-                for (int i = 0; i < tokens.length; i += 2) {
-                    if ("ticket".equals(tokens[i])) {
-                        ticket = tokens[i+1];
-                    }
-                }
-                
-                if (ticket != null) {
-                    webUser = SignIn.loginUser(ctx, session, ticket,
-                                               reqUrl.toString());
-                    session.setAttribute(Constants.WEBUSER_SES_ATTR, webUser);
                 }
             }
         }
@@ -136,18 +129,7 @@ public final class AuthenticationFilter extends BaseFilter {
                             queryString == null ? "" : queryString);
                     setCallback(forwardURL.toString(), session);
                 }
-                
-                AuthBoss authBoss = ContextUtils.getAuthBoss(ctx);
-                String casURL = authBoss.getCasURL();
-                
-                String redirectURL;
-                if (casURL != null) {
-                    redirectURL = casURL + "/login?service=" +
-                                  URLEncoder.encode(reqUrl.toString(), "UTF-8");
-                }
-                else {
-                    redirectURL = contextPath + PageListing.SIGN_IN_URL;
-                }
+                String redirectURL = contextPath + PageListing.SIGN_IN_URL;
                 response.sendRedirect(redirectURL);
                 return;
             }
