@@ -7,11 +7,17 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as GroupMan
 import org.hyperic.hq.authz.shared.AuthzConstants
+import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface
+import org.hyperic.hq.authz.shared.PermissionManagerFactory
+import org.hyperic.hq.events.MaintenanceEvent
 
 class ResourceGroupCategory {
     private static groupMan = GroupMan.one
     private static rsrcMan  = RsrcMan.one
-    
+
+    private static MaintenanceEventManagerInterface maintMan =
+        PermissionManagerFactory.getInstance().getMaintenanceEventManager();
+
     static String urlFor(ResourceGroup r, String context) {
         "/Resource.do?eid=${AppdefEntityConstants.APPDEF_TYPE_GROUP}:${r.id}"
     }
@@ -72,5 +78,23 @@ class ResourceGroupCategory {
 
     static void remove(ResourceGroup g, AuthzSubject subject) {
         groupMan.removeResourceGroup(subject, g)
+    }
+
+    static MaintenanceEvent scheduleMaintenance(ResourceGroup g, AuthzSubject subject,
+                                                long start, long end) {
+        MaintenanceEvent e = new MaintenanceEvent(g.getId());
+        e.setStartTime(start)
+        e.setEndTime(end)
+        maintMan.schedule(subject, e)
+    }
+
+    static void unscheduleMaintenance(ResourceGroup g, AuthzSubject subject) {
+        MaintenanceEvent e = new MaintenanceEvent(g.getId());
+        maintMan.unschedule(subject, e)
+    }
+
+    static MaintenanceEvent getMaintenanceEvent(ResourceGroup g,
+                                                AuthzSubject subject) {
+        maintMan.getMaintenanceEvent(subject, g.getId())
     }
 }
