@@ -235,6 +235,11 @@ public class SNMPMeasurementPlugin
         return new MetricUnreachableException(msg, e);
     }
 
+    //e.g. ifOperStatus == 0 == AVAIL_DOWN
+    private boolean isAvail(Metric metric) {
+        return "true".equals(metric.getObjectProperty("Avail"));
+    }
+
     /**
      * @see org.hyperic.hq.product.MeasurementPlugin#getValue
      */
@@ -290,7 +295,12 @@ public class SNMPMeasurementPlugin
             } catch (MIBLookupException e) {
                 throw new MetricInvalidException(e.getMessage());
             } catch (SNMPException e) {
-                throw snmpConnectException(metric, e);
+                if (isAvail(metric)) {
+                    return new MetricValue(Metric.AVAIL_DOWN);
+                }
+                else {
+                    throw snmpConnectException(metric, e);
+                }
             } finally {
                 if (timer != null) {
                     this.log.debug("getValue took: " + timer);
@@ -361,7 +371,12 @@ public class SNMPMeasurementPlugin
                     throw new MetricNotFoundException("Invalid vartype");
                 }
             } catch (SNMPException e) {
-                throw snmpConnectException(metric, e);
+                if (isAvail(metric)) {
+                    return new MetricValue(Metric.AVAIL_DOWN);
+                }
+                else {
+                    throw snmpConnectException(metric, e);
+                }
             } finally {
                 if (timer != null) {
                     this.log.debug("getValue took: " + timer +
@@ -370,8 +385,7 @@ public class SNMPMeasurementPlugin
             }
         }
 
-        //e.g. Airport ifOperStatus == 0 == AVAIL_DOWN
-        if ("true".equals(metric.getObjectProperty("Avail"))) {
+        if (isAvail(metric)) {
             if (value <= 0) {
                 value = Metric.AVAIL_DOWN;
             }
