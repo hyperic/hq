@@ -69,7 +69,6 @@ import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
-import org.hyperic.util.pager.PageList;
 import org.hyperic.util.units.FormattedNumber;
 import org.json.JSONObject;
 
@@ -94,7 +93,7 @@ public class ViewAction extends BaseAction {
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		SessionUtils.getIntegerAttribute(session, Constants.SELECTED_DASHBOARD_ID, null),
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, aBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         

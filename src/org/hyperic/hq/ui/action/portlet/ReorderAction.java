@@ -86,7 +86,7 @@ public class ReorderAction extends BaseAction {
             ordPortlets.append(portlet);
         }
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		SessionUtils.getIntegerAttribute(session, Constants.SELECTED_DASHBOARD_ID, null),
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         // tokenize and reshuffle

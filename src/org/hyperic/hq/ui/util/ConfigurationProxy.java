@@ -61,7 +61,7 @@ public class ConfigurationProxy {
 			AuthzSubject me = boss.findSubjectById(user.getSessionId(), user
 					.getSubject().getId());
 			DashboardConfig dashConfig = DashboardUtils.findDashboard(
-					Integer.valueOf(String.valueOf(session.getAttribute(Constants.SELECTED_DASHBOARD_ID))),
+					(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
 					user, boss);
 			ConfigResponse dashboardConfigResp = dashConfig.getConfig();
 			dashboardConfigResp.setValue(key, value);
@@ -83,7 +83,7 @@ public class ConfigurationProxy {
 		AuthzSubject me = boss.findSubjectById(user.getSessionId(), user
 				.getSubject().getId());
 		DashboardConfig dashConfig = DashboardUtils.findDashboard(
-				SessionUtils.getIntegerAttribute(session, Constants.SELECTED_DASHBOARD_ID, null),
+				(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
 				user, boss);
 		dashManager.configureDashboard(me, dashConfig, dashConfigResp);
 	}

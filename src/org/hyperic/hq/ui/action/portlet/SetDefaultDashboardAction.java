@@ -32,7 +32,7 @@ public class SetDefaultDashboardAction extends BaseAction {
 		// If they aren't equal it means the user is changing it, so update
 		if (!submittedDefaultDashboardId.equals(currentDefaultDashboardId)) {
 			user.setPreference(Constants.DEFAULT_DASHBOARD_ID, dForm.getDefaultDashboard());
-			session.setAttribute(Constants.SELECTED_DASHBOARD_ID, dForm.getDefaultDashboard());
+			session.setAttribute(Constants.SELECTED_DASHBOARD_ID, new Integer(dForm.getDefaultDashboard()));
 			authzBoss.setUserPrefs(user.getSessionId(), user.getSubject().getId(), user.getPreferences());
 		}
 

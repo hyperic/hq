@@ -26,7 +26,6 @@
 package org.hyperic.hq.ui.action.portlet.addcontent;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -46,7 +45,6 @@ import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 /**
@@ -72,7 +70,7 @@ public class ViewAction extends TilesAction {
         HttpSession session = request.getSession();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		SessionUtils.getIntegerAttribute(session, Constants.SELECTED_DASHBOARD_ID, null),
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         List<String> multi;

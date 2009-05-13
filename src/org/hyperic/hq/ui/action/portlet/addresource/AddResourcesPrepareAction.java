@@ -58,7 +58,6 @@ import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
@@ -144,7 +143,7 @@ public class AddResourcesPrepareAction extends Action {
         Integer sessionId = user.getSessionId();
         AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		SessionUtils.getIntegerAttribute(session, Constants.SELECTED_DASHBOARD_ID, null),
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, aBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         

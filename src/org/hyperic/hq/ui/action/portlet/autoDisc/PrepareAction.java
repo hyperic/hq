@@ -42,7 +42,6 @@ import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 public class PrepareAction extends BaseAction {
@@ -68,7 +67,7 @@ public class PrepareAction extends BaseAction {
         WebUser user = RequestUtils.getWebUser(session);
 		AuthzBoss aBoss = ContextUtils.getAuthzBoss(ctx);	
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		SessionUtils.getIntegerAttribute(session, Constants.SELECTED_DASHBOARD_ID, null),
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, aBoss);
 		ConfigResponse dashPrefs = dashConfig.getConfig();
         Integer range =

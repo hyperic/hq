@@ -61,16 +61,18 @@ public class SessionUtils {
 	 * @param defValue the value to return if the key returns a null value
 	 * @return the Integer value in the session otherwise the defaultValue if null
 	 */
-	public static Integer getIntegerAttribute(HttpSession session, String key, Integer defValue) {
+	public static Integer getIntegerAttribute(HttpSession session, String key,
+			Integer defValue) {
 		try{
-			return Integer.valueOf(String.valueOf(session.getAttribute(Constants.SELECTED_DASHBOARD_ID)));
+			Integer value = (Integer) session.getAttribute(key);
+			if (value == null)
+				return defValue;
+			return value;
 		} catch (ClassCastException cce){
-			return defValue;
-		} catch (NumberFormatException nfe) {
 			return defValue;
 		}
 	}
-	
+		
 	/**
 	 * 
 	 * @param key the attribute key requested

@@ -43,7 +43,6 @@ import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 
 public class RemovePortletAction extends BaseAction {
@@ -60,7 +59,7 @@ public class RemovePortletAction extends BaseAction {
         WebUser user = RequestUtils.getWebUser(session);
         String portletName = (String) request.getParameter(Constants.REM_PORTLET_PARAM);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		SessionUtils.getIntegerAttribute(session, Constants.SELECTED_DASHBOARD_ID, null),
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         

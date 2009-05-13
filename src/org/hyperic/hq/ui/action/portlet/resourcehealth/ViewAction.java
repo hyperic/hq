@@ -26,7 +26,6 @@
 package org.hyperic.hq.ui.action.portlet.resourcehealth;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -76,7 +75,7 @@ public class ViewAction extends BaseAction {
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
         DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		SessionUtils.getIntegerAttribute(session, Constants.SELECTED_DASHBOARD_ID, null),
+        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
         		user, aBoss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
         
