@@ -169,6 +169,20 @@ public class AvailabilityManagerEJBImpl
     }
 
     /**
+     * @ejb:interface-method
+     */
+    public List getAvailMeasurementChildren(Resource resource,
+                                            String resourceRelationType) {
+        final List sList = Collections.singletonList(resource.getId());
+        List rtn = (List) getAvailMeasurementChildren(sList, resourceRelationType)
+                                    .get(resource.getId());
+        if (rtn == null) {
+            rtn = Collections.EMPTY_LIST;
+        }
+        return rtn;
+    }
+    
+    /**
      * @param {@link List} of {@link Integer} resource ids
      * @return {@link Map} of {@link Integer} to {@link List} of
      * {@link Measurement}
