@@ -266,8 +266,14 @@ public class AvailabilityCheckService
                            TimeUtil.toString(rdp.getTimestamp()));
             }
             rtn.put(platform.getId(), rdp);
-            final List associatedResources =
-                (List)rHierarchy.get(platform.getId());
+            if (rdp.getValue() != AVAIL_DOWN) {
+                // platform may be paused, so skip pausing its children
+                continue;
+            }
+            final List associatedResources = (List)rHierarchy.get(platform.getId());
+            if (associatedResources == null) {
+                continue;
+            }
             if (debug) {
                 _log.debug("platform [resource id " + platform.getId() + "] has " +
                     associatedResources.size() + " associated resources");
