@@ -25,8 +25,8 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 	private static final String PROCESS_DIR = "/libexec";
 	private static final String ZMSTATS_DIR = "zmstat";
 	private static final String PTQL_QUERY = "State.Name.eq={0}";
-	private static final String PROCESS_PID_QUERY = "Pid.PidFile.eq={0}";
-	private static final String PROCESS_EXEC = "Exe.Name.eq={0}";
+	private static final String PROCESS_PID_QUERY = "Pid.SudoPidFile.eq={0}";
+	private static final String PROCESS_EXEC = "State.Name.eq={0}";
 	// private static final String PROCESS_CHILD_QUERY = "State.Ppid.eq={0,number,#}";
 
 	private static Log log = LogFactory.getLog(ZimbraServerDetector.class);
@@ -107,7 +107,7 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 
 				services.add(service);
 			} else {
-				log.info("'" + serviceSata[0] + "(" + serviceSata[1] + ")' not found");
+				log.debug("OTHER_SERVICES '" + serviceSata[0] + "(" + serviceSata[1] + ")' not found");
 			}
 		}
 
@@ -134,7 +134,7 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 
 				services.add(service);
 			} else {
-				log.info("'" + serviceSata[0] + "(" + serviceSata[1] + ")' not found");
+				log.debug("SERVICES '" + serviceSata[0] + "(" + serviceSata[1] + ")' not found");
 			}
 		}
 
@@ -143,7 +143,9 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 			File pidFile = new File(config.getValue("installpath"), serviceSata[1]);
 			log.debug("pidFile='" + pidFile + "'");
 			String args[] = { pidFile.getAbsolutePath() };
-			long[] pids = getPids(MessageFormat.format(PROCESS_PID_QUERY, args));
+            String pQuery=MessageFormat.format(PROCESS_PID_QUERY, args);
+            log.debug("pQuery --> '"+pQuery+"'");
+			long[] pids = getPids(pQuery);
 			if (pids.length > 0) {
 				long pid = pids[0];
 				String exec = getProcExe(pid);
@@ -155,7 +157,7 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 				service.setDescription(pidFile.getAbsolutePath());
 
 				ConfigResponse props = new ConfigResponse();
-				String[] args2 = { exec };
+				String[] args2 = { new File(exec).getName() };
 				props.setValue("process.query", MessageFormat.format(PROCESS_EXEC, args2));
 				setProductConfig(service, props);
 
@@ -164,7 +166,7 @@ public class ZimbraServerDetector extends ServerDetector implements AutoServerDe
 
 				services.add(service);
 			} else {
-				log.info("'" + serviceSata[0] + "(" + serviceSata[1] + ")' not found");
+				log.debug("MULTI_SERVICES '" + serviceSata[0] + "(" + serviceSata[1] + ")' not found");
 			}
 		}
 

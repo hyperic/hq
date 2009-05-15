@@ -93,7 +93,7 @@ USA.
         
         <service name="Postfix">
             <config>
-                <option name="process.query" default="Pid.PidFile.eq=%installpath%/postfix/spool/pid/master.pid" description="PTQL for Zimbra Apache Httpd"/>
+                <option name="process.query" default="Pid.SudoPidFile.eq=%installpath%/postfix/spool/pid/master.pid" description="PTQL for Zimbra Apache Httpd"/>
             </config>
             <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
             &process-metrics;
@@ -358,7 +358,7 @@ USA.
         <service name="AMaViS">
             <config>
                 <option name="process.query"
-                 default="Pid.PidFile.eq=%installpath%/log/amavisd.pid"
+                 default="Pid.SudoPidFile.eq=%installpath%/log/amavisd.pid"
                  description="PTQL for Zimbra AMaViS"/>
             </config>
             <metric name="Availability"
@@ -427,7 +427,428 @@ USA.
         
     </server>
 
-    
+    <filter name="template_mailboxd" value="zimbra-stats:statsfile=%installpath%/zmstat/mailboxd.csv:${alias}"/>
+    <filter name="template_mysql" value="zimbra-stats:statsfile=%installpath%/zmstat/mysql.csv:${alias}"/>
+    <filter name="template_cpu" value="zimbra-stats:statsfile=%installpath%/zmstat/cpu.csv:${alias}"/>
+    <filter name="template_mtaqueue" value="zimbra-stats:statsfile=%installpath%/zmstat/mtaqueue.csv:${alias}"/>
+    <filter name="template_threads" value="zimbra-stats:statsfile=%installpath%/zmstat/threads.csv:${alias}"/>
+    <filter name="template_vm" value="zimbra-stats:statsfile=%installpath%/zmstat/vm.csv:${alias}"/>
+
+    <metrics name="Zimbra 5.0.x">
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=%zimbra-ptql%:State" indicator="true"/>
+        &process-metrics;
+        <metric name="timestamp" template="${template_mailboxd}" category="THROUGHPUT" alias="timestamp" interval="60000" indicator="false"/>
+        <metric name="lmtp_rcvd_msgs" template="${template_mailboxd}" category="THROUGHPUT" alias="lmtp_rcvd_msgs" interval="60000" indicator="true" collectionType="trendsup"/>
+        <metric name="lmtp_rcvd_bytes" template="${template_mailboxd}" category="THROUGHPUT" alias="lmtp_rcvd_bytes" interval="60000" indicator="true" collectionType="trendsup"/>
+        <metric name="lmtp_rcvd_rcpt" template="${template_mailboxd}" category="THROUGHPUT" alias="lmtp_rcvd_rcpt" interval="60000" indicator="true" collectionType="trendsup"/>
+        <metric name="lmtp_dlvd_msgs" template="${template_mailboxd}" category="THROUGHPUT" alias="lmtp_dlvd_msgs" interval="60000" indicator="true" collectionType="trendsup"/>
+        <metric name="lmtp_dlvd_bytes" template="${template_mailboxd}" category="THROUGHPUT" alias="lmtp_dlvd_bytes" interval="60000" indicator="true" collectionType="trendsup"/>
+        <metric name="db_conn_count" template="${template_mailboxd}" category="THROUGHPUT" alias="db_conn_count" interval="60000" indicator="false"/>
+        <metric name="db_conn_ms_avg" template="${template_mailboxd}" category="THROUGHPUT" alias="db_conn_ms_avg" interval="60000" indicator="false"/>
+        <metric name="ldap_dc_count" template="${template_mailboxd}" category="THROUGHPUT" alias="ldap_dc_count" interval="60000" indicator="false"/>
+        <metric name="ldap_dc_ms_avg" template="${template_mailboxd}" category="THROUGHPUT" alias="ldap_dc_ms_avg" interval="60000" indicator="false"/>
+        <metric name="mbox_add_msg_count" template="${template_mailboxd}" category="THROUGHPUT" alias="mbox_add_msg_count" interval="60000" indicator="false"/>
+        <metric name="mbox_add_msg_ms_avg" template="${template_mailboxd}" category="THROUGHPUT" alias="mbox_add_msg_ms_avg" interval="60000" indicator="false"/>
+        <metric name="mbox_get_count" template="${template_mailboxd}" category="THROUGHPUT" alias="mbox_get_count" interval="60000" indicator="false"/>
+        <metric name="mbox_get_ms_avg" template="${template_mailboxd}" category="THROUGHPUT" alias="mbox_get_ms_avg" interval="60000" indicator="false"/>
+        <metric name="mbox_cache" template="${template_mailboxd}" category="THROUGHPUT" alias="mbox_cache" interval="60000" indicator="false"/>
+        <metric name="mbox_msg_cache" template="${template_mailboxd}" category="THROUGHPUT" alias="mbox_msg_cache" interval="60000" indicator="false"/>
+        <metric name="mbox_item_cache" template="${template_mailboxd}" category="THROUGHPUT" alias="mbox_item_cache" interval="60000" indicator="false"/>
+        <metric name="soap_count" template="${template_mailboxd}" category="THROUGHPUT" alias="soap_count" interval="60000" indicator="false"/>
+        <metric name="soap_ms_avg" template="${template_mailboxd}" category="THROUGHPUT" alias="soap_ms_avg" interval="60000" indicator="false"/>
+        <metric name="imap_count" template="${template_mailboxd}" category="THROUGHPUT" alias="imap_count" interval="60000" indicator="false"/>
+        <metric name="imap_ms_avg" template="${template_mailboxd}" category="THROUGHPUT" alias="imap_ms_avg" interval="60000" indicator="false"/>
+        <metric name="pop_count" template="${template_mailboxd}" category="THROUGHPUT" alias="pop_count" interval="60000" indicator="false"/>
+        <metric name="pop_ms_avg" template="${template_mailboxd}" category="THROUGHPUT" alias="pop_ms_avg" interval="60000" indicator="false"/>
+        <metric name="idx_wrt_avg" template="${template_mailboxd}" category="THROUGHPUT" alias="idx_wrt_avg" interval="60000" indicator="false"/>
+        <metric name="idx_wrt_opened" template="${template_mailboxd}" category="THROUGHPUT" alias="idx_wrt_opened" interval="60000" indicator="false"/>
+        <metric name="idx_wrt_opened_cache_hit" template="${template_mailboxd}" category="THROUGHPUT" alias="idx_wrt_opened_cache_hit" interval="60000" indicator="false"/>
+        <metric name="calcache_hit" template="${template_mailboxd}" category="THROUGHPUT" alias="calcache_hit" interval="60000" indicator="false"/>
+        <metric name="calcache_mem_hit" template="${template_mailboxd}" category="THROUGHPUT" alias="calcache_mem_hit" interval="60000" indicator="false"/>
+        <metric name="calcache_lru_size" template="${template_mailboxd}" category="THROUGHPUT" alias="calcache_lru_size" interval="60000" indicator="false"/>
+        <metric name="idx_bytes_written" template="${template_mailboxd}" category="THROUGHPUT" alias="idx_bytes_written" interval="60000" indicator="false"/>
+        <metric name="idx_bytes_written_avg" template="${template_mailboxd}" category="THROUGHPUT" alias="idx_bytes_written_avg" interval="60000" indicator="false"/>
+        <metric name="idx_bytes_read" template="${template_mailboxd}" category="THROUGHPUT" alias="idx_bytes_read" interval="60000" indicator="false"/>
+        <metric name="idx_bytes_read_avg" template="${template_mailboxd}" category="THROUGHPUT" alias="idx_bytes_read_avg" interval="60000" indicator="false"/>
+        <metric name="bis_read" template="${template_mailboxd}" category="THROUGHPUT" alias="bis_read" interval="60000" indicator="false"/>
+        <metric name="bis_seek_rate" template="${template_mailboxd}" category="THROUGHPUT" alias="bis_seek_rate" interval="60000" indicator="false"/>
+        <metric name="db_pool_size" template="${template_mailboxd}" category="THROUGHPUT" alias="db_pool_size" interval="60000" indicator="false"/>
+        <metric name="innodb_bp_hit_rate" template="${template_mailboxd}" category="THROUGHPUT" alias="innodb_bp_hit_rate" interval="60000" indicator="false"/>
+        <metric name="pop_conn" template="${template_mailboxd}" category="THROUGHPUT" alias="pop_conn" interval="60000" indicator="false"/>
+        <metric name="pop_ssl_conn" template="${template_mailboxd}" category="THROUGHPUT" alias="pop_ssl_conn" interval="60000" indicator="false"/>
+        <metric name="imap_conn" template="${template_mailboxd}" category="THROUGHPUT" alias="imap_conn" interval="60000" indicator="false"/>
+        <metric name="imap_ssl_conn" template="${template_mailboxd}" category="THROUGHPUT" alias="imap_ssl_conn" interval="60000" indicator="false"/>
+        <metric name="soap_sessions" template="${template_mailboxd}" category="THROUGHPUT" alias="soap_sessions" interval="60000" indicator="false"/>
+        <metric name="gc_copy_count" template="${template_mailboxd}" category="THROUGHPUT" alias="gc_copy_count" interval="60000" indicator="false"/>
+        <metric name="gc_copy_ms" template="${template_mailboxd}" category="THROUGHPUT" alias="gc_copy_ms" interval="60000" indicator="false"/>
+        <metric name="gc_marksweepcompact_count" template="${template_mailboxd}" category="THROUGHPUT" alias="gc_marksweepcompact_count" interval="60000" indicator="false"/>
+        <metric name="gc_marksweepcompact_ms" template="${template_mailboxd}" category="THROUGHPUT" alias="gc_marksweepcompact_ms" interval="60000" indicator="false"/>
+        <metric name="gc_minor_count" template="${template_mailboxd}" category="THROUGHPUT" alias="gc_minor_count" interval="60000" indicator="false"/>
+        <metric name="gc_minor_ms" template="${template_mailboxd}" category="THROUGHPUT" alias="gc_minor_ms" interval="60000" indicator="false"/>
+        <metric name="gc_major_count" template="${template_mailboxd}" category="THROUGHPUT" alias="gc_major_count" interval="60000" indicator="false"/>
+        <metric name="gc_major_ms" template="${template_mailboxd}" category="THROUGHPUT" alias="gc_major_ms" interval="60000" indicator="false"/>
+        <metric name="mpool_code_cache_used" template="${template_mailboxd}" category="THROUGHPUT" alias="mpool_code_cache_used" interval="60000" indicator="false"/>
+        <metric name="mpool_code_cache_free" template="${template_mailboxd}" category="THROUGHPUT" alias="mpool_code_cache_free" interval="60000" indicator="false"/>
+        <metric name="mpool_eden_space_used" template="${template_mailboxd}" category="THROUGHPUT" alias="mpool_eden_space_used" interval="60000" indicator="false"/>
+        <metric name="mpool_eden_space_free" template="${template_mailboxd}" category="THROUGHPUT" alias="mpool_eden_space_free" interval="60000" indicator="false"/>
+        <metric name="mpool_survivor_space_used" template="${template_mailboxd}" category="THROUGHPUT" alias="mpool_survivor_space_used" interval="60000" indicator="false"/>
+        <metric name="mpool_survivor_space_free" template="${template_mailboxd}" category="THROUGHPUT" alias="mpool_survivor_space_free" interval="60000" indicator="false"/>
+        <metric name="mpool_tenured_gen_used" template="${template_mailboxd}" category="THROUGHPUT" alias="mpool_tenured_gen_used" interval="60000" indicator="false"/>
+        <metric name="mpool_tenured_gen_free" template="${template_mailboxd}" category="THROUGHPUT" alias="mpool_tenured_gen_free" interval="60000" indicator="false"/>
+        <metric name="mpool_perm_gen_used" template="${template_mailboxd}" category="THROUGHPUT" alias="mpool_perm_gen_used" interval="60000" indicator="false"/>
+        <metric name="mpool_perm_gen_free" template="${template_mailboxd}" category="THROUGHPUT" alias="mpool_perm_gen_free" interval="60000" indicator="false"/>
+        <metric name="heap_used" template="${template_mailboxd}" category="THROUGHPUT" alias="heap_used" interval="60000" indicator="false"/>
+        <metric name="heap_free" template="${template_mailboxd}" category="THROUGHPUT" alias="heap_free" interval="60000" indicator="false"/>
+    </metrics>
+
+    <metrics name="Zimbra 5.0.x VM Stats">
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=%vm-stat-ptql%:State" indicator="true"/>
+        <metric name="timestamp" template="${template_vm}" category="THROUGHPUT" alias="timestamp" interval="60000" indicator="false"/>
+        <metric name="r" template="${template_vm}" category="THROUGHPUT" alias="__r" interval="60000" indicator="false"/>
+        <metric name="b" template="${template_vm}" category="THROUGHPUT" alias="__b" interval="60000" indicator="false"/>
+        <metric name="swpd" template="${template_vm}" category="THROUGHPUT" alias="swpd" interval="60000" indicator="false"/>
+        <metric name="free" template="${template_vm}" category="THROUGHPUT" alias="free" interval="60000" indicator="false"/>
+        <metric name="buff" template="${template_vm}" category="THROUGHPUT" alias="buff" interval="60000" indicator="false"/>
+        <metric name="cache" template="${template_vm}" category="THROUGHPUT" alias="cache" interval="60000" indicator="false"/>
+        <metric name="si" template="${template_vm}" category="THROUGHPUT" alias="__si" interval="60000" indicator="false"/>
+        <metric name="so" template="${template_vm}" category="THROUGHPUT" alias="__so" interval="60000" indicator="false"/>
+        <metric name="bi" template="${template_vm}" category="THROUGHPUT" alias="__bi" interval="60000" indicator="false"/>
+        <metric name="bo" template="${template_vm}" category="THROUGHPUT" alias="__bo" interval="60000" indicator="false"/>
+        <metric name="in" template="${template_vm}" category="THROUGHPUT" alias="__in" interval="60000" indicator="false"/>
+        <metric name="cs" template="${template_vm}" category="THROUGHPUT" alias="__cs" interval="60000" indicator="false"/>
+        <metric name="us" template="${template_vm}" category="THROUGHPUT" alias="__us" interval="60000" indicator="false"/>
+        <metric name="sy" template="${template_vm}" category="THROUGHPUT" alias="__sy" interval="60000" indicator="false"/>
+        <metric name="id" template="${template_vm}" category="THROUGHPUT" alias="__id" interval="60000" indicator="false"/>
+        <metric name="wa" template="${template_vm}" category="THROUGHPUT" alias="__wa" interval="60000" indicator="false"/>
+        <metric name="st" template="${template_vm}" category="THROUGHPUT" alias="__st" interval="60000" indicator="false"/>
+        <metric name="MemTotal" template="${template_vm}" category="THROUGHPUT" alias="MemTotal" interval="60000" indicator="false"/>
+        <metric name="MemFree" template="${template_vm}" category="THROUGHPUT" alias="MemFree" interval="60000" indicator="false"/>
+        <metric name="Buffers" template="${template_vm}" category="THROUGHPUT" alias="Buffers" interval="60000" indicator="false"/>
+        <metric name="Cached" template="${template_vm}" category="THROUGHPUT" alias="Cached" interval="60000" indicator="false"/>
+        <metric name="SwapCached" template="${template_vm}" category="THROUGHPUT" alias="SwapCached" interval="60000" indicator="false"/>
+        <metric name="Active" template="${template_vm}" category="THROUGHPUT" alias="Active" interval="60000" indicator="false"/>
+        <metric name="Inactive" template="${template_vm}" category="THROUGHPUT" alias="Inactive" interval="60000" indicator="false"/>
+        <metric name="HighTotal" template="${template_vm}" category="THROUGHPUT" alias="HighTotal" interval="60000" indicator="false"/>
+        <metric name="HighFree" template="${template_vm}" category="THROUGHPUT" alias="HighFree" interval="60000" indicator="false"/>
+        <metric name="LowTotal" template="${template_vm}" category="THROUGHPUT" alias="LowTotal" interval="60000" indicator="false"/>
+        <metric name="LowFree" template="${template_vm}" category="THROUGHPUT" alias="LowFree" interval="60000" indicator="false"/>
+        <metric name="SwapTotal" template="${template_vm}" category="THROUGHPUT" alias="SwapTotal" interval="60000" indicator="false"/>
+        <metric name="SwapFree" template="${template_vm}" category="THROUGHPUT" alias="SwapFree" interval="60000" indicator="false"/>
+        <metric name="Dirty" template="${template_vm}" category="THROUGHPUT" alias="Dirty" interval="60000" indicator="false"/>
+        <metric name="Writeback" template="${template_vm}" category="THROUGHPUT" alias="Writeback" interval="60000" indicator="false"/>
+        <metric name="AnonPages" template="${template_vm}" category="THROUGHPUT" alias="AnonPages" interval="60000" indicator="false"/>
+        <metric name="Mapped" template="${template_vm}" category="THROUGHPUT" alias="Mapped" interval="60000" indicator="false"/>
+        <metric name="Slab" template="${template_vm}" category="THROUGHPUT" alias="Slab" interval="60000" indicator="false"/>
+        <metric name="PageTables" template="${template_vm}" category="THROUGHPUT" alias="PageTables" interval="60000" indicator="false"/>
+        <metric name="NFS_Unstable" template="${template_vm}" category="THROUGHPUT" alias="NFS_Unstable" interval="60000" indicator="false"/>
+        <metric name="Bounce" template="${template_vm}" category="THROUGHPUT" alias="Bounce" interval="60000" indicator="false"/>
+        <metric name="CommitLimit" template="${template_vm}" category="THROUGHPUT" alias="CommitLimit" interval="60000" indicator="false"/>
+        <metric name="Committed_AS" template="${template_vm}" category="THROUGHPUT" alias="Committed_AS" interval="60000" indicator="false"/>
+        <metric name="VmallocTotal" template="${template_vm}" category="THROUGHPUT" alias="VmallocTotal" interval="60000" indicator="false"/>
+        <metric name="VmallocUsed" template="${template_vm}" category="THROUGHPUT" alias="VmallocUsed" interval="60000" indicator="false"/>
+        <metric name="VmallocChunk" template="${template_vm}" category="THROUGHPUT" alias="VmallocChunk" interval="60000" indicator="false"/>
+        <metric name="HugePages_Total" template="${template_vm}" category="THROUGHPUT" alias="HugePages_Total" interval="60000" indicator="false"/>
+        <metric name="HugePages_Free" template="${template_vm}" category="THROUGHPUT" alias="HugePages_Free" interval="60000" indicator="false"/>
+        <metric name="HugePages_Rsvd" template="${template_vm}" category="THROUGHPUT" alias="HugePages_Rsvd" interval="60000" indicator="false"/>
+        <metric name="Hugepagesize" template="${template_vm}" category="THROUGHPUT" alias="Hugepagesize" interval="60000" indicator="false"/>
+        <metric name="loadavg" template="${template_vm}" category="THROUGHPUT" alias="loadavg" interval="60000" indicator="false"/>
+    </metrics>
+
+    <metrics name="Zimbra 5.0.x Jetty Process">
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
+            &process-metrics;
+        <metric name="btpool" template="${template_threads}" category="THROUGHPUT" alias="btpool" interval="60000" indicator="false"/>
+        <metric name="pool" template="${template_threads}" category="THROUGHPUT" alias="pool" interval="60000" indicator="false"/>
+        <metric name="LmtpHandler" template="${template_threads}" category="THROUGHPUT" alias="LmtpHandler" interval="60000" indicator="false"/>
+        <metric name="ImapHandler" template="${template_threads}" category="THROUGHPUT" alias="ImapHandler" interval="60000" indicator="false"/>
+        <metric name="Pop3Handler" template="${template_threads}" category="THROUGHPUT" alias="Pop3Handler" interval="60000" indicator="false"/>
+        <metric name="ScheduledTask" template="${template_threads}" category="THROUGHPUT" alias="ScheduledTask" interval="60000" indicator="false"/>
+        <metric name="Timer" template="${template_threads}" category="THROUGHPUT" alias="Timer" interval="60000" indicator="false"/>
+        <metric name="AnonymousIoService" template="${template_threads}" category="THROUGHPUT" alias="AnonymousIoService" interval="60000" indicator="false"/>
+        <metric name="FLAP processor" template="${template_threads}" category="THROUGHPUT" alias="FLAP processor" interval="60000" indicator="false"/>
+        <metric name="GC" template="${template_threads}" category="THROUGHPUT" alias="__GC" interval="60000" indicator="false"/>
+        <metric name="SocketAcceptor" template="${template_threads}" category="THROUGHPUT" alias="SocketAcceptor" interval="60000" indicator="false"/>
+        <metric name="Thread" template="${template_threads}" category="THROUGHPUT" alias="Thread" interval="60000" indicator="false"/>
+        <metric name="other" template="${template_threads}" category="THROUGHPUT" alias="other" interval="60000" indicator="false"/>
+        <metric name="total" template="${template_threads}" category="THROUGHPUT" alias="total" interval="60000" indicator="false"/>
+    </metrics>
+
+    <metrics name="Zimbra 5.0.x Convertd Monitor">
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
+            &process-metrics;
+    </metrics>
+
+    <metrics name="Zimbra 5.0.x memcached">
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
+            &process-metrics;
+    </metrics>
+
+    <metrics name="Zimbra 5.0.x MySQL">
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
+        <metric name="Aborted_clients" template="${template_mysql}" category="THROUGHPUT" alias="Aborted_clients" interval="60000" indicator="false"/>
+        <metric name="Aborted_connects" template="${template_mysql}" category="THROUGHPUT" alias="Aborted_connects" interval="60000" indicator="false"/>
+        <metric name="Binlog_cache_disk_use" template="${template_mysql}" category="THROUGHPUT" alias="Binlog_cache_disk_use" interval="60000" indicator="false"/>
+        <metric name="Binlog_cache_use" template="${template_mysql}" category="THROUGHPUT" alias="Binlog_cache_use" interval="60000" indicator="false"/>
+        <metric name="Bytes_received" template="${template_mysql}" category="THROUGHPUT" alias="Bytes_received" interval="60000" indicator="false"/>
+        <metric name="Bytes_sent" template="${template_mysql}" category="THROUGHPUT" alias="Bytes_sent" interval="60000" indicator="false"/>
+        <metric name="Com_admin_commands" template="${template_mysql}" category="THROUGHPUT" alias="Com_admin_commands" interval="60000" indicator="false"/>
+        <metric name="Com_alter_db" template="${template_mysql}" category="THROUGHPUT" alias="Com_alter_db" interval="60000" indicator="false"/>
+        <metric name="Com_alter_table" template="${template_mysql}" category="THROUGHPUT" alias="Com_alter_table" interval="60000" indicator="false"/>
+        <metric name="Com_analyze" template="${template_mysql}" category="THROUGHPUT" alias="Com_analyze" interval="60000" indicator="false"/>
+        <metric name="Com_backup_table" template="${template_mysql}" category="THROUGHPUT" alias="Com_backup_table" interval="60000" indicator="false"/>
+        <metric name="Com_begin" template="${template_mysql}" category="THROUGHPUT" alias="Com_begin" interval="60000" indicator="false"/>
+        <metric name="Com_call_procedure" template="${template_mysql}" category="THROUGHPUT" alias="Com_call_procedure" interval="60000" indicator="false"/>
+        <metric name="Com_change_db" template="${template_mysql}" category="THROUGHPUT" alias="Com_change_db" interval="60000" indicator="false"/>
+        <metric name="Com_change_master" template="${template_mysql}" category="THROUGHPUT" alias="Com_change_master" interval="60000" indicator="false"/>
+        <metric name="Com_check" template="${template_mysql}" category="THROUGHPUT" alias="Com_check" interval="60000" indicator="false"/>
+        <metric name="Com_checksum" template="${template_mysql}" category="THROUGHPUT" alias="Com_checksum" interval="60000" indicator="false"/>
+        <metric name="Com_commit" template="${template_mysql}" category="THROUGHPUT" alias="Com_commit" interval="60000" indicator="false"/>
+        <metric name="Com_create_db" template="${template_mysql}" category="THROUGHPUT" alias="Com_create_db" interval="60000" indicator="false"/>
+        <metric name="Com_create_function" template="${template_mysql}" category="THROUGHPUT" alias="Com_create_function" interval="60000" indicator="false"/>
+        <metric name="Com_create_index" template="${template_mysql}" category="THROUGHPUT" alias="Com_create_index" interval="60000" indicator="false"/>
+        <metric name="Com_create_table" template="${template_mysql}" category="THROUGHPUT" alias="Com_create_table" interval="60000" indicator="false"/>
+        <metric name="Com_create_user" template="${template_mysql}" category="THROUGHPUT" alias="Com_create_user" interval="60000" indicator="false"/>
+        <metric name="Com_dealloc_sql" template="${template_mysql}" category="THROUGHPUT" alias="Com_dealloc_sql" interval="60000" indicator="false"/>
+        <metric name="Com_delete" template="${template_mysql}" category="THROUGHPUT" alias="Com_delete" interval="60000" indicator="false"/>
+        <metric name="Com_delete_multi" template="${template_mysql}" category="THROUGHPUT" alias="Com_delete_multi" interval="60000" indicator="false"/>
+        <metric name="Com_do" template="${template_mysql}" category="THROUGHPUT" alias="Com_do" interval="60000" indicator="false"/>
+        <metric name="Com_drop_db" template="${template_mysql}" category="THROUGHPUT" alias="Com_drop_db" interval="60000" indicator="false"/>
+        <metric name="Com_drop_function" template="${template_mysql}" category="THROUGHPUT" alias="Com_drop_function" interval="60000" indicator="false"/>
+        <metric name="Com_drop_index" template="${template_mysql}" category="THROUGHPUT" alias="Com_drop_index" interval="60000" indicator="false"/>
+        <metric name="Com_drop_table" template="${template_mysql}" category="THROUGHPUT" alias="Com_drop_table" interval="60000" indicator="false"/>
+        <metric name="Com_drop_user" template="${template_mysql}" category="THROUGHPUT" alias="Com_drop_user" interval="60000" indicator="false"/>
+        <metric name="Com_execute_sql" template="${template_mysql}" category="THROUGHPUT" alias="Com_execute_sql" interval="60000" indicator="false"/>
+        <metric name="Com_flush" template="${template_mysql}" category="THROUGHPUT" alias="Com_flush" interval="60000" indicator="false"/>
+        <metric name="Com_grant" template="${template_mysql}" category="THROUGHPUT" alias="Com_grant" interval="60000" indicator="false"/>
+        <metric name="Com_ha_close" template="${template_mysql}" category="THROUGHPUT" alias="Com_ha_close" interval="60000" indicator="false"/>
+        <metric name="Com_ha_open" template="${template_mysql}" category="THROUGHPUT" alias="Com_ha_open" interval="60000" indicator="false"/>
+        <metric name="Com_ha_read" template="${template_mysql}" category="THROUGHPUT" alias="Com_ha_read" interval="60000" indicator="false"/>
+        <metric name="Com_help" template="${template_mysql}" category="THROUGHPUT" alias="Com_help" interval="60000" indicator="false"/>
+        <metric name="Com_insert" template="${template_mysql}" category="THROUGHPUT" alias="Com_insert" interval="60000" indicator="false"/>
+        <metric name="Com_insert_select" template="${template_mysql}" category="THROUGHPUT" alias="Com_insert_select" interval="60000" indicator="false"/>
+        <metric name="Com_kill" template="${template_mysql}" category="THROUGHPUT" alias="Com_kill" interval="60000" indicator="false"/>
+        <metric name="Com_load" template="${template_mysql}" category="THROUGHPUT" alias="Com_load" interval="60000" indicator="false"/>
+        <metric name="Com_load_master_data" template="${template_mysql}" category="THROUGHPUT" alias="Com_load_master_data" interval="60000" indicator="false"/>
+        <metric name="Com_load_master_table" template="${template_mysql}" category="THROUGHPUT" alias="Com_load_master_table" interval="60000" indicator="false"/>
+        <metric name="Com_lock_tables" template="${template_mysql}" category="THROUGHPUT" alias="Com_lock_tables" interval="60000" indicator="false"/>
+        <metric name="Com_optimize" template="${template_mysql}" category="THROUGHPUT" alias="Com_optimize" interval="60000" indicator="false"/>
+        <metric name="Com_preload_keys" template="${template_mysql}" category="THROUGHPUT" alias="Com_preload_keys" interval="60000" indicator="false"/>
+        <metric name="Com_prepare_sql" template="${template_mysql}" category="THROUGHPUT" alias="Com_prepare_sql" interval="60000" indicator="false"/>
+        <metric name="Com_purge" template="${template_mysql}" category="THROUGHPUT" alias="Com_purge" interval="60000" indicator="false"/>
+        <metric name="Com_purge_before_date" template="${template_mysql}" category="THROUGHPUT" alias="Com_purge_before_date" interval="60000" indicator="false"/>
+        <metric name="Com_rename_table" template="${template_mysql}" category="THROUGHPUT" alias="Com_rename_table" interval="60000" indicator="false"/>
+        <metric name="Com_repair" template="${template_mysql}" category="THROUGHPUT" alias="Com_repair" interval="60000" indicator="false"/>
+        <metric name="Com_replace" template="${template_mysql}" category="THROUGHPUT" alias="Com_replace" interval="60000" indicator="false"/>
+        <metric name="Com_replace_select" template="${template_mysql}" category="THROUGHPUT" alias="Com_replace_select" interval="60000" indicator="false"/>
+        <metric name="Com_reset" template="${template_mysql}" category="THROUGHPUT" alias="Com_reset" interval="60000" indicator="false"/>
+        <metric name="Com_restore_table" template="${template_mysql}" category="THROUGHPUT" alias="Com_restore_table" interval="60000" indicator="false"/>
+        <metric name="Com_revoke" template="${template_mysql}" category="THROUGHPUT" alias="Com_revoke" interval="60000" indicator="false"/>
+        <metric name="Com_revoke_all" template="${template_mysql}" category="THROUGHPUT" alias="Com_revoke_all" interval="60000" indicator="false"/>
+        <metric name="Com_rollback" template="${template_mysql}" category="THROUGHPUT" alias="Com_rollback" interval="60000" indicator="false"/>
+        <metric name="Com_savepoint" template="${template_mysql}" category="THROUGHPUT" alias="Com_savepoint" interval="60000" indicator="false"/>
+        <metric name="Com_select" template="${template_mysql}" category="THROUGHPUT" alias="Com_select" interval="60000" indicator="false"/>
+        <metric name="Com_set_option" template="${template_mysql}" category="THROUGHPUT" alias="Com_set_option" interval="60000" indicator="false"/>
+        <metric name="Com_show_binlog_events" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_binlog_events" interval="60000" indicator="false"/>
+        <metric name="Com_show_binlogs" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_binlogs" interval="60000" indicator="false"/>
+        <metric name="Com_show_charsets" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_charsets" interval="60000" indicator="false"/>
+        <metric name="Com_show_collations" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_collations" interval="60000" indicator="false"/>
+        <metric name="Com_show_column_types" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_column_types" interval="60000" indicator="false"/>
+        <metric name="Com_show_create_db" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_create_db" interval="60000" indicator="false"/>
+        <metric name="Com_show_create_table" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_create_table" interval="60000" indicator="false"/>
+        <metric name="Com_show_databases" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_databases" interval="60000" indicator="false"/>
+        <metric name="Com_show_errors" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_errors" interval="60000" indicator="false"/>
+        <metric name="Com_show_fields" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_fields" interval="60000" indicator="false"/>
+        <metric name="Com_show_grants" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_grants" interval="60000" indicator="false"/>
+        <metric name="Com_show_innodb_status" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_innodb_status" interval="60000" indicator="false"/>
+        <metric name="Com_show_keys" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_keys" interval="60000" indicator="false"/>
+        <metric name="Com_show_logs" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_logs" interval="60000" indicator="false"/>
+        <metric name="Com_show_master_status" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_master_status" interval="60000" indicator="false"/>
+        <metric name="Com_show_ndb_status" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_ndb_status" interval="60000" indicator="false"/>
+        <metric name="Com_show_new_master" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_new_master" interval="60000" indicator="false"/>
+        <metric name="Com_show_open_tables" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_open_tables" interval="60000" indicator="false"/>
+        <metric name="Com_show_privileges" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_privileges" interval="60000" indicator="false"/>
+        <metric name="Com_show_processlist" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_processlist" interval="60000" indicator="false"/>
+        <metric name="Com_show_slave_hosts" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_slave_hosts" interval="60000" indicator="false"/>
+        <metric name="Com_show_slave_status" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_slave_status" interval="60000" indicator="false"/>
+        <metric name="Com_show_status" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_status" interval="60000" indicator="false"/>
+        <metric name="Com_show_storage_engines" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_storage_engines" interval="60000" indicator="false"/>
+        <metric name="Com_show_tables" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_tables" interval="60000" indicator="false"/>
+        <metric name="Com_show_triggers" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_triggers" interval="60000" indicator="false"/>
+        <metric name="Com_show_variables" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_variables" interval="60000" indicator="false"/>
+        <metric name="Com_show_warnings" template="${template_mysql}" category="THROUGHPUT" alias="Com_show_warnings" interval="60000" indicator="false"/>
+        <metric name="Com_slave_start" template="${template_mysql}" category="THROUGHPUT" alias="Com_slave_start" interval="60000" indicator="false"/>
+        <metric name="Com_slave_stop" template="${template_mysql}" category="THROUGHPUT" alias="Com_slave_stop" interval="60000" indicator="false"/>
+        <metric name="Com_stmt_close" template="${template_mysql}" category="THROUGHPUT" alias="Com_stmt_close" interval="60000" indicator="false"/>
+        <metric name="Com_stmt_execute" template="${template_mysql}" category="THROUGHPUT" alias="Com_stmt_execute" interval="60000" indicator="false"/>
+        <metric name="Com_stmt_fetch" template="${template_mysql}" category="THROUGHPUT" alias="Com_stmt_fetch" interval="60000" indicator="false"/>
+        <metric name="Com_stmt_prepare" template="${template_mysql}" category="THROUGHPUT" alias="Com_stmt_prepare" interval="60000" indicator="false"/>
+        <metric name="Com_stmt_reset" template="${template_mysql}" category="THROUGHPUT" alias="Com_stmt_reset" interval="60000" indicator="false"/>
+        <metric name="Com_stmt_send_long_data" template="${template_mysql}" category="THROUGHPUT" alias="Com_stmt_send_long_data" interval="60000" indicator="false"/>
+        <metric name="Com_truncate" template="${template_mysql}" category="THROUGHPUT" alias="Com_truncate" interval="60000" indicator="false"/>
+        <metric name="Com_unlock_tables" template="${template_mysql}" category="THROUGHPUT" alias="Com_unlock_tables" interval="60000" indicator="false"/>
+        <metric name="Com_update" template="${template_mysql}" category="THROUGHPUT" alias="Com_update" interval="60000" indicator="false"/>
+        <metric name="Com_update_multi" template="${template_mysql}" category="THROUGHPUT" alias="Com_update_multi" interval="60000" indicator="false"/>
+        <metric name="Com_xa_commit" template="${template_mysql}" category="THROUGHPUT" alias="Com_xa_commit" interval="60000" indicator="false"/>
+        <metric name="Com_xa_end" template="${template_mysql}" category="THROUGHPUT" alias="Com_xa_end" interval="60000" indicator="false"/>
+        <metric name="Com_xa_prepare" template="${template_mysql}" category="THROUGHPUT" alias="Com_xa_prepare" interval="60000" indicator="false"/>
+        <metric name="Com_xa_recover" template="${template_mysql}" category="THROUGHPUT" alias="Com_xa_recover" interval="60000" indicator="false"/>
+        <metric name="Com_xa_rollback" template="${template_mysql}" category="THROUGHPUT" alias="Com_xa_rollback" interval="60000" indicator="false"/>
+        <metric name="Com_xa_start" template="${template_mysql}" category="THROUGHPUT" alias="Com_xa_start" interval="60000" indicator="false"/>
+            <!--<metric name="Compression" template="${template_mysql}" category="THROUGHPUT" alias="Compression" interval="60000" indicator="false"/>-->
+        <metric name="Connections" template="${template_mysql}" category="THROUGHPUT" alias="Connections" interval="60000" indicator="false"/>
+        <metric name="Created_tmp_disk_tables" template="${template_mysql}" category="THROUGHPUT" alias="Created_tmp_disk_tables" interval="60000" indicator="false"/>
+        <metric name="Created_tmp_files" template="${template_mysql}" category="THROUGHPUT" alias="Created_tmp_files" interval="60000" indicator="false"/>
+        <metric name="Created_tmp_tables" template="${template_mysql}" category="THROUGHPUT" alias="Created_tmp_tables" interval="60000" indicator="false"/>
+        <metric name="Delayed_errors" template="${template_mysql}" category="THROUGHPUT" alias="Delayed_errors" interval="60000" indicator="false"/>
+        <metric name="Delayed_insert_threads" template="${template_mysql}" category="THROUGHPUT" alias="Delayed_insert_threads" interval="60000" indicator="false"/>
+        <metric name="Delayed_writes" template="${template_mysql}" category="THROUGHPUT" alias="Delayed_writes" interval="60000" indicator="false"/>
+        <metric name="Flush_commands" template="${template_mysql}" category="THROUGHPUT" alias="Flush_commands" interval="60000" indicator="false"/>
+        <metric name="Handler_commit" template="${template_mysql}" category="THROUGHPUT" alias="Handler_commit" interval="60000" indicator="false"/>
+        <metric name="Handler_delete" template="${template_mysql}" category="THROUGHPUT" alias="Handler_delete" interval="60000" indicator="false"/>
+        <metric name="Handler_discover" template="${template_mysql}" category="THROUGHPUT" alias="Handler_discover" interval="60000" indicator="false"/>
+        <metric name="Handler_prepare" template="${template_mysql}" category="THROUGHPUT" alias="Handler_prepare" interval="60000" indicator="false"/>
+        <metric name="Handler_read_first" template="${template_mysql}" category="THROUGHPUT" alias="Handler_read_first" interval="60000" indicator="false"/>
+        <metric name="Handler_read_key" template="${template_mysql}" category="THROUGHPUT" alias="Handler_read_key" interval="60000" indicator="false"/>
+        <metric name="Handler_read_next" template="${template_mysql}" category="THROUGHPUT" alias="Handler_read_next" interval="60000" indicator="false"/>
+        <metric name="Handler_read_prev" template="${template_mysql}" category="THROUGHPUT" alias="Handler_read_prev" interval="60000" indicator="false"/>
+        <metric name="Handler_read_rnd" template="${template_mysql}" category="THROUGHPUT" alias="Handler_read_rnd" interval="60000" indicator="false"/>
+        <metric name="Handler_read_rnd_next" template="${template_mysql}" category="THROUGHPUT" alias="Handler_read_rnd_next" interval="60000" indicator="false"/>
+        <metric name="Handler_rollback" template="${template_mysql}" category="THROUGHPUT" alias="Handler_rollback" interval="60000" indicator="false"/>
+        <metric name="Handler_savepoint" template="${template_mysql}" category="THROUGHPUT" alias="Handler_savepoint" interval="60000" indicator="false"/>
+        <metric name="Handler_savepoint_rollback" template="${template_mysql}" category="THROUGHPUT" alias="Handler_savepoint_rollback" interval="60000" indicator="false"/>
+        <metric name="Handler_update" template="${template_mysql}" category="THROUGHPUT" alias="Handler_update" interval="60000" indicator="false"/>
+        <metric name="Handler_write" template="${template_mysql}" category="THROUGHPUT" alias="Handler_write" interval="60000" indicator="false"/>
+        <metric name="Innodb_buffer_pool_pages_data" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_data" interval="60000" indicator="false"/>
+        <metric name="Innodb_buffer_pool_pages_dirty" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_dirty" interval="60000" indicator="false"/>
+        <metric name="Innodb_buffer_pool_pages_flushed" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_flushed" interval="60000" indicator="false"/>
+        <metric name="Innodb_buffer_pool_pages_free" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_free" interval="60000" indicator="false"/>
+        <metric name="Innodb_buffer_pool_pages_latched" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_latched" interval="60000" indicator="false"/>
+        <metric name="Innodb_buffer_pool_pages_misc" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_misc" interval="60000" indicator="false"/>
+        <metric name="Innodb_buffer_pool_pages_total" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_total" interval="60000" indicator="false"/>
+        <metric name="Innodb_buffer_pool_read_ahead_rnd" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_buffer_pool_read_ahead_rnd" interval="60000" indicator="false"/>
+        <metric name="Innodb_buffer_pool_read_ahead_seq" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_buffer_pool_read_ahead_seq" interval="60000" indicator="false"/>
+        <metric name="Innodb_buffer_pool_read_requests" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_buffer_pool_read_requests" interval="60000" indicator="false"/>
+        <metric name="Innodb_buffer_pool_reads" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_buffer_pool_reads" interval="60000" indicator="false"/>
+        <metric name="Innodb_buffer_pool_wait_free" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_buffer_pool_wait_free" interval="60000" indicator="false"/>
+        <metric name="Innodb_buffer_pool_write_requests" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_buffer_pool_write_requests" interval="60000" indicator="false"/>
+        <metric name="Innodb_data_fsyncs" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_data_fsyncs" interval="60000" indicator="false"/>
+        <metric name="Innodb_data_pending_fsyncs" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_data_pending_fsyncs" interval="60000" indicator="false"/>
+        <metric name="Innodb_data_pending_reads" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_data_pending_reads" interval="60000" indicator="false"/>
+        <metric name="Innodb_data_pending_writes" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_data_pending_writes" interval="60000" indicator="false"/>
+        <metric name="Innodb_data_read" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_data_read" interval="60000" indicator="false"/>
+        <metric name="Innodb_data_reads" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_data_reads" interval="60000" indicator="false"/>
+        <metric name="Innodb_data_writes" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_data_writes" interval="60000" indicator="false"/>
+        <metric name="Innodb_data_written" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_data_written" interval="60000" indicator="false"/>
+        <metric name="Innodb_dblwr_pages_written" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_dblwr_pages_written" interval="60000" indicator="false"/>
+        <metric name="Innodb_dblwr_writes" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_dblwr_writes" interval="60000" indicator="false"/>
+        <metric name="Innodb_log_waits" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_log_waits" interval="60000" indicator="false"/>
+        <metric name="Innodb_log_write_requests" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_log_write_requests" interval="60000" indicator="false"/>
+        <metric name="Innodb_log_writes" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_log_writes" interval="60000" indicator="false"/>
+        <metric name="Innodb_os_log_fsyncs" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_os_log_fsyncs" interval="60000" indicator="false"/>
+        <metric name="Innodb_os_log_pending_fsyncs" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_os_log_pending_fsyncs" interval="60000" indicator="false"/>
+        <metric name="Innodb_os_log_pending_writes" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_os_log_pending_writes" interval="60000" indicator="false"/>
+        <metric name="Innodb_os_log_written" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_os_log_written" interval="60000" indicator="false"/>
+        <metric name="Innodb_page_size" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_page_size" interval="60000" indicator="false"/>
+        <metric name="Innodb_pages_created" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_pages_created" interval="60000" indicator="false"/>
+        <metric name="Innodb_pages_read" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_pages_read" interval="60000" indicator="false"/>
+        <metric name="Innodb_pages_written" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_pages_written" interval="60000" indicator="false"/>
+        <metric name="Innodb_row_lock_current_waits" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_row_lock_current_waits" interval="60000" indicator="false"/>
+        <metric name="Innodb_row_lock_time" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_row_lock_time" interval="60000" indicator="false"/>
+        <metric name="Innodb_row_lock_time_avg" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_row_lock_time_avg" interval="60000" indicator="false"/>
+        <metric name="Innodb_row_lock_time_max" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_row_lock_time_max" interval="60000" indicator="false"/>
+        <metric name="Innodb_row_lock_waits" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_row_lock_waits" interval="60000" indicator="false"/>
+        <metric name="Innodb_rows_deleted" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_rows_deleted" interval="60000" indicator="false"/>
+        <metric name="Innodb_rows_inserted" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_rows_inserted" interval="60000" indicator="false"/>
+        <metric name="Innodb_rows_read" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_rows_read" interval="60000" indicator="false"/>
+        <metric name="Innodb_rows_updated" template="${template_mysql}" category="THROUGHPUT" alias="Innodb_rows_updated" interval="60000" indicator="false"/>
+        <metric name="Key_blocks_not_flushed" template="${template_mysql}" category="THROUGHPUT" alias="Key_blocks_not_flushed" interval="60000" indicator="false"/>
+        <metric name="Key_blocks_unused" template="${template_mysql}" category="THROUGHPUT" alias="Key_blocks_unused" interval="60000" indicator="false"/>
+        <metric name="Key_blocks_used" template="${template_mysql}" category="THROUGHPUT" alias="Key_blocks_used" interval="60000" indicator="false"/>
+        <metric name="Key_read_requests" template="${template_mysql}" category="THROUGHPUT" alias="Key_read_requests" interval="60000" indicator="false"/>
+        <metric name="Key_reads" template="${template_mysql}" category="THROUGHPUT" alias="Key_reads" interval="60000" indicator="false"/>
+        <metric name="Key_write_requests" template="${template_mysql}" category="THROUGHPUT" alias="Key_write_requests" interval="60000" indicator="false"/>
+        <metric name="Key_writes" template="${template_mysql}" category="THROUGHPUT" alias="Key_writes" interval="60000" indicator="false"/>
+        <metric name="Last_query_cost" template="${template_mysql}" category="THROUGHPUT" alias="Last_query_cost" interval="60000" indicator="false"/>
+        <metric name="Max_used_connections" template="${template_mysql}" category="THROUGHPUT" alias="Max_used_connections" interval="60000" indicator="false"/>
+        <metric name="Not_flushed_delayed_rows" template="${template_mysql}" category="THROUGHPUT" alias="Not_flushed_delayed_rows" interval="60000" indicator="false"/>
+        <metric name="Open_files" template="${template_mysql}" category="THROUGHPUT" alias="Open_files" interval="60000" indicator="false"/>
+        <metric name="Open_streams" template="${template_mysql}" category="THROUGHPUT" alias="Open_streams" interval="60000" indicator="false"/>
+        <metric name="Open_tables" template="${template_mysql}" category="THROUGHPUT" alias="Open_tables" interval="60000" indicator="false"/>
+        <metric name="Opened_tables" template="${template_mysql}" category="THROUGHPUT" alias="Opened_tables" interval="60000" indicator="false"/>
+        <metric name="Prepared_stmt_count" template="${template_mysql}" category="THROUGHPUT" alias="Prepared_stmt_count" interval="60000" indicator="false"/>
+        <metric name="Qcache_free_blocks" template="${template_mysql}" category="THROUGHPUT" alias="Qcache_free_blocks" interval="60000" indicator="false"/>
+        <metric name="Qcache_free_memory" template="${template_mysql}" category="THROUGHPUT" alias="Qcache_free_memory" interval="60000" indicator="false"/>
+        <metric name="Qcache_hits" template="${template_mysql}" category="THROUGHPUT" alias="Qcache_hits" interval="60000" indicator="false"/>
+        <metric name="Qcache_inserts" template="${template_mysql}" category="THROUGHPUT" alias="Qcache_inserts" interval="60000" indicator="false"/>
+        <metric name="Qcache_lowmem_prunes" template="${template_mysql}" category="THROUGHPUT" alias="Qcache_lowmem_prunes" interval="60000" indicator="false"/>
+        <metric name="Qcache_not_cached" template="${template_mysql}" category="THROUGHPUT" alias="Qcache_not_cached" interval="60000" indicator="false"/>
+        <metric name="Qcache_queries_in_cache" template="${template_mysql}" category="THROUGHPUT" alias="Qcache_queries_in_cache" interval="60000" indicator="false"/>
+        <metric name="Qcache_total_blocks" template="${template_mysql}" category="THROUGHPUT" alias="Qcache_total_blocks" interval="60000" indicator="false"/>
+        <metric name="Questions" template="${template_mysql}" category="THROUGHPUT" alias="Questions" interval="60000" indicator="false"/>
+            <!--<metric name="Rpl_status" template="${template_mysql}" category="THROUGHPUT" alias="Rpl_status" interval="60000" indicator="false"/>-->
+        <metric name="Select_full_join" template="${template_mysql}" category="THROUGHPUT" alias="Select_full_join" interval="60000" indicator="false"/>
+        <metric name="Select_full_range_join" template="${template_mysql}" category="THROUGHPUT" alias="Select_full_range_join" interval="60000" indicator="false"/>
+        <metric name="Select_range" template="${template_mysql}" category="THROUGHPUT" alias="Select_range" interval="60000" indicator="false"/>
+        <metric name="Select_range_check" template="${template_mysql}" category="THROUGHPUT" alias="Select_range_check" interval="60000" indicator="false"/>
+        <metric name="Select_scan" template="${template_mysql}" category="THROUGHPUT" alias="Select_scan" interval="60000" indicator="false"/>
+        <metric name="Slave_open_temp_tables" template="${template_mysql}" category="THROUGHPUT" alias="Slave_open_temp_tables" interval="60000" indicator="false"/>
+        <metric name="Slave_retried_transactions" template="${template_mysql}" category="THROUGHPUT" alias="Slave_retried_transactions" interval="60000" indicator="false"/>
+            <!--<metric name="Slave_running" template="${template_mysql}" category="THROUGHPUT" alias="Slave_running" interval="60000" indicator="false"/>-->
+        <metric name="Slow_launch_threads" template="${template_mysql}" category="THROUGHPUT" alias="Slow_launch_threads" interval="60000" indicator="false"/>
+        <metric name="Slow_queries" template="${template_mysql}" category="THROUGHPUT" alias="Slow_queries" interval="60000" indicator="false"/>
+        <metric name="Sort_merge_passes" template="${template_mysql}" category="THROUGHPUT" alias="Sort_merge_passes" interval="60000" indicator="false"/>
+        <metric name="Sort_range" template="${template_mysql}" category="THROUGHPUT" alias="Sort_range" interval="60000" indicator="false"/>
+        <metric name="Sort_rows" template="${template_mysql}" category="THROUGHPUT" alias="Sort_rows" interval="60000" indicator="false"/>
+        <metric name="Sort_scan" template="${template_mysql}" category="THROUGHPUT" alias="Sort_scan" interval="60000" indicator="false"/>
+        <metric name="Ssl_accept_renegotiates" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_accept_renegotiates" interval="60000" indicator="false"/>
+        <metric name="Ssl_accepts" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_accepts" interval="60000" indicator="false"/>
+        <metric name="Ssl_callback_cache_hits" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_callback_cache_hits" interval="60000" indicator="false"/>
+        <metric name="Ssl_cipher" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_cipher" interval="60000" indicator="false"/>
+        <metric name="Ssl_cipher_list" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_cipher_list" interval="60000" indicator="false"/>
+        <metric name="Ssl_client_connects" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_client_connects" interval="60000" indicator="false"/>
+        <metric name="Ssl_connect_renegotiates" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_connect_renegotiates" interval="60000" indicator="false"/>
+        <metric name="Ssl_ctx_verify_depth" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_ctx_verify_depth" interval="60000" indicator="false"/>
+        <metric name="Ssl_ctx_verify_mode" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_ctx_verify_mode" interval="60000" indicator="false"/>
+        <metric name="Ssl_default_timeout" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_default_timeout" interval="60000" indicator="false"/>
+        <metric name="Ssl_finished_accepts" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_finished_accepts" interval="60000" indicator="false"/>
+        <metric name="Ssl_finished_connects" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_finished_connects" interval="60000" indicator="false"/>
+        <metric name="Ssl_session_cache_hits" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_session_cache_hits" interval="60000" indicator="false"/>
+        <metric name="Ssl_session_cache_misses" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_session_cache_misses" interval="60000" indicator="false"/>
+            <!--<metric name="Ssl_session_cache_mode" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_session_cache_mode" interval="60000" indicator="false"/>-->
+        <metric name="Ssl_session_cache_overflows" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_session_cache_overflows" interval="60000" indicator="false"/>
+        <metric name="Ssl_session_cache_size" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_session_cache_size" interval="60000" indicator="false"/>
+        <metric name="Ssl_session_cache_timeouts" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_session_cache_timeouts" interval="60000" indicator="false"/>
+        <metric name="Ssl_sessions_reused" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_sessions_reused" interval="60000" indicator="false"/>
+        <metric name="Ssl_used_session_cache_entries" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_used_session_cache_entries" interval="60000" indicator="false"/>
+        <metric name="Ssl_verify_depth" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_verify_depth" interval="60000" indicator="false"/>
+        <metric name="Ssl_verify_mode" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_verify_mode" interval="60000" indicator="false"/>
+        <metric name="Ssl_version" template="${template_mysql}" category="THROUGHPUT" alias="Ssl_version" interval="60000" indicator="false"/>
+        <metric name="Table_locks_immediate" template="${template_mysql}" category="THROUGHPUT" alias="Table_locks_immediate" interval="60000" indicator="false"/>
+        <metric name="Table_locks_waited" template="${template_mysql}" category="THROUGHPUT" alias="Table_locks_waited" interval="60000" indicator="false"/>
+        <metric name="Tc_log_max_pages_used" template="${template_mysql}" category="THROUGHPUT" alias="Tc_log_max_pages_used" interval="60000" indicator="false"/>
+        <metric name="Tc_log_page_size" template="${template_mysql}" category="THROUGHPUT" alias="Tc_log_page_size" interval="60000" indicator="false"/>
+        <metric name="Tc_log_page_waits" template="${template_mysql}" category="THROUGHPUT" alias="Tc_log_page_waits" interval="60000" indicator="false"/>
+        <metric name="Threads_cached" template="${template_mysql}" category="THROUGHPUT" alias="Threads_cached" interval="60000" indicator="false"/>
+        <metric name="Threads_connected" template="${template_mysql}" category="THROUGHPUT" alias="Threads_connected" interval="60000" indicator="false"/>
+        <metric name="Threads_created" template="${template_mysql}" category="THROUGHPUT" alias="Threads_created" interval="60000" indicator="false"/>
+        <metric name="Threads_running" template="${template_mysql}" category="THROUGHPUT" alias="Threads_running" interval="60000" indicator="false"/>
+        <metric name="Uptime" template="${template_mysql}" category="THROUGHPUT" alias="Uptime" interval="60000" indicator="false"/>
+        <metric name="Uptime_since_flush_status" template="${template_mysql}" category="THROUGHPUT" alias="Uptime_since_flush_status" interval="60000" indicator="false"/>
+            &process-metrics;
+    </metrics>
+
+    <metrics name="Zimbra 5.0.x CPU Stats">
+        <metric name="Availability" template="sigar:Type=ProcState,Arg=%cpu-stat-ptql%:State" indicator="true"/>
+        <metric name="timestamp" template="${template_cpu}" category="THROUGHPUT" alias="timestamp" interval="60000" indicator="false" units="percentage"/>
+        <metric name="cpu:user" template="${template_cpu}" category="THROUGHPUT" alias="cpu:user" interval="60000" indicator="false" units="percentage"/>
+        <metric name="cpu:nice" template="${template_cpu}" category="THROUGHPUT" alias="cpu:nice" interval="60000" indicator="false" units="percentage"/>
+        <metric name="cpu:sys" template="${template_cpu}" category="THROUGHPUT" alias="cpu:sys" interval="60000" indicator="false" units="percentage"/>
+        <metric name="cpu:idle" template="${template_cpu}" category="THROUGHPUT" alias="cpu:idle" interval="60000" indicator="false" units="percentage"/>
+        <metric name="cpu:iowait" template="${template_cpu}" category="THROUGHPUT" alias="cpu:iowait" interval="60000" indicator="false" units="percentage"/>
+        <metric name="cpu:irq" template="${template_cpu}" category="THROUGHPUT" alias="cpu:irq" interval="60000" indicator="false" units="percentage"/>
+        <metric name="cpu:softirq" template="${template_cpu}" category="THROUGHPUT" alias="cpu:softirq" interval="60000" indicator="false" units="percentage"/>
+    </metrics>
+
     <server name="Zimbra" version="5.0.x" include="Zimbra 4.5.x">
         <plugin type="autoinventory" class="org.hyperic.hq.plugin.zimbra.five.ZimbraServerDetector"/>
         <plugin type="measurement" class="org.hyperic.hq.product.MeasurementPlugin"/>
@@ -436,31 +857,15 @@ USA.
         <plugin type="control" class="org.hyperic.hq.plugin.zimbra.five.ZimbraControl"/>
         <config>
             <option name="installpath" default="/opt/zimbra" description="Zimbra Install Path"/>
-            <option name="zimbra-ptql" default="Pid.PidFile.eq=%installpath%/log/zmmailboxd_manager.pid" description="Sigar PTQL Process Query"/>
+            <option name="zimbra-ptql" default="Pid.SudoPidFile.eq=%installpath%/log/zmmailboxd_manager.pid" description="Sigar PTQL Process Query"/>
             <option name="process.query" default="%zimbra-ptql%" description="PTQL for Zimbra Logger MySQLd"/>
         </config>
-        
+
         <service name="Jetty Process">
             <config>
-                <option name="process.query" default="Pid.PidFile.eq=%installpath%/log/zmmailboxd_java.pid" description="Sigar PTQL Process Query"/>
+                <option name="process.query" default="Pid.SudoPidFile.eq=%installpath%/log/zmmailboxd_java.pid" description="Sigar PTQL Process Query"/>
             </config>
-            <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
-            &process-metrics;
-            <filter name="template" value="zimbra-stats:statsfile=%installpath%/zmstat/threads.csv:${alias}"/>
-            <metric name="btpool" category="THROUGHPUT" alias="btpool" interval="60000" indicator="false"/>
-            <metric name="pool" category="THROUGHPUT" alias="pool" interval="60000" indicator="false"/>
-            <metric name="LmtpHandler" category="THROUGHPUT" alias="LmtpHandler" interval="60000" indicator="false"/>
-            <metric name="ImapHandler" category="THROUGHPUT" alias="ImapHandler" interval="60000" indicator="false"/>
-            <metric name="Pop3Handler" category="THROUGHPUT" alias="Pop3Handler" interval="60000" indicator="false"/>
-            <metric name="ScheduledTask" category="THROUGHPUT" alias="ScheduledTask" interval="60000" indicator="false"/>
-            <metric name="Timer" category="THROUGHPUT" alias="Timer" interval="60000" indicator="false"/>
-            <metric name="AnonymousIoService" category="THROUGHPUT" alias="AnonymousIoService" interval="60000" indicator="false"/>
-            <metric name="FLAP processor" category="THROUGHPUT" alias="FLAP processor" interval="60000" indicator="false"/>
-            <metric name="GC" category="THROUGHPUT" alias="__GC" interval="60000" indicator="false"/>
-            <metric name="SocketAcceptor" category="THROUGHPUT" alias="SocketAcceptor" interval="60000" indicator="false"/>
-            <metric name="Thread" category="THROUGHPUT" alias="Thread" interval="60000" indicator="false"/>
-            <metric name="other" category="THROUGHPUT" alias="other" interval="60000" indicator="false"/>
-            <metric name="total" category="THROUGHPUT" alias="total" interval="60000" indicator="false"/>
+            <plugin type="collector" class="org.hyperic.hq.plugin.zimbra.five.ZimbraCollector"/>
         </service>
         
         <service name="Convertd Monitor">
@@ -468,16 +873,12 @@ USA.
             <config>
                 <option name="process.query" default="Pid.PidFile.eq=%installpath%/log/zmconvertdmon.pid" description="Sigar PTQL Process Query"/>
             </config>
-            <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
-            &process-metrics;
         </service>
         
         <service name="memcached">
             <config>
                 <option name="process.query" default="Pid.PidFile.eq=%installpath%/log/memcached.pid" description="Sigar PTQL Process Query"/>
             </config>
-            <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
-            &process-metrics;
         </service>
         
         <!--  MySQL  -->
@@ -486,258 +887,6 @@ USA.
                 <option name="process.query" description="Sigar PTQL Process Query"/>
             </config>
             <plugin type="collector" class="org.hyperic.hq.plugin.zimbra.five.ZimbraCollector"/>
-            <metric name="Availability" template="sigar:Type=ProcState,Arg=%process.query%:State" indicator="true"/>
-            <filter name="template" value="zimbra-stats:statsfile=%installpath%/zmstat/mysql.csv:${alias}"/>
-            <metric name="Aborted_clients" category="THROUGHPUT" alias="Aborted_clients" interval="60000" indicator="false"/>
-            <metric name="Aborted_connects" category="THROUGHPUT" alias="Aborted_connects" interval="60000" indicator="false"/>
-            <metric name="Binlog_cache_disk_use" category="THROUGHPUT" alias="Binlog_cache_disk_use" interval="60000" indicator="false"/>
-            <metric name="Binlog_cache_use" category="THROUGHPUT" alias="Binlog_cache_use" interval="60000" indicator="false"/>
-            <metric name="Bytes_received" category="THROUGHPUT" alias="Bytes_received" interval="60000" indicator="false"/>
-            <metric name="Bytes_sent" category="THROUGHPUT" alias="Bytes_sent" interval="60000" indicator="false"/>
-            <metric name="Com_admin_commands" category="THROUGHPUT" alias="Com_admin_commands" interval="60000" indicator="false"/>
-            <metric name="Com_alter_db" category="THROUGHPUT" alias="Com_alter_db" interval="60000" indicator="false"/>
-            <metric name="Com_alter_table" category="THROUGHPUT" alias="Com_alter_table" interval="60000" indicator="false"/>
-            <metric name="Com_analyze" category="THROUGHPUT" alias="Com_analyze" interval="60000" indicator="false"/>
-            <metric name="Com_backup_table" category="THROUGHPUT" alias="Com_backup_table" interval="60000" indicator="false"/>
-            <metric name="Com_begin" category="THROUGHPUT" alias="Com_begin" interval="60000" indicator="false"/>
-            <metric name="Com_call_procedure" category="THROUGHPUT" alias="Com_call_procedure" interval="60000" indicator="false"/>
-            <metric name="Com_change_db" category="THROUGHPUT" alias="Com_change_db" interval="60000" indicator="false"/>
-            <metric name="Com_change_master" category="THROUGHPUT" alias="Com_change_master" interval="60000" indicator="false"/>
-            <metric name="Com_check" category="THROUGHPUT" alias="Com_check" interval="60000" indicator="false"/>
-            <metric name="Com_checksum" category="THROUGHPUT" alias="Com_checksum" interval="60000" indicator="false"/>
-            <metric name="Com_commit" category="THROUGHPUT" alias="Com_commit" interval="60000" indicator="false"/>
-            <metric name="Com_create_db" category="THROUGHPUT" alias="Com_create_db" interval="60000" indicator="false"/>
-            <metric name="Com_create_function" category="THROUGHPUT" alias="Com_create_function" interval="60000" indicator="false"/>
-            <metric name="Com_create_index" category="THROUGHPUT" alias="Com_create_index" interval="60000" indicator="false"/>
-            <metric name="Com_create_table" category="THROUGHPUT" alias="Com_create_table" interval="60000" indicator="false"/>
-            <metric name="Com_create_user" category="THROUGHPUT" alias="Com_create_user" interval="60000" indicator="false"/>
-            <metric name="Com_dealloc_sql" category="THROUGHPUT" alias="Com_dealloc_sql" interval="60000" indicator="false"/>
-            <metric name="Com_delete" category="THROUGHPUT" alias="Com_delete" interval="60000" indicator="false"/>
-            <metric name="Com_delete_multi" category="THROUGHPUT" alias="Com_delete_multi" interval="60000" indicator="false"/>
-            <metric name="Com_do" category="THROUGHPUT" alias="Com_do" interval="60000" indicator="false"/>
-            <metric name="Com_drop_db" category="THROUGHPUT" alias="Com_drop_db" interval="60000" indicator="false"/>
-            <metric name="Com_drop_function" category="THROUGHPUT" alias="Com_drop_function" interval="60000" indicator="false"/>
-            <metric name="Com_drop_index" category="THROUGHPUT" alias="Com_drop_index" interval="60000" indicator="false"/>
-            <metric name="Com_drop_table" category="THROUGHPUT" alias="Com_drop_table" interval="60000" indicator="false"/>
-            <metric name="Com_drop_user" category="THROUGHPUT" alias="Com_drop_user" interval="60000" indicator="false"/>
-            <metric name="Com_execute_sql" category="THROUGHPUT" alias="Com_execute_sql" interval="60000" indicator="false"/>
-            <metric name="Com_flush" category="THROUGHPUT" alias="Com_flush" interval="60000" indicator="false"/>
-            <metric name="Com_grant" category="THROUGHPUT" alias="Com_grant" interval="60000" indicator="false"/>
-            <metric name="Com_ha_close" category="THROUGHPUT" alias="Com_ha_close" interval="60000" indicator="false"/>
-            <metric name="Com_ha_open" category="THROUGHPUT" alias="Com_ha_open" interval="60000" indicator="false"/>
-            <metric name="Com_ha_read" category="THROUGHPUT" alias="Com_ha_read" interval="60000" indicator="false"/>
-            <metric name="Com_help" category="THROUGHPUT" alias="Com_help" interval="60000" indicator="false"/>
-            <metric name="Com_insert" category="THROUGHPUT" alias="Com_insert" interval="60000" indicator="false"/>
-            <metric name="Com_insert_select" category="THROUGHPUT" alias="Com_insert_select" interval="60000" indicator="false"/>
-            <metric name="Com_kill" category="THROUGHPUT" alias="Com_kill" interval="60000" indicator="false"/>
-            <metric name="Com_load" category="THROUGHPUT" alias="Com_load" interval="60000" indicator="false"/>
-            <metric name="Com_load_master_data" category="THROUGHPUT" alias="Com_load_master_data" interval="60000" indicator="false"/>
-            <metric name="Com_load_master_table" category="THROUGHPUT" alias="Com_load_master_table" interval="60000" indicator="false"/>
-            <metric name="Com_lock_tables" category="THROUGHPUT" alias="Com_lock_tables" interval="60000" indicator="false"/>
-            <metric name="Com_optimize" category="THROUGHPUT" alias="Com_optimize" interval="60000" indicator="false"/>
-            <metric name="Com_preload_keys" category="THROUGHPUT" alias="Com_preload_keys" interval="60000" indicator="false"/>
-            <metric name="Com_prepare_sql" category="THROUGHPUT" alias="Com_prepare_sql" interval="60000" indicator="false"/>
-            <metric name="Com_purge" category="THROUGHPUT" alias="Com_purge" interval="60000" indicator="false"/>
-            <metric name="Com_purge_before_date" category="THROUGHPUT" alias="Com_purge_before_date" interval="60000" indicator="false"/>
-            <metric name="Com_rename_table" category="THROUGHPUT" alias="Com_rename_table" interval="60000" indicator="false"/>
-            <metric name="Com_repair" category="THROUGHPUT" alias="Com_repair" interval="60000" indicator="false"/>
-            <metric name="Com_replace" category="THROUGHPUT" alias="Com_replace" interval="60000" indicator="false"/>
-            <metric name="Com_replace_select" category="THROUGHPUT" alias="Com_replace_select" interval="60000" indicator="false"/>
-            <metric name="Com_reset" category="THROUGHPUT" alias="Com_reset" interval="60000" indicator="false"/>
-            <metric name="Com_restore_table" category="THROUGHPUT" alias="Com_restore_table" interval="60000" indicator="false"/>
-            <metric name="Com_revoke" category="THROUGHPUT" alias="Com_revoke" interval="60000" indicator="false"/>
-            <metric name="Com_revoke_all" category="THROUGHPUT" alias="Com_revoke_all" interval="60000" indicator="false"/>
-            <metric name="Com_rollback" category="THROUGHPUT" alias="Com_rollback" interval="60000" indicator="false"/>
-            <metric name="Com_savepoint" category="THROUGHPUT" alias="Com_savepoint" interval="60000" indicator="false"/>
-            <metric name="Com_select" category="THROUGHPUT" alias="Com_select" interval="60000" indicator="false"/>
-            <metric name="Com_set_option" category="THROUGHPUT" alias="Com_set_option" interval="60000" indicator="false"/>
-            <metric name="Com_show_binlog_events" category="THROUGHPUT" alias="Com_show_binlog_events" interval="60000" indicator="false"/>
-            <metric name="Com_show_binlogs" category="THROUGHPUT" alias="Com_show_binlogs" interval="60000" indicator="false"/>
-            <metric name="Com_show_charsets" category="THROUGHPUT" alias="Com_show_charsets" interval="60000" indicator="false"/>
-            <metric name="Com_show_collations" category="THROUGHPUT" alias="Com_show_collations" interval="60000" indicator="false"/>
-            <metric name="Com_show_column_types" category="THROUGHPUT" alias="Com_show_column_types" interval="60000" indicator="false"/>
-            <metric name="Com_show_create_db" category="THROUGHPUT" alias="Com_show_create_db" interval="60000" indicator="false"/>
-            <metric name="Com_show_create_table" category="THROUGHPUT" alias="Com_show_create_table" interval="60000" indicator="false"/>
-            <metric name="Com_show_databases" category="THROUGHPUT" alias="Com_show_databases" interval="60000" indicator="false"/>
-            <metric name="Com_show_errors" category="THROUGHPUT" alias="Com_show_errors" interval="60000" indicator="false"/>
-            <metric name="Com_show_fields" category="THROUGHPUT" alias="Com_show_fields" interval="60000" indicator="false"/>
-            <metric name="Com_show_grants" category="THROUGHPUT" alias="Com_show_grants" interval="60000" indicator="false"/>
-            <metric name="Com_show_innodb_status" category="THROUGHPUT" alias="Com_show_innodb_status" interval="60000" indicator="false"/>
-            <metric name="Com_show_keys" category="THROUGHPUT" alias="Com_show_keys" interval="60000" indicator="false"/>
-            <metric name="Com_show_logs" category="THROUGHPUT" alias="Com_show_logs" interval="60000" indicator="false"/>
-            <metric name="Com_show_master_status" category="THROUGHPUT" alias="Com_show_master_status" interval="60000" indicator="false"/>
-            <metric name="Com_show_ndb_status" category="THROUGHPUT" alias="Com_show_ndb_status" interval="60000" indicator="false"/>
-            <metric name="Com_show_new_master" category="THROUGHPUT" alias="Com_show_new_master" interval="60000" indicator="false"/>
-            <metric name="Com_show_open_tables" category="THROUGHPUT" alias="Com_show_open_tables" interval="60000" indicator="false"/>
-            <metric name="Com_show_privileges" category="THROUGHPUT" alias="Com_show_privileges" interval="60000" indicator="false"/>
-            <metric name="Com_show_processlist" category="THROUGHPUT" alias="Com_show_processlist" interval="60000" indicator="false"/>
-            <metric name="Com_show_slave_hosts" category="THROUGHPUT" alias="Com_show_slave_hosts" interval="60000" indicator="false"/>
-            <metric name="Com_show_slave_status" category="THROUGHPUT" alias="Com_show_slave_status" interval="60000" indicator="false"/>
-            <metric name="Com_show_status" category="THROUGHPUT" alias="Com_show_status" interval="60000" indicator="false"/>
-            <metric name="Com_show_storage_engines" category="THROUGHPUT" alias="Com_show_storage_engines" interval="60000" indicator="false"/>
-            <metric name="Com_show_tables" category="THROUGHPUT" alias="Com_show_tables" interval="60000" indicator="false"/>
-            <metric name="Com_show_triggers" category="THROUGHPUT" alias="Com_show_triggers" interval="60000" indicator="false"/>
-            <metric name="Com_show_variables" category="THROUGHPUT" alias="Com_show_variables" interval="60000" indicator="false"/>
-            <metric name="Com_show_warnings" category="THROUGHPUT" alias="Com_show_warnings" interval="60000" indicator="false"/>
-            <metric name="Com_slave_start" category="THROUGHPUT" alias="Com_slave_start" interval="60000" indicator="false"/>
-            <metric name="Com_slave_stop" category="THROUGHPUT" alias="Com_slave_stop" interval="60000" indicator="false"/>
-            <metric name="Com_stmt_close" category="THROUGHPUT" alias="Com_stmt_close" interval="60000" indicator="false"/>
-            <metric name="Com_stmt_execute" category="THROUGHPUT" alias="Com_stmt_execute" interval="60000" indicator="false"/>
-            <metric name="Com_stmt_fetch" category="THROUGHPUT" alias="Com_stmt_fetch" interval="60000" indicator="false"/>
-            <metric name="Com_stmt_prepare" category="THROUGHPUT" alias="Com_stmt_prepare" interval="60000" indicator="false"/>
-            <metric name="Com_stmt_reset" category="THROUGHPUT" alias="Com_stmt_reset" interval="60000" indicator="false"/>
-            <metric name="Com_stmt_send_long_data" category="THROUGHPUT" alias="Com_stmt_send_long_data" interval="60000" indicator="false"/>
-            <metric name="Com_truncate" category="THROUGHPUT" alias="Com_truncate" interval="60000" indicator="false"/>
-            <metric name="Com_unlock_tables" category="THROUGHPUT" alias="Com_unlock_tables" interval="60000" indicator="false"/>
-            <metric name="Com_update" category="THROUGHPUT" alias="Com_update" interval="60000" indicator="false"/>
-            <metric name="Com_update_multi" category="THROUGHPUT" alias="Com_update_multi" interval="60000" indicator="false"/>
-            <metric name="Com_xa_commit" category="THROUGHPUT" alias="Com_xa_commit" interval="60000" indicator="false"/>
-            <metric name="Com_xa_end" category="THROUGHPUT" alias="Com_xa_end" interval="60000" indicator="false"/>
-            <metric name="Com_xa_prepare" category="THROUGHPUT" alias="Com_xa_prepare" interval="60000" indicator="false"/>
-            <metric name="Com_xa_recover" category="THROUGHPUT" alias="Com_xa_recover" interval="60000" indicator="false"/>
-            <metric name="Com_xa_rollback" category="THROUGHPUT" alias="Com_xa_rollback" interval="60000" indicator="false"/>
-            <metric name="Com_xa_start" category="THROUGHPUT" alias="Com_xa_start" interval="60000" indicator="false"/>
-            <!--<metric name="Compression" category="THROUGHPUT" alias="Compression" interval="60000" indicator="false"/>-->
-            <metric name="Connections" category="THROUGHPUT" alias="Connections" interval="60000" indicator="false"/>
-            <metric name="Created_tmp_disk_tables" category="THROUGHPUT" alias="Created_tmp_disk_tables" interval="60000" indicator="false"/>
-            <metric name="Created_tmp_files" category="THROUGHPUT" alias="Created_tmp_files" interval="60000" indicator="false"/>
-            <metric name="Created_tmp_tables" category="THROUGHPUT" alias="Created_tmp_tables" interval="60000" indicator="false"/>
-            <metric name="Delayed_errors" category="THROUGHPUT" alias="Delayed_errors" interval="60000" indicator="false"/>
-            <metric name="Delayed_insert_threads" category="THROUGHPUT" alias="Delayed_insert_threads" interval="60000" indicator="false"/>
-            <metric name="Delayed_writes" category="THROUGHPUT" alias="Delayed_writes" interval="60000" indicator="false"/>
-            <metric name="Flush_commands" category="THROUGHPUT" alias="Flush_commands" interval="60000" indicator="false"/>
-            <metric name="Handler_commit" category="THROUGHPUT" alias="Handler_commit" interval="60000" indicator="false"/>
-            <metric name="Handler_delete" category="THROUGHPUT" alias="Handler_delete" interval="60000" indicator="false"/>
-            <metric name="Handler_discover" category="THROUGHPUT" alias="Handler_discover" interval="60000" indicator="false"/>
-            <metric name="Handler_prepare" category="THROUGHPUT" alias="Handler_prepare" interval="60000" indicator="false"/>
-            <metric name="Handler_read_first" category="THROUGHPUT" alias="Handler_read_first" interval="60000" indicator="false"/>
-            <metric name="Handler_read_key" category="THROUGHPUT" alias="Handler_read_key" interval="60000" indicator="false"/>
-            <metric name="Handler_read_next" category="THROUGHPUT" alias="Handler_read_next" interval="60000" indicator="false"/>
-            <metric name="Handler_read_prev" category="THROUGHPUT" alias="Handler_read_prev" interval="60000" indicator="false"/>
-            <metric name="Handler_read_rnd" category="THROUGHPUT" alias="Handler_read_rnd" interval="60000" indicator="false"/>
-            <metric name="Handler_read_rnd_next" category="THROUGHPUT" alias="Handler_read_rnd_next" interval="60000" indicator="false"/>
-            <metric name="Handler_rollback" category="THROUGHPUT" alias="Handler_rollback" interval="60000" indicator="false"/>
-            <metric name="Handler_savepoint" category="THROUGHPUT" alias="Handler_savepoint" interval="60000" indicator="false"/>
-            <metric name="Handler_savepoint_rollback" category="THROUGHPUT" alias="Handler_savepoint_rollback" interval="60000" indicator="false"/>
-            <metric name="Handler_update" category="THROUGHPUT" alias="Handler_update" interval="60000" indicator="false"/>
-            <metric name="Handler_write" category="THROUGHPUT" alias="Handler_write" interval="60000" indicator="false"/>
-            <metric name="Innodb_buffer_pool_pages_data" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_data" interval="60000" indicator="false"/>
-            <metric name="Innodb_buffer_pool_pages_dirty" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_dirty" interval="60000" indicator="false"/>
-            <metric name="Innodb_buffer_pool_pages_flushed" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_flushed" interval="60000" indicator="false"/>
-            <metric name="Innodb_buffer_pool_pages_free" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_free" interval="60000" indicator="false"/>
-            <metric name="Innodb_buffer_pool_pages_latched" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_latched" interval="60000" indicator="false"/>
-            <metric name="Innodb_buffer_pool_pages_misc" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_misc" interval="60000" indicator="false"/>
-            <metric name="Innodb_buffer_pool_pages_total" category="THROUGHPUT" alias="Innodb_buffer_pool_pages_total" interval="60000" indicator="false"/>
-            <metric name="Innodb_buffer_pool_read_ahead_rnd" category="THROUGHPUT" alias="Innodb_buffer_pool_read_ahead_rnd" interval="60000" indicator="false"/>
-            <metric name="Innodb_buffer_pool_read_ahead_seq" category="THROUGHPUT" alias="Innodb_buffer_pool_read_ahead_seq" interval="60000" indicator="false"/>
-            <metric name="Innodb_buffer_pool_read_requests" category="THROUGHPUT" alias="Innodb_buffer_pool_read_requests" interval="60000" indicator="false"/>
-            <metric name="Innodb_buffer_pool_reads" category="THROUGHPUT" alias="Innodb_buffer_pool_reads" interval="60000" indicator="false"/>
-            <metric name="Innodb_buffer_pool_wait_free" category="THROUGHPUT" alias="Innodb_buffer_pool_wait_free" interval="60000" indicator="false"/>
-            <metric name="Innodb_buffer_pool_write_requests" category="THROUGHPUT" alias="Innodb_buffer_pool_write_requests" interval="60000" indicator="false"/>
-            <metric name="Innodb_data_fsyncs" category="THROUGHPUT" alias="Innodb_data_fsyncs" interval="60000" indicator="false"/>
-            <metric name="Innodb_data_pending_fsyncs" category="THROUGHPUT" alias="Innodb_data_pending_fsyncs" interval="60000" indicator="false"/>
-            <metric name="Innodb_data_pending_reads" category="THROUGHPUT" alias="Innodb_data_pending_reads" interval="60000" indicator="false"/>
-            <metric name="Innodb_data_pending_writes" category="THROUGHPUT" alias="Innodb_data_pending_writes" interval="60000" indicator="false"/>
-            <metric name="Innodb_data_read" category="THROUGHPUT" alias="Innodb_data_read" interval="60000" indicator="false"/>
-            <metric name="Innodb_data_reads" category="THROUGHPUT" alias="Innodb_data_reads" interval="60000" indicator="false"/>
-            <metric name="Innodb_data_writes" category="THROUGHPUT" alias="Innodb_data_writes" interval="60000" indicator="false"/>
-            <metric name="Innodb_data_written" category="THROUGHPUT" alias="Innodb_data_written" interval="60000" indicator="false"/>
-            <metric name="Innodb_dblwr_pages_written" category="THROUGHPUT" alias="Innodb_dblwr_pages_written" interval="60000" indicator="false"/>
-            <metric name="Innodb_dblwr_writes" category="THROUGHPUT" alias="Innodb_dblwr_writes" interval="60000" indicator="false"/>
-            <metric name="Innodb_log_waits" category="THROUGHPUT" alias="Innodb_log_waits" interval="60000" indicator="false"/>
-            <metric name="Innodb_log_write_requests" category="THROUGHPUT" alias="Innodb_log_write_requests" interval="60000" indicator="false"/>
-            <metric name="Innodb_log_writes" category="THROUGHPUT" alias="Innodb_log_writes" interval="60000" indicator="false"/>
-            <metric name="Innodb_os_log_fsyncs" category="THROUGHPUT" alias="Innodb_os_log_fsyncs" interval="60000" indicator="false"/>
-            <metric name="Innodb_os_log_pending_fsyncs" category="THROUGHPUT" alias="Innodb_os_log_pending_fsyncs" interval="60000" indicator="false"/>
-            <metric name="Innodb_os_log_pending_writes" category="THROUGHPUT" alias="Innodb_os_log_pending_writes" interval="60000" indicator="false"/>
-            <metric name="Innodb_os_log_written" category="THROUGHPUT" alias="Innodb_os_log_written" interval="60000" indicator="false"/>
-            <metric name="Innodb_page_size" category="THROUGHPUT" alias="Innodb_page_size" interval="60000" indicator="false"/>
-            <metric name="Innodb_pages_created" category="THROUGHPUT" alias="Innodb_pages_created" interval="60000" indicator="false"/>
-            <metric name="Innodb_pages_read" category="THROUGHPUT" alias="Innodb_pages_read" interval="60000" indicator="false"/>
-            <metric name="Innodb_pages_written" category="THROUGHPUT" alias="Innodb_pages_written" interval="60000" indicator="false"/>
-            <metric name="Innodb_row_lock_current_waits" category="THROUGHPUT" alias="Innodb_row_lock_current_waits" interval="60000" indicator="false"/>
-            <metric name="Innodb_row_lock_time" category="THROUGHPUT" alias="Innodb_row_lock_time" interval="60000" indicator="false"/>
-            <metric name="Innodb_row_lock_time_avg" category="THROUGHPUT" alias="Innodb_row_lock_time_avg" interval="60000" indicator="false"/>
-            <metric name="Innodb_row_lock_time_max" category="THROUGHPUT" alias="Innodb_row_lock_time_max" interval="60000" indicator="false"/>
-            <metric name="Innodb_row_lock_waits" category="THROUGHPUT" alias="Innodb_row_lock_waits" interval="60000" indicator="false"/>
-            <metric name="Innodb_rows_deleted" category="THROUGHPUT" alias="Innodb_rows_deleted" interval="60000" indicator="false"/>
-            <metric name="Innodb_rows_inserted" category="THROUGHPUT" alias="Innodb_rows_inserted" interval="60000" indicator="false"/>
-            <metric name="Innodb_rows_read" category="THROUGHPUT" alias="Innodb_rows_read" interval="60000" indicator="false"/>
-            <metric name="Innodb_rows_updated" category="THROUGHPUT" alias="Innodb_rows_updated" interval="60000" indicator="false"/>
-            <metric name="Key_blocks_not_flushed" category="THROUGHPUT" alias="Key_blocks_not_flushed" interval="60000" indicator="false"/>
-            <metric name="Key_blocks_unused" category="THROUGHPUT" alias="Key_blocks_unused" interval="60000" indicator="false"/>
-            <metric name="Key_blocks_used" category="THROUGHPUT" alias="Key_blocks_used" interval="60000" indicator="false"/>
-            <metric name="Key_read_requests" category="THROUGHPUT" alias="Key_read_requests" interval="60000" indicator="false"/>
-            <metric name="Key_reads" category="THROUGHPUT" alias="Key_reads" interval="60000" indicator="false"/>
-            <metric name="Key_write_requests" category="THROUGHPUT" alias="Key_write_requests" interval="60000" indicator="false"/>
-            <metric name="Key_writes" category="THROUGHPUT" alias="Key_writes" interval="60000" indicator="false"/>
-            <metric name="Last_query_cost" category="THROUGHPUT" alias="Last_query_cost" interval="60000" indicator="false"/>
-            <metric name="Max_used_connections" category="THROUGHPUT" alias="Max_used_connections" interval="60000" indicator="false"/>
-            <metric name="Not_flushed_delayed_rows" category="THROUGHPUT" alias="Not_flushed_delayed_rows" interval="60000" indicator="false"/>
-            <metric name="Open_files" category="THROUGHPUT" alias="Open_files" interval="60000" indicator="false"/>
-            <metric name="Open_streams" category="THROUGHPUT" alias="Open_streams" interval="60000" indicator="false"/>
-            <metric name="Open_tables" category="THROUGHPUT" alias="Open_tables" interval="60000" indicator="false"/>
-            <metric name="Opened_tables" category="THROUGHPUT" alias="Opened_tables" interval="60000" indicator="false"/>
-            <metric name="Prepared_stmt_count" category="THROUGHPUT" alias="Prepared_stmt_count" interval="60000" indicator="false"/>
-            <metric name="Qcache_free_blocks" category="THROUGHPUT" alias="Qcache_free_blocks" interval="60000" indicator="false"/>
-            <metric name="Qcache_free_memory" category="THROUGHPUT" alias="Qcache_free_memory" interval="60000" indicator="false"/>
-            <metric name="Qcache_hits" category="THROUGHPUT" alias="Qcache_hits" interval="60000" indicator="false"/>
-            <metric name="Qcache_inserts" category="THROUGHPUT" alias="Qcache_inserts" interval="60000" indicator="false"/>
-            <metric name="Qcache_lowmem_prunes" category="THROUGHPUT" alias="Qcache_lowmem_prunes" interval="60000" indicator="false"/>
-            <metric name="Qcache_not_cached" category="THROUGHPUT" alias="Qcache_not_cached" interval="60000" indicator="false"/>
-            <metric name="Qcache_queries_in_cache" category="THROUGHPUT" alias="Qcache_queries_in_cache" interval="60000" indicator="false"/>
-            <metric name="Qcache_total_blocks" category="THROUGHPUT" alias="Qcache_total_blocks" interval="60000" indicator="false"/>
-            <metric name="Questions" category="THROUGHPUT" alias="Questions" interval="60000" indicator="false"/>
-            <!--<metric name="Rpl_status" category="THROUGHPUT" alias="Rpl_status" interval="60000" indicator="false"/>-->
-            <metric name="Select_full_join" category="THROUGHPUT" alias="Select_full_join" interval="60000" indicator="false"/>
-            <metric name="Select_full_range_join" category="THROUGHPUT" alias="Select_full_range_join" interval="60000" indicator="false"/>
-            <metric name="Select_range" category="THROUGHPUT" alias="Select_range" interval="60000" indicator="false"/>
-            <metric name="Select_range_check" category="THROUGHPUT" alias="Select_range_check" interval="60000" indicator="false"/>
-            <metric name="Select_scan" category="THROUGHPUT" alias="Select_scan" interval="60000" indicator="false"/>
-            <metric name="Slave_open_temp_tables" category="THROUGHPUT" alias="Slave_open_temp_tables" interval="60000" indicator="false"/>
-            <metric name="Slave_retried_transactions" category="THROUGHPUT" alias="Slave_retried_transactions" interval="60000" indicator="false"/>
-            <!--<metric name="Slave_running" category="THROUGHPUT" alias="Slave_running" interval="60000" indicator="false"/>-->
-            <metric name="Slow_launch_threads" category="THROUGHPUT" alias="Slow_launch_threads" interval="60000" indicator="false"/>
-            <metric name="Slow_queries" category="THROUGHPUT" alias="Slow_queries" interval="60000" indicator="false"/>
-            <metric name="Sort_merge_passes" category="THROUGHPUT" alias="Sort_merge_passes" interval="60000" indicator="false"/>
-            <metric name="Sort_range" category="THROUGHPUT" alias="Sort_range" interval="60000" indicator="false"/>
-            <metric name="Sort_rows" category="THROUGHPUT" alias="Sort_rows" interval="60000" indicator="false"/>
-            <metric name="Sort_scan" category="THROUGHPUT" alias="Sort_scan" interval="60000" indicator="false"/>
-            <metric name="Ssl_accept_renegotiates" category="THROUGHPUT" alias="Ssl_accept_renegotiates" interval="60000" indicator="false"/>
-            <metric name="Ssl_accepts" category="THROUGHPUT" alias="Ssl_accepts" interval="60000" indicator="false"/>
-            <metric name="Ssl_callback_cache_hits" category="THROUGHPUT" alias="Ssl_callback_cache_hits" interval="60000" indicator="false"/>
-            <metric name="Ssl_cipher" category="THROUGHPUT" alias="Ssl_cipher" interval="60000" indicator="false"/>
-            <metric name="Ssl_cipher_list" category="THROUGHPUT" alias="Ssl_cipher_list" interval="60000" indicator="false"/>
-            <metric name="Ssl_client_connects" category="THROUGHPUT" alias="Ssl_client_connects" interval="60000" indicator="false"/>
-            <metric name="Ssl_connect_renegotiates" category="THROUGHPUT" alias="Ssl_connect_renegotiates" interval="60000" indicator="false"/>
-            <metric name="Ssl_ctx_verify_depth" category="THROUGHPUT" alias="Ssl_ctx_verify_depth" interval="60000" indicator="false"/>
-            <metric name="Ssl_ctx_verify_mode" category="THROUGHPUT" alias="Ssl_ctx_verify_mode" interval="60000" indicator="false"/>
-            <metric name="Ssl_default_timeout" category="THROUGHPUT" alias="Ssl_default_timeout" interval="60000" indicator="false"/>
-            <metric name="Ssl_finished_accepts" category="THROUGHPUT" alias="Ssl_finished_accepts" interval="60000" indicator="false"/>
-            <metric name="Ssl_finished_connects" category="THROUGHPUT" alias="Ssl_finished_connects" interval="60000" indicator="false"/>
-            <metric name="Ssl_session_cache_hits" category="THROUGHPUT" alias="Ssl_session_cache_hits" interval="60000" indicator="false"/>
-            <metric name="Ssl_session_cache_misses" category="THROUGHPUT" alias="Ssl_session_cache_misses" interval="60000" indicator="false"/>
-            <!--<metric name="Ssl_session_cache_mode" category="THROUGHPUT" alias="Ssl_session_cache_mode" interval="60000" indicator="false"/>-->
-            <metric name="Ssl_session_cache_overflows" category="THROUGHPUT" alias="Ssl_session_cache_overflows" interval="60000" indicator="false"/>
-            <metric name="Ssl_session_cache_size" category="THROUGHPUT" alias="Ssl_session_cache_size" interval="60000" indicator="false"/>
-            <metric name="Ssl_session_cache_timeouts" category="THROUGHPUT" alias="Ssl_session_cache_timeouts" interval="60000" indicator="false"/>
-            <metric name="Ssl_sessions_reused" category="THROUGHPUT" alias="Ssl_sessions_reused" interval="60000" indicator="false"/>
-            <metric name="Ssl_used_session_cache_entries" category="THROUGHPUT" alias="Ssl_used_session_cache_entries" interval="60000" indicator="false"/>
-            <metric name="Ssl_verify_depth" category="THROUGHPUT" alias="Ssl_verify_depth" interval="60000" indicator="false"/>
-            <metric name="Ssl_verify_mode" category="THROUGHPUT" alias="Ssl_verify_mode" interval="60000" indicator="false"/>
-            <metric name="Ssl_version" category="THROUGHPUT" alias="Ssl_version" interval="60000" indicator="false"/>
-            <metric name="Table_locks_immediate" category="THROUGHPUT" alias="Table_locks_immediate" interval="60000" indicator="false"/>
-            <metric name="Table_locks_waited" category="THROUGHPUT" alias="Table_locks_waited" interval="60000" indicator="false"/>
-            <metric name="Tc_log_max_pages_used" category="THROUGHPUT" alias="Tc_log_max_pages_used" interval="60000" indicator="false"/>
-            <metric name="Tc_log_page_size" category="THROUGHPUT" alias="Tc_log_page_size" interval="60000" indicator="false"/>
-            <metric name="Tc_log_page_waits" category="THROUGHPUT" alias="Tc_log_page_waits" interval="60000" indicator="false"/>
-            <metric name="Threads_cached" category="THROUGHPUT" alias="Threads_cached" interval="60000" indicator="false"/>
-            <metric name="Threads_connected" category="THROUGHPUT" alias="Threads_connected" interval="60000" indicator="false"/>
-            <metric name="Threads_created" category="THROUGHPUT" alias="Threads_created" interval="60000" indicator="false"/>
-            <metric name="Threads_running" category="THROUGHPUT" alias="Threads_running" interval="60000" indicator="false"/>
-            <metric name="Uptime" category="THROUGHPUT" alias="Uptime" interval="60000" indicator="false"/>
-            <metric name="Uptime_since_flush_status" category="THROUGHPUT" alias="Uptime_since_flush_status" interval="60000" indicator="false"/>
-            &process-metrics;
         </service>
         <!-- -->
         
@@ -799,94 +948,17 @@ USA.
             &process-metrics;
         </service>
         <!-- -->
-        
-        <metric name="Availability" template="sigar:Type=ProcState,Arg=%zimbra-ptql%:State" indicator="true"/>
-        &process-metrics;
-        <filter name="template" value="zimbra-stats:statsfile=%installpath%/zmstat/mailboxd.csv:${alias}"/>
-        <metric name="timestamp" category="THROUGHPUT" alias="timestamp" interval="60000" indicator="false"/>
-        <metric name="lmtp_rcvd_msgs" category="THROUGHPUT" alias="lmtp_rcvd_msgs" interval="60000" indicator="true" collectionType="trendsup"/>
-        <metric name="lmtp_rcvd_bytes" category="THROUGHPUT" alias="lmtp_rcvd_bytes" interval="60000" indicator="true" collectionType="trendsup"/>
-        <metric name="lmtp_rcvd_rcpt" category="THROUGHPUT" alias="lmtp_rcvd_rcpt" interval="60000" indicator="true" collectionType="trendsup"/>
-        <metric name="lmtp_dlvd_msgs" category="THROUGHPUT" alias="lmtp_dlvd_msgs" interval="60000" indicator="true" collectionType="trendsup"/>
-        <metric name="lmtp_dlvd_bytes" category="THROUGHPUT" alias="lmtp_dlvd_bytes" interval="60000" indicator="true" collectionType="trendsup"/>
-        <metric name="db_conn_count" category="THROUGHPUT" alias="db_conn_count" interval="60000" indicator="false"/>
-        <metric name="db_conn_ms_avg" category="THROUGHPUT" alias="db_conn_ms_avg" interval="60000" indicator="false"/>
-        <metric name="ldap_dc_count" category="THROUGHPUT" alias="ldap_dc_count" interval="60000" indicator="false"/>
-        <metric name="ldap_dc_ms_avg" category="THROUGHPUT" alias="ldap_dc_ms_avg" interval="60000" indicator="false"/>
-        <metric name="mbox_add_msg_count" category="THROUGHPUT" alias="mbox_add_msg_count" interval="60000" indicator="false"/>
-        <metric name="mbox_add_msg_ms_avg" category="THROUGHPUT" alias="mbox_add_msg_ms_avg" interval="60000" indicator="false"/>
-        <metric name="mbox_get_count" category="THROUGHPUT" alias="mbox_get_count" interval="60000" indicator="false"/>
-        <metric name="mbox_get_ms_avg" category="THROUGHPUT" alias="mbox_get_ms_avg" interval="60000" indicator="false"/>
-        <metric name="mbox_cache" category="THROUGHPUT" alias="mbox_cache" interval="60000" indicator="false"/>
-        <metric name="mbox_msg_cache" category="THROUGHPUT" alias="mbox_msg_cache" interval="60000" indicator="false"/>
-        <metric name="mbox_item_cache" category="THROUGHPUT" alias="mbox_item_cache" interval="60000" indicator="false"/>
-        <metric name="soap_count" category="THROUGHPUT" alias="soap_count" interval="60000" indicator="false"/>
-        <metric name="soap_ms_avg" category="THROUGHPUT" alias="soap_ms_avg" interval="60000" indicator="false"/>
-        <metric name="imap_count" category="THROUGHPUT" alias="imap_count" interval="60000" indicator="false"/>
-        <metric name="imap_ms_avg" category="THROUGHPUT" alias="imap_ms_avg" interval="60000" indicator="false"/>
-        <metric name="pop_count" category="THROUGHPUT" alias="pop_count" interval="60000" indicator="false"/>
-        <metric name="pop_ms_avg" category="THROUGHPUT" alias="pop_ms_avg" interval="60000" indicator="false"/>
-        <metric name="idx_wrt_avg" category="THROUGHPUT" alias="idx_wrt_avg" interval="60000" indicator="false"/>
-        <metric name="idx_wrt_opened" category="THROUGHPUT" alias="idx_wrt_opened" interval="60000" indicator="false"/>
-        <metric name="idx_wrt_opened_cache_hit" category="THROUGHPUT" alias="idx_wrt_opened_cache_hit" interval="60000" indicator="false"/>
-        <metric name="calcache_hit" category="THROUGHPUT" alias="calcache_hit" interval="60000" indicator="false"/>
-        <metric name="calcache_mem_hit" category="THROUGHPUT" alias="calcache_mem_hit" interval="60000" indicator="false"/>
-        <metric name="calcache_lru_size" category="THROUGHPUT" alias="calcache_lru_size" interval="60000" indicator="false"/>
-        <metric name="idx_bytes_written" category="THROUGHPUT" alias="idx_bytes_written" interval="60000" indicator="false"/>
-        <metric name="idx_bytes_written_avg" category="THROUGHPUT" alias="idx_bytes_written_avg" interval="60000" indicator="false"/>
-        <metric name="idx_bytes_read" category="THROUGHPUT" alias="idx_bytes_read" interval="60000" indicator="false"/>
-        <metric name="idx_bytes_read_avg" category="THROUGHPUT" alias="idx_bytes_read_avg" interval="60000" indicator="false"/>
-        <metric name="bis_read" category="THROUGHPUT" alias="bis_read" interval="60000" indicator="false"/>
-        <metric name="bis_seek_rate" category="THROUGHPUT" alias="bis_seek_rate" interval="60000" indicator="false"/>
-        <metric name="db_pool_size" category="THROUGHPUT" alias="db_pool_size" interval="60000" indicator="false"/>
-        <metric name="innodb_bp_hit_rate" category="THROUGHPUT" alias="innodb_bp_hit_rate" interval="60000" indicator="false"/>
-        <metric name="pop_conn" category="THROUGHPUT" alias="pop_conn" interval="60000" indicator="false"/>
-        <metric name="pop_ssl_conn" category="THROUGHPUT" alias="pop_ssl_conn" interval="60000" indicator="false"/>
-        <metric name="imap_conn" category="THROUGHPUT" alias="imap_conn" interval="60000" indicator="false"/>
-        <metric name="imap_ssl_conn" category="THROUGHPUT" alias="imap_ssl_conn" interval="60000" indicator="false"/>
-        <metric name="soap_sessions" category="THROUGHPUT" alias="soap_sessions" interval="60000" indicator="false"/>
-        <metric name="gc_copy_count" category="THROUGHPUT" alias="gc_copy_count" interval="60000" indicator="false"/>
-        <metric name="gc_copy_ms" category="THROUGHPUT" alias="gc_copy_ms" interval="60000" indicator="false"/>
-        <metric name="gc_marksweepcompact_count" category="THROUGHPUT" alias="gc_marksweepcompact_count" interval="60000" indicator="false"/>
-        <metric name="gc_marksweepcompact_ms" category="THROUGHPUT" alias="gc_marksweepcompact_ms" interval="60000" indicator="false"/>
-        <metric name="gc_minor_count" category="THROUGHPUT" alias="gc_minor_count" interval="60000" indicator="false"/>
-        <metric name="gc_minor_ms" category="THROUGHPUT" alias="gc_minor_ms" interval="60000" indicator="false"/>
-        <metric name="gc_major_count" category="THROUGHPUT" alias="gc_major_count" interval="60000" indicator="false"/>
-        <metric name="gc_major_ms" category="THROUGHPUT" alias="gc_major_ms" interval="60000" indicator="false"/>
-        <metric name="mpool_code_cache_used" category="THROUGHPUT" alias="mpool_code_cache_used" interval="60000" indicator="false"/>
-        <metric name="mpool_code_cache_free" category="THROUGHPUT" alias="mpool_code_cache_free" interval="60000" indicator="false"/>
-        <metric name="mpool_eden_space_used" category="THROUGHPUT" alias="mpool_eden_space_used" interval="60000" indicator="false"/>
-        <metric name="mpool_eden_space_free" category="THROUGHPUT" alias="mpool_eden_space_free" interval="60000" indicator="false"/>
-        <metric name="mpool_survivor_space_used" category="THROUGHPUT" alias="mpool_survivor_space_used" interval="60000" indicator="false"/>
-        <metric name="mpool_survivor_space_free" category="THROUGHPUT" alias="mpool_survivor_space_free" interval="60000" indicator="false"/>
-        <metric name="mpool_tenured_gen_used" category="THROUGHPUT" alias="mpool_tenured_gen_used" interval="60000" indicator="false"/>
-        <metric name="mpool_tenured_gen_free" category="THROUGHPUT" alias="mpool_tenured_gen_free" interval="60000" indicator="false"/>
-        <metric name="mpool_perm_gen_used" category="THROUGHPUT" alias="mpool_perm_gen_used" interval="60000" indicator="false"/>
-        <metric name="mpool_perm_gen_free" category="THROUGHPUT" alias="mpool_perm_gen_free" interval="60000" indicator="false"/>
-        <metric name="heap_used" category="THROUGHPUT" alias="heap_used" interval="60000" indicator="false"/>
-        <metric name="heap_free" category="THROUGHPUT" alias="heap_free" interval="60000" indicator="false"/>
-        
+           
         <service name="CPU Stats">
             <plugin type="collector" class="org.hyperic.hq.plugin.zimbra.five.ZimbraCollector"/>
             <config>
                 <option name="cpu-stat-ptql" default="Pid.PidFile.eq=%installpath%/zmstat/pid/zmstat-cpu.pid" description="Sigar PTQL Process Query"/>
             </config>
-            <filter name="template" value="zimbra-stats:statsfile=%installpath%/zmstat/cpu.csv:${alias}"/>
-            <metric name="Availability" template="sigar:Type=ProcState,Arg=%cpu-stat-ptql%:State" indicator="true"/>
-            <metric name="timestamp" category="THROUGHPUT" alias="timestamp" interval="60000" indicator="false" units="percentage"/>
-            <metric name="cpu:user" category="THROUGHPUT" alias="cpu:user" interval="60000" indicator="false" units="percentage"/>
-            <metric name="cpu:nice" category="THROUGHPUT" alias="cpu:nice" interval="60000" indicator="false" units="percentage"/>
-            <metric name="cpu:sys" category="THROUGHPUT" alias="cpu:sys" interval="60000" indicator="false" units="percentage"/>
-            <metric name="cpu:idle" category="THROUGHPUT" alias="cpu:idle" interval="60000" indicator="false" units="percentage"/>
-            <metric name="cpu:iowait" category="THROUGHPUT" alias="cpu:iowait" interval="60000" indicator="false" units="percentage"/>
-            <metric name="cpu:irq" category="THROUGHPUT" alias="cpu:irq" interval="60000" indicator="false" units="percentage"/>
-            <metric name="cpu:softirq" category="THROUGHPUT" alias="cpu:softirq" interval="60000" indicator="false" units="percentage"/>
         </service>
         <service name="FD Stats" description="Host System File Descriptors Stats">
             <plugin type="collector" class="org.hyperic.hq.plugin.zimbra.five.ZimbraCollector"/>
-            <filter name="template" value="zimbra-stats:statsfile=%installpath%/zmstat/fd.csv:${alias}"/>
             <metric name="Availability" template="sigar:Type=ProcState,Arg=%fd-stat-ptql%:State" indicator="true"/>
-            <metric name="fd_count" category="UTILIZATION" alias="fd_count" interval="60000" units="none" indicator="true"/>
+            <metric name="fd_count" template="zimbra-stats:statsfile=%installpath%/zmstat/fd.csv:${alias}" category="UTILIZATION" alias="fd_count" interval="60000" units="none" indicator="true"/>
         </service>
         
         <service name="MTAQueue Stats" description="Postfix queue stats">
@@ -894,10 +966,9 @@ USA.
             <config>
                 <option name="mtaqueue-stat-ptql" default="Pid.PidFile.eq=%installpath%/zmstat/pid/zmstat-mtaqueue.pid" description="Sigar PTQL Process Query"/>
             </config>
-            <filter name="template" value="zimbra-stats:statsfile=%installpath%/zmstat/mtaqueue.csv:${alias}"/>
             <metric name="Availability" template="sigar:Type=ProcState,Arg=%mtaqueue-stat-ptql%:State" indicator="true"/>
-            <metric name="KBytes" category="THROUGHPUT" alias="KBytes" interval="60000" units="KB" indicator="false"/>
-            <metric name="requests" category="THROUGHPUT" alias="requests" interval="60000" units="none" indicator="false"/>
+            <metric name="KBytes" template="${template_mtaqueue}" category="THROUGHPUT" alias="KBytes" interval="60000" units="KB" indicator="false"/>
+            <metric name="requests" template="${template_mtaqueue}" category="THROUGHPUT" alias="requests" interval="60000" units="none" indicator="false"/>
         </service>
         
         <service name="VM Stats">
@@ -905,57 +976,6 @@ USA.
             <config>
                 <option name="vm-stat-ptql" default="Pid.PidFile.eq=%installpath%/zmstat/pid/zmstat-vm.pid" description="Sigar PTQL Process Query"/>
             </config>
-            <filter name="template" value="zimbra-stats:statsfile=%installpath%/zmstat/vm.csv:${alias}"/>
-            <metric name="Availability" template="sigar:Type=ProcState,Arg=%vm-stat-ptql%:State" indicator="true"/>
-            <metric name="timestamp" category="THROUGHPUT" alias="timestamp" interval="60000" indicator="false"/>
-            <metric name="r" category="THROUGHPUT" alias="__r" interval="60000" indicator="false"/>
-            <metric name="b" category="THROUGHPUT" alias="__b" interval="60000" indicator="false"/>
-            <metric name="swpd" category="THROUGHPUT" alias="swpd" interval="60000" indicator="false"/>
-            <metric name="free" category="THROUGHPUT" alias="free" interval="60000" indicator="false"/>
-            <metric name="buff" category="THROUGHPUT" alias="buff" interval="60000" indicator="false"/>
-            <metric name="cache" category="THROUGHPUT" alias="cache" interval="60000" indicator="false"/>
-            <metric name="si" category="THROUGHPUT" alias="__si" interval="60000" indicator="false"/>
-            <metric name="so" category="THROUGHPUT" alias="__so" interval="60000" indicator="false"/>
-            <metric name="bi" category="THROUGHPUT" alias="__bi" interval="60000" indicator="false"/>
-            <metric name="bo" category="THROUGHPUT" alias="__bo" interval="60000" indicator="false"/>
-            <metric name="in" category="THROUGHPUT" alias="__in" interval="60000" indicator="false"/>
-            <metric name="cs" category="THROUGHPUT" alias="__cs" interval="60000" indicator="false"/>
-            <metric name="us" category="THROUGHPUT" alias="__us" interval="60000" indicator="false"/>
-            <metric name="sy" category="THROUGHPUT" alias="__sy" interval="60000" indicator="false"/>
-            <metric name="id" category="THROUGHPUT" alias="__id" interval="60000" indicator="false"/>
-            <metric name="wa" category="THROUGHPUT" alias="__wa" interval="60000" indicator="false"/>
-            <metric name="st" category="THROUGHPUT" alias="__st" interval="60000" indicator="false"/>
-            <metric name="MemTotal" category="THROUGHPUT" alias="MemTotal" interval="60000" indicator="false"/>
-            <metric name="MemFree" category="THROUGHPUT" alias="MemFree" interval="60000" indicator="false"/>
-            <metric name="Buffers" category="THROUGHPUT" alias="Buffers" interval="60000" indicator="false"/>
-            <metric name="Cached" category="THROUGHPUT" alias="Cached" interval="60000" indicator="false"/>
-            <metric name="SwapCached" category="THROUGHPUT" alias="SwapCached" interval="60000" indicator="false"/>
-            <metric name="Active" category="THROUGHPUT" alias="Active" interval="60000" indicator="false"/>
-            <metric name="Inactive" category="THROUGHPUT" alias="Inactive" interval="60000" indicator="false"/>
-            <metric name="HighTotal" category="THROUGHPUT" alias="HighTotal" interval="60000" indicator="false"/>
-            <metric name="HighFree" category="THROUGHPUT" alias="HighFree" interval="60000" indicator="false"/>
-            <metric name="LowTotal" category="THROUGHPUT" alias="LowTotal" interval="60000" indicator="false"/>
-            <metric name="LowFree" category="THROUGHPUT" alias="LowFree" interval="60000" indicator="false"/>
-            <metric name="SwapTotal" category="THROUGHPUT" alias="SwapTotal" interval="60000" indicator="false"/>
-            <metric name="SwapFree" category="THROUGHPUT" alias="SwapFree" interval="60000" indicator="false"/>
-            <metric name="Dirty" category="THROUGHPUT" alias="Dirty" interval="60000" indicator="false"/>
-            <metric name="Writeback" category="THROUGHPUT" alias="Writeback" interval="60000" indicator="false"/>
-            <metric name="AnonPages" category="THROUGHPUT" alias="AnonPages" interval="60000" indicator="false"/>
-            <metric name="Mapped" category="THROUGHPUT" alias="Mapped" interval="60000" indicator="false"/>
-            <metric name="Slab" category="THROUGHPUT" alias="Slab" interval="60000" indicator="false"/>
-            <metric name="PageTables" category="THROUGHPUT" alias="PageTables" interval="60000" indicator="false"/>
-            <metric name="NFS_Unstable" category="THROUGHPUT" alias="NFS_Unstable" interval="60000" indicator="false"/>
-            <metric name="Bounce" category="THROUGHPUT" alias="Bounce" interval="60000" indicator="false"/>
-            <metric name="CommitLimit" category="THROUGHPUT" alias="CommitLimit" interval="60000" indicator="false"/>
-            <metric name="Committed_AS" category="THROUGHPUT" alias="Committed_AS" interval="60000" indicator="false"/>
-            <metric name="VmallocTotal" category="THROUGHPUT" alias="VmallocTotal" interval="60000" indicator="false"/>
-            <metric name="VmallocUsed" category="THROUGHPUT" alias="VmallocUsed" interval="60000" indicator="false"/>
-            <metric name="VmallocChunk" category="THROUGHPUT" alias="VmallocChunk" interval="60000" indicator="false"/>
-            <metric name="HugePages_Total" category="THROUGHPUT" alias="HugePages_Total" interval="60000" indicator="false"/>
-            <metric name="HugePages_Free" category="THROUGHPUT" alias="HugePages_Free" interval="60000" indicator="false"/>
-            <metric name="HugePages_Rsvd" category="THROUGHPUT" alias="HugePages_Rsvd" interval="60000" indicator="false"/>
-            <metric name="Hugepagesize" category="THROUGHPUT" alias="Hugepagesize" interval="60000" indicator="false"/>
-            <metric name="loadavg" category="THROUGHPUT" alias="loadavg" interval="60000" indicator="false"/>
         </service>
         
     </server>
@@ -964,6 +984,9 @@ USA.
     <help name="Zimbra">
         <![CDATA[
     <p>
+        The agent user must be in "zimbra" grop, and needs sudo access as root in order to access the appropriate files.
+
+
       Here is the link to the Zimbra wiki that describes a lot of the plugin metrics:
       http://wiki.zimbra.com/index.php?title=Log_Files
     </p>
