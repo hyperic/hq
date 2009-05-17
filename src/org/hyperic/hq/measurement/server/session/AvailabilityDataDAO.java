@@ -317,7 +317,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
                     .append("SELECT m, min(rle.availVal),")
                     .append(" max(rle.availVal),")
                     .append(" avg(rle.availVal),")
-                    .append(" count(distinct m.id), ")
+                    .append(" (:endtime - :startime) / m.interval, ")
                     .append(" sum(").append(TOTAL_UPTIME).append("), ")
                     .append(" sum(").append(TOTAL_TIME).append(") ")
                     .append(" FROM Measurement m")
