@@ -879,7 +879,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         final ServerManagerLocal svrMan = ServerManagerEJBImpl.getOne();
         final CPropManagerLocal cpropMan = CPropManagerEJBImpl.getOne();
     
-        for (Iterator i = mergeInfos.iterator(); i.hasNext();) {
+        for (final Iterator i = mergeInfos.iterator(); i.hasNext();) {
             ServiceMergeInfo sInfo = (ServiceMergeInfo) i.next();
             AIServiceValue aiservice = sInfo.aiservice;
             Server server = svrMan.getServerById(sInfo.serverId);
@@ -887,8 +887,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             _log.info("Checking for existing service: " + aiservice.getName());
             
             final ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
-            Service service = svcMan.getServiceByName(server,
-                                                      aiservice.getName());
+            Service service =
+                svcMan.getServiceByAIID(server, aiservice.getName());
             boolean update = false;
             
             if (service == null) {

@@ -236,6 +236,18 @@ public class ServiceDAO extends HibernateDAO
             .uniqueResult();
     }
 
+    public Service getByAIID(Server server, String aiid) {
+        final String sql = new StringBuilder()
+            .append("select s from Service s")
+            .append(" WHERE s.server = :server")
+            .append(" AND s.autoinventoryIdentifier = :aiid")
+            .toString();
+        return (Service) createQuery(sql)
+            .setParameter("server", server)
+            .setParameter("aiid", aiid)
+            .uniqueResult();
+    }
+
     public Collection findByPlatform_orderName(Integer id, boolean asc)
     {
         String sql="select sv from Service sv " +
