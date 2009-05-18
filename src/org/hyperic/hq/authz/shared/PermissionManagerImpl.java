@@ -447,6 +447,7 @@ public class PermissionManagerImpl
             .append(" ON ").append(resVar).append(".id = edge.TO_ID")
             .append(" AND ").append(resVar).append(".id = edge.FROM_ID")
             .append(" WHERE edge.distance >= :").append(distanceParam)
+            .append(" AND edge.rel_id = " + AuthzConstants.RELATION_CONTAINMENT_ID)
             .append(" AND ").append(resVar).append(".id = :").append(resParam)
             .append(" ").toString();
 
@@ -470,8 +471,9 @@ public class PermissionManagerImpl
             "join " + resourceVar+ ".toEdges _e " + 
             "join _e.from _fromResource " +  
             "where " + 
-            "  _fromResource = :" + resourceParam + 
-            "  and _e.distance >= :" + distanceParam + " "; 
+            "  _fromResource = :" + resourceParam +
+            "  and _e.distance >= :" + distanceParam +  
+            "  and _e.relation.id = " + AuthzConstants.RELATION_CONTAINMENT_ID + " ";
 
         return new EdgePermCheck(sql, subjectParam, resourceVar,
                                  resourceParam, distanceParam, opsParam) 
