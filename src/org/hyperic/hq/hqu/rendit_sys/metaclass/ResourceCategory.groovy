@@ -154,13 +154,15 @@ class ResourceCategory {
     }
     
     static List getAlertDefinitions(Resource r, AuthzSubject user) {
+        def alertDefs
         if (r.isPlatform() || r.isServer() || r.isService()) {
             // Individual alert definition
-            return defMan.findAlertDefinitions(user, r.entityId)
+            alertDefs = defMan.findAlertDefinitions(user, r.entityId)
         } else {
             // Resource type alert definition
-            return defMan.findAlertDefinitions(user, r)
+            alertDefs = defMan.findAlertDefinitions(user, r)
         }
+        alertDefs.findAll { !it.deleted }
     }
 
     /**
