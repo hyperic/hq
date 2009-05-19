@@ -272,7 +272,7 @@
         
         var updatedDate = new Date(summaryInfo.LastUpdated);
         document.getElementById("OpHeaderLastUpdated").innerHTML =
-            "Updated at " + updatedDate.formatDate('hh:mm:ss') +
+            "Updated at " + updatedDate.formatDate('HH:mm:ss') +
             ", population took " + summaryInfo.FetchTime + " ms.";
 
         document.getElementById("DownPlatforms").innerHTML = formatValue(summaryInfo.DownPlatforms);
