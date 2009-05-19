@@ -52,8 +52,6 @@ public final class JMXFilter implements Filter {
 
     public static final String UNKNOWN_IP = "0.0.0.0";
     
-    static HashMap filters = new HashMap();
-    
     // Objects to tell us where to log URL data.
     private BufferedWriter logwriter;
     private RandomAccessFile logfile;
