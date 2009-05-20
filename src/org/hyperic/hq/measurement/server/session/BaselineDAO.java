@@ -72,15 +72,13 @@ public class BaselineDAO extends HibernateDAO {
         String sql = new StringBuffer()
             .append("SELECT {m.*}")
         	.append(" FROM EAM_MEASUREMENT m")
-        	.append(" LEFT JOIN (")
-        	    .append("SELECT measurement_id, id from EAM_MEASUREMENT_BL")
-        	    .append(" WHERE compute_time > :computeTime")
-        	.append(" ) b on b.measurement_id = m.id")
+        	.append(" LEFT JOIN EAM_MEASUREMENT_BL b on b.measurement_id = m.id")
         	.append(" JOIN EAM_MEASUREMENT_TEMPL t on m.template_id = t.id")
         	.append(" WHERE t.COLLECTION_TYPE=:collType")
         	.append(" AND m.ENABLED=:enabled")
         	.append(" AND m.COLL_INTERVAL is not null")
-        	.append(" AND b.ID is null").toString();
+        	.append(" AND (b.id is null or b.compute_time < :computeTime) ")
+        	.toString();
         int collType = MeasurementConstants.COLL_TYPE_DYNAMIC;
         return getSession().createSQLQuery(sql)
             .addEntity("m", Measurement.class)
