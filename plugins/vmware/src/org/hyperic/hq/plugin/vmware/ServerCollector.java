@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -23,23 +23,32 @@
  * USA.
  */
 
-package org.hyperic.hq.plugin.vim;
+package org.hyperic.hq.plugin.vmware;
 
-public class VimPoolCollector extends VimHostCollector {
+import java.util.Map;
 
-    static final String PROP_POOL = "pool";
-    
-    static final String TYPE = VimUtil.POOL;
+import org.hyperic.hq.product.Collector;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.sigar.vmware.VMwareException;
 
-    protected String getName() {
-        return getProperties().getProperty(PROP_POOL);
+public class ServerCollector extends Collector {
+
+    public void collect() {
+        try {
+            Map values =
+                VMwareMetrics.getInstance(getProperties());
+
+            addValues(values);
+            setAvailability(true);
+        } catch (VMwareException e) {
+            setAvailability(true);
+            setErrorMessage(e.getMessage());
+        }
     }
 
-    protected String getType() {
-        return TYPE;
-    }
+    protected void init() throws PluginException {
+        VMwareProductPlugin.checkIsLoaded();
 
-    protected void collect(VimUtil vim) throws Exception {
-        super.collect(vim);
+        setSource(getPlugin().getName());
     }
 }

@@ -1048,7 +1048,7 @@
 
     <hqplugin name="informix"/>
 	
-    <hqplugin name="vim"/>
+    <hqplugin name="vmware"/>
 
     <hqplugin name="xen">
        <!-- XXX Xen sdk built w/ 1.6 + mods for Xen 4.0 compat -->

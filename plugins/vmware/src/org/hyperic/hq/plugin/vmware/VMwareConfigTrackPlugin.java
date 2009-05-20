@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -23,29 +23,20 @@
  * USA.
  */
 
-package org.hyperic.hq.plugin.vim;
+package org.hyperic.hq.plugin.vmware;
 
-import org.hyperic.hq.product.MeasurementPlugin;
-import org.hyperic.hq.product.Metric;
-import org.hyperic.hq.product.MetricNotFoundException;
-import org.hyperic.hq.product.MetricUnreachableException;
-import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.ConfigFileTrackPlugin;
+import org.hyperic.hq.product.TypeInfo;
 
-public class VimMeasurementPlugin extends MeasurementPlugin {
+public class VMwareConfigTrackPlugin extends ConfigFileTrackPlugin {
 
-    public MetricValue getValue(Metric metric)
-        throws PluginException, MetricNotFoundException, MetricUnreachableException {
-
-        MetricValue value = super.getValue(metric);
-        //special case where VM service (NIC,CPU,etc) metrics are collected
-        //by the VmCollector who won't set Availabilty.%instance%
-        //when a VM is off
-        if ((value.getValue() == MetricValue.VALUE_NONE) &&
-            metric.getAttributeName().equals(Metric.ATTR_AVAIL))
-        {
-            value.setValue(Metric.AVAIL_DOWN);
+    public String getDefaultConfigFile(String installPath) {
+        //these lame defaults should never get used, they are auto-discovered
+        if (getTypeInfo().getType() == TypeInfo.TYPE_SERVER) {
+            return "server-config-file";
         }
-        return value;
+        else {
+            return "${vm.name}.vmx";
+        }
     }
 }
