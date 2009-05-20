@@ -269,7 +269,7 @@ public class AlertDefinitionManagerEJBImpl
                     new EnableAlertDefActionConfig();
                 action.setAlertDefId(cond.getMeasurementId());
 
-                recoverAction.setClassname(action.getClass().getName());
+                recoverAction.setClassname(action.getImplementor());
                 try {
                     recoverAction
                         .setConfig(action.getConfigResponse().encode());
@@ -446,7 +446,7 @@ public class AlertDefinitionManagerEJBImpl
                     if (recoverAction == null) {
                         recoverAction = new ActionValue();
                         action.setAlertDefId(conds[i].getMeasurementId());
-                        recoverAction.setClassname(action.getClass().getName());
+                        recoverAction.setClassname(action.getImplementor());
 
                         try {
                             recoverAction
