@@ -223,6 +223,7 @@
           <!-- Shared and utility sources -->
           <path location="src" />
           <!-- Test sources -->
+		  <path location="unittest/src"/>
           <!-- Plugin sources -->
           <dirset dir="plugins">
             <include name="*/src"/>
