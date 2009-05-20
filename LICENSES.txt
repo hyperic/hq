@@ -155,6 +155,11 @@ Information: http://tapestry.apache.org/
 License: http://www.apache.org/licenses/LICENSE-2.0
 Use: UI Framework
 
+- JQuery -
+Information: http://jquery.com/
+License: http://docs.jquery.com/License
+Use: Javascript Toolkit
+
 - CAS -
 Copyright (c) 2007, JA-SIG, Inc.
 All rights reserved.
@@ -162,3 +167,7 @@ Information: http://www.jasig.org/cas
 License: http://developer.jasig.org/source/browse/jasigsvn/cas3/trunk/license.txt
 Use: Single Sign-on
 
+- SAAJ -
+Information: https://saaj.dev.java.net/
+License: https://glassfish.dev.java.net/public/CDDL+GPL.html
+Use: SOAP Messaging

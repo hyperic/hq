@@ -96,7 +96,7 @@
     <path refid="pdknative" />
     <path refid="unittest" />
     <fileset dir="${lather.lib}" includes="lather.jar" />
-    <fileset dir="${thirdparty.lib}" includes="*.jar" excludes="strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar"/>
+    <fileset dir="${thirdparty.lib}" includes="*.jar" excludes="strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar,jaas.jar"/>
     <fileset dir="${thirdparty.lib}" includes="*.zip" />      
     <fileset dir="${thirdparty.lib}/oracle_jdbc" includes="*.jar" />
     <fileset dir="${thirdparty.lib}/postgresql"
@@ -223,7 +223,6 @@
           <!-- Shared and utility sources -->
           <path location="src" />
           <!-- Test sources -->
-          <path location="unittest/src"/>
           <!-- Plugin sources -->
           <dirset dir="plugins">
             <include name="*/src"/>
@@ -944,14 +943,9 @@
     <!-- Copy jdbc drivers for use with jdbc based plugins -->
     <mkdir dir="${pdk.lib}/jdbc"/>
     <copy toDir="${pdk.lib}/jdbc">
-       <fileset dir="${thirdparty.lib}/oracle_jdbc" includes="oracle12.jar" />
-       <fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar" />
-       <fileset dir="${thirdparty.lib}/sybase_jdbc" includes="jconn3.jar" />
-       <fileset dir="${thirdparty.lib}/informix_jdbc" includes="ifxjdbc.jar" />
-       <!-- Postgres plugin uses the 7.4.3 driver -->
+	   	<fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar" />
+       	<!-- Postgres plugin uses the 7.4.3 driver -->
        <fileset dir="${thirdparty.lib}/postgresql" includes="postgresql-7.4.3.jar"/>
-       <fileset dir="${thirdparty.lib}/mssql_jdbc" includes="ms*.jar" />
-       <fileset dir="${thirdparty.lib}/db2_jdbc" includes="*.jar" />
     </copy>
 
     <!-- requires ${pdk.lib} we just created -->
@@ -1031,8 +1025,6 @@
 
     <hqplugin name="mssql"/>
 
-    <hqplugin name="mqseries"/>
-
     <hqplugin name="ntp"/>
 
     <hqplugin name="bind"/>
@@ -1054,9 +1046,7 @@
     <hqplugin name="perlbal"/>
 
     <hqplugin name="informix"/>
-
-    <hqplugin name="vmware"/>
-
+	
     <hqplugin name="vim"/>
 
     <hqplugin name="xen">
