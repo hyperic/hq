@@ -50,6 +50,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.bizapp.shared.action.EnableAlertDefActionConfig;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
@@ -65,9 +66,12 @@ import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
-import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementDAO;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
+import org.hyperic.util.config.InvalidOptionException;
+import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -252,6 +256,29 @@ public class AlertDefinitionManagerEJBImpl
                 }
                 res.setName(describeCondition(cond, dm));
             }
+            
+            if (cond.getType() == EventConstants.TYPE_ALERT) {
+                ActionValue recoverAction = new ActionValue();
+
+                EnableAlertDefActionConfig action =
+                    new EnableAlertDefActionConfig();
+                action.setAlertDefId(cond.getMeasurementId());
+
+                recoverAction.setClassname(action.getClass().getName());
+                try {
+                    recoverAction
+                        .setConfig(action.getConfigResponse().encode());
+                } catch (EncodingException e) {
+                    log.debug("Error encoding EnableAlertDefAction", e);
+                } catch (InvalidOptionException e) {
+                    log.debug("Error encoding EnableAlertDefAction", e);
+                } catch (InvalidOptionValueException e) {
+                    log.debug("Error encoding EnableAlertDefAction", e);
+                }
+                
+                a.addAction(recoverAction);
+            }
+            
             acDAO.save(cond);
         }
                 
@@ -333,6 +360,21 @@ public class AlertDefinitionManagerEJBImpl
         }
     }
 
+    /**
+     * Get the EnableAlertDefAction ActionValue from an
+     * AlertDefinitionValue.  If none exists, return null.
+     */
+    private ActionValue getEnableAction(AlertDefinitionValue adv) {
+        ActionValue[] actions = adv.getActions();
+        EnableAlertDefActionConfig cfg = new EnableAlertDefActionConfig();
+        for (int i = 0; i < actions.length; ++i) {
+            String actionClass = actions[i].getClassname();
+            if (cfg.getImplementor().equals(actionClass))
+                return actions[i];
+        }
+        return null;
+    }
+
     /** 
      * Update an alert definition
      * @ejb:interface-method
@@ -344,6 +386,10 @@ public class AlertDefinitionManagerEJBImpl
         AlertDefinitionDAO dao = getAlertDefDAO();
         ActionDAO actDao = getActionDAO();
         AlertDefinition aldef = dao.findById(adval.getId());
+
+        // Find recovery actions first
+        ActionValue recoverAction = getEnableAction(adval);
+        adval.removeAction(recoverAction);
         
         // See if the conditions changed
         if (adval.getAddedConditions().size()   > 0 ||
@@ -361,6 +407,49 @@ public class AlertDefinitionManagerEJBImpl
                 // Trigger ID is null for resource type alerts
                 if (conds[i].getTriggerId() != null) 
                     trigger = getTriggerDAO().findById(conds[i].getTriggerId());
+                
+                if (conds[i].getType() == EventConstants.TYPE_ALERT) {
+                    EnableAlertDefActionConfig action =
+                        new EnableAlertDefActionConfig();
+                    if (recoverAction != null) {
+                        try {
+                            ConfigResponse configResponse =
+                                ConfigResponse.decode(recoverAction.getConfig());
+                            action.init(configResponse);
+
+                            if (action.getAlertDefId() !=
+                                conds[i].getMeasurementId()) {
+                                action.setAlertDefId(conds[i].getMeasurementId());
+                                recoverAction.setConfig(action
+                                                            .getConfigResponse()
+                                                            .encode());
+                                adval.updateAction(recoverAction);
+                            }
+                        } catch (Exception e) {
+                            recoverAction = null;
+                        }
+                    }
+
+                    // Add action if doesn't exist
+                    if (recoverAction == null) {
+                        recoverAction = new ActionValue();
+                        action.setAlertDefId(conds[i].getMeasurementId());
+                        recoverAction.setClassname(action.getClass().getName());
+
+                        try {
+                            recoverAction
+                            .setConfig(action.getConfigResponse().encode());
+                        } catch (EncodingException e) {
+                            log.debug("Error encoding EnableAlertDefAction", e);
+                        } catch (InvalidOptionException e) {
+                            log.debug("Error encoding EnableAlertDefAction", e);
+                        } catch (InvalidOptionValueException e) {
+                            log.debug("Error encoding EnableAlertDefAction", e);
+                        }
+
+                        adval.addAction(recoverAction);
+                    }
+                }
                 
                 aldef.createCondition(conds[i], trigger);
             }
