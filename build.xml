@@ -1610,7 +1610,6 @@
       <fileset dir="${build.dir}/ant" includes="**/lib/*"/>
       <fileset dir="${sigar.lib}" includes="**"/>
       <fileset dir="${thirdparty.lib}">
-        <include name="oracle_jdbc/ojdbc14.jar"/>
         <include name="postgresql/postgresql-8.2-*.jdbc3.jar"/>
         <include name="mysql_jdbc/mysql*.jar"/>
         <include name="jakarta-oro*.jar" />
