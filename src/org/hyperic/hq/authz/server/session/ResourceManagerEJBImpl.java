@@ -42,6 +42,7 @@ import javax.ejb.SessionBean;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
@@ -63,6 +64,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.ResourceEdgeCreateException;
 import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.authz.shared.ResourceManagerUtil;
 import org.hyperic.hq.common.SystemException;
@@ -213,68 +215,6 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
 
         ResourceAudit.moveResource(target, destination, owner, start,
                                    System.currentTimeMillis());
-    }
-
-    /**
-     * 
-     * @ejb:interface-method
-     */
-    public void associateResourceByNetworkRelation(AuthzSubject subject,
-                                                   AppdefEntityID parent,
-                                                   AppdefEntityID[] children)
-        throws PermissionException {
-        
-        ResourceRelation relation = getNetworkRelation();
-        Resource parentResource = findResource(parent);
-        Resource childResource = null;
-        
-        if (parentResource != null && !parentResource.isInAsyncDeleteState()) {
-            ResourceEdgeDAO eDAO = getResourceEdgeDAO();
-
-            if (findResourceByNetworkRelation(parentResource).isEmpty()) {
-                // create self-edge for parent of network hierarchy
-                eDAO.create(parentResource, parentResource, 0, relation);
-            }
-            for (int i=0; i< children.length; i++) {
-                childResource = findResource(children[i]);
-                
-                if (childResource != null && !childResource.isInAsyncDeleteState()) {
-                    eDAO.create(parentResource, childResource, 1, relation);
-                    eDAO.create(childResource, parentResource, -1, relation);
-                }
-            }
-        }
-    }
-    
-    /**
-     * 
-     * @ejb:interface-method
-     */
-    public void disassociateResourceByNetworkRelation(AuthzSubject subject,
-                                                      AppdefEntityID parent,
-                                                      AppdefEntityID[] children)
-        throws PermissionException {
-        
-        ResourceRelation relation = getNetworkRelation();
-        Resource parentResource = findResource(parent);
-        Resource childResource = null;
-        
-        if (parentResource != null && !parentResource.isInAsyncDeleteState()) {
-            ResourceEdgeDAO eDAO = getResourceEdgeDAO();
-
-            for (int i=0; i< children.length; i++) {
-                childResource = findResource(children[i]);
-                
-                if (childResource != null && !childResource.isInAsyncDeleteState()) {
-                    eDAO.deleteEdge(parentResource, childResource, relation);
-                    eDAO.deleteEdge(childResource, parentResource, relation);
-                }
-            }
-            if (findResourceByNetworkRelation(parentResource).isEmpty()) {
-                // remove self-edge for parent of network hierarchy
-                eDAO.deleteEdges(parentResource, relation);
-            }
-        }
     }
     
     /**
@@ -731,29 +671,221 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
      * 
      * @ejb:interface-method
      */
-    public Collection findResourceByNetworkRelation(Resource parent) {
+    public Collection findResourceEdges(ResourceRelation relation,
+                                        Resource parent) {
         return getResourceEdgeDAO()
-                    .findDescendantEdges(parent, getNetworkRelation());
+                    .findDescendantEdges(parent, relation);
     }
 
     /**
      * 
      * @ejb:interface-method
      */
-    public Collection findResourceByNetworkRelation(List platformTypeIds,
-                                                    String platformName) {
+    public List findResourceEdges(ResourceRelation relation,
+                                  Integer resourceId,
+                                  List platformTypeIds,
+                                  String platformName) {
+        if (relation == null 
+                || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
+            throw new IllegalArgumentException(
+                        "Only " + AuthzConstants.ResourceEdgeNetworkRelation
+                        + " resource relationships are supported.");
+        }
+        
         return getResourceEdgeDAO()
                     .findDescendantEdgesByNetworkRelation(
-                                platformTypeIds, platformName);
+                                resourceId, platformTypeIds, platformName);
+    }
+
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public void createResourceEdges(AuthzSubject subject,
+                                    ResourceRelation relation,
+                                    AppdefEntityID parent,
+                                    AppdefEntityID[] children)
+        throws PermissionException, ResourceEdgeCreateException {
+        
+        createResourceEdges(subject, relation, parent, children, false);
+    }
+
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public void createResourceEdges(AuthzSubject subject,
+                                    ResourceRelation relation,
+                                    AppdefEntityID parent,
+                                    AppdefEntityID[] children,
+                                    boolean deleteExisting)
+        throws PermissionException, ResourceEdgeCreateException {
+
+        if (relation == null 
+                || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
+            throw new ResourceEdgeCreateException(
+                        "Only " + AuthzConstants.ResourceEdgeNetworkRelation
+                        + " resource relationships are supported.");
+        }
+        
+        if (parent == null || !parent.isPlatform()) {
+            throw new ResourceEdgeCreateException("Only platforms are supported.");
+        }
+        
+        PlatformManagerLocal platMan = PlatformManagerEJBImpl.getOne();
+        Platform parentPlatform = null;
+        
+        try {
+            parentPlatform = platMan.findPlatformById(parent.getId());
+        } catch (PlatformNotFoundException pe) {
+            throw new ResourceEdgeCreateException("Platform id " + parent.getId() + " not found.");
+        }
+        List supportedPlatformTypes = new ArrayList(platMan.findSupportedPlatformTypes());
+
+        if (supportedPlatformTypes.contains(parentPlatform.getPlatformType())) {
+            throw new ResourceEdgeCreateException(parentPlatform.getPlatformType().getName()
+                                + " not supported as a top-level platform type.");
+        }
+        
+        Resource parentResource = parentPlatform.getResource();
+        
+        // Make sure user has permission to modify resource edges
+        final PermissionManager pm = PermissionManagerFactory.getInstance();
+
+        pm.check(subject.getId(), 
+                 parentResource.getResourceType(), 
+                 parentResource.getInstanceId(), 
+                 AuthzConstants.platformOpModifyPlatform);
+
+        if (parentResource != null 
+                && !parentResource.isInAsyncDeleteState()
+                && children != null
+                && children.length > 0) {
+
+            if (deleteExisting) {
+                removeResourceEdges(subject, relation, parentResource);
+            }
+            
+            ResourceEdgeDAO eDAO = getResourceEdgeDAO();
+            Collection edges = findResourceEdges(relation, parentResource);
+            List existing = null;
+            Platform childPlatform = null;
+            Resource childResource = null;
+
+            if (edges.isEmpty()) {
+                // create self-edge for parent of network hierarchy
+                eDAO.create(parentResource, parentResource, 0, relation);
+            }
+            for (int i=0; i< children.length; i++) {
+                if (!children[i].isPlatform()) {
+                    throw new ResourceEdgeCreateException("Only platforms are supported.");
+                }
+                try {
+                    childPlatform = platMan.findPlatformById(children[i].getId());
+                    childResource = childPlatform.getResource();
+                    
+                    if (!supportedPlatformTypes.contains(childPlatform.getPlatformType())) {
+                        throw new ResourceEdgeCreateException(childPlatform.getPlatformType().getName()
+                                        + " not supported as a dependent platform type.");
+                    }
+                } catch (PlatformNotFoundException pe) {
+                    throw new ResourceEdgeCreateException ("Platform id " + children[i].getId() + " not found.");
+                }
+                
+                // Check if child resource already exists in a network hierarchy
+                // TODO: This needs to be optimized
+                existing = findResourceEdges(relation, childResource.getId(), null, null);
+
+                if (existing.size() == 1) {
+                    ResourceEdge existingChildEdge = (ResourceEdge) existing.get(0);
+                    Resource existingParent = existingChildEdge.getFrom();
+                    if (existingParent.getId().equals(parentResource.getId())) {
+                        // already exists with same parent, so skip
+                        continue;
+                    } else {
+                        // already exists with different parent
+                        throw new ResourceEdgeCreateException("Resource id " + childResource.getId()
+                                        + " already exists in another network hierarchy.");
+                    }
+                } else if (existing.size() > 1) {
+                    // a resource can only belong to one network hierarchy
+                    // this is a data integrity issue if it happens
+                    throw new ResourceEdgeCreateException("Resource id " + childResource.getId()
+                                        + " exists in " + existing.size() + " network hierarchies.");
+                }
+                
+                if (childResource != null && !childResource.isInAsyncDeleteState()) {                    
+                    eDAO.create(parentResource, childResource, 1, relation);
+                    eDAO.create(childResource, parentResource, -1, relation);
+                }
+            }
+        }
     }
     
     /**
      * 
      * @ejb:interface-method
      */
-    public void removeResourceNetworkRelation(AuthzSubject subject, Resource parent) 
+    public void removeResourceEdges(AuthzSubject subject,
+                                    ResourceRelation relation,
+                                    AppdefEntityID parent,
+                                    AppdefEntityID[] children)
         throws PermissionException {
-        // Make sure user has permission to remove the network map
+        
+        if (relation == null 
+                || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
+            throw new IllegalArgumentException(
+                        "Only " + AuthzConstants.ResourceEdgeNetworkRelation
+                        + " resource relationships are supported.");
+        }
+        
+        Resource parentResource = findResource(parent);
+        Resource childResource = null;
+
+        // Make sure user has permission to modify resource edges
+        final PermissionManager pm = PermissionManagerFactory.getInstance();
+
+        pm.check(subject.getId(), 
+                 parentResource.getResourceType(), 
+                 parentResource.getInstanceId(), 
+                 AuthzConstants.platformOpModifyPlatform);
+        
+        if (parentResource != null && !parentResource.isInAsyncDeleteState()) {
+            ResourceEdgeDAO eDAO = getResourceEdgeDAO();
+
+            for (int i=0; i< children.length; i++) {
+                childResource = findResource(children[i]);
+                
+                if (childResource != null && !childResource.isInAsyncDeleteState()) {
+                    eDAO.deleteEdge(parentResource, childResource, relation);
+                    eDAO.deleteEdge(childResource, parentResource, relation);
+                }
+            }
+            Collection edges = findResourceEdges(relation, parentResource);
+            if (edges.isEmpty()) {
+                // remove self-edge for parent of network hierarchy
+                eDAO.deleteEdges(parentResource, relation);
+            }
+        }
+    }
+
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public void removeResourceEdges(AuthzSubject subject, 
+                                    ResourceRelation relation,
+                                    Resource parent) 
+        throws PermissionException {
+        
+        if (relation == null 
+                || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
+            throw new IllegalArgumentException(
+                        "Only " + AuthzConstants.ResourceEdgeNetworkRelation
+                        + " resource relationships are supported.");
+        }
+        
+        // Make sure user has permission to modify resource edges
         final PermissionManager pm = PermissionManagerFactory.getInstance();
 
         pm.check(subject.getId(), 
@@ -761,7 +893,7 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                  parent.getInstanceId(), 
                  AuthzConstants.platformOpModifyPlatform);
         
-        getResourceEdgeDAO().deleteEdges(parent, getNetworkRelation());
+        getResourceEdgeDAO().deleteEdges(parent, relation);
     }
 
     public static ResourceManagerLocal getOne() {

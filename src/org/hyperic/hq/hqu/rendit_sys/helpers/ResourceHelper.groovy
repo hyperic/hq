@@ -22,6 +22,7 @@ import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
 import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
+import org.hyperic.hq.appdef.shared.AppdefEntityID
 
 class ResourceHelper extends BaseHelper {
     private rman = ResourceManagerEJBImpl.one
@@ -255,6 +256,138 @@ class ResourceHelper extends BaseHelper {
      */
     List findAllApplications() {
         findApplications(PageInfo.getAll(ResourceSortField.NAME, true))
+    }
+    
+    /**
+     * Find the descendant edges of a resource
+     *
+     * @return a Collection of {@link ResourceEdge}s
+     */
+    Collection findResourceEdges(String resourceRelation, Resource parent) {
+    	def edges = []
+    	if (resourceRelation.equals(AuthzConstants.ResourceEdgeNetworkRelation)) {
+    		edges = rman.findResourceEdges(rman.getNetworkRelation(), parent)
+    	} else if (resourceRelation.equals(AuthzConstants.ResourceEdgeContainmentRelation)) {
+    		edges = rman.findResourceEdges(rman.getContainmentRelation(), parent)
+    	}
+    	return edges
+    }
+    
+    /**
+     * Find the descendant edges of a resource
+     *
+     * @return a Collection of {@link ResourceEdge}s
+     */
+    Collection findResourceEdges(String resourceRelation, List platformTypeIds, String platformName) {
+    	def edges = []
+    	if (resourceRelation == AuthzConstants.ResourceEdgeNetworkRelation) {
+    		edges = rman.findResourceEdges(rman.getNetworkRelation(), null, platformTypeIds, platformName)    	
+    	}
+    	return edges
+    }
+    
+    /**
+     * Find the descendant edges of a resource
+     *
+     * @return a Collection of {@link ResourceEdge}s
+     */
+    Collection findResourceEdges(String resourceRelation, String prototype, String platformName) {
+    	def edges = []
+    	if (resourceRelation == AuthzConstants.ResourceEdgeNetworkRelation) {
+    		def platformType = null
+    		def platformTypeIds = []
+    		if (prototype) {
+    			try {
+    				platformType = PlatMan.one.findPlatformTypeByName(prototype)
+    			} catch (PlatformNotFoundException e) {
+    				return Collections.EMPTY_LIST
+    			}    		
+    		}
+    		if (platformType == null) {
+    			platformTypeIds = Collections.EMPTY_LIST
+    		} else {
+    			platformTypeIds = Collections.singletonList(platformType.id)
+    		}    			
+    		edges = findResourceEdges(resourceRelation, platformTypeIds, platformName) 
+    	}
+    	return edges
+    }
+            
+    List findParentPlatformsByNetworkRelation(String prototype, String name, boolean hasChildren) {
+    	def platformType = null
+    	def platformTypeIds = null
+    	
+    	if (prototype) {
+    		try {
+    			platformType = PlatMan.one.findPlatformTypeByName(prototype)
+    		} catch (PlatformNotFoundException e) {
+    			return Collections.EMPTY_LIST
+    		}
+    	}
+    	
+    	if (platformType == null) {
+    		platformTypeIds = Collections.EMPTY_LIST
+    	} else {
+    		platformTypeIds = Collections.singletonList(platformType.id)
+    	}
+    	
+		return PlatMan.one.findParentPlatformPojosByNetworkRelation(
+    									user, platformTypeIds, name, Boolean.valueOf(hasChildren))    	
+    }
+    
+    List findPlatformsByNoNetworkRelation(String prototype, String name) {
+    	def platformType = null
+    	def platformTypeIds = null
+    	def platforms = null
+    	
+    	if (prototype) {
+    		try {
+    			platformType = PlatMan.one.findPlatformTypeByName(prototype)
+    		} catch (PlatformNotFoundException e) {
+    			platforms = Collections.EMPTY_LIST
+    		}
+    	}
+    	
+    	if (platforms == null) {
+    		if (platformType == null) {
+    			platformTypeIds = Collections.EMPTY_LIST
+    		} else {
+    			platformTypeIds = Collections.singletonList(platformType.id)
+    		}
+    		platforms = PlatMan.one.findPlatformPojosByNoNetworkRelation(user, platformTypeIds, name)
+    	}
+    	
+    	return platforms
+    }
+
+    void createResourceEdges(String resourceRelation, AppdefEntityID parent, AppdefEntityID[] children, boolean deleteExisting) {
+    	if (!resourceRelation.equals(AuthzConstants.ResourceEdgeNetworkRelation)) {
+    		throw new IllegalArgumentException('Only ' 
+    				+ AuthzConstants.ResourceEdgeNetworkRelation
+    				+ ' resource relationships are supported.')
+    	}
+    	
+    	rman.createResourceEdges(user, rman.getNetworkRelation(), parent, children, deleteExisting) 
+    }
+        
+    void removeResourceEdges(String resourceRelation, Resource resource) {
+    	if (!resourceRelation.equals(AuthzConstants.ResourceEdgeNetworkRelation)) {
+    		throw new IllegalArgumentException('Only ' 
+    				+ AuthzConstants.ResourceEdgeNetworkRelation
+    				+ ' resource relationships are supported.')
+    	}
+    	 
+    	rman.removeResourceEdges(user, rman.getNetworkRelation(), resource)
+    }
+    
+    void removeResourceEdges(String resourceRelation, AppdefEntityID parent, AppdefEntityID[] children) {
+    	if (!resourceRelation.equals(AuthzConstants.ResourceEdgeNetworkRelation)) {
+    		throw new IllegalArgumentException('Only ' 
+    				+ AuthzConstants.ResourceEdgeNetworkRelation
+    				+ ' resource relationships are supported.')
+    	}
+    	
+    	rman.removeResourceEdges(user, rman.getNetworkRelation(), parent, children) 
     }
 
     Collection getDownResources(String typeId, PageInfo pInfo) {

@@ -99,15 +99,22 @@ public class ResourceEdgeDAO
                 .list();
     }
     
-    Collection findDescendantEdgesByNetworkRelation(List platformTypeIds,
-                                                    String platformName) {
+    List findDescendantEdgesByNetworkRelation(Integer resourceId,
+                                              List platformTypeIds,
+                                              String platformName) {
         String nameEx = null;
         String sql = "select {e.*} from EAM_RESOURCE_EDGE e " +
                      " join EAM_RESOURCE r on e.to_id = r.id " +
                      " join EAM_PLATFORM p on p.resource_id = r.id " +
                      " where e.rel_id = " + AuthzConstants.RELATION_NETWORK_ID +
-                     " and e.distance != 0 " +
-                     " and p.platform_type_id in (:ids) ";
+                     " and e.distance != 0 ";
+        
+        if (resourceId != null) {
+            sql += " and r.id = :rid ";
+        }
+        if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
+            sql += " and p.platform_type_id in (:ptids) ";
+        }
 
         if (platformName != null && platformName.trim().length() > 0) {
             HQDialect dialect = Util.getHQDialect();
@@ -119,8 +126,14 @@ public class ResourceEdgeDAO
 
         Query query = getSession()
                         .createSQLQuery(sql)
-                        .addEntity("e", ResourceEdge.class)
-                        .setParameterList("ids", platformTypeIds, new IntegerType());
+                        .addEntity("e", ResourceEdge.class);
+
+        if (resourceId != null) {
+            query.setInteger("rid", resourceId.intValue());
+        }
+        if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
+            query.setParameterList("ptids", platformTypeIds, new IntegerType());
+        }
 
         if (nameEx != null) {
             query.setString("regex", platformName);

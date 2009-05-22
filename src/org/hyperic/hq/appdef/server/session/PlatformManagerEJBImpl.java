@@ -163,6 +163,40 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * @return {@link PlatformType}s
+     * @ejb:interface-method
+     */
+    public Collection findSupportedPlatformTypes() {
+        Collection platformTypes = findAllPlatformTypes();
+        PlatformType pType = null;
+        
+        for (Iterator it=platformTypes.iterator(); it.hasNext();) {
+            pType = (PlatformType)it.next(); 
+            if (!PlatformDetector.isSupportedPlatform(pType.getName())) {
+                it.remove();
+            }
+        }
+        return platformTypes;
+    }
+    
+    /**
+     * @return {@link PlatformType}s
+     * @ejb:interface-method
+     */
+    public Collection findUnsupportedPlatformTypes() {
+        Collection platformTypes = findAllPlatformTypes();
+        PlatformType pType = null;
+        
+        for (Iterator it=platformTypes.iterator(); it.hasNext();) {
+            pType = (PlatformType)it.next(); 
+            if (PlatformDetector.isSupportedPlatform(pType.getName())) {
+                it.remove();
+            }
+        }
+        return platformTypes;
+    }
+    
+    /**
      * @ejb:interface-method
      */
     public Resource findResource(PlatformType pt) {
@@ -1165,9 +1199,32 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                                          List platformTypeIds,
                                                          String platformName,
                                                          Boolean hasChildren) {
+        List unsupportedPlatformTypes = new ArrayList(findUnsupportedPlatformTypes());
+        List pTypeIds = new ArrayList();
+        PlatformType pType = null;
+        
+        if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
+            for (Iterator it=platformTypeIds.iterator(); it.hasNext(); ) {
+                Integer pTypeId = (Integer) it.next();
+                pType = findPlatformType(pTypeId);
+                if (unsupportedPlatformTypes.contains(pType)) {
+                    pTypeIds.add(pTypeId);
+                }
+            }
+            if (pTypeIds.isEmpty()) {
+                return Collections.EMPTY_LIST;
+            }
+        } else {
+           // default values
+            for (Iterator it=unsupportedPlatformTypes.iterator(); it.hasNext(); ) {
+               pType = (PlatformType) it.next();
+               pTypeIds.add(pType.getId());
+           }
+        }
+        
         return getPlatformDAO()
                     .findParentByNetworkRelation(
-                            platformTypeIds, platformName, hasChildren);
+                            pTypeIds, platformName, hasChildren);
     }
     
     /**
@@ -1180,8 +1237,31 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public List findPlatformPojosByNoNetworkRelation(AuthzSubject subj,
                                                      List platformTypeIds,
                                                      String platformName) {
+        List supportedPlatformTypes = new ArrayList(findSupportedPlatformTypes());
+        List pTypeIds = new ArrayList();
+        PlatformType pType = null;
+        
+        if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
+            for (Iterator it=platformTypeIds.iterator(); it.hasNext(); ) {
+                Integer pTypeId = (Integer) it.next();
+                pType = findPlatformType(pTypeId);
+                if (supportedPlatformTypes.contains(pType)) {
+                    pTypeIds.add(pTypeId);
+                }
+            }
+            if (pTypeIds.isEmpty()) {
+                return Collections.EMPTY_LIST;
+            }
+        } else {
+           // default values
+            for (Iterator it=supportedPlatformTypes.iterator(); it.hasNext(); ) {
+               pType = (PlatformType) it.next();
+               pTypeIds.add(pType.getId());
+           }
+        }
+        
         return getPlatformDAO().findByNoNetworkRelation(
-                                    platformTypeIds, platformName);
+                                        pTypeIds, platformName);
     }
 
     /**

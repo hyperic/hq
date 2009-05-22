@@ -173,11 +173,19 @@ public abstract class AuthzSession {
         return this.ctx;
     }
     
-    protected ResourceRelation getContainmentRelation() {
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public ResourceRelation getContainmentRelation() {
         return getResourceRelation(AuthzConstants.RELATION_CONTAINMENT_ID);
     }
 
-    protected ResourceRelation getNetworkRelation() {
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public ResourceRelation getNetworkRelation() {
         return getResourceRelation(AuthzConstants.RELATION_NETWORK_ID);
     }
 
