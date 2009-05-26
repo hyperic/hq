@@ -71,4 +71,7 @@ public class MockTriggerFireStrategy
         _expectedNumCalls.verify();
     }
 
+    public void setFailOnVerify() {
+    	_expectedNumCalls.setFailOnVerify();
+    }
 }
