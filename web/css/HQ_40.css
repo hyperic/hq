@@ -263,7 +263,7 @@ a:visited,a:hover,a {
 	YOU SHOULD NOT STYLE the background of the ".mainMenu UL" or this feature may not work properly!
 	if you do it, make sure you 110% know what you do */
 .mainMenu div {
-	background-image: url(empty.gif);	/* required for sticky to work in IE6 and IE7 - due to their (different) hover bugs */
+	background-image: url('/images/empty.gif');	/* required for sticky to work in IE6 and IE7 - due to their (different) hover bugs */
 	padding: 8px 30px 30px 30px;
 	margin: -10px 0 0 -30px;
 	/*background: #f00;*/	/* uncomment this if you want to see the "safe" area.
