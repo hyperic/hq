@@ -87,26 +87,21 @@ public class MultiConditionTrigger
     public static final String AND = "&";
     public static final String OR  = "|";
     
-    private final Object lock = new Object();
+    protected static class LastFulfillingEventsState {
+    	List events;
+    	long fireStamp;
+    	
+    	public LastFulfillingEventsState(List init) {
+    		events = init;
+    		fireStamp = 0;
+		}
+    }
     
-    private final Object lastFulfillingEventsLock = new Object();
-
-    private final Map currentSharedLockHolders = Collections.synchronizedMap(new HashMap());
-        
-    // make the lock reentrant just to be safe in preventing deadlocks
-    private final ReadWriteLock rwLock = new ReentrantReadWriteLock();
-    
-    private static final ThreadLocal IGNORE_NEXT_EXCLUSIVE_LOCK_RELEASE = 
-        new ThreadLocal() {
-            protected Object initialValue() {
-                return Boolean.FALSE;
-            }
-        };
-       
-    private List lastFulfillingEvents = Collections.EMPTY_LIST;
+    protected final LastFulfillingEventsState lastFulfillingEvents =
+    	new LastFulfillingEventsState(new ArrayList());
 
     /** Holds value of property triggerIds. */
-    private HashSet triggerIds;
+    private Set triggerIds;
 
     /** Holds value of property andTriggerIds. */
     private Integer[] andTriggerIds;
@@ -125,170 +120,51 @@ public class MultiConditionTrigger
     }
     
     /**
-     * Acquire the shared lock for processing events. A best effort is made 
-     * to reacquire the lock even if the thread is interrupted.
-     * 
-     * @throws InterruptedException 
-     */
-    public void acquireSharedLock() throws InterruptedException {
-        // We handle the interrupted state since users acquiring a shared 
-        // lock should be able to do so to process events.
-        boolean acquired = false;
-        int counter = 0;
-        
-        while (!acquired && counter < 10) {
-            try {
-                rwLock.readLock().lockInterruptibly();
-                acquired = true;
-            } catch (InterruptedException e) {
-                // interrupted state is cleared - retry
-                counter++;
-            }            
-        }     
-        
-        if (acquired) {
-            currentSharedLockHolders.put(Thread.currentThread(), new Date());
-            
-            if (log.isDebugEnabled()) {
-                log.debug(Thread.currentThread()+ 
-                          " currently holds shared lock on trigger id="+getId());            
-            }                         
-        } else {
-            throw new InterruptedException("thread was interrupted attempting " +
-                               "to acquire shared lock: "+Thread.currentThread());           
-        }
-    }
-    
-    /**
-     * Release the shared lock for processing events.
-     */
-    public void releaseSharedLock() {
-        try {
-            rwLock.readLock().unlock();            
-        } finally {
-            currentSharedLockHolders.remove(Thread.currentThread());
-            
-            if (log.isDebugEnabled()) {
-                log.debug(Thread.currentThread()+ 
-                          " currently released shared lock on trigger id="+getId());            
-            }            
-        }        
-    }
-    
-    /**
-     * Retrieve the map of Thread objects -> lock acquisition time currently 
-     * holding the shared lock.
-     * 
-     * @return The map of Thread objects to their lock acquisition time.
-     */
-    public Map getCurrentSharedLockHolders() {
-        Map lockHolders = null;
-
-        synchronized (currentSharedLockHolders) {
-            lockHolders = new HashMap(currentSharedLockHolders);
-        }
-
-        return lockHolders;
-    }
-
-    /**
      * Check if the triggering conditions have been fulfilled, meaning 
-     * the state should be flushed.
+     * the state should be flushed.  Contract: for an encoding of:
+     * 1&2|3&4|5&6
+     * the conditions are evaluated left-to-right, with no precedence rule
+     * of AND over OR (so it's different from Java precedence rules).
      * 
      * @return <code>true</code> if the triggering conditions have been fulfilled; 
      *         <code>false</code> if not.
      */
-    public boolean triggeringConditionsFulfilled() {
-        synchronized (lastFulfillingEventsLock) {
-            // Find out which instance we should be looking for
-            Integer[] subIds = getAndTriggerIds();
-            Map orIds = getOrTriggerIds();
-            
-            Set fulfilled = new HashSet();
-            for (Iterator it = lastFulfillingEvents.iterator(); it.hasNext(); ){
-                AbstractEvent event = (AbstractEvent) it.next();
-                fulfilled.add(event.getInstanceId());
-            }
-            
-            // Now let's see how well we did
-            int orInd = 0;
-            
-            for (Iterator i = orIds.keySet().iterator(); i.hasNext(); ) {
-                Object orId = i.next();
-                if (fulfilled.contains(orId)) {
-                    Integer index = (Integer) orIds.get(orId);
-                    if (orInd < index.intValue()) {
-                        orInd = index.intValue();
-                    }
-                }
-            }
-    
-            // Go through the subIds
-            for (int i = orInd; i < subIds.length; i++) {
-                // Did not fulfill yet
-                if (!fulfilled.contains(subIds[i]))
-                    return false;
-            }
-    
-            return true;            
-        }
-    }    
-    
-    /**
-     * Release the shared lock and attempt to upgrade to an exclusive lock 
-     * for processing events. If the exclusive lock is acquired, it must 
-     * be released before others may process events. This method has the 
-     * same semantics as calling {@link #releaseSharedLock() releaseSharedLock()} 
-     * followed by {@link #attemptExclusiveLock() attemptExclusiveLock()}.
-     * 
-     * @return <code>true</code> if the exclusive lock has been acquired; 
-     *          <code>false</code> otherwise, meaning some other thread 
-     *          either has a shared lock or has already acquired the 
-     *          exclusive lock.
-     * @throws InterruptedException if the thread is interrupted while 
-     *                              attempting to acquire the exclusive lock.
-     */
-    public boolean upgradeSharedLockToExclusiveLock() throws InterruptedException {
-        releaseSharedLock();
-        return attemptExclusiveLock();
-    }
-    
-    /**
-     * Attempt to acquire the exclusive lock for processing events.
-     * 
-     * @return <code>true</code> if the exclusive lock has been acquired; 
-     *          <code>false</code> otherwise, meaning some other thread 
-     *          either has a shared lock or has already acquired the 
-     *          exclusive lock.
-     * @throws InterruptedException
-     */
-    public boolean attemptExclusiveLock() throws InterruptedException {
-        return rwLock.writeLock().tryLock();        
-    }
-    
-    /**
-     * Release the exclusive lock for processing events.
-     */
-    public void releaseExclusiveLock() {
-        if (ignoreNextExclusiveLockRelease()) {
-            resetIgnoreNextExclusiveLockRelease();
-        } else {
-            rwLock.writeLock().unlock();            
-        }
-    }
-    
-    private void setIgnoreNextExclusiveLockRelease() {
-        IGNORE_NEXT_EXCLUSIVE_LOCK_RELEASE.set(Boolean.TRUE);
-    }
-    
-    private boolean ignoreNextExclusiveLockRelease() {
-        return ((Boolean)IGNORE_NEXT_EXCLUSIVE_LOCK_RELEASE.get()).booleanValue();
-    }
-    
-    private void resetIgnoreNextExclusiveLockRelease() {
-        IGNORE_NEXT_EXCLUSIVE_LOCK_RELEASE.set(Boolean.FALSE);    
-    }
+    public boolean triggeringConditionsFulfilled(Collection events) {
 
+    	// Find out which instance we should be looking for
+    	Integer[] subIds = getAndTriggerIds();
+    	Map orIds = getOrTriggerIds();
+
+    	Set fulfilled = new HashSet();
+    	for (Iterator it = events.iterator(); it.hasNext(); ){
+    		AbstractEvent event = (AbstractEvent) it.next();
+    		fulfilled.add(event.getInstanceId());
+    	}
+
+    	// Now let's see how well we did
+    	int orInd = 0;
+
+    	for (Iterator i = orIds.keySet().iterator(); i.hasNext(); ) {
+    		Object orId = i.next();
+    		if (fulfilled.contains(orId)) {
+    			Integer index = (Integer) orIds.get(orId);
+    			if (orInd < index.intValue()) {
+    				orInd = index.intValue();
+    			}
+    		}
+    	}
+
+    	// Go through the subIds
+    	for (int i = orInd; i < subIds.length; i++) {
+    		// Did not fulfill yet
+    		if (!fulfilled.contains(subIds[i])) {
+    			return false;
+    		}
+    	}
+
+    	return true;            
+    }
+    
     /**
      * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getConfigSchema()
      */
@@ -337,49 +213,58 @@ public class MultiConditionTrigger
             String srange   = triggerData.getValue(CFG_TIME_RANGE);
             String sdurable = triggerData.getValue(CFG_DURABLE);
 
-            String delimiters = (AND + OR);
-            StringTokenizer st = new StringTokenizer(stids, delimiters, true);
-            triggerIds = new HashSet();
-            orTriggerIds  = new HashMap();
-            ArrayList andTrigIds = new ArrayList();
-            int i = 0;
-            while (st.hasMoreTokens()) {
-                boolean bAnd = true;
-                String tok = st.nextToken();
-                if (tok.equals(AND) || tok.equals(OR)) {
-                    bAnd = tok.equals(AND);
-                    tok = st.nextToken();
-                }
+            init(stids,
+            	 Long.parseLong(srange) * 1000,
+            	 Boolean.valueOf(sdurable).booleanValue());
 
-                Integer tid = new Integer(tok);
-
-                if (bAnd) {
-                    // Put it in the AND list
-                    andTrigIds.add(tid);
-                    i++;
-                } else {
-                    // Put it in the OR list
-                    orTriggerIds.put(tid, new Integer(i));
-                }
-                
-                // All trigger ID's go into triggerIds
-                triggerIds.add(tid);
-            }
-
-            andTriggerIds = (Integer[]) andTrigIds.toArray(
-                    new Integer[andTrigIds.size()]);
-
-            // Turn timerange into milliseconds
-            setTimeRange(Long.parseLong(srange) * 1000);
-            
-            setDurable(Boolean.valueOf(sdurable).booleanValue());
         } catch (EncodingException e) {
             throw new InvalidTriggerDataException(e);
         } catch (NumberFormatException e) {
             throw new InvalidTriggerDataException(e);
         }
     }
- 
+    
+    public void init(String stids, long trange, boolean durable) {
+
+        triggerIds = new HashSet();
+        orTriggerIds  = new HashMap();
+        ArrayList andTrigIds = new ArrayList();
+        
+        String delimiters = (AND + OR);
+        StringTokenizer st = new StringTokenizer(stids, delimiters, true);
+        int i = 0;
+        while (st.hasMoreTokens()) {
+            boolean bAnd = true;
+            String tok = st.nextToken();
+            if (tok.equals(AND) || tok.equals(OR)) {
+                bAnd = tok.equals(AND);
+                tok = st.nextToken();
+            }
+
+            Integer tid = new Integer(tok);
+
+            if (bAnd) {
+                // Put it in the AND list
+            	andTrigIds.add(tid);
+                i++;
+            } else {
+                // Put it in the OR list
+            	orTriggerIds.put(tid, new Integer(i));
+            }
+            
+            // All trigger ID's go into triggerIds
+            triggerIds.add(tid);
+        }
+
+        andTriggerIds = (Integer[]) andTrigIds.toArray(
+                new Integer[andTrigIds.size()]);
+
+        // Turn timerange into milliseconds
+        setTimeRange(trange);
+        
+        setDurable(durable);
+    }
+  
     /** 
      * Process an event from the dispatcher.
      * 
@@ -389,12 +274,17 @@ public class MultiConditionTrigger
     public void processEvent(AbstractEvent event)
         throws EventTypeException, ActionExecuteException {
         // If we didn't fulfill the condition, then don't fire
-        if(!(event instanceof TriggerFiredEvent ||
-             event instanceof TriggerNotFiredEvent || 
-             event instanceof FlushStateEvent))
+        if (!(event instanceof TriggerFiredEvent ||
+              event instanceof TriggerNotFiredEvent)) {
             throw new EventTypeException(
-                "Invalid event type passed: expected TriggerFiredEvent, " +
-                "TriggerNotFiredEvent, or FlushStateEvent");
+                "Invalid event type passed: expected TriggerFiredEvent " +
+                "or TriggerNotFiredEvent");
+        }
+        
+        long fireStamp;
+        synchronized (lastFulfillingEvents) {
+        	fireStamp = lastFulfillingEvents.fireStamp;
+        }
         
         EventTrackerLocal etracker = null;
         
@@ -405,17 +295,42 @@ public class MultiConditionTrigger
                                               "trigger id="+getId(), e);
         }
         
-        TriggerFiredEvent target = prepareTargetEventOnFlush(event, etracker);
+        boolean shouldFire = false;
+        List fulfilled = addNewEvent(event, etracker, fireStamp);
+        if (fulfilled != null) {
+        	// Enough events to fire, check to see if we really need to
+        	long newStamp;
+        	synchronized (lastFulfillingEvents) {
+        		newStamp = lastFulfillingEvents.fireStamp;
+            	if (newStamp == fireStamp) {
+            		// Looks like we have the baton.  Go ahead and fire.
+            		// Update the fireStamp so no other thread will try to fire
+            		// based on the same conditions
+            		lastFulfillingEvents.fireStamp++;
+            		
+            		// Must clear out the events from this thread, but we don't want to
+            		// clear out events that came in later.  The lists fulfilled and
+            		// lastFulfillingEvents.events should be the same up to the length
+            		// of fulfilled.
+            		if (lastFulfillingEvents.events.size() == fulfilled.size()) {
+            			lastFulfillingEvents.events.clear();
+            		} else {
+            			List tempList =
+            				new ArrayList(lastFulfillingEvents.events.subList(fulfilled.size(),
+            																  lastFulfillingEvents.events.size()));
+            			lastFulfillingEvents.events = tempList;
+            		}
+            		shouldFire = true;
+            	}
+        	}
+        }
                 
-        if (target != null) {
-            this.releaseExclusiveLock();
-            
-            // HHQ-1791: We only need the exclusive lock when evaluating if 
-            // we should fire actions. Release the lock before firing.
-            this.setIgnoreNextExclusiveLockRelease();
+        if (shouldFire) {
             
             try {
                 // Fire actions using the target event
+                TriggerFiredEvent target =
+                	prepareTargetEvent(fulfilled, etracker);
                 super.fireActions(target);
             } catch (AlertCreateException e) {
                 throw new ActionExecuteException(e);
@@ -424,193 +339,191 @@ public class MultiConditionTrigger
             } catch (SystemException e) {
                 throw new ActionExecuteException(e);
             }            
-        }        
-
-    }
-
-    private TriggerFiredEvent prepareTargetEventOnFlush(AbstractEvent event,
-                                                        EventTrackerLocal etracker)
-            throws ActionExecuteException {
-        
-        TriggerFiredEvent target = null;
-        
-        synchronized (lock) {
-            if (event instanceof FlushStateEvent) {
-                if (triggeringConditionsFulfilled()) {
-                    try {
-                        // Since prepareTargetEvent iterates through the 
-                        // lastFulfillingEvents, make a copy so we don't 
-                        // have to synchronize on the list iteration.                        
-                        List copyOfLastFulfillingEvents = null;
-                        
-                        synchronized (lastFulfillingEventsLock) {
-                            copyOfLastFulfillingEvents = 
-                                new ArrayList(lastFulfillingEvents);
-                        }     
-                        
-                        target = prepareTargetEvent(copyOfLastFulfillingEvents, etracker);                        
-
-                    } finally {
-                        if (target != null) {
-                            synchronized (lastFulfillingEventsLock) {
-                                lastFulfillingEvents.clear();                                                            
-                            }
-                        }
-                    }
-                }                            
-            } else {
-                List tempLastFulfillingEvents = 
-                    addNewEvent(event, etracker);
-                
-                synchronized (lastFulfillingEventsLock) {
-                    lastFulfillingEvents = tempLastFulfillingEvents;                    
-                }
-            }            
         }
-        
-        return target;
     }
     
     /**
-     * Check if the new event fulfills the triggering conditions.
+     * Check if the new event fulfills the triggering conditions.  Contract:
+     * The number of events needed to fulfill a MultiConditionTrigger is
+     * at least 2.
      * 
      * @param event The new event.
      * @param etracker The event tracker.
-     * @return The list of fulfilling events or an empty list. This list must 
-     *          be thread-safe!
+     * @param fireStamp The incident stamp for event firing, used to short-circuit
+     * @return true if the new event fulfilled all the conditions of the trigger
      * @throws ActionExecuteException
      */    
-    private List addNewEvent(AbstractEvent event, EventTrackerLocal etracker)
+    protected List addNewEvent(AbstractEvent event,
+    								 EventTrackerLocal etracker,
+    								 long fireStamp)
         throws ActionExecuteException {        
-                              
-        List events = getPriorEventsForTrigger(etracker);
 
-        // Now add the new event, too
-        events.add(event);
-        
+    	boolean checkCompletion = false;
+    	List result = null;
+    	AbstractEvent toDelete = null;
+        List events = getEventsForTrigger(event, etracker, fireStamp);
+
         // Create a table to keep track
-        HashMap fulfilled = new LinkedHashMap();
-        
-        AbstractEvent toDelete = null;
+    	Map fulfilled = new LinkedHashMap();
 
-        for (Iterator iter = events.iterator(); iter.hasNext(); ) {
-            AbstractEvent tracked = (AbstractEvent) iter.next();
-            
-            // If this tracked event equals the new event, then
-            // the old one is obsolete
-            if (tracked != event &&
-                tracked.getInstanceId().equals(event.getInstanceId())) {
-                toDelete = tracked;
-                continue;
-            }
-            
-            if (tracked instanceof TriggerFiredEvent) {
-                fulfilled.put(tracked.getInstanceId(), tracked);
-            } else { // TriggerNotFiredEvent 
-                // Well, we know we ain't firing
-                fulfilled.remove(tracked.getInstanceId());
-                
-                // For this trigger we should publish not fired events only 
-                // when we have tracked that one of the sub trigger does 
-                // not currently fulfill the conditions. Otherwise, the 
-                // DurationTrigger when applied as a damper to a recovery 
-                // alert definition will not work correctly (remember that 
-                // recovery alert definitions use the MultiConditionTrigger).
-                // Once the recovery condition is met for the recovery alert 
-                // definition we only want the listening DurationTrigger to 
-                // receive a TriggerNotFiredEvent when the conditions are not 
-                // met, not because the primary alert definition has not
-                // currently fired.                
-                notFired();
-            }
-        }
+        // A null value for events is a sentinel meaning abort
+        if (events != null) {
+        	
+        	// If there are no prior events, then this new event cannot possibly
+        	// fulfill the conditions.  Since the new event is already in the events
+        	// Collection, the size must be greater than 1 for the conditions
+        	// to be fulfilled
+        	if (events.size() > 1) {
 
-        // If we've got nothing, then just clean up
-        if (fulfilled.size() == 0) {
-            if (events.size() > 1) {
-                try {
-                    etracker.deleteReference(getId());            
-                } catch (SQLException e) {
-                    // It's ok if we can't delete the old events now.
-                    // We can do it next time.
-                    log.warn("Failed to remove all references to trigger id=" +
-                             getId(), e);                
-                }
-            }                        
-            return Collections.EMPTY_LIST;
-        } else if (!triggeringConditionsFulfilled()) {
-            try {
-                // Clean up unused event
-                if (toDelete != null) {
-                    // Only need to update reference if event may expire
-                    if (getTimeRange() > 0) {
-                        try {
-                            etracker.updateReference(getId(), toDelete.getId(),
-                                                     event, getTimeRange());
-                        } catch (SQLException e) {
-                            log.debug("Failed to update event reference for " +
-                                      "trigger id=" + getId(), e);
-                            etracker.addReference(getId(), event, getTimeRange());
-                        }
-                    }
-                } else if (event instanceof TriggerFiredEvent) {
-                    // Only need track TriggerFiredEvent
-                    if (event instanceof TriggerFiredEvent) {
-                        // Only want to add TriggerFiredEvent, don't add
-                        // TriggerNotFiredEvent
-                        etracker.addReference(getId(), event, getTimeRange());
-                    }
-                }          
-            } catch (SQLException e) {
-                log.error("Failed to add event reference for trigger id=" +
-                          getId(), e);
-            }            
+        		for (Iterator iter = events.iterator(); iter.hasNext(); ) {
+        			AbstractEvent tracked = (AbstractEvent) iter.next();
+
+        			// If this tracked event equals the new event, then
+        			// the old one is obsolete
+        			if (tracked != event &&
+        					tracked.getInstanceId().equals(event.getInstanceId())) {
+        				toDelete = tracked;
+        				continue;
+        			}
+
+        			if (tracked instanceof TriggerFiredEvent) {
+        				fulfilled.put(tracked.getInstanceId(), tracked);
+        			} else { // TriggerNotFiredEvent
+        				fulfilled.remove(tracked.getInstanceId());
+
+        				// For this trigger we should publish not fired events only 
+        				// when we have tracked that one of the sub trigger does 
+        				// not currently fulfill the conditions. Otherwise, the 
+        				// DurationTrigger when applied as a damper to a recovery 
+        				// alert definition will not work correctly (remember that 
+        				// recovery alert definitions use the MultiConditionTrigger).
+        				// Once the recovery condition is met for the recovery alert 
+        				// definition we only want the listening DurationTrigger to 
+        				// receive a TriggerNotFiredEvent when the conditions are not 
+        				// met, not because the primary alert definition has not
+        				// currently fired.
+        				notFired();
+        			}
+        		}
+
+        		// If we've got nothing, then just clean up
+        		if (fulfilled.size() == 0) {
+        			if (events.size() > 1) {
+        				try {
+        					etracker.deleteReference(getId());            
+        				} catch (SQLException e) {
+        					// It's ok if we can't delete the old events now.
+        					// We can do it next time.
+        					log.warn("Failed to remove all references to trigger id=" +
+        							getId(), e);                
+        				}
+        			}
+        		} else {
+        			// Continue on to see if we should fire
+        			checkCompletion = true;
+        		}
+        	}
+
+        	if (checkCompletion) {
+
+        		if (!triggeringConditionsFulfilled(fulfilled.values())) {
+
+        			try {
+        				// Clean up unused event
+        				if (toDelete != null) {
+        					// Only need to update reference if event may expire
+        					if (getTimeRange() > 0) {
+        						try {
+        							etracker.updateReference(getId(), toDelete.getId(),
+        									event, getTimeRange());
+        						} catch (SQLException e) {
+        							log.debug("Failed to update event reference for " +
+        									"trigger id=" + getId(), e);
+        							etracker.addReference(getId(), event, getTimeRange());
+        						}
+        					}
+        				} else if (event instanceof TriggerFiredEvent) {
+        					// Only need track TriggerFiredEvent
+        					etracker.addReference(getId(), event, getTimeRange());
+        				}          
+        			} catch (SQLException e) {
+        				log.error("Failed to add event reference for trigger id=" +
+        						getId(), e);
+        			}            
+        		} else {
+        			// fulfilled!
+        			result = events;
+        		}
+        	}
         }
         
-        return new ArrayList(fulfilled.values());
+        return result;
     }
     
-    private List getPriorEventsForTrigger(EventTrackerLocal etracker) 
+    /**
+     * Get events that interest this trigger, including the new one.
+     * Contract: A null return is a sentinel value indicating that
+     * this processing should abort due to the
+	 * trigger firing during event processing.
+     * 
+     * @param event      The current event
+     * @param etracker   EventTracker
+     * @param fireStamp  Identity of last trigger fire incident, used for short-circuiting
+     * @return           A list of all prior events, size may be zero but the list will not be null.
+     * @throws ActionExecuteException
+     */
+    private List getEventsForTrigger(AbstractEvent event,
+    									  EventTrackerLocal etracker,
+    									  long fireStamp) 
         throws ActionExecuteException {
-        List events = new ArrayList();
+        List events = null;
+    	boolean abort = false;
 
-        if (lastFulfillingEvents.isEmpty()) {
-            try {
-                Collection eventObjectDesers =
-                    etracker.getReferencedEventStreams(getId());
-                if (log.isDebugEnabled())
-                    log.debug("Get prior events for trigger id="+getId());
-            
-                for (Iterator iter = eventObjectDesers.iterator();
-                     iter.hasNext(); ) {
-                    EventObjectDeserializer deser =
-                        (EventObjectDeserializer) iter.next();
-                    events.add(deserializeEvent(deser, true));
-                }
-            } catch(Exception exc) {
-                throw new ActionExecuteException(
-                    "Failed to get referenced streams for trigger id=" +getId(),
-                    exc);
-            }
+        // Potentially long monitor hold....
+        synchronized (lastFulfillingEvents) {
+        	if (lastFulfillingEvents.fireStamp > fireStamp) {
+        		abort = true;
+        	} else if (lastFulfillingEvents.events.isEmpty()) {
+        		try {
+        			Collection eventObjectDesers =
+        				etracker.getReferencedEventStreams(getId());
+        			if (log.isDebugEnabled()) {
+        				log.debug("Get prior events for trigger id="+getId());
+        			}
+
+        			for (Iterator iter = eventObjectDesers.iterator();
+        			iter.hasNext(); ) {
+        				EventObjectDeserializer deser =
+        					(EventObjectDeserializer) iter.next();
+        				lastFulfillingEvents.events.add(deserializeEvent(deser, true));
+        			}
+        		} catch(Exception exc) {
+        			throw new ActionExecuteException(
+        					"Failed to get referenced streams for trigger id=" +getId(),
+        					exc);
+        		}
+        	}
+
+        	lastFulfillingEvents.events.add(event);
+        	events = new ArrayList();
+        	long expire = (getTimeRange() > 0 ?
+        			System.currentTimeMillis() - getTimeRange() : 0);
+
+        	// Like Collection.addAll(), but with an expiration filter, and no optimization
+        	for (Iterator it = lastFulfillingEvents.events.iterator(); it.hasNext(); ) {
+        		AbstractEvent mayBeExpired = (AbstractEvent) it.next();
+        		if (mayBeExpired.getTimestamp() <= expire) {
+        			it.remove();
+        		} else {
+        			events.add(mayBeExpired);
+        		}
+        	}
         }
-        else {
-            synchronized (lastFulfillingEventsLock) {
-                long expire = getTimeRange() > 0 ?
-                        System.currentTimeMillis() - getTimeRange() : 0;
-                        
-                for (Iterator it = lastFulfillingEvents.iterator();
-                     it.hasNext(); ) {
-                    AbstractEvent event = (AbstractEvent) it.next();
-                    if (event.getTimestamp() > expire)
-                        events.add(event);
-                }
-            }
-        }
-        
+
         return events;
     }
     
-    private TriggerFiredEvent prepareTargetEvent(List fulfillingEvents, 
+    private TriggerFiredEvent prepareTargetEvent(Collection fulfillingEvents, 
                                                  EventTrackerLocal etracker) 
         throws ActionExecuteException {
               
@@ -662,7 +575,7 @@ public class MultiConditionTrigger
     public Integer[] getInterestedInstanceIDs(Class c) {
         // Ask the sub triggers what they are interested in
         // Same set for both fired and not fired
-        HashSet trigSet = getTriggerIds();
+        Set trigSet = getTriggerIds();
         return (Integer[]) trigSet.toArray(new Integer[trigSet.size()]);
     }
 
@@ -670,15 +583,15 @@ public class MultiConditionTrigger
     * @return Value of property triggerIds.
     *
     */
-   public HashSet getTriggerIds() {
+   public Set getTriggerIds() {
        return triggerIds;
    }
 
-   /** Setter for property andTriggerIds.
+   /** Setter for property triggerIds.
     * @param triggerIds New value of property triggerIds.
     *
     */
-   public void setTriggerIds(HashSet val) {
+   public void setTriggerIds(Set val) {
        triggerIds = val;
    }
 
