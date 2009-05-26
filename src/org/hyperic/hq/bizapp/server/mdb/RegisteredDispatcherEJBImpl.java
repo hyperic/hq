@@ -82,7 +82,7 @@ public class RegisteredDispatcherEJBImpl
     private final Log log =
         LogFactory.getLog(RegisteredDispatcherEJBImpl.class);
     
-    private void ensureSessionOpen() {
+    protected void ensureSessionOpen() {
         try {
             if (Util.getSessionFactory().getCurrentSession() != null)
                 return;
@@ -98,15 +98,11 @@ public class RegisteredDispatcherEJBImpl
      * Dispatch the event to interested triggers.
      * 
      * @param event The event.
-     * @param visitedMCTriggers The set of visited multicondition triggers 
-     *                          that will be updated if a trigger of this type 
-     *                          processes this event.
      */
-    private void dispatchEvent(AbstractEvent event, Set visitedMCTriggers) 
+    private void dispatchEvent(AbstractEvent event) 
         throws InterruptedException {        
         // Get interested triggers
-        Collection triggers =
-            RegisteredTriggers.getInterestedTriggers(event);
+        Collection triggers = getInterestedTriggers(event);
         
         //log.debug("There are " + triggers.size() + " registered for event");
 
@@ -116,14 +112,13 @@ public class RegisteredDispatcherEJBImpl
             
             TriggerInterface trigger = (TriggerInterface) i.next();
             try {
-                updateVisitedMCTriggersSet(visitedMCTriggers, trigger);
                 trigger.processEvent(event);                
             } catch (ActionExecuteException e) {
                 // Log error
                 log.error("ProcessEvent failed to execute action", e);
             } catch (EventTypeException e) {
                 // The trigger was not meant to process this event
-                log.debug("dispatchEvent dispatched to trigger (" +
+                log.error("dispatchEvent dispatched to trigger (" +
                         trigger.getClass() + " that's not " +
                         "configured to handle this type of event: " +
                         event.getClass(), e);
@@ -131,26 +126,11 @@ public class RegisteredDispatcherEJBImpl
         }            
         
     }
-
-    private void updateVisitedMCTriggersSet(Set visitedMCTriggers,
-                                            TriggerInterface trigger) 
-        throws InterruptedException {
-        
-        if (trigger instanceof MultiConditionTrigger) {
-            boolean firstTimeVisited = visitedMCTriggers.add(trigger);
-
-            try {
-                if (firstTimeVisited) {
-                    ((MultiConditionTrigger)trigger).acquireSharedLock();                        
-                }                            
-            } catch (InterruptedException e) {
-                // failed to acquire shared lock - we will not visit this trigger
-                visitedMCTriggers.remove(trigger);
-                throw e;
-            }
-        }
-    } 
     
+    protected Collection getInterestedTriggers(AbstractEvent evt) {
+    	return RegisteredTriggers.getInterestedTriggers(evt);
+    }
+
     /**
      * The onMessage method
      */
@@ -161,7 +141,6 @@ public class RegisteredDispatcherEJBImpl
         
         // Just to be safe, start with a fresh queue.
         Messenger.resetThreadLocalQueue();
-        final Set visitedMCTriggers = new HashSet();
         boolean debug = log.isDebugEnabled();
         
         try {
@@ -179,7 +158,7 @@ public class RegisteredDispatcherEJBImpl
                     log.debug("1 event in the message");
                 }
                 
-                dispatchEvent(event, visitedMCTriggers);
+                dispatchEvent(event);
             } else if (obj instanceof Collection) {
                 Collection events = (Collection) obj;
                 
@@ -189,7 +168,7 @@ public class RegisteredDispatcherEJBImpl
                 
                 for (Iterator it = events.iterator(); it.hasNext(); ) {
                     AbstractEvent event = (AbstractEvent) it.next();
-                    dispatchEvent(event, visitedMCTriggers);
+                    dispatchEvent(event);
                 }
             }
         } catch (JMSException e) {
@@ -197,91 +176,7 @@ public class RegisteredDispatcherEJBImpl
         } catch (InterruptedException e) {
             log.info("Thread was interrupted while processing events.");
         } finally {
-            try {
-                flushStateForVisitedMCTriggers(visitedMCTriggers);
-            } catch (Exception e) {
-                log.error("Failed to flush state for multi condition trigger", e);
-            }
-            
             dispatchEnqueuedEvents();
-        }
-    }
-    
-    private void flushStateForVisitedMCTriggers(Set visitedMCTriggers) 
-        throws EventTypeException, ActionExecuteException, InterruptedException {
-        
-        if (visitedMCTriggers.isEmpty()) {
-            return;
-        }        
-        
-        try {
-            FlushStateEvent event = new FlushStateEvent();
-
-            if (log.isDebugEnabled()) {
-                log.debug("Flushing states for " + visitedMCTriggers.size() +
-                          " triggers");
-            }
-            
-            int i = 1;
-            
-            for (Iterator it = visitedMCTriggers.iterator(); it.hasNext();) {
-                MultiConditionTrigger trigger = (MultiConditionTrigger) it.next();
-
-                if (trigger.triggeringConditionsFulfilled()) {
-                    tryFlushState(event, trigger);
-                } else {
-                    trigger.releaseSharedLock();
-                }
-                it.remove();
-                
-                if (log.isDebugEnabled()) {
-                    log.debug("Release lock: " + i++);
-                }
-            }
-        } finally {
-            // The visitedMCTriggers list may not be empty if an exception occurs. 
-            // Need to release the shared lock on all remaining list elements.   
-            // If the shared lock isn't released then the multicondition trigger 
-            // may never fire again until the server is rebooted!
-            if (!visitedMCTriggers.isEmpty()) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Releasing locks for " + visitedMCTriggers.size()
-                              + " triggers");
-                }
-            
-                for (Iterator it = visitedMCTriggers.iterator(); it.hasNext();) {
-                    MultiConditionTrigger trigger = (MultiConditionTrigger) it.next();
-                    trigger.releaseSharedLock();
-                    it.remove();
-                }
-            }
-        }
-    }
-
-    private void tryFlushState(FlushStateEvent event, MultiConditionTrigger trigger) 
-        throws InterruptedException, EventTypeException, ActionExecuteException {
-        
-        boolean lockAcquired = false;
-        try {
-            lockAcquired = trigger.upgradeSharedLockToExclusiveLock();
-
-            ensureSessionOpen();
-
-            if (lockAcquired) {
-                trigger.processEvent(event);                    
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("There must be more interesting events "+
-                            "to multicondition alert with trigger id="+
-                            trigger.getId()+" since we failed to upgrade "+
-                            "shared lock on flushing state. Current shared " +
-                            "lock holders: "+trigger.getCurrentSharedLockHolders());    
-                }                            
-            }                        
-        } finally {
-            if (lockAcquired) {
-                trigger.releaseExclusiveLock();
-            }
         }
     }
     
@@ -297,30 +192,10 @@ public class RegisteredDispatcherEJBImpl
         if (enqueuedEvents.isEmpty()) {
             return;
         }
-        /*
-        if (debug) {
-            log.debug("Registering events publishing handler");
-        }
-            
-        EventsHandler eventsPublishHandler = 
-            new EventsHandler() {
-            public void handleEvents(List enqueuedEvents) {
-        */
-                Messenger sender = new Messenger();
-                sender.publishMessage(EventConstants.EVENTS_TOPIC, 
-                                      (Serializable) enqueuedEvents);
-        /*
-            }
-        };
-        
-        handleEventsPostCommit(enqueuedEvents, 
-                               eventsPublishHandler, 
-                               true);
-        
-        if (debug) {
-            log.debug("Finished registering events publishing handler");
-        }
-        */
+
+        Messenger sender = new Messenger();
+        sender.publishMessage(EventConstants.EVENTS_TOPIC, 
+        					  (Serializable) enqueuedEvents);
     }
         
     /**
