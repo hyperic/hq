@@ -41,7 +41,7 @@
       <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-specific-archive">
-      <param name="jre-file" value="amd64-linux-jre-1_6.tar.gz"/>
+      <param name="jre-file" value="amd64-linux-jre-1_*.tar.gz"/>
       <param name="archive-suffix" value="x86_64-linux"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>
@@ -61,7 +61,7 @@
       <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-specific-archive">
-      <param name="jre-file" value="x86-linux-glibc2-jre-1_6.tar.gz"/>
+      <param name="jre-file" value="x86-linux-glibc2-jre-1_*.tar.gz"/>
       <param name="archive-suffix" value="x86-linux"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>
@@ -76,7 +76,7 @@
       <param name="compress-mode" value="tgz"/>
     </antcall>
     <antcall target="roll-platform-specific-archive">
-      <param name="jre-file" value="sparc-sun-solaris-jre-1_6.tar.gz"/>
+      <param name="jre-file" value="sparc-sun-solaris-jre-1_*.tar.gz"/>
       <param name="archive-suffix" value="sparc-solaris"/>
       <param name="compress-mode" value="tgz"/>
     </antcall>
@@ -86,7 +86,7 @@
       <param name="compress-mode" value="zip"/>
     </antcall>
     <antcall target="roll-platform-specific-archive">
-      <param name="jre-file" value="x86-win32-jre-1_6.exe"/>
+      <param name="jre-file" value="x86-win32-jre-1_*.exe"/>
       <param name="archive-suffix" value="win32"/>
       <param name="compress-mode" value="zip"/>
     </antcall>
