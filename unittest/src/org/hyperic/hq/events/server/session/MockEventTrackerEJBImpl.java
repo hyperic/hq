@@ -49,7 +49,7 @@ import org.jmock.expectation.ExpectationCounter;
  * A mock implementation of the event tracker EJB. This implementation is 
  * not thread safe.
  */
-public class MockEventTrackerEJBImpl 
+public class MockEventTrackerEJBImpl
     implements EventTrackerLocal, Verifiable {
 
     private final Map _triggerEventId2triggerId = new HashMap();
