@@ -253,8 +253,10 @@ public class Action
     }
 
     public ActionInterface getInitializedAction() {
+    	String actionClassName = null;
         try {
-            Class ac = Class.forName(getClassName());
+        	actionClassName = getClassName();
+            Class ac = Class.forName(actionClassName);
             ActionInterface action = (ActionInterface) ac.newInstance();
 
             action.init(ConfigResponse.decode(action.getConfigSchema(),
@@ -262,6 +264,7 @@ public class Action
         
             return action;
         } catch (Exception e) {
+        	_log.error("Error getting initialized action for " + actionClassName);
             throw new SystemException("Unable to get action", e); 
         }
     }

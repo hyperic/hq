@@ -167,6 +167,7 @@ public final class AuthenticationFilter extends BaseFilter {
         } catch (Exception e) {
             log.warn("Caught Exception from client "
                     + request.getRemoteAddr() + ": " + e.getMessage());
+            log.debug(e);
         }
     }
 

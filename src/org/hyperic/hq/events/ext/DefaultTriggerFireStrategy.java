@@ -215,8 +215,8 @@ public class DefaultTriggerFireStrategy implements TriggerFireStrategy {
         return flags[0].equals(Boolean.TRUE) && flags[1].equals(_trigger.getId());
     }
 
-    private boolean shouldFireActions(AlertDefinitionManagerLocal aman, 
-                                      AlertDefinition alertDef) 
+    protected boolean shouldFireActions(AlertDefinitionManagerLocal aman, 
+    									AlertDefinition alertDef) 
         throws PermissionException {
 
         if (_log.isDebugEnabled())
@@ -224,6 +224,10 @@ public class DefaultTriggerFireStrategy implements TriggerFireStrategy {
                     " causing alert definition id " + alertDef.getId() + 
                     " to fire");
 
+        if (alertDef.getEscalation() != null) {
+        	return false;
+        }
+        
         // See if we need to suppress this trigger        
         if (alertDef.getFrequencyType() == EventConstants.FREQ_NO_DUP) {
             TriggerTrackerLocal tracker = TriggerTrackerEJBImpl.getOne();                
