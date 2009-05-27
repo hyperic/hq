@@ -227,7 +227,7 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 		}
 	}
 	
-	// Sneaky InvocationHandler that randomizes any list it returns
+	// Sneaky InvocationHandler that randomizes any list it dispatches as a message
 	private static class MsgInvocationHandler implements InvocationHandler {
 
 		private Object msgObject;
