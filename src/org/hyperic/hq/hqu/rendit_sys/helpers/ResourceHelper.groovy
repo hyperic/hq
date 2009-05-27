@@ -313,7 +313,7 @@ class ResourceHelper extends BaseHelper {
     	return edges
     }
             
-    List findParentPlatformsByNetworkRelation(String prototype, String name, boolean hasChildren) {
+    List findParentPlatformsByNetworkRelation(String prototype, String name, Boolean hasChildren) {
     	def platformType = null
     	def platformTypeIds = null
     	
@@ -331,10 +331,14 @@ class ResourceHelper extends BaseHelper {
     		platformTypeIds = Collections.singletonList(platformType.id)
     	}
     	
-		return PlatMan.one.findParentPlatformPojosByNetworkRelation(
-    									user, platformTypeIds, name, Boolean.valueOf(hasChildren))    	
+		return findParentPlatformsByNetworkRelation(platformTypeIds, name, hasChildren)    	
     }
-    
+
+    List findParentPlatformsByNetworkRelation(List platformTypeIds, String name, Boolean hasChildren) {
+		return PlatMan.one.findParentPlatformPojosByNetworkRelation(
+    									user, platformTypeIds, name, hasChildren)    
+    }
+        
     List findPlatformsByNoNetworkRelation(String prototype, String name) {
     	def platformType = null
     	def platformTypeIds = null
@@ -354,10 +358,14 @@ class ResourceHelper extends BaseHelper {
     		} else {
     			platformTypeIds = Collections.singletonList(platformType.id)
     		}
-    		platforms = PlatMan.one.findPlatformPojosByNoNetworkRelation(user, platformTypeIds, name)
+    		platforms = findPlatformsByNoNetworkRelation(platformTypeIds, name)
     	}
     	
     	return platforms
+    }
+    
+	List findPlatformsByNoNetworkRelation(List platformTypeIds, String name) {
+        return PlatMan.one.findPlatformPojosByNoNetworkRelation(user, platformTypeIds, name)
     }
 
     void createResourceEdges(String resourceRelation, AppdefEntityID parent, AppdefEntityID[] children, boolean deleteExisting) {
