@@ -41,7 +41,9 @@ import javax.ejb.SessionBean;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
@@ -757,67 +759,82 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
                  parentResource.getInstanceId(), 
                  AuthzConstants.platformOpModifyPlatform);
 
+        // HQ-1670: Should not be able to add a parent resource to
+        // a network hierarchy if it has not been configured yet 
+        ConfigResponseDB config = ConfigManagerEJBImpl.getOne().getConfigResponse(parent);
+        if (config != null) {
+            String validationError = config.getValidationError();
+            if (validationError != null) {
+                throw new ResourceEdgeCreateException("Resource id " + parentResource.getId() 
+                                                        + ": " + validationError);
+            }
+        }
+        
         if (parentResource != null 
                 && !parentResource.isInAsyncDeleteState()
                 && children != null
                 && children.length > 0) {
 
-            if (deleteExisting) {
-                removeResourceEdges(subject, relation, parentResource);
-            }
+            try {
+                if (deleteExisting) {
+                    removeResourceEdges(subject, relation, parentResource);
+                }
             
-            ResourceEdgeDAO eDAO = getResourceEdgeDAO();
-            Collection edges = findResourceEdges(relation, parentResource);
-            List existing = null;
-            Platform childPlatform = null;
-            Resource childResource = null;
+                ResourceEdgeDAO eDAO = getResourceEdgeDAO();
+                Collection edges = findResourceEdges(relation, parentResource);
+                List existing = null;
+                Platform childPlatform = null;
+                Resource childResource = null;
 
-            if (edges.isEmpty()) {
-                // create self-edge for parent of network hierarchy
-                eDAO.create(parentResource, parentResource, 0, relation);
-            }
-            for (int i=0; i< children.length; i++) {
-                if (!children[i].isPlatform()) {
-                    throw new ResourceEdgeCreateException("Only platforms are supported.");
+                if (edges.isEmpty()) {
+                    // create self-edge for parent of network hierarchy
+                    eDAO.create(parentResource, parentResource, 0, relation);
                 }
-                try {
-                    childPlatform = platMan.findPlatformById(children[i].getId());
-                    childResource = childPlatform.getResource();
+                for (int i=0; i< children.length; i++) {
+                    if (!children[i].isPlatform()) {
+                        throw new ResourceEdgeCreateException("Only platforms are supported.");
+                    }
+                    try {
+                        childPlatform = platMan.findPlatformById(children[i].getId());
+                        childResource = childPlatform.getResource();
                     
-                    if (!supportedPlatformTypes.contains(childPlatform.getPlatformType())) {
-                        throw new ResourceEdgeCreateException(childPlatform.getPlatformType().getName()
+                        if (!supportedPlatformTypes.contains(childPlatform.getPlatformType())) {
+                            throw new ResourceEdgeCreateException(childPlatform.getPlatformType().getName()
                                         + " not supported as a dependent platform type.");
+                        }
+                    } catch (PlatformNotFoundException pe) {
+                        throw new ResourceEdgeCreateException ("Platform id " + children[i].getId() + " not found.");
                     }
-                } catch (PlatformNotFoundException pe) {
-                    throw new ResourceEdgeCreateException ("Platform id " + children[i].getId() + " not found.");
-                }
                 
-                // Check if child resource already exists in a network hierarchy
-                // TODO: This needs to be optimized
-                existing = findResourceEdges(relation, childResource.getId(), null, null);
+                    // Check if child resource already exists in a network hierarchy
+                    // TODO: This needs to be optimized
+                    existing = findResourceEdges(relation, childResource.getId(), null, null);
 
-                if (existing.size() == 1) {
-                    ResourceEdge existingChildEdge = (ResourceEdge) existing.get(0);
-                    Resource existingParent = existingChildEdge.getFrom();
-                    if (existingParent.getId().equals(parentResource.getId())) {
-                        // already exists with same parent, so skip
-                        continue;
-                    } else {
-                        // already exists with different parent
-                        throw new ResourceEdgeCreateException("Resource id " + childResource.getId()
+                    if (existing.size() == 1) {
+                        ResourceEdge existingChildEdge = (ResourceEdge) existing.get(0);
+                        Resource existingParent = existingChildEdge.getFrom();
+                        if (existingParent.getId().equals(parentResource.getId())) {
+                            // already exists with same parent, so skip
+                            continue;
+                        } else {
+                            // already exists with different parent
+                            throw new ResourceEdgeCreateException("Resource id " + childResource.getId()
                                         + " already exists in another network hierarchy.");
-                    }
-                } else if (existing.size() > 1) {
-                    // a resource can only belong to one network hierarchy
-                    // this is a data integrity issue if it happens
-                    throw new ResourceEdgeCreateException("Resource id " + childResource.getId()
+                        }
+                    } else if (existing.size() > 1) {
+                        // a resource can only belong to one network hierarchy
+                        // this is a data integrity issue if it happens
+                        throw new ResourceEdgeCreateException("Resource id " + childResource.getId()
                                         + " exists in " + existing.size() + " network hierarchies.");
-                }
+                    }
                 
-                if (childResource != null && !childResource.isInAsyncDeleteState()) {                    
-                    eDAO.create(parentResource, childResource, 1, relation);
-                    eDAO.create(childResource, parentResource, -1, relation);
+                    if (childResource != null && !childResource.isInAsyncDeleteState()) {                    
+                        eDAO.create(parentResource, childResource, 1, relation);
+                        eDAO.create(childResource, parentResource, -1, relation);
+                    }
                 }
+            } catch (Throwable t) {
+                throw new ResourceEdgeCreateException(t);
             }
         }
     }
