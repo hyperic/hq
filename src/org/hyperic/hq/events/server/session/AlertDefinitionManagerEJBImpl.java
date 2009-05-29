@@ -798,7 +798,12 @@ public class AlertDefinitionManagerEJBImpl
     public AlertDefinitionValue getById(AuthzSubject subj, Integer id) 
         throws PermissionException
     {
-        return getByIdAndCheck(subj, id).getAlertDefinitionValue();
+        AlertDefinitionValue adv = null;
+        AlertDefinition ad = getByIdAndCheck(subj, id);
+        if (ad != null) {
+            adv = ad.getAlertDefinitionValue();
+        }
+        return adv;
     }
     
     /** Find an alert definition
@@ -811,7 +816,18 @@ public class AlertDefinitionManagerEJBImpl
     {
         AlertDefinition ad = getAlertDefDAO().get(id);
         if (ad != null) {
-            canManageAlerts(subj, getAppdefEntityID(ad));
+            if (ad.isDeleted()) {
+                ad = null;
+            } else {
+                Resource r = ad.getResource();
+                if (r == null || r.isInAsyncDeleteState()) {
+                    ad = null;
+                }
+            }
+            
+            if (ad != null) {
+                canManageAlerts(subj, getAppdefEntityID(ad));
+            }
         }
         return ad;
     }
