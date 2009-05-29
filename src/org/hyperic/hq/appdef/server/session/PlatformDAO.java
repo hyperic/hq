@@ -245,28 +245,41 @@ public class PlatformDAO extends HibernateDAO {
                                             String platformName,
                                             Boolean hasChildren) {
         String nameEx = null;
-        String sql = "select {p.*} from EAM_PLATFORM p " +
-                     "join EAM_RESOURCE r on p.resource_id = r.id " +
-                     "where " + (hasChildren.booleanValue() ? "" : "not") + " exists (" +
-                         " select id from EAM_RESOURCE_EDGE e " +
-                         " where p.resource_id = e.from_id " +
-                         " and e.rel_id = " + AuthzConstants.RELATION_NETWORK_ID +
-                         " and e.distance = 0) ";
+        StringBuffer sql = new StringBuffer("select {p.*} from EAM_PLATFORM p ");
+                         
+        sql.append("join EAM_RESOURCE r on p.resource_id = r.id ");
+        
+        StringBuffer whereClause = new StringBuffer();
+
+        if (hasChildren != null) {
+        	whereClause.append((hasChildren.booleanValue() ? "" : "not"))
+        	           .append(" exists (select id from EAM_RESOURCE_EDGE e ")
+                       .append(" where p.resource_id = e.from_id ")
+                       .append(" and e.rel_id = ").append(AuthzConstants.RELATION_NETWORK_ID)
+                       .append(" and e.distance = 0) ");
+        }
         
         if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
-            sql += " and p.platform_type_id in (:ids) ";
+        	whereClause.append((whereClause.length() > 0) ? " and" : "")
+        	           .append(" p.platform_type_id in (:ids) ");
         }
 
         if (platformName != null && platformName.trim().length() > 0) {
             HQDialect dialect = Util.getHQDialect();
             nameEx = dialect.getRegExSQL("r.sort_name", ":regex", true, false);
 
-            sql += " and (" + nameEx + ") ";
+            whereClause.append((whereClause.length() > 0) ? " and" : "")
+                       .append(" (").append(nameEx).append(") ");
         }
-        sql += " order by r.sort_name ";
+        
+        if (whereClause.length() > 0) {
+        	sql.append("where ").append(whereClause);
+        }
+        
+        sql.append(" order by r.sort_name ");
         
         Query query = getSession()
-                        .createSQLQuery(sql)
+                        .createSQLQuery(sql.toString())
                         .addEntity("p", Platform.class);
         
         if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
