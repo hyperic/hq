@@ -487,7 +487,11 @@ public class PermissionManagerImpl
         };
     }
 
-    public String getOperableGroupsHQL(String alias, String oper) { return ""; }
+    public String getOperableGroupsHQL(AuthzSubject subject,
+                                       String alias, 
+                                       String oper) { 
+        return "";
+    }
 
     public String getSQLWhere(Integer subjectId) {
         return "";

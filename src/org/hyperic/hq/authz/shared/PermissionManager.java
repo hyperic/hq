@@ -194,7 +194,9 @@ public abstract class PermissionManager extends AuthzSession {
                                               String resType,
                                               String op);
 
-    public abstract String getOperableGroupsHQL(String alias, String oper);
+    public abstract String getOperableGroupsHQL(AuthzSubject subject,
+                                                String alias, 
+                                                String oper);
     
     public abstract Collection 
         getGroupResources(Integer subjectId, Integer groupId, Boolean fsystem);

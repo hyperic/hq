@@ -466,7 +466,7 @@ public class ResourceGroupDAO extends HibernateDAO
                " where m.resource = :resource and m.group = g " + 
                ") ";
         
-        String pmql = pm.getOperableGroupsHQL("g",
+        String pmql = pm.getOperableGroupsHQL(subject, "g",
                inclusive ? AuthzConstants.groupOpViewResourceGroup : 
                            AuthzConstants.groupOpModifyResourceGroup);
         
