@@ -2308,6 +2308,7 @@ button span{
 .button42 {
 	color:#fff;
 	font-weight:700;
+	font-size: 11px !important;
 	width:auto;
 	overflow:visible;
     border: 1px solid #84B96D;
