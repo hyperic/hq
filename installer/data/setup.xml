@@ -151,7 +151,7 @@ Setup properties will be written to %WRITABLEFILE% instead.
   	<available file="eula.txt" property="eula.present"/>	
   </target>
   
-  <target name="show-eula" depends="check-eula" if="eula.present">
+  <target name="show-eula" depends="check-eula" if="eula.present" unless="accept.eula">
   	<loadfile property="eula.text" srcFile="eula.txt"/>
 	<echo>^^^INFO:
 __ll__
@@ -168,7 +168,7 @@ __ll__
   </target>	
 
   <target name="init" 
-          depends="show-eula,load-basics,load-user-setup-properties,load-default-setup-properties">
+          depends="load-basics,load-user-setup-properties,show-eula,load-default-setup-properties">
 
     <!-- Parameterized names of things to deploy -->
     <echo>^^^INFO: Preparing to install...</echo>
