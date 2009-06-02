@@ -224,10 +224,6 @@ public class DefaultTriggerFireStrategy implements TriggerFireStrategy {
                     " causing alert definition id " + alertDef.getId() + 
                     " to fire");
 
-        if (alertDef.getEscalation() != null) {
-        	return false;
-        }
-        
         // See if we need to suppress this trigger        
         if (alertDef.getFrequencyType() == EventConstants.FREQ_NO_DUP) {
             TriggerTrackerLocal tracker = TriggerTrackerEJBImpl.getOne();                
