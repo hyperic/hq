@@ -1323,11 +1323,6 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         if(service.matchesValueObject(existing)) {
             log.debug("No changes found between value object and entity");
         } else {
-            if(!existing.getName().equals(service.getName())) {
-                Resource rv = service.getResource();
-                rv.setName(existing.getName());
-            }
-
             service.updateService(existing);
         }
         return service;
