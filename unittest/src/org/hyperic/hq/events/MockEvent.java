@@ -6,5 +6,9 @@ public class MockEvent extends AbstractEvent {
 		setId(id);
 		setInstanceId(instanceId);
 	}
+	
+	public String toString() {
+		return "[MockEvent: id=" + getId() + ", instanceid=" + getInstanceId() + "]";
+	}
 }
 

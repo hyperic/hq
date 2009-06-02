@@ -81,6 +81,7 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
         super.setUp();
         
         _eventTracker = new MockEventTrackerEJBImpl();
+        _eventTracker.setFailOnVerify();
         
         // set the initial context factory
         MockContextFactory.setAsInitial();
@@ -137,8 +138,8 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
     	int triggerID = 1001;
     	
     	// 1&2|3&4|5&6 with events 1,2 ==> shouldn't fire.
-		MultiConditionTrigger mct =
-			createTrigger(new Integer(triggerID++), "1&2|3&4|5&6", 1000000000, false);
+		MockMultiConditionTrigger mct =
+			createTrigger(new Integer(triggerID++), "1&2|3&4|5&6", 1000000000, false, true);
 
 		AbstractEvent e1 = createEvent(1, true);
 		mct.processEvent(e1);
@@ -146,7 +147,7 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
 		mct.processEvent(e2);
     	
     	// 1&2|3&4|5&6 with events 5,6 ==> should fire.
-		mct = createTrigger(new Integer(triggerID++), "1&2|3&4|5&6", 1000000000, false);
+		mct = createTrigger(new Integer(triggerID++), "1&2|3&4|5&6", 1000000000, false, true);
 		e1 = createEvent(5, true);
 		mct.processEvent(e1);
 		e2 = createEvent(6, true);
@@ -155,7 +156,7 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
 		mct.processEvent(e2);
     	
     	// 1&2|3&4|5&6 with events 6,2,4,1 ==> should fire.
-		mct = createTrigger(new Integer(triggerID++), "1&2|3&4|5&6", 1000000000, false);
+		mct = createTrigger(new Integer(triggerID++), "1&2|3&4|5&6", 1000000000, false, true);
 		e1 = createEvent(6, true);
 		mct.processEvent(e1);
 		e2 = createEvent(2, true);
@@ -169,7 +170,7 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
     	
     	// ((((1&2)|3)&4)|5)&6 with events 1 (not fired), 2 (fired),
 		// 6 (not fired), 5 (fired) ==> should not fire.
-		mct = createTrigger(new Integer(triggerID++), "1&2|3&4|5&6", 1000000000, false);
+		mct = createTrigger(new Integer(triggerID++), "1&2|3&4|5&6", 1000000000, false, true);
 		e1 = createEvent(1, false);
 		mct.processEvent(e1);
 		e2 = createEvent(2, true);
@@ -179,11 +180,35 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
 		e4 = createEvent(5, true);
 		mct.processEvent(e4);
     	
+    	// ((((1&2)&3)&4)&5)|6 with events 6 (fired) ==> should fire.
+		mct = createTrigger(new Integer(triggerID++), "1&2&3&4&5|6", 1000000000, false, true);
+		e1 = createEvent(6, true);
+		mct.processEvent(e1);
+    	
+    	// ((((1|2)&3)&4)&5)&6 with events 1 (fired) ==> should not fire.
+		mct = createTrigger(new Integer(triggerID++), "1|2&3&4&5&6", 1000000000, false, true);
+		e1 = createEvent(1, true);
+		mct.processEvent(e1);
+    	
+    	// ((((1|2)&3)&4)&5)&6 with events 2 (fired), 3 (fired), 4 (fired),
+		// 5 (fired), 6 (fired) ==> should fire.
+		mct = createTrigger(new Integer(triggerID++), "1|2&3&4&5&6", 1000000000, false, true);
+		e1 = createEvent(2, true);
+		mct.processEvent(e1);
+		e2 = createEvent(3, true);
+		mct.processEvent(e2);
+		e3 = createEvent(4, true);
+		mct.processEvent(e3);
+		e4 = createEvent(5, true);
+		mct.processEvent(e4);
+		AbstractEvent e5 = createEvent(6, true);
+		mct.processEvent(e5);
+    	
     	// Mix in not fired and fired.
 		// ((((1&2)|3)&4)|5)&6 with events 1 (not fired), 2 (fired),
 		// 6 (not fired), 5 (fired), 4 (not fired), 5 (not fired),
 		// 6 (fired), 1 (fired), 5 (fired) ==> should fire.
-		mct = createTrigger(new Integer(triggerID++), "1&2|3&4|5&6", 1000000000, false);
+		mct = createTrigger(new Integer(triggerID++), "1&2|3&4|5&6", 1000000000, false, true);
 		e1 = createEvent(1, false);
 		mct.processEvent(e1);
 		e2 = createEvent(2, true);
@@ -192,7 +217,7 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
 		mct.processEvent(e3);
 		e4 = createEvent(5, true);
 		mct.processEvent(e4);
-		AbstractEvent e5 = createEvent(4, false);
+		e5 = createEvent(4, false);
 		mct.processEvent(e5);
 		// This next one should negate e4 above
 		AbstractEvent e6 = createEvent(5, false);
@@ -213,8 +238,8 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
     	// 1&2 with events 1, 2, but 2 is sent after expiration ==> shouldn't fire.
     	int triggerID = 2001;
     	long expire = 200;
-		MultiConditionTrigger mct =
-			createTrigger(new Integer(triggerID++), "1&2", expire, false);
+		MockMultiConditionTrigger mct =
+			createTrigger(new Integer(triggerID++), "1&2", expire, false, true);
 
 		AbstractEvent e1 = createEvent(1, true);
 		mct.processEvent(e1);

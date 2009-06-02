@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
@@ -52,8 +53,6 @@ import org.jmock.expectation.ExpectationCounter;
 public class MockEventTrackerEJBImpl
     implements EventTrackerLocal, Verifiable {
 
-    private final Map _triggerEventId2triggerId = new HashMap();
-    
     private final Map _triggerId2TriggerEvents = new HashMap();
     
     private final ExpectationCounter _expectedNumCalls = 
@@ -73,6 +72,10 @@ public class MockEventTrackerEJBImpl
      */
     public void setExpectNeverInvoked() {
         _expectedNumCalls.setExpectNothing();
+    }
+    
+    public void setFailOnVerify() {
+    	_expectedNumCalls.setFailOnVerify();
     }
     
     public void setCurrentTimeMillis(long currentTime) {
@@ -103,25 +106,26 @@ public class MockEventTrackerEJBImpl
                                                      eventObject.getTimestamp(), 
                                                      expire);
         
-        _triggerEventId2triggerId.put(teid, tid);
-        
-        Set triggerEvents = (Set)_triggerId2TriggerEvents.get(tid);
-        
-        if (triggerEvents == null) {
-            triggerEvents = new TreeSet(new Comparator() {
+        synchronized (_triggerId2TriggerEvents) {
 
-                public int compare(Object o1, Object o2) {
-                    TriggerEvent event1 = (TriggerEvent)o1;
-                    TriggerEvent event2 = (TriggerEvent)o2;
-                    return (int)(event1.getCtime() - event2.getCtime());
-                }
-                
-            });
-            
-            _triggerId2TriggerEvents.put(tid, triggerEvents);
+        	Set triggerEvents = (Set)_triggerId2TriggerEvents.get(tid);
+
+        	if (triggerEvents == null) {
+        		triggerEvents = new TreeSet(new Comparator() {
+
+        			public int compare(Object o1, Object o2) {
+        				TriggerEvent event1 = (TriggerEvent)o1;
+        				TriggerEvent event2 = (TriggerEvent)o2;
+        				return (int)(event1.getCtime() - event2.getCtime());
+        			}
+
+        		});
+
+        		_triggerId2TriggerEvents.put(tid, triggerEvents);
+        	}
+
+        	triggerEvents.add(triggerEvent);
         }
-        
-        triggerEvents.add(triggerEvent);
         
         eventObject.setId(teid);
         
@@ -133,7 +137,11 @@ public class MockEventTrackerEJBImpl
      */
     public void deleteReference(Integer tid) throws SQLException {
         _expectedNumCalls.inc();
-        // for now we don't care if we delete anything in the mock object
+
+        synchronized (_triggerId2TriggerEvents) {
+        	// remove all events for this trigger
+        	_triggerId2TriggerEvents.remove(tid);
+        }
     }
 
     /**
@@ -144,18 +152,21 @@ public class MockEventTrackerEJBImpl
         
         _expectedNumCalls.inc();
         
-        Set triggerEvents = (Set)_triggerId2TriggerEvents.get(tid);
-        
         LinkedList eventStreams = new LinkedList();
-        
-        if (triggerEvents != null && !triggerEvents.isEmpty()) {            
-            for (Iterator iter = triggerEvents.iterator(); iter.hasNext();) {
-                TriggerEvent triggerEvent = (TriggerEvent) iter.next();
-                
-                if (!isExpired(triggerEvent)) {
-                    eventStreams.add(new EventToTriggerEventLinker(triggerEvent));
-                }
-            }
+
+        synchronized (_triggerId2TriggerEvents) {
+
+        	Set triggerEvents = (Set)_triggerId2TriggerEvents.get(tid);
+
+        	if (triggerEvents != null && !triggerEvents.isEmpty()) {            
+        		for (Iterator iter = triggerEvents.iterator(); iter.hasNext();) {
+        			TriggerEvent triggerEvent = (TriggerEvent) iter.next();
+
+        			if (!isExpired(triggerEvent)) {
+        				eventStreams.add(new EventToTriggerEventLinker(triggerEvent));
+        			}
+        		}
+        	}
         }
         
         return eventStreams;
@@ -165,19 +176,23 @@ public class MockEventTrackerEJBImpl
         throws SQLException {
         _expectedNumCalls.inc();
         
-        Set triggerEvents = (Set)_triggerId2TriggerEvents.get(tid);
-        
-        LinkedList eventStreams = new LinkedList();
-        
         int count = 0;
-        if (triggerEvents != null && !triggerEvents.isEmpty()) {            
-            for (Iterator iter = triggerEvents.iterator(); iter.hasNext();) {
-                TriggerEvent triggerEvent = (TriggerEvent) iter.next();
-                
-                if (!isExpired(triggerEvent)) {
-                    count++;
-                }
-            }
+        
+        synchronized (_triggerId2TriggerEvents) {
+
+        	Set triggerEvents = (Set)_triggerId2TriggerEvents.get(tid);
+
+        	LinkedList eventStreams = new LinkedList();
+
+        	if (triggerEvents != null && !triggerEvents.isEmpty()) {            
+        		for (Iterator iter = triggerEvents.iterator(); iter.hasNext();) {
+        			TriggerEvent triggerEvent = (TriggerEvent) iter.next();
+
+        			if (!isExpired(triggerEvent)) {
+        				count++;
+        			}
+        		}
+        	}
         }
         
         return count;
@@ -199,27 +214,42 @@ public class MockEventTrackerEJBImpl
         
         TriggerEvent toUpdate = null;
         
-        Set triggerEvents = (Set)_triggerId2TriggerEvents.get(tid);
-        
-        for (Iterator iter = triggerEvents.iterator(); iter.hasNext();) {
-            TriggerEvent triggerEvent = (TriggerEvent) iter.next();
-            
-            if (triggerEvent.getId().equals(teid)) {
-                iter.remove();
-                toUpdate = triggerEvent;
-            }            
-        }
-        
-        if (toUpdate == null) {
-            throw new SQLException("Can't update object that doesn't exist, teid="+teid);            
-        }
-        
-        toUpdate.setEventObject(eventObject);
-        toUpdate.setCtime(eventObject.getTimestamp());
+        synchronized (_triggerId2TriggerEvents) {
 
-        triggerEvents.add(toUpdate);
-        
-        eventObject.setId(teid);
+        	Set triggerEvents = (Set)_triggerId2TriggerEvents.get(tid);
+        	if (triggerEvents == null) {
+        		triggerEvents = new TreeSet(new Comparator() {
+
+        			public int compare(Object o1, Object o2) {
+        				TriggerEvent event1 = (TriggerEvent)o1;
+        				TriggerEvent event2 = (TriggerEvent)o2;
+        				return (int)(event1.getCtime() - event2.getCtime());
+        			}
+
+        		});
+        		_triggerId2TriggerEvents.put(tid, triggerEvents);
+        	} else {
+        		for (Iterator iter = triggerEvents.iterator(); iter.hasNext();) {
+        			TriggerEvent triggerEvent = (TriggerEvent) iter.next();
+
+        			if (triggerEvent.getId().equals(teid)) {
+        				iter.remove();
+        				toUpdate = triggerEvent;
+        			}            
+        		}
+        	}
+
+        	if (toUpdate == null) {
+        		throw new SQLException("Can't update object that doesn't exist, teid="+teid);            
+        	}
+
+        	toUpdate.setEventObject(eventObject);
+        	toUpdate.setCtime(eventObject.getTimestamp());
+
+        	triggerEvents.add(toUpdate);
+
+        	eventObject.setId(teid);
+        }
     }
 
     /**
@@ -268,6 +298,4 @@ public class MockEventTrackerEJBImpl
             _expectedNumCalls.verify();
         }
     }
-
-
 }

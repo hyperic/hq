@@ -72,6 +72,10 @@ implements Verifiable
 		return (Collection) triggerAssociations.get(evt);
 	}
 	
+	protected void dispatchEnqueuedEvents() {
+		// Intentional no-op
+	}
+	
 	public void verify() {
 		counter.verify();
 	}

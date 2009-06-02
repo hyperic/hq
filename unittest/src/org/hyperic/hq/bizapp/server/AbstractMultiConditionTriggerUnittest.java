@@ -29,6 +29,20 @@ public class AbstractMultiConditionTriggerUnittest extends TestCase {
 													  long timeRange,
 													  boolean durable,
 													  boolean failOnVerify) {
+		return createTrigger(triggerId,
+							 encodedSubConditions,
+							 timeRange,
+							 durable,
+							 failOnVerify,
+							 0);
+	}
+	
+	protected MockMultiConditionTrigger createTrigger(Integer triggerId,
+													  String encodedSubConditions,
+													  long timeRange,
+													  boolean durable,
+													  boolean failOnVerify,
+													  int numExpectedFires) {
 
 		MockMultiConditionTrigger trigger = new MockMultiConditionTrigger();
 		RegisteredTriggerValue tval = new RegisteredTriggerValue();
@@ -43,7 +57,7 @@ public class AbstractMultiConditionTriggerUnittest extends TestCase {
 		}
 
 		trigger.setTriggerFireStrategy(strategy);
-		setExpectedFires(trigger, 0);
+		setExpectedFires(trigger, numExpectedFires);
 
 		return trigger;
 	}
@@ -54,16 +68,37 @@ public class AbstractMultiConditionTriggerUnittest extends TestCase {
     	strategy.setExpectedNumTimesActionsFired(numFires);
 	}
     
+	/**
+	 * Create simple events.  For testing simplicity sake, make the event ids be the same
+	 * as the instance ids.
+	 * 
+	 * @param instanceId
+	 * @param fired
+	 * @return
+	 */
     protected AbstractEvent createEvent(int instanceId, boolean fired) {
-    	final Long one = new Long(1);
-    	MockEvent evt = new MockEvent(one, new Integer(instanceId));
+    	MockEvent evt = new MockEvent(new Long(instanceId), new Integer(instanceId));
     	AbstractEvent aEvt;
     	if (fired) {
     		aEvt = new TriggerFiredEvent(evt.getInstanceId(), evt);
+    		aEvt.setId(new Long(1000 + evt.getId()));
+    		((TriggerFiredEvent) aEvt).setMessage("[TriggerFiredEvent: instanceId=" + aEvt.getInstanceId() + "]");
     	} else {
-    		aEvt = new TriggerNotFiredEvent(evt.getInstanceId());
+    		aEvt = new MyNotFiredEvent(evt.getInstanceId());
+    		aEvt.setId(new Long(2000 + evt.getId()));
     	}
     	
     	return aEvt;
+    }
+    
+    private static class MyNotFiredEvent extends TriggerNotFiredEvent {
+    	
+    	public MyNotFiredEvent(Integer instanceId) {
+    		super(instanceId);
+    	}
+    	
+    	public String toString() {
+    		return "[TriggerNotFiredEvent: instanceId=" + getInstanceId() + "]";
+    	}
     }
 }
