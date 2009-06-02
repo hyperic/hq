@@ -81,11 +81,11 @@ public class AbstractMultiConditionTriggerUnittest extends TestCase {
     	AbstractEvent aEvt;
     	if (fired) {
     		aEvt = new TriggerFiredEvent(evt.getInstanceId(), evt);
-    		aEvt.setId(new Long(1000 + evt.getId()));
+    		aEvt.setId(new Long(1000 + evt.getId().longValue()));
     		((TriggerFiredEvent) aEvt).setMessage("[TriggerFiredEvent: instanceId=" + aEvt.getInstanceId() + "]");
     	} else {
     		aEvt = new MyNotFiredEvent(evt.getInstanceId());
-    		aEvt.setId(new Long(2000 + evt.getId()));
+    		aEvt.setId(new Long(2000 + evt.getId().longValue()));
     	}
     	
     	return aEvt;
