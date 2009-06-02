@@ -34,25 +34,20 @@ package org.hyperic.hq.bizapp.server.trigger.conditional;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
-import org.hyperic.hq.events.AlertCreateException;
 import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.FlushStateEvent;
 import org.hyperic.hq.events.InvalidTriggerDataException;
@@ -78,8 +73,8 @@ import org.hyperic.util.config.StringConfigOption;
  */
 public class MultiConditionTrigger
     extends AbstractTrigger {
-    private final Log log = LogFactory.getLog(MultiConditionTrigger.class);
-
+    private static final Log log = LogFactory.getLog(MultiConditionTrigger.class);
+    
     public static final String CFG_TRIGGER_IDS = "triggerIds";
     public static final String CFG_TIME_RANGE  = "timeRange";
     public static final String CFG_DURABLE     = "durable";
@@ -87,19 +82,6 @@ public class MultiConditionTrigger
     public static final String AND = "&";
     public static final String OR  = "|";
     
-    protected static class LastFulfillingEventsState {
-    	List events;
-    	long fireStamp;
-    	
-    	public LastFulfillingEventsState(List init) {
-    		events = init;
-    		fireStamp = 0;
-		}
-    }
-    
-    protected final LastFulfillingEventsState lastFulfillingEvents =
-    	new LastFulfillingEventsState(new ArrayList());
-
     /** Holds value of property triggerIds. */
     private Set triggerIds;
 
@@ -117,6 +99,362 @@ public class MultiConditionTrigger
     
     /** Creates a new instance of MultiConditionTrigger */
     public MultiConditionTrigger() {
+    	baton = new Baton();
+    }
+    
+    private static class Baton {
+    	// Container class for all things synchronized.  This class does no
+    	// synchronization on its own: concurrency correctness must be
+    	// ensured by the calling code.
+    	Thread processor;
+    	LinkedList eventsToProcess;
+    	LinkedList priorState;
+    	
+    	Baton() {
+    		eventsToProcess = new LinkedList();
+    		priorState = null;
+    	}
+    	
+    	Thread getProcessor() {
+    		return processor;
+    	}
+    	
+    	/*
+    	 * NOTE: returns the actual list reference, not a copy.  
+    	 */
+    	LinkedList getEventsToProcess() {
+    		return eventsToProcess;
+    	}
+    	
+    	/*
+    	 * NOTE: returns the actual list reference, not a copy.  
+    	 */
+    	LinkedList getPriorState() {
+    		return priorState;
+    	}
+    	
+    	void setPriorState(LinkedList priorState) {
+    		this.priorState = priorState;
+    	}
+    	
+    	// Must be done under lock!
+    	boolean grab() {
+    		boolean result = false;
+    		if (processor == null) {
+    			processor = Thread.currentThread();
+    			result = true;
+    		} else {
+    			if (processor.equals(Thread.currentThread())) {
+    				// Should not happen!
+    				log.error("Illegal monitor state in Baton");
+    				// But...the best thing to do in this (impossible?) scenario is to proceed
+    				result = true;
+    			}
+    		}
+    		
+    		return result;
+    	}
+
+    	// Must be done under lock!
+		public void release() {
+			processor = null;
+		}
+    }
+    
+    private Baton baton;
+    
+    /** 
+     * Process an event from the dispatcher.  This is the main entrypoint method.
+     * This method must:
+     * 1) Examine current running state.  If another thread is already processing for
+     *     this trigger, simply put the event on a queue for that thread to pick up,
+     *     and then exit.
+     * 2) If the current thread is to process the event (i.e. no other thread currently
+     *     processing), then determine if event stream initialization from the database
+     *     must be done.  This is necessary on startup, or on failover in an HA instance.
+     * 3) Once all necessary event stream initialization is done, process the events in
+     *     the order they are received.  Processing of an event consists of examining
+     *     the current event and all prior events that have not caused a trigger fire.
+     *     Also, the event must be added to permanent storage until the trigger fires,
+     *     because this enables failover to do the right thing.  Handle expiring events.
+     * 
+     * @param event the Event to process
+     * @throws ActionExecuteException if an action throws an exception
+     */
+    public void processEvent(AbstractEvent event)
+        throws EventTypeException, ActionExecuteException {
+    	
+        // If we didn't fulfill the condition, then don't fire
+        if (!(event instanceof TriggerFiredEvent ||
+              event instanceof TriggerNotFiredEvent)) {
+            throw new EventTypeException(
+                "Invalid event type passed: expected TriggerFiredEvent " +
+                "or TriggerNotFiredEvent");
+        }
+        
+        LinkedList eventsToProcess = getEventsToProcess(event);
+        if (eventsToProcess != null) {
+        	evaluateEventList(eventsToProcess);
+        }
+    }
+    
+    private LinkedList getEventsToProcess(AbstractEvent event) {
+    	LinkedList result = null;
+    	synchronized (baton) {
+    		if (baton.grab()) {
+    			// Grab events and continue processing
+    			result = new LinkedList(baton.getEventsToProcess());
+    			result.add(event);
+    		} else {
+    			// Queue the event for the baton holder to process
+    			baton.getEventsToProcess().add(event);
+    		}
+    	}
+    	
+    	return result;
+    }
+    
+    /**
+     * Internal workhorse method.  This method is not synchronized because it assumes it is
+     * running only when it has the baton.  Chew through the list of events until it is emptied.
+     * It is known at the start of this method that eventsToProcess.size() > 0.
+     */
+	void evaluateEventList(LinkedList eventsToProcess) {
+		
+        EventTrackerLocal etracker = null;
+        try {
+            etracker = EventTrackerUtil.getLocalHome().create();
+        } catch (Exception e) {
+            log.error("Internal error, cannot create event tracker", e);
+        }
+		
+        boolean drainedQueue = false;
+        // It guaranteed that, if we're here, there is at least one event in the queue
+        do {
+        	
+        	AbstractEvent current = (AbstractEvent) eventsToProcess.removeFirst();
+        	
+        	// Evaluate one-by-one.  Requirements:
+        	//
+        	// 1. Evaluate events in the order they came in, starting with the event
+        	//     at position startFrom.
+        	// 2. Filter out expired events based on the timestamp of the "current" event.
+        	//     If this trigger has an expiration of N milliseconds, then any events
+        	//     with a timestamp less than (current.getTimestamp() - N) is considered
+        	//     to be expired.
+        	// 3. Once triggering conditions are met, fire and get rid of all previous events,
+        	//     per the feature requirements for this trigger.
+        	// 4. Leave events that occurred after the triggering event for subsequent
+        	//     evaluation.
+        	// 5. A MultiConditionTrigger can fire with a single triggering condition,
+        	//     for example, if the conditions are "a OR b" and a fires.  This means
+        	//     the list of conditions need to be evaluated front-to-back when there
+        	//     are any OR conditions.  If there are only AND conditions, then the
+        	//     minimum is the number of AND conditions.
+        	//
+        	// Other things to note:
+        	//
+        	// - a TriggerNotFiredEvent has no useful meaning if there are no prior
+        	//    TriggerFiredEvents for the condition
+        	// - a TriggerFiredEvent followed (not necessarily immediately followed, if
+        	//    the TriggerNotFiredEvent occurs before sufficient fulfilling conditions)
+        	//    by a TriggerNotFiredEvent for the same condition effectively neutralizes
+        	//    both events
+        	LinkedList priorState = baton.getPriorState();
+			if (priorState == null) {
+				
+				// First time seeing this trigger.  There may be backed-up events
+				LinkedList persistedStream = getPersistedReferencedEvents(etracker);
+				baton.setPriorState(persistedStream);
+			}
+        	
+        	
+        	Collection fulfilled = doSingleEvaluation(baton.getPriorState(),
+        											  current,
+        											  etracker);
+        	if (fulfilled != null) {
+        		// No matter what, do not consider the fulfilling events in another
+        		// evaluation -- clear them now!  Fulfilled contains all the info we
+        		// need to create the alert.
+        		baton.getPriorState().clear();
+        		fire(fulfilled, etracker);
+        	}
+        	
+        	if (eventsToProcess.isEmpty()) {
+        		synchronized (baton) {
+        			if (baton.getEventsToProcess().isEmpty()) {
+        				// Looks like we're done here...
+        				baton.release();
+        				drainedQueue = true;
+        			} else {
+        				// New events have come in while we were processing
+        				eventsToProcess.addAll(baton.getEventsToProcess());
+        				baton.getEventsToProcess().clear();
+        			}
+        		}
+        	}
+        	
+        	if (!drainedQueue) {
+        		if (log.isDebugEnabled()) {
+        			log.debug("Event queue size is " + baton.getEventsToProcess().size() +
+        			", continuing.");
+        		}
+        	}
+        	
+        } while (!drainedQueue);
+	}
+	
+    private Collection doSingleEvaluation(LinkedList events, AbstractEvent event, EventTrackerLocal etracker) {
+    	
+    	Collection result = null;
+    	
+    	long timeRange = getTimeRange();
+    	long expire = Long.MIN_VALUE;
+    	if (timeRange > 0) {
+    		long eventTime = event.getTimestamp();
+    		expire = eventTime = timeRange;
+    	}
+
+    	AbstractEvent toUpdate = null;
+
+    	// Create a table to keep track
+    	Map fulfilled = new LinkedHashMap();
+    	Map subTriggersNotFiring = null;
+
+    	// Add in the current event
+    	events.add(event);
+
+    	for (Iterator iter = events.iterator(); iter.hasNext(); ) {
+
+    		AbstractEvent tracked = (AbstractEvent) iter.next();
+    		// Bypass expired events.  Don't bother cleaning them up, they get cleaned
+    		// up by TriggerEventDAO.deleteByTriggerId() in one fell swoop.  Note that
+    		// if there is no expiration, expire=Long.MIN_VALUE and the timestamp is guaranteed
+    		// to be greater.
+    		if (tracked.getTimestamp() >= expire) {
+
+    			if (tracked != event &&
+    					tracked.getInstanceId().equals(event.getInstanceId())) {
+
+    				// If this tracked event equals the new event, then
+    				// the old one is obsolete.  There can be only one event
+    				// to delete, because of the way the event stream is
+    				// evaluated -- every step along the way filters out any
+    				// previous obsolete event.
+    				
+    				// Mark event for update in permanent storage
+    				toUpdate = tracked;
+    				// delete previous obsolete event
+    				iter.remove();
+    			}
+
+    			if (tracked instanceof TriggerFiredEvent) {
+    				fulfilled.put(tracked.getInstanceId(), tracked);
+
+    				// If there were any previous "not fired" events for the 
+    				// sub-trigger, get rid of them
+    				if (subTriggersNotFiring != null) {
+    					subTriggersNotFiring.remove(tracked.getInstanceId());
+    				}
+    			} else { // TriggerNotFiredEvent
+    				fulfilled.remove(tracked.getInstanceId());
+
+    				// For this trigger we should publish not fired events only 
+    				// when we have tracked that one of the sub trigger does 
+    				// not currently fulfill the conditions. Otherwise, the 
+    				// DurationTrigger when applied as a damper to a recovery 
+    				// alert definition will not work correctly (remember that 
+    				// recovery alert definitions use the MultiConditionTrigger).
+    				// Once the recovery condition is met for the recovery alert 
+    				// definition we only want the listening DurationTrigger to 
+    				// receive a TriggerNotFiredEvent when the conditions are not 
+    				// met, not because the primary alert definition has not
+    				// currently fired.
+    				if (subTriggersNotFiring == null) {
+    					subTriggersNotFiring = new HashMap();
+    				}
+    				subTriggersNotFiring.put(tracked.getInstanceId(), tracked);
+    			}
+    		} else {
+    			// Get rid of the expired event.  Since the prior events are in time order,
+    			// an expired event cannot have any useful purpose once it is identified
+    			// as being expired
+    			iter.remove();
+    		}
+    	}
+
+    	// If we've got nothing, then just clean up.  This condition means that any
+    	// prior events were TriggerNotFiredEvents and are just laying around
+    	// taking up space, or there were some TriggerFiredEvents that were later
+    	// made obsolete by TriggerNotFiredEvents.
+    	boolean checkCompletion = true;
+    	boolean sendNotFired = false;
+    	if (fulfilled.size() == 0) {
+
+    		checkCompletion = false;
+    		if (subTriggersNotFiring != null && subTriggersNotFiring.size() > 0) {
+    			sendNotFired = true;
+    		}
+    		try {
+    			// This deletes all persisted state for this trigger
+    			etracker.deleteReference(getId());            
+    		} catch (SQLException e) {
+    			// It's ok if we can't delete the old events now.
+    			// We can do it next time.
+    			log.warn("Failed to remove all references to trigger id=" +
+    					getId(), e);                
+    		}
+    	}
+
+    	if (checkCompletion) {
+
+    		if (!triggeringConditionsFulfilled(fulfilled.values())) {
+
+    			try {
+    				// Clean up unused event, track the current one, if necessary
+    				boolean track = true;
+    				if (toUpdate != null) {
+    					// Only need to update reference if event may expire
+    					if (timeRange > 0) {
+    						try {
+    							etracker.updateReference(getId(), toUpdate.getId(),
+    									event, getTimeRange());
+    							track = false;
+    						} catch (SQLException e) {
+    							log.debug("Failed to update event reference for " +
+    									"trigger id=" + getId(), e);
+    						}
+    					}
+    				}
+
+    				if (event instanceof TriggerNotFiredEvent) {
+    					// Only need track TriggerFiredEvent
+    					track = false;
+    				}
+
+    				if (track) {
+    					etracker.addReference(getId(), event, getTimeRange());
+    				}
+    				
+    	    		if (subTriggersNotFiring != null && subTriggersNotFiring.size() > 0) {
+    	    			sendNotFired = true;
+    	    		}
+
+    			} catch (SQLException e) {
+    				log.error("Failed to add event reference for trigger id=" +
+    						getId(), e);
+    			}            
+    		} else {
+    			// fulfilled!
+    			result = fulfilled.values();
+    		}
+    	}
+    	
+    	if (sendNotFired) {
+    		notFired();
+    	}
+
+    	return result;
     }
     
     /**
@@ -265,301 +603,6 @@ public class MultiConditionTrigger
         setDurable(durable);
     }
   
-    /** 
-     * Process an event from the dispatcher.
-     * 
-     * @param event the Event to process
-     * @throws ActionExecuteException if an action throws an exception
-     */
-    public void processEvent(AbstractEvent event)
-        throws EventTypeException, ActionExecuteException {
-        // If we didn't fulfill the condition, then don't fire
-        if (!(event instanceof TriggerFiredEvent ||
-              event instanceof TriggerNotFiredEvent)) {
-            throw new EventTypeException(
-                "Invalid event type passed: expected TriggerFiredEvent " +
-                "or TriggerNotFiredEvent");
-        }
-        
-        long fireStamp;
-        synchronized (lastFulfillingEvents) {
-        	fireStamp = lastFulfillingEvents.fireStamp;
-        }
-        
-        EventTrackerLocal etracker = null;
-        
-        try {
-            etracker = EventTrackerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new ActionExecuteException("Failed to evaluate multi condition " +
-                                              "trigger id="+getId(), e);
-        }
-        
-        boolean shouldFire = false;
-        List fulfilled = addNewEvent(event, etracker, fireStamp);
-        if (fulfilled != null) {
-        	// Enough events to fire, check to see if we really need to
-        	long newStamp;
-        	synchronized (lastFulfillingEvents) {
-        		newStamp = lastFulfillingEvents.fireStamp;
-            	if (newStamp == fireStamp) {
-            		// Looks like we have the baton.  Go ahead and fire.
-            		// Update the fireStamp so no other thread will try to fire
-            		// based on the same conditions
-            		lastFulfillingEvents.fireStamp++;
-            		
-            		// Must clear out the events from this thread, but we don't want to
-            		// clear out events that came in later.  The lists fulfilled and
-            		// lastFulfillingEvents.events should be the same up to the length
-            		// of fulfilled.
-            		if (lastFulfillingEvents.events.size() == fulfilled.size()) {
-            			lastFulfillingEvents.events.clear();
-            		} else {
-            			List tempList =
-            				new ArrayList(lastFulfillingEvents.events.subList(fulfilled.size(),
-            																  lastFulfillingEvents.events.size()));
-            			lastFulfillingEvents.events = tempList;
-            		}
-            		shouldFire = true;
-            	}
-        	}
-        }
-                
-        if (shouldFire) {
-            
-            try {
-                // Fire actions using the target event
-                TriggerFiredEvent target =
-                	prepareTargetEvent(fulfilled, etracker);
-                super.fireActions(target);
-            } catch (AlertCreateException e) {
-                throw new ActionExecuteException(e);
-            } catch (ActionExecuteException e) {
-                throw new ActionExecuteException(e);
-            } catch (SystemException e) {
-                throw new ActionExecuteException(e);
-            }            
-        }
-    }
-    
-    /**
-     * Check if the new event fulfills the triggering conditions.  Contract:
-     * The number of events needed to fulfill a MultiConditionTrigger is
-     * at least 2.
-     * 
-     * @param event The new event.
-     * @param etracker The event tracker.
-     * @param fireStamp The incident stamp for event firing, used to short-circuit
-     * @return true if the new event fulfilled all the conditions of the trigger
-     * @throws ActionExecuteException
-     */    
-    protected List addNewEvent(AbstractEvent event,
-    								 EventTrackerLocal etracker,
-    								 long fireStamp)
-        throws ActionExecuteException {        
-
-    	boolean checkCompletion = false;
-    	List result = null;
-    	AbstractEvent toDelete = null;
-        List events = getEventsForTrigger(event, etracker, fireStamp);
-
-        // Create a table to keep track
-    	Map fulfilled = new LinkedHashMap();
-
-        // A null value for events is a sentinel meaning abort
-        if (events != null) {
-        	
-        	// If there are no prior events, then this new event cannot possibly
-        	// fulfill the conditions.  Since the new event is already in the events
-        	// Collection, the size must be greater than 1 for the conditions
-        	// to be fulfilled
-        	if (events.size() > 1) {
-
-        		for (Iterator iter = events.iterator(); iter.hasNext(); ) {
-        			AbstractEvent tracked = (AbstractEvent) iter.next();
-
-        			// If this tracked event equals the new event, then
-        			// the old one is obsolete
-        			if (tracked != event &&
-        					tracked.getInstanceId().equals(event.getInstanceId())) {
-        				toDelete = tracked;
-        				continue;
-        			}
-
-        			if (tracked instanceof TriggerFiredEvent) {
-        				fulfilled.put(tracked.getInstanceId(), tracked);
-        			} else { // TriggerNotFiredEvent
-        				fulfilled.remove(tracked.getInstanceId());
-
-        				// For this trigger we should publish not fired events only 
-        				// when we have tracked that one of the sub trigger does 
-        				// not currently fulfill the conditions. Otherwise, the 
-        				// DurationTrigger when applied as a damper to a recovery 
-        				// alert definition will not work correctly (remember that 
-        				// recovery alert definitions use the MultiConditionTrigger).
-        				// Once the recovery condition is met for the recovery alert 
-        				// definition we only want the listening DurationTrigger to 
-        				// receive a TriggerNotFiredEvent when the conditions are not 
-        				// met, not because the primary alert definition has not
-        				// currently fired.
-        				notFired();
-        			}
-        		}
-
-        		// If we've got nothing, then just clean up
-        		if (fulfilled.size() == 0) {
-        			if (events.size() > 1) {
-        				try {
-        					etracker.deleteReference(getId());            
-        				} catch (SQLException e) {
-        					// It's ok if we can't delete the old events now.
-        					// We can do it next time.
-        					log.warn("Failed to remove all references to trigger id=" +
-        							getId(), e);                
-        				}
-        			}
-        		} else {
-        			// Continue on to see if we should fire
-        			checkCompletion = true;
-        		}
-        	}
-
-        	if (checkCompletion) {
-
-        		if (!triggeringConditionsFulfilled(fulfilled.values())) {
-
-        			try {
-        				// Clean up unused event
-        				if (toDelete != null) {
-        					// Only need to update reference if event may expire
-        					if (getTimeRange() > 0) {
-        						try {
-        							etracker.updateReference(getId(), toDelete.getId(),
-        									event, getTimeRange());
-        						} catch (SQLException e) {
-        							log.debug("Failed to update event reference for " +
-        									"trigger id=" + getId(), e);
-        							etracker.addReference(getId(), event, getTimeRange());
-        						}
-        					}
-        				} else if (event instanceof TriggerFiredEvent) {
-        					// Only need track TriggerFiredEvent
-        					etracker.addReference(getId(), event, getTimeRange());
-        				}          
-        			} catch (SQLException e) {
-        				log.error("Failed to add event reference for trigger id=" +
-        						getId(), e);
-        			}            
-        		} else {
-        			// fulfilled!
-        			result = events;
-        		}
-        	}
-        }
-        
-        return result;
-    }
-    
-    /**
-     * Get events that interest this trigger, including the new one.
-     * Contract: A null return is a sentinel value indicating that
-     * this processing should abort due to the
-	 * trigger firing during event processing.
-     * 
-     * @param event      The current event
-     * @param etracker   EventTracker
-     * @param fireStamp  Identity of last trigger fire incident, used for short-circuiting
-     * @return           A list of all prior events, size may be zero but the list will not be null.
-     * @throws ActionExecuteException
-     */
-    private List getEventsForTrigger(AbstractEvent event,
-    									  EventTrackerLocal etracker,
-    									  long fireStamp) 
-        throws ActionExecuteException {
-        List events = null;
-    	boolean abort = false;
-
-        // Potentially long monitor hold....
-        synchronized (lastFulfillingEvents) {
-        	if (lastFulfillingEvents.fireStamp > fireStamp) {
-        		abort = true;
-        	} else if (lastFulfillingEvents.events.isEmpty()) {
-        		try {
-        			Collection eventObjectDesers =
-        				etracker.getReferencedEventStreams(getId());
-        			if (log.isDebugEnabled()) {
-        				log.debug("Get prior events for trigger id="+getId());
-        			}
-
-        			for (Iterator iter = eventObjectDesers.iterator();
-        			iter.hasNext(); ) {
-        				EventObjectDeserializer deser =
-        					(EventObjectDeserializer) iter.next();
-        				lastFulfillingEvents.events.add(deserializeEvent(deser, true));
-        			}
-        		} catch(Exception exc) {
-        			throw new ActionExecuteException(
-        					"Failed to get referenced streams for trigger id=" +getId(),
-        					exc);
-        		}
-        	}
-
-        	lastFulfillingEvents.events.add(event);
-        	events = new ArrayList();
-        	long expire = (getTimeRange() > 0 ?
-        			System.currentTimeMillis() - getTimeRange() : 0);
-
-        	// Like Collection.addAll(), but with an expiration filter, and no optimization
-        	for (Iterator it = lastFulfillingEvents.events.iterator(); it.hasNext(); ) {
-        		AbstractEvent mayBeExpired = (AbstractEvent) it.next();
-        		if (mayBeExpired.getTimestamp() <= expire) {
-        			it.remove();
-        		} else {
-        			events.add(mayBeExpired);
-        		}
-        	}
-        }
-
-        return events;
-    }
-    
-    private TriggerFiredEvent prepareTargetEvent(Collection fulfillingEvents, 
-                                                 EventTrackerLocal etracker) 
-        throws ActionExecuteException {
-              
-        if (!durable) {
-            // Get ready to fire, reset EventTracker
-            try {
-                etracker.deleteReference(getId());
-            } catch (SQLException e) {
-                throw new ActionExecuteException(
-                        "Failed to delete reference for trigger id="+getId(), e);
-            }
-        }                
-        
-        // Message string which tracks the return message
-        StringBuffer message = new StringBuffer();
-        for (Iterator iter = fulfillingEvents.iterator(); iter.hasNext(); ) {
-            AbstractEvent tracked = (AbstractEvent) iter.next();
-            if (tracked instanceof TriggerFiredEvent) {
-                message.append(tracked);
-                message.append("\n");
-            }
-        }
-        
-        // Get the events that fulfilled this trigger
-        AbstractEvent[] nested = (AbstractEvent[])
-            fulfillingEvents.toArray(
-                new AbstractEvent[fulfillingEvents.size()]);
-        
-        TriggerFiredEvent target = new TriggerFiredEvent(getId(), nested);
-
-        // Set the message
-        target.setMessage(message.toString());
-
-        return target;
-    }
-    
     /**
      * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedEventTypes()
      */
@@ -618,7 +661,7 @@ public class MultiConditionTrigger
    public Map getOrTriggerIds() {
        return orTriggerIds;
    }
-
+   
    /** Setter for property orTriggerIds.
     * @param orTriggerIds New value of property orTriggerIds.
     *
@@ -658,5 +701,96 @@ public class MultiConditionTrigger
     public void setDurable(boolean val) {
         durable = val;
     }
+    
+    public int hashCode() {
+    	
+    	int hash = 12;
+    	hash = 37 * hash + MultiConditionTrigger.class.hashCode();
+    	hash = 37 * hash + getId().hashCode();
+    	
+    	return hash;
+    }
+    
+    protected void fire(Collection fulfilled, EventTrackerLocal etracker) {
+        try {
+            // Fire actions using the target event.
+            TriggerFiredEvent target =
+            	prepareTargetEvent(fulfilled, etracker);
+            super.fireActions(target);
+        } catch (Exception e) {
+            log.error("Error creating alert: ", e);
+        }            
+    }
+        
+    private TriggerFiredEvent prepareTargetEvent(Collection fulfillingEvents, 
+                                                 EventTrackerLocal etracker) 
+        throws ActionExecuteException {
+              
+        if (!durable) {
+            // Get ready to fire, reset EventTracker
+            try {
+                etracker.deleteReference(getId());
+            } catch (SQLException e) {
+                throw new ActionExecuteException(
+                        "Failed to delete reference for trigger id="+getId(), e);
+            }
+        }                
+        
+        // Message string which tracks the return message
+        StringBuffer message = new StringBuffer();
+        for (Iterator iter = fulfillingEvents.iterator(); iter.hasNext(); ) {
+            AbstractEvent tracked = (AbstractEvent) iter.next();
+            if (tracked instanceof TriggerFiredEvent) {
+                message.append(tracked);
+                message.append("\n");
+            }
+        }
+        
+        // Get the events that fulfilled this trigger
+        AbstractEvent[] nested = (AbstractEvent[])
+            fulfillingEvents.toArray(
+                new AbstractEvent[fulfillingEvents.size()]);
+        
+        TriggerFiredEvent target = new TriggerFiredEvent(getId(), nested);
 
+        // Set the message
+        target.setMessage(message.toString());
+
+        return target;
+    }
+    
+    LinkedList getPersistedReferencedEvents(EventTrackerLocal etracker) {
+		// Events not in memory, must get from serialized stream.
+		// XXX is this only significant on startup or in an HA environment?
+		// Seems like once this class starts processing events, the only time
+		// the collection would be empty is immediately after a fire, and
+		// then the referenced streams would also be empty.  The only exception
+		// is in a failover (HA) condition.
+    	
+    	LinkedList result = new LinkedList();
+    	
+		try {
+			List eventObjectDesers =
+				etracker.getReferencedEventStreams(getId());
+			if (log.isDebugEnabled()) {
+				log.debug("Get prior events for trigger id="+getId());
+			}
+
+			for (Iterator iter = eventObjectDesers.iterator();
+				 iter.hasNext(); ) {
+				
+				// Go through the list in order, first to last.  For any TriggerNotFiredEvent,
+				// remove any previous TriggerFiredEvents for the same condition (instanceId),
+				// and then discard the event
+				EventObjectDeserializer deser =
+					(EventObjectDeserializer) iter.next();
+				result.add(deserializeEvent(deser, true));
+			}
+		} catch (Exception exc) {
+			log.error("Internal error getting referenced streams for trigger id=" +
+					  getId() + ", some events may have been dropped", exc);
+		}
+		
+		return result;
+    }    
 }
