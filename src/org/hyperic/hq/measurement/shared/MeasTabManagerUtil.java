@@ -121,6 +121,38 @@ public class MeasTabManagerUtil {
         return retTables;
     }
 
+    private static String getUnionStatement(long begin, long end,
+            String measInStmt) {
+        StringBuffer sql = new StringBuffer();
+        List ranges = MeasRangeObj.getInstance().getRanges();
+        int joins = 0;
+        for (Iterator i=ranges.iterator(); i.hasNext(); )
+        {
+            MeasRange range = (MeasRange)i.next();
+            long rBegin = range.getMinTimestamp(),
+                 rEnd   = range.getMaxTimestamp();
+    
+            boolean outOfRange = (begin > rEnd || end < rBegin);
+            if (outOfRange && joins == 0) {
+                continue;
+            } else if (outOfRange && joins > 0) {
+                break;
+            }
+    
+            String table = range.getTable();
+            if (joins > 0)
+                sql.append(" UNION ALL ");
+    
+            joins++;
+            sql.append("SELECT * FROM ")
+               .append(table)
+               .append( getTimeInStmt(((rBegin > begin) ? rBegin : begin),
+                                      ((rEnd < end) ? rEnd : end)) )
+               .append(measInStmt);
+        }
+        return sql.toString();
+    }
+
     /**
      * Get the UNION statement from the detailed measurement tables based on
      * the beginning of the time range.
@@ -131,37 +163,12 @@ public class MeasTabManagerUtil {
      */
     public static String getUnionStatement(long begin, long end, Object[] measIds)
     {
-        String measInStmt = (measIds.length == 0) ? "" :
-                                getMeasInStmt(measIds, true);
-        StringBuffer sql = new StringBuffer();
-        sql.append("(");
-        List ranges = MeasRangeObj.getInstance().getRanges();
-        int joins = 0;
-        for (Iterator i=ranges.iterator(); i.hasNext(); )
-        {
-            MeasRange range = (MeasRange)i.next();
-            long rBegin = range.getMinTimestamp(),
-                 rEnd   = range.getMaxTimestamp();
+        String measInStmt = (measIds.length == 0) ?
+                             "" : getMeasInStmt(measIds, true);
+        StringBuffer sql = new StringBuffer("(")
+            .append(getUnionStatement(begin, end, measInStmt))
+            .append(") ").append(TAB_DATA);
 
-            boolean outOfRange = (begin > rEnd || end < rBegin);
-            if (outOfRange && joins == 0) {
-                continue;
-            } else if (outOfRange && joins > 0) {
-                break;
-            }
-
-            String table = range.getTable();
-            if (joins > 0)
-                sql.append(" UNION ALL ");
-
-            joins++;
-            sql.append("SELECT * FROM ")
-               .append(table)
-               .append( getTimeInStmt(((rBegin > begin) ? rBegin : begin),
-                                      ((rEnd < end) ? rEnd : end)) )
-               .append(measInStmt);
-        }
-        sql.append(") ").append(TAB_DATA);
         return sql.toString();
     }
 
@@ -182,6 +189,19 @@ public class MeasTabManagerUtil {
             append(measInStmt).
             append(") ").append(TAB_DATA);
         return sql.toString();
+    }
+
+    /**
+     * Get the UNION statement from the detailed measurement tables based on
+     * the beginning of the time range for the count of unique measurement IDs.
+     * @param begin The beginning of the time range.
+     * @param end The end of the time range
+     * @return The UNION SQL statement.
+     */
+    public static String getCountUnionStatement(long begin, long end)
+    {
+        String measInStmt = " AND measurement_id = id";
+        return getUnionStatement(begin, end, measInStmt);
     }
 
     private static String getTimeInStmt(long begin, long end)

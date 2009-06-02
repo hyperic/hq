@@ -176,7 +176,7 @@ public class MySQL5InnoDBDialect
 
     public Map getLastData(Connection conn, String minMax,
                            Map resMap, Map lastMap, Integer[] iids,
-                           long begin, long end, String table)
+                           long begin, long end, String[] tables)
         throws SQLException {
 
         ResultSet rs    = null;
@@ -195,10 +195,14 @@ public class MySQL5InnoDBDialect
                 LongListObj obj = (LongListObj) entry.getValue();
                 Long lastTime = obj.getLong();
                 Object[] measIds = obj.getList().toArray();
-                if (table.endsWith(TAB_DATA))
+                String table;
+                if (tables.length > 1)
                 {
                     table = MeasTabManagerUtil.getUnionStatement(measIds,
                                                     lastTime.longValue());
+                }
+                else {
+                    table = tables[0];
                 }
 
                 String sql = "SELECT value FROM " + table +

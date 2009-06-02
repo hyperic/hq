@@ -157,17 +157,24 @@ public class HQDialectUtil {
                 DBUtil.composeConjunctions("template_id", tids.length));
         DBUtil.replacePlaceHolders(tidsConj, tids);
         
+        // Optimize for union statements
+        boolean addTimestamp = table.indexOf("timestamp") < 0;
         final String countSQL =
             "SELECT template_id, COUNT(id) FROM " + TAB_MEAS +
             " WHERE " + iidsConj + " AND " + tidsConj +
-            " AND EXISTS (SELECT measurement_id FROM " + table  +
-            " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id) " +
-            " GROUP BY template_id";
+            " AND EXISTS (" +
+            (addTimestamp ?
+                    "SELECT measurement_id FROM " + table  +
+                    " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id":
+                    table) +
+            ") GROUP BY template_id";
         try {
             astmt = conn.prepareStatement(countSQL);
             int ind = 1;
-            astmt.setLong(ind++, begin);
-            astmt.setLong(ind++, end);
+            if (addTimestamp) {
+                astmt.setLong(ind++, begin);
+                astmt.setLong(ind++, end);
+            }
             timer.markTimeBegin("countSQL");
             rs = astmt.executeQuery();
             while (rs.next()) {
@@ -200,7 +207,7 @@ public class HQDialectUtil {
 
     public static Map getLastData(Connection conn, String minMax,
                                   Map resMap, Map lastMap, Integer[] iids,
-                                  long begin, long end, String table)
+                                  long begin, long end, String[] tables)
         throws SQLException {
 
         ResultSet rs            = null;
@@ -211,11 +218,17 @@ public class HQDialectUtil {
                 DBUtil.composeConjunctions("instance_id", iids.length));
         DBUtil.replacePlaceHolders(iidsConj, iids);
 
-        final String lastSQL =
-            "SELECT value FROM " + table + ", " +
-            "(SELECT id FROM " + TAB_MEAS +
-            " WHERE template_id = ? AND " + iidsConj + ") ids " +
-            "WHERE id = measurement_id AND timestamp = ?";
+        StringBuffer sql = new StringBuffer();
+        for (int i = 0; i < tables.length; i++) {
+            if (i > 0) {
+                sql.append(" UNION ALL ");
+            }
+            sql.append("SELECT value FROM " + tables[i] + ", " +
+                       "(SELECT id FROM " + TAB_MEAS +
+                       " WHERE template_id = ? AND " + iidsConj + ") ids " +
+                       "WHERE id = measurement_id AND timestamp = ?");
+        }
+        final String lastSQL = sql.toString();
 
         for (Iterator it = lastMap.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
@@ -235,8 +248,10 @@ public class HQDialectUtil {
 
                 // Reset the index
                 int ind = 1;
-                lstmt.setInt(ind++, tid.intValue());
-                lstmt.setLong(ind++, lastTime.longValue());
+                for (int i = 0; i < tables.length; i++) {
+                    lstmt.setInt(ind++, tid.intValue());
+                    lstmt.setLong(ind++, lastTime.longValue());
+                }
 
                 rs = lstmt.executeQuery();
 

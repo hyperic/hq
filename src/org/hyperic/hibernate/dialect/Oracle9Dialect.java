@@ -125,12 +125,13 @@ public class Oracle9Dialect
 
     public Map getLastData(Connection conn, String minMax,
                            Map resMap, Map lastMap, Integer[] iids,
-                           long begin, long end, String table) 
+                           long begin, long end, String[] tables)
         throws SQLException
     {
         return HQDialectUtil.getLastData(conn, minMax, resMap, lastMap,
-                                         iids, begin, end, table);
+                iids, begin, end, tables);
     }
+
 
     public Map getAggData(Connection conn, String minMax, Map resMap,
                           Integer[] tids, Integer[] iids,

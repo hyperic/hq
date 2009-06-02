@@ -1827,10 +1827,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             rs = stmt.executeQuery(sqlBuf.toString());
 
             rs.next();          // Better have some result
-            double[] data = new double[MeasurementConstants.IND_MAX + 1];
-            data[MeasurementConstants.IND_MIN] = rs.getDouble(1);
-            data[MeasurementConstants.IND_AVG] = rs.getDouble(2);
-            data[MeasurementConstants.IND_MAX] = rs.getDouble(3);
+            double[] data = new double[IND_MAX + 1];
+            data[IND_MIN] = rs.getDouble(1);
+            data[IND_AVG] = rs.getDouble(2);
+            data[IND_MAX] = rs.getDouble(3);
                 
             return data;
         } catch (SQLException e) {
@@ -1884,7 +1884,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                            boolean count)
     {
         // Check the begin and end times
-        this.checkTimeArguments(begin, end);
+        checkTimeArguments(begin, end);
 
         // Result set
         Map resMap = new HashMap();
@@ -1892,35 +1892,48 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         if (tids.length == 0 || iids.length == 0)
             return resMap;
         
-        // Get the data points and add to the ArrayList
-        Connection conn = null;
-
         // Help database if previous query was cached
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);
 
         // Use the already calculated min, max and average on
         // compressed tables.
-        String minMax;
-        if (usesMetricUnion(begin)) {
-            minMax = " MIN(value), AVG(value), MAX(value), ";
-        } else {
-            minMax = " MIN(minvalue), AVG(value), MAX(maxvalue), ";
-        }
+        boolean usesUnion = usesMetricUnion(begin);
+        String minMax = usesUnion ? " MIN(value), AVG(value), MAX(value), " :
+                                  " MIN(minvalue), AVG(value), MAX(maxvalue), ";
 
+        // Get the data points and add to the ArrayList
+        Connection conn = null;
         try {
-            conn = DBUtil.getConnByContext(getInitialContext(),
-                                           DATASOURCE_NAME);
+            conn = DBUtil.getConnByContext(getInitialContext(),DATASOURCE_NAME);
             HQDialect dialect = Util.getHQDialect();
             List measids = MeasTabManagerUtil.getMeasIds(conn, tids, iids);
             String table = getDataTable(begin, end, measids.toArray());
             Map lastMap = dialect.getAggData(conn, minMax, resMap, tids,
                                              iids, begin, end, table);
             if (count) {
-                resMap = dialect.getCountData(conn, minMax, resMap, tids, iids,
-                                              begin, end, table);
+                Set lastTables = new HashSet();
+            	if (usesUnion) {
+            	    String countUnion =
+            	        MeasTabManagerUtil.getCountUnionStatement(begin, end);
+                    resMap = dialect.getCountData(conn, minMax, resMap, tids,
+                                                  iids, begin, end, countUnion);
+                    
+                    for (Iterator it = lastMap.values().iterator();
+                         it.hasNext(); ) {
+                        Long ts = (Long) it.next();
+                        lastTables.add(MeasRangeObj.getInstance()
+                                                   .getTable(ts.longValue()));
+                    }
+            	}
+            	else {
+                    resMap = dialect.getCountData(conn, minMax, resMap, tids,
+                                                  iids, begin, end, table);
+                    lastTables.add(table);
+                }
                 return dialect.getLastData(conn, minMax, resMap, lastMap,
-                                           iids, begin, end, table);
+                                           iids, begin, end, (String[])
+                                           lastTables.toArray(new String[0]));
             }
             return resMap;
         } catch (SQLException e) {
