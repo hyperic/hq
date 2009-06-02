@@ -28,10 +28,8 @@ package org.hyperic.hq.bizapp.server.mdb;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.ejb.MessageDrivenBean;
 import javax.ejb.MessageDrivenContext;
@@ -43,17 +41,14 @@ import javax.jms.ObjectMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.HibernateException;
-import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
-import org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.EventTypeException;
-import org.hyperic.hq.events.FlushStateEvent;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.hibernate.SessionManager;
@@ -104,7 +99,9 @@ public class RegisteredDispatcherEJBImpl
         // Get interested triggers
         Collection triggers = getInterestedTriggers(event);
         
-        //log.debug("There are " + triggers.size() + " registered for event");
+        if (log.isDebugEnabled()) {
+        	log.debug("There are " + triggers.size() + " registered for event");
+        }
 
         // Dispatch to each trigger
         for (Iterator i = triggers.iterator(); i.hasNext(); ) {
@@ -180,7 +177,7 @@ public class RegisteredDispatcherEJBImpl
         }
     }
     
-    private void dispatchEnqueuedEvents() {
+    protected void dispatchEnqueuedEvents() {
         boolean debug = log.isDebugEnabled();
         
         List enqueuedEvents = Messenger.drainEnqueuedMessages();
