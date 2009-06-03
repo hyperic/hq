@@ -541,14 +541,30 @@ getstatus() {
 }
 
 testpid() {
-    pid=`$PSEXE -p $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
+    # It is possible that 'a' process with the pid exists but that it is not the
+    # correct process. This can happen in a number of cases, but the most
+    # common is during system startup after an unclean shutdown.
+    # The ps statement below looks for the specific wrapper command running as
+    # the pid. If it is not found then the pid file is considered to be stale.
+    case "$DIST_OS" in
+        'macosx')
+            pid=`$PSEXE -ww $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
+            ;;
+        'solaris')
+            PSEXE="/usr/ucb/ps"
+            pid=`$PSEXE ww $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
+            ;;
+        *)
+            pid=`$PSEXE -p $pid | grep $pid | grep -v grep | awk '{print $1}' | tail -1`
+            ;;
+    esac
     if [ "X$pid" = "X" ]
     then
         # Process is gone so remove the pid file.
         rm -f "$PIDFILE"
         pid=""
     fi
-}
+} 
  
 start() {
     echo -n "Starting $APP_LONG_NAME..."
