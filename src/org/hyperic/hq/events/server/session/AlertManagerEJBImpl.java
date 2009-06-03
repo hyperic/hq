@@ -516,9 +516,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             case EventConstants.TYPE_THRESHOLD:
             case EventConstants.TYPE_BASELINE:
                 dm = dmDao.findById(new Integer(cond.getMeasurementId()));
-                // Format the number
-                String actualValue =
-                    safeGetAlertConditionLogNumericValue(log, dm);
+                // Value is already formatted by HHQ-2573
+                String actualValue = log.getValue();
 
                 text.append(cond.getName())
                     .append(" (").append(actualValue).append(") ");
@@ -554,30 +553,6 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
         // Get the short reason for the alert
         return text.toString();
-    }
-    
-    /**
-     * Convert the alert condition log value into a number in the units specified 
-     * by the derived measurement.
-     * 
-     * @param log The alert condition log.
-     * @param dm The derived measurement.
-     * @return The string representation of the converted alert condition log 
-     *         value or <code>NOTAVAIL</code> if the value cannot be converted.
-     */
-    private String safeGetAlertConditionLogNumericValue(AlertConditionLog log, 
-                                                        Measurement dm) {
-        Number val = NumberUtil.stringAsNumber(log.getValue());
-        
-        if (NumberUtil.NaN.equals(val)) {
-            _log.warn("Alert condition log with id="+log.getId()+" has value that " +
-            		"cannot be converted to a number: "+log.getValue());
-            return NOTAVAIL;
-        } else {
-            FormattedNumber av = UnitsConvert.convert(
-                    val.doubleValue(), dm.getTemplate().getUnits());
-            return av.toString();            
-        }
     }
     
     /**
@@ -618,9 +593,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 dm = dmDao.findById(new Integer(cond.getMeasurementId()));
                 text.append(describeCondition(cond, dm));
 
-                // Format the number
-                String actualValue =
-                    safeGetAlertConditionLogNumericValue(logs[i], dm);
+                // Value is already formatted by HHQ-2573
+                String actualValue = logs[i].getValue();
                 text.append(" (actual value = ").append(actualValue).append(")");
                 break;
             case EventConstants.TYPE_CONTROL:
