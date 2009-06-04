@@ -106,8 +106,14 @@ public class MultiConditionTrigger
     	// Container class for all things synchronized.  This class does no
     	// synchronization on its own: concurrency correctness must be
     	// ensured by the calling code.
+    	
+    	// The thread currently holding the baton
     	Thread processor;
+    	
+    	// The list of events that the baton holder must process
     	LinkedList eventsToProcess;
+    	
+    	// Prior persisted state, if any.  This will usually be empty/null.
     	LinkedList priorState;
     	
     	Baton() {
@@ -192,8 +198,13 @@ public class MultiConditionTrigger
                 "or TriggerNotFiredEvent");
         }
         
+        if (log.isDebugEnabled()) {
+        	log.debug("processEvent for event " + event);
+        }
+        
         LinkedList eventsToProcess = getEventsToProcess(event);
         if (eventsToProcess != null) {
+        	// We have the baton, continue
         	evaluateEventList(eventsToProcess);
         }
     }
@@ -202,8 +213,9 @@ public class MultiConditionTrigger
     	LinkedList result = null;
     	synchronized (baton) {
     		if (baton.grab()) {
-    			// Grab events and continue processing
+    			// Drain the event queue and continue processing
     			result = new LinkedList(baton.getEventsToProcess());
+    			baton.getEventsToProcess().clear();
     			result.add(event);
     		} else {
     			// Queue the event for the baton holder to process
@@ -227,13 +239,18 @@ public class MultiConditionTrigger
         } catch (Exception e) {
             log.error("Internal error, cannot create event tracker", e);
         }
-		
+        		
         boolean drainedQueue = false;
+        boolean doDebug = log.isDebugEnabled();
         // It guaranteed that, if we're here, there is at least one event in the queue
         do {
         	
         	AbstractEvent current = (AbstractEvent) eventsToProcess.removeFirst();
         	
+            if (doDebug) {
+            	log.debug("evaluating event " + current);
+            }
+                    	
         	// Evaluate one-by-one.  Requirements:
         	//
         	// 1. Evaluate events in the order they came in, starting with the event
@@ -260,14 +277,16 @@ public class MultiConditionTrigger
         	//    the TriggerNotFiredEvent occurs before sufficient fulfilling conditions)
         	//    by a TriggerNotFiredEvent for the same condition effectively neutralizes
         	//    both events
-        	LinkedList priorState = baton.getPriorState();
-			if (priorState == null) {
+			if (baton.getPriorState() == null) {
 				
 				// First time seeing this trigger.  There may be backed-up events
 				LinkedList persistedStream = getPersistedReferencedEvents(etracker);
 				baton.setPriorState(persistedStream);
 			}
         	
+        	if (doDebug) {
+        		log.debug("Prior state for event " + current + " is " + baton.getPriorState());
+        	}
         	
         	Collection fulfilled = doSingleEvaluation(baton.getPriorState(),
         											  current,
@@ -277,6 +296,11 @@ public class MultiConditionTrigger
         		// evaluation -- clear them now!  Fulfilled contains all the info we
         		// need to create the alert.
         		baton.getPriorState().clear();
+        		
+        		if (doDebug) {
+        			log.debug("Trigger " + this + " firing on event " + current);
+        		}
+        		
         		fire(fulfilled, etracker);
         	}
         	
@@ -297,7 +321,7 @@ public class MultiConditionTrigger
         	if (!drainedQueue) {
         		if (log.isDebugEnabled()) {
         			log.debug("Event queue size is " + baton.getEventsToProcess().size() +
-        			", continuing.");
+        					  ", continuing.");
         		}
         	}
         	
@@ -451,10 +475,19 @@ public class MultiConditionTrigger
     	}
     	
     	if (sendNotFired) {
-    		notFired();
+    		publishNotFired();
     	}
 
     	return result;
+    }
+    
+    /**
+     * Publish a TriggerNotFiredEvent.  The notFired() method is (as of this writing)
+     * final in the superclass, so this wrapper method exists to separate out that
+     * implementation detail.
+     */
+    protected void publishNotFired() {
+    	notFired();
     }
     
     /**
@@ -472,6 +505,8 @@ public class MultiConditionTrigger
     	// Find out which instance we should be looking for
     	Integer[] subIds = getAndTriggerIds();
     	Map orIds = getOrTriggerIds();
+    	
+    	boolean result = true;
 
     	Set fulfilled = new HashSet();
     	for (Iterator it = events.iterator(); it.hasNext(); ){
@@ -493,14 +528,14 @@ public class MultiConditionTrigger
     	}
 
     	// Go through the subIds
-    	for (int i = orInd; i < subIds.length; i++) {
+    	for (int i = orInd; result == true && i < subIds.length; i++) {
     		// Did not fulfill yet
     		if (!fulfilled.contains(subIds[i])) {
-    			return false;
+    			result = false;
     		}
     	}
 
-    	return true;            
+    	return result;            
     }
     
     /**
