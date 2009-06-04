@@ -375,7 +375,7 @@ class DashboardController extends BaseController
                 }
 
                 def availMetric = it.Resource.getAvailabilityMeasurement()
-                def last = availMetric.getLastDataPoint()
+                def last = getLastDataPoint(availMetric)
                 it["LastCheck"] = last.timestamp
             }
 
@@ -391,7 +391,7 @@ class DashboardController extends BaseController
                     // Search conditions that have measurement ids.
                     if (condType == 1 || condType == 2 || condType == 4) {
                         def condMetric = metricHelper.findMeasurementById(condition.measurementId)
-                        def last = condMetric.getLastDataPoint()
+                        def last = getLastDataPoint(condMetric)
                         if (last && last.timestamp > lastCheck) {
                             lastCheck = last.timestamp
                             it["StatusInfo"] << " Current value = " +
@@ -438,6 +438,15 @@ class DashboardController extends BaseController
             }                    
         }
     }
+
+    private getLastDataPoint(metric) {
+        // We use this method, because because MetricCategory.getlastDataPoint() defaulted
+        // to using the entire time range (from time t=0) instead of using the sentinal
+        // value of -1.  This has been fixed in MetricCategory.groovy, and eventually this
+        // method should be removed.
+        metric.getLastDataPoint(-1)
+    }
+
 
     public getDashboardSchema() {
         def selectCol      = new TableColumn('Select', '<input type="checkbox" id="dashboardTable_CheckAllBox" onclick="MyAlertCenter.toggleAll(this)" />', false)
