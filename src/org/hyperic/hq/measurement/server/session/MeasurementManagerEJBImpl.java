@@ -1087,6 +1087,64 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
+     * @param subject
+     * @param mids
+     * @throws MeasurementUnscheduleException 
+     * @throws PermissionException 
+     * @ejb:interface-method
+     */
+    public void disableMeasurements(AuthzSubject subject, Integer[] mids)
+        throws PermissionException, MeasurementUnscheduleException
+    {
+        StopWatch watch = new StopWatch();        
+        Integer mid = null;
+        Measurement meas = null;
+        Resource resource = null;
+        AppdefEntityID appId = null;
+        List appIdList = new ArrayList();
+        
+        List midsList = Arrays.asList(mids);
+        for (Iterator iter=midsList.iterator(); iter.hasNext(); ) {
+            mid = (Integer) iter.next();
+            
+            meas = getMeasurementDAO().get(mid);
+            if (!meas.isEnabled()) {
+                iter.remove();
+                continue;
+            }
+
+            resource = meas.getResource();
+            meas.setEnabled(false);
+            appId = new AppdefEntityID(resource);
+
+            checkModifyPermission(subject.getId(), appId);
+            
+            appIdList.add(appId);
+        }
+        
+        if (!midsList.isEmpty()) {
+            mids = (Integer[]) midsList.toArray(new Integer[0]);
+            
+            watch.markTimeBegin("removeMeasurementsFromCache");
+            removeMeasurementsFromCache(mids);
+            watch.markTimeEnd("removeMeasurementsFromCache");
+        
+            watch.markTimeBegin("enqueueZevents");
+            enqueueZeventsForMeasScheduleCollectionDisabled(mids);
+            watch.markTimeEnd("enqueueZevents");
+        
+            // Unscheduling of all metrics for a resource could indicate that
+            // the resource is getting removed.  Send the unschedule synchronously
+            // so that all the necessary plumbing is in place.
+            watch.markTimeBegin("unschedule");
+            MeasurementProcessorEJBImpl.getOne().unschedule(appIdList);
+            watch.markTimeEnd("unschedule");
+        }
+        
+        log.debug("disableMeasurements: size=" + midsList.size() + ", " + watch);
+    }
+    
+    /**
      * @throws PermissionException 
      * @ejb:interface-method
      */
