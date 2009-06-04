@@ -2886,18 +2886,28 @@ hyperic.group_manager = function() {
 	that.addNewGroup = function(eid) {
 		var eidArray = eid.split(",");
 		var entityType = eidArray[0].split(":")[0];
-		var url = "/resource/hub/RemoveResource.do";
+		var myForm = document.AddToExistingGroupForm;
 		
-		url += "?group.x=1";
-		url += "&ff=" + entityType;
+		myForm.action = "/resource/hub/RemoveResource.do";
+		myForm.method = "POST";
+		myForm.removeChild(myForm.eid);
+				
+		var a = new Array(eidArray.length+2);
+		a[0] = {name: "group.x" , value: "1"};
+		a[1] = {name: "ff", value: entityType};
 
 		for (var i=0; i<eidArray.length; i++) {
-			url += "&resources=" + escape(eidArray[i]);
+			a[i+2] = {name: "resources", value: eidArray[i]};
 		}
 		
-		url += "&preventCache=" + new Date().getTime();
-
-		window.location.href = url;
+		for (var j=0; j<a.length; j++) {
+			var e = document.createElement("input");
+			e.type = "hidden";
+			e.name = a[j].name;
+			e.value = a[j].value;
+			myForm.appendChild(e);			
+		}
+		myForm.submit();
 	}
 	
 	that.addToGroup = function(eid) {
