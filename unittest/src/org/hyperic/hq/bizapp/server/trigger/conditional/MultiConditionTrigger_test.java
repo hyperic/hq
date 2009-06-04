@@ -259,6 +259,77 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
 		mct.processEvent(e2);
     }
     
+    public void testOrConditionWithSingleEvent() throws Exception {
+		MockMultiConditionTrigger mct =
+			createTrigger(new Integer(2100), "1|2", 100000000, false, true);
+		AbstractEvent e1 = createEvent(1, true);
+		mct.processEvent(e1);
+		assertEquals(1, mct.getFireCount());
+		
+		AbstractEvent e2 = createEvent(2, true);
+		mct.processEvent(e2);
+		assertEquals(2, mct.getFireCount());
+    }
+    
+    public void testNotFiredPublishing() throws Exception {
+    	// notFired() publishing should only happen when a MultiConditionTrigger has
+    	// sub-conditions that had explicit notFired conditions, as opposed to not
+    	// having any conditions measured at all.  For example:
+    	//
+    	// 1&2, event 1 (fired) is seen ==> don't publish
+    	// 1&2, event 1 (not fired) is seen ==> publish
+		MockMultiConditionTrigger mct =
+			createTrigger(new Integer(2200), "1&2", 100000000, false, true);
+		AbstractEvent e1 = createEvent(1, true);
+		mct.processEvent(e1);
+		assertEquals(0, mct.getNotFiredCount());
+		
+		AbstractEvent e2 = createEvent(2, false);
+		mct.processEvent(e2);
+		assertEquals(1, mct.getNotFiredCount());
+    }
+    
+    public void testOrConditionAndNotFiredPublishing() throws Exception {
+    	MockMultiConditionTrigger trigger = 
+			createTrigger(new Integer(2201), "1|2|3|4|5", 100000000, false, true);
+    	AbstractEvent notFired = createEvent(1, false);
+    	AbstractEvent fired = createEvent(2, true);
+    	trigger.processEvent(notFired);
+    	assertEquals(1, trigger.getNotFiredCount());
+    	assertEquals(0, trigger.getFireCount());
+    	trigger.processEvent(fired);
+    	assertEquals(1, trigger.getNotFiredCount());
+    	assertEquals(1, trigger.getFireCount());
+    }
+    
+    public void testHighlyConcurrentFiredAndNotFiredCount() throws Exception {
+    	int nThreads = 20;
+    	int iterations = 20;
+    	int[] eventIds = new int[] { 1, 2, 3, 4, 5 };
+    	MockMultiConditionTrigger trigger = 
+			createTrigger(new Integer(2300), "1|2|3|4|5", 100000000, false, true);
+    	
+    	// Tee them up
+    	EventBlaster[] blasters = new EventBlaster[nThreads];
+    	int[] started = new int[1];
+    	started[0] = 0;
+    	for (int i = 0; i < nThreads; ++i) {
+    		blasters[i] = new EventBlaster(i, nThreads, started, iterations, eventIds, trigger);
+    		blasters[i].start();
+    	}
+
+    	// Blast away...
+    	boolean bail = false;
+
+    	// Assess the damage
+    	for (int i = 0; i < nThreads; ++i) {
+    		blasters[i].join();
+    	}
+
+    	assertEquals(nThreads * iterations, trigger.getNotFiredCount());
+    	assertEquals(nThreads * iterations, trigger.getFireCount());
+    }
+    
     private void verifyExpectations(MultiConditionTrigger trigger) {
         _eventTracker.verify();
         
@@ -269,5 +340,58 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
         } else {
             throw new IllegalStateException("the trigger fire strategy was not set");
         }        
+    }
+    
+    private class EventBlaster extends Thread {
+    	
+		private int total;
+    	private int[] gate;
+		private int count;
+		private int[] eventIds;
+		private MultiConditionTrigger trigger;
+
+		EventBlaster(int id, int total, int[] gate, int count, int[] eventIds, MultiConditionTrigger trigger) {
+			super("EventBlaster " + id);
+			this.total = total;
+    		this.gate = gate;
+    		this.count = count;
+    		this.eventIds = eventIds;
+    		this.trigger = trigger;
+    	}
+    	
+    	public void run() {
+    		
+    		boolean bail = false;
+    		synchronized (gate) {
+    			if (++gate[0] == total) {
+    				gate.notifyAll();
+    			} else {
+    				try {
+    					gate.wait();
+    				} catch (InterruptedException ie) {
+    					bail = true;
+    				}
+    			}
+    		}
+    		
+    		if (!bail) {
+    			
+    			for (int i = 0; i < count; ++i) {
+    				int index = i % eventIds.length + 1;
+    				AbstractEvent evtFired = createEvent(index, true);
+    				AbstractEvent evtNotFired = createEvent(index, false);
+
+    				try {
+    					trigger.processEvent(evtFired);
+    					yield();
+    					trigger.processEvent(evtNotFired);
+    					yield();
+    				} catch (Exception e) {
+    					// shouldn't happen
+    					e.printStackTrace();
+    				}
+    			}
+    		}
+    	}
     }
 }

@@ -7,25 +7,37 @@ import org.hyperic.hq.events.shared.EventTrackerLocal;
 
 public class MockMultiConditionTrigger extends MultiConditionTrigger {
 
-	private int fireCount;
+	private long fireCount;
+	private long notFiredCount;
 	private Collection lastFiredConditions;
 	
 	public MockMultiConditionTrigger() {
 		super();
 		fireCount = 0;
+		notFiredCount = 0;
 	}
 	
 	protected void fire(Collection fulfilled, EventTrackerLocal etracker) {
-		fireCount++;
-		lastFiredConditions = new ArrayList(fulfilled);
+		synchronized (this) {
+			fireCount++;
+			lastFiredConditions = new ArrayList(fulfilled);
+		}
 		super.fire(fulfilled, etracker);
 	}
 	
-	public long getFireCount() {
+	public synchronized long getFireCount() {
 		return fireCount;
 	}
 	
-	public Collection getLastFired() {
+	public synchronized long getNotFiredCount() {
+		return notFiredCount;
+	}
+	
+	public synchronized Collection getLastFired() {
 		return lastFiredConditions;
+	}
+	
+	protected synchronized void publishNotFired() {
+		notFiredCount++;
 	}
 }
