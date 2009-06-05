@@ -211,7 +211,11 @@ class AlertController
              label:{df.format(it.mtime)}], 
             [field:AlertDefSortField.ACTIVE, width:'7%',
              label:{
-             	
+            	def markUp = "<span style='whitespace:nowrap:'>"
+                	 
+                markUp += YesOrNo.valueFor(it.active).value.capitalize()
+
+                return markUp + "</span>"
              }],
             [field:[getValue: {localeBundle.ResourceType },
                     description:'resourceType', sortable:false], width:'19%',
