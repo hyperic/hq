@@ -231,6 +231,7 @@ table border on left side - do not remove */
 }
 
 .filterBox {
+	clear: none;
     padding: 8px;
 }
 
@@ -435,9 +436,7 @@ table border on left side - do not remove */
     font-size: 11px;
     width: 100%;
     border: 1px solid #ccc;
-    border-collapse: collaps
-
-e;
+    border-collapse: collapse;
     /* IE issue loosing table border on left side - do not remove */
     *margin-left: 1px;
     cursor: default;
@@ -634,14 +633,6 @@ e;
     width: 20%;
     height: 400px;
     margin-right: 10px;
-}
-
-.BlockTitle {
-    font-family: arial, sans-serif;
-    font-size: 12px;
-    color: #ffffff;
-    font-weight: bold;
-    background-color: #60A5EA;
 }
 
 #result_cont {
@@ -940,7 +931,7 @@ pre {
 }
 
 #EventLogs {
-    width: 100%;
+    width: 99.9%;
     table-layout: fixed;
     min-width:660px;
     *margin-left:1px

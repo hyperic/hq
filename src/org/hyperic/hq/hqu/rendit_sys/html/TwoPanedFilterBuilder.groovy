@@ -37,48 +37,31 @@ class TwoPanedFilterBuilder extends BuilderSupport {
     }
     
     def createNode(name, Map attributes) {
-	   if(attributes.labelMarkup == null)
-	       attributes.labelMarkup = '';
-        def res = [nodeType: name, name: attributes.label, markup: attributes.labelMarkup]
-        if (name == 'filterAndPane') {
-            output.write("""
-    <div style="margin-bottom:5px;padding-right:10px;border:1px solid #7BAFFF; padding:10px;background-color:#fff">""")
-            res.finish = { """
-    </div>
-"""  }
-        } else if (name == 'filter') {
-            output.write("""
-        <div style="float:left;width:200px;margin-right:10px;">
-          <div class="filters">
-            <div class="BlockTitle">${res.name}</div>
-            <div class="filterBox">""")
-            res.finish= { """
-            </div>
-          </div>
-        </div>
-""" }
-        } else if (name == 'filterElement') {
-            output.write("""
-             <div class="fieldSetStacked" style="margin-bottom:8px;">
-               <span><strong>${res.name}</strong></span>${res.markup}
-               <div>""")
-            res.finish = { """
-     	       </div>
-             </div>          
-""" }
-        } else if (name == 'pane') {
-            output.write("""
-        <div style="width:81%;height: 445px;overflow-x: hidden; overflow-y: auto;" 
-             id="logsCont">
-          <div>""")
-            res.finish = { """
-          </div>
-        </div>
-""" }
-        } else {
-            throw new RuntimeException("Unknown type: [$name]")
-        }
-        res
+	   if (attributes.labelMarkup == null) attributes.labelMarkup = '';
+	   
+       def res = [nodeType: name, name: attributes.label, markup: attributes.labelMarkup]
+       
+       if (name == 'filterAndPane') {
+    	   output.write("""<div style="margin-bottom:5px;padding-right:10px;border:1px solid #7BAFFF; padding:10px;background-color:#fff">""")
+           
+    	   res.finish = { """</div>""" }
+       } else if (name == 'filter') {
+           output.write("""<div style="float:left;width:200px;margin-right:10px;"><div class="filters"><div class="BlockTitle">${res.name}</div><div class="filterBox">""")
+           
+           res.finish= { """</div></div></div>""" }
+       } else if (name == 'filterElement') {
+           output.write("""<div class="fieldSetStacked" style="margin-bottom:8px;"><span><strong>${res.name}</strong></span>${res.markup}<div>""")
+            
+           res.finish = { """</div></div>""" }
+       } else if (name == 'pane') {
+           output.write("""<div style="width:auto;height: 445px;overflow-x: hidden; overflow-y: auto;" id="logsCont"><div>""")
+           
+           res.finish = { """</div></div>""" }
+       } else {
+           throw new RuntimeException("Unknown type: [$name]")
+       }
+
+       res
     }
     
     def createNode(name, Map Attributes, value) {
