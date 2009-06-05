@@ -1007,6 +1007,50 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             ZeventManager.getInstance().enqueueEventAfterCommit(event);
         }
     } 
+
+    /**
+     * Enable a collection of metrics, enqueue for scheduling 
+     * after commit
+     * @ejb:interface-method
+     */
+    public void enableMeasurements(AuthzSubject subject, Integer[] mids)
+        throws PermissionException
+    {
+        StopWatch watch = new StopWatch();        
+        Integer mid = null;
+        Measurement meas = null;
+        Resource resource = null;
+        AppdefEntityID appId = null;
+        List appIdList = new ArrayList();        
+        List midsList = Arrays.asList(mids);
+        
+        watch.markTimeBegin("setEnabled");
+        for (Iterator iter=midsList.iterator(); iter.hasNext(); ) {
+            mid = (Integer) iter.next();
+            
+            meas = getMeasurementDAO().get(mid);
+
+            if (!meas.isEnabled()) {                
+                resource = meas.getResource();
+                appId = new AppdefEntityID(resource);
+
+                checkModifyPermission(subject.getId(), appId);                
+                appIdList.add(appId);
+                
+                meas.setEnabled(true);
+            }
+        }
+        watch.markTimeEnd("setEnabled");
+
+        if (!appIdList.isEmpty()) {
+            watch.markTimeBegin("enqueueZevents");
+            AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(appIdList);
+            ZeventManager.getInstance().enqueueEventAfterCommit(event);
+            watch.markTimeEnd("enqueueZevents");
+
+            log.debug("enableMeasurements: total=" + appIdList.size() + ", time=" + watch);
+        }
+    }
     
     /**
      * Enable the Measurement and enqueue for scheduling after commit
@@ -1067,23 +1111,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     public void disableMeasurement(AuthzSubject subject, Integer mId)
         throws PermissionException, MeasurementUnscheduleException
     {
-        Integer[] mids = new Integer[1];
-        mids[0] = mId;
-        Measurement meas = getMeasurementDAO().get(mId);
-        if (!meas.isEnabled()) {
-            return;
-        }
-        Resource resource = meas.getResource();
-        meas.setEnabled(false);
-        AppdefEntityID appId = new AppdefEntityID(resource);
-        checkModifyPermission(subject.getId(), appId);
-        removeMeasurementsFromCache(mids);
-        enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-        // Unscheduling of all metrics for a resource could indicate that
-        // the resource is getting removed.  Send the unschedule synchronously
-        // so that all the necessary plumbing is in place.
-        MeasurementProcessorEJBImpl.getOne().unschedule(
-            Collections.singletonList(appId));
+        disableMeasurements(subject, new Integer[]{mId});
     }
 
     /**
@@ -1101,9 +1129,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         Measurement meas = null;
         Resource resource = null;
         AppdefEntityID appId = null;
-        List appIdList = new ArrayList();
-        
+        List appIdList = new ArrayList();        
         List midsList = Arrays.asList(mids);
+        
         for (Iterator iter=midsList.iterator(); iter.hasNext(); ) {
             mid = (Integer) iter.next();
             
@@ -1114,20 +1142,18 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             }
 
             resource = meas.getResource();
-            meas.setEnabled(false);
             appId = new AppdefEntityID(resource);
 
             checkModifyPermission(subject.getId(), appId);
-            
             appIdList.add(appId);
+
+            meas.setEnabled(false);
         }
         
         if (!midsList.isEmpty()) {
             mids = (Integer[]) midsList.toArray(new Integer[0]);
             
-            watch.markTimeBegin("removeMeasurementsFromCache");
             removeMeasurementsFromCache(mids);
-            watch.markTimeEnd("removeMeasurementsFromCache");
         
             watch.markTimeBegin("enqueueZevents");
             enqueueZeventsForMeasScheduleCollectionDisabled(mids);
@@ -1139,9 +1165,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             watch.markTimeBegin("unschedule");
             MeasurementProcessorEJBImpl.getOne().unschedule(appIdList);
             watch.markTimeEnd("unschedule");
-        }
-        
-        log.debug("disableMeasurements: size=" + midsList.size() + ", " + watch);
+            
+            log.debug("disableMeasurements: total=" + mids.length + ", time=" + watch);
+        }        
     }
     
     /**
