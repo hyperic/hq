@@ -159,6 +159,12 @@ public class AvailabilityCheckService
                             new ResourceDataPoint(resource, point));
                 } else if (last.getValue() == AVAIL_DOWN ||
                            (now - lastTimestamp) > interval*2) {
+                    // HQ-1664: This is a hack: Give a 5 minute grace period for the agent and HQ
+                    // to sync up if a resource was recently part of a downtime window
+                    if (last.getValue() == AVAIL_PAUSED
+                            && (now - lastTimestamp) <= 5*60*1000 ) {
+                        continue;
+                    }
                     long t = (last.getValue() != AVAIL_DOWN) ?
                         lastTimestamp + interval :
                         TimingVoodoo.roundDownTime(now - interval, interval);
