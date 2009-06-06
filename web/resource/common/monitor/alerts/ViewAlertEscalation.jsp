@@ -57,41 +57,41 @@
     <td width="20%" class="BlockLabel" style="padding-bottom:3px;">
       <span style="color:#333333;"><hq:dateFormatter value="${log.timeStamp}"/> - </span>
     </td>
-    <td colspan="3"  class="BlockContent" style="padding-left: 4px;padding-bottom:3px;">
+    <td colspan="2"  class="BlockContent" style="padding-left: 4px;padding-bottom:3px;">
       <c:out value="${log.detail}"/>
     </td>
   </tr>
   </c:forEach>
   <c:if test="${alert.acknowledgeable}">
   <tr>
-    <td width="20%" class="BlockLabel" style="padding: 10px; border-top: solid #D5D8DE 1px;">&nbsp;</td>
-    <td colspan="2" nowrap="true" class="BlockContent" style="padding: 10px; border-top: solid #D5D8DE 1px;">
-        <span class="BoldText"><fmt:message key="resource.common.alert.ackNote"/></span><br><html:textarea property="ackNote" cols="70" rows="4"/>	  
+    <td width="20%" class="BlockLabel" style="border-top: solid #D5D8DE 1px;" valign="top" align="right"><span class="BoldText"><fmt:message key="resource.common.alert.ackNote"/></span></td>
+    <td colspan="2" class="BlockContent" style="border-top: solid #D5D8DE 1px;">
+        <html:textarea property="ackNote" cols="70" rows="4"/>	  
     </td>
   </tr>
   </c:if>
   <tr>
-    <td rowspan="2" width="20%" class="BlockLabel">&nbsp;</td>
-    <td nowrap="true" class="BlockContent" style="padding: 10px;">
-  <c:if test="${escalation.pauseAllowed && alert.acknowledgeable}">
-	  <span id="AlertEscalationOption"><input type="checkbox" name="pause" value="true" checked="checked" onclick="dojo11.byId('pauseTimeSel').disabled = !this.checked;" />&nbsp;<fmt:message key="alert.escalation.pause"/>&nbsp;</span>	  
-  </c:if>&nbsp;
-    </td>
-    <td rowspan="2" width="60%" class="BlockLabel">
-        <div style="text-align:left;">
-<tiles:insert page="/common/components/ActionButton.jsp">
-  <tiles:put name="labelKey" value="resource.common.alert.action.acknowledge.label"/>
-  <tiles:put name="buttonClick">dojo.byId('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.acknowledge.label"/>'); document.forms[0].submit();</tiles:put>
-  <c:choose>
-    <c:when test="${alert.acknowledgeable}">
-      <tiles:put name="disabled" value="false"/>
-    </c:when>
-    <c:otherwise>
-      <tiles:put name="hidden" value="true"/>
-    </c:otherwise>
-  </c:choose>
-</tiles:insert>
-            </div>
+    <td width="20%" class="BlockLabel">&nbsp;</td>
+    <td width="80%" class="BlockContent">
+		 <c:if test="${escalation.pauseAllowed && alert.acknowledgeable}">
+			  <div id="AlertEscalationOption" syle="text-align:left;">
+			     <input type="checkbox" name="pause" value="true" checked="checked" onclick="dojo11.byId('pauseTimeSel').disabled = !this.checked;" />&nbsp;<fmt:message key="alert.escalation.pause"/>
+			  </div>	  
+		  </c:if>&nbsp;
+          <div style="text-align:left;">
+			  <tiles:insert page="/common/components/ActionButton.jsp">
+  			     <tiles:put name="labelKey" value="resource.common.alert.action.acknowledge.label"/>
+                 <tiles:put name="buttonClick">dojo.byId('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.acknowledge.label"/>'); document.forms[0].submit();</tiles:put>
+                 <c:choose>
+                    <c:when test="${alert.acknowledgeable}">
+                       <tiles:put name="disabled" value="false"/>
+                    </c:when>
+                    <c:otherwise>
+                       <tiles:put name="hidden" value="true"/>
+                    </c:otherwise>
+                 </c:choose>
+              </tiles:insert>
+          </div>
     </td>
   </tr>
 </table>
