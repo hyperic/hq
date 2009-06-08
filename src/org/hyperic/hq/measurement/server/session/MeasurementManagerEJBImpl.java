@@ -798,7 +798,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         for (Iterator it=resources.iterator(); it.hasNext(); ) {
             Object o = it.next();
             Resource resource = null;
-            if (o instanceof AppdefEntityValue) {
+            if (o == null) {
+                continue;
+            } else if (o instanceof AppdefEntityValue) {
                 AppdefEntityValue rv = (AppdefEntityValue) o;
                 AppdefEntityID aeid = rv.getID();
                 resource = resMan.findResource(aeid);
