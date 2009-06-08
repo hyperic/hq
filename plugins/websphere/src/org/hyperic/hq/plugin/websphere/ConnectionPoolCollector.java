@@ -69,29 +69,26 @@ public class ConnectionPoolCollector extends WebsphereCollector {
                 name + " query returned " +
                 beans.size() + " results";
             throw new PluginException(msg);
+        } else if (beans.size() == 1) {
+        	return (ObjectName) beans.iterator().next();
+        } else {
+        	for (Iterator it=beans.iterator(); it.hasNext();) {
+        		//XXX seen in samples, two beans where all attributes are equal
+        		//with the exception of mbeanIdentifier
+        		ObjectName fullName = (ObjectName) it.next();
+        		String id = fullName.getKeyProperty("mbeanIdentifier");
+        		if (id != null) {
+        			if (id.indexOf(getServerName()) != -1) {
+        				return fullName;
+        			}
+        		}
+        	}
         }
-        ObjectName fullName =
-            (ObjectName)beans.iterator().next();
 
-        if (beans.size() == 1) {
-            return fullName;
-        }
-        else {
-            for (Iterator it=beans.iterator(); it.hasNext();) {
-                //XXX seen in samples, two beans where all attributes are equal
-                //with the exception of mbeanIdentifier
-                String id = fullName.getKeyProperty("mbeanIdentifier");
-                if (id != null) {
-                    if (id.indexOf(getServerName()) != -1) {
-                        return fullName;
-                    }
-                }
-            }
-            String msg =
-                name + " query returned " +
-                beans.size() + " results";
-            throw new PluginException(msg);
-        }
+        String msg =
+        	name + " query returned " +
+        	beans.size() + " results";
+        throw new PluginException(msg);
     }
 
     protected void init(AdminClient mServer) throws PluginException {
