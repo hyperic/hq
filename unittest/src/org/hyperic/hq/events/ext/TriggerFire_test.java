@@ -53,9 +53,9 @@ public class TriggerFire_test extends TestCase {
 		
 		// Should be able to fire the first time
 		assertTrue(strat.shouldFireActions(adMan, def));
-		// Should not be able to fire the second time, after setting escalation
+		// Should still be able to fire the second time, after setting escalation
 		def.setEscalation();
-		assertFalse(strat.shouldFireActions(adMan, def));
+		assertTrue(strat.shouldFireActions(adMan, def));
 	}
 	
 	private static class FakeTrigger extends AbstractTrigger {
