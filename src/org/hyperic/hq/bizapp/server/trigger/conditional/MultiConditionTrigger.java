@@ -443,10 +443,14 @@ public class MultiConditionTrigger
     						try {
     							etracker.updateReference(getId(), toUpdate.getId(),
     									event, getTimeRange());
-    							track = false;
+    							etracker.updateReference(getId(), toUpdate.getId(),
+    													 event, getTimeRange());
     						} catch (SQLException e) {
     							log.debug("Failed to update event reference for " +
     									"trigger id=" + getId(), e);
+    						} finally {
+    							// Even if we fail...
+    							track = false;
     						}
     					}
     				}
@@ -764,7 +768,7 @@ public class MultiConditionTrigger
         if (!durable) {
             // Get ready to fire, reset EventTracker
             try {
-                etracker.deleteReference(getId());
+    			etracker.deleteReference(getId());            
             } catch (SQLException e) {
                 throw new ActionExecuteException(
                         "Failed to delete reference for trigger id="+getId(), e);
