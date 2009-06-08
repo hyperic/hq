@@ -125,12 +125,6 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 													  false,
 													  true);
 		
-		try {
-			_eventTracker.deleteReference(mct.getId());
-		} catch (Exception notPossible) {
-			
-		}
-		
 		AbstractEvent e1 = createEvent(1, true);
 		AbstractEvent e2 = createEvent(2, true);
 		AbstractEvent e3 = createEvent(3, true);
@@ -179,20 +173,7 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 													  false,
 													  true);
 
-		try {
-			_eventTracker.deleteReference(mct.getId());
-		} catch (SQLException notInMockImpl) {
-			
-		}
-
 		for (int nLoops = 0; nLoops < 20; ++nLoops) {
-
-			// Make sure the event tracker is cleaned up
-			try {
-				_eventTracker.deleteReference(mct.getId());
-			} catch (Exception notPossible) {
-
-			}
 
 			AbstractEvent e1 = createEvent(1, true);
 			AbstractEvent e2 = createEvent(2, true);
@@ -224,7 +205,7 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 			int count = 30;
 			Thread[] threads = new Thread[count];
 			for (int i = 0; i < count; ++i) {
-				threads[i] = new MessageThread(rd, om);
+				threads[i] = new MessageThread(i, rd, om);
 			}
 
 			for (int i = 0; i < count; ++i) {
@@ -601,7 +582,8 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 		private RegisteredDispatcherEJBImpl rd;
 		private ObjectMessage om;
 
-		MessageThread(RegisteredDispatcherEJBImpl rd, ObjectMessage om) {
+		MessageThread(int index, RegisteredDispatcherEJBImpl rd, ObjectMessage om) {
+			super("MessageThread " + index);
 			this.rd = rd;
 			this.om = om;
 		}
