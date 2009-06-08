@@ -240,12 +240,16 @@ public class MockEventTrackerEJBImpl
         	}
 
         	if (toUpdate == null) {
-        		throw new SQLException("Can't update object that doesn't exist, teid="+teid);            
+                toUpdate = new TriggerEvent(teid,
+                						    eventObject, 
+                						    tid, 
+                						    eventObject.getTimestamp(), 
+                						    expiration);
+        	} else {
+        		toUpdate.setEventObject(eventObject);
+        		toUpdate.setCtime(eventObject.getTimestamp());
         	}
-
-        	toUpdate.setEventObject(eventObject);
-        	toUpdate.setCtime(eventObject.getTimestamp());
-
+        	
         	triggerEvents.add(toUpdate);
 
         	eventObject.setId(teid);
