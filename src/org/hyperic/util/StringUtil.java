@@ -296,6 +296,177 @@ public class StringUtil {
         return res;
     }
 
+    /* the following code..explodeQuoted is based on code from bash-4.0/subst.c
+     * XXX can be optimized if needed, but functionality first.
+     */
+    private static final char QUOTE = '\'';
+    private static final char DOUBLEQUOTE = '"';
+    private static final char BACKSLASH = '\\';
+
+    private static boolean spctabnl(char c) {
+        return (c == ' ') || (c == '\t') || (c == '\n');
+    }
+
+    private static int skipSingleQuoted(String str, int slen, int sind) {
+        int i = sind;
+
+        while ((i < slen) && str.charAt(i) != QUOTE) {
+            i++;
+        }
+        if (i < slen) {
+            i++;
+        }
+        return i;
+    }
+
+    private static int skipDoubleQuoted(String str, int slen, int sind) {
+        int i = sind;
+        int pass_next = 0;
+
+        while (i < slen) {
+            char c = str.charAt(i);
+            if (pass_next != 0) {
+                pass_next = 0;
+                i++;
+            }
+            else if (c == BACKSLASH) {
+                pass_next++;
+                i++;
+            }
+            else if (c != DOUBLEQUOTE) {
+                i++;
+            }
+            else {
+                break;
+            }
+        }
+
+        if (i < slen) {
+            i++;
+        }
+        return i;
+    }
+
+    private static String extractDoubleQuoted(String str) {
+        int slen = str.length();
+        int i=0;
+        int pass_next=0;
+        int dquote=0;
+        StringBuffer temp = new StringBuffer(slen);
+
+        while (i < slen) {
+            char c = str.charAt(i);
+            if (pass_next != 0) {
+                if (dquote == 0) {
+                    temp.append('\\');
+                }
+                pass_next = 0;
+                temp.append(c);
+            }
+            else if (c == BACKSLASH) {
+                pass_next++;
+            }
+            else if (c != DOUBLEQUOTE) {
+                temp.append(c);
+            }
+            else {
+                dquote ^= 1;
+            }
+            i++;
+        }
+
+        if (dquote != 0) {
+            throw new IllegalArgumentException("Unbalanced quotation marks");
+        }
+
+        return temp.toString();
+    }
+
+    private static String extractSingleQuoted(String str) {
+        char first = str.charAt(0);
+        char last = str.charAt(str.length()-1);
+        if (first == QUOTE) {
+            if (last == QUOTE) {
+                return str.substring(1, str.length()-1);
+            }
+            else {
+                throw new IllegalArgumentException("Unbalanced quotation marks");
+            }
+        }
+        else {
+            return str;
+        }
+    }
+
+    public static String extractQuoted(String str) {
+        if (str.length() == 0) {
+            return str;
+        }
+        if (str.charAt(0) == QUOTE) {
+            str = extractSingleQuoted(str);
+        }
+        else if (str.charAt(0) == DOUBLEQUOTE) {
+            str = extractDoubleQuoted(str);
+        }
+        return str;
+    }
+
+    private static String[] splitCommandLine(String str, boolean extract) {
+        List list = new ArrayList();
+        int slen;
+        char c;
+        int i=0;
+        int tokstart=0;
+
+        if ((str == null) || ((str = str.trim()).length() == 0)) {
+            return new String[0];
+        }
+
+        slen = str.length();
+
+        while (true) {
+            if (i < slen) {
+                c = str.charAt(i);
+            }
+            else {
+                c = '\0';
+            }
+
+            if (c == BACKSLASH) {
+                i++;
+                if (i < slen) {
+                    i++;
+                }
+            }
+            else if (c == QUOTE) {
+                i = skipSingleQuoted(str, slen, ++i);
+            }
+            else if (c == DOUBLEQUOTE) {
+                i = skipDoubleQuoted(str, slen, ++i);
+            }
+            else if ((c == '\0') || spctabnl(c)) {
+                String token = str.substring(tokstart, i);
+                if (extract) {
+                    token = extractQuoted(token);
+                }
+                list.add(token);
+                while ((i < slen) && spctabnl(str.charAt(i))) {
+                    i++;
+                }
+                if (i < slen) {
+                    tokstart = i;
+                }
+                else {
+                    break;
+                }
+            }
+            else {
+                i++;
+            }
+        }
+        return (String[])list.toArray(new String[list.size()]);
+    }
+
     /**
      * Split a string up by whitespace, taking into account quoted
      * subcomponents.  If there is an uneven number of quotes, a
@@ -305,47 +476,8 @@ public class StringUtil {
      * @return an array of elements, the argument was split into
      * @throws IllegalArgumentException indicating there was a quoting error
      */
-
-    public static String[] explodeQuoted(String arg)
-        throws IllegalArgumentException 
-    {
-        ArrayList res = new ArrayList();
-        StringTokenizer quoteTok;
-        boolean inQuote = false;
-
-        if ((arg == null) ||
-            ((arg = arg.trim()).length() == 0))
-        {
-            return new String[0];
-        }
-            
-        quoteTok = new StringTokenizer(arg, "\"", true);
-
-        while (quoteTok.hasMoreTokens()) {
-            String elem = (String)quoteTok.nextElement();
-
-            if (elem.equals("\"")) {
-                inQuote = !inQuote;
-                continue;
-            }
-
-            if (inQuote) {
-                res.add(elem);
-            }
-            else {
-                StringTokenizer spaceTok = new StringTokenizer(elem.trim());
-
-                while (spaceTok.hasMoreTokens()) {
-                    res.add(spaceTok.nextToken());
-                }
-            }
-        }
-        
-        if (inQuote) {
-            throw new IllegalArgumentException("Unbalanced quotation marks");
-        }
-
-        return (String[]) res.toArray(new String[0]);
+    public static String[] explodeQuoted(String arg) {
+        return splitCommandLine(arg, true);
     }
 
     /**
