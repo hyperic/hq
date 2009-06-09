@@ -161,17 +161,6 @@ exit 0
 %config %{prefix}/hq-plugins
 
 %changelog
-* Wed May 20 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Tue May 19 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
 * Thu May  7 2009 Hyperic Support <support@hyperic.com> 4.1.2
 * Mon Apr  6 2009 Hyperic Support <support@hyperic.com> 4.1.1
 * Fri Mar  6 2009 Hyperic Support <support@hyperic.com> 4.1.0

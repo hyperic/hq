@@ -133,9 +133,9 @@ elif [ -f /etc/init.d/%{name} ]; then
     echo "The HQ Agent has successfully been installed, and the service has been"
     echo "configured to start at boot. Prior to starting the service, be sure to"
     echo "uncomment and modify the agent.setup values in the agent.properties file in"
-    echo "%{prefix}/%{HQ_Component_Name}. Instructions for doing so can be found online"
-    echo "at http://support.hyperic.com/confluence/display/DOC/HQ+Agent+Configuration \\"
-    echo "#HQAgentConfiguration-auto. You will also want to check the sanity of the"
+    echo "%{prefix}/%{HQ_Component_Name}/conf. Instructions for doing so can be found online"
+    echo "at http://support.hyperic.com/display/DOC/Configuring+Agent+Startup+Settings+in+its+Properties+File."
+    echo "You will also want to check the sanity of the"
     echo "HQ_JAVA_HOME setting in the /etc/init.d/%{name} init script."
     echo
 fi
@@ -151,17 +151,6 @@ exit 0
 %config %{prefix}/hq-plugins
 
 %changelog
-* Wed May 20 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Tue May 19 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
-* Mon May 18 2009 Hyperic Support <support@hyperic.com> 4.1.2
 * Thu May  7 2009 Hyperic Support <support@hyperic.com> 4.1.2
 * Mon Apr  6 2009 Hyperic Support <support@hyperic.com> 4.1.1
 * Fri Mar  6 2009 Hyperic Support <support@hyperic.com> 4.1.0
