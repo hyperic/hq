@@ -61,7 +61,7 @@ public class OracleServerDetector
     implements FileServerDetector,
                AutoServerDetector {
 
-    private Log log =  LogFactory.getLog("OracleServerDetector");
+    private transient Log log =  LogFactory.getLog("OracleServerDetector");
 
     private static final String PTQL_QUERY = "State.Name.eq=oracle";
 
@@ -291,8 +291,21 @@ public class OracleServerDetector
         throws PluginException
     {
         String url = config.getValue(OracleMeasurementPlugin.PROP_URL);
+        if (url == null) {
+        	log.warn("No value for config property " + OracleMeasurementPlugin.PROP_URL +
+        			", no services will be discovered.");
+        	return null;
+        }
+
         String user = config.getValue(OracleMeasurementPlugin.PROP_USER);
+        if (user == null) {
+        	log.info("No value for config property " + OracleMeasurementPlugin.PROP_USER);
+        }
+
         String pass = config.getValue(OracleMeasurementPlugin.PROP_PASSWORD);
+        if (pass == null) {
+        	log.info("No value for config property " + OracleMeasurementPlugin.PROP_PASSWORD);
+        }
 
         ArrayList services = new ArrayList();
         Connection conn = null;
