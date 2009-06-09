@@ -2666,9 +2666,25 @@ public class AppdefBossEJBImpl
         assignedSvcFilter = null;
         groupMemberFilter = null;
 
+    	// This list can contain items having different appdef types
+    	// we need to screen the list and only include items matching the 
+    	// value of appdefTypeId.  Otherwise, the paging logic below
+    	// will be thrown off (it assumes that list of pendingEntities is always
+    	// a subset of the available, which is not always the case) [HHQ-3026]
+    	List pendingEntitiesFiltered = new ArrayList();
+
         // add a pager filter for removing pending appdef entities
         if (pendingEntities != null) {
-            filterList.add( new AppdefPagerFilterExclude ( pendingEntities ));
+        	
+        	for (int x = 0; x < pendingEntities.length; x++) {
+        		if (pendingEntities[x].getType() == appdefTypeId) {
+        			pendingEntitiesFiltered.add(pendingEntities[x]);
+        		}
+        	}
+        	
+            filterList.add( new AppdefPagerFilterExclude ( 
+            		(AppdefEntityID[]) pendingEntitiesFiltered.toArray(
+            				new AppdefEntityID[pendingEntitiesFiltered.size()])));
         }
 
         // If the caller supplied a group entity for filtering, this will be
@@ -2761,9 +2777,11 @@ public class AppdefBossEJBImpl
             }
         }
 
+        // Use pendingEntitiesFiltered as it will contain the correct number of 
+        // items based on the selected appdeftype [HHQ-3026]
         int pendingSize = 0;
-        if (pendingEntities != null)
-            pendingSize = pendingEntities.length;
+        if (pendingEntitiesFiltered != null)
+            pendingSize = pendingEntitiesFiltered.size();
 
         int erFilterSize = 0;
         if (erFilter != null)
