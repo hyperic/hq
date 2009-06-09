@@ -442,8 +442,6 @@ public class MultiConditionTrigger
     					if (timeRange > 0) {
     						try {
     							etracker.updateReference(getId(), toUpdate.getId(),
-    									event, getTimeRange());
-    							etracker.updateReference(getId(), toUpdate.getId(),
     													 event, getTimeRange());
     						} catch (SQLException e) {
     							log.debug("Failed to update event reference for " +
