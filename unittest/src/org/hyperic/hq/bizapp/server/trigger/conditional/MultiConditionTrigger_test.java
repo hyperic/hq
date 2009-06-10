@@ -27,19 +27,13 @@ package org.hyperic.hq.bizapp.server.trigger.conditional;
 
 import javax.naming.InitialContext;
 
-import junit.framework.TestCase;
-
 import org.hyperic.hq.bizapp.server.AbstractMultiConditionTriggerUnittest;
 import org.hyperic.hq.events.AbstractEvent;
-import org.hyperic.hq.events.MockEvent;
-import org.hyperic.hq.events.TriggerFiredEvent;
-import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.ext.MockTriggerFireStrategy;
 import org.hyperic.hq.events.ext.TriggerFireStrategy;
 import org.hyperic.hq.events.server.session.MockEventTrackerEJBImpl;
 import org.hyperic.hq.events.server.session.MockEventTrackerLocalHome;
 import org.hyperic.hq.events.shared.EventTrackerLocalHome;
-import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.mockejb.jndi.MockContextFactory;
 
 /**
@@ -328,6 +322,31 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
 
     	assertEquals(nThreads * iterations, trigger.getNotFiredCount());
     	assertEquals(nThreads * iterations, trigger.getFireCount());
+    }
+    
+    public void testThatAddEventsDontAccumulate() throws Exception {
+    	
+    	// Non-expiring...
+    	Integer tid1 = new Integer(2301);
+    	MockMultiConditionTrigger t1 = 
+			createTrigger(tid1, "1&2", 0, false, true);
+    	AbstractEvent e1 = createEvent(1, true);
+    	t1.processEvent(e1);
+    	assertEquals(1, _eventTracker.getEventsCount(tid1));
+    	AbstractEvent e2 = createEvent(1, true);
+    	t1.processEvent(e2);
+    	assertEquals(1, _eventTracker.getEventsCount(tid1));
+    	
+    	// Expiring...
+    	Integer tid2 = new Integer(2302);
+    	MockMultiConditionTrigger t2 = 
+			createTrigger(tid2, "1&2", 1000000000, false, true);
+    	AbstractEvent e3 = createEvent(1, true);
+    	t2.processEvent(e3);
+    	assertEquals(1, _eventTracker.getEventsCount(tid2));
+    	AbstractEvent e4 = createEvent(1, true);
+    	t2.processEvent(e4);
+    	assertEquals(1, _eventTracker.getEventsCount(tid2));
     }
     
     private void verifyExpectations(MultiConditionTrigger trigger) {
