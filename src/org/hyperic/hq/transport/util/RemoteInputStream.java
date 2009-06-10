@@ -207,18 +207,28 @@ public class RemoteInputStream
         out.writeUTF(_streamId);
     }
     
-    private InputStreamService getInputStreamService() throws IOException {        
+    private InputStreamService getInputStreamService() throws IOException {
         if (_streamService == null) {
             if (_sourceInvokerLocator == null) {
                 throw new IOException("remote source invoker locator was not set");
             }
             
+            // HQ-1638 (Use the same strategy as HQ-1572)
+            // InputStreamService and the remoting classes for the unidirectional transport are intentionally
+            // put into the ServerHandler classloader.  As of this comment, that classloader is a peer
+            // to the context classloader, so those classes are not visible to the current thread context,
+            // unless we force the issue.
+            ClassLoader currentContext = Thread.currentThread().getContextClassLoader();
+            Thread.currentThread().setContextClassLoader(InputStreamService.class.getClassLoader());
+
             try {
                 _streamService = (InputStreamService)TransporterClient.
                     createTransporterClient(_sourceInvokerLocator, InputStreamService.class);
             } catch (Exception e) {
                 throw new IOException("Failed to connect to input stream " +
                 		              "service on remote source: "+e);
+            } finally {
+                Thread.currentThread().setContextClassLoader(currentContext);
             }
         }
 
