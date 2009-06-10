@@ -335,10 +335,9 @@ public class MultiConditionTrigger
     	long timeRange = getTimeRange();
     	long expire = Long.MIN_VALUE;
     	if (timeRange > 0) {
-    		long eventTime = event.getTimestamp();
-    		expire = eventTime = timeRange;
+    		expire = System.currentTimeMillis() - timeRange;
     	}
-
+    	
     	AbstractEvent toUpdate = null;
 
     	// Create a table to keep track
@@ -419,8 +418,10 @@ public class MultiConditionTrigger
     		if (subTriggersNotFiring != null && subTriggersNotFiring.size() > 0) {
     			sendNotFired = true;
     		}
+    		
     		try {
-    			// This deletes all persisted state for this trigger
+    			// This deletes all persisted state for this trigger,
+    			// and all expired events
     			etracker.deleteReference(getId());            
     		} catch (SQLException e) {
     			// It's ok if we can't delete the old events now.
@@ -442,15 +443,17 @@ public class MultiConditionTrigger
     					if (timeRange > 0) {
     						try {
     							etracker.updateReference(getId(), toUpdate.getId(),
-    									event, getTimeRange());
-    							track = false;
+    													 event, getTimeRange());
     						} catch (SQLException e) {
     							log.debug("Failed to update event reference for " +
     									"trigger id=" + getId(), e);
     						}
     					}
+    					
+    					// If we updated, we will not track.
+						track = false;
     				}
-
+    				
     				if (event instanceof TriggerNotFiredEvent) {
     					// Only need track TriggerFiredEvent
     					track = false;
@@ -764,10 +767,11 @@ public class MultiConditionTrigger
         if (!durable) {
             // Get ready to fire, reset EventTracker
             try {
-                etracker.deleteReference(getId());
+    			etracker.deleteReference(getId());          
             } catch (SQLException e) {
-                throw new ActionExecuteException(
-                        "Failed to delete reference for trigger id="+getId(), e);
+            	// Log the error, but we still want to fire
+            	log.error("Failed to delete reference for trigger id=" +
+            			   getId(), e);
             }
         }                
         
