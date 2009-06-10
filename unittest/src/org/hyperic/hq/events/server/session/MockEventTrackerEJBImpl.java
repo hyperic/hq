@@ -108,28 +108,37 @@ public class MockEventTrackerEJBImpl
         
         synchronized (_triggerId2TriggerEvents) {
 
-        	Set triggerEvents = (Set)_triggerId2TriggerEvents.get(tid);
+        	LinkedList triggerEvents = (LinkedList)_triggerId2TriggerEvents.get(tid);
 
         	if (triggerEvents == null) {
-        		triggerEvents = new TreeSet(new Comparator() {
-
-        			public int compare(Object o1, Object o2) {
-        				TriggerEvent event1 = (TriggerEvent)o1;
-        				TriggerEvent event2 = (TriggerEvent)o2;
-        				return (int)(event1.getCtime() - event2.getCtime());
-        			}
-
-        		});
-
+        		triggerEvents = new LinkedList();
         		_triggerId2TriggerEvents.put(tid, triggerEvents);
         	}
 
-        	triggerEvents.add(triggerEvent);
+        	addEvent(triggerEvents, triggerEvent);
         }
         
         eventObject.setId(teid);
         
         return teid;
+    }
+    
+    private void addEvent(LinkedList list, TriggerEvent te) {
+    	if (list.size() == 0) {
+    		list.add(te);
+    	} else {
+    		int addAt = 0;
+    		int index = 0;
+    		do {
+    			TriggerEvent evtAt = (TriggerEvent) list.get(index);
+    			if (evtAt.getCtime() > te.getCtime()) {
+    				addAt = index;
+    				break;
+    			}
+    		} while (++index < list.size());
+
+    		list.add(addAt, te);
+    	}
     }
 
     /**
@@ -143,7 +152,7 @@ public class MockEventTrackerEJBImpl
         	_triggerId2TriggerEvents.remove(tid);
         }
     }
-
+    
     /**
      * @see org.hyperic.hq.events.shared.EventTrackerLocal#getReferencedEventStreams(java.lang.Integer)
      */
@@ -156,7 +165,7 @@ public class MockEventTrackerEJBImpl
 
         synchronized (_triggerId2TriggerEvents) {
 
-        	Set triggerEvents = (Set)_triggerId2TriggerEvents.get(tid);
+        	LinkedList triggerEvents = (LinkedList)_triggerId2TriggerEvents.get(tid);
 
         	if (triggerEvents != null && !triggerEvents.isEmpty()) {            
         		for (Iterator iter = triggerEvents.iterator(); iter.hasNext();) {
@@ -180,7 +189,7 @@ public class MockEventTrackerEJBImpl
         
         synchronized (_triggerId2TriggerEvents) {
 
-        	Set triggerEvents = (Set)_triggerId2TriggerEvents.get(tid);
+        	LinkedList triggerEvents = (LinkedList)_triggerId2TriggerEvents.get(tid);
 
         	LinkedList eventStreams = new LinkedList();
 
@@ -216,17 +225,9 @@ public class MockEventTrackerEJBImpl
         
         synchronized (_triggerId2TriggerEvents) {
 
-        	Set triggerEvents = (Set)_triggerId2TriggerEvents.get(tid);
+        	LinkedList triggerEvents = (LinkedList)_triggerId2TriggerEvents.get(tid);
         	if (triggerEvents == null) {
-        		triggerEvents = new TreeSet(new Comparator() {
-
-        			public int compare(Object o1, Object o2) {
-        				TriggerEvent event1 = (TriggerEvent)o1;
-        				TriggerEvent event2 = (TriggerEvent)o2;
-        				return (int)(event1.getCtime() - event2.getCtime());
-        			}
-
-        		});
+        		triggerEvents = new LinkedList();
         		_triggerId2TriggerEvents.put(tid, triggerEvents);
         	} else {
         		for (Iterator iter = triggerEvents.iterator(); iter.hasNext();) {
@@ -250,7 +251,7 @@ public class MockEventTrackerEJBImpl
         		toUpdate.setCtime(eventObject.getTimestamp());
         	}
         	
-        	triggerEvents.add(toUpdate);
+        	addEvent(triggerEvents, toUpdate);
 
         	eventObject.setId(teid);
         }
