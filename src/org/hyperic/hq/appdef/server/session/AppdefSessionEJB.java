@@ -216,7 +216,7 @@ public abstract class AppdefSessionEJB
         if (log.isDebugEnabled()) {
             log.debug("Checking Permission for operation: " +
                       operation + " ResourceType: " + rtV.getName() +
-                      " Id: " + id + " Subject: " + subject.getName());
+                      " Id: " + id + " Subject Id: " + subject.getId());
         }
         PermissionManager permMgr = PermissionManagerFactory.getInstance();
         Integer opId = getOpIdByResourceType(rtV, operation);
