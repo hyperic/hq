@@ -1637,7 +1637,7 @@
       <fileset dir="installer/bin" includes="db-*.bat"/>
     </copy>
     <copy todir="${installer.dir}/data">
-      <fileset dir="installer/data" includes="**"/>
+      <fileset dir="installer/data" includes="**" excludes="eula.txt" />
     </copy>
 
     <!-- Copy other files needed by consolidated config system -->
