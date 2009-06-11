@@ -241,7 +241,7 @@ public class Service extends AppdefResource
         setModifiedBy( valueHolder.getModifiedBy() );
         setLocation( valueHolder.getLocation() );
         setParentId( valueHolder.getParentId() );
-        // setName( valueHolder.getName() );
+        setName( valueHolder.getName() );
     }
 
     public boolean equals(Object obj) {

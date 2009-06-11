@@ -908,8 +908,16 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                 update = true;
                 // UPDATE SERVICE
                 _log.info("Updating service: " + service.getName());
-                if (aiservice.getName() != null &&
-                    !aiservice.getName().equals(service.getName())) {
+                final String aiSvcName = aiservice.getName();
+                final String svcName = service.getName();
+                final String aiid = service.getAutoinventoryIdentifier();
+                // if aiid.equals(svcName) this means that the name has
+                // not been manually changed.  Therefore it is ok to change
+                // the current resource name
+                if (aiSvcName != null &&
+                    !aiSvcName.equals(svcName) &&
+                    aiid.equals(svcName))
+                {
                     service.setName(aiservice.getName().trim());
                     service.getResource().setName(service.getName());
                 }
