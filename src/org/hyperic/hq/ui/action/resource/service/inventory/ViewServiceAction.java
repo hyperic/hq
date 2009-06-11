@@ -43,6 +43,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.ApplicationException;
@@ -95,10 +96,29 @@ public class ViewServiceAction extends TilesAction {
             // check to see if this thing is a platform service
             if(service.getServer().getServerType().getVirtual()) {
                 // find the platform resource and add it to the request scope
-                // TODO handle permission error here
-                PlatformValue pv =
-                    boss.findPlatformByDependentID(sessionId.intValue(), entityId);
-                request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pv);
+                try {
+                	PlatformValue pv =
+                		boss.findPlatformByDependentID(sessionId.intValue(), entityId);
+                	request.setAttribute(Constants.PARENT_RESOURCE_ATTR, pv);
+                } catch (PermissionException pe) {
+                	// TODO Would like to able to fall back and grab the name through other means
+                	//      which isn't easily done right now.  Only thing we should prevent
+                	//      in the case of an error is plain text instead of a link.
+                	log.error("insufficient permissions for parent platform ", pe);
+
+                	RequestUtils
+                            .setError(request,
+                                      "resource.service.inventory.error.ViewParentPlatformPermission");
+                    request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS,
+                                         new ArrayList());
+                    request.setAttribute(Constants.PRODUCT_CONFIG_OPTIONS_COUNT,
+                                         new Integer(0));
+                    request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS,
+                                         new ArrayList());
+                    request.setAttribute(Constants.MONITOR_CONFIG_OPTIONS_COUNT,
+                                         new Integer(0));
+                    return null;
+                }
             }
             request.setAttribute(Constants.ALL_RESGRPS_ATTR, groups);
             if (service == null) {
