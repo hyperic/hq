@@ -132,10 +132,10 @@ public class MockEventTrackerEJBImpl
     		do {
     			TriggerEvent evtAt = (TriggerEvent) list.get(index);
     			if (evtAt.getCtime() > te.getCtime()) {
-    				addAt = index;
     				break;
     			}
-    		} while (++index < list.size());
+				addAt = ++index;
+    		} while (index < list.size());
 
     		list.add(addAt, te);
     	}
