@@ -80,6 +80,10 @@ public class NotReadyAppender extends AppenderSkeleton {
 
     protected void append(LoggingEvent event) {
 
+        if (event == null || event.getMessage() == null) {
+            return;
+        }
+
         String message = event.getMessage().toString();
         Priority level = event.level;
 
