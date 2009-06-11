@@ -964,6 +964,9 @@ public class AvailabilityManagerEJBImpl
         tmp.setStartime(start+1);
         SortedSet set = rles.tailSet(tmp);
         if (set.size() == 0) {
+            _log.error("Availability measurement_id=" + state.getMetricId() +
+                " does not have a availability point after timestamp " +
+                state.getTimestamp());
             return null;
         }
         return (AvailabilityDataRLE)set.first();
