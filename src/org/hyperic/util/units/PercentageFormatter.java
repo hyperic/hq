@@ -45,7 +45,13 @@ public class PercentageFormatter
     }
     
     protected FormattedNumber formatNumber(double rawValue, NumberFormat fmt){
-        return new FormattedNumber(fmt.format(rawValue * getMultiplier()), "%", "");
+    	double value = rawValue;
+    	
+    	if (0 < rawValue && rawValue < 1) {
+    		value = rawValue * getMultiplier();
+    	}
+    	
+    	return new FormattedNumber(fmt.format(value), "%", "");
     }
 
     public UnitNumber parse(String val, Locale locale, 
