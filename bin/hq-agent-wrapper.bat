@@ -28,7 +28,7 @@ cd %_REALPATH%
 if not "%HQ_JAVA_HOME%"=="" goto gothqjava
 
 if EXIST "%AGENT_INSTALL_HOME%\jre" (
-    set HQ_JAVA_HOME="%AGENT_INSTALL_HOME%\jre"
+    set HQ_JAVA_HOME=%AGENT_INSTALL_HOME%\jre
     goto gotjava
 )
 
@@ -41,7 +41,7 @@ if not EXIST "%HQ_JAVA_HOME%" (
   echo HQ_JAVA_HOME must be set to a valid directory
   goto :eof
 ) else (
-  set HQ_JAVA_HOME="%HQ_JAVA_HOME%"
+  set HQ_JAVA_HOME=%HQ_JAVA_HOME%
 )
 
 :gotjava
@@ -99,7 +99,7 @@ set CLIENT_CLASSPATH=%CLIENT_CLASSPATH%;%AGENT_LIB%\lather.jar
 
 set CLIENT_CLASS=org.hyperic.hq.bizapp.agent.client.AgentClient
 
-set CLIENT_CMD=%HQ_JAVA_HOME%\bin\java -Djava.net.preferIPv4Stack=true -D%AGENT_INSTALL_HOME_PROP%="%AGENT_INSTALL_HOME%" -D%AGENT_BUNDLE_HOME_PROP%="%AGENT_BUNDLE_HOME%" -cp "%CLIENT_CLASSPATH%" %CLIENT_CLASS%
+set CLIENT_CMD="%HQ_JAVA_HOME%\bin\java" -Djava.net.preferIPv4Stack=true -D%AGENT_INSTALL_HOME_PROP%="%AGENT_INSTALL_HOME%" -D%AGENT_BUNDLE_HOME_PROP%="%AGENT_BUNDLE_HOME%" -cp "%CLIENT_CLASSPATH%" %CLIENT_CLASS%
 
 set PING_CMD=%CLIENT_CMD% ping
 set SETUP_CMD=%CLIENT_CMD% setup
