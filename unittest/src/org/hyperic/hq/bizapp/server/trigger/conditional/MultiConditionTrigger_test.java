@@ -340,13 +340,22 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
     	// Expiring...
     	Integer tid2 = new Integer(2302);
     	MockMultiConditionTrigger t2 = 
-			createTrigger(tid2, "1&2", 1000000000, false, true);
+			createTrigger(tid2, "1&2&3", 1000000000, false, true);
     	AbstractEvent e3 = createEvent(1, true);
     	t2.processEvent(e3);
     	assertEquals(1, _eventTracker.getEventsCount(tid2));
     	AbstractEvent e4 = createEvent(1, true);
     	t2.processEvent(e4);
     	assertEquals(1, _eventTracker.getEventsCount(tid2));
+    	AbstractEvent e5 = createEvent(2, true);
+    	t2.processEvent(e5);
+    	assertEquals(2, _eventTracker.getEventsCount(tid2));
+    	AbstractEvent e6 = createEvent(2, false);
+    	t2.processEvent(e6);
+    	assertEquals(2, _eventTracker.getEventsCount(tid2));
+    	AbstractEvent e7 = createEvent(2, false);
+    	t2.processEvent(e7);
+    	assertEquals(2, _eventTracker.getEventsCount(tid2));
     }
     
     private void verifyExpectations(MultiConditionTrigger trigger) {
