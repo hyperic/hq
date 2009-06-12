@@ -153,7 +153,7 @@ public class SecureAgentConnection
             throw new AgentConnectionException("Unable to connect to " +
                                                this.agentAddress + ":" +
                                                this.agentPort + ": " +
-                                               exc.getMessage());
+                                               exc.getMessage(), exc);
         }
 
         // Write our security settings
