@@ -897,7 +897,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             // thus reducing the amount of potential problems.
             final List tmp =
                 svcMan.getServicesByAIID(server, aiservice.getName());
-            Service service = (Service)tmp.get(0);
+            Service service = (tmp.size() > 0) ? (Service)tmp.get(0) : null;
             boolean update = false;
             
             if (service == null) {
