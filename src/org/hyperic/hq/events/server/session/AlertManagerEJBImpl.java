@@ -350,9 +350,13 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                            PageInfo pageInfo) 
         throws PermissionException 
     {
-        // Time voodoo the end time to the nearest minute so that we might
-        // be able to use cached results
-        endTime = TimingVoodoo.roundUpTime(endTime, 60000);
+        // [HHQ-2946] Only round up if end time is not a multiple of a minute
+        long mod = endTime % 60000;
+        if (mod > 0) {
+            // Time voodoo the end time to the nearest minute so that we might
+            // be able to use cached results.    
+            endTime = TimingVoodoo.roundUpTime(endTime, 60000);
+        }
         return getAlertDAO().findByCreateTimeAndPriority(subj,
                                                          endTime - timeRange,
                                                          endTime, priority,
