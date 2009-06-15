@@ -33,6 +33,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * The CallbackDispatcher is able to generate listeners and callers for
  * the Proxied Callback Pattern.    
@@ -47,6 +50,8 @@ import java.util.Set;
  */
 public class CallbackDispatcher {
     private Map _ifaceToHandler = new HashMap();
+    private transient final Log _log =
+        LogFactory.getLog(CallbackDispatcher.class);
 
     private static class CallbackHandler implements InvocationHandler {
         private Set          _listeners = new HashSet();
@@ -66,6 +71,10 @@ public class CallbackDispatcher {
             synchronized (_listeners) {
                 _listeners.remove(o);
             }
+        }
+        
+        private CallbackType getType() {
+            return _type;
         }
         
         public Object invoke(Object proxy, Method meth, Object[] methArgs) 
@@ -162,23 +171,31 @@ public class CallbackDispatcher {
     public Object generateCaller(Class iFace, CallbackType type) {
         CallbackHandler newHandler;
         Object src;
-        
         if (!iFace.isInterface()) {
             throw new IllegalArgumentException("Class [" + iFace.getName() +
                                                "] is not an interface");
         }
-        
         newHandler = new CallbackHandler(type);
         src = Proxy.newProxyInstance(iFace.getClassLoader(), 
                                      new Class[] { iFace }, newHandler);
         synchronized(_ifaceToHandler) {
-            if (_ifaceToHandler.containsKey(iFace)) {
-                throw new IllegalArgumentException("Caller already generated " +
-                                                   " for interface [" + 
-                                                   iFace.getName() + "]");
+            CallbackHandler tmp;
+            if (null != (tmp = (CallbackHandler)_ifaceToHandler.get(iFace))) {
+                if (tmp.getType().getClass().equals(type.getClass())) {
+                    _log.warn("Caller already generated for interface=[" + 
+                              iFace.getName() + "] with the same " +
+                              "CallbackType, ignoring");
+                    src = Proxy.newProxyInstance(iFace.getClassLoader(),
+                        new Class[] { iFace }, tmp);
+                } else {
+                    throw new IllegalArgumentException(
+                        "attempt to generate Caller failed since the " +
+                        "interface was already registered with a different " +
+                        "CallbackType.  interface=[" + iFace.getName() + "]");
+                }
+            } else {
+                _ifaceToHandler.put(iFace, newHandler);
             }
-            
-            _ifaceToHandler.put(iFace, newHandler);
         }
         return src;
     }
