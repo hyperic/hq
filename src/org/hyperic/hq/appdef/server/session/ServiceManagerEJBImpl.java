@@ -389,9 +389,10 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     /**
      * @param server {@link Server}
      * @param aiid service autoinventory identifier
+     * @return {@link List} of {@link Service}
      * @ejb:interface-method
      */
-    public Service getServiceByAIID(Server server, String aiid) {
+    public List getServicesByAIID(Server server, String aiid) {
         return getServiceDAO().getByAIID(server, aiid);
     }
 

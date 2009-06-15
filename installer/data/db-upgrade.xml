@@ -9869,17 +9869,9 @@ has already been defined.
       <statement targetDB='mysql'>
         ALTER TABLE EAM_SERVICE ADD CONSTRAINT FKEE7E4387EA5FF386 FOREIGN KEY (SERVER_ID) REFERENCES EAM_SERVER(ID)
       </statement>
-      <!--
-      <statement targetDB='mysql'>
-        create unique index EAM_SERVICE_AIID_IDX on EAM_SERVICE(SERVER_ID, AUTOINVENTORYIDENTIFIER)
+      <statement>
+        create index EAM_SERVICE_AIID_IDX on EAM_SERVICE(SERVER_ID, AUTOINVENTORYIDENTIFIER)
       </statement>
-      <statement targetDB='oracle'>
-        ALTER TABLE EAM_SERVICE ADD UNIQUE(SERVER_ID, AUTOINVENTORYIDENTIFIER)
-      </statement>
-      <statement targetDB='postgresql'>
-        ALTER TABLE EAM_SERVICE ADD UNIQUE(SERVER_ID, AUTOINVENTORYIDENTIFIER)
-      </statement>
-      -->
     </schema-directSQL>
   </schemaSpec>
   

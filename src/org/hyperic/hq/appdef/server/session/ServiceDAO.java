@@ -236,16 +236,19 @@ public class ServiceDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public Service getByAIID(Server server, String aiid) {
+    /**
+     * @return {@link List} of {@link Service}
+     */
+    public List getByAIID(Server server, String aiid) {
         final String sql = new StringBuilder()
             .append("select s from Service s")
             .append(" WHERE s.server = :server")
             .append(" AND s.autoinventoryIdentifier = :aiid")
             .toString();
-        return (Service) createQuery(sql)
+        return createQuery(sql)
             .setParameter("server", server)
             .setParameter("aiid", aiid)
-            .uniqueResult();
+            .list();
     }
 
     public Collection findByPlatform_orderName(Integer id, boolean asc)

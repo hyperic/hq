@@ -887,8 +887,17 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             _log.info("Checking for existing service: " + aiservice.getName());
             
             final ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
-            Service service =
-                svcMan.getServiceByAIID(server, aiservice.getName());
+            // this is a propagation of a bug that nobody really runs into.
+            // Occurs when a set of services under a server have the same name
+            // and therefore the AIID is also the same.  In a perfect world the
+            // AIIDs will be unique, but there is nothing else that comes from
+            // the agent that can uniquely identify a service under a server.
+            // The get(0), instead of operating on the whole list, enables
+            // us to make the least amount of code changes in a messy code path
+            // thus reducing the amount of potential problems.
+            final List tmp =
+                svcMan.getServicesByAIID(server, aiservice.getName());
+            Service service = (Service)tmp.get(0);
             boolean update = false;
             
             if (service == null) {

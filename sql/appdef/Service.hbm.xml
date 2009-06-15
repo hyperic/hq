@@ -58,10 +58,10 @@
 
     <properties name="serviceAiidIdx">
       <many-to-one name="server" class="Server">
-        <column name="SERVER_ID" not-null="false" unique-key="EAM_SERVICE_AIID_IDX"/>
+        <column name="SERVER_ID" not-null="false" index="EAM_SERVICE_AIID_IDX"/>
       </many-to-one>
       <property name="autoinventoryIdentifier" type="string">
-        <column name="AUTOINVENTORYIDENTIFIER" not-null="false" length="250" unique-key="EAM_SERVICE_AIID_IDX"/>
+        <column name="AUTOINVENTORYIDENTIFIER" not-null="false" length="250" index="EAM_SERVICE_AIID_IDX"/>
       </property>
     </properties>
 
