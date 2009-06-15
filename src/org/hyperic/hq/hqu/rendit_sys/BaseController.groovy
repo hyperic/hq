@@ -300,7 +300,7 @@ abstract class BaseController {
         rendered = true
         opts['createDefaultOutput'] = {
             def outStream = invokeArgs.response.outputStream
-            new OutputStreamWriter(outStream)
+            new OutputStreamWriter(outStream, "UTF-8")
         }
         opts['setContentType'] = { contentType ->
             invokeArgs.response.setContentType(contentType)
