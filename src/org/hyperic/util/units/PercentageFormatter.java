@@ -44,14 +44,8 @@ public class PercentageFormatter
         return 100.0;
     }
     
-    protected FormattedNumber formatNumber(double rawValue, NumberFormat fmt){
-    	double value = rawValue;
-    	
-    	if (0 < rawValue && rawValue < 1) {
-    		value = rawValue * getMultiplier();
-    	}
-    	
-    	return new FormattedNumber(fmt.format(value), "%", "");
+    protected FormattedNumber formatNumber(double rawValue, NumberFormat fmt) {
+        return new FormattedNumber(fmt.format(rawValue * getMultiplier()), "%", "");
     }
 
     public UnitNumber parse(String val, Locale locale, 
@@ -84,6 +78,4 @@ public class PercentageFormatter
         }
         return res;
     }
-
 }
-

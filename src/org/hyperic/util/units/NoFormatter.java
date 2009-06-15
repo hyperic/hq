@@ -39,6 +39,6 @@ public class NoFormatter
     }
 
     protected FormattedNumber formatNumber(double rawValue, NumberFormat fmt){
-    	return new FormattedNumber(String.valueOf(rawValue), "");
+    	return new FormattedNumber(fmt.format(rawValue), "");
     }
 }
