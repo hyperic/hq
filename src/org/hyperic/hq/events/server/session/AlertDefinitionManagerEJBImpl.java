@@ -1180,9 +1180,10 @@ public class AlertDefinitionManagerEJBImpl
             for (Iterator cit=conds.iterator(); cit.hasNext(); ) {
                 AlertCondition cond = (AlertCondition) cit.next();
                 
-                if (cond.getName().toUpperCase()
-                        .equals(MeasurementConstants.CAT_AVAILABILITY)) {
-                    if (cond.getComparator().equals("=")) {
+                if (cond != null
+                        && MeasurementConstants.CAT_AVAILABILITY.equalsIgnoreCase(cond.getName())) {
+                    
+                    if ("=".equals(cond.getComparator())) {
                         if (up) {
                             if (cond.getThreshold() == MeasurementConstants.AVAIL_UP) {
                                 isAvail = true;
@@ -1194,7 +1195,7 @@ public class AlertDefinitionManagerEJBImpl
                                 break;
                             }
                         }
-                    } else if (cond.getComparator().equals("<")) {
+                    } else if ("<".equals(cond.getComparator())) {
                         if (!up) {
                             if (cond.getThreshold() <= MeasurementConstants.AVAIL_UP
                                     && cond.getThreshold() > MeasurementConstants.AVAIL_DOWN) {
@@ -1202,7 +1203,7 @@ public class AlertDefinitionManagerEJBImpl
                                 break;
                             }
                         }
-                    } else if (cond.getComparator().equals(">")) {
+                    } else if (">".equals(cond.getComparator())) {
                         if (up) {
                             if (cond.getThreshold() >= MeasurementConstants.AVAIL_DOWN
                                     && cond.getThreshold() < MeasurementConstants.AVAIL_UP) {
