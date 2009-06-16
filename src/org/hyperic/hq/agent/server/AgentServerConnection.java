@@ -27,6 +27,7 @@ package org.hyperic.hq.agent.server;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -63,7 +64,7 @@ public abstract class AgentServerConnection {
      * Read the command invocation information from the client
      */
     public AgentCommand readCommand()
-        throws AgentConnectionException
+        throws AgentConnectionException, EOFException
     {
         DataInputStream dIs;
         AgentRemoteValue cmdArg;
@@ -76,6 +77,8 @@ public abstract class AgentServerConnection {
             cmdVersion   = dIs.readInt();
             cmd          = dIs.readUTF();
             cmdArg       = AgentRemoteValue.fromStream(dIs);
+        } catch(EOFException exc){
+            throw exc;
         } catch(IOException exc){
             throw new AgentConnectionException("Unable to read command: " +
                                                exc.getMessage(), exc);
