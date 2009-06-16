@@ -26,6 +26,7 @@
 package org.hyperic.hq.bizapp.agent.server;
 
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.InetAddress;
@@ -117,6 +118,9 @@ class SSLConnectionListener
                 res.readCommand();
                 res.sendErrorResponse("Unauthorized");
             } catch(AgentConnectionException iExc){
+                log.debug(iExc, iExc);
+            } catch (EOFException e) {
+                log.debug(e, e);
             }
 
             throw new AgentConnectionException("Client from " + remoteAddr +

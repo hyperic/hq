@@ -25,11 +25,14 @@
 
 package org.hyperic.hq.agent.server;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentCommand;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
@@ -37,9 +40,6 @@ import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorIncalculableException;
 import org.hyperic.hq.agent.server.monitor.AgentMonitorSimple;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -200,6 +200,9 @@ public class CommandListener
                     // This is a fine result, raised via the AgentServerHandler
                     // interface
                     dispatchResult = exc;
+                } catch(EOFException exc){
+                    logger.debug(exc, exc);
+                    continue;
                 } catch(Exception exc){
                     // Catch-all so we don't blow up the program when a plugin
                     // fails.
