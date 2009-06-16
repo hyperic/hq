@@ -434,27 +434,9 @@ public final class ConditionBean {
                 }
 
                 try {
-                	// First check for percentage character
-                	String stringValue = getAbsoluteValue();
-                	
-                	if (!stringValue.endsWith("%")) {
-                		// Doesn't have percentage character
-                		// so let's add one, but before we do
-                		// let's check the numeric value
-                		// if it's between 0 and 1 they are likely
-                		// representing the percentage as a decimal
-                		// and we'll leave it alone otherwise, we add 
-                		// the % char and try again
-                		double numericValue = getThresholdValue();
-                	 
-                		if (numericValue >= 1) {
-                			stringValue += "%";
-                		}
-                	}
-                	
                 	acv.setThreshold(
                 		BizappUtils.parseMeasurementValue(
-                			stringValue, 
+                			getAbsoluteValue(), 
                             unit
                         )
                     );
