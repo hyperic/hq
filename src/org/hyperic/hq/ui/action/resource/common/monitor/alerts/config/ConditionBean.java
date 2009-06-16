@@ -40,6 +40,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionValue;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -362,9 +363,13 @@ public final class ConditionBean {
                         unit = m.getTemplate().getUnits();
                     }
                     
-                    FormattedNumber absoluteFmt = UnitsConvert.convert
-                        ( acv.getThreshold(), unit );
-                    absoluteValue = absoluteFmt.toString();
+                    if (unit.equals(MeasurementConstants.UNITS_NONE)) {
+                    	absoluteValue = String.valueOf(acv.getThreshold());
+                    } else {
+                    	FormattedNumber absoluteFmt = UnitsConvert.convert
+                        	( acv.getThreshold(), unit );
+                    	absoluteValue = absoluteFmt.toString();
+                    }
                 } else if (acv.getType() == EventConstants.TYPE_BASELINE) {
                     thresholdType = TYPE_PERC;
                     baselineOption = acv.getOption();

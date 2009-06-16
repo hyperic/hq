@@ -209,9 +209,15 @@ public class AlertDefUtil {
                     value /= 100.0;
                 }
                 
-                FormattedNumber absoluteFmt =
-                    UnitsConvert.convert(value, format);
-                textValue.append(absoluteFmt.toString());
+                if (format.equals(MeasurementConstants.UNITS_NONE)) {
+                	textValue.append(String.valueOf(value));
+                } else {
+	                FormattedNumber absoluteFmt = UnitsConvert.convert(value, format);
+	                
+	                textValue.append(absoluteFmt.toString());
+                }
+                
+                
                 
                 if (acv.getType() == EventConstants.TYPE_BASELINE) {
                     textValue.append(" of ");
