@@ -55,7 +55,7 @@ public class MySqlStatsControlPlugin extends JDBCControlPlugin {
             setResult(RESULT_SUCCESS);
             // Get result from the query
             final Map columns = getColumnMap(rs);
-            final StringBuilder result = new StringBuilder();
+            final StringBuffer result = new StringBuffer();
             if (rs != null && rs.next()) {
                 for (Iterator it=columns.entrySet().iterator(); it.hasNext(); ) {
                     final Map.Entry entry = (Map.Entry)it.next();

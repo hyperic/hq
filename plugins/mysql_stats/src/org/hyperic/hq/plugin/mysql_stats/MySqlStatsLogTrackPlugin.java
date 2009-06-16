@@ -50,7 +50,7 @@ public class MySqlStatsLogTrackPlugin extends LogFileTailPlugin {
                           HASH_REGEX = Pattern.compile("^#");
     private static final String SLOW_LOG_FILE = "slow_query.file";
     private long _time = -1l;
-    private final StringBuilder _lineBuf = new StringBuilder();
+    private final StringBuffer _lineBuf = new StringBuffer();
     private static final int MAX_LENGTH = 2000;
 
     public String[] getLogLevelAliases() {
