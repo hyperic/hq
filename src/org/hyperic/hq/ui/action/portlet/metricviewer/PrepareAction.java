@@ -49,6 +49,7 @@ import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -76,6 +77,10 @@ public class PrepareAction extends TilesAction {
         ConfigResponse dashPrefs = dashConfig.getConfig();
         PropertiesForm pForm = (PropertiesForm) form;
         PageList resources = new PageList();
+
+        // this quarantees that the session dosen't contain any resources it
+        // shouldnt
+        SessionUtils.removeList(session, Constants.PENDING_RESOURCES_SES_ATTR);
 
         String token = pForm.getToken();
 
