@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -30,6 +30,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,6 +42,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
@@ -48,11 +54,15 @@ import org.hibernate.Transaction;
 import org.hyperic.hibernate.HibernateInterceptorChain;
 import org.hyperic.hibernate.HypericInterceptor;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.hyperic.hq.transport.ServerTransport;
+import org.hyperic.tools.ant.dbupgrade.DBUpgrader;
 import org.hyperic.txsnatch.TxSnatch;
 import org.hyperic.util.callback.CallbackDispatcher;
+import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.thread.ThreadWatchdog;
 import org.jboss.invocation.Invocation;
 
@@ -85,6 +95,7 @@ public class HQApp {
 
     private Map _methInvokeStats      = new HashMap();
     private AtomicBoolean _collectMethStats = new AtomicBoolean();
+    private static AtomicBoolean _isShutdown = new AtomicBoolean(false);
     
     private StartupFinishedCallback _startupFinished;
     
@@ -611,12 +622,18 @@ public class HQApp {
      * Execute the registered startup classes.
      */
     public void runStartupClasses() {
+        if (_isShutdown.get()) {
+            throw new SystemException("HQ is shutdown");
+        }
         List classNames;
-        
+
         synchronized (_startupClasses) {
             classNames = new ArrayList(_startupClasses);
         }
-        
+
+        // HHQ-2743, exit if db schema version is in a bad state
+        checkDBSchemaState();
+
         for (Iterator i=classNames.iterator(); i.hasNext(); ) {
             String name = (String)i.next();
             
@@ -642,6 +659,40 @@ public class HQApp {
         }
     }
     
+    private void checkDBSchemaState() {
+        Connection conn = null;
+        Statement stmt  = null;
+        ResultSet rs    = null;
+        try {
+            conn = DBUtil.getConnByContext(
+                new InitialContext(), HQConstants.DATASOURCE); 
+            stmt = conn.createStatement();
+            final String sql = "select propvalue from EAM_CONFIG_PROPS " +
+                "WHERE propkey = '" + HQConstants.SchemaVersion + "'";
+            rs = stmt.executeQuery(sql);
+            if (rs.next()) {
+                final String currSchema = rs.getString("propvalue");
+                if (currSchema.contains(DBUpgrader.SCHEMA_MOD_IN_PROGRESS)) {
+                    _log.fatal("HQ DB schema is in a bad state: '" + currSchema +
+                        "'.  This is most likely due to a failed upgrade.  " +
+                        "Please either restore from backups and start your " +
+                        "previous version of HQ or contact HQ support.  " +
+                        "HQ cannot start while the current DB Schema version " +
+                        "is in a this state");
+                    _isShutdown.set(true);
+                    System.exit(1);
+                    throw new SystemException("HQ is shutdown");
+                }
+            }
+        } catch (SQLException e) {
+            _log.error(e, e);
+        } catch (NamingException e) {
+            _log.error(e, e);
+        } finally {
+            DBUtil.closeJDBCObjects(HQApp.class.getName(), conn, stmt, rs);
+        }
+    }
+
     private void scheduleCommitCallback() {
         Transaction t = 
             Util.getSessionFactory().getCurrentSession().getTransaction();
