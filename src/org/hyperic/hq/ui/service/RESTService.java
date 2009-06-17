@@ -477,17 +477,21 @@ public class RESTService extends BaseService {
 	                                mtid.put(Integer.valueOf(matcher.group(1)));
 	                            }                            
 	                            
-	                            // Extract the resource ID
+	                            // Extract the resource ID & name
 	                            Integer resId = 0;
+	                            String resName = chart.get(0);
+	                            
 	                            matcher = AEID_PATTERN.matcher(chart.get(1));
+	                            
 	                            if (matcher.matches()) {
 	                                AppdefEntityID aeid =
 	                                    new AppdefEntityID(matcher.group(1) + ':' +
 	                                                       matcher.group(2));
 	                                try {
-	                                    Resource resource =
-	                                        resMan.findResource(aeid);
+	                                    Resource resource =	resMan.findResource(aeid);
+	                                    
 	                                    resId = resource.getId();
+	                                    resName = resource.getName();
 	                                } catch (Exception e) {
 	                                    // Resource removed
 	                                    continue;
@@ -501,7 +505,7 @@ public class RESTService extends BaseService {
 	                                ctype = matcher.group(1) + ":" + matcher.group(2);
 	                            }
 	                            
-	                            arr.put(new JSONObject().put("name", chart.get(0))
+	                            arr.put(new JSONObject().put("name", resName)
 	                                                    .put("rid", resId)
 	                                                    .put("mtid", mtid)
 	                                                    .put("ctype", ctype)
