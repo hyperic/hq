@@ -4315,7 +4315,7 @@ Date.prototype.getTimezoneName = function(){
 
 hyperic.MetricsUpdater = function(eid,ctype,messages) {
     that = this;
-    that.attributes = ["min", "average", "max", "last", "avail"];
+    that.attributes = ["min", "average", "max", "last", "avail", "alertCount", "oobCount"];
     that.eid = eid || false;
     that.ctype = ctype || false;
     that.lastUpdate = 0;
@@ -4343,7 +4343,6 @@ hyperic.MetricsUpdater = function(eid,ctype,messages) {
                 handleAs: "json",
                 timeout: 5000,
                 load: function(data, ioArgs) {
-                    console.log(data);
                     that.lastUpdate = now;
                     that.refreshTimeout = setTimeout( that.update, parseInt(that.refreshInterval,10)*1000 );
                     for (var i = 0; i < data.objects.length; i++) {
@@ -4371,8 +4370,6 @@ hyperic.MetricsUpdater = function(eid,ctype,messages) {
     that.substitute = function( attribute, metricValues) {
         var metric = metricValues.mid;
         var lastSpan = dojo11.byId(attribute + metric);
-        console.log(lastSpan);
-        console.log(attribute + metric);
         if (lastSpan !== null) {
             var html;
             if (attribute == "avail") {
