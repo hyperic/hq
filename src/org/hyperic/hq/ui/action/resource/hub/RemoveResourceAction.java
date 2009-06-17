@@ -161,8 +161,6 @@ public class RemoveResourceAction extends BaseAction {
                 }
             }
             
-            removeResourcesFromDashboard(request, deleted);
-            
             if (vetoed > 0) {
                 RequestUtils
                     .setError(request,

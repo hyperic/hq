@@ -446,6 +446,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
         
         for (int i = 0; i < ids.length; i++) {
             final Resource r = rMan.findResource(ids[i]);
+            if (r == null || r.isInAsyncDeleteState()) {
+                continue;
+            }
             if (midMap.containsKey(r.getId())) {
                 Integer mid = ((Measurement)midMap.get(r.getId())).getId();
                 MetricValue mval = null;

@@ -1333,6 +1333,11 @@ public class AppdefBossEJBImpl
                 throw new ApplicationException(se);
             }
         }
+        if (res == null) {
+            log.warn("AppdefEntityId=" + aeid +
+                " is not associated with a Resource");
+            return new AppdefEntityID[0];
+        }
         AppdefEntityID[] removed = resMan.removeResourcePerms(
             subject, res, false);
         try {
