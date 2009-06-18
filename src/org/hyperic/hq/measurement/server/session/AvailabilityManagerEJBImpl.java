@@ -907,6 +907,12 @@ public class AvailabilityManagerEJBImpl
             removeAvail(avail);
         } else if (newStartime == avail.getEndtime()) {
             AvailabilityDataRLE after = findAvailAfter(pt);
+            if (after == null) {
+                throw new BadAvailStateException(
+                    "Availability measurement_id=" + pt.getMetricId() +
+                    " does not have a availability point after timestamp " +
+                    pt.getTimestamp());
+            }
             if (after.getAvailVal() == pt.getValue()) {
                 // resolve by removing the before obj, if it exists,
                 // and sliding back the start time of after obj
@@ -956,17 +962,14 @@ public class AvailabilityManagerEJBImpl
     }
     
     private AvailabilityDataRLE findAvailAfter(DataPoint state) {
-        Integer mId = state.getMetricId();
-        TreeSet rles = (TreeSet)_currAvails.get(mId);
-        long start = state.getTimestamp();
-        AvailabilityDataRLE tmp = new AvailabilityDataRLE();
+        final Integer mId = state.getMetricId();
+        final TreeSet rles = (TreeSet)_currAvails.get(mId);
+        final long start = state.getTimestamp();
+        final AvailabilityDataRLE tmp = new AvailabilityDataRLE();
         // tailSet is inclusive so we need to add 1 to start
         tmp.setStartime(start+1);
-        SortedSet set = rles.tailSet(tmp);
+        final SortedSet set = rles.tailSet(tmp);
         if (set.size() == 0) {
-            _log.error("Availability measurement_id=" + state.getMetricId() +
-                " does not have a availability point after timestamp " +
-                state.getTimestamp());
             return null;
         }
         return (AvailabilityDataRLE)set.first();
