@@ -97,7 +97,7 @@ public class VimVmDetector
         //PoolInfo
         cprops.setValue("pool", (String)pool.getPropertyByPath("name"));                        
 
-        String state = runtime.getPowerState().getValue();
+        String state = runtime.getPowerState().toString();
         if (state.equals("poweredOn")) {
             server.setMeasurementConfig();
             server.setControlConfig();

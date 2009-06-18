@@ -113,7 +113,7 @@ public class VimHostEventPlugin
         }
         Event[] events;
         try {
-            events = _history.getLastPage();
+            events = _history.getLatestPage();
         } catch (Exception e) {
             throw new PluginException("getEvents: " + e, e);
         }

@@ -25,13 +25,12 @@
 
 package org.hyperic.hq.plugin.vim;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Properties;
-
-import javax.xml.rpc.ServiceException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,7 +59,7 @@ public class VimUtil extends ServiceInstance {
     private String _url;
 
     public VimUtil(URL url, String username, String password, boolean ignoreCert)
-        throws ServiceException, RemoteException {
+        throws RemoteException, MalformedURLException {
         super(url, username, password, ignoreCert);
         _url = url.toString();
     }

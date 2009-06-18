@@ -115,7 +115,7 @@ public class VimVmControlPlugin extends ControlPlugin {
                 return;
             }
             else if (action.equals("guestHeartbeatStatus")) {
-                setMessage(vm.getGuestHeartbeatStatus().getValue());
+                setMessage(vm.getGuestHeartbeatStatus().toString());
                 setResult(ControlPlugin.RESULT_SUCCESS);
                 return;
             }

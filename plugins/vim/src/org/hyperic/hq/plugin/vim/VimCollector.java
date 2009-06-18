@@ -65,7 +65,7 @@ public abstract class VimCollector extends Collector {
     protected String getCounterKey(PerfCounterInfo info) {
         String group = info.getGroupInfo().getKey();
         String name = info.getNameInfo().getKey();
-        String rollup = info.getRollupType().getValue();
+        String rollup = info.getRollupType().toString();
         return group + "." + name + "." + rollup;
     }
 

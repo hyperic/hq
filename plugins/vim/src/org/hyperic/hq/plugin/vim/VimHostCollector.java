@@ -79,7 +79,7 @@ public class VimHostCollector extends VimCollector {
     }
 
     protected void printXml(PerfCounterInfo info, String key) {
-        String rollup = info.getRollupType().getValue();
+        String rollup = info.getRollupType().toString();
         String name = info.getNameInfo().getLabel();
         String units = info.getUnitInfo().getLabel();
 
@@ -171,10 +171,10 @@ public class VimHostCollector extends VimCollector {
             if (info.getUnitInfo().getLabel().equals("Percent")) {
                 val /= 100;
             }
-            String type = info.getStatsType().getValue();
+            String type = info.getStatsType().toString();
             if (type.equals("absolute") ||
                 (type.equals("rate") &&
-                 info.getRollupType().getValue().equals("average")))
+                 info.getRollupType().toString().equals("average")))
             {
                 setValue(key, val);
                 if (printMetric) printXml(info, key);
