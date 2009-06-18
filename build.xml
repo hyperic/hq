@@ -228,6 +228,7 @@
           <dirset dir="plugins">
             <include name="*/src"/>
             <exclude name="xen/src"/>
+            <exclude name="vim/src"/>
           </dirset>
         </src>
         <exclude name="org/hyperic/hq/ui/**/*.java" />
@@ -572,6 +573,7 @@
       <src>
         <path location="${hq.home}/src" />
         <path location="${hq.home}/plugins/xen/src" />
+        <path location="${hq.home}/plugins/vim/src" />
         <!-- Test sources --> 
         <path location="${hq.home}/unittest/src"/>
       </src>
@@ -580,6 +582,7 @@
       <!-- Xen api requires 1.5 -->
       <include name="org/hyperic/hq/plugin/xen/**"/>
       <include name="com/xensource/**"/>
+      <include name="org/hyperic/hq/plugin/vim/**"/>
     </hq-javac>
 
   </target>
@@ -1045,6 +1048,8 @@
 
     <hqplugin name="informix"/>
 	
+    <hqplugin name="vim"/>
+
     <hqplugin name="vmware"/>
 
     <hqplugin name="xen">
