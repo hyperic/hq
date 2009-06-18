@@ -89,7 +89,10 @@ public class VimConnection {
                 }
             }
             else {
-                requiresReconnect = !conn.vim.isSessionValid();
+                if (conn.vim != null) {
+                    requiresReconnect = !conn.vim.isSessionValid();
+                }
+                // Else, some previous error must have happened -- expect it to be already logged.
             }
             if (requiresReconnect) {
                 VimUtil.dispose(conn.vim);
