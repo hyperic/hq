@@ -24,7 +24,7 @@
     <echo message="-Dhq.unittest.hq.home=${basedir}"/>
     <echo message="-Dhq.unittest.working.dir=${hq.home}/unittest/data"/>
 			
-    <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltonerror="no">
+    <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltonerror="yes" haltonfailure="yes">
         <jvmarg value="-Xmx1024m"/>
         <jvmarg value="-Xms1024m"/>
         <jvmarg value="-XX:MaxPermSize=300m"/>		

@@ -40,6 +40,7 @@ import org.hyperic.hq.events.ext.TriggerFireStrategy;
 import org.hyperic.hq.events.server.session.MockEventTrackerEJBImpl;
 import org.hyperic.hq.events.server.session.MockEventTrackerLocalHome;
 import org.hyperic.hq.events.shared.EventTrackerLocalHome;
+import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.product.MetricValue;
@@ -62,12 +63,6 @@ public class DurationTrigger_test extends TestCase {
     private static final long SEVEN_MINUTES =7*60*1000;
     private static final long EIGHT_MINUTES =8*60*1000;
     
-    // We have to make this a static variable so it survives 
-    // across the unit tests. This necessary b/c we need to 
-    // reset the event tracker on the same local home between 
-    // test runs since the local home is cached.
-    private static MockEventTrackerLocalHome _localHome;
-    
     private MockEventTrackerEJBImpl _eventTracker;
     
     private long _currentTime;
@@ -83,27 +78,24 @@ public class DurationTrigger_test extends TestCase {
     }
     
     public void setUp() throws Exception {
-        super.setUp();
+    	 super.setUp();
+         
+         _eventTracker = new MockEventTrackerEJBImpl();
+         _eventTracker.setFailOnVerify();
+         
+         // set the initial context factory
+         MockContextFactory.setAsInitial();
+         
+         // now register this EJB in the JNDI
+         InitialContext context = new InitialContext();
+         
+         //Below is only effective if EventTrackerUtil.getLocalHome() has never been called - else JNDI lookup won't occur again
+         context.rebind(EventTrackerLocalHome.JNDI_NAME, new MockEventTrackerLocalHome(_eventTracker));
         
-        _eventTracker = new MockEventTrackerEJBImpl();
-        
-        // set the initial context factory
-        MockContextFactory.setAsInitial();
-        
-        // now register this EJB in the JNDI
-        InitialContext context = new InitialContext();
-        
-        // the local home is cached by the EventTrackerUtil so need 
-        // to reset the event tracker EJB on the same local home
-        if (_localHome == null) {
-            _localHome = new MockEventTrackerLocalHome(_eventTracker);          
-        } else {
-            _localHome.setEventTracker(_eventTracker);
-        }
-        
-        context.rebind(EventTrackerLocalHome.JNDI_NAME, _localHome);
-                
-        _currentTime = System.currentTimeMillis();
+         //Reset the existing MockLocalHome with a new Mock EJB
+         ((MockEventTrackerLocalHome)EventTrackerUtil.getLocalHome()).setEventTracker(_eventTracker);
+                 
+         _currentTime = System.currentTimeMillis();
     }
     
     public void tearDown() throws Exception {

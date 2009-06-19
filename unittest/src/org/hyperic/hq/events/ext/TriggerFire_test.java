@@ -1,49 +1,23 @@
 package org.hyperic.hq.events.ext;
-
-import javax.naming.InitialContext;
-
 import junit.framework.TestCase;
-
-import org.hyperic.hq.escalation.server.session.EscalationAlertType;
-import org.hyperic.hq.escalation.server.session.MockEscalation;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.InvalidTriggerDataException;
-import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.MockAlertDefinition;
 import org.hyperic.hq.events.server.session.MockAlertDefinitionManagerEJBImpl;
-import org.hyperic.hq.events.server.session.MockAlertDefinitionManagerLocalHome;
-import org.hyperic.hq.events.shared.EventTrackerLocalHome;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.util.config.ConfigSchema;
-import org.mockejb.jndi.MockContextFactory;
+
 
 public class TriggerFire_test extends TestCase {
 
     private MockAlertDefinitionManagerEJBImpl adMan;
-	private MockAlertDefinitionManagerLocalHome localHome;
+	
 
 	public void setUp() throws Exception {
         super.setUp();
-        
         adMan = new MockAlertDefinitionManagerEJBImpl();
-        
-        // set the initial context factory
-        MockContextFactory.setAsInitial();
-        
-        // now register this EJB in the JNDI
-        InitialContext context = new InitialContext();
-        
-        // the local home is cached by the EventTrackerUtil so need 
-        // to reset the event tracker EJB on the same local home
-        if (localHome == null) {
-        	localHome = new MockAlertDefinitionManagerLocalHome(adMan);          
-        } else {
-        	localHome.setAlertDefinitionManager(adMan);
-        }
-        
-        context.rebind(EventTrackerLocalHome.JNDI_NAME, localHome);
     }
 
 	public void testShouldFire() throws Exception {
