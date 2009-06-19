@@ -537,8 +537,9 @@ public class AvailabilityManagerEJBImpl
     public Map getLastAvail(Collection resources, Map measCache) {
         final MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
         final Set midsToGet = new HashSet(resources.size());
+        final List resToGet = new ArrayList(resources.size());
         final ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
-        for (Iterator it=resources.iterator(); it.hasNext(); ) {
+        for (final Iterator it=resources.iterator(); it.hasNext(); ) {
             final Object o = it.next();
             Resource resource = null;
             if (o instanceof AppdefEntityValue) {
@@ -562,26 +563,26 @@ public class AvailabilityManagerEJBImpl
                 measIds = (List)measCache.get(resource.getId());
             }
             if (measIds == null) {
-                measIds = (List)mMan.getAvailMeasurements(
-                    Collections.singletonList(resource)).get(resource.getId());
+                resToGet.add(resource);
             }
             // may still be null if the Resource has not been configured
             if (measIds == null) {
                 continue;
             }
-            for (Iterator iter=measIds.iterator(); iter.hasNext(); ) {
-                final Measurement m = (Measurement)iter.next();
-                midsToGet.add(m.getId());
-            }
+        }
+        final Collection measIds = mMan.getAvailMeasurements(resToGet).values();
+        for (final Iterator iter=measIds.iterator(); iter.hasNext(); ) {
+            final Measurement m = (Measurement)iter.next();
+            midsToGet.add(m.getId());
         }
         return getLastAvail((Integer[])midsToGet.toArray(new Integer[0]));
     }
-    
+
     /**
      * @ejb:interface-method
      */
     public MetricValue getLastAvail(Measurement m) {
-        Map map = getLastAvail(new Integer[] { m.getId() }, MAX_AVAIL_TIMESTAMP - 1);
+        Map map = getLastAvail(new Integer[] { m.getId() });
         MetricValue mv = (MetricValue)map.get(m.getId());
         if (mv == null) {
             return new MetricValue(AVAIL_UNKNOWN, System.currentTimeMillis());
@@ -591,58 +592,38 @@ public class AvailabilityManagerEJBImpl
     }
 
     /**
-     * @return Map<Integer, MetricValue> Integer is the measurementId
-     * @ejb:interface-method
-     */
-    public Map getLastAvail(Integer[] mids) {
-        return getLastAvail(mids, -1);
-    }
-
-    /**
      * Only unique measurement ids should be passed in. Duplicate measurement
      * ids will be filtered out from the returned Map if present.
      * 
-     * @return Map<Integer, MetricValue> Integer is the measurementId
+     * @return {@link Map} of {@link Integer} to {@link MetricValue}
+     * Integer is the measurementId
      * @ejb:interface-method
      */
-    public Map getLastAvail(Integer[] mids, long after) {
-        Map rtn = new HashMap();
+    public Map getLastAvail(Integer[] mids) {
         if (mids.length == 0) {
-            return rtn;
+            return Collections.EMPTY_MAP;
         }
-        List list;
         // Don't modify callers array
-        List midList = new ArrayList(Arrays.asList(mids));
-        if (after != -1) {
-            list = _dao.findLastAvail(midList, after);
-        } else {
-            list = _dao.findLastAvail(midList);
-        }
-        long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), 60000);
-        for (Iterator i=list.iterator(); i.hasNext(); ) {
-            AvailabilityDataRLE avail = (AvailabilityDataRLE)i.next();
-            Integer mid = avail.getMeasurement().getId();
-            long endtime;
-            if (avail.getEndtime() == MAX_AVAIL_TIMESTAMP) {
-                endtime = now;
-            } else {
-                endtime = avail.getEndtime();
-            }
-            MetricValue tmp;
-            if (null == (tmp = (MetricValue)rtn.get(mid)) ||
-                    endtime > tmp.getTimestamp()) {
-                MetricValue mVal = new MetricValue(avail.getAvailVal(), endtime);
-                rtn.put(mid, mVal);
-                // HQ-1600: remove all in case there are duplicates
-                midList.removeAll(Collections.singleton(mid));
-            }
+        final List midList = Collections.unmodifiableList(Arrays.asList(mids));
+        final Map rtn = new HashMap(midList.size());
+        final List list = _dao.findLastAvail(midList);
+        for (final Iterator i=list.iterator(); i.hasNext(); ) {
+            final AvailabilityDataRLE avail = (AvailabilityDataRLE)i.next();
+            final Integer mid = avail.getMeasurement().getId();
+            final MetricValue mVal =
+                new MetricValue(avail.getAvailVal(), avail.getEndtime());
+            rtn.put(mid, mVal);
         }
         // fill in missing measurements
+        final long now = TimingVoodoo.roundDownTime(
+            System.currentTimeMillis(), MeasurementConstants.MINUTE);
         if (midList.size() > 0) {
-            for (Iterator i=midList.iterator(); i.hasNext(); ) {
-                Integer mid = (Integer)i.next();
-                MetricValue mVal = new MetricValue(AVAIL_UNKNOWN, now);
-                rtn.put(mid, mVal);
+            for (final Iterator i=midList.iterator(); i.hasNext(); ) {
+                final Integer mid = (Integer)i.next();
+                if (!rtn.containsKey(mid)) {
+                    final MetricValue mVal = new MetricValue(AVAIL_UNKNOWN, now);
+                    rtn.put(mid, mVal);
+                }
             }
         }
         return rtn;

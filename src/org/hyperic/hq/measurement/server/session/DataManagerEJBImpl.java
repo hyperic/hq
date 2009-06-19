@@ -1600,7 +1600,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         Map data = getLastDataPts(sepMids, timestamp);
 
         if (availIds.size() > 0)
-            data.putAll(getAvailMan().getLastAvail(avIds, timestamp));
+            data.putAll(getAvailMan().getLastAvail(avIds));
         
         return data;
     }
