@@ -535,7 +535,7 @@ public class HQApp {
                         try {
                             app.warnMethodTooLong(total, warnTime, v, res,
                                                   failed, methName,
-                                                  className);
+                                                  c.getName());
                         } catch(Throwable t) {
                             _log.warn("Error while warning.  Ugly", t);
                         }
