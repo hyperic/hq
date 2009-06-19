@@ -571,9 +571,12 @@ public class AvailabilityManagerEJBImpl
             }
         }
         final Collection measIds = mMan.getAvailMeasurements(resToGet).values();
-        for (final Iterator iter=measIds.iterator(); iter.hasNext(); ) {
-            final Measurement m = (Measurement)iter.next();
-            midsToGet.add(m.getId());
+        for (final Iterator it=measIds.iterator(); it.hasNext(); ) {
+            final List mids = (List)it.next();
+            for (final Iterator iter=mids.iterator(); iter.hasNext(); ) {
+                final Measurement m = (Measurement)iter.next();
+                midsToGet.add(m.getId());
+            }
         }
         return getLastAvail((Integer[])midsToGet.toArray(new Integer[0]));
     }
