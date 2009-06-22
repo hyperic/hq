@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.action.resource.common.monitor.alerts;
 
 import java.rmi.RemoteException;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 
@@ -42,6 +43,10 @@ import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertCondition;
+import org.hyperic.hq.events.server.session.AlertConditionLog;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
@@ -90,16 +95,16 @@ public class ListAlertAction extends TilesAction {
     {
         int sessionId = RequestUtils.getSessionId(request).intValue();
         AppdefEntityID appEntId = RequestUtils.getEntityId(request);
-
         ServletContext ctx = getServlet().getServletContext();
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
         MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
-
         GregorianCalendar cal = new GregorianCalendar();
+        
         try {
             Integer year = RequestUtils.getIntParameter(request, "year");
             Integer month = RequestUtils.getIntParameter(request, "month");
             Integer day = RequestUtils.getIntParameter(request, "day");
+            
             cal.set(Calendar.YEAR, year.intValue());
             cal.set(Calendar.MONTH, month.intValue());
             cal.set(Calendar.DAY_OF_MONTH, day.intValue());
@@ -121,10 +126,14 @@ public class ListAlertAction extends TilesAction {
         }
         
         PageList alerts;
+        
         try {
             long begin = cal.getTimeInMillis();
-            alerts = eb.findAlerts(sessionId, appEntId, begin,
-                                   begin + Constants.DAYS, pc);
+            alerts = eb.findAlerts(sessionId, 
+            		               appEntId, 
+            		               begin, 
+            		               begin + Constants.DAYS, 
+            		               pc);
         } catch(PermissionException e) {
             // user is not allowed to see/manage alerts. 
             // return empty list for now
@@ -132,40 +141,61 @@ public class ListAlertAction extends TilesAction {
         }
 
         PageList uiBeans = new PageList();
-        for (Iterator itr = alerts.iterator();itr.hasNext();) {
-            AlertValue av = (AlertValue)itr.next();
-            AlertDefinitionValue adv = eb.getAlertDefinition
-                ( sessionId, av.getAlertDefId() );
-            AlertBean bean = new AlertBean(av.getId(), av.getCtime(),
-                                           adv.getId(), adv.getName(),
-                                           adv.getPriority(), appEntId.getId(),
+        
+        for (Iterator<Alert> itr = alerts.iterator();itr.hasNext();) {
+            Alert alert = itr.next();
+            AlertDefinition alertDefinition = alert.getAlertDefinition();
+            AlertBean bean = new AlertBean(alert.getId(), 
+            							   alert.getCtime(),
+            							   alertDefinition.getId(), 
+            							   alertDefinition.getName(),
+            							   alertDefinition.getPriority(), 
+            							   appEntId.getId(),
                                            new Integer(appEntId.getType()),
-                                           av.isFixed(), av.isAcknowledgeable());
-
-            if (adv.getEscalationId() != null) {
-                Escalation esc = eb.findEscalationById(sessionId, adv.getEscalationId());
-                if (esc != null && esc.isPauseAllowed()) {
-                    bean.setMaxPauseTime(esc.getMaxPauseTime());
-                }
+                                           alert.isFixed(), 
+                                           alert.isAckable());
+            Escalation escalation = alertDefinition.getEscalation();
+            
+            if (escalation != null && escalation.isPauseAllowed()) {
+            	bean.setMaxPauseTime(escalation.getMaxPauseTime());
             }
             
-            AlertConditionLogValue[] condLogs = av.getConditionLogs();
-            if (condLogs.length > 1) {
+            Collection<AlertConditionLog> conditionLogs = alert.getConditionLog();
+            
+            if (conditionLogs.size() > 1) {
                 _setupMultiCondition(bean, request);
-            } else if (condLogs.length == 1) {
-                AlertConditionValue cond = condLogs[0].getCondition();
-                _setupCondition(bean, cond, condLogs[0].getValue(), request,
-                                mb, sessionId);
+            } else if (conditionLogs.size() == 1) {
+            	AlertConditionLog conditionLog = 
+            		(AlertConditionLog) conditionLogs.iterator().next();
+                AlertConditionValue condition = 
+                	conditionLog.getCondition().getAlertConditionValue();
+                
+                _setupCondition(bean, 
+                		        condition, 
+                		        conditionLog.getValue(), 
+                		        request,
+                                mb, 
+                                sessionId);
             } else {
                 // fall back to alert definition conditions: PR 6992
-                AlertConditionValue[] conds = adv.getConditions();
-                if (conds.length > 1) {
+                Collection<AlertCondition> conditions = 
+                	alertDefinition.getConditions();
+                
+                if (conditions.size() > 1) {
                     _setupMultiCondition(bean, request);
-                } else if (conds.length == 1) {
-                    _setupCondition(bean, conds[0], null, request, mb, sessionId);
+                } else if (conditions.size() == 1) {
+                	AlertCondition condition = conditions.iterator().next();
+                	
+                    _setupCondition(bean, 
+                    		        condition.getAlertConditionValue(),
+                    		        null, 
+                    		        request, 
+                    		        mb, 
+                    		        sessionId);
                 } else {
                     // *serious* trouble
-                    log.error("No condition logs for alert: " + av.getId());
+                    log.error("No condition logs for alert: " + alert.getId());
+                    
                     bean.setMultiCondition(true);
                     bean.setConditionName(Constants.UNKNOWN);
                     bean.setValue(Constants.UNKNOWN);
@@ -174,6 +204,7 @@ public class ListAlertAction extends TilesAction {
 
             uiBeans.add(bean);
         }
+        
         context.putAttribute( Constants.RESOURCE_ATTR,
                               RequestUtils.getResource(request) );
         context.putAttribute( Constants.RESOURCE_OWNER_ATTR,
@@ -190,10 +221,10 @@ public class ListAlertAction extends TilesAction {
     private void _setupCondition(AlertBean bean, AlertConditionValue cond,
                                  String value, HttpServletRequest request,
                                  MeasurementBoss mb, int sessionId)
-        throws SessionTimeoutException,
-               SessionNotFoundException,
-               MeasurementNotFoundException,
-               RemoteException
+    throws SessionTimeoutException,
+           SessionNotFoundException,
+           MeasurementNotFoundException,
+           RemoteException
     {
         bean.setConditionName( cond.getName() );
 

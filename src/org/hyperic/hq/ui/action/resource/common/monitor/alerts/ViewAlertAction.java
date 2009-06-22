@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -43,7 +46,11 @@ import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.server.session.Action;
+import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertActionLog;
+import org.hyperic.hq.events.server.session.AlertConditionLog;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
@@ -76,123 +83,152 @@ public class ViewAlertAction extends TilesAction {
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-        throws Exception
+    throws Exception
     {
         // pass-through the alertId
         Integer alertId = RequestUtils.getIntParameter(request, "a");
-        
         ServletContext ctx = getServlet().getServletContext();
         int sessionID = RequestUtils.getSessionId(request).intValue();
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
         MeasurementBoss mb = ContextUtils.getMeasurementBoss(ctx);
-
-        // properties
-        AlertValue av = eb.getAlert(sessionID, alertId);
-        request.setAttribute("alert", av);
-        AlertDefinitionValue adv =
-            eb.getAlertDefinition( sessionID, av.getAlertDefId() );
-        request.setAttribute(Constants.ALERT_DEFINITION_ATTR, adv);
+        Alert alert = eb.getAlert(sessionID, alertId);
         
-        if (adv.getEscalationId() != null) {
-            Escalation escalation =
-                eb.findEscalationById(sessionID, adv.getEscalationId());
+        request.setAttribute("alert", alert);
+        
+        AlertDefinition alertDefinition = alert.getAlertDefinition();
+        
+        assert(alertDefinition != null);
+        
+        request.setAttribute(Constants.ALERT_DEFINITION_ATTR, alertDefinition.getAlertDefinitionValue());
+        
+        Escalation escalation = alertDefinition.getEscalation();
+        
+        if (escalation != null) {
             request.setAttribute("escalation", escalation);
             
             JSONObject escJson = Escalation.getJSON(escalation);
+            
             request.setAttribute("escalationJSON", escJson.toString());
         }            
 
         // conditions
-        AlertConditionLogValue[] condLogs = av.getConditionLogs();
-        AlertConditionValue[] conds = new AlertConditionValue[condLogs.length];
-        for (int i = 0; i < condLogs.length; i++) {
-            conds[i] = condLogs[i].getCondition();
+        Collection<AlertConditionLog> conditionLogs = alert.getConditionLog();
+        AlertConditionValue[] conditionValues = new AlertConditionValue[conditionLogs.size()];
+        int index = 0;
+        
+        for (Iterator<AlertConditionLog> i = conditionLogs.iterator(); i.hasNext(); index++) {
+        	AlertConditionLog conditionLog = i.next();
+        	
+        	conditionValues[index] = conditionLog.getCondition().getAlertConditionValue();
         }
 
-        List alertDefConditions = AlertDefUtil.getAlertConditionBeanList(
-                sessionID, request, mb, conds,
-                EventConstants.TYPE_ALERT_DEF_ID.equals(adv.getParentId()));
+        boolean template = false;
+        AlertDefinition parentAlertDefinition = alertDefinition.getParent();
+        
+        if (parentAlertDefinition != null) {
+        	template = EventConstants.TYPE_ALERT_DEF_ID.equals(parentAlertDefinition.getId());
+        }
+        
+        List<AlertConditionBean> conditionBeans = 
+        	AlertDefUtil.getAlertConditionBeanList(sessionID, 
+        			                               request, 
+        			                               mb,
+        			                               conditionValues,
+        			                               template);
 
-        for (int i = 0; i < alertDefConditions.size(); i++) {
-            AlertConditionBean ab =
-                (AlertConditionBean) alertDefConditions.get(i);
-            final String logVal = condLogs[i].getValue();
-            switch ( conds[i].getType() ) {
-            case EventConstants.TYPE_CONTROL:
-                ab.setActualValue
-                    ( RequestUtils.message(request, "alert.current.list.ControlActualValue") );
-                break;
+        index = 0;
+        
+        AlertConditionLog[] conditionLogsArr = conditionLogs.toArray(new AlertConditionLog[conditionLogs.size()]);
+        
+        for (Iterator<AlertConditionBean> i = conditionBeans.iterator(); i.hasNext(); index++) {
+            AlertConditionBean conditionBean = i.next();
+            AlertConditionLogValue conditionLogValue = conditionLogsArr[index].getAlertConditionLogValue();
+            final String logVal = conditionLogValue.getValue();
+            
+            switch ( conditionValues[index].getType() ) {
+            	case EventConstants.TYPE_CONTROL:
+            		conditionBean.setActualValue( RequestUtils.message(request, "alert.current.list.ControlActualValue") );
+            		break;
 
-            case EventConstants.TYPE_THRESHOLD:
-            case EventConstants.TYPE_BASELINE:
-            case EventConstants.TYPE_CHANGE:
-                String last = logVal.substring(logVal.length() - 1);
-                try {
-                    Integer.parseInt(last);
-                    // Let's actually format the value
-                    double value =
-                        NumberUtil.stringAsNumber(logVal).doubleValue();
-                    if ( Double.isNaN(value) ) {
-                        ab.setActualValue(Constants.UNKNOWN);
-                    }
-                    else {
-                        // This is legacy code, used to format a comma delimited
-                        // number in the logs.  However, we should be storing
-                        // fully formatted values into logs now.  Remove post
-                        // 4.1
+            	case EventConstants.TYPE_THRESHOLD:
+            	case EventConstants.TYPE_BASELINE:
+            	case EventConstants.TYPE_CHANGE:
+            		String last = logVal.substring(logVal.length() - 1);
+                
+            		try {
+            			Integer.parseInt(last);
+            			
+            			// Let's actually format the value
+            			double value = NumberUtil.stringAsNumber(logVal).doubleValue();
 
-                        // format threshold and value
-                        Integer mid =
-                            new Integer(condLogs[i].getCondition()
-                                                   .getMeasurementId());
-                        Measurement m = mb.getMeasurement(sessionID, mid);
-                        FormatSpecifics precMax = new FormatSpecifics();
-                        precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
+            			if ( Double.isNaN(value) ) {
+            				conditionBean.setActualValue(Constants.UNKNOWN);
+            			} else {
+	                        // This is legacy code, used to format a comma delimited
+	                        // number in the logs.  However, we should be storing
+	                        // fully formatted values into logs now.  Remove post
+	                        // 4.1
+	
+	                        // format threshold and value
+            				Integer mid = new Integer(conditionLogValue.getCondition()
+                                                                       .getMeasurementId());
+            				Measurement m = mb.getMeasurement(sessionID, mid);
+            				FormatSpecifics precMax = new FormatSpecifics();
+                        
+            				precMax.setPrecision(FormatSpecifics.PRECISION_MAX);
     
-                        FormattedNumber val =
-                            UnitsConvert.convert(value,
-                                                 m.getTemplate().getUnits());
-                        ab.setActualValue( val.toString() );
-                    }
-                } catch (NumberFormatException e) {
-                    ab.setActualValue(logVal);
-                }
-                break;
+            				FormattedNumber val = UnitsConvert.convert(value,
+                                                 					   m.getTemplate().getUnits());
+                        
+            				conditionBean.setActualValue( val.toString() );
+            			}
+            		} catch (NumberFormatException e) {
+            			conditionBean.setActualValue(logVal);
+            		}
+                
+            		break;
 
-            case EventConstants.TYPE_CUST_PROP:
-            case EventConstants.TYPE_LOG:
-            case EventConstants.TYPE_CFG_CHG:
-                ab.setActualValue(logVal);
-                break;
+            	case EventConstants.TYPE_CUST_PROP:
+            	case EventConstants.TYPE_LOG:
+            	case EventConstants.TYPE_CFG_CHG:
+            		conditionBean.setActualValue(logVal);
 
-            default:
-                ab.setActualValue(Constants.UNKNOWN);
-                break;
+            		break;
+
+            	default:
+            		conditionBean.setActualValue(Constants.UNKNOWN);
             }
         }
 
-        request.setAttribute("alertDefConditions", alertDefConditions);
+        request.setAttribute("alertDefConditions", conditionBeans);
 
         // if alert is fixed, then there should be a fixed log
-        if (av.isFixed()) {
-            AlertActionLog[] logs = av.getActionLogs();
-            for (int i = logs.length - 1; i >= 0; i--) {
-                if (logs[i].getAction() == null) {
-                    request.setAttribute("fixedNote", logs[i].getDetail());
+        if (alert.isFixed()) {
+            Collection<AlertActionLog> actionLogs = alert.getActionLog();
+            
+            // Reverse the order, the most recent log is first
+            Collections.reverse(conditionBeans);
+            
+            for (Iterator<AlertActionLog> i = actionLogs.iterator(); i.hasNext();) {
+            	AlertActionLog actionLog = i.next();
+            	
+            	if (actionLog.getAction() == null) {
+                    request.setAttribute("fixedNote", actionLog.getDetail());
+                    
                     break;
                 }
             }
-        }
-        else {
+        } else {
             // See if there might be a previous fixed log
-            String fixedNote = eb.getLastFix(sessionID, adv.getId());
+            String fixedNote = eb.getLastFix(sessionID, alertDefinition.getId());
+            
             if (fixedNote != null) {
                 request.setAttribute("fixedNote", fixedNote);
             }
         }
         
         // enablement
-        AlertDefUtil.setEnablementRequestAttributes(request, adv);
+        AlertDefUtil.setEnablementRequestAttributes(request, alertDefinition.getAlertDefinitionValue());
 
         // Get the list of users
         AuthzBoss authzBoss = ContextUtils.getAuthzBoss(ctx);

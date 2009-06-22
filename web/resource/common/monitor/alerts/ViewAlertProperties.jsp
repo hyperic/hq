@@ -44,7 +44,7 @@
 		</td>
 		<td width="30%" class="BlockContent">
 			<c:choose>
-				<c:when test="${not empty Resource}">
+				<c:when test="${not empty Resource and not alertDef.deleted}">
 					<html:link page="/alerts/Config.do?mode=viewDefinition&eid=${Resource.entityId.appdefKey}&ad=${alertDef.id}"
 					           titleKey="alert.config.props.PB.ViewDef">
 						<c:out value="${alertDef.name}" />

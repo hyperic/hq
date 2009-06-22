@@ -1100,8 +1100,8 @@ public class EventsBossEJBImpl
      * @ejb:interface-method
      */
     public AlertDefinitionValue getAlertDefinition(int sessionID, Integer id)
-        throws SessionNotFoundException, SessionTimeoutException, 
-               FinderException, PermissionException 
+    throws SessionNotFoundException, SessionTimeoutException, 
+           FinderException, PermissionException 
     {
         AuthzSubject subject = manager.getSubject(sessionID);
         return getADM().getById(subject, id);
@@ -1112,17 +1112,18 @@ public class EventsBossEJBImpl
      *
      * @ejb:interface-method
      */
-    public AlertValue getAlert(int sessionID, Integer id)
-        throws SessionNotFoundException, SessionTimeoutException, 
-               AlertNotFoundException 
+    public Alert getAlert(int sessionID, Integer id)
+    throws SessionNotFoundException, 
+           SessionTimeoutException, 
+           AlertNotFoundException 
     {
         manager.authenticate(sessionID);
 
-        AlertValue av = getAM().getById(id);
-        if (av == null) {   
-            throw new AlertNotFoundException(id);
-        }       
-        return av;
+        Alert alert = getAM().findAlertById(id);
+        
+        if (alert == null) throw new AlertNotFoundException(id);
+        
+        return alert;
     }
 
     /**

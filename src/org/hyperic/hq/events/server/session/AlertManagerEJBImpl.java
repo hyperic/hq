@@ -87,7 +87,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     private final String VALUE_PROCESSOR =
         PagerProcessor_events.class.getName();
 
-    private Pager          valuePager;
+    private Pager valuePager;
+    private Pager pojoPager;
     
     public AlertManagerEJBImpl() {}
 
@@ -324,7 +325,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                                                         SortAttribute.NAME,
                                                     pc.isAscending());
 
-        return valuePager.seek(alerts, pc);
+        return pojoPager.seek(alerts, pc);
     }
 
     /**
@@ -651,7 +652,11 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     
     public void ejbCreate() throws CreateException {
         try {
+        	// Old and busted, we need to phase out the Value objects
             valuePager = Pager.getPager(VALUE_PROCESSOR);
+            
+            // New hotness, and start using the POJOs instead
+            pojoPager = Pager.getDefaultPager();
         } catch ( Exception e ) {
             throw new CreateException("Could not create value pager:" + e);
         }

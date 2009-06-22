@@ -300,14 +300,15 @@ public class Pager {
              iter.hasNext() && currentPage < pagenum;
              currentPage += (i != 0 && i % pagesize == 0) ? 1:0 ) 
         {
+        	Object ret = null;
+        	
             if (_processor instanceof PagerProcessorExt) {
-                Object ret = ((PagerProcessorExt)_processor)
-                    .processElement(iter.next(), procData);
-                if (ret != null) {
-                    i++;
-                } 
+                ret = ((PagerProcessorExt)_processor).processElement(iter.next(), procData);
             } else {
-                _processor.processElement(iter.next());
+                ret = _processor.processElement(iter.next());
+            }
+            
+            if (ret != null) {
                 i++;
             }
         }

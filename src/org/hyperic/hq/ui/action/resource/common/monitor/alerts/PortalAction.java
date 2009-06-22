@@ -44,6 +44,8 @@ import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.AlertNotFoundException;
+import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
@@ -150,9 +152,9 @@ public class PortalAction extends ResourceController {
         ServletContext ctx = getServlet().getServletContext();
         int sessionID = RequestUtils.getSessionId(request).intValue();
         EventsBoss eb = ContextUtils.getEventsBoss(ctx);
-
         AppdefEntityID aeid = setResource(request);
         Integer alertId = new Integer( request.getParameter("a") );
+
         try {
             Portal portal = Portal.createPortal();
             
@@ -167,15 +169,17 @@ public class PortalAction extends ResourceController {
                 
                 portal.addPortlet(new Portlet(".events.group.alert.view"), 1);
             } else {
-                AlertValue av = eb.getAlert(sessionID, alertId);
-                AlertDefinitionValue adv =
-                    eb.getAlertDefinition( sessionID, av.getAlertDefId() );
-                request.setAttribute(Constants.TITLE_PARAM2_ATTR, adv.getName());
+                Alert alert = eb.getAlert(sessionID, alertId);
+                AlertDefinition alertDefinition = alert.getAlertDefinition();
+
+                assert(alertDefinition != null);
+                
+                request.setAttribute(Constants.TITLE_PARAM2_ATTR, alertDefinition.getName());
 
                 if (aeid == null) {
                     aeid = setResource(request,
-                                       new AppdefEntityID(adv.getAppdefType(),
-                                                          adv.getAppdefId()),
+                                       new AppdefEntityID(alertDefinition.getAppdefType(),
+                                    		   			  alertDefinition.getAppdefId()),
                                        false);
                 }
                 
