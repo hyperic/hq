@@ -100,6 +100,15 @@ public final class AuthenticationFilter extends BaseFilter {
                         return;
                     }
                 }
+            } else {
+                // No auth header, if this is an API call send 401 for clients
+                // that do not support pre-emptive authenticaion. (i.e. Java's
+                // Authenticator)
+                if (servletPath.indexOf("hqapi") > 0) {
+                    response.setHeader("WWW-Authenticate", "BASIC realm=\"HQApi\"");
+                    response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+                    return;
+                }
             }
         }
 
