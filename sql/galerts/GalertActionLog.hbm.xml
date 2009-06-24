@@ -15,16 +15,16 @@
     </property>
 
     <property name="detail">
-      <column name="DETAIL" not-null="true" length="500"/>
+      <column name="DETAIL" not-null="true" length="1024"/>
     </property>
 
     <many-to-one name="galertLog">
       <column name="GALERT_ID" not-null="true" index="GALERT_ACTION_LOG_IDX"/>
     </many-to-one>
 
-	<property name="alertTypeEnum">
-	  <column name="ALERT_TYPE" not-null="true"/>
-	</property>
+    <property name="alertTypeEnum">
+      <column name="ALERT_TYPE" not-null="true"/>
+    </property>
 
     <many-to-one name="action">
       <column name="ACTION_ID" index="GALERT_ACTION_ID_IDX"/>
