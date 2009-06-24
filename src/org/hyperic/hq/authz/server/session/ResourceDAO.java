@@ -206,7 +206,7 @@ public class ResourceDAO
         };
 
         EdgePermCheck wherePermCheck = 
-            getPermissionManager().makePermCheckHql("rez");
+            getPermissionManager().makePermCheckHql("rez", true);
         String hql = "select rez from Resource rez " + wherePermCheck; 
         
         Query q = createQuery(hql);
