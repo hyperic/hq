@@ -1944,6 +1944,20 @@
                 units="sec"
                 alias="Seconds_Behind_Master"/>
 
+    <!-- Slave_IO_Running and Slave_SQL_Running are YES/NO values that map to 1/0 -->
+
+        <metric name="Slave IO Running"
+                category="PERFORMANCE"
+                indicator="false"
+                units="none"
+                alias="Slave_IO_Running"/>
+
+        <metric name="Slave SQL Running"
+                category="PERFORMANCE"
+                indicator="false"
+                units="none"
+                alias="Slave_SQL_Running"/>
+
     <!-- Derived metrics representing slave's lag behind master log position -->
 
         <metric name="Bytes Behind Master"

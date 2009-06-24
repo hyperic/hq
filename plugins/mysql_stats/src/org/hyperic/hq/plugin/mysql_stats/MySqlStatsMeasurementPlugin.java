@@ -68,6 +68,7 @@ public class MySqlStatsMeasurementPlugin
                            SHOW_GLOBAL_STATUS = "show /*!50002 global */ status",
                            // computed for mysql replication
                            BYTES_BEHIND_MASTER     = "Bytes_Behind_Master",
+                           SECONDS_BEHIND_MASTER   = "Seconds_Behind_Master",
                            LOG_FILES_BEHIND_MASTER = "Log_Files_Behind_Master";
     private String _driver;
     private JDBCQueryCache _globalStatus = null,
@@ -108,14 +109,18 @@ public class MySqlStatsMeasurementPlugin
             if (metric.isAvail()) {
                 return Metric.AVAIL_DOWN;
             }
+            _log.debug(e, e);
             throw new MetricNotFoundException(
-                "Service "+objectName+":"+alias+" not found", e);
+                "Service " + objectName + ":" + alias +
+                " not found: " + e.getMessage(), e);
         } catch (Exception e) {
             if (metric.isAvail()) {
                 return Metric.AVAIL_DOWN;
             }
+            _log.debug(e, e);
             throw new MetricNotFoundException(
-                "Service "+objectName+":"+alias+" not found", e);
+                "Service " + objectName + ":" + alias +
+                " not found: " + e.getMessage(), e);
         } finally {
             setErrorState(sqlException);
         }
@@ -254,7 +259,8 @@ public class MySqlStatsMeasurementPlugin
         throws NumberFormatException,
                MetricUnreachableException,
                SQLException,
-               JDBCQueryCacheException {
+               JDBCQueryCacheException,
+               MetricNotFoundException {
         String valColumn = metric.getObjectProperty("value");
         String alias = metric.getAttributeName();
         if (alias.equalsIgnoreCase(BYTES_BEHIND_MASTER)) {
@@ -262,6 +268,19 @@ public class MySqlStatsMeasurementPlugin
             return (tmp >= 0) ? tmp : 0d;
         } else if (alias.equalsIgnoreCase(LOG_FILES_BEHIND_MASTER)) {
             return getLogFilesBehindMaster(metric);
+        } else if (alias.equalsIgnoreCase(SECONDS_BEHIND_MASTER)) {
+            // HHQ-3207 need to special case this since the metric may be null
+            // http://feedblog.org/2007/09/29/where-does-mysql-lie-about-seconds_behind_master/
+            Connection conn = getCachedConnection(metric);
+            Double val = Double.valueOf(
+                _replStatus.getOnlyRow(conn, valColumn).toString());
+            _log.info("value of " + SECONDS_BEHIND_MASTER + "=" + val);
+            // return a large negative number if this occurs
+            if (val == null) {
+                throw new MetricNotFoundException("query for " +
+                    SECONDS_BEHIND_MASTER + " returned null");
+            }
+            return val.doubleValue();
         } else if (metric.isAvail()) {
             // XXX need to figure out how to determine if repl is down from slave
             // For now just call another method that will throw an exception
@@ -270,8 +289,15 @@ public class MySqlStatsMeasurementPlugin
             return Metric.AVAIL_UP;
         } else {
             Connection conn = getCachedConnection(metric);
-            Double val = Double.valueOf(
-                _replStatus.getOnlyRow(conn, valColumn).toString());
+            String s = _replStatus.getOnlyRow(conn, valColumn).toString();
+            Double val = null;
+            if (s.equalsIgnoreCase("yes")) {
+                val = new Double(1);
+            } else if (s.equalsIgnoreCase("no")) {
+                val = new Double(0);
+            } else {
+                val = Double.valueOf(s);
+            }
             return val.doubleValue();
         }
     }

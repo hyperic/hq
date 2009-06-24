@@ -94,6 +94,7 @@ public class MySqlServerDetector
             Map.Entry entry = (Map.Entry)it.next();
             Long pid = (Long)entry.getKey();
             String dir = (String)entry.getValue();
+            _log.debug("pid="+pid+", dir="+dir);
             // no need to create unique ptql if there is only one mysqld process
             // TODO scottmf, need to augment this to automatically find
             // uniqueness in the process args and apply only one or two of them
@@ -265,13 +266,14 @@ public class MySqlServerDetector
         }
     }
 
-    private static Map getServerProcessMap()
+    private Map getServerProcessMap()
     {
         Map servers = new HashMap();
         long[] pids = getPids(PTQL_QUERY);
         for (int i=0; i<pids.length; i++)
         {
             String exe = getProcExe(pids[i]);
+            _log.debug("exe="+exe+" pid="+pids[i]);
             if (exe == null) {
                 continue;
             }
