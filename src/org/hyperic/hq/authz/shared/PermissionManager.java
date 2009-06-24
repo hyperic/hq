@@ -228,19 +228,23 @@ public abstract class PermissionManager extends AuthzSession {
     /**
      * Creates an edge perm check with default names of the replacement
      * variables and parameters.  Used for a SQL query.
+     * @param includeDescendants - include the resource's descendants in the query
      */
-    public EdgePermCheck makePermCheckSql(String resourceVar) {
+    public EdgePermCheck makePermCheckSql(String resourceVar,
+                                          boolean includeDescendants) {
         return makePermCheckSql("subject", resourceVar, "resource",
-                                "distance", "ops");
+                                "distance", "ops", includeDescendants);
     }
 
     /**
      * Creates an edge perm check with default names of the replacement
      * variables and parameters.  Used for a HQL query.
+     * @param includeDescendants - include the resource's descendants in the query
      */
-    public EdgePermCheck makePermCheckHql(String resourceVar) {
+    public EdgePermCheck makePermCheckHql(String resourceVar,
+                                          boolean includeDescendants) {
         return makePermCheckHql("subject", resourceVar, "resource",
-                                "distance", "ops");
+                                "distance", "ops", includeDescendants);
     }
 
     /**
@@ -266,12 +270,14 @@ public abstract class PermissionManager extends AuthzSession {
      * straight in the SQL text.  
      *   (e.g.  "select rez from Resource rez "... , you would specify
      *    the name of your resourceVar as 'rez')
+     * @param includeDescendants - include the resource's descendants in the query
      */
     public abstract EdgePermCheck makePermCheckSql(String subjectParam, 
                                                    String resourceVar,
                                                    String resourceParam,
                                                    String distanceParam,
-                                                   String opsParam); 
+                                                   String opsParam,
+                                                   boolean includeDescendants); 
 
     /**
      * Generates an object which aids in the creation of hierarchical,
@@ -280,7 +286,7 @@ public abstract class PermissionManager extends AuthzSession {
      * This method spits out a piece of HQL, like:
      *   join r.toEdges _e 
      *  ... 
-     *  where _e.fromDistance > :distance
+     *  where _e.fromDistance >= :distance (could be '=' based on includeDescendants)
      *   and ...
      *   and ...
      *   
@@ -295,11 +301,14 @@ public abstract class PermissionManager extends AuthzSession {
      * straight in the SQL text.  
      *   (e.g.  "select rez from Resource rez "... , you would specify
      *    the name of your resourceVar as 'rez')
+     * @param includeDescendants - include the resource's descendants in the query
      */
-    public abstract EdgePermCheck
-        makePermCheckHql(String subjectParam, 
-                         String resourceVar, String resourceParam,
-                         String distanceParam, String opsParam);
+    public abstract EdgePermCheck makePermCheckHql(String subjectParam, 
+                                                   String resourceVar,
+                                                   String resourceParam,
+                                                   String distanceParam,
+                                                   String opsParam,
+                                                   boolean includeDescendants);
     
     /**
      * Return the MaintenanceEventManager implementation

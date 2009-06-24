@@ -192,7 +192,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
      */
     public List findByRootResource(AuthzSubject subject, Resource r) {
         EdgePermCheck wherePermCheck = 
-            getPermissionManager().makePermCheckHql("rez");
+            getPermissionManager().makePermCheckHql("rez", true);
         String hql = "select ad from AlertDefinition ad join ad.resource rez " 
                         + wherePermCheck
                         + " and ad.deleted = false and ad.resource is not null ";

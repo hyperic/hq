@@ -441,13 +441,17 @@ public class PermissionManagerImpl
                                              String resVar,
                                              String resParam,
                                              String distanceParam,
-                                             String opsParam) {
-        String sql = new StringBuilder()
+                                             String opsParam,
+                                             boolean includeDescendants) {
+        final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
+        final String oper = (includeDescendants) ? ">=" : "=";
+        final String sql = new StringBuilder()
             .append(" JOIN EAM_RESOURCE_EDGE edge")
             .append(" ON ").append(resVar).append(".id = edge.TO_ID")
             .append(" AND ").append(resVar).append(".id = edge.FROM_ID")
-            .append(" WHERE edge.distance >= :").append(distanceParam)
-            .append(" AND edge.rel_id = " + AuthzConstants.RELATION_CONTAINMENT_ID)
+            .append(" WHERE edge.distance ")
+                .append(oper).append(" :").append(distanceParam)
+            .append(" AND edge.rel_id = ").append(cId)
             .append(" AND ").append(resVar).append(".id = :").append(resParam)
             .append(" ").toString();
 
@@ -462,18 +466,23 @@ public class PermissionManagerImpl
         };
     }
 
-    public EdgePermCheck
-        makePermCheckHql(String subjectParam, 
-                         String resourceVar, String resourceParam,
-                         String distanceParam, String opsParam)
-    {
-        String sql = 
-            "join " + resourceVar+ ".toEdges _e " + 
-            "join _e.from _fromResource " +  
-            "where " + 
-            "  _fromResource = :" + resourceParam +
-            "  and _e.distance >= :" + distanceParam +  
-            "  and _e.relation.id = " + AuthzConstants.RELATION_CONTAINMENT_ID + " ";
+    public EdgePermCheck makePermCheckHql(String subjectParam, 
+                                          String resourceVar,
+                                          String resourceParam,
+                                          String distanceParam,
+                                          String opsParam,
+                                          boolean includeDescendants) {
+        final Integer cId = AuthzConstants.RELATION_CONTAINMENT_ID;
+        final String oper = (includeDescendants) ? ">=" : "=";
+        final String sql = new StringBuilder()
+            .append("join ").append(resourceVar).append(".toEdges _e ")
+            .append("join _e.from _fromResource ")
+            .append("where ")
+            .append(" _fromResource = :" ).append(resourceParam)
+            .append(" AND _e.distance ").append(oper)
+            .append(" :").append(distanceParam)
+            .append(" AND _e.relation.id = ").append(cId).append(' ')
+            .toString();
 
         return new EdgePermCheck(sql, subjectParam, resourceVar,
                                  resourceParam, distanceParam, opsParam) 

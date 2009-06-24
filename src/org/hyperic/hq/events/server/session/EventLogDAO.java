@@ -194,7 +194,7 @@ public class EventLogDAO extends HibernateDAO {
                                String status) 
     {
         EdgePermCheck wherePermCheck =
-            getPermissionManager().makePermCheckHql("rez");
+            getPermissionManager().makePermCheckHql("rez", false);
         String hql = "select l from EventLog l " +
             "join l.resource rez " +
             wherePermCheck +
@@ -214,7 +214,7 @@ public class EventLogDAO extends HibernateDAO {
                       Collection eventTypes)
     {
         EdgePermCheck wherePermCheck = 
-            getPermissionManager().makePermCheckHql("rez");
+            getPermissionManager().makePermCheckHql("rez", false);
         String hql = " select l from EventLog l " + 
             "join l.resource rez " +
             wherePermCheck +
@@ -434,7 +434,7 @@ public class EventLogDAO extends HibernateDAO {
     {
         long interval = (end - begin) / intervals;
         EdgePermCheck wherePermCheck = 
-            getPermissionManager().makePermCheckSql("rez");
+            getPermissionManager().makePermCheckSql("rez", false);
 
         String sql = getLogsExistSQL(resource, begin, end, intervals,
                                      wherePermCheck);
