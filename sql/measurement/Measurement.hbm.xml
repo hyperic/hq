@@ -36,7 +36,7 @@
       <column name="COLL_INTERVAL" not-null="true"/>
     </property>
     <property name="dsn" type="string">
-      <column name="DSN" not-null="true" length="500"/>
+      <column name="DSN" not-null="true" length="2048"/>
     </property>
 
     <many-to-one name="resource" class="org.hyperic.hq.authz.server.session.Resource" index="MEAS_RES_IDX">
