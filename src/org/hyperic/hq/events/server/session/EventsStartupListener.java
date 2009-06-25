@@ -25,11 +25,13 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.StringTokenizer;
 
-import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
-import javax.management.ObjectName;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,6 +39,8 @@ import org.hibernate.PropertyNotFoundException;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.common.DiagnosticThread;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.util.jdbc.DBUtil;
 
 public class EventsStartupListener 
     implements StartupListener
@@ -69,8 +73,46 @@ public class EventsStartupListener
         loadConfigProps("actions");
         
         DiagnosticThread.addDiagnosticObject(EventTrackerDiagnostic.getInstance());
+        cleanupRegisteredTriggers();
     }
         
+    private void cleanupRegisteredTriggers() {
+        Connection conn = null;
+        Statement stmt = null;
+        try {
+            conn = DBUtil.getConnByContext(
+                new InitialContext(), HQConstants.DATASOURCE);              
+            stmt = conn.createStatement();
+            int rows = stmt.executeUpdate(
+                "update EAM_ALERT_CONDITION set trigger_id = null " +
+                "WHERE exists (" +
+                    "select 1 from EAM_ALERT_DEFINITION WHERE deleted = '1' " +
+                    "AND EAM_ALERT_CONDITION.alert_definition_id = id" +
+                ")");
+            _log.info("disassociated " + rows + " triggers in EAM_ALERT_CONDITION" +
+                " from their deleted alert definitions");
+            rows = stmt.executeUpdate(
+                "delete from EAM_REGISTERED_TRIGGER WHERE exists (" +
+                    "select 1 from EAM_ALERT_DEFINITION WHERE deleted = '1' " +
+                    "AND EAM_REGISTERED_TRIGGER.alert_definition_id = id" +
+                ")");
+            _log.info("deleted " + rows + " rows from EAM_REGISTERED_TRIGGER");
+            rows = stmt.executeUpdate(
+                "delete from EAM_TRIGGER_EVENT where expiration < " +
+                System.currentTimeMillis()
+                );
+            _log.info("deleted " + rows +
+                " expired triggers from EAM_TRIGGER_EVENT");
+        } catch (SQLException e) {
+            _log.error(e, e);
+        } catch (NamingException e) {
+            _log.error(e, e);
+        } finally {
+            DBUtil.closeJDBCObjects(
+                EventsStartupListener.class.getName(), conn, stmt, null);
+        }
+    }
+
     private void loadConfigProps(String prop) {
         try {
             String property = System.getProperty(prop);
