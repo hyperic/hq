@@ -192,6 +192,11 @@ implements AlertDefinitionManagerLocal, Verifiable {
 
 	}
 
+        public int getActiveCount() {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+
 	public void startup() {
 		// TODO Auto-generated method stub
 
