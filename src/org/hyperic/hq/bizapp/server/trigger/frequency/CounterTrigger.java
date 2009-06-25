@@ -59,8 +59,19 @@ public class CounterTrigger extends AbstractTrigger
     private Integer triggerId;
     private int     count;
     private long    timeRange;
+    private int		purgeCounter;
+    private int		purgeThreshold;
     
-    public CounterTrigger() {}
+    public static final int PURGE_THRESHOLD_INCREMENT = 50;
+    
+    public CounterTrigger() {
+    	purgeCounter = 0;
+    }
+    
+    protected CounterTrigger(Integer triggerId, int count, long timeRange) {
+    	this();
+    	init(triggerId, count, timeRange);
+    }
 
     /**
      * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getConfigSchema()
@@ -123,12 +134,14 @@ public class CounterTrigger extends AbstractTrigger
                 ConfigResponse.decode(getConfigSchema(),
                                       tval.getConfig());
 
-            triggerId = 
+            Integer triggerId = 
                 Integer.valueOf(triggerData.getValue(CFG_TRIGGER_ID));
-            count =
+            int count =
                 Integer.parseInt(triggerData.getValue(CFG_COUNT));
-            timeRange =
+            long timeRange =
                 Long.parseLong(triggerData.getValue(CFG_TIME_RANGE)) * 1000;
+            
+            init(triggerId, count, timeRange);
         } catch(InvalidOptionException exc){
             throw new InvalidTriggerDataException(exc);
         } catch(InvalidOptionValueException exc){
@@ -136,6 +149,15 @@ public class CounterTrigger extends AbstractTrigger
         } catch(EncodingException exc){
             throw new InvalidTriggerDataException(exc);
         } 
+    }
+    
+    private void init(Integer triggerId, int count, long timeRange) {
+    	this.triggerId = triggerId;
+    	this.count = count;
+    	this.timeRange = timeRange;
+    	
+    	purgeCounter = 0;
+    	purgeThreshold = count + PURGE_THRESHOLD_INCREMENT;
     }
 
     /**
@@ -150,6 +172,10 @@ public class CounterTrigger extends AbstractTrigger
      */
     public Integer[] getInterestedInstanceIDs(Class c){
         return new Integer[] { triggerId };
+    }
+    
+    private void purge(EventTrackerLocal eTracker, Integer triggerId) {
+    	eTracker.deleteExpiredByTriggerId(triggerId);
     }
 
     /** 
@@ -177,6 +203,7 @@ public class CounterTrigger extends AbstractTrigger
         TriggerFiredEvent myEvent = null;
         
         synchronized (lock) {
+        	
             int prevCount;
 
             try {
@@ -192,9 +219,14 @@ public class CounterTrigger extends AbstractTrigger
              * function otherwise, we have to make sure that things are in the
              * same user transaction, which is a pain */
             if ((prevCount + 1) >= count) {
-                // Get ready to fire, reset EventTracker
+                // Get ready to fire, reset EventTracker.  This deletes all
+            	// tracked events referenced by this trigger.
                 try {
-                    eTracker.deleteReference(getId());                            
+                    eTracker.deleteReference(getId());
+                	if (log.isDebugEnabled()) {
+                		log.debug("CounterTrigger id=" + getId()+ " deleting references.");
+                	}
+                    purgeCounter = 0;
                 } catch (SQLException exc) {
                     throw new ActionExecuteException(
                         "Failed to delete event references for trigger id=" + 
@@ -202,7 +234,7 @@ public class CounterTrigger extends AbstractTrigger
                 }
                             
                 myEvent = new TriggerFiredEvent(getId(), event);
-
+                
                 myEvent.setMessage("Occurred " + (prevCount + 1) +
                                    " times in the span of " +
                                    timeRange / MeasurementConstants.MINUTE +
@@ -210,11 +242,24 @@ public class CounterTrigger extends AbstractTrigger
             } else {
                 // Throw it into the event tracker
                 try {
-                    eTracker.addReference(getId(), tfe, timeRange);                           
+                    eTracker.addReference(getId(), tfe, timeRange);
+                	if (log.isDebugEnabled()) {
+                		log.debug("CounterTrigger id=" + getId()+ " adding reference.");
+                	}
                 } catch (SQLException e) {
                     throw new ActionExecuteException(
                             "Failed to add event reference for trigger id="+
                             getId(), e);                            
+                } finally {
+                    // Tidy up if necessary.  The use case here is many events that have
+                	// come in and then expired since the last trigger fire.
+                    if (++purgeCounter > purgeThreshold) {
+                    	purge(eTracker, getId());
+                    	if (log.isDebugEnabled()) {
+                    		log.debug("CounterTrigger id=" + getId()+ " purging.");
+                    	}
+                    	purgeCounter = 0;
+                    }                	
                 }
                 
                 // Now send a NotFired event
@@ -228,7 +273,7 @@ public class CounterTrigger extends AbstractTrigger
             } catch(Exception exc){
                 throw new ActionExecuteException("Error firing actions: " +
                                                  exc);
-            }            
+            }          
         }
     }
 }

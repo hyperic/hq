@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
@@ -84,7 +85,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         throws SQLException {
 
         if (log.isDebugEnabled())
-            log.debug("Add referenced event for trigger id: " + tid);      
+            log.debug("Add referenced event for trigger id: " + tid + " with expiration " + expiration);      
         
         _diagnostic.startAddReference();
         
@@ -135,13 +136,14 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
                                 AbstractEvent eventObject, long expiration) 
         throws SQLException {        
         if (log.isDebugEnabled())
-            log.debug("Updating the event object for trigger event id: " + teid);            
+            log.debug("Updating the event object for trigger event id: " + teid +
+                    " and trigger id" + tid + " and expiration " + expiration);            
 
         _diagnostic.startUpdateReference();
         
         TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
         try {
-            TriggerEvent triggerEvent = triggerEventDAO.findById(teid);
+            TriggerEvent triggerEvent = triggerEventDAO.get(teid);
             
             long expire = 0;
             
@@ -191,7 +193,11 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         
         TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
         try {
-            triggerEventDAO.deleteByTriggerId(tid);        
+            List referenced = triggerEventDAO.findAllByTriggerId(tid);
+            for (Iterator it = referenced.iterator(); it.hasNext(); ) {
+            	TriggerEvent te = (TriggerEvent) it.next();
+            	triggerEventDAO.delete(te);
+            }
         } catch (Exception e) {
             log.error("Failed to delete expired and referenced events for " +
                       "trigger id=" + tid, e);     
@@ -202,6 +208,42 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         _diagnostic.endDeleteReference();
     }
 
+    /**
+     * Delete a set of events referenced by a trigger, by those events' ID
+     *
+     * @param  idsOfEventsToDelete   The trigger event IDs (primary keys)
+     * @ejb:interface-method
+     */
+    public void deleteEvents(Set idsOfEventsToDelete) {
+        if (log.isDebugEnabled()) {
+            log.debug("Delete referenced events by id");
+        }
+
+        TriggerEventDAO dao = getTriggerEventDAO();
+        for (Iterator it = idsOfEventsToDelete.iterator(); it.hasNext(); ) {
+        	Long teid = (Long) it.next();
+        	dao.deleteById(teid);
+        }
+    }
+    
+    /**
+     * Delete a set of events referenced by a trigger that have expired
+     *
+     * @param  triggerId   The trigger ID of the events to delete
+     * @ejb:interface-method
+     */
+    public void deleteExpiredByTriggerId(Integer triggerId) {
+        if (log.isDebugEnabled()) {
+            log.debug("Delete expired events by trigger id " + triggerId);
+        }
+
+        TriggerEventDAO dao = getTriggerEventDAO();
+    	List expiredForTrigger = dao.findExpiredByTriggerId(triggerId);
+    	for (Iterator it = expiredForTrigger.iterator(); it.hasNext(); ) {
+    		TriggerEvent te = (TriggerEvent) it.next();
+    		dao.delete(te);
+    	}
+    }
 
     /** 
      * Get the list of events that are referenced by a given trigger in order
@@ -211,7 +253,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @return The list of {@link EventObjectDeserializer EventObjectDeserializers} 
      *         containing the events referenced by the trigger. Each event will 
      *         have its id set to the trigger event id.
-     *         
+     *  
      * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */

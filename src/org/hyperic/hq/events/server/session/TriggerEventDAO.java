@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -52,6 +52,10 @@ public class TriggerEventDAO extends HibernateDAO {
         return (TriggerEvent) super.findById(id);            
     }
     
+    TriggerEvent get(Long id) {
+        return (TriggerEvent) super.get(id);
+    }
+    
     List findUnexpiredByTriggerId(Integer tid, Session session) {
         String hql = "from TriggerEvent te where te.triggerId= :tid and " +
                       "te.expiration > :exp order by te.ctime";
@@ -62,9 +66,27 @@ public class TriggerEventDAO extends HibernateDAO {
                         .list();            
     }
     
+    List findExpiredByTriggerId(Integer tid) {
+    	String hql = "from TriggerEvent te where te.triggerId= :tid and " +
+    				 "te.expiration < :exp order by te.ctime";
+
+    	return createQuery(hql)
+    				  .setInteger("tid", tid.intValue())
+    				  .setLong("exp", System.currentTimeMillis())
+    				  .list();            
+    }
+    
+    List findAllByTriggerId(Integer tid) {
+    	String hql = "from TriggerEvent te where te.triggerId= :tid";
+
+    	return createQuery(hql)
+    				  .setInteger("tid", tid.intValue())
+    				  .list();            
+    }
+    
     int countUnexpiredByTriggerId(Integer tid, Session session) {
         String hql = "select count(te) from TriggerEvent te " +
-        		     "where te.triggerId= :tid and te.expiration > :exp";
+                     "where te.triggerId= :tid and te.expiration > :exp";
         
         return ((Number) session.createQuery(hql)
                         .setInteger("tid", tid.intValue())
@@ -72,13 +94,21 @@ public class TriggerEventDAO extends HibernateDAO {
                         .uniqueResult()).intValue();            
     }
     
-    void deleteByTriggerId(Integer tid) {
-        String hql = "delete from TriggerEvent te where te.triggerId= :tid " +
-        		     "or te.expiration < :exp";
+    void deleteById(Long teid) {
+    	remove(findById(teid));
+    }
+    
+    void delete(TriggerEvent te) {
+    	remove(te);
+    }
+    
+    void deleteByAlertDefinition(AlertDefinition def) {
+        String hql = "delete from TriggerEvent te where te.triggerId in " +
+                     "(select r.id from RegisteredTrigger r " +
+                     "where r.alertDefinition = :def)";
 
         createQuery(hql)
-                .setInteger("tid", tid.intValue())
-                .setLong("exp", System.currentTimeMillis())
+                .setParameter("def", def)
                 .executeUpdate();
     }
 }

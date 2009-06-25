@@ -49,7 +49,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.EventTypeException;
-import org.hyperic.hq.events.FlushStateEvent;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
@@ -102,7 +101,7 @@ public class MultiConditionTrigger
     	baton = new Baton();
     }
     
-    private static class Baton {
+    protected static class Baton {
     	// Container class for all things synchronized.  This class does no
     	// synchronization on its own: concurrency correctness must be
     	// ensured by the calling code.
@@ -167,7 +166,7 @@ public class MultiConditionTrigger
 		}
     }
     
-    private Baton baton;
+    protected Baton baton;
     
     /** 
      * Process an event from the dispatcher.  This is the main entrypoint method.
@@ -242,6 +241,7 @@ public class MultiConditionTrigger
         		
         boolean drainedQueue = false;
         boolean doDebug = log.isDebugEnabled();
+        Set persistedEventsToDelete = new HashSet();
         // It guaranteed that, if we're here, there is at least one event in the queue
         do {
         	
@@ -290,13 +290,9 @@ public class MultiConditionTrigger
         	
         	Collection fulfilled = doSingleEvaluation(baton.getPriorState(),
         											  current,
-        											  etracker);
+        											  etracker,
+        											  persistedEventsToDelete);
         	if (fulfilled != null) {
-        		// No matter what, do not consider the fulfilling events in another
-        		// evaluation -- clear them now!  Fulfilled contains all the info we
-        		// need to create the alert.
-        		baton.getPriorState().clear();
-        		
         		if (doDebug) {
         			log.debug("Trigger " + this + " firing on event " + current);
         		}
@@ -307,7 +303,12 @@ public class MultiConditionTrigger
         	if (eventsToProcess.isEmpty()) {
         		synchronized (baton) {
         			if (baton.getEventsToProcess().isEmpty()) {
-        				// Looks like we're done here...
+        				// Looks like we're done here...cleanup and go home
+        				etracker.deleteEvents(persistedEventsToDelete);
+            			if (log.isDebugEnabled()) {
+            				log.debug("MultiConditionTrigger trigger id=" + getId() +
+            						" deleting event set size=" + persistedEventsToDelete.size());
+            			}
         				baton.release();
         				drainedQueue = true;
         			} else {
@@ -328,7 +329,27 @@ public class MultiConditionTrigger
         } while (!drainedQueue);
 	}
 	
-    private Collection doSingleEvaluation(LinkedList events, AbstractEvent event, EventTrackerLocal etracker) {
+	/**
+	 * Evaluate this trigger based on a set of prior events and a new, incoming event.  This
+	 * method should only be called when the set of prior events is not sufficient to cause
+	 * a trigger fire.
+	 * 
+	 * @param priorEvents   A live, mutable collection of prior events that will be
+	 *                       updated based on this evaluation
+	 * @param event         The incoming event
+	 * @param etracker      Persisted event tracker, used to persist state changes.  These
+	 *                       state changes must be made in tandem with the in-memory changes.
+	 * @parem persistedEventsToDelete
+	 *                      Set that gets added to in this method.  Objects put into this set
+	 *                       will be deleted in one operation when this class completes a cycle
+	 *                       of event processing (i.e. drains the queue).
+	 * @return              The collection of events that causes this trigger to fire.  Null
+	 *                       if the incoming event does not cause the trigger to fire.
+	 */
+    private Collection doSingleEvaluation(LinkedList priorEvents,
+    									  AbstractEvent event,
+    									  EventTrackerLocal etracker,
+    									  Set persistedEventsToDelete) {
     	
     	Collection result = null;
     	
@@ -345,15 +366,11 @@ public class MultiConditionTrigger
     	Map subTriggersNotFiring = null;
 
     	// Add in the current event
-    	events.add(event);
+    	priorEvents.add(event);
 
-    	for (Iterator iter = events.iterator(); iter.hasNext(); ) {
+    	for (Iterator iter = priorEvents.iterator(); iter.hasNext(); ) {
 
     		AbstractEvent tracked = (AbstractEvent) iter.next();
-    		// Bypass expired events.  Don't bother cleaning them up, they get cleaned
-    		// up by TriggerEventDAO.deleteByTriggerId() in one fell swoop.  Note that
-    		// if there is no expiration, expire=Long.MIN_VALUE and the timestamp is guaranteed
-    		// to be greater.
     		if (tracked.getTimestamp() >= expire) {
 
     			if (tracked != event &&
@@ -365,9 +382,14 @@ public class MultiConditionTrigger
     				// evaluated -- every step along the way filters out any
     				// previous obsolete event.
     				
-    				// Mark event for update in permanent storage
+    				// Mark old event for update in permanent storage.  It's state will
+    				// be overwritten with the new state.
     				toUpdate = tracked;
-    				// delete previous obsolete event
+    				
+    				// Delete previous obsolete event from the list of events to consider in
+    				// evaluations.  In the common case, the list comes from memory, not from
+    				// the persisted event stream.  This remove only affects the in-memory
+    				// stream.  The persisted stream is handled by the updateReference() call.
     				iter.remove();
     			}
 
@@ -401,7 +423,10 @@ public class MultiConditionTrigger
     		} else {
     			// Get rid of the expired event.  Since the prior events are in time order,
     			// an expired event cannot have any useful purpose once it is identified
-    			// as being expired
+    			// as being expired.
+    			// INVARIANT: toUpdate != tracked here, because toUpdate is only
+    			// assigned a value if tracked is not expired.
+    			deleteEvent(tracked, persistedEventsToDelete);
     			iter.remove();
     		}
     	}
@@ -414,20 +439,11 @@ public class MultiConditionTrigger
     	boolean sendNotFired = false;
     	if (fulfilled.size() == 0) {
 
+    		// Not a single event fulfills the conditions of this trigger.  No way we're firing,
+    		// so don't even do the evaluation.
     		checkCompletion = false;
     		if (subTriggersNotFiring != null && subTriggersNotFiring.size() > 0) {
     			sendNotFired = true;
-    		}
-    		
-    		try {
-    			// This deletes all persisted state for this trigger,
-    			// and all expired events
-    			etracker.deleteReference(getId());            
-    		} catch (SQLException e) {
-    			// It's ok if we can't delete the old events now.
-    			// We can do it next time.
-    			log.warn("Failed to remove all references to trigger id=" +
-    					getId(), e);                
     		}
     	}
 
@@ -439,19 +455,20 @@ public class MultiConditionTrigger
     				// Clean up unused event, track the current one, if necessary
     				boolean track = true;
     				if (toUpdate != null) {
-    					// Only need to update reference if event may expire
     					if (timeRange > 0) {
-    						try {
-    							etracker.updateReference(getId(), toUpdate.getId(),
-    													 event, getTimeRange());
-    						} catch (SQLException e) {
-    							log.debug("Failed to update event reference for " +
-    									"trigger id=" + getId(), e);
-    						}
+        					// If the trigger has an expiration, update its state.  Updating
+    						// state means (1) set the event object BLOB to the current event,
+    						// and (2) update the expiration time to reflect the current time.
+    						// This code will always update a NON-EXPIRED trigger condition.
+    						updateStateForEvent(etracker, toUpdate);
+        					
+        					// If we updated, we will not track.
+    						track = false;
+    					} else {
+    						// No expiration, but the old state is made obsolete by the new
+    						// state.  Delete the old state, it will be replaced with the new state.
+    						deleteEvent(toUpdate, persistedEventsToDelete);
     					}
-    					
-    					// If we updated, we will not track.
-						track = false;
     				}
     				
     				if (event instanceof TriggerNotFiredEvent) {
@@ -461,6 +478,10 @@ public class MultiConditionTrigger
 
     				if (track) {
     					etracker.addReference(getId(), event, getTimeRange());
+    	    			if (log.isDebugEnabled()) {
+    	    				log.debug("MultiConditionTrigger trigger id=" + getId() +
+    	    						" adding reference.");
+    	    			}
     				}
     				
     	    		if (subTriggersNotFiring != null && subTriggersNotFiring.size() > 0) {
@@ -474,7 +495,11 @@ public class MultiConditionTrigger
     		} else {
     			// fulfilled!
     			result = fulfilled.values();
+    			resetState(etracker, priorEvents);
     		}
+    	} else {
+    		// Don't even evaluate, just start over
+    		resetState(etracker, priorEvents);
     	}
     	
     	if (sendNotFired) {
@@ -482,6 +507,44 @@ public class MultiConditionTrigger
     	}
 
     	return result;
+    }
+    
+    protected void resetState(EventTrackerLocal etracker, Collection priorEvents) {
+		
+		// reset state
+    	priorEvents.clear();
+		try {
+			// This deletes all persisted state for this trigger
+			etracker.deleteReference(getId());
+			if (log.isDebugEnabled()) {
+				log.debug("MultiConditionTrigger trigger id=" + getId() +
+						" deleting references");
+			}
+		} catch (SQLException e) {
+			// It's bad, but not unrecoverable, if we can't delete the old events now.
+			// We can do it next time.
+			log.warn("Failed to remove all references to trigger id=" +
+					 getId(), e);                
+		}
+    }
+    
+    protected void updateStateForEvent(EventTrackerLocal etracker, AbstractEvent toUpdate) {
+		try {
+			etracker.updateReference(getId(), toUpdate.getId(),
+									 toUpdate, getTimeRange());
+			if (log.isDebugEnabled()) {
+				log.debug("MultiConditionTrigger trigger id=" + getId() +
+						" updating references for teid " + toUpdate.getId());
+			}
+		} catch (SQLException e) {
+			log.debug("Failed to update event reference for " +
+					"trigger id=" + getId(), e);
+		}
+    }
+    
+    protected void deleteEvent(AbstractEvent toDelete,
+    						   Set persistedEventsToDelete) {
+    	persistedEventsToDelete.add(toDelete.getId());
     }
     
     /**
@@ -646,8 +709,7 @@ public class MultiConditionTrigger
      */
     public Class[] getInterestedEventTypes() {
         return new Class[] { TriggerFiredEvent.class,
-                             TriggerNotFiredEvent.class,
-                             FlushStateEvent.class };
+                             TriggerNotFiredEvent.class };
     }
 
     /**
@@ -767,7 +829,12 @@ public class MultiConditionTrigger
         if (!durable) {
             // Get ready to fire, reset EventTracker
             try {
-    			etracker.deleteReference(getId());          
+    			etracker.deleteReference(getId());
+    			if (log.isDebugEnabled()) {
+    				log.debug("MultiConditionTrigger trigger id=" + getId() +
+    						" deleting references");
+    			}
+      
             } catch (SQLException e) {
             	// Log the error, but we still want to fire
             	log.error("Failed to delete reference for trigger id=" +
