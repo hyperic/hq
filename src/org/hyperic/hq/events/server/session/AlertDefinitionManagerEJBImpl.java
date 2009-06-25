@@ -1221,6 +1221,13 @@ public class AlertDefinitionManagerEJBImpl
     /**
      * @ejb:interface-method
      */
+    public int getActiveCount() {
+        return getAlertDefDAO().getNumActiveDefs();
+    }
+
+    /**
+     * @ejb:interface-method
+     */
     public void startup() {
         log.info("Alert Definition Manager starting up!");
         

@@ -414,6 +414,14 @@ public class AlertDefinitionDAO extends HibernateDAO {
             .setParameter("def", def)
             .executeUpdate();
     }
+    
+    int getNumActiveDefs() {
+        String hql = "select count(*) from AlertDefinition where active = 1";
+        return ((Number)createQuery(hql)
+            .setCacheable(true)
+            .setCacheRegion("AlertDefinition.getNumActiveDefs")
+            .uniqueResult()).intValue();
+    }
 
     int setChildrenEscalation(AlertDefinition def, Escalation esc) {
         return createQuery("update AlertDefinition set escalation = :esc, " +

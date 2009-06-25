@@ -8,6 +8,7 @@ import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
 import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl as AppMan
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl as EscMan
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl as AlertMan
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl as AlertDefMan
 import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl as RoleMan
 
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException
@@ -85,6 +86,7 @@ class ResourceHelper extends BaseHelper {
             case 'roles': return RoleMan.one.roleCount
             case 'users': return RoleMan.one.subjectCount
             case 'alerts': return AlertMan.one.alertCount
+            case 'alertDefs': return AlertDefMan.one.activeCount
             case 'resources': return ResMan.one.resourceCount
             case 'resourceTypes': return ResMan.one.resourceTypeCount
             case 'groups': return GroupMan.one.groupCount
