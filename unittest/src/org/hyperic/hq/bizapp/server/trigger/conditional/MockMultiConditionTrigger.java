@@ -37,6 +37,12 @@ public class MockMultiConditionTrigger extends MultiConditionTrigger {
 		return lastFiredConditions;
 	}
 	
+	public int getCurrentFulfillingEventsCount() {
+		synchronized (baton) {
+			return baton.getPriorState() == null ? 0 : baton.getPriorState().size();
+		}
+	}
+	
 	protected synchronized void publishNotFired() {
 		notFiredCount++;
 	}

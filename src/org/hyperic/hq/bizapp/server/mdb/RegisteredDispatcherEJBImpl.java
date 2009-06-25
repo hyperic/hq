@@ -196,49 +196,6 @@ public class RegisteredDispatcherEJBImpl
     }
         
     /**
-     * Register the handler to handle the events post commit. If registration 
-     * fails and the flag is set to force events handling, handle the events 
-     * immediately.
-     * 
-     * @param events The events to be handled.
-     * @param handler The events handler.
-     * @param forceEventsHandling <code>true</code> to handle the events 
-     *                            immediately if registration fails.
-     */
-    private void handleEventsPostCommit(final List events, 
-                                        final EventsHandler handler, 
-                                        boolean forceEventsHandling) {
-        
-        if (events.isEmpty()) {
-            return;
-        }
-        
-        try {
-            HQApp.getInstance().addTransactionListener(new TransactionListener() {
-                public void afterCommit(boolean success) {
-                    handler.handleEvents(events);
-                }
-
-                public void beforeCommit() {
-                }
-            });                
-        } catch (Throwable t) {
-            log.warn("Failed to register events to be handled post commit: "+events, t);
-
-            if (forceEventsHandling) {            
-                ArrayList copyOfEvents = new ArrayList(events);
-    
-                // We want to make sure we don't handle the events twice. 
-                // To be sure, clear the list of events handled post commit.
-                events.clear();
-
-                log.warn("Forcing events to be handled now!");
-                handler.handleEvents(copyOfEvents);
-            }
-        }
-    }
-    
-    /**
      * @ejb:create-method
      */
     public void ejbCreate() {}

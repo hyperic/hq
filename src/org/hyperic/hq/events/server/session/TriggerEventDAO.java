@@ -66,6 +66,24 @@ public class TriggerEventDAO extends HibernateDAO {
                         .list();            
     }
     
+    List findExpiredByTriggerId(Integer tid) {
+    	String hql = "from TriggerEvent te where te.triggerId= :tid and " +
+    				 "te.expiration < :exp order by te.ctime";
+
+    	return createQuery(hql)
+    				  .setInteger("tid", tid.intValue())
+    				  .setLong("exp", System.currentTimeMillis())
+    				  .list();            
+    }
+    
+    List findAllByTriggerId(Integer tid) {
+    	String hql = "from TriggerEvent te where te.triggerId= :tid";
+
+    	return createQuery(hql)
+    				  .setInteger("tid", tid.intValue())
+    				  .list();            
+    }
+    
     int countUnexpiredByTriggerId(Integer tid, Session session) {
         String hql = "select count(te) from TriggerEvent te " +
                      "where te.triggerId= :tid and te.expiration > :exp";
@@ -76,16 +94,14 @@ public class TriggerEventDAO extends HibernateDAO {
                         .uniqueResult()).intValue();            
     }
     
-    void deleteByTriggerId(Integer tid) {
-        String hql = "delete from TriggerEvent te where te.triggerId = :tid " +
-                     "or te.expiration < :exp";
-
-        createQuery(hql)
-                .setInteger("tid", tid.intValue())
-                .setLong("exp", System.currentTimeMillis())
-                .executeUpdate();
+    void deleteById(Long teid) {
+    	remove(findById(teid));
     }
-
+    
+    void delete(TriggerEvent te) {
+    	remove(te);
+    }
+    
     void deleteByAlertDefinition(AlertDefinition def) {
         String hql = "delete from TriggerEvent te where te.triggerId in " +
                      "(select r.id from RegisteredTrigger r " +
