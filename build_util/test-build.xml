@@ -28,6 +28,8 @@
 		<istrue value="${ci.build}"/>
 	</condition>
 	
+	<echo message="Halt on error or failure: ${test.halt}"/>
+	<echo message="CI Build: ${ci.build}"/>
     <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltonerror="${test.halt}" haltonfailure="${test.halt}">
         <jvmarg value="-Xmx1024m"/>
         <jvmarg value="-Xms1024m"/>
@@ -37,6 +39,7 @@
         <jvmarg value="-Dhq.unittest.jboss.home=${jboss.home}"/>
         <jvmarg value="-Dhq.unittest.hq.home=${basedir}"/>
         <jvmarg value="-Dhq.unittest.working.dir=${hq.home}/unittest/data"/>
+ 		<jvmarg value="-Dci.build=${ci.build}"/>
         <classpath>
             <path refid="alljars"/>
             <path refid="testjars"/>
