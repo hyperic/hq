@@ -99,11 +99,11 @@ public class JDBCQueryCache {
      */
     public Object getOnlyRow(Connection conn, String column)
         throws SQLException, JDBCQueryCacheException {
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
         if (_cache.size() == 0 || (now - _cacheTimeout) > _last) {
             repopulateCache(conn);
         }
-        Set keys = _cache.keySet();
+        final Set keys = _cache.keySet();
         if (keys.size() > 1) {
             throw new JDBCQueryCacheException(
                 "cache contains more than one row");
@@ -112,16 +112,16 @@ public class JDBCQueryCache {
                 "cache does not contain any results");
         }
         List list = null;
-        for (Iterator it = _cache.entrySet().iterator(); it.hasNext();) {
-            Map.Entry entry = (Map.Entry)it.next();
+        for (final Iterator it = _cache.entrySet().iterator(); it.hasNext();) {
+            final Map.Entry entry = (Map.Entry)it.next();
             list = (List)entry.getValue();
             break;
         }
         if (list == null) {
             return null;
         }
-        for (Iterator it = list.iterator(); it.hasNext();) {
-            NameValuePair pair = (NameValuePair) it.next();
+        for (final Iterator it = list.iterator(); it.hasNext();) {
+            final NameValuePair pair = (NameValuePair) it.next();
             if (pair.getName().equals(column)) {
                 return pair.getValue();
             }
@@ -146,7 +146,7 @@ public class JDBCQueryCache {
         }
         for (Iterator it = list.iterator(); it.hasNext();) {
             NameValuePair pair = (NameValuePair) it.next();
-            if (pair.getName().equals(column)) {
+            if (pair.getName().equalsIgnoreCase(column)) {
                 return pair.getValue();
             }
         }
@@ -168,23 +168,31 @@ public class JDBCQueryCache {
             _cache.clear();
             stmt = conn.createStatement();
             rs = stmt.executeQuery(_query);
-            List columns = getQueryColumns(rs);
+            final List columns = getQueryColumns(rs);
+            final boolean debug = _log.isDebugEnabled();
             while (rs.next()) {
                 int i = 1;
-                List vals = new ArrayList();
+                final List vals = new ArrayList();
                 String key = null;
-                for (Iterator it = columns.iterator(); it.hasNext(); i++) {
-                    String column = (String) it.next();
+                for (final Iterator it = columns.iterator(); it.hasNext(); i++) {
+                    final String column = (String) it.next();
                     if (column.equalsIgnoreCase(_queryKey)) {
                         key = rs.getString(i);
                     } else {
-                        vals.add(new NameValuePair(column, rs.getObject(i)));
+                        String tmp = rs.getString(i);
+                        tmp = (rs.wasNull()) ? null : tmp;
+                        if (debug) {
+                            _log.debug("adding nameValuePair="
+                                + column + "/" + tmp);
+                        }
+                        vals.add(new NameValuePair(column, tmp));
                     }
                 }
                 if (key == null) {
                     throw new JDBCQueryCacheException("queryKey, " + _queryKey
                         + " was not represented in the query");
                 }
+                if (debug) _log.debug("adding key=" + key);
                 _cache.put(key, vals);
             }
         } catch (SQLException e) {
