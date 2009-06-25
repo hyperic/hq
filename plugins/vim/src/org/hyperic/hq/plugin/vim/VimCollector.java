@@ -114,8 +114,8 @@ public abstract class VimCollector extends Collector {
         VimConnection conn;
 
         try {
-            conn = VimConnection.getInstance(getProperties());
             setAvailability(false);
+            conn = VimConnection.getInstance(getProperties());
             synchronized (conn.LOCK) {
                 collect(conn.vim);
             }
