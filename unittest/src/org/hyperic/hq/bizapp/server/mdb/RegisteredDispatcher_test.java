@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -304,155 +305,91 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 						e3NotFiredHandler);
 
 			// B
-			if (mct.getFireCount() > 0) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(0, mct.getFireCount());
 			rd.onMessage(e2FiredMessage);
 			// C
-			if (mct.getFireCount() > 0) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(0, mct.getFireCount());
 			rd.onMessage(e3FiredMessage);
 			// b
-			if (mct.getFireCount() > 0) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(0, mct.getFireCount());
 			rd.onMessage(e2NotFiredMessage);
 			// a
-			if (mct.getFireCount() > 0) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(0, mct.getFireCount());
 			rd.onMessage(e1NotFiredMessage);
 			// B
-			if (mct.getFireCount() > 0) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(0, mct.getFireCount());
 			rd.onMessage(e2FiredMessage);
 			// C
-			if (mct.getFireCount() > 0) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(0, mct.getFireCount());
 			rd.onMessage(e3FiredMessage);
 			// a
-			if (mct.getFireCount() > 0) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(0, mct.getFireCount());
 			rd.onMessage(e1NotFiredMessage);
 			// A -- causes an event to fire
-			if (mct.getFireCount() > 0) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(0, mct.getFireCount());
 			rd.onMessage(e1FiredMessage);
+
 			assertEquals(1, mct.getFireCount());
 			Collection fulfilling = mct.getLastFired();
 			assertNotNull(fulfilling);
-			if (fulfilling.size() != 3) {
-				System.out.println(fulfilling);
-			}
 			assertEquals(3, fulfilling.size());
 			assertTrue(fulfilling.contains(e1Fired));
 			assertTrue(fulfilling.contains(e2Fired));
 			assertTrue(fulfilling.contains(e3Fired));
+
 			// b
 			rd.onMessage(e2NotFiredMessage);
 			// C
-			if (mct.getFireCount() > 1) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(1, mct.getFireCount());
 			rd.onMessage(e3FiredMessage);
 			// A
-			if (mct.getFireCount() > 1) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(1, mct.getFireCount());
 			rd.onMessage(e1FiredMessage);
 			// c
-			if (mct.getFireCount() > 1) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(1, mct.getFireCount());
 			rd.onMessage(e3NotFiredMessage);
 			// B
-			if (mct.getFireCount() > 1) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(1, mct.getFireCount());
 			rd.onMessage(e2FiredMessage);
 			// C -- causes an event to fire
-			if (mct.getFireCount() > 1) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(1, mct.getFireCount());
 			rd.onMessage(e3FiredMessage);
 			assertEquals(2, mct.getFireCount());
+
 			fulfilling = mct.getLastFired();
 			assertNotNull(fulfilling);
-			if (fulfilling.size() != 3) {
-				System.out.println(fulfilling);
-			}
 			assertEquals(3, fulfilling.size());
 			assertTrue(fulfilling.contains(e1Fired));
 			assertTrue(fulfilling.contains(e2Fired));
 			assertTrue(fulfilling.contains(e3Fired));
+			
 			// b
 			rd.onMessage(e2NotFiredMessage);
 			// A
-			if (mct.getFireCount() > 2) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(2, mct.getFireCount());
 			rd.onMessage(e1FiredMessage);
 			// c
-			if (mct.getFireCount() > 2) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(2, mct.getFireCount());
 			rd.onMessage(e3NotFiredMessage);
 			// a
-			if (mct.getFireCount() > 2) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(2, mct.getFireCount());
 			rd.onMessage(e1NotFiredMessage);
 			// c
-			if (mct.getFireCount() > 2) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(2, mct.getFireCount());
 			rd.onMessage(e3NotFiredMessage);
 			// A
-			if (mct.getFireCount() > 2) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(2, mct.getFireCount());
 			rd.onMessage(e1FiredMessage);
 			// B
-			if (mct.getFireCount() > 2) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(2, mct.getFireCount());
 			rd.onMessage(e2FiredMessage);
 			// C -- causes an event to fire
-			if (mct.getFireCount() > 2) {
-				System.out.println(mct.getLastFired());
-			}
 			assertEquals(2, mct.getFireCount());
 			rd.onMessage(e3FiredMessage);
 			assertEquals(3, mct.getFireCount());
+
 			fulfilling = mct.getLastFired();
 			assertNotNull(fulfilling);
-			if (fulfilling.size() != 3) {
-				System.out.println(fulfilling);
-			}
 			assertEquals(3, fulfilling.size());
 			assertTrue(fulfilling.contains(e1Fired));
 			assertTrue(fulfilling.contains(e2Fired));
@@ -563,6 +500,322 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 			assertEquals(6, mct.getFireCount());
 		}
 	}
+	
+	public void testMultipleTriggersInterestedInEventsSingleThreaded() throws Exception {
+		
+		MockRegisteredDispatcherEJBImpl rd = new MockRegisteredDispatcherEJBImpl();
+		MockMultiConditionTrigger mct1 = createTrigger(new Integer(6000),
+													   "1&2&3&4&5&6",
+													   1000000000,
+													   false,
+													   true);
+		MockMultiConditionTrigger mct2 = createTrigger(new Integer(6001),
+													   "1|2&3|6",
+													   0,
+													   true,
+													   true);
+		MockMultiConditionTrigger mct3 = createTrigger(new Integer(6002),
+													   "1&2|3&4|5&6",
+													   0,
+													   false,
+													   true);
+		MockMultiConditionTrigger mct4 = createTrigger(new Integer(6003),
+													   "4&5&6",
+													   1000000000,
+													   true,
+													   true);
+		MockMultiConditionTrigger mct5 = createTrigger(new Integer(6004),
+													   "1|2|3|4|5|6",
+													   1000000000,
+													   false,
+													   true);
+		
+		try {
+			_eventTracker.deleteReference(mct1.getId());
+			_eventTracker.deleteReference(mct2.getId());
+			_eventTracker.deleteReference(mct3.getId());
+			_eventTracker.deleteReference(mct4.getId());
+			_eventTracker.deleteReference(mct5.getId());
+		} catch (SQLException notInMockImpl) {
+		
+		}
+		
+		AbstractEvent e1Fired = createEvent(1, true);
+		AbstractEvent e1NotFired = createEvent(1, false);
+		AbstractEvent e2Fired = createEvent(2, true);
+		AbstractEvent e2NotFired = createEvent(2, false);
+		AbstractEvent e3Fired = createEvent(3, true);
+		AbstractEvent e3NotFired = createEvent(3, false);
+		AbstractEvent e4Fired = createEvent(4, true);
+		AbstractEvent e4NotFired = createEvent(4, false);
+		AbstractEvent e5Fired = createEvent(5, true);
+		AbstractEvent e5NotFired = createEvent(5, false);
+		AbstractEvent e6Fired = createEvent(6, true);
+		AbstractEvent e6NotFired = createEvent(6, false);
+		
+		rd.associateTrigger(e1Fired, mct1);
+		rd.associateTrigger(e1NotFired, mct1);
+		rd.associateTrigger(e2Fired, mct1);
+		rd.associateTrigger(e2NotFired, mct1);
+		rd.associateTrigger(e3Fired, mct1);
+		rd.associateTrigger(e3NotFired, mct1);
+		rd.associateTrigger(e4Fired, mct1);
+		rd.associateTrigger(e4NotFired, mct1);
+		rd.associateTrigger(e5Fired, mct1);
+		rd.associateTrigger(e5NotFired, mct1);
+		rd.associateTrigger(e6Fired, mct1);
+		rd.associateTrigger(e6NotFired, mct1);
+		
+		rd.associateTrigger(e1Fired, mct2);
+		rd.associateTrigger(e1NotFired, mct2);
+		rd.associateTrigger(e2Fired, mct2);
+		rd.associateTrigger(e2NotFired, mct2);
+		rd.associateTrigger(e3Fired, mct2);
+		rd.associateTrigger(e3NotFired, mct2);
+		rd.associateTrigger(e6Fired, mct2);
+		rd.associateTrigger(e6NotFired, mct2);
+		
+		rd.associateTrigger(e1Fired, mct3);
+		rd.associateTrigger(e1NotFired, mct3);
+		rd.associateTrigger(e2Fired, mct3);
+		rd.associateTrigger(e2NotFired, mct3);
+		rd.associateTrigger(e3Fired, mct3);
+		rd.associateTrigger(e3NotFired, mct3);
+		rd.associateTrigger(e4Fired, mct3);
+		rd.associateTrigger(e4NotFired, mct3);
+		rd.associateTrigger(e5Fired, mct3);
+		rd.associateTrigger(e5NotFired, mct3);
+		rd.associateTrigger(e6Fired, mct3);
+		rd.associateTrigger(e6NotFired, mct3);
+		
+		rd.associateTrigger(e4Fired, mct4);
+		rd.associateTrigger(e4NotFired, mct4);
+		rd.associateTrigger(e5Fired, mct4);
+		rd.associateTrigger(e5NotFired, mct4);
+		rd.associateTrigger(e6Fired, mct4);
+		rd.associateTrigger(e6NotFired, mct4);
+		
+		rd.associateTrigger(e1Fired, mct5);
+		rd.associateTrigger(e1NotFired, mct5);
+		rd.associateTrigger(e2Fired, mct5);
+		rd.associateTrigger(e2NotFired, mct5);
+		rd.associateTrigger(e3Fired, mct5);
+		rd.associateTrigger(e3NotFired, mct5);
+		rd.associateTrigger(e4Fired, mct5);
+		rd.associateTrigger(e4NotFired, mct5);
+		rd.associateTrigger(e5Fired, mct5);
+		rd.associateTrigger(e5NotFired, mct5);
+		rd.associateTrigger(e6Fired, mct5);
+		rd.associateTrigger(e6NotFired, mct5);
+		
+		// Set up the stream, ordered to reflect the specification above
+		// First, associate events to their letter code
+		Map associations = new HashMap(12);
+		associations.put("A", e1Fired);
+		associations.put("a", e1NotFired);
+		associations.put("B", e2Fired);
+		associations.put("b", e2NotFired);
+		associations.put("C", e3Fired);
+		associations.put("c", e3NotFired);
+		associations.put("D", e4Fired);
+		associations.put("d", e4NotFired);
+		associations.put("E", e5Fired);
+		associations.put("e", e5NotFired);
+		associations.put("F", e6Fired);
+		associations.put("f", e6NotFired);
+		
+		List stream = createEventStream(associations,
+				"ABCDEFabcdefAabBCcdDEefFaBcDeFAbCdEfdFaBeEfCbABabABdEFAdBdCaAdfDFeEa");
+		MsgInvocationHandler hndlr = new MsgInvocationHandler(stream, false);
+		ObjectMessage om =
+				(ObjectMessage) Proxy.newProxyInstance(RegisteredDispatcher_test.class.getClassLoader(),
+						new Class[] { ObjectMessage.class },
+						hndlr);
+		rd.onMessage(om);
+
+		// Expected firings: The number below the stream letters indicates the trigger number expected
+		// to fire after the indicated event is processed.
+		//
+		// trigger#,
+		// scenario
+		//                          ABCDEFabcdefAabBCcdDEefFaBcDeFAbCdEfdFaBeEfCbABabABdEFAdBdCaAdfDFeEa
+		//  1, ((((1&2)&3)&4)&5)&6       *                                                          *    =2
+		//  2, ((1|2)&3)|6            *  *          *      *     *  *    *     *         *    *     *    =11
+		//  3, ((((1&2)|3)&4)|5)&6       *                        *      *               *          *    =5
+		//  4, (4&5)&6                   *                                                            *  =2
+		//  5 ((((1|2)|3)|4)|5)|6   ******      *  **  **  * * * ** * *  * * * * **  ** *** * * *  ** *  =35
+		//                          ABCDEFabcdefAabBCcdDEefFaBcDeFAbCdEfdFaBeEfCbABabABdEFAdBdCaAdfDFeEa
+
+		assertEquals(2, mct1.getFireCount());		
+		assertEquals(11, mct2.getFireCount());		
+		assertEquals(5, mct3.getFireCount());		
+		assertEquals(2, mct4.getFireCount());		
+		assertEquals(35, mct5.getFireCount());		
+	}
+
+	public void testMultipleTriggersInterestedInEventsMultithreaded() throws Exception {
+		
+		MockRegisteredDispatcherEJBImpl rd = new MockRegisteredDispatcherEJBImpl();
+		MockMultiConditionTrigger mct1 = createTrigger(new Integer(6005),
+													   "1&2&3&4&5&6",
+													   1000000000,
+													   false,
+													   true);
+		MockMultiConditionTrigger mct2 = createTrigger(new Integer(6006),
+													   "1|2&3|6",
+													   0,
+													   true,
+													   true);
+		MockMultiConditionTrigger mct3 = createTrigger(new Integer(6007),
+													   "1&2|3&4|5&6",
+													   0,
+													   false,
+													   true);
+		MockMultiConditionTrigger mct4 = createTrigger(new Integer(6008),
+													   "4&5&6",
+													   1000000000,
+													   true,
+													   true);
+		MockMultiConditionTrigger mct5 = createTrigger(new Integer(6009),
+													   "1|2|3|4|5|6",
+													   1000000000,
+													   false,
+													   true);
+		
+		try {
+			_eventTracker.deleteReference(mct1.getId());
+			_eventTracker.deleteReference(mct2.getId());
+			_eventTracker.deleteReference(mct3.getId());
+			_eventTracker.deleteReference(mct4.getId());
+			_eventTracker.deleteReference(mct5.getId());
+		} catch (SQLException notInMockImpl) {
+
+		}
+
+		AbstractEvent e1Fired = createEvent(1, true);
+		AbstractEvent e1NotFired = createEvent(1, false);
+		AbstractEvent e2Fired = createEvent(2, true);
+		AbstractEvent e2NotFired = createEvent(2, false);
+		AbstractEvent e3Fired = createEvent(3, true);
+		AbstractEvent e3NotFired = createEvent(3, false);
+		AbstractEvent e4Fired = createEvent(4, true);
+		AbstractEvent e4NotFired = createEvent(4, false);
+		AbstractEvent e5Fired = createEvent(5, true);
+		AbstractEvent e5NotFired = createEvent(5, false);
+		AbstractEvent e6Fired = createEvent(6, true);
+		AbstractEvent e6NotFired = createEvent(6, false);
+		
+		rd.associateTrigger(e1Fired, mct1);
+		rd.associateTrigger(e1NotFired, mct1);
+		rd.associateTrigger(e2Fired, mct1);
+		rd.associateTrigger(e2NotFired, mct1);
+		rd.associateTrigger(e3Fired, mct1);
+		rd.associateTrigger(e3NotFired, mct1);
+		rd.associateTrigger(e4Fired, mct1);
+		rd.associateTrigger(e4NotFired, mct1);
+		rd.associateTrigger(e5Fired, mct1);
+		rd.associateTrigger(e5NotFired, mct1);
+		rd.associateTrigger(e6Fired, mct1);
+		rd.associateTrigger(e6NotFired, mct1);
+		
+		rd.associateTrigger(e1Fired, mct2);
+		rd.associateTrigger(e1NotFired, mct2);
+		rd.associateTrigger(e2Fired, mct2);
+		rd.associateTrigger(e2NotFired, mct2);
+		rd.associateTrigger(e3Fired, mct2);
+		rd.associateTrigger(e3NotFired, mct2);
+		rd.associateTrigger(e6Fired, mct2);
+		rd.associateTrigger(e6NotFired, mct2);
+		
+		rd.associateTrigger(e1Fired, mct3);
+		rd.associateTrigger(e1NotFired, mct3);
+		rd.associateTrigger(e2Fired, mct3);
+		rd.associateTrigger(e2NotFired, mct3);
+		rd.associateTrigger(e3Fired, mct3);
+		rd.associateTrigger(e3NotFired, mct3);
+		rd.associateTrigger(e4Fired, mct3);
+		rd.associateTrigger(e4NotFired, mct3);
+		rd.associateTrigger(e5Fired, mct3);
+		rd.associateTrigger(e5NotFired, mct3);
+		rd.associateTrigger(e6Fired, mct3);
+		rd.associateTrigger(e6NotFired, mct3);
+		
+		rd.associateTrigger(e4Fired, mct4);
+		rd.associateTrigger(e4NotFired, mct4);
+		rd.associateTrigger(e5Fired, mct4);
+		rd.associateTrigger(e5NotFired, mct4);
+		rd.associateTrigger(e6Fired, mct4);
+		rd.associateTrigger(e6NotFired, mct4);
+		
+		rd.associateTrigger(e1Fired, mct5);
+		rd.associateTrigger(e1NotFired, mct5);
+		rd.associateTrigger(e2Fired, mct5);
+		rd.associateTrigger(e2NotFired, mct5);
+		rd.associateTrigger(e3Fired, mct5);
+		rd.associateTrigger(e3NotFired, mct5);
+		rd.associateTrigger(e4Fired, mct5);
+		rd.associateTrigger(e4NotFired, mct5);
+		rd.associateTrigger(e5Fired, mct5);
+		rd.associateTrigger(e5NotFired, mct5);
+		rd.associateTrigger(e6Fired, mct5);
+		rd.associateTrigger(e6NotFired, mct5);
+		
+		// Set up the stream, ordered to reflect the specification above
+		// First, associate events to their letter code
+		Map associations = new HashMap(12);
+		associations.put("A", e1Fired);
+		associations.put("a", e1NotFired);
+		associations.put("B", e2Fired);
+		associations.put("b", e2NotFired);
+		associations.put("C", e3Fired);
+		associations.put("c", e3NotFired);
+		associations.put("D", e4Fired);
+		associations.put("d", e4NotFired);
+		associations.put("E", e5Fired);
+		associations.put("e", e5NotFired);
+		associations.put("F", e6Fired);
+		associations.put("f", e6NotFired);
+		
+		List stream = createEventStream(associations,
+				"ABCDEFabcdefAabBCcdDEefFaBcDeFAbCdEfdFaBeEfCbABabABdEFAdBdCaAdfDFeEa");
+
+		int[] lastRun = new int[1];
+		lastRun[0] = Integer.MAX_VALUE;
+		for (int j = 0; j < 8; ++j) {
+			ScriptedThread st = new ScriptedThread(stream, j, lastRun, rd);
+			st.start();
+		}
+		
+		boolean more = true;
+		while (more) {
+			synchronized (stream) {
+				// Let them fight for it
+				stream.notifyAll();
+				if (stream.size() == 0) {
+					more = false;
+				}
+			}
+		}
+
+		// Expected firings: The number below the stream letters indicates the trigger number expected
+		// to fire after the indicated event is processed.
+		//
+		// trigger#,
+		// scenario
+		//                          ABCDEFabcdefAabBCcdDEefFaBcDeFAbCdEfdFaBeEfCbABabABdEFAdBdCaAdfDFeEa
+		//  1, ((((1&2)&3)&4)&5)&6       *                                                          *    =2
+		//  2, ((1|2)&3)|6            *  *          *      *     *  *    *     *         *    *     *    =11
+		//  3, ((((1&2)|3)&4)|5)&6       *                        *      *               *          *    =5
+		//  4, (4&5)&6                   *                                                            *  =2
+		//  5 ((((1|2)|3)|4)|5)|6   ******      *  **  **  * * * ** * *  * * * * **  ** *** * * *  ** *  =35
+		//                          ABCDEFabcdefAabBCcdDEefFaBcDeFAbCdEfdFaBeEfCbABabABdEFAdBdCaAdfDFeEa
+
+		assertEquals(2, mct1.getFireCount());		
+		assertEquals(11, mct2.getFireCount());		
+		assertEquals(5, mct3.getFireCount());		
+		assertEquals(2, mct4.getFireCount());		
+		assertEquals(35, mct5.getFireCount());		
+	}
 
 	private List createEventStream(Map associations, String stream) {
 		List result = new ArrayList();
@@ -573,7 +826,6 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 		
 		return result;
 	}
-
 
 	private static class MessageThread extends Thread {
 		
@@ -647,13 +899,20 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 		}
 	}
 	
-	// Sneaky InvocationHandler that randomizes any list it dispatches as a message
+	// Sneaky InvocationHandler that can randomize any list it dispatches as a message,
+	// if directed to do so
 	private static class MsgInvocationHandler implements InvocationHandler {
 
 		private Object msgObject;
+		private boolean randomize;
 
 		public MsgInvocationHandler(Object msgObject) {
+			this(msgObject, true);
+		}
+		
+		public MsgInvocationHandler(Object msgObject, boolean randomize) {
 			this.msgObject = msgObject;
+			this.randomize = randomize;
 		}
 		
 		public synchronized Object invoke(Object obj, Method m, Object[] args)
@@ -662,10 +921,10 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 			Object result = null;
 			
 			if (m.getName().equals("getObject")) {
-				if (msgObject instanceof List) {
+				if (msgObject instanceof List && randomize) {
 					
 					List objects = (List) msgObject;
-					
+
 					int count = objects.size();
 					List copy = new ArrayList(objects);
 					List newList = new ArrayList(count);

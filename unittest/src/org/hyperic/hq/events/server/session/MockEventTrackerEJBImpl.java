@@ -97,29 +97,33 @@ public class MockEventTrackerEJBImpl
             expire = expiration + _currentTimeMillis;
         }
                 
-        Long teid = getNextId();
-        
-        TriggerEvent triggerEvent = new TriggerEvent(teid,
-                                                     eventObject, 
-                                                     tid, 
-                                                     eventObject.getTimestamp(), 
-                                                     expire);
+        Long teid;
         
         synchronized (monitor) {
 
+        	teid = getNextId();
+        
+        	TriggerEvent triggerEvent = new TriggerEvent(teid,
+        												 eventObject, 
+        												 tid, 
+        												 eventObject.getTimestamp(), 
+        												 expire);
+        
         	LinkedList triggerEvents = (LinkedList)_triggerId2TriggerEvents.get(tid);
 
         	if (triggerEvents == null) {
         		triggerEvents = new LinkedList();
+        		// Associate by trigger id
         		_triggerId2TriggerEvents.put(tid, triggerEvents);
         	}
 
         	addEvent(triggerEvents, triggerEvent);
         	
+        	// Associate by POJO primary key, pointing back to the list sibling event IDs
         	_triggerEventId2ContainingList.put(teid, triggerEvents);
+
+        	eventObject.setId(teid);
         }
-        
-        eventObject.setId(teid);
         
         return teid;
     }
@@ -170,20 +174,46 @@ public class MockEventTrackerEJBImpl
     	synchronized (monitor) {
     		for (Iterator idIt = teids.iterator(); idIt.hasNext(); ) {
     			Long teid = (Long) idIt.next();
+    			
+    			// Pull this trigger event ID out of any list that contains is.
     			LinkedList eventsList = (LinkedList) _triggerEventId2ContainingList.get(teid);
     			if (eventsList != null) {
-    				for (Iterator it = eventsList.iterator(); it.hasNext(); ) {
+    				boolean deleted = false;
+    				for (Iterator it = eventsList.iterator(); !deleted && it.hasNext(); ) {
     					TriggerEvent te = (TriggerEvent) it.next();
     					if (teid.equals(te.getId())) {
     						it.remove();
-    						break;
+    						deleted = true;
     					}
     				}
+    				
+    				if (!deleted) {
+    					dumpState();
+        				throw new RuntimeException("Attempt to delete by ID of object that does not exist: " +
+        						"teid=" + teid + ", no instance in trigger list");
+    				}
+    			} else {
+					dumpState();
+    				throw new RuntimeException("Attempt to delete by ID of object that does not exist: " +
+    						" teid=" + teid + ", no containing list");
     			}
 
     			_triggerEventId2ContainingList.remove(teid);
     		}
 		}
+    }
+    
+    private void dumpState() {
+    	// Must be run under monitor!
+    	for (Iterator it = _triggerId2TriggerEvents.entrySet().iterator(); it.hasNext(); ) {
+    		Map.Entry entry = (Map.Entry) it.next();
+    		System.err.println("Trigger ID " + entry.getKey() + ": " + entry.getValue());
+    	}
+
+    	for (Iterator it = _triggerEventId2ContainingList.entrySet().iterator(); it.hasNext(); ) {
+    		Map.Entry entry = (Map.Entry) it.next();
+    		System.err.println("Trigger event ID " + entry.getKey() + ": " + entry.getValue());
+    	}
     }
     
     /**
@@ -341,6 +371,7 @@ public class MockEventTrackerEJBImpl
     }
     
     private Long getNextId() {
+    	// Not thread-safe, call under monitor!
         return new Long(_nextId++);
     }
     

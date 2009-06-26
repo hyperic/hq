@@ -80,15 +80,40 @@ public class AbstractMultiConditionTriggerUnittest extends TestCase {
     	MockEvent evt = new MockEvent(new Long(instanceId), new Integer(instanceId));
     	AbstractEvent aEvt;
     	if (fired) {
-    		aEvt = new TriggerFiredEvent(evt.getInstanceId(), evt);
+    		aEvt = new MyFiredEvent(evt.getInstanceId(), evt);
     		aEvt.setId(new Long(1000 + evt.getId().longValue()));
-    		((TriggerFiredEvent) aEvt).setMessage("[TriggerFiredEvent: instanceId=" + aEvt.getInstanceId() + "]");
     	} else {
     		aEvt = new MyNotFiredEvent(evt.getInstanceId());
     		aEvt.setId(new Long(2000 + evt.getId().longValue()));
     	}
     	
     	return aEvt;
+    }
+    
+    private static class MyFiredEvent extends TriggerFiredEvent {
+    	
+    	public MyFiredEvent(Integer instanceId, AbstractEvent evt) {
+    		super(instanceId, evt);
+    	}
+    	
+    	public String toString() {
+    		return "[TriggerFiredEvent: instanceId=" + getInstanceId() + "]";
+    	}
+    	
+    	public int hashCode() {
+    		int hash = 7;
+    		hash = 37 * hash + getInstanceId().hashCode();
+    		
+    		return hash;
+    	}
+    	
+    	public boolean equals(Object another) {
+    		try {
+    			return getInstanceId().equals(((MyFiredEvent) another).getInstanceId());
+    		} catch (ClassCastException cce) {
+    			return false;
+    		}
+    	}
     }
     
     private static class MyNotFiredEvent extends TriggerNotFiredEvent {
@@ -99,6 +124,21 @@ public class AbstractMultiConditionTriggerUnittest extends TestCase {
     	
     	public String toString() {
     		return "[TriggerNotFiredEvent: instanceId=" + getInstanceId() + "]";
+    	}
+    	
+    	public int hashCode() {
+    		int hash = 7;
+    		hash = 37 * hash + getInstanceId().hashCode();
+    		
+    		return hash;
+    	}
+    	
+    	public boolean equals(Object another) {
+    		try {
+    			return getInstanceId().equals(((MyNotFiredEvent) another).getInstanceId());
+    		} catch (ClassCastException cce) {
+    			return false;
+    		}
     	}
     }
 }

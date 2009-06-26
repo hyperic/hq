@@ -118,6 +118,14 @@ public class TriggerFiredEvent extends AbstractEvent
         }
         return timestamp;
     }
+    
+    public static TriggerFiredEvent duplicate(TriggerFiredEvent orig) {
+    	try {
+    		return (TriggerFiredEvent) orig.clone();
+    	} catch (CloneNotSupportedException wontHappen) {
+    		return null;
+    	}
+    }
 
     public String toString() {
         if (events.length == 1) {
