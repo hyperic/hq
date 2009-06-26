@@ -37,7 +37,7 @@ import java.io.Serializable;
  * Subsystems will extend the abstract Event class to be able to
  * return a specific payload value.
  */
-public abstract class AbstractEvent implements Serializable {
+public abstract class AbstractEvent implements Serializable, Cloneable {
     
     private static final long serialVersionUID = 1300452915258577781L;
     
@@ -72,5 +72,4 @@ public abstract class AbstractEvent implements Serializable {
     public boolean isLoggingSupported() {
         return this instanceof LoggableInterface;
     }
-
 }

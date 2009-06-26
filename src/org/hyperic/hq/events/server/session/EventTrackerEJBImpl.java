@@ -212,9 +212,10 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * Delete a set of events referenced by a trigger, by those events' ID
      *
      * @param  idsOfEventsToDelete   The trigger event IDs (primary keys)
+     * @throws SQLException 
      * @ejb:interface-method
      */
-    public void deleteEvents(Set idsOfEventsToDelete) {
+    public void deleteEvents(Set idsOfEventsToDelete) throws SQLException {
         if (log.isDebugEnabled()) {
             log.debug("Delete referenced events by id");
         }
@@ -222,7 +223,11 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         TriggerEventDAO dao = getTriggerEventDAO();
         for (Iterator it = idsOfEventsToDelete.iterator(); it.hasNext(); ) {
         	Long teid = (Long) it.next();
-        	dao.deleteById(teid);
+        	try {
+        		dao.deleteById(teid);
+        	} catch (Exception e) {
+        		throw new SQLException("Error deleting trigger event object id=" + teid);
+        	}
         }
     }
     

@@ -127,4 +127,7 @@ public class TriggerEvent extends LongIdPersistedObject {
         _expiration = expiration;
     }    
 
+    public String toString() {
+    	return "[TriggerEvent: id=" + getId() + ", tid=" + getTriggerId() + "]";
+    }
 }
