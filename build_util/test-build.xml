@@ -30,7 +30,7 @@
 	
 	<echo message="Halt on error or failure: ${test.halt}"/>
 	<echo message="CI Build: ${ci.build}"/>
-    <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltonerror="${test.halt}" haltonfailure="${test.halt}">
+    <junit reloading="no" fork="true" forkmode="once" printsummary="yes">
         <jvmarg value="-Xmx1024m"/>
         <jvmarg value="-Xms1024m"/>
         <jvmarg value="-XX:MaxPermSize=300m"/>		
