@@ -212,7 +212,7 @@ public class MeasurementStartupListener
         }
     }
     
-    static DataInserter getAvailDataInserter() {
+    public static DataInserter getAvailDataInserter() {
         synchronized (LOCK) {
             return _availDataInserter;
         }

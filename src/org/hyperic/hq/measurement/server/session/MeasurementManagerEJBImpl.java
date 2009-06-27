@@ -1117,10 +1117,17 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     }
 
     /**
-     * @param subject
-     * @param mids
-     * @throws MeasurementUnscheduleException 
-     * @throws PermissionException 
+     * Synchronously disables measurements according to the mids array.  Removes
+     * measurements from the cache as well.
+     * XXX scottmf, may be a good idea to add a flag that specifies
+     * if the measurements should be removed in the background / foreground
+     * and removed from cache.
+     * XXX scottmf, probably a bad idea to throw a MeasurementUnscheduleException
+     * if a failure occurs considering this is done in batch without any
+     * error status on what succeeded and what did not.
+     * @param subject {@link AuthzSubject} checks if subject has modify
+     * permission on the {@link AppdefEntityID} associated with the mid
+     * @param mids {@link Integer} array of mids representing a MeasurementId
      * @ejb:interface-method
      */
     public void disableMeasurements(AuthzSubject subject, Integer[] mids)

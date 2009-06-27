@@ -117,7 +117,7 @@ public class Measurement extends PersistedObject
         return _enabled;
     }
 
-    protected void setEnabled(boolean enabled) {
+    public void setEnabled(boolean enabled) {
         _enabled = enabled;
     }
 
