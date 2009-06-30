@@ -562,20 +562,23 @@ public class AvailabilityManagerEJBImpl
             if (measCache != null) {
                 measIds = (List)measCache.get(resource.getId());
             }
-            if (measIds == null) {
+            if (measIds == null || measIds.size() == 0) {
                 resToGet.add(resource);
-            }
-            // may still be null if the Resource has not been configured
-            if (measIds == null) {
                 continue;
-            }
-        }
-        final Collection measIds = mMan.getAvailMeasurements(resToGet).values();
-        for (final Iterator it=measIds.iterator(); it.hasNext(); ) {
-            final List mids = (List)it.next();
-            for (final Iterator iter=mids.iterator(); iter.hasNext(); ) {
+            }           
+            for (final Iterator iter=measIds.iterator(); iter.hasNext(); ) {
                 final Measurement m = (Measurement)iter.next();
                 midsToGet.add(m.getId());
+            }
+        }
+        if (!resToGet.isEmpty()) {
+            final Collection measIds = mMan.getAvailMeasurements(resToGet).values();
+            for (final Iterator it=measIds.iterator(); it.hasNext(); ) {
+                final List mids = (List)it.next();
+                for (final Iterator iter=mids.iterator(); iter.hasNext(); ) {
+                    final Measurement m = (Measurement)iter.next();
+                    midsToGet.add(m.getId());
+                }
             }
         }
         return getLastAvail((Integer[])midsToGet.toArray(new Integer[0]));
