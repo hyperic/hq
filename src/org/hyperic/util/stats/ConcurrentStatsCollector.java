@@ -77,7 +77,7 @@ public final class ConcurrentStatsCollector {
         new ScheduledThreadPoolExecutor(1);
     private static final ConcurrentStatsCollector _instance =
         new ConcurrentStatsCollector();
-    private static final int WRITE_PERIOD = 15;
+    public static final int WRITE_PERIOD = 15;
     private final Sigar _sigar = new Sigar();
     private Long _pid;
     public static final String JVM_TOTAL_MEMORY = "JVM_TOTAL_MEMORY",
@@ -103,25 +103,34 @@ public final class ConcurrentStatsCollector {
         METRIC_DATA_COMPRESS_TIME    = "METRIC_DATA_COMPRESS_TIME",
         DB_ANALYZE_TIME              = "DB_ANALYZE_TIME",
         PURGE_EVENT_LOGS_TIME        = "PURGE_EVENT_LOGS_TIME",
-        PURGE_MEASUREMENTS_TIME      = "PURGE_MEASUREMENTS_TIME";
+        PURGE_MEASUREMENTS_TIME      = "PURGE_MEASUREMENTS_TIME",
+        MEASUREMENT_SCHEDULE_TIME    = "MEASUREMENT_SCHEDULE_TIME",
+        EMAIL_ACTIONS                = "EMAIL_ACTIONS",
+        MULTI_COND_TRIGGER_MON_WAIT	 = "MULTI_COND_TRIGGER_MON_WAIT";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
-    private final MBeanServer _mbeanServer = MBeanUtil.getMBeanServer();
-
+    private final MBeanServer _mbeanServer;
+    
     private ConcurrentStatsCollector() {
-        final char fs = File.separatorChar;
-        final String jbossLogSuffix =
-            "server" + fs + "default" + fs + "log" + fs + "hqstats" + fs;
-        final String d =
-            HQApp.getInstance().getRestartStorageDir().getAbsolutePath();
-        _baseDir = d + fs + jbossLogSuffix;
-        _log.info("using hqstats baseDir " + _baseDir);
-        final File dir = new File(_baseDir);
-        if (!dir.exists()) {
-            dir.mkdir();
-        }
-        registerInternalStats();
+    	final char fs = File.separatorChar;
+    	if (System.getProperty("hq.unittest.run") != null) {
+        	final String d =
+        		HQApp.getInstance().getRestartStorageDir().getAbsolutePath();
+        	final String jbossLogSuffix =
+        		"server" + fs + "default" + fs + "log" + fs + "hqstats" + fs;
+        	_baseDir = d + fs + jbossLogSuffix;
+        	_log.info("using hqstats baseDir " + _baseDir);
+        	final File dir = new File(_baseDir);
+        	if (!dir.exists()) {
+        		dir.mkdir();
+        	}
+    		_mbeanServer = MBeanUtil.getMBeanServer();
+    		registerInternalStats();
+    	} else {
+    		_mbeanServer = null;
+    		_baseDir = null;
+    	}
     }
 
     public final void register(final String statId) {
@@ -234,7 +243,7 @@ public final class ConcurrentStatsCollector {
         final String monthStr = (month < 10) ? "0"+month : String.valueOf(month);
         final int day = cal.get(Calendar.DAY_OF_MONTH);
         final String dayStr = (day < 10) ? "0"+day : String.valueOf(day);
-        String rtn = BASE_FILENAME+"-"+monthStr+"-"+dayStr+".csv";
+        String rtn = BASE_FILENAME+"-"+monthStr+"-"+dayStr;
         if (withTimestamp) {
             final int hour = cal.get(Calendar.HOUR_OF_DAY);
             final String hourStr = (hour < 10) ? "0"+hour : String.valueOf(hour);
@@ -242,9 +251,9 @@ public final class ConcurrentStatsCollector {
             final String minStr = (min < 10) ? "0"+min : String.valueOf(min);
             final int sec = cal.get(Calendar.SECOND);
             final String secStr = (sec < 10) ? "0"+sec : String.valueOf(sec);
-            rtn = rtn+"-"+hourStr+":"+minStr+":"+secStr;
+            rtn = rtn+"-"+hourStr+"."+minStr+"."+secStr;
         }
-        return _baseDir + rtn;
+        return _baseDir + rtn + ".csv";
     }
 
     public static final ConcurrentStatsCollector getInstance() {
