@@ -28,8 +28,15 @@ package org.hyperic.hq.plugin.mssql;
 import java.util.Properties;
 
 import org.hyperic.hq.product.Metric;
+import org.hyperic.hq.product.MetricNotFoundException;
+import org.hyperic.hq.product.MetricUnreachableException;
+import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.hq.product.Win32MeasurementPlugin;
+import org.hyperic.sigar.win32.Service;
+import org.hyperic.sigar.win32.Win32Exception;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -41,12 +48,15 @@ public class MsSQLMeasurementPlugin
 
     private static final String TOTAL_NAME  = "_Total";
 
-    protected String getDomainName(Metric metric) {
+    private String getServiceName(Metric metric) {
         Properties props = metric.getProperties();
         
-        String serviceName =
-            props.getProperty(Win32ControlPlugin.PROP_SERVICENAME,
-                              MsSQLDetector.DEFAULT_SERVICE_NAME);
+        return props.getProperty(Win32ControlPlugin.PROP_SERVICENAME,
+                                 MsSQLDetector.DEFAULT_SERVICE_NAME);
+    }
+
+    protected String getDomainName(Metric metric) {
+        String serviceName = getServiceName(metric);
 
         if (serviceName.equalsIgnoreCase(MsSQLDetector.DEFAULT_SERVICE_NAME)) {
             // not sure why they drop the 'MS' from the service name
@@ -87,5 +97,41 @@ public class MsSQLMeasurementPlugin
         }
 
         return template;
+    }
+    
+    private static int getServiceStatus(String name) {
+        Service svc = null;
+        try {
+            svc = new Service(name);
+            return svc.getStatus();
+        } catch (Win32Exception e) {
+            return Service.SERVICE_STOPPED;
+        } finally {
+            if (svc != null) {
+                svc.close();
+            }
+        }
+    }
+    
+    public MetricValue getValue(Metric metric) throws PluginException,
+        MetricNotFoundException, MetricUnreachableException {
+
+        String name = getServiceName(metric);
+        if (getServiceStatus(name) != Service.SERVICE_STOPPED) {
+            return super.getValue(metric);
+        }
+        //XXX should not have to do this, but pdh.dll seems to cache last
+        //value in some environments
+        if (metric.isAvail() ||
+            metric.getObjectPropString().equals("Type=Availability")) //XXX crusty old template
+        {
+            return new MetricValue(Metric.AVAIL_DOWN);
+        }
+        else if (getTypeInfo().getType() == TypeInfo.TYPE_SERVER) {
+            throw new MetricUnreachableException(metric.toString());
+        }
+        else {
+            return MetricValue.NONE; //log.error--
+        }
     }
 }
