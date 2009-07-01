@@ -61,17 +61,14 @@ public class MySqlServerDetector
     private static final String _logCtx = MySqlServerDetector.class.getName();
     private final Log _log = LogFactory.getLog(_logCtx);
     private Connection _conn;
-    // mysqld process name for unix systems
-    private static String PROCESS_NAME = "mysqld";
+    private static final List _ptqlQueries = new ArrayList();
+    private String _validQuery;
     static {
+        _ptqlQueries.add("State.Name.eq=mysqld");
         if (isWin32()) {
-            PROCESS_NAME = "mysqld-nt";
+            _ptqlQueries.add("State.Name.eq=mysqld-nt");
         }
     }
-    // this PTQL query matches the PROCESS_NAME and returns the parent process
-    // id.  An example process path is /usr/sbin/mysqld
-    private static final String PTQL_QUERY = "State.Name.eq=" + PROCESS_NAME;
-
     private static final String VERSION_4_0_x = "4.0.x",
                                 VERSION_4_1_x = "4.1.x",
                                 VERSION_5_0_x = "5.0.x",
@@ -268,20 +265,34 @@ public class MySqlServerDetector
 
     private Map getServerProcessMap()
     {
-        Map servers = new HashMap();
-        long[] pids = getPids(PTQL_QUERY);
-        for (int i=0; i<pids.length; i++)
-        {
-            String exe = getProcExe(pids[i]);
-            _log.debug("exe="+exe+" pid="+pids[i]);
-            if (exe == null) {
-                continue;
+        final Map servers = new HashMap();
+        final List pidArray = new ArrayList();
+        for (final Iterator it=_ptqlQueries.iterator(); it.hasNext(); ) {
+            final String ptql = (String)it.next();
+            final long[] pids = getPids(ptql);
+            if (pids.length > 0) {
+                // [HHQ-3218] this is hacky, but since we don't know which
+                // version of mysql is running until the ptql runs, we don't
+                // know what to set for the "process.query" config prop
+                // http://dev.mysql.com/doc/refman/5.1/en/windows-select-server.html
+                _validQuery = ptql;
+                pidArray.add(pids);
             }
-            File binary = new File(exe);
-            if (!binary.isAbsolute()) {
-                continue;
+        }
+        for (final Iterator it=pidArray.iterator(); it.hasNext(); ) {
+            final long[] pids = (long[])it.next();
+            for (int i=0; i<pids.length; i++) {
+                final String exe = getProcExe(pids[i]);
+                _log.debug("exe="+exe+" pid="+pids[i]);
+                if (exe == null) {
+                    continue;
+                }
+                final File binary = new File(exe);
+                if (!binary.isAbsolute()) {
+                    continue;
+                }
+                servers.put(new Long(pids[i]), binary.getAbsolutePath());
             }
-            servers.put(new Long(pids[i]), binary.getAbsolutePath());
         }
         return servers;
     }
@@ -303,7 +314,7 @@ public class MySqlServerDetector
         cprop.setValue("version", version);
         server.setCustomProperties(cprop);
         ConfigResponse productConfig = new ConfigResponse();
-        productConfig.setValue("process.query", PTQL_QUERY + getPtqlArgs(args));
+        productConfig.setValue("process.query", _validQuery + getPtqlArgs(args));
         setProductConfig(server, productConfig);
         // sets a default Measurement Config property with no values
         setMeasurementConfig(server, new ConfigResponse());
