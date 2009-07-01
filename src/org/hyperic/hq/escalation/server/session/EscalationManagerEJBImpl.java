@@ -971,10 +971,14 @@ public class EscalationManagerEJBImpl
                 GalertEscalationAlertType.GALERT
         };
         
+        boolean debugLog = _log.isDebugEnabled();
+        
         for (Iterator i=_stateDAO.findAll().iterator(); i.hasNext(); ) {
             EscalationState state = (EscalationState)i.next();
             
-            _log.info("Loading escalation state [" + state.getId() + "]");
+            if (debugLog) {
+            	_log.debug("Loading escalation state [" + state.getId() + "]");
+            }
             EscalationRuntime.getInstance().scheduleEscalation(state);
         }
     }
