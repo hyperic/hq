@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -62,6 +62,7 @@ import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.server.session.SessionBase;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
@@ -305,7 +306,7 @@ public class EscalationManagerEJBImpl
     public boolean startEscalation(PerformsEscalations def, 
                                    EscalatableCreator creator) 
     {
-        if (!AlertDefinitionManagerEJBImpl.getOne().areAlertsAllowed()) {
+        if (!AlertRegulator.getInstance().alertsAllowed()) {
             return false;
         }
         
@@ -621,10 +622,10 @@ public class EscalationManagerEJBImpl
         Escalation escalation = def.getEscalation();
 
         if (pause > 0 && escalation.isPauseAllowed()) {
-            long nextTime;      
-            if (pause > escalation.getMaxPauseTime()) {
-                pause = escalation.getMaxPauseTime();
-            }
+        	long nextTime;    	
+        	if (pause > escalation.getMaxPauseTime()) {
+        	    pause = escalation.getMaxPauseTime();
+        	}
         	if (pause == Long.MAX_VALUE) {
         		nextTime = pause;
                 moreInfo = " and paused escalation until fixed. " + moreInfo;
@@ -799,7 +800,8 @@ public class EscalationManagerEJBImpl
             state.setAcknowledgedBy(subject);
         }
 
-        if (!suppressNotification) {
+        if (!suppressNotification
+                && AlertRegulator.getInstance().alertNotificationsAllowed()) {
             if (state != null) {
                 sendNotifications(state, esc, subject, 
                                   state.getEscalation().isNotifyAll(), fixed,
@@ -969,10 +971,14 @@ public class EscalationManagerEJBImpl
                 GalertEscalationAlertType.GALERT
         };
         
+        boolean debugLog = _log.isDebugEnabled();
+        
         for (Iterator i=_stateDAO.findAll().iterator(); i.hasNext(); ) {
             EscalationState state = (EscalationState)i.next();
             
-            _log.info("Loading escalation state [" + state.getId() + "]");
+            if (debugLog) {
+            	_log.debug("Loading escalation state [" + state.getId() + "]");
+            }
             EscalationRuntime.getInstance().scheduleEscalation(state);
         }
     }
