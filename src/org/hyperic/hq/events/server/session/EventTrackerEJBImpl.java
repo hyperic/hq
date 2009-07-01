@@ -224,9 +224,9 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         for (Iterator it = idsOfEventsToDelete.iterator(); it.hasNext(); ) {
         	Long teid = (Long) it.next();
         	try {
-        		dao.deleteById(teid);
+                    dao.deleteById(teid);
         	} catch (Exception e) {
-        		throw new SQLException("Error deleting trigger event object id=" + teid, e);
+                    throw new SQLException("Error deleting trigger event object id=" + teid);
         	}
         }
     }
