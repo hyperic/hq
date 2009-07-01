@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -705,7 +707,10 @@ public class MetricSessionEJB extends BizappSessionEJB {
              }
          }
         
-        return count == 0 ? MeasurementConstants.AVAIL_UNKNOWN : sum / count;
+        final double r = (count == 0) ?
+            MeasurementConstants.AVAIL_UNKNOWN : sum / count;
+        final BigDecimal b = new BigDecimal(r, new MathContext(10));
+        return b.doubleValue();
     }
 
     protected Map findMetrics(int sessionId, AppdefEntityID entId, long begin,
