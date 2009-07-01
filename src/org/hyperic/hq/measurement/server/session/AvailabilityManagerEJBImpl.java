@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -371,7 +373,7 @@ public class AvailabilityManagerEJBImpl
                     continue;
                 }
                 if (rtn.size() <= i) {
-                    rtn.add(val);
+                    rtn.add(round(val));
                 } else {
                     updateMetricValue(val, (HighLowMetricValue)rtn.get(i));
                 }
@@ -382,6 +384,12 @@ public class AvailabilityManagerEJBImpl
             rtn.addAll(getDefaultHistoricalAvail(end));
         }
         return rtn;
+    }
+
+    private HighLowMetricValue round(HighLowMetricValue val) {
+        final BigDecimal b = new BigDecimal(val.getValue(), new MathContext(10));
+        val.setValue(b.doubleValue());
+        return val;
     }
 
     private HighLowMetricValue updateMetricValue(HighLowMetricValue newVal,
@@ -406,6 +414,7 @@ public class AvailabilityManagerEJBImpl
                 ((newVal.getValue()+(oldVal.getValue()*count)))/(count+1);
             oldVal.setValue(value);
             oldVal.incrementCount();
+            round(oldVal);
         }
         return oldVal;
     }
