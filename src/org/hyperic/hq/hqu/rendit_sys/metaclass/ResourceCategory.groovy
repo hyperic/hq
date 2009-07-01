@@ -497,17 +497,38 @@ class ResourceCategory {
                                             proto.name + " parent = " + parent.name
                 
                 server = svrMan.findServerById(servers[0].id) // value -> pojo
-            } else {
+            } else if (parent.isServer()) {
+                // Normal case, create service on a server
                 server = toServer(parent)
+            } else {
+                // Invalid parameters
+                throw new IllegalArgumentException("Invalid prototypes passed to " +
+                                                   "createInstance, cannot create " +
+                                                   proto.name + " on " + parent.name)
             }
+
+            if (!serverType.equals(server.getServerType())) {
+                throw new IllegalArgumentException("Cannot create resources of" +
+                                                   " type " + serviceType.name +
+                                                   " on " + server.getServerType().name)
+            }
+
             def res = svcMan.createService(subject, server,  serviceType, name,
                                            "", "", null).resource
             setConfig(res, cfg, subject)
             return res
-        } else if (proto.isServerPrototype()) {
+        } else if (proto.isServerPrototype() && parent.isPlatform()) {
             Platform platform = toPlatform(parent)
+            def serverType = svrMan.findServerType(proto.instanceId)
+            def platformTypes = serverType.getPlatformTypes()
             ServerValue sv = new ServerValue()
             sv.name        = name
+
+            if (!platformTypes.contains(platform.getPlatformType())) {
+                throw new IllegalArgumentException("Cannot create resources of " +
+                                                   "type " + serverType.name +
+                                                   " on " + platform.getPlatformType().name)
+            }
 
             if (cfg['installpath']) {
                 sv.installPath = cfg['installpath']
@@ -530,9 +551,9 @@ class ResourceCategory {
             setConfig(res, cfg, subject)
             return res
         } else {
-            throw new IllegalArgumentException("Resource prototype [" + 
-                                               "${proto.name} not available " + 
-                                               "to createInstance()")
+            throw new IllegalArgumentException("Cannot create resources of type " +
+                                               proto.name + " on resource " +
+                                               parent.name)
         }
     }
 
