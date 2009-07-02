@@ -32,7 +32,7 @@
  --%>
 
 
-<tiles:importAttribute name="showRt" ignore="true"/>
+<tiles:importAttribute name="showIQSettings" ignore="true"/>
 
 <script src="<html:rewrite page="/js/"/>functions.js" type="text/javascript"></script>
 <link rel=stylesheet href="<html:rewrite page="/css/"/>win.css" type="text/css">
@@ -83,16 +83,18 @@
 </table>
 <!--  /  -->
 
-<tiles:insert definition=".header.tab">
-  <tiles:put name="tabKey" value="admin.settings.ARCSettings"/>
-</tiles:insert>
-<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
-  <tr>
-    <td width="30%" class="BlockLabel"><fmt:message key="admin.settings.ARCURL"/></td>
-    <td width="40%" class="BlockContent"><html:text size="31" property="arcURL" /></td>
-    <td width="30%" class="BlockContent" colspan="2"></td>
-  </tr>
-  </table>
+<c:if test="${showIQSettings}">
+	<tiles:insert definition=".header.tab">
+	  <tiles:put name="tabKey" value="admin.settings.ARCSettings"/>
+	</tiles:insert>
+	<table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">
+	  <tr>
+	    <td width="30%" class="BlockLabel"><fmt:message key="admin.settings.ARCURL"/></td>
+	    <td width="40%" class="BlockContent"><html:text size="31" property="arcURL" /></td>
+	    <td width="30%" class="BlockContent" colspan="2"></td>
+	  </tr>
+	  </table>
+</c:if>
 
 <!--  UPDATE CONFIG TITLE -->
 <tiles:insert definition=".header.tab">  
