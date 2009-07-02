@@ -111,27 +111,27 @@ public final class ConcurrentStatsCollector {
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
     private final MBeanServer _mbeanServer;
-    
+
     private ConcurrentStatsCollector() {
-    	final char fs = File.separatorChar;
-    	final String prop = System.getProperty("hq.unittest.run");
-    	if (prop == null || !prop.equalsIgnoreCase("true")) {
-        	final String d =
-        		HQApp.getInstance().getRestartStorageDir().getAbsolutePath();
-        	final String jbossLogSuffix =
-        		"server" + fs + "default" + fs + "log" + fs + "hqstats" + fs;
-        	_baseDir = d + fs + jbossLogSuffix;
-        	_log.info("using hqstats baseDir " + _baseDir);
-        	final File dir = new File(_baseDir);
-        	if (!dir.exists()) {
-        		dir.mkdir();
-        	}
-    		_mbeanServer = MBeanUtil.getMBeanServer();
-    		registerInternalStats();
-    	} else {
-    		_mbeanServer = null;
-    		_baseDir = null;
-    	}
+        final char fs = File.separatorChar;
+        final String prop = System.getProperty("hq.unittest.run");
+        if (prop == null || !prop.equalsIgnoreCase("true")) {
+            final String d = HQApp.getInstance().getRestartStorageDir()
+                .getAbsolutePath();
+            final String jbossLogSuffix = "server" + fs + "default" + fs
+                + "log" + fs + "hqstats" + fs;
+            _baseDir = d + fs + jbossLogSuffix;
+            _log.info("using hqstats baseDir " + _baseDir);
+            final File dir = new File(_baseDir);
+            if (!dir.exists()) {
+                dir.mkdir();
+            }
+            _mbeanServer = MBeanUtil.getMBeanServer();
+            registerInternalStats();
+        } else {
+            _mbeanServer = null;
+            _baseDir = null;
+        }
     }
 
     public final void register(final String statId) {
