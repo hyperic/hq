@@ -800,8 +800,7 @@ public class EscalationManagerEJBImpl
             state.setAcknowledgedBy(subject);
         }
 
-        if (!suppressNotification
-                && AlertRegulator.getInstance().alertNotificationsAllowed()) {
+        if (!suppressNotification) {
             if (state != null) {
                 sendNotifications(state, esc, subject, 
                                   state.getEscalation().isNotifyAll(), fixed,
