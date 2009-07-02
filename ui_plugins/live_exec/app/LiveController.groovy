@@ -7,6 +7,8 @@ import org.hyperic.hq.livedata.shared.LiveDataCommand
 import org.json.JSONObject
 import org.json.JSONArray
 
+import javax.servlet.http.HttpServletResponse
+
 class LiveController 
 	extends BaseController
 {
@@ -110,6 +112,14 @@ class LiveController
             }
             res.put(val)
         }
+        
+        HttpServletResponse response = getInvokeArgs().getResponse();
+        
+        // IE will cache these responses, so we need make sure this doesn't happen
+    	// by setting the appropriate response headers.
+    	response.addHeader("Pragma", "no-cache");
+    	response.addHeader("Cache-Control", "no-cache");
+    	response.addIntHeader("Expires", -1);
         
         JSONObject jsres = new JSONObject()
         jsres.put('results', res)
