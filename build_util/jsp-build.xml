@@ -20,7 +20,7 @@
 
   <target name="precompile-jsp" 
           description="Precompile JSPs into Java Source"
-          depends="precompile-jsp-check,init-taskdefs,pack"
+          depends="precompile-jsp-check,init-taskdefs"
           unless="precompile-jsp.notrequired">
     <path id="jsp-jars" >
        <path refid="alljars" />

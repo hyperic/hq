@@ -126,9 +126,9 @@
 	<path location="${thirdparty.lib}/dbunit-2.2.jar" />
   </path>
 
-  <path id="emma.lib">
-    <pathelement location="${thirdparty.lib}/emma.jar" />
-    <pathelement location="${thirdparty.lib}/emma_ant.jar" />
+
+  <path id="clover.classpath">
+	<pathelement location="${thirdparty.lib}/com.springsource.com.cenqua.clover-2.4.2.jar" />
   </path>
 
   <path id="remotejars">    
@@ -146,8 +146,6 @@
     <fileset dir="${pdk.lib}"
              excludes="hq-product.jar"
              includes="**/*.jar" />
-    <!-- needed for coverage information -->
-    <fileset dir="${thirdparty.lib}" includes="emma.jar"/>
     <path location="${build.dir}/classes" />
   </path>
 
@@ -168,30 +166,7 @@
      <property name="init-props.notrequired" value="true"/>
   </target>
 
-  <target name="init-internal-taskdefs" 
-          unless="init-internal-taskdefs.notrequired">
-    <macrodef name="hq-javac">
-      <attribute name="destdir"      default="${build.dir}/classes"/>
-      <attribute name="source"       default="${hq.javac.source}"/>
-      <attribute name="target"	     default="${hq.javac.target}"/>
-      <attribute name="deprecation"  default=""/>
-      <element name="javac-body" implicit="yes"/>      
-
-      <sequential>
-        <javac destdir="@{destdir}"
-               optimize="${hq.javac.optimize}"
-               debug="${hq.javac.debug}"
-               source="@{source}"
-               target="@{target}">
-          <javac-body/>
-        </javac>
-      </sequential>
-    </macrodef>
-
-    <property name="init-internal-taskdefs.notrequired" value="true"/>
-  </target>
-
-  <target name="init" depends="init-props,init-internal-taskdefs"
+  <target name="init" depends="init-props"
           unless="init.notrequired">
      <property name="init.notrequired" value="true"/>
   </target>
@@ -210,36 +185,77 @@
 
   <!-- ==================== Compile java sources ==================== -->
   <target name="compile-app-sources" depends="init">
-      <mkdir dir="${build.dir}/classes" />
-      <hq-javac destdir="${build.dir}/classes">
-        <classpath>
+	<path id="compile.classpath">
             <path refid="alljars"/>
             <path refid="testjars"/>
             <path location="${build.dir}/tools/txsnatch/classes"/>
-        </classpath>
+    </path>
+    <path id="src.path">
+		  <path location="${build.dir}/src" />
+          <path location="${basedir}/src" />
+		  <path location="${basedir}/unittest/src" />
+    </path>
+    <compile-app classpath.id="compile.classpath" srcpath.id="src.path" output.dir="${build.dir}/classes"/>
+   </target>
+
+  <macrodef name="compile-app">
+		<attribute name="classpath.id"/>
+		<attribute name="srcpath.id"/>
+		<attribute name="output.dir"/>
+      <sequential>
+	  <antcall target="compile-txsnatch"/>
+      <mkdir dir="@{output.dir}" />
+      <hq-javac destdir="@{output.dir}">
+        <classpath refid="@{classpath.id}"/>
+        <src refid="@{srcpath.id}"/>
         <src>
-          <!-- Generated sources -->
-          <path location="${build.dir}/src" />
-          <!-- Shared and utility sources -->
-          <path location="src" />
-          <!-- Test sources -->
-		  <path location="unittest/src"/>
-          <!-- Plugin sources -->
-          <dirset dir="plugins">
+			<path location="${basedir}/plugins/system/src"/>
+		</src>
+        <exclude name="org/hyperic/hq/ui/**/*.java" />
+        <exclude name="org/hyperic/ui/tapestry/**/*.java" />
+     </hq-javac>
+     <antcall target="compile-plugins"/>
+	 <antcall target="compile-java5-plugins"/>
+	</sequential>
+  </macrodef>
+
+  <target name="compile-plugins">
+	 <hq-javac destdir="${build.dir}/classes">
+        <classpath>
+	 		<path refid="alljars"/>
+	       	<path refid="testjars"/>
+	        <path location="${build.dir}/classes"/>
+		</classpath>
+        <src>
+          <dirset dir="${basedir}/plugins">
             <include name="*/src"/>
             <exclude name="xen/src"/>
             <exclude name="vim/src"/>
           </dirset>
         </src>
-        <exclude name="org/hyperic/hq/ui/**/*.java" />
-        <exclude name="org/hyperic/ui/tapestry/**/*.java" />
-        <src>
-          <path location="src/org/hyperic/hq/ui/server" />
-        </src>
       </hq-javac>
   </target>
+
+   <target name="compile-java5-plugins">
+	    <hq-javac destdir="${build.dir}/classes" source="1.5" target="1.5">
+	      <classpath>
+			<path refid="alljars" />
+			<path refid="testjars" />
+			<path location="${build.dir}/classes"/>
+		  </classpath>
+	      <src>
+	        <path location="${basedir}/plugins/xen/src" />
+	        <path location="${basedir}/plugins/vim/src" />
+	      </src>
+	      <include name="org/hyperic/hq/plugin/xen/**"/>
+	      <include name="com/xensource/**"/>
+	      <include name="org/hyperic/hq/plugin/vim/**"/>
+	    </hq-javac>
+  </target>
     
-  <target name="copy-resources" depends="init">
+
+ <target name="copy-resources" depends="init">
+	
       <!-- Copy resources -->
       <copy toDir="${build.dir}/classes">
         <fileset dir="src" includes="**/*.properties" />
@@ -278,7 +294,7 @@
   </target>
 
   <target name="compile" description="Compile sources" 
-          depends="compile-txsnatch,compile-app-sources,copy-resources,compile-ui"/>
+          depends="compile-app-sources,copy-resources,compile-ui"/>
 
   <!-- ==================== JSP precompile ============================ -->
   
@@ -557,35 +573,40 @@
   <!-- ==================== UI packaging ==================== -->
 
   <target name="compile-ui" description="compiles the ui classes" depends="init">
+ 		<mkdir dir="${war.dir}/WEB-INF/lib" />
+		<path id="compile.classpath">
+			<path refid="alljars" />
+		    <path refid="testjars" />
+	     </path>
+	     <path id="src.path">
+			<path location="${build.dir}/src" />
+		    <path location="${basedir}/src" />
+			<path location="${basedir}/unittest/src" />
+		 </path>
+		<compile-ui-sources srcpath.id="src.path" output.dir="${build.dir}/classes" classpath.id="compile.classpath"/>
+  </target>
 
+ 
+ 
+  <macrodef name="compile-ui-sources">
+		<attribute name="output.dir"/>
+		<attribute name="srcpath.id"/>
+		<attribute name="classpath.id"/>
+	<sequential>
     <taskdef resource="net/sf/antcontrib/antcontrib.properties"
              classpathref="alljars"/>
-
-    <mkdir dir="${hq.home}/build/classes" />
-    <mkdir dir="${war.dir}/WEB-INF/lib" />
-
-    <hq-javac destdir="${hq.home}/build/classes" source="1.5" target="1.5">
+    <mkdir dir="@{output.dir}" />
+    <!-- The UI needs to be built with 1.5 features -->
+    <hq-javac destdir="@{output.dir}" source="1.5" target="1.5">
       <!-- The UI needs to be built with 1.5 features -->
-      <classpath>
-        <path refid="alljars" />
-        <path refid="testjars" />
-      </classpath>
-      <src>
-        <path location="${hq.home}/src" />
-        <path location="${hq.home}/plugins/xen/src" />
-        <path location="${hq.home}/plugins/vim/src" />
-        <!-- Test sources --> 
-        <path location="${hq.home}/unittest/src"/>
-      </src>
+      <classpath refid="@{classpath.id}"/>
+      <src refid="@{srcpath.id}"/>
       <include name="org/hyperic/hq/ui/**" />
       <include name="org/hyperic/ui/tapestry/**" />
-      <!-- Xen api requires 1.5 -->
-      <include name="org/hyperic/hq/plugin/xen/**"/>
-      <include name="com/xensource/**"/>
-      <include name="org/hyperic/hq/plugin/vim/**"/>
     </hq-javac>
-
-  </target>
+  </sequential>
+</macrodef>
+ 
   
   <target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )"
           depends="pack-ear,pack-test">
@@ -761,7 +782,7 @@
 
   <target name="redeploy-ui" depends="undeploy-ui,deploy-ui,trigger-jboss-reload"/>
 
-  <target name="minify-ui" depends="init-taskdefs, init-internal-taskdefs, pack-war">
+  <target name="minify-ui" depends="init-taskdefs, pack-war">
     <for param="file">
       <path>
         <fileset dir="${war.dir}" includes="**/*.js"/>
@@ -1415,15 +1436,31 @@
           depends="init,xdoclet,hibernate-prep,build" >
   </target>
 
-  <!-- When running the 'test' target 'test-all' must be run to deploy the 
+   <target name="pack-test-coverage">
+	 <copy todir="${war.dir}/WEB-INF/lib/" >
+	      <fileset dir="${thirdparty.lib}" >
+	        <include name="com.springsource.com.cenqua.clover-*.jar" />
+	      </fileset>
+	    </copy>
+
+	    <copy todir="${ROOT.war}/WEB-INF/lib/">
+			 <fileset dir="${thirdparty.lib}" includes="com.springsource.com.cenqua.clover-*.jar"/>
+		</copy>
+   </target>
+
+   <!-- When running the 'test' target 'test-all' must be run to deploy the 
        tests into the EAR and ensure deferrable constraints are set correctly -->
-  <target name="test-all">
+  <target name="test-all" depends="test-build, pack-test-ear" />
+
+  <target name="test-build">
     <property name="unittest-lib" location="${hq.home}/unittest/lib" />
     <echo message="using unittest.lib as -> ${unittest-lib}"/>    
     <antcall target="all">
       <param name="unittest.lib" value="${unittest-lib}"/>
     </antcall>
+  </target>
 
+   <target name="pack-test-ear">
     <!-- Package the test jars and deploy into the EAR -->
     <jar file="${ear.dir}/hq-test.jar" basedir="${build.dir}/classes" > 
       <include name="org/hyperic/**/*_test*"/>
@@ -1434,8 +1471,12 @@
       <fileset dir="${build.dir}/dd/session-test" includes="*" />
     </copy>
 
+    <copy todir="${ear.dir}/lib">
+		<fileset dir="${thirdparty.lib}" includes="com.springsource.com.cenqua.clover-*.jar"/>
+	</copy>
+	
     <!-- Rewrite the manifest to include the test jars -->
-    <antcall target="write-ear-manifest"/>
+    <antcall target="write-ear-manifest" inheritAll="false"/>
 
     <!-- Copy in application.xml that includes the test EJBs -->
     <copy file="etc/application-test.xml"
@@ -1524,7 +1565,7 @@
 	   (see the "URLs" attribute for the URLDeploymentScanner in 
 	    product-plugin-service.xml) -->		
   <target name="test-prepare-jboss" 
-          depends="test-all,prepare-jboss"
+          depends="prepare-jboss"
           description="Prepare jboss for in-container unit testing">
 	  
       <delete dir="${jboss.home}/server/unittest"/>
@@ -1550,12 +1591,15 @@
 			  <include name="jmock-core-1.2.0.jar"/>
 			  <include name="dbunit*.jar"/>
 			  <include name="junit*.jar"/>
+			
 		  </fileset>	  
       </copy>	  
 	  
       <echo message="Copying code coverage libraries.."/>
       <copy todir="${jboss.home}/server/unittest/lib">
-          <fileset dir="${thirdparty.lib}" includes="emma.jar"/>
+          <fileset dir="${thirdparty.lib}">
+			<include name="com.springsource.com.cenqua.clover-*.jar"/>
+		  </fileset>
       </copy>
  	  
       <echo message="Before running unit tests DON'T FORGET to set the connectionURL in the 'unittest' configuration hq-ds.xml to point at the unit test database."/>

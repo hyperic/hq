@@ -86,4 +86,22 @@
     </if>
   </target>
 
+  <macrodef name="hq-javac">
+    <attribute name="destdir"      default="${build.dir}/classes"/>
+    <attribute name="source"       default="${hq.javac.source}"/>
+    <attribute name="target"	     default="${hq.javac.target}"/>
+    <attribute name="deprecation"  default=""/>
+    <element name="javac-body" implicit="yes"/>      
+
+    <sequential>
+      <javac destdir="@{destdir}"
+             optimize="${hq.javac.optimize}"
+             debug="${hq.javac.debug}"
+             source="@{source}"
+             target="@{target}">
+        <javac-body/>
+      </javac>
+    </sequential>
+  </macrodef>
+
 </project>

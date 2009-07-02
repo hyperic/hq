@@ -600,7 +600,7 @@ public class ProductPluginManager extends PluginManager {
         String[] platforms = null;
         String thisPlatform = OperatingSystem.getInstance().getName();
         String name = plugin.getName();
-        String skipMsg;
+        String skipMsg = null;
 
         if (DEBUG_LIFECYCLE) {
             skipMsg =
