@@ -188,8 +188,8 @@ public class MultiConditionTrigger
         // Delete any past invalidated events
 		try {
 			etracker.deleteEvents(persistedEventsToDelete);
-		} catch (SQLException sqle) {
-			log.error("Error deleting events for trigger ID " + getId(), sqle);
+		} catch (Exception e) {
+			log.error("Error deleting events for trigger ID " + getId(), e);
 		}
 		if (log.isDebugEnabled()) {
 			log.debug("MultiConditionTrigger trigger id=" + getId() +
@@ -384,7 +384,7 @@ public class MultiConditionTrigger
 				log.debug("MultiConditionTrigger trigger id=" + getId() +
 						" deleting references");
 			}
-		} catch (SQLException e) {
+		} catch (Exception e) {
 			// It's bad, but not unrecoverable, if we can't delete the old events now.
 			// We can do it next time.
 			log.warn("Failed to remove all references to trigger id=" +
@@ -696,7 +696,7 @@ public class MultiConditionTrigger
     						" deleting references");
     			}
       
-            } catch (SQLException e) {
+            } catch (Exception e) {
             	// Log the error, but we still want to fire
             	log.error("Failed to delete reference for trigger id=" +
             			   getId(), e);

@@ -252,7 +252,7 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 			
 			try {
 				_eventTracker.deleteReference(mct.getId());
-			} catch (SQLException notInMockImpl) {
+			} catch (Exception notInMockImpl) {
 				
 			}
 			
@@ -430,7 +430,7 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 			
 			try {
 				_eventTracker.deleteReference(mct.getId());
-			} catch (SQLException notInMockImpl) {
+			} catch (Exception notInMockImpl) {
 				
 			}
 
@@ -536,7 +536,7 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 			_eventTracker.deleteReference(mct3.getId());
 			_eventTracker.deleteReference(mct4.getId());
 			_eventTracker.deleteReference(mct5.getId());
-		} catch (SQLException notInMockImpl) {
+		} catch (Exception notInMockImpl) {
 		
 		}
 		
@@ -688,7 +688,7 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 			_eventTracker.deleteReference(mct3.getId());
 			_eventTracker.deleteReference(mct4.getId());
 			_eventTracker.deleteReference(mct5.getId());
-		} catch (SQLException notInMockImpl) {
+		} catch (Exception notInMockImpl) {
 
 		}
 

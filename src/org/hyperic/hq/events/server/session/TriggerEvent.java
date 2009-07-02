@@ -127,6 +127,13 @@ public class TriggerEvent extends LongIdPersistedObject {
         _expiration = expiration;
     }    
 
+    public int hashCode() {
+        int res = super.hashCode();
+        res = 37*res + (_triggerId != null ? _triggerId.hashCode() : 0);
+        res = 37*res + (_ctime != 0 ? new Long(_ctime).hashCode(): 0);
+        return res;
+    }
+
     public String toString() {
     	return "[TriggerEvent: id=" + getId() + ", tid=" + getTriggerId() + "]";
     }

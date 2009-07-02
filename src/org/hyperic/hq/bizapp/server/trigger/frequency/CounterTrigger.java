@@ -227,7 +227,7 @@ public class CounterTrigger extends AbstractTrigger
                 		log.debug("CounterTrigger id=" + getId()+ " deleting references.");
                 	}
                     purgeCounter = 0;
-                } catch (SQLException exc) {
+                } catch (Exception exc) {
                     throw new ActionExecuteException(
                         "Failed to delete event references for trigger id=" + 
                         getId(), exc);                  

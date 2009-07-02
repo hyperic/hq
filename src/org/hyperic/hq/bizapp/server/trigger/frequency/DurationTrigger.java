@@ -544,7 +544,7 @@ public class DurationTrigger extends AbstractTrigger
             // Get ready to fire, reset trigger state.
             eTracker.deleteReference(getId());
             _purgeCount = 0;
-        } catch (SQLException exc) {
+        } catch (Exception exc) {
             // It's ok if we can't delete the old events now.
             // We can do it next time.
             log.warn("Failed to remove all references to trigger id="+getId(), exc);  

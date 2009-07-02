@@ -149,7 +149,7 @@ public class MockEventTrackerEJBImpl
     /**
      * @see org.hyperic.hq.events.shared.EventTrackerLocal#deleteReference(java.lang.Integer)
      */
-    public void deleteReference(Integer tid) throws SQLException {
+    public void deleteReference(Integer tid) {
         _expectedNumCalls.inc();
 
         synchronized (monitor) {

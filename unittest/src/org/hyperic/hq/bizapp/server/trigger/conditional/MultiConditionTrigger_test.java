@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.bizapp.server.trigger.conditional;
 
+import java.util.LinkedList;
+
 import javax.naming.InitialContext;
 
 import org.hyperic.hq.bizapp.server.AbstractMultiConditionTriggerUnittest;
@@ -33,6 +35,7 @@ import org.hyperic.hq.events.ext.MockTriggerFireStrategy;
 import org.hyperic.hq.events.ext.TriggerFireStrategy;
 import org.hyperic.hq.events.server.session.MockEventTrackerEJBImpl;
 import org.hyperic.hq.events.server.session.MockEventTrackerLocalHome;
+import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocalHome;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
 import org.mockejb.jndi.MockContextFactory;
@@ -394,8 +397,91 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
     	t2.processEvent(e7);
     	assertEquals(2, _eventTracker.getEventsCount(tid2));
     }
-        
-    private void pause(long time) {
+
+    public void testStateTracking() throws Exception {
+    	_testStateTracking(true, 1501);
+    	_testStateTracking(false, 6401);
+    }
+      
+    private void _testStateTracking(boolean durableTrigger, int tid) throws Exception {
+    	Integer tid1 = new Integer(tid++);
+    	MockMultiConditionTrigger t1 = 
+			createTrigger(tid1, "1&2&3", 0, durableTrigger, true);
+    	
+    	// One "fired" event -- gets stored in the stream
+    	AbstractEvent e1 = createEvent(1, true);
+    	t1.processEvent(e1);
+    	assertEquals(1, _eventTracker.getEventsCount(tid1));
+    	LinkedList eventStream = _eventTracker.getReferencedEventStreams(tid1);
+    	assertEquals(1, eventStream.size());
+    	EventObjectDeserializer linker = (EventObjectDeserializer) eventStream.get(0);
+    	AbstractEvent evt = linker.deserializeEventObject();
+    	assertNotNull(evt);
+    	assertTrue(evt.equals(e1));
+    	
+    	// "notfired" for the same condition, with no other conditions fired --
+    	// this should cause the stream to be emptied
+    	AbstractEvent e2 = createEvent(1, false);
+    	t1.processEvent(e2);
+    	assertEquals(0, _eventTracker.getEventsCount(tid1));
+    	eventStream = _eventTracker.getReferencedEventStreams(tid1);
+    	assertEquals(0, eventStream.size());
+    	
+    	// "fired" for the same condition again
+    	AbstractEvent e3 = createEvent(1, true);
+    	t1.processEvent(e3);
+    	assertEquals(1, _eventTracker.getEventsCount(tid1));
+    	eventStream = _eventTracker.getReferencedEventStreams(tid1);
+    	assertEquals(1, eventStream.size());
+    	linker = (EventObjectDeserializer) eventStream.get(0);
+    	evt = linker.deserializeEventObject();
+    	assertNotNull(evt);
+    	assertTrue(evt.equals(e3));
+    	
+    	// "fired" for a different condition
+    	AbstractEvent e4 = createEvent(2, true);
+    	t1.processEvent(e4);
+    	assertEquals(2, _eventTracker.getEventsCount(tid1));
+    	eventStream = _eventTracker.getReferencedEventStreams(tid1);
+    	assertEquals(2, eventStream.size());
+    	linker = (EventObjectDeserializer) eventStream.get(0);
+    	evt = linker.deserializeEventObject();
+    	assertNotNull(evt);
+    	assertTrue(evt.equals(e3));
+    	linker = (EventObjectDeserializer) eventStream.get(1);
+    	evt = linker.deserializeEventObject();
+    	assertNotNull(evt);
+    	assertTrue(evt.equals(e4));
+    	
+    	// Now do a "notfired" for the first event in the stream.  Should end
+    	// up with two events, first not fired, second fired.
+    	AbstractEvent e5 = createEvent(1, false);
+    	t1.processEvent(e5);
+    	assertEquals(1, _eventTracker.getEventsCount(tid1));
+    	eventStream = _eventTracker.getReferencedEventStreams(tid1);
+    	assertEquals(1, eventStream.size());
+    	linker = (EventObjectDeserializer) eventStream.get(0);
+    	evt = linker.deserializeEventObject();
+    	assertNotNull(evt);
+    	assertTrue(evt.equals(e4));
+    	
+    	// flapping states
+    	for (int i = 0; i < 30; ++i) {
+    		t1.processEvent(createEvent(1, true));
+    		t1.processEvent(createEvent(1, false));
+    	}
+    	
+    	// Should now be in the same place we were before this loop
+    	assertEquals(1, _eventTracker.getEventsCount(tid1));
+    	eventStream = _eventTracker.getReferencedEventStreams(tid1);
+    	assertEquals(1, eventStream.size());
+    	linker = (EventObjectDeserializer) eventStream.get(0);
+    	evt = linker.deserializeEventObject();
+    	assertNotNull(evt);
+    	assertTrue(evt.equals(e4));
+	}
+
+	private void pause(long time) {
     	try {
     		Thread.sleep(time + 1);
     	} catch (InterruptedException ie) {
