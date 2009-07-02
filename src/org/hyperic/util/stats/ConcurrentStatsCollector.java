@@ -114,7 +114,8 @@ public final class ConcurrentStatsCollector {
     
     private ConcurrentStatsCollector() {
     	final char fs = File.separatorChar;
-    	if (System.getProperty("hq.unittest.run") != null) {
+    	final String prop = System.getProperty("hq.unittest.run");
+    	if (prop == null || !prop.equalsIgnoreCase("true")) {
         	final String d =
         		HQApp.getInstance().getRestartStorageDir().getAbsolutePath();
         	final String jbossLogSuffix =
