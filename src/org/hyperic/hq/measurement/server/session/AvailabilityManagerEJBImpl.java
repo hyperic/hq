@@ -725,10 +725,9 @@ public class AvailabilityManagerEJBImpl
                 updateCache(availPoints, updateList, outOfOrderAvail);
                 debugTimes(begin, "updateCache", availPoints.size());
                 begin = getDebugTime(debug);
-                _currAvails =
-                    getOne()._setCurrAvails(outOfOrderAvail, updateList);
+                setCurrAvails(outOfOrderAvail, updateList);
                 debugTimes(begin, "setCurrAvails",
-                    outOfOrderAvail.size() + updateList.size());
+                           outOfOrderAvail.size() + updateList.size());
                 state = captureCurrAvailState();
                 begin = getDebugTime(debug);
                 updateStates(updateList);
@@ -737,8 +736,7 @@ public class AvailabilityManagerEJBImpl
                 updateOutOfOrderState(outOfOrderAvail);
                 flushCreateAndRemoves();
                 logErrorInfo(state, availPoints);
-                debugTimes(begin, "updateOutOfOrderState",
-                    outOfOrderAvail.size());
+                debugTimes(begin, "updateOutOfOrderState", outOfOrderAvail.size());
                 cache.commitTran();
             } catch (Throwable e) {
                 logErrorInfo(state, availPoints);
@@ -811,23 +809,21 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
-    /**
-     * @ejb:transaction type="NotSupported"
-     * @ejb:interface-method
-     */
-    public Map _setCurrAvails(final List outOfOrderAvail,
-                              final List updateList) {
+    private void setCurrAvails(final List outOfOrderAvail,
+                               final List updateList) {
         if (outOfOrderAvail.size() == 0 && updateList.size() == 0) {
-            return Collections.EMPTY_MAP;
+            _currAvails = Collections.EMPTY_MAP;
+            return;
         }
         long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), 60000);
         HashSet mids = getMidsWithinAllowedDataWindow(updateList, now);
         mids.addAll(getMidsWithinAllowedDataWindow(outOfOrderAvail, now));
         if (mids.size() <= 0) {
-            return Collections.EMPTY_MAP;
+            _currAvails = Collections.EMPTY_MAP;
+            return;
         }
         Integer[] mIds = (Integer[])mids.toArray(new Integer[0]);
-        return _dao.getHistoricalAvailMap(
+        _currAvails = _dao.getHistoricalAvailMap(
             mIds, now-MAX_DATA_BACKLOG_TIME, false);
     }
     
