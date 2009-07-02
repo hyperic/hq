@@ -333,8 +333,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         DAOFactory.getDAOFactory().getCurrentSession().flush();
 
         // Reschedule metrics
-        MeasurementManagerEJBImpl.getOne().enableDefaultMeasurements(subject,
-                                                                     target.getResource());
+        ResourceUpdatedZevent zevent =
+            new ResourceUpdatedZevent(subject, target.getEntityId());
+        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);            
 
         // Must also move all dependent services so that ancestor edges are
         // rebuilt and that service metrics are re-scheduled

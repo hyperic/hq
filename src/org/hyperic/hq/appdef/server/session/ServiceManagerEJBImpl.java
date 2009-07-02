@@ -242,9 +242,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         DAOFactory.getDAOFactory().getCurrentSession().flush();
 
         // Reschedule metrics
-        // TODO: Where is MeasMan.enableMeasurements(subject, res)?
-        MeasurementManagerEJBImpl.getOne().enableDefaultMeasurements(subject,
-                                                                     target.getResource());
+        ResourceUpdatedZevent zevent =
+            new ResourceUpdatedZevent(subject, target.getEntityId());
+        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
     }
 
     /**
