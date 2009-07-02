@@ -93,6 +93,7 @@ public class RegisteredDispatcherEJBImpl
      * Dispatch the event to interested triggers.
      * 
      * @param event The event.
+     * @ejb:interface-method
      */
     private void dispatchEvent(AbstractEvent event) 
         throws InterruptedException {        
@@ -130,6 +131,8 @@ public class RegisteredDispatcherEJBImpl
 
     /**
      * The onMessage method
+     * @ejb:interface-method
+     * @ejb:transaction type="NotSupported"
      */
     public void onMessage(Message inMessage) {
         if (!(inMessage instanceof ObjectMessage)) {

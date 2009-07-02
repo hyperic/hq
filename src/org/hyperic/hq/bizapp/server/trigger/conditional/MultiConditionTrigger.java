@@ -65,6 +65,7 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.config.LongConfigOption;
 import org.hyperic.util.config.StringConfigOption;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 /** The MultiConditionTrigger is a specialized trigger that can combine multiple
  * conditions and only fire actions when all conditions have been met
@@ -96,78 +97,13 @@ public class MultiConditionTrigger
     /** Holds value of property durable. */
     private boolean durable;
     
+    protected Object monitor;
+    
     /** Creates a new instance of MultiConditionTrigger */
     public MultiConditionTrigger() {
-    	baton = new Baton();
+    	monitor = this;
     }
-    
-    protected static class Baton {
-    	// Container class for all things synchronized.  This class does no
-    	// synchronization on its own: concurrency correctness must be
-    	// ensured by the calling code.
-    	
-    	// The thread currently holding the baton
-    	Thread processor;
-    	
-    	// The list of events that the baton holder must process
-    	LinkedList eventsToProcess;
-    	
-    	// Prior persisted state, if any.  This will usually be empty/null.
-    	LinkedList priorState;
-    	
-    	Baton() {
-    		eventsToProcess = new LinkedList();
-    		priorState = null;
-    	}
-    	
-    	Thread getProcessor() {
-    		return processor;
-    	}
-    	
-    	/*
-    	 * NOTE: returns the actual list reference, not a copy.  
-    	 */
-    	LinkedList getEventsToProcess() {
-    		return eventsToProcess;
-    	}
-    	
-    	/*
-    	 * NOTE: returns the actual list reference, not a copy.  
-    	 */
-    	LinkedList getPriorState() {
-    		return priorState;
-    	}
-    	
-    	void setPriorState(LinkedList priorState) {
-    		this.priorState = priorState;
-    	}
-    	
-    	// Must be done under lock!
-    	boolean grab() {
-    		boolean result = false;
-    		if (processor == null) {
-    			processor = Thread.currentThread();
-    			result = true;
-    		} else {
-    			if (processor.equals(Thread.currentThread())) {
-    				// Should not happen!
-    				log.error("Illegal monitor state in Baton");
-    				// But...the best thing to do in this (impossible?) scenario is to proceed
-    				result = true;
-    			}
-    		}
-    		
-    		return result;
-    	}
-
-    	// Must be done under lock!
-		public void release() {
-			processor = null;
-		}
-    }
-    
-    protected Baton baton;
-    
+        
     /** 
      * Process an event from the dispatcher.  This is the main entrypoint method.
      * This method must:
@@ -205,36 +141,19 @@ public class MultiConditionTrigger
         	log.debug("processEvent for event " + event);
         }
         
-        LinkedList eventsToProcess = getEventsToProcess(eventToProcess);
-        if (eventsToProcess != null) {
-        	// We have the baton, continue
-        	evaluateEventList(eventsToProcess);
+        long start = System.currentTimeMillis();
+        synchronized (monitor) {
+        	evaluateEvent(eventToProcess);
         }
-    }
-    
-    private LinkedList getEventsToProcess(AbstractEvent event) {
-    	LinkedList result = null;
-    	synchronized (baton) {
-    		if (baton.grab()) {
-    			// Drain the event queue and continue processing
-    			result = new LinkedList(baton.getEventsToProcess());
-    			baton.getEventsToProcess().clear();
-    			result.add(event);
-    		} else {
-    			// Queue the event for the baton holder to process
-    			baton.getEventsToProcess().add(event);
-    		}
-    	}
-    	
-    	return result;
+        long time = System.currentTimeMillis() - start;
+        ConcurrentStatsCollector.getInstance().addStat(time,
+        					ConcurrentStatsCollector.MULTI_COND_TRIGGER_MON_WAIT);
     }
     
     /**
-     * Internal workhorse method.  This method is not synchronized because it assumes it is
-     * running only when it has the baton.  Chew through the list of events until it is emptied.
-     * It is known at the start of this method that eventsToProcess.size() > 0.
+     * Internal workhorse method, main purpose is to abstract out any locking semantics.
      */
-	void evaluateEventList(LinkedList eventsToProcess) {
+	void evaluateEvent(AbstractEvent newEvent) {
 		
         EventTrackerLocal etracker = null;
         try {
@@ -242,105 +161,45 @@ public class MultiConditionTrigger
         } catch (Exception e) {
             log.error("Internal error, cannot create event tracker", e);
         }
-        		
-        boolean drainedQueue = false;
+
+        LinkedList eventsToProcess = getPersistedReferencedEvents(etracker);
+
         boolean doDebug = log.isDebugEnabled();
         Set persistedEventsToDelete = new HashSet();
-        // It guaranteed that, if we're here, there is at least one event in the queue
-        do {
-        	
-        	AbstractEvent current = (AbstractEvent) eventsToProcess.removeFirst();
-        	
-            if (doDebug) {
-            	log.debug("evaluating event " + current);
-            }
-                    	
-        	// Evaluate one-by-one.  Requirements:
-        	//
-        	// 1. Evaluate events in the order they came in, starting with the event
-        	//     at position startFrom.
-        	// 2. Filter out expired events based on the timestamp of the "current" event.
-        	//     If this trigger has an expiration of N milliseconds, then any events
-        	//     with a timestamp less than (current.getTimestamp() - N) is considered
-        	//     to be expired.
-        	// 3. Once triggering conditions are met, fire and get rid of all previous events,
-        	//     per the feature requirements for this trigger.
-        	// 4. Leave events that occurred after the triggering event for subsequent
-        	//     evaluation.
-        	// 5. A MultiConditionTrigger can fire with a single triggering condition,
-        	//     for example, if the conditions are "a OR b" and a fires.  This means
-        	//     the list of conditions need to be evaluated front-to-back when there
-        	//     are any OR conditions.  If there are only AND conditions, then the
-        	//     minimum is the number of AND conditions.
-        	//
-        	// Other things to note:
-        	//
-        	// - a TriggerNotFiredEvent has no useful meaning if there are no prior
-        	//    TriggerFiredEvents for the condition
-        	// - a TriggerFiredEvent followed (not necessarily immediately followed, if
-        	//    the TriggerNotFiredEvent occurs before sufficient fulfilling conditions)
-        	//    by a TriggerNotFiredEvent for the same condition effectively neutralizes
-        	//    both events
-			if (baton.getPriorState() == null) {
-				
-				// First time seeing this trigger.  There may be backed-up events
-				LinkedList persistedStream = getPersistedReferencedEvents(etracker);
-				baton.setPriorState(persistedStream);
-			}
-        	
+
+        if (doDebug) {
+        	log.debug("evaluating event " + newEvent);
+        }
+
+        Collection fulfilled = doEvaluation(eventsToProcess,
+        								    newEvent,
+        								    etracker,
+        								    persistedEventsToDelete);
+        if (fulfilled != null) {
         	if (doDebug) {
-        		log.debug("Prior state for event " + current + " is " + baton.getPriorState());
+        		log.debug("Trigger " + this + " firing on event " + newEvent);
         	}
-        	
-        	Collection fulfilled = doSingleEvaluation(baton.getPriorState(),
-        											  current,
-        											  etracker,
-        											  persistedEventsToDelete);
-        	if (fulfilled != null) {
-        		if (doDebug) {
-        			log.debug("Trigger " + this + " firing on event " + current);
-        		}
-        		
-        		persistedEventsToDelete.clear();
-        		fire(fulfilled, etracker);
-        	}
-        	
-        	if (eventsToProcess.isEmpty()) {
-        		synchronized (baton) {
-        			if (baton.getEventsToProcess().isEmpty()) {
-        				// Looks like we're done here...cleanup and go home
-        				try {
-        					etracker.deleteEvents(persistedEventsToDelete);
-        				} catch (SQLException sqle) {
-        					log.error("Error deleting events for trigger ID " + getId());
-        				}
-            			if (log.isDebugEnabled()) {
-            				log.debug("MultiConditionTrigger trigger id=" + getId() +
-            						" deleting event set size=" + persistedEventsToDelete.size());
-            			}
-        				baton.release();
-        				drainedQueue = true;
-        			} else {
-        				// New events have come in while we were processing
-        				eventsToProcess.addAll(baton.getEventsToProcess());
-        				baton.getEventsToProcess().clear();
-        			}
-        		}
-        	}
-        	
-        	if (!drainedQueue) {
-        		if (log.isDebugEnabled()) {
-        			log.debug("Event queue size is " + baton.getEventsToProcess().size() +
-        					  ", continuing.");
-        		}
-        	}
-        	
-        } while (!drainedQueue);
+
+        	// Don't bother clearing, fire causes these to be deleted anyway.
+        	persistedEventsToDelete.clear();
+        	fire(fulfilled, etracker);
+        }
+
+        // Delete any past invalidated events
+		try {
+			etracker.deleteEvents(persistedEventsToDelete);
+		} catch (SQLException sqle) {
+			log.error("Error deleting events for trigger ID " + getId(), sqle);
+		}
+		if (log.isDebugEnabled()) {
+			log.debug("MultiConditionTrigger trigger id=" + getId() +
+					" deleting event set size=" + persistedEventsToDelete.size());
+		}
 	}
 	
 	/**
 	 * Evaluate this trigger based on a set of prior events and a new, incoming event.  This
-	 * method should only be called when the set of prior events is not sufficient to cause
+	 * method will typically only be called when the set of prior events is not sufficient to cause
 	 * a trigger fire.
 	 * 
 	 * @param priorEvents   A live, mutable collection of prior events that will be
@@ -355,7 +214,7 @@ public class MultiConditionTrigger
 	 * @return              The collection of events that causes this trigger to fire.  Null
 	 *                       if the incoming event does not cause the trigger to fire.
 	 */
-    private Collection doSingleEvaluation(LinkedList priorEvents,
+    private Collection doEvaluation(LinkedList priorEvents,
     									  AbstractEvent event,
     									  EventTrackerLocal etracker,
     									  Set persistedEventsToDelete) {
@@ -369,6 +228,7 @@ public class MultiConditionTrigger
     	}
     	
     	AbstractEvent toUpdate = null;
+    	priorEvents.add(event);
 
     	// Create a table to keep track
     	Map fulfilled = new LinkedHashMap();
@@ -379,7 +239,8 @@ public class MultiConditionTrigger
     		AbstractEvent tracked = (AbstractEvent) iter.next();
     		if (tracked.getTimestamp() >= expire) {
 
-    			if (tracked.getInstanceId().equals(event.getInstanceId())) {
+    			if (tracked != event &&
+    					tracked.getInstanceId().equals(event.getInstanceId())) {
 
     				// If this tracked event equals the new event, then
     				// the old one is obsolete.  There can be only one event
@@ -395,7 +256,6 @@ public class MultiConditionTrigger
     				// evaluations.  In the common case, the list comes from memory, not from
     				// the persisted event stream.  This remove only affects the in-memory
     				// stream.  The persisted stream is handled by the updateReference() call.
-    				iter.remove();
     			} else if (tracked instanceof TriggerFiredEvent) {
     				fulfilled.put(tracked.getInstanceId(), tracked);
 
@@ -424,8 +284,7 @@ public class MultiConditionTrigger
     			// as being expired.
     			// INVARIANT: toUpdate != tracked here, because toUpdate is only
     			// assigned a value if tracked is not expired.
-    			deleteEvent(tracked, persistedEventsToDelete);
-    			iter.remove();
+    	    	persistedEventsToDelete.add(tracked.getId());
     		}
     	}
     	
@@ -465,14 +324,14 @@ public class MultiConditionTrigger
     					// state means (1) set the event object BLOB to the current event,
     					// and (2) update the expiration time to reflect the current time.
     					// This code will always update a NON-EXPIRED trigger condition.
-    					updateStateForEvent(etracker, priorEvents, event, toUpdate);
+    					updateStateForEvent(etracker, event, toUpdate);
 
     					// If we updated, we will not track.
     					track = false;
     				} else {
     					// No expiration, but the old state is made obsolete by the new
     					// state.  Delete the old state, it will be replaced with the new state.
-    					deleteEvent(toUpdate, persistedEventsToDelete);
+    			    	persistedEventsToDelete.add(toUpdate.getId());
     				}
     			}
 
@@ -482,7 +341,12 @@ public class MultiConditionTrigger
     			}
 
     			if (track) {
-    				addEvent(etracker, priorEvents, event);
+    		    	try {
+    		    		etracker.addReference(getId(), event, getTimeRange());
+    		    	} catch (SQLException sqle) {
+    		    		log.error("Failed to add reference for event on trigger ID " + getId());
+    		    	}
+    		    	
     				if (log.isDebugEnabled()) {
     					log.debug("MultiConditionTrigger trigger id=" + getId() +
     					" adding reference.");
@@ -528,26 +392,12 @@ public class MultiConditionTrigger
 		}
     }
 
-    protected void addEvent(EventTrackerLocal etracker,
-    						List priorEvents,
-    						AbstractEvent event) {
-    	try {
-    		etracker.addReference(getId(), event, getTimeRange());
-    		priorEvents.add(event);
-    	} catch (SQLException sqle) {
-    		log.error("Failed to add reference for event on trigger ID " + getId());
-    	}
-    }
-   
     protected void updateStateForEvent(EventTrackerLocal etracker,
-    								   List priorEvents,
     								   AbstractEvent event,
     								   AbstractEvent toUpdate) {
 		try {
-			event.setId(toUpdate.getId());
-			priorEvents.add(event);
 			etracker.updateReference(getId(), toUpdate.getId(),
-									 toUpdate, getTimeRange());
+									 event, getTimeRange());
 			if (log.isDebugEnabled()) {
 				log.debug("MultiConditionTrigger trigger id=" + getId() +
 						" updating references for teid " + toUpdate.getId());
@@ -556,11 +406,6 @@ public class MultiConditionTrigger
 			log.debug("Failed to update event reference for " +
 					"trigger id=" + getId(), e);
 		}
-    }
-    
-    protected void deleteEvent(AbstractEvent toDelete,
-    						   Set persistedEventsToDelete) {
-    	persistedEventsToDelete.add(toDelete.getId());
     }
     
     /**

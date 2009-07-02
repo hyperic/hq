@@ -264,6 +264,7 @@ public class ProductPluginDeployer
             c.register(ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
             c.register(ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
             c.register(ConcurrentStatsCollector.EMAIL_ACTIONS);
+            c.register(ConcurrentStatsCollector.MULTI_COND_TRIGGER_MON_WAIT);
             c.startCollector();
         } catch (Exception e) {
             _log.error("Could not start Concurrent Stats Collector", e);

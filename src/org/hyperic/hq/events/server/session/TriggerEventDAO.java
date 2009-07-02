@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -77,11 +79,19 @@ public class TriggerEventDAO extends HibernateDAO {
     }
     
     List findAllByTriggerId(Integer tid) {
-    	String hql = "from TriggerEvent te where te.triggerId= :tid";
+    	String hql = "select te.id from TriggerEvent te where " +
+    					"te.triggerId= :tid";
 
-    	return createQuery(hql)
-    				  .setInteger("tid", tid.intValue())
-    				  .list();            
+        List list = createQuery(hql)
+        				.setInteger("tid", tid.intValue())
+        				.list();
+        List rtn = new ArrayList(list.size());
+        for (Iterator it = list.iterator(); it.hasNext(); ) {
+        	Long id = (Long) it.next();
+        	rtn.add(findById(id));
+        }
+
+        return rtn;
     }
     
     int countUnexpiredByTriggerId(Integer tid, Session session) {

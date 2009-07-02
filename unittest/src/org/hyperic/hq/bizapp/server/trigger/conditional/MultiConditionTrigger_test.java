@@ -337,21 +337,20 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
     	EventBlaster[] blasters = new EventBlaster[nThreads];
     	int[] started = new int[1];
     	started[0] = 0;
+
+    	// Blast away...
     	for (int i = 0; i < nThreads; ++i) {
     		blasters[i] = new EventBlaster(i, nThreads, started, iterations, eventIds, trigger);
     		blasters[i].start();
     	}
-
-    	// Blast away...
-    	boolean bail = false;
 
     	// Assess the damage
     	for (int i = 0; i < nThreads; ++i) {
     		blasters[i].join();
     	}
 
-    	assertEquals(nThreads * iterations, trigger.getNotFiredCount());
     	assertEquals(nThreads * iterations, trigger.getFireCount());
+    	assertEquals(nThreads * iterations, trigger.getNotFiredCount());
     }
     
     public void testThatAddEventsDontAccumulate() throws Exception {
@@ -395,228 +394,7 @@ public class MultiConditionTrigger_test extends AbstractMultiConditionTriggerUni
     	t2.processEvent(e7);
     	assertEquals(2, _eventTracker.getEventsCount(tid2));
     }
-    
-    /**
-     * Validate the internal event state tracking.  The basic rules are:
-     * - a "not fired" event doesn't get tracked
-     * - a "fired" event gets tracked
-     * - a "not fired" event with the same instance ID of a previous "fired" event
-     *      updates the state of the event tracking, but does not change the
-     *      number of tracked events.
-     *      
-     * @throws Exception
-     */
-    public void testStateTrackingForNonExpiring() throws Exception {
-    	_testStateTrackingForNonExpiring(true, 1501);
-    	_testStateTrackingForNonExpiring(false, 1601);
-    }
-    
-    private void _testStateTrackingForNonExpiring(boolean durableTrigger,
-    											  int tid) throws Exception {
-    	
-    	// Sub-condition fired, then not fired
-    	Integer tid1 = new Integer(tid++);
-    	MockMultiConditionTrigger t1 = 
-			createTrigger(tid1, "1&2&3&4", 0, durableTrigger, true);
-    	AbstractEvent e1 = createEvent(1, true);
-    	t1.processEvent(e1);
-    	AbstractEvent e2 = createEvent(1, false);
-    	t1.processEvent(e2);
-    	assertEquals(0, t1.getCurrentFulfillingEventsCount());
-    	assertEquals(0, _eventTracker.getEventsCount(tid1));
-    	
-    	// All sub-conditions fire, trigger fires
-    	Integer tid2 = new Integer(tid++);
-    	MockMultiConditionTrigger t2 = 
-			createTrigger(tid2, "1&2&3&4", 0, durableTrigger, true);
-    	AbstractEvent e3 = createEvent(1, true);
-    	t2.processEvent(e3);
-    	AbstractEvent e4 = createEvent(2, true);
-    	t2.processEvent(e4);
-    	AbstractEvent e5 = createEvent(3, true);
-    	t2.processEvent(e5);
-    	AbstractEvent e6 = createEvent(4, true);
-    	t2.processEvent(e6);
-    	// Fired, state should be reset
-    	assertEquals(0, t2.getCurrentFulfillingEventsCount());
-    	assertEquals(0, _eventTracker.getEventsCount(tid2));
-    	assertEquals(1, t2.getFireCount());
-    	
-    	// Many updated firings, no accumulation
-    	Integer tid3 = new Integer(tid++);
-    	MockMultiConditionTrigger t3 = 
-			createTrigger(tid3, "1&2&3&4", 0, durableTrigger, true);
-    	AbstractEvent e7 = createEvent(1, true);
-    	t3.processEvent(e7);
-    	AbstractEvent e8 = createEvent(2, true);
-    	t3.processEvent(e8);
-    	AbstractEvent e9 = createEvent(3, true);
-    	t3.processEvent(e9);
-    	AbstractEvent e10 = createEvent(1, true);
-    	t3.processEvent(e10);
-    	AbstractEvent e11 = createEvent(2, true);
-    	t3.processEvent(e11);
-    	AbstractEvent e12 = createEvent(3, true);
-    	t3.processEvent(e12);
-    	AbstractEvent e13 = createEvent(1, true);
-    	t3.processEvent(e13);
-    	AbstractEvent e14 = createEvent(2, true);
-    	t3.processEvent(e14);
-    	AbstractEvent e15 = createEvent(3, true);
-    	t3.processEvent(e15);
-    	AbstractEvent e16 = createEvent(1, true);
-    	t3.processEvent(e16);
-    	AbstractEvent e17 = createEvent(2, true);
-    	t3.processEvent(e17);
-    	AbstractEvent e18 = createEvent(3, true);
-    	t3.processEvent(e18);
-    	AbstractEvent e19 = createEvent(1, true);
-    	t3.processEvent(e19);
-    	AbstractEvent e20 = createEvent(2, true);
-    	t3.processEvent(e20);
-    	AbstractEvent e21 = createEvent(3, true);
-    	t3.processEvent(e21);
-    	AbstractEvent e22 = createEvent(1, true);
-    	t3.processEvent(e22);
-    	AbstractEvent e23 = createEvent(2, true);
-    	t3.processEvent(e23);
-    	AbstractEvent e24 = createEvent(3, true);
-    	t3.processEvent(e24);
-    	assertEquals(3, t3.getCurrentFulfillingEventsCount());
-    	assertEquals(3, _eventTracker.getEventsCount(tid3));
-    	
-    	// Now reverse every fired/notfired scenario above this comment
-    	
-    	// Sub-condition not fired, then fired
-    	Integer tid4 = new Integer(tid++);
-    	MockMultiConditionTrigger t4 = 
-			createTrigger(tid4, "1&2&3&4", 0, durableTrigger, true);
-    	AbstractEvent e25 = createEvent(1, false);
-    	t4.processEvent(e25);
-    	AbstractEvent e26 = createEvent(1, true);
-    	t4.processEvent(e26);
-    	assertEquals(1, t4.getCurrentFulfillingEventsCount());
-    	assertEquals(1, _eventTracker.getEventsCount(tid4));
-    	
-    	// All sub-conditions do not fire, trigger
-    	Integer tid5 = new Integer(tid++);
-    	MockMultiConditionTrigger t5 = 
-			createTrigger(tid5, "1&2&3&4", 0, durableTrigger, true);
-    	AbstractEvent e27 = createEvent(1, false);
-    	t5.processEvent(e27);
-    	AbstractEvent e28 = createEvent(2, false);
-    	t5.processEvent(e28);
-    	AbstractEvent e29 = createEvent(3, false);
-    	t5.processEvent(e29);
-    	AbstractEvent e30 = createEvent(4, false);
-    	t5.processEvent(e30);
-    	assertEquals(0, t5.getCurrentFulfillingEventsCount());
-    	assertEquals(0, _eventTracker.getEventsCount(tid5));
-    	assertEquals(0, t5.getFireCount());
-    	
-    	// Many updated firings, no accumulation
-    	Integer tid6 = new Integer(tid++);
-    	MockMultiConditionTrigger t6 = 
-			createTrigger(tid6, "1&2&3&4", 0, durableTrigger, true);
-    	AbstractEvent e31 = createEvent(1, false);
-    	t6.processEvent(e31);
-    	AbstractEvent e32 = createEvent(2, false);
-    	t6.processEvent(e32);
-    	AbstractEvent e33 = createEvent(3, false);
-    	t6.processEvent(e33);
-    	AbstractEvent e34 = createEvent(1, false);
-    	t6.processEvent(e34);
-    	AbstractEvent e35 = createEvent(2, false);
-    	t6.processEvent(e35);
-    	AbstractEvent e36 = createEvent(3, false);
-    	t6.processEvent(e36);
-    	AbstractEvent e37 = createEvent(1, false);
-    	t6.processEvent(e37);
-    	AbstractEvent e38 = createEvent(2, false);
-    	t6.processEvent(e38);
-    	AbstractEvent e39 = createEvent(3, false);
-    	t6.processEvent(e39);
-    	AbstractEvent e40 = createEvent(1, false);
-    	t6.processEvent(e40);
-    	AbstractEvent e41 = createEvent(2, false);
-    	t6.processEvent(e41);
-    	AbstractEvent e42 = createEvent(3, false);
-    	t6.processEvent(e42);
-    	AbstractEvent e43 = createEvent(1, false);
-    	t6.processEvent(e43);
-    	AbstractEvent e44 = createEvent(2, false);
-    	t6.processEvent(e44);
-    	AbstractEvent e45 = createEvent(3, false);
-    	t6.processEvent(e45);
-    	AbstractEvent e46 = createEvent(1, false);
-    	t6.processEvent(e46);
-    	AbstractEvent e47 = createEvent(2, false);
-    	t6.processEvent(e47);
-    	AbstractEvent e48 = createEvent(3, false);
-    	t6.processEvent(e48);
-    	assertEquals(0, t6.getCurrentFulfillingEventsCount());
-    	assertEquals(0, _eventTracker.getEventsCount(tid6));    	
-    }
-    
-    public void testStateTrackingForExpiring() throws Exception {
-    	_testStateTrackingForExpiring(true, 1701);
-    	_testStateTrackingForExpiring(false, 1801);
-    }
-    
-    private void _testStateTrackingForExpiring(boolean durableTrigger,
-    										   int tid) throws Exception {
-    	Integer tid1 = new Integer(tid++);
-    	long expiration1 = 200;
-    	MockMultiConditionTrigger t1 = 
-			createTrigger(tid1, "1&2&3&4", expiration1, durableTrigger, true);
-    	AbstractEvent e1 = createEvent(1, true);
-    	t1.processEvent(e1);
-    	
-    	// Let that first event expire
-    	pause(expiration1);
-    	
-    	// Expiration will not be noticed until the next event is processed
-    	AbstractEvent e2 = createEvent(2, true);
-    	t1.processEvent(e2);
-    	assertEquals(1, t1.getCurrentFulfillingEventsCount());
-    	assertEquals(1, _eventTracker.getEventsCount(tid1));
-    	
-    	// Loop on events, always waiting just long enough
-    	Integer tid2 = new Integer(tid++);
-    	long expiration2 = 50;
-    	MockMultiConditionTrigger t2 = 
-			createTrigger(tid2, "1&2&3&4", expiration2, durableTrigger, true);
-    	for (int i = 0; i < 50; ++i) {
-    		// Event 1
-    		AbstractEvent e = createEvent(1, true);
-    		t2.processEvent(e);
-        	assertEquals("failure at loop index " + i, 1, t2.getCurrentFulfillingEventsCount());
-        	assertEquals("failure at loop index " + i, 1, _eventTracker.getEventsCount(tid2));
-    		pause(expiration2);
-    		
-    		// Event 2
-    		e = createEvent(2, true);
-    		t2.processEvent(e);
-        	assertEquals("failure at loop index " + i, 1, t2.getCurrentFulfillingEventsCount());
-        	assertEquals("failure at loop index " + i, 1, _eventTracker.getEventsCount(tid2));
-        	pause(expiration2);
-        	
-        	// Event 3
-    		e = createEvent(3, true);
-    		t2.processEvent(e);
-        	assertEquals("failure at loop index " + i, 1, t2.getCurrentFulfillingEventsCount());
-        	assertEquals("failure at loop index " + i, 1, _eventTracker.getEventsCount(tid2));
-        	pause(expiration2);
-        	
-        	// Event 4
-    		e = createEvent(4, true);
-    		t2.processEvent(e);
-        	assertEquals("failure at loop index " + i, 1, t2.getCurrentFulfillingEventsCount());
-        	assertEquals("failure at loop index " + i, 1, _eventTracker.getEventsCount(tid2));
-        	pause(expiration2);
-    	}
-    }
-    
+        
     private void pause(long time) {
     	try {
     		Thread.sleep(time + 1);

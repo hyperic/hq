@@ -328,8 +328,8 @@ public class RegisteredDispatcher_test extends AbstractMultiConditionTriggerUnit
 			// A -- causes an event to fire
 			assertEquals(0, mct.getFireCount());
 			rd.onMessage(e1FiredMessage);
-
 			assertEquals(1, mct.getFireCount());
+
 			Collection fulfilling = mct.getLastFired();
 			assertNotNull(fulfilling);
 			assertEquals(3, fulfilling.size());
