@@ -28,8 +28,10 @@ package org.hyperic.hq.events.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.RemoveException;
@@ -51,24 +53,21 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.shared.AlertConditionLogValue;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
-import org.hyperic.hq.events.shared.AlertManagerUtil;
-import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertSortField;
+import org.hyperic.hq.events.shared.AlertConditionLogValue;
+import org.hyperic.hq.events.shared.AlertManagerLocal;
+import org.hyperic.hq.events.shared.AlertManagerUtil;
+import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.hq.measurement.TimingVoodoo;
-import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementDAO;
-import org.hyperic.util.NumberUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-import org.hyperic.util.units.FormattedNumber;
 
 /** 
  * @ejb:bean name="AlertManager"
@@ -343,6 +342,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     
     /**
      * A more optimized look up which includes the permission checking
+     * @return {@link List} of {@link Alert}s
      * @ejb:interface-method
      */
     public List findAlerts(Integer subj, int priority, long timeRange,
@@ -383,16 +383,19 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         throws PermissionException 
     {
         List result = new ArrayList();
+        final Set inclSet = new HashSet(includes);
         
         for (int index = 0; result.size() < count; index++) {
             // Permission checking included
             PageInfo pInfo = PageInfo.create(index, count, AlertSortField.DATE,
                                              false);
+            // XXX need to change this to pass in specific includes so that
+            // the session does not blow up with too many objects
             List alerts = findAlerts(subj.getId(), priority, timeRange,
                                      endTime, false, false, null, pInfo);
-            if (alerts.size() == 0)
+            if (alerts.size() == 0) {
                 break;
-            
+            }
             if (includes != null) {
                 Iterator it = alerts.iterator();
                 for (int i = 0; it.hasNext(); i++) {
@@ -401,15 +404,17 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
                     // Filter by appdef entity
                     AppdefEntityID aeid = alertdef.getAppdefEntityId();
-                    if (!includes.contains(aeid))
+                    if (!inclSet.contains(aeid)) {
                         continue;
+                    }
 
                     // Add it
                     result.add(alert);
                     
                     // Finished
-                    if (result.size() == count)
+                    if (result.size() == count) {
                         break;
+                    }
                 }
             }
             else {

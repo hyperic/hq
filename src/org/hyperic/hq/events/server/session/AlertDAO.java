@@ -83,11 +83,17 @@ public class AlertDAO extends HibernateDAO {
             .list();
     }
 
+    /**
+     * @return {@link List} of {@link Alert}s
+     * XXX scottmf [HQ-1785] this leads bloating the session when it queries too
+     * many alerts and causes an OOM.  To fix we'd have to do something along
+     * the lines of only querying alertIds and then the caller would have to do
+     * a findById(alertId), process it, then immediately evict from the session
+     */
     List findByCreateTimeAndPriority(Integer subj, long begin, long end,
                                      int priority, boolean inEsc,
                                      boolean notFixed, Integer groupId,
-                                     Integer alertDefId, PageInfo pageInfo)   
-    {
+                                     Integer alertDefId, PageInfo pageInfo) {
         String[] ops =
             new String[] { AuthzConstants.platformOpManageAlerts,
                            AuthzConstants.serverOpManageAlerts,
