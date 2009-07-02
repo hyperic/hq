@@ -41,6 +41,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
@@ -185,24 +186,30 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @param tid The trigger id.
      * @ejb:interface-method
      */
-    public void deleteReference(Integer tid) throws SQLException {
-        if (log.isDebugEnabled())
+    public void deleteReference(Integer tid) {
+    	final boolean debug = log.isDebugEnabled();
+        if (debug) {
             log.debug("Delete referenced events for trigger id: " + tid);
-       
+        }
         _diagnostic.startDeleteReference();
         
-        TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
-        try {
-            List referenced = triggerEventDAO.findAllByTriggerId(tid);
-            for (Iterator it = referenced.iterator(); it.hasNext(); ) {
-            	TriggerEvent te = (TriggerEvent) it.next();
-            	triggerEventDAO.delete(te);
+        TriggerEventDAO dao = getTriggerEventDAO();
+        List referenced = dao.findAllByTriggerId(tid);
+        for (Iterator it = referenced.iterator(); it.hasNext(); ) {
+        	TriggerEvent te = (TriggerEvent) it.next();
+            try {
+                if (debug) log.debug("deleteing TriggerEvent id=" + te.getId());
+            	dao.delete(te);
+            } catch (ObjectNotFoundException e) {
+        	    if (debug) {
+        	        log.debug(e, e);
+        	        // XXX scottmf, I don't believe this check is necessary
+        	        // but it gives warm fuzzies for now
+        	        log.debug("double check of db (vs. cache): " +
+        	            te.getId() + (dao.idExistsInDB(te.getId()) ?
+            	            " exists in db" : " does not exist in db"));
+        	    }
             }
-        } catch (Exception e) {
-            log.error("Failed to delete expired and referenced events for " +
-                      "trigger id=" + tid, e);     
-            throw new SQLException("Failed to delete expired and referenced " +
-                                   "events for trigger id=" + tid);
         }
         
         _diagnostic.endDeleteReference();
@@ -215,18 +222,27 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @throws SQLException 
      * @ejb:interface-method
      */
-    public void deleteEvents(Set idsOfEventsToDelete) throws SQLException {
-        if (log.isDebugEnabled()) {
+    public void deleteEvents(Set idsOfEventsToDelete) {
+        final boolean debug = log.isDebugEnabled();
+        if (debug) {
             log.debug("Delete referenced events by id");
         }
-
         TriggerEventDAO dao = getTriggerEventDAO();
         for (Iterator it = idsOfEventsToDelete.iterator(); it.hasNext(); ) {
         	Long teid = (Long) it.next();
         	try {
-                    dao.deleteById(teid);
-        	} catch (Exception e) {
-                    throw new SQLException("Error deleting trigger event object id=" + teid);
+        	    if (debug) log.debug("deleteing TriggerEvent id=" + teid);
+                dao.deleteById(teid);
+        	} catch (ObjectNotFoundException e) {
+        	    if (debug) {
+        	        log.debug(e, e);
+        	        // XXX scottmf, I don't believe this check is necessary
+        	        // but it gives warm fuzzies for now
+        	        log.debug("double check of db (vs. cache): " +
+        	            teid + (dao.idExistsInDB(teid) ?
+            	            " exists in db" : " does not exist in db"));
+        	    }
+                continue;
         	}
         }
     }
@@ -238,15 +254,28 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public void deleteExpiredByTriggerId(Integer triggerId) {
-        if (log.isDebugEnabled()) {
+    	final boolean debug = log.isDebugEnabled();
+        if (debug) {
             log.debug("Delete expired events by trigger id " + triggerId);
         }
 
         TriggerEventDAO dao = getTriggerEventDAO();
     	List expiredForTrigger = dao.findExpiredByTriggerId(triggerId);
     	for (Iterator it = expiredForTrigger.iterator(); it.hasNext(); ) {
-    		TriggerEvent te = (TriggerEvent) it.next();
-    		dao.delete(te);
+	        TriggerEvent te = (TriggerEvent) it.next();
+    	    try {
+    	        if (debug) log.debug("deleteing TriggerEvent id=" + te.getId());
+    	        dao.delete(te);
+    	    } catch (ObjectNotFoundException e) {
+    	        if (debug) {
+    	            log.debug(e, e);
+    	            // XXX scottmf, I don't believe this check is necessary
+    	            // but it gives warm fuzzies for now
+    	            log.debug("double check of db (vs. cache): " +
+    	                te.getId() + (dao.idExistsInDB(te.getId()) ?
+    	                    " exists in db" : " does not exist in db"));
+    	        }
+    	    }
     	}
     }
 

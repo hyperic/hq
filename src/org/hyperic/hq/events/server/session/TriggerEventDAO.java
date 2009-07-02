@@ -77,6 +77,14 @@ public class TriggerEventDAO extends HibernateDAO {
     				  .setLong("exp", System.currentTimeMillis())
     				  .list();            
     }
+
+    boolean idExistsInDB(Long id) {
+    	String hql = "select te.id from TriggerEvent te where te.id= :id";
+        List list = createQuery(hql)
+            .setLong("id", id.longValue())
+            .list();
+        return (list.size() == 0) ? false : true;
+    }
     
     List findAllByTriggerId(Integer tid) {
     	String hql = "select te.id from TriggerEvent te where " +
@@ -87,7 +95,7 @@ public class TriggerEventDAO extends HibernateDAO {
         				.list();
         List rtn = new ArrayList(list.size());
         for (Iterator it = list.iterator(); it.hasNext(); ) {
-        	Integer id = (Integer) it.next();
+        	Long id = (Long) it.next();
         	rtn.add(findById(id));
         }
 

@@ -105,7 +105,7 @@ public class AvertTrigger extends AbstractTrigger {
                         
                         try {
                             etracker.deleteReference(getId());                            
-                        } catch (SQLException e) {
+                        } catch (Exception e) {
                             throw new ActionExecuteException(
                                     "Failed to delete reference for trigger id="+getId(), e);                            
                         }
@@ -153,7 +153,7 @@ public class AvertTrigger extends AbstractTrigger {
                             try {
                                 etracker.deleteReference(getId());
     
-                            } catch (SQLException e) {
+                            } catch (Exception e) {
                                 throw new ActionExecuteException(
                                         "Failed to delete reference for trigger id="+
                                         getId(), e);
