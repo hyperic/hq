@@ -390,7 +390,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
                                long endtime, double availVal) {
         AvailabilityDataRLE availObj =
             new AvailabilityDataRLE(meas, startime, endtime, availVal);
-        save(availObj);
+        getSession().save(availObj);
         return availObj;
     }
 
