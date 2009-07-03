@@ -376,6 +376,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @param page
      *            TODO
      * 
+     * @param includes {@link List} of {@link AppdefEntityID}s to filter,
+     *  may be null for all.
      * @ejb:interface-method
      */
     public List findAlerts(AuthzSubject subj, int count, int priority,
@@ -383,7 +385,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         throws PermissionException 
     {
         List result = new ArrayList();
-        final Set inclSet = new HashSet(includes);
+        final Set inclSet = (includes == null) ? null : new HashSet(includes);
         
         for (int index = 0; result.size() < count; index++) {
             // Permission checking included
@@ -396,7 +398,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             if (alerts.size() == 0) {
                 break;
             }
-            if (includes != null) {
+            if (inclSet != null) {
                 Iterator it = alerts.iterator();
                 for (int i = 0; it.hasNext(); i++) {
                     Alert alert = (Alert) it.next();
