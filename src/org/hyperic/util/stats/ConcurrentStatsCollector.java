@@ -118,7 +118,7 @@ public final class ConcurrentStatsCollector {
     	boolean inUnittestEnv =
     		unittestPropStringVal == null ? false :
     			(new Boolean(unittestPropStringVal)).booleanValue();
-    	if (inUnittestEnv) {
+    	if (!inUnittestEnv) {
         	final String d =
         		HQApp.getInstance().getRestartStorageDir().getAbsolutePath();
         	final String jbossLogSuffix =
