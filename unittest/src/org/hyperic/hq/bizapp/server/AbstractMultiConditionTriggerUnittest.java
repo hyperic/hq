@@ -11,7 +11,7 @@ import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.ext.MockTriggerFireStrategy;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
-public class AbstractMultiConditionTriggerUnittest extends TestCase {
+abstract public class AbstractMultiConditionTriggerUnittest extends TestCase {
 	
 	protected AbstractMultiConditionTriggerUnittest(String name) {
 		super(name);

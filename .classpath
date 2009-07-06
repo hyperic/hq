@@ -77,8 +77,6 @@
 	<classpathentry kind="lib" path="thirdparty/lib/easymock-2.3.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/easymockclassextension-2.3.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/ehcache-1.5.0.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/emma_ant.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/emma.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/getopt.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/groovy-all-1.6.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/henplus.jar"/>
@@ -207,16 +205,17 @@
 	<classpathentry kind="lib" path="tools/perftest/lib/nekohtml.jar"/>
 	<classpathentry kind="lib" path="unittest/lib/hibernate3.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/Users/trader/jboss/jboss-4.2.3.GA-hq411/server/default/lib/jboss-j2ee.jar"/>
-	<classpathentry kind="lib" path="/Users/trader/jboss/jboss-4.2.3.GA-hq411/server/default/lib/jbosssx.jar"/>
-	<classpathentry kind="lib" path="/Users/trader/jboss/jboss-4.2.3.GA-hq411/server/default/lib/mail.jar"/>
-	<classpathentry kind="lib" path="/Users/trader/jboss/jboss-4.2.3.GA-hq411/server/default/lib/jsp-api.jar"/>
-	<classpathentry kind="lib" path="/Users/trader/jboss/jboss-4.2.3.GA-hq411/server/default/lib/jmx-adaptor-plugin.jar"/>
-	<classpathentry kind="lib" path="/Users/trader/jboss/jboss-4.2.3.GA-hq411/server/default/lib/jboss-jsr77.jar"/>
-	<classpathentry kind="lib" path="/Users/trader/jboss/jboss-4.2.3.GA-hq411/lib/jboss-system.jar"/>
-	<classpathentry kind="lib" path="/Users/trader/jboss/jboss-4.2.3.GA-hq411/server/default/lib/jboss.jar"/>
-	<classpathentry kind="lib" path="/Users/trader/jboss/jboss-4.2.3.GA-hq411/server/default/deploy/jboss-web.deployer/jbossweb.jar"/>
+	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jbosssx.jar"/>
+	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/mail.jar"/>
+	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jsp-api.jar"/>
+	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jmx-adaptor-plugin.jar"/>
+	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jboss-jsr77.jar"/>
+	<classpathentry kind="var" path="JBOSS_HOME/lib/jboss-system.jar"/>
+	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jboss.jar"/>
+	<classpathentry kind="var" path="JBOSS_HOME/server/default/deploy/jboss-web.deployer/jbossweb.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/tomcat/catalina.jar"/>
-	<classpathentry kind="lib" path="build/classes"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
+	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jboss-j2ee.jar"/>
+	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jnpserver.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
