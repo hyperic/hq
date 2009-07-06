@@ -166,7 +166,7 @@ public class LogEventTrigger
         if (match == null || match.length() == 0 ||
             event.getMessage().indexOf(match) > -1) {
             try {
-                TriggerFiredEvent tfe = new TriggerFiredEvent(getId(), event);
+                TriggerFiredEvent tfe = prepareTriggerFiredEvent(event);
                 tfe.setMessage("Firing log event trigger: Level(" +
                                ResourceLogEvent.getLevelString(level) +
                                ") and Match(" + match + ")");

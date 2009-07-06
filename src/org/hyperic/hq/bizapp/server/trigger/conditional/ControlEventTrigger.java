@@ -163,7 +163,7 @@ public class ControlEventTrigger
 
         if (event.getStatus().equals(status)) {
             try {
-                TriggerFiredEvent tfe = new TriggerFiredEvent(getId(), event);
+                TriggerFiredEvent tfe = prepareTriggerFiredEvent(event);
                 tfe.setMessage("Firing control event trigger: " +
                                action + " " + status);
                 super.fireActions(tfe);

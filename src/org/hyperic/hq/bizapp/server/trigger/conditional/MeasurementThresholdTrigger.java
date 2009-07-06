@@ -247,7 +247,7 @@ public class MeasurementThresholdTrigger extends AbstractTrigger
         }
         
         try {
-            TriggerFiredEvent tfe = new TriggerFiredEvent(getId(), event);
+            TriggerFiredEvent tfe = prepareTriggerFiredEvent(event);
             tfe.setMessage("Metric(" + metricId + ") value " + val + " "
                            + OPER_STRS[operator] + " " + threshold);
             fireActions(tfe);

@@ -74,6 +74,7 @@ import org.hyperic.util.stats.ConcurrentStatsCollector;
 public class MultiConditionTrigger
     extends AbstractTrigger {
     private static final Log log = LogFactory.getLog(MultiConditionTrigger.class);
+    private static final Log traceLog = LogFactory.getLog(MultiConditionTrigger.class.getName() + "Trace");
     
     public static final String CFG_TRIGGER_IDS = "triggerIds";
     public static final String CFG_TIME_RANGE  = "timeRange";
@@ -229,6 +230,11 @@ public class MultiConditionTrigger
     	
     	AbstractEvent toUpdate = null;
     	priorEvents.add(event);
+    	
+    	if (traceLog.isDebugEnabled()) {
+    		traceLog.debug("my id=" + getId() +
+    						", evaluating event stream " + prepareTraceString(priorEvents));
+    	}
 
     	// Create a table to keep track
     	Map fulfilled = new LinkedHashMap();
@@ -366,10 +372,38 @@ public class MultiConditionTrigger
     		resetState(etracker, priorEvents);
     	}
     	
-    	if (sendNotFired) {
-    		publishNotFired();
+    	if (result == null) {
+    		if (sendNotFired) {
+    			// trace logging in parent class, if enabled
+    			publishNotFired();
+    		} else {
+    			if (traceLog.isDebugEnabled()) {
+    				traceLog.debug("my id=" + getId() + ", not firing");
+    			}
+    		}
     	}
+    	// else, trace logging in parent class for firing, if enabled
 
+    	return result;
+    }
+    
+    protected String prepareTraceString(Collection events) {
+    	String result = "";
+
+    	if (events != null && events.size() > 0) {
+    		StringBuffer sb = new StringBuffer('[');
+    		for (Iterator it = events.iterator(); it.hasNext(); ) {
+    			AbstractEvent evt = (AbstractEvent) it.next();
+    			sb.append(evt.getInstanceId());
+    			if (it.hasNext()) {
+    				sb.append(',');
+    			}
+    		}
+    		
+    		sb.append(']');
+    		result = sb.toString();
+    	}
+    	
     	return result;
     }
     
@@ -718,7 +752,7 @@ public class MultiConditionTrigger
             fulfillingEvents.toArray(
                 new AbstractEvent[fulfillingEvents.size()]);
         
-        TriggerFiredEvent target = new TriggerFiredEvent(getId(), nested);
+        TriggerFiredEvent target = prepareTriggerFiredEvent(nested);
 
         // Set the message
         target.setMessage(message.toString());

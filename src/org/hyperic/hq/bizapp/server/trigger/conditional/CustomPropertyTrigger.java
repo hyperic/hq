@@ -165,7 +165,7 @@ public class CustomPropertyTrigger extends AbstractTrigger
             return;
 
         try {
-            TriggerFiredEvent tfe = new TriggerFiredEvent(getId(), event);
+            TriggerFiredEvent tfe = prepareTriggerFiredEvent(event);
             StringBuffer sb = new StringBuffer();
             
             synchronized (lock) {

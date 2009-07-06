@@ -700,7 +700,7 @@ public class DurationTrigger extends AbstractTrigger
         
         // Create the target event
         TriggerFiredEvent targetEvent = 
-            new TriggerFiredEvent(getId(), mostRecentTfe);
+            prepareTriggerFiredEvent(mostRecentTfe);
 
         targetEvent.setMessage("Event " + _triggerId + " occurred " +
                            _count / 1000 + " seconds within " +

@@ -201,7 +201,7 @@ public class ValueChangeTrigger extends AbstractTrigger
             } else if (last.getValue().getValue() != me.getValue().getValue() && 
                        last.getValue().getTimestamp() < me.getValue().getTimestamp()) {
                 // Get ready to fire                
-                myEvent = new TriggerFiredEvent(getId(), event);
+                myEvent = prepareTriggerFiredEvent(event);
                 double values[] = { me.getValue().getValue(),
                                     last.getValue().getValue() };
                 FormattedNumber[] fmtValues =

@@ -48,6 +48,7 @@ public abstract class AbstractTrigger
     implements TriggerInterface, RegisterableTriggerInterface {
     
     protected final Log log = LogFactory.getLog(AbstractTrigger.class);
+    protected final Log traceLog = LogFactory.getLog(AbstractTrigger.class.getName() + "Trace");
     
     private final Object lock = new Object();
             
@@ -68,8 +69,28 @@ public abstract class AbstractTrigger
     protected final void publishEvent(AbstractEvent event) {
         Messenger.enqueueMessage(event);
     }
+    
+    protected TriggerFiredEvent prepareTriggerFiredEvent(AbstractEvent source) {
+    	if (traceLog.isDebugEnabled()) {
+    		traceLog.debug("Trigger [id=" + getId() + ", cls=" +
+    				getClass().getSimpleName() + "] creating TriggerFiredEvent");
+    	}
+    	return new TriggerFiredEvent(getId(), source);
+    }
+
+    protected TriggerFiredEvent prepareTriggerFiredEvent(AbstractEvent[] sources) {
+    	if (traceLog.isDebugEnabled()) {
+    		traceLog.debug("Trigger [id=" + getId() + ", cls=" +
+    				getClass().getSimpleName() + "] creating TriggerFiredEvent");
+    	}
+    	return new TriggerFiredEvent(getId(), sources);
+    }
 
     protected final void notFired() {
+    	if (traceLog.isDebugEnabled()) {
+    		traceLog.debug("Trigger [id=" + getId() + ", cls=" +
+    				getClass().getSimpleName() + "] publishing TriggerNotFiredEvent");
+    	}
         publishEvent(new TriggerNotFiredEvent(getId()));
     }
      

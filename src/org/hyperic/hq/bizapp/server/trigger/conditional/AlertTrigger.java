@@ -99,7 +99,7 @@ public class AlertTrigger extends AbstractTrigger
         }
 
         try {
-            TriggerFiredEvent tfe = new TriggerFiredEvent(getId(), event);            
+            TriggerFiredEvent tfe = prepareTriggerFiredEvent(event);            
             fireActions(tfe);
         } catch (AlertCreateException e) {
             throw new ActionExecuteException(e);

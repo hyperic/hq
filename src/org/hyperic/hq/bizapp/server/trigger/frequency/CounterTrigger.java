@@ -233,7 +233,7 @@ public class CounterTrigger extends AbstractTrigger
                         getId(), exc);                  
                 }
                             
-                myEvent = new TriggerFiredEvent(getId(), event);
+                myEvent = prepareTriggerFiredEvent(event);
                 
                 myEvent.setMessage("Occurred " + (prevCount + 1) +
                                    " times in the span of " +

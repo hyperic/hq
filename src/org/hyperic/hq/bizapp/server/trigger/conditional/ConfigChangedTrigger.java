@@ -158,7 +158,7 @@ public class ConfigChangedTrigger
         if (match == null || match.length() == 0 ||
             event.getMessage().indexOf(match) > -1) {
             try {
-                TriggerFiredEvent tfe = new TriggerFiredEvent(getId(), event);
+                TriggerFiredEvent tfe = prepareTriggerFiredEvent(event);
                 tfe.setMessage("Config file (" + event.getSource() +
                                ") changed: " + event.getMessage());
                 super.fireActions(tfe);
