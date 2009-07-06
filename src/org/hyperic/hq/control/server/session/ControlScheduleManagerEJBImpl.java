@@ -46,6 +46,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.server.session.AppdefManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -205,6 +206,9 @@ public class ControlScheduleManagerEJBImpl
                         break;
                 } catch (PermissionException e) {
                     i.remove();
+                } catch (AppdefEntityNotFoundException e) {
+                	// Resource not found, skip it and move on
+                	i.remove();
                 }
             }
 
