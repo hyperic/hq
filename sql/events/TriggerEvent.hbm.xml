@@ -5,6 +5,7 @@
            reads then updates event objects serially with an exclusive lock. Thus, 
            we don't need an optimistic locking strategy and the associated overhead. -->
   <class name="TriggerEvent" table="EAM_TRIGGER_EVENT" optimistic-lock="none">
+    <cache usage="read-write"/>
     <id name="id" type="long">
       <column name="ID" not-null="true"/>
       <generator class="org.hyperic.hibernate.id.ComboGenerator">
@@ -12,11 +13,11 @@
       </generator>
     </id>
 
-    <properties name="measurementId" unique="false">
+    <properties name="triggerIdIndx" unique="false">
       <property name="triggerId" type="integer">
         <column name="TRIGGER_ID" not-null="true" index="TRIGGER_EVENT_TRIGGER_ID_IDX"/>
-      </property>
-      <property name="id" index="TRIGGER_EVENT_TRIGGER_ID_IDX"/>
+      </property>	  
+      <property name="id" column="ID" update="false" insert="false" index="TRIGGER_EVENT_TRIGGER_ID_IDX"/>
     </properties>
 
     <property lazy="true" name="eventObject" type="binary">
