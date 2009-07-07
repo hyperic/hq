@@ -259,6 +259,12 @@ public class AlertDefinitionManagerEJBImpl
                         new MeasurementDAO(DAOFactory.getDAOFactory());
                     dm = dmDao.findById(new Integer(cond.getMeasurementId()));
                 }
+                if (dm == null) {
+                    log.warn("AlertCondition (id=" + cond.getId() + ") has an " +
+                        "associated Measurement (id=" + cond.getMeasurementId() +
+                        ") that does not exist, ignoring");
+                    continue;
+                }
                 res.setName(describeCondition(cond, dm));
             }
             
@@ -876,6 +882,13 @@ public class AlertDefinitionManagerEJBImpl
         } else {
             return null;
         }
+    }
+
+    /**
+     * @ejb:interface-method
+     */
+    public AlertDefinition findAlertDefinitionById(Integer id) {
+        return getAlertDefDAO().findById(id);
     }
 
     /** Get an alert definition's name

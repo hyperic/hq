@@ -272,4 +272,9 @@ implements AlertDefinitionManagerLocal, Verifiable {
 		// TODO Auto-generated method stub
 
 	}
+
+    public AlertDefinition findAlertDefinitionById(Integer id) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }
