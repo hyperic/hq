@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.bizapp;
 
-import org.hyperic.hq.bizapp.server.session.EventsBoss_testEJBImpl;
-import org.hyperic.hq.bizapp.shared.EventsBoss_testLocal;
 import org.hyperic.util.unittest.server.BaseServerTestCase;
 import org.hyperic.util.unittest.server.LocalInterfaceRegistry;
 
@@ -40,15 +38,19 @@ public class EventsBoss_test extends BaseServerTestCase {
     }
 
     public void setUp() throws Exception {
+/*
         super.setUp();
         super.insertSchemaData(FILENAME);
         _registry = deployHQ();
+*/
     }
     
     public void tearDown() throws Exception {
+/*
         super.deleteSchemaData(FILENAME);
         super.tearDown();
         undeployHQ();
+*/
     }
 
     public void testUpdateAlertDefinition() throws Exception {
