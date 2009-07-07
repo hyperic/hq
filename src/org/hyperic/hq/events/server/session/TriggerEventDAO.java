@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2009], Hyperic, Inc.
+ * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.events.server.session;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Session;
@@ -54,10 +52,6 @@ public class TriggerEventDAO extends HibernateDAO {
         return (TriggerEvent) super.findById(id);            
     }
     
-    TriggerEvent get(Long id) {
-        return (TriggerEvent) super.get(id);
-    }
-    
     List findUnexpiredByTriggerId(Integer tid, Session session) {
         String hql = "from TriggerEvent te where te.triggerId= :tid and " +
                       "te.expiration > :exp order by te.ctime";
@@ -68,43 +62,9 @@ public class TriggerEventDAO extends HibernateDAO {
                         .list();            
     }
     
-    List findExpiredByTriggerId(Integer tid) {
-    	String hql = "from TriggerEvent te where te.triggerId= :tid and " +
-    				 "te.expiration < :exp order by te.ctime";
-
-    	return createQuery(hql)
-    				  .setInteger("tid", tid.intValue())
-    				  .setLong("exp", System.currentTimeMillis())
-    				  .list();            
-    }
-
-    boolean idExistsInDB(Long id) {
-    	String hql = "select te.id from TriggerEvent te where te.id= :id";
-        List list = createQuery(hql)
-            .setLong("id", id.longValue())
-            .list();
-        return (list.size() == 0) ? false : true;
-    }
-    
-    List findAllByTriggerId(Integer tid) {
-    	String hql = "select te.id from TriggerEvent te where " +
-    					"te.triggerId= :tid";
-
-        List list = createQuery(hql)
-        				.setInteger("tid", tid.intValue())
-        				.list();
-        List rtn = new ArrayList(list.size());
-        for (Iterator it = list.iterator(); it.hasNext(); ) {
-        	Long id = (Long) it.next();
-        	rtn.add(findById(id));
-        }
-
-        return rtn;
-    }
-    
     int countUnexpiredByTriggerId(Integer tid, Session session) {
         String hql = "select count(te) from TriggerEvent te " +
-                     "where te.triggerId= :tid and te.expiration > :exp";
+        		     "where te.triggerId= :tid and te.expiration > :exp";
         
         return ((Number) session.createQuery(hql)
                         .setInteger("tid", tid.intValue())
@@ -112,21 +72,13 @@ public class TriggerEventDAO extends HibernateDAO {
                         .uniqueResult()).intValue();            
     }
     
-    void deleteById(Long teid) {
-    	remove(findById(teid));
-    }
-    
-    void delete(TriggerEvent te) {
-    	remove(te);
-    }
-    
-    void deleteByAlertDefinition(AlertDefinition def) {
-        String hql = "delete from TriggerEvent te where te.triggerId in " +
-                     "(select r.id from RegisteredTrigger r " +
-                     "where r.alertDefinition = :def)";
+    void deleteByTriggerId(Integer tid) {
+        String hql = "delete from TriggerEvent te where te.triggerId= :tid " +
+        		     "or te.expiration < :exp";
 
         createQuery(hql)
-                .setParameter("def", def)
+                .setInteger("tid", tid.intValue())
+                .setLong("exp", System.currentTimeMillis())
                 .executeUpdate();
     }
 }

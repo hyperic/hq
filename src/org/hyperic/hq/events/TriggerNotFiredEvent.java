@@ -37,12 +37,4 @@ public class TriggerNotFiredEvent extends AbstractEvent
     public TriggerNotFiredEvent(Integer instanceId) {
         setInstanceId(instanceId);
     }
-    
-    public static TriggerNotFiredEvent duplicate(TriggerNotFiredEvent orig) {
-    	try {
-    		return (TriggerNotFiredEvent) orig.clone();
-    	} catch (CloneNotSupportedException wontHappen) {
-    		return null;
-    	}
-    }
 }

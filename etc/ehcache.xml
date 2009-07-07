@@ -658,12 +658,6 @@
          timeToIdleSeconds="0"
          timeToLiveSeconds="0"
          memoryStoreEvictionPolicy="LRU"/>
-  <cache name="org.hyperic.hq.events.server.session.TriggerEvent"
-         maxElementsInMemory="50000"
-         eternal="true"
-         timeToIdleSeconds="0"
-         timeToLiveSeconds="0"
-         memoryStoreEvictionPolicy="LRU"/>
 
   <!-- Group alert caches -->
   <cache name="org.hyperic.hq.galerts.server.session.GalertDef"

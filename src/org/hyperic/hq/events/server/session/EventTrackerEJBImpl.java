@@ -31,7 +31,6 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.EJBException;
@@ -41,7 +40,6 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
@@ -86,7 +84,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
         throws SQLException {
 
         if (log.isDebugEnabled())
-            log.debug("Add referenced event for trigger id: " + tid + " with expiration " + expiration);      
+            log.debug("Add referenced event for trigger id: " + tid);      
         
         _diagnostic.startAddReference();
         
@@ -137,14 +135,13 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
                                 AbstractEvent eventObject, long expiration) 
         throws SQLException {        
         if (log.isDebugEnabled())
-            log.debug("Updating the event object for trigger event id: " + teid +
-                    " and trigger id" + tid + " and expiration " + expiration);            
+            log.debug("Updating the event object for trigger event id: " + teid);            
 
         _diagnostic.startUpdateReference();
         
         TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
         try {
-            TriggerEvent triggerEvent = triggerEventDAO.get(teid);
+            TriggerEvent triggerEvent = triggerEventDAO.findById(teid);
             
             long expire = 0;
             
@@ -186,98 +183,25 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @param tid The trigger id.
      * @ejb:interface-method
      */
-    public void deleteReference(Integer tid) {
-    	final boolean debug = log.isDebugEnabled();
-        if (debug) {
+    public void deleteReference(Integer tid) throws SQLException {
+        if (log.isDebugEnabled())
             log.debug("Delete referenced events for trigger id: " + tid);
-        }
+       
         _diagnostic.startDeleteReference();
         
-        TriggerEventDAO dao = getTriggerEventDAO();
-        List referenced = dao.findAllByTriggerId(tid);
-        for (Iterator it = referenced.iterator(); it.hasNext(); ) {
-        	TriggerEvent te = (TriggerEvent) it.next();
-            try {
-                if (debug) log.debug("deleteing TriggerEvent id=" + te.getId());
-            	dao.delete(te);
-            } catch (ObjectNotFoundException e) {
-        	    if (debug) {
-        	        log.debug(e, e);
-        	        // XXX scottmf, I don't believe this check is necessary
-        	        // but it gives warm fuzzies for now
-        	        log.debug("double check of db (vs. cache): " +
-        	            te.getId() + (dao.idExistsInDB(te.getId()) ?
-            	            " exists in db" : " does not exist in db"));
-        	    }
-            }
+        TriggerEventDAO triggerEventDAO = getTriggerEventDAO();
+        try {
+            triggerEventDAO.deleteByTriggerId(tid);        
+        } catch (Exception e) {
+            log.error("Failed to delete expired and referenced events for " +
+                      "trigger id=" + tid, e);     
+            throw new SQLException("Failed to delete expired and referenced " +
+                                   "events for trigger id=" + tid);
         }
         
         _diagnostic.endDeleteReference();
     }
 
-    /**
-     * Delete a set of events referenced by a trigger, by those events' ID
-     *
-     * @param  idsOfEventsToDelete   The trigger event IDs (primary keys)
-     * @throws SQLException 
-     * @ejb:interface-method
-     */
-    public void deleteEvents(Set idsOfEventsToDelete) {
-        final boolean debug = log.isDebugEnabled();
-        if (debug) {
-            log.debug("Delete referenced events by id");
-        }
-        TriggerEventDAO dao = getTriggerEventDAO();
-        for (Iterator it = idsOfEventsToDelete.iterator(); it.hasNext(); ) {
-        	Long teid = (Long) it.next();
-        	try {
-        	    if (debug) log.debug("deleteing TriggerEvent id=" + teid);
-                dao.deleteById(teid);
-        	} catch (ObjectNotFoundException e) {
-        	    if (debug) {
-        	        log.debug(e, e);
-        	        // XXX scottmf, I don't believe this check is necessary
-        	        // but it gives warm fuzzies for now
-        	        log.debug("double check of db (vs. cache): " +
-        	            teid + (dao.idExistsInDB(teid) ?
-            	            " exists in db" : " does not exist in db"));
-        	    }
-                continue;
-        	}
-        }
-    }
-    
-    /**
-     * Delete a set of events referenced by a trigger that have expired
-     *
-     * @param  triggerId   The trigger ID of the events to delete
-     * @ejb:interface-method
-     */
-    public void deleteExpiredByTriggerId(Integer triggerId) {
-    	final boolean debug = log.isDebugEnabled();
-        if (debug) {
-            log.debug("Delete expired events by trigger id " + triggerId);
-        }
-
-        TriggerEventDAO dao = getTriggerEventDAO();
-    	List expiredForTrigger = dao.findExpiredByTriggerId(triggerId);
-    	for (Iterator it = expiredForTrigger.iterator(); it.hasNext(); ) {
-	        TriggerEvent te = (TriggerEvent) it.next();
-    	    try {
-    	        if (debug) log.debug("deleteing TriggerEvent id=" + te.getId());
-    	        dao.delete(te);
-    	    } catch (ObjectNotFoundException e) {
-    	        if (debug) {
-    	            log.debug(e, e);
-    	            // XXX scottmf, I don't believe this check is necessary
-    	            // but it gives warm fuzzies for now
-    	            log.debug("double check of db (vs. cache): " +
-    	                te.getId() + (dao.idExistsInDB(te.getId()) ?
-    	                    " exists in db" : " does not exist in db"));
-    	        }
-    	    }
-    	}
-    }
 
     /** 
      * Get the list of events that are referenced by a given trigger in order
@@ -287,7 +211,7 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
      * @return The list of {@link EventObjectDeserializer EventObjectDeserializers} 
      *         containing the events referenced by the trigger. Each event will 
      *         have its id set to the trigger event id.
-     *  
+     *         
      * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */

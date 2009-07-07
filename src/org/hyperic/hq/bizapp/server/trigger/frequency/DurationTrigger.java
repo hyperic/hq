@@ -88,13 +88,11 @@ public class DurationTrigger extends AbstractTrigger
     private Integer _triggerId;
     private long    _count;
     private long    _timeRange;
-    private int		_purgeCount;
     
     private AbstractEvent     _lastTrackableEvent;
     private TriggerFiredEvent _lastTriggerFiredEvent;
     private long              _collectionInterval = MIN_COLLECTION_INTERVAL_MILLIS;
     
-    private static final int PURGE_THRESHOLD = 100;
     
     /**
      * The default constructor, required by the system when creating instances.
@@ -125,7 +123,6 @@ public class DurationTrigger extends AbstractTrigger
         _count = count;
         _timeRange = timeRange;
         _clock = clock;
-        _purgeCount = 0;
     }
     
     /**
@@ -246,7 +243,6 @@ public class DurationTrigger extends AbstractTrigger
                 Long.parseLong(triggerData.getValue(CFG_COUNT)) * 1000;
             _timeRange =
                 Long.parseLong(triggerData.getValue(CFG_TIME_RANGE)) * 1000;
-            _purgeCount = 0;
         } catch(InvalidOptionException exc){
             throw new InvalidTriggerDataException(exc);
         } catch(InvalidOptionValueException exc){
@@ -527,10 +523,6 @@ public class DurationTrigger extends AbstractTrigger
                         getId(), e);                            
             }
         }
-        
-        if (++_purgeCount >= PURGE_THRESHOLD) {
-        	eTracker.deleteExpiredByTriggerId(getId());
-        }
     }
     
     /**
@@ -542,9 +534,8 @@ public class DurationTrigger extends AbstractTrigger
         
         try {
             // Get ready to fire, reset trigger state.
-            eTracker.deleteReference(getId());
-            _purgeCount = 0;
-        } catch (Exception exc) {
+            eTracker.deleteReference(getId());                          
+        } catch (SQLException exc) {
             // It's ok if we can't delete the old events now.
             // We can do it next time.
             log.warn("Failed to remove all references to trigger id="+getId(), exc);  

@@ -2,10 +2,9 @@
 <hibernate-mapping package="org.hyperic.hq.events.server.session">
 
   <!-- We prevent concurrent updates at the application level. Each trigger 
-       reads then updates event objects serially with an exclusive lock. Thus, 
-       we don't need an optimistic locking strategy and the associated overhead. -->
+	   reads then updates event objects serially with an exclusive lock. Thus, 
+	   we don't need an optimistic locking strategy and the associated overhead. -->
   <class name="TriggerEvent" table="EAM_TRIGGER_EVENT" optimistic-lock="none">
-    <cache usage="read-write"/>
     <id name="id" type="long">
       <column name="ID" not-null="true"/>
       <generator class="org.hyperic.hibernate.id.ComboGenerator">
@@ -13,23 +12,20 @@
       </generator>
     </id>
 
-    <properties name="measurementId" unique="false">
-      <property name="triggerId" type="integer">
-        <column name="TRIGGER_ID" not-null="true" index="TRIGGER_EVENT_TRIGGER_ID_IDX"/>
-      </property>	  
-      <property name="id" column="ID" update="false" insert="false" index="TRIGGER_EVENT_TRIGGER_ID_IDX"/>
-    </properties>
-
     <property lazy="true" name="eventObject" type="binary">
       <column name="EVENT_OBJECT" not-null="true" length="256"/>
     </property>
 
+    <property name="triggerId" type="integer">
+      <column name="TRIGGER_ID" not-null="true" index="TRIGGER_EVENT_TRIGGER_ID_IDX"/>
+    </property>	  
+	  
     <property name="ctime" type="long">
-      <column name="CTIME" not-null="true"/>
+      <column name="CTIME" not-null="true" index="TRIGGER_EVENT_CTIME_IDX"/>
     </property>
 
     <property name="expiration" type="long">
-      <column name="EXPIRATION" not-null="true"/>
+      <column name="EXPIRATION" not-null="true" index="TRIGGER_EVENT_EXPIRATION_IDX"/>
     </property>
   </class>
 
