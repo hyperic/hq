@@ -27,16 +27,37 @@ package org.hyperic.hq.auth.shared;
 
 import java.util.Random;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.collection.IntHashMap;
 
 public class SessionManager {
+    private final Log _log = LogFactory.getLog(SessionManager.class);
     private static Random _random = new Random();
     private static IntHashMap _cache = new IntHashMap();
     private static SessionManager _manager = new SessionManager();
     private static final long DEFAULT_TIMEOUT = 90 * 1000 * 60;
+    private static final long HOUR = MeasurementConstants.HOUR;
 
-    private SessionManager() {}
+    private SessionManager() {
+        final Runnable task = new Runnable() {
+            public void run() {
+                try {
+                    _log.info("cleaning up expired sessions");
+                    int num = cleanupExpired();
+                    _log.info("done cleaning up expired sessions (" + num + 
+                        " expired sessions)");
+                } catch (Throwable t) {
+                    _log.error(t, t);
+                }
+            }
+        };
+        HQApp.getInstance().getScheduler().scheduleAtFixedRate(
+            task, HOUR, HOUR);
+    }
 
     public static SessionManager getInstance() {
         return _manager;
@@ -67,6 +88,10 @@ public class SessionManager {
             key = _random.nextInt();
         } while (_cache.containsKey(key));
         
+        if (_log.isDebugEnabled()) {
+            _log.debug("adding session with user=" + subject.getName() +
+                ",sessionId=" + key + ",timeout=" + timeout);
+        }
         _cache.put(key, new AuthSession(subject, timeout));
         
         return key;
@@ -105,6 +130,7 @@ public class SessionManager {
         } catch (NullPointerException e) {
             // this shouldn't ever happen since their will always be atleast
             // one session (belonging to authzsubject) in cache.
+            _log.error(e, e);
         }
 
         // If the session not found, then throw exception.
@@ -165,7 +191,27 @@ public class SessionManager {
      * @param sessionId The session id
      */
     public synchronized void invalidate(int sessionId) {
-        // XXX: check for other stale sessions?
-        _cache.remove(sessionId);
+        AuthSession sess = (AuthSession)_cache.remove(sessionId);
+        if (_log.isDebugEnabled()) {
+            _log.debug("removed session sessionId=" + sessionId +
+                ",user=" + sess.getAuthzSubject().getName());
+        }
+    }
+    
+    private synchronized int cleanupExpired() {
+        int rtn = 0;
+        final int[] keys = _cache.getKeys();
+        for (int i=0; i<_cache.getKeys().length; i++) {
+            final int sessionID = keys[i];
+            AuthSession sess = (AuthSession)_cache.get(sessionID);
+            if (sess == null) {
+                // ignore spaces in intHashMap
+                continue;
+            } else if (sess.isExpired()) {
+                rtn++;
+                invalidate(sessionID);
+            }
+        }
+        return rtn;
     }
 }
