@@ -64,7 +64,7 @@ class HealthController
                  label: {it.agent.port}],
                 [field: AgentSortField.VERSION,
                  width: '10%',
-                 label: {it.agent.version}],
+                 label: {it.version}],
                 [field: [getValue: {localeBundle.build},
                  description:'build', sortable:false],
                  width: '5%',
@@ -150,7 +150,8 @@ class HealthController
                             bundleVersion:getAgentCProp(a, d[2], "AgentBundleVersion"),
                             numMetrics:numMetrics,
                             creationTime:df.format(a.creationTime),
-                            licenseCount:getLicenseCount(a)]
+                            licenseCount:getLicenseCount(a),
+                            version:getAgentCProp(a, d[2], "version")]
                     found = true
                     break
                 }
