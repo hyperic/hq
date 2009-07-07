@@ -66,8 +66,6 @@ import org.junit.Assert;
  */
 public class EventsBoss_testEJBImpl implements SessionBean {
     
-    private transient Log _log = LogFactory.getLog(EventsBoss_testEJBImpl.class);
-    
     /**
      * @ejb:interface-method
      */
@@ -79,11 +77,7 @@ public class EventsBoss_testEJBImpl implements SessionBean {
         final AuthzSubjectManagerLocal authMan = getAuthMan();
         final AuthzSubject subj = authMan.getOverlordPojo();
         final int sessionID = SessionManager.getInstance().put(subj);
-        try {
-            eBoss.updateAlertDefinition(sessionID, def.getAlertDefinitionValue());
-        } catch (Exception e) {
-            _log.error(e, e);
-        }
+        eBoss.updateAlertDefinition(sessionID, def.getAlertDefinitionValue());
         final Collection children = def.getChildren();
         for (final Iterator it=children.iterator(); it.hasNext(); ) {
             final AlertDefinition child = (AlertDefinition)it.next();
