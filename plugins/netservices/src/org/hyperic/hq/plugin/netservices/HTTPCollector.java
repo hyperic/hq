@@ -37,6 +37,7 @@ import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpMethod;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.auth.BasicScheme;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
@@ -297,10 +298,10 @@ public class HTTPCollector extends SocketChecker {
                 method.addRequestHeader(new Header("Authorization", auth));
             }
             else {
-                client.getState().setCredentials(realm,
-                                                 getHostname(),
-                                                 credentials);
-
+                String authHost = (this.hosthdr == null) ? getHostname() : this.hosthdr;
+                AuthScope authScope = new AuthScope(authHost, -1, realm);
+                client.getState().setCredentials(authScope, credentials);
+                
                 method.setDoAuthentication(true);
             }
         }
