@@ -3,66 +3,66 @@
 <project name="test-build" basedir="..">
 
 <property file="${hq.home}/build_util/clover.properties"/>
-		
+
 <target name="init-tests">
-	<delete dir="${junitResults.dir}"/>
-	<mkdir dir="${junitResults.dir}"/>
-	<mkdir dir="${hq.home}/unittest/data"/>  
+  <delete dir="${junitResults.dir}"/>
+  <mkdir dir="${junitResults.dir}"/>
+  <mkdir dir="${hq.home}/unittest/data"/>
 </target>
-	
+
 <target name="single-test">
-	<fail message="Must specify a test case system property: -Dtestcase=org.hyperic.My_test" unless="testcase"/>
+  <fail message="Must specify a test case system property: -Dtestcase=org.hyperic.My_test" unless="testcase"/>
     <echo message="Running Single Test: ${testcase}"/>
     <antcall target="test">
-		<param name="single.test" value="true" />
+    <param name="single.test" value="true" />
     </antcall>
 </target>
 
-		
+
 <target name="test" depends="init,init-taskdefs,init-tests">
-	<path id="test.compile.classpath">
-		<path refid="alljars"/>
-	 	<path refid="testjars"/>
-	  	<path location="${build.dir}/classes" />
-	  	<path location="${build.dir}/src" />
-	</path>
-	<test-run classpath.id="test.compile.classpath" input.dir="${basedir}/unittest/src"/>
+  <path id="test.compile.classpath">
+    <path refid="alljars"/>
+     <path refid="testjars"/>
+      <path location="${build.dir}/classes" />
+      <path location="${build.dir}/src" />
+  </path>
+  <test-run classpath.id="test.compile.classpath" input.dir="${basedir}/unittest/src"/>
 </target>
 
 <macrodef name="test-run">
-		<attribute name="classpath.id"/>
-		<attribute name="input.dir"/>
-		<sequential>
+    <attribute name="classpath.id"/>
+    <attribute name="input.dir"/>
+    <sequential>
 
     <echo message="Using the following system properties..."/>
-    <echo message="-Djava.system.class.loader=org.hyperic.util.unittest.server.IsolatingDefaultSystemClassLoader"/>	
+    <echo message="-Djava.system.class.loader=org.hyperic.util.unittest.server.IsolatingDefaultSystemClassLoader"/>
     <echo message="-Dhq.unittest.run=true"/>
     <echo message="-Dhq.unittest.jboss.home=${jboss.home}"/>
     <echo message="-Dhq.unittest.hq.home=${basedir}"/>
     <echo message="-Dhq.unittest.working.dir=${hq.home}/unittest/data"/>
-	
-	<condition property="test.halt" value="false" else="true">
-		<istrue value="${ci.build}"/>
-	</condition>
-	
-	<echo message="Halt on error or failure: ${test.halt}"/>
+
+  <condition property="test.halt" value="false" else="true">
+    <istrue value="${ci.build}"/>
+  </condition>
+
+  <echo message="Halt on error or failure: ${test.halt}"/>
 
     <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltOnError="${test.halt}" haltOnFailure="${test.halt}">
         <jvmarg value="-Xmx1024m"/>
         <jvmarg value="-Xms1024m"/>
-        <jvmarg value="-XX:MaxPermSize=512m"/>		
+        <jvmarg value="-XX:MaxPermSize=512m"/>
         <jvmarg value="-Djava.system.class.loader=org.hyperic.util.unittest.server.IsolatingDefaultSystemClassLoader"/>
         <jvmarg value="-Dhq.unittest.run=true"/>
         <jvmarg value="-Dhq.unittest.jboss.home=${jboss.home}"/>
         <jvmarg value="-Dhq.unittest.hq.home=${basedir}"/>
         <jvmarg value="-Dhq.unittest.working.dir=${hq.home}/unittest/data"/>
- 		<jvmarg value="-Dtest.halt=${test.halt}"/>
-		<classpath refid="@{classpath.id}"/>
-    	
+     <jvmarg value="-Dtest.halt=${test.halt}"/>
+    <classpath refid="@{classpath.id}"/>
+
        <formatter type="xml"/>
-		
+
        <test name="${testcase}" todir="${junitResults.dir}" if="single.test" />
-		
+
        <batchtest todir="${junitResults.dir}" unless="single.test">
            <fileset dir="@{input.dir}">
                <include name="**/*_test.java"/>
@@ -74,9 +74,9 @@
                <!-- Need to figure out why these tests are failing -->
                <exclude name="**/AuthzSubjectManager_test.java"/>
                <exclude name="**/ProblemMetricManager_test.java"/>
-			   <exclude name="**/ResourceGroupManager_test.java"/>
-			   <exclude name="**/InputStreamService_test.java"/>
-               <!-- This unit test should be enabled only when testing the 
+         <exclude name="**/ResourceGroupManager_test.java"/>
+         <exclude name="**/InputStreamService_test.java"/>
+               <!-- This unit test should be enabled only when testing the
                     unit test framework itself -->
                <exclude name="**/ServerLifecycleManagement_test.java"/>
            </fileset>
@@ -118,129 +118,142 @@
 
   </target>
 
-  <target name="clover" depends="clover.pre, clover.instrument, clover.compile, pack, precompile-jsp, pack-test-coverage, pack-test-ear, test-dbsetup, test-prepare-jboss, clover.do, clover.post" description="Executes all tests resulting from a compilation of the test tree returning test coverage metrics."/>
-			
+  <target name="clover" depends="clover.pre, clover.instrument, clover.compile, pack, precompile-jsp, pack-test-coverage, pack-test-ear, clover.testdb.setup, test-prepare-jboss, clover.do, clover.post" description="Executes all tests resulting from a compilation of the test tree returning test coverage metrics."/>
+
   <target name="clover.pre">
-		<delete dir="${clover.output.dir}" quiet="true"/>
-		<mkdir dir="${clover.output.dir}"/>
+    <delete dir="${clover.output.dir}" quiet="true"/>
+    <mkdir dir="${clover.output.dir}"/>
   </target>
-		
+
+  <target name="clover.testdb.setup">
+      <property name="unittest-lib" location="${hq.home}/unittest/lib" />
+     <antcall target="test-dbsetup">
+        <param name="unittest.lib" value="${unittest-lib}"/>
+      </antcall>
+  </target>
+
    <target name="clover.do" depends="clover.init, init-tests">
-		<path id="clover.run.classpath">
-			<pathelement location="${build.dir}/classes"/>
-				<path refid="clover.classpath"/>
-				<path refid="testjars"/>
-		</path>
-		<test-run classpath.id="clover.run.classpath" input.dir="${test.clover.dir}"/>
-	</target>	
+    <path id="clover.run.classpath">
+      <pathelement location="${build.dir}/classes"/>
+        <path refid="clover.classpath"/>
+        <path refid="testjars"/>
+    </path>
+    <test-run classpath.id="clover.run.classpath" input.dir="${test.clover.dir}"/>
+  </target>
 
-    <target name="clover.instrument" depends="clover.init, xdoclet, hibernate-prep, copy-resources">
-		<instrument input.dir="${basedir}/src" output.dir="${main.clover.dir}"/>
-		<instrument input.dir="${basedir}/unittest/src" output.dir="${test.clover.dir}"/>
-		<instrument-java5 input.dir="${basedir}/src" output.dir="${main.clover.dir}"/>
-		<instrument-java5 input.dir="${basedir}/unittest/src" output.dir="${test.clover.dir}"/>
-	</target>
-	
-	<target name="clover.compile">	
-		<path id="clover.compile.classpath">
-				<path refid="clover.classpath"/>
-				<path refid="testjars"/>
-				<pathelement location="${build.dir}/tools/txsnatch/classes"/>
-		</path>
-		<path id="main.src.path">
-			<path location="${build.dir}/src" />
-	        <path location="${main.clover.dir}" />
-			<path location="${test.clover.dir}" />
-	    </path>
-		<path id="compile.classpath">
-			<path refid="alljars" />
-			<path refid="testjars" />
-		</path>
-		<compile-app classpath.id="clover.compile.classpath" srcpath.id="main.src.path" output.dir="${build.dir}/classes"/>
-		<compile-ui-sources classpath.id="clover.compile.classpath" srcpath.id="main.src.path" output.dir="${build.dir}/classes"/>
-	</target>
-	
-	<target name="clover.init" depends="init">
-		<taskdef resource="cloverlib.xml" classpathref="clover.classpath"/>
-	</target>
-	
-	<target name="clover.post" depends="clover.init">
-		<clover-report initstring="${clover.db.file}">
-			<current outfile="${clover.output.dir}/clover.xml">
-				<format type="xml"/>
-				<testsources dir="${basedir}/unittest/src">
-					<include name="**/*.java"/>
-					<include name="*.java"/>
-				</testsources>
-			</current>
-		</clover-report>
-		<clover-report initstring="${clover.db.file}">
-			<current outfile="${clover.output.dir}/html">
-				<format type="html"/>
-				<testsources dir="${basedir}/unittest/src">
-					<include name="**/*.java"/>
-					<include name="*.java"/>
-				</testsources>
-			</current>
-		</clover-report>
-		<clover-report initstring="${clover.db.file}">
-			<current outfile="${clover.output.dir}/clover.pdf" summary="true">
-				<format type="pdf"/>
-				<testsources dir="${basedir}/unittest/src">
-					<include name="**/*.java"/>
-					<include name="*.java"/>
-				</testsources>
-			</current>
-		</clover-report>
-		<clover-check initstring="${clover.db.file}" target="${clover.coverage}" haltOnFailure="${clover.enforce}">
-			<testsources dir="${basedir}/unittest/src">
-				<include name="**/*.java"/>
-				<include name="*.java"/>
-			</testsources>
-		</clover-check>
-	</target>
+    <target name="clover.instrument" depends="clover.init">
+      <property name="unittest-lib" location="${hq.home}/unittest/lib" />
+      <antcall target="xdoclet"/>
+      <antcall target="hibernate-prep">
+        <param name="unittest.lib" value="${unittest-lib}"/>
+      </antcall>
+      <antcall target="copy-resources"/>
+    <instrument input.dir="${basedir}/src" output.dir="${main.clover.dir}"/>
+    <instrument input.dir="${basedir}/unittest/src" output.dir="${test.clover.dir}"/>
+    <instrument-java5 input.dir="${basedir}/src" output.dir="${main.clover.dir}"/>
+    <instrument-java5 input.dir="${basedir}/unittest/src" output.dir="${test.clover.dir}"/>
+  </target>
 
-	<macrodef name="instrument">
-		<attribute name="input.dir"/>
-		<attribute name="output.dir"/>
-		<sequential>
-			<clover-instr initstring="${clover.db.file}" destdir="@{output.dir}" source="1.4">
-				<fileset dir="@{input.dir}">
-					<include name="**/*.java"/>
-					<exclude name="org/hyperic/hq/ui/**/*.java" />
-				    <exclude name="org/hyperic/ui/tapestry/**/*.java" />
-					<exclude name="com/hyperic/hq/ui/**/*.java"/>
-				    <exclude name="com/hyperic/ui/**/*.java"/>
-				</fileset>
-			</clover-instr>		
-			<copy todir="@{output.dir}">
-				<fileset dir="@{input.dir}">
-					<exclude name="**/*.java"/>
-					<exclude name="*.java"/>
-				</fileset>
-			</copy>
-		</sequential>
-	</macrodef>
-	
-	<macrodef name="instrument-java5">
-		<attribute name="input.dir"/>
-		<attribute name="output.dir"/>
-		<sequential>
-			<clover-instr initstring="${clover.db.file}" destdir="@{output.dir}" source="1.5">
-				<fileset dir="@{input.dir}">
-					  <include name="org/hyperic/hq/ui/**/*.java" />
-				      <include name="org/hyperic/ui/tapestry/**/*.java" />
-					  <include name="com/hyperic/hq/ui/**/*.java"/>
-				      <include name="com/hyperic/ui/**/*.java"/>
-				</fileset>
-			</clover-instr>		
-			<copy todir="@{output.dir}">
-				<fileset dir="@{input.dir}">
-					<exclude name="**/*.java"/>
-					<exclude name="*.java"/>
-				</fileset>
-			</copy>
-		</sequential>
-	</macrodef>
-	
+  <target name="clover.compile">
+    <path id="clover.compile.classpath">
+        <path refid="clover.classpath"/>
+        <path refid="testjars"/>
+        <pathelement location="${build.dir}/tools/txsnatch/classes"/>
+    </path>
+    <path id="main.src.path">
+      <path location="${build.dir}/src" />
+          <path location="${main.clover.dir}" />
+      <path location="${test.clover.dir}" />
+      </path>
+    <path id="compile.classpath">
+      <path refid="alljars" />
+      <path refid="testjars" />
+    </path>
+    <compile-app classpath.id="clover.compile.classpath" srcpath.id="main.src.path" output.dir="${build.dir}/classes"/>
+    <compile-ui-sources classpath.id="clover.compile.classpath" srcpath.id="main.src.path" output.dir="${build.dir}/classes"/>
+  </target>
+
+  <target name="clover.init" depends="init">
+    <taskdef resource="cloverlib.xml" classpathref="clover.classpath"/>
+  </target>
+
+  <target name="clover.post" depends="clover.init">
+    <clover-report initstring="${clover.db.file}">
+      <current outfile="${clover.output.dir}/clover.xml">
+        <format type="xml"/>
+        <testsources dir="${basedir}/unittest/src">
+          <include name="**/*.java"/>
+          <include name="*.java"/>
+        </testsources>
+      </current>
+    </clover-report>
+    <clover-report initstring="${clover.db.file}">
+      <current outfile="${clover.output.dir}/html">
+        <format type="html"/>
+        <testsources dir="${basedir}/unittest/src">
+          <include name="**/*.java"/>
+          <include name="*.java"/>
+        </testsources>
+      </current>
+    </clover-report>
+    <clover-report initstring="${clover.db.file}">
+      <current outfile="${clover.output.dir}/clover.pdf" summary="true">
+        <format type="pdf"/>
+        <testsources dir="${basedir}/unittest/src">
+          <include name="**/*.java"/>
+          <include name="*.java"/>
+        </testsources>
+      </current>
+    </clover-report>
+    <clover-check initstring="${clover.db.file}" target="${clover.coverage}" haltOnFailure="${clover.enforce}">
+      <testsources dir="${basedir}/unittest/src">
+        <include name="**/*.java"/>
+        <include name="*.java"/>
+      </testsources>
+    </clover-check>
+  </target>
+
+  <macrodef name="instrument">
+    <attribute name="input.dir"/>
+    <attribute name="output.dir"/>
+    <sequential>
+      <clover-instr initstring="${clover.db.file}" destdir="@{output.dir}" source="1.4">
+        <fileset dir="@{input.dir}">
+          <include name="**/*.java"/>
+          <exclude name="org/hyperic/hq/ui/**/*.java" />
+            <exclude name="org/hyperic/ui/tapestry/**/*.java" />
+          <exclude name="com/hyperic/hq/ui/**/*.java"/>
+            <exclude name="com/hyperic/ui/**/*.java"/>
+        </fileset>
+      </clover-instr>
+      <copy todir="@{output.dir}">
+        <fileset dir="@{input.dir}">
+          <exclude name="**/*.java"/>
+          <exclude name="*.java"/>
+        </fileset>
+      </copy>
+    </sequential>
+  </macrodef>
+
+  <macrodef name="instrument-java5">
+    <attribute name="input.dir"/>
+    <attribute name="output.dir"/>
+    <sequential>
+      <clover-instr initstring="${clover.db.file}" destdir="@{output.dir}" source="1.5">
+        <fileset dir="@{input.dir}">
+            <include name="org/hyperic/hq/ui/**/*.java" />
+              <include name="org/hyperic/ui/tapestry/**/*.java" />
+            <include name="com/hyperic/hq/ui/**/*.java"/>
+              <include name="com/hyperic/ui/**/*.java"/>
+        </fileset>
+      </clover-instr>
+      <copy todir="@{output.dir}">
+        <fileset dir="@{input.dir}">
+          <exclude name="**/*.java"/>
+          <exclude name="*.java"/>
+        </fileset>
+      </copy>
+    </sequential>
+  </macrodef>
+
 </project>
