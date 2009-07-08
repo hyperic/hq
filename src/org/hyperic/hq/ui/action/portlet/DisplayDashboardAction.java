@@ -66,38 +66,37 @@ import org.hyperic.util.config.ConfigResponse;
 public class DisplayDashboardAction extends TilesAction {
 
 	public ActionForward execute(ComponentContext context,
-			ActionMapping mapping, ActionForm form, HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
-
+			                     ActionMapping mapping, 
+			                     ActionForm form, 
+			                     HttpServletRequest request,
+			                     HttpServletResponse response) 
+	throws Exception {
 		HttpSession session = request.getSession();
 		ServletContext ctx = getServlet().getServletContext();
 		AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
 		DashboardForm dForm = (DashboardForm) form;
         WebUser user = RequestUtils.getWebUser(request);
 		DashboardManagerLocal dashManager = DashboardManagerEJBImpl.getOne();
-		AuthzSubject me = boss.findSubjectById(user.getSessionId(), user
-				.getSubject().getId());
-		Portal portal = (Portal) session
-				.getAttribute(Constants.USERS_SES_PORTAL);
-		// TODO add a condition here to check if the dash selected has changed
-		// and re-add if null check
-		
+		AuthzSubject me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
+		Portal portal = (Portal) session.getAttribute(Constants.USERS_SES_PORTAL);
 		portal = new Portal();
+		
 		portal.setName("dashboard.template.title");
 		portal.setColumns(2);
 
 		// Set dashboard string list for the dashboard select list
-		List dashboards = new ArrayList();
-		ArrayList dashboardCollection;
-		dashboardCollection = (ArrayList) dashManager.getDashboards(me);
-		Iterator i = dashboardCollection.iterator();
-		while (i.hasNext()) {
+		List<DashboardConfig> dashboardCollection = (ArrayList<DashboardConfig>) dashManager.getDashboards(me);
+		List<Dashboard> dashboards = new ArrayList<Dashboard>();
+        
+		for (Iterator<DashboardConfig> i = dashboardCollection.iterator(); i.hasNext();) {
+			DashboardConfig config = i.next();
 			Dashboard dashboard = new Dashboard();
-			DashboardConfig config = (DashboardConfig) i.next();
+            
 			dashboard.setId(config.getId());
 			dashboard.set_name(config.getName());
 			dashboards.add(dashboard);
 		}
+		
 		if (dashboards.size() > 0) {
 			dForm.setDashboards(dashboards);
 		} else {
@@ -114,7 +113,7 @@ public class DisplayDashboardAction extends TilesAction {
 		if (defaultDashboard != null && selectedDashboard == null) {
 			// If this is a fresh session, selected dashboard id won't be set so we'll need to 
 			// initially set it to the default dashboard id.
-			dashboardConfig = DashboardUtils.findDashboard(dashboardCollection, Integer.valueOf(defaultDashboard));
+			dashboardConfig = DashboardUtils.findDashboard((ArrayList<DashboardConfig>) dashboardCollection, Integer.valueOf(defaultDashboard));
         } else if (dashboardCollection.size() == 1) {
             // No need to select a default - only one available
             dashboardConfig = (DashboardConfig) dashboardCollection.get(0);
@@ -122,7 +121,7 @@ public class DisplayDashboardAction extends TilesAction {
 		} else if (selectedDashboard != null) {
 			// If we have a selected dashboard id, find it in the list of dashboards
 			// if it has been removed, inform the user
-			dashboardConfig = DashboardUtils.findDashboard(dashboardCollection, selectedDashboard);
+			dashboardConfig = DashboardUtils.findDashboard((ArrayList<DashboardConfig>) dashboardCollection, selectedDashboard);
 		} 
 		
 		if (dashboardConfig == null) {
@@ -158,34 +157,25 @@ public class DisplayDashboardAction extends TilesAction {
 		//      We'll need to add some logic to role creation in hqapi so that
 		//      dashboard creation happens, however for 4.2 this is not something
 		//      we can squeeze in, this will suffice for the time being
-		if (dashPrefs.getValue(Constants.USER_PORTLETS_FIRST) == null && 
-			dashPrefs.getValue(Constants.USER_PORTLETS_SECOND) == null) 
-		{
-		    ConfigResponse defaultRoleDashPrefs = (ConfigResponse)
-		        ctx.getAttribute(Constants.DEF_ROLE_DASH_PREFS);
-		    try {
-		        AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-		        dashManager.configureDashboard(overlord, dashboardConfig,
-		                                       defaultRoleDashPrefs);
-		        dashPrefs.merge(defaultRoleDashPrefs, true);
-		    } catch (PermissionException e) {
-		        // User has no permission to write the dashboard configs
-		    }
+		if (dashPrefs.getValue(Constants.USER_PORTLETS_FIRST) == null && dashPrefs.getValue(Constants.USER_PORTLETS_SECOND) == null) {
+		    ConfigResponse defaultRoleDashPrefs = (ConfigResponse) ctx.getAttribute(Constants.DEF_ROLE_DASH_PREFS);
+		    AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+		    
+		    dashManager.configureDashboard(overlord, dashboardConfig, defaultRoleDashPrefs);
+		    dashPrefs.merge(defaultRoleDashPrefs, true); 
 		}
 		
-		portal.addPortletsFromString(dashPrefs
-				.getValue(Constants.USER_PORTLETS_FIRST), 1);
-		portal.addPortletsFromString(dashPrefs
-				.getValue(Constants.USER_PORTLETS_SECOND), 2);
+		portal.addPortletsFromString(dashPrefs.getValue(Constants.USER_PORTLETS_FIRST), 1);
+		portal.addPortletsFromString(dashPrefs.getValue(Constants.USER_PORTLETS_SECOND), 2);
 
 		// Go through the portlets and see if they have descriptions
-		for (Iterator pit = portal.getPortlets().iterator(); pit.hasNext();) {
-			Collection portlets = (Collection) pit.next();
-			for (Iterator it = portlets.iterator(); it.hasNext();) {
-				Portlet portlet = (Portlet) it.next();
-				String titleKey = portlet.getUrl()
-						+ ".title"
-						+ (portlet.getToken() != null ? portlet.getToken() : "");
+		for (Iterator<Collection<Portlet>> pit = portal.getPortlets().iterator(); pit.hasNext();) {
+			Collection<Portlet> portlets = pit.next();
+			
+			for (Iterator<Portlet> it = portlets.iterator(); it.hasNext();) {
+				Portlet portlet = it.next();
+				String titleKey = portlet.getUrl() + ".title" + (portlet.getToken() != null ? portlet.getToken() : "");
+				
 				portlet.setDescription(dashPrefs.getValue(titleKey, ""));
 			}
 		}
@@ -193,22 +183,21 @@ public class DisplayDashboardAction extends TilesAction {
 		session.setAttribute(Constants.USERS_SES_PORTAL, portal);
 
 		// Make sure there's a valid RSS auth token
-		ConfigResponse dashCfg =
-		    dashManager.getUserDashboard(me, me).getConfig();
+		ConfigResponse dashCfg = dashManager.getUserDashboard(me, me).getConfig();
 		String rssToken = dashCfg.getValue(Constants.RSS_TOKEN);
+		
 		if (rssToken == null) {
 			rssToken = String.valueOf(session.hashCode());
+			
 			dashCfg.setValue(Constants.RSS_TOKEN, rssToken);
 			// Now store the RSS auth token
-			ConfigurationProxy.getInstance()
-                    .setUserDashboardPreferences(dashCfg, boss, user);
+			ConfigurationProxy.getInstance().setUserDashboardPreferences(dashCfg, boss, user);
 		}
+		
 		session.setAttribute("rssToken", rssToken);
-
 		request.setAttribute(Constants.PORTAL_KEY, portal);
 
-		Map userOpsMap = (Map) session
-				.getAttribute(Constants.USER_OPERATIONS_ATTR);
+		Map<String, Object> userOpsMap = (Map<String, Object>) session.getAttribute(Constants.USER_OPERATIONS_ATTR);
 
 		if (userOpsMap.containsKey(AuthzConstants.rootOpCAMAdmin)) {
 			// Now check for updates
@@ -219,6 +208,7 @@ public class DisplayDashboardAction extends TilesAction {
 				uboss.ignoreUpdate();
 			} catch (ParameterNotFoundException e) {
 				String update = uboss.getUpdateReport();
+
 				if (update != null) {
 					request.setAttribute("HQUpdateReport", update);
 				}
@@ -227,5 +217,4 @@ public class DisplayDashboardAction extends TilesAction {
 
 		return null;
 	}
-
 }
