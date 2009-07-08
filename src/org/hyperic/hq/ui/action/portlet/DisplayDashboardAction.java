@@ -42,6 +42,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -153,13 +154,18 @@ public class DisplayDashboardAction extends TilesAction {
 
 		// See if we need to initialize the dashboard (for Roles)
 		// we now check both columns for null-ness, instead of only the first
+		// TODO This typically will only occur if the role was created via API
+		//      We'll need to add some logic to role creation in hqapi so that
+		//      dashboard creation happens, however for 4.2 this is not something
+		//      we can squeeze in, this will suffice for the time being
 		if (dashPrefs.getValue(Constants.USER_PORTLETS_FIRST) == null && 
 			dashPrefs.getValue(Constants.USER_PORTLETS_SECOND) == null) 
 		{
 		    ConfigResponse defaultRoleDashPrefs = (ConfigResponse)
 		        ctx.getAttribute(Constants.DEF_ROLE_DASH_PREFS);
 		    try {
-		        dashManager.configureDashboard(me, dashboardConfig,
+		        AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+		        dashManager.configureDashboard(overlord, dashboardConfig,
 		                                       defaultRoleDashPrefs);
 		        dashPrefs.merge(defaultRoleDashPrefs, true);
 		    } catch (PermissionException e) {
