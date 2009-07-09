@@ -72,7 +72,8 @@ public class ServiceValue extends AppdefResourceValue
     private boolean ResourceGroupHasBeenSet = false;
     private ServiceTypeValue ServiceType;
     private boolean ServiceTypeHasBeenSet = false;
-
+    private String _autoinventoryIdentifier;
+    
     public ServiceValue()
     {
     }
@@ -391,6 +392,14 @@ public class ServiceValue extends AppdefResourceValue
     {
         this.ServiceType = ServiceType;
         ServiceTypeHasBeenSet = true;
+    }
+
+    public String getAutoinventoryIdentifier() {
+        return _autoinventoryIdentifier;
+    }
+
+    public void setAutoinventoryIdentifier(String aiid) {
+        _autoinventoryIdentifier = aiid;
     }
 
     public String toString()

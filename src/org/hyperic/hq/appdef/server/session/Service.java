@@ -165,6 +165,7 @@ public class Service extends AppdefResource
     {
         _serviceValue.setSortName(getSortName());
         _serviceValue.setAutodiscoveryZombie(isAutodiscoveryZombie());
+        _serviceValue.setAutoinventoryIdentifier(getAutoinventoryIdentifier());
         _serviceValue.setServiceRt(isServiceRt());
         _serviceValue.setEndUserRt(isEndUserRt());
         _serviceValue.setModifiedBy(getModifiedBy());
@@ -221,6 +222,9 @@ public class Service extends AppdefResource
             (getLocation() != null ?
                 getLocation().equals(obj.getLocation())
                 : (obj.getLocation() == null)) &&
+            (getAutoinventoryIdentifier() != null ?
+                getAutoinventoryIdentifier().equals(obj.getAutoinventoryIdentifier())
+                : (obj.getAutoinventoryIdentifier() == null)) &&
             (isEndUserRt() == obj.getEndUserRt()) &&
             (isServiceRt() == obj.getServiceRt());
         return matches;
@@ -234,6 +238,7 @@ public class Service extends AppdefResource
      * included in the value object. This is for speed/locking reasons
      */
     void updateService(ServiceValue valueHolder) {
+        setAutoinventoryIdentifier(valueHolder.getAutoinventoryIdentifier());
         setDescription( valueHolder.getDescription() );
         setAutodiscoveryZombie( valueHolder.getAutodiscoveryZombie() );
         setServiceRt( valueHolder.getServiceRt() );
