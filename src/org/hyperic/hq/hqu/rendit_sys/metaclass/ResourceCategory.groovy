@@ -530,8 +530,8 @@ class ResourceCategory {
                                                    " on " + platform.getPlatformType().name)
             }
 
-            if (cfg['installpath']) {
-                sv.installPath = cfg['installpath']
+            if (cfg['installPath']) {
+                sv.installPath = cfg['installPath']
             } else {
                 sv.installPath = ""
             }
@@ -542,8 +542,8 @@ class ResourceCategory {
                 sv.description = ""
             }
 
-            if (cfg['autoinventoryIdentifier']) {
-                sv.autoinventoryIdentifier = cfg['autoinventoryIdentifier']
+            if (cfg['autoIdentifier']) {
+                sv.autoinventoryIdentifier = cfg['autoIdentifier']
             }
 
             def res = svrMan.createServer(subject, platform.id,
