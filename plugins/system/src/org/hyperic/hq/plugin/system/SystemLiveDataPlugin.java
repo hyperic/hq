@@ -29,8 +29,10 @@ import org.hyperic.hq.product.LiveDataPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProcessControlPlugin;
 import org.hyperic.hq.product.SigarMeasurementPlugin;
+import org.hyperic.sigar.Humidor;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
+import org.hyperic.sigar.SigarProxy;
 import org.hyperic.util.config.ConfigResponse;
 import com.thoughtworks.xstream.XStream;
 
@@ -72,6 +74,17 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
         CMD_IFCONFIG,
         CMD_WHO
     };
+
+    private Sigar _sigarImpl;
+    private Humidor _humidor;
+
+    public void shutdown() throws PluginException {
+        super.shutdown();
+        if (_sigarImpl != null) {
+            _sigarImpl.close();
+            _sigarImpl = null;
+        }
+    }
 
     private ReadData getReadData(String file, String sOffset, String sNumBytes)
         throws PluginException
@@ -140,10 +153,18 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
         }
     }
 
+    private synchronized SigarProxy getSigar() {
+        if (_humidor == null) {
+            _sigarImpl = new Sigar();
+            _humidor = new Humidor(_sigarImpl);
+        }
+        return _humidor.getSigar();
+    }
+
     public Object getData(String command, ConfigResponse config)
         throws PluginException
     {
-        Sigar sigar = new Sigar();
+        SigarProxy sigar = getSigar();
 
         try {
             if (command.equals(CMD_TIME)) {
@@ -173,7 +194,7 @@ public class SystemLiveDataPlugin extends LiveDataPlugin {
                 long pid = getPid(config);
                 int signal = ProcessControlPlugin.getSignal(signame);
 
-                sigar.kill(pid, signal);
+                _sigarImpl.kill(pid, signal);
                 return null;
             } else if (command.equals(CMD_NETSTAT)) {
                 NetstatData data = new NetstatData();
