@@ -78,6 +78,8 @@ class ResourceConfig {
                         set: { svcVal, desc -> svcVal.description = desc }],
         'location':    [get: { svc -> svc.location },
                         set: { svcVal, loc -> svcVal.location = loc }],
+        'autoIdentifier': [get: { svc -> svc.autoinventoryIdentifier },
+                           set: { svcVal, loc -> svcVal.autoinventoryIdentifier = loc }],
     ]
     
     private static APPDEF_FIELD_HANDLERS = [
