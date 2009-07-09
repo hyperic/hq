@@ -28,7 +28,7 @@ package org.hyperic.hq.plugin.system;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.SigarNotImplementedException;
 import org.hyperic.sigar.util.PrintfFormat;
@@ -41,7 +41,7 @@ public class UptimeData {
 
     public UptimeData() {}
 
-    public void populate(Sigar sigar) throws SigarException {
+    public void populate(SigarProxy sigar) throws SigarException {
         _time = System.currentTimeMillis();
         _uptime = sigar.getUptime().getUptime();
         try {
@@ -51,7 +51,7 @@ public class UptimeData {
         }
     }
 
-    public static UptimeData gather(Sigar sigar) throws SigarException {
+    public static UptimeData gather(SigarProxy sigar) throws SigarException {
         UptimeData data = new UptimeData();
         data.populate(sigar);
         return data;

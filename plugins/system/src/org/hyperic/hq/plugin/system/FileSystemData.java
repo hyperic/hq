@@ -27,7 +27,7 @@ package org.hyperic.hq.plugin.system;
 
 import org.hyperic.sigar.FileSystem;
 import org.hyperic.sigar.FileSystemUsage;
-import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 
 public class FileSystemData {
@@ -37,7 +37,7 @@ public class FileSystemData {
 
     public FileSystemData() {}
 
-    public void populate(Sigar sigar, FileSystem fs)
+    public void populate(SigarProxy sigar, FileSystem fs)
         throws SigarException {
 
         _config = fs;
@@ -49,7 +49,7 @@ public class FileSystemData {
         }
     }
 
-    public static FileSystemData gather(Sigar sigar, FileSystem fs)
+    public static FileSystemData gather(SigarProxy sigar, FileSystem fs)
         throws SigarException {
     
         FileSystemData data = new FileSystemData();

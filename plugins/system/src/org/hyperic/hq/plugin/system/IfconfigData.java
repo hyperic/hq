@@ -28,7 +28,7 @@ package org.hyperic.hq.plugin.system;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 
 public class IfconfigData {
@@ -36,7 +36,7 @@ public class IfconfigData {
 
     public IfconfigData() {}
 
-    public void populate(Sigar sigar)
+    public void populate(SigarProxy sigar)
         throws SigarException {
 
         _interfaces = new ArrayList();
@@ -46,7 +46,7 @@ public class IfconfigData {
         }
     }
 
-    public static IfconfigData gather(Sigar sigar)
+    public static IfconfigData gather(SigarProxy sigar)
         throws SigarException {
     
         IfconfigData data = new IfconfigData();

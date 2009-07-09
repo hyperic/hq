@@ -35,6 +35,7 @@ import org.hyperic.sigar.ProcMem;
 import org.hyperic.sigar.ProcState;
 import org.hyperic.sigar.ProcUtil;
 import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 
 public class ProcessData {
@@ -81,7 +82,7 @@ public class ProcessData {
 
     public ProcessData() {}
 
-    public void populate(Sigar sigar, long pid)
+    public void populate(SigarProxy sigar, long pid)
         throws SigarException {
 
         _procState = sigar.getProcState(pid);
@@ -125,7 +126,7 @@ public class ProcessData {
         _name = ProcUtil.getDescription(sigar, pid);
     }
 
-    public static ProcessData gather(Sigar sigar, long pid)
+    public static ProcessData gather(SigarProxy sigar, long pid)
         throws SigarException {
 
         ProcessData data = new ProcessData();

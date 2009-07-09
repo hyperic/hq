@@ -31,7 +31,7 @@ import java.util.Map;
 import org.hyperic.sigar.ProcCred;
 import org.hyperic.sigar.ProcExe;
 import org.hyperic.sigar.ProcFd;
-import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 
 public class ProcessDetailData extends ProcessData {
@@ -49,7 +49,7 @@ public class ProcessDetailData extends ProcessData {
     //- if the pid is invalid super.populate will throw ex
     //- if any getProc* below throws ex it is due to
     //  permissions or method is not implemented for the given platform
-    public void populate(Sigar sigar, long pid)
+    public void populate(SigarProxy sigar, long pid)
         throws SigarException {
 
         super.populate(sigar, pid);
@@ -79,7 +79,7 @@ public class ProcessDetailData extends ProcessData {
         } catch (SigarException e) {}
     }
 
-    public static ProcessData gather(Sigar sigar, long pid)
+    public static ProcessData gather(SigarProxy sigar, long pid)
         throws SigarException {
 
         ProcessDetailData data = new ProcessDetailData();

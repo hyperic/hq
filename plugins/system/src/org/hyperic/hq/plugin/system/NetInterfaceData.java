@@ -27,7 +27,7 @@ package org.hyperic.hq.plugin.system;
 
 import org.hyperic.sigar.NetInterfaceConfig;
 import org.hyperic.sigar.NetInterfaceStat;
-import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 
 public class NetInterfaceData {
@@ -37,7 +37,7 @@ public class NetInterfaceData {
 
     private NetInterfaceData() {}
 
-    public static NetInterfaceData gather(Sigar sigar, String name)
+    public static NetInterfaceData gather(SigarProxy sigar, String name)
         throws SigarException {
     
         NetInterfaceData data = new NetInterfaceData();

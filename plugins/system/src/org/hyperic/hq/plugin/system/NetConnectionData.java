@@ -30,7 +30,7 @@ import java.net.UnknownHostException;
 
 import org.hyperic.sigar.NetConnection;
 import org.hyperic.sigar.NetFlags;
-import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 
 public class NetConnectionData {
@@ -46,7 +46,7 @@ public class NetConnectionData {
     private long _processPid = -1;
     private String _processName;
 
-    public NetConnectionData(Sigar sigar,
+    public NetConnectionData(SigarProxy sigar,
                              NetConnection conn,
                              boolean isNumericHosts,
                              boolean isNumericPorts) {
@@ -80,7 +80,7 @@ public class NetConnectionData {
         return _remotePort;
     }
 
-    private String getFormattedPort(Sigar sigar, int proto, long port) {
+    private String getFormattedPort(SigarProxy sigar, int proto, long port) {
         if (port == 0) {
             return "*";
         }
@@ -161,7 +161,7 @@ public class NetConnectionData {
         return _processPid + "/" + _processName;
     }
 
-    public void lookupProcessInfo(Sigar sigar) {
+    public void lookupProcessInfo(SigarProxy sigar) {
         if (_conn.getState() != NetFlags.TCP_LISTEN) {
             return;
         }

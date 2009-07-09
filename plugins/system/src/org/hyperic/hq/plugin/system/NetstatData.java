@@ -32,6 +32,7 @@ import java.util.List;
 import org.hyperic.sigar.NetConnection;
 import org.hyperic.sigar.NetFlags;
 import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 
 public class NetstatData {
@@ -49,7 +50,7 @@ public class NetstatData {
 
     public NetstatData() {}
 
-    public void populate(Sigar sigar) throws SigarException {
+    public void populate(SigarProxy sigar) throws SigarException {
         _connections = new ArrayList();
         NetConnection[] connections =
             sigar.getNetConnectionList(_flags);

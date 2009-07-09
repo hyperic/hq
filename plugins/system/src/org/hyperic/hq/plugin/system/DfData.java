@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hyperic.sigar.FileSystem;
-import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 
 public class DfData {
@@ -37,7 +37,7 @@ public class DfData {
 
     public DfData() {}
 
-    public void populate(Sigar sigar)
+    public void populate(SigarProxy sigar)
         throws SigarException {
 
         _fs = new ArrayList();
@@ -47,7 +47,7 @@ public class DfData {
         }
     }
 
-    public static DfData gather(Sigar sigar)
+    public static DfData gather(SigarProxy sigar)
         throws SigarException {
     
         DfData data = new DfData();

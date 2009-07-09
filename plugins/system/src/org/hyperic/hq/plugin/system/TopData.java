@@ -33,6 +33,7 @@ import org.hyperic.sigar.CpuPerc;
 import org.hyperic.sigar.Mem;
 import org.hyperic.sigar.ProcStat;
 import org.hyperic.sigar.Sigar;
+import org.hyperic.sigar.SigarProxy;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.sigar.Swap;
 import org.hyperic.sigar.ptql.ProcessFinder;
@@ -48,7 +49,7 @@ public class TopData {
 
     public TopData() {}
 
-    public void populate(Sigar sigar, String filter)
+    public void populate(SigarProxy sigar, String filter)
         throws SigarException {
 
         _uptime = UptimeData.gather(sigar);
@@ -60,7 +61,7 @@ public class TopData {
         ps(sigar, filter);
     }
 
-    private void ps(Sigar sigar, String filter) throws SigarException {
+    private void ps(SigarProxy sigar, String filter) throws SigarException {
         _processes = new ArrayList();
         long[] pids;
 
@@ -81,7 +82,7 @@ public class TopData {
         }
     }
 
-    public static TopData gather(Sigar sigar, String filter)
+    public static TopData gather(SigarProxy sigar, String filter)
         throws SigarException {
 
         TopData data = new TopData();
