@@ -9887,7 +9887,42 @@ has already been defined.
                    columnType="BOOLEAN" 
 				   value="FALSE" />
   </schemaSpec>
-  
+
+  <schemaSpec version="3.148">
+    <schema-directSQL>
+      <statement targetDB='oracle'>
+        DROP INDEX TRIGGER_EVENT_EXPIRATION_IDX
+      </statement>
+      <statement targetDB='postgresql'>
+        DROP INDEX TRIGGER_EVENT_EXPIRATION_IDX
+      </statement>
+      <statement targetDB='mysql'>
+        ALTER TABLE EAM_TRIGGER_EVENT DROP INDEX TRIGGER_EVENT_EXPIRATION_IDX
+      </statement>
+      <statement targetDB='oracle'>
+        DROP INDEX TRIGGER_EVENT_TRIGGER_ID_IDX
+      </statement>
+      <statement targetDB='postgresql'>
+        DROP INDEX TRIGGER_EVENT_TRIGGER_ID_IDX
+      </statement>
+      <statement targetDB='mysql'>
+        ALTER TABLE EAM_TRIGGER_EVENT DROP INDEX TRIGGER_EVENT_TRIGGER_ID_IDX
+      </statement>
+      <statement targetDB='oracle'>
+        DROP INDEX TRIGGER_EVENT_CTIME_IDX
+      </statement>
+      <statement targetDB='postgresql'>
+        DROP INDEX TRIGGER_EVENT_CTIME_IDX
+      </statement>
+      <statement targetDB='mysql'>
+        ALTER TABLE EAM_TRIGGER_EVENT DROP INDEX TRIGGER_EVENT_CTIME_IDX
+      </statement>
+      <statement>
+        CREATE INDEX TRIGGER_EVENT_TRIGGER_ID_IDX ON EAM_TRIGGER_EVENT (TRIGGER_ID, ID)
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
