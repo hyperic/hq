@@ -106,7 +106,8 @@ public final class ConcurrentStatsCollector {
         PURGE_MEASUREMENTS_TIME      = "PURGE_MEASUREMENTS_TIME",
         MEASUREMENT_SCHEDULE_TIME    = "MEASUREMENT_SCHEDULE_TIME",
         EMAIL_ACTIONS                = "EMAIL_ACTIONS",
-        MULTI_COND_TRIGGER_MON_WAIT	 = "MULTI_COND_TRIGGER_MON_WAIT";
+        MULTI_COND_TRIGGER_MON_WAIT	 = "MULTI_COND_TRIGGER_MON_WAIT",
+        MULTI_COND_TRIGGER_DELETE_REF = "MULTI_COND_TRIGGER_DELETE_REF";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);

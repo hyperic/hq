@@ -408,12 +408,16 @@ public class MultiConditionTrigger
     }
     
     protected void resetState(EventTrackerLocal etracker, Collection priorEvents) {
-		
 		// reset state
     	priorEvents.clear();
 		try {
 			// This deletes all persisted state for this trigger
+		    final ConcurrentStatsCollector stats =
+		        ConcurrentStatsCollector.getInstance();
+		    final long start = System.currentTimeMillis();
 			etracker.deleteReference(getId());
+		    stats.addStat((System.currentTimeMillis()-start),
+		        ConcurrentStatsCollector.MULTI_COND_TRIGGER_DELETE_REF);
 			if (log.isDebugEnabled()) {
 				log.debug("MultiConditionTrigger trigger id=" + getId() +
 						" deleting references");

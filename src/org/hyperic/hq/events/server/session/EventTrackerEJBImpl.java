@@ -49,6 +49,7 @@ import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.shared.EventObjectDeserializer;
 import org.hyperic.hq.events.shared.EventTrackerLocal;
 import org.hyperic.hq.events.shared.EventTrackerUtil;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * Maintains the event state for each trigger. Event state changes are performed 
@@ -192,9 +193,12 @@ public class EventTrackerEJBImpl extends SessionBase implements SessionBean {
             log.debug("Delete referenced events for trigger id: " + tid);
         }
         _diagnostic.startDeleteReference();
-        
+        final StopWatch watch = new StopWatch();
         TriggerEventDAO dao = getTriggerEventDAO();
+        if (debug) watch.markTimeBegin("findAllByTriggerId=" + tid);
         List referenced = dao.findAllByTriggerId(tid);
+        if (debug) watch.markTimeEnd("findAllByTriggerId=" + tid);
+        if (debug) log.debug(watch);
         for (Iterator it = referenced.iterator(); it.hasNext(); ) {
         	TriggerEvent te = (TriggerEvent) it.next();
             try {
