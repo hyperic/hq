@@ -67,7 +67,7 @@
               path="/admin/user/RegisterUser.jsp"/>
 
   <definition name=".admin.alerts.List"
-              controllerUrl="/alerts/ListDefinitions.do"
+              controllerUrl="/alerts/ListTypeDefinitions.do"
               path="/admin/config/ListDefinitions.jsp"/>
 
   <definition name=".admin.config.EditEscalationConfig"

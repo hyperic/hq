@@ -2023,6 +2023,13 @@
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ListDefinitionsAction">
         <set-property property="title" value="Alert.ListDefinition"/>
       </action>
+      
+      <action path="/alerts/ListTypeDefinitions"
+              name="RemoveConfigForm"
+              scope="request"
+              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ListDefinitionsAction">
+        <set-property property="title" value="Alert.ListTypeDefinition"/>
+      </action>
 
       <action path="/alerts/RemoveConfig" 
               type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveDefinitionAction" 
