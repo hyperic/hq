@@ -672,7 +672,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
         final ResourceGroupManagerLocal resGrpMgr = getResourceGroupManager();
         final ResourceGroup group =
             resGrpMgr.findResourceGroupById(subject, gid);
-
+        if (group == null) {
+            return MeasurementConstants.AVAIL_UNKNOWN;
+        }
         final Resource resource = group.getResource();
         if (resource == null || resource.isInAsyncDeleteState()) {
             return MeasurementConstants.AVAIL_UNKNOWN;

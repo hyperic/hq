@@ -143,19 +143,19 @@ public class ResourceGroupManagerEJBImpl
     /**
      * Find the group that has the given ID.  Performs authz checking
      * @param whoami user requesting to find the group
+     * @return {@link ResourceGroup} or null if it does not exist
+     * XXX scottmf, why is this method called find() but calls dao.get()???
      * @ejb:interface-method
      */
-    public ResourceGroup findResourceGroupById(AuthzSubject whoami,
-                                               Integer id)
+    public ResourceGroup findResourceGroupById(AuthzSubject whoami, Integer id)
         throws PermissionException
     {
         ResourceGroup group = getResourceGroupDAO().get(id);
         if (group == null) {
             return null;
         }
-
-        checkGroupPermission(whoami, group.getId(),
-                             AuthzConstants.perm_viewResourceGroup);
+        checkGroupPermission(
+            whoami, group.getId(), AuthzConstants.perm_viewResourceGroup);
         return group;
     }
 
