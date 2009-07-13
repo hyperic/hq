@@ -217,8 +217,7 @@ public class SST_DirectSQL extends SchemaSpecTask {
                 try {
                     ps.execute();
                 } catch (SQLException e) {
-                    if (!isFail() ||
-                        sqlStmt.trim().toLowerCase().startsWith("drop")) {
+                    if (!isFail()) {
                         log(">>>>> SQL failed: " + e);
                         conn.rollback();
                         conn.commit();
