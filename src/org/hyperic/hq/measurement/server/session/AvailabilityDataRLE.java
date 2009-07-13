@@ -76,6 +76,20 @@ public class AvailabilityDataRLE
     public void setAvailVal(double val) {
         _availVal = val;
     }
+    
+    public long getApproxEndtime() {
+        long approxEndtime = _endtime;
+        
+        if (approxEndtime == MAX_ENDTIME) {        
+            long interval = _measurement.getInterval();
+            // java will round down
+            long multiplier = (System.currentTimeMillis() - _startime) / interval;
+            
+            approxEndtime = _startime + (multiplier * interval);        
+        }
+        
+        return approxEndtime;
+    }
 
     public boolean equals(Object rhs) {
         if (this == rhs) {
@@ -94,6 +108,7 @@ public class AvailabilityDataRLE
         return buf.append(" measurement -> ").append(_measurement.getId())
                .append(" startime -> ").append(_startime)
                .append(" endtime -> ").append(_endtime)
+               .append(" approxEndtime -> ").append(getApproxEndtime())
                .append(" availVal -> ").append(_availVal).toString();
     }
 }

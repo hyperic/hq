@@ -626,7 +626,7 @@ public class AvailabilityManagerEJBImpl
             final AvailabilityDataRLE avail = (AvailabilityDataRLE)i.next();
             final Integer mid = avail.getMeasurement().getId();
             final MetricValue mVal =
-                new MetricValue(avail.getAvailVal(), avail.getEndtime());
+                new MetricValue(avail.getAvailVal(), avail.getApproxEndtime());
             rtn.put(mid, mVal);
         }
         // fill in missing measurements
