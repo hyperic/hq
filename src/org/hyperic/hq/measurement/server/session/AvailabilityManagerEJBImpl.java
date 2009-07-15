@@ -1277,8 +1277,10 @@ public class AvailabilityManagerEJBImpl
     }
 
     private void sendDataToEventHandlers(List data) {
-        ArrayList events  = new ArrayList();
-        List zevents = new ArrayList();
+        int maxCapacity = data.size();
+        ArrayList events  = new ArrayList(maxCapacity);
+        Map downEvents  = new HashMap(maxCapacity);
+        List zevents = new ArrayList(maxCapacity);
 
         boolean allEventsInteresting = 
             Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
@@ -1291,12 +1293,31 @@ public class AvailabilityManagerEJBImpl
 
             if (RegisteredTriggers.isTriggerInterested(event)
                     || allEventsInteresting) {
-                events.add(event);
+                if (event.getValue().getValue() == AVAIL_DOWN) {
+                    Resource r = getResource(event.getResource());
+                    if (r != null && !r.isInAsyncDeleteState()) {
+                        downEvents.put(r.getId(), event);
+                    }
+                } else {
+                    events.add(event);
+                }
             }
 
             zevents.add(new MeasurementZevent(metricId.intValue(), val));
         }
 
+        if (!downEvents.isEmpty()) {
+            // Determine whether the measurement events can
+            // be suppressed as part of hierarchical alerting
+            PermissionManagerFactory.getInstance()
+                .getHierarchicalAlertingManager()
+                    .suppressMeasurementEvents(downEvents);
+            
+            if (!downEvents.isEmpty()) {
+                events.addAll(downEvents.values());
+            }
+        }
+        
         if (!events.isEmpty()) {
             Messenger sender = new Messenger();
             sender.publishMessage(EventConstants.EVENTS_TOPIC, events);
@@ -1315,24 +1336,19 @@ public class AvailabilityManagerEJBImpl
      * @ejb:interface-method
      */
     public void sendDataToEventHandlers(Map data) {
-        Map events  = new HashMap();
-        List zevents = new ArrayList();
+        int maxCapacity = data.size();
+        Map events  = new HashMap(maxCapacity);
+        List zevents = new ArrayList(maxCapacity);
 
         boolean allEventsInteresting = 
             Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
-
-        Integer resourceIdKey = null;
-        DataPoint dp = null;
-        Integer metricId = null;
-        MetricValue val = null;
-        MeasurementEvent event = null;
         
         for (Iterator i = data.keySet().iterator(); i.hasNext();) {
-            resourceIdKey = (Integer) i.next();
-            dp = (DataPoint) data.get(resourceIdKey);
-            metricId = dp.getMetricId();
-            val = dp.getMetricValue();
-            event = new MeasurementEvent(metricId, val);
+            Integer resourceIdKey = (Integer) i.next();
+            DataPoint dp = (DataPoint) data.get(resourceIdKey);
+            Integer metricId = dp.getMetricId();
+            MetricValue val = dp.getMetricValue();
+            MeasurementEvent event = new MeasurementEvent(metricId, val);
 
             if (RegisteredTriggers.isTriggerInterested(event)
                     || allEventsInteresting) {
