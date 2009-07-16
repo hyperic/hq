@@ -155,10 +155,16 @@ public class AppdefEntityValue {
         return server;
     }
 
-    private Service getService()
-        throws AppdefEntityNotFoundException {
-        if (service == null)
-            service = getServiceManager().findServiceById(_id.getId());
+    private Service getService(boolean permCheck)
+        throws AppdefEntityNotFoundException, PermissionException {
+        if (service == null) {
+            if (permCheck) {
+                service = getServiceManager().getServiceById(getSubject(),
+                                                              _id.getId());
+            } else {
+                service = getServiceManager().findServiceById(_id.getId());
+            }
+        }
 
         return service;
     }
@@ -313,7 +319,7 @@ public class AppdefEntityValue {
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             return getServer(false);
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            return getService();
+            return getService(false);
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return getApplication();
         default:
@@ -334,7 +340,7 @@ public class AppdefEntityValue {
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             return getServer(true).getServerValue();
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            return getService().getServiceValue();
+            return getService(true).getServiceValue();
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return getApplication().getApplicationValue();
         case AppdefEntityConstants.APPDEF_TYPE_GROUP:
