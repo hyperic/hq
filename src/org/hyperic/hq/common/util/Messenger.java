@@ -29,7 +29,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import javax.jms.Destination;
 import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.jms.QueueConnection;
@@ -61,8 +63,13 @@ public class Messenger {
     // Static ConnectionFactory for convenience
     private static Object _factory;
 
-    // Static HashMap of Topics and Queues
-    private static HashMap _tAndQs = new HashMap();
+    // Cache of topics and queues
+    private static Map _tAndQs = new HashMap();
+    private static ThreadLocal _localTAndQs = new ThreadLocal() {
+        public Object initialValue() {
+            return new HashMap();
+        }
+    };
 
     // Instance variables
     private QueueConnection _qConn;
@@ -110,6 +117,42 @@ public class Messenger {
         queue.clearEnqueuedObjects();
         return enqueued;
     }
+    
+    private Queue getQueue(String name) {
+        return (Queue) getDestination(name);
+    }
+    
+    private Topic getTopic(String name) {
+        return (Topic) getDestination(name);
+    }
+    
+    private Destination getDestination(String name) {
+        
+        Destination result = null;
+        
+        try {
+            
+            Map tlMap = (Map) _localTAndQs.get();
+            result = (Destination) tlMap.get(name);
+            if (result == null) {
+                synchronized (_tAndQs) {
+                    result = (Destination) _tAndQs.get(name);
+                    if (result == null) {
+                        // Static Queue for convenience
+                        result = (Destination) _ic.lookup(name);
+                        _tAndQs.put(name, result);
+                    }
+                }
+
+                tlMap.put(name, result);
+            }
+            
+        } catch (NamingException ne) {
+            _log.error("Naming error for " + name + ": " + ne.toString());
+        }
+
+        return result;
+    }
 
     /**
      * Send message to a Queue.
@@ -125,39 +168,34 @@ public class Messenger {
                 _factory = _ic.lookup(CONN_FACTORY_JNDI);
 
             QueueConnectionFactory qFactory = (QueueConnectionFactory) _factory;
+            Queue queue = getQueue(name);
+            if (queue != null) {
 
-            if (!_tAndQs.containsKey(name)) {
-                // Static Queue for convenience
-                Queue queue = (Queue) _ic.lookup(name);
-                _tAndQs.put(name, queue);
+                // Now create a connection to send a message
+                if (_qConn != null)
+                    conn = _qConn;
+                else
+                    conn = qFactory.createQueueConnection();
+
+                if (conn == null)
+                    _log.error("QueueConnection cannot be created");
+
+                if (_qSession != null)
+                    session = _qSession;
+                else
+                    session = conn.createQueueSession(false,
+                                                      Session.AUTO_ACKNOWLEDGE);
+
+                // Create a sender and send the message
+                final long start = System.currentTimeMillis();
+                QueueSender sender = session.createSender(queue);
+                ObjectMessage msg = session.createObjectMessage();
+                msg.setObject(sObj);
+                sender.send(msg);
+                final long now = System.currentTimeMillis();
+                ConcurrentStatsCollector.getInstance().addStat(
+                            (now - start), ConcurrentStatsCollector.JMS_QUEUE_PUBLISH_TIME);
             }
-
-            Queue queue = (Queue) _tAndQs.get(name);
-
-            // Now create a connection to send a message
-            if (_qConn != null)
-                conn = _qConn;
-            else
-                conn = qFactory.createQueueConnection();
-
-            if (conn == null)
-                _log.error("QueueConnection cannot be created");
-            
-            if (_qSession != null)
-                session = _qSession;
-            else
-                session = conn.createQueueSession(false,
-                                                  Session.AUTO_ACKNOWLEDGE);
-
-            // Create a sender and send the message
-            final long start = System.currentTimeMillis();
-            QueueSender sender = session.createSender(queue);
-            ObjectMessage msg = session.createObjectMessage();
-            msg.setObject(sObj);
-            sender.send(msg);
-            final long now = System.currentTimeMillis();
-            ConcurrentStatsCollector.getInstance().addStat(
-                (now - start), ConcurrentStatsCollector.JMS_QUEUE_PUBLISH_TIME);
         } catch (NamingException e) {
             _log.error("Naming error for " + name + ": " + e.toString());
         } catch (Exception e) {
@@ -201,38 +239,34 @@ public class Messenger {
 
             TopicConnectionFactory tFactory = (TopicConnectionFactory) _factory;
 
-            if (!_tAndQs.containsKey(name)) {
-                // Static Queue for convenience
-                Topic topic = (Topic) _ic.lookup(name);
-                _tAndQs.put(name, topic);
+            Topic topic = getTopic(name);
+            if (topic != null) {
+
+                // Now create a connection to send a message
+                if (_tConn != null)
+                    conn = _tConn;
+                else
+                    conn = tFactory.createTopicConnection();
+
+                if (conn == null)
+                    _log.error("TopicConnection cannot be created");
+
+                if (_tSession != null)
+                    session = _tSession;
+                else
+                    session = conn.createTopicSession(false,
+                                                      Session.AUTO_ACKNOWLEDGE);
+
+                // Create a publisher and publish the message
+                final long start = System.currentTimeMillis();
+                TopicPublisher publisher = session.createPublisher(topic);
+                ObjectMessage msg = session.createObjectMessage();
+                msg.setObject(sObj);
+                publisher.publish(msg);
+                final long now = System.currentTimeMillis();
+                ConcurrentStatsCollector.getInstance().addStat(
+                             (now - start), ConcurrentStatsCollector.JMS_TOPIC_PUBLISH_TIME);
             }
-
-            Topic topic = (Topic) _tAndQs.get(name);
-
-            // Now create a connection to send a message
-            if (_tConn != null)
-                conn = _tConn;
-            else
-                conn = tFactory.createTopicConnection();
-
-            if (conn == null)
-                _log.error("TopicConnection cannot be created");
-            
-            if (_tSession != null)
-                session = _tSession;
-            else
-                session = conn.createTopicSession(false,
-                                                  Session.AUTO_ACKNOWLEDGE);
-
-            // Create a publisher and publish the message
-            final long start = System.currentTimeMillis();
-            TopicPublisher publisher = session.createPublisher(topic);
-            ObjectMessage msg = session.createObjectMessage();
-            msg.setObject(sObj);
-            publisher.publish(msg);
-            final long now = System.currentTimeMillis();
-            ConcurrentStatsCollector.getInstance().addStat(
-                (now - start), ConcurrentStatsCollector.JMS_TOPIC_PUBLISH_TIME);
         } catch (NamingException e) {
             _log.error("Naming error for " + name + ": " + e.toString());
         } catch (Exception e) {
