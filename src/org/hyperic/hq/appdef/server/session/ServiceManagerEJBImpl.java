@@ -387,6 +387,20 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * Get Service by Id and perform permission check.
+     * 
+     * @ejb:interface-method
+     * @return The Service identified by this id.
+     */
+    public Service getServiceById(AuthzSubject subject, Integer id)
+        throws ServiceNotFoundException, PermissionException {
+        
+        Service service = findServiceById(id);
+        checkViewPermission(subject, service.getEntityId());
+        return service;
+    }
+    
+    /**
      * @param server {@link Server}
      * @param aiid service autoinventory identifier
      * @return {@link List} of {@link Service}
