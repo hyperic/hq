@@ -75,6 +75,7 @@ import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.util.ArrayUtil;
+import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -176,6 +177,22 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             throw new ValidationException(msg);
         }
     }
+
+    /**
+     * Construct the new name of the server
+     * to be cloned to the target platform
+     */
+    private String getTargetServerName(Platform targetPlatform,
+                                       Server serverToClone) {        
+        
+        String newServerName = StringUtil.removePrefix(
+                                    serverToClone.getName(),
+                                    serverToClone.getPlatform().getName());
+        
+        newServerName = targetPlatform.getName() + " " + newServerName;
+        
+        return newServerName;
+    }
     
     /**
      * Clone a Server to a target Platform
@@ -212,7 +229,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             ConfigResponseDB configResponse = cMan.createConfigResponse(
                 productResponse, measResponse, controlResponse, rtResponse);
             s = new Server();
-            s.setName(serverToClone.getName());
+            s.setName(getTargetServerName(targetPlatform, serverToClone));
             s.setDescription(serverToClone.getDescription());
             s.setInstallPath(serverToClone.getInstallPath());
             String aiid = serverToClone.getAutoinventoryIdentifier();
