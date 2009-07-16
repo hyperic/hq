@@ -100,9 +100,15 @@ public class MultiConditionTrigger
     
     protected Object monitor;
     
+    private boolean logStats;
+    
     /** Creates a new instance of MultiConditionTrigger */
     public MultiConditionTrigger() {
     	monitor = this;
+        String unittestPropStringVal =  System.getProperty("hq.unittest.run");
+        logStats =
+            unittestPropStringVal == null ? false :
+                (new Boolean(unittestPropStringVal)).booleanValue();
     }
         
     /** 
@@ -147,8 +153,10 @@ public class MultiConditionTrigger
         	evaluateEvent(eventToProcess);
         }
         long time = System.currentTimeMillis() - start;
-        ConcurrentStatsCollector.getInstance().addStat(time,
-        					ConcurrentStatsCollector.MULTI_COND_TRIGGER_MON_WAIT);
+        if (logStats) {
+            ConcurrentStatsCollector.getInstance().addStat(time,
+                                    ConcurrentStatsCollector.MULTI_COND_TRIGGER_MON_WAIT);
+        }
     }
     
     /**
@@ -395,6 +403,13 @@ public class MultiConditionTrigger
     		for (Iterator it = events.iterator(); it.hasNext(); ) {
     			AbstractEvent evt = (AbstractEvent) it.next();
     			sb.append(evt.getInstanceId());
+    			if (evt instanceof TriggerFiredEvent) {
+    			    sb.append(" (fired)");
+    			} else if (evt instanceof TriggerNotFiredEvent) {
+    			    sb.append(" (notfired)");
+    			} else {
+    			    sb.append(" (ERROR: invalid evt class: " + evt.getClass().getSimpleName() + ")");
+    			}
     			if (it.hasNext()) {
     				sb.append(',');
     			}
