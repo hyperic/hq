@@ -210,11 +210,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             Server server = (Server) it.next();
             if (server.getServerType().equals(serverToClone.getServerType())) {
                 // Do nothing if it's a Network server
-                if (server.getServerType().getName().equals("NetworkServer"))
+                if (server.getServerType().getName().equals("NetworkServer")) {
                     return null;
-                
-                s = server;
-                break;
+                }
+                // HQ-1657: virtual servers are not deleted. clone all other servers
+                if (server.getServerType().isVirtual()) {
+                    s = server;
+                    break;
+                }
             }
         }
         ConfigResponseDB cr = serverToClone.getConfigResponse();
