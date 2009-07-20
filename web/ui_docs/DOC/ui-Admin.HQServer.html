@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 Documentation : ui-Admin.HQServer</title>
+        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Admin.HQServer</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,162 +12,234 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 Documentation : ui-Admin.HQServer
+                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Admin.HQServer
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 25, 2009 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 17, 2009 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
+				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<h1><a name="ui-Admin.HQServer-EditHQServerSettings"></a>Edit HQ Server Settings </h1>
-<p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
+<p>The <b>HQ Server Settings</b> page allows an HQ user with Super User role to configure a variety of HQ Server behaviors. Most changes take effect upon HQ Server restart.</p>
 
-<p>This screen contains the general configuration settings for the HQ Server. Any changes made on this screen will take effect after the HQ Server is restarted. Users must be members of the <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Users+and+Roles" title="HQ Users and Roles">Super User role</a> to configure the Server. See the <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Server+Configuration" title="HQ Server Configuration">overview of Server configuration</a> for more information.</p>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1247860074806 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1247860074806 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1247860074806 li {margin-left: 0px;padding-left: 0px;}
 
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td> HQ Server settings can powerfully affect the functionality and usefulness of your HQ deployment. Please be sure to set and change the settings carefully.</td></tr></table></div>
-
-<p><em>If you have any comments or suggestions for this help page, please submit them at the bottom of the page by clicking <b>Add Comment</b>.</em></p>
-
-<h3><a name="ui-Admin.HQServer-SectionsonThisScreen"></a>Sections on This Screen</h3>
-
-<p><a name="ui-Admin.HQServer-email"></a></p>
-<h4><a name="ui-Admin.HQServer-HQEmailConfigurationProperties"></a>HQ Email Configuration Properties</h4>
-
-<p>This section displays the email configurations used for alert emails:</p>
+/*]]>*/</style><div class='rbtoc1247860074806'>
 <ul>
-	<li><ins>Base URL</ins>: Used as the prefix to the URL links to the alert details in the email notification. This should be the base URL to the HQ Server.</li>
-	<li><ins>From Email Address</ins>: The email address listed as the sender of the alert emails.</li>
+    <li><a href='#ui-Admin.HQServer-HQEmailConfigurationProperties'>HQ Email Configuration Properties</a></li>
+    <li><a href='#ui-Admin.HQServer-HypericIQProperties'>Hyperic IQ Properties <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-HQAnnouncementProperties'>HQ Announcement Properties</a></li>
+    <li><a href='#ui-Admin.HQServer-MaintenanceProperties'>Maintenance Properties</a></li>
+    <li><a href='#ui-Admin.HQServer-DataManagerConfigurationProperties'>Data Manager Configuration Properties</a></li>
+    <li><a href='#ui-Admin.HQServer-GlobalAlertProperties'>Global Alert Properties</a></li>
+    <li><a href='#ui-Admin.HQServer-NotificationThrottlingConfigurationProperties'>Notification Throttling Configuration Properties <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-AutomaticBaselineConfigurationProperties'>Automatic Baseline Configuration Properties <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-LDAPConfigurationProperties'>LDAP Configuration Properties <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-KerberosConfigurationProperties'>Kerberos Configuration Properties <span style="color: red">*</span></a></li>
+    <li><a href='#ui-Admin.HQServer-SNMPServerConfigurationProperties'>SNMP Server Configuration Properties <span style="color: red">*</span></a></li>
+</ul></div>
+
+<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
+
+<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td>HQ Server settings have a fundamental and wide-ranging impact on the functionality and behavior of your HQ deployment. Edit with extreme caution.</td></tr></table></div>
+
+
+<h1><a name="ui-Admin.HQServer-HQEmailConfigurationProperties"></a>HQ Email Configuration Properties</h1>
+
+<p>These properties relate to alert notifications sent via email:</p>
+<ul>
+	<li><b>Base URL</b> &#45; The address and port where the HQ Server listens for web application requests. The value forms the prefix of the URL, included in an alert notification, that points to the <b>Alert Detail</b> page for the fired alert.</li>
 </ul>
 
 
-<p><a name="ui-Admin.HQServer-HypericIQ"></a></p>
-<h4><a name="ui-Admin.HQServer-HypericIQProperties"></a>Hyperic IQ Properties*</h4>
-
-<p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
-<p>This section displays the URL for connecting to a Hyperic IQ installation. The URL must be configured to enable users to view IQ reports in the Hyperic IQ Reports dashboard portlet. The URL is <a href="http://IQ_host:9080/arc">http://IQ_host:9080/arc</a>, where <em>IQ_host</em> is the IQ host.</p>
-
-<p><a name="ui-Admin.HQServer-announcement"></a></p>
-<h4><a name="ui-Admin.HQServer-HQAnnouncementProperties"></a>HQ Announcement Properties</h4>
-
-<p>This section allows Administrators to select whether they will receive all HQ security and version announcements from Hyperic, just the major ones, or none. </p>
-
-<p>Administrators can also select here whether users will access embedded context-sensitive help pages ("Internal"), which are static, or will access the help pages in the remote Hyperic wiki ("Remote"), which will be continually improved. </p>
-
-<div class='panelMacro'><table class='warningMacro'><colgroup><col width='24'><col></colgroup><tr><td valign='top'><img src="images/icons/emoticons/forbidden.gif" width="16" height="16" align="absmiddle" alt="" border="0"></td><td><b>Overwriting the Customization of Embedded Help Pages</b><br /><br/>
-The embedded help pages can be customized, but be aware that getting a new version of the help system will wipe out the customization. </td></tr></table></div>
-
-<p><a name="ui-Admin.HQServer-maintenance"></a></p>
-<h4><a name="ui-Admin.HQServer-MaintenanceProperties"></a>Maintenance Properties</h4>
-
-<p>This section allows Administrators to turn off ("No" in <ins>Alerts Enabled</ins>) all alerts system wide. Alerts can be re-enabled globally by selecting "Yes".</p>
-
-<p>Restarting the Server re-enables alerts.</p>
-
-<p><a name="ui-Admin.HQServer-data"></a></p>
-<h4><a name="ui-Admin.HQServer-DataManagerConfigurationProperties"></a>Data Manager Configuration Properties</h4>
-
-<p>This section lists the parameters that dictate how data is condensed and purged from the database. These values therefore greatly affect HQ performance. Whereas metric data is maintained for up to two years, modifying how quickly detailed data and alerts get purged can improve performance dramatically.</p>
-
 <ul>
-	<li><ins>Run Database Maintenance Every</ins>: The frequency with which HQ performs the compressing and archiving explained in <ins>Delete Detailed Data Older Than</ins>. By default, every hour.</li>
-	<li><ins>Delete Detailed Metric Data Older Than</ins>: The number of days HQ keeps detailed metric data before compressing it into hourly averages with highs and lows and archiving those values. By default, 2 days. HQ does not support a value greater than 7 days.</li>
-	<li><ins>Reindex Metric Data Tables Nightly</ins>: Dictates whether or not HQ will nightly rebuild the indexes for the metric data tables. The reindexing occurs around midnight.</li>
-	<li><ins>Delete Alerts Older Than</ins>: The number of days HQ keeps <a href="http://support.hyperic.com/confluence/display/DOC/Alerts+Overview" title="Alerts Overview">alerts</a> data. By default, 31 days.</li>
-	<li><ins>Delete Events and Logs Older Than</ins>:</li>
+	<li><b>From Email Address</b> &#45;&nbsp; The email address listed as the sender of the alert emails.</li>
 </ul>
 
 
-<p><a name="ui-Admin.HQServer-baseline"></a></p>
-<h4><a name="ui-Admin.HQServer-AutomaticBaselineConfigurationProperties"></a>Automatic Baseline Configuration Properties <font color="red">*</font> </h4>
+<h1><a name="ui-Admin.HQServer-HypericIQProperties"></a>Hyperic IQ Properties<font color="red">&#42;</font></h1>
 
-<p>This section contains the parameters that control the HQ <a href="http://support.hyperic.com/confluence/display/DOC/Baselines" title="Baselines">baselining</a> process and the accuracy of the baseline.</p>
+<p>In HQ Enterprise 4.1 and later, the <b>Hyperic IQ Server URL</b> property identifies the URL of a Hyperic IQ installation. You must specify the IQ server to enable users to view IQ reports in the Hyperic IQ Reports dashboard portlet. The URL is:</p>
+<div class="preformatted panel" style="border-width: 1px;"><div class="preformattedContent panelContent">
+<pre>http://IQ_host:9080/arc
+</pre>
+</div></div>
+<p>where <tt><em>IQ_host</em></tt> is the address of the IQ server.</p>
+
+<h1><a name="ui-Admin.HQServer-HQAnnouncementProperties"></a>HQ Announcement Properties</h1>
 
 <ul>
-	<li><ins>Baseline Frequency</ins>: The frequency with which HQ calculates a baseline for each metric. By default, every 3 days.</li>
-	<li><ins>Baseline Dataset</ins>: The time range of metric data used in calculating the baseline. By default, 3 days' worth of data.</li>
-	<li><ins>Baseline Minimum Data Points</ins>: The minimum number of datapoints used in calculating a baseline. By default, 40.</li>
-	<li><ins>Track Out-of-Bounds Metrics</ins>: Dictates whether or not HQ tracks <a href="http://support.hyperic.com/confluence/display/DOC/Monitoring+Overview#MonitoringOverview-ProblemMetrics">OOB metrics</a></li>
+	<li><b>HQ Version and Security Announcements</b> &#45; Controls what security and version announcements will be sent to HQ Administrators: All, Major, or None.</li>
 </ul>
 
 
-<p><a name="ui-Admin.HQServer-ldap"></a></p>
-<h4><a name="ui-Admin.HQServer-LDAPConfigurationProperties"></a>LDAP Configuration Properties <font color="red">*</font> </h4>
-
-<p>This section allows users to enable and configure the use of an external LDAP directory &#8212; in addition to HQ's own database &#8212; for authenticating users. </p>
-
 <ul>
-	<li><ins>URL</ins>: The LDAP URL the HQ Server will use to access the LDAP directory</li>
-	<li><ins>SSL</ins>: Indicates whether or not the LDAP directory requires SSL connections</li>
-	<li><ins>Username</ins> and <ins>Password</ins>: Used if the LDAP directory does not allow anonymous searching, which is common in a secure environment. The username must be an LDAP user with sufficient privileges to view at least the sections of the directory containing the information for the users to be logging in to HQ.</li>
-	<li><ins>Search Base</ins>: Also known as the suffix. Required for an LDAP connection. If unsure of this setting, check with the LDAP administrator.</li>
-	<li><ins>Search Filter</ins>: Limits the users in LDAP to a subset of the entire directory</li>
-	<li><ins>Login Property</ins>: The LDAP property that HQ will use as the username. Very important. Examples of common login properties are "cn" and "uid".</li>
+	<li><b>Context-Sensitive Help</b> &#45; Defines the location from which help pages will be served when an HQ user clicks <b>Help</b>. When set to "Remote", help pages will be served from the Hyperic documentation wiki. When set to "Internal", the help pages that are embedded in the HQ Server will be served.</li>
 </ul>
 
 
-<p><a name="ui-Admin.HQServer-kerberos"></a></p>
-<h4><a name="ui-Admin.HQServer-KerberosConfigurationProperties"></a>Kerberos Configuration Properties <font color="red">*</font></h4>
+<p><b>Note:</b>&nbsp; Although you can modify embedded help pages, modified help pages will be over-written when you upgrade the HQ Server to a new version.</p>
 
+<h1><a name="ui-Admin.HQServer-MaintenanceProperties"></a>Maintenance Properties</h1>
+
+<p>This section appears in the <b>HQ Server Settings</b> page in versions of HQ prior to 4.2.</p>
+
+<p>In those versions of HQ, the <b>Alerts Enabled</b> setting can be used to disable or enable all alert definitions for all resources.</p>
+<ol>
+	<li>Enable or disable alert definitions:
+	<ul>
+		<li>Click <b>No</b> to disable all alert definitions.</li>
+		<li>Click <b>Yes</b> to re-enable alert definitions.</li>
+	</ul>
+	</li>
+	<li>Restart the HQ Server.</li>
+</ol>
+
+
+<p>In HQ 4.2, this setting is in the <a href="#ui-Admin.HQServer-GlobalAlertProperties">Global Alert Properties</a> section of the page.</p>
+
+<h1><a name="ui-Admin.HQServer-DataManagerConfigurationProperties"></a>Data Manager Configuration Properties</h1>
+
+<p>These properties control how HQ condenses and purges the contents of the HQ database. Regardless of these settings HQ will retain two years of compressed metric history, but you can control how long detailed metric data is retained. Retaining fewer days of detailed metric data and deleting alerts and other events on a timely basis can improve HQ performance.</p>
 <ul>
-	<li><ins>Realm</ins></li>
-	<li><ins>KDC</ins></li>
-	<li><ins>Debug</ins></li>
+	<li><b>Run Database Maintenance Every</b> &#45; Controls how frequently HQ compresses and archives detailed metric data that is older than the age specified by the following property. By default, HQ does database maintenance every hour.</li>
 </ul>
 
 
-<p><a name="ui-Admin.HQServer-snmp"></a></p>
-<h4><a name="ui-Admin.HQServer-SNMPServerConfigurationProperties"></a>SNMP Server Configuration Properties <font color="red">*</font></h4>
+<ul>
+	<li><b>Delete Detailed Metric Data Older Than</b> &#45; Controls how many days of detailed metric data HQ retains before compressing it into hourly averages with highs and lows and archiving those values. The default setting is 2 days. HQ does not support a value greater than 7 days.</li>
+</ul>
 
-<p>This section lists the parameters for using an SNMP server, which can be used for alert notification once SNMP traps are <a href="http://support.hyperic.com/confluence/display/DOC/SNMP+Traps" title="SNMP Traps">enabled</a>. The display of configuration properties depends on the selected <ins>SNMP Protocol Version</ins> (if any).</p>
 
+<ul>
+	<li><b>Reindex Metric Data Tables Nightly</b> &#45; Controls whether HQ reindexes metric data tables every night. When set to <b>Yes</b>, HQ reindexes the tables around midnight.</li>
+</ul>
+
+
+<ul>
+	<li><b>Delete Alerts Older Than</b> &#45; Controls how long HQ stores alert event data. The default value is 31 days.</li>
+</ul>
+
+
+<ul>
+	<li><b>Delete Events and Logs Older Than</b> &#45; Controls how long HQ stores other HQ event and log data. The default value is 31 days.</li>
+</ul>
+
+
+<h1><a name="ui-Admin.HQServer-GlobalAlertProperties"></a>Global Alert Properties</h1>
+
+<p>As of HQ 4.2, these properties enable immediate and global control of alert processing.</p>
+<ul>
+	<li><b>Alerts</b> &#45; Disable or enable all alert definitions for all resources immediately. <b>OFF</b> stops any alerts from firing; notifications defined in escalations that are currently in progress will be completed.</li>
+</ul>
+
+
+<ul>
+	<li><b>Alert Notifications</b> &#45; Disable or enable alert notifications for all resources immediately. <b>OFF</b> stops all notifications, include those for alerts with escalations currently in progress.</li>
+</ul>
+
+
+<ul>
+	<li><b>Hierarchical Alerting</b> <font color="red">&#42;</font> &#45; As of HQ Enterprise 4.2, this setting controls whether alerts are evaluated using the hierarchical alerting method. When hierarchical alerting is enabled, before firing an alert for a resource, HQ considers the availability and alert status of the resource's parent. The purpose of hierarchical alerting is to avoid firing alerts for every resource affected by a single root cause. For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-UnderstandingHierarchicalAlerting">Understanding Hierarchical Alerting</a>.</li>
+</ul>
+
+
+<p><b>Note:</b> You can extend the effect of hierarchical alerting in HQ Enterprise 4.2 and later by configuring the relationship between a network device or virtual host and the platforms that depend on it using the <b>Network and Host Dependency Manager</b> available in the "Plugins" section of the <b>Administration</b> tab. For more information see <a href="http://support.hyperic.com/confluence/display/DOC/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-ConfigureNetworkHostDependenciesforHierarchicalAlerting">Configure Network Host Dependencies for Hierarchical Alerting</a>.</p>
+
+<h1><a name="ui-Admin.HQServer-NotificationThrottlingConfigurationProperties"></a>Notification Throttling Configuration Properties<font color="red">&#42;</font></h1>
+
+<p>Starting in HQ Enterprise 4.2, you can use notification throttling to limit the number of alert email actions (notifications sent by email for a fired alert) that HQ will issue in a 15 second interval. When the threshold you specify is reached, HQ stops sending email alert notifications and instead sends a summary of alert activity every ten minutes to the recipients you specify.</p>
+
+<p>After startoing to throttle, HQ re-evaluates notification volume for fired alerts every 10 minutes; when it determines that the per interval volume of individual notifications that fired alerts would generate is less than the configured threshold, HQ resumes sending individual notifications.</p>
+
+<p>To enable notification throttling:</p>
+<ol>
+	<li>Click the <b>Notification Throttling</b> ON control.</li>
+	<li>In the "Threshold" field, enter the maximum number of notifications you want sent in a 15 second interval.</li>
+	<li>Enter one or more email addresses in the "Notification Email(s) field".</li>
+</ol>
+
+
+<p>For related information, see&nbsp;<a href="http://support.hyperic.com/confluence/display/DOC/Controlling+Alert+and+Notification+Volume" title="Controlling Alert and Notification Volume">Controlling Alert and Notification Volume</a>.</p>
+
+<h1><a name="ui-Admin.HQServer-AutomaticBaselineConfigurationProperties"></a>Automatic Baseline Configuration Properties <font color="red">&#42;</font></h1>
+
+<p>In HQ Enterprise, these properties control the HQ <a href="http://support.hyperic.com/confluence/display/DOC/Baselines" title="Baselines">baselining</a> process and the accuracy of the baseline.</p>
+<ul>
+	<li><b>Baseline Frequency</b> &#45; The frequency with which HQ calculates a baseline for each metric. By default, every 3 days.</li>
+	<li><b>Baseline Dataset</b> &#45; The time range of metric data used in calculating the baseline. By default, 3 days of data.</li>
+	<li><b>Baseline Minimum Data Points</b> &#45; The minimum number of datapoints used in calculating a baseline. By default, 40.</li>
+	<li><b>Track Out-of-Bounds Metrics</b> &#45; Controls whether or not HQ tracks <a href="http://support.hyperic.com/confluence/display/DOC/Monitoring+Overview#MonitoringOverview-ProblemMetrics">OOB metrics</a>.</li>
+</ul>
+
+
+<h1><a name="ui-Admin.HQServer-LDAPConfigurationProperties"></a>LDAP Configuration Properties <font color="red">&#42;</font></h1>
+
+<p>By default Hyperic HQ uses its database for storing information about users and authenticating those users. HQ can be configured to use an external LDAP directory for authenticating users in addition to its own database.</p>
+
+<p>In HQ Enterprise, these properties configure HQ to use an external LDAP directory &#8212; in addition to HQ's own database &#8212; for authenticating users.</p>
+<ul>
+	<li><b>URL</b> &#45; The LDAP URL the HQ Server will use to access the LDAP directory</li>
+	<li><b>SSL</b> &#45; Indicates whether the LDAP directory requires SSL connections.</li>
+	<li><b>Username and Password</b> &#45; Used if the LDAP directory does not allow anonymous searching, as is common in secure environments. The username must be an LDAP user with sufficient privileges to view at least the sections of the directory containing the information for HQ users.</li>
+	<li><b>Search Base</b> &#45;&nbsp; Also known as the suffix. Required for an LDAP connection. If unsure of this setting, check with the LDAP administrator.</li>
+	<li><b>Search Filter</b> &#45; Limits the users in LDAP to a subset of the entire directory</li>
+	<li><b>Login Property</b> &#45; The LDAP property that HQ will use as the username. Very important. Examples of common login properties are "cn" and "uid".</li>
+</ul>
+
+
+<p>After LDAP authentication has been successfully configured, users will be able to log into HQ with their LDAP password (using the value specified as the <ins>Login Property</ins> as their username). The first time LDAP users log in to HQ, they will be asked to provide some identifying information before they can continue: their first and last name, email address, phone number, etc. This is for display purposes and alert notification purposes.<b>Note:</b>&nbsp; LDAP Users Need HQ Roles, Too<br/>
+As with all new users in HQ, LDAP users are not assigned to any roles by default and therefore they will not be able to see any resources in HQ until they are added to a role. HQ administrators will need to <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Users+and+Roles#HQUsersandRoles-assignuser">add a new LDAP user to a role</a> in HQ after the new user logs in for the first time.</p>
+
+<h1><a name="ui-Admin.HQServer-KerberosConfigurationProperties"></a>Kerberos Configuration Properties<font color="red">&#42;</font></h1>
+
+<p>In HQ Enterprise, these properties configure HQ to use Kerberos authentication.</p>
+<ul>
+	<li><b>Realm</b> &#45; Identifies the Kerberos realm.</li>
+	<li><b>KDC</b> &#45; Identifies the Kerberos kdc</li>
+	<li><b>Debug</b> &#45; Enables debug logging.</li>
+</ul>
+
+
+<h1><a name="ui-Admin.HQServer-SNMPServerConfigurationProperties"></a>SNMP Server Configuration Properties <font color="red">&#42;</font></h1>
+
+<p>This section lists the properties for configuring HQ Enterprise for an SNMP server, which can be used for alert notification once SNMP traps are <a href="http://support.hyperic.com/confluence/display/DOC/SNMP+Traps" title="SNMP Traps">enabled</a>. The display of configuration properties depends on the selected <ins>SNMP Protocol Version</ins> (if any).</p>
 <table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
 <td class="confluenceTd"  valign="top" width="34%">
 <p><b>For version 3:</b></p>
 <ul>
-	<li><ins>Trap OID</ins></li>
-	<li><ins>Auth Protocol</ins></li>
-	<li><ins>Auth Passphrase</ins></li>
-	<li><ins>Privacy Protocol</ins></li>
-	<li><ins>Privacy Passphrase</ins></li>
-	<li><ins>Target Context Name</ins></li>
-	<li><ins>Security Name</ins></li>
-	<li><ins>Engine Id</ins></li>
+	<li>Trap OID</li>
+	<li>Auth Protocol</li>
+	<li>Auth Passphrase</li>
+	<li>Privacy Protocol</li>
+	<li>Privacy Passphrase</li>
+	<li>Target Context Name</li>
+	<li>Security Name</li>
+	<li>Engine Id</li>
 </ul>
 </td>
-
 <td class="confluenceTd"  valign="top" width="33%">
 <p><b>For version 2c:</b></p>
 <ul>
-	<li><ins>Trap OID</ins></li>
-	<li><ins>Community</ins></li>
+	<li>Trap OID</li>
+	<li>Community</li>
 </ul>
 </td>
-
 <td class="confluenceTd"  valign="top" width="33%">
 <p><b>For version 1:</b></p>
 <ul>
-	<li>+Trap OID</li>
-	<li><ins>Community</ins></li>
-	<li><ins>Generic ID</ins></li>
-	<li><ins>Specific ID</ins></li>
-	<li><ins>Enterprise ID</ins></li>
-	<li><ins>Agent Address</ins></li>
+	<li>Trap OID</li>
+	<li>Community</li>
+	<li>Generic ID</li>
+	<li>Specific ID</li>
+	<li>Enterprise ID</li>
+	<li>Agent Address</li>
 </ul>
 </td></tr></tbody></table>
-
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Next Steps</b></div><div class="panelContent">
-<p><a href="http://support.hyperic.com/confluence/display/DOC/ui-Alert.Edit" title="ui-Alert.Edit">Use SNMP trap notification in an alert</a><br/>
-<a href="http://support.hyperic.com/confluence/display/DOC/ui-Monitor.CurrentHealth.Chart" title="ui-Monitor.CurrentHealth.Chart">Establish a baseline for a metric</a></p>
-</div></div>
-
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p><a href="http://support.hyperic.com/confluence/display/DOC/HQ+Server+Configuration" title="HQ Server Configuration">HQ Server Configuration</a><br/>
-<a href="http://support.hyperic.com/confluence/display/DOC/Baselines" title="Baselines">Baselines</a></p>
-</div></div></tr></tbody></table>
-
-<h5><a name="ui-Admin.HQServer-ReturntotheHQAdministrationuiAdmin."></a>Return to the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Admin" title="ui-Admin">HQ Administration</a>.</h5>
 
 				    
                     			    </td>
@@ -178,7 +250,7 @@ The embedded help pages can be customized, but be aware that getting a new versi
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Mar 02, 2009 13:37</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
 		    </tr>
 	    </table>
     </body>

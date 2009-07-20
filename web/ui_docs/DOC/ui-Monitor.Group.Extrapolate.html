@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 Documentation : ui-Monitor.Group.Extrapolate</title>
+        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Monitor.Group.Extrapolate</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,37 +12,35 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 Documentation : ui-Monitor.Group.Extrapolate
+                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Monitor.Group.Extrapolate
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Sep 30, 2008 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 20, 2009 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Monitor.Group.Extrapolate-ExtrapolatingMetricsforaGroup"></a>Extrapolating Metrics for a Group*</h1>
+				    <h1><a name="ui-Monitor.Group.Extrapolate-ExtrapolatingMetricsforaGroup"></a>Extrapolating Metrics for a Group<font color="red">&#42;</font></h1>
 
-<p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
+<p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
 <p>This page allows you to predict future values of a metric for a the members of group based on historical metrics.&nbsp;</p>
 
-<p>The  Metric Data Extrapolation plugin is available on the Views tab when a group is selected. Although this function is available for any group, whether compatible or mixed, metric projections are most meaningful for compatible groups.</p>
-
+<p>The Metric Data Extrapolation plugin is available on the Views tab when a group is selected. Although this function is available for any group, whether compatible or mixed, metric projections are most meaningful for compatible groups.</p>
 
 <p>The extrapolation method is a simple linear regression using the Apache Commons Math package. The historical metric data for a group is used to calculate a slope, which is used to predict future values. For more information on the simple linear regression algorithm, see <a href="http://commons.apache.org/math/userguide/stat.html">http://commons.apache.org/math/userguide/stat.html</a>.</p>
-
-<p><em>If you have any comments or suggestions for this help page, please submit them at the bottom of the page by clicking <b>Add Comment</b>.</em></p>
-<p><b>To extrapolate a metric for a members of a group :</b></p>
+<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
+<p>*To extrapolate a metric for a members of a group:*<font color="red">&#42;</font></p>
 <ol>
 	<li>Navigate to compatible group of interest.</li>
 	<li>Choose the Metric Data Extrapolation option from the Views tab.</li>
 	<li>You can select:
 	<ul>
-		<li>Metric to extrapolate.&nbsp; By default, Availability is selected. If desired, choose another metric.&nbsp;</li>
+		<li>Metric to extrapolate.&nbsp; By default, Availability is selected. If desired, choose another metric.</li>
 		<li>Known Data Range. The amountof history upon which the extrapolation will be based. You can select values ranging from 1 day to 1 year. Typically, a longer data range yields a better extrapolation. In some cases, however, it might be better to select the data range based on the timing of environment-related events, such as a new release or infrastructure change.</li>
 		<li>Projection Range. The total duration included in the trend analysis, including the Known Data Range and the Projection Range. The range you select determines, but is not equal to, how far into the future the metric will be projected.</li>
-		<li>Threshold value for the metric.&nbsp; Charts will display a horizontal line at the metric value you enter.</li>
+		<li>Threshold value for the metric. Charts will display a horizontal line at the metric value you enter.</li>
 	</ul>
 	</li>
-	<li>Click Update button to plot the extrapolated values for the selected metric for each member of the Group. Historical values are plotted in blue.</li>
+	<li>Click <b>Update</b> to plot the extrapolated values for the selected metric for each member of the Group. Historical values are plotted in blue.</li>
 </ol>
 
 
@@ -58,7 +56,7 @@
 
 <p>Extrapolated values are represented by the orange triangle that appears between "now" and the end of the projection range on the timeline.</p>
 
-<h5><a name="ui-Monitor.Group.Extrapolate-ReturntoHQPortalReferenceHQUserInterfaceReference."></a>Return to <a href="HQ User Interface Reference.html" title="HQ User Interface Reference">HQ Portal Reference</a>.</h5>
+<h5><a name="ui-Monitor.Group.Extrapolate-ReturntoHQPortalReferenceHQUserInterfaceReference."></a>Return to <a href="http://support.hyperic.com/confluence/display/DOC/HQ+User+Interface+Reference" title="HQ User Interface Reference">HQ Portal Reference</a>.</h5>
 
 				    
                     			    </td>
@@ -69,7 +67,7 @@
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 08, 2008 14:07</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
 		    </tr>
 	    </table>
     </body>

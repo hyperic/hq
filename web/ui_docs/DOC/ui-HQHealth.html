@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 Documentation :  ui-HQHealth</title>
+        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-HQHealth</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,17 +12,16 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 Documentation :  ui-HQHealth
+                            Hyperic HQ 4.0 and 4.1 Documentation : ui-HQHealth
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Feb 17, 2009 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 20, 2009 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
+				    <h1><a name="ui-HQHealth-HQHealth"></a><a name="ui-HQHealth-top"></a>HQ Health</h1>
 
-<h1><a name="ui-HQHealth-HQHealth"></a><a name="ui-HQHealth-top"></a>HQ Health</h1>
-
-<p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
+<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 <p>This screen provides real-time diagnostic data for the machine on which the HQ Server is installed. This data is mostly useful for HQ Support to troubleshoot problems with the system and is not intended for customers to use on their own. This screen is available to Administrators only.</p>
 
 <p>This screen displays statistics from HQ's internal caches. For information about modifying cache settings, see <a href="http://support.hyperic.com/confluence/display/DOC/Configuring+HQ+for+Large+Environments+and+Improved+Performance#ConfiguringHQforLargeEnvironmentsandImprovedPerformance-ConfigureHQCacheSettingsforImprovedPerformance">Configure HQ Cache Settings for Improved Performance.</a></p>
@@ -33,7 +32,7 @@
 </ul>
 
 
-<p><em>If you have any comments or suggestions for this help page, please submit them at the bottom of the page by clicking <b>Add Comment</b>.</em></p>
+<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
 <p><a name="ui-HQHealth-Tasks"></a></p>
 
 <h3><a name="ui-HQHealth-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
@@ -103,22 +102,29 @@
 </tr>
 <tr>
 <td class='confluenceTd'> Database </td>
-<td class='confluenceTd'> Actions
-<ul>
-	<li>Purge AIQ Data - Deletes the contents of the auto-discovery queue. This is useful if the queue contains resources that for some reason cannot be imported.&nbsp; Deleting resources from the queue will cause the agent to re-discover them.</li>
-	<li>Purge Stalled Executions - Deletes escalations that are stall for some reason.&nbsp; Queries</li>
-	<li>AutoInventory IPs</li>
-	<li>AutoInventory Platforms&nbsp;</li>
-	<li>AutoInventory Servers</li>
-	<li>Orphaned AlertDef Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
-	<li>Orphaned Audit Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
-	<li>Stalled Escalations</li>
-	<li>Orphaned Group Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
-	<li>Postgres Locks</li>
-	<li>Postgres Activity</li>
-	<li>Active But Disabled Resource Alert Defs</li>
-	<li>Resource Type Alert Defs with Triggers</li>
-	<li>Database Version Information&nbsp; <br clear="all" /></li>
+<td class='confluenceTd'><ul>
+	<li><b>Actions</b>:
+	<ul>
+		<li>Purge AIQ Data - In HQ 4.1 and later, deletes the contents of the auto-discovery queue. This is useful if the queue contains resources that for some reason cannot be imported.&nbsp; Deleting resources from the queue will cause the agent to re-discover them.</li>
+		<li>Purge Stalled Executions - In HQ 4.1 and later, deletes escalations that are stall for some reason.</li>
+	</ul>
+	</li>
+	<li><b>Queries:</b>
+	<ul>
+		<li>AutoInventory IPs</li>
+		<li>AutoInventory Platforms&nbsp;</li>
+		<li>AutoInventory Servers</li>
+		<li>Orphaned AlertDef Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
+		<li>Orphaned Audit Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
+		<li>Stalled Escalation s&#45; In HQ 4.1 and later.</li>
+		<li>Orphaned Group Count (See <a href="#ui-HQHealth-OrphanedDatabaseRows">Orphaned Database Rows</a>)</li>
+		<li>Postgres Locks - In HQ 4.1 and later.</li>
+		<li>Postgres Activity - In HQ 4.1 and later.</li>
+		<li>Active But Disabled Resource Alert Defs</li>
+		<li>Resource Type Alert Defs with Triggers</li>
+		<li>Database Version Information&nbsp; <br clear="all" /></li>
+	</ul>
+	</li>
 </ul>
 </td>
 </tr>
@@ -172,29 +178,29 @@ org.hyperic.hq.measurement.MeasurementNotFoundException: No measurement found <s
 <table class='confluenceTable'><tbody>
 <tr>
 <td class='confluenceTd'> <b>Dashboard</b> </td>
-<td class='confluenceTd'> Displays the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Dashboard" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
+<td class='confluenceTd'> Displays the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Resources</b> </td>
-<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Resources" title="ui-Resources">Browse Resources</a> screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the <a href="http://support.hyperic.com/confluence/display/DOC/ui-CurrentlyDown" title="ui-CurrentlyDown">Currently Down</a> screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Monitor.CurrentHealth" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource). </td>
+<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the <a href="ui-Resources.html" title="ui-Resources">Browse Resources</a> screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the <a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a> screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource). </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Analyze</b> </td>
-<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Report.Center" title="ui-Report.Center">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Alert.Center" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Event.Center" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br clear="all" /> </td>
+<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-Report.Center.html" title="ui-Report.Center">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="ui-Event.Center.html" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br clear="all" /> </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Administration</b> </td>
-<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Admin" title="ui-Admin">Administration</a> screen, where they can manage the system-wide settings </td>
+<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="ui-Admin.html" title="ui-Admin">Administration</a> screen, where they can manage the system-wide settings </td>
 </tr>
 <tr>
 <td class='confluenceTd'> <b>Search</b> <br clear="all" /> </td>
-<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search the HQ inventory for resources of any type. <br clear="all" />
+<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search for HQ resources of any type and HQ users. <br clear="all" />
 <br clear="all" />
 Search results appear after four characters are entered in the text box. Results will include the first 10 platforms, servers, services, and groups whose name includes the search string. <br clear="all" />  <br clear="all" />
 Double-click a resource in the list to navigate to its Resource page. </td>
 </tr>
 </tbody></table>
-<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="http://support.hyperic.com/confluence/display/DOC/ui-Alert.Detail" title="ui-Alert.Detail">alert detail</a>.</p>
+<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
 <p><a href="#ui-HQHealth-top"><em>back to top</em></a></p>
 
 <h5><a name="ui-HQHealth-ReturntotheHQUserInterfaceReference."></a>Return to the <a href="http://support.hyperic.com/confluence/display/DOC/HQ+User+Interface+Reference" title="HQ User Interface Reference">HQ User Interface Reference</a>.</h5>
@@ -208,7 +214,7 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Mar 02, 2009 13:37</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
 		    </tr>
 	    </table>
     </body>

@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 Documentation : ui-Monitor.Server.MbeanBrowser</title>
+        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Monitor.Server.MbeanBrowser</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,27 +12,29 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 Documentation : ui-Monitor.Server.MbeanBrowser
+                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Monitor.Server.MbeanBrowser
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Oct 06, 2008 by <font color="#0050B2">gviedma</font>.
+					    This page last changed on Jul 20, 2009 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
 				    <h1><a name="ui-Monitor.Server.MbeanBrowser-UsingJMXMBeanQuery"></a>Using JMX MBean Query</h1>
 
-<p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
-<p>The JMX Console allows you to search for MBeans, display their attributes, and invoke selected MBean operations on them.</p>
+<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
 
-<p>When HQ alerts you of availability or health issues with a JVM resource or service, you can use the JMX Console to troubleshoot and resolve the problem.</p>
+<p>The JMX MBean Query tool allows you to search for MBeans, display their attributes, and invoke selected MBean operations on them.</p>
 
-<p>The MBean attributes displayed in the JMX Console are read-only; the console does not support attribute editing.  In this version of HQ, support for MBean operations is limited to operations with one or no arguments of primitive or simple type.</p>
+<p>When HQ alerts you of availability or health issues with a JVM resource or service, you can use the JMX MBean Query tool to troubleshoot and resolve the problem.</p>
 
-<p>The JMX Console is available on the Views tab when you have a JVM server selected in the HQ portal. These instructions assume that your JVM is in HQ inventory. Note that JVMs are not auto-discovered by HQ. For related instructions, see <a href="#ui-Monitor.Server.MbeanBrowser-ImportingaSunJVMintoInventory">Importing a Sun JVM into Inventory</a>.</p>
+<p>The MBean attributes displayed in the JMX MBean Query tool are read-only; the console does not support attribute editing.  In this version of HQ, support for MBean operations is limited to operations with one or no arguments of primitive or simple type.</p>
+
+<p>The JMX MBean Query tool is available on the Views tab when you have a JVM server selected in the HQ portal. These instructions assume that your JVM is in HQ inventory. Note that JVMs are not auto-discovered by HQ. For related instructions, see <a href="http://support.hyperic.com/confluence/display/hypcomm/Sun+JVM" title="Sun JVM">Configuring Sun JVM for Monitoring</a>.</p>
 
 <h2><a name="ui-Monitor.Server.MbeanBrowser-EnteringQueryOptions"></a>Entering Query Options</h2>
 
-<p>To access specific MBean attributes and operations, you enter search patterns in the these text boxes in the JMX Console page:</p>
+<p>To access specific MBean attributes and operations, you enter search patterns in the these text boxes in the JMX MBean Query tool page:</p>
+
 <ul>
 	<li>Object Name Pattern - To specify the MBean or Mbeans of interest, enter a&nbsp; valid MBean object name pattern.&nbsp;For information on object name patterns, see <a href="http://java.sun.com/j2ee/1.4/docs/api/javax/management/ObjectName.html">http://java.sun.com/j2ee/1.4/docs/api/javax/management/ObjectName.html</a>.</li>
 </ul>
@@ -52,7 +54,7 @@
 
 <p>For MBeans whose object name matches the Object Name Pattern, attributes and operations that match your filter criteria will be listed.&nbsp; For example:</p>
 
-<p><a href='http://support.hyperic.com/confluence/download/attachments/56099766/jmx console.png' target='jmx console.png' onClick='window.open("http://support.hyperic.com/confluence/download/attachments/56099766/jmx console.png", "jmx console.png", "height=670,width=1323,menubar=no,status=no,toolbar=no"); return false;'><img src="download/thumbnails/56099766/jmx console.png" align="absmiddle" border="0"/></a></p>
+<p><a href='http://support.hyperic.com/confluence/download/attachments/59375750/jmx console.gif' target='jmx console.gif' onClick='window.open("http://support.hyperic.com/confluence/download/attachments/59375750/jmx console.gif", "jmx console.gif", "height=670,width=1323,menubar=no,status=no,toolbar=no"); return false;'><img src="download/thumbnails/59375750/jmx console.gif" align="absmiddle" border="0"/></a></p>
 
 <h2><a name="ui-Monitor.Server.MbeanBrowser-EnablingAutomaticRefresh"></a>Enabling Automatic Refresh</h2>
 
@@ -60,8 +62,8 @@
 
 <h2><a name="ui-Monitor.Server.MbeanBrowser-DefiningSavedMbeanSearches"></a>Defining Saved Mbean Searches</h2>
 
-<p>If you expect to perform the same search frequently, you can create an XML file that specifies the search criteria. You name the file according to a predefined convention, and store it in a specific directory in your HQ Server installation. Queries you define in this way will appear in the console's <b>Preset Searches</b> drop-down menu.
-<br clear="all" /></p>
+<p>If you expect to perform the same search frequently, you can create an XML file that specifies the search criteria. You name the file according to a predefined convention, and store it in a specific directory in your HQ Server installation. Queries you define in this way will appear in the tool's <b>Preset Searches</b> drop-down menu.</p>
+
 
 <p>When you run a saved search, the Object Name Pattern, Attribute Regex Filter, and Operation Regex Filter it comprises will be displayed in the corresponding text boxes at the top of the view.</p>
 
@@ -78,6 +80,7 @@
 <h3><a name="ui-Monitor.Server.MbeanBrowser-SchemaforJMXSearchCriteria"></a>Schema for JMX Search Criteria</h3>
 
 <p>A saved MBean search criteria consists of:</p>
+
 <ul>
 	<li>A top-level <em>filters</em> element, containing at least one <em>filter</em> sub-element. Each filter sub-element consists of:
 	<ul>
@@ -91,20 +94,24 @@
 
 
 <p>For example:</p>
+
 <div class="code panel" style="border-width: 1px;"><div class="codeContent panelContent">
 <pre class="code-java">&lt;?xml version=<span class="code-quote">"1.0"</span> encoding=<span class="code-quote">"UTF-8"</span>?&gt;
 
 &lt;filters&gt;
+
   &lt;filter id=<span class="code-quote">"JVM Memory MBean"</span>&gt;
     &lt;objectName&gt;java.lang:type=Memory&lt;/objectName&gt;
     &lt;attributeRegex&gt;.*Usage&lt;/attributeRegex&gt;
     &lt;operationRegex&gt;.*&lt;/operationRegex&gt;
   &lt;/filter&gt;
+
   &lt;filter id=<span class="code-quote">"JVM Platform MBeans"</span>&gt;
     &lt;objectName&gt;java.lang:*&lt;/objectName&gt;
     &lt;attributeRegex&gt;.*&lt;/attributeRegex&gt;
     &lt;operationRegex&gt;.*&lt;/operationRegex&gt;
   &lt;/filter&gt;
+
 &lt;/filters&gt;</pre>
 </div></div>
 
@@ -116,7 +123,7 @@
 
 <p>On the subsequent page, click the "Configuration Properties" link, highlighted in yellow. If you've set up password authentication for your JMX monitoring, you'll have to input your user and password here. Double-check the jmx.url field and set the port number accordingly. To track configuration and log files, add in the appropriate info after checking the boxes "server.log_track.enable" and "server.config_track.enable". Make sure the box for "Auto-Discover Garbage Collectors and Memory Pools?" is checked. After clicking ok, HQ Server will start receiving the default metrics for that JVM, although it will take a few minutes for them to appear.</p>
 
-<h5><a name="ui-Monitor.Server.MbeanBrowser-ReturntoHQPortalReferenceHQUserInterfaceReference."></a>Return to <a href="HQ User Interface Reference.html" title="HQ User Interface Reference">HQ Portal Reference</a>.</h5>
+<h5><a name="ui-Monitor.Server.MbeanBrowser-ReturntoHQPortalReferenceHQUserInterfaceReference."></a>Return to <a href="http://support.hyperic.com/confluence/display/DOC/HQ+User+Interface+Reference" title="HQ User Interface Reference">HQ Portal Reference</a>.</h5>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -125,7 +132,7 @@
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/56099766/jmx console.png">jmx console.png</a> (image/png)
+                                <a href="download/attachments/59375750/jmx console.gif">jmx console.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -137,7 +144,7 @@
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 08, 2008 14:07</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
 		    </tr>
 	    </table>
     </body>

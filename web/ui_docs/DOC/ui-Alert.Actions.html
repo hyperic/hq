@@ -1,0 +1,80 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.Actions</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.Actions
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jul 16, 2009 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p>You assign actions to an alert definition on the <b>Alert Definition</b> page, which is presented when you save a new alert definition or edit an existing alert definition. The <b>Alert Definition</b> page is similar to the <b>New Alert</b> page, with the addition of <b>Edit</b> controls in the "Alert Properties" and "Condition Set" sections, and a set of tabs at the bottom of the page for defining alert actions.</p>
+
+<p>You can specify multiple actions to be performed automatically when an alert fires. The types of actions available in the <b>Alert Definition</b> page vary based on: (1) the type of resource the alert applies to, (2) your version of HQ, and (3) whether you've configured HQ for the types of actions that must be enabled before you can use them, such as escalations, OpenNMS trap actions, and in HQ Enterprise, SNMP trap actions.</p>
+
+<p>To define an alert action, select one of the tabs and supply the required information:</p>
+<ul>
+	<li><b>Escalation</b> &#45; Select an escalation from the "Escalation "Scheme" pulldown; the tab refreshes and shows the escalation steps.&nbsp; You must define an escalation before you can assign it to an alert definition. Using escalations configured to repeat until the alert is fixed is a good way to prevent redundant alerts firing for the same problem. To create an escalation, click <b>Escalation Schemes Configuration</b> on the <b>Administration</b> tab. For more information about escalations, see <a href="http://support.hyperic.com/confluence/display/DOC/Escalation" title="Escalation">Escalation</a>.</li>
+</ul>
+
+
+<ul>
+	<li><b>Control Action</b><font color="red">&#42;</font> &#45; In HQ Enterprise, you can define a resource control action for HQ to perform when the alert fires. The control action can target the current resource (the one to which the alert definition is assigned) or a different resource on the same platform, as long as the resource type has HQ-supported control actions. To configure a control action for the alert, select the <b>Control Action</b> tab, click <b>Edit</b>, and follow the instructions on <a href="ui-Alert.ControlAction.html" title="ui-Alert.ControlAction">ui&#45;Alert.ControlAction</a>.&nbsp; You can only assign a single control action to an alert definition. <b>Note:</b>&nbsp; Control actions cannot be defined for a resource type alert.</li>
+</ul>
+
+
+<ul>
+	<li><b>Notify Roles</b><font color="red">&#42;</font> &#45; In HQ Enterprise you can specify one or more HQ roles as notification recipients. HQ users with a role you specify will be notified when an alert is fired.&nbsp; Click <b>Add to List</b> on the <b>Notify Roles</b> tab.&nbsp; On the roles selection page, choose the role(s) to be notified when the alert fires. The <a href="ui-Alert.Notification.html" title="ui-Alert.Notification">help page</a>has instructions.&nbsp; <b>Note</b>:&nbsp; For information about creating roles specifically for use in notfication actions, see in <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Users+and+Roles#HQUsersandRoles-RoleBasedAlertNotifications">Role-Based Alert Notifications</a>.</li>
+</ul>
+
+
+<ul>
+	<li><b>Notify HQ Users</b> &#45; Click <b>Add to List</b> on  this tab to specify one or more HQ uses as notification recipients. On the user selection page, choose the users to be notified when the alert fires. The <a href="ui-Alert.Notification.html" title="ui-Alert.Notification">help page</a>has instructions.&nbsp;</li>
+</ul>
+
+
+<ul>
+	<li><b>Notify Other Recipients</b> &#45; Click <b>Add to List</b> on this tab to specify non-HQ user email recipients for alert notifications.&nbsp; The <a href="ui-Alert.Notification.html" title="ui-Alert.Notification">help page</a>has instructions.&nbsp;</li>
+</ul>
+
+
+<ul>
+	<li><b>Script</b><font color="red">&#42;</font> &#45; In HQ Enterprise, to assign a script action to the alert definition, click the <b>Script</b> tab, enter the full path to the script, and click <b>Set</b>.&nbsp; HQ will run the script when the alert fires. Scripts can reference alert-related HQ environment variables to perform custom notification logic. For information, see <a href="ui-Alert.Script.html" title="ui-Alert.Script">Define a Script Action for an Alert</a>.</li>
+</ul>
+
+
+<ul>
+	<li><b>OpenNMS</b> &#45; You can use this tab to configure HQ to send an SNMP trap to an OpenNMS system when the alert fires. Enter the the listen address and port of your OpenNMS server.&nbsp; The HQ Server must be configured for OpenNMS integration. For more information, see <a href="http://support.hyperic.com/confluence/display/hypcomm/HQU+OpenNMS" title="HQU OpenNMS">Enabling OpenNMS Integration</a>.</li>
+</ul>
+
+
+<ul>
+	<li><b>SNMP Trap Action</b><font color="red">&#42;</font> &#45; This tab is present in HQ Enterprise if the HQ Server is configured for your SNMP server and traps are enabled. Enter the SNMP server's listen address and port, and the MIB object identifier (OID) for the trap. For information about enabling SNMP traps in HQ and configuring the HQ Server for your SNMP server, see <a href="http://support.hyperic.com/confluence/display/DOC/SNMP+Traps" title="SNMP Traps">SNMP Traps</a>.</li>
+</ul>
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

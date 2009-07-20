@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 Documentation : ui-Alert.Condition</title>
+        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.Condition</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,106 +12,89 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 Documentation : ui-Alert.Condition
+                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.Condition
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Sep 22, 2008 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Jul 15, 2009 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Alert.Condition-EditAlertConditionSet"></a>Edit Alert Condition Set</h1>
+				    <h3><a name="ui-Alert.Condition-DefineAlertCondition"></a>Define Alert Condition</h3>
 
-<p><b>Available in HQ Open Source unless marked by <font color="red">*</font> for HQ Enterprise only</b></p>
-<p>This screen allows users to view, edit, and add new (multiple) conditions that will trigger the alert. Alerts can be triggered by metric values, changes to inventory property, the status of a <a href="http://support.hyperic.com/confluence/display/HQ40/Hyperic+Glossary#HypericGlossary-controlaction">control action</a> being performed on a resource (if the resource supports control actions), and log-tracking data. Additionally, users can configure <a href="http://support.hyperic.com/confluence/display/HQ40/Recovery+Alerts" title="Recovery Alerts">recovery alerts</a> and can control how the alert behaves after it has been triggered (referred to as "alert filters").</p>
-<p><em>If you have any comments or suggestions for this help page, please submit them at the bottom of the page by clicking <b>Add Comment</b>.</em></p>
+<p>An alert condition specifies a resource metric value or event that will initiate the alert firing process.</p>
 
-<h3><a name="ui-Alert.Condition-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+<p>The condition types you can choose in the alert definition page vary by resource type and HQ version. If a condition type is not supported by your version of HQ or is not valid for the target resource, it will not appear as an option.</p>
 
-<p>On this screen, users can do the following tasks:</p>
-
-<p><a name="ui-Alert.Condition-editcondition"></a> <b>To edit an existing alert condition:</b></p>
-<ol>
-	<li>Select the kind of condition that will be alerted on:
-	<ul>
-		<li><ins>Metrics</ins>: Select the metric from the droplist.
+<p>To define the alert condition, choose one of the following condition types, and select or enter the required parameter values.</p>
+<ul>
+	<li><b>Metric condition</b> &#45;&nbsp; Use this condition type to base the alert on the value of a metric that HQ collects for the resource. To create a metric condition:
+	<ol>
+		<li>Select a metric from the selector list.&nbsp; Only currently enabled metrics are listed.&nbsp; (If the metric you're looking for is not listed, see the note below.)</li>
+		<li>Define the rule for evaluating the metric value.&nbsp; Choose one of the following options:
 		<ul>
-			<li>To compare the metric value against an absolute value, select the comparison operator (<em>&gt;</em>, <em>&lt;</em> or <em>=</em>) from the first droplist. Type the absolute value (for percentages, use a decimal value less than 1) against which the metric value will be compared using the comparison operator.</li>
-			<li>To compare the metric value against a baseline <font color="red">&#42;</font>, select the comparison operator (<em>&gt;</em>, <em>&lt;</em> or <em>=</em>) from the second droplist. Type a percent value (up to 100) and select the baseline against which the metric value will be compared using the comparison operator.</li>
-			<li>To monitor the metric simply for a change in value, select <ins>value changes</ins>. The alert will be triggered if the value for the metric ever changes.</li>
+			<li>Metric value is greater than, less than, equal to, or not equal to the value you specify.</li>
+			<li>Any change in metric value.</li>
+			<li>In HQ Enterprise only:
+			<ul>
+				<li>Metric value is greater than, less than, equal to, or not equal to a percentage (specified as a decimal value less than 1) of the baseline value for the metric.&nbsp; Requires that baselining feature is enabled.&nbsp; For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Baselines" title="Baselines">Baselines</a>.</li>
+			</ul>
+			</li>
 		</ul>
 		</li>
-		<li><ins>Inventory Property</ins>: Select the resource's property that HQ should monitor for a change. If a change is detected in results of an auto-discovery scan, the alert will be triggered. <font color="red">&#42;</font></li>
-		<li><ins>Control Action</ins>: <font color="red">&#42;</font> Select the control action and then the status to look for: In Progress, Completed, or Failed. (available only if the resource supports control actions)</li>
-		<li><ins>Event/Logs Level</ins>: <font color="red">&#42;</font> Select a <a href="http://support.hyperic.com/confluence/display/HQ40/Hyperic+Glossary#HypericGlossary-loglevel">log level</a> that, when HQ detects it in a resource's logs, will trigger the alert. (optional) Users can also type a substring that must match in the log string. (available only if the resource supports event and log tracking).</li>
-		<li>Configuration change (<ins>Config changed and match file name</ins>): <font color="red">&#42;</font> If a configuration change is detected in any of the user-specified files (on the <a href="ui-Inventory.Configuration.html" title="ui-Inventory.Configuration">"Edit Configuration"</a> screen for a resource), the alert will be triggered. To restrict the alert to changes in a specific file, type the filename (maximum 25-character name length).</li>
-	</ul>
+	</ol>
 	</li>
-	<li>In <ins>Enable Action(s)</ins>, specify when and how often the alert will be triggered when the defined condition(s) is met:
-	<ul>
-		<li>"Each time the condition is met": (most common selection) This means "perform the specified notification immediately when the conditions for this alert have been met." <a href="http://support.hyperic.com/confluence/display/HQ40/Defining+Alerts#DefiningAlerts-eachtime">More information</a></li>
-		<li>"When conditions are exceeded for x within a time period of y": <font color="red">&#42;</font> Knowledge of the metric's collection interval helps make this setting more useful. <a href="http://support.hyperic.com/confluence/display/HQ40/Defining+Alerts#DefiningAlerts-exceeded">More information</a></li>
-		<li>"Once every X times conditions are exceeded within a time period of Y": <font color="red">&#42;</font> Exact knowledge of the metric's collection interval is necessary. <a href="http://support.hyperic.com/confluence/display/HQ40/Defining+Alerts#DefiningAlerts-exceededsometimes">More information</a></li>
-	</ul>
-	</li>
-	<li>Click <img src="download/attachments/56099712/fb_ok.gif" align="absmiddle" border="0"/>.</li>
-</ol>
-
-
-<p><b>To delete an existing alert condition:</b> <font color="red">&#42;</font></p>
-<ul>
-	<li>Click <b>Delete This Condition</b> under the specific condition and click <img src="download/attachments/56099712/fb_ok.gif" align="absmiddle" border="0"/>.</li>
 </ul>
 
 
-<p><b>To create a new (multiple) alert condition:</b> <font color="red">&#42;</font></p>
-
-<p>You can define up to three conditions for an alert in HQ Enterprise.</p>
-<ol>
-	<li>Click <b>Add Another Condition</b>.</li>
-	<li>Specify whether both the new condition and the preceding one must be satisfied for the alert to be triggered ("AND") or only one must be satisfed ("OR").</li>
-	<li>Follow the instructions for <a href="#ui-Alert.Condition-editcondition">editing a condition</a>.</li>
-</ol>
-
-
-<p><a name="ui-Alert.Condition-recovery"></a> <b>To assign this alert as a</b> <b><a href="http://support.hyperic.com/confluence/display/HQ40/Recovery+Alerts" title="Recovery Alerts"><b>recovery alert</b></a></b> <b>for another alert definition:</b> <font color="red">&#42;</font></p>
-<ol>
-	<li>Select the other alert definition in <ins>Recovery Alert</ins> and click <img src="download/attachments/56099712/fb_ok.gif" align="absmiddle" border="0"/>.<br/>
-Now when the "primary" alert is triggered, instead of receiving continual notification of the alert being triggered as the condition persists, users can receive only the notification that the opposite condition has occurred (that is, when this recovery alert is triggered). This setup requires that the alert is disabled after being triggered, as described just below. The primary alert must already be defined on this resource (or resource type) before a recovery alert can be assigned to it.</li>
-</ol>
-
-
-<p><a name="ui-Alert.Condition-filter"></a> <b>To prevent the alert from triggering repeatedly:</b> <font color="red">&#42;</font></p>
-<ul>
-	<li>Under "Enable Action Filters," select "Disable alert until marked fixed or by recovery alert" and click <img src="download/attachments/56099712/fb_ok.gif" align="absmiddle" border="0"/>.<br/>
-The alert will be triggered only once. After that, it must be reenabled manually or via a recovery alert, as described just above. <a href="http://support.hyperic.com/confluence/display/HQ40/Defining+Alerts#DefiningAlerts-disable">More information</a>.</li>
-</ul>
-
-
-<p><b>To prevent the same control action, defined in related alerts, from being performed multiple times on the same resource:</b> <font color="red">&#42;</font></p>
-<ul>
-	<li>Under "Enable Action Filters," select "Disregard control actions that are defined for related alerts" and click <img src="download/attachments/56099712/fb_ok.gif" align="absmiddle" border="0"/>.<br/>
-This option is available only when the resource on which this alert is defined both supports control actions and is part of an application that has other resources with similar alert control actions. <a href="http://support.hyperic.com/confluence/display/HQ40/Defining+Alerts#DefiningAlerts-disregard">More information</a>.</li>
-</ul>
-
-
-<p><b>To consolidate notification for all alerts on resources in the same application:</b> <font color="red">&#42;</font></p>
-<ul>
-	<li>Under "Enable Action Filters," select "Filter notification actions that are defined for related alerts" and click <img src="download/attachments/56099712/fb_ok.gif" align="absmiddle" border="0"/>.<br/>
-This option is very useful for cutting down on the number of alerts from a single application. <a href="http://support.hyperic.com/confluence/display/HQ40/Defining+Alerts#DefiningAlerts-consolidate">More information</a>.
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Next Steps</b></div><div class="panelContent">
-<p>Resume <a href="ui-Alert.Edit.html" title="ui-Alert.Edit">editing the rest of the alert definition</a></p>
+<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>To Enable Collection of a Metric</b></div><div class="panelContent">
+<p>If you want to base a metric condition on a metric that is not currently collected, you have to enable collection of that metric. To do so, update the metric collection settings for the resource type (choose <b>Monitoring Defaults</b> from the <b>Administration</b> tab), or for the specific resource (click <b>Metrics</b> on the <b>Monitor</b> tab for the resource).</p>
 </div></div>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p>More detail on <a href="http://support.hyperic.com/confluence/display/HQ40/Defining+Alerts" title="Defining Alerts">how to configure alert conditions, filters and actions</a>.<br/>
-<a href="http://support.hyperic.com/confluence/display/HQ40/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a><br/>
-<a href="http://support.hyperic.com/confluence/display/HQ40/Log+Tracking" title="Log Tracking">Log Tracking</a><br/>
-<a href="http://support.hyperic.com/confluence/display/HQ40/Configuration+Tracking" title="Configuration Tracking">Configuration Tracking</a></p>
-</div></div></tr></tbody></table></li>
+<ul>
+	<li><b>Inventory Property Condition</b> &#45; To define a condition that is triggered when the value of an inventory property for resource changes, select an inventory property.&nbsp; The pulldown contains only those inventory properties that are valid for the type of the resource to which the alert applies.</li>
 </ul>
 
 
-<h5><a name="ui-Alert.Condition-ReturntoeditingthealertuiAlert.Edit."></a>Return to <a href="ui-Alert.Edit.html" title="ui-Alert.Edit">editing the alert</a>.</h5>
+<ul>
+	<li><b>Control Action Condition</b> &#45; When you define an alert for a resource that supports control actions, you can define a condition that is triggered when a particular control action is performed. If desired, you can base the condition on a control action with a particular result status: "in progress", "completed", or "failed".&nbsp; Pulldowns allow you to select a control action that the resource supports, and a result status if desired.</li>
+</ul>
+
+
+<ul>
+	<li><b>Events/Log Level Condition</b> &#45; To define a condition that is triggered by a log event, select a message severity level ("error", "warn", "info", "debug", "all") and optionally a match string. The condition is satisfied each time a message of the selected severity that contains the match string (if one was specified) is written to a log file that HQ is tracking. Log tracking must be enabled for the resource. To determine the log files that HQ monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The log files that HQ monitors for a resource are defined using the <b>server.log_track.files</b> property. For configuration instructions, see&nbsp; see <a href="http://support.hyperic.com/confluence/display/DOC/Log+Tracking" title="Log Tracking">Log Tracking</a>.</li>
+</ul>
+
+
+<ul>
+	<li><b>Config Changed... Condition</b> &#45; This type of condition is triggered by a change to a configuration file that HQ is configured to monitor for the resource. To limit the condition to a single file, enter its filename in the "match filename" field.&nbsp; If you don't specify a filename, a change to any file monitored will trigger the alert.&nbsp; To determine the log files that HQ monitors for the resource, see the <b>Configuration Properties</b> section of the resource's <b>Inventory</b> tab. The files that HQ monitors for a resource are defined using the <b>server.config_track.files</b> property. The maximum length for filename entered is&nbsp; 25 characters.&nbsp; For configuration instructions, see <a href="http://support.hyperic.com/confluence/display/DOC/Configuration+Tracking" title="Configuration Tracking">Configuration Tracking</a>.</li>
+</ul>
+
+
+<h3><a name="ui-Alert.Condition-DefineAdditionalConditions"></a>Define Additional Conditions<font color="red">&#42;</font></h3>
+
+<p>In HQ Enterprise, you can define up to three conditions for an alert. To add another condition, click <b>Add Another Condition</b> and specify whether both the new condition and the preceding one must be satisfied for the alert to be triggered ("AND") or only one must be satisfied ("OR").</p>
+
+<h3><a name="ui-Alert.Condition-DefineRecoveryAlertBehavior"></a>Define Recovery Alert Behavior<font color="red">&#42;</font></h3>
+
+<p>To designate the alert you're defining as a recovery alert, select the primary alert definition from the pulldown. A recovery alert condition should detect when the condition that fired the primary alert is no longer true. When a recovery alert fires, it marks the primary alert "Fixed", and re-enables the primary alert definition. A recovery alert should be paired with a primary alert definition that is configured with the <b>Disable alert until marked fixed or by recovery alert</b> action, as described below in <a href="#ui-Alert.Condition-EnableActionFilters">Enable Action Filters</a>. For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a>.</p>
+
+<h3><a name="ui-Alert.Condition-EnableActions"></a>Enable Actions<font color="red">&#42;</font></h3>
+
+<p>In HQ Enterprise, you can use the <em>"Once every x times conditions are met within a time period of y minutes</em>" option to configure an alert definition to fire when its conditions occur multiple times in a time period, instead of every time the condition are met. Enter a period of time, and how many occurrences of the conditions within the period are required to fire the alert.</p>
+<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Option removed in 4.1</b></div><div class="panelContent">
+<p>In versions of HQ Enterprise previous to 4.1, you could configure an alert definition to fire when its conditions have meet met continuously for a specified portion of an period of time.&nbsp; the option - <em>"When conditions are exceeded for</em> <em>x within a time period of y</em> <em>minutes"</em> &#45; was removed in HQ 4.1.</p>
+</div></div>
+
+<h3><a name="ui-Alert.Condition-EnableActionFilters"></a>Enable Action Filters</h3>
+
+<p>If you select this option, when the alert fires it will disable the alert definition to prevent it from firing again until the alert is fixed. Use this option if you don't want repeated alerts fired for the same triggering event.&nbsp; In HQ Enterprise, configure this behavior if you intend to assign a recovery alert to the current alert definition.  For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Recovery+Alerts" title="Recovery Alerts">Recovery Alerts</a></p>
+<ul>
+	<li><b>Disable alert until marked fixed or by recovery alert -</b> By default, an alert fires as soon as the condition or conditions are met, and fires again every time the conditions are re-evaluated and determined to be satisfied. If you choose this option, the alert definition will be disabled when an alert fires, and automatically re-enabled when the fired alert is marked "fixed", either manually or via a recovery alert.</li>
+</ul>
+
+
+<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Option removed in 4.2</b></div><div class="panelContent">
+<p>Versions of HQ previous to 4.2 also had a <b>Filter notification actions that are defined for related alerts</b> option to prevent multiple notification when alerts fire for resources on the same platform. In HQ 4.2, the option was removed. HQ 4.2 provides enhanced functionality for global control of notification volume.&nbsp; For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-SetaNotificationThrottle">Set a Notification Throttle</a>.</p>
+</div></div>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -120,7 +103,7 @@ This option is very useful for cutting down on the number of alerts from a singl
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/56099712/fb_ok.gif">fb_ok.gif</a> (image/gif)
+                                <a href="download/attachments/59375806/fb_ok.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -132,7 +115,7 @@ This option is very useful for cutting down on the number of alerts from a singl
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 08, 2008 14:07</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
 		    </tr>
 	    </table>
     </body>

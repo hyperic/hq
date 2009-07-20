@@ -1,0 +1,135 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Admin.Dependency</title>
+	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
+        <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
+    </head>
+
+    <body>
+	    <table class="pagecontent" border="0" cellpadding="0" cellspacing="0" width="100%" bgcolor="#ffffff">
+		    <tr>
+			    <td valign="top" class="pagebody">
+				    <div class="pageheader">
+					    <span class="pagetitle">
+                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Admin.Dependency
+                                                    </span>
+				    </div>
+				    <div class="pagesubheading">
+					    This page last changed on Jul 20, 2009 by <font color="#0050B2">mmcgarry</font>.
+				    </div>
+
+				    <p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1248102421469 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1248102421469 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1248102421469 li {margin-left: 0px;padding-left: 0px;}
+
+/*]]>*/</style><div class='rbtoc1248102421469'>
+<ul>
+    <li><a href='#ui-Admin.Dependency-DefineNetworkHostRelationships'>Define Network Host Relationships <span style="color: red">*</span></a></li>
+<ul>
+    <li><a href='#ui-Admin.Dependency-Step1%3ASelectaTopLevelPlatformtoUpdate'>Step 1: Select a Top Level Platform to Update</a></li>
+    <li><a href='#ui-Admin.Dependency-Step2%3AManageaTopLevelPlatform%27sDependents'>Step 2: Manage a Top Level Platform's Dependents</a></li>
+</ul>
+</ul></div>
+
+<h1><a name="ui-Admin.Dependency-DefineNetworkHostRelationships"></a>Define Network Host Relationships<font color="red">&#42;</font></h1>
+
+<p>The <b>Network and Host Dependency Manager</b>, available starting in HQ Enterprise 4.2, from the "Plugins" section of the <b>Administration</b> tab, allows you to define relationships between a top level platform (a network device or virtual host) and lower level (operating system) platforms that depend on it.</p>
+
+<p>Defining dependency relationships extends the benefits of HQ hierarchical alerting to top level platforms. For more information see <a href="http://support.hyperic.com/confluence/display/DOC/Controlling+Alert+and+Notification+Volume#ControllingAlertandNotificationVolume-HierarchicalAlertingPreventaCascadeofAlertsinResourceHierarchies">Hierarchical Alerting Prevent a Cascade of Alerts in Resource Hierarchies</a>.</p>
+
+<h2><a name="ui-Admin.Dependency-Step1%3ASelectaTopLevelPlatformtoUpdate"></a>Step 1: Select a Top Level Platform to Update</h2>
+
+<p>To define or change the dependent platforms for a top level platform, you first select the top level platform. For ease of navigation, the <b>Network and Host Dependency Manager</b> provides two ways to find a top level platform. Depending on how many top level platforms you have in inventory, and what you know about your target, one of the following options may be preferable.</p>
+
+<h3><a name="ui-Admin.Dependency-OptionA%3ABrowseaFilteredListofTopLevelPlatforms"></a>Option A: Browse a Filtered List of Top Level Platforms</h3>
+
+<p>You can peruse a complete or filtered list of top level platforms in inventory to find the one you want to update.</p>
+<ol>
+	<li>Select the <b>By Top Level Platform</b> tab to list all top level platforms in inventory.</li>
+	<li>Filter the list, as desired:
+	<ul>
+		<li>Enter the leading characters of the top level platform name in the "Name" field.</li>
+		<li>Select a type of device or host from the <b>Type</b> pull-down.</li>
+		<li>Use the <b>Show</b> pull-down to limit the display to: all top level platforms,&nbsp; those with existing dependent platforms, or those with none.</li>
+	</ul>
+	</li>
+	<li>Select a top level platform from the filtered list.
+	<ul>
+		<li>Any dependent platforms already assigned to the top level platform are listed.</li>
+	</ul>
+	</li>
+	<li>To add or remove dependent platforms, follow the instructions in <b>Step 2</b>.</li>
+</ol>
+
+
+<h3><a name="ui-Admin.Dependency-OptionB%3ANavigatefromaDependentPlatform"></a>Option B: Navigate from a Dependent Platform</h3>
+
+<p>If the top level platform you want to update already has a dependent platform, you can start from there.</p>
+<ol>
+	<li>Select the <b>By Dependent Platform</b> tab to list all operating system platforms that have a top level platform defined.</li>
+	<li>Filter the list, as desired:
+	<ul>
+		<li>Enter the leading characters of the platform name in the "Name" field.</li>
+		<li>Select an operating system platform type from the "Type" pull-down.</li>
+	</ul>
+	</li>
+	<li>The dependent platforms that match the filter settings are listed in this format:
+	<ul>
+		<li><em>dependent platform name</em> &gt;<em><ins>top level platform name</ins></em></li>
+	</ul>
+	</li>
+	<li>Click <em><ins>top level platform name</ins></em> to select it.
+	<ul>
+		<li>The dependent platforms already assigned to the top level platform are listed.</li>
+	</ul>
+	</li>
+	<li>To add or remove dependent platforms, follow the instructions in <b>Step 2</b>.</li>
+</ol>
+
+
+<h2><a name="ui-Admin.Dependency-Step2%3AManageaTopLevelPlatform%27sDependents"></a>Step 2: Manage a Top Level Platform's Dependents</h2>
+
+<ol>
+	<li>Navigate to the desired top level platform and select it, using one of the methods described in <b>Step 1</b>.</li>
+	<li>To remove dependencies:
+	<ul>
+		<li>Use the <b>Select</b> and <b>Remove</b> controls on the page.</li>
+	</ul>
+	</li>
+	<li>To add dependencies:
+	<ul>
+		<li>Click <b>Add</b>.</li>
+		<li>The <b>Available Platforms</b> popup lists operating system platforms in inventory that are not currently assigned to a top level platform.</li>
+		<li>Filter the list, as desired:
+		<ul>
+			<li>Enter the leading characters of the operating system platform name in the "Name" field.</li>
+			<li>Select a operating system platform type from the "Type" pull-down.</li>
+		</ul>
+		</li>
+		<li>Select one or more operating system platforms from the list.</li>
+		<li>Click <b>Add Dependency</b> to save the association immediately.</li>
+		<li>Click <b>Done</b> to close the window when you are done updating dependencies for the top level platform.&nbsp;</li>
+	</ul>
+	</li>
+</ol>
+
+
+
+
+				    
+                    			    </td>
+		    </tr>
+	    </table>
+	    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+			<tr>
+				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
+			</tr>
+		    <tr>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
+		    </tr>
+	    </table>
+    </body>
+</html>

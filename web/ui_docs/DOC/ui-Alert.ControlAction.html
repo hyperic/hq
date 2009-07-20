@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
-        <title>Hyperic HQ 4.0 Documentation : ui-Alert.ControlAction</title>
+        <title>Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.ControlAction</title>
 	    <link rel="stylesheet" href="styles/site.css" type="text/css" />
         <META http-equiv="Content-Type" content="text/html; charset=UTF-8">	    
     </head>
@@ -12,51 +12,48 @@
 			    <td valign="top" class="pagebody">
 				    <div class="pageheader">
 					    <span class="pagetitle">
-                            Hyperic HQ 4.0 Documentation : ui-Alert.ControlAction
+                            Hyperic HQ 4.0 and 4.1 Documentation : ui-Alert.ControlAction
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Nov 26, 2007 by <font color="#0050B2">megbartelt</font>.
+					    This page last changed on Jul 17, 2009 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Alert.ControlAction-AssigningaControlActiontoanAlertDefinition"></a>Assigning a Control Action to an Alert Definition</h1>
-<p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
+				    <p><b>Available only in <font color="red">HQ Enterprise</font></b></p>
 
-<p>This screen allows users to view and manage the existing <a href="http://support.hyperic.com/confluence/display/HQ40/Hyperic+Glossary#HypericGlossary-controlaction">control action</a> defined on an alert definition and to create one if it doesn't already exist. A maximum of one control action is allowed per alert definition. The control action in an alert definition needn't be performed on the resource for which the alert is defined; an alert defined for resource A can include a control action to be performed on resource B.</p>
+<p>You can use the <b>Add Control Action</b> page, which appears when you click <b>Edit</b> on the <b>Control Action</b> tab at the bottom of an <b>Alert Definition</b> page, to specify a control action for HQ to perform when the alert fires, or remove a previously assigned control action from the alert definition.</p>
 
-<p><em>If you have any comments or suggestions for this help page, please submit them at the bottom of the page by clicking <b>Add Comment</b>.</em></p>
+<p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
 
-<h3><a name="ui-Alert.ControlAction-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+<h1><a name="ui-Alert.ControlAction-AddaControlActiontoanAlertDefinition"></a>Add a Control Action to an Alert Definition</h1>
 
-<p>On this screen, users can do the following tasks:</p>
 
-<p><b><a name="ui-Alert.ControlAction-control"></a>To add a control action to alert or modify the existing one:</b></p>
+
+<p>On the <b>Add Control Action</b> page for an alert definition: <a name="ui-Alert.ControlAction-control"></a></p>
 <ol>
-	<li>Select the following values:
-	<ul>
-		<li><ins>Resource Type</ins> of the resource on which to perform the action, which filters the values in:</li>
-		<li><ins>Resource Name</ins>, where users select the specific resource on which to perform the action</li>
-		<li><ins>Control Action</ins>: The action to perform on the selected resource when the alert is triggered</li>
-	</ul>
+	<li>Select the target resource for the control command using the <b>Resource Type</b> and <b>Resource Name</b> pulldowns. The lists allow you to select only a target resource that:
+	<ol>
+		<li>Runs on the same platform as the resource to which the alert definition is assigned, and</li>
+		<li>Supports one or more HQ control operations, and is configured, as necessary, for control actions.</li>
+	</ol>
 	</li>
-	<li>Click <img src="download/attachments/56099870/fb_ok.gif" align="absmiddle" border="0"/>.</li>
+	<li>Select the desired control action from the <b>Control Type</b> pulldown.&nbsp;&nbsp;&nbsp;</li>
+	<li>Click <img src="download/attachments/59375642/fb_ok.gif" align="absmiddle" border="0"/>.</li>
 </ol>
 
 
-<p><b>To delete an existing control action:</b></p>
-<ul>
-	<li>In <ins>Control Type</ins>, select "none" and click <img src="download/attachments/56099870/fb_ok.gif" align="absmiddle" border="0"/>.</li>
-</ul>
+<p><b>Note:</b>&nbsp; You can assign only one control action to an alert definition.</p>
+
+<h1><a name="ui-Alert.ControlAction-RemoveaControlActionFromanAlertDefinition"></a>Remove a Control Action From an Alert Definition</h1>
+
+<p>On the <b>Add Control Action</b> page for an alert definition:</p>
+<ol>
+	<li>Select <b>none</b> from <b>Control Type</b> pulldown.&nbsp;&nbsp;&nbsp;</li>
+	<li>Click <img src="download/attachments/59375642/fb_ok.gif" align="absmiddle" border="0"/>.</li>
+</ol>
 
 
-<p><br clear="all" /></p>
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p>Learn what it means to <a href="http://support.hyperic.com/confluence/display/HQ40/Controlling+Resources" title="Controlling Resources">"control resources"</a> <br/>
-<a href="http://support.hyperic.com/confluence/display/HQ40/Alerts+Overview" title="Alerts Overview">Alerts Overview</a></p>
-</div></div></tr></tbody></table>
-
-<h5><a name="ui-Alert.ControlAction-ReturntoeditingthealertdefinitionuiAlert.Edit."></a>Return to <a href="ui-Alert.Edit.html" title="ui-Alert.Edit">editing the alert definition</a>.</h5>
+<h5><a name="ui-Alert.ControlAction-ReturntoeditingthealertdefinitionuiAlert.Edit."></a>Return to <a href="ui-Alert.Edit.html" title="ui-Alert.Edit">editing the alert definition</a>. </h5>
 
 				    					    <br/>
                         <div class="tabletitle">
@@ -65,16 +62,16 @@
 
                         <div class="greybox" align="left">
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/56099870/dash-button_go-arrow.png">dash-button_go-arrow.png</a> (image/png)
+                                <a href="download/attachments/59375642/tbb_delete.png">tbb_delete.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/56099870/tbb_new.png">tbb_new.png</a> (image/png)
+                                <a href="download/attachments/59375642/dash-button_go-arrow.png">dash-button_go-arrow.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/56099870/tbb_delete.png">tbb_delete.png</a> (image/png)
+                                <a href="download/attachments/59375642/tbb_new.png">tbb_new.png</a> (image/png)
                                 <br/>
                                                             <img src="images/icons/bullet_blue.gif" height="8" width="8" alt=""/>
-                                <a href="download/attachments/56099870/fb_ok.gif">fb_ok.gif</a> (image/gif)
+                                <a href="download/attachments/59375642/fb_ok.gif">fb_ok.gif</a> (image/gif)
                                 <br/>
                                                     </div>
 				    
@@ -86,7 +83,7 @@
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Oct 08, 2008 14:07</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
 		    </tr>
 	    </table>
     </body>
