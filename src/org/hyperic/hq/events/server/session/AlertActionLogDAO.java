@@ -25,10 +25,12 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.util.Collection;
+
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.hibernate.PersistedObject;
 
 public class AlertActionLogDAO extends HibernateDAO {
     public AlertActionLogDAO(DAOFactory f) {
@@ -47,6 +49,21 @@ public class AlertActionLogDAO extends HibernateDAO {
     public void savePersisted(PersistedObject entity)
     {
         save((AlertActionLog)entity);
+    }
+    
+    /**
+     * @param alerts {@link Collection} of {@link Alert}s
+     */
+    void deleteAlertActions(Collection alerts) {
+        if (alerts.size() == 0) {
+            return;
+        }
+        final String hql = new StringBuilder()
+            .append("delete from AlertActionLog where alert in (:alerts)")
+            .toString();
+        getSession().createQuery(hql)
+            .setParameterList("alerts", alerts)
+            .executeUpdate();
     }
     
     void handleSubjectRemoval(AuthzSubject subject) {
