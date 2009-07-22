@@ -271,22 +271,28 @@ public class SybaseServerDetector
             for (int i=0; i<databases.size(); i++)
             {
                 String database = (String)databases.get(i);
-                stmt.execute("use "+database);
-                stmt.execute("sp_helpsegment");
-                rs = stmt.getResultSet();
-                while (rs.next())
-                {
-                    String segment = rs.getString("name");
-                    ServiceResource service = new ServiceResource();
-                    service.setType(this, TYPE_STORAGE);
-                    service.setServiceName(database+"."+segment);
-                    ConfigResponse productConfig = new ConfigResponse();
-                    productConfig.setValue(PROP_DATABASE, database);
-                    productConfig.setValue(PROP_SEGMENT, segment);
-                    productConfig.setValue(PROP_PAGESIZE, pagesize);
-                    service.setProductConfig(productConfig);
-                    service.setMeasurementConfig();
-                    services.add(service);
+                try{
+                    stmt.execute("use "+database);
+                    stmt.execute("sp_helpsegment");
+                    rs = stmt.getResultSet();
+                    while (rs.next())
+                    {
+                        String segment = rs.getString("name");
+                        ServiceResource service = new ServiceResource();
+                        service.setType(this, TYPE_STORAGE);
+                        service.setServiceName(database+"."+segment);
+                        ConfigResponse productConfig = new ConfigResponse();
+                        productConfig.setValue(PROP_DATABASE, database);
+                        productConfig.setValue(PROP_SEGMENT, segment);
+                        productConfig.setValue(PROP_PAGESIZE, pagesize);
+                        service.setProductConfig(productConfig);
+                        service.setMeasurementConfig();
+                        services.add(service);
+                    }
+                }catch (SQLException e) {
+                    if (getLog().isDebugEnabled()) {
+                        getLog().error("[setSpaceAvailServices] database '" + database + "' > " + e.getMessage(), e);
+                    }
                 }
             }
         }
