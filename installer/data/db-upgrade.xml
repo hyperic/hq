@@ -9741,6 +9741,29 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.142.1">
+    <schema-directSQL>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="postgresql">
+           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC1AA4E259
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="postgresql">
+           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC9C76C3BB
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="oracle">
+           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC1AA4E259
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="oracle">
+           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC9C76C3BB
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="mysql">
+           alter table EAM_ALERT_ACTION_LOG drop foreign key FK423FA3CC1AA4E259
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="mysql">
+           alter table EAM_ALERT_ACTION_LOG drop foreign key FK423FA3CC9C76C3BB
+        </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
