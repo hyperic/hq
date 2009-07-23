@@ -9741,35 +9741,6 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
-  <schemaSpec version="3.139">
-    <schema-alterColumn table="EAM_MEASUREMENT"
-                        column="DSN"
-                        precision="2048"
-                        columnType="VARCHAR2" />
-    <schema-alterColumn table="EAM_GALERT_ACTION_LOG"
-                        column="DETAIL"
-                        precision="1024"
-                        columnType="VARCHAR2" />
-  </schemaSpec>
-
-  <schemaSpec version="3.140">
-    <schema-insert table="EAM_CONFIG_PROPS"
-                   dupFail="false"
-                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (62, 'HQ_ALERTS_ENABLED', 'true', 'true', %%FALSE%%)"/>
-    <schema-insert table="EAM_CONFIG_PROPS"
-                   dupFail="false"
-                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (63, 'HQ_ALERT_NOTIFICATIONS_ENABLED', 'true', 'true', %%FALSE%%)"/>
-  </schemaSpec>
-
-  <schemaSpec version="3.141">
-    <schema-insert table="EAM_CONFIG_PROPS"
-                   dupFail="false"
-                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (64, 'HQ_ALERT_THRESHOLD', '0', '', %%FALSE%%)"/>
-    <schema-insert table="EAM_CONFIG_PROPS"
-                   dupFail="false"
-                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (65, 'HQ_ALERT_THRESHOLD_EMAILS', '', '', %%FALSE%%)"/>
-  </schemaSpec>
-
   <schemaSpec version="3.142">
     <schema-directSQL>
       <statement>
@@ -9784,7 +9755,59 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.142.1">
+    <schema-directSQL>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="postgresql">
+           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC1AA4E259
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="postgresql">
+           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC9C76C3BB
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="oracle">
+           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC1AA4E259
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="oracle">
+           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC9C76C3BB
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="mysql">
+           alter table EAM_ALERT_ACTION_LOG drop foreign key FK423FA3CC1AA4E259
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="mysql">
+           alter table EAM_ALERT_ACTION_LOG drop foreign key FK423FA3CC9C76C3BB
+        </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
   <schemaSpec version="3.143">
+    <schema-alterColumn table="EAM_MEASUREMENT"
+                        column="DSN"
+                        precision="2048"
+                        columnType="VARCHAR2" />
+    <schema-alterColumn table="EAM_GALERT_ACTION_LOG"
+                        column="DETAIL"
+                        precision="1024"
+                        columnType="VARCHAR2" />
+  </schemaSpec>
+
+  <schemaSpec version="3.144">
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (62, 'HQ_ALERTS_ENABLED', 'true', 'true', %%FALSE%%)"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (63, 'HQ_ALERT_NOTIFICATIONS_ENABLED', 'true', 'true', %%FALSE%%)"/>
+  </schemaSpec>
+
+  <schemaSpec version="3.145">
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (64, 'HQ_ALERT_THRESHOLD', '0', '', %%FALSE%%)"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (65, 'HQ_ALERT_THRESHOLD_EMAILS', '', '', %%FALSE%%)"/>
+  </schemaSpec>
+
+  <schemaSpec version="3.146">
     <schema-directSQL>
         <statement targetDB="oracle" fail="false">
           ALTER TABLE EAM_ESCALATION_STATE DROP UNIQUE (ALERT_DEF_ID, ALERT_ID)
@@ -9819,7 +9842,7 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
-  <schemaSpec version="3.144">
+  <schemaSpec version="3.147">
     <schema-insert table="EAM_RESOURCE_RELATION"
                    insertCmd="(ID, VERSION_COL, NAME, IS_HIER) VALUES (2, 0, 'network', %%TRUE%%)"/>
     <schema-directSQL>
@@ -9842,7 +9865,7 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
-  <schemaSpec version="3.145">
+  <schemaSpec version="3.148">
     <schema-addColumn table="EAM_SERVICE" column="AUTOINVENTORYIDENTIFIER" 
                       columnType="VARCHAR2" precision="250"/>
     <schema-directSQL>
@@ -9875,20 +9898,20 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
   
-  <schemaSpec version="3.146">
+  <schemaSpec version="3.149">
     <schema-insert table="EAM_CONFIG_PROPS"
                    dupFail="false"
                    insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (66, 'HQ_HIERARCHICAL_ALERTING_ENABLED', 'true', 'true', %%FALSE%%)"/>
   </schemaSpec>
 
-  <schemaSpec version="3.147">
+  <schemaSpec version="3.150">
   	<schema-update table="EAM_ALERT_DEFINITION" 
 	               column="NOTIFY_FILTERED"
-                   columnType="BOOLEAN" 
-				   value="FALSE" />
+                       columnType="BOOLEAN" 
+                       value="FALSE" />
   </schemaSpec>
 
-  <schemaSpec version="3.148">
+  <schemaSpec version="3.151">
     <schema-directSQL>
       <statement targetDB='oracle'>
         DROP INDEX TRIGGER_EVENT_EXPIRATION_IDX
@@ -9920,29 +9943,6 @@ has already been defined.
       <statement>
         CREATE INDEX TRIGGER_EVENT_TRIGGER_ID_IDX ON EAM_TRIGGER_EVENT (TRIGGER_ID, ID)
       </statement>
-    </schema-directSQL>
-  </schemaSpec>
-
-  <schemaSpec version="3.149">
-    <schema-directSQL>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="postgresql">
-           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC1AA4E259
-        </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="postgresql">
-           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC9C76C3BB
-        </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="oracle">
-           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC1AA4E259
-        </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="oracle">
-           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC9C76C3BB
-        </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="mysql">
-           alter table EAM_ALERT_ACTION_LOG drop foreign key FK423FA3CC1AA4E259
-        </statement>
-        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="mysql">
-           alter table EAM_ALERT_ACTION_LOG drop foreign key FK423FA3CC9C76C3BB
-        </statement>
     </schema-directSQL>
   </schemaSpec>
 
