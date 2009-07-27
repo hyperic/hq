@@ -466,7 +466,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.admin.user.NewFormPrepareAction">              
         <set-property property="workflow" value="user/New"/>
-        <set-property property="title" value="Admin.User.AssignRole"/>
+        <set-property property="title" value="Admin.User.New"/>
       </action>
 
       <action path="/admin/user/Remove" 
