@@ -64,7 +64,7 @@ class HealthController
                  label: {it.agent.port}],
                 [field: AgentSortField.VERSION,
                  width: '10%',
-                 label: {it.version}],
+                 label: {it.agent.version}],
                 [field: [getValue: {localeBundle.build},
                  description:'build', sortable:false],
                  width: '5%',

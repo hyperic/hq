@@ -26,6 +26,7 @@
 package org.hyperic.hq.agent.client;
 
 import java.io.InputStream;
+import java.util.Map;
 
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
@@ -94,7 +95,7 @@ public interface AgentCommandsClient {
      *                                  communicating with the agent.
      */
     
-    void upgrade(String tarFile, String destination) throws AgentRemoteException, AgentConnectionException;
+    Map upgrade(String tarFile, String destination) throws AgentRemoteException, AgentConnectionException;
 
     /**
      * Send file data to a remote agent

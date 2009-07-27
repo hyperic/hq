@@ -27,6 +27,7 @@ package org.hyperic.hq.agent.server;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,6 +46,7 @@ import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
 import org.hyperic.hq.agent.commands.AgentRestart_args;
 import org.hyperic.hq.agent.commands.AgentRestart_result;
 import org.hyperic.hq.agent.commands.AgentUpgrade_args;
+import org.hyperic.hq.agent.commands.AgentUpgrade_result;
 
 /**
  * The server-side of the commands the Agent supports.  This object 
@@ -95,8 +97,15 @@ public class AgentCommandsServer
             AgentUpgrade_args upgradeArgs = new AgentUpgrade_args(args);  // Just parse the args
             String bundleFile = upgradeArgs.getBundleFile();
             String dest = upgradeArgs.getDestination();
-            agentCommandsService.upgrade(bundleFile, dest);
-            return new AgentRestart_result();
+            Map props = agentCommandsService.upgrade(bundleFile, dest);
+            
+            if (props.isEmpty()) return new AgentRestart_result(); // Fall back to what it used to do, if we have an empty map
+            
+            String version = (String) props.get(AgentUpgrade_result.VERSION);
+            String build = (String) props.get(AgentUpgrade_result.BUILD);
+            String bundleName = (String) props.get(AgentUpgrade_result.BUNDLE_NAME);
+            
+            return new AgentUpgrade_result(version, build, bundleName);
         } else if(cmd.equals(AgentCommandsAPI.command_die)){
             new AgentDie_args(args);  // Just parse the args
             agentCommandsService.die();
