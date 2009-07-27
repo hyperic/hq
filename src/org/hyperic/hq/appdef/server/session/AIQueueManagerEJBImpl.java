@@ -499,7 +499,6 @@ public class AIQueueManagerEJBImpl
             = (action == AIQueueConstants.Q_DECISION_PURGE);
         int i;
         Iterator iter;
-        Integer id;
 
         Map aiplatformsToResync = new HashMap();
         Map aiserversToRemove = new HashMap();
@@ -515,8 +514,6 @@ public class AIQueueManagerEJBImpl
         CPropManagerLocal cpropMgr = getCPropManager();
 
         AIPlatform aiplatform = null;
-        AIServer aiserver = null;
-        AIIp aiip = null;
         List createdResources = new ArrayList();
 
         // Create our visitor based on the action
@@ -525,7 +522,7 @@ public class AIQueueManagerEJBImpl
 
         if (platformList != null) {
             for ( i=0; i<platformList.size(); i++ ) {
-                id = (Integer) platformList.get(i);
+                final Integer id = (Integer) platformList.get(i);
 
                 if (id == null) {
                     log.error("processQueue: platform with ID=null");
@@ -535,11 +532,12 @@ public class AIQueueManagerEJBImpl
                 aiplatform = aiplatformDao.get(id);
 
                 if (aiplatform == null) {
-                    if (isPurgeAction)
+                    if (isPurgeAction) {
                         continue;
-                    else
-                        throw new ObjectNotFoundException(id, AIPlatform.class
-                                                                    .getName());
+                    } else {
+                        throw new ObjectNotFoundException(
+                            id, AIPlatform.class.getName());
+                    }
                 }
 
                 // Before processing platforms, ensure the agent is up since
@@ -563,9 +561,16 @@ public class AIQueueManagerEJBImpl
                             "Error invoking remote method on agent " +
                             e.getMessage(), e);
                     } catch (AgentConnectionException e) {
-                        throw new AIQApprovalException(
-                            "Error connecting or communicating with agent " +
-                            e.getMessage(), e);
+                        // [HHQ-3249] if the IP is being updated then ping may
+                        // fail but that is expected so ignore
+                        if (ipIsUpdated(aiplatform, ipList)) {
+                            final String msg = ", ignoring";
+                            log.warn(msg);
+                        } else {
+                            throw new AIQApprovalException(
+                                "Error connecting or communicating with agent " +
+                                e.getMessage(), e);
+                        }
                     }
                 }
 
@@ -576,14 +581,14 @@ public class AIQueueManagerEJBImpl
         }
         if (ipList != null) {
             for (i=0; i<ipList.size(); i++) {
-                id = (Integer) ipList.get(i);
+                final Integer id = (Integer) ipList.get(i);
                 if (id == null) {
                     log.error("processQueue: " + aiplatform.getName() +
                               " has an IP with ID=null");
                     continue;
                 }
 
-                aiip = aiipDao.get(id);
+                final AIIp aiip = aiipDao.get(id);
                 
                 if (aiip == null) {
                     if (isPurgeAction)
@@ -601,19 +606,20 @@ public class AIQueueManagerEJBImpl
         }
         if (serverList != null) {
             for ( i=0; i<serverList.size(); i++ ) {
-                id = (Integer) serverList.get(i);
+                final Integer id = (Integer) serverList.get(i);
                 if (id == null) {
                     log.error("processQueue: " + aiplatform.getName() +
                               " has a Server with ID=null");
                     continue;
                 }
-                aiserver = aiserverDao.get(id);
+                final AIServer aiserver = aiserverDao.get(id);
                 if (aiserver == null) {
-                    if (isPurgeAction)
+                    if (isPurgeAction) {
                         continue;
-                    else
-                        throw new ObjectNotFoundException(id, AIServer.class
-                                                                    .getName());
+                    } else {
+                        throw new ObjectNotFoundException(
+                            id, AIServer.class.getName());
+                    }
                 }
 
                 visitor.visitServer(aiserver,  subject, pmLocal, smLocal,
@@ -634,7 +640,7 @@ public class AIQueueManagerEJBImpl
         if (isApproveAction) {
             iter = aiplatformsToResync.keySet().iterator();
             while ( iter.hasNext() ) { 
-                id = (Integer) iter.next();
+                final Integer id = (Integer) iter.next();
                 aiplatform = aiplatformDao.get(id);
                 syncQueue(aiplatform, isApproveAction);
             }
@@ -656,6 +662,29 @@ public class AIQueueManagerEJBImpl
         return createdResources;
     }
     
+    private boolean ipIsUpdated(AIPlatform aiplatform, Collection ipList) {
+        if (AIQueueConstants.Q_STATUS_CHANGED != aiplatform.getQueueStatus()) {
+            return false;
+        }
+        final AIIpDAO dao = getAIIpDAO();
+        boolean added = false;
+        boolean removed = false;
+        for (final Iterator it=ipList.iterator(); it.hasNext(); ) {
+            final Integer id = (Integer)it.next();
+            final AIIp aiip = dao.get(id);
+            if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus()) {
+                removed = true;
+            }
+            if (AIQueueConstants.Q_STATUS_ADDED == aiip.getQueueStatus()) {
+                added = true;
+            }
+        }
+        if (added && removed) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Remove an AI platform from the queue.
      * @ejb:interface-method
