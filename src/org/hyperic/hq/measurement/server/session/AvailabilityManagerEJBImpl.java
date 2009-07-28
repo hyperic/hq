@@ -68,6 +68,7 @@ import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerUtil;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.product.AvailabilityMetricValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
@@ -625,8 +626,10 @@ public class AvailabilityManagerEJBImpl
         for (final Iterator i=list.iterator(); i.hasNext(); ) {
             final AvailabilityDataRLE avail = (AvailabilityDataRLE)i.next();
             final Integer mid = avail.getMeasurement().getId();
-            final MetricValue mVal =
-                new MetricValue(avail.getAvailVal(), avail.getApproxEndtime());
+            final AvailabilityMetricValue mVal =
+                new AvailabilityMetricValue(avail.getAvailVal(),
+                                            avail.getStartime(),
+                                            avail.getApproxEndtime());
             rtn.put(mid, mVal);
         }
         // fill in missing measurements
@@ -1311,7 +1314,7 @@ public class AvailabilityManagerEJBImpl
             // be suppressed as part of hierarchical alerting
             PermissionManagerFactory.getInstance()
                 .getHierarchicalAlertingManager()
-                    .suppressMeasurementEvents(downEvents);
+                    .suppressMeasurementEvents(downEvents, true);
             
             if (!downEvents.isEmpty()) {
                 events.addAll(downEvents.values());
@@ -1363,7 +1366,7 @@ public class AvailabilityManagerEJBImpl
             // be suppressed as part of hierarchical alerting
             PermissionManagerFactory.getInstance()
                 .getHierarchicalAlertingManager()
-                    .suppressMeasurementEvents(events);
+                    .suppressMeasurementEvents(events, false);
 
             Messenger sender = new Messenger();
             sender.publishMessage(EventConstants.EVENTS_TOPIC, 
