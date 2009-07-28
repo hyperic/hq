@@ -185,9 +185,19 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     private String getTargetServerName(Platform targetPlatform,
                                        Server serverToClone) {        
         
-        String newServerName = StringUtil.removePrefix(
-                                    serverToClone.getName(),
-                                    serverToClone.getPlatform().getName());
+        String prefix = serverToClone.getPlatform().getName();
+        String oldServerName = serverToClone.getName();
+        String newServerName = StringUtil.removePrefix(oldServerName, prefix);
+        
+        if (newServerName.equals(oldServerName)) {
+            // old server name may not contain the canonical host name
+            // of the platform. try to get just the host name
+            int dotIndex = prefix.indexOf(".");
+            if (dotIndex > 0) {
+                prefix = prefix.substring(0, dotIndex);
+                newServerName = StringUtil.removePrefix(oldServerName, prefix);
+            }
+        }
         
         newServerName = targetPlatform.getName() + " " + newServerName;
         
