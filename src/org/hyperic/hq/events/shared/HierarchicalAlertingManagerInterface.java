@@ -32,8 +32,11 @@ public interface HierarchicalAlertingManagerInterface {
     /**
      * Determine whether the measurement events can
      * be suppressed as part of hierarchical alerting
+     * 
+     * @param events Map<Integer, MeasurementEvent> Integer => Resource.getId()
+     * @param isFromAgent --> indicates whether the events came from the agent or backfiller
      */
-    public void suppressMeasurementEvents(Map events);
+    public void suppressMeasurementEvents(Map events, boolean isFromAgent);
     
     /**
      * Perform a simple "secondary" availability check for down platforms.
