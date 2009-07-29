@@ -232,7 +232,11 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
     
     /**
-     * @return Map<Integer, TreeSet<AvailabilityDataRLE>> Integer -> mid
+     * @return {@link Map} of {@link Integer} to ({@link TreeSet} of
+     *  {@link AvailabilityDataRLE}).
+     * <p>The {@link Map} key of {@link Integer} == {@link Measurement}.getId().
+     * <p>The {@link TreeSet}'s comparator sorts by
+     *  {@link AvailabilityDataRLE}.getStartime().
      */
     Map getHistoricalAvailMap(Integer[] mids, final long after,
                               final boolean descending) {
