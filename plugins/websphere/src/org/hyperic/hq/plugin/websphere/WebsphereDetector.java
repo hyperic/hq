@@ -229,7 +229,7 @@ public class WebsphereDetector
     static List getServerProcessList() {
         return getServerProcessList(PTQL_QUERY);
     }
-
+    
     protected Properties loadProps(File file) {
         Properties props = new Properties();
         FileInputStream is = null;
@@ -256,10 +256,6 @@ public class WebsphereDetector
         return fqdn;
     }
 
-    protected String getDefaultServerNode() {
-        return getNodeNameFromFQDN(getPlatformName());
-    }
-
     protected Properties getProductConfig(File path) {
         Properties productProps = new Properties();
 
@@ -271,7 +267,10 @@ public class WebsphereDetector
 
         String node = getNodeName();
         if (node == null) {
-            node = getDefaultServerNode();
+            // Use next-to-last argument in the command line as the default
+            
+            Process p = (Process) getServerProcessList().get(0);
+            node = p.defaultNode;
         }
         productProps.setProperty(WebsphereProductPlugin.PROP_SERVER_NODE,
                                  node);
@@ -286,24 +285,32 @@ public class WebsphereDetector
     static class Process {
         String installRoot; // /opt/WebSphere/AppServer
         String serverRoot; // /opt/WebSphere/AppServer/profiles/default
+        String defaultNode; // node name, next-to-last arg
 
         boolean isConfigured() {
             return
                 (this.installRoot != null) &&
-                (this.serverRoot  != null);
+                (this.serverRoot  != null) &&
+                (this.defaultNode != null);
+        }
+        
+        boolean isPropsConfigured() {
+            return
+            (this.installRoot != null) &&
+            (this.serverRoot  != null);
         }
 
         public String toString() {
             return
                 "was.install.root=" + this.installRoot +
-                ", server.root=" + this.serverRoot;
+                ", server.root=" + this.serverRoot +
+                ", server.node=" + this.defaultNode;
         }
     }
     
     protected static List getServerProcessList(String query) {
         final String wasProp  = "-Dwas.install.root=";
-        final String rootProp = "-Dserver.root="; //5.x
-        final String bootProp = "-bootFile"; //4.0
+        final String rootProp = "-Dserver.root="; //5.x, optional in 6.1
 
         ArrayList servers = new ArrayList();
 
@@ -324,15 +331,16 @@ public class WebsphereDetector
                     process.serverRoot =
                         arg.substring(rootProp.length(), arg.length());
                 }
-                else if (arg.equals(bootProp)) {
-                    arg = new File(args[j+1]).getParentFile().getParent();
-                    process.installRoot = process.serverRoot = arg;
-                }
 
-                if (process.isConfigured()) {
+                if (process.isPropsConfigured()) {
                     servers.add(process);
                     break;
                 }
+            }
+            
+            // next-to-last arg should be node name
+            if (args.length > 2) {
+                process.defaultNode = args[args.length - 2];
             }
         }
 
@@ -421,7 +429,7 @@ public class WebsphereDetector
             }
         }
 
-        //distinquish between 5.x and 6.x using a unique file
+        //distinquish between versions using a unique file
         //since there is no simple way to get the version on disk.
         String uniqueFile =
             getTypeProperty("UNIQUE_FILE");
@@ -452,7 +460,7 @@ public class WebsphereDetector
 
         String type = getTypeInfo().getName();
 
-        //for example, having WebSphere 5.0 and 5.1 installed
+        //for example, having WebSphere 6.0 and 6.1 installed
         //on the same machine, use version in the name to make
         //them unique.
         if ((version != null) && (version.length() == 3)) {
@@ -514,6 +522,7 @@ public class WebsphereDetector
         if ((version != null) && (version.length() > 3)) {
             version = version.trim().substring(0, 3);
         }
+
         return getServerList(new File(path), version);
     }
 
@@ -523,7 +532,7 @@ public class WebsphereDetector
 
         for (int i=0; i<processes.size(); i++) {
             Process process = (Process)processes.get(i);
-            List found = getServerList(new File(process.serverRoot), null);
+            List found = getServerList(new File(process.installRoot), null);
             if (found != null) {
                 servers.addAll(found);
             }

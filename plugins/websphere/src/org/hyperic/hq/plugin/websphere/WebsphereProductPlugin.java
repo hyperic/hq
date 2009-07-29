@@ -35,6 +35,7 @@ import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.jar.JarEntry;
@@ -43,10 +44,8 @@ import java.util.jar.JarOutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
-
 import org.hyperic.sigar.win32.RegistryKey;
 import org.hyperic.sigar.win32.Win32Exception;
 
@@ -112,7 +111,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
     private static boolean autoRT = false;
     private static boolean hasSoapConfig = false;
     private static boolean isOSGi = false;
-    private static boolean useExt = true;
+    private static boolean useExt = false;
     static boolean useJMX = true;
 
     //if we are running with the ibm jdk we can configure
@@ -254,6 +253,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 continue;
             }
 
+            log.debug("Classpath += " + dir + jars[j]);
             path.add(dir + jars[j]);
         }
     }
@@ -263,6 +263,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
                                   String dir,
                                   String[] jars)
     {
+        log.debug("Adding OSGi packages from " + dir);
         final HashMap wantedJars = new HashMap();
         for (int i=0; i<jars.length; i++) {
             wantedJars.put(jars[i], Boolean.TRUE);
@@ -347,6 +348,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         String[] dirs = {
             "lib",
             "plugins",
+            "runtimes"
         };
 
         for (int i=0; i<dirs.length; i++) {
@@ -360,6 +362,12 @@ public class WebsphereProductPlugin extends ProductPlugin {
                 if (jar.isDirectory() || !jars[j].endsWith(".jar")) {
                     continue;
                 }
+                
+                if (jars[j].startsWith("com.ibm.ws.webservices.thinclient")) {
+                    // skip
+                    continue;
+                }
+                
                 log.debug("classpath += " + jar);
                 if (jars[j].startsWith("com.ibm.ws.runtime_")) {
                     jar = runtimeJarHack(jar);
@@ -376,7 +384,7 @@ public class WebsphereProductPlugin extends ProductPlugin {
         final String[] plugins = {
             "com.ibm.ws.runtime",
             "com.ibm.ws.security.crypto",
-            "com.ibm.ws.emf"
+            "org.eclipse.osgi",
         };
         addClassPathOSGi(path, installDir + "/plugins/", plugins);
 
@@ -384,19 +392,6 @@ public class WebsphereProductPlugin extends ProductPlugin {
             "com.ibm.ws.webservices.thinclient",
         };
         addClassPathOSGi(path, installDir + "/runtimes/", runtimes);
-
-        final String[] libs = {
-            "j2ee.jar",
-            "bootstrap.jar",
-            "urlprotocols.jar",
-            "mail-impl.jar"    
-        };
-        addClassPath(path, installDir + "/lib/", libs);
-
-        final String[] etc = {
-            "tmx4jTransform.jar"
-        };
-        addClassPath(path, installDir + "/etc/", etc);
 
         String[] cp = new String[path.size()];
         path.toArray(cp);
@@ -419,7 +414,8 @@ public class WebsphereProductPlugin extends ProductPlugin {
 
         useJMX = !"false".equals(managerProps.getProperty("websphere.usejmx"));
 
-        useExt = !"false".equals(managerProps.getProperty("websphere.useext"));
+        useExt = "true".equals(managerProps.getProperty("websphere.useext"));
+        log.debug("useExt=" + useExt);
 
         String installDir =
             managerProps.getProperty(PROP_INSTALLPATH);
@@ -445,49 +441,11 @@ public class WebsphereProductPlugin extends ProductPlugin {
                            "file:" + corbaConfig);
 
         String defaultSoapProps = 
-            File.separator +
             "properties" + File.separator + "soap.client.props";
 
-        String defaultSoapConfig = installDir;
-        File profileDir = new File(installDir, "profiles");
-        File defaultProfile = new File(profileDir, "default");
-
-        //argh. 6.1 doesn't have soap.client.properties by default
-        if (profileDir.isDirectory()) {
-            String[] profiles = profileDir.list();
-            if (profiles != null) {
-                for (int i=0; i<profiles.length; i++) {
-                    defaultProfile = new File(profileDir, profiles[i]);
-                    if (new File(defaultProfile, defaultSoapProps).exists()) {
-                        break;
-                    }
-                }
-            }
-        }
-        String profile = defaultProfile.getName();
-
-        if (defaultProfile.exists()) {
-            //WAS 6.0+ need to use soap.client.props from a profile
-            //since $installpath/etc/soap.client.props template will
-            //not work w/ global security enabled.
-            defaultSoapConfig +=
-                File.separator + "profiles" + File.separator;
-
-            List servers = WebsphereDetector.getServerProcessList();
-            if (servers.size() != 0) {
-                WebsphereDetector.Process process =
-                    (WebsphereDetector.Process)servers.get(0);
-
-                if (process.serverRoot != null) {
-                    profile = new File(process.serverRoot).getName();
-                    log.debug("Using profile: " + profile);
-                }
-            }
-
-            defaultSoapConfig += profile;
-        }
-
-        defaultSoapConfig += defaultSoapProps;
+        String defaultSoapConfig =
+            getInstallPropertiesDir(installDir, defaultSoapProps).getPath();
+        log.debug("default soap config is " + defaultSoapConfig);
 
         String soapConfig = 
             managerProps.getProperty("websphere.SOAP.ConfigURL",
@@ -501,11 +459,12 @@ public class WebsphereProductPlugin extends ProductPlugin {
                                "file:" + soapConfig);
         }
         else {
-            log.debug("Unable to find soap.client.props");
+            log.debug("Unable to find soap.client.props in " + soapConfig);
         }
 
         isOSGi =
             new File(installDir, "/plugins").isDirectory();
+        log.debug("isOSGi=" + isOSGi);
 
         //required for 6.1
         File sslConfigFile =
@@ -600,5 +559,86 @@ public class WebsphereProductPlugin extends ProductPlugin {
             installDir + "/java/jre/lib/ext/ibmjcefips.jar",
             installDir + "/etc/tmx4jTransform.jar",
         };
+    }
+    
+    File getInstallPropertiesDir(String installDir, String lookFor) {
+        File result = getInstallPropertiesDirForWAS61(lookFor);
+        
+        if (result == null) {
+            result = getInstallPropertiesDirForWAS60(installDir, lookFor);
+        }
+        
+        return result;
+    }
+    
+    File getInstallPropertiesDirForWAS61(String lookFor) {
+        
+        File result = null;
+        
+        List servers = getServerProcessList();
+        if (servers.size() != 0) {
+            for (Iterator it = servers.iterator(); it.hasNext(); ) {
+                WebsphereDetector.Process process =
+                    (WebsphereDetector.Process) it.next();
+
+                if (process.serverRoot != null) {
+                    File candidate = new File(process.serverRoot, lookFor);
+                    if (candidate.exists()) {
+                        log.debug("Getting WAS properties from profile under server.root: " +
+                                  candidate);
+                        result = candidate;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    List getServerProcessList() {
+        return WebsphereDetector.getServerProcessList();
+    }
+
+    File getInstallPropertiesDirForWAS60(String installDir, String lookFor) {
+        
+        File result = null;
+
+        File profileDir = new File(installDir + File.separator + "profiles");
+        if (profileDir.exists()) {
+            File candidateDir = new File(profileDir +
+                                      File.separator + "default");
+            if (candidateDir.exists()) {
+                File candidate = new File(candidateDir, lookFor);
+                if (candidate.exists()) {
+                    log.debug("Getting WAS properties from default profile location: " +
+                              candidate);
+                    result = candidate;
+                }
+            }
+
+            if (result == null) {
+                // Look under non-default profiles.
+                if (profileDir.isDirectory()) {
+                    String[] profiles = profileDir.list();
+                    if (profiles != null) {
+                        for (int i=0; i<profiles.length; i++) {
+                            candidateDir = new File(profileDir, profiles[i]);
+                            if (candidateDir.exists()) {
+                                File candidate = new File(candidateDir, lookFor);
+                                if (candidate.exists()) {
+                                    log.debug("Getting WAS properties from profile non-default location: " +
+                                              candidate);
+                                    result = candidate;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return result;
     }
 }
