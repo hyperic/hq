@@ -193,7 +193,7 @@ public class AvailabilityManagerEJBImpl
         List rtn = (List) getAvailMeasurementChildren(sList, resourceRelationType)
                                     .get(resource.getId());
         if (rtn == null) {
-            rtn = Collections.EMPTY_LIST;
+            rtn = new ArrayList(0);
         }
         return rtn;
     }
@@ -221,7 +221,7 @@ public class AvailabilityManagerEJBImpl
         List rtn = (List) getAvailMeasurementParent(sList, resourceRelationType)
                                     .get(resource.getId());
         if (rtn == null) {
-            rtn = Collections.EMPTY_LIST;
+            rtn = new ArrayList(0);
         }
         return rtn;
     }
