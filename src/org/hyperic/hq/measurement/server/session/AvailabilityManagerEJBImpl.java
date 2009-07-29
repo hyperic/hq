@@ -111,8 +111,21 @@ public class AvailabilityManagerEJBImpl
     private final AvailabilityDataDAO _dao = getAvailabilityDataDAO();
     private static final String AVAIL_MANAGER_METRICS_INSERTED =
         ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED;
+    /**
+     * {@link Map} of {@link DataPoint} to {@link AvailabilityDataRLE}
+     */
     private Map _createMap = null;
+    /**
+     * {@link Map} of {@link DataPoint} to {@link AvailabilityDataRLE}
+     */
     private Map _removeMap = null;
+    /**
+     * {@link Map} of {@link Integer} to ({@link TreeSet} of
+     *  {@link AvailabilityDataRLE}).
+     * <p>The {@link Map} key of {@link Integer} == {@link Measurement}.getId().
+     * <p>The {@link TreeSet}'s comparator sorts by
+     *  {@link AvailabilityDataRLE}.getStartime().
+     */
     private Map _currAvails = null;
 
     private final long MAX_DATA_BACKLOG_TIME = 7 * MeasurementConstants.DAY;
