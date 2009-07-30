@@ -29,8 +29,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 import junit.framework.TestCase;
+
+import org.hyperic.hq.product.ProductPluginManager;
 
 /**
  * Tests various approaches to finding the profile information needed by the WebSphere plugin.
@@ -306,6 +309,20 @@ public class ProfilesDirectory_test extends TestCase {
         }
     }
     
+    /**
+     * Test that this does not blow up in a non-WAS environment.  The plugin as a whole should
+     * not load, but this test only concerns the WebsphereProductPlugin directory sniffing
+     * part.
+     * 
+     * @throws Exception
+     */
+    public void testClassPathInNonWASEnv() throws Exception {
+        List emptyServers = new ArrayList();
+        WebsphereProductPlugin stubbedPlugin = new StubbedWebsphereProductPlugin(emptyServers);
+        String[] path = stubbedPlugin.getClassPath(new StubbedProductPluginManager());
+        assertNotNull(path);
+    }
+    
     private File createDirectory(String pathName) throws Exception {
         
         File result = null;
@@ -341,6 +358,12 @@ public class ProfilesDirectory_test extends TestCase {
         
         List getServerProcessList() {
             return serverProcessList;
+        }
+    }
+    
+    private static class StubbedProductPluginManager extends ProductPluginManager {
+        public Properties getProperties() {
+            return new Properties();
         }
     }
 }
