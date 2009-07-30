@@ -3,7 +3,7 @@
 
   <class name="AlertDefinition" table="EAM_ALERT_DEFINITION">
     <cache usage="read-write"/>
- 
+
     <id name="id" type="integer">
       <column name="ID" not-null="true"/>
       <generator class="org.hyperic.hibernate.id.ComboGenerator">
@@ -26,7 +26,7 @@
     <property name="mtime" type="long">
       <column name="MTIME" not-null="true"/>
     </property>
-    
+
     <many-to-one name="parent" class="AlertDefinition">
       <column name="PARENT_ID" index="ALERT_DEF_CHILD_IDX"/>
     </many-to-one>
@@ -46,7 +46,7 @@
 
     <property name="active" type="boolean">
       <column name="ACTIVE" not-null="true"/>
-    </property>		  
+    </property>
 
     <property name="enabled" type="boolean">
       <column name="ENABLED" not-null="true"/>
@@ -75,10 +75,6 @@
     <property name="controlFiltered" type="boolean">
       <column name="CONTROL_FILTERED" not-null="true"/>
     </property>
-
-    <many-to-one name="actOnTrigger" class="RegisteredTrigger">
-      <column name="ACT_ON_TRIGGER_ID" index="ACT_ON_TRIGGER_ID_IDX"/>
-    </many-to-one>
 
     <property name="deleted" type="boolean">
       <column name="DELETED" not-null="true"/>

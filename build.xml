@@ -193,7 +193,6 @@
     <path id="src.path">
 		  <path location="${build.dir}/src" />
           <path location="${basedir}/src" />
-		  <path location="${basedir}/unittest/src" />
     </path>
     <compile-app classpath.id="compile.classpath" srcpath.id="src.path" output.dir="${build.dir}/classes"/>
    </target>
@@ -581,13 +580,34 @@
 	     <path id="src.path">
 			<path location="${build.dir}/src" />
 		    <path location="${basedir}/src" />
-			<path location="${basedir}/unittest/src" />
 		 </path>
 		<compile-ui-sources srcpath.id="src.path" output.dir="${build.dir}/classes" classpath.id="compile.classpath"/>
   </target>
 
- 
- 
+
+  <target name="compile-tests">
+	 <path id="src.path">
+			<path location="${basedir}/unittest/src" />
+	 </path>
+	<path id="compile.classpath">
+		 <path refid="testjars" />
+	</path>
+	<compile-test-sources srcpath.id="src.path" output.dir="${build.dir}/classes" classpath.id="compile.classpath"/>
+  </target>
+
+  <macrodef name="compile-test-sources">
+		<attribute name="output.dir"/>
+		<attribute name="srcpath.id"/>
+		<attribute name="classpath.id"/>
+	<sequential>
+		<hq-javac destdir="@{output.dir}" source="1.5" target="1.5">
+	      <!-- The tests need to be built with 1.5 features -->
+	       <classpath refid="@{classpath.id}"/>
+			<src refid="@{srcpath.id}"/>
+	    </hq-javac>
+	</sequential>
+</macrodef>
+	
   <macrodef name="compile-ui-sources">
 		<attribute name="output.dir"/>
 		<attribute name="srcpath.id"/>
@@ -1458,6 +1478,7 @@
     <antcall target="all">
       <param name="unittest.lib" value="${unittest-lib}"/>
     </antcall>
+    <antcall target="compile-tests"/>
   </target>
 
    <target name="pack-test-ear">

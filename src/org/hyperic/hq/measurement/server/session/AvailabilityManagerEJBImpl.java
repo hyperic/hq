@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -77,13 +77,13 @@ import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 /** The AvailabityManagerEJBImpl class is a stateless session bean that can be
  *  used to retrieve Availability Data RLE points
- *  
+ *
  * @ejb:bean name="AvailabilityManager"
  *      jndi-name="ejb/measurement/AvailabilityManager"
  *      local-jndi-name="LocalAvailabilityManager"
  *      view-type="local"
  *      type="Stateless"
- *      
+ *
  * @ejb:transaction type="Required"
  */
 public class AvailabilityManagerEJBImpl
@@ -105,7 +105,7 @@ public class AvailabilityManagerEJBImpl
     private final int IND_TOTAL_TIME = IND_UP_TIME + 1;
     private final long MAX_AVAIL_TIMESTAMP =
         AvailabilityDataRLE.getLastTimestamp();
-    private final String ALL_EVENTS_INTERESTING_PROP = 
+    private final String ALL_EVENTS_INTERESTING_PROP =
         "org.hq.triggers.all.events.interesting";
     private final int DEFAULT_INTERVAL = 60;
     private final AvailabilityDataDAO _dao = getAvailabilityDataDAO();
@@ -129,14 +129,14 @@ public class AvailabilityManagerEJBImpl
     private Map _currAvails = null;
 
     private final long MAX_DATA_BACKLOG_TIME = 7 * MeasurementConstants.DAY;
-    
+
     /**
      * @ejb:interface-method
      */
     public Measurement getAvailMeasurement(Resource resource) {
         return getMeasurementDAO().findAvailMeasurement(resource);
     }
-    
+
     /**
      * @ejb:interface-method
      */
@@ -147,7 +147,7 @@ public class AvailabilityManagerEJBImpl
 
     /**
      * @return Down time in ms for the Resource availability
-     * 
+     *
      * @ejb:interface-method
      */
     public long getDowntime(Resource resource, long begin, long end)
@@ -177,7 +177,7 @@ public class AvailabilityManagerEJBImpl
 
     /**
      * @return List of all measurement ids for availability, ordered
-     * 
+     *
      * @ejb:interface-method
      */
     public List getAllAvailIds() {
@@ -197,7 +197,7 @@ public class AvailabilityManagerEJBImpl
         }
         return rtn;
     }
-    
+
     /**
      * @param {@link List} of {@link Integer} resource ids
      * @return {@link Map} of {@link Integer} to {@link List} of
@@ -211,7 +211,7 @@ public class AvailabilityManagerEJBImpl
 
         return convertAvailMeasurementListToMap(objects);
     }
-    
+
     /**
      * @ejb:interface-method
      */
@@ -225,7 +225,7 @@ public class AvailabilityManagerEJBImpl
         }
         return rtn;
     }
-    
+
     /**
      * @ejb:interface-method
      */
@@ -234,7 +234,7 @@ public class AvailabilityManagerEJBImpl
         final List objects = getMeasurementDAO().findParentAvailMeasurements(
                                       resourceIds,
                                       resourceRelationType);
-        
+
         return convertAvailMeasurementListToMap(objects);
     }
 
@@ -253,10 +253,10 @@ public class AvailabilityManagerEJBImpl
         }
         return rtn;
     }
-    
+
     /**
      * TODO: Can this method be combined with the one that takes an array?
-     * 
+     *
      * @ejb:interface-method
      */
     public PageList getHistoricalAvailData(Measurement m, long begin, long end,
@@ -271,7 +271,7 @@ public class AvailabilityManagerEJBImpl
     /**
      * Fetches historical availability encapsulating the specified time range
      * for each measurement id in mids;
-     * @param mids measurement ids 
+     * @param mids measurement ids
      * @param begin time range start
      * @param end time range end
      * @param interval interval of each time range window
@@ -293,7 +293,7 @@ public class AvailabilityManagerEJBImpl
             end, pc.isDescending());
         return getPageList(availInfo, begin, end, interval, prependUnknowns);
     }
-    
+
     // XXX scottmf, not used right now.  Will be used in some fashion to calc
     // the correct availability uptime percent
     private double getUpTime(List availInfo, long begin, long end) {
@@ -309,7 +309,7 @@ public class AvailabilityManagerEJBImpl
         }
         return (double)totalUptime/(double)totalTime*100;
     }
-    
+
     /**
      * Get the list of Raw RLE objects for a resource
      * @return List<AvailabilityDataRLE>
@@ -355,7 +355,7 @@ public class AvailabilityManagerEJBImpl
                         endtime = availEndtime;
                         int measId = rle.getMeasurement().getId().intValue();
                         String msg = "Measurement, " + measId +
-                            ", for interval " + begin + " - " + end + 
+                            ", for interval " + begin + " - " + end +
                             " did not return a value for range " +
                             curr + " - " + (curr + interval);
                         _log.warn(msg);
@@ -530,16 +530,16 @@ public class AvailabilityManagerEJBImpl
                 Math.min(data[IND_MIN], ((Double)objs[1]).doubleValue());
             data[IND_MAX] =
                 Math.max(data[IND_MAX], ((Double)objs[3]).doubleValue());
-            
+
             // Expect data to be sorted by end time, so that the last value
             // returned is the final count and the last value
             data[IND_CFG_COUNT] = ((java.lang.Number)objs[4]).doubleValue();
             data[IND_LAST_TIME] = ((Double)objs[2]).doubleValue();
-            
+
             data[IND_UP_TIME]    += ((Double)objs[5]).doubleValue();
             data[IND_TOTAL_TIME] += ((Double)objs[6]).doubleValue();
         }
-        
+
         // Now calculate the average value
         for (Iterator it = rtn.values().iterator(); it.hasNext(); ) {
             double[] data = (double[]) it.next();
@@ -547,7 +547,7 @@ public class AvailabilityManagerEJBImpl
         }
         return rtn;
     }
-    
+
     /**
      * @param resources Collection may be of type {@link Resource},
      *  {@link AppdefEntityId}, {@link AppdefEntityValue},
@@ -588,7 +588,7 @@ public class AvailabilityManagerEJBImpl
             if (measIds == null || measIds.size() == 0) {
                 resToGet.add(resource);
                 continue;
-            }           
+            }
             for (final Iterator iter=measIds.iterator(); iter.hasNext(); ) {
                 final Measurement m = (Measurement)iter.next();
                 midsToGet.add(m.getId());
@@ -623,7 +623,7 @@ public class AvailabilityManagerEJBImpl
     /**
      * Only unique measurement ids should be passed in. Duplicate measurement
      * ids will be filtered out from the returned Map if present.
-     * 
+     *
      * @return {@link Map} of {@link Integer} to {@link MetricValue}
      * Integer is the measurementId
      * @ejb:interface-method
@@ -702,22 +702,22 @@ public class AvailabilityManagerEJBImpl
      * to the event handlers.
      *
      * @param availPoints List of DataPoints
-     * 
+     *
      * @ejb:interface-method
      */
     public void addData(List availPoints) {
         addData(availPoints, true);
     }
-        
+
     /**
      * Process Availability data.
      *
      * @param availPoints List of DataPoints
-     * @param sendData 
+     * @param sendData
      *          Indicates whether to send the data to event handlers.
      *          The default behavior is true. If false, the calling method
      *          should call sendDataToEventHandlers directly afterwards.
-     * 
+     *
      * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
@@ -800,7 +800,7 @@ public class AvailabilityManagerEJBImpl
         }
         return -1;
     }
-    
+
     private void debugTimes(final long begin, final String name,
                             final int points) {
         if (_log.isDebugEnabled()) {
@@ -842,7 +842,7 @@ public class AvailabilityManagerEJBImpl
         _currAvails = _dao.getHistoricalAvailMap(
             mIds, now-MAX_DATA_BACKLOG_TIME, false);
     }
-    
+
     private HashSet getMidsWithinAllowedDataWindow(final List states,
                                                    final long now) {
         HashSet mids = new HashSet();
@@ -858,7 +858,7 @@ public class AvailabilityManagerEJBImpl
                 long days = (now-timestamp)/MeasurementConstants.DAY;
                 _log.warn(" Avail measurement came in " + days + " days " +
                           " late, dropping: timestamp=" + timestamp +
-                          " measId=" + pt.getMetricId() + 
+                          " measId=" + pt.getMetricId() +
                           " value=" + pt.getMetricValue());
                 continue;
             }
@@ -869,7 +869,7 @@ public class AvailabilityManagerEJBImpl
         }
         return mids;
     }
-    
+
     private void updateDup(DataPoint state, AvailabilityDataRLE dup)
         throws BadAvailStateException
     {
@@ -959,7 +959,7 @@ public class AvailabilityManagerEJBImpl
             }
         }
     }
-    
+
     private AvailabilityDataRLE findAvail(DataPoint state) {
         Integer mId = state.getMetricId();
         Collection rles = (Collection)_currAvails.get(mId);
@@ -972,7 +972,7 @@ public class AvailabilityManagerEJBImpl
         }
         return null;
     }
-    
+
     private AvailabilityDataRLE findAvailAfter(DataPoint state) {
         final Integer mId = state.getMetricId();
         final TreeSet rles = (TreeSet)_currAvails.get(mId);
@@ -1092,7 +1092,7 @@ public class AvailabilityManagerEJBImpl
     private void updateEndtime(AvailabilityDataRLE avail, long endtime) {
         avail.setEndtime(endtime);
     }
-    
+
     private AvailabilityDataRLE updateStartime(AvailabilityDataRLE avail,
                                                long start) {
         // this should not be the case here, but want to make sure and
@@ -1108,7 +1108,7 @@ public class AvailabilityManagerEJBImpl
         removeAvail(avail);
         return create(meas, start, avail.getEndtime(), avail.getAvailVal());
     }
-    
+
     private void removeAvail(AvailabilityDataRLE avail) {
         long start = avail.getStartime();
         Integer mId = avail.getMeasurement().getId();
@@ -1129,7 +1129,7 @@ public class AvailabilityManagerEJBImpl
         }
         return (AvailabilityDataRLE)rles.last();
     }
-    
+
     private AvailabilityDataRLE create(Measurement meas, long start,
                                        long end, double val) {
         AvailabilityDataRLE rtn = _createAvail(meas, start, end, val);
@@ -1139,7 +1139,7 @@ public class AvailabilityManagerEJBImpl
         rles.add(rtn);
         return rtn;
     }
-    
+
     private AvailabilityDataRLE _createAvail(Measurement meas, long start,
                                              long end, double val) {
         AvailabilityDataRLE rtn = new AvailabilityDataRLE();
@@ -1149,7 +1149,7 @@ public class AvailabilityManagerEJBImpl
         rtn.setAvailVal(val);
         return rtn;
     }
-    
+
     private AvailabilityDataRLE create(Measurement meas, long start, double val) {
         AvailabilityDataRLE rtn = _createAvail(meas, start, MAX_AVAIL_TIMESTAMP, val);
         _createMap.put(new DataPoint(meas.getId().intValue(), val, start), rtn);
@@ -1227,7 +1227,7 @@ public class AvailabilityManagerEJBImpl
                 }
                 boolean updateCache = updateState(state);
                 if (debug) {
-                    _log.debug("state " + state + 
+                    _log.debug("state " + state +
                                " was updated, cache updated: " + updateCache);
                 }
                 if (updateCache) {
@@ -1280,7 +1280,7 @@ public class AvailabilityManagerEJBImpl
                     oldState.getValue() != val) {
                 updateList.add(newState);
                 if (debug) {
-                    String msg = "value of state " + newState + 
+                    String msg = "value of state " + newState +
                                  " differs from" + " current value" +
                                  ((oldState != null) ? oldState.toString() :
                                      " old state does not exist");
@@ -1292,23 +1292,39 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
+    private void updateMeasurementEvent(Integer metricId, MeasurementEvent event) {
+        try {
+            MeasurementDAO dao =getMeasurementDAO();
+            Measurement dm = dao.findById(metricId);
+            int resourceType = dm.getTemplate().getMonitorableType()
+                    .getAppdefType();
+            event.setResource(new AppdefEntityID(resourceType, dm.getInstanceId()));
+            event.setUnits(dm.getTemplate().getUnits());
+        } catch (Exception e) {
+            // don't set anything
+            _log.warn("Couldn't setup measurement event unit or resource values", e);
+        }
+    }
+
     private void sendDataToEventHandlers(List data) {
         int maxCapacity = data.size();
         ArrayList events  = new ArrayList(maxCapacity);
         Map downEvents  = new HashMap(maxCapacity);
         List zevents = new ArrayList(maxCapacity);
 
-        boolean allEventsInteresting = 
+        boolean allEventsInteresting =
             Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
 
         for (Iterator i = data.iterator(); i.hasNext();) {
             DataPoint dp = (DataPoint) i.next();
             Integer metricId = dp.getMetricId();
             MetricValue val = dp.getMetricValue();
+
             MeasurementEvent event = new MeasurementEvent(metricId, val);
 
             if (RegisteredTriggers.isTriggerInterested(event)
                     || allEventsInteresting) {
+                updateMeasurementEvent(metricId, event);
                 if (event.getValue().getValue() == AVAIL_DOWN) {
                     Resource r = getResource(event.getResource());
                     if (r != null && !r.isInAsyncDeleteState()) {
@@ -1328,12 +1344,12 @@ public class AvailabilityManagerEJBImpl
             PermissionManagerFactory.getInstance()
                 .getHierarchicalAlertingManager()
                     .suppressMeasurementEvents(downEvents, true);
-            
+
             if (!downEvents.isEmpty()) {
                 events.addAll(downEvents.values());
             }
         }
-        
+
         if (!events.isEmpty()) {
             Messenger sender = new Messenger();
             sender.publishMessage(EventConstants.EVENTS_TOPIC, events);
@@ -1348,7 +1364,7 @@ public class AvailabilityManagerEJBImpl
      * This method should only be called by the AvailabilityCheckService
      * and is used to filter availability data points based on
      * hierarchical alerting rules.
-     * 
+     *
      * @ejb:interface-method
      */
     public void sendDataToEventHandlers(Map data) {
@@ -1356,9 +1372,9 @@ public class AvailabilityManagerEJBImpl
         Map events  = new HashMap(maxCapacity);
         List zevents = new ArrayList(maxCapacity);
 
-        boolean allEventsInteresting = 
+        boolean allEventsInteresting =
             Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
-        
+
         for (Iterator i = data.keySet().iterator(); i.hasNext();) {
             Integer resourceIdKey = (Integer) i.next();
             DataPoint dp = (DataPoint) data.get(resourceIdKey);
@@ -1368,6 +1384,7 @@ public class AvailabilityManagerEJBImpl
 
             if (RegisteredTriggers.isTriggerInterested(event)
                     || allEventsInteresting) {
+                updateMeasurementEvent(metricId, event);
                 events.put(resourceIdKey, event);
             }
 
@@ -1382,7 +1399,7 @@ public class AvailabilityManagerEJBImpl
                     .suppressMeasurementEvents(events, false);
 
             Messenger sender = new Messenger();
-            sender.publishMessage(EventConstants.EVENTS_TOPIC, 
+            sender.publishMessage(EventConstants.EVENTS_TOPIC,
                                   new ArrayList(events.values()));
         }
 
@@ -1390,7 +1407,7 @@ public class AvailabilityManagerEJBImpl
             ZeventManager.getInstance().enqueueEventsAfterCommit(zevents);
         }
     }
-    
+
     private Measurement getMeasurement(Integer mId) {
         return MeasurementManagerEJBImpl.getOne().getMeasurement(mId);
     }
@@ -1458,7 +1475,7 @@ public class AvailabilityManagerEJBImpl
         }
         return null;
     }
-        
+
     private boolean isAvailDataRLEValid(Integer measId, DataPoint lastPt,
                                         Collection avails) {
         AvailabilityDataRLE last = null;
@@ -1467,7 +1484,7 @@ public class AvailabilityManagerEJBImpl
             AvailabilityDataRLE avail = (AvailabilityDataRLE)it.next();
             Long endtime = new Long(avail.getEndtime());
             if (endtimes.contains(endtime)) {
-                _log.error("list for MID=" + measId + 
+                _log.error("list for MID=" + measId +
                            " contains two or more of the same endtime=" + endtime);
                 return false;
             }

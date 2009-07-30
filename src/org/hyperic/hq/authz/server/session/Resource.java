@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -45,12 +45,12 @@ public class Resource extends AuthzNamedBean implements Comparable {
     private Collection   _fromEdges = new ArrayList();
     private Collection   _toEdges = new ArrayList();
     private Collection   _groupBag = new ArrayList();
-    
+
     protected Resource() {
     }
 
-    Resource(ResourceType type, Resource prototype, String name, 
-             AuthzSubject owner, Integer instanceId, boolean system) 
+    public Resource(ResourceType type, Resource prototype, String name,
+             AuthzSubject owner, Integer instanceId, boolean system)
     {
         super(name);
         _resourceType = type;
@@ -63,7 +63,7 @@ public class Resource extends AuthzNamedBean implements Comparable {
     protected Collection getGroupBag() {
         return _groupBag;
     }
-    
+
     protected void setGroupBag(Collection b) {
         _groupBag = b;
     }
@@ -79,11 +79,11 @@ public class Resource extends AuthzNamedBean implements Comparable {
     protected void setResourceType(ResourceType resourceTypeId) {
         _resourceType = resourceTypeId;
     }
-    
+
     public Resource getPrototype() {
         return _prototype;
     }
-    
+
     protected void setPrototype(Resource p) {
         _prototype = p;
     }
@@ -107,18 +107,18 @@ public class Resource extends AuthzNamedBean implements Comparable {
     public boolean isSystem() {
         return _system;
     }
-    
+
     /**
      * Returns true of this is the root resource
      */
     public boolean isRoot() {
         return getId().equals(AuthzConstants.rootResourceId);
     }
-    
+
     public void markDirty() {
         _mtime = System.currentTimeMillis();
     }
-    
+
     public void setMtime(long mtime) {
         _mtime = mtime;
     }
@@ -142,7 +142,7 @@ public class Resource extends AuthzNamedBean implements Comparable {
     protected void setFromEdges(Collection e) {
         _fromEdges = e;
     }
-    
+
     protected Collection getFromEdges() {
         return _fromEdges;
     }
@@ -150,7 +150,7 @@ public class Resource extends AuthzNamedBean implements Comparable {
     protected void setToEdges(Collection e) {
         _toEdges = e;
     }
-    
+
     protected Collection getToEdges() {
         return _toEdges;
     }
@@ -202,12 +202,12 @@ public class Resource extends AuthzNamedBean implements Comparable {
 
         return result;
     }
-    
+
     public int compareTo(Object arg0) {
         if (!(arg0 instanceof Resource) || getSortName() == null ||
                 ((Resource) arg0).getSortName() == null)
             return -1;
-        
+
         return getSortName().compareTo(((Resource) arg0).getSortName());
     }
 

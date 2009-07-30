@@ -148,11 +148,11 @@ public class Measurement extends PersistedObject
     protected void setBaselinesBag(Collection baselines) {
         _baselines = baselines;
     }
-    
+
     protected Collection getAvailabilityData() {
         return _availabilityData;
     }
-    
+
     protected void setAvailabilityData(Collection availabilityData) {
         _availabilityData = availabilityData;
     }
@@ -165,7 +165,7 @@ public class Measurement extends PersistedObject
         return Collections.unmodifiableCollection(_baselines);
     }
 
-    void setBaseline(Baseline b) {
+    public void setBaseline(Baseline b) {
         final Collection baselines = getBaselinesBag();
         if (!baselines.isEmpty())
             baselines.clear();

@@ -27,15 +27,13 @@ package org.hyperic.hq.bizapp.server.trigger.conditional;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.shared.ConditionalTriggerSchema;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
-import org.hyperic.hq.events.ActionExecuteException;
-import org.hyperic.hq.events.AlertCreateException;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
+import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.measurement.shared.ConfigChangedEvent;
@@ -58,7 +56,7 @@ public class ConfigChangedTrigger
             new Integer(EventConstants.TYPE_CFG_CHG),
             ConfigChangedTrigger.class);
     }
-    
+
     private AppdefEntityID id;
     private String         match;
 
@@ -104,13 +102,13 @@ public class ConfigChangedTrigger
     /**
      * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#init(org.hyperic.hq.events.shared.RegisteredTriggerValue)
      */
-    public void init(RegisteredTriggerValue tval)
+    public void init(RegisteredTriggerValue tval, AlertConditionEvaluator alertConditionEvaluator)
         throws InvalidTriggerDataException {
         ConfigResponse triggerData;
         String sID, sType;
 
-        // Set the trigger value
-        setTriggerValue(tval);
+        setId(tval.getId());
+        setAlertConditionEvaluator(alertConditionEvaluator);
 
         // Decode the configuration
         try {
@@ -141,9 +139,9 @@ public class ConfigChangedTrigger
      * @see org.hyperic.hq.events.AbstractEvent#processEvent()
      */
     public void processEvent(AbstractEvent e)
-        throws EventTypeException, ActionExecuteException {
+        throws EventTypeException {
         ConfigChangedEvent event;
-        
+
         if(!(e instanceof ConfigChangedEvent)){
             throw new EventTypeException("Invalid event type passed, " +
                                          "expected ConfigChangedEvent");
@@ -151,28 +149,23 @@ public class ConfigChangedTrigger
 
         // If we didn't fulfill the condition, then don't fire
         event = (ConfigChangedEvent) e;
-        
-        if (!event.getResource().equals(id))
+
+        if (!event.getResource().equals(id)) {
             return;
-        
+        }
+
         if (match == null || match.length() == 0 ||
             event.getMessage().indexOf(match) > -1) {
-            try {
+
                 TriggerFiredEvent tfe = prepareTriggerFiredEvent(event);
                 tfe.setMessage("Config file (" + event.getSource() +
                                ") changed: " + event.getMessage());
                 super.fireActions(tfe);
-            } catch (AlertCreateException exc) {
-                throw new ActionExecuteException(exc);
-            } catch (ActionExecuteException exc) {
-                throw new ActionExecuteException(exc);
-            } catch (SystemException exc) {
-                throw new ActionExecuteException(exc);
-            }
+
         }
         else {
             // Let dispatchers know that trigger evaluated to false
-            notFired();
+            notFired(e);
         }
     }
 

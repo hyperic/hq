@@ -158,9 +158,9 @@ public class MockAlertDefinitionManagerLocalHome implements
         return null;
     }
 
-    public Object[] getEnabledAndTriggerId(Integer id) {
+    public boolean isEnabled(Integer id) {
         // TODO Auto-generated method stub
-        return null;
+        return true;
     }
 
     public Integer getIdFromTrigger(Integer tid) {

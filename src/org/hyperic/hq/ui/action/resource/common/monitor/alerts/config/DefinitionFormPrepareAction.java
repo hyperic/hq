@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -68,7 +68,7 @@ import org.hyperic.util.pager.PageControl;
  */
 public abstract class DefinitionFormPrepareAction extends TilesAction {
     protected Log log =
-        LogFactory.getLog(DefinitionFormPrepareAction.class.getName());    
+        LogFactory.getLog(DefinitionFormPrepareAction.class.getName());
 
     /**
      * Prepare the form for a new alert definition.
@@ -78,7 +78,7 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
                                  ActionForm form,
                                  HttpServletRequest request,
                                  HttpServletResponse response)
-        throws Exception 
+        throws Exception
     {
         ServletContext ctx = getServlet().getServletContext();
         int sessionID = RequestUtils.getSessionId(request).intValue();
@@ -101,14 +101,12 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
     protected void setupForm(DefinitionForm defForm, HttpServletRequest request,
                              int sessionID, EventsBoss eb, MeasurementBoss mb,
                              ControlBoss cb, AppdefBoss ab)
-        throws Exception 
+        throws Exception
     {
         request.setAttribute( "enableEachTime",
                               new Integer(EventConstants.FREQ_EVERYTIME) );
         request.setAttribute( "enableOnce",
                               new Integer(EventConstants.FREQ_ONCE) );
-        request.setAttribute( "enableTimePeriod",
-                              new Integer(EventConstants.FREQ_DURATION) );
         request.setAttribute( "enableNumTimesInPeriod",
                               new Integer(EventConstants.FREQ_COUNTER) );
         request.setAttribute( "noneDeleted",
@@ -119,7 +117,7 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
         int numMetricsEnabled = 0;
         AppdefEntityID adeId;
         boolean controlEnabled;
-        
+
         try {
             adeId = RequestUtils.getEntityTypeId(request);
             metrics = mb.findMeasurementTemplates(
@@ -127,9 +125,9 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
             defForm.setType(new Integer(adeId.getType()));
             defForm.setResourceType(adeId.getId());
             numMetricsEnabled++;
-            
+
             controlEnabled =
-                cb.isControlSupported(sessionID, (AppdefEntityTypeID) adeId);            
+                cb.isControlSupported(sessionID, (AppdefEntityTypeID) adeId);
         } catch (ParameterNotFoundException e) {
             adeId = RequestUtils.getEntityId(request);
             metrics = mb.findMeasurements( sessionID, adeId, pc );
@@ -143,7 +141,7 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
             }
 
             controlEnabled = cb.isControlEnabled(sessionID, adeId);
-            
+
             // Check for logging
             // [SUPPORT-21] Show log track alerting on all resources/resource
             // types
@@ -154,7 +152,7 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
                 */
         }
         request.setAttribute("logTrackEnabled", Boolean.TRUE);
-        
+
         defForm.setMetrics(metrics);
 
         if (metrics.size() == 0) {
@@ -164,10 +162,10 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
             RequestUtils.setError(
                 request, "resource.common.monitor.alert.config.error.NoMetricsEnabled");
         }
-        
+
         // need to duplicate this for the JavaScript on the page
         request.setAttribute("baselines", baselines);
-        
+
         request.setAttribute(Constants.CONTROL_ENABLED,
                              new Boolean(controlEnabled));
         if (controlEnabled) {
@@ -178,11 +176,11 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
             controlActions.add("(N/A)");
             defForm.setControlActions(controlActions);
         }
-        
+
         List custProps = getCustomProperties(sessionID, adeId, ab);
         if (custProps != null && custProps.size() > 0) {
             request.setAttribute(Constants.CUSTPROPS_AVAIL, Boolean.TRUE);
-            defForm.setCustomProperties(custProps);            
+            defForm.setCustomProperties(custProps);
         }
     }
 
@@ -197,23 +195,23 @@ public abstract class DefinitionFormPrepareAction extends TilesAction {
                                      AppdefBoss ab)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException,
-               RemoteException 
+               RemoteException
     {
         List custProps;
-        
+
         if (adeId instanceof AppdefEntityTypeID)
             custProps =
                 ab.getCPropKeys(sessionID, adeId.getType(), adeId.getID());
         else
             custProps = ab.getCPropKeys(sessionID, adeId);
-            
+
         ArrayList custPropStrs = new ArrayList(custProps.size());
         for (Iterator it = custProps.iterator(); it.hasNext();) {
             CpropKey custProp = (CpropKey) it.next();
             custPropStrs.add(new LabelValueBean(custProp.getDescription(),
                                                 custProp.getKey()));
         }
-    
+
         return custPropStrs;
     }
 }

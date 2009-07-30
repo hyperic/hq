@@ -60,7 +60,12 @@ implements AlertDefinitionManagerLocal, Verifiable {
 
 	}
 
-	public PageList findAlertDefinitionChildren(Integer id) {
+	public boolean isEnabled(Integer id) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public PageList findAlertDefinitionChildren(Integer id) {
 		// TODO Auto-generated method stub
 		return null;
 	}

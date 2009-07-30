@@ -40,5 +40,5 @@ public interface TriggerChangeCallback {
      * 
      * @param trigger being created
      */
-    void afterTriggerCreated(RegisteredTrigger trigger);
+    void afterTriggersCreated(Collection triggers);
 }

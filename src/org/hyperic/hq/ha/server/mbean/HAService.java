@@ -48,10 +48,6 @@ public class HAService
      */
     public void startSingleton() {
         MBeanServer server = MBeanUtil.getMBeanServer();
-        
-        // Re-initialize the Registered Trigger cache in case this is
-        // a failover
-        RegisteredTriggers.reinitialize();
 
         _log.info("Starting HA Services");
 

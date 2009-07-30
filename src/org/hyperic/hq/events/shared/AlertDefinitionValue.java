@@ -70,8 +70,6 @@ public class AlertDefinitionValue
    private boolean countHasBeenSet = false;
    private long range;
    private boolean rangeHasBeenSet = false;
-   private int actOnTriggerId;
-   private boolean actOnTriggerIdHasBeenSet = false;
    private Integer escalationId;
    private boolean escalationIdHasBeenSet = false;
    private boolean deleted;
@@ -121,8 +119,7 @@ public class AlertDefinitionValue
 	  countHasBeenSet = true;
 	  this.range = otherValue.range;
 	  rangeHasBeenSet = true;
-	  this.actOnTriggerId = otherValue.actOnTriggerId;
-	  actOnTriggerIdHasBeenSet = true;
+
 	  this.deleted = otherValue.deleted;
 	  deletedHasBeenSet = true;
 	// TODO Clone is better no ?
@@ -179,7 +176,7 @@ public class AlertDefinitionValue
    public boolean ctimeHasBeenSet(){
 	  return ctimeHasBeenSet;
    }
-   
+
    /**
     * Set the mtime to the current time if it has not been set yet.
     */
@@ -188,7 +185,7 @@ public class AlertDefinitionValue
            setMtime(System.currentTimeMillis());
        }
    }
-   
+
    public long getMtime()
    {
 	  return this.mtime;
@@ -234,7 +231,7 @@ public class AlertDefinitionValue
    public boolean descriptionHasBeenSet(){
 	  return descriptionHasBeenSet;
    }
-   
+
    public boolean getActive()
    {
       return this.active;
@@ -246,11 +243,11 @@ public class AlertDefinitionValue
       activeHasBeenSet = true;
 
    }
-   
+
    public boolean activeHasBeenSet(){
        return activeHasBeenSet;
     }
-   
+
    public boolean getEnabled()
    {
 	  return this.enabled;
@@ -399,23 +396,10 @@ public class AlertDefinitionValue
    }
 
    public boolean rangeHasBeenSet(){
-	  return rangeHasBeenSet;
-   }
-   public int getActOnTriggerId()
-   {
-	  return this.actOnTriggerId;
-   }
+       return rangeHasBeenSet;
+    }
 
-   public void setActOnTriggerId( int actOnTriggerId )
-   {
-	  this.actOnTriggerId = actOnTriggerId;
-	  actOnTriggerIdHasBeenSet = true;
 
-   }
-
-   public boolean actOnTriggerIdHasBeenSet(){
-	  return actOnTriggerIdHasBeenSet;
-   }
    public boolean getDeleted()
    {
 	  return this.deleted;
@@ -616,7 +600,7 @@ public class AlertDefinitionValue
    {
 	  StringBuffer str = new StringBuffer("{");
 
-	  str.append("id=" + getId() + " " + "name=" + getName() + " " + "ctime=" + getCtime() + " " + "mtime=" + getMtime() + " " + "parentId=" + getParentId() + " " + "description=" + getDescription() + " " + "active" + getActive() + "enabled=" + getEnabled() + " " + "willRecover=" + getWillRecover() + " " + "notifyFiltered=" + getNotifyFiltered() + " " + "controlFiltered=" + getControlFiltered() + " " + "priority=" + getPriority() + " " + "appdefId=" + getAppdefId() + " " + "appdefType=" + getAppdefType() + " " + "frequencyType=" + getFrequencyType() + " " + "count=" + getCount() + " " + "range=" + getRange() + " " + "actOnTriggerId=" + getActOnTriggerId() + " " + "deleted=" + getDeleted());
+	  str.append("id=" + getId() + " " + "name=" + getName() + " " + "ctime=" + getCtime() + " " + "mtime=" + getMtime() + " " + "parentId=" + getParentId() + " " + "description=" + getDescription() + " " + "active" + getActive() + "enabled=" + getEnabled() + " " + "willRecover=" + getWillRecover() + " " + "notifyFiltered=" + getNotifyFiltered() + " " + "controlFiltered=" + getControlFiltered() + " " + "priority=" + getPriority() + " " + "appdefId=" + getAppdefId() + " " + "appdefType=" + getAppdefType() + " " + "frequencyType=" + getFrequencyType() + " " + "count=" + getCount() + " " + "range=" + getRange() + " " + " " + "deleted=" + getDeleted());
 	  str.append('}');
 
 	  return(str.toString());
@@ -706,7 +690,6 @@ public class AlertDefinitionValue
 		 lEquals = lEquals && this.frequencyType == that.frequencyType;
 		 lEquals = lEquals && this.count == that.count;
 		 lEquals = lEquals && this.range == that.range;
-		 lEquals = lEquals && this.actOnTriggerId == that.actOnTriggerId;
 		 lEquals = lEquals && this.deleted == that.deleted;
 		 if( this.getTriggers() == null )
 		 {
@@ -714,7 +697,7 @@ public class AlertDefinitionValue
 		 }
 		 else
 		 {
-            // XXX Covalent Custom - dont compare the arrays, as order is not significant. ever.    
+            // XXX Covalent Custom - dont compare the arrays, as order is not significant. ever.
             // - javier 7/16/03
             java.util.Collection cmr1 = java.util.Arrays.asList(this.getTriggers());
             java.util.Collection cmr2 = java.util.Arrays.asList(that.getTriggers());
@@ -727,7 +710,7 @@ public class AlertDefinitionValue
 		 }
 		 else
 		 {
-            // XXX Covalent Custom - dont compare the arrays, as order is not significant. ever.    
+            // XXX Covalent Custom - dont compare the arrays, as order is not significant. ever.
             // - javier 7/16/03
             java.util.Collection cmr1 = java.util.Arrays.asList(this.getConditions());
             java.util.Collection cmr2 = java.util.Arrays.asList(that.getConditions());
@@ -740,7 +723,7 @@ public class AlertDefinitionValue
 		 }
 		 else
 		 {
-            // XXX Covalent Custom - dont compare the arrays, as order is not significant. ever.    
+            // XXX Covalent Custom - dont compare the arrays, as order is not significant. ever.
             // - javier 7/16/03
             java.util.Collection cmr1 = java.util.Arrays.asList(this.getActions());
             java.util.Collection cmr2 = java.util.Arrays.asList(that.getActions());
@@ -771,7 +754,7 @@ public class AlertDefinitionValue
       result = 37*result + ((this.description != null) ? this.description.hashCode() : 0);
 
       result = 37*result + (active ? 0 : 1);
-      
+
       result = 37*result + (enabled ? 0 : 1);
 
       result = 37*result + (willRecover ? 0 : 1);
@@ -791,8 +774,6 @@ public class AlertDefinitionValue
       result = 37*result + (int)(count^(count>>>32));
 
       result = 37*result + (int)(range^(range>>>32));
-
-      result = 37*result + (int) actOnTriggerId;
 
       result = 37*result + (deleted ? 0 : 1);
 
