@@ -32,6 +32,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -99,67 +100,71 @@ public class SybaseServerDetector
                         VERSION_12_5 = "12.5.x",
                         VERSION_12_0 = "12.x";
 
-    private static List getServerProcessList()
+    private static long[] getServerProcessList()
     {
-        List servers = new ArrayList();
-        long[] pids = getPids(PTQL_QUERY);
-        for (int i=0; i<pids.length; i++)
-        {
-            String exe = getProcExe(pids[i]);
-            if (exe == null) {
-                continue;
-            }
-            File binary = new File(exe);
-            if (!binary.isAbsolute()) {
-                continue;
-            }
-            servers.add(binary.getAbsolutePath());
-        }
-        return servers;
+        return getPids(PTQL_QUERY);
     }
 
     public List getServerResources(ConfigResponse platformConfig) 
         throws PluginException
     {
         List servers = new ArrayList();
-        List paths = getServerProcessList();
-        for (int i=0; i<paths.size(); i++)
+        long pids[] = getServerProcessList();
+        for (int i=0; i<pids.length; i++)
         {
-            String dir = (String)paths.get(i);
-            List found = getServerList(dir);
+            List found = getServerList(pids[i]);
             if (!found.isEmpty())
                 servers.addAll(found);
         }   
         return servers;
     }
 
-    public List getServerResources(ConfigResponse platformConfig, String path)
-        throws PluginException
-    {
-        // Normal file scan
-        return getServerList(path);
+    public List getServerResources(ConfigResponse platformConfig, String path) throws PluginException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public List getServerResources (ConfigResponse platformConfig, 
-                                    String path, RegistryKey current) 
-        throws PluginException
-    {
-        return getServerList(path);
+    public List getServerResources(ConfigResponse platformConfig, String path, RegistryKey current) throws PluginException {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public List getServerList(String path) throws PluginException
+
+    public List getServerList(long pid) throws PluginException
     {
+        String[] args=getProcArgs(pid);
+        String path=args[0];
+        log.debug("[getServerList] ("+pid+") args="+Arrays.asList(args));
+
+        // Only check the binaries if they match the path we expect
+        List servers = new ArrayList();
+
+        String name=null;
+        String installpath = null;
+        for(int i=0;i<args.length;i++){
+            if(args[i].startsWith("-s")){
+                name=args[i].substring(2);
+            }
+        }
+        for(int i=0;i<args.length;i++){
+            if(args[i].startsWith("-d")){
+                installpath=args[i].substring(2);
+            }
+        }
+
+        if ((path.indexOf("dataserver") == -1 && path.indexOf("sqlsrvr") == -1) || (name==null)) {
+            return servers;
+        }
+        if(installpath==null){
+            installpath=path+" -s"+name;
+        }
+
+
         ConfigResponse productConfig = new ConfigResponse();
         productConfig.setValue(PROP_USER, "sa");
         productConfig.setValue(PROP_PASSWORD, "");
+        productConfig.setValue("serverName", name);
 
-        List servers = new ArrayList();
         String version = "";
 
-        // Only check the binaries if they match the path we expect
-        if (path.indexOf("dataserver") == -1 && path.indexOf("sqlsrvr") == -1) {
-            return servers;
-        }
 
         if (path.indexOf("12_0") != -1) {
             version = VERSION_12_0;
@@ -177,15 +182,14 @@ public class SybaseServerDetector
         if (!version.equals(getTypeInfo().getVersion())) {
             return servers;
         }
-        String installdir = getParentDir(path, 3);
-        ServerResource server = createServerResource(installdir);
+        ServerResource server = createServerResource(installpath);
         // Set custom properties
         ConfigResponse cprop = new ConfigResponse();
         cprop.setValue("version", version);
         server.setCustomProperties(cprop);
         setProductConfig(server, productConfig);
         server.setMeasurementConfig();
-        server.setName(getPlatformName() + " " + SERVER_NAME + " " + version);
+        server.setName(getPlatformName() + " " + SERVER_NAME + " " + version+ " " + name);
         servers.add(server);
 
         return servers;
@@ -194,9 +198,11 @@ public class SybaseServerDetector
     protected List discoverServices(ConfigResponse config) 
         throws PluginException
     {
+        log.debug("[discoverServices] config="+config);
         String url  = config.getValue(PROP_URL);
         String user = config.getValue(PROP_USER);
         String pass = config.getValue(PROP_PASSWORD);
+        String name = config.getValue("serverName");
 
         pass = (pass == null) ? "" : pass;
         pass = (pass.matches("^\\s*$")) ? "" : pass;
@@ -227,7 +233,7 @@ public class SybaseServerDetector
             setSPMonitorConfigServices(rtn, stmt);
             setEngineServices(rtn, stmt);
             setSpaceAvailServices(rtn, stmt);
-            setProcessService(rtn);
+            setProcessService(rtn,name);
         }
         catch (SQLException e) {
             String msg = "Error querying for services: "+e.getMessage();
@@ -239,15 +245,15 @@ public class SybaseServerDetector
         return rtn;
     }
 
-    private void setProcessService(List services) {
+    private void setProcessService(List services, String serverName) {
         ServiceResource service = new ServiceResource();
         service.setType(this, "DataServer Process Metrics");
         service.setServiceName("DataServer Process Metrics");
         ConfigResponse productConfig = new ConfigResponse();
         if (isWin32()) {
-            productConfig.setValue("process.query", "State.Name.eq=sqlsrvr");
+            productConfig.setValue("process.query", "State.Name.eq=sqlsrvr,Args.*.eq=-s"+serverName);
         } else {
-            productConfig.setValue("process.query", "State.Name.eq=dataserver");
+            productConfig.setValue("process.query", "State.Name.eq=dataserver,Args.*.eq=-s"+serverName);
         }
         service.setProductConfig(productConfig);
         service.setMeasurementConfig();
