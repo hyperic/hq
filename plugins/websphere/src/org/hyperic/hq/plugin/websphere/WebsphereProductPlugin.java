@@ -443,16 +443,22 @@ public class WebsphereProductPlugin extends ProductPlugin {
         String defaultSoapProps = 
             "properties" + File.separator + "soap.client.props";
 
-        String defaultSoapConfig =
-            getInstallPropertiesDir(installDir, defaultSoapProps).getPath();
-        log.debug("default soap config is " + defaultSoapConfig);
+        File installPropertiesDir = 
+            getInstallPropertiesDir(installDir, defaultSoapProps);
+        String soapConfig = null;
+        File soapConfigFile = null;
+        if (installPropertiesDir != null && installPropertiesDir.exists()) {
+            String defaultSoapConfig = installPropertiesDir.getPath();
+            log.debug("default soap config is " + defaultSoapConfig);
 
-        String soapConfig = 
-            managerProps.getProperty("websphere.SOAP.ConfigURL",
-                                     defaultSoapConfig);
+            soapConfig = 
+                managerProps.getProperty("websphere.SOAP.ConfigURL",
+                                         defaultSoapConfig);
 
-        File soapConfigFile = new File(soapConfig);
-        hasSoapConfig = soapConfigFile.exists();
+            soapConfigFile = new File(soapConfig);
+            hasSoapConfig = soapConfigFile.exists();
+        }
+        
         if (hasSoapConfig) {
             log.debug("Using soap properties: " + soapConfig);    
             System.setProperty("com.ibm.SOAP.ConfigURL",
@@ -467,10 +473,14 @@ public class WebsphereProductPlugin extends ProductPlugin {
         log.debug("isOSGi=" + isOSGi);
 
         //required for 6.1
-        File sslConfigFile =
-            new File(soapConfigFile.getParent(),
-                     "ssl.client.props");
-        if (sslConfigFile.exists()) {
+        File sslConfigFile = null;
+        if (hasSoapConfig && soapConfigFile != null) {
+            sslConfigFile =
+                new File(soapConfigFile.getParent(),
+                "ssl.client.props");
+        }
+        
+        if (sslConfigFile != null && sslConfigFile.exists()) {
             log.debug("Using ssl properties: " + sslConfigFile);
             System.setProperty("com.ibm.SSL.ConfigURL",
                                "file:" + sslConfigFile);
