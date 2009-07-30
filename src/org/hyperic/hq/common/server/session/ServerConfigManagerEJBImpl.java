@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -61,7 +61,7 @@ import org.hyperic.util.timer.StopWatch;
 import org.hibernate.mapping.Table;
 
 /**
- * This class is responsible for setting/getting the server 
+ * This class is responsible for setting/getting the server
  * configuration
  * @ejb:bean name="ServerConfigManager"
  *      jndi-name="ejb/common/ServerConfigManager"
@@ -81,24 +81,24 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
     private final String[] APPDEF_TABLES
         = { "EAM_PLATFORM", "EAM_SERVER", "EAM_SERVICE", "EAM_CONFIG_RESPONSE",
             "EAM_AGENT", "EAM_IP", "EAM_RESOURCE", "EAM_CPROP_KEY",
-            "EAM_TRIGGER_EVENT", "EAM_AUDIT", "EAM_AIQ_SERVER",
+            "EAM_AUDIT", "EAM_AIQ_SERVER",
             "EAM_AIQ_PLATFORM", "EAM_RESOURCE_EDGE",
             "EAM_RES_GRP_RES_MAP" };
-    
-    private final String[] DATA_TABLES 
+
+    private final String[] DATA_TABLES
         = { "EAM_MEASUREMENT_DATA_1D", "EAM_MEASUREMENT_DATA_6H",
             "EAM_MEASUREMENT_DATA_1H", "HQ_METRIC_DATA_COMPAT",
             "EAM_METRIC_PROB", "EAM_REQUEST_STAT",
             "EAM_ALERT_ACTION_LOG", "EAM_ALERT_CONDITION_LOG",
             "EAM_ALERT", "EAM_EVENT_LOG", "EAM_CPROP", "EAM_MEASUREMENT",
             "EAM_SRN", "HQ_AVAIL_DATA_RLE"};
-                         
+
     public final String logCtx
         = "org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl";
     protected Log log = LogFactory.getLog(logCtx);
 
     /**
-     * Get the "root" server configuration, that means those keys that have 
+     * Get the "root" server configuration, that means those keys that have
      * the NULL prefix.
      * @return Properties
      * @ejb:interface-method
@@ -138,7 +138,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                         // prune any keys from the config.
                         props.setProperty(key, "");
                     }
-                } 
+                }
             }
 
             return props;
@@ -150,15 +150,15 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
     private void createChangeAudit(AuthzSubject subject, String key,
                                    String oldVal, String newVal)
     {
-        if (key.equals(HQConstants.BaseURL)) 
+        if (key.equals(HQConstants.BaseURL))
             ServerConfigAudit.updateBaseURL(subject, newVal, oldVal);
         else if (key.equals(HQConstants.EmailSender))
             ServerConfigAudit.updateFromEmail(subject, newVal, oldVal);
         else if (key.equals(HQConstants.ExternalHelp)) {
             boolean oldExternal = oldVal.equals("true");
             boolean newExternal = newVal.equals("true");
-            
-            ServerConfigAudit.updateExternalHelp(subject, newExternal, 
+
+            ServerConfigAudit.updateExternalHelp(subject, newExternal,
                                                  oldExternal);
         } else if (key.equals(HQConstants.DataMaintenance)) {
             int oldHours = (int)(Long.parseLong(oldVal) / 60 / 60 / 1000);
@@ -183,7 +183,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             boolean newEnabled = newVal.equals("true");
             ServerConfigAudit.updateAlertsEnabled(subject,
                                                   newEnabled,
-                                                  oldEnabled);            
+                                                  oldEnabled);
         } else if (key.equals(HQConstants.AlertNotificationsEnabled)) {
             boolean oldEnabled = oldVal.equals("true");
             boolean newEnabled = newVal.equals("true");
@@ -198,31 +198,31 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                                                                 oldEnabled);
         }
     }
-    
-    private void createChangeAudits(AuthzSubject subject, Collection allProps, 
+
+    private void createChangeAudits(AuthzSubject subject, Collection allProps,
                                     Properties newProps)
     {
         Properties oldProps = new Properties();
-        
+
         for (Iterator i=allProps.iterator(); i.hasNext(); ) {
             ConfigProperty prop = (ConfigProperty)i.next();
             String val = prop.getValue();
 
             if (val == null)
                 val = prop.getDefaultValue();
-            
+
             if (val == null)
                 val = "";
-            
+
             oldProps.put(prop.getKey(), val);
         }
-        
+
         for (Iterator i=newProps.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry newEnt = (Map.Entry)i.next();
             String newKey = (String)newEnt.getKey();
             String newVal = (String)newEnt.getValue();
             String oldVal = (String)oldProps.get(newKey);
-            
+
             if (oldVal == null || !oldVal.equals(newVal)) {
                 if (oldVal == null)
                     oldVal = "";
@@ -238,9 +238,9 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * a key that's currently in the database
      * @ejb:interface-method
      */
-    public void setConfig(AuthzSubject subject, Properties newProps) 
-        throws ApplicationException, ConfigPropertyException 
-    { 
+    public void setConfig(AuthzSubject subject, Properties newProps)
+        throws ApplicationException, ConfigPropertyException
+    {
         setConfig(subject, null, newProps);
     }
 
@@ -253,9 +253,9 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * a key that's currently in the database
      * @ejb:interface-method
      */
-    public void setConfig(AuthzSubject subject, String prefix, 
+    public void setConfig(AuthzSubject subject, String prefix,
                           Properties newProps)
-        throws ApplicationException, ConfigPropertyException 
+        throws ApplicationException, ConfigPropertyException
     {
         ServerConfigCache cache = ServerConfigCache.getInstance();
         Collection allProps;
@@ -330,14 +330,14 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             conn = DBUtil.getConnByContext(getInitialContext(),
                                            HQConstants.DATASOURCE);
 
-            for (Iterator i = Util.getTableMappings(); i.hasNext();) {                
+            for (Iterator i = Util.getTableMappings(); i.hasNext();) {
                 Table t = (Table)i.next();
 
                 if (t.getName().toUpperCase().startsWith("EAM_MEASUREMENT_DATA") ||
                     t.getName().toUpperCase().startsWith("HQ_METRIC_DATA")) {
                     continue;
                 }
-                
+
                 String sql = dialect.getOptimizeStmt(t.getName(), 0);
                 duration += doCommand(conn, sql, null);
             }
@@ -399,8 +399,8 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * do a VACUUM ANALYZE.  On other databases we just return -1.
      * Since 3.1 we do not want to vacuum the hq_metric_data tables,
      * only the compressed eam_measurement_xxx tables.
-     * 
-     * @return The time it took to vaccum, in milliseconds, or -1 if the 
+     *
+     * @return The time it took to vaccum, in milliseconds, or -1 if the
      * database is not PostgreSQL.
      * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
@@ -431,10 +431,10 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * Run database-specific cleanup routines on appdef tables -- on PostgreSQL 
-     * we do a VACUUM ANALYZE against the relevant appdef, authz and measurement 
+     * Run database-specific cleanup routines on appdef tables -- on PostgreSQL
+     * we do a VACUUM ANALYZE against the relevant appdef, authz and measurement
      * tables.  On other databases we just return -1.
-     * @return The time it took to vaccum, in milliseconds, or -1 if the 
+     * @return The time it took to vaccum, in milliseconds, or -1 if the
      * database is not PostgreSQL.
      */
     private long vacuumAppdef() {
@@ -468,9 +468,9 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
 
         if (table == null)
             table = "";
-        
+
         sql = StringUtil.replace(sql, "{0}", table);
-        
+
         if (log.isDebugEnabled()) {
             log.debug("Execute command: " + sql);
         }
@@ -491,10 +491,10 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
     public Collection getConfigProperties() {
         ConfigPropertyDAO dao =
             DAOFactory.getDAOFactory().getConfigPropertyDAO();
-        
+
         return dao.findAll();
     }
-    
+
     private Collection getProps(ConfigPropertyDAO ccLH,
                                 String prefix) throws FinderException {
         if ( prefix == null ) {
@@ -509,23 +509,23 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * the duration of an HQ install and is created upon the first call of
      * this method.  If for some reason it can't be determined, 'unknown'
      * will be returned.
-     * 
+     *
      * @ejb:interface-method
      */
     public String getGUID() {
         Properties p;
         String res;
-        
+
         try {
             p = getConfig();
         } catch(Exception e) {
             throw new SystemException(e);
         }
-        
+
         res = p.getProperty("HQ-GUID");
         if (res == null || res.trim().length() == 0) {
             if ((res = GUIDGenerator.createGUID()) == null)
-                return "unknown";  
+                return "unknown";
             p.setProperty("HQ-GUID", res);
             try {
                 setConfig(AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(),
@@ -556,7 +556,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             throw new SystemException(e);
         }
     }
-    
+
     public void ejbCreate() { }
     public void ejbRemove() { }
     public void ejbActivate() { }
