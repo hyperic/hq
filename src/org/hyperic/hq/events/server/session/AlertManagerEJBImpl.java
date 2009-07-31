@@ -212,6 +212,11 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public Alert findAlertById(Integer id) {
         Alert alert = getAlertDAO().findById(id);
         Hibernate.initialize(alert);
+        
+        alert.setAckable(EscalationManagerEJBImpl.getOne()
+                         .isAlertAcknowledgeable(alert.getId(), 
+                                                 alert.getDefinition()));
+        
         return alert;
     }
 
@@ -338,6 +343,10 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public PageList findAllAlerts() {
+        // TODO - This is messy, from what I can tell this collection contains
+        //        a list of both alert POJOs and AlertValue objects.  Why this 
+        //        is done, I haven't figured out yet, just adding a note so I
+        //        don't forget to come back to it.
         Collection res;
 
         res = getAlertDAO().findAll();
@@ -728,10 +737,10 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
     public void ejbCreate() throws CreateException {
         try {
-        	// Old and busted, we need to phase out the Value objects
+        	// We need to phase out the Value objects...
             valuePager = Pager.getPager(VALUE_PROCESSOR);
 
-            // New hotness, and start using the POJOs instead
+            // ...and start using the POJOs instead
             pojoPager = Pager.getDefaultPager();
         } catch ( Exception e ) {
             throw new CreateException("Could not create value pager:" + e);

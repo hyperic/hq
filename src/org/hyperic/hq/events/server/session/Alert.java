@@ -52,7 +52,8 @@ public class Alert
     private Long            _stateId;
     private Long            _ackedBy;
     private AlertValue      _alertVal;
-
+    private Boolean         _ackable = null;
+    
     public Alert() {
     }
 
@@ -177,9 +178,16 @@ public class Alert
     }
 
     public boolean isAckable() {
-        return getStateId() != null && getAckedBy() == null;
+        // Performing the conditional check to maintain existing functionality
+        return (_ackable == null) ? 
+               (getStateId() != null && getAckedBy() == null) :
+               _ackable.booleanValue();
     }
 
+    public void setAckable(boolean ackable) {
+        this._ackable = new Boolean(ackable);
+    }
+    
     /**
      * Need to have a way of invalidating the object so that we will not use
      * Alert POJOs out of the query caches and the object cache.  This is
