@@ -5,7 +5,7 @@
 // normal use of the program, and does *not* fall under the heading of
 // "derived work".
 // 
-// Copyright (C) [2004-2008], Hyperic, Inc.
+// Copyright (C) [2004-2009], Hyperic, Inc.
 // This file is part of HQ.
 // 
 // HQ is free software; you can redistribute it and/or modify
@@ -27,7 +27,7 @@ function resetNote(){
     dojo.byId('baselineNotCalcMsg').style.display='none';
 }
 function toggleNoBaselineMessage(obj){
-	if(this.length <= 2 && obj.selectedIndex == 1){
+	if(obj.options.length == 2 && obj.selectedIndex == 1){
 	   dojo.byId('baselineNotCalcMsg').style.display='inline';
 	}
 	else{
