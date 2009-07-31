@@ -39,6 +39,7 @@ import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluatorFactory;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluatorFactoryImpl;
+import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.RegisteredTrigger;
 import org.hyperic.hq.events.server.session.TriggerChangeCallback;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
@@ -50,7 +51,11 @@ import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.zevents.ZeventManager;
 
 import edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap;
-
+/**
+ * Repository of in memory triggers for event processing
+ * @author jhickey
+ *
+ */
 public class RegisteredTriggers {
     private final static Log log = LogFactory.getLog(RegisteredTriggers.class.getName());
 
@@ -109,22 +114,36 @@ public class RegisteredTriggers {
         Collection registeredTriggers = registeredTriggerManager.getTriggers();
         registerTriggers(registeredTriggers);
     }
-    
+
     private void registerTriggers(Collection registeredTriggers) {
         Map alertEvaluators = new HashMap();
+        //Create AlertConditionEvaluator for each AlertDefinition, so they can be shared by all triggers associated with the alertDef
         for (Iterator i = registeredTriggers.iterator(); i.hasNext();) {
-            RegisteredTrigger tv = (RegisteredTrigger) i.next();
-            Integer alertDefId = alertDefinitionManager.getIdFromTrigger(tv.getId());
-            if(alertEvaluators.get(alertDefId) == null) {
-                alertEvaluators.put(alertDefId, factory.create(alertDefinitionManager.getByIdNoCheck(alertDefId)));
+            try {
+                RegisteredTrigger tv = (RegisteredTrigger) i.next();
+                Integer alertDefId = alertDefinitionManager.getIdFromTrigger(tv.getId());
+                if (alertDefId != null && alertEvaluators.get(alertDefId) == null) {
+                    AlertDefinition alertDefinition = alertDefinitionManager.getByIdNoCheck(alertDefId);
+                    if (alertDefinition == null) {
+                        log.warn("Unable to find AlertDefinition with id " + alertDefId + " for trigger with id " +
+                                 tv.getId() + ".  These alerts will not fire.");
+                    } else {
+                        alertEvaluators.put(alertDefId, factory.create(alertDefinition));
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error retrieving alert definition for trigger", e);
             }
         }
         for (Iterator i = registeredTriggers.iterator(); i.hasNext();) {
             // Try to register each trigger, if exception, then move on
             RegisteredTrigger tv = (RegisteredTrigger) i.next();
             try {
-                registerTrigger(tv.getRegisteredTriggerValue(),
-                                (AlertConditionEvaluator)alertEvaluators.get(alertDefinitionManager.getIdFromTrigger(tv.getId())));
+                final Integer alertDefId = alertDefinitionManager.getIdFromTrigger(tv.getId());
+                if (alertDefId != null && alertEvaluators.get(alertDefId) != null) {
+                    registerTrigger(tv.getRegisteredTriggerValue(),
+                                    (AlertConditionEvaluator) alertEvaluators.get(alertDefId));
+                }
             } catch (Exception e) {
                 log.error("Error registering trigger", e);
             }
@@ -186,9 +205,9 @@ public class RegisteredTriggers {
      * @throws InvalidTriggerDataException
      */
     private void registerTrigger(RegisteredTriggerValue tv, AlertConditionEvaluator alertConditionEvaluator) throws ClassNotFoundException,
-                                                                                     InstantiationException,
-                                                                                     IllegalAccessException,
-                                                                                     InvalidTriggerDataException
+                                                                                                            InstantiationException,
+                                                                                                            IllegalAccessException,
+                                                                                                            InvalidTriggerDataException
     {
         // First create Trigger
         Class tc = Class.forName(tv.getClassname());

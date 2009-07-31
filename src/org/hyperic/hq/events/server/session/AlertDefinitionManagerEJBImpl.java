@@ -870,7 +870,7 @@ public class AlertDefinitionManagerEJBImpl
 
         AlertDefinition def = trigger.getAlertDefinition();
 
-        if (def != null && def.isEnabled() && !def.isDeleted()) {
+        if (def != null && !def.isDeleted()) {
             return def.getId();
         } else {
             return null;
