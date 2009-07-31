@@ -27,7 +27,11 @@ function resetNote(){
     dojo.byId('baselineNotCalcMsg').style.display='none';
 }
 function toggleNoBaselineMessage(obj){
-	if(obj.options.length == 2 && obj.selectedIndex == 1){
+	// baselines with values are in the format: 100.0% (Baseline Value)
+	// baselines with no values are in the format: Baseline Value
+	if(obj.selectedIndex > 0
+			&& obj[obj.selectedIndex].text.indexOf('(') == -1
+			&& obj[obj.selectedIndex].text.indexOf(')') == -1){
 	   dojo.byId('baselineNotCalcMsg').style.display='inline';
 	}
 	else{
