@@ -9,6 +9,7 @@ import java.util.Map;
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
+import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.MockEvent;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluatorFactory;
@@ -296,6 +297,22 @@ public class RegisteredTriggersTest
 
         Collection interestedTriggers2 = RegisteredTriggers.getInterestedTriggers(new MockEvent(7l, 999));
         assertTrue(interestedTriggers2.isEmpty());
+    }
+
+    /**
+     * Verifies that nothing blows up trying to create a trigger with an invalid classname.  We are going to remove old triggers (MultiCondition, Counter, Duration) during upgrade,
+     * but this should nicely handle any that are accidentally hanging around for some reason
+     * @throws InvalidTriggerDataException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
+    public void testRegisterTriggerInvalidClass() throws InvalidTriggerDataException,  InstantiationException, IllegalAccessException {
+        RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
+        mockTrigger.setClassname("com.fake.nonexistent");
+        mockTrigger.setId(5678);
+        replay();
+        registeredTriggers.registerTrigger(mockTrigger, alertConditionEvaluator);
+        verify();
     }
 
     /**

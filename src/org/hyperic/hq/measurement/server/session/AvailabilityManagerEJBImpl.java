@@ -1302,7 +1302,7 @@ public class AvailabilityManagerEJBImpl
             event.setUnits(dm.getTemplate().getUnits());
         } catch (Exception e) {
             // don't set anything
-            _log.warn("Couldn't setup measurement event unit or resource values", e);
+            _log.error("Couldn't setup measurement event unit or resource values", e);
         }
     }
 

@@ -333,7 +333,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         } catch (PermissionException e) {
             _log.error("Alert not firing due to a permissions issue",e);
         } catch (ResourceDeletedException e) {
-            _log.debug(e);
+            _log.debug(e,e);
         }
     }
 

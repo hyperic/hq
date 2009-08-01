@@ -45,13 +45,13 @@ import org.hyperic.util.config.InvalidOptionValueException;
 public class MeasurementThresholdTrigger
     extends AbstractTrigger implements ConditionalTriggerInterface
 {
-    private Log log = LogFactory.getLog(getClass().getName());
-
     static {
         // Register the trigger/condition
         ConditionalTriggerInterface.MAP_COND_TRIGGER.put(new Integer(EventConstants.TYPE_THRESHOLD),
                                                          MeasurementThresholdTrigger.class);
     }
+
+    private Log log = LogFactory.getLog(getClass().getName());
 
     private final int OPER_LE = ConditionalTriggerSchema.OPER_LE;
     private final int OPER_LT = ConditionalTriggerSchema.OPER_LT;
@@ -65,6 +65,29 @@ public class MeasurementThresholdTrigger
     private int operator;
     private double threshold;
     private Integer metricId;
+
+    public ConfigResponse getConfigResponse() {
+        ConfigResponse resp = new ConfigResponse();
+        resp.setValue(CFG_ID, String.valueOf(getMeasurementID()));
+        resp.setValue(CFG_THRESHOLD, String.valueOf(getThreshold()));
+        resp.setValue(CFG_COMPARATOR, OPER_STRS[getOperator()]);
+        return resp;
+    }
+
+    public ConfigResponse getConfigResponse(AppdefEntityID id, AlertConditionValue cond) throws InvalidOptionException,
+                                                                                        InvalidOptionValueException
+    {
+        if (cond.getType() != EventConstants.TYPE_THRESHOLD)
+            throw new InvalidOptionValueException("Condition is not a Measurement Threshold");
+        return getSharedConfigResponse(cond);
+    }
+
+    /**
+     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getConfigSchema()
+     */
+    public ConfigSchema getConfigSchema() {
+        return ConditionalTriggerSchema.getConfigSchema(EventConstants.TYPE_THRESHOLD);
+    }
 
     /**
      * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedEventTypes()
@@ -80,11 +103,30 @@ public class MeasurementThresholdTrigger
         return new Integer[] { metricId };
     }
 
+    public Integer getMeasurementID() {
+        return metricId;
+    }
+
+    public int getOperator() {
+        return operator;
+    }
+
     /**
-     * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getConfigSchema()
+     * extracts the operator
      */
-    public ConfigSchema getConfigSchema() {
-        return ConditionalTriggerSchema.getConfigSchema(EventConstants.TYPE_THRESHOLD);
+    protected int getOperator(String soperator) throws InvalidTriggerDataException {
+        int operator = -1;
+
+        for (int i = 1; i < OPER_STRS.length; i++) {
+            if (soperator.equals(OPER_STRS[i])) {
+                operator = i;
+                break;
+            }
+        }
+
+        if (operator == -1)
+            throw new InvalidTriggerDataException("Invalid operator, '" + soperator + "'");
+        return operator;
     }
 
     protected ConfigResponse getSharedConfigResponse(AlertConditionValue cond) throws InvalidOptionException,
@@ -97,26 +139,15 @@ public class MeasurementThresholdTrigger
         return resp;
     }
 
-    public ConfigResponse getConfigResponse(AppdefEntityID id, AlertConditionValue cond) throws InvalidOptionException,
-                                                                                        InvalidOptionValueException
-    {
-        if (cond.getType() != EventConstants.TYPE_THRESHOLD)
-            throw new InvalidOptionValueException("Condition is not a Measurement Threshold");
-        return getSharedConfigResponse(cond);
-    }
-
-    public ConfigResponse getConfigResponse() {
-        ConfigResponse resp = new ConfigResponse();
-        resp.setValue(CFG_ID, String.valueOf(getMeasurementID()));
-        resp.setValue(CFG_THRESHOLD, String.valueOf(getThreshold()));
-        resp.setValue(CFG_COMPARATOR, OPER_STRS[getOperator()]);
-        return resp;
+    public double getThreshold() {
+        return threshold;
     }
 
     /**
      * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#init(org.hyperic.hq.events.shared.RegisteredTriggerValue)
      */
-    public void init(RegisteredTriggerValue tval, AlertConditionEvaluator alertConditionEvaluator) throws InvalidTriggerDataException {
+    public void init(RegisteredTriggerValue tval, AlertConditionEvaluator alertConditionEvaluator) throws InvalidTriggerDataException
+    {
         ConfigResponse triggerData;
         String soperator, sthreshold, smeasID;
         Integer measID;
@@ -160,22 +191,10 @@ public class MeasurementThresholdTrigger
         metricId = measID;
     }
 
-    /**
-     * extracts the operator
-     */
-    protected int getOperator(String soperator) throws InvalidTriggerDataException {
-        int operator = -1;
-
-        for (int i = 1; i < OPER_STRS.length; i++) {
-            if (soperator.equals(OPER_STRS[i])) {
-                operator = i;
-                break;
-            }
+    private void logComparison(String operator, double compVal) {
+        if (log.isDebugEnabled()) {
+            log.debug("Evaluating if " + compVal + " " + operator + " " + threshold);
         }
-
-        if (operator == -1)
-            throw new InvalidTriggerDataException("Invalid operator, '" + soperator + "'");
-        return operator;
     }
 
     public void processEvent(AbstractEvent e) throws EventTypeException {
@@ -192,23 +211,25 @@ public class MeasurementThresholdTrigger
         MetricValue val = event.getValue();
         double compVal = val.getValue();
 
-        if (log.isDebugEnabled()) {
-            log.debug("Operator is " + operator);
-        }
-
-        if (operator == OPER_LE)
+        if (operator == OPER_LE) {
             fire = compVal <= threshold;
-        else if (operator == OPER_LT)
+            logComparison("<=", compVal);
+        } else if (operator == OPER_LT) {
             fire = compVal < threshold;
-        else if (operator == OPER_EQ)
+            logComparison("<", compVal);
+        } else if (operator == OPER_EQ) {
             fire = compVal == threshold;
-        else if (operator == OPER_GT)
+            logComparison("==", compVal);
+        } else if (operator == OPER_GT) {
             fire = compVal > threshold;
-        else if (operator == OPER_GE)
+            logComparison(">", compVal);
+        } else if (operator == OPER_GE) {
             fire = compVal >= threshold;
-        else if (operator == OPER_NE)
+            logComparison(">=", compVal);
+        } else if (operator == OPER_NE) {
             fire = compVal != threshold;
-        else {
+            logComparison("!=", compVal);
+        } else {
             // Wow -- we should never get here -- throw an assertion
             throw new RuntimeException("Invalid threshold operation!");
         }
@@ -225,27 +246,15 @@ public class MeasurementThresholdTrigger
 
     }
 
-    public double getThreshold() {
-        return threshold;
-    }
-
-    public void setThreshold(double val) {
-        threshold = val;
-    }
-
-    public int getOperator() {
-        return operator;
+    public void setMeasurementID(Integer val) {
+        metricId = val;
     }
 
     public void setOperator(int val) {
         operator = val;
     }
 
-    public Integer getMeasurementID() {
-        return metricId;
-    }
-
-    public void setMeasurementID(Integer val) {
-        metricId = val;
+    public void setThreshold(double val) {
+        threshold = val;
     }
 }

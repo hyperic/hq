@@ -204,13 +204,19 @@ public class RegisteredTriggers {
      * @throws IllegalAccessException
      * @throws InvalidTriggerDataException
      */
-    private void registerTrigger(RegisteredTriggerValue tv, AlertConditionEvaluator alertConditionEvaluator) throws ClassNotFoundException,
+    void registerTrigger(RegisteredTriggerValue tv, AlertConditionEvaluator alertConditionEvaluator) throws
                                                                                                             InstantiationException,
                                                                                                             IllegalAccessException,
                                                                                                             InvalidTriggerDataException
     {
         // First create Trigger
-        Class tc = Class.forName(tv.getClassname());
+        Class tc;
+        try {
+            tc = Class.forName(tv.getClassname());
+        }catch(ClassNotFoundException e) {
+            log.warn("Trigger class " + tv.getClassname() + " is not supported.  Triggers of this type should be removed from the database.");
+            return;
+        }
         RegisterableTriggerInterface trigger = (RegisterableTriggerInterface) tc.newInstance();
 
         trigger.init(tv, alertConditionEvaluator);
