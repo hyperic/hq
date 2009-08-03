@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -83,7 +83,8 @@ public final class ConcurrentStatsCollector {
     public static final String JVM_TOTAL_MEMORY = "JVM_TOTAL_MEMORY",
         JVM_FREE_MEMORY              = "JVM_FREE_MEMORY",
         JVM_MAX_MEMORY               = "JVM_MAX_MEMORY",
-        ALERT_FIRED_EVENT            = "ALERT_FIRED_EVENT",
+        FIRE_ALERT_TIME              = "FIRE_ALERT_TIME",
+        EVENT_PROCESSING_TIME        = "EVENT_PROCESSING_TIME",
         GALERT_FIRED_EVENT           = "GALERT_FIRED_EVENT",
         EHCACHE_TOTAL_OBJECTS        = "EHCACHE_TOTAL_OBJECTS",
         CONCURRENT_STATS_COLLECTOR   = "CONCURRENT_STATS_COLLECTOR",
@@ -106,13 +107,12 @@ public final class ConcurrentStatsCollector {
         PURGE_MEASUREMENTS_TIME      = "PURGE_MEASUREMENTS_TIME",
         MEASUREMENT_SCHEDULE_TIME    = "MEASUREMENT_SCHEDULE_TIME",
         EMAIL_ACTIONS                = "EMAIL_ACTIONS",
-        MULTI_COND_TRIGGER_MON_WAIT	 = "MULTI_COND_TRIGGER_MON_WAIT",
-        MULTI_COND_TRIGGER_DELETE_REF = "MULTI_COND_TRIGGER_DELETE_REF";
+        ZEVENT_QUEUE_SIZE            = "ZEVENT_QUEUE_SIZE";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);
     private final MBeanServer _mbeanServer;
-    
+
     private ConcurrentStatsCollector() {
     	final char fs = File.separatorChar;
     	String unittestPropStringVal =  System.getProperty("hq.unittest.run");
@@ -149,7 +149,7 @@ public final class ConcurrentStatsCollector {
         }
         _statKeys.put(statId, null);
     }
-    
+
     public final void register(final StatCollector stat) {
         // can't register any stats after the collector has been initially
         // started due to the need for consistent ordering in the csv output file
@@ -167,7 +167,7 @@ public final class ConcurrentStatsCollector {
         }
         _statKeys.put(stat.getId(), stat);
     }
-    
+
     public final void startCollector() {
         if (_hasStarted.get()) {
             return;
@@ -194,7 +194,7 @@ public final class ConcurrentStatsCollector {
         _hasStarted.set(true);
         _log.info("ConcurrentStatsCollector has started");
     }
-    
+
     private final void cleanupFilename(String filename) {
         final File file = new File(filename);
         final File path = file.getParentFile();
@@ -264,7 +264,7 @@ public final class ConcurrentStatsCollector {
     public static final ConcurrentStatsCollector getInstance() {
         return _instance;
     }
-    
+
     public final void addStat(final long value, final String id) {
         if (!_statKeys.containsKey(id)) {
             return;
@@ -276,7 +276,7 @@ public final class ConcurrentStatsCollector {
         final long total = System.currentTimeMillis() - now;
         _queue.add(new StatsObject(total, CONCURRENT_STATS_COLLECTOR));
     }
-    
+
     private class StatsWriter implements Runnable {
         public synchronized void run() {
             try {
@@ -399,7 +399,7 @@ public final class ConcurrentStatsCollector {
             }
         }.start();
     }
-    
+
     private final void registerInternalStats() {
         register(new StatCollector() {
             private final CacheManager _cMan = CacheManager.getInstance();
@@ -608,11 +608,10 @@ public final class ConcurrentStatsCollector {
             true));
 
         register(LATHER_NUMBER_OF_CONNECTIONS);
-        register(ALERT_FIRED_EVENT);
     	register(GALERT_FIRED_EVENT);
         register(CONCURRENT_STATS_COLLECTOR);
     }
-    
+
     private long getProcPid() {
         if (_pid != null) {
             return _pid.longValue();
