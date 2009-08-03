@@ -47,6 +47,7 @@ public class AlertBean implements Serializable {
     private boolean _multiCondition;
     private boolean _fixed;
     private boolean _acknowledgeable;
+    private boolean viewable;
     
     // escalation fields
     private long _maxPauseTime;
@@ -203,6 +204,14 @@ public class AlertBean implements Serializable {
     
     public void setMaxPauseTime(long maxPauseTime) {
         _maxPauseTime = maxPauseTime;
+    }
+
+    public boolean isViewable() {
+        return viewable;
+    }
+
+    public void setViewable(boolean viewable) {
+        this.viewable = viewable;
     }
 
     public String toString() {

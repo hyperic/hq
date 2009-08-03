@@ -160,6 +160,11 @@ public class ListAlertAction extends TilesAction {
             	bean.setMaxPauseTime(escalation.getMaxPauseTime());
             }
             
+            // Determine whether or not this alert definition is viewable
+            bean.setViewable(!alertDefinition.isDeleted() && 
+                             alertDefinition.getResource() != null &&
+                             !alertDefinition.getResource().isInAsyncDeleteState());
+            
             Collection<AlertConditionLog> conditionLogs = alert.getConditionLog();
             
             if (conditionLogs.size() > 1) {
