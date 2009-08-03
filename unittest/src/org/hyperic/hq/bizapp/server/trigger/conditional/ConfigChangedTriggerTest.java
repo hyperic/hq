@@ -49,7 +49,7 @@ public class ConfigChangedTriggerTest
 
     /**
      * Verify trigger is fired when config changed event is received when not
-     * matching on message
+     * matching on source
      * @throws EventTypeException
      */
     public void testProcessEvent() throws EventTypeException {
@@ -68,19 +68,19 @@ public class ConfigChangedTriggerTest
 
     /**
      * Verifies trigger is fired when config changed event is received matching
-     * on message
+     * on substring of source
      * @throws EncodingException
      * @throws InvalidTriggerDataException
      * @throws EventTypeException
      */
-    public void testProcessEventMessageMatch() throws EncodingException,
+    public void testProcessEventFilePartialMatch() throws EncodingException,
                                               InvalidTriggerDataException,
                                               EventTypeException
     {
         ConfigResponse config = new ConfigResponse();
         config.setValue(ConditionalTriggerInterface.CFG_ID, RESOURCE.getID());
         config.setValue(ConditionalTriggerInterface.CFG_TYPE, RESOURCE.getType());
-        config.setValue(ConditionalTriggerInterface.CFG_OPTION, "myPropString");
+        config.setValue(ConditionalTriggerInterface.CFG_OPTION, "my.properties");
         RegisteredTriggerValue regTrigger = new RegisteredTriggerValue();
         regTrigger.setId(TRIGGER_ID);
         regTrigger.setConfig(config.encode());
@@ -89,7 +89,7 @@ public class ConfigChangedTriggerTest
         ConfigChangedEvent event = new ConfigChangedEvent(new TrackEvent(RESOURCE,
                                                                          System.currentTimeMillis(),
                                                                          LogTrackPlugin.LOGLEVEL_INFO,
-                                                                         "source",
+                                                                         "/some/path/to/my.properties",
                                                                          "myPropString"));
         TriggerFiredEvent triggerFired = new TriggerFiredEvent(TRIGGER_ID, event);
         triggerFired.setMessage("Config file (" + event.getSource() + ") changed: " + event.getMessage());
@@ -101,19 +101,20 @@ public class ConfigChangedTriggerTest
     }
 
     /**
-     * Verifies TriggerNotFired when message that doesn't match is received
+     * Verifies trigger is fired when config changed event is received matching
+     * full path to source file
+     * @throws EncodingException
      * @throws InvalidTriggerDataException
      * @throws EventTypeException
-     * @throws EncodingException
      */
-    public void testProcessEventMessageNotMatch() throws InvalidTriggerDataException,
-                                                 EventTypeException,
-                                                 EncodingException
+    public void testProcessEventFileMatch() throws EncodingException,
+                                              InvalidTriggerDataException,
+                                              EventTypeException
     {
         ConfigResponse config = new ConfigResponse();
         config.setValue(ConditionalTriggerInterface.CFG_ID, RESOURCE.getID());
         config.setValue(ConditionalTriggerInterface.CFG_TYPE, RESOURCE.getType());
-        config.setValue(ConditionalTriggerInterface.CFG_OPTION, "yourPropString");
+        config.setValue(ConditionalTriggerInterface.CFG_OPTION, "/some/path/to/my.properties");
         RegisteredTriggerValue regTrigger = new RegisteredTriggerValue();
         regTrigger.setId(TRIGGER_ID);
         regTrigger.setConfig(config.encode());
@@ -122,7 +123,40 @@ public class ConfigChangedTriggerTest
         ConfigChangedEvent event = new ConfigChangedEvent(new TrackEvent(RESOURCE,
                                                                          System.currentTimeMillis(),
                                                                          LogTrackPlugin.LOGLEVEL_INFO,
-                                                                         "source",
+                                                                         "/some/path/to/my.properties",
+                                                                         "myPropString"));
+        TriggerFiredEvent triggerFired = new TriggerFiredEvent(TRIGGER_ID, event);
+        triggerFired.setMessage("Config file (" + event.getSource() + ") changed: " + event.getMessage());
+        alertConditionEvaluator.triggerFired(TriggerFiredEventMatcher.eqTriggerFiredEvent(triggerFired));
+        EasyMock.replay(alertConditionEvaluator);
+        trigger.processEvent(event);
+        EasyMock.verify(alertConditionEvaluator);
+
+    }
+
+    /**
+     * Verifies TriggerNotFired when source that doesn't match is received
+     * @throws InvalidTriggerDataException
+     * @throws EventTypeException
+     * @throws EncodingException
+     */
+    public void testProcessEventFileNotMatch() throws InvalidTriggerDataException,
+                                                 EventTypeException,
+                                                 EncodingException
+    {
+        ConfigResponse config = new ConfigResponse();
+        config.setValue(ConditionalTriggerInterface.CFG_ID, RESOURCE.getID());
+        config.setValue(ConditionalTriggerInterface.CFG_TYPE, RESOURCE.getType());
+        config.setValue(ConditionalTriggerInterface.CFG_OPTION, "your.properties");
+        RegisteredTriggerValue regTrigger = new RegisteredTriggerValue();
+        regTrigger.setId(TRIGGER_ID);
+        regTrigger.setConfig(config.encode());
+        trigger.init(regTrigger, alertConditionEvaluator);
+
+        ConfigChangedEvent event = new ConfigChangedEvent(new TrackEvent(RESOURCE,
+                                                                         System.currentTimeMillis(),
+                                                                         LogTrackPlugin.LOGLEVEL_INFO,
+                                                                         "my.properties",
                                                                          "myPropString"));
         TriggerNotFiredEvent notFired = new TriggerNotFiredEvent(TRIGGER_ID);
         notFired.setTimestamp(event.getTimestamp());

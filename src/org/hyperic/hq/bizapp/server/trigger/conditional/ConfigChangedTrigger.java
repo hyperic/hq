@@ -1,26 +1,18 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
- * program services by normal system calls through the application
- * program interfaces provided as part of the Hyperic Plug-in Development
- * Kit or the Hyperic Client Development Kit - this is merely considered
- * normal use of the program, and does *not* fall under the heading of
- * "derived work".
- *
- * Copyright (C) [2004-2008], Hyperic, Inc.
- * This file is part of HQ.
- *
- * HQ is free software; you can redistribute it and/or modify
- * it under the terms version 2 of the GNU General Public License as
- * published by the Free Software Foundation. This program is distributed
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA.
+ * NOTE: This copyright doesnot cover user programs that use HQ program services
+ * by normal system calls through the application program interfaces provided as
+ * part of the Hyperic Plug-in Development Kit or the Hyperic Client Development
+ * Kit - this is merely considered normal use of the program, and doesnot fall
+ * under the heading of "derived work". Copyright (C) [2004-2008], Hyperic, Inc.
+ * This file is part of HQ. HQ is free software; you can redistribute it and/or
+ * modify it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed in the
+ * hope that it will be useful, but WITHOUT ANY WARRANTY; without even the
+ * implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See
+ * the GNU General Public License for more details. You should have received a
+ * copy of the GNU General Public License along with this program; if not, write
+ * to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
+ * 02111-1307 USA.
  */
 
 package org.hyperic.hq.bizapp.server.trigger.conditional;
@@ -48,49 +40,46 @@ import org.hyperic.util.config.InvalidOptionValueException;
  */
 
 public class ConfigChangedTrigger
-    extends AbstractTrigger
-    implements ConditionalTriggerInterface {
+    extends AbstractTrigger implements ConditionalTriggerInterface
+{
     static {
         // Register the trigger/condition
-        ConditionalTriggerInterface.MAP_COND_TRIGGER.put(
-            new Integer(EventConstants.TYPE_CFG_CHG),
-            ConfigChangedTrigger.class);
+        ConditionalTriggerInterface.MAP_COND_TRIGGER.put(new Integer(EventConstants.TYPE_CFG_CHG),
+                                                         ConfigChangedTrigger.class);
     }
 
     private AppdefEntityID id;
-    private String         match;
+    private String match;
 
     /**
      * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedEventTypes()
      */
-    public Class[] getInterestedEventTypes(){
+    public Class[] getInterestedEventTypes() {
         return new Class[] { ConfigChangedEvent.class };
     }
 
     /**
      * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getInterestedInstanceIDs(java.lang.Class)
      */
-    public Integer[] getInterestedInstanceIDs(Class c){
+    public Integer[] getInterestedInstanceIDs(Class c) {
         return new Integer[] { id.getId() };
     }
 
     /**
      * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#getConfigSchema()
      */
-    public ConfigSchema getConfigSchema(){
-        return ConditionalTriggerSchema
-            .getConfigSchema(EventConstants.TYPE_CFG_CHG);
+    public ConfigSchema getConfigSchema() {
+        return ConditionalTriggerSchema.getConfigSchema(EventConstants.TYPE_CFG_CHG);
     }
 
     /**
      * @see org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface#getConfigResponse()
      */
-    public ConfigResponse getConfigResponse(AppdefEntityID id,
-                                            AlertConditionValue cond)
-        throws InvalidOptionException, InvalidOptionValueException {
+    public ConfigResponse getConfigResponse(AppdefEntityID id, AlertConditionValue cond) throws InvalidOptionException,
+                                                                                        InvalidOptionValueException
+    {
         if (cond.getType() != EventConstants.TYPE_CFG_CHG)
-            throw new InvalidOptionValueException(
-                "Condition is not a Log Event");
+            throw new InvalidOptionValueException("Condition is not a Log Event");
 
         ConfigResponse resp = new ConfigResponse();
         resp.setValue(CFG_TYPE, String.valueOf(id.getType()));
@@ -102,8 +91,8 @@ public class ConfigChangedTrigger
     /**
      * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#init(org.hyperic.hq.events.shared.RegisteredTriggerValue)
      */
-    public void init(RegisteredTriggerValue tval, AlertConditionEvaluator alertConditionEvaluator)
-        throws InvalidTriggerDataException {
+    public void init(RegisteredTriggerValue tval, AlertConditionEvaluator alertConditionEvaluator) throws InvalidTriggerDataException
+    {
         ConfigResponse triggerData;
         String sID, sType;
 
@@ -113,38 +102,33 @@ public class ConfigChangedTrigger
         // Decode the configuration
         try {
             triggerData = ConfigResponse.decode(tval.getConfig());
-            sType       = triggerData.getValue(CFG_TYPE);
-            sID         = triggerData.getValue(CFG_ID);
-            match       = triggerData.getValue(CFG_OPTION);
+            sType = triggerData.getValue(CFG_TYPE);
+            sID = triggerData.getValue(CFG_ID);
+            match = triggerData.getValue(CFG_OPTION);
         } catch (EncodingException e) {
             throw new InvalidTriggerDataException(e);
         }
 
-        if(sType == null || sID == null) {
-            throw new InvalidTriggerDataException(
-                CFG_TYPE   + " = '" + sType  + "' " +
-                CFG_ID     + " = '" + sID    + "' ");
+        if (sType == null || sID == null) {
+            throw new InvalidTriggerDataException(CFG_TYPE + " = '" + sType + "' " + CFG_ID + " = '" + sID + "' ");
         }
 
         try {
             id = new AppdefEntityID(sType + ":" + sID);
-        } catch(NumberFormatException exc){
-            throw new InvalidTriggerDataException(
-                "Instance type: " + sType + " or id: " + sID +
-                " is not a valid number");
+        } catch (NumberFormatException exc) {
+            throw new InvalidTriggerDataException("Instance type: " + sType + " or id: " + sID +
+                                                  " is not a valid number");
         }
     }
 
     /**
      * @see org.hyperic.hq.events.AbstractEvent#processEvent()
      */
-    public void processEvent(AbstractEvent e)
-        throws EventTypeException {
+    public void processEvent(AbstractEvent e) throws EventTypeException {
         ConfigChangedEvent event;
 
-        if(!(e instanceof ConfigChangedEvent)){
-            throw new EventTypeException("Invalid event type passed, " +
-                                         "expected ConfigChangedEvent");
+        if (!(e instanceof ConfigChangedEvent)) {
+            throw new EventTypeException("Invalid event type passed, " + "expected ConfigChangedEvent");
         }
 
         // If we didn't fulfill the condition, then don't fire
@@ -154,16 +138,11 @@ public class ConfigChangedTrigger
             return;
         }
 
-        if (match == null || match.length() == 0 ||
-            event.getMessage().indexOf(match) > -1) {
-
-                TriggerFiredEvent tfe = prepareTriggerFiredEvent(event);
-                tfe.setMessage("Config file (" + event.getSource() +
-                               ") changed: " + event.getMessage());
-                super.fireActions(tfe);
-
-        }
-        else {
+        if (match == null || match.length() == 0 || (event.getSource() != null && event.getSource().indexOf(match) > -1)) {
+            TriggerFiredEvent tfe = prepareTriggerFiredEvent(event);
+            tfe.setMessage("Config file (" + event.getSource() + ") changed: " + event.getMessage());
+            super.fireActions(tfe);
+        } else {
             // Let dispatchers know that trigger evaluated to false
             notFired(e);
         }
