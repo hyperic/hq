@@ -128,5 +128,8 @@ public class HQConstants {
     // TODO should have a better way to resolve this based on agent.bundle.home
     // agent property
     public static final String AgentBundleDropDir = "../../bundles";
+    
+    // license expiration warning
+    public static final int LICENSE_EXPIRATION_WARNING_MAX_DAYS = 45;
 
 }
