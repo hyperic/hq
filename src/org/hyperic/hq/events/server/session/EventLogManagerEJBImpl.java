@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -174,6 +175,11 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     {
         EventLogDAO eDAO = getEventLogDAO();
         Resource r = ResourceManagerEJBImpl.getOne().findResource(ent);
+        
+        if (r == null || r.isInAsyncDeleteState()) {
+            return new ArrayList(0);
+        }
+        
         Collection eTypes;
         
         if (eventTypes == null)
