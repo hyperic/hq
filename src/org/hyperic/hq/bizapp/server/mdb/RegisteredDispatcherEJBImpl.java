@@ -33,6 +33,7 @@ import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 /**
  * The RegisteredDispatcher Message-Drive Bean registers Triggers and dispatches
@@ -69,8 +70,10 @@ public class RegisteredDispatcherEJBImpl implements MessageDrivenBean, MessageLi
         // Dispatch to each trigger
         for (Iterator i = triggers.iterator(); i.hasNext();) {
             TriggerInterface trigger = (TriggerInterface) i.next();
+            long startTime = System.currentTimeMillis();
             try {
                 trigger.processEvent(event);
+                ConcurrentStatsCollector.getInstance().addStat(System.currentTimeMillis() - startTime, ConcurrentStatsCollector.EVENT_PROCESSING_TIME);
             } catch (EventTypeException e) {
                 // The trigger was not meant to process this event
                 log.error("dispatchEvent dispatched to trigger (" + trigger.getClass() + " that's not " +

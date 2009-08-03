@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -165,12 +165,12 @@ public class ProductPluginDeployer
         //to find it.
         System.setProperty("org.hyperic.sigar.path",
                            ear + "/sigar_bin/lib");
-        
+
         _hquDir = ear + "/hq.war/" + HQU;
 
         // Initialize database
         DatabaseInitializer.init();
-        
+
         File propFile = ProductPluginManager.PLUGIN_PROPERTIES_FILE;
         _ppm = new ProductPluginManager(propFile);
         _ppm.setRegisterTypes(true);
@@ -189,18 +189,18 @@ public class ProductPluginDeployer
     }
 
     /**
-     * This is called when the full server startup has occurred, and you 
+     * This is called when the full server startup has occurred, and you
      * get the "Started in 30s:935ms" message.
-     * 
+     *
      * We load all startup classes, then initialize the plugins.  Currently
-     * this is necesssary, since startup classes need to initialize the 
+     * this is necesssary, since startup classes need to initialize the
      * application (creating callbacks, etc.), and plugins can't hit the
      * app until that's been done.  Unfortunately, it also means that any
      * startup listeners that depend on plugins loaded through the deployer
-     * won't work.  So far that doesn't seem to be a problem, but if it 
+     * won't work.  So far that doesn't seem to be a problem, but if it
      * ends up being one, we can split the plugin loading into more stages so
      * that everyone has access to everyone.
-     * 
+     *
      * @jmx:managed-operation
      */
     public void handleNotification(Notification n, Object o) {
@@ -232,18 +232,18 @@ public class ProductPluginDeployer
         //but we are not "done" since a plugin can be dropped into
         //hq-plugins at anytime.
         pluginNotify("deployer", DEPLOYER_CLEARED);
-        
+
         if (Boolean.getBoolean("hq.unittest.run")) {
-            doInContainerUnitTestFrameworkSetup();            
+            doInContainerUnitTestFrameworkSetup();
         }
-        
+
         setReady(true);
-        
+
         if (n != null && n.getType().equals("org.jboss.system.server.started")) {
             SystemAudit.createUpAudit(((Number)n.getUserData()).longValue());
         }
     }
-    
+
     private void startConcurrentStatsCollector() {
         String prop = System.getProperty("hq.unittest.run");
         System.out.println(prop);
@@ -264,14 +264,15 @@ public class ProductPluginDeployer
             c.register(ConcurrentStatsCollector.PURGE_MEASUREMENTS_TIME);
             c.register(ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
             c.register(ConcurrentStatsCollector.EMAIL_ACTIONS);
-            c.register(ConcurrentStatsCollector.MULTI_COND_TRIGGER_MON_WAIT);
-            c.register(ConcurrentStatsCollector.MULTI_COND_TRIGGER_DELETE_REF);
+            c.register(ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
+            c.register(ConcurrentStatsCollector.FIRE_ALERT_TIME);
+            c.register(ConcurrentStatsCollector.EVENT_PROCESSING_TIME);
             c.startCollector();
         } catch (Exception e) {
             _log.error("Could not start Concurrent Stats Collector", e);
         }
     }
-    
+
     /**
      * Do the setup necessary to run the in-container unit test framework.
      */
@@ -297,58 +298,58 @@ public class ProductPluginDeployer
             }
         }
 
-        registerEJBDeployerClassLoader(classLoader);        
+        registerEJBDeployerClassLoader(classLoader);
     }
-    
+
     /**
-     * Register the EJB deployer classloader, making it accessible to the 
+     * Register the EJB deployer classloader, making it accessible to the
      * in-container unit tests for looking up local references to EJBs.
-     * 
+     *
      * @param deployerClassLoader The EJB deployer classloader.
      */
-    private void registerEJBDeployerClassLoader(ClassLoader deployerClassLoader) {            
+    private void registerEJBDeployerClassLoader(ClassLoader deployerClassLoader) {
         // Have to use reflection - else we will get a ClassCastException
         ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
 
         _log.info("Registering EJB deployer classloader for unit tests");
 
-        try {                
+        try {
             Method method = sysClassLoader.getClass()
-                            .getMethod("registerEJBClassLoader", 
+                            .getMethod("registerEJBClassLoader",
                                     new Class[]{ClassLoader.class});
 
-            method.invoke(sysClassLoader, new Object[]{deployerClassLoader});                
+            method.invoke(sysClassLoader, new Object[]{deployerClassLoader});
         } catch (Exception e) {
             throw new RuntimeException("failed to register EJB classloader", e);
         }
     }
-    
+
     /**
-     * Find all EJBImpl classes in the jar file and invoke the getOne() static 
-     * factory method on them, preloading the instance pool for that EJB. This 
-     * is necessary for the in-container unit tests when looking up local 
+     * Find all EJBImpl classes in the jar file and invoke the getOne() static
+     * factory method on them, preloading the instance pool for that EJB. This
+     * is necessary for the in-container unit tests when looking up local
      * references to EJBs.
-     * 
+     *
      * @param jarFile The jar file.
      * @param deployerClassLoader The EJB deployer classloader.
      * @throws Exception
      */
-    private void preloadInstancePoolsForEJBs(URL jarFile, ClassLoader deployerClassLoader) 
+    private void preloadInstancePoolsForEJBs(URL jarFile, ClassLoader deployerClassLoader)
         throws Exception {
-        
+
         ZipFile file = new ZipFile(new File(new URI(jarFile.toString())));
         Enumeration enumeration = file.entries();
-                        
+
         while (enumeration.hasMoreElements()) {
             ZipEntry entry = (ZipEntry)enumeration.nextElement();
             String name = entry.getName();
-            
+
             if (name.endsWith("EJBImpl.class")) {
                 String className = name.substring(0, name.length()-6)
                                         .replace('/', '.');
-                
+
                 _log.debug("Found class: "+className);
-                                
+
                 try {
                     Class clazz = deployerClassLoader.loadClass(className);
                     Method m = clazz.getMethod("getOne", new Class[0]);
@@ -365,7 +366,7 @@ public class ProductPluginDeployer
                     _log.error("Caught Throwable preloading instance pool for: "+className, t);
                 }
             }
-        }        
+        }
     }
 
     protected boolean isDeployable(String name, URL url) {
@@ -380,13 +381,13 @@ public class ProductPluginDeployer
 
     public void addNotificationListener(NotificationListener listener,
                                         NotificationFilter filter,
-                                        Object handback) 
+                                        Object handback)
     {
         _broadcaster.addNotificationListener(listener, filter, handback);
     }
 
     public void removeNotificationListener(NotificationListener listener)
-        throws ListenerNotFoundException 
+        throws ListenerNotFoundException
     {
         _broadcaster.removeNotificationListener(listener);
     }
@@ -421,18 +422,18 @@ public class ProductPluginDeployer
     }
 
     private Set getPluginNames(String type)
-        throws PluginException 
+        throws PluginException
     {
         return _ppm.getPluginManager(type).getPlugins().keySet();
     }
-    
+
     /**
      * @jmx:managed-attribute
      * List registered plugin names of given type.
      * Intended for use via /jmx-console
      */
     public ArrayList getRegisteredPluginNames(String type)
-        throws PluginException 
+        throws PluginException
     {
         return new ArrayList(getPluginNames(type));
     }
@@ -443,7 +444,7 @@ public class ProductPluginDeployer
      * Intended for use via /jmx-console
      */
     public ArrayList getRegisteredPluginNames()
-        throws PluginException 
+        throws PluginException
     {
         return new ArrayList(_ppm.getPlugins().keySet());
     }
@@ -452,7 +453,7 @@ public class ProductPluginDeployer
      * @jmx:managed-attribute
      */
     public int getProductPluginCount()
-        throws PluginException 
+        throws PluginException
     {
         return _ppm.getPlugins().keySet().size();
     }
@@ -461,7 +462,7 @@ public class ProductPluginDeployer
      * @jmx:managed-attribute
      */
     public int getMeasurementPluginCount()
-        throws PluginException 
+        throws PluginException
     {
         return getPluginNames(ProductPlugin.TYPE_MEASUREMENT).size();
     }
@@ -470,7 +471,7 @@ public class ProductPluginDeployer
      * @jmx:managed-attribute
      */
     public int getControlPluginCount()
-        throws PluginException 
+        throws PluginException
     {
         return getPluginNames(ProductPlugin.TYPE_CONTROL).size();
     }
@@ -479,7 +480,7 @@ public class ProductPluginDeployer
      * @jmx:managed-attribute
      */
     public int getAutoInventoryPluginCount()
-        throws PluginException 
+        throws PluginException
     {
         return getPluginNames(ProductPlugin.TYPE_AUTOINVENTORY).size();
     }
@@ -488,7 +489,7 @@ public class ProductPluginDeployer
      * @jmx:managed-attribute
      */
     public int getLogTrackPluginCount()
-        throws PluginException 
+        throws PluginException
     {
         return getPluginNames(ProductPlugin.TYPE_LOG_TRACK).size();
     }
@@ -497,13 +498,13 @@ public class ProductPluginDeployer
      * @jmx:managed-attribute
      */
     public int getConfigTrackPluginCount()
-        throws PluginException 
+        throws PluginException
     {
         return getPluginNames(ProductPlugin.TYPE_CONFIG_TRACK).size();
     }
 
     /**
-     * @jmx:managed-operation 
+     * @jmx:managed-operation
      */
     public void setProperty(String name, String value) {
         String oldValue = _ppm.getProperty(name, "null");
@@ -513,17 +514,17 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-operation 
+     * @jmx:managed-operation
      */
     public String getProperty(String name) {
-       return _ppm.getProperty(name); 
+       return _ppm.getProperty(name);
     }
 
     /**
      * @jmx:managed-operation
      */
     public PluginInfo getPluginInfo(String name)
-        throws PluginException 
+        throws PluginException
     {
         PluginInfo info = _ppm.getPluginInfo(name);
 
@@ -563,39 +564,39 @@ public class ProductPluginDeployer
 
     private void setReady(boolean ready) {
         if (getServer() != null) {
-            try {            
+            try {
                 getServer().setAttribute(_readyMgrName,
                                          new Attribute(READY_ATTR,
                                                        ready ? Boolean.TRUE :
                                                        Boolean.FALSE));
             } catch(Exception e) {
                 _log.error("Unable to declare application ready", e);
-            }            
-        }        
+            }
+        }
     }
-    
+
     /**
      * @jmx:managed-attribute
      */
     public boolean isReady() {
         Boolean isReady;
         try {
-            isReady = (Boolean)getServer().getAttribute(_readyMgrName, 
+            isReady = (Boolean)getServer().getAttribute(_readyMgrName,
                                                         READY_ATTR);
         } catch (Exception e) {
             _log.error("Unable to get Application's ready state", e);
             return false;
         }
-        
+
         return isReady.booleanValue();
     }
 
     private void loadStartupClasses() {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream is = 
-            loader.getResourceAsStream("META-INF/startup_classes.txt"); 
+        InputStream is =
+            loader.getResourceAsStream("META-INF/startup_classes.txt");
         List lines;
-        
+
         try {
             lines = FileUtil.readLines(is);
         } catch(IOException e) {
@@ -611,11 +612,11 @@ public class ProductPluginDeployer
         _app.setWebAccessibleDir(warDir);
         for (Iterator i=lines.iterator(); i.hasNext(); ) {
             String className = (String)i.next();
-            
+
             className = className.trim();
             if (className.length() == 0 || className.startsWith("#"))
                 continue;
-            
+
             _app.addStartupClass(className);
         }
         _app.runStartupClasses();
@@ -625,8 +626,8 @@ public class ProductPluginDeployer
         String action = type.substring(type.lastIndexOf(".") + 1);
         String msg = PRODUCT + " plugin " + name + " " + action;
 
-        Notification notif = new Notification(type, this, ++_notifSequence, 
-                                              msg); 
+        Notification notif = new Notification(type, this, ++_notifSequence,
+                                              msg);
 
         _log.info(msg);
 
@@ -635,7 +636,7 @@ public class ProductPluginDeployer
 
     private void attributeChangeNotify(String msg, String attr,
                                        Object oldValue, Object newValue) {
-        
+
         Notification notif =
             new AttributeChangeNotification(this,
                                             ++_notifSequence,
@@ -676,7 +677,7 @@ public class ProductPluginDeployer
         }
     }
 
-    private void deployPlugin(String plugin, ProductManagerLocal pm) 
+    private void deployPlugin(String plugin, ProductManagerLocal pm)
         throws DeploymentException {
 
         try {
@@ -690,7 +691,7 @@ public class ProductPluginDeployer
     private void addCustomPluginURL(File dir) {
         ObjectName urlScanner;
 
-        String msg = "Adding custom plugin dir " + dir; 
+        String msg = "Adding custom plugin dir " + dir;
         _log.info(msg);
 
         try {
@@ -700,7 +701,7 @@ public class ProductPluginDeployer
                           new String[] { URL.class.getName() });
         } catch (Exception e) {
             _log.error(msg, e);
-        }        
+        }
     }
 
     //check $jboss.home.url/.. and higher for hq-plugins
@@ -708,7 +709,7 @@ public class ProductPluginDeployer
         URL url;
         String prop = "jboss.home.url";
         String home = System.getProperty(prop);
-        
+
         if (home == null) {
             return;
         }
@@ -718,7 +719,7 @@ public class ProductPluginDeployer
             _log.error("Malformed " + prop + "=" + home);
             return;
         }
-        
+
         File dir = new File(url.getFile()).getParentFile();
         while (dir != null) {
             File pluginDir = new File(dir, PLUGIN_DIR);
@@ -729,27 +730,27 @@ public class ProductPluginDeployer
             dir = dir.getParentFile();
         }
     }
-    
+
     /**
      * MBean Service start method. This method is called when JBoss is deploying
-     * the MBean, unfortunately, the dependencies that this has with 
+     * the MBean, unfortunately, the dependencies that this has with
      * HighAvailService and with other components is such that the only thing
-     * this method does is queue up the plugins that are ready for deployment. 
+     * this method does is queue up the plugins that are ready for deployment.
      * The actual deployment occurs when the startDeployer() method is called.
      */
-    public void start() throws Exception { 
-        if(_isStarted) 
+    public void start() throws Exception {
+        if(_isStarted)
             return;
 
         _isStarted = true;
-        
+
         super.start();
 
         _ppm.init();
 
         try {
-            //hq.ear contains sigar_bin/lib with the 
-            //native sigar libraries.  we set sigar.install.home 
+            //hq.ear contains sigar_bin/lib with the
+            //native sigar libraries.  we set sigar.install.home
             //here so plugins which use sigar can find it during Sigar.load()
 
             String path = getClass().getClassLoader().
@@ -761,7 +762,7 @@ public class ProductPluginDeployer
         }
 
         getServer().addNotificationListener(_serverName, this, null, null);
-        
+
         //turn off ready filter asap at shutdown
         //this.stop() won't run until all files are undeploy()ed
         //which may take several minutes.
@@ -770,7 +771,7 @@ public class ProductPluginDeployer
                 setReady(false);
             }
         });
-        
+
         addCustomPluginDir();
     }
 
@@ -835,11 +836,11 @@ public class ProductPluginDeployer
                 rendit.removePluginDir(destDir.getName());
                 rendit.addPluginDir(destDir);
             } //else Rendit watcher will deploy the new plugin
-        }        
+        }
     }
 
     public void start(DeploymentInfo di)
-        throws DeploymentException 
+        throws DeploymentException
     {
         try {
             start();
@@ -873,7 +874,7 @@ public class ProductPluginDeployer
     }
 
     public void stop(DeploymentInfo di)
-        throws DeploymentException 
+        throws DeploymentException
     {
         _log.debug("stop: " + di.url.getFile());
 

@@ -48,6 +48,7 @@ import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticThread;
 import org.hyperic.util.PrintfFormat;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 import org.hyperic.util.thread.LoggingThreadGroup;
 import org.hyperic.util.thread.ThreadGroupFactory;
 import org.hyperic.util.thread.ThreadWatchdog;
@@ -420,6 +421,7 @@ public class ZeventManager implements ZeventEnqueuer {
             e.enterQueue();
             _eventQueue.offer(e, 1, TimeUnit.SECONDS);
         }
+        ConcurrentStatsCollector.getInstance().addStat(_eventQueue.size(), ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
     }
 
     public void enqueueEventAfterCommit(Zevent event) {

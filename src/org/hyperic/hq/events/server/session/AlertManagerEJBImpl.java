@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 import javax.ejb.CreateException;
 import javax.ejb.RemoveException;
@@ -212,11 +213,11 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public Alert findAlertById(Integer id) {
         Alert alert = getAlertDAO().findById(id);
         Hibernate.initialize(alert);
-        
+
         alert.setAckable(EscalationManagerEJBImpl.getOne()
-                         .isAlertAcknowledgeable(alert.getId(), 
+                         .isAlertAcknowledgeable(alert.getId(),
                                                  alert.getDefinition()));
-        
+
         return alert;
     }
 
@@ -289,7 +290,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             _log.debug("Alert not firing because they are not allowed");
             return;
         }
-
+        long startTime = System.currentTimeMillis();
         try {
             AlertDefinitionManagerLocal aman =
                 AlertDefinitionManagerEJBImpl.getOne();
@@ -329,7 +330,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             } else {
                 creator.createEscalatable();
             }
-
+            ConcurrentStatsCollector.getInstance().addStat(System.currentTimeMillis() - startTime,ConcurrentStatsCollector.FIRE_ALERT_TIME);
         } catch (PermissionException e) {
             _log.error("Alert not firing due to a permissions issue",e);
         } catch (ResourceDeletedException e) {
@@ -344,7 +345,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public PageList findAllAlerts() {
         // TODO - This is messy, from what I can tell this collection contains
-        //        a list of both alert POJOs and AlertValue objects.  Why this 
+        //        a list of both alert POJOs and AlertValue objects.  Why this
         //        is done, I haven't figured out yet, just adding a note so I
         //        don't forget to come back to it.
         Collection res;
