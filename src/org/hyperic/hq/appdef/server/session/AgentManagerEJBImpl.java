@@ -134,6 +134,18 @@ public class AgentManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
+    public void removeAgentStatus(Agent agent) {
+        AgentReportStatusDAO dao = getAgentReportStatusDAO();
+        AgentReportStatus status = dao.getReportStatus(agent);
+        if (status != null) {
+            dao.remove(status);
+        }
+    }
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
     public void removeAgent(Agent agent) {
         AgentReportStatusDAO aDAO = getAgentReportStatusDAO();
         AgentReportStatus status = aDAO.getReportStatus(agent);

@@ -317,61 +317,26 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         final Resource r = platform.getResource();
         final Audit audit = ResourceAudit.deleteResource(r, subject, 0, 0);
         boolean pushed = false;
-
         try {
             AuditManagerEJBImpl.getOne().pushContainer(audit);
             pushed = true;
-
             checkRemovePermission(subject, platform.getEntityId());
-
             // keep the configresponseId so we can remove it later
             ConfigResponseDB config = platform.getConfigResponse();
-
-            // Remove servers
-            final ServerManagerLocal sMan = getServerManager();
-            final Collection servers = platform.getServersBag();
-            // since we are using the hibernate collection
-            // we need to synchronize
-            synchronized(servers) {
-                for (Iterator i=servers.iterator(); i.hasNext();) {
-                    try {
-                        // this looks funky but the idea is to pull the server
-                        // obj into the session so that it is updated when flushed
-                        Server server =
-                            sMan.findServerById(((Server)i.next()).getId());
-                        // there are instances where we may have a duplicate
-                        // autoinventory identifier btwn platforms
-                        // (sendmail, ntpd, CAM Agent Server, etc...)
-                        final String uniqAiid =
-                            server.getPlatform().getId() +
-                            server.getAutoinventoryIdentifier();
-                        server.setAutoinventoryIdentifier(uniqAiid);
-                        server.setPlatform(null);
-                        i.remove();
-                    } catch (ServerNotFoundException e) {
-                        log.warn(e.getMessage());
-                    }
-                }
-            }
+            removeServerReferences(platform);
             final PlatformDAO dao = getPlatformDAO();
             // this flush ensures that the server's platform_id is set to null
             // before the platform is deleted and the servers cascaded
             dao.getSession().flush();
-            
             getAIQManagerLocal().removeAssociatedAIPlatform(platform);
+            cleanupAgentStatus(platform);
+            platform.getIps().clear();
             dao.remove(platform);
-
-            // remove the config response
             if (config != null) {
                 getConfigResponseDAO().remove(config);
             }
-
-            // remove custom properties
             deleteCustomProperties(aeid);
-
-            // now remove the resource for the platform
             removeAuthzResource(subject, aeid, r);
-
             dao.getSession().flush();
         } catch (RemoveException e) {
             _log.debug("Error while removing Platform");
@@ -384,6 +349,42 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         } finally {
             if (pushed)
                 AuditManagerEJBImpl.getOne().popContainer(false);
+        }
+    }
+
+    private void cleanupAgentStatus(Platform platform) {
+        final Agent agent = platform.getAgent();
+        final Platform p = getPhysPlatformByAgentToken(agent.getAgentToken());
+        if (p.getId().equals(platform.getId())) {
+            AgentManagerEJBImpl.getOne().removeAgentStatus(agent);
+        }
+    }
+
+    private void removeServerReferences(Platform platform) {
+        final ServerManagerLocal sMan = getServerManager();
+        final Collection servers = platform.getServersBag();
+        // since we are using the hibernate collection
+        // we need to synchronize
+        synchronized(servers) {
+            for (final Iterator i=servers.iterator(); i.hasNext();) {
+                try {
+                    // this looks funky but the idea is to pull the server
+                    // obj into the session so that it is updated when flushed
+                    final Server server =
+                        sMan.findServerById(((Server)i.next()).getId());
+                    // there are instances where we may have a duplicate
+                    // autoinventory identifier btwn platforms
+                    // (sendmail, ntpd, CAM Agent Server, etc...)
+                    final String uniqAiid =
+                        server.getPlatform().getId() +
+                        server.getAutoinventoryIdentifier();
+                    server.setAutoinventoryIdentifier(uniqAiid);
+                    server.setPlatform(null);
+                    i.remove();
+                } catch (ServerNotFoundException e) {
+                    log.warn(e.getMessage());
+                }
+            }
         }
     }
 
@@ -713,7 +714,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
         String agentToken = aiPlatform.getAgentToken();
         if (p == null)
-            p = getPlatformFromAgentToken(agentToken);
+            p = getPhysPlatformByAgentToken(agentToken);
         
         if (p != null) {
             checkViewPermission(subject, p.getEntityId());
@@ -727,7 +728,12 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         return p;
     }
 
-    private Platform getPlatformFromAgentToken(String agentToken) {
+    /**
+     * @return non-virtual, physical, {@link Platform} associated with the
+     *  agentToken or null if one does not exist.
+     * @ejb:interface-method
+     */
+    public Platform getPhysPlatformByAgentToken(String agentToken) {
         try {
             AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
             Agent agent = aMan.getAgent(agentToken);

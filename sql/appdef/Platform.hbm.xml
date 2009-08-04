@@ -64,11 +64,11 @@
       <column name="CONFIG_RESPONSE_ID" not-null="false" index="CONFIG_RESPONSE_ID_IDX"/>
     </many-to-one>
 
-    <many-to-one name="agent" class="org.hyperic.hq.appdef.Agent">
+    <many-to-one name="agent" cascade="delete" class="org.hyperic.hq.appdef.Agent">
       <column name="AGENT_ID" not-null="false" index="AGENT_ID_IDX"/>
     </many-to-one>
 
-    <bag inverse="true" cascade="all"
+    <bag inverse="true" cascade="all-delete-orphan"
          name="ips" table="EAM_IP" optimistic-lock="false">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="PLATFORM_ID"/>
@@ -78,7 +78,7 @@
     <bag inverse="true" cascade="all" name="serversBag" table="EAM_SERVER"
          optimistic-lock="false">
       <cache usage="read-write"/>
-      <key on-delete="cascade" column="PLATFORM_ID"/>
+      <key column="PLATFORM_ID"/>
       <one-to-many class="Server"/>
     </bag>
     
