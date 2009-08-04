@@ -9852,7 +9852,7 @@ has already been defined.
         <statement targetDB="oracle">
           ALTER TABLE EAM_RESOURCE_EDGE DROP UNIQUE (FROM_ID, TO_ID, DISTANCE)
         </statement>
-        <statement targetDB="oracle">
+        <statement targetDB="oracle" fail="false">
           DROP INDEX EAM_RESOURCE_EDGE_FROM_ID_KEY
         </statement>
         <statement targetDB="mysql">
