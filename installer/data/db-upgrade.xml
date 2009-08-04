@@ -9946,6 +9946,50 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.152">
+    <schema-directSQL>
+      <statement desc="Convert frequency type of DURATION to frequency type EVERYTIME">
+        UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 1
+      </statement>
+      <statement desc="Convert frequency type of NO_DUP to frequency type EVERYTIME">
+        UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 3
+      </statement>
+      <statement desc="Set EAM_ALERT_DEFINITION.ACT_ON_TRIGGER_ID to NULL">
+        UPDATE EAM_ALERT_DEFINITION SET ACT_ON_TRIGGER_ID = NULL
+      </statement>
+      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='oracle'>
+        DROP INDEX ACT_ON_TRIGGER_ID_IDX
+      </statement>
+      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='postgresql'>
+        DROP INDEX ACT_ON_TRIGGER_ID_IDX
+      </statement>
+      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='mysql'>
+        ALTER TABLE EAM_ALERT_DEFINITION DROP INDEX ACT_ON_TRIGGER_ID_IDX
+      </statement>
+      <statement desc="Drop unused EAM_ALERT_DEFINITION column ACT_ON_TRIGGER_ID" fail="false">
+        ALTER TABLE EAM_ALERT_DEFINITION DROP COLUMN ACT_ON_TRIGGER_ID
+      </statement>
+      <statement desc="Delete MultiConditionTrigger from EAM_REGISTERED_TRIGGER">
+        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger'
+      </statement>
+      <statement desc="Delete AvertTrigger from EAM_REGISTERED_TRIGGER">
+        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.AvertTrigger'
+      </statement>
+      <statement desc="Delete CounterTrigger from EAM_REGISTERED_TRIGGER">
+        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger'
+      </statement>
+      <statement desc="Delete DurationTrigger from EAM_REGISTERED_TRIGGER">
+        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger'
+      </statement>
+      <statement desc="Drop table EAM_TRIGGER_EVENT">
+        DROP TABLE EAM_TRIGGER_EVENT
+      </statement>
+      <statement desc="Drop table EAM_FIRED_TRIGGER">
+        DROP TABLE EAM_FIRED_TRIGGER
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+  
 </dbupgrade>
 </target>
 </project>
