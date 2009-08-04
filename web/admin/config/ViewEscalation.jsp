@@ -112,9 +112,12 @@ function showViewEscResponse(originalRequest) {
             dojo11.byId('allowPauseTrue').checked = "true";
 
             var sel = dojo11.byId('maxWaitTime');
-            for (var i = 0; sel.selectedIndex == 0 && i < sel.length; i++) {
-                sel.options[i].selected =
-                    (sel.options[i].value == tmp.escalation.maxWaitTime);
+
+            for (var i = 0; i < sel.length; i++) {
+            	if (sel.options[i].value == tmp.escalation.maxWaitTime) {
+	                sel.options[i].selected = true;
+	                break;
+	            }
             }
         }
         else {
