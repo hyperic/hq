@@ -107,7 +107,8 @@ public final class ConcurrentStatsCollector {
         PURGE_MEASUREMENTS_TIME      = "PURGE_MEASUREMENTS_TIME",
         MEASUREMENT_SCHEDULE_TIME    = "MEASUREMENT_SCHEDULE_TIME",
         EMAIL_ACTIONS                = "EMAIL_ACTIONS",
-        ZEVENT_QUEUE_SIZE            = "ZEVENT_QUEUE_SIZE";
+        ZEVENT_QUEUE_SIZE            = "ZEVENT_QUEUE_SIZE",
+        TRIGGER_INIT_TIME            = "TRIGGER_INIT_TIME";
     // using tree due to ordering capabilities
     private final Map _statKeys = new TreeMap();
     private AtomicBoolean _hasStarted = new AtomicBoolean(false);

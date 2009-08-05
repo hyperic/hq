@@ -128,12 +128,6 @@ public class AlertDefinitionManagerEJBImpl
                                                EscalationManagerLocal escMan) {
         StopWatch watch = new StopWatch();
 
-        // Get rid of their triggers first
-        watch.markTimeBegin("removeActOnTrigger");
-        EventsStartupListener.getChangedTriggerCallback()
-            .beforeTriggersDeleted(alertdef.getTriggers());
-        watch.markTimeEnd("removeActOnTrigger");
-
         // Delete escalation state
         watch.markTimeBegin("endEscalation");
         if (alertdef.getEscalation() != null &&
@@ -182,7 +176,7 @@ public class AlertDefinitionManagerEJBImpl
         deleteAlertDefinitionStuff(subj, alertdef, escMan);
 
         watch.markTimeBegin("deleteTriggers");
-        getTriggerDAO().deleteAlertDefinition(alertdef);
+        RegisteredTriggerManagerEJBImpl.getOne().deleteTriggers(alertdef);
         watch.markTimeBegin("deleteTriggers");
 
         watch.markTimeBegin("markActionsDeleted");

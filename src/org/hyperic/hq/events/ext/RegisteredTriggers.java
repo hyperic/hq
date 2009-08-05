@@ -22,132 +22,47 @@
 package org.hyperic.hq.events.ext;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.events.AbstractEvent;
-import org.hyperic.hq.events.InvalidTriggerDataException;
-import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
-import org.hyperic.hq.events.server.session.AlertConditionEvaluatorFactory;
-import org.hyperic.hq.events.server.session.AlertConditionEvaluatorFactoryImpl;
-import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.RegisteredTrigger;
-import org.hyperic.hq.events.server.session.TriggerChangeCallback;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
+import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
-import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
-import org.hyperic.hq.events.shared.RegisteredTriggerValue;
-import org.hyperic.hq.hibernate.SessionManager;
-import org.hyperic.hq.zevents.ZeventManager;
 
 import edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Repository of in memory triggers for event processing
  * @author jhickey
  *
  */
-public class RegisteredTriggers {
-    private final static Log log = LogFactory.getLog(RegisteredTriggers.class.getName());
+public class RegisteredTriggers implements RegisterableTriggerRepository {
 
     public static final Integer KEY_ALL = new Integer(0);
 
     private static final Object INIT_LOCK = new Object();
 
-    private Object triggerUpdateLock = new Object();
-
     private static RegisteredTriggers INSTANCE;
+
+    private Object triggerUpdateLock = new Object();
 
     private Map triggers = new ConcurrentHashMap();
 
-    private AlertConditionEvaluatorFactory factory;
-
     private RegisteredTriggerManagerLocal registeredTriggerManager;
 
-    private AlertDefinitionManagerLocal alertDefinitionManager;
-
     /** Creates a new instance of RegisteredTriggers */
-    RegisteredTriggers(RegisteredTriggerManagerLocal registeredTriggerManager,
-                       AlertDefinitionManagerLocal alertDefinitionManager,
-                       AlertConditionEvaluatorFactory alertConditionEvaluatorFactory)
-    {
+    RegisteredTriggers(RegisteredTriggerManagerLocal registeredTriggerManager) {
         this.registeredTriggerManager = registeredTriggerManager;
-        this.alertDefinitionManager = alertDefinitionManager;
-        this.factory = alertConditionEvaluatorFactory;
+
     }
 
-    public static RegisteredTriggers getInstance() throws CreateException, NamingException {
-        synchronized (INIT_LOCK) {
-            if (INSTANCE == null) {
-                INSTANCE = new RegisteredTriggers(RegisteredTriggerManagerUtil.getLocalHome().create(),
-                                                  AlertDefinitionManagerUtil.getLocalHome().create(),
-                                                  new AlertConditionEvaluatorFactoryImpl(ZeventManager.getInstance()));
-            }
-        }
-        return INSTANCE;
+    Map getTriggers() {
+        return this.triggers;
     }
 
-    public void init() {
-        // create overall Hibernate session in which to call registerTrigger
-        boolean sessionCreated = SessionManager.setupSession("RegisteredTriggersInit");
-        try {
-            initializeTriggers();
-            HQApp app = HQApp.getInstance();
-            app.registerCallbackListener(TriggerChangeCallback.class, new RegisteredTriggersUpdater());
-        } finally {
-            if (sessionCreated) {
-                SessionManager.cleanupSession(false);
-            }
-        }
-    }
-
-    void initializeTriggers() {
-        Collection registeredTriggers = registeredTriggerManager.getTriggers();
-        registerTriggers(registeredTriggers);
-    }
-
-    private void registerTriggers(Collection registeredTriggers) {
-        Map alertEvaluators = new HashMap();
-        //Create AlertConditionEvaluator for each AlertDefinition, so they can be shared by all triggers associated with the alertDef
-        for (Iterator i = registeredTriggers.iterator(); i.hasNext();) {
-            try {
-                RegisteredTrigger tv = (RegisteredTrigger) i.next();
-                Integer alertDefId = alertDefinitionManager.getIdFromTrigger(tv.getId());
-                if (alertDefId != null && alertEvaluators.get(alertDefId) == null) {
-                    AlertDefinition alertDefinition = alertDefinitionManager.getByIdNoCheck(alertDefId);
-                    if (alertDefinition == null) {
-                        log.warn("Unable to find AlertDefinition with id " + alertDefId + " for trigger with id " +
-                                 tv.getId() + ".  These alerts will not fire.");
-                    } else {
-                        alertEvaluators.put(alertDefId, factory.create(alertDefinition));
-                    }
-                }
-            } catch (Exception e) {
-                log.error("Error retrieving alert definition for trigger", e);
-            }
-        }
-        for (Iterator i = registeredTriggers.iterator(); i.hasNext();) {
-            // Try to register each trigger, if exception, then move on
-            RegisteredTrigger tv = (RegisteredTrigger) i.next();
-            try {
-                final Integer alertDefId = alertDefinitionManager.getIdFromTrigger(tv.getId());
-                if (alertDefId != null && alertEvaluators.get(alertDefId) != null) {
-                    registerTrigger(tv.getRegisteredTriggerValue(),
-                                    (AlertConditionEvaluator) alertEvaluators.get(alertDefId));
-                }
-            } catch (Exception e) {
-                log.error("Error registering trigger", e);
-            }
-        }
+    void init() {
+        registeredTriggerManager.initializeTriggers(this);
     }
 
     public Collection getInterestedTriggers(Class eventClass, Integer instanceId) {
@@ -160,67 +75,7 @@ public class RegisteredTriggers {
         return trigs;
     }
 
-    public static Collection getInterestedTriggers(AbstractEvent event) {
-        HashSet trigs = new HashSet();
-
-        // Can't very well look up a null object
-        if (event.getInstanceId() != null) {
-            // Get the triggers that are interested in this instance
-            trigs.addAll(INSTANCE.getInterestedTriggers(event.getClass(), event.getInstanceId()));
-        }
-        // Get the triggers that are interested in all instances
-        trigs.addAll(INSTANCE.getInterestedTriggers(event.getClass(), KEY_ALL));
-        return trigs;
-    }
-
-    public static boolean isTriggerInterested(AbstractEvent event) {
-        // If the event happened more than a day ago, does anyone care?
-        final long ONE_DAY = 86400000;
-        long current = System.currentTimeMillis();
-        if (event.getTimestamp() < current - ONE_DAY)
-            return false;
-
-        // Can't very well look up a null object
-        if (event.getInstanceId() != null) {
-            // Get the triggers that are interested in this instance
-            Collection trigs = INSTANCE.getInterestedTriggers(event.getClass(), event.getInstanceId());
-            if (trigs.size() > 0)
-                return true;
-        }
-
-        // Check the triggers that are interested in all instances
-        Collection trigs = INSTANCE.getInterestedTriggers(event.getClass(), KEY_ALL);
-        return (trigs.size() > 0);
-    }
-
-    /**
-     * Register a trigger. NOTE: This method should be called within an active
-     * Hibernate session/transaction. Trigger init method may interact with a
-     * lazily initialized AlertDefinition.
-     * @param tv
-     * @param alertDef
-     * @throws ClassNotFoundException
-     * @throws InstantiationException
-     * @throws IllegalAccessException
-     * @throws InvalidTriggerDataException
-     */
-    void registerTrigger(RegisteredTriggerValue tv, AlertConditionEvaluator alertConditionEvaluator) throws
-                                                                                                            InstantiationException,
-                                                                                                            IllegalAccessException,
-                                                                                                            InvalidTriggerDataException
-    {
-        // First create Trigger
-        Class tc;
-        try {
-            tc = Class.forName(tv.getClassname());
-        }catch(ClassNotFoundException e) {
-            log.warn("Trigger class " + tv.getClassname() + " is not supported.  Triggers of this type should be removed from the database.");
-            return;
-        }
-        RegisterableTriggerInterface trigger = (RegisterableTriggerInterface) tc.newInstance();
-
-        trigger.init(tv, alertConditionEvaluator);
-
+    public void addTrigger(RegisterableTriggerInterface trigger) {
         Class[] types = trigger.getInterestedEventTypes();
         for (int i = 0; i < types.length; i++) {
             Class type = types[i];
@@ -241,7 +96,7 @@ public class RegisteredTriggers {
                     if (triggersById == null) {
                         triggersById = new ConcurrentHashMap();
                     }
-                    triggersById.put(tv.getId(), trigger);
+                    triggersById.put(trigger.getId(), trigger);
                     triggers.put(key, triggersById);
                 }
             }
@@ -252,11 +107,11 @@ public class RegisteredTriggers {
         this.triggers = triggers;
     }
 
-    void unregisterTrigger(Integer tvId) {
+    public void removeTrigger(Integer triggerId) {
         synchronized (triggerUpdateLock) {
             for (Iterator triggerMaps = triggers.values().iterator(); triggerMaps.hasNext();) {
                 Map triggerIdsToTriggers = (Map) triggerMaps.next();
-                triggerIdsToTriggers.remove(tvId);
+                triggerIdsToTriggers.remove(triggerId);
                 if (triggerIdsToTriggers.isEmpty()) {
                     triggerMaps.remove();
                 }
@@ -264,42 +119,49 @@ public class RegisteredTriggers {
         }
     }
 
-    Map getTriggers() {
-        return this.triggers;
+    private static RegisteredTriggers getInstance() {
+        synchronized (INIT_LOCK) {
+            if (INSTANCE == null) {
+                INSTANCE = new RegisteredTriggers(RegisteredTriggerManagerEJBImpl.getOne());
+                INSTANCE.init();
+            }
+        }
+        return INSTANCE;
     }
 
-    public class RegisteredTriggersUpdater implements TriggerChangeCallback {
+    public static Collection getInterestedTriggers(AbstractEvent event) {
+        HashSet trigs = new HashSet();
 
-        public void beforeTriggersDeleted(final Collection triggers) {
+        // Can't very well look up a null object
+        if (event.getInstanceId() != null) {
+            // Get the triggers that are interested in this instance
+            trigs.addAll(RegisteredTriggers.getInstance()
+                                           .getInterestedTriggers(event.getClass(), event.getInstanceId()));
+        }
+        // Get the triggers that are interested in all instances
+        trigs.addAll(RegisteredTriggers.getInstance().getInterestedTriggers(event.getClass(), KEY_ALL));
+        return trigs;
+    }
 
-            for (Iterator it = triggers.iterator(); it.hasNext();) {
-                RegisteredTrigger trigger = (RegisteredTrigger) it.next();
-                unregisterTrigger(trigger.getId());
-            }
+    public static boolean isTriggerInterested(AbstractEvent event) {
+        // If the event happened more than a day ago, does anyone care?
+        final long ONE_DAY = 86400000;
+        long current = System.currentTimeMillis();
+        if (event.getTimestamp() < current - ONE_DAY)
+            return false;
 
+        // Can't very well look up a null object
+        if (event.getInstanceId() != null) {
+            // Get the triggers that are interested in this instance
+            Collection trigs = RegisteredTriggers.getInstance().getInterestedTriggers(event.getClass(),
+                                                                                      event.getInstanceId());
+            if (trigs.size() > 0)
+                return true;
         }
 
-        public void afterTriggersCreated(final Collection triggers) {
-            try {
-                HQApp.getInstance().addTransactionListener(new TransactionListener() {
-                    public void afterCommit(boolean success) {
-                        if (success) {
-                            try {
-                                registerTriggers(triggers);
-                            } catch (Exception e) {
-                                log.error("Error registering trigger", e);
-                            }
-                        }
-                    }
-
-                    public void beforeCommit() {
-                    }
-                });
-            } catch (Throwable t) {
-                log.error("Error registering trigger", t);
-            }
-
-        }
+        // Check the triggers that are interested in all instances
+        Collection trigs = RegisteredTriggers.getInstance().getInterestedTriggers(event.getClass(), KEY_ALL);
+        return (trigs.size() > 0);
     }
 
     /**

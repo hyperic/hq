@@ -1,0 +1,461 @@
+package org.hyperic.hq.events.server.session;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import junit.framework.TestCase;
+
+import org.easymock.EasyMock;
+import org.hyperic.hq.events.InvalidTriggerDataException;
+import org.hyperic.hq.events.ext.MockTrigger;
+import org.hyperic.hq.events.ext.RegisterableTriggerRepository;
+import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+
+/**
+ * Unit test of the {@link RegisteredTriggerManagerEJBImpl}
+ * @author jhickey
+ *
+ */
+public class RegisteredTriggerManagerEJBImplTest
+    extends TestCase
+{
+
+    private AlertConditionEvaluatorFactory alertConditionEvaluatorFactory;
+    private AlertConditionEvaluator alertConditionEvaluator;
+    private TriggerDAOInterface triggerDAO;
+    private RegisteredTriggerManagerEJBImpl registeredTriggerManager;
+    private RegisterableTriggerRepository registeredTriggerRepository;
+
+    private void replay() {
+        EasyMock.replay(alertConditionEvaluatorFactory,
+                        alertConditionEvaluator,
+                        triggerDAO,
+                        registeredTriggerRepository);
+    }
+
+    public void setUp() throws Exception {
+        super.setUp();
+        this.alertConditionEvaluatorFactory = EasyMock.createMock(AlertConditionEvaluatorFactory.class);
+        this.alertConditionEvaluator = EasyMock.createMock(AlertConditionEvaluator.class);
+        this.triggerDAO = EasyMock.createMock(TriggerDAOInterface.class);
+        this.registeredTriggerRepository = EasyMock.createMock(RegisterableTriggerRepository.class);
+        this.registeredTriggerManager = new RegisteredTriggerManagerEJBImpl();
+        registeredTriggerManager.setAlertConditionEvaluatorFactory(alertConditionEvaluatorFactory);
+        registeredTriggerManager.setTriggerDAO(triggerDAO);
+        MockTrigger.initialized = false;
+    }
+
+    /**
+     * Verifies that triggers are successfully created after commit
+     */
+    public void testHandleTriggerCreation() {
+        Integer triggerId = Integer.valueOf(987);
+        Integer trigger2Id = Integer.valueOf(456);
+        Integer alertDefinitionId = Integer.valueOf(5432);
+
+        AlertDefinition alertDef = new AlertDefinition();
+        alertDef.setId(alertDefinitionId);
+        RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
+        mockTrigger.setClassname(MockTrigger.class.getName());
+        mockTrigger.setId(triggerId);
+
+        RegisteredTrigger trigger = new RegisteredTrigger(mockTrigger);
+        trigger.setId(mockTrigger.getId());
+        trigger.setAlertDefinition(alertDef);
+
+        RegisteredTriggerValue mockTrigger2 = new RegisteredTriggerValue();
+        mockTrigger2.setClassname(MockTrigger.class.getName());
+        mockTrigger2.setId(trigger2Id);
+
+        RegisteredTrigger trigger2 = new RegisteredTrigger(mockTrigger2);
+        trigger2.setId(mockTrigger2.getId());
+        trigger2.setAlertDefinition(alertDef);
+
+        List triggers = new ArrayList();
+        triggers.add(trigger);
+        triggers.add(trigger2);
+
+        List createdEvents = new ArrayList();
+        createdEvents.add(new TriggersCreatedZevent(alertDefinitionId));
+
+        EasyMock.expect(triggerDAO.findByAlertDefinitionId(alertDefinitionId)).andReturn(triggers);
+        EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef)).andReturn(alertConditionEvaluator);
+        registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
+        EasyMock.expectLastCall().times(2);
+        replay();
+        registeredTriggerManager.setRegisteredTriggerRepository(registeredTriggerRepository);
+        registeredTriggerManager.handleTriggerCreatedEvents(createdEvents);
+        verify();
+        assertTrue(MockTrigger.initialized);
+    }
+
+    /**
+     * Verifies that nothing blows up if an alert def is not found for triggers to be created
+     */
+    public void testHandleTriggerCreationAlertDefNotFound() {
+        Integer triggerId = Integer.valueOf(987);
+        Integer alertDefinitionId = Integer.valueOf(5432);
+
+        RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
+        mockTrigger.setClassname(MockTrigger.class.getName());
+        mockTrigger.setId(triggerId);
+
+        RegisteredTrigger trigger = new RegisteredTrigger(mockTrigger);
+        trigger.setId(mockTrigger.getId());
+
+        List triggers = new ArrayList();
+        triggers.add(trigger);
+
+        List createdEvents = new ArrayList();
+        createdEvents.add(new TriggersCreatedZevent(alertDefinitionId));
+
+        EasyMock.expect(triggerDAO.findByAlertDefinitionId(alertDefinitionId)).andReturn(triggers);
+
+        replay();
+        registeredTriggerManager.setRegisteredTriggerRepository(registeredTriggerRepository);
+        registeredTriggerManager.handleTriggerCreatedEvents(createdEvents);
+        verify();
+    }
+
+    /**
+     * Verifies that other triggers will still be created if an error occurs registering a single trigger
+     */
+    public void testHandleTriggerCreationErrorRegistering() {
+        Integer triggerId = Integer.valueOf(987);
+        Integer trigger2Id = Integer.valueOf(456);
+        Integer alertDefinitionId = Integer.valueOf(5432);
+
+        AlertDefinition alertDef = new AlertDefinition();
+        alertDef.setId(alertDefinitionId);
+        RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
+        mockTrigger.setClassname(MockTrigger.class.getName());
+        mockTrigger.setId(triggerId);
+
+        RegisteredTrigger trigger = new RegisteredTrigger(mockTrigger);
+        trigger.setId(mockTrigger.getId());
+        trigger.setAlertDefinition(alertDef);
+
+        RegisteredTriggerValue mockTrigger2 = new RegisteredTriggerValue();
+        mockTrigger2.setClassname(MockTrigger.class.getName());
+        mockTrigger2.setId(trigger2Id);
+
+        RegisteredTrigger trigger2 = new RegisteredTrigger(mockTrigger2);
+        trigger2.setId(mockTrigger2.getId());
+        trigger2.setAlertDefinition(alertDef);
+
+        List triggers = new ArrayList();
+        triggers.add(trigger);
+        triggers.add(trigger2);
+
+        List createdEvents = new ArrayList();
+        createdEvents.add(new TriggersCreatedZevent(alertDefinitionId));
+
+        EasyMock.expect(triggerDAO.findByAlertDefinitionId(alertDefinitionId)).andReturn(triggers);
+        EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef)).andReturn(alertConditionEvaluator);
+        registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
+        registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
+        EasyMock.expectLastCall().andThrow(new RuntimeException("Oh No!"));
+        replay();
+        registeredTriggerManager.setRegisteredTriggerRepository(registeredTriggerRepository);
+        registeredTriggerManager.handleTriggerCreatedEvents(createdEvents);
+        verify();
+        assertTrue(MockTrigger.initialized);
+    }
+
+    /**
+     * Verifies that trigger creation is not yet processed if repository has not been initialized
+     */
+    public void testHandleTriggerCreationNotInitialized() {
+        Integer alertDefinitionId = Integer.valueOf(5432);
+
+        List createdEvents = new ArrayList();
+        createdEvents.add(new TriggersCreatedZevent(alertDefinitionId));
+
+        replay();
+        registeredTriggerManager.handleTriggerCreatedEvents(createdEvents);
+        verify();
+
+    }
+
+    /**
+     * Verifies that triggers are properly created, initialized, and added to
+     * the repository
+     */
+    public void testInitializeTriggers() {
+        Integer triggerId = Integer.valueOf(987);
+        Integer trigger2Id = Integer.valueOf(456);
+        Integer alertDefinitionId = Integer.valueOf(5432);
+
+        AlertDefinition alertDef = new AlertDefinition();
+        alertDef.setId(alertDefinitionId);
+        RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
+        mockTrigger.setClassname(MockTrigger.class.getName());
+        mockTrigger.setId(triggerId);
+
+        RegisteredTrigger trigger = new RegisteredTrigger(mockTrigger);
+        trigger.setId(mockTrigger.getId());
+        trigger.setAlertDefinition(alertDef);
+
+        RegisteredTriggerValue mockTrigger2 = new RegisteredTriggerValue();
+        mockTrigger2.setClassname(MockTrigger.class.getName());
+        mockTrigger2.setId(trigger2Id);
+
+        RegisteredTrigger trigger2 = new RegisteredTrigger(mockTrigger2);
+        trigger2.setId(mockTrigger2.getId());
+        trigger2.setAlertDefinition(alertDef);
+
+        List triggers = new ArrayList();
+        triggers.add(trigger);
+        triggers.add(trigger2);
+
+        EasyMock.expect(triggerDAO.findAll()).andReturn(triggers);
+        EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef)).andReturn(alertConditionEvaluator);
+        registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
+        EasyMock.expectLastCall().times(2);
+        replay();
+        registeredTriggerManager.initializeTriggers(registeredTriggerRepository);
+        verify();
+        assertTrue(MockTrigger.initialized);
+    }
+
+    /**
+     * Verifies that other triggers will be processed and no Exceptions thrown
+     * if an alert definition for a given trigger is not found for some reason
+     */
+    public void testInitializeTriggersAlertDefNotFound() {
+        Integer triggerId = Integer.valueOf(987);
+        Integer trigger2Id = Integer.valueOf(456);
+        Integer alertDefinitionId = Integer.valueOf(5432);
+
+        AlertDefinition alertDef = new AlertDefinition();
+        alertDef.setId(alertDefinitionId);
+        RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
+        mockTrigger.setClassname(MockTrigger.class.getName());
+        mockTrigger.setId(triggerId);
+
+        RegisteredTrigger trigger = new RegisteredTrigger(mockTrigger);
+        trigger.setId(mockTrigger.getId());
+
+        RegisteredTriggerValue mockTrigger2 = new RegisteredTriggerValue();
+        mockTrigger2.setClassname(MockTrigger.class.getName());
+        mockTrigger2.setId(trigger2Id);
+
+        RegisteredTrigger trigger2 = new RegisteredTrigger(mockTrigger2);
+        trigger2.setId(mockTrigger2.getId());
+        trigger2.setAlertDefinition(alertDef);
+
+        List triggers = new ArrayList();
+        triggers.add(trigger);
+        triggers.add(trigger2);
+
+        EasyMock.expect(triggerDAO.findAll()).andReturn(triggers);
+        EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef)).andReturn(alertConditionEvaluator);
+        registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
+        replay();
+        registeredTriggerManager.initializeTriggers(registeredTriggerRepository);
+        verify();
+        assertTrue(MockTrigger.initialized);
+    }
+
+    /**
+     * Verifies that triggers are still initialized if a single trigger cannot be registered
+     */
+    public void testInitializeTriggersErrorRegistering() {
+        Integer triggerId = Integer.valueOf(987);
+        Integer trigger2Id = Integer.valueOf(456);
+        Integer alertDefinitionId = Integer.valueOf(5432);
+
+        AlertDefinition alertDef = new AlertDefinition();
+        alertDef.setId(alertDefinitionId);
+        RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
+        mockTrigger.setClassname(MockTrigger.class.getName());
+        mockTrigger.setId(triggerId);
+
+        RegisteredTrigger trigger = new RegisteredTrigger(mockTrigger);
+        trigger.setId(mockTrigger.getId());
+        trigger.setAlertDefinition(alertDef);
+
+        RegisteredTriggerValue mockTrigger2 = new RegisteredTriggerValue();
+        mockTrigger2.setClassname(MockTrigger.class.getName());
+        mockTrigger2.setId(trigger2Id);
+
+        RegisteredTrigger trigger2 = new RegisteredTrigger(mockTrigger2);
+        trigger2.setId(mockTrigger2.getId());
+        trigger2.setAlertDefinition(alertDef);
+
+        List triggers = new ArrayList();
+        triggers.add(trigger);
+        triggers.add(trigger2);
+
+        EasyMock.expect(triggerDAO.findAll()).andReturn(triggers);
+        EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef)).andReturn(alertConditionEvaluator);
+        registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
+        registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
+        EasyMock.expectLastCall().andThrow(new RuntimeException("Oh No!"));
+        replay();
+        registeredTriggerManager.initializeTriggers(registeredTriggerRepository);
+        verify();
+        assertTrue(MockTrigger.initialized);
+    }
+
+    /**
+     * Verifies that other triggers will be processed and no Exceptions thrown
+     * if an Exception occurs registering a single trigger
+     */
+    public void testInitializeTriggersExceptionInitializing() {
+        Integer triggerId = Integer.valueOf(987);
+        Integer trigger2Id = Integer.valueOf(456);
+        Integer alertDefinitionId = Integer.valueOf(5432);
+        Integer alertDefinition2Id = Integer.valueOf(8997);
+
+        AlertDefinition alertDef = new AlertDefinition();
+        alertDef.setId(alertDefinitionId);
+        AlertDefinition alertDef2 = new AlertDefinition();
+        alertDef2.setId(alertDefinition2Id);
+        RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
+        mockTrigger.setClassname(MockTrigger.class.getName());
+        mockTrigger.setId(triggerId);
+
+        RegisteredTrigger trigger = new RegisteredTrigger(mockTrigger);
+        trigger.setId(mockTrigger.getId());
+        trigger.setAlertDefinition(alertDef);
+
+        RegisteredTriggerValue mockTrigger2 = new RegisteredTriggerValue();
+        mockTrigger2.setClassname(MockTrigger.class.getName());
+        mockTrigger2.setId(trigger2Id);
+
+        RegisteredTrigger trigger2 = new RegisteredTrigger(mockTrigger2);
+        trigger2.setId(mockTrigger2.getId());
+        trigger2.setAlertDefinition(alertDef2);
+
+        List triggers = new ArrayList();
+        triggers.add(trigger);
+        triggers.add(trigger2);
+
+        EasyMock.expect(triggerDAO.findAll()).andReturn(triggers);
+        EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef)).andReturn(alertConditionEvaluator);
+        EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef2)).andThrow(new RuntimeException("Yikes!"));
+        registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
+        replay();
+        registeredTriggerManager.initializeTriggers(registeredTriggerRepository);
+        verify();
+        assertTrue(MockTrigger.initialized);
+    }
+
+    /**
+     * Verifies that nothing blows up trying to create a trigger with an invalid
+     * classname. We are going to remove old triggers (MultiCondition, Counter,
+     * Duration) during upgrade, but this should nicely handle any that are
+     * accidentally hanging around for some reason
+     * @throws InvalidTriggerDataException
+     * @throws InstantiationException
+     * @throws IllegalAccessException
+     */
+    public void testRegisterTriggerInvalidClass() throws InvalidTriggerDataException,
+                                                 InstantiationException,
+                                                 IllegalAccessException
+    {
+        Integer triggerId = Integer.valueOf(987);
+        Integer alertDefinitionId = Integer.valueOf(5432);
+
+        AlertDefinition alertDef = new AlertDefinition();
+        alertDef.setId(alertDefinitionId);
+        RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
+        mockTrigger.setClassname("com.fake.nonexistent");
+        mockTrigger.setId(triggerId);
+
+        RegisteredTrigger trigger = new RegisteredTrigger(mockTrigger);
+        trigger.setId(mockTrigger.getId());
+        trigger.setAlertDefinition(alertDef);
+
+        List triggers = new ArrayList();
+        triggers.add(trigger);
+
+        EasyMock.expect(triggerDAO.findAll()).andReturn(triggers);
+        EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef)).andReturn(alertConditionEvaluator);
+        replay();
+        registeredTriggerManager.initializeTriggers(registeredTriggerRepository);
+        verify();
+
+    }
+
+    /**
+     * Verifies that triggers are successfully removed from the repository
+     */
+    public void testUnregisterTriggers() {
+        Integer triggerId = Integer.valueOf(987);
+        Integer trigger2Id = Integer.valueOf(456);
+        Integer alertDefinitionId = Integer.valueOf(5432);
+
+        AlertDefinition alertDef = new AlertDefinition();
+        alertDef.setId(alertDefinitionId);
+        RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
+        mockTrigger.setClassname(MockTrigger.class.getName());
+        mockTrigger.setId(triggerId);
+
+        RegisteredTrigger trigger = new RegisteredTrigger(mockTrigger);
+        trigger.setId(mockTrigger.getId());
+        trigger.setAlertDefinition(alertDef);
+
+        RegisteredTriggerValue mockTrigger2 = new RegisteredTriggerValue();
+        mockTrigger2.setClassname(MockTrigger.class.getName());
+        mockTrigger2.setId(trigger2Id);
+
+        RegisteredTrigger trigger2 = new RegisteredTrigger(mockTrigger2);
+        trigger2.setId(mockTrigger2.getId());
+        trigger2.setAlertDefinition(alertDef);
+
+        List triggers = new ArrayList();
+        triggers.add(trigger);
+        triggers.add(trigger2);
+
+        registeredTriggerRepository.removeTrigger(triggerId);
+        registeredTriggerRepository.removeTrigger(trigger2Id);
+        replay();
+        registeredTriggerManager.setRegisteredTriggerRepository(registeredTriggerRepository);
+        registeredTriggerManager.unregisterTriggers(triggers);
+        verify();
+    }
+
+    /**
+     * Verifies that nothing happens when attempting to unregister a trigger if repository is not initialized
+     */
+    public void testUnregisterTriggersNotInitialized() {
+        Integer triggerId = Integer.valueOf(987);
+        Integer trigger2Id = Integer.valueOf(456);
+        Integer alertDefinitionId = Integer.valueOf(5432);
+
+        AlertDefinition alertDef = new AlertDefinition();
+        alertDef.setId(alertDefinitionId);
+        RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
+        mockTrigger.setClassname(MockTrigger.class.getName());
+        mockTrigger.setId(triggerId);
+
+        RegisteredTrigger trigger = new RegisteredTrigger(mockTrigger);
+        trigger.setId(mockTrigger.getId());
+        trigger.setAlertDefinition(alertDef);
+
+        RegisteredTriggerValue mockTrigger2 = new RegisteredTriggerValue();
+        mockTrigger2.setClassname(MockTrigger.class.getName());
+        mockTrigger2.setId(trigger2Id);
+
+        RegisteredTrigger trigger2 = new RegisteredTrigger(mockTrigger2);
+        trigger2.setId(mockTrigger2.getId());
+        trigger2.setAlertDefinition(alertDef);
+
+        List triggers = new ArrayList();
+        triggers.add(trigger);
+        triggers.add(trigger2);
+
+        replay();
+        registeredTriggerManager.unregisterTriggers(triggers);
+        verify();
+    }
+
+    private void verify() {
+        EasyMock.verify(alertConditionEvaluatorFactory,
+                        alertConditionEvaluator,
+                        triggerDAO,
+                        registeredTriggerRepository);
+    }
+}

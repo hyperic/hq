@@ -28,6 +28,10 @@ public class MockTrigger implements RegisterableTriggerInterface {
         return new Integer[] { 123, 456 };
     }
 
+    public Integer getId() {
+       return 3;
+    }
+
     public void init(RegisteredTriggerValue trigger, AlertConditionEvaluator alertConditionEvaluator) throws InvalidTriggerDataException
     {
         MockTrigger.initialized = true;

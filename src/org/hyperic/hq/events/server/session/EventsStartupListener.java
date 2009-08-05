@@ -32,7 +32,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.ejb.CreateException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -41,9 +40,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.PropertyNotFoundException;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.common.DiagnosticThread;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.jdbc.DBUtil;
@@ -54,7 +51,6 @@ public class EventsStartupListener
     private static final Log _log =
         LogFactory.getLog(EventsStartupListener.class);
     private static final Object LOCK = new Object();
-    private static TriggerChangeCallback _triggerChangeCallback;
     private static AlertDefinitionChangeCallback _alertDefChangeCallback;
 
     public void hqStarted() {
@@ -66,9 +62,6 @@ public class EventsStartupListener
         HQApp app = HQApp.getInstance();
 
         synchronized (LOCK) {
-            _triggerChangeCallback = (TriggerChangeCallback)
-                app.registerCallbackCaller(TriggerChangeCallback.class);
-
             _alertDefChangeCallback = (AlertDefinitionChangeCallback)
                 app.registerCallbackCaller(AlertDefinitionChangeCallback.class);
         }
@@ -79,17 +72,20 @@ public class EventsStartupListener
         loadConfigProps("actions");
 
         ZeventManager.getInstance().registerEventClass(AlertConditionsSatisfiedZEvent.class);
-        Set listenEvents = new HashSet();
-        listenEvents.add(AlertConditionsSatisfiedZEvent.class);
+        Set alertEvents = new HashSet();
+        alertEvents.add(AlertConditionsSatisfiedZEvent.class);
 
         ZeventManager.getInstance().addBufferedListener(
-            listenEvents, new AlertConditionsSatisfiedListener());
+            alertEvents, new AlertConditionsSatisfiedListener());
+
+
+        Set triggerEvents = new HashSet();
+        triggerEvents.add(TriggersCreatedZevent.class);
+
+        ZeventManager.getInstance().addBufferedListener(
+                                                        triggerEvents, new TriggersCreatedListener());
+
         cleanupRegisteredTriggers();
-        try {
-            RegisteredTriggers.getInstance().init();
-        } catch (Exception e) {
-           _log.error("Error initializing triggers.  No alerts will be created for existing alert definitions.  Cause: " + e.getMessage());
-        }
     }
 
     private void cleanupRegisteredTriggers() {
@@ -152,12 +148,6 @@ public class EventsStartupListener
         } catch (Exception e) {
             // Swallow all exceptions
             _log.error("Encountered error initializing " + prop, e);
-        }
-    }
-
-    public static TriggerChangeCallback getChangedTriggerCallback() {
-        synchronized (LOCK) {
-            return _triggerChangeCallback;
         }
     }
 

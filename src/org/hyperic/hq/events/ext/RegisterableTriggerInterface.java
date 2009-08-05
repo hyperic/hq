@@ -72,4 +72,10 @@ public interface RegisterableTriggerInterface {
 
     public ConfigSchema getConfigSchema();
 
+    /**
+     *
+     * @return The ID of this trigger
+     */
+    Integer getId();
+
 }

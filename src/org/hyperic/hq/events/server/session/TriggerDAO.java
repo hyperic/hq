@@ -31,25 +31,23 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
-public class TriggerDAO extends HibernateDAO {
+public class TriggerDAO extends HibernateDAO implements TriggerDAOInterface{
     public TriggerDAO(DAOFactory f) {
         super(RegisteredTrigger.class, f);
     }
 
-    RegisteredTrigger create(RegisteredTriggerValue createInfo) {
+    public RegisteredTrigger create(RegisteredTriggerValue createInfo) {
         RegisteredTrigger res = new RegisteredTrigger(createInfo);
         save(res);
 
         //  Set the new ID just in case someone wants to use it
         createInfo.setId(res.getId());
 
-        
+
         return res;
     }
 
-    void removeTriggers(AlertDefinition def) {
-        EventsStartupListener.getChangedTriggerCallback()
-            .beforeTriggersDeleted(def.getTriggers());
+    public void removeTriggers(AlertDefinition def) {
 
         String sql = "update AlertCondition set trigger = null " +
                      "where alertDefinition = :def";
@@ -59,7 +57,7 @@ public class TriggerDAO extends HibernateDAO {
         def.clearTriggers();
     }
 
-    void deleteAlertDefinition(AlertDefinition def) {
+    public void deleteAlertDefinition(AlertDefinition def) {
         String sql = "update AlertCondition c set trigger = null " +
                      "where alertDefinition = :def or " +
                            "exists (select d.id from AlertDefinition d where " +
@@ -89,7 +87,7 @@ public class TriggerDAO extends HibernateDAO {
      * @param id The alert definition id.
      * @return The list of associated registered triggers.
      */
-    List findByAlertDefinitionId(Integer id) {
+    public List findByAlertDefinitionId(Integer id) {
         String sql = "from RegisteredTrigger rt where rt.alertDefinition.id = :defId";
 
         return getSession().createQuery(sql)
