@@ -25,12 +25,21 @@
 
 package org.hyperic.hq.escalation.server.session;
 
+import java.util.List;
+
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
 
 public class EscalationStartupListener 
-    implements StartupListener
+    implements StartupListener, PluginsDeployedCallback
 {
     public void hqStarted() {
+        HQApp.getInstance()
+             .registerCallbackListener(PluginsDeployedCallback.class, this);        
+    }
+
+    public void pluginsDeployed(List plugins) {
         EscalationManagerEJBImpl.getOne().startup();
     }
 }
