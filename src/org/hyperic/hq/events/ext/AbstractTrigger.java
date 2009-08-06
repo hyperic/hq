@@ -25,8 +25,6 @@ import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
 
-
-
 /**
  * Abstract class that defines a trigger, which can fire actions
  */
@@ -38,51 +36,60 @@ public abstract class AbstractTrigger implements TriggerInterface, RegisterableT
 
     private AlertConditionEvaluator alertConditionEvaluator;
 
+    private boolean enabled;
+
     public AbstractTrigger() {
 
     }
 
-    protected TriggerFiredEvent prepareTriggerFiredEvent(AbstractEvent source) {
-        if (log.isDebugEnabled()) {
-            log.debug("Trigger [id=" + getId() + ", cls=" + getClass().getSimpleName() +
-                           "] creating TriggerFiredEvent");
-        }
-        return new TriggerFiredEvent(getId(), source);
-    }
-
-    protected TriggerFiredEvent prepareTriggerFiredEvent(AbstractEvent[] sources) {
-        if (log.isDebugEnabled()) {
-            log.debug("Trigger [id=" + getId() + ", cls=" + getClass().getSimpleName() +
-                           "] creating TriggerFiredEvent");
-        }
-        return new TriggerFiredEvent(getId(), sources);
-    }
-
-    protected final void notFired(AbstractEvent nonFiringEvent) {
-        if (log.isDebugEnabled()) {
-            log.debug("Trigger [id=" + getId() + ", cls=" + getClass().getSimpleName() +
-                           "] publishing TriggerNotFiredEvent");
-        }
-        TriggerNotFiredEvent notFired = new TriggerNotFiredEvent(getId());
-        //Preserve the timestamp of the event that caused the condition not to fire.  We need to evaluate the events in order they occurred.
-        notFired.setTimestamp(nonFiringEvent.getTimestamp());
-        alertConditionEvaluator.triggerNotFired(notFired);
-    }
-
-    protected final void fireActions(TriggerFiredEvent event)  {
-       alertConditionEvaluator.triggerFired(event);
+    protected final void fireActions(TriggerFiredEvent event) {
+        alertConditionEvaluator.triggerFired(event);
     }
 
     public Integer getId() {
         return this.id;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    protected final void notFired(AbstractEvent nonFiringEvent) {
+        if (log.isDebugEnabled()) {
+            log.debug("Trigger [id=" + getId() + ", cls=" + getClass().getSimpleName() +
+                      "] publishing TriggerNotFiredEvent");
+        }
+        TriggerNotFiredEvent notFired = new TriggerNotFiredEvent(getId());
+        // Preserve the timestamp of the event that caused the condition not to
+        // fire. We need to evaluate the events in order they occurred.
+        notFired.setTimestamp(nonFiringEvent.getTimestamp());
+        alertConditionEvaluator.triggerNotFired(notFired);
+    }
+
+    protected TriggerFiredEvent prepareTriggerFiredEvent(AbstractEvent source) {
+        if (log.isDebugEnabled()) {
+            log.debug("Trigger [id=" + getId() + ", cls=" + getClass().getSimpleName() + "] creating TriggerFiredEvent");
+        }
+        return new TriggerFiredEvent(getId(), source);
+    }
+
+    protected TriggerFiredEvent prepareTriggerFiredEvent(AbstractEvent[] sources) {
+        if (log.isDebugEnabled()) {
+            log.debug("Trigger [id=" + getId() + ", cls=" + getClass().getSimpleName() + "] creating TriggerFiredEvent");
+        }
+        return new TriggerFiredEvent(getId(), sources);
     }
 
     public void setAlertConditionEvaluator(AlertConditionEvaluator alertConditionEvaluator) {
         this.alertConditionEvaluator = alertConditionEvaluator;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
 }

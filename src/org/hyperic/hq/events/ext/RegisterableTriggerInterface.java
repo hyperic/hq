@@ -37,14 +37,13 @@ import org.hyperic.util.config.ConfigSchema;
 
 public interface RegisterableTriggerInterface {
 
+    public ConfigSchema getConfigSchema();
+
     /**
-     * Initialize the trigger with a value object.
-     * @param trigger The trigger data object containing all the configuration data
-     * @param alertConditionEvaluator  The evaluator to use for reporting trigger fired/trigger not fired events
-     * @throws InvalidTriggerDataException if the configuration data is invalid.
+     *
+     * @return The ID of this trigger
      */
-    public void init(RegisteredTriggerValue trigger, AlertConditionEvaluator alertConditionEvaluator)
-        throws InvalidTriggerDataException;
+    Integer getId();
 
     /**
      * Get the event classes that the trigger is interested in
@@ -70,12 +69,28 @@ public interface RegisterableTriggerInterface {
      */
     public Integer[] getInterestedInstanceIDs(Class c);
 
-    public ConfigSchema getConfigSchema();
+    /**
+     * Initialize the trigger with a value object.
+     * @param trigger The trigger data object containing all the configuration data
+     * @param alertConditionEvaluator  The evaluator to use for reporting trigger fired/trigger not fired events
+     * @throws InvalidTriggerDataException if the configuration data is invalid.
+     */
+    public void init(RegisteredTriggerValue trigger, AlertConditionEvaluator alertConditionEvaluator)
+        throws InvalidTriggerDataException;
 
     /**
-     *
-     * @return The ID of this trigger
-     */
-    Integer getId();
+    *
+    * @return true if the trigger is enabled, likely meaning its associated
+    *         alert definition is enabled
+    */
+   boolean isEnabled();
+
+   /**
+    *
+    * @param enabled true to enable the trigger for event processing, false
+    *        otherwise. This state will likely match the enabled state of the
+    *        trigger's associated alert definition
+    */
+   void setEnabled(boolean enabled);
 
 }

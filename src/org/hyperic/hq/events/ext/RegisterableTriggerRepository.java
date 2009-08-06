@@ -28,5 +28,13 @@ public interface RegisterableTriggerRepository {
      */
     void removeTrigger(Integer triggerId);
 
+    /**
+     * Enables or disables triggers.  Should be called when the alert definition is enabled or disabled.
+     * Disabled triggers will not be returned from calls to getInterestedTriggers, and therefore will not receive events from the RegisteredDispatcher
+     * @param triggerIds  The triggers that should be enabled or disabled
+     * @param enabled true if triggers should be enabled
+     */
+    void setTriggersEnabled(Collection triggerIds, boolean enabled);
+
 
 }

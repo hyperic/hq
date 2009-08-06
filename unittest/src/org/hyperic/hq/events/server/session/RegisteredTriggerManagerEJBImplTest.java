@@ -1,6 +1,7 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -43,6 +44,63 @@ public class RegisteredTriggerManagerEJBImplTest
         registeredTriggerManager.setAlertConditionEvaluatorFactory(alertConditionEvaluatorFactory);
         registeredTriggerManager.setTriggerDAO(triggerDAO);
         MockTrigger.initialized = false;
+        MockTrigger.enabled = false;
+    }
+
+    /**
+     * Verifies successful disable of triggers
+     */
+    public void testDisableTriggers() {
+        Integer triggerId = Integer.valueOf(987);
+        List triggerIds = new ArrayList();
+        triggerIds.add(triggerId);
+        registeredTriggerRepository.setTriggersEnabled(triggerIds, false);
+        replay();
+        registeredTriggerManager.setRegisteredTriggerRepository(registeredTriggerRepository);
+        registeredTriggerManager.setTriggersEnabled(triggerIds, false);
+        verify();
+    }
+
+    /**
+     * Verifies nothing happens if setTriggersEnabled is called before the repository is initialized
+     */
+    public void testDisableTriggersNotInitialized() {
+        Integer triggerId = Integer.valueOf(987);
+        List triggerIds = new ArrayList();
+        triggerIds.add(triggerId);
+        replay();
+        registeredTriggerManager.setTriggersEnabled(triggerIds, false);
+        verify();
+    }
+
+    /**
+     * Verifies successful retrieval of triggers IDs by alert definition ID
+     */
+    public void testGetTriggerIdsByAlertDefId() {
+        Integer alertDefinitionId = Integer.valueOf(5432);
+        Integer triggerId = Integer.valueOf(987);
+        AlertDefinition alertDef = new AlertDefinition();
+        alertDef.setId(alertDefinitionId);
+
+        RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
+        mockTrigger.setClassname(MockTrigger.class.getName());
+        mockTrigger.setId(triggerId);
+
+        RegisteredTrigger trigger = new RegisteredTrigger(mockTrigger);
+        trigger.setId(mockTrigger.getId());
+        trigger.setAlertDefinition(alertDef);
+
+        List triggers = new ArrayList();
+        triggers.add(trigger);
+
+        List expectedIds = new ArrayList();
+        expectedIds.add(triggerId);
+
+        EasyMock.expect(triggerDAO.findByAlertDefinitionId(alertDefinitionId)).andReturn(triggers);
+        replay();
+        Collection triggerIds = registeredTriggerManager.getTriggerIdsByAlertDefId(alertDefinitionId);
+        verify();
+        assertEquals(expectedIds,triggerIds);
     }
 
     /**
@@ -55,6 +113,7 @@ public class RegisteredTriggerManagerEJBImplTest
 
         AlertDefinition alertDef = new AlertDefinition();
         alertDef.setId(alertDefinitionId);
+        alertDef.setActiveStatus(true);
         RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
         mockTrigger.setClassname(MockTrigger.class.getName());
         mockTrigger.setId(triggerId);
@@ -87,6 +146,7 @@ public class RegisteredTriggerManagerEJBImplTest
         registeredTriggerManager.handleTriggerCreatedEvents(createdEvents);
         verify();
         assertTrue(MockTrigger.initialized);
+        assertTrue(MockTrigger.enabled);
     }
 
     /**
@@ -127,6 +187,7 @@ public class RegisteredTriggerManagerEJBImplTest
 
         AlertDefinition alertDef = new AlertDefinition();
         alertDef.setId(alertDefinitionId);
+        alertDef.setEnabled(true);
         RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
         mockTrigger.setClassname(MockTrigger.class.getName());
         mockTrigger.setId(triggerId);
@@ -160,6 +221,7 @@ public class RegisteredTriggerManagerEJBImplTest
         registeredTriggerManager.handleTriggerCreatedEvents(createdEvents);
         verify();
         assertTrue(MockTrigger.initialized);
+        assertTrue(MockTrigger.enabled);
     }
 
     /**
@@ -188,6 +250,7 @@ public class RegisteredTriggerManagerEJBImplTest
 
         AlertDefinition alertDef = new AlertDefinition();
         alertDef.setId(alertDefinitionId);
+        alertDef.setActiveStatus(true);
         RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
         mockTrigger.setClassname(MockTrigger.class.getName());
         mockTrigger.setId(triggerId);
@@ -216,6 +279,7 @@ public class RegisteredTriggerManagerEJBImplTest
         registeredTriggerManager.initializeTriggers(registeredTriggerRepository);
         verify();
         assertTrue(MockTrigger.initialized);
+        assertTrue(MockTrigger.enabled);
     }
 
     /**
@@ -229,6 +293,7 @@ public class RegisteredTriggerManagerEJBImplTest
 
         AlertDefinition alertDef = new AlertDefinition();
         alertDef.setId(alertDefinitionId);
+        alertDef.setActiveStatus(true);
         RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
         mockTrigger.setClassname(MockTrigger.class.getName());
         mockTrigger.setId(triggerId);
@@ -255,6 +320,7 @@ public class RegisteredTriggerManagerEJBImplTest
         registeredTriggerManager.initializeTriggers(registeredTriggerRepository);
         verify();
         assertTrue(MockTrigger.initialized);
+        assertTrue(MockTrigger.enabled);
     }
 
     /**
@@ -267,6 +333,7 @@ public class RegisteredTriggerManagerEJBImplTest
 
         AlertDefinition alertDef = new AlertDefinition();
         alertDef.setId(alertDefinitionId);
+        alertDef.setEnabled(true);
         RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
         mockTrigger.setClassname(MockTrigger.class.getName());
         mockTrigger.setId(triggerId);
@@ -296,6 +363,7 @@ public class RegisteredTriggerManagerEJBImplTest
         registeredTriggerManager.initializeTriggers(registeredTriggerRepository);
         verify();
         assertTrue(MockTrigger.initialized);
+        assertTrue(MockTrigger.enabled);
     }
 
     /**
@@ -310,6 +378,7 @@ public class RegisteredTriggerManagerEJBImplTest
 
         AlertDefinition alertDef = new AlertDefinition();
         alertDef.setId(alertDefinitionId);
+        alertDef.setActiveStatus(true);
         AlertDefinition alertDef2 = new AlertDefinition();
         alertDef2.setId(alertDefinition2Id);
         RegisteredTriggerValue mockTrigger = new RegisteredTriggerValue();
@@ -340,6 +409,7 @@ public class RegisteredTriggerManagerEJBImplTest
         registeredTriggerManager.initializeTriggers(registeredTriggerRepository);
         verify();
         assertTrue(MockTrigger.initialized);
+        assertTrue(MockTrigger.enabled);
     }
 
     /**

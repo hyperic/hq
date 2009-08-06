@@ -111,7 +111,8 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         this.registeredTriggerRepository = registeredTriggerRepository;
         Collection registeredTriggers = getTriggers();
         registerTriggers(registeredTriggers);
-        ConcurrentStatsCollector.getInstance().addStat(System.currentTimeMillis() - startTime, ConcurrentStatsCollector.TRIGGER_INIT_TIME);
+        ConcurrentStatsCollector.getInstance().addStat(System.currentTimeMillis() - startTime,
+                                                       ConcurrentStatsCollector.TRIGGER_INIT_TIME);
         log.debug("Finished initializing triggers");
     }
 
@@ -123,7 +124,8 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         }
         Collection registeredTriggers = getAllTriggersByAlertDefId(alertDefId);
         if (!(registeredTriggers.isEmpty())) {
-            AlertDefinition alertDefinition = getDefinitionFromTrigger((RegisteredTrigger) registeredTriggers.iterator().next());
+            AlertDefinition alertDefinition = getDefinitionFromTrigger((RegisteredTrigger) registeredTriggers.iterator()
+                                                                                                             .next());
             if (alertDefinition == null) {
                 log.warn("Unable to find AlertDefinition with id: " + alertDefId + ".  These alerts will not fire.");
                 return;
@@ -134,7 +136,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
                 // Try to register each trigger, if exception, then move on
                 RegisteredTrigger tv = (RegisteredTrigger) i.next();
                 try {
-                    registerTrigger(tv.getRegisteredTriggerValue(), alertConditionEvalutor);
+                    registerTrigger(tv.getRegisteredTriggerValue(), alertConditionEvalutor, alertDefinition.isEnabled());
                 } catch (Exception e) {
                     log.error("Error registering trigger", e);
                 }
@@ -167,7 +169,8 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
                 AlertDefinition def = getDefinitionFromTrigger(tv);
                 if (def != null && alertEvaluators.get(def.getId()) != null) {
                     registerTrigger(tv.getRegisteredTriggerValue(),
-                                    (AlertConditionEvaluator) alertEvaluators.get(def.getId()));
+                                    (AlertConditionEvaluator) alertEvaluators.get(def.getId()),
+                                    def.isEnabled());
                 }
             } catch (Exception e) {
                 log.error("Error registering trigger", e);
@@ -180,14 +183,17 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      * Hibernate session/transaction. Trigger init method may interact with a DB
      * @param tv The trigger to register
      * @param alertDef The trigger's corresponding alert definition
+     * @param enableTrigger True if trigger should be enabled
      * @throws ClassNotFoundException
      * @throws InstantiationException
      * @throws IllegalAccessException
      * @throws InvalidTriggerDataException
      */
-    void registerTrigger(RegisteredTriggerValue tv, AlertConditionEvaluator alertConditionEvaluator) throws InstantiationException,
-                                                                                                    IllegalAccessException,
-                                                                                                    InvalidTriggerDataException
+    void registerTrigger(RegisteredTriggerValue tv,
+                         AlertConditionEvaluator alertConditionEvaluator,
+                         boolean enableTrigger) throws InstantiationException,
+                                               IllegalAccessException,
+                                               InvalidTriggerDataException
     {
         Class tc;
         try {
@@ -199,7 +205,78 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         }
         RegisterableTriggerInterface trigger = (RegisterableTriggerInterface) tc.newInstance();
         trigger.init(tv, alertConditionEvaluator);
+        trigger.setEnabled(enableTrigger);
         this.registeredTriggerRepository.addTrigger(trigger);
+    }
+
+    /**
+     * Enable or disable triggers associated with an alert definition
+     *
+     * @ejb:interface-method
+     */
+    public void setAlertDefinitionTriggersEnabled(Integer alertDefId, boolean enabled) {
+        Collection triggerIds = getTriggerIdsByAlertDefId(alertDefId);
+        addPostCommitSetEnabledListener(triggerIds, enabled);
+    }
+
+    private void addPostCommitSetEnabledListener(final Collection triggerIds, final boolean enabled) {
+        try {
+            HQApp.getInstance().addTransactionListener(new TransactionListener() {
+                public void afterCommit(boolean success) {
+                    if (success) {
+                        try {
+                            setTriggersEnabled(triggerIds, enabled);
+                        } catch (Exception e) {
+                            log.error("Error setting triggers enabled to " + enabled, e);
+                        }
+                    }
+                }
+
+                public void beforeCommit() {
+                }
+            });
+        } catch (Throwable t) {
+            log.error("Error registering to set triggers enabled to " + enabled, t);
+        }
+    }
+
+    void setTriggersEnabled(final Collection triggerIds, final boolean enabled) {
+        if (this.registeredTriggerRepository != null) {
+            registeredTriggerRepository.setTriggersEnabled(triggerIds, enabled);
+        }
+    }
+
+    Collection getTriggerIdsByAlertDefId(Integer id) {
+        Collection triggers = getAllTriggersByAlertDefId(id);
+        List triggerIds = new ArrayList();
+        for (Iterator iterator = triggers.iterator(); iterator.hasNext();) {
+            triggerIds.add(((RegisteredTrigger) iterator.next()).getId());
+        }
+        return triggerIds;
+    }
+
+    /**
+     * Finds a trigger by its ID, assuming existence
+     * @param id The trigger ID
+     * @return The trigger with the specified ID (exception will occur if
+     *         trigger does not exist)
+     *
+     * @ejb:interface-method
+     */
+    public RegisteredTrigger findById(Integer id) {
+        return getTriggerDAO().findById(id);
+    }
+
+    /**
+     * Get a trigger by its ID
+     * @param id The trigger ID
+     * @return The trigger with the associated ID or null if the trigger does
+     *         not exist
+     *
+     * @ejb:interface-method
+     */
+    public RegisteredTrigger get(Integer id) {
+        return getTriggerDAO().get(id);
     }
 
     void unregisterTriggers(Collection triggers) {

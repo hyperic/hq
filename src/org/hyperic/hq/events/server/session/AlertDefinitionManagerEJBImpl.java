@@ -40,7 +40,6 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.Session;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -66,6 +65,7 @@ import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -98,6 +98,8 @@ public class AlertDefinitionManagerEJBImpl
 {
     private Log log = LogFactory.getLog(AlertDefinitionManagerEJBImpl.class);
 
+    private RegisteredTriggerManagerLocal registeredTriggerManager = RegisteredTriggerManagerEJBImpl.getOne();
+
     private final String VALUE_PROCESSOR =
         PagerProcessor_events.class.getName();
 
@@ -109,10 +111,6 @@ public class AlertDefinitionManagerEJBImpl
 
     private ActionDAO getActionDAO() {
         return new ActionDAO(DAOFactory.getDAOFactory());
-    }
-
-    private TriggerDAO getTriggerDAO() {
-        return new TriggerDAO(DAOFactory.getDAOFactory());
     }
 
     private AlertDAO getAlertDAO() {
@@ -176,7 +174,7 @@ public class AlertDefinitionManagerEJBImpl
         deleteAlertDefinitionStuff(subj, alertdef, escMan);
 
         watch.markTimeBegin("deleteTriggers");
-        RegisteredTriggerManagerEJBImpl.getOne().deleteTriggers(alertdef);
+        registeredTriggerManager.deleteTriggers(alertdef);
         watch.markTimeBegin("deleteTriggers");
 
         watch.markTimeBegin("markActionsDeleted");
@@ -225,7 +223,6 @@ public class AlertDefinitionManagerEJBImpl
         a.initializeMTimeToNow();
 
         AlertDefinition res = new AlertDefinition();
-        TriggerDAO tDAO = getTriggerDAO();
         ActionDAO aDAO = getActionDAO();
         AlertDefinitionDAO adDAO = getAlertDefDAO();
 
@@ -240,7 +237,7 @@ public class AlertDefinitionManagerEJBImpl
         AlertConditionDAO acDAO = getConditionDAO();
         for (int i = 0; i < conds.length; i++) {
             RegisteredTrigger trigger = conds[i].getTriggerId() != null ?
-                tDAO.findById(conds[i].getTriggerId()) : null;
+                registeredTriggerManager.findById(conds[i].getTriggerId()) : null;
 
             AlertCondition cond = res.createCondition(conds[i], trigger);
 
@@ -310,7 +307,7 @@ public class AlertDefinitionManagerEJBImpl
 
                 // Triggers were already created by bizapp, so we only need
                 // to add them to our list
-                trig = tDAO.findById(triggers[i].getId());
+                trig = registeredTriggerManager.findById(triggers[i].getId());
                 trig.setAlertDefinition(res);
             }
         }
@@ -360,6 +357,7 @@ public class AlertDefinitionManagerEJBImpl
             if (def.isActive() != activate || def.isEnabled() != activate) {
                 def.setActiveStatus(activate);
                 AlertAudit.enableAlert(def, subj);
+                registeredTriggerManager.setAlertDefinitionTriggersEnabled(def.getId(), activate);
             }
             def.setMtime(System.currentTimeMillis());
 
@@ -414,7 +412,7 @@ public class AlertDefinitionManagerEJBImpl
 
                 // Trigger ID is null for resource type alerts
                 if (conds[i].getTriggerId() != null)
-                    trigger = getTriggerDAO().findById(conds[i].getTriggerId());
+                    trigger = registeredTriggerManager.findById(conds[i].getTriggerId());
 
                 if (conds[i].getType() == EventConstants.TYPE_ALERT) {
                     EnableAlertDefActionConfig action =
@@ -488,7 +486,7 @@ public class AlertDefinitionManagerEJBImpl
         RegisteredTriggerValue[] triggers = adval.getTriggers();
         if (triggers.length > 0) {
             for (int i = 0; i < triggers.length; i++) {
-                RegisteredTrigger t = getTriggerDAO().findById(triggers[i].getId());
+                RegisteredTrigger t = registeredTriggerManager.findById(triggers[i].getId());
                 t.setAlertDefinition(aldef);
             }
         }
@@ -540,8 +538,7 @@ public class AlertDefinitionManagerEJBImpl
 
     /**
      * Activate/deactivate an alert definition.
-     *
-     * @ejb:interface-method
+     *@ejb:interface-method
      */
     public void updateAlertDefinitionActiveStatus(AuthzSubject subj,
                                                   AlertDefinition def,
@@ -554,6 +551,7 @@ public class AlertDefinitionManagerEJBImpl
             def.setActiveStatus(activate);
             def.setMtime(System.currentTimeMillis());
             AlertAudit.enableAlert(def, subj);
+            registeredTriggerManager.setAlertDefinitionTriggersEnabled(def.getId(), activate);
         }
 
         getAlertDefDAO().setChildrenActive(def, activate);
@@ -579,6 +577,7 @@ public class AlertDefinitionManagerEJBImpl
         if (def.isEnabled() != enable) {
             canManageAlerts(subj, def.getAppdefEntityId());
             def.setEnabledStatus(enable);
+            registeredTriggerManager.setAlertDefinitionTriggersEnabled(def.getId(), enable);
             succeeded = true;
         }
 
@@ -603,40 +602,6 @@ public class AlertDefinitionManagerEJBImpl
     }
 
     /**
-     * Enable/Disable an alert definition. For internal use only where the mtime
-     * does not need to be reset on each update. This operation will always
-     * be performed within a new transaction.
-     *
-     * @return <code>true</code> if the enable/disable succeeded.
-     * @ejb:transaction type="RequiresNew"
-     * @ejb:interface-method
-     */
-    public boolean updateAlertDefinitionInternalEnableForceNewTxn(AuthzSubject subj,
-                                                                  Integer defId,
-                                                                  boolean enable)
-        throws PermissionException {
-
-        // We need a new session in case we are already within an existing
-        // session where the transaction has been marked for rollback but
-        // not yet rolled back. Hibernate sessions were not meant to have
-        // nested transactions.
-        AlertDefinitionDAO dao = getAlertDefDAO();
-
-        boolean succeeded = false;
-        Session session = dao.getNewSession();
-
-        try {
-            AlertDefinition def = dao.findById(defId, session);
-            succeeded = updateAlertDefinitionInternalEnable(subj, def, enable);
-            session.flush();
-        } finally {
-            session.close();
-        }
-
-        return succeeded;
-    }
-
-    /**
      * Set the escalation on the alert definition
      *
      * @ejb:interface-method
@@ -647,7 +612,7 @@ public class AlertDefinitionManagerEJBImpl
         AlertDefinition def = getAlertDefDAO().findById(defId);
         canManageAlerts(subj, def);
 
-    	EscalationManagerLocal escMan = EscalationManagerEJBImpl.getOne();
+        EscalationManagerLocal escMan = EscalationManagerEJBImpl.getOne();
         Escalation esc = escMan.findById(escId);
 
         // End any escalation we were previously doing.
@@ -697,24 +662,7 @@ public class AlertDefinitionManagerEJBImpl
         }
     }
 
-    /** Remove alert definitions
-     * @throws PermissionException
-     * @ejb:interface-method
-     */
-    public void deleteAlertDefinitions(AuthzSubject subj, AppdefEntityID aeid)
-        throws RemoveException, PermissionException
-    {
-        canManageAlerts(subj, aeid);
 
-        AlertDefinitionDAO aDao = getAlertDefDAO();
-        Resource res = findResource(aeid);
-        List adefs = aDao.findByResource(res);
-
-        for (Iterator i = adefs.iterator(); i.hasNext(); ) {
-            AlertDefinition adef = (AlertDefinition) i.next();
-            deleteAlertDefinition(subj, adef, true);
-        }
-    }
 
     /**
      * Set Resource to null on entity's alert definitions
@@ -857,7 +805,7 @@ public class AlertDefinitionManagerEJBImpl
      * @return the ID of the alert definition
      */
     public Integer getIdFromTrigger(Integer tid) {
-        RegisteredTrigger trigger = getTriggerDAO().get(tid);
+        RegisteredTrigger trigger = registeredTriggerManager.get(tid);
         if (trigger == null) {
             return null;
         }

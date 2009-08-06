@@ -135,8 +135,12 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         // If the alert definition is set to "recover", then we should enable it.
         AlertDefinition def = alert.getAlertDefinition();
 
-        if (def.isWillRecover() && !def.isEnabled()) {
-            def.setEnabledStatus(true);
+        if (def.isWillRecover()) {
+            try {
+                AlertDefinitionManagerEJBImpl.getOne().updateAlertDefinitionInternalEnable( AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(), def, true);
+            } catch (PermissionException e) {
+                _log.error("Error re-enabling alert with ID: " + def.getId() + " after it was fixed.",e);
+            }
         }
     }
 
