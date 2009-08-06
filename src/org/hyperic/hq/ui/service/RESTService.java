@@ -626,14 +626,17 @@ public class RESTService extends BaseService {
         try {
             EventsBoss eb = ContextUtils.getEventsBoss(_servletContext);
             MaintenanceEvent event = null;
+            Integer groupId = Integer.valueOf(groupIdParam);
 
             if ((scheduleParam == null) || (scheduleParam.trim().length() == 0))
             {
             	// Get Scheduled Maintenance Event              
-            	event = eb.getMaintenanceEvent(user.getSessionId(), 
-            	                               Integer.valueOf(groupIdParam));            	
+                event = eb.getMaintenanceEvent(user.getSessionId(), groupId);
+            	if (event == null) {
+            	    event = new MaintenanceEvent(groupId);
+            	}
             } else {
-            	event = new MaintenanceEvent(Integer.valueOf(groupIdParam));
+            	event = new MaintenanceEvent(groupId);
             	
             	if (Boolean.valueOf(scheduleParam).booleanValue()) {
             		// Reschedule Maintenance Event
