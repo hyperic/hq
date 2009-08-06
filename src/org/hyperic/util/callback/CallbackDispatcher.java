@@ -29,7 +29,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -54,7 +54,7 @@ public class CallbackDispatcher {
         LogFactory.getLog(CallbackDispatcher.class);
 
     private static class CallbackHandler implements InvocationHandler {
-        private Set          _listeners = new HashSet();
+        private Set          _listeners = new LinkedHashSet();
         private CallbackType _type;
         
         public CallbackHandler(CallbackType type) {
@@ -83,7 +83,7 @@ public class CallbackDispatcher {
             Set listeners; 
         
             synchronized (_listeners) {
-                listeners = new HashSet(_listeners);
+                listeners = new LinkedHashSet(_listeners);
             }
         
             return _type.callListeners(meth, methArgs, listeners);
