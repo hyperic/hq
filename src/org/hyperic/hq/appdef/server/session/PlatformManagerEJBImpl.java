@@ -329,7 +329,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // before the platform is deleted and the servers cascaded
             dao.getSession().flush();
             getAIQManagerLocal().removeAssociatedAIPlatform(platform);
-            cleanupAgentStatus(platform);
+            cleanupAgent(platform);
             platform.getIps().clear();
             dao.remove(platform);
             if (config != null) {
@@ -352,10 +352,30 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
-    private void cleanupAgentStatus(Platform platform) {
+    private void cleanupAgent(Platform platform) {
         final Agent agent = platform.getAgent();
-        final Platform p = getPhysPlatformByAgentToken(agent.getAgentToken());
-        if (p.getId().equals(platform.getId())) {
+        if (agent == null) {
+            return;
+        }
+        final Collection platforms = agent.getPlatforms();
+        Platform phys = null;
+        for (final Iterator it=platforms.iterator(); it.hasNext(); ) {
+            final Platform p = (Platform)it.next();
+            if (p == null) {
+                continue;
+            }
+            final String platType = platform.getPlatformType().getName();
+            if (PlatformDetector.isSupportedPlatform(platType)) {
+                phys = p;
+            }
+            if (p.getId().equals(platform.getId())) {
+                it.remove();
+            }
+        }
+        if (phys == null) {
+            return;
+        }
+        if (phys.getId().equals(platform.getId())) {
             AgentManagerEJBImpl.getOne().removeAgentStatus(agent);
         }
     }

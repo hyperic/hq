@@ -64,7 +64,7 @@
       <column name="CONFIG_RESPONSE_ID" not-null="false" index="CONFIG_RESPONSE_ID_IDX"/>
     </many-to-one>
 
-    <many-to-one name="agent" cascade="delete" class="org.hyperic.hq.appdef.Agent">
+    <many-to-one name="agent" class="org.hyperic.hq.appdef.Agent">
       <column name="AGENT_ID" not-null="false" index="AGENT_ID_IDX"/>
     </many-to-one>
 
