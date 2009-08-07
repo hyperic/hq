@@ -40,7 +40,6 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
-import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -51,6 +50,7 @@ import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.BaseTilesAction;
 import org.hyperic.hq.ui.util.BizappUtils;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -63,7 +63,7 @@ import org.hyperic.util.config.ConfigSchema;
  * <code>ResourceConfigForm</code> form with configOptions from the
  * Product plugin.
  */
-public class ResourceConfigFormPrepareAction extends TilesAction {
+public class ResourceConfigFormPrepareAction extends BaseTilesAction {
     Log log =
         LogFactory.getLog(ResourceConfigFormPrepareAction.class.getName());
 
@@ -107,6 +107,9 @@ public class ResourceConfigFormPrepareAction extends TilesAction {
                                  HttpServletRequest request,
                                  HttpServletResponse response)
         throws Exception {
+
+        checkModifyPermission(request);
+        
         // HACK for the ProblemResources portlet to tell us
         // to redirect back to dash when done
         if (request.getParameter("todash") != null) {
