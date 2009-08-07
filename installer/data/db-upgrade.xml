@@ -9925,6 +9925,9 @@ has already been defined.
       <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='postgresql'>
         DROP INDEX ACT_ON_TRIGGER_ID_IDX
       </statement>
+      <statement desc="Drop Foreign Key Constraint on ACT_ON_TRIGGER_ID" targetDB='mysql'>
+        ALTER TABLE EAM_ALERT_DEFINITION DROP FOREIGN KEY FK975407845BC79AEA
+      </statement>
       <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='mysql'>
         ALTER TABLE EAM_ALERT_DEFINITION DROP INDEX ACT_ON_TRIGGER_ID_IDX
       </statement>
