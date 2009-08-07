@@ -83,6 +83,7 @@ import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
+import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -1659,6 +1660,35 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                       ": " + e.getMessage(), e);
         }
     }
+   
+   /**
+    * Initializes the units and resource properties of a measurement event
+    *
+    * @ejb:interface-method
+    */
+   public void buildMeasurementEvent(MeasurementEvent event) {      
+       Measurement dm = null;
+       
+       try {
+           dm = getMeasurementDAO().get(event.getInstanceId());
+           int resourceType = dm.getTemplate().getMonitorableType()
+                                   .getAppdefType();
+           event.setResource(new AppdefEntityID(resourceType, dm.getInstanceId()));
+           event.setUnits(dm.getTemplate().getUnits());
+       } catch (Exception e) {
+           if (event == null) {
+               log.warn("Measurement event is null");
+           } else if (dm == null) {
+               log.warn("Measurement is null for measurement event with metric id=" + event.getInstanceId());                
+           } else if (event.getResource() == null) {
+               log.error("Unable to set resource for measurement event with metric id=" + event.getInstanceId(), e);
+           } else if (event.getUnits() == null ) {
+               log.error("Unable to set units for measurement event with metric id=" + event.getInstanceId(), e);
+           } else {
+               log.error("Unable to build measurement event with metric id=" + event.getInstanceId(), e);
+           }
+       }
+   }
 
     public static MeasurementManagerLocal getOne() {
         try {

@@ -1292,25 +1292,12 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
-    private void updateMeasurementEvent(Integer metricId, MeasurementEvent event) {
-        try {
-            MeasurementDAO dao =getMeasurementDAO();
-            Measurement dm = dao.findById(metricId);
-            int resourceType = dm.getTemplate().getMonitorableType()
-                    .getAppdefType();
-            event.setResource(new AppdefEntityID(resourceType, dm.getInstanceId()));
-            event.setUnits(dm.getTemplate().getUnits());
-        } catch (Exception e) {
-            // don't set anything
-            _log.error("Couldn't setup measurement event unit or resource values", e);
-        }
-    }
-
     private void sendDataToEventHandlers(List data) {
         int maxCapacity = data.size();
         ArrayList events  = new ArrayList(maxCapacity);
         Map downEvents  = new HashMap(maxCapacity);
         List zevents = new ArrayList(maxCapacity);
+        MeasurementManagerLocal measMan = MeasurementManagerEJBImpl.getOne();
 
         boolean allEventsInteresting =
             Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
@@ -1324,7 +1311,7 @@ public class AvailabilityManagerEJBImpl
 
             if (RegisteredTriggers.isTriggerInterested(event)
                     || allEventsInteresting) {
-                updateMeasurementEvent(metricId, event);
+                measMan.buildMeasurementEvent(event);
                 if (event.getValue().getValue() == AVAIL_DOWN) {
                     Resource r = getResource(event.getResource());
                     if (r != null && !r.isInAsyncDeleteState()) {
@@ -1371,6 +1358,7 @@ public class AvailabilityManagerEJBImpl
         int maxCapacity = data.size();
         Map events  = new HashMap(maxCapacity);
         List zevents = new ArrayList(maxCapacity);
+        MeasurementManagerLocal measMan = MeasurementManagerEJBImpl.getOne();
 
         boolean allEventsInteresting =
             Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
@@ -1384,7 +1372,7 @@ public class AvailabilityManagerEJBImpl
 
             if (RegisteredTriggers.isTriggerInterested(event)
                     || allEventsInteresting) {
-                updateMeasurementEvent(metricId, event);
+                measMan.buildMeasurementEvent(event);
                 events.put(resourceIdKey, event);
             }
 
