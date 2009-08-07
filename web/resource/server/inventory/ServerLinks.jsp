@@ -13,7 +13,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004-2008], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -40,15 +40,19 @@
         value="/resource/service/Inventory.do?mode=new&eid=${resource.entityId.appdefKey}" />
     <hq:userResourcePermissions debug="false" resource="${Resource}"/>    
 <table border="0"><tr><td class="LinkBox">
-    <html:link page="/resource/server/Inventory.do?mode=editConfig&eid=${resource.entityId.appdefKey}" ><fmt:message key="resource.server.inventory.link.Configure"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link>
-	<br>
-    <tiles:insert definition=".resource.common.quickDelete">
-      <tiles:put name="resource" beanName="resource"/>
-	  <tiles:put name="deleteMessage">
-		<fmt:message key="resource.server.inventory.link.DeleteServer"/>
-	  </tiles:put>
-    </tiles:insert>
-	<br>
+    <c:if test="${canModify}" >
+    	<html:link page="/resource/server/Inventory.do?mode=editConfig&eid=${resource.entityId.appdefKey}" ><fmt:message key="resource.server.inventory.link.Configure"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link>
+		<br>
+	</c:if>
+    <c:if test="${canRemove}" >
+    	<tiles:insert definition=".resource.common.quickDelete">
+      		<tiles:put name="resource" beanName="resource"/>
+	  		<tiles:put name="deleteMessage">
+				<fmt:message key="resource.server.inventory.link.DeleteServer"/>
+	  		</tiles:put>
+    	</tiles:insert>
+		<br>
+	</c:if>
     <c:choose>
         <c:when test="${canCreateChild}" >
             <html:link page="${newServiceUrl}" ><fmt:message key="resource.server.inventory.link.NewService"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
