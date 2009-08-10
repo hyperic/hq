@@ -580,7 +580,7 @@ public class EmailAction extends EmailActionConfig
             _continueMsg =
                 _continueMsg.replaceAll("\\{1\\}", EVALUATION_PERIOD/1000+"")
                             .replaceAll("\\{2\\}", THRESHOLD_WINDOW/60000+"");
-            return _continueMsg;
+            return _continueMsg.replaceAll("\\{0\\}", notificationCount+"");
         }
 
         private final String getWindowStartMsg(int notificationCount) {
