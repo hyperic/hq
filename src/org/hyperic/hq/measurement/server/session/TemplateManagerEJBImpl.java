@@ -346,7 +346,13 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             if (!template.isDefaultOn())
                 template.setDefaultOn(interval != 0);
             
-            dmDao.updateIntervalToTemplateInterval(template);
+            final List measurements =
+                getMeasurementDAO().findByTemplate(template.getId());
+            for (final Iterator it=measurements.iterator(); it.hasNext(); ) {
+                final Measurement m = (Measurement)it.next();
+                m.setEnabled(template.isDefaultOn());
+                m.setInterval(template.getDefaultInterval());
+            }
             
             List appdefEntityIds = 
                 dmDao.findAppdefEntityIdsByTemplate(template.getId());

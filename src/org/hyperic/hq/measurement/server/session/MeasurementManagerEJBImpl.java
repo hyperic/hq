@@ -1000,8 +1000,11 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             mids.addAll(dao.findIdsByTemplateForInstances(mtids[i], iids));
         }
 
-        // Do the update in bulk
-        dao.updateInterval(mids, interval);
+        for (final Iterator it=mids.iterator(); it.hasNext(); ) {
+            final Integer mid = (Integer)it.next();
+            final Measurement m = dao.findById(mid);
+            m.setInterval(interval);
+        }
         
         // Update the agent schedule
         for (int i = 0; i < aeids.length; i++) {
@@ -1072,7 +1075,11 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         AppdefEntityID appId = new AppdefEntityID(resource);
         checkModifyPermission(subject.getId(), appId);
         MeasurementDAO dao = getMeasurementDAO();
-        dao.updateInterval(mids, interval);
+        for (final Iterator it=mids.iterator(); it.hasNext(); ) {
+            final Integer mid = (Integer)it.next();
+            final Measurement m = dao.findById(mid);
+            m.setInterval(interval);
+        }
         List eids = Collections.singletonList(appId);
         AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
         ZeventManager.getInstance().enqueueEventAfterCommit(event);
