@@ -26,13 +26,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 
-import edu.emory.mathcs.backport.java.util.concurrent.ConcurrentHashMap;
+
 
 /**
  * Repository of in memory triggers for event processing
@@ -69,7 +70,7 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
 
     public Collection getInterestedTriggers(Class eventClass, Integer instanceId) {
         HashSet trigs = new HashSet();
-        //All alerts are disabled, so no triggers should be processing events
+        // All alerts are disabled, so no triggers should be processing events
         if (!AlertRegulator.getInstance().alertsAllowed()) {
             return trigs;
         }
@@ -78,10 +79,11 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
         if (triggersById != null) {
             trigs.addAll(triggersById.values());
         }
-        //Remove disabled triggers from new set so don't have to synchronize retrieval around concurrent triggers map
-        for(Iterator iterator = trigs.iterator();iterator.hasNext();) {
-            RegisterableTriggerInterface trigger = (RegisterableTriggerInterface)iterator.next();
-            if(! trigger.isEnabled()) {
+        // Remove disabled triggers from new set so don't have to synchronize
+        // retrieval around concurrent triggers map
+        for (Iterator iterator = trigs.iterator(); iterator.hasNext();) {
+            RegisterableTriggerInterface trigger = (RegisterableTriggerInterface) iterator.next();
+            if (!trigger.isEnabled()) {
                 iterator.remove();
             }
         }
@@ -132,19 +134,26 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
         }
     }
 
-
-    public void setTriggersEnabled(Collection triggerIds, boolean enabled) {
-        Set triggersToProcess = new HashSet();
+    public RegisterableTriggerInterface getTriggerById(Integer triggerId) {
         synchronized (triggerUpdateLock) {
             for (Iterator triggerMaps = triggers.values().iterator(); triggerMaps.hasNext();) {
                 Map triggerIdsToTriggers = (Map) triggerMaps.next();
-                for(Iterator idIterator = triggerIds.iterator(); idIterator.hasNext();) {
-                    Integer triggerId = (Integer)idIterator.next();
-                    RegisterableTriggerInterface trigger = (RegisterableTriggerInterface)triggerIdsToTriggers.get(triggerId);
-                    if(trigger != null) {
-                        triggersToProcess.add(trigger);
-                    }
+                RegisterableTriggerInterface trigger = (RegisterableTriggerInterface) triggerIdsToTriggers.get(triggerId);
+                if (trigger != null) {
+                    return trigger;
                 }
+            }
+            return null;
+        }
+    }
+
+    public void setTriggersEnabled(Collection triggerIds, boolean enabled) {
+        Set triggersToProcess = new HashSet();
+        for(Iterator idIterator = triggerIds.iterator(); idIterator.hasNext();) {
+            Integer triggerId = (Integer)idIterator.next();
+            RegisterableTriggerInterface trigger = getTriggerById(triggerId);
+            if(trigger != null) {
+                triggersToProcess.add(trigger);
             }
         }
         //not concerned with thread-safety of "enabled" boolean - willing to deal with some being read with old value during update

@@ -10,6 +10,12 @@ public interface RegisterableTriggerRepository {
 
     /**
      *
+     * @param trigger The trigger to add to the repository
+     */
+    void addTrigger(RegisterableTriggerInterface trigger);
+
+    /**
+     *
      * @param eventClass The event class
      * @param instanceId The id of the source instance of the event
      * @return The {@link RegisterableTriggerInterface}s interested in the event
@@ -18,9 +24,10 @@ public interface RegisterableTriggerRepository {
 
     /**
      *
-     * @param trigger The trigger to add to the repository
+     * @param triggerId The trigger ID
+     * @return The {@link RegisterableTriggerInterface} with the specified ID or null if none exists
      */
-    void addTrigger(RegisterableTriggerInterface trigger);
+    RegisterableTriggerInterface getTriggerById(Integer triggerId);
 
     /**
      *

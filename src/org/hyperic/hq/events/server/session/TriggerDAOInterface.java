@@ -1,6 +1,7 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.List;
+import java.util.Set;
 
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 /**
@@ -24,4 +25,5 @@ public interface TriggerDAOInterface {
 
     void removeTriggers(AlertDefinition def);
 
+    Set findAllEnabledTriggers();
 }

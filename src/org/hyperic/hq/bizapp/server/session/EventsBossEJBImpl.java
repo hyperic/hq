@@ -196,7 +196,7 @@ public class EventsBossEJBImpl
     	        .getMaintenanceEventManager();
     }
 
-   
+
 
     /*
      * How the Boss figures out which triggers to create based on conditions
@@ -1213,20 +1213,6 @@ public class EventsBossEJBImpl
             throw new EncodingException("Failed to instantiate class: " + exc);
         }
         return iface.getConfigSchema();
-    }
-
-   
-
-    /**
-     * Get a collection of all triggers using the 'Registered Dispatcher'
-     *
-     * @ejb:interface-method
-     */
-    public Collection getAllRegisteredTriggers(int sessionID)
-        throws SessionNotFoundException, SessionTimeoutException
-    {
-        manager.authenticate(sessionID);
-        return getRTM().getAllTriggers();
     }
 
     /**

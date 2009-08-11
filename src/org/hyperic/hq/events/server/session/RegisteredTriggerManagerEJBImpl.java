@@ -46,6 +46,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -86,6 +87,8 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
 
     private TriggerDAOInterface triggerDAO;
 
+    private ZeventEnqueuer zeventEnqueuer;
+
     /**
      * Processes {@link TriggerCreatedEvent}s that indicate that triggers should
      * be created
@@ -109,7 +112,13 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         log.debug("Initializing triggers");
         long startTime = System.currentTimeMillis();
         this.registeredTriggerRepository = registeredTriggerRepository;
-        Collection registeredTriggers = getTriggers();
+        // Only initialize the enabled triggers. If disabled ones become enabled
+        // we will lazy init
+        log.debug("Fetching enabled triggers");
+        Collection registeredTriggers = getTriggerDAO().findAllEnabledTriggers();
+        if(log.isDebugEnabled()) {
+            log.debug("Found " + registeredTriggers.size() + " triggers");
+        }
         registerTriggers(registeredTriggers);
         ConcurrentStatsCollector.getInstance().addStat(System.currentTimeMillis() - startTime,
                                                        ConcurrentStatsCollector.TRIGGER_INIT_TIME);
@@ -216,22 +225,21 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      */
     public void setAlertDefinitionTriggersEnabled(Integer alertDefId, boolean enabled) {
         Collection triggerIds = getTriggerIdsByAlertDefId(alertDefId);
-        addPostCommitSetEnabledListener(triggerIds, enabled);
+        addPostCommitSetEnabledListener(alertDefId, triggerIds, enabled);
     }
 
-    private void addPostCommitSetEnabledListener(final Collection triggerIds, final boolean enabled) {
+    private void addPostCommitSetEnabledListener(final Integer alertDefId, final Collection triggerIds, final boolean enabled) {
         try {
             HQApp.getInstance().addTransactionListener(new TransactionListener() {
                 public void afterCommit(boolean success) {
                     if (success) {
                         try {
-                            setTriggersEnabled(triggerIds, enabled);
+                            setTriggersEnabled(alertDefId, triggerIds, enabled);
                         } catch (Exception e) {
                             log.error("Error setting triggers enabled to " + enabled, e);
                         }
                     }
                 }
-
                 public void beforeCommit() {
                 }
             });
@@ -240,9 +248,20 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         }
     }
 
-    void setTriggersEnabled(final Collection triggerIds, final boolean enabled) {
+    void setTriggersEnabled(final Integer alertDefinitionId, final Collection triggerIds, final boolean enabled) {
         if (this.registeredTriggerRepository != null) {
-            registeredTriggerRepository.setTriggersEnabled(triggerIds, enabled);
+            if (enabled == true && !(triggerIds.isEmpty())) {
+                Integer triggerId = (Integer) triggerIds.iterator().next();
+                if (registeredTriggerRepository.getTriggerById(triggerId) == null) {
+                    try {
+                        zeventEnqueuer.enqueueEvent(new TriggersCreatedZevent(alertDefinitionId));
+                    } catch (InterruptedException e) {
+                       log.error("Error sending event to create newly enabled triggers for alert definition " + alertDefinitionId + ". These alerts will not fire",e);
+                    }
+                }
+            } else {
+                registeredTriggerRepository.setTriggersEnabled(triggerIds, enabled);
+            }
         }
     }
 
@@ -267,18 +286,6 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         return getTriggerDAO().findById(id);
     }
 
-    /**
-     * Get a trigger by its ID
-     * @param id The trigger ID
-     * @return The trigger with the associated ID or null if the trigger does
-     *         not exist
-     *
-     * @ejb:interface-method
-     */
-    public RegisteredTrigger get(Integer id) {
-        return getTriggerDAO().get(id);
-    }
-
     void unregisterTriggers(Collection triggers) {
         // No point unregistering if repository has not been intialized
         if (this.registeredTriggerRepository != null) {
@@ -299,43 +306,13 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * Get a collection of all triggers
-     *
-     * @ejb:interface-method
-     */
-    public Collection getAllTriggers() {
-        Collection triggers;
-        List triggerValues = new ArrayList();
-
-        triggers = getTriggers();
-
-        for (Iterator i = triggers.iterator(); i.hasNext();) {
-            RegisteredTrigger t = (RegisteredTrigger) i.next();
-
-            triggerValues.add(t.getRegisteredTriggerValue());
-        }
-
-        return triggerValues;
-    }
-
-    /**
-     * Get a collection of all triggers
-     *
-     * @ejb:interface-method
-     */
-    public Collection getTriggers() {
-        return getTriggerDAO().findAll();
-    }
-
-    /**
      * Get the registered trigger objects associated with a given alert
      * definition.
      *
      * @param id The alert def id.
      * @return The registered trigger objects.
-     * @ejb:interface-method
      */
-    public Collection getAllTriggersByAlertDefId(Integer id) {
+    private Collection getAllTriggersByAlertDefId(Integer id) {
         return getTriggerDAO().findByAlertDefinitionId(id);
     }
 
@@ -416,7 +393,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
                                 AlertDefinition alertDefinition = getDefinitionFromTrigger((RegisteredTrigger) triggers.iterator()
                                                                                                                        .next());
                                 if (alertDefinition != null) {
-                                    ZeventManager.getInstance()
+                                    zeventEnqueuer
                                                  .enqueueEvent(new TriggersCreatedZevent(alertDefinition.getId()));
                                 }
                             }
@@ -474,17 +451,6 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * Update a trigger.
-     *
-     * @ejb:interface-method
-     */
-    public void updateTrigger(RegisteredTriggerValue val) {
-        RegisteredTrigger t = getRegisteredTrigger(val.getId());
-
-        t.setRegisteredTriggerValue(val);
-    }
-
-    /**
      * Delete all triggers for an alert definition.
      *
      * @ejb:interface-method
@@ -517,6 +483,10 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         this.registeredTriggerRepository = registeredTriggerRepository;
     }
 
+    void setZeventEnqueuer(ZeventEnqueuer zeventEnqueuer) {
+        this.zeventEnqueuer = zeventEnqueuer;
+    }
+
     public static RegisteredTriggerManagerLocal getOne() {
         try {
             return RegisteredTriggerManagerUtil.getLocalHome().create();
@@ -526,7 +496,8 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     }
 
     public void ejbCreate() {
-        this.alertConditionEvaluatorFactory = new AlertConditionEvaluatorFactoryImpl(ZeventManager.getInstance());
+        this.zeventEnqueuer = ZeventManager.getInstance();
+        this.alertConditionEvaluatorFactory = new AlertConditionEvaluatorFactoryImpl(zeventEnqueuer);
         this.triggerDAO = DAOFactory.getDAOFactory().getTriggerDAO();
     }
 

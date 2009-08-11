@@ -797,27 +797,7 @@ public class AlertDefinitionManagerEJBImpl
         return ad.isResourceTypeDefinition();
     }
 
-    /**
-     * Decide if a trigger should fire the alert
-     *
-     * @ejb:interface-method
-     * @param tid the trigger ID
-     * @return the ID of the alert definition
-     */
-    public Integer getIdFromTrigger(Integer tid) {
-        RegisteredTrigger trigger = registeredTriggerManager.get(tid);
-        if (trigger == null) {
-            return null;
-        }
 
-        AlertDefinition def = trigger.getAlertDefinition();
-
-        if (def != null && !def.isDeleted()) {
-            return def.getId();
-        } else {
-            return null;
-        }
-    }
 
     /**
      * @ejb:interface-method
