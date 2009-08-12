@@ -258,10 +258,10 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
                     } catch (InterruptedException e) {
                        log.error("Error sending event to create newly enabled triggers for alert definition " + alertDefinitionId + ". These alerts will not fire",e);
                     }
-                }
-            } else {
-                registeredTriggerRepository.setTriggersEnabled(triggerIds, enabled);
-            }
+                    return;
+                } 
+            } 
+            registeredTriggerRepository.setTriggersEnabled(triggerIds, enabled);
         }
     }
 

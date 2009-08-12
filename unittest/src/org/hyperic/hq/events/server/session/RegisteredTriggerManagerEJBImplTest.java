@@ -11,6 +11,7 @@ import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.ext.MockTrigger;
+import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisterableTriggerRepository;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
@@ -78,6 +79,23 @@ public class RegisteredTriggerManagerEJBImplTest
         triggerIds.add(triggerId);
         replay();
         registeredTriggerManager.setTriggersEnabled(alertDefinitionId,triggerIds, false);
+        verify();
+    }
+
+    /**
+     * Verify that triggers already initialized can be enabled
+     */
+    public void testEnableInitializedTriggers() {
+        Integer triggerId = Integer.valueOf(987);
+        Integer alertDefinitionId = Integer.valueOf(5432);
+        List triggerIds = new ArrayList();
+        triggerIds.add(triggerId);
+        RegisterableTriggerInterface trigger1 = EasyMock.createMock(RegisterableTriggerInterface.class);
+        EasyMock.expect(registeredTriggerRepository.getTriggerById(triggerId)).andReturn(trigger1);
+        registeredTriggerRepository.setTriggersEnabled(triggerIds, true);
+        replay();
+        registeredTriggerManager.setRegisteredTriggerRepository(registeredTriggerRepository);
+        registeredTriggerManager.setTriggersEnabled(alertDefinitionId, triggerIds, true);
         verify();
     }
 
@@ -529,7 +547,7 @@ public class RegisteredTriggerManagerEJBImplTest
         registeredTriggerManager.unregisterTriggers(triggers);
         verify();
     }
-
+    
     /**
      * Verifies that nothing happens when attempting to unregister a trigger if repository is not initialized
      */
