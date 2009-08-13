@@ -1,5 +1,7 @@
 package org.hyperic.hq.events.server.session;
 
+import java.io.Serializable;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
@@ -35,4 +37,13 @@ public class SingleAlertExecutionStrategy implements ExecutionStrategy {
                      " will not be processed.  Cause: " + e.getMessage());
         }
     }
+
+    public Serializable getState() {
+        return null;
+    }
+
+    public void initialize(Serializable initialState) {
+        // No-Op
+    }
+
 }

@@ -1,7 +1,10 @@
 package org.hyperic.hq.events.server.session;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.TestCase;
 
@@ -15,7 +18,7 @@ import org.hyperic.hq.zevents.ZeventEnqueuer;
 /**
  * Unit test of the {@link CounterExecutionStrategy}
  * @author jhickey
- *
+ * 
  */
 public class CounterExecutionStrategyTest
     extends TestCase
@@ -23,11 +26,22 @@ public class CounterExecutionStrategyTest
 
     private ZeventEnqueuer zeventEnqueuer;
 
-    private List expirations = new ArrayList();
+    private ArrayList expirations = new ArrayList();
 
     public void setUp() throws Exception {
         super.setUp();
         this.zeventEnqueuer = EasyMock.createMock(ZeventEnqueuer.class);
+    }
+
+    /**
+     * Verifies nothing blows up if a non-List is passed to initialize
+     */
+    public void testInitializeNotList() {
+        // 2 events within 10 minutes
+        final long timeRange = (10 * 60 * 1000l);
+        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer);
+        strategy.initialize(null);
+        assertTrue(((List)strategy.getState()).isEmpty());
     }
 
     /**
@@ -37,7 +51,8 @@ public class CounterExecutionStrategyTest
     public void testProcessEventClearOldExpired() {
         // 2 events within 10 minutes
         final long timeRange = (10 * 60 * 1000l);
-        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer, expirations);
+        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer);
+        strategy.initialize(expirations);
         MockEvent mockEvent = new MockEvent(1l, 2);
         // event occurred 11 minutes ago
         mockEvent.setTimestamp(System.currentTimeMillis() - (11 * 60 * 1000));
@@ -56,6 +71,12 @@ public class CounterExecutionStrategyTest
         EasyMock.replay(zeventEnqueuer);
         strategy.conditionsSatisfied(event);
         strategy.conditionsSatisfied(event2);
+        FileAlertConditionEvaluatorStateRepository repo = new FileAlertConditionEvaluatorStateRepository(new File(System.getProperty("user.dir")));
+        Map states = new HashMap();
+        for (int i = 0; i < 100000; i++) {
+            states.put(i, strategy.getState());
+        }
+        repo.saveExecutionStrategyStates(states);
 
         EasyMock.verify(zeventEnqueuer);
         List expectedExpirations = new ArrayList();
@@ -72,7 +93,8 @@ public class CounterExecutionStrategyTest
     public void testProcessEventConditionsMet() throws InterruptedException {
         // 2 events within 10 minutes
         final long timeRange = (10 * 60 * 1000l);
-        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer, expirations);
+        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer);
+        strategy.initialize(expirations);
         MockEvent mockEvent = new MockEvent(1l, 2);
         // event occurred 5 minutes ago
         mockEvent.setTimestamp(System.currentTimeMillis() - (5 * 60 * 1000));
@@ -109,7 +131,8 @@ public class CounterExecutionStrategyTest
     public void testProcessEventErrorEnqueueing() throws InterruptedException {
         // 1 events within 10 minutes
         final long timeRange = (10 * 60 * 1000l);
-        CounterExecutionStrategy strategy = new CounterExecutionStrategy(1l, timeRange, zeventEnqueuer, expirations);
+        CounterExecutionStrategy strategy = new CounterExecutionStrategy(1l, timeRange, zeventEnqueuer);
+        strategy.initialize(expirations);
         MockEvent mockEvent = new MockEvent(1l, 2);
         // event occurred 5 minutes ago
         mockEvent.setTimestamp(System.currentTimeMillis() - (5 * 60 * 1000));
@@ -137,7 +160,8 @@ public class CounterExecutionStrategyTest
     public void testProcessEventUpdatesExpirations() {
         // 3 events within 10 minutes
         final long timeRange = (10 * 60 * 1000l);
-        CounterExecutionStrategy strategy = new CounterExecutionStrategy(3l, timeRange, zeventEnqueuer, expirations);
+        CounterExecutionStrategy strategy = new CounterExecutionStrategy(3l, timeRange, zeventEnqueuer);
+        strategy.initialize(expirations);
         MockEvent mockEvent = new MockEvent(1l, 2);
         // event occurred 5 minutes ago
         mockEvent.setTimestamp(System.currentTimeMillis() - (5 * 60 * 1000));
@@ -159,7 +183,8 @@ public class CounterExecutionStrategyTest
     public void testProcessExpiredEvent() {
         // 2 events within 10 minutes
         final long timeRange = (10 * 60 * 1000l);
-        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer, expirations);
+        CounterExecutionStrategy strategy = new CounterExecutionStrategy(2l, timeRange, zeventEnqueuer);
+        strategy.initialize(expirations);
         MockEvent mockEvent = new MockEvent(1l, 2);
         // event occurred 11 minutes ago
         mockEvent.setTimestamp(System.currentTimeMillis() - (11 * 60 * 1000));

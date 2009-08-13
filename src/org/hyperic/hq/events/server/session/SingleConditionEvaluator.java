@@ -1,5 +1,7 @@
 package org.hyperic.hq.events.server.session;
 
+import java.io.Serializable;
+
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
@@ -30,6 +32,22 @@ public class SingleConditionEvaluator implements AlertConditionEvaluator {
         this.executionStrategy = executionStrategy;
     }
 
+    public Integer getAlertDefinitionId() {
+        return this.alertDefinitionId;
+    }
+
+    public ExecutionStrategy getExecutionStrategy() {
+        return this.executionStrategy;
+    }
+
+    public Serializable getState() {
+        return null;
+    }
+
+    public void initialize(Serializable initialState) {
+       //No-Op
+    }
+
     public void triggerFired(TriggerFiredEvent event) {
         executionStrategy.conditionsSatisfied(new AlertConditionsSatisfiedZEvent(alertDefinitionId.intValue(),
                                                                                  new TriggerFiredEvent[] { event }));
@@ -37,10 +55,6 @@ public class SingleConditionEvaluator implements AlertConditionEvaluator {
 
     public void triggerNotFired(TriggerNotFiredEvent event) {
         // No-Op
-    }
-
-    ExecutionStrategy getExecutionStrategy() {
-        return this.executionStrategy;
     }
 
 }

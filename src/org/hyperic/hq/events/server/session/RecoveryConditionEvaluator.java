@@ -1,9 +1,12 @@
 package org.hyperic.hq.events.server.session;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 
@@ -14,7 +17,7 @@ import org.hyperic.hq.events.TriggerNotFiredEvent;
  * condition met events are older than alert fired event (which might happen
  * during a backfill).
  * @author jhickey
- *
+ * 
  */
 public class RecoveryConditionEvaluator
     extends MultiConditionEvaluator
@@ -26,8 +29,10 @@ public class RecoveryConditionEvaluator
 
     private final Object monitor = new Object();
 
+    private final Log log = LogFactory.getLog(RecoveryConditionEvaluator.class);
+
     /**
-     *
+     * 
      * @param alertDefinitionId The ID of the recovery alert definition
      * @param alertTriggerId The ID of the trigger listening for alert from
      *        which we are to recover
@@ -47,7 +52,7 @@ public class RecoveryConditionEvaluator
     }
 
     /**
-     *
+     * 
      * @param alertDefinitionId The ID of the recovery alert definition
      * @param alertTriggerId The ID of the trigger listening for alert from
      *        which we are to recover
@@ -88,8 +93,16 @@ public class RecoveryConditionEvaluator
         return alertTriggerId;
     }
 
-    TriggerFiredEvent getLastAlertFired() {
+    public Serializable getState() {
         return this.lastAlertFired;
+    }
+
+    public void initialize(Serializable initialState) {
+        if (!(initialState instanceof TriggerFiredEvent)) {
+            log.warn("Received persisted state that was not an instance of TriggerFiredEvent.  Recovery alerts for alerts that fired before server restart will not be created.");
+            return;
+        }
+        this.lastAlertFired = (TriggerFiredEvent) initialState;
     }
 
     public void triggerFired(TriggerFiredEvent event) {

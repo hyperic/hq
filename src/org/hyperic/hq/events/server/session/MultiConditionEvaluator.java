@@ -1,6 +1,8 @@
 package org.hyperic.hq.events.server.session;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,7 +19,7 @@ import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
+
 
 /**
  * Responsible for evaluating a set of alert conditions and firing an
@@ -141,7 +143,11 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
                                                                                  (TriggerFiredEvent[]) fulfilled.toArray(new TriggerFiredEvent[fulfilled.size()])));
     }
 
-    ExecutionStrategy getExecutionStrategy() {
+    public Integer getAlertDefinitionId() {
+        return alertDefinitionId;
+    }
+
+    public ExecutionStrategy getExecutionStrategy() {
         return executionStrategy;
     }
 
@@ -161,6 +167,10 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
         return null;
     }
 
+    public Serializable getState() {
+        return null;
+    }
+
     long getTimeRange() {
         return timeRange;
     }
@@ -170,6 +180,10 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
         triggers.addAll(orTriggerIds.keySet());
         triggers.addAll(Arrays.asList(andTriggerIds));
         return triggers;
+    }
+
+    public void initialize(Serializable initialState) {
+        // No-Op.  We start from scratch.
     }
 
     private void initializeWatchedTriggers(Collection alertConditions) {
