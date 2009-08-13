@@ -442,20 +442,23 @@ public class MeasurementDAO extends HibernateDAO {
         final Query query = getSession().createQuery(sql)
             .setCacheable(true)
             .setCacheRegion("Measurement.findAvailMeasurements");
-        for (int i=0; i<resList.size(); i+=BATCH_SIZE) {
-            int end = Math.min(i + BATCH_SIZE, resList.size());
-            query.setParameterList("resources", resList.subList(i, end));
-            rtn.addAll(query.list());
-        }
+        
         // should be a unique result if only one resource is being examined
         if (resources.size() == 1) {
+            query.setParameterList("resources", resList);            
             Object result = query.uniqueResult();
             if (result != null) {
-                return Collections.singletonList(query.uniqueResult());
+                rtn.add(result);
             }
-            return Collections.EMPTY_LIST;
+        } else {        
+            for (int i=0; i<resList.size(); i+=BATCH_SIZE) {
+                int end = Math.min(i + BATCH_SIZE, resList.size());
+                query.setParameterList("resources", resList.subList(i, end));
+                rtn.addAll(query.list());
+            }
         }
-        return query.list();
+
+        return rtn;
     }
     
     List findAvailMeasurements(ResourceGroup g) {
