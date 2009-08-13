@@ -19,16 +19,16 @@ import org.apache.commons.logging.LogFactory;
  * Implementation of {@link AlertConditionEvaluatorRepository} that stores and
  * retrieves by serialzing state to/from a file
  * @author jhickey
- * 
+ *
  */
 public class FileAlertConditionEvaluatorStateRepository implements AlertConditionEvaluatorStateRepository {
     private final File storageDirectory;
-    public static final String EVALUATOR_STATE_FILE_NAME = "AlertConditionEvaluatorStates.tmp";
-    public static final String EXECUTION_STRATEGY_FILE_NAME = "ExecutionStrategyStates.tmp";
+    public static final String EVALUATOR_STATE_FILE_NAME = "AlertConditionEvaluatorStates.dat";
+    public static final String EXECUTION_STRATEGY_FILE_NAME = "ExecutionStrategyStates.dat";
     private final Log log = LogFactory.getLog(FileAlertConditionEvaluatorStateRepository.class);
 
     /**
-     * 
+     *
      * @param storageDirectory The directory in which to write and read
      *        serialized object files
      */
