@@ -1757,6 +1757,15 @@
       </action>        
       <!-- / end autogroup monitoring config -->
 
+      <!-- PORTLET ACTIONS -->
+	  <action path="/PortletController"
+              scope="request"
+              type="org.hyperic.hq.ui.action.portlet.DisplayPortletAction" />
+      
+      <action path="/Portlet"
+              forward=".portlet.layout">  
+      </action>
+	  
       <!-- DASHBOARD ACTIONS -->           
       <action path="/DashboardController"
               name="DashboardForm"
