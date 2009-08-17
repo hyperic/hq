@@ -219,17 +219,24 @@ public class ResourceBreadcrumbTag
             breadcrumbs.remove(x);
         }
         
-        if (breadcrumbs.size() == 0) {
-            // ...add the browse crumb...
-            breadcrumbs.add(createRootBreadcrumb(resource));
-        }
-        
-        if (breadcrumbs.size() == 1) {
-            // ...all we have is the browse crumb, update it...
-            breadcrumbs.remove(0);
+        if (breadcrumbs.size() < 2) {
+            if (breadcrumbs.size() == 1) {
+                // ...all we have is the browse crumb which may be stale so remove it...
+                breadcrumbs.remove(0);
+            }
+            
+            // ...add the newest browse crumb...
             breadcrumbs.add(createRootBreadcrumb(resource));
             
-            // ...add the current resource crumb...
+            if (newCrumb.isAutoGroup()) {
+                // ...if we're dealing with an auto group, we need to include the parent resource
+                // in the bread crumb...
+                String parentUrl = BreadcrumbUtil.createResourceURL(baseResourceUrl, resourceId, null);
+                
+                breadcrumbs.add(new BreadcrumbItem(parentUrl, resourceId, null, resource.getName(), new AppdefEntityID(resourceId)));
+            }
+            
+            // ...and finally, add the newest bread crumb...
             breadcrumbs.add(newCrumb);
         }
         
@@ -312,9 +319,10 @@ public class ResourceBreadcrumbTag
     private boolean isParentOfChild(BreadcrumbItem parent, BreadcrumbItem child) {
         boolean result = false;
         
-        if (parent.isPlatform() && child.isServer() ||
-            parent.isPlatform() && child.isService() ||
-            parent.isServer() && child.isService()) {
+        if (!child.isAutoGroup() &&
+            ((parent.isPlatform() && child.isServer()) ||
+             (parent.isPlatform() && child.isService()) ||
+             (parent.isServer() && child.isService()))) {
             ResourceManagerLocal resourceManager = ResourceManagerEJBImpl.getOne();
             Resource parentResource = resourceManager.findResource(parent.getAppdefEntityId());
             Resource childResource = resourceManager.findResource(child.getAppdefEntityId());
@@ -378,7 +386,7 @@ public class ResourceBreadcrumbTag
     {
         boolean result = false;
         
-        if (group.isAutoGroup()) {
+        if (group.isAutoGroup() && (member.isService() || member.isServer())) {
             HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
             ServletContext ctx = pageContext.getServletContext();
             AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
