@@ -98,7 +98,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <html:form action="/resource/hub/RemoveResource.do">
 
 <tiles:insert definition=".page.title.resource.hub">
-  <tiles:put name="titleName"><c:out value="${navHierarchy}"/></tiles:put>
+  <tiles:put name="titleName"><c:out value="${navHierarchy}" escapeXml="false" /></tiles:put>
 </tiles:insert>
 
 <c:if test="${not empty ResourceSummary}">

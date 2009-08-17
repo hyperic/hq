@@ -96,7 +96,7 @@ public class ResourceHubPortalAction extends BaseAction {
     private static final int DEFAULT_GROUP_TYPE = 1;
     private static final String DEFAULT_RESOURCE_NAME = null;
 
-    private static final String SEPARATOR = " > ";
+    private static final String SEPARATOR = "&nbsp;&rsaquo;&nbsp;";
     private static final String VIEW_ATTRIB = "Resource Hub View";
     private static final String TYPE_ATTRIB = "Resource Hub Apppdef Type";
     private static final String GRP_ATTRIB  = "Resource Hub Group Type";
