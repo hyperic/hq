@@ -26,7 +26,7 @@ public class AlertFiredEvent
     extends AbstractEvent implements java.io.Serializable, ResourceEventInterface, LoggableInterface
 {
 
-    private static final long serialVersionUID = -8339832891585148162L;
+    private static final long serialVersionUID = -3740509119080501003L;
 
     /** Holds value of alert ID. */
     private Integer alertId;

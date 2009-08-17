@@ -40,7 +40,7 @@ import org.hyperic.util.units.UnitsFormat;
 public class MeasurementEvent extends AbstractEvent
     implements Serializable, ResourceEventInterface {
 
-    private static final long serialVersionUID = -4995860536892188423L;
+    private static final long serialVersionUID = -4805198063892667418L;
     private AppdefEntityID _resource;
     private MetricValue    _value;
     private String         _units;
