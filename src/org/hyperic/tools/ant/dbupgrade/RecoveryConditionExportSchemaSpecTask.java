@@ -27,7 +27,7 @@ import org.hyperic.util.jdbc.DBUtil;
  * @author jhickey
  *
  */
-public class RecoveryConditionExportTask
+public class RecoveryConditionExportSchemaSpecTask
     extends SchemaSpecTask
 {
 
@@ -71,7 +71,7 @@ public class RecoveryConditionExportTask
         } catch (Exception e) {
             throw new BuildException(e.getMessage(), e);
         } finally {
-            DBUtil.closeJDBCObjects(RecoveryConditionExportTask.class.getName(), null, stmt, rs);
+            DBUtil.closeJDBCObjects(RecoveryConditionExportSchemaSpecTask.class.getName(), null, stmt, rs);
         }
     }
 

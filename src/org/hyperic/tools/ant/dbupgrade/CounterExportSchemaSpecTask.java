@@ -25,7 +25,7 @@ import org.hyperic.util.jdbc.DBUtil;
  * @author jhickey
  *
  */
-public class CounterExportTask
+public class CounterExportSchemaSpecTask
     extends SchemaSpecTask
 {
 
@@ -64,7 +64,7 @@ public class CounterExportTask
         } catch (Exception e) {
             throw new BuildException(e.getMessage(), e);
         } finally {
-            DBUtil.closeJDBCObjects(CounterExportTask.class.getName(), null, stmt, rs);
+            DBUtil.closeJDBCObjects(CounterExportSchemaSpecTask.class.getName(), null, stmt, rs);
         }
     }
 

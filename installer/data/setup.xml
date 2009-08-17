@@ -3,7 +3,7 @@
 <project name="setup" default="all" basedir=".">
 
   <!-- true for text based installs -->
-  <available property="server.pgsql.available" 
+  <available property="server.pgsql.available"
              file="${install.dir}/data/hqdb/pgsql.tar.gz"/>
 
   <target name="load-basics">
@@ -41,7 +41,7 @@
 
   </target>
 
-  <!-- The agent uses a 1.5 JRE. -->	
+  <!-- The agent uses a 1.5 JRE. -->
   <target name="pick-jre" if="use.builtin.jre">
     <condition property="jre.tar.name" value="amd64-linux-jre-1_5.tar.gz">
         <available file="${install.dir}/jres/amd64-linux-jre-1_5.tar.gz"/>
@@ -56,8 +56,8 @@
         <available file="${install.dir}/jres/x86-win32-jre-1_5.exe"/>
     </condition>
   </target>
-	
-  <!-- The server uses a 1.5 JRE. -->	
+
+  <!-- The server uses a 1.5 JRE. -->
   <target name="pick-server-jre" if="use.builtin.jre">
     <condition property="jre.tar.name" value="amd64-linux-jre-1_6.tar.gz">
         <available file="${install.dir}/jres/amd64-linux-jre-1_6.tar.gz"/>
@@ -71,7 +71,7 @@
     <condition property="jre.exe.name" value="x86-win32-jre-1_6.exe">
         <available file="${install.dir}/jres/x86-win32-jre-1_6.exe"/>
     </condition>
-  </target>	
+  </target>
 
   <target name="install-jre-tar" if="jre.tar.name">
     <echo>^^^INFO:
@@ -80,7 +80,7 @@
     <untar src="${install.dir}/jres/${jre.tar.name}"
            dest="${destination}"
            compression="gzip"/>
-  </target> 
+  </target>
 
   <target name="install-jre-exe" if="jre.exe.name">
     <echo>^^^INFO:
@@ -89,7 +89,7 @@
     <exec executable="${install.dir}/jres/${jre.exe.name}">
       <arg line="-d '${destination}'"/>
     </exec>
-  </target> 
+  </target>
 
   <target name="install-agent-jre" depends="pick-jre" if="use.builtin.jre">
     <echo>^^^INFO: Installing the agent JRE ...</echo>
@@ -108,8 +108,8 @@
       Checking for existence of install configuration file (${setup})
     </echo>
 
-    <absolutePath property="setup.absolute" 
-                  path="${setup}" 
+    <absolutePath property="setup.absolute"
+                  path="${setup}"
                   pwd="${install.dir}/.."
                   failOnMissing="false"/>
     <available property="user-setup-properties.available"
@@ -117,7 +117,7 @@
     <msgfail unless="user-setup-properties.available">^^^ERROR:\
        The specified Hyperic HQ install configuration file does not exist:
          ${setup.absolute}
-       Make sure that the setup property is set to the correct file and 
+       Make sure that the setup property is set to the correct file and
        try running the installer again.
     </msgfail>
 
@@ -130,7 +130,7 @@
 
   <target name="load-default-setup-properties" unless="setup">
 
-    <findWritable property="setup" 
+    <findWritable property="setup"
                   preferredDir="${install.dir}"
                   filename="data/setup.properties"
                   altDirPrefix="HQ_tmp">^^^INFO:
@@ -141,23 +141,23 @@ Setup properties will be written to %WRITABLEFILE% instead.
     <ant antfile="setup-interactive.xml" target="generate-props"/>
     <echo>^^^INFO: Loading install configuration...</echo>
     <property file="${setup}"/>
-    <absolutePath property="setup.absolute" 
-                  path="${setup}" 
+    <absolutePath property="setup.absolute"
+                  path="${setup}"
                   failOnMissing="true"/>
     <echo>^^^DEBUG: Install configuration loaded.</echo>
   </target>
-  
+
   <target name="check-eula">
-  	<available file="eula.txt" property="eula.present"/>	
+  	<available file="eula.txt" property="eula.present"/>
   </target>
-  
+
   <target name="show-eula" depends="check-eula" if="eula.present" unless="accept.eula">
   	<loadfile property="eula.text" srcFile="eula.txt"/>
 	<echo>^^^INFO:
 __ll__
 ${eula.text}
 __ll__
-	</echo> 
+	</echo>
     <input message="Do accept the terms of the agreement?"
            validargs="y,n"
            addproperty="license.accepted" />
@@ -165,9 +165,9 @@ __ll__
       <equals arg1="n" arg2="${license.accepted}"/>
     </condition>
     <fail if="do.abort">The license must be accepted in order to proceed with the installation.</fail>
-  </target>	
+  </target>
 
-  <target name="init" 
+  <target name="init"
           depends="load-basics,load-user-setup-properties,show-eula,load-default-setup-properties">
 
     <!-- Parameterized names of things to deploy -->
@@ -179,7 +179,7 @@ __ll__
     <property name="covalent.jboss-service.tag" value="jboss-service.xml" />
 	<property name="jboss.server" value="server/default"/>
 	<property name="jboss.home" value="${server.installdir}/server-${version}/hq-engine"/>
-	<property name="embedded-tomcat.home" 
+	<property name="embedded-tomcat.home"
 		value="${jboss.home}/${jboss.server}/deploy/jbossweb-tomcat41.sar"/>
     <condition property="script-ext" value=".bat">
       <os family="windows"/>
@@ -245,7 +245,7 @@ __ll__
   <target name="validate-os-install">
   </target>
 
-  <target name="agent" 
+  <target name="agent"
           depends="agent.valid-props"
           if="agent.installdir"
           description="Install the HQ agent.">
@@ -274,15 +274,15 @@ __ll__
     </echo>
     <concatWithPrefix failOnMissing="false" file="${setup}.agent-summary.txt" prefix="^^^INFO:"/>
   </target>
-  
+
   <target name="validate-user-privs"
           if="server.database-url"
           unless="using.builtin.db">
     <!-- Do a sanity check - does the user have the perms required on the DB -->
     <echo>^^^DEBUG: Checking database permissions...</echo>
-    <dbprivcheck jdbcUrl="${server.database-url}" 
-                 jdbcUser="${server.database-user}" 
-                 jdbcPassword="${server.database-password}" 
+    <dbprivcheck jdbcUrl="${server.database-url}"
+                 jdbcUser="${server.database-user}"
+                 jdbcPassword="${server.database-password}"
                  property="server.db.user.permission"
                  errMsgProperty="errMsg"/>
     <antcall target="fail-if-no-permission">
@@ -331,14 +331,14 @@ __ll__
       <socket server="127.0.0.1" port="${server.webapp.secure.port}"/>
     </condition>
     <antcall target="fail-if-webapp-secure-port-used"/>
-    
+
     <!-- Do a sanity check - is anything listening on the server port now? -->
     <echo>^^^DEBUG: Checking server JRMP port...</echo>
     <condition property="server.jboss.server.port.isAlreadyUsed">
       <socket server="127.0.0.1" port="${hq-engine.server.port}"/>
     </condition>
     <antcall target="fail-if-mbean-port-used"/>
-    
+
     <!-- Do a sanity check - is anything listening on the JNP port now? -->
     <echo>^^^DEBUG: Checking server JNP port...</echo>
     <condition property="server.jnp.port.isAlreadyUsed">
@@ -377,7 +377,7 @@ __ll__
 
     <!-- Do DB-specific validation stuff -->
     <echo>^^^DEBUG: Validating server DB configuration...</echo>
-    <ant antfile="setup-db-${server.database}.xml" 
+    <ant antfile="setup-db-${server.database}.xml"
          target="validate"/>
   </target>
 
@@ -411,7 +411,7 @@ ${errMsg}
     </msgfail>
   </target>
 
-  <target name="server" 
+  <target name="server"
           depends="validate-os-install,server.valid-props,fail-if--server.alreadyInstalled"
           if="server.installdir"
           description="Install or upgrade the HQ server.">
@@ -433,7 +433,7 @@ ${errMsg}
     <antcall target="setup-server"/>
     <echo>^^^INFO: Copying existing hq-server.conf</echo>
     <!-- Copy the existing consolidated config -->
-    <copy file="${server.upgradedir}/conf/hq-server.conf" 
+    <copy file="${server.upgradedir}/conf/hq-server.conf"
           todir="${server.installdir}/server-${version}/conf"/>
     <!-- Copy the existing license file, if there is one -->
     <echo>^^^INFO: Copying existing license file</echo>
@@ -443,12 +443,17 @@ ${errMsg}
     <echo>^^^INFO: Copying existing HQ server cache information</echo>
     <ehcacheUpgrade existing="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/ehcache.xml"
                     new="${server.installdir}/server-${version}/hq-engine/server/default/deploy/hq.ear/ehcache.xml"/>
-      
+
     <echo>^^^INFO: Copying existing HQU plugins</echo>
     <copy todir="${server.installdir}/server-${version}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu">
       <fileset dir="${server.upgradedir}/hq-engine/server/default/deploy/hq.ear/hq.war/hqu"/>
     </copy>
-      
+
+  	<echo>^^^INFO: Copying existing state files</echo>
+  	<copy todir="${server.installdir}/server-${version}/hq-engine">
+      <fileset dir="${server.upgradedir}/hq-engine/" includes="*.dat"/>
+    </copy>
+
     <echo>^^^COMPLETION:
       Server successfully upgraded to: ${server.product.dir}
     </echo>
@@ -457,7 +462,7 @@ ${errMsg}
 
   <target name="setup-server-init">
     <property name="server.vname" value="server-${version}"/>
-    <property name="server.product.dir" 
+    <property name="server.product.dir"
               value="${server.installdir}/${server.vname}"/>
   </target>
 
@@ -498,7 +503,7 @@ ${errMsg}
     <copy tofile="${server.product.dir}/data/hq-server-install.conf"
           file="${setup.absolute}"/>
     <chmod file="${server.product.dir}/data/hq-server-install.conf" perm="go-rwx"/>
-              
+
     <!-- Copy server control file to server's data dir -->
     <mkdir dir="${server.product.dir}/data"/>
     <echo>^^^DEBUG: Copying server control file...</echo>
