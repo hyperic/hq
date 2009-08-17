@@ -138,6 +138,14 @@ public interface AttrConstants {
      */
     public static final String RETURN_IGNORED_FOR_OK_ATTR = "returnLocIgnored";
     
+    /** 
+     * The session scope attribute used to store the most recent browse url
+     * used in the breadcrumb navigation
+     */
+    public static final String ROOT_BREADCRUMB_URL_ATTR_NAME = "rootBreadcrumbUrl";
+    public final static String BREADCRUMB_SESSION_BACKUP_ATTR_NAME = "breadcrumbListBackup";
+    public final static String BREADCRUMB_SESSION_ATTR_NAME = "breadcrumbList";
+    
     //---------------------------------------request attributes
 
     /**

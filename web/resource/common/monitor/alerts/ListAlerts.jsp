@@ -145,10 +145,10 @@
 
 
 <tiles:insert  definition=".page.title.events.list.platform">
-    <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
     <tiles:put name="resource" beanName="Resource"/>
     <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
     <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+    <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
 <tiles:insert definition =".tabs.resource.platform.alert.alerts">
     <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
@@ -157,10 +157,10 @@
 </c:if>
 <c:if test="${ CONST_SERVER == entityId.type}">
 <tiles:insert  definition=".page.title.events.list.server">
-    <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
     <tiles:put name="resource" beanName="Resource"/>
     <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
     <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+    <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
     <c:choose>
         <c:when test="${ canControl }">
@@ -179,10 +179,10 @@
 </c:if>
 <c:if test="${ CONST_SERVICE == entityId.type}">
 <tiles:insert  definition=".page.title.events.list.service">
-    <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
     <tiles:put name="resource" beanName="Resource"/>
     <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
     <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+    <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
     <c:choose>
         <c:when test="${ canControl }">

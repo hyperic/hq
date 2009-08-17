@@ -86,7 +86,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
       <tiles:put name="linkUrl" value=""/>
     </c:when>
     <c:otherwise>
-      <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
+      <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
     </c:otherwise>
   </c:choose>
   <c:choose>

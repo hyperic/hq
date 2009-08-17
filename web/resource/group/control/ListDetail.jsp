@@ -62,7 +62,7 @@
 
 <c:set var="entityId" value="${Resource.entityId}"/>
 <tiles:insert definition=".page.title.resource.group">
-  <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}"/></tiles:put>
+  <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
             
 <tiles:insert definition=".page.return">

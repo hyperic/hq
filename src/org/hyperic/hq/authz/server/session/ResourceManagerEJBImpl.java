@@ -678,7 +678,15 @@ public class ResourceManagerEJBImpl extends AuthzSession implements SessionBean
         return getResourceEdgeDAO()
                     .findDescendantEdges(parent, relation);
     }
-
+    
+    /**
+     * 
+     * @ejb:interface-method
+     */
+    public boolean isResourceChildOf(Resource parent, Resource child) {
+        return getResourceEdgeDAO().isResourceChildOf(parent, child);
+    }
+    
     /**
      * 
      * @ejb:interface-method

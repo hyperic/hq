@@ -59,10 +59,10 @@ var pageData = new Array();
 <c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
 
 <tiles:insert definition=".page.title.resource.server.full">
-  <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
   <tiles:put name="resource" beanName="Resource"/>
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+  <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
 
 <c:choose>

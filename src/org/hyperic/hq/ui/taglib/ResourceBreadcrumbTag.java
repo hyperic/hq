@@ -1,0 +1,508 @@
+package org.hyperic.hq.ui.taglib;
+
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.tagext.TagSupport;
+
+import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
+import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.ui.Constants;
+import org.hyperic.hq.ui.action.resource.hub.BreadcrumbUtil;
+import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.hq.ui.util.RequestUtils;
+
+public class ResourceBreadcrumbTag
+    extends TagSupport
+{
+    private final static String RESOURCE_BREADCRUMB_TAG_NAME = "breadcrumb";
+    private final static String RESOURCE_ID_ATTR_NAME = "resourceId";
+    private final static String CTYPE_ATTR_NAME = "ctype";
+    private final static String BASE_BROWSE_URL_ATTR_NAME = "baseBrowseUrl";
+    private final static String BASE_RESOURCE_URL_ATTR_NAME = "baseResourceUrl";
+    
+    private String resourceId;
+    private String ctype;
+    private String baseBrowseUrl;
+    private String baseResourceUrl;
+
+    public String getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public String getCtype() {
+        return ctype;
+    }
+
+    public void setCtype(String ctype) {
+        this.ctype = ctype;
+    }
+
+    public String getBaseBrowseUrl() {
+        return baseBrowseUrl;
+    }
+
+    public void setBaseBrowseUrl(String baseBrowseUrl) {
+        this.baseBrowseUrl = baseBrowseUrl;
+    }
+
+    public String getBaseResourceUrl() {
+        return baseResourceUrl;
+    }
+
+    public void setBaseResourceUrl(String baseResourceUrl) {
+        this.baseResourceUrl = baseResourceUrl;
+    }
+
+    @Override
+    public int doStartTag() throws JspException {
+        try {
+            String resourceId = (String) ExpressionUtil.evalNotNull(RESOURCE_BREADCRUMB_TAG_NAME,
+                                                                    RESOURCE_ID_ATTR_NAME,
+                                                                    getResourceId(),
+                                                                    String.class,
+                                                                    this,
+                                                                    pageContext);
+            String ctype = (String) ExpressionUtil.evalNotNull(RESOURCE_BREADCRUMB_TAG_NAME,
+                                                               CTYPE_ATTR_NAME,
+                                                               getCtype(),
+                                                               String.class,
+                                                               this,
+                                                               pageContext);
+            String baseBrowseUrl = (String) ExpressionUtil.evalNotNull(RESOURCE_BREADCRUMB_TAG_NAME,
+                                                                       BASE_BROWSE_URL_ATTR_NAME,
+                                                                       getBaseBrowseUrl(),
+                                                                       String.class,
+                                                                       this,
+                                                                       pageContext);
+            String baseResourceUrl = (String) ExpressionUtil.evalNotNull(RESOURCE_BREADCRUMB_TAG_NAME,
+                                                                         BASE_RESOURCE_URL_ATTR_NAME,
+                                                                         getBaseResourceUrl(),
+                                                                         String.class,
+                                                                         this,
+                                                                         pageContext);
+            
+            // ...first, backup the bread crumb, we may need it later...
+            List<BreadcrumbItem> backupBreadcrumbs = processBackupBreadcrumb();
+            
+            // ...then, process the bread crumbs...
+            List<BreadcrumbItem> breadcrumbs = processBreadcrumb(resourceId, ctype, baseBrowseUrl, baseResourceUrl);
+
+            // ...then, render them...
+            renderBreadcrumb(breadcrumbs, backupBreadcrumbs);
+        } catch (Exception e) {
+            throw new JspException(e);
+        }
+
+        return SKIP_BODY;
+    }
+
+    private List<BreadcrumbItem> processBackupBreadcrumb() 
+    throws ServletException,
+           CloneNotSupportedException
+    {
+        HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
+        HttpSession session = request.getSession();
+        String[] returnToValues = request.getParameterValues(Constants.RETURN_TO_LINK_PARAM_NAME);
+        boolean useBackup = false;
+        List<BreadcrumbItem> backup = null;
+        
+        if (returnToValues != null && returnToValues.length > 0) {
+            useBackup = returnToValues[0].equals(Constants.RETURN_TO_LINK_PARAM_VALUE);
+        }
+        
+        if (useBackup) {
+            // ...reset bread crumbs from backup...
+            List<BreadcrumbItem> breadcrumbs = (List<BreadcrumbItem>) session.getAttribute(Constants.BREADCRUMB_SESSION_BACKUP_ATTR_NAME);
+            
+            session.setAttribute(Constants.BREADCRUMB_SESSION_ATTR_NAME, breadcrumbs);
+        } else {
+            List<BreadcrumbItem> breadcrumbs = (List<BreadcrumbItem>) session.getAttribute(Constants.BREADCRUMB_SESSION_ATTR_NAME);
+            
+            if (breadcrumbs != null) {
+                backup = new ArrayList<BreadcrumbItem>();
+                
+                // ...clone the bread crumbs...
+                for (Iterator<BreadcrumbItem> i = breadcrumbs.iterator(); i.hasNext();) {
+                    backup.add((BreadcrumbItem) i.next().clone());
+                }
+            }
+        }
+        
+        session.setAttribute(Constants.BREADCRUMB_SESSION_BACKUP_ATTR_NAME, backup);
+        
+        return backup;
+    }
+    
+    private List<BreadcrumbItem> processBreadcrumb(String resourceId, String ctype, String baseBrowseUrl, String baseResourceUrl) 
+    throws ServletException,
+           SessionNotFoundException,
+           RemoteException,
+           SessionTimeoutException,
+           PermissionException,
+           AppdefEntityNotFoundException
+    {
+        HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
+        HttpSession session = request.getSession();
+        ServletContext ctx = pageContext.getServletContext();
+        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+        int sessionId = RequestUtils.getSessionId(request).intValue();
+        List<BreadcrumbItem> breadcrumbs = (List<BreadcrumbItem>) session.getAttribute(Constants.BREADCRUMB_SESSION_ATTR_NAME);
+
+        if (breadcrumbs == null) {
+            // ...create the bread crumb list...
+            breadcrumbs = new ArrayList<BreadcrumbItem>();
+        }
+        
+        // ...create the bread crumb item for this resource...
+        AppdefEntityID appdefEntityId = new AppdefEntityID(resourceId);
+        AppdefResourceValue resource = appdefBoss.findById(sessionId, appdefEntityId);
+        String url = BreadcrumbUtil.createResourceURL(baseResourceUrl, resourceId, ctype);
+        String label = resource.getName();
+        
+        if (ctype != null && !ctype.equals("")) {
+            // ...we're dealing with an auto group which is a different beast...
+            appdefEntityId = new AppdefEntityTypeID(ctype); 
+            AppdefResourceTypeValue resourceType = appdefBoss.findResourceTypeById(sessionId, (AppdefEntityTypeID) appdefEntityId);
+            label = resourceType.getName();
+        }
+        
+        BreadcrumbItem newCrumb = new BreadcrumbItem(url, resourceId, ctype, label, appdefEntityId);
+        
+        // ...now loop through the bread crumbs and figure out where this crumb fits in
+        // we don't iterate over index 0 bc that'll always the browse crumb...
+        for (int x = breadcrumbs.size() - 1; x > 0; x--) { 
+            BreadcrumbItem crumb = breadcrumbs.get(x);
+            
+            if (!newCrumb.equals(crumb)                 &&
+                (isParentOfChild(crumb, newCrumb)       || 
+                 isMemberOfApplication(crumb, newCrumb) ||
+                 isMemberOfGroup(crumb, newCrumb)       ||
+                 isParentOfAutoGroup(crumb, newCrumb)   ||
+                 isMemberOfAutoGroup(crumb, newCrumb))) {
+                // ...is this a child of the comparison crumb?..
+                breadcrumbs.add(newCrumb);
+                
+                break;
+            }
+            
+            // ...not a child so clean up the trail...
+            breadcrumbs.remove(x);
+        }
+        
+        if (breadcrumbs.size() == 0) {
+            // ...add the browse crumb...
+            breadcrumbs.add(createRootBreadcrumb(resource));
+        }
+        
+        if (breadcrumbs.size() == 1) {
+            // ...all we have is the browse crumb, update it...
+            breadcrumbs.remove(0);
+            breadcrumbs.add(createRootBreadcrumb(resource));
+            
+            // ...add the current resource crumb...
+            breadcrumbs.add(newCrumb);
+        }
+        
+        //...then stash the bread crumbs in the session...
+        session.setAttribute(Constants.BREADCRUMB_SESSION_ATTR_NAME, breadcrumbs);
+        
+        return breadcrumbs;
+    }
+
+    private void renderBreadcrumb(List<BreadcrumbItem> breadcrumbs, List<BreadcrumbItem> backupBreadcrumbs) 
+    throws IOException
+    {
+        HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
+        StringBuilder markup = new StringBuilder("<ul class=\"breadcrumbs\">");
+
+        // Now that the bread crumb has been generated, let's render it...
+        for (int x = 0; x < breadcrumbs.size(); x++) {
+            BreadcrumbItem item = breadcrumbs.get(x);
+
+            markup.append("<li class=\"item\">");
+
+            if (x < (breadcrumbs.size() - 1)) {
+                markup.append("<a href=\"").append(item.getUrl()).append("\">");
+                markup.append(item.getLabel());
+                markup.append("</a>&nbsp;&rsaquo;&nbsp;");
+            } else {
+                markup.append(item.getLabel());
+            }
+
+            markup.append("</li>");
+        }
+
+        markup.append("</ul>");
+        
+        if (backupBreadcrumbs != null && !breadcrumbs.get(0).equals(backupBreadcrumbs.get(0))) {
+            // ...if the browse crumbs don't match, provide a "Return to ..." link.
+            BreadcrumbItem crumb = backupBreadcrumbs.get(backupBreadcrumbs.size() - 1);
+            String returnTo = RequestUtils.message(request, "breadcrumb.returnTo");
+            
+            markup.append("<span class=\"returnToLink\"><a href=\"").append(BreadcrumbUtil.createReturnToURL(crumb.getUrl())).append("\">");
+            markup.append(returnTo).append(" ").append(crumb.getLabel());
+            markup.append("</a></span>");
+        }
+
+        pageContext.getOut().write(markup.toString());
+    }
+
+    private BreadcrumbItem createRootBreadcrumb(AppdefResourceValue resource) {
+        HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
+        HttpSession session = request.getSession();
+
+        // ...we have a fresh trail of crumbs to lay down...
+        String browseUrl = (String) session.getAttribute(Constants.ROOT_BREADCRUMB_URL_ATTR_NAME);
+
+        if (browseUrl == null || browseUrl.equals("")) {
+            // ...we can't find a browse url, so we need to create one from
+            // the resource...
+            Integer groupType = null;
+            
+            if (resource.getEntityId().isGroup()) {
+                // ...we are dealing with a group, let's determine the type (compatible or mixed)
+                AppdefGroupValue group = (AppdefGroupValue) resource;
+                
+                groupType = new Integer(group.isGroupCompat() ? 
+                                        Constants.APPDEF_TYPE_GROUP_COMPAT : 
+                                        Constants.APPDEF_TYPE_GROUP_ADHOC); 
+            }
+            
+            browseUrl = BreadcrumbUtil.createRootBrowseURL(baseBrowseUrl, resource.getEntityId().getType(), groupType);
+        } else {
+            // ...we got what we need, remove it from the session...
+            session.removeAttribute(Constants.ROOT_BREADCRUMB_URL_ATTR_NAME);
+        }
+        
+        String browse = RequestUtils.message(request, "breadcrumb.browse");
+        
+        return new BreadcrumbItem(browseUrl, null, null, browse, null);
+    }
+    
+    private boolean isParentOfChild(BreadcrumbItem parent, BreadcrumbItem child) {
+        boolean result = false;
+        
+        if (parent.isPlatform() && child.isServer() ||
+            parent.isPlatform() && child.isService() ||
+            parent.isServer() && child.isService()) {
+            ResourceManagerLocal resourceManager = ResourceManagerEJBImpl.getOne();
+            Resource parentResource = resourceManager.findResource(parent.getAppdefEntityId());
+            Resource childResource = resourceManager.findResource(child.getAppdefEntityId());
+    
+            result = resourceManager.isResourceChildOf(parentResource, childResource);
+        }
+        
+        return result;
+    }
+    
+    private boolean isParentOfAutoGroup(BreadcrumbItem parent, BreadcrumbItem group) {
+        boolean result = false;
+        
+        if ((parent.isPlatform() || 
+             parent.isServer()   || 
+             parent.isApplication()) && group.isAutoGroup()) {
+            ResourceManagerLocal resourceManager = ResourceManagerEJBImpl.getOne();
+            Resource parentResource = resourceManager.findResource(parent.getAppdefEntityId());
+            Resource parentOfAutoGroupResource = resourceManager.findResource(new AppdefEntityID(group.getResourceId()));
+    
+            result = parentResource.equals(parentOfAutoGroupResource);
+        }
+        
+        return result;
+    }
+
+    private boolean isMemberOfApplication(BreadcrumbItem application, BreadcrumbItem member) {
+        boolean result = false;
+        
+        if (application.isApplication()) {
+            ApplicationManagerLocal applicationManager = ApplicationManagerEJBImpl.getOne();
+            
+            result = applicationManager.isApplicationMember(application.getAppdefEntityId(), 
+                                                            member.getAppdefEntityId());
+        }
+        
+        return result;
+    }
+    
+    private boolean isMemberOfGroup(BreadcrumbItem group, BreadcrumbItem member) {
+        boolean result = false;
+        
+        if (group.isGroup()) {
+            ResourceManagerLocal resourceManager = ResourceManagerEJBImpl.getOne();
+            Resource groupResource = resourceManager.findResource(group.getAppdefEntityId());
+            Resource memberResource = resourceManager.findResource(member.getAppdefEntityId());
+            ResourceGroupManagerLocal resourceGroupManager = ResourceGroupManagerEJBImpl.getOne();
+            ResourceGroup resourceGroup = resourceGroupManager.getResourceGroupByResource(groupResource);
+            
+            result = resourceGroupManager.isMember(resourceGroup, memberResource);
+        }
+        
+        return result;
+    }
+    
+    private boolean isMemberOfAutoGroup(BreadcrumbItem group, BreadcrumbItem member) 
+    throws SessionNotFoundException,
+           SessionTimeoutException,
+           RemoteException,
+           ServletException
+    {
+        boolean result = false;
+        
+        if (group.isAutoGroup()) {
+            HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
+            ServletContext ctx = pageContext.getServletContext();
+            AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+            int sessionId = RequestUtils.getSessionId(request).intValue();
+            ResourceManagerLocal resourceManager = ResourceManagerEJBImpl.getOne();
+            AppdefResourceTypeValue autoGroupResourceType = appdefBoss.findResourceTypeById(sessionId, (AppdefEntityTypeID) group.getAppdefEntityId());
+            Resource memberResource = resourceManager.findResource(member.getAppdefEntityId());
+
+            if (autoGroupResourceType.getAppdefType() == memberResource.getResourceType().getAppdefType()) {
+                // ...resource types are the same, now check if parents are the same,
+                // luckily resourceId represents the parent...
+                Resource parentResource = resourceManager.findResource(new AppdefEntityID(group.getResourceId()));
+                
+                result = resourceManager.isResourceChildOf(parentResource, memberResource);
+            }
+        }
+        
+        return result;
+    }
+    
+    protected class BreadcrumbItem 
+    implements Cloneable
+    {
+        private String url;
+        private String resourceId;
+        private String autoGroupId;
+        private String label;
+        private AppdefEntityID appdefEntityId;
+        
+        public BreadcrumbItem() {
+        }
+
+        public BreadcrumbItem(String url, String resourceId, String autoGroupId, String label, AppdefEntityID appdefEntityId) {
+            setUrl(url);
+            setResourceId(resourceId);
+            setAutoGroupId(autoGroupId);
+            setLabel(label);
+            setAppdefEntityId(appdefEntityId);
+        }
+
+        public String getUrl() {
+            return url;
+        }
+
+        public void setUrl(String url) {
+            this.url = url;
+        }
+
+        public String getResourceId() {
+            return resourceId;
+        }
+
+        public void setResourceId(String resourceId) {
+            this.resourceId = resourceId;
+        }
+
+        public String getAutoGroupId() {
+            return autoGroupId;
+        }
+
+        public void setAutoGroupId(String autoGroupId) {
+            this.autoGroupId = autoGroupId;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public void setLabel(String label) {
+            this.label = label;
+        }
+
+        public AppdefEntityID getAppdefEntityId() {
+            return appdefEntityId;
+        }
+
+        public void setAppdefEntityId(AppdefEntityID appdefEntityId) {
+            this.appdefEntityId = appdefEntityId;
+        }
+
+        public boolean isApplication() {
+            return this.appdefEntityId.isApplication();
+        }
+        
+        public boolean isAutoGroup() {
+            return this.appdefEntityId instanceof AppdefEntityTypeID;
+        }
+        
+        public boolean isGroup() {
+            return this.appdefEntityId.isGroup();
+        }
+        
+        public boolean isPlatform() {
+            return this.appdefEntityId.isPlatform();
+        }
+        
+        public boolean isServer() {
+            return this.appdefEntityId.isServer();
+        }
+        
+        public boolean isService() {
+            return this.appdefEntityId.isService();
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            BreadcrumbItem crumb = (BreadcrumbItem) obj;
+            
+            return crumb != null &&
+                   ((crumb.getAutoGroupId() == null && this.getAutoGroupId() == null) ||
+                    (crumb.getAutoGroupId() != null && crumb.getAutoGroupId().equals(this.getAutoGroupId()))) &&
+                   ((crumb.getLabel() == null && this.getLabel() == null) ||
+                    (crumb.getLabel() != null && crumb.getLabel().equals(this.getLabel()))) &&
+                   ((crumb.getResourceId() == null && this.getResourceId() == null) ||
+                    (crumb.getResourceId() != null && crumb.getResourceId().equals(this.getResourceId()))) &&
+                   ((crumb.getUrl() == null && this.getUrl() == null) ||
+                    (crumb.getUrl() != null && crumb.getUrl().equals(this.getUrl()))) &&
+                   ((crumb.getAppdefEntityId() == null && this.getAppdefEntityId() == null) ||
+                    (crumb.getAppdefEntityId() != null && crumb.getAppdefEntityId().equals(this.getAppdefEntityId())));
+        }
+
+        @Override
+        protected Object clone() throws CloneNotSupportedException {
+            return new BreadcrumbItem(getUrl(), getResourceId(), getAutoGroupId(), getLabel(), getAppdefEntityId());
+        }
+    }
+}

@@ -41,6 +41,8 @@
 <tiles:importAttribute name="resourceOwner" ignore="true"/>
 <tiles:importAttribute name="linkUrl" ignore="true"/>
 <tiles:importAttribute name="showSearch" ignore="true"/>
+<tiles:importAttribute name="eid" ignore="true" />
+<tiles:importAttribute name="ctype" ignore="true" />
 
 <hq:constant var="PLATFORM"
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
@@ -86,6 +88,16 @@
  <script  type="text/javascript">
   var help = "<hq:help/>";
 </script>
+
+<c:if test="${not empty eid}">
+	<div id="breadcrumbContainer">
+		<hq:breadcrumb resourceId="${eid}" 
+					   ctype="${ctype}"
+		               baseBrowseUrl="/ResourceHub.do" 
+		               baseResourceUrl="/Resource.do" />
+	</div>
+</c:if>
+
 <table width="100%" cellspacing="0" cellpadding="0" style="border: 0px;">
   <tr>
     <td colspan="4">

@@ -123,26 +123,7 @@ public class ResourceHubPortalAction extends BaseAction {
         // Set the view in the form
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
-        
         PageControl pc = RequestUtils.getPageControl(request);
-
-        /* Disable setting of paging preferences
-        if (hubForm.getPs() != null) {
-            user.setPreference(PAGE_ATTRIB, hubForm.getPs());
-            prefChanged = true; // Save new preference
-        } else {
-            try {
-                String pageSizeStr = user.getPreference(PAGE_ATTRIB);
-                Integer pageSize = Integer.valueOf(pageSizeStr);
-                if (pageSize.intValue() != pc.getPagesize()) {
-                    pc.setPagenum(pageSize.intValue());
-                    hubForm.setPs(pageSize);
-                }
-            } catch (InvalidOptionException e) {
-                // Just use default
-            }
-        }
-        */
         
         String view = hubForm.getView();
         if (!ResourceHubForm.LIST_VIEW.equals(view) &&
@@ -338,6 +319,12 @@ public class ResourceHubPortalAction extends BaseAction {
                                       hubForm.isAny(), hubForm.isOwn(),
                                       hubForm.isUnavail(), pc);
 
+        // Generate root breadcrumb url based on the filter criteria submitted...
+        String rootBrowseUrl = BreadcrumbUtil.createRootBrowseURL(mapping.getInput(), hubForm, pc);
+        
+        // ...store it in the session, so that the bread crumb tag can get at it
+        session.setAttribute(Constants.ROOT_BREADCRUMB_URL_ATTR_NAME, rootBrowseUrl);
+        
         watch.markTimeEnd("findCompatInventory");
 
         request.setAttribute(Constants.ALL_RESOURCES_ATTR, resources);

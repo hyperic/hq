@@ -37,6 +37,7 @@ import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -182,5 +183,28 @@ public class ResourceEdgeDAO
                     .setParameter("to", child)
                     .setInteger("rel_id", rel.getId().intValue())
                     .executeUpdate();
+    }
+    
+    boolean isResourceChildOf(Resource parent, Resource child) {
+        String sql = "from ResourceEdge re " +
+                     "where re.from=:from and re.to=:to and distance=:distance and rel_id=:rel_id";
+        // ...in most cases we want to check for a direct parent child relationship
+        int distance = 1;
+        
+        if (parent.getResourceType().getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_PLATFORM &&
+            child.getResourceType().getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
+            // ...in the case where the parent is a platform and the child is a service, we need to adjust the distance
+            // to get the appropriate answer...
+            distance = 2;
+        }
+        
+        List results = getSession().createQuery(sql)
+                                   .setParameter("from", parent)
+                                   .setParameter("to", child)
+                                   .setInteger("distance", distance)
+                                   .setInteger("rel_id", AuthzConstants.RELATION_CONTAINMENT_ID.intValue())
+                                   .list();
+        
+        return results.size() == 1;
     }
 }

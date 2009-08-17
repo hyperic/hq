@@ -57,10 +57,10 @@ var pageData = new Array();
 </c:choose>
 
 <tiles:insert definition=".page.title.resource.application.full">
-  <tiles:put name="titleName"><hq:inventoryHierarchy resource="${eid}" /></tiles:put>
   <tiles:put name="resource" beanName="Resource"/>
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+  <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
 
 <tiles:insert definition=".tabs.resource.application.monitor.visibility">
@@ -79,7 +79,7 @@ var pageData = new Array();
           <tiles:put name="form" beanName="MetricsControlForm"/>
           <tiles:put name="formName" value="MetricsControlForm"/>
           <tiles:put name="mode" beanName="mode"/>
-          <tiles:put name="eid" beanName="eid"/>
+          <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
           <c:if test="${not empty view}">
             <tiles:put name="view" beanName="view"/>
           </c:if>

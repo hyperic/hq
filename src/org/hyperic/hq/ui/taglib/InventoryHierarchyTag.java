@@ -47,6 +47,7 @@ import org.hyperic.util.StringUtil;
  * Such as:
  * Platform > Linux > mazinger.hyperic.net
  */
+@Deprecated
 public class InventoryHierarchyTag extends TagSupport {
 
     private AppdefEntityID resourceId;

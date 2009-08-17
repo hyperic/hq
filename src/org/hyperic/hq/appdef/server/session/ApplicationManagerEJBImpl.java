@@ -682,6 +682,14 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
+     * @ejb.interface-method
+     */
+    public boolean isApplicationMember(AppdefEntityID application, AppdefEntityID service) {
+        return getApplicationDAO().isApplicationService(application.getId().intValue(), 
+                                                        service.getId().intValue());
+    }
+    
+    /**
      * Generate a resource tree based on the root resources and
      * the traversal (one of ResourceTreeGenerator.TRAVERSE_*)
      *

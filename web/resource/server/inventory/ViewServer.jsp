@@ -45,10 +45,10 @@ var pageData = new Array();
 <hq:pageSize var="pageSize"/>
 
 <tiles:insert definition=".page.title.resource.inventory.full">
-    <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
     <tiles:put name="resource" beanName="Resource"/>
     <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
     <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+    <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
 
 <!-- CONTROL BAR -->

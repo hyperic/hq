@@ -484,4 +484,10 @@ public interface ParamConstants {
     public static final String EDITABLE_DASHBOARDS_PARAM = "editableDashboards";
     public static final String HAS_MULTIPLE_DASHBOARDS_PARAM = "hasMultipleDashboard";
     public static final String DASHBOARD_ID_PARAM = "dashboardId";
+    
+    /**
+     * Parameter used for breadcrumbs
+     */
+    public static final String RETURN_TO_LINK_PARAM_NAME = "returnTo";
+    public static final String RETURN_TO_LINK_PARAM_VALUE = "1";
 }
