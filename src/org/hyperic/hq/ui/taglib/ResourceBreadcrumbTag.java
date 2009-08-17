@@ -398,9 +398,19 @@ public class ResourceBreadcrumbTag
             if (autoGroupResourceType.getAppdefType() == memberResource.getResourceType().getAppdefType()) {
                 // ...resource types are the same, now check if parents are the same,
                 // luckily resourceId represents the parent...
-                Resource parentResource = resourceManager.findResource(new AppdefEntityID(group.getResourceId()));
+                AppdefEntityID parentAppdef = new AppdefEntityID(group.getResourceId());
                 
-                result = resourceManager.isResourceChildOf(parentResource, memberResource);
+                if (parentAppdef.isApplication()) {
+                    // ...if the parent is an application we need to determine if the other is a member...
+                    ApplicationManagerLocal applicationManager = ApplicationManagerEJBImpl.getOne();
+                    
+                    result = applicationManager.isApplicationMember(parentAppdef, member.getAppdefEntityId());
+                } else {
+                    // ...otherwise, we check if it's a child resource...
+                    Resource parentResource = resourceManager.findResource(parentAppdef);
+                    
+                    result = resourceManager.isResourceChildOf(parentResource, memberResource);
+                }
             }
         }
         
