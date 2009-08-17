@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!DOCTYPE plugin [
-  <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+  <!ENTITY multi-process-metrics SYSTEM "/pdk/plugins/multi-process-metrics.xml">
 ]>
 
 <!--
@@ -204,10 +204,6 @@
     <plugin type="autoinventory"
             class="SybaseServerDetector"/>
     <metrics include="Sybase 12.x Instance"/>
-    <properties>
-       <property name="instance"
-                 description="Database instance to monitor"/>
-    </properties>
   </server>
 
   <server name="Sybase"
@@ -226,15 +222,15 @@
     </properties>
 
     <config>
-      <!--option name="jdbcUrl"
+      <option name="jdbcUrl"
               description="JDBC Url (NOTE: localhost may not work)"
-              default="jdbc:sybase:Tds:&lt;hostname&gt;:4100/master"/-->
-      <!--option name="jdbcUser"
+              default="jdbc:sybase:Tds:&lt;hostname&gt;:4100/master"/>
+      <option name="jdbcUser"
               description="JDBC User"
-              default="sa"/-->
-      <!--option name="jdbcPassword" type="secret"
+              default="sa"/>
+      <option name="jdbcPassword" type="secret"
               optional="true"
-              description="JDBC Password"/-->
+              description="JDBC Password"/>
       <option name="serverName"
               description="Sybase Server Name"
               default="LOCALHOST"/>
@@ -365,21 +361,11 @@
     </service>
 
     <service name="DataServer Process Metrics">
-     <plugin type="measurement"
-            class="org.hyperic.hq.product.MeasurementPlugin"/>
-     <config>
+      <config>
         <option name="process.query"
                 default="State.Name.eq=dataserver"
                 description="PTQL for Sybase DataServer Process"/>
       </config>
-      <metric name="Availability"
-        alias="Availability"
-            template="sigar:Type=ProcState,Arg=%process.query%:State"
-        category="AVAILABILITY"
-        indicator="true"
-        units="percentage"
-        collectionType="dynamic"/>
-
       &multi-process-metrics;
     </service>
   </server>

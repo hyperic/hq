@@ -238,7 +238,7 @@ public class SybaseMeasurementPlugin
      * generate config schema questions for the server types.  The service
      * types will use server config
      */
-    /*public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config)
+    public ConfigSchema getConfigSchema(TypeInfo info, ConfigResponse config)
     {
         if (info.getType() == TypeInfo.TYPE_SERVICE) {
             SchemaBuilder builder = new SchemaBuilder(config);
@@ -248,7 +248,7 @@ public class SybaseMeasurementPlugin
         }
 
         return new ConfigSchema();
-    }*/
+    }
 
     protected String getQuery(Metric metric)
     {
