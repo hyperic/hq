@@ -1742,6 +1742,10 @@
         <include name="org/hyperic/hibernate/**"/>
         <!-- For SST_MetricDataUpgrader -->
         <include name="org/hyperic/hq/measurement/shared/**"/>
+        <!-- For RecoveryCondition and Counter export tasks-->
+		<include name="org/hyperic/hq/events/*"/>
+		<include name="org/hyperic/hq/events/server/session/**"/>
+		<include name="org/hyperic/hq/appdef/shared/**"/>
         <exclude name="**/*License*" />
         <exclude name="**/*license*" />
       </fileset>

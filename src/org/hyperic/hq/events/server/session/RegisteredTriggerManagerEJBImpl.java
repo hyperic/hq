@@ -19,10 +19,8 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -53,16 +51,15 @@ import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
-import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 /**
  * The trigger manager.
- * 
+ *
  * @ejb:bean name="RegisteredTriggerManager"
  *           jndi-name="ejb/events/RegisteredTriggerManager"
  *           local-jndi-name="LocalRegisteredTriggerManager" view-type="local"
  *           type="Stateless"
- * 
+ *
  * @ejb:transaction type="Required"
  */
 
@@ -104,7 +101,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     /**
      * Initialize the in-memory triggers and update the RegisteredTriggers
      * repository
-     * 
+     *
      * @ejb:interface-method
      */
     public void initializeTriggers(RegisterableTriggerRepository registeredTriggerRepository) {
@@ -119,9 +116,9 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
             log.debug("Found " + registeredTriggers.size() + " triggers");
         }
         initializeTriggers(registeredTriggers);
-        ConcurrentStatsCollector.getInstance().addStat(System.currentTimeMillis() - startTime,
-                                                       ConcurrentStatsCollector.TRIGGER_INIT_TIME);
-        log.debug("Finished initializing triggers");
+        if(log.isInfoEnabled()) {
+            log.info("Finished initializing triggers in " + (System.currentTimeMillis() - startTime) + " ms.");
+        }
     }
 
     private void registerTriggers(Integer alertDefId) {
@@ -226,7 +223,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
 
     /**
      * Enable or disable triggers associated with an alert definition
-     * 
+     *
      * @ejb:interface-method
      */
     public void setAlertDefinitionTriggersEnabled(Integer alertDefId, boolean enabled) {
@@ -290,7 +287,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      * @param id The trigger ID
      * @return The trigger with the specified ID (exception will occur if
      *         trigger does not exist)
-     * 
+     *
      * @ejb:interface-method
      */
     public RegisteredTrigger findById(Integer id) {
@@ -320,7 +317,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     /**
      * Get the registered trigger objects associated with a given alert
      * definition.
-     * 
+     *
      * @param id The alert def id.
      * @return The registered trigger objects.
      */
@@ -330,9 +327,9 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
 
     /**
      * Create a new trigger
-     * 
+     *
      * @return a RegisteredTriggerValue
-     * 
+     *
      * @ejb:interface-method
      */
     public RegisteredTrigger createTrigger(RegisteredTriggerValue val) {
@@ -345,9 +342,9 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
 
     /**
      * Create new triggers
-     * 
+     *
      * @return a RegisteredTriggerValue
-     * 
+     *
      * @ejb:interface-method
      */
     public void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef) throws TriggerCreateException,
@@ -463,7 +460,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
 
     /**
      * Delete all triggers for an alert definition.
-     * 
+     *
      * @ejb:interface-method
      */
     public void deleteAlertDefinitionTriggers(Integer adId) {
@@ -474,7 +471,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
 
     /**
      * Completely deletes all triggers when an alert definition is deleted
-     * 
+     *
      * @ejb:interface-method
      */
     public void deleteTriggers(AlertDefinition alertDef) {
