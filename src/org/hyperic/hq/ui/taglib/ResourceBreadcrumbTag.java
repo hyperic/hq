@@ -386,7 +386,10 @@ public class ResourceBreadcrumbTag
     {
         boolean result = false;
         
-        if (group.isAutoGroup() && (member.isService() || member.isServer())) {
+        if (group.isAutoGroup()   &&
+            !member.isAutoGroup() &&
+            (member.isService()   || 
+             member.isServer())) {
             HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
             ServletContext ctx = pageContext.getServletContext();
             AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
