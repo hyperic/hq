@@ -186,7 +186,7 @@ public class ResourceHubPortalAction extends BaseAction {
         String ft = hubForm.getFt();
         AppdefEntityTypeID aetid = null;
         if (ff.intValue() != AppdefEntityConstants.APPDEF_TYPE_APPLICATION &&
-            ft != null && ft.length() > 0) {
+            ft != null && ft.length() > 0 && !ft.equals(String.valueOf(DEFAULT_RESOURCE_TYPE))) {
             try {
                 // compat groups use the entity id format for ft
                 aetid = new AppdefEntityTypeID(ft);
