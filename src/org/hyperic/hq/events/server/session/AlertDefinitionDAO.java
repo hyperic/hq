@@ -412,7 +412,8 @@ public class AlertDefinitionDAO extends HibernateDAO {
     }
 
     int getNumActiveDefs() {
-        String hql = "select count(*) from AlertDefinition where active = 1";
+        String hql = "select count(*) from AlertDefinition where active = true and deleted = false and " +
+        		"(parent_id is null or parent_id > 0)";
         return ((Number)createQuery(hql)
             .setCacheable(true)
             .setCacheRegion("AlertDefinition.getNumActiveDefs")

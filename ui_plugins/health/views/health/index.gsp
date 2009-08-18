@@ -251,7 +251,7 @@ getSystemStats();
       ${l.numApplications}: ${numApplications}<br>
       ${l.numRoles}: ${numRoles}<br>
       ${l.numUsers}: ${numUsers}<br>
-      ${l.numAlerts}: ${numAlerts}<br>
+      ${l.numAlertDefs}: ${numAlertDefs}<br>
       ${l.numResources}: ${numResources}<br>
       ${l.numResourceTypes}: ${numResourceTypes}<br>
       ${l.numGroups}: ${numGroups}<br>
