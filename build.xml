@@ -1740,16 +1740,22 @@
         <include name="org/hyperic/tools/**"/>
         <!-- For SST_Crisponizer -->
         <include name="org/hyperic/hibernate/**"/>
-        <!-- For SST_MetricDataUpgrader -->
+        <!-- For SST_MetricDataUpgrader.  RecoveryConditionExport also needs ConfigChangedEvent and ResourceLogEvent contained here -->
         <include name="org/hyperic/hq/measurement/shared/**"/>
-        <!-- For RecoveryCondition and Counter export tasks-->
+        <!-- For RecoveryCondition and Counter export tasks.  We must be able to deserialize any TriggerFiredEvents (and nested AbstractEvents) stored with now-removed "Multi Condition Triggers" during upgrade.-->
         <include name="org/hyperic/hq/control/ControlEvent.class"/>
- 		<include name="org/hyperic/hq/events/AbstractEvent.class"/>
+ 		<include name="org/hyperic/hq/measurement/ext/MeasurementEvent.class"/>
+        <include name="org/hyperic/hq/product/MetricValue.class"/>
+		<include name="org/hyperic/hq/events/AbstractEvent.class"/>
 		<include name="org/hyperic/hq/events/AlertFiredEvent.class"/>
 		<include name="org/hyperic/hq/events/TriggerFiredEvent.class"/>
 		<include name="org/hyperic/hq/events/TriggerNotFiredEvent.class"/>
+		<include name="org/hyperic/hq/events/ResourceEventInterface.class"/>
+		<include name="org/hyperic/hq/events/LoggableInterface.class"/>
+		<include name="org/hyperic/hq/events/AbstractEvent.class"/>
 		<include name="org/hyperic/hq/events/server/session/FileAlertConditionEvaluatorStateRepository.class"/>
 		<include name="org/hyperic/hq/events/server/session/AlertConditionEvaluatorStateRepository.class"/>
+		<!-- Need CPropChangeEvent and AppdefEntityID in package below for deserialization-->
 		<include name="org/hyperic/hq/appdef/shared/**"/>
         <exclude name="**/*License*" />
         <exclude name="**/*license*" />
