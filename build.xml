@@ -1743,8 +1743,13 @@
         <!-- For SST_MetricDataUpgrader -->
         <include name="org/hyperic/hq/measurement/shared/**"/>
         <!-- For RecoveryCondition and Counter export tasks-->
-		<include name="org/hyperic/hq/events/*"/>
-		<include name="org/hyperic/hq/events/server/session/**"/>
+        <include name="org/hyperic/hq/control/ControlEvent.class"/>
+ 		<include name="org/hyperic/hq/events/AbstractEvent.class"/>
+		<include name="org/hyperic/hq/events/AlertFiredEvent.class"/>
+		<include name="org/hyperic/hq/events/TriggerFiredEvent.class"/>
+		<include name="org/hyperic/hq/events/TriggerNotFiredEvent.class"/>
+		<include name="org/hyperic/hq/events/server/session/FileAlertConditionEvaluatorStateRepository.class"/>
+		<include name="org/hyperic/hq/events/server/session/AlertConditionEvaluatorStateRepository.class"/>
 		<include name="org/hyperic/hq/appdef/shared/**"/>
         <exclude name="**/*License*" />
         <exclude name="**/*license*" />
