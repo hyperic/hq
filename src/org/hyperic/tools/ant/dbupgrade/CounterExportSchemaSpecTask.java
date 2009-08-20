@@ -51,9 +51,12 @@ public class CounterExportSchemaSpecTask
 
         try {
             conn = getConnection();
-            String selectSQL = "select rt.alert_definition_id, te.expiration from eam_trigger_event te, EAM_REGISTERED_TRIGGER rt where " +
-                               "rt.classname='org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger' and te.expiration > " +
-                               System.currentTimeMillis() + " and rt.id=te.trigger_id";
+            String selectSQL =
+                "SELECT rt.alert_definition_id, te.expiration " +
+                "FROM EAM_TRIGGER_EVENT te, EAM_REGISTERED_TRIGGER rt WHERE " +
+                "rt.classname='org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger' " +
+                "AND te.expiration > " +
+                System.currentTimeMillis() + " and rt.id=te.trigger_id";
             stmt = conn.createStatement();
             rs = stmt.executeQuery(selectSQL);
             Map lastAlertExpirations = new HashMap();

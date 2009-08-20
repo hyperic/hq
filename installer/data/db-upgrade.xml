@@ -9660,15 +9660,6 @@ has already been defined.
       <statement targetDB="mysql">
         drop index AVAIL_RLE_VAL_IDX on HQ_AVAIL_DATA_RLE
       </statement>
-      <statement targetDB="oracle">
-        drop index AVAIL_RLE_ENDTIME_IDX
-      </statement>
-      <statement targetDB="postgresql">
-        drop index AVAIL_RLE_ENDTIME_IDX
-      </statement>
-      <statement targetDB="mysql">
-        drop index AVAIL_RLE_ENDTIME_IDX on HQ_AVAIL_DATA_RLE
-      </statement>
     </schema-directSQL>
   </schemaSpec>
 
@@ -9856,11 +9847,23 @@ has already been defined.
           DROP INDEX EAM_RESOURCE_EDGE_FROM_ID_KEY
         </statement>
         <statement targetDB="mysql">
-          ALTER TABLE EAM_RESOURCE_EDGE DROP INDEX FROM_ID
+          alter table EAM_RESOURCE_EDGE drop foreign key FKD1FCB6C0A2BF2D92
+        </statement>
+        <statement targetDB="mysql">
+          alter table EAM_RESOURCE_EDGE DROP INDEX eam_resource_edge_from_id_key
+        </statement>
+        <statement targetDB="mysql">
+          ALTER TABLE EAM_RESOURCE_EDGE DROP INDEX eam_resource_from_id_idx
         </statement>
         <statement>
           ALTER TABLE EAM_RESOURCE_EDGE
-        		ADD CONSTRAINT EAM_RESOURCE_EDGE_FROM_ID_KEY UNIQUE (FROM_ID, TO_ID, REL_ID, DISTANCE)
+          ADD CONSTRAINT EAM_RESOURCE_EDGE_FROM_ID_KEY
+          UNIQUE (FROM_ID, TO_ID, REL_ID, DISTANCE)
+        </statement>
+        <statement targetDB="mysql">
+          ALTER TABLE EAM_RESOURCE_EDGE
+          ADD FOREIGN KEY FKD1FCB6C0A2BF2D92 (from_id)
+          REFERENCES EAM_RESOURCE (ID) ON DELETE CASCADE
         </statement>
     </schema-directSQL>
   </schemaSpec>
@@ -9906,14 +9909,14 @@ has already been defined.
 
   <schemaSpec version="3.150">
   	<schema-update table="EAM_ALERT_DEFINITION" 
-	               column="NOTIFY_FILTERED"
+                       column="NOTIFY_FILTERED"
                        columnType="BOOLEAN" 
                        value="FALSE" />
   </schemaSpec>
 
   <schemaSpec version="3.151">
-	<export-counters exportDir="${jboss.home}"/>
-	<export-recovery-conditions exportDir="${jboss.home}"/>
+    <export-counters exportDir="${jboss.home}"/>
+    <export-recovery-conditions exportDir="${jboss.home}"/>
     <schema-directSQL>
       <statement desc="Convert frequency type of DURATION to frequency type EVERYTIME">
         UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 1
@@ -9956,7 +9959,7 @@ has already been defined.
       </statement>
     </schema-directSQL>  
   </schemaSpec>
-  
+
 </dbupgrade>
 </target>
 </project>

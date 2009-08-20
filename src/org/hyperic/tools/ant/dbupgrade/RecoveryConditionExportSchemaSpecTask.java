@@ -59,8 +59,11 @@ public class RecoveryConditionExportSchemaSpecTask
 
         try {
             conn = getConnection();
-            String selectSQL = "select rt.alert_definition_id, te.event_object from eam_trigger_event te, EAM_REGISTERED_TRIGGER rt where "
-                               + "rt.classname='org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger' and rt.id=te.trigger_id";
+            String selectSQL =
+                "SELECT rt.alert_definition_id, te.event_object " +
+                "FROM EAM_TRIGGER_EVENT te, EAM_REGISTERED_TRIGGER rt WHERE " +
+                "rt.classname='org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger' " +
+                "AND rt.id=te.trigger_id";
             stmt = conn.createStatement();
             rs = stmt.executeQuery(selectSQL);
             Map lastAlerts = new HashMap();
@@ -80,8 +83,8 @@ public class RecoveryConditionExportSchemaSpecTask
         try {
             alertDefinitionId = rs.getInt(1);
         } catch (Exception e) {
-            log("Error processing result set.  A recovery condition may not be initialized with previous alert state.  Cause: " +
-                e.getMessage());
+            log("Error processing result set.  A recovery condition may not be " +
+                "initialized with previous alert state.  Cause: " + e.getMessage());
             return;
         }
         try {
@@ -98,7 +101,8 @@ public class RecoveryConditionExportSchemaSpecTask
             }
         } catch (Exception e) {
             log("Error processing result set.  Recovery alert " + alertDefinitionId +
-                " will not be initialized with previous alert state.  Cause: " + e.getMessage());
+                " will not be initialized with previous alert state.  Cause: " + 
+                e.getMessage());
         }
     }
 
