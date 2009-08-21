@@ -44,6 +44,7 @@ import java.util.jar.JarFile;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.snmp4j.smi.OctetString;
 
 /**
  * MIB file parser intended ONLY for
@@ -286,7 +287,17 @@ public class MIBTree {
                     scratch[ix++] = Integer.parseInt(node);
                 }
                 else {
-                    int[] subnode = getOID(node);
+                    int[] subnode;
+                    int len = node.length()-1;
+                    //see: http://www.snmp4j.org/doc/org/snmp4j/smi/OID.html#OID(java.lang.String)
+                    final char quote = '\'';
+                    if ((node.charAt(0) == quote) && (node.charAt(len) == quote)) {
+                        node = node.substring(1, len);
+                        subnode = new OctetString(node).toSubIndex(false).getValue();
+                    }
+                    else {
+                        subnode = getOID(node);
+                    }
                     if (subnode == null) {
                         return null;
                     }
