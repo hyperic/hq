@@ -16,6 +16,7 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,6 +26,8 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+
+
 
 public class TriggerDAO
     extends HibernateDAO implements TriggerDAOInterface
@@ -88,10 +91,21 @@ public class TriggerDAO
 
     public Set findAllEnabledTriggers() {
         Dialect dialect = Util.getDialect();
-        String hql = new StringBuilder().append("from RegisteredTrigger rt inner join fetch rt.alertDefinition as ad inner join fetch ad.conditionsBag as c where rt.alertDefinition.enabled = ")
+        //For performance optimization, we want to fetch each trigger's alert def as well as the alert def's conditions in a single query (as they will be used to create AlertConditionEvaluators when creating trigger impls).
+        //This query guarantees that when we do trigger.getAlertDefinition().getConditions(), the database is not hit again
+        String hql = new StringBuilder().append("from AlertDefinition ad left join fetch ad.conditionsBag c inner join fetch c.trigger where ad.enabled = ")
                                         .append(dialect.toBooleanValueString(true))
                                         .toString();
-        return new LinkedHashSet(getSession().createQuery(hql).list());
+        List alertDefs = getSession().createQuery(hql).list();
+        Set triggers = new LinkedHashSet();
+        for(Iterator iterator = alertDefs.iterator();iterator.hasNext();) {
+            AlertDefinition definition = (AlertDefinition)iterator.next();
+            for(Iterator conditions = definition.getConditionsBag().iterator(); conditions.hasNext();) {
+                AlertCondition condition = (AlertCondition)conditions.next();
+                triggers.add(condition.getTrigger());
+            }
+        }
+        return triggers;
     }
 
 }
