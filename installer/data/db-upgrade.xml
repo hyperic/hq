@@ -9960,6 +9960,188 @@ has already been defined.
     </schema-directSQL>  
   </schemaSpec>
 
+  <!-- Fixes upgrade inconsistencies on EAM_ESCALATION_STATE table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.152">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_ESCALATION_STATE ADD KEY FKAA7401955029EFD7 (ESCALATION_ID)
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_ESCALATION_STATE DROP INDEX ESCALATION_ID
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_ESCALATION_STATE ADD CONSTRAINT ALERT_DEF_ID UNIQUE (ALERT_DEF_ID,ALERT_TYPE)
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_ESCALATION_STATE DROP INDEX ALERT_DEF_ID_KEY
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_MEASUREMENT_BL table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.153">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_MEASUREMENT_BL DROP FOREIGN KEY FK1877029BAE18683B
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_MEASUREMENT_BL ADD CONSTRAINT FK1877029BB6E3839C
+        FOREIGN KEY (MEASUREMENT_ID) REFERENCES EAM_MEASUREMENT (ID) ON DELETE CASCADE
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_METRIC_AUX_LOGS table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.154">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_METRIC_AUX_LOGS DROP FOREIGN KEY FKE7D70B0B993199C7
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_METRIC_AUX_LOGS ADD CONSTRAINT FKE7D70B0BA1FCB528
+        FOREIGN KEY (METRIC_ID) REFERENCES EAM_MEASUREMENT (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.155">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE DROP FOREIGN KEY EAM_RESOURCE_ibfk_1
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE ADD CONSTRAINT FK7AC0E15C9E309B2B
+        FOREIGN KEY (RESOURCE_TYPE_ID) REFERENCES EAM_RESOURCE_TYPE (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE_EDGE table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.156">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP INDEX FKD1FCB6C0CCC27921
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP FOREIGN KEY EAM_RESOURCE_EDGE_ibfk_1
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE ADD CONSTRAINT FKD1FCB6C0A2BF2D92
+        FOREIGN KEY (FROM_ID) REFERENCES EAM_RESOURCE (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE MODIFY COLUMN VERSION_COL bigint(20) NOT NULL DEFAULT 0
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE ADD CONSTRAINT FROM_ID UNIQUE(FROM_ID,TO_ID,REL_ID,DISTANCE)
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP INDEX EAM_RESOURCE_EDGE_FROM_ID_KEY
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on HQ_AVAIL_DATA_RLE table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.157">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE HQ_AVAIL_DATA_RLE DROP FOREIGN KEY FK6E8F9E9CAE18683B
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE HQ_AVAIL_DATA_RLE ADD CONSTRAINT FK6E8F9E9CB6E3839C
+        FOREIGN KEY (MEASUREMENT_ID) REFERENCES EAM_MEASUREMENT (ID) ON DELETE CASCADE
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_ALERT_ACTION_LOG table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.158">
+    <schema-directSQL>
+      <statement targetDB="mysql" fail="false">
+         ALTER TABLE EAM_ALERT_ACTION_LOG ADD CONSTRAINT FK423FA3CC1AA4E259
+         FOREIGN KEY (ALERT_ID) REFERENCES EAM_ALERT (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="mysql" fail="false">
+         ALTER TABLE EAM_ALERT_ACTION_LOG ADD CONSTRAINT FK423FA3CC9C76C3BB
+         FOREIGN KEY (ACTION_ID) REFERENCES EAM_ACTION (ID) ON DELETE CASCADE
+      </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RES_GRP_RES_MAP table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.159">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RES_GRP_RES_MAP DROP INDEX eam_res_grp_idx
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RES_GRP_RES_MAP ADD CONSTRAINT RESOURCE_ID UNIQUE (RESOURCE_ID,RESOURCE_GROUP_ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_APP_SERVICE table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.160">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_APP_SERVICE DROP INDEX SERVICE_ID
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_APP_SERVICE ADD CONSTRAINT SERVICE_ID UNIQUE (SERVICE_ID,GROUP_ID,APPLICATION_ID)
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_APP_SERVICE DROP INDEX eam_app_service_service_id_key
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE_RELATION table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.161">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_RELATION DROP INDEX eam_resource_relation_name_key
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_RELATION ADD CONSTRAINT NAME UNIQUE (NAME)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on left over indexes -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.162">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_CRITERIA DROP INDEX FK36EFCAD6DA1B7C9
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_MEASUREMENT DROP INDEX MEAS_ID_CLASS
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>
