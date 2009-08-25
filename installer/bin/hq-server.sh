@@ -216,7 +216,7 @@ ANT_OPTS="$ANT_OPTS -Djava.net.preferIPv4Stack=true" ANT_ARGS="" JAVA_HOME=${JAV
   -Dserver.home=${SERVER_HOME} \
   -Dengine.home=${ENGINE_HOME} \
   -logger org.hyperic.tools.ant.installer.InstallerLogger \
-  -f ${SERVER_HOME}/data/server.xml sh-setup
+  -f ${SERVER_HOME}/data/server.xml sh-setup | grep -v "Unable to locate tools.jar"
 
 # Start the database if we have a hqdb dir, and if it's not running
 if [ -d "${SERVER_HOME}/hqdb" ] ; then

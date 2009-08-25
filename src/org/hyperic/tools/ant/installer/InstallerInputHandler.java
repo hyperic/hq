@@ -43,13 +43,27 @@ public class InstallerInputHandler extends DefaultInputHandler {
     }
 
     public void handleInput(InputRequest request) throws BuildException {
+        int counter = 100;
         String prompt = getPrompt(request);
         BufferedReader in = 
             new BufferedReader(new InputStreamReader(getInputStream()));
         do {
             logger.handleMessage(prefix + prompt);
             try {
+                /*
+                 * Added by Jim 04/07/2009
+                 *   Put an upper limit on the amount of times
+                 *   we allow for looping here.
+                 *   TCSRV-233
+                 */
+                if (--counter <= 0) {
+                    throw new IOException("Prevented runaway input looping.");
+                }
                 String input = in.readLine();
+                if (input == null) {
+                    // End of stream
+                    throw new IOException("End of stream.");
+                }
                 request.setInput(input);
             } catch (IOException e) {
                 throw new BuildException("Failed to read input from Console.",

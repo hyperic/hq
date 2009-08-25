@@ -383,26 +383,42 @@ __ll__
 
   <target name="fail-if-webapp-port-used" if="server.webapp.port.isAlreadyUsed">
     <msgfail>^^^ERROR:\
-      There is already a program using port ${server.webapp.port}.
+      There is another program using port ${server.webapp.port}.
       Please choose a different value for the server.webapp.port property.
+    	
+      Run the setup program with the "-full" option so that you
+      can pick either an alternate port or a different database to use
+      for the HQ server.
     </msgfail>
   </target>
   <target name="fail-if-webapp-secure-port-used" if="server.webapp.secure.port.isAlreadyUsed">
     <msgfail>^^^ERROR:\
-      There is already a program using port ${server.webapp.secure.port}.
+      There is another program using port ${server.webapp.secure.port}.
       Please choose a different value for the server.webapp.secure.port property.
+    	
+      Run the setup program with the "-full" option so that you
+      can pick either an alternate port or a different database to use
+      for the HQ server.
     </msgfail>
   </target>
   <target name="fail-if-jnp-port-used" if="server.jnp.port.isAlreadyUsed">
     <msgfail>^^^ERROR:\
-      There is already a program using port ${hq-engine.jnp.port}.
+      There is another program using port ${hq-engine.jnp.port}.
       Please choose a different value for the hq-engine.jnp.port property.
+    
+      Run the setup program with the "-full" option so that you
+      can pick either an alternate port or a different database to use
+      for the HQ server.
     </msgfail>
   </target>
   <target name="fail-if-mbean-port-used" if="server.jboss.server.port.isAlreadyUsed">
     <msgfail>^^^ERROR:\
-      There is already a program using port ${hq-engine.server.port}.
+      There is another program using port ${hq-engine.server.port}.
       Please choose a different value for the hq-engine.server.port property.
+    	
+      Run the setup program with the "-full" option so that you
+      can pick either an alternate port or a different database to use
+      for the HQ server.
     </msgfail>
   </target>
   <target name="fail-if-no-permission" unless="server.db.user.permission">

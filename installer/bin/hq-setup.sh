@@ -102,6 +102,7 @@ while [ ! "x${1}" = "x" ] ; do
   shift
 done
 
+echo "Please ignore references to missing tools.jar"
 if [ "x${SETUP_FILE}" = "x" ] ; then
   ANT_OPTS="$ANT_OPTS -Djava.net.preferIPv4Stack=true" ANT_ARGS="" JAVA_HOME=${HQ_JAVA_HOME} ${ANT_HOME}/bin/ant --noconfig -q \
     -Dinstall.dir=${INSTALL_DIR} \

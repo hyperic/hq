@@ -64,7 +64,7 @@ public class InteractiveResponseBuilder implements ResponseBuilder {
         throws IOException, InvalidOptionException, EarlyExitException
     {
         List options = schema.getOptions();
-        int i, nOptions = options.size();
+        int i, counter, nOptions = options.size();
         ConfigResponse res;
         Set defaultKeys;
 
@@ -72,6 +72,7 @@ public class InteractiveResponseBuilder implements ResponseBuilder {
 
         res = new ConfigResponse(schema);
         i = 0;
+        counter = 100;
         while(i < nOptions){
             ConfigOption opt = (ConfigOption)options.get(i);
             String val, inputStr, def;
@@ -129,6 +130,15 @@ public class InteractiveResponseBuilder implements ResponseBuilder {
                         i++;
 
                     // If there is no default, ask the question again
+                    /*
+                     * Added by Jim 04/07/2009
+                     *   Put an upper limit on the amount of times
+                     *   we allow for looping here.
+                     *   TCSRV-233
+                     */
+                    if (--counter <= 0) {
+                        throw new IOException("Prevented runaway input looping.");
+                    }
                     continue;
                 }
                 else {
@@ -184,7 +194,7 @@ public class InteractiveResponseBuilder implements ResponseBuilder {
                         continue;
                 }
             }
-            
+            counter = 100;
             try {
                 res.setValue(opt.getName(), val);
             } catch (EarlyExitException e) {
