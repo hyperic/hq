@@ -394,8 +394,8 @@ public class FileUtil {
      * 
      * @param dir The directory to create.
      * @param numTries The number of tries to create the directory.
-     * @return <code>true</code> if directory creation succeeds; 
-     *         <code>false</code> if it fails.
+     * @return <code>true</code> if directory creation succeeds or the directory
+     *         already exists,b<code>false</code> if it fails.
      * @throws InterruptedException if the operation is interrupted.        
      * @throws IllegalArgumentException if the number of tries is less than one.        
      */
@@ -403,21 +403,21 @@ public class FileUtil {
         if (numTries < 1) {
             throw new IllegalArgumentException("number of tries must be greater than zero");
         }
-        
-        if (!dir.exists()) {
-            int tries = 0;
-            boolean succeeded = dir.mkdirs();
 
-            while (!succeeded && ++tries < numTries) {
-                Thread.sleep(10);
-
-                succeeded = dir.mkdirs();
+        int tries = 0;
+        while (tries++ < numTries) {
+            boolean result = dir.mkdirs();
+            if (result) {
+                return true;
+            } else {
+                if (dir.exists()) {
+                    return true;
+                } else {
+                    Thread.sleep(100);
+                }
             }
-
-            return succeeded;
-        } else {
-            return true;
         }
+        return false;
     }
      
     /** 
