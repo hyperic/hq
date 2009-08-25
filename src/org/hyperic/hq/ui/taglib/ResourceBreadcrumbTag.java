@@ -34,6 +34,7 @@ import org.hyperic.hq.authz.shared.ResourceManagerLocal;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.hub.BreadcrumbUtil;
+import org.hyperic.hq.ui.action.resource.hub.ResourceHubForm;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
@@ -176,16 +177,19 @@ public class ResourceBreadcrumbTag
         ServletContext ctx = pageContext.getServletContext();
         AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
         int sessionId = RequestUtils.getSessionId(request).intValue();
-        List<BreadcrumbItem> breadcrumbs = (List<BreadcrumbItem>) session.getAttribute(Constants.BREADCRUMB_SESSION_ATTR_NAME);
-
-        if (breadcrumbs == null) {
-            // ...create the bread crumb list...
-            breadcrumbs = new ArrayList<BreadcrumbItem>();
-        }
-        
-        // ...create the bread crumb item for this resource...
         AppdefEntityID appdefEntityId = new AppdefEntityID(resourceId);
         AppdefResourceValue resource = appdefBoss.findById(sessionId, appdefEntityId);
+        String browseUrl = getBrowseUrl(resource, (String) session.getAttribute(Constants.ROOT_BREADCRUMB_URL_ATTR_NAME));
+        List<BreadcrumbItem> breadcrumbs = (List<BreadcrumbItem>) session.getAttribute(Constants.BREADCRUMB_SESSION_ATTR_NAME);
+
+        if (breadcrumbs == null || browseUrl != null) {
+            // ...create the new bread crumb, if we don't already have one or we're coming from the browse page...
+            breadcrumbs = new ArrayList<BreadcrumbItem>();
+            // ...clear out backup...
+            session.removeAttribute(Constants.BREADCRUMB_SESSION_BACKUP_ATTR_NAME);
+        } 
+        
+        // ...create the bread crumb item for this resource...
         String url = BreadcrumbUtil.createResourceURL(baseResourceUrl, resourceId, ctype);
         String label = resource.getName();
         
@@ -271,6 +275,9 @@ public class ResourceBreadcrumbTag
 
         markup.append("</ul>");
         
+        // Stash the browse crumb in a hidden text field for js use
+        markup.append("<input type=\"hidden\" id=\"browseUrlInput\" value=\"").append(breadcrumbs.get(0).getUrl()).append("\" />");
+        
         if (backupBreadcrumbs != null && !breadcrumbs.get(0).equals(backupBreadcrumbs.get(0))) {
             // ...if the browse crumbs don't match, provide a "Return to ..." link.
             BreadcrumbItem crumb = backupBreadcrumbs.get(backupBreadcrumbs.size() - 1);
@@ -282,6 +289,43 @@ public class ResourceBreadcrumbTag
         }
 
         pageContext.getOut().write(markup.toString());
+    }
+    
+    private int getGroupType(AppdefGroupValue group) {
+        // ...group type ids used to distinguish between compat and mixed groups...
+        // TODO there are constants that are already in the TypeConstants class but they have the values 
+        // swapped for some reason.  To be safe, specifying the values here and will look into 
+        // refactoring using the TypeConstants class later.
+        final Integer APPDEF_TYPE_GROUP_COMPAT = new Integer(1);
+        final Integer APPDEF_TYPE_GROUP_MIXED = new Integer(2);
+        
+        return group.isGroupCompat() ? APPDEF_TYPE_GROUP_COMPAT : APPDEF_TYPE_GROUP_MIXED;
+    }
+    
+    private String getBrowseUrl(AppdefResourceValue resource, String url) {
+        String result = url;
+        
+        if (url != null) {
+            //...if we have an url, check to make sure the resource is associated...
+            String test = ResourceHubForm.ENTITY_TYPE_ID_PARAM + "=" + resource.getEntityId().getType();
+            String testGroup = null;
+            
+            if (resource.getEntityId().isGroup()) {
+                // ...if we're dealing with a group, need to do a secondary test...
+                testGroup = ResourceHubForm.GROUP_TYPE_ID_PARAM + "=" + getGroupType((AppdefGroupValue) resource);
+            }
+            
+            if ((url.indexOf(test) == -1 && testGroup == null) ||
+                (testGroup != null && url.indexOf(test) > -1 && url.indexOf(testGroup) == -1)) {
+                // ...this browse url isn't using the current resource's resource type,
+                // so generate one based off the resource.
+                BreadcrumbItem crumb = createRootBreadcrumb(resource);
+                
+                result = crumb.getUrl();
+            }
+        }
+        
+        return result;
     }
 
     private BreadcrumbItem createRootBreadcrumb(AppdefResourceValue resource) {
@@ -298,11 +342,7 @@ public class ResourceBreadcrumbTag
             
             if (resource.getEntityId().isGroup()) {
                 // ...we are dealing with a group, let's determine the type (compatible or mixed)
-                AppdefGroupValue group = (AppdefGroupValue) resource;
-                
-                groupType = new Integer(group.isGroupCompat() ? 
-                                        Constants.APPDEF_TYPE_GROUP_COMPAT : 
-                                        Constants.APPDEF_TYPE_GROUP_ADHOC); 
+                groupType = new Integer(getGroupType((AppdefGroupValue) resource));
             }
             
             browseUrl = BreadcrumbUtil.createRootBrowseURL(baseBrowseUrl, resource.getEntityId().getType(), groupType);
