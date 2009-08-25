@@ -96,9 +96,10 @@
 		               baseBrowseUrl="/ResourceHub.do" 
 		               baseResourceUrl="/Resource.do" />
 	</div>
+	<br/>
 </c:if>
 
-<table width="100%" cellspacing="0" cellpadding="0" style="border: 0px;">
+<table width="100%" cellspacing="0" cellpadding="0" style="border: 0px;clear:both;">
   <tr>
     <td colspan="4">
 
