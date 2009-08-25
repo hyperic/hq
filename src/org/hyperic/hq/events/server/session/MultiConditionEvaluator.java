@@ -135,9 +135,6 @@ public class MultiConditionEvaluator implements AlertConditionEvaluator {
     }
 
     protected void fireConditionsSatisfied(Collection fulfilled) {
-        if(log.isDebugEnabled()) {
-            log.debug("Trigger firing on events" + fulfilled);
-        }
         events.clear();
         executionStrategy.conditionsSatisfied(new AlertConditionsSatisfiedZEvent(alertDefinitionId.intValue(),
                                                                                  (TriggerFiredEvent[]) fulfilled.toArray(new TriggerFiredEvent[fulfilled.size()])));

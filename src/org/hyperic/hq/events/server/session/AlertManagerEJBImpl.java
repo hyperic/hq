@@ -334,6 +334,12 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             } else {
                 creator.createEscalatable();
             }
+            
+            if (_log.isDebugEnabled()) {
+                _log.debug("Alert definition " + alertDef.getName() +
+                           " (id=" + alertDef.getId() + ") fired.");
+            }
+            
             ConcurrentStatsCollector.getInstance().addStat(System.currentTimeMillis() - startTime,ConcurrentStatsCollector.FIRE_ALERT_TIME);
         } catch (PermissionException e) {
             _log.error("Alert not firing due to a permissions issue",e);

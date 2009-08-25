@@ -34,6 +34,10 @@ public class AlertConditionsSatisfiedZEvent
         AlertConditionsSatisfiedZEvent other = (AlertConditionsSatisfiedZEvent) obj;
         return getPayload().equals(other.getPayload()) && getSourceId().equals(other.getSourceId());
     }
+    
+    public String toString() {
+        return getPayload().toString();
+    }
 
     public int hashCode() {
         final int prime = 31;

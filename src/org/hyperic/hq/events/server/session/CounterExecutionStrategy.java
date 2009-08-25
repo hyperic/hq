@@ -64,6 +64,9 @@ public class CounterExecutionStrategy implements ExecutionStrategy {
                 payload.setMessage("Occurred " + expirations.size() + " times in the span of " + timeRange /
                                    MeasurementConstants.MINUTE + " minutes");
                 try {
+                    if (log.isDebugEnabled()) {
+                        log.debug("Firing event " + event);
+                    }
                     zeventEnqueuer.enqueueEvent(event);
                     expirations.clear();
                 } catch (InterruptedException e) {

@@ -152,17 +152,33 @@
   </category>
   -->
 	
-  <!-- Use this category to log every instance of a resource alert firing.
-	   Comment out if the log messages become unwieldy. -->	
-  <category name="org.hyperic.hq.events.ext.AbstractTrigger.Fired">
+  <!-- Use this category to log every instance of resource counter-type alerts triggering.
+	   Comment out if the log messages become unwieldy.
+  <category name="org.hyperic.hq.events.server.session.CounterExecutionStrategy">
     <priority value="DEBUG" />
   </category>
+  -->
 
-  <!-- Use this category to log every instance of a group alert firing.
-	   Comment out if the log messages become unwieldy. -->	
-  <category name="org.hyperic.hq.galerts.processor.MemGalertDef.Fired">
+  <!-- Use this category to log every instance of resource alerts, non-counter-type, triggering.
+	   Comment out if the log messages become unwieldy.
+  <category name="org.hyperic.hq.events.server.session.SingleAlertExecutionStrategy">
     <priority value="DEBUG" />
   </category>
+  -->
+
+  <!-- Use this category to log every instance of a resource alert firing.
+	   Comment out if the log messages become unwieldy.
+  <category name="org.hyperic.hq.events.server.session.AlertManagerEJBImpl">
+    <priority value="DEBUG" />
+  </category>
+  -->
+  
+  <!-- Use this category to log every instance of a group alert firing.
+	   Comment out if the log messages become unwieldy.
+  <category name="  org.hyperic.hq.galerts.processor.MemGalertDef.Fired">
+    <priority value="DEBUG" />
+  </category>
+  -->
 
   <!-- ======================= -->
   <!-- Setup the Root category -->

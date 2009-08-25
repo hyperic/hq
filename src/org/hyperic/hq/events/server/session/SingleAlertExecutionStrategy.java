@@ -31,6 +31,9 @@ public class SingleAlertExecutionStrategy implements ExecutionStrategy {
 
     public void conditionsSatisfied(AlertConditionsSatisfiedZEvent event) {
         try {
+            if (log.isDebugEnabled()) {
+                log.debug("Firing event " + event);
+            }
             zeventEnqueuer.enqueueEvent(event);
         } catch (InterruptedException e) {
             log.warn("Interrupted enqueuing an AlertConditionsSatisfiedZEvent.  Event: " + event +

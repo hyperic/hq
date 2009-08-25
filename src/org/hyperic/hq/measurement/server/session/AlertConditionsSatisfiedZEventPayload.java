@@ -1,6 +1,7 @@
 package org.hyperic.hq.measurement.server.session;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.zevents.ZeventPayload;
@@ -97,7 +98,6 @@ public class AlertConditionsSatisfiedZEventPayload implements ZeventPayload {
     }
 
     public String toString() {
-        return "[message=" + getMessage() + "]";
+        return "[message=" + getMessage() + ", timestamp=" + new Date(getTimestamp()) + "]";
     }
-
 }
