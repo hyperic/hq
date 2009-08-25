@@ -153,7 +153,11 @@ abstract class BaseController {
     File getViewDir() {
         this.viewDir
     }
-    
+
+    boolean logRequests() {
+        true
+    }
+
     /**
      * Called by the dispatcher when a controller action is dispatched.
      *
@@ -182,10 +186,7 @@ abstract class BaseController {
 	        return
 	    }
 	    
-	    if (!lowestClass.name.equals("HealthController") &&
-	        !lowestClass.name.equals("SystemsdownController") &&
-	        !lowestClass.name.equals("EventController") &&
-	        !lowestClass.name.equals("AlertController")) {
+	    if (logRequests()) {
 	       log.info "Invoking method: ${action} with ${params}"
 	    } else if (log.debugEnabled) {
 	       log.debug "Invoking method: ${action} with ${params}"

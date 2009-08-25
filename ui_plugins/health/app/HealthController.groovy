@@ -42,7 +42,11 @@ class HealthController
         setJSONMethods(['getSystemStats', 'getDiag', 'cacheData', 
                         'agentData', 'runQuery', 'executeQuery'])
     }
-    
+
+    boolean logRequests() {
+        false
+    }
+
     private getAgentSchema() {
         def res = [
             getData: {pageInfo, params ->

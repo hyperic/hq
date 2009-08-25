@@ -47,7 +47,11 @@ class SystemsdownController extends BaseController {
    def SystemsdownController() {
         setTemplate('standard')
     }
-    
+
+    boolean logRequests() {
+        false
+    }    
+
     def getNow() {
         System.currentTimeMillis()
     }

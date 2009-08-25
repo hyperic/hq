@@ -45,6 +45,10 @@ class EventController
         ],
     ]   
 
+    boolean logRequests() {
+        false
+    }
+    
     private List getInGroups(params) {
         def inGroups = params.getOne('groups', '')
         
