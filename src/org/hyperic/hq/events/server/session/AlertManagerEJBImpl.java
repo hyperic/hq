@@ -279,17 +279,13 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
-     * Processes {@link AlertConditionSatisfiedZEvent}s that indicate that an alert should be created
+     * Processes {@link AlertConditionSatisfiedZEvent} that indicate that an alert should be created
+     * 
+     * To minimize StaleStateExceptions, this method should only be called once in one transaction.
+     *      
      * @ejb:interface-method
      */
-    public void handleAlertConditionsSatisfiedEvents(Collection events) {
-        for (Iterator i=events.iterator(); i.hasNext(); ) {
-            AlertConditionsSatisfiedZEvent z = (AlertConditionsSatisfiedZEvent)i.next();
-            fireAlert(z);
-        }
-    }
-
-    private void fireAlert(AlertConditionsSatisfiedZEvent event) {
+    public void fireAlert(AlertConditionsSatisfiedZEvent event) {
         if (!AlertRegulator.getInstance().alertsAllowed()) {
             _log.debug("Alert not firing because they are not allowed");
             return;
