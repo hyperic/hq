@@ -131,12 +131,12 @@ catch (ClassCastException ce) {
 </c:if>
 
 <c:catch> 
-  <c:if test="${not empty exception}"> 
+  <% if (exception != null) { %> 
       <div id="exception" style="visibility:hidden"><%=StringUtil.getStackTrace(exception)%></div>
-    <c:if test="${not empty root}"> 
+    <% if (root != null) { %> 
       <div id="root" style="visibility:hidden"><%=StringUtil.getStackTrace(root)%></div>
-    </c:if> 
-  </c:if> 
+    <% } %> 
+  <% } %> 
 </c:catch>
 
 
