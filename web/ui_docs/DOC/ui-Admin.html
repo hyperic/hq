@@ -16,194 +16,88 @@
                                                     </span>
 				    </div>
 				    <div class="pagesubheading">
-					    This page last changed on Jul 13, 2009 by <font color="#0050B2">mmcgarry</font>.
+					    This page last changed on Aug 18, 2009 by <font color="#0050B2">mmcgarry</font>.
 				    </div>
 
-				    <h1><a name="ui-Admin-HQAdministration"></a><a name="ui-Admin-top"></a>HQ Administration</h1>
+				    <p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
+<style type='text/css'>/*<![CDATA[*/
+div.rbtoc1250632355118 {margin-left: 1.5em;padding: 0px;}
+div.rbtoc1250632355118 ul {list-style: disc;margin-left: 0px;padding-left: 20px;}
+div.rbtoc1250632355118 li {margin-left: 0px;padding-left: 0px;}
 
-<p><em>Topics marked with</em> <font color="red"><em>&#42;</em></font> <em>relate to HQ Enterprise-only features.</em></p>
-<p>This screen allows Administrators to configure their deployment of Hyperic HQ: manage users and roles, monitoring (metrics) defaults and alert-definition defaults (including escalation schemes) for each <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resourcetype">resource type</a>, manage the HQ Server configuration, and view license information for this deployment. This screen and all its component functions are available to Administrators only.</p>
+/*]]>*/</style><div class='rbtoc1250632355118'>
 <ul>
-	<li><a href="#ui-Admin-Tasks">Tasks</a> available on this screen</li>
-</ul>
-
-
+    <li><a href='#ui-Admin-AdministrationPage'> Administration Page</a></li>
 <ul>
-	<li><a href="#ui-Admin-Sections">Sections</a> on this screen</li>
+    <li><a href='#ui-Admin-Authentication%2FAuthorization'>Authentication/Authorization</a></li>
+    <li><a href='#ui-Admin-HQServerSettings'>HQ Server Settings</a></li>
+    <li><a href='#ui-Admin-Plugins'>Plugins</a></li>
+    <li><a href='#ui-Admin-HQLicenseInformation'>HQ License Information</a></li>
 </ul>
-
-
-<ul>
-	<li><a href="#ui-Admin-Navigating">Navigating</a> via the masthead menu</li>
-</ul>
-
-
+</ul></div>
 <p><em>Feedback is welcome. Click <b>Add Comment</b> at the bottom of the page.</em></p>
-<p><a name="ui-Admin-Tasks"></a></p>
 
-<h3><a name="ui-Admin-TasksAvailableonThisScreen"></a>Tasks Available on This Screen</h3>
+<h1><a name="ui-Admin-AdministrationPage"></a><a name="ui-Admin-top"></a>Administration Page</h1>
 
-<p>On this screen, users can do the following tasks:</p>
+<p>This page appears when you click <b>Administration</b> in the Masthead. Only users with administrator privilege can use the features on this page.</p>
 
-<p><b>To view a list of all users:</b></p>
+<h2><a name="ui-Admin-Authentication%2FAuthorization"></a>Authentication/Authorization</h2>
+
+<p>The "Authentication/Authorization" section has options for viewing and updating HQ user accounts.</p>
+
+<p>In HQ Enterprise only, additional options for managing roles are also available.<font color="red">&#42;</font></p>
+
+<p>For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Users+and+Roles" title="HQ Users and Roles">HQ Users and Roles</a>.</p>
+
+<h2><a name="ui-Admin-HQServerSettings"></a>HQ Server Settings</h2>
+
+<p>The "HQ Server Settings" section has links to several configuration pages:</p>
 <ul>
-	<li>Click <b>List Users</b> and proceed to the "<a href="ui-Admin.User.List.html" title="ui-Admin.User.List">List Users</a>" screen.</li>
-</ul>
-
-
-<p><b>To create a new user:</b></p>
-<ul>
-	<li>Click <b>New User</b> and proceed to the "<a href="ui-Admin.User.New.html" title="ui-Admin.User.New">New User</a>" screen.</li>
-</ul>
-
-
-<p><b>To view a list of all roles:</b> <font color="red">&#42;</font></p>
-<ul>
-	<li>Click <b>List Roles</b> and proceed to the "<a href="ui-Admin.Role.List.html" title="ui-Admin.Role.List">List Roles</a>" screen.</li>
-</ul>
-
-
-<p><b>To create a new role:</b> <font color="red">&#42;</font></p>
-<ul>
-	<li>Click <b>New Role</b> and proceed to the "<a href="ui-Admin.Role.New.html" title="ui-Admin.Role.New">New Role</a>" screen.</li>
-</ul>
-
-
-<p><b>To manage the HQ server:</b></p>
-<ul>
-	<li>Click <b>HQ Server Settings</b> and proceed to the "<a href="ui-Admin.HQServer.html" title="ui-Admin.HQServer">Edit HQ Server Settings</a>" screen.</li>
-</ul>
-
-
-<p><b>To manage monitoring and alerting defaults:</b></p>
-<ul>
-	<li>Click <b>Monitoring Defaults</b> and proceed to the "<a href="ui-Admin.Monitor.html" title="ui-Admin.Monitor">HQ Monitoring Defaults Configuration</a>" screen.</li>
-</ul>
-
-
-<p><b>To manage escalation schemes for use in alerts:</b></p>
-<ul>
-	<li>Click <b>Escalation Schemes Configuration</b> and proceed to the "<a href="ui-Admin.Escalation.html" title="ui-Admin.Escalation">Escalation Schemes Configuration</a>" screen.</li>
-</ul>
-
-
-<p><b>To access the HQ Health plugin diagnostics:</b></p>
-<ul>
-	<li>Click <b>HQ Health</b> in the "Plugins" section and proceed to the "<a href="ui-HQHealth.html" title="ui-HQHealth">HQ Health</a>" screen.</li>
-</ul>
-
-
-<p><b>To access the Groovy console:</b></p>
-<ul>
-	<li>Click <b>Groovy Console</b> in the "Plugins" section and proceed to the "<a href="ui-Groovy.html" title="ui-Groovy">Groovy Console</a>" screen.</li>
-</ul>
-
-
-<p>*To access the Network and Host Dependency Manager:*<font color="red">&#42;</font></p>
-<ul>
-	<li>Click <b>Network and Host Dependency Manager</b> in the "Plugins" section and proceed to the "<a href="ui-Admin.Dependency.html" title="ui-Admin.Dependency">Network and Host Dependency Manager</a>" screen.</li>
-</ul>
-
-
-<p><em><a href="#ui-Admin-top"><em>back to top</em></a></em></p>
-
-<p><a name="ui-Admin-Sections"></a></p>
-
-<h3><a name="ui-Admin-SectionsonThisScreen"></a>Sections on This Screen</h3>
-
-
-<h4><a name="ui-Admin-Authentication%2FAuthorization"></a>Authentication/Authorization</h4>
-
-<p>This section gives users access to all the users and roles defined in the system and allows them to create new ones.</p>
-
-<h4><a name="ui-Admin-HQServerSettings"></a>HQ Server Settings</h4>
-
-<p>"HQ Server Configuration" allows users to view the current configuration settings for the Hyperic HQ server. "Monitoring Defaults Configuration" allows viewers to view current monitoring defaults for each resource type. And in "Escalation Schemes Configuration," users can define escalation schemes for use in alerts throughout HQ.</p>
-
-<h4><a name="ui-Admin-Plugins"></a>Plugins</h4>
-
-<p>This section lists all the UI plugins &#8212; standard or custom &#8212; that are installed on HQ. The two standard plugins are:</p>
-<ul>
-	<li><a href="ui-HQHealth.html" title="ui-HQHealth">HQ Health</a>: This plugin provides real-time diagnostic data for the machine on which the HQ Server is installed. The data is not intended for customers to use on their own, but instead to help HQ Support troubleshoot problems with a customer's deployment.</li>
+	<li><b>HQ Server Settings</b> &#45; You can set a variety of deployment-wide HQ Server configuration options here. For more information see the associated <a href="http://support.hyperic.com/confluence/display/DOC/ui-Admin.HQServer" title="ui-Admin.HQServer">help page</a>.</li>
 </ul>
 
 
 <ul>
-	<li><a href="ui-Groovy.html" title="ui-Groovy">Groovy Console</a>: This plugin allows users to run Groovy code directly in the HQ Server.</li>
+	<li><b>Monitoring Defaults</b> &#45; You set the default monitoring settings for each resource type on this page.&nbsp; For more information see the associated <a href="ui-Admin.Monitor.html" title="ui-Admin.Monitor">help page</a>.&nbsp; <b>Note:&nbsp;</b> Although metric collection settings defined here can be over-written for an individual resource,&nbsp; such changes will not persist when type-level defaults are updated. Each time you update the monitoring configuration for a resource type, the settings for each individual resource of that type are updated.</li>
 </ul>
 
 
 <ul>
-	<li>HQ Web Services API: This plugin provides programmatic access to the HQ Server.&nbsp; It replaces the command-line interface (CLI) provided in previous version of HQ.</li>
+	<li><b>Escalation Schemes Configuration</b> &#45; Use this page to create and manage escalation schemes for use in alert definitions. For more information see the associated <a href="http://support.hyperic.com/confluence/display/DOC/ui-Admin.Escalation" title="ui-Admin.Escalation">help page</a>.</li>
 </ul>
 
 
-<p>To access a plugin, click its name.</p>
+<h2><a name="ui-Admin-Plugins"></a>Plugins</h2>
 
-<h4><a name="ui-Admin-HQLicenseInformation"></a>HQ License Information<font color="red">&#42;</font></h4>
+<p>This section is an attachment point for HQU plugins.</p>
+<div class="panel" style="border-width: 1px;"><div class="panelContent">
+<p>HQU plugins are Groovy-based HQ extensions that can be attached:</p>
+<ul>
+	<li>to the <b>Views</b> tab for a resource type,</li>
+	<li>as an item on a Masthead tab menu, or</li>
+	<li>to the "Plugins" section of HQ's <b>Administration</b> tab.<br/>
+HQ has a number of built-in HQU plugins. Users can also develop and deploy custom HQU plugins. For more information see <a href="http://support.hyperic.com/confluence/display/hypcomm/HQU+Documentation" title="HQU Documentation">HQU Documentation</a>.</li>
+</ul>
+</div></div>
+<p>The built-in HQU plugins available here are:</p>
+<ul>
+	<li><b>Network and Host Dependency Manager</b><font color="red">&#42;</font> &#45; In HQ Enterprise, you can use this plugin to define the relationship between platforms and network hosts or devices. For more information see the associated <a href="http://support.hyperic.com/confluence/display/DOC/ui-Admin.Dependency" title="ui-Admin.Dependency">help page</a>.</li>
+	<li><b>HQ Health</b> &#45; Provides real-time diagnostic data for the HQ Server host used by HQ Support for troubleshooting. For more information see the associated <a href="http://support.hyperic.com/confluence/display/DOC/ui-HQHealth" title="ui-HQHealth">help page</a>.</li>
+	<li><b>Groovy Console</b> &#45; Allows users to run Groovy code directly in the HQ Server. For more information see the associated <a href="http://support.hyperic.com/confluence/display/DOC/ui-Groovy" title="ui-Groovy">help page</a>.</li>
+	<li><b>HQ Web Services API</b> &#45; The API enables programmatic and command-line access to the HQ Server. Introduced in HQ 4.0, the web services API replaces the command-line interface (CLI) provided in previous version of HQ.  For more information, see <a href="http://support.hyperic.com/confluence/display/DOC/HQ+Web+Services+API" title="HQ Web Services API">HQ Web Services API</a>.</li>
+</ul>
+
+
+<h2><a name="ui-Admin-HQLicenseInformation"></a>HQ License Information</h2>
 
 <p>This section lists the license information for the HQ server:</p>
 <ul>
-	<li><ins>Name</ins>: The name on the Hyperic account</li>
+	<li>Name - The name on the license.</li>
+	<li>Expires -  The date the license expires.</li>
+	<li>Platform Limit -  The number of platforms (network boxes) the license allows HQ to manage.</li>
+	<li>Current Platform Count - The number of platforms that are currently managed by HQ.</li>
 </ul>
 
-
-<ul>
-	<li><ins>Expires</ins>: The date the license expires</li>
-</ul>
-
-
-<ul>
-	<li><ins>Platform Limit</ins>: The number of platforms (network boxes) the license allows HQ to manage</li>
-</ul>
-
-
-<ul>
-	<li><ins>Current Platform Count</ins>: The number of those platforms that are currently being managed</li>
-</ul>
-
-
-<p><em><a href="#ui-Admin-top"><em>back to top</em></a></em></p>
-
-<p><a name="ui-Admin-Navigating"></a></p>
-<h3><a name="ui-Admin-NavigatingviatheMastheadMenu"></a>Navigating via the Masthead Menu</h3>
-
-<p>Main screens in Hyperic contain a masthead menu. Users can navigate to the following parts of HQ using this menu:</p>
-<table class='confluenceTable'><tbody>
-<tr>
-<td class='confluenceTd'> <b>Dashboard</b> </td>
-<td class='confluenceTd'> Displays the <a href="ui-Dashboard.html" title="ui-Dashboard">Dashboard</a>, the starting screen in HQ, which displays information about resource health, recent alerts, recently performed auto-discovery scan, and control actions </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Resources</b> </td>
-<td class='confluenceTd'> Click the menu name to access either <b>Browse</b> (takes users to the <a href="ui-Resources.html" title="ui-Resources">Browse Resources</a> screen, where they can locate and navigate through information about all <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-managedresource">managed resources</a>), <b>Currently Down</b> (takes users to the <a href="ui-CurrentlyDown.html" title="ui-CurrentlyDown">Currently Down</a> screen, where they can look at all managed resources that are unavailable), <b>Nagios Availability</b> (available only when Nagios is installed), or <b>Recently Viewed</b> (provides a drop-down list of <a href="http://support.hyperic.com/confluence/display/DOC/Hyperic+Glossary#HypericGlossary-resource">resources</a> that the user has recently viewed. Selecting one of those resources takes the user to the <a href="ui-Monitor.CurrentHealth.html" title="ui-Monitor.CurrentHealth">Current Health</a> screen for the resource). </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Analyze</b> </td>
-<td class='confluenceTd'> Click the menu name to access <b>Reporting</b> <font color="red">&#42;</font> (presents the <a href="ui-Report.Center.html" title="ui-Report.Center">Reporting</a> screen, from which reports can be generated), <b>Alert Center</b> (presents the <a href="ui-Alert.Center.html" title="ui-Alert.Center">Alert Center</a>, which displays a deployment wide alert summary), or <b>Event Center</b> (presents the <a href="ui-Event.Center.html" title="ui-Event.Center">Event Center</a>, which displays a deployment-wide event summary). <br clear="all" /> </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Administration</b> </td>
-<td class='confluenceTd'> Takes users (with "Administer Hyperic HQ Server Configuration" permissions) to the <a href="ui-Admin.html" title="ui-Admin">Administration</a> screen, where they can manage the system-wide settings </td>
-</tr>
-<tr>
-<td class='confluenceTd'> <b>Search</b> <br clear="all" /> </td>
-<td class='confluenceTd'> The Search box in the upper right of the Masthead allows you to search for HQ resources of any type and HQ users. <br clear="all" />
-<br clear="all" />
-Search results appear after four characters are entered in the text box. Results will include the first 10 platforms, servers, services, and groups whose name includes the search string. <br clear="all" />  <br clear="all" />
-Double-click a resource in the list to navigate to its Resource page. </td>
-</tr>
-</tbody></table>
-<p>The masthead also displays the two most recently triggered alerts. Users can click the alert's time to be taken to the <a href="ui-Alert.Detail.html" title="ui-Alert.Detail">alert detail</a>.</p>
-<p><em><a href="#ui-Admin-top"><em>back to top</em></a></em></p>
-
-<p><br clear="all" /></p>
-<table class="sectionMacro" border="0" cellpadding="5" cellspacing="0" width="100%"><tbody><tr>
-<div class="panel" style="border-width: 1px;"><div class="panelHeader" style="border-bottom-width: 1px;"><b>Related Information</b></div><div class="panelContent">
-<p><a href="http://support.hyperic.com/confluence/display/DOC/HQ+Users+and+Roles" title="HQ Users and Roles">HQ Users and Roles</a></p>
-
-<p><a href="http://support.hyperic.com/confluence/display/DOC/HQ+Server+Configuration" title="HQ Server Configuration">HQ Server Configuration</a></p>
-</div></div></tr></tbody></table>
 
 <h5><a name="ui-Admin-ReturntotheHQUserInterfaceReference."></a>Return to the <a href="http://support.hyperic.com/confluence/display/DOC/HQ+User+Interface+Reference" title="HQ User Interface Reference">HQ User Interface Reference</a>.</h5>
 
@@ -216,7 +110,7 @@ Double-click a resource in the list to navigate to its Resource page. </td>
 				<td height="12" background="http://support.hyperic.com/confluence/images/border/border_bottom.gif"><img src="images/border/spacer.gif" width="1" height="1" border="0"/></td>
 			</tr>
 		    <tr>
-			    <td align="center"><font color="grey">Document generated by Confluence on Jul 20, 2009 15:33</font></td>
+			    <td align="center"><font color="grey">Document generated by Confluence on Aug 21, 2009 12:53</font></td>
 		    </tr>
 	    </table>
     </body>

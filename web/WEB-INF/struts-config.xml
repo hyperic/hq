@@ -2403,7 +2403,9 @@
               forward=".attach.tab.layout"/>
               
       <action path="/attach/TabBody"
-              type="org.hyperic.hq.ui.action.attach.TabBodyAction"/>
+              type="org.hyperic.hq.ui.action.attach.TabBodyAction">
+      	<set-property property="title" value="Views"/>
+      </action>
               
       <action path="/attach/TabPortal"
               parameter="mode"
