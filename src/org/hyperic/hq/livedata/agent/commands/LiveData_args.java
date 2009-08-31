@@ -25,20 +25,47 @@
 
 package org.hyperic.hq.livedata.agent.commands;
 
-import org.hyperic.hq.agent.AgentRemoteValue;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.agent.AgentRemoteValue;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.encoding.Base64;
+
+
 
 public class LiveData_args extends AgentRemoteValue {
 
     private static final String PARAM_TYPE    = "type";
     private static final String PARAM_COMMAND = "command";
     private static final String PARAM_CONFIG  = "config";
+    
+    private static final int MAX_VALUE_SIZE = 65500;
 
     public LiveData_args() {
         super();
+    }
+    
+    private Map chunkConfig(String key, String value){
+    	Map chunkMap = new LinkedHashMap();
+    	int valueLength = value.length();
+    	int count = 1;
+	    while (valueLength > 0){
+	    	String newValue;
+	    	int offset = (count-1) * MAX_VALUE_SIZE;
+	    	if (valueLength > MAX_VALUE_SIZE){
+	    		newValue = value.substring(offset, MAX_VALUE_SIZE*count);
+	    	} else {
+	    		newValue = value.substring(offset, value.length());
+	    	}
+	    	valueLength = valueLength - MAX_VALUE_SIZE;
+	    	chunkMap.put(key+(count),  newValue);
+	    	count++;
+	    }
+	    return chunkMap;
     }
 
     public LiveData_args(AgentRemoteValue val)
@@ -46,7 +73,7 @@ public class LiveData_args extends AgentRemoteValue {
     {
         String type = val.getValue(PARAM_TYPE);
         String command = val.getValue(PARAM_COMMAND);
-        String configStr = val.getValue(PARAM_CONFIG);
+        String configStr = getConfigValue(val,PARAM_CONFIG);
 
         ConfigResponse config;
         try {
@@ -59,6 +86,18 @@ public class LiveData_args extends AgentRemoteValue {
 
         setConfig(type, command, config);
     }
+    
+	public void setConfigValue(String key, String val) {
+		if (val.length() > MAX_VALUE_SIZE){
+			Iterator iterator = chunkConfig(key, val).entrySet().iterator();
+			while (iterator.hasNext()){
+				Map.Entry chunkEntry = (Map.Entry) iterator.next();
+				super.setValue((String)chunkEntry.getKey(), (String)chunkEntry.getValue());
+			}
+		}else {
+			super.setValue(key, val);
+		}
+	}
 
     public void setConfig(String type, String command, ConfigResponse config)
         throws AgentRemoteException
@@ -76,7 +115,7 @@ public class LiveData_args extends AgentRemoteValue {
 
         super.setValue(PARAM_TYPE, type);
         super.setValue(PARAM_COMMAND, command);
-        super.setValue(PARAM_CONFIG, configStr);
+        setConfigValue(PARAM_CONFIG, configStr);
     }
 
     public String getType() {
@@ -87,10 +126,24 @@ public class LiveData_args extends AgentRemoteValue {
         return getValue(PARAM_COMMAND);
     }
     
+    private String getConfigValue(AgentRemoteValue agentRemoteValue, String key){
+    	int count = 1;
+    	String configValue = agentRemoteValue.getValue(key);
+    	if (configValue == null){
+    		configValue = "";
+    		String chunkValue;
+	    	while ((chunkValue = agentRemoteValue.getValue(key+count)) !=null){
+	    		configValue = configValue + chunkValue;
+	    		count++;
+	    	}
+    	}
+    	return configValue;
+    }
+    
     public ConfigResponse getConfig()
         throws AgentRemoteException
     {
-        String configStr = getValue(PARAM_CONFIG);
+        String configStr = getConfigValue(this, PARAM_CONFIG);
         ConfigResponse config;
 
         try {

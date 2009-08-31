@@ -76,8 +76,7 @@ public class LiveDataCommandsService implements LiveDataCommandsClient {
             res.setResult(xml);
             return res;
         } catch (Exception e) {
-            throw new AgentRemoteException("Unable to invoke command: " +
-                    e.getMessage(), e);
+            throw new AgentRemoteException(e.getMessage(), e);
         }
     }
 
