@@ -32,7 +32,10 @@ import java.util.List;
 
 import javax.servlet.ServletContext;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -44,6 +47,7 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Dashboard;
 import org.hyperic.hq.ui.WebUser;
+import org.hyperic.hq.ui.action.portlet.addresource.AddResourcesPrepareAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
@@ -57,7 +61,8 @@ import org.hyperic.util.config.InvalidOptionValueException;
  */
 public class DashboardUtils {
     public static final char MULTI_PORTLET_TOKEN = '_';
-
+    public static final Log log = LogFactory.getLog(DashboardUtils.class.getName());
+    
     public static List listAsResources(List list, ServletContext ctx,
                                        WebUser user)
         throws Exception {
@@ -66,9 +71,22 @@ public class DashboardUtils {
         ArrayList resources = new ArrayList();
         for (Iterator i = entityIds.iterator(); i.hasNext();) {
             AppdefEntityID entityID = (AppdefEntityID) i.next();
-            AppdefResourceValue resource =
-                appdefBoss.findById(user.getSessionId().intValue(), entityID);
-            resources.add(resource);
+            
+            // Adding try/catch block as a safe guard to issue filed in [SUPPORT-5402]
+            // Because of the existing logic, a pending resource list could contain a resource
+            // that has since been deleted causing an AppdefEntityNotFound exception.  It wasn't being handled
+            // before causing bad results in the UI, now we're catching and logging as it's non fatal.
+            // TODO look at redesigning this logic. IMO transient state (which the pending resources list essentially is) 
+            //      shouldn't be stored as a user preference...
+            try {
+                AppdefResourceValue resource = appdefBoss.findById(user.getSessionId().intValue(), entityID);
+                
+                resources.add(resource);
+            } catch(AppdefEntityNotFoundException e) {
+                // ...we have a pending appdef id that does not exist
+                // log it, and remove it from the list
+                log.warn("Appdef Id: " + entityID + " does not exist, so ignoring it.", e);
+            }
         }
 
         return resources;
