@@ -1181,8 +1181,8 @@ public class AgentClient {
                     }
                 } catch(IOException e) {
                     SYSTEM_ERR.println("Unable to read preliminary agent auth " +
-                                       "tokens: " + e.getMessage());
-                    return null;
+                                       "tokens, waiting for Agent to initialize " +
+                                       "(error was: " + e.getMessage() + ")");
                 }
             }
             SYSTEM_ERR.println("Timeout waiting for token file");
