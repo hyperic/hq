@@ -10064,6 +10064,13 @@ has already been defined.
         ALTER TABLE HQ_AVAIL_DATA_RLE ADD CONSTRAINT FK6E8F9E9CB6E3839C
         FOREIGN KEY (MEASUREMENT_ID) REFERENCES EAM_MEASUREMENT (ID) ON DELETE CASCADE
       </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE HQ_AVAIL_DATA_RLE DROP CONSTRAINT FK6E8F9E9CAE18683B
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE HQ_AVAIL_DATA_RLE ADD CONSTRAINT FK6E8F9E9CB6E3839C
+        FOREIGN KEY (MEASUREMENT_ID) REFERENCES EAM_MEASUREMENT (ID) ON DELETE CASCADE
+      </statement>
     </schema-directSQL>  
   </schemaSpec>
 
@@ -10077,6 +10084,14 @@ has already been defined.
          FOREIGN KEY (ALERT_ID) REFERENCES EAM_ALERT (ID) ON DELETE CASCADE
       </statement>
       <statement targetDB="mysql" fail="false">
+         ALTER TABLE EAM_ALERT_ACTION_LOG ADD CONSTRAINT FK423FA3CC9C76C3BB
+         FOREIGN KEY (ACTION_ID) REFERENCES EAM_ACTION (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle">
+         ALTER TABLE EAM_ALERT_ACTION_LOG ADD CONSTRAINT FK423FA3CC1AA4E259
+         FOREIGN KEY (ALERT_ID) REFERENCES EAM_ALERT (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle">
          ALTER TABLE EAM_ALERT_ACTION_LOG ADD CONSTRAINT FK423FA3CC9C76C3BB
          FOREIGN KEY (ACTION_ID) REFERENCES EAM_ACTION (ID) ON DELETE CASCADE
       </statement>
@@ -10138,6 +10153,559 @@ has already been defined.
       </statement>
       <statement targetDB="mysql" fail="false">
         ALTER TABLE EAM_MEASUREMENT DROP INDEX MEAS_ID_CLASS
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on left over indexes -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.163">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_CPROP DROP CONSTRAINT FKE5D047984EAEAB4A
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_CPROP ADD CONSTRAINT FKE5D04798CCF47F9F
+        FOREIGN KEY (KEYID) REFERENCES EAM_CPROP_KEY (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on left over indexes -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.164">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_REQUEST_STAT DROP CONSTRAINT FKE8EBBC725A959C18
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_REQUEST_STAT ADD CONSTRAINT FKE8EBBC72154D0F55
+        FOREIGN KEY (SVCREQ_ID) REFERENCES EAM_SERVICE_REQUEST (ID) ON DELETE CASCADE
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on left over indexes -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.165">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_STAT_ERRORS DROP CONSTRAINT FK6F2383A8B931CEC9
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_STAT_ERRORS ADD CONSTRAINT FK6F2383A8237D366C
+        FOREIGN KEY (ERROR_ID) REFERENCES EAM_ERROR_CODE (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_STAT_ERRORS DROP CONSTRAINT FK6F2383A828D8858D
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_STAT_ERRORS ADD CONSTRAINT FK6F2383A82DE89070
+        FOREIGN KEY (REQSTAT_ID) REFERENCES EAM_REQUEST_STAT (ID) ON DELETE CASCADE
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on left over indexes -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.166">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_SUBJECT ADD CONSTRAINT FK8E4D1FE6E3C7CB1
+        FOREIGN KEY (PREF_CRISPO_ID) REFERENCES EAM_CRISPO (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on left over indexes -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.167">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_BLOB_TRIGGERS ADD CONSTRAINT EAM_FK_QBT_QT
+        FOREIGN KEY (TRIGGER_NAME, TRIGGER_GROUP) REFERENCES QRTZ_TRIGGERS (TRIGGER_NAME, TRIGGER_GROUP)
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_CRON_TRIGGERS ADD CONSTRAINT EAM_FK_QCT_QT
+        FOREIGN KEY (TRIGGER_NAME, TRIGGER_GROUP) REFERENCES QRTZ_TRIGGERS (TRIGGER_NAME, TRIGGER_GROUP)
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_JOB_LISTENERS ADD CONSTRAINT EAM_FK_QJL_QJD
+        FOREIGN KEY (JOB_NAME, JOB_GROUP) REFERENCES QRTZ_JOB_DETAILS (JOB_NAME, JOB_GROUP) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_SIMPLE_TRIGGERS ADD CONSTRAINT EAM_FK_QST_QT
+        FOREIGN KEY (TRIGGER_NAME, TRIGGER_GROUP) REFERENCES QRTZ_TRIGGERS (TRIGGER_NAME, TRIGGER_GROUP)
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_TRIGGERS ADD CONSTRAINT EAM_FK_QT_QJD
+        FOREIGN KEY (JOB_NAME, JOB_GROUP) REFERENCES QRTZ_JOB_DETAILS (JOB_NAME, JOB_GROUP) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_TRIGGER_LISTENERS ADD CONSTRAINT EAM_FK_QTL_QT
+        FOREIGN KEY (TRIGGER_NAME, TRIGGER_GROUP) REFERENCES QRTZ_TRIGGERS (TRIGGER_NAME, TRIGGER_GROUP) ON DELETE CASCADE
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on columns for oracle -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments -->
+  <schemaSpec version="3.168">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_ALERT_ACTION_LOG MODIFY DETAIL NOT NULL
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_CONTROL_HISTORY MODIFY VERSION_COL NOT NULL
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_TRIGGERS MODIFY PRIORITY NULL
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_APP_SERVICE for oracle -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments -->
+  <schemaSpec version="3.169">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_APP_SERVICE_SERVICE_ID_KEY
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_APP_SERVICE ADD UNIQUE (SERVICE_ID, GROUP_ID, APPLICATION_ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_ESCALATION_STATE for oracle -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments -->
+  <schemaSpec version="3.170">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_ESCALATION_STATE_ID_KEY
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_ESCALATION_STATE DROP CONSTRAINT ALERT_DEF_ID_KEY
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        drop index STATE_IDX
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_ESCALATION_STATE ADD UNIQUE (ALERT_DEF_ID, ALERT_TYPE)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_APP_TYPE_SERVICE_TYPE_MAP for oracle -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments -->
+  <schemaSpec version="3.171">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        drop index FK5A2C503AAAC031CF
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_AUDIT for oracle -->
+  <!-- The primary key constraint does not have consistent naming -->
+  <schemaSpec version="3.172">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT DROP CONSTRAINT FKE5B6292DC81F5938
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT DROP CONSTRAINT FKE5B6292DE82FBC
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT DROP CONSTRAINT FKE5B6292DFC176AE
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        drop index EAM_AUDIT_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT ADD PRIMARY KEY (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT ADD CONSTRAINT FKE5B6292DC81F5938
+        FOREIGN KEY (PARENT_ID) REFERENCES EAM_AUDIT (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT ADD CONSTRAINT FKE5B6292DE82FBC
+        FOREIGN KEY (SUBJECT_ID) REFERENCES EAM_SUBJECT (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT ADD CONSTRAINT FKE5B6292DFC176AE
+        FOREIGN KEY (RESOURCE_ID) REFERENCES EAM_RESOURCE (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_CALENDAR for oracle -->
+  <schemaSpec version="3.173">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_CALENDAR_ENT DROP CONSTRAINT FK84892E98F8214D4D
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_ROLE_CALENDAR DROP CONSTRAINT FKD703BC59F8214D4D
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_CALENDAR DROP PRIMARY KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_CALENDAR DROP UNIQUE (NAME)
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_CALENDAR_PKEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_CALENDAR_NAME_KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_CALENDAR ADD PRIMARY KEY(ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_CALENDAR ADD UNIQUE (NAME)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_CALENDAR_ENT ADD CONSTRAINT FK84892E98F8214D4D FOREIGN KEY (CALENDAR_ID) REFERENCES EAM_CALENDAR (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_ROLE_CALENDAR ADD CONSTRAINT FKD703BC59F8214D4D FOREIGN KEY (CALENDAR_ID) REFERENCES EAM_CALENDAR (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_GALERT_AUX_LOGS for oracle -->
+  <schemaSpec version="3.174">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_AUX_LOGS DROP CONSTRAINT FK859D15ED997CFC6
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_GALERT_AUX_LOGS DROP CONSTRAINT FKE20899066993629F
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_METRIC_AUX_LOGS DROP CONSTRAINT FKE7D70B0B997CFC6
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_GALERT_AUX_LOGS DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_GALERT_AUX_LOGS_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_GALERT_AUX_LOGS ADD PRIMARY KEY (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_GALERT_AUX_LOGS ADD CONSTRAINT FKE20899066993629F
+        FOREIGN KEY (PARENT) REFERENCES EAM_GALERT_AUX_LOGS(ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_METRIC_AUX_LOGS ADD CONSTRAINT FKE7D70B0B997CFC6
+        FOREIGN KEY (AUX_LOG_ID) REFERENCES EAM_GALERT_AUX_LOGS(ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_AUX_LOGS ADD CONSTRAINT FK859D15ED997CFC6
+        FOREIGN KEY (AUX_LOG_ID) REFERENCES EAM_GALERT_AUX_LOGS(ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_METRIC_AUX_LOGS for oracle -->
+  <schemaSpec version="3.175">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_METRIC_AUX_LOGS DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_METRIC_AUX_LOGS_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_METRIC_AUX_LOGS ADD PRIMARY KEY (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE_AUX_LOGS for oracle -->
+  <schemaSpec version="3.176">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_AUX_LOGS DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_RESOURCE_AUX_LOGS_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_AUX_LOGS ADD PRIMARY KEY (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE_EDGE for oracle -->
+  <schemaSpec version="3.177">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_RESOURCE_EDGE_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE ADD PRIMARY KEY (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE_EDGE for oracle -->
+  <schemaSpec version="3.178">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        DROP INDEX EAM_RESOURCE_FROM_ID_IDX
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP PRIMARY KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP UNIQUE (FROM_ID, TO_ID, REL_ID, DISTANCE)
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_RESOURCE_EDGE_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE ADD PRIMARY KEY (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE ADD UNIQUE (FROM_ID, TO_ID, REL_ID, DISTANCE)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE_RELATION for oracle -->
+  <schemaSpec version="3.179">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_RELATION DROP UNIQUE (NAME)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP CONSTRAINT FKD1FCB6C04405AE5F
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_RELATION DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_RESOURCE_RELATION_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_RELATION ADD PRIMARY KEY (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE ADD CONSTRAINT FKD1FCB6C04405AE5F FOREIGN KEY (REL_ID) REFERENCES EAM_RESOURCE_RELATION(ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_RELATION ADD UNIQUE (NAME)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RES_GRP_RES_MAP for oracle
+       Need to ensure the naming is consistent by dropping and readding
+       the unique constraint.  This way it will get the oracle naming
+       convention.  -->
+  <schemaSpec version="3.180">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RES_GRP_RES_MAP DROP UNIQUE (RESOURCE_ID, RESOURCE_GROUP_ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RES_GRP_RES_MAP ADD UNIQUE (RESOURCE_ID, RESOURCE_GROUP_ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_ROLE_CALENDAR for oracle -->
+  <schemaSpec version="3.181">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_ROLE_CALENDAR DROP PRIMARY KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_ROLE_CALENDAR DROP UNIQUE (ROLE_ID, CALENDAR_ID, CALTYPE)
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_ROLE_CALENDAR_PKEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_ROLE_CALENDAR_ROLE_ID_KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_ROLE_CALENDAR ADD UNIQUE (ROLE_ID, CALENDAR_ID, CALTYPE)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_ROLE_CALENDAR ADD PRIMARY KEY (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_SUBJECT_ROLE_MAP for oracle -->
+  <schemaSpec version="3.182">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_SUBJECT_ROLE_MAP DROP CONSTRAINT FK320F631499D737AE
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX FK320F631499D737AE
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_SUBJECT_ROLE_MAP ADD CONSTRAINT FK320F631499D737AE
+        FOREIGN KEY (ROLE_ID) REFERENCES EAM_ROLE
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_PLATFORM_SERVER_TYPE_MAP for oracle -->
+  <schemaSpec version="3.183">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_PLATFORM_SERVER_TYPE_MAP DROP CONSTRAINT FK4BE3F5B5E3E1026D
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX FK4BE3F5B5E3E1026D
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_PLATFORM_SERVER_TYPE_MAP ADD CONSTRAINT FK4BE3F5B5E3E1026D
+        FOREIGN KEY (PLATFORM_TYPE_ID) REFERENCES EAM_PLATFORM_TYPE
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_UI_PLUGIN for oracle -->
+  <schemaSpec version="3.184">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW DROP CONSTRAINT FK5FD54E62B5F36A31
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_PLUGIN DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_UI_PLUGIN_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_PLUGIN DROP UNIQUE (NAME)
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_UI_PLUGIN_NAME_KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_PLUGIN ADD PRIMARY KEY (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_PLUGIN ADD UNIQUE (NAME)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW ADD CONSTRAINT FK5FD54E62B5F36A31 FOREIGN KEY (UI_PLUGIN_ID) REFERENCES EAM_UI_PLUGIN
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_UI_VIEW for oracle -->
+  <schemaSpec version="3.185">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_ATTACHMENT DROP CONSTRAINT FK2807DF20F6253048
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW_ADMIN DROP CONSTRAINT FK7815EB12F6253048
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW_MASTHEAD DROP CONSTRAINT FKC9583392F6253048
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW_RESOURCE DROP CONSTRAINT FKA416A54BF6253048
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_UI_VIEW_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW DROP UNIQUE(PATH)
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_UI_VIEW_PATH_KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW ADD PRIMARY KEY(ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW ADD UNIQUE(PATH)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_ATTACHMENT ADD CONSTRAINT FK2807DF20F6253048 FOREIGN KEY (VIEW_ID) REFERENCES EAM_UI_VIEW
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW_ADMIN ADD CONSTRAINT FK7815EB12F6253048 FOREIGN KEY (VIEW_ID) REFERENCES EAM_UI_VIEW
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW_MASTHEAD ADD CONSTRAINT FKC9583392F6253048 FOREIGN KEY (VIEW_ID) REFERENCES EAM_UI_VIEW
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW_RESOURCE ADD CONSTRAINT FKA416A54BF6253048 FOREIGN KEY (VIEW_ID) REFERENCES EAM_UI_VIEW
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on QRTZ_TRIGGERS for oracle -->
+  <schemaSpec version="3.186">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        drop index EAM_FK_QT_QJD
       </statement>
     </schema-directSQL>  
   </schemaSpec>
