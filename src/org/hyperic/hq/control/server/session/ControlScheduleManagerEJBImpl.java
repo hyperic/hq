@@ -92,6 +92,8 @@ import org.quartz.SimpleTrigger;
 public class ControlScheduleManagerEJBImpl 
     extends BaseScheduleManagerEJB implements SessionBean {
 
+    private static final int MAX_HISTORY_TEXT_SIZE = 500;
+
     private Log log = LogFactory.getLog(ControlScheduleManagerEJBImpl.class);
 
     private final String JOB_PREFIX      = "action";
@@ -853,10 +855,10 @@ public class ControlScheduleManagerEJBImpl
                                         String errorMessage)
     {
         return getControlHistoryDAO().create(id, groupId, batchId, subjectName,
-        		action, truncateText(500, args), scheduled,
+        		action, truncateText(MAX_HISTORY_TEXT_SIZE, args), scheduled,
                 startTime, stopTime, scheduleTime,
-                status, truncateText(500, description),
-                truncateText(500, errorMessage));    
+                status, truncateText(MAX_HISTORY_TEXT_SIZE, description),
+                truncateText(MAX_HISTORY_TEXT_SIZE, errorMessage));    
     }
 
     /**
@@ -879,7 +881,7 @@ public class ControlScheduleManagerEJBImpl
 
         local.setEndTime(endTime);
         local.setStatus(status);
-        local.setMessage(truncateText(500,message));
+        local.setMessage(truncateText(MAX_HISTORY_TEXT_SIZE,message));
     }
 
     /**

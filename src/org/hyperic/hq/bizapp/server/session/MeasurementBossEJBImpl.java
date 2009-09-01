@@ -2976,7 +2976,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return getResourcesCurrentHealth(subject, services);
     }
     
-    private double getAvailability(AuthzSubject subj, AppdefEntityID id)
+	 /**
+     * Get Availability measurement for a given entitiy
+     * @ejb:interface-method
+     */
+    public double getAvailability(AuthzSubject subj, AppdefEntityID id)
         throws AppdefEntityNotFoundException,
                PermissionException {
         return getAvailability(subj, id, null, null);
