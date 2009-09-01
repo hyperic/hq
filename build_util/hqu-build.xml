@@ -61,10 +61,16 @@
 			<classpath refid="compile.classpath" />
 		</groovyc>
 
+		<!-- compiled classes -->
 		<jar file="${ear.dir}/hqu-groovy.jar" basedir="${compile.groovy.classes}">
 			<include name="org/hyperic/hq/hqu/rendit/**" />
 		</jar>
 
+		<!-- script sources -->
+		<jar file="${ear.dir}/hqu-groovy-source.jar" basedir="${hq.home}/src/">
+			<include name="org/hyperic/hq/hqu/rendit/**/*.groovy" />
+		</jar>
+		
 		<property name="hqu-init.notrequired" value="true" />
 	</target>
 
