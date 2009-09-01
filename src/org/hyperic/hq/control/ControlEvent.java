@@ -46,6 +46,7 @@ public class ControlEvent extends AbstractEvent
     private boolean scheduled;
     private long    dateScheduled;
     private String  status;
+    private String message;
 
     /** Creates a new instance of ControlEvent */
     public ControlEvent(String subject, int resourcetype, Integer resourceId,
@@ -68,8 +69,8 @@ public class ControlEvent extends AbstractEvent
     public String getAction() {
         return this.action;
     }
-    
-    /** Setter for property action.
+
+	/** Setter for property action.
      * @param action New value of property action.
      *
      */
@@ -178,5 +179,21 @@ public class ControlEvent extends AbstractEvent
 
     public String getLevelString() {
         return getStatus();
-    }    
+    }
+    
+    /**
+     * 
+     * @return The message associated with the result (status) of the control action
+     */
+    public String getMessage() {
+		return message;
+	}
+
+    /**
+     * 
+     * @param message The message associated with the result (status) of the control action
+     */
+	public void setMessage(String message) {
+		this.message = message;
+	}
 }

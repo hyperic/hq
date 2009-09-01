@@ -202,7 +202,7 @@ public class ControlActionGroupJob extends ControlJob {
                                          cv.getScheduled().booleanValue(),
                                          cv.getDateScheduled(),
                                          status);
-        
+                    event.setMessage(errMsg);
                     Messenger sender = new Messenger();
                     sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
                 } catch (Exception e) {

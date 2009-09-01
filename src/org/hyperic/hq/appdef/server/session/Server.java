@@ -133,7 +133,7 @@ public class Server extends ServerBase
         _services = services;
     }
     
-    void addService(Service s) {
+    public void addService(Service s) {
         _services.add(s);
     }
 

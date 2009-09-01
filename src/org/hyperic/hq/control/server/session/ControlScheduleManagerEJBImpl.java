@@ -51,10 +51,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.control.server.session.ControlHistory;
-import org.hyperic.hq.control.server.session.ControlSchedule;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlFrequencyValue;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
@@ -253,14 +253,13 @@ public class ControlScheduleManagerEJBImpl
                         break;
                 } catch (PermissionException e) {
                     i.remove();
-                }
+                } 
             }
 
             // This will remove stale data and update fire times which
             // may result in the list being out of order.  We should
             // probably sort a second time
-            PageList list = schedulePager.seek(pending, 0, rows);
-            list.setTotalSize(pending.size());
+            PageList list = schedulePager.seek(pending, 0, rows);        
             return list;
 
         } finally {
@@ -535,6 +534,13 @@ public class ControlScheduleManagerEJBImpl
     public void deleteJobHistory(AuthzSubject subject, Integer[] ids)
         throws ApplicationException
     {
+    	// SpringSource: require admin privileges
+    	PermissionManager pm = PermissionManagerFactory.getInstance();
+    	if (!pm.hasAdminPermission(subject.getId())) {
+    		throw new PermissionException("Admin permission is required to delete job history");
+    	}
+    	// END SpringSource
+    	
         ControlHistoryDAO hdao = getControlHistoryDAO();
 
         for (int i=0; i<ids.length; i++) {
@@ -815,6 +821,16 @@ public class ControlScheduleManagerEJBImpl
             }
         }
     }
+    
+    private String truncateText(int maxSize, String text){
+    	String truncatedText = text;
+    	if (text != null){
+    		if (text.length() > maxSize){
+    			truncatedText = text.substring(0,maxSize-3) + "...";
+    		}
+    	}
+    	return truncatedText;
+    }
 
     /**
      * Create a control history entry
@@ -837,9 +853,10 @@ public class ControlScheduleManagerEJBImpl
                                         String errorMessage)
     {
         return getControlHistoryDAO().create(id, groupId, batchId, subjectName,
-                                             action, args, scheduled, startTime,
-                                             stopTime, scheduleTime, status,
-                                             description, errorMessage);
+        		action, truncateText(500, args), scheduled,
+                startTime, stopTime, scheduleTime,
+                status, truncateText(500, description),
+                truncateText(500, errorMessage));    
     }
 
     /**
@@ -862,7 +879,7 @@ public class ControlScheduleManagerEJBImpl
 
         local.setEndTime(endTime);
         local.setStatus(status);
-        local.setMessage(message);
+        local.setMessage(truncateText(500,message));
     }
 
     /**

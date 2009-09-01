@@ -189,6 +189,17 @@ public class ControlManagerEJBImpl implements SessionBean {
     
         _controlScheduleManager.doSingleAction(id, subject, action, args, null);
     }
+    
+    /**
+     * Execute a single control action on a given entity.
+     *
+     * @ejb:interface-method view-type="local"
+     */
+    public void doAction(AuthzSubject subject, AppdefEntityID id,
+                         String action) throws PluginException, PermissionException {
+        String args = null;
+        doAction(subject, id, action, args);
+    }
 
     /**
      * Schedule a new control action.
@@ -550,6 +561,7 @@ public class ControlManagerEJBImpl implements SessionBean {
                              cLocal.getScheduled().booleanValue(),
                              cLocal.getDateScheduled(),
                              status);
+        event.setMessage(msg);
         Messenger sender = new Messenger();
         sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
     }
