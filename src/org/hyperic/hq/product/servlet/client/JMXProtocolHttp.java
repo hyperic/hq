@@ -68,9 +68,9 @@ public class JMXProtocolHttp extends JMXProtocolRequest {
             UsernamePasswordCredentials credentials =
                 new UsernamePasswordCredentials(user, pass);
 
-            client.getState().setCredentials(host,
-                                             host,
-                                             credentials);
+            //pass the same credentials in for any realm on the host
+            //TODO could add support for a specific realm config prop if necessary
+            client.getState().setCredentials(null, host, credentials);
                     
             get.setDoAuthentication(true);
         }
