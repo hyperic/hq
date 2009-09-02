@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -46,10 +47,10 @@ import javax.management.ReflectionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
@@ -59,6 +60,8 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
@@ -68,9 +71,11 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.PluginManager;
 import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.hq.product.PluginUpdater;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.ServerTypeInfo;
+import org.hyperic.hq.product.ServiceType;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.hq.product.server.MBeanUtil;
@@ -92,7 +97,8 @@ import org.hyperic.util.timer.StopWatch;
 public class ProductManagerEJBImpl 
     implements SessionBean 
 {
-    //XXX constant should be elsewhere
+	
+	//XXX constant should be elsewhere
     private final String PLUGIN_DEPLOYER = 
         "hyperic.jmx:type=Service,name=ProductPluginDeployer";
 
@@ -102,6 +108,8 @@ public class ProductManagerEJBImpl
     private ConfigManagerLocal     configManagerLocal;
     private CPropManagerLocal      cPropManagerLocal;
     private TemplateManagerLocal   templateManagerLocal;
+    private PluginUpdater pluginUpdater = new PluginUpdater();
+    
 
     /*
      * There is once instance of the ProductPluginDeployer service
@@ -328,71 +336,100 @@ public class ProductManagerEJBImpl
         try {
             AuditManagerEJBImpl.getOne().pushContainer(audit);
             pushed = true;
-            
-            getConfigManagerLocal().updateAppdefEntities(pluginName, entities);
-
-            StopWatch timer = new StopWatch();
-
-            // Get the measurement templates
-            TemplateManagerLocal tMan = getTemplateManagerLocal();
-            // Keep a list of templates to add
-            HashMap toAdd = new HashMap();
-
-            for (int i = 0; i < entities.length; i++) {
-                TypeInfo info = entities[i];
-            
-                MeasurementInfo[] measurements;
-
-                try {
-                    measurements =
-                        ppm.getMeasurementPluginManager().getMeasurements(info);
-                } catch (PluginNotFoundException e) {
-                    if (!isVirtualServer(info)) {
-                        log.info(info.getName() +
-                                      " does not support measurement");
-                    }
-                    continue;
-                }
-
-                if (measurements != null && measurements.length > 0) {
-                    MonitorableType monitorableType =
-                        tMan.getMonitorableType(pluginName, info);
-                    Map newMeasurements = tMan.updateTemplates(pluginName, info,
-                                                               monitorableType,
-                                                               measurements);
-                    toAdd.put(monitorableType, newMeasurements);
-                }
-            }
-
-            // For performance reasons, we add all the new measurements at once.
-            tMan.createTemplates(pluginName, toAdd);
-
-            // Add any custom properties.
-            CPropManagerLocal cPropManager = getCPropManagerLocal();
-            for (int i = 0; i < entities.length; i++) {
-                TypeInfo info = entities[i];
-                ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
-                List options = schema.getOptions();
-                AppdefResourceType appdefType = cPropManager.findResourceType(info);
-                for (Iterator j=options.iterator(); j.hasNext();) {
-                    ConfigOption opt = (ConfigOption)j.next();
-                    CpropKey c = cPropManager.findByKey(appdefType, opt.getName());
-                    if (c == null) {
-                        cPropManager.addKey(appdefType, opt.getName(),
-                                            opt.getDescription());
-                    }
-                }
-            }
-            log.info(pluginName + " deployment took: " + timer + " seconds");
-
-            pluginDeployed(pInfo);
-            updateEJBPlugin(plHome, pInfo);
-            
+            updatePlugin(pluginName);   
         } finally {
             if (pushed) {
                 AuditManagerEJBImpl.getOne().popContainer(true);
             }
         }
+    }
+    
+    /**
+     * @param pluginName The name of the product plugin
+     * @param serviceTypes The Set of {@link ServiceType}s to update
+     * @throws PluginNotFoundException 
+     * @throws VetoException
+     * @throws CreateException 
+     * @throws RemoveException 
+     * @throws FinderException 
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void updateDynamicServiceTypePlugin(String pluginName, Set serviceTypes) throws PluginNotFoundException, FinderException, RemoveException, CreateException, VetoException {
+    	ProductPlugin productPlugin = (ProductPlugin) ppm.getPlugin(pluginName);
+    	try {
+			pluginUpdater.updateServiceTypes(productPlugin, serviceTypes);
+			updatePlugin(pluginName);
+		}
+		catch (PluginException e) {
+			log.error("Error updating service types.  Cause: " + e.getMessage());
+		}
+    }
+    
+   
+    private void updatePlugin(String pluginName) throws FinderException, RemoveException, CreateException, VetoException, PluginNotFoundException {
+    	ProductPlugin pplugin = (ProductPlugin) ppm.getPlugin(pluginName);
+    	
+    	PluginInfo pInfo = ppm.getPluginInfo(pluginName);
+    	
+    	PluginDAO plHome = getPluginDAO();
+    	TypeInfo[] entities = pplugin.getTypes();
+    	getConfigManagerLocal().updateAppdefEntities(pluginName, entities);
+
+        StopWatch timer = new StopWatch();
+
+         // Get the measurement templates
+         TemplateManagerLocal tMan = getTemplateManagerLocal();
+         // Keep a list of templates to add
+         HashMap toAdd = new HashMap();
+
+         for (int i = 0; i < entities.length; i++) {
+             TypeInfo info = entities[i];
+         
+             MeasurementInfo[] measurements;
+
+             try {
+                 measurements =
+                     ppm.getMeasurementPluginManager().getMeasurements(info);
+             } catch (PluginNotFoundException e) {
+                 if (!isVirtualServer(info)) {
+                     log.info(info.getName() +
+                                   " does not support measurement");
+                 }
+                 continue;
+             }
+
+             if (measurements != null && measurements.length > 0) {
+                 MonitorableType monitorableType =
+                     tMan.getMonitorableType(pluginName, info);
+                 Map newMeasurements = tMan.updateTemplates(pluginName, info,
+                                                            monitorableType,
+                                                            measurements);
+                 toAdd.put(monitorableType, newMeasurements);
+             }
+         }
+
+         // For performance reasons, we add all the new measurements at once.
+         tMan.createTemplates(pluginName, toAdd);
+
+         // Add any custom properties.
+         CPropManagerLocal cPropManager = getCPropManagerLocal();
+         for (int i = 0; i < entities.length; i++) {
+             TypeInfo info = entities[i];
+             ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
+             List options = schema.getOptions();
+             AppdefResourceType appdefType = cPropManager.findResourceType(info);
+             for (Iterator j=options.iterator(); j.hasNext();) {
+                 ConfigOption opt = (ConfigOption)j.next();
+                 CpropKey c = cPropManager.findByKey(appdefType, opt.getName());
+                 if (c == null) {
+                     cPropManager.addKey(appdefType, opt.getName(),
+                                         opt.getDescription());
+                 }
+             }
+         }
+         pluginDeployed(pInfo);
+         updateEJBPlugin(plHome, pInfo);
     }
 
     private ConfigManagerLocal getConfigManagerLocal() {
@@ -400,6 +437,7 @@ public class ProductManagerEJBImpl
             configManagerLocal = ConfigManagerEJBImpl.getOne();
         return configManagerLocal;
     }
+    
 
     private CPropManagerLocal getCPropManagerLocal() {
         if(cPropManagerLocal == null)

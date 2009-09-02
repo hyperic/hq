@@ -27,15 +27,22 @@ package org.hyperic.hq.autoinventory;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIServerExtValue;
+import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.appdef.shared.AIServiceTypeValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.product.MeasurementInfo;
+import org.hyperic.hq.product.MeasurementInfos;
+import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 
 /**
@@ -145,6 +152,9 @@ public class AICompare {
                                 //                   + ",svc2="+StringUtil.arrayToString(svc1)+")");
                                 return false;
                             }
+                        	if(! compareAIServiceTypes(se1.getAiServiceTypes(),se2.getAiServiceTypes())) {
+                        		return false;
+                        	}
                         } else {
                             // System.err.println("AIC: both servers are not exts");
                             return false;
@@ -201,6 +211,116 @@ public class AICompare {
         }
         return true;
     }
+    
+    public static boolean compareAIServiceTypes(AIServiceTypeValue[] serviceTypes1, AIServiceTypeValue[] serviceTypes2) {
+    	if (serviceTypes1 == null)
+    		return (serviceTypes2 == null);
+    		if (serviceTypes2 == null)
+    			return false;
+    		  
+    		if (serviceTypes1.length != serviceTypes2.length) {
+    			return false;
+    		}
+    		boolean foundMatchingServiceType;
+    		AIServiceTypeValue s1, s2;
+    		for (int i = 0; i < serviceTypes1.length; i++) {
+    			foundMatchingServiceType = false;
+    			s1 = serviceTypes1[i];
+    			for (int j = 0; j < serviceTypes2.length; j++) {
+    				s2 = serviceTypes2[j];
+    				if (compareAiServiceType(s1, s2)){
+    					foundMatchingServiceType = true;
+    					break;
+    				}
+    			}
+    			if (!foundMatchingServiceType) {
+    				return false;
+    			}
+    		}
+    		return true;
+    }
+     	
+    public static boolean compareAiServiceType(AIServiceTypeValue s1, AIServiceTypeValue s2) {
+    		return compare(s1.getDescription(), s2.getDescription()) &&
+    			compare(s1.getName(),s2.getName()) &&
+    			compare(s1.getServiceName(), s2.getServiceName()) &&
+    			configsEqual(s1.getPluginClasses(), s2
+    					.getPluginClasses()) &&
+    			configsEqual(s1.getProperties(), s2 
+    					.getProperties()) &&
+    			configSchemasEqual(s1.getCustomProperties(), s2
+    					.getCustomProperties()) &&
+    			compare(s1.getControlActions(),s2.getControlActions()) &&
+    				measurementInfosEqual(s1.getMeasurements(), s2.getMeasurements());
+    }
+    		 	
+    public static boolean measurementInfosEqual(byte[] m1,byte[]m2) {
+    	if (m1 == m2) {
+    		return true;
+    	}
+    	if ((m1 == null) || (m2 == null)) {
+    		return false;
+    	}
+    	//skip length comparison here - measurement infos may or may not have an attributes map, but could be equal in all ways that count
+    	if ((m1.length == 0) && (m2.length == 0)) {
+    		return true; // both empty
+    	}
+    	try {
+    		MeasurementInfos mi1 = MeasurementInfos.decode(m1);
+    		MeasurementInfos mi2 = MeasurementInfos.decode(m2);
+    		if(! mi1.equals(mi2)) {
+    			return false;
+    		}
+    		//we know that the measurement names are equal at this point;
+    		Set measurementNames = mi1.getMeasurementNames();
+    		for(Iterator iterator = measurementNames.iterator();iterator.hasNext();) {
+    			final String measurementName = (String)iterator.next();
+    			boolean measurementsEqual = compare(mi1.getMeasurement(measurementName),mi2.getMeasurement(measurementName));
+    			if(! measurementsEqual) {
+    				return false;
+    			}
+    		}
+    		return true;
+    	} catch (EncodingException e) {
+    		throw new SystemException(e.getMessage());
+    	}
+    }
+    			
+    public static boolean configSchemasEqual(byte[] c1, byte[] c2) {
+    	if (c1 == c2) {
+    		return true;
+    	}
+    	if ((c1 == null) || (c2 == null)) {
+    		return false;
+    	}
+    	if (c1.length != c2.length) {
+    		return false;
+    	}
+    	if ((c1.length == 0) && (c2.length == 0)) {
+    		return true; // both empty
+    	}
+    	// can't use Arrays.equals(c1, c2), order may have changed.
+    	try {
+    		ConfigSchema cs1 = ConfigSchema.decode(c1);
+    		ConfigSchema cs2 = ConfigSchema.decode(c2);
+    		boolean configNamesEqual = compare(cs1.getOptionNames(),cs2.getOptionNames());
+    		if(! configNamesEqual) {
+    			return false;
+    		}
+    		final String[] optionNames = cs1.getOptionNames();
+    		for(int i=0;i< optionNames.length;i++) {
+    			ConfigOption option1 = cs1.getOption(optionNames[i]);
+    			ConfigOption option2 = cs2.getOption(optionNames[i]);
+    			//compare only name and description, as that is all we set for custom properties in ServiceTypeFactory
+    			if(!(compare(option1.getName(),option2.getName()) || compare(option1.getDescription(),option2.getDescription()))) {
+    				return false;
+    		}
+    		}
+    		return true;
+    	} catch (EncodingException e) {
+    		throw new SystemException(e.getMessage());
+    	}
+    }
 
     public static boolean configsEqual(byte[] c1, byte[] c2) {
         if ((c1 == null) != (c2 == null)) {
@@ -240,4 +360,36 @@ public class AICompare {
         }
         return s1.equals(s2);
     }
+	private static boolean compare(MeasurementInfo m1, MeasurementInfo m2) {
+		if (m1 == m2) {
+			return true;
+		}
+		if (m1 == null || m2 == null) {
+			return false;
+		}
+		return compare(m1.getAlias(),m2.getAlias()) && compare(m1.getCategory(),m2.getCategory()) && 
+			compare(m1.getGroup(),m2.getGroup()) && compare(m1.getName(),m2.getName()) && compare(m1.getRate(),m2.getRate()) && 
+			compare(m1.getTemplate(), m2.getTemplate()) && compare(m1.getUnits(),m2.getUnits()) && (m1.getCollectionType() == m2.getCollectionType()) && 
+				(m1.getInterval() == m2.getInterval()) && (m1.isDefaultOn() == m2.isDefaultOn()) && (m1.isIndicator() == m2.isIndicator());
+		}
+		 	
+	/**
+	 * Compare String arrays without regard to order of elements
+	 * @param strArray1
+	 * @param strArray2
+	 * @return
+	 */
+	private static boolean compare(String[] strArray1, String[] strArray2) {
+		if (strArray1 == strArray2) {
+			return true;
+		}
+		if ((strArray1 == null) || (strArray2 == null)) {
+			return false;
+		}
+		Set set1 = new HashSet(Arrays.asList(strArray1));
+		Set set2 = new HashSet(Arrays.asList(strArray2));
+		return set1.equals(set2);
+	}
+		  
+
 }

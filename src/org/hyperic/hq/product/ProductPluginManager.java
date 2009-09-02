@@ -33,11 +33,13 @@ import java.lang.reflect.Method;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.Set;
 
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.common.LicenseManager;
@@ -431,7 +433,10 @@ public class ProductPluginManager extends PluginManager {
         else {
             log.debug("Initializing in server mode");
         }
+        initPluginManagers(props);
+    }
 
+    protected void initPluginManagers(Properties props) throws PluginException {
         this.mpm = new MeasurementPluginManager(props);
         this.cpm = new ControlPluginManager(props);
         this.apm = new AutoinventoryPluginManager(props);
@@ -1029,50 +1034,7 @@ public class ProductPluginManager extends PluginManager {
                                ".getTypes returned null");
                 return null;
             }
-
-            if (this.registerTypes) {
-                info.deploymentOrder = registerTypeInfo(types);
-            }
-
-            for (int i=0; i<ProductPlugin.TYPES.length; i++) {
-                String type = ProductPlugin.TYPES[i];
-
-                if(type.equals(ProductPlugin.TYPE_PRODUCT))
-                    continue;
-
-                if (!isPluginTypeEnabled(type)) {
-                    continue;
-                }
-                PluginManager pm =
-                    (PluginManager)managers.get(type);
-
-                for (int j=0; j<types.length; j++) {
-                    GenericPlugin gPlugin;
-                    String typeName = types[j].getName();
-
-                    gPlugin = plugin.getPlugin(type, types[j]);
-                    if (gPlugin == null) {
-                        if (DEBUG_LIFECYCLE) {
-                            log.debug(pluginName +
-                                      " does not implement " + type +
-                                      " for type=" + typeName);
-                        }
-                        continue;
-                    }
-                    
-                    gPlugin.data = data;
-                    gPlugin.setName(typeName);
-                    gPlugin.setTypeInfo(types[j]);
-
-                    if (DEBUG_LIFECYCLE) {
-                        log.debug(pluginName + " implements " + type +
-                                " for type=" + typeName);
-                    }
-
-                    registerTypePlugin(pm, info, gPlugin, types[j]);
-                }
-            }
-
+            addPluginTypes(types, plugin);
             return pluginName;
         } catch (PluginException e) {
             throw e;
@@ -1084,6 +1046,84 @@ public class ProductPluginManager extends PluginManager {
             }
         }
     }
+    
+    public void addPluginTypes(TypeInfo[] types, ProductPlugin plugin) throws PluginExistsException {
+    	PluginInfo info = getPluginInfo(plugin.getName()); 
+    	if (this.registerTypes) {
+             info.deploymentOrder = registerTypeInfo(types);
+         }  
+    	for (int i=0; i<ProductPlugin.TYPES.length; i++) {
+              String type = ProductPlugin.TYPES[i];
+
+              if(type.equals(ProductPlugin.TYPE_PRODUCT))
+                  continue;
+
+              if (!isPluginTypeEnabled(type)) {
+                  continue;
+              }
+              PluginManager pm =
+                  (PluginManager)managers.get(type);
+
+              for (int j=0; j<types.length; j++) {
+                  GenericPlugin gPlugin;
+                  String typeName = types[j].getName();
+
+                  gPlugin = plugin.getPlugin(type, types[j]);
+                  if (gPlugin == null) {
+                      if (DEBUG_LIFECYCLE) {
+                          log.debug(plugin.getName() +
+                                    " does not implement " + type +
+                                    " for type=" + typeName);
+                      }
+                      continue;
+                  }
+                  
+                  gPlugin.data = plugin.data;
+                  gPlugin.setName(typeName);
+                  gPlugin.setTypeInfo(types[j]);
+
+                  if (DEBUG_LIFECYCLE) {
+                      log.debug(plugin.getName() + " implements " + type +
+                              " for type=" + typeName);
+                  }
+
+                  registerTypePlugin(pm, info, gPlugin, types[j]);
+              }
+          }
+
+    }
+
+    public void removePluginTypes(List typeInfos) {
+		for (int i = 0; i < ProductPlugin.TYPES.length; i++) {
+			String type = ProductPlugin.TYPES[i];
+		  
+			if (type.equals(ProductPlugin.TYPE_PRODUCT))
+				continue;
+		 
+			if (!isPluginTypeEnabled(type)) {
+				continue;
+			}
+			PluginManager pm = (PluginManager) managers.get(type);
+			Map plugins = pm.getPlugins();
+			Set pluginsToDelete = new HashSet();
+			for(Iterator iterator = plugins.values().iterator();iterator.hasNext();) {
+				GenericPlugin gPlugin = (GenericPlugin) iterator.next();
+				if(typeInfos.contains(gPlugin.getTypeInfo())) {
+			 		pluginsToDelete.add(gPlugin.getName());
+				}
+			}
+			for(Iterator iterator = pluginsToDelete.iterator();iterator.hasNext();) {
+				try {
+					pm.removePlugin((String)iterator.next());
+				} catch (PluginNotFoundException e) {
+					log.warn("Error attempting to remove a plugin that does not exist");
+				} catch(PluginException e) {
+					log.warn("Error removing a plugin while updating type metadata.  " + 
+							"This could cause a PluginExistsException later when an attempt is made to re-register the plugin.  Cause: " + e.getMessage());
+			 		}
+			}
+		}
+	}
 
     private void removeManagerPlugins(PluginManager mgr,
                                       String jarName)

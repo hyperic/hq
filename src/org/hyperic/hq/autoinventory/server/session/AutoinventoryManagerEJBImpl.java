@@ -28,6 +28,7 @@ package org.hyperic.hq.autoinventory.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
+import javax.ejb.RemoveException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
@@ -107,6 +109,8 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.GenericPlugin;
+import org.hyperic.hq.product.PluginManager;
+import org.hyperic.hq.product.PluginUpdater;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -862,11 +866,41 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         RuntimeReportProcessor rrp = new RuntimeReportProcessor();
         try {
             rrp.processRuntimeReport(subject, agentToken, crrr);
+            mergeServiceTypes(rrp.getServiceTypeMerges());
             return rrp.getServiceMerges();
         } catch (CreateException e) {
             throw new SystemException(e);
         }
     }
+    
+    private void mergeServiceTypes(final Set serviceTypeMerges) {
+    	if(! serviceTypeMerges.isEmpty()) {
+    		final ProductManagerLocal productManager = ProductManagerEJBImpl.getOne();
+    		Map productTypes = new HashMap();
+    		for(Iterator iterator = serviceTypeMerges.iterator();iterator.hasNext();) {
+    			final org.hyperic.hq.product.ServiceType serviceType = (org.hyperic.hq.product.ServiceType) iterator
+    	 			.next();
+    			Set serviceTypes = (Set)productTypes.get(serviceType.getProductName());
+    			if(serviceTypes == null) {
+    				serviceTypes = new HashSet();
+    			}
+    			serviceTypes.add(serviceType);
+    			_log.info("Adding serviceType " + serviceType + " to product type: " + serviceType.getProductName());
+    			productTypes.put(serviceType.getProductName(), serviceTypes);
+    		}
+    		_log.info("The size of productTypes: " + productTypes.size());
+    		for(Iterator iterator = productTypes.entrySet().iterator();iterator.hasNext();)  {
+    			try {
+    				Map.Entry serviceTypeEntry = (Map.Entry)iterator.next();
+    				_log.info("Updating dynamic service type plugin");
+    				productManager.updateDynamicServiceTypePlugin((String)serviceTypeEntry.getKey(), (Set)serviceTypeEntry.getValue());
+    			} catch (Exception e) {
+    				_log.error("Error merging dynamic service types for product.  Cause: " + e.getMessage());
+    			} 
+    		}
+    	}
+    }
+    
     
     /**
      * Merge a list of {@link ServiceMergeInfo}s in HQ's appdef model

@@ -75,6 +75,14 @@ public abstract class GenericPlugin {
     private ProductPlugin productPlugin = null;
     protected ConfigResponse config;
     private static String hostname = null;
+    
+    public void setData(PluginData data) {
+        this.data = data;
+    }
+          
+    public PluginData getPluginData() {
+        return this.data;
+    }
 
     static String[] createTypeLabels(String prop) {
         int len = TYPE_LABELS.length;

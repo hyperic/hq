@@ -33,11 +33,14 @@ import java.io.FileInputStream;
 import java.io.PrintStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,6 +60,8 @@ import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EnumerationConfigOption;
+
+
 
 public class PluginData {
     public static final String PLUGIN_XML = "etc/hq-plugin.xml";
@@ -343,8 +348,12 @@ public class PluginData {
         return getMetrics(name, false);
     }
     
-    void addMetric(String name, MeasurementInfo metric) {
+    public void addMetric(String name, MeasurementInfo metric) {
         getMetrics(name, true).add(metric);
+    }
+       
+    public void removeMetrics(String name) {
+    	this.metricStash.remove(name);
     }
     
     public class ServiceExtension {
@@ -377,7 +386,7 @@ public class PluginData {
         return implClass;
     }
 
-    void addPlugin(String type, String typeName, String implClass) {
+    public void addPlugin(String type, String typeName, String implClass) {
         Map plugins = (Map)this.pluginImpls.get(type);
         if (plugins == null) {
             plugins = new HashMap();
@@ -385,6 +394,14 @@ public class PluginData {
         }
 
         plugins.put(typeName, qualifiedPluginClass(implClass));
+    }
+    
+    public void removePlugins(String typeName) {
+    	//remove plugins of all types for the specified resource type
+    	for(Iterator iterator = this.pluginImpls.values().iterator();iterator.hasNext();) {
+    		Map pluginTypes = (Map)iterator.next();
+    		pluginTypes.remove(typeName);
+    	}
     }
 
     private String getPlatformName(TypeInfo info) {
@@ -412,13 +429,17 @@ public class PluginData {
         return (String)plugins.get(typeName);
     }
 
-    void addControlActions(String typeName, List actions) {
+    public void addControlActions(String typeName, List actions) {
         List controlActions = getControlActions(typeName);
         if (controlActions == null) {
             controlActions = new ArrayList();
             this.actions.put(typeName, controlActions);
         }
         controlActions.addAll(actions);
+    }
+    
+    public void removeControlActions(String typeName) {
+    	this.actions.remove(typeName);
     }
 
     public List getControlActions(TypeInfo info) {
@@ -437,7 +458,7 @@ public class PluginData {
         return types;
     }
 
-    void addTypes(TypeInfo[] types) {
+    public void addTypes(TypeInfo[] types) {
         if (this.types == NO_TYPES) {
             this.types = types;
         }
@@ -446,6 +467,16 @@ public class PluginData {
                 (TypeInfo[])ArrayUtil.merge(this.types, types,
                                             new TypeInfo[0]);
         }
+    }
+    
+    public void removeTypes(TypeInfo[] types) {
+    	List existingTypes = new ArrayList(Arrays.asList(this.types));
+    	for(int i = 0; i <types.length;i++) {
+    		if(existingTypes.contains(types[i])) {
+    			existingTypes.remove(types[i]);
+    		}
+    	}
+    	this.types = (TypeInfo[])existingTypes.toArray(new TypeInfo[existingTypes.size()]);
     }
 
     /**
@@ -465,7 +496,7 @@ public class PluginData {
         return (Map)serviceInventoryPlugins.get(serverType);
     }
 
-    void addServiceInventoryPlugin(String serverType, String serviceType, String name) {
+    public void addServiceInventoryPlugin(String serverType, String serviceType, String name) {
         Map services = getServiceInventoryPlugins(serverType); 
         if (services == null) {
             services = new HashMap();
@@ -582,7 +613,7 @@ public class PluginData {
         return schema;
     }
     
-    void addCustomPropertiesSchema(String name, ConfigSchema schema) {
+    public void addCustomPropertiesSchema(String name, ConfigSchema schema) {
         ConfigSchema cpropSchema = getCustomPropertiesSchema(name);
 
         if (cpropSchema == null) {
@@ -595,12 +626,25 @@ public class PluginData {
         this.cprops.put(name, cpropSchema);
     }
     
+    public void removeCustomPropertiesSchema(String name) {
+    	ConfigSchema schema = (ConfigSchema)this.cprops.get(name);
+        if (schema == null) {
+            ServiceExtension ext =
+                PluginData.getServiceExtension(name);
+            if (ext != null) {
+                ext.data.cprops.remove(name);
+            }
+        }else {
+        	this.cprops.remove(name);
+        }
+    }
+    
     public static void addSharedConfigSchema(String name, ConfigSchema schema) {
         sharedConfig.put(name, schema);
     }
 
     //parsing helpers
-    String applyFilters(String s) {
+    public String applyFilters(String s) {
         return this.parser.applyFilters(s);
     }
 
@@ -612,7 +656,7 @@ public class PluginData {
         this.parser.addFilters(props);
     }
 
-    String getFilter(String key) {
+    public String getFilter(String key) {
         return this.parser.getFilter(key);
     }
     

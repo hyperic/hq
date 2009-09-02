@@ -27,7 +27,9 @@ package org.hyperic.hq.product.jmx;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.management.MBeanServerConnection;
@@ -43,8 +45,8 @@ import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceResource;
-
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
@@ -54,6 +56,10 @@ public class MxServerDetector
     extends DaemonDetector
     implements AutoServerDetector
 {
+    private static final String DYNAMIC_SERVICE_DOMAIN = "spring.application";
+    private static final String TEMPLATE_PROPERTY = "template";
+    private static final String CONTROL_CLASS_PROPERTY = "control-class";
+    private static final String MEASUREMENT_CLASS_PROPERTY = "measurement-class";
     private static final Log log = LogFactory.getLog(MxServerDetector.class);
     static final String PROP_SERVICE_NAME = "name";
     public static final String PROC_MAIN_CLASS    = "PROC_MAIN_CLASS";
@@ -65,6 +71,9 @@ public class MxServerDetector
         "-Dcom.sun.management.jmxremote";
     protected static final String SUN_JMX_PORT = 
         SUN_JMX_REMOTE + ".port=";
+    
+    private ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
+   
 
     protected static String getMxURL(String port) {
         return
@@ -465,5 +474,43 @@ public class MxServerDetector
                 throw new PluginException(e.getMessage(), e);
             }
         }
+    }
+    
+   
+    
+    public Set discoverServiceTypes(ConfigResponse serverConfig)
+	throws PluginException {
+    	 JMXConnector connector;
+         MBeanServerConnection mServer;
+         Set serviceTypes = new HashSet();
+         
+         //plugins need to define these properties at the plugin level to discover dynamic service types
+         if(getProductPlugin().getPluginData()
+			.getProperty(MEASUREMENT_CLASS_PROPERTY) == null || getProductPlugin().getPluginData()
+			.getProperty(CONTROL_CLASS_PROPERTY) == null || getProductPlugin().getPluginData()
+			.getProperty(TEMPLATE_PROPERTY) == null) {
+        	 return serviceTypes;
+         }
+         
+         try {
+             connector = MxUtil.getMBeanConnector(serverConfig.toProperties());
+             mServer = connector.getMBeanServerConnection();
+         } catch (Exception e) {
+             throw new PluginException(e.getMessage(), e);
+         } 
+
+    	try {
+			final Set objectNames = mServer.queryNames(new ObjectName(DYNAMIC_SERVICE_DOMAIN + ":*"), null);
+			serviceTypes = serviceTypeFactory.create(getProductPlugin(), (ServerTypeInfo)getTypeInfo(), mServer, objectNames);
+		} catch (Exception e) {
+			 throw new PluginException(e.getMessage(), e);
+		} finally {
+            try {
+                connector.close();
+            } catch (IOException e) {
+                throw new PluginException(e.getMessage(), e);
+            }
+        }
+		return serviceTypes;
     }
 }

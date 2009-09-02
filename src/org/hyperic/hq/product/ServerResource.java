@@ -39,6 +39,7 @@ import org.hyperic.hq.appdef.shared.AIServerExtValue;
 public class ServerResource {
     //package has access to these fields
     List services = new ArrayList();
+    List serviceTypes = new ArrayList();
 
     private AIServerExtValue resource;
     private String[] connectProps = null;
@@ -91,6 +92,10 @@ public class ServerResource {
     public void addService(ServiceResource service) {
         //service.resource.setCTime(...); XXX?
         this.services.add(service.resource);
+    }
+    
+    public void addServiceType(ServiceType serviceType) {
+    	this.serviceTypes.add(serviceType.getAIServiceTypeValue());
     }
 
     public void setInstallPath(String name) {
