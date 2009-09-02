@@ -18,8 +18,8 @@
       <column name="ENDTIME" not-null="true" default="9223372036854775807" index="AVAIL_RLE_ENDTIME_VAL_IDX"/>
     </property>
 
-    <property name="availVal" type="big_decimal">
-      <column name="AVAILVAL" not-null="true" precision="24" scale="5" index="AVAIL_RLE_ENDTIME_VAL_IDX"/>
+    <property name="availVal" type="double">
+      <column name="AVAILVAL" not-null="true" index="AVAIL_RLE_ENDTIME_VAL_IDX"/>
     </property>
 
   </class>

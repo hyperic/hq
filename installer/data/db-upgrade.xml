@@ -10753,7 +10753,7 @@ has already been defined.
         alter table QRTZ_CRON_TRIGGERS modify cron_expression varchar(200) not null
       </statement>
     </schema-directSQL>  
-    <schema-alterColumn table="HQ_AVAIL_DATA_RLE" column="availval" columnType="BIGDEC" nullable="NOT NULL"/>
+    <schema-alterColumn table="HQ_AVAIL_DATA_RLE" column="availval" columnType="DOUBLE" nullable="NOT NULL"/>
   </schemaSpec>
 
   <!-- Used for AMS merge -->
