@@ -10710,6 +10710,66 @@ has already been defined.
     </schema-directSQL>  
   </schemaSpec>
 
+  <!-- Fixes upgrade inconsistencies on MySQL column lengths -->
+  <schemaSpec version="3.187">
+    <schema-directSQL>  
+      <statement targetDB="mysql">
+        alter table EAM_APP_SERVICE modify isgroup bit not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table EAM_GALERT_ACTION_LOG modify detail varchar(1024) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table EAM_MEASUREMENT modify dsn varchar(2048) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table EAM_RESOURCE modify mtime bigint null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_JOB_DETAILS modify job_class_name varchar(250) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_TRIGGERS modify priority int null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_TRIGGERS modify job_name varchar(200) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_TRIGGERS modify job_group varchar(200) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_FIRED_TRIGGERS modify trigger_group varchar(200) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_FIRED_TRIGGERS modify trigger_name varchar(200) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_FIRED_TRIGGERS modify instance_name varchar(200) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_CALENDARS modify calendar_name varchar(200) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_CRON_TRIGGERS modify cron_expression varchar(200) not null
+      </statement>
+    </schema-directSQL>  
+    <schema-alterColumn table="HQ_AVAIL_DATA_RLE" column="availval" columnType="BIGDEC" nullable="NOT NULL"/>
+  </schemaSpec>
+
+  <!-- Used for AMS merge -->
+  <schemaSpec version="3.188">
+    <schema-alterColumn table="EAM_MEASUREMENT_TEMPL" column="template"
+                        precision="800" columnType="VARCHAR2" nullable="NOT NULL" />
+    <schema-alterColumn table="EAM_RESOURCE" column="name"
+                        precision="500" columnType="VARCHAR2" />
+    <schema-alterColumn table="EAM_RESOURCE" column="sort_name"
+                        precision="500" columnType="VARCHAR2" />
+    <schema-alterColumn table="EAM_SERVICE_TYPE" column="sort_name"
+                        precision="500" columnType="VARCHAR2" />
+    <schema-alterColumn table="EAM_SERVICE_TYPE" column="name"
+                        precision="500" columnType="VARCHAR2" nullable="NOT NULL" />
+  </schemaSpec>
+
 </dbupgrade>
 </target>
 </project>

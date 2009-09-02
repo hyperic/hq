@@ -16,11 +16,11 @@
     </version>
 
     <property name="name" type="string">
-      <column name="NAME" not-null="true" length="200"/>
+      <column name="NAME" not-null="true" length="500"/>
     </property>
 
     <property name="sortName" type="string">
-      <column name="SORT_NAME" not-null="false" length="200"/>
+      <column name="SORT_NAME" not-null="false" length="500"/>
     </property>
 
     <property name="cid" type="integer">
