@@ -36,6 +36,8 @@
 	<classpathentry kind="src" path="plugins/sybase/src"/>
 	<classpathentry kind="src" path="plugins/system/src"/>
 	<classpathentry kind="src" path="plugins/tomcat/src"/>
+	<classpathentry kind="src" path="plugins/vim/src"/>
+	<classpathentry kind="lib" path="plugins/vim/lib/mo.jar"/>
 	<classpathentry kind="src" path="plugins/vmware/src"/>
 	<classpathentry kind="src" path="plugins/weblogic/doc"/>
 	<classpathentry kind="src" path="plugins/weblogic/src"/>
