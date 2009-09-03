@@ -9849,10 +9849,10 @@ has already been defined.
         <statement targetDB="mysql">
           alter table EAM_RESOURCE_EDGE drop foreign key FKD1FCB6C0A2BF2D92
         </statement>
-        <statement targetDB="mysql">
+        <statement targetDB="mysql" fail="false">
           alter table EAM_RESOURCE_EDGE DROP INDEX eam_resource_edge_from_id_key
         </statement>
-        <statement targetDB="mysql">
+        <statement targetDB="mysql" fail="false">
           ALTER TABLE EAM_RESOURCE_EDGE DROP INDEX eam_resource_from_id_idx
         </statement>
         <statement>
