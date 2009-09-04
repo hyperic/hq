@@ -52,7 +52,6 @@ public class InstallerLogger implements BuildLogger {
     public static final String PROP_LOGFILE = "install.log";
     public static final String PROP_NOWRAP  = "install.nowrap";
     public static final String PROP_LOGFILE_PATH = "install.log.path";
-    public static final String PROP_DEBUG_LOG = "install.log.debug";
     
     public static final String PREFIX = "^^^";
     public static final String[] MESSAGE_HANDLERS
@@ -132,18 +131,15 @@ public class InstallerLogger implements BuildLogger {
             }
         }
         
-        String debug = getProperty(PROP_DEBUG_LOG);
-        if( debug != null && Boolean.valueOf(debug).booleanValue()) {
-        	registerMessageHandler(DEBUG_HANDLER);
-        	BasicLogger basicLogger = new BasicLogger();
+        registerMessageHandler(DEBUG_HANDLER);
+        BasicLogger basicLogger = new BasicLogger();
 
-        	// Make sure raw log is in the same dir as regular log
-        	logfile = new WritableFile(logfile.getParentFile(),
-                                   logfile.getName() + ".debug");
-        	basicLogger.setFile(logfile);
-        	basicLogger.setLevel("debug");
-        	basicLogger.register(project);
-        }
+        // Make sure raw log is in the same dir as regular log
+        logfile = new WritableFile(logfile.getParentFile(),
+                                   logfile.getName() + ".verbose");
+        basicLogger.setFile(logfile);
+        basicLogger.setLevel("debug");
+        basicLogger.register(project);
         
         // For debugging, uncomment the line below to
         // see all registered message handlers.
