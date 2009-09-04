@@ -22,10 +22,6 @@ import org.hyperic.util.config.ConfigSchema;
  */
 public class SpringStandaloneApplicationDetector extends MxServerDetector {
 
-	public List discoverServices(final ConfigResponse serverConfig) throws PluginException {
-		return super.discoverServices(serverConfig);
-	}
-
 	public List getServerResources(ConfigResponse platformConfig) throws PluginException {
 		List servers = new ArrayList();
 		List procs = getServerProcessList();

@@ -38,6 +38,9 @@
 
   <filter name="template"
           value="${OBJECT_NAME}:${alias}"/>
+  <property name="template" value="${OBJECT_NAME}:${alias}" />
+  <property name="measurement-class" value="org.hyperic.hq.product.jmx.MxMeasurementPlugin" />
+  <property name="control-class" value="org.hyperic.hq.product.jmx.MxControlPlugin" />
 
   <metrics name="Thread Metrics">
     <metric name="Thread Count"

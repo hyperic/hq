@@ -1038,7 +1038,9 @@
 
     <hqplugin name="samba"/>
 
-	<hqplugin name="spring" resourceDir="src/main/resources"/>
+	<hqplugin name="spring">
+	  <fileset dir="plugins/spring/src/main/resources" includes="**"/>
+	</hqplugin>
 
     <hqplugin name="sybase"/>
 

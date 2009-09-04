@@ -56,7 +56,6 @@ public class MxServerDetector
     extends DaemonDetector
     implements AutoServerDetector
 {
-    private static final String DYNAMIC_SERVICE_DOMAIN = "spring.application";
     private static final String TEMPLATE_PROPERTY = "template";
     private static final String CONTROL_CLASS_PROPERTY = "control-class";
     private static final String MEASUREMENT_CLASS_PROPERTY = "measurement-class";
@@ -211,7 +210,7 @@ public class MxServerDetector
         return query.toString();
     }
 
-    protected class MxProcess {
+    public class MxProcess {
         long _pid;
         String _installpath;
         String[] _args;
@@ -500,7 +499,7 @@ public class MxServerDetector
          } 
 
     	try {
-			final Set objectNames = mServer.queryNames(new ObjectName(DYNAMIC_SERVICE_DOMAIN + ":*"), null);
+			final Set objectNames = mServer.queryNames(new ObjectName(MBeanUtil.DYNAMIC_SERVICE_DOMAIN + ":*"), null);
 			serviceTypes = serviceTypeFactory.create(getProductPlugin(), (ServerTypeInfo)getTypeInfo(), mServer, objectNames);
 		} catch (Exception e) {
 			 throw new PluginException(e.getMessage(), e);

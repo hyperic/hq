@@ -50,6 +50,8 @@ import org.apache.commons.logging.LogFactory;
 public class MBeanUtil {
     private static Log log =
         LogFactory.getLog(MBeanUtil.class);
+    
+    public static final String DYNAMIC_SERVICE_DOMAIN = "spring.application";
 
     private static Map converters = new HashMap();
 
@@ -590,7 +592,7 @@ public class MBeanUtil {
     }
 
     //where is commons-anything-tostring.jar?
-    static String anyToString(Object obj) {
+    public static String anyToString(Object obj) {
         if (obj.getClass().isArray()) {
             if (Object[].class.isAssignableFrom(obj.getClass())) {
                 return Arrays.asList((Object[])obj).toString();
