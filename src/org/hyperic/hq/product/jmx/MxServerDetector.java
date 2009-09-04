@@ -216,7 +216,7 @@ public class MxServerDetector
         String[] _args;
         String _url;
 
-        protected MxProcess(long pid,
+        public MxProcess(long pid,
                             String[] args,
                             String installpath) {
             _pid = pid;
