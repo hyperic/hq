@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="installer/src"/>
+	<classpathentry kind="src" path="plugins/spring/src/main/java"/>
 	<classpathentry kind="src" path="build/src"/>
 	<classpathentry kind="src" path="plugins/alfresco/src"/>
 	<classpathentry kind="src" path="plugins/apache/src"/>

@@ -51,6 +51,23 @@ public class PluginJar extends Jar {
     private String pluginDir = null;
     private String pluginPackage = null;
     private String pluginClass = null;
+    private String resourceDir = null;
+    
+	/**
+	 * @return resourceDir The name of the directory that contains resources.
+	 * May be used instead of placing hq-plugin.xml in the hard-coded "etc" dir
+	 */
+    public String getResourceDir() {
+    	return resourceDir;
+    }
+      
+    /**
+     * @param resourceDir The name of the directory that contains resources. May
+     * be used instead of placing hq-plugin.xml in the hard-coded "etc" dir
+     */
+    public void setResourceDir(String resourceDir) {
+    	this.resourceDir = resourceDir;
+    }
 
     public String getDir() {
         if (this.pluginDir == null) {
@@ -172,6 +189,16 @@ public class PluginJar extends Jar {
             set.setIncludes(name + "/**");
             addFileset(set);
         }
+
+		if (this.resourceDir != null) {
+			File resourceDirFullPath = new File(getDir(), this.resourceDir);
+			if (resourceDirFullPath.exists()) {
+				FileSet set = new FileSet();
+				set.setDir(resourceDirFullPath);
+				set.setIncludes("**");
+				addFileset(set);
+			}
+		}
 
         //<include name="org.hyperic.hq.product/${plugin.package}/**/*.class"/>
         FileSet classes = new FileSet();

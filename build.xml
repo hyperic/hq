@@ -230,6 +230,7 @@
             <include name="*/src"/>
             <exclude name="xen/src"/>
             <exclude name="vim/src"/>
+			<exclude name="spring/src"/>
           </dirset>
         </src>
       </hq-javac>
@@ -245,10 +246,12 @@
 	      <src>
 	        <path location="${basedir}/plugins/xen/src" />
 	        <path location="${basedir}/plugins/vim/src" />
+			<path location="${basedir}/plugins/spring/src/main/java" />
 	      </src>
 	      <include name="org/hyperic/hq/plugin/xen/**"/>
 	      <include name="com/xensource/**"/>
 	      <include name="org/hyperic/hq/plugin/vim/**"/>
+	 	  <include name="org/hyperic/hq/plugin/spring/**"/>
 	    </hq-javac>
   </target>
     
@@ -1034,6 +1037,8 @@
     <hqplugin name="mysql"/>
 
     <hqplugin name="samba"/>
+
+	<hqplugin name="spring" resourceDir="src/main/resources"/>
 
     <hqplugin name="sybase"/>
 
