@@ -123,11 +123,11 @@ public class ServerConfig extends BaseConfig {
     public static final String Q_JDBC_USER
         = "Enter the username to use to connect to the database";
     public static final String Q_JDBC_PASSWORD
-        = "Enter the password to use to connect to the database.  WARNING: Password will be shown in plain text.  It is recommended that you enter a temporary value";
+        = "Enter the password to use to connect to the database.";
     public static final String Q_ADMIN_USER
         = "What should the username be for the initial admin user?";
     public static final String Q_ADMIN_PASSWORD
-        = "What should the password be for the initial admin user?  WARNING: Password will be shown in plain text.  It is recommended that you enter a temporary value";
+        = "What should the password be for the initial admin user?";
     public static final String Q_ADMIN_EMAIL
         = "What should the email address be for the initial admin user?";
 
@@ -417,9 +417,7 @@ public class ServerConfig extends BaseConfig {
                                                         Q_JDBC_USER));
                 passwordOption = new StringConfigOption(
                         "server.database-password", Q_JDBC_PASSWORD);
-                //Jen changed below to false because disable echo was causing issues
-                //with tc Server installer.  TODO long term fix so pw isn't plain text
-                passwordOption.setSecret(false);
+                passwordOption.setSecret(true);
                 schema.addOption(passwordOption);
             }
 
@@ -440,9 +438,7 @@ public class ServerConfig extends BaseConfig {
 
                 passwordOption = new StringConfigOption
                     ("server.admin.password", Q_ADMIN_PASSWORD, null);
-                //Jen changed below to false because disable echo was causing issues
-                //with tc Server installer.  TODO long term fix so pw isn't visible
-                passwordOption.setSecret(false);
+                passwordOption.setSecret(true);
                 passwordOption.setMinLength(6);
                 passwordOption.setMaxLength(40);
                 schema.addOption(passwordOption);
