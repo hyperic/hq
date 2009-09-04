@@ -1003,6 +1003,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         for (final Iterator it=mids.iterator(); it.hasNext(); ) {
             final Integer mid = (Integer)it.next();
             final Measurement m = dao.findById(mid);
+            m.setEnabled(true);
             m.setInterval(interval);
         }
         
@@ -1078,6 +1079,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         for (final Iterator it=mids.iterator(); it.hasNext(); ) {
             final Integer mid = (Integer)it.next();
             final Measurement m = dao.findById(mid);
+            m.setEnabled(true);
             m.setInterval(interval);
         }
         List eids = Collections.singletonList(appId);
