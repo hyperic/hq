@@ -133,6 +133,10 @@ public abstract class MxQuery {
                     stringValue = value.toString();
                 }
                 setAttribute(names[i], stringValue);
+            } else {
+                // Show 'Attribute was null' in UI.
+                log.debug("getAttribute(" + objName + ", " + name + ") returned null");
+                setAttribute(names[i], "Attribute was null");
             }
         }
 
