@@ -33,6 +33,7 @@ import org.hyperic.hq.product.ServerResource;
 import org.hyperic.hq.product.Win32ControlPlugin;
 import org.hyperic.hq.product.jmx.MxServerDetector;
 import org.hyperic.hq.product.jmx.MxUtil;
+import org.hyperic.hq.product.jmx.MxServerDetector.MxProcess;
 import org.hyperic.util.config.ConfigResponse;
 
 import org.hyperic.sigar.win32.RegistryKey;
@@ -55,6 +56,8 @@ public class TomcatServerDetector extends MxServerDetector {
     // use hard-coded ptql instead of SigarMeasurementPlugin.PTQL_CONFIG for backward
     // compatibility with pre-4.0 tomcat plugin
     private static final String PTQL_CONFIG_OPTION = "ptql";
+    
+    private static final String CATALINA_HOME_PROP = "-Dcatalina.home=";
 
     private Log log = LogFactory.getLog(TomcatServerDetector.class);
 
@@ -160,6 +163,30 @@ public class TomcatServerDetector extends MxServerDetector {
             serverMap.put(services[i], options);
         }
         return serverMap;
+    }
+    
+   
+    protected boolean isInstallTypeVersion(MxProcess process) {
+        final String[] processArgs = process.getArgs();
+        String catalinaHome = getCatalinaHome(processArgs);
+        if (catalinaHome == null) {
+            getLog()
+                    .warn(
+                            "Unable to determine Tomcat version of possible Tomcat process with install path: "
+                                    + process.getInstallPath()
+                                    + ".  Could not find value of catalina.home in process system properties.  This process will be skipped.");
+            return false;
+        }
+        return isInstallTypeVersion(catalinaHome);
+    }
+    
+    protected String getCatalinaHome(String[] args) {
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].startsWith(CATALINA_HOME_PROP)) {
+                return args[i].substring(CATALINA_HOME_PROP.length());
+            }
+        }
+        return null;
     }
 
     /**

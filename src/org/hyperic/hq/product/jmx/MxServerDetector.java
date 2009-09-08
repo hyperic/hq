@@ -307,6 +307,60 @@ public class MxServerDetector
 
         return procs;
     }
+    
+    protected boolean isInstallTypeVersion(MxProcess process) {
+        String dir = process.getInstallPath();
+        return isInstallTypeVersion(dir);
+    }
+    
+    protected  ServerResource getServerResource(MxProcess process) {
+        String dir = process.getInstallPath();
+        //set process.query using the same query used to find the process,
+        //with PROC_HOME_DIR (if defined) expanded to match dir
+        String query = getProcQuery(dir);
+
+        // Create the server resource
+        ServerResource server = newServerResource(dir);
+        adjustClassPath(dir);
+
+        ConfigResponse config = new ConfigResponse();
+        ConfigSchema schema =
+            getConfigSchema(getTypeInfo().getName(),
+                            ProductPlugin.CFGTYPE_IDX_PRODUCT);
+
+        if (schema != null) {
+            ConfigOption option =
+                schema.getOption(PROP_PROCESS_QUERY);
+
+            if (option != null) {
+                // Configure process.query
+                config.setValue(option.getName(), query);
+            }
+        }
+
+        if (process.getURL() != null) {
+            config.setValue(MxUtil.PROP_JMX_URL,
+                            process.getURL());
+        }
+        else {
+            String[] args = process.getArgs();
+            for (int j=0; j<args.length; j++) {
+                if (configureMxURL(config, args[j])) {
+                    break;
+                }
+                else if (configureLocalMxURL(config, args[j], query)) {
+                    //continue as .port might come later
+                }
+            }
+        }
+
+        // default anything not auto-configured
+        setProductConfig(server, config);
+        discoverServerConfig(server, process.getPid());
+
+        server.setMeasurementConfig();
+        return server;
+    }
 
     public List getServerResources(ConfigResponse platformConfig)
         throws PluginException {
@@ -318,56 +372,11 @@ public class MxServerDetector
 
         for (int i=0; i<procs.size(); i++) {
             MxProcess process = (MxProcess)procs.get(i);
-            String dir = process.getInstallPath();
-
-            if (!isInstallTypeVersion(dir)) {
+            
+            if (!isInstallTypeVersion(process)) {
                 continue;
             }
-            //set process.query using the same query used to find the process,
-            //with PROC_HOME_DIR (if defined) expanded to match dir
-            String query = getProcQuery(dir);
-
-            // Create the server resource
-            ServerResource server = newServerResource(dir);
-            adjustClassPath(dir);
-
-            ConfigResponse config = new ConfigResponse();
-            ConfigSchema schema =
-                getConfigSchema(getTypeInfo().getName(),
-                                ProductPlugin.CFGTYPE_IDX_PRODUCT);
-
-            if (schema != null) {
-                ConfigOption option =
-                    schema.getOption(PROP_PROCESS_QUERY);
-
-                if (option != null) {
-                    // Configure process.query
-                    config.setValue(option.getName(), query);
-                }
-            }
-
-            if (process.getURL() != null) {
-                config.setValue(MxUtil.PROP_JMX_URL,
-                                process.getURL());
-            }
-            else {
-                String[] args = process.getArgs();
-                for (int j=0; j<args.length; j++) {
-                    if (configureMxURL(config, args[j])) {
-                        break;
-                    }
-                    else if (configureLocalMxURL(config, args[j], query)) {
-                        //continue as .port might come later
-                    }
-                }
-            }
-
-            // default anything not auto-configured
-            setProductConfig(server, config);
-            discoverServerConfig(server, process.getPid());
-
-            server.setMeasurementConfig();
-            servers.add(server);
+            servers.add(getServerResource(process));
         }
 
         return servers;
