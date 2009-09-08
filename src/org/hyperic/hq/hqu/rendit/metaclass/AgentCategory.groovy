@@ -3,6 +3,7 @@ package org.hyperic.hq.hqu.rendit.metaclass
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl as AgentMan
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.authz.server.session.AuthzSubject
+import org.hyperic.hq.authz.shared.PermissionException
 
 class AgentCategory {
 
@@ -16,6 +17,8 @@ class AgentCategory {
         try {
             aMan.pingAgent(subject, agent)
             return true
+        } catch (PermissionException p) {
+            throw p
         } catch (Exception e) {
             return false
         }
