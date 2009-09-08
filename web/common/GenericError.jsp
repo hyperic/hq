@@ -131,14 +131,18 @@ catch (ClassCastException ce) {
 </c:if>
 
 <c:catch> 
-  <% if (exception != null) { %> 
-      <div id="exception" style="visibility:hidden"><%=StringUtil.getStackTrace(exception)%></div>
-    <% if (root != null) { %> 
-      <div id="root" style="visibility:hidden"><%=StringUtil.getStackTrace(root)%></div>
-    <% } %> 
-  <% } %> 
+	<% if (exception != null) { %> 
+ 		<c:set var="exceptionStackTrace"><%=StringUtil.getStackTrace(exception)%></c:set>
+ 		
+      	<div id="exception" style="visibility:hidden"><c:out value="${exceptionStackTrace}" /></div>
+    
+    	<% if (root != null) { %> 
+    		<c:set var="rootStackTrace"><%=StringUtil.getStackTrace(root)%></c:set>
+    		
+      		<div id="root" style="visibility:hidden"><c:out value="${rootStackTrace}" /></div>
+    	<% } %> 
+  	<% } %> 
 </c:catch>
-
 
 <script type="text/javascript">
 /*--- start declaration/initialization ---*/
