@@ -25,9 +25,9 @@
 
 package org.hyperic.hq.plugin.weblogic.jmx;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 
 import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
 import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
@@ -85,7 +85,7 @@ public class ApplicationQuery extends ServiceQuery {
         return WeblogicMetric.PROP_APP;
     }
 
-    public boolean getAttributes(MBeanServer mServer,
+    public boolean getAttributes(MBeanServerConnection mServer,
                                  ObjectName name) {
 
         String appName = name.getKeyProperty("Name");

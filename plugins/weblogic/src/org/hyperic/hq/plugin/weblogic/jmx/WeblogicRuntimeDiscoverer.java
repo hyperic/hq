@@ -25,408 +25,496 @@
 
 package org.hyperic.hq.plugin.weblogic.jmx;
 
+import java.io.IOException;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Properties;
+import java.util.Set;
+
+import javax.management.MBeanInfo;
+import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
+import javax.management.ObjectName;
+import javax.management.modelmbean.ModelMBeanInfo;
+import javax.management.remote.JMXConnector;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import javax.management.MBeanServer;
-
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerExtValue;
+import org.hyperic.hq.appdef.shared.AIServiceTypeValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
-
-import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.RuntimeDiscoverer;
-import org.hyperic.hq.product.RuntimeResourceReport;
-
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.EncodingException;
-
 import org.hyperic.hq.plugin.weblogic.WeblogicAuth;
 import org.hyperic.hq.plugin.weblogic.WeblogicDetector;
 import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
 import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
+import org.hyperic.hq.plugin.weblogic.WeblogicUtil;
+import org.hyperic.hq.product.GenericPlugin;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginUpdater;
+import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.RuntimeDiscoverer;
+import org.hyperic.hq.product.RuntimeResourceReport;
+import org.hyperic.hq.product.ServerTypeInfo;
+import org.hyperic.hq.product.ServiceType;
+import org.hyperic.hq.product.jmx.MBeanUtil;
+import org.hyperic.hq.product.jmx.ServiceTypeFactory;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.EncodingException;
 
-public class WeblogicRuntimeDiscoverer
-    implements RuntimeDiscoverer, PrivilegedAction {
+public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedAction {
 
-    private static final boolean useJAAS = WeblogicProductPlugin.useJAAS();
+	private static final Double DYNAMIC_SVC_SUPPORTED_WEBLOGIC_VERSION = new Double(9.1d);
+	
+	
+
+	private static final boolean useJAAS = WeblogicProductPlugin.useJAAS();
     private static final String PROP_FQDN = "weblogic.discover.fqdn";
-    private static Log log = LogFactory.getLog("WeblogicRuntimeDiscoverer");
+	private static Log log = LogFactory.getLog("WeblogicRuntimeDiscoverer");
 
-    private int serverId;
-    private AIPlatformValue aiplatform;
-    private ConfigResponse config;
-    private String targetFqdn = null;
-    private boolean usePlatformName = false;
-    private WeblogicDetector plugin;
-    private String version;
+	private int serverId;
     private Properties props;
 
-    public WeblogicRuntimeDiscoverer(WeblogicDetector plugin) {
-        this.plugin = plugin;
-        this.version = plugin.getTypeInfo().getVersion();
+	private AIPlatformValue aiplatform;
 
-        props = plugin.getManager().getProperties();
+	private ConfigResponse config;
 
-        //this property can be used to host foreign nodes on 
-        //another platform.  if set to "same" will use the same fqdn
-        //as the admin server.
-        this.targetFqdn = props.getProperty(PROP_FQDN);
+	private String targetFqdn = null;
 
-        //XXX cant do this by default because it will ruin DB
-        //make it optional for acotel
-        this.usePlatformName =
-            "true".equals(props.getProperty("weblogic.discover.pname"));
-    }
+	private boolean usePlatformName = false;
 
-    public WeblogicDetector getPlugin() {
-        return this.plugin;
-    }
+	private WeblogicDetector plugin;
 
-    public String getPluginVersion() {
-        return this.version;
-    }
+	private String version;
+	
+	private ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
+	
+	private PluginUpdater pluginUpdater = new PluginUpdater();
 
-    public RuntimeResourceReport discoverResources(int serverId,
-                                                   AIPlatformValue aiplatform,
-                                                   ConfigResponse config) 
-        throws PluginException {
+	public WeblogicRuntimeDiscoverer(WeblogicDetector plugin) {
+		this.plugin = plugin;
+		this.version = plugin.getTypeInfo().getVersion();
 
-        if (useJAAS) {
-            return discoverAs(serverId, aiplatform, config);
-        }
-        else {
-            try {
-                return discover(serverId, aiplatform, config);
-            } catch (SecurityException e) {
-                String msg = "SecurityException: " + e.getMessage();
-                throw new PluginException(msg, e);
-            }
-        }
-    }
+	     props = plugin.getManager().getProperties();
 
-    private RuntimeResourceReport discoverAs(int serverId,
-                                             AIPlatformValue aiplatform,
-                                             ConfigResponse config) 
-        throws PluginException {
+		// this property can be used to host foreign nodes on
+		// another platform. if set to "same" will use the same fqdn
+		// as the admin server.
+		this.targetFqdn = props.getProperty(PROP_FQDN);
 
-        Object obj;
-        WeblogicAuth auth = WeblogicAuth.getInstance(config.toProperties());
+		// XXX cant do this by default because it will ruin DB
+		// make it optional for acotel
+		this.usePlatformName = "true".equals(props.getProperty("weblogic.discover.pname"));
+	}
 
-        this.serverId = serverId;
-        this.aiplatform = aiplatform;
-        this.config = config;
+	public WeblogicDetector getPlugin() {
+		return this.plugin;
+	}
 
-        try {
-            obj = auth.runAs(this);
-        } catch (SecurityException e) {
-            throw new PluginException(e.getMessage(), e);
-        }
+	public String getPluginVersion() {
+		return this.version;
+	}
 
-        if (obj instanceof RuntimeResourceReport) {
-            return (RuntimeResourceReport)obj;
-        }
+	public RuntimeResourceReport discoverResources(int serverId, AIPlatformValue aiplatform, ConfigResponse config)
+			throws PluginException {
 
-        if (obj instanceof PluginException) {
-            throw (PluginException)obj;
-        }
+		if (useJAAS) {
+			return discoverAs(serverId, aiplatform, config);
+		}
+		else {
+			try {
+				return discover(serverId, aiplatform, config);
+			}
+			catch (SecurityException e) {
+				String msg = "SecurityException: " + e.getMessage();
+				throw new PluginException(msg, e);
+			}
+		}
+	}
 
-        if (obj instanceof Exception) {
-            Exception e = (Exception)obj;
-            throw new PluginException(e.getMessage(), e);
-        }
+	private RuntimeResourceReport discoverAs(int serverId, AIPlatformValue aiplatform, ConfigResponse config)
+			throws PluginException {
 
-        throw new IllegalArgumentException();
-    }
+		Object obj;
+		WeblogicAuth auth = WeblogicAuth.getInstance(config.toProperties());
 
-    public Object run() {
-        try {
-            return discover(this.serverId, this.aiplatform, this.config);
-        } catch (Exception e) {
-            return e;
-        }
-    }
+		this.serverId = serverId;
+		this.aiplatform = aiplatform;
+		this.config = config;
 
-    private RuntimeResourceReport discover(int serverId,
-                                           AIPlatformValue aiplatform,
-                                           ConfigResponse config) 
-        throws PluginException {
+		try {
+			obj = auth.runAs(this);
+		}
+		catch (SecurityException e) {
+			throw new PluginException(e.getMessage(), e);
+		}
 
-        String installpath =
-            config.getValue(ProductPlugin.PROP_INSTALLPATH);
-        //incase jaas is disabled; generatePlatform may use this.
-        this.aiplatform = aiplatform;
+		if (obj instanceof RuntimeResourceReport) {
+			return (RuntimeResourceReport) obj;
+		}
 
-        log.debug("discover using: " + config);
+		if (obj instanceof PluginException) {
+			throw (PluginException) obj;
+		}
 
-        String domainName = config.getValue(WeblogicMetric.PROP_DOMAIN);
-        String serverName = config.getValue(WeblogicMetric.PROP_SERVER);
+		if (obj instanceof Exception) {
+			Exception e = (Exception) obj;
+			throw new PluginException(e.getMessage(), e);
+		}
 
-        RuntimeResourceReport rrr = new RuntimeResourceReport(serverId);
+		throw new IllegalArgumentException();
+	}
 
-        Properties props = config.toProperties();
+	public Object run() {
+		try {
+			return discover(this.serverId, this.aiplatform, this.config);
+		}
+		catch (Exception e) {
+			return e;
+		}
+	}
 
-        WeblogicDiscover discover = new WeblogicDiscover(this.version, props);
+	private RuntimeResourceReport discover(int serverId, AIPlatformValue aiplatform, ConfigResponse config)
+			throws PluginException {
 
-        try {
-            MBeanServer mServer = discover.getMBeanServer();
+		String installpath = config.getValue(ProductPlugin.PROP_INSTALLPATH);
+		// incase jaas is disabled; generatePlatform may use this.
+		this.aiplatform = aiplatform;
 
-            discover.init(mServer);
+		log.debug("discover using: " + config);
 
-            NodeManagerQuery nodemgrQuery = new NodeManagerQuery();
-            ServerQuery serverQuery = new ServerQuery();
-            serverQuery.setDiscover(discover);
+		String domainName = config.getValue(WeblogicMetric.PROP_DOMAIN);
+		String serverName = config.getValue(WeblogicMetric.PROP_SERVER);
 
-            ArrayList servers = new ArrayList();
+		RuntimeResourceReport rrr = new RuntimeResourceReport(serverId);
 
-            discover.find(mServer, serverQuery, servers);
+		Properties props = config.toProperties();
 
-            WeblogicQuery[] serviceQueries =
-                discover.getServiceQueries();
+		WeblogicDiscover discover = new WeblogicDiscover(this.version,props);
 
-            //ensure admin is first incase we need version
-            serverQuery.sort(servers);
+		try {
+			MBeanServer mServer = discover.getMBeanServer();
 
-            String adminVersion = null;
+			discover.init(mServer);
 
-            for (int i=0; i<servers.size(); i++) {
-                serverQuery = (ServerQuery)servers.get(i);
+			NodeManagerQuery nodemgrQuery = new NodeManagerQuery();
+			ServerQuery serverQuery = new ServerQuery();
+			serverQuery.setDiscover(discover);
 
-                if (serverQuery.isAdmin()) {
-                    adminVersion = serverQuery.getVersion();
-                }
-                else if (serverQuery.getVersion() == null) {
-                    //will be the case if a server was create but never started
-                    //safely assume it was created by the admin server in this
-                    //case and hence is the same version.
-                    serverQuery.setVersion(adminVersion);
-                }
+			ArrayList servers = new ArrayList();
 
-                AIPlatformValue aPlatform;
-                AIServerExtValue aServer = generateServer(serverQuery);
+			discover.find(mServer, serverQuery, servers);
 
-                // Set the ID, so when this report is processed at the server,
-                // there is no mistaking this server in the report for any other server
-                // in appdef (or worse, not matching anything and adding a new server).
-                if (serverQuery.getName().equals(serverName) &&
-                    serverQuery.getDiscover().getDomain().equals(domainName))
-                {
-                    aServer.setId(new Integer(serverId));
-                    aServer.setPlaceholder(true);
-                    //maintain existing installpath,
-                    //MBeanServer CurrentDirectory might be different
-                    if (installpath != null) {
-                        aServer.setInstallPath(installpath);
-                    }
-                    aiplatform.addAIServerValue(aServer);
-                    rrr.addAIPlatform(aiplatform);
-                }
-                else {
-                    aPlatform = generatePlatform(serverQuery);
-                    aPlatform.addAIServerValue(aServer);
-                    rrr.addAIPlatform(aPlatform);
-                }
+			WeblogicQuery[] serviceQueries = discover.getServiceQueries();
 
-                if (!serverQuery.isRunning()) {
-                    continue;
-                }
+			// ensure admin is first incase we need version
+			serverQuery.sort(servers);
 
-                mServer = discover.getMBeanServer(serverQuery.getUrl());
+			String adminVersion = null;
 
-                ArrayList aServices = new ArrayList();
-                ArrayList services = new ArrayList();
+			for (int i = 0; i < servers.size(); i++) {
+				serverQuery = (ServerQuery) servers.get(i);
 
-                for (int j=0; j<serviceQueries.length; j++) {
-                    WeblogicQuery serviceQuery = serviceQueries[j];
+				if (serverQuery.isAdmin()) {
+					adminVersion = serverQuery.getVersion();
+				}
+				else if (serverQuery.getVersion() == null) {
+					// will be the case if a server was create but never started
+					// safely assume it was created by the admin server in this
+					// case and hence is the same version.
+					serverQuery.setVersion(adminVersion);
+				}
 
-                    serviceQuery.setParent(serverQuery);
-                    serviceQuery.setVersion(serverQuery.getVersion());
+				AIPlatformValue aPlatform;
+				AIServerExtValue aServer = generateServer(serverQuery);
 
-                    discover.find(mServer, serviceQuery, services);
-                }
+				// Set the ID, so when this report is processed at the server,
+				// there is no mistaking this server in the report for any other
+				// server
+				// in appdef (or worse, not matching anything and adding a new
+				// server).
+				if (serverQuery.getName().equals(serverName)
+						&& serverQuery.getDiscover().getDomain().equals(domainName)) {
+					aServer.setId(new Integer(serverId));
+					aServer.setPlaceholder(true);
+					// maintain existing installpath,
+					// MBeanServer CurrentDirectory might be different
+					if (installpath != null) {
+						aServer.setInstallPath(installpath);
+					}
+					aiplatform.addAIServerValue(aServer);
+					rrr.addAIPlatform(aiplatform);
+				}
+				else {
+					aPlatform = generatePlatform(serverQuery);
+					aPlatform.addAIServerValue(aServer);
+					rrr.addAIPlatform(aPlatform);
+				}
 
-                for (int k=0; k<services.size(); k++) {
-                    aServices.add(generateService((ServiceQuery)services.get(k)));
-                }
+				if (!serverQuery.isRunning()) {
+					continue;
+				}
 
-                AIServiceValue[] aiservices =
-                    (AIServiceValue[])aServices.toArray(new AIServiceValue[0]);
-                aServer.setAIServiceValues(aiservices);
+				mServer = discover.getMBeanServer(serverQuery.getUrl());
 
-                if (serverQuery.isAdmin()) {
-                    ArrayList mgrs = new ArrayList();
-                    nodemgrQuery.setAdminServer(serverQuery);
-                    discover.find(mServer, nodemgrQuery, mgrs);
+				ArrayList aServices = new ArrayList();
+				ArrayList services = new ArrayList();
 
-                    for (int n=0; n<mgrs.size(); n++) {
-                        nodemgrQuery = (NodeManagerQuery)mgrs.get(n);
-                        aServer = generateServer(nodemgrQuery);
-                        aPlatform = generatePlatform(nodemgrQuery);
-                        aPlatform.addAIServerValue(aServer);
-                        rrr.addAIPlatform(aPlatform);
-                    }
-                }
-            }
-        } catch (WeblogicDiscoverException e) {
-            throw new PluginException(e.getMessage(), e);
-        }
+				for (int j = 0; j < serviceQueries.length; j++) {
+					WeblogicQuery serviceQuery = serviceQueries[j];
 
-        return rrr;
-    }
+					serviceQuery.setParent(serverQuery);
+					serviceQuery.setVersion(serverQuery.getVersion());
 
-    private AIPlatformValue generatePlatform(BaseServerQuery server) {
+					discover.find(mServer, serviceQuery, services);
+				}
 
-        AIPlatformValue aiplatform = new AIPlatformValue();
+				// Dynamic services can only be discovered on WebLogic 9.1 or
+				// higher
+				if (DYNAMIC_SVC_SUPPORTED_WEBLOGIC_VERSION.compareTo(Double.valueOf(serverQuery.getVersion())) <= 0) {
+					final JMXConnector jmxConnector = WeblogicUtil.getManagedServerConnection(props);
+					Set serviceTypes = new HashSet();
+					try {
+						discoverDynamicServices(discover, jmxConnector.getMBeanServerConnection(), serverQuery, services, serviceTypes);
+					}
+					catch (IOException e) {
+						throw new PluginException("Error discovering dynamic services", e);
+					}
+					finally {
+						try {
+							jmxConnector.close();
+						}
+						catch (IOException e) {
+						}
+					}
+					final AIServiceTypeValue[] serviceTypeValues = new AIServiceTypeValue[serviceTypes.size()];
+					int count = 0;
+					for(Iterator iterator = serviceTypes.iterator();iterator.hasNext();) {
+						serviceTypeValues[count] = ((ServiceType)iterator.next()).getAIServiceTypeValue();
+						count++;
+					}
+					aServer.setAiServiceTypes(serviceTypeValues);
+					pluginUpdater.updateServiceTypes(plugin.getProductPlugin(), serviceTypes);
+				}
 
-        String serverFqdn = server.getFqdn();
+				for (int k = 0; k < services.size(); k++) {
+					aServices.add(generateService((ServiceQuery) services.get(k)));
+				}
+
+				AIServiceValue[] aiservices = (AIServiceValue[]) aServices.toArray(new AIServiceValue[0]);
+				aServer.setAIServiceValues(aiservices);
+
+				if (serverQuery.isAdmin()) {
+					ArrayList mgrs = new ArrayList();
+					nodemgrQuery.setAdminServer(serverQuery);
+					discover.find(mServer, nodemgrQuery, mgrs);
+
+					for (int n = 0; n < mgrs.size(); n++) {
+						nodemgrQuery = (NodeManagerQuery) mgrs.get(n);
+						aServer = generateServer(nodemgrQuery);
+						aPlatform = generatePlatform(nodemgrQuery);
+						aPlatform.addAIServerValue(aServer);
+						rrr.addAIPlatform(aPlatform);
+					}
+				}
+			}
+		}
+		catch (WeblogicDiscoverException e) {
+			throw new PluginException(e.getMessage(), e);
+		}
+
+		return rrr;
+	}
+
+	private void discoverDynamicServices(WeblogicDiscover discover, MBeanServerConnection mServer, ServerQuery parent,
+			ArrayList types, Set serviceTypes) throws PluginException, WeblogicDiscoverException {
+		try {
+			final Set objectNames = mServer.queryNames(new ObjectName(MBeanUtil.DYNAMIC_SERVICE_DOMAIN + ":*"), null);
+			//Only WebLogic Admin servers have auto-inventory plugins - have to construct a ServerInfo for the WebLogic server
+			String[] platformTypes = ((ServerTypeInfo)plugin.getTypeInfo()).getPlatformTypes();
+			 ServerTypeInfo server =
+	                new ServerTypeInfo(parent.getResourceType(), parent.getDescription(), parent.getVersion());
+	        server.setValidPlatformTypes(platformTypes);
+			for (Iterator iterator = objectNames.iterator(); iterator.hasNext();) {
+				final ObjectName objectName = (ObjectName) iterator.next();
+				final MBeanInfo serviceInfo = mServer.getMBeanInfo(objectName);
+				if (serviceInfo instanceof ModelMBeanInfo) {
+					ServiceType identityType = serviceTypeFactory.getServiceType(plugin.getProductPlugin().getName(),server,
+							(ModelMBeanInfo) serviceInfo, objectName);
+					//identityType could be null if MBean is not to be exported
+					if(identityType != null) {
+						ServiceType serviceType;
+						if (!serviceTypes.contains(identityType)) {
+							serviceType = serviceTypeFactory.create(plugin.getProductPlugin(),
+									server, (ModelMBeanInfo) serviceInfo,
+									objectName);
+							if (serviceType != null) {
+								serviceTypes.add(serviceType);
+							}
+						}else {
+							serviceType = findServiceType(identityType.getInfo().getName(),serviceTypes);
+						}
+						final String shortServiceType = identityType.getServiceName();
+						DynamicServiceQuery dynamicServiceQuery = new DynamicServiceQuery();
+						dynamicServiceQuery.setParent(parent);
+						dynamicServiceQuery.setType(shortServiceType);
+						dynamicServiceQuery.setAttributeNames(serviceType.getCustomProperties().getOptionNames());
+						dynamicServiceQuery.setName(objectName.getKeyProperty("name"));
+						dynamicServiceQuery.getAttributes(mServer, objectName);
+						types.add(dynamicServiceQuery);
+					}
+				}
+			}
+		} catch (Exception e) {
+			 throw new PluginException(e.getMessage(), e);
+		} 	
+	}
+	
+	private ServiceType findServiceType(String serviceName, Set serviceTypes) {
+		for(Iterator iterator = serviceTypes.iterator();iterator.hasNext();) {
+			ServiceType serviceType = (ServiceType)iterator.next();
+			if(serviceType.getInfo().getName().equals(serviceName)) {
+				return serviceType;
+			}
+		}
+		return null;
+	}
+
+	private AIPlatformValue generatePlatform(BaseServerQuery server) {
+
+		AIPlatformValue aiplatform = new AIPlatformValue();
+
+		String serverFqdn = server.getFqdn();
         serverFqdn = //support mapping via agent.properties
             this.props.getProperty(PROP_FQDN + "." + serverFqdn,
                                    serverFqdn);
-        String fqdn = serverFqdn;
+		String fqdn = serverFqdn;
 
-        //let it be known if the platform does not exist in cam
-        //since ai will ka-boom with huge "No such entity!" stacktrace.
-        //XXX ai should handle this condition better
-        if (!fqdn.equals(this.aiplatform.getFqdn())) {
-            log.info("Discovered server (" + server.getResourceFullName() +
-                     ") hosted on another platform (fqdn=" + fqdn + ")");
-        }
+		// let it be known if the platform does not exist in cam
+		// since ai will ka-boom with huge "No such entity!" stacktrace.
+		// XXX ai should handle this condition better
+		if (!fqdn.equals(this.aiplatform.getFqdn())) {
+			log.info("Discovered server (" + server.getResourceFullName() + ") hosted on another platform (fqdn="
+					+ fqdn + ")");
+		}
 
-        if (this.targetFqdn != null) {
-            if (this.targetFqdn.equals("same")) {
-                fqdn = this.aiplatform.getFqdn();
-            }
-            else {
-                fqdn = this.targetFqdn;
-            }
-        }
-        else {
-            //out-of-the-box weblogic w/o changing ListenAddress
-            if (serverFqdn.equals("localhost") ||
-                serverFqdn.equals("127.0.0.1"))
-            {
-                fqdn = this.aiplatform.getFqdn();
-            }
-            else {
-                fqdn = serverFqdn;
-            }
-        }
+		if (this.targetFqdn != null) {
+			if (this.targetFqdn.equals("same")) {
+				fqdn = this.aiplatform.getFqdn();
+			}
+			else {
+				fqdn = this.targetFqdn;
+			}
+		}
+		else {
+			// out-of-the-box weblogic w/o changing ListenAddress
+			if (serverFqdn.equals("localhost") || serverFqdn.equals("127.0.0.1")) {
+				fqdn = this.aiplatform.getFqdn();
+			}
+			else {
+				fqdn = serverFqdn;
+			}
+		}
 
-        if (!fqdn.equals(serverFqdn)) {
-            log.info("changing fqdn for " + server.getName() +
-                     ": " + serverFqdn + " => " + fqdn);
-        }
+		if (!fqdn.equals(serverFqdn)) {
+			log.info("changing fqdn for " + server.getName() + ": " + serverFqdn + " => " + fqdn);
+		}
 
-        aiplatform.setFqdn(fqdn);
+		aiplatform.setFqdn(fqdn);
 
-        return aiplatform;
-    }
+		return aiplatform;
+	}
 
-    private AIServerExtValue generateServer(BaseServerQuery server) 
-        throws PluginException
-    {
+	private AIServerExtValue generateServer(BaseServerQuery server) throws PluginException {
 
-        AIServerExtValue aiserver = new AIServerExtValue();
+		AIServerExtValue aiserver = new AIServerExtValue();
 
-        aiserver.setInstallPath(server.getInstallPath());
-        aiserver.setAutoinventoryIdentifier(server.getIdentifier());
+		aiserver.setInstallPath(server.getInstallPath());
+		aiserver.setAutoinventoryIdentifier(server.getIdentifier());
 
-        aiserver.setServicesAutomanaged(true);
-        aiserver.setServerTypeName(server.getResourceName());
-        String name = server.getResourceFullName();
-        if (this.usePlatformName) {
-            name = GenericPlugin.getPlatformName() + " " + name;
-        }
-        aiserver.setName(name);
-        String notes = server.getDescription();
-        if (notes != null) {
-            aiserver.setDescription(notes);
-        }
-        if (!server.isAdmin()) {
-            ConfigResponse productConfig =
-                new ConfigResponse(server.getResourceConfig());
-            ConfigResponse metricConfig =
-                new ConfigResponse();
-            ConfigResponse cprops =
-                new ConfigResponse(server.getCustomProperties());
+		aiserver.setServicesAutomanaged(true);
+		aiserver.setServerTypeName(server.getResourceName());
+		String name = server.getResourceFullName();
+		if (this.usePlatformName) {
+			name = GenericPlugin.getPlatformName() + " " + name;
+		}
+		aiserver.setName(name);
+		String notes = server.getDescription();
+		if (notes != null) {
+			aiserver.setDescription(notes);
+		}
+		if (!server.isAdmin()) {
+			ConfigResponse productConfig = new ConfigResponse(server.getResourceConfig());
+			ConfigResponse metricConfig = new ConfigResponse();
+			ConfigResponse cprops = new ConfigResponse(server.getCustomProperties());
 
-            try {
-                if (server.hasControl() && !server.isServer61()) { 
-                    ConfigResponse controlConfig =
-                        new ConfigResponse(server.getControlConfig());
-                    aiserver.setControlConfig(controlConfig.encode());
-                }
- 
-                aiserver.setProductConfig(productConfig.encode());
-                aiserver.setMeasurementConfig(metricConfig.encode());
-                aiserver.setCustomProperties(cprops.encode());
-            } catch (EncodingException e) {
-                throw new PluginException("Error generating config", e);
-            }
-        }
+			try {
+				if (server.hasControl() && !server.isServer61()) {
+					ConfigResponse controlConfig = new ConfigResponse(server.getControlConfig());
+					aiserver.setControlConfig(controlConfig.encode());
+				}
 
-        log.debug("discovered server: " + aiserver.getName());
+				aiserver.setProductConfig(productConfig.encode());
+				aiserver.setMeasurementConfig(metricConfig.encode());
+				aiserver.setCustomProperties(cprops.encode());
+			}
+			catch (EncodingException e) {
+				throw new PluginException("Error generating config", e);
+			}
+		}
 
-        return aiserver;
-    }
+		log.debug("discovered server: " + aiserver.getName());
 
-    private AIServiceValue generateService(ServiceQuery service) 
-        throws PluginException
-    {
-        AIServiceValue aiservice = new AIServiceValue();
+		return aiserver;
+	}
 
-        ConfigResponse productConfig =
-            new ConfigResponse(service.getResourceConfig());
-        ConfigResponse metricConfig =
-            new ConfigResponse();
-        ConfigResponse cprops =
-            new ConfigResponse(service.getCustomProperties());
+	private AIServiceValue generateService(ServiceQuery service) throws PluginException {
+		AIServiceValue aiservice = new AIServiceValue();
 
-        String notes = service.getDescription();
-        if (notes != null) {
-            aiservice.setDescription(notes);
-        }
+		ConfigResponse productConfig = new ConfigResponse(service.getResourceConfig());
+		ConfigResponse metricConfig = new ConfigResponse();
+		ConfigResponse cprops = new ConfigResponse(service.getCustomProperties());
 
-        aiservice.setServiceTypeName(service.getResourceName());
+		String notes = service.getDescription();
+		if (notes != null) {
+			aiservice.setDescription(notes);
+		}
 
-        String name = service.getResourceFullName();
-        if (this.usePlatformName) {
-            name = GenericPlugin.getPlatformName() + " " + name;
-        }
-        if (name.length() >= 200) {
-            //make sure we dont exceed service name limit
-            name = name.substring(0, 199);
-        }
-        aiservice.setName(name);
+		aiservice.setServiceTypeName(service.getResourceName());
 
-        try {
-            if (service.hasControl() && !service.isServer61()) { 
-                ConfigResponse controlConfig =
-                    new ConfigResponse(service.getControlConfig());
-                aiservice.setControlConfig(controlConfig.encode());
-            }
-            
-            aiservice.setProductConfig(productConfig.encode());
-            aiservice.setMeasurementConfig(metricConfig.encode());
-            aiservice.setCustomProperties(cprops.encode());
+		String name = service.getResourceFullName();
+		if (this.usePlatformName) {
+			name = GenericPlugin.getPlatformName() + " " + name;
+		}
+		if (name.length() >= 200) {
+			// make sure we dont exceed service name limit
+			name = name.substring(0, 199);
+		}
+		aiservice.setName(name);
 
-            if (service.hasResponseTime()) {
-                ConfigResponse rtConfig =
-                    new ConfigResponse(service.getResponseTimeConfig());
-                aiservice.setResponseTimeConfig(rtConfig.encode());
-            }
-        } catch (EncodingException e) {
-            throw new PluginException("Error generating config", e);
-        }
+		try {
+			if (service.hasControl() && !service.isServer61()) {
+				ConfigResponse controlConfig = new ConfigResponse(service.getControlConfig());
+				aiservice.setControlConfig(controlConfig.encode());
+			}
 
-        log.debug("discovered service: " + aiservice.getName());
+			aiservice.setProductConfig(productConfig.encode());
+			aiservice.setMeasurementConfig(metricConfig.encode());
+			aiservice.setCustomProperties(cprops.encode());
 
-        return aiservice;
-    }
+			if (service.hasResponseTime()) {
+				ConfigResponse rtConfig = new ConfigResponse(service.getResponseTimeConfig());
+				aiservice.setResponseTimeConfig(rtConfig.encode());
+			}
+		}
+		catch (EncodingException e) {
+			throw new PluginException("Error generating config", e);
+		}
+
+		log.debug("discovered service: " + aiservice.getName());
+
+		return aiservice;
+	}
 }

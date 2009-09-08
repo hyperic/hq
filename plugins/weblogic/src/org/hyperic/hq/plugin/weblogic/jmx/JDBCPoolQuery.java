@@ -28,7 +28,7 @@ package org.hyperic.hq.plugin.weblogic.jmx;
 import java.util.Hashtable;
 import java.util.Properties;
 
-import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -72,7 +72,7 @@ public class JDBCPoolQuery extends ServiceQuery {
         }
     }
 
-    public boolean getAttributes(MBeanServer mServer,
+    public boolean getAttributes(MBeanServerConnection mServer,
                                  ObjectName name) {
         
         super.getAttributes(mServer, name);

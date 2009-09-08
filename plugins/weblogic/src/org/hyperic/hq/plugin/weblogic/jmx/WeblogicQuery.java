@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.weblogic.jmx;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -34,6 +35,7 @@ import javax.management.Attribute;
 import javax.management.AttributeList;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanServer;
+import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
@@ -79,7 +81,7 @@ public class WeblogicQuery {
         return NOOP_ATTRIBUTE_NAMES;
     }
 
-    public boolean getAttributes(MBeanServer mServer,
+    public boolean getAttributes(MBeanServerConnection mServer,
                                  ObjectName name) {
         return getAttributes(mServer, name, getAttributeNames());
     }
@@ -89,7 +91,7 @@ public class WeblogicQuery {
         WeblogicDiscover.getLog().debug(msg, e);
     }
 
-    public boolean getAttributes(MBeanServer mServer,
+    public boolean getAttributes(MBeanServerConnection mServer,
                                  ObjectName name,
                                  String[] attrNames) {
 
@@ -115,6 +117,9 @@ public class WeblogicQuery {
         } catch (ReflectionException e) {
             //this should not happen either
             logAttrFailure(name, e);
+            return false;
+        } catch(IOException e) {
+        	logAttrFailure(name, e);
             return false;
         }
 

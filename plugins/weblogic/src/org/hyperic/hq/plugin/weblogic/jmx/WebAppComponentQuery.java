@@ -28,17 +28,17 @@ package org.hyperic.hq.plugin.weblogic.jmx;
 import java.io.File;
 import java.util.Properties;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
+import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
+import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
+import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
+import org.hyperic.hq.product.RtPlugin;
 
 import weblogic.management.descriptors.WebDescriptorMBean;
 import weblogic.management.descriptors.webapp.FilterMBean;
 import weblogic.management.descriptors.webapp.ParameterMBean;
-
-import org.hyperic.hq.product.RtPlugin;
-import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
-import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
 
 public class WebAppComponentQuery extends ComponentQuery {
     public static final String MBEAN_TYPE = "WebAppComponentRuntime";
@@ -93,7 +93,7 @@ public class WebAppComponentQuery extends ComponentQuery {
         return this.rtConfig;
     }
 
-    public boolean getAttributes(MBeanServer mServer,
+    public boolean getAttributes(MBeanServerConnection mServer,
                                  ObjectName name) {
         if (!super.getAttributes(mServer, name)) {
             return false;

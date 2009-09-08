@@ -39,6 +39,10 @@
     <!-- 6.1 -->
     <include name="lib/weblogic.jar"/>
   </classpath>
+  
+  <property name="template" value="${OBJECT_NAME}:${alias}" />
+  <property name="measurement-class" value="org.hyperic.hq.plugin.weblogic.WeblogicServiceMeasurementPlugin" />
+  <property name="control-class" value="org.hyperic.hq.plugin.weblogic.WeblogicServiceControlPlugin" />
 
   <!-- appended to every template -->
   <property name="template-config"
