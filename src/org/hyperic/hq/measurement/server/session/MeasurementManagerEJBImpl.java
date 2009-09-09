@@ -190,7 +190,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @param props       Configuration data for the instance
      *
      * @return a List of the associated Measurement objects
-     * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
     public List createMeasurements(AppdefEntityID id, Integer[] templates,
@@ -208,41 +207,37 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 "The templates and intervals lists must be the same size");
         }
 
-        try {
-            MeasurementTemplateDAO tDao = getMeasurementTemplateDAO();
-            MeasurementDAO dao = getMeasurementDAO();
-            List metrics = dao.findByTemplatesForInstance(templates, resource);
-            
-            // Put the metrics in a map for lookup
-            Map lookup = new HashMap(metrics.size());
-            for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                Measurement m = (Measurement) it.next();
-                lookup.put(m.getTemplate().getId(), m);
-            }
+        MeasurementTemplateDAO tDao = getMeasurementTemplateDAO();
+        MeasurementDAO dao = getMeasurementDAO();
+        List metrics = dao.findByTemplatesForInstance(templates, resource);
 
-            for (int i = 0; i < templates.length; i++) {
-                MeasurementTemplate t = tDao.get(templates[i]);
-                if (t == null) {
-                    continue;
-                }
-                Measurement m = (Measurement) lookup.get(templates[i]);
-                
-                if (m == null) {
-                    // No measurement, create it
-                    m = createMeasurement(resource, t, props, intervals[i]);
-                } else {
-                    m.setEnabled(intervals[i] != 0);
-                    m.setInterval(intervals[i]);
-                    String dsn = translate(m.getTemplate().getTemplate(), props);
-                    m.setDsn(dsn);
-                    enqueueZeventForMeasScheduleChange(m, intervals[i]);
-                }
-                dmList.add(m);
-            }
-        } finally {
-            // Force a flush to ensure the metrics are stored
-            getMeasurementDAO().getSession().flush();
+        // Put the metrics in a map for lookup
+        Map lookup = new HashMap(metrics.size());
+        for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+            Measurement m = (Measurement) it.next();
+            lookup.put(m.getTemplate().getId(), m);
         }
+
+        for (int i = 0; i < templates.length; i++) {
+            MeasurementTemplate t = tDao.get(templates[i]);
+            if (t == null) {
+                continue;
+            }
+            Measurement m = (Measurement) lookup.get(templates[i]);
+
+            if (m == null) {
+                // No measurement, create it
+                m = createMeasurement(resource, t, props, intervals[i]);
+            } else {
+                m.setEnabled(intervals[i] != 0);
+                m.setInterval(intervals[i]);
+                String dsn = translate(m.getTemplate().getTemplate(), props);
+                m.setDsn(dsn);
+                enqueueZeventForMeasScheduleChange(m, intervals[i]);
+            }
+            dmList.add(m);
+        }
+
         return dmList;
     }
 
@@ -259,9 +254,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         // Authz check
         super.checkModifyPermission(subject.getId(), id);        
 
-        // Call back into ourselves to force a new transaction to be created.
-        List dmList = getOne().createMeasurements(
-            id, templates, intervals, props);
+        List dmList = createMeasurements(id, templates, intervals, props);
         List eids = Collections.singletonList(id);
         AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
         ZeventManager.getInstance().enqueueEventAfterCommit(event);
@@ -342,7 +335,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 intervals[i] = 0;
         }
 
-        return getOne().createMeasurements(subject, id, tids, intervals, props);
+        return createMeasurements(subject, id, tids, intervals, props);
     }
 
     /**

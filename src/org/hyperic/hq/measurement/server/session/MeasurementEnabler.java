@@ -27,12 +27,21 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.zevents.ZeventListener;
 
 class MeasurementEnabler 
     implements ZeventListener
 {
+    private final Log log = LogFactory.getLog(MeasurementEnabler.class.getName());
+    
     public void processEvents(List e) {
+        
+        if (log.isDebugEnabled()) {
+            log.debug("handling refresh event list size=" + e.size());
+        }
+        
         MeasurementManagerEJBImpl.getOne().handleCreateRefreshEvents(e);
     }
     
