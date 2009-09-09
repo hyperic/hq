@@ -51,7 +51,7 @@
             <map db="pointbase" type="FLOAT(15)" />
             <map db="postgres" type="FLOAT8" />
             <map db="java" type="FLOAT" />
-            <map db="mysql" type="FLOAT(15)" />
+            <map db="mysql" type="DOUBLE" />
         </typemap>
         <typemap type="BOOLEAN">
             <map db="postgres" type="BOOLEAN" />
