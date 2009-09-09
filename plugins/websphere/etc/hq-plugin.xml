@@ -1,5 +1,6 @@
 <?xml version="1.0"?> 
 
+
 <!--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -30,7 +31,18 @@
           value="%server.node%/%server.name%"/>
   <filter name="auth"
           value="username=%username%,password=%password%"/>
-  <property name="template-config"
+	<filter name="template"
+		value="${OBJECT_NAME},cell=%cellName%,node=%server.node%,process=%server.name%:${alias}" />
+		
+	<property name="template"
+		value="${OBJECT_NAME}:${alias}" />
+	
+	<property name="measurement-class"
+		value="org.hyperic.hq.plugin.websphere.WebsphereServiceMeasurementPlugin" />
+	<property name="control-class"
+		value="org.hyperic.hq.plugin.websphere.WebsphereServiceControlPlugin" />
+	
+	 <property name="template-config"
             value="admin.host=%admin.host%,admin.port=%admin.port%,${auth}"/>
 
   <filter name="template"

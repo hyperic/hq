@@ -82,7 +82,7 @@ public class WebsphereDetector
 
         if (this.discoverer == null) {
             String version = getTypeInfo().getVersion();
-            this.discoverer = new WebsphereRuntimeDiscoverer(version);
+            this.discoverer = new WebsphereRuntimeDiscoverer(version,this);
         }
 
         //for use w/ -jar hq-product.jar or agent.properties

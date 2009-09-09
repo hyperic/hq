@@ -26,29 +26,35 @@
 package org.hyperic.hq.plugin.websphere.jmx;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.management.MBeanInfo;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
-
-import com.ibm.websphere.management.AdminClient;
-import com.ibm.websphere.management.exception.ConnectorException;
+import javax.management.modelmbean.ModelMBeanInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import org.hyperic.util.config.ConfigResponse;
-
+import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
+import org.hyperic.hq.plugin.websphere.WebsphereUtil;
 import org.hyperic.hq.product.MetricUnreachableException;
 import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginUpdater;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceResource;
+import org.hyperic.hq.product.ServiceType;
+import org.hyperic.hq.product.jmx.MBeanUtil;
+import org.hyperic.hq.product.jmx.ServiceTypeFactory;
+import org.hyperic.util.config.ConfigResponse;
 
-import org.hyperic.hq.plugin.websphere.WebsphereUtil;
-import org.hyperic.hq.plugin.websphere.WebsphereProductPlugin;
+import com.ibm.websphere.management.AdminClient;
+import com.ibm.websphere.management.exception.ConnectorException;
 
 /**
  * WebSphere Application server and service discovery.
@@ -57,7 +63,9 @@ public class WebsphereRuntimeDiscoverer {
 
     private Log log =
         LogFactory.getLog(WebsphereRuntimeDiscoverer.class.getName());
+    private ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
     private String version;
+    private ServerDetector serverDetector;
 
     static final WebSphereQuery[] serviceQueries = {
         new JDBCProviderQuery(),
@@ -69,10 +77,66 @@ public class WebsphereRuntimeDiscoverer {
         new EJBModuleQuery(),
         new WebModuleQuery(),
     };
+    
+	private PluginUpdater pluginUpdater = new PluginUpdater();
 
-    public WebsphereRuntimeDiscoverer(String version) {
+    public WebsphereRuntimeDiscoverer(String version, ServerDetector serverDetector) {
         this.version = version;
+        this.serverDetector = serverDetector;
     }
+    
+	private void discoverDynamicServices(AdminClient mServer,
+		WebSphereQuery parent, ArrayList types, Set serviceTypes, ServerResource serverResource) throws PluginException {
+		try {
+			WebSphereQuery query = parent;
+			StringBuffer scope = new StringBuffer();
+			do {
+				scope.append(query.getMBeanAlias());
+				scope.append("=");
+				scope.append(query.getName());
+				scope.append(",");
+			} while ((query = query.getParent()) != null);
+				scope.append('*');
+				final Set objectNames = mServer.queryNames(new ObjectName(MBeanUtil.DYNAMIC_SERVICE_DOMAIN + ":" + scope.toString()), null);
+				//Only WebSphere Admin servers have auto-inventory plugins - have to construct a ServerInfo for the WebSphere server
+				String[] platformTypes = ((ServerTypeInfo)serverDetector.getTypeInfo()).getPlatformTypes();
+				ServerTypeInfo server = new ServerTypeInfo(serverResource.getType(), serverResource.getDescription(), parent.getVersion());
+				server.setValidPlatformTypes(platformTypes);
+				for (Iterator iterator = objectNames.iterator(); iterator.hasNext();) {
+					final ObjectName objectName = (ObjectName) iterator.next();
+					final MBeanInfo serviceInfo = mServer.getMBeanInfo(objectName);
+					if (serviceInfo instanceof ModelMBeanInfo) {
+						ServiceType identityType = serviceTypeFactory.getServiceType(serverDetector.getProductPlugin().getName(),server,
+								(ModelMBeanInfo) serviceInfo, objectName);
+						//identityType could be null if MBean is not to be exported
+					if(identityType != null) {
+						ServiceType serviceType;
+						if (!(serviceTypes.contains(identityType))) {
+							serviceType = serviceTypeFactory.create(serverDetector.getProductPlugin(),
+									server, (ModelMBeanInfo) serviceInfo,
+									objectName);
+							if (serviceType != null) {
+								serviceTypes.add(serviceType);
+							}
+						}else {
+							serviceType = findServiceType(identityType.getInfo().getName(),serviceTypes);
+						}
+						final String shortServiceType = identityType.getServiceName();
+						DynamicServiceQuery dynamicServiceQuery = new DynamicServiceQuery();
+						dynamicServiceQuery.setParent(parent);
+						dynamicServiceQuery.setType(shortServiceType);
+						dynamicServiceQuery.setAttributeNames(serviceType.getCustomProperties().getOptionNames());
+						dynamicServiceQuery.setName(objectName.getKeyProperty("name"));
+						dynamicServiceQuery.setObjectName(objectName);
+						dynamicServiceQuery.getAttributes(mServer, objectName);
+						types.add(dynamicServiceQuery);
+					}
+				}
+			}
+		} catch (Exception e) {
+			throw new PluginException(e.getMessage(), e);
+		} 
+	}
 
     public void discover(AdminClient mServer,
                          String domain,
@@ -121,7 +185,17 @@ public class WebsphereRuntimeDiscoverer {
             }
         }
     }
-
+    
+	private ServiceType findServiceType(String serviceName, Set serviceTypes) {
+		for(Iterator iterator = serviceTypes.iterator();iterator.hasNext();) {
+			ServiceType serviceType = (ServiceType)iterator.next();
+			if(serviceType.getInfo().getName().equals(serviceName)) {
+				return serviceType;
+			}
+		}
+		return null;
+	}
+    
     private boolean hasValidCredentials(AdminClient mServer,
                                         String domain,
                                         String node,
@@ -218,6 +292,16 @@ public class WebsphereRuntimeDiscoverer {
             server.setName(srvType + " " + serverQuery.getFullName());
 
             this.log.debug("discovered server: " + server.getName());
+            
+            Set serviceTypes = new HashSet();
+            		
+            //populate services and serviceTypes
+            discoverDynamicServices(mServer,  serverQuery,
+            		services, serviceTypes, server);
+             			
+            for(Iterator iterator = serviceTypes.iterator();iterator.hasNext();) {
+            	server.addServiceType((ServiceType)iterator.next());
+            }
 
             ConfigResponse productConfig =
                 new ConfigResponse(serverQuery.getProperties());
@@ -287,6 +371,7 @@ public class WebsphereRuntimeDiscoverer {
                 aiservice.setCustomProperties(cprops);
                 server.addService(aiservice);
             }
+        	pluginUpdater.updateServiceTypes(serverDetector.getProductPlugin(), serviceTypes);
         }
 
         return aiservers;
