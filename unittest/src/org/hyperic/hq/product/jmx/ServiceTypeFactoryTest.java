@@ -304,7 +304,7 @@ public class ServiceTypeFactoryTest
                                                          true, 300000l,true,null);
         ServiceType actual = (ServiceType) serviceTypes.iterator().next();
 
-        assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
+        assertTrue(AICompare.aiServiceTypesEqual(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
     }
     
     /**
@@ -332,7 +332,7 @@ public class ServiceTypeFactoryTest
                                                          true, 600000l,true,"none");
         ServiceType actual = (ServiceType) serviceTypes.iterator().next();
 
-        assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
+        assertTrue(AICompare.aiServiceTypesEqual(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
     }
 
     /**
@@ -360,7 +360,7 @@ public class ServiceTypeFactoryTest
                                                          false,50000l, true, "1h");
         ServiceType actual = (ServiceType) serviceTypes.iterator().next();
 
-        assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
+        assertTrue(AICompare.aiServiceTypesEqual(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
     }
 
     /**
@@ -388,7 +388,7 @@ public class ServiceTypeFactoryTest
                                                          false,3000l, false, "2m");
         ServiceType actual = (ServiceType) serviceTypes.iterator().next();
 
-        assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
+        assertTrue(AICompare.aiServiceTypesEqual(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
     }
 
     /**
@@ -418,7 +418,7 @@ public class ServiceTypeFactoryTest
                                                          false, 600l,true, "8s");
         ServiceType actual = (ServiceType) serviceTypes.iterator().next();
 
-        assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
+        assertTrue(AICompare.aiServiceTypesEqual(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
     }
     
     /**
@@ -446,7 +446,7 @@ public class ServiceTypeFactoryTest
                                                          false, 600l,false, "8s");
         ServiceType actual = (ServiceType) serviceTypes.iterator().next();
 
-        assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
+        assertTrue(AICompare.aiServiceTypesEqual(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
     }
     
     /**
@@ -474,7 +474,7 @@ public class ServiceTypeFactoryTest
                                                          false, 600000l, false, "9h");
         ServiceType actual = (ServiceType) serviceTypes.iterator().next();
 
-        assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
+        assertTrue(AICompare.aiServiceTypesEqual(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
     }
 
     /**
@@ -523,7 +523,7 @@ public class ServiceTypeFactoryTest
                                                          true,300000l, true, null);
         ServiceType actual = (ServiceType) serviceTypes.iterator().next();
 
-        assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
+        assertTrue(AICompare.aiServiceTypesEqual(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
 
         mBeanServer.unregisterMBean(this.objectName);
 
@@ -546,7 +546,7 @@ public class ServiceTypeFactoryTest
                                                           true, 300000l, true, null);
         ServiceType actual2 = (ServiceType) serviceTypes.iterator().next();
 
-        assertTrue(AICompare.compareAiServiceType(expected2.getAIServiceTypeValue(), actual2.getAIServiceTypeValue()));
+        assertTrue(AICompare.aiServiceTypesEqual(expected2.getAIServiceTypeValue(), actual2.getAIServiceTypeValue()));
     }
 
 }

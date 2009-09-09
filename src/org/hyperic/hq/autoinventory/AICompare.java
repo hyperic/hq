@@ -152,7 +152,7 @@ public class AICompare {
                                 //                   + ",svc2="+StringUtil.arrayToString(svc1)+")");
                                 return false;
                             }
-                        	if(! compareAIServiceTypes(se1.getAiServiceTypes(),se2.getAiServiceTypes())) {
+                        	if(! aIServiceTypesEqual(se1.getAiServiceTypes(),se2.getAiServiceTypes())) {
                         		return false;
                         	}
                         } else {
@@ -212,7 +212,7 @@ public class AICompare {
         return true;
     }
     
-    public static boolean compareAIServiceTypes(AIServiceTypeValue[] serviceTypes1, AIServiceTypeValue[] serviceTypes2) {
+    public static boolean aIServiceTypesEqual(AIServiceTypeValue[] serviceTypes1, AIServiceTypeValue[] serviceTypes2) {
     	if (serviceTypes1 == null)
     		return (serviceTypes2 == null);
     		if (serviceTypes2 == null)
@@ -228,7 +228,7 @@ public class AICompare {
     			s1 = serviceTypes1[i];
     			for (int j = 0; j < serviceTypes2.length; j++) {
     				s2 = serviceTypes2[j];
-    				if (compareAiServiceType(s1, s2)){
+    				if (aiServiceTypesEqual(s1, s2)){
     					foundMatchingServiceType = true;
     					break;
     				}
@@ -240,7 +240,7 @@ public class AICompare {
     		return true;
     }
      	
-    public static boolean compareAiServiceType(AIServiceTypeValue s1, AIServiceTypeValue s2) {
+    public static boolean aiServiceTypesEqual(AIServiceTypeValue s1, AIServiceTypeValue s2) {
     		return compare(s1.getDescription(), s2.getDescription()) &&
     			compare(s1.getName(),s2.getName()) &&
     			compare(s1.getServiceName(), s2.getServiceName()) &&
