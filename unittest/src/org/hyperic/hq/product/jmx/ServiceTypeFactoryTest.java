@@ -111,7 +111,7 @@ public class ServiceTypeFactoryTest
                                                            String units,
                                                            String metricType,
                                                            String metricCategory,
-                                                           boolean indicator)
+                                                           boolean indicator, String collectionInterval, String defaultOn, String rate)
     {
         ModelMBeanAttributeInfo[] attributeInfos = createAttributeInfos(attributeName,
                                                                         metricAliasName,
@@ -130,6 +130,9 @@ public class ServiceTypeFactoryTest
         metricDescriptor.setField("indicator", Boolean.toString(indicator));
         metricDescriptor.setField("metricType", metricType);
         metricDescriptor.setField("metricCategory", metricCategory);
+        metricDescriptor.setField("collectionInterval", collectionInterval);
+        metricDescriptor.setField("defaultOn", defaultOn);
+        metricDescriptor.setField("rate", rate);
         attributeInfos[1].setDescriptor(metricDescriptor);
         return attributeInfos;
     }
@@ -141,7 +144,7 @@ public class ServiceTypeFactoryTest
                                                   String units,
                                                   String metricType,
                                                   String metricCategory,
-                                                  boolean indicator)
+                                                  boolean indicator, long interval, boolean defaultOn, String rate)
     {
         ServiceType expected = new ServiceType("Spring Configurable Bean Factory",
                                                "spring",
@@ -190,16 +193,15 @@ public class ServiceTypeFactoryTest
         expectedMeasurement.setAlias(metricAliasName);
         expectedMeasurement.setName(metricName);
         expectedMeasurement.setCategory(metricCategory.toUpperCase());
-        expectedMeasurement.setDefaultOn(indicator);
+        expectedMeasurement.setDefaultOn(defaultOn);
         expectedMeasurement.setIndicator(indicator);
         if ("GAUGE".equals(metricType.toUpperCase())) {
             expectedMeasurement.setCollectionType(MeasurementConstants.COLL_TYPE_DYNAMIC);
-            expectedMeasurement.setInterval(300000l);
         } else if ("COUNTER".equals(metricType.toUpperCase())) {
             expectedMeasurement.setCollectionType(MeasurementConstants.COLL_TYPE_TRENDSUP);
-            expectedMeasurement.setRate("none");
-            expectedMeasurement.setInterval(600000l);
+            expectedMeasurement.setRate(rate);
         }
+        expectedMeasurement.setInterval(interval);
         expectedMeasurement.setTemplate(objectNameTemplate.toString() + ":" + metricAliasName);
         expectedMeasurement.setUnits(units);
         measurements.addMeasurementInfo(expectedMeasurement);
@@ -299,7 +301,35 @@ public class ServiceTypeFactoryTest
                                                          "ms",
                                                          "gauge",
                                                          "performance",
-                                                         true);
+                                                         true, 300000l,true,null);
+        ServiceType actual = (ServiceType) serviceTypes.iterator().next();
+
+        assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
+    }
+    
+    /**
+     * Verifies that default rate of none is applied to a counter with no specified rate
+     * 
+     * @throws Exception
+     */
+    public void testCreateCounterDefaultRate() throws Exception {
+        ModelMBeanAttributeInfo[] attributeInfos = createAttributeInfos("MonitoringEnabled",
+                                                                        "AverageExecutionTime(ms)",
+                                                                        "Average Execution Time",
+                                                                        "ms",
+                                                                        "counter",
+                                                                        "performance");
+        ModelMBeanOperationInfo[] operationInfos = createOperationInfos("ResetMetrics");
+        Set serviceTypes = createServiceTypes(attributeInfos, operationInfos, true);
+        assertEquals(1, serviceTypes.size());
+        ServiceType expected = createExpectedServiceType("MonitoringEnabled",
+                                                         "AverageExecutionTime(ms)",
+                                                         "Average Execution Time",
+                                                         "ResetMetrics",
+                                                         "ms",
+                                                         "counter",
+                                                         "performance",
+                                                         true, 600000l,true,"none");
         ServiceType actual = (ServiceType) serviceTypes.iterator().next();
 
         assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
@@ -316,7 +346,7 @@ public class ServiceTypeFactoryTest
                                                                         "ms",
                                                                         "counter",
                                                                         "foo",
-                                                                        false);
+                                                                        false,"50000","true","1h");
         ModelMBeanOperationInfo[] operationInfos = createOperationInfos("ResetMetrics");
         Set serviceTypes = createServiceTypes(attributeInfos, operationInfos, true);
         assertEquals(1, serviceTypes.size());
@@ -327,7 +357,7 @@ public class ServiceTypeFactoryTest
                                                          "ms",
                                                          "counter",
                                                          "utilization",
-                                                         false);
+                                                         false,50000l, true, "1h");
         ServiceType actual = (ServiceType) serviceTypes.iterator().next();
 
         assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
@@ -344,7 +374,7 @@ public class ServiceTypeFactoryTest
                                                                         "messages",
                                                                         "counter",
                                                                         "utilization",
-                                                                        false);
+                                                                        false,"3000","false","2m");
         ModelMBeanOperationInfo[] operationInfos = createOperationInfos("ResetMetrics");
         Set serviceTypes = createServiceTypes(attributeInfos, operationInfos, true);
         assertEquals(1, serviceTypes.size());
@@ -355,7 +385,7 @@ public class ServiceTypeFactoryTest
                                                          "none",
                                                          "counter",
                                                          "utilization",
-                                                         false);
+                                                         false,3000l, false, "2m");
         ServiceType actual = (ServiceType) serviceTypes.iterator().next();
 
         assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
@@ -374,7 +404,7 @@ public class ServiceTypeFactoryTest
                                                                         "s",
                                                                         "counter",
                                                                         "utilization",
-                                                                        false);
+                                                                        false,"600", "true","8s");
         ModelMBeanOperationInfo[] operationInfos = createOperationInfos("ResetMetrics");
         Set serviceTypes = createServiceTypes(attributeInfos, operationInfos, true);
         assertEquals(1, serviceTypes.size());
@@ -385,7 +415,63 @@ public class ServiceTypeFactoryTest
                                                          "sec",
                                                          "counter",
                                                          "utilization",
-                                                         false);
+                                                         false, 600l,true, "8s");
+        ServiceType actual = (ServiceType) serviceTypes.iterator().next();
+
+        assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
+    }
+    
+    /**
+     * Verifies that defaul value is applied if defaultOn is set to something other than true/false
+     * @throws Exception
+     */
+    public void testCreateInvalidDefaultOn() throws Exception {
+        ModelMBeanAttributeInfo[] attributeInfos = createAttributeInfos("MonitoringEnabled",
+                                                                        "AverageExecutionTime(s)",
+                                                                        "Average Execution Time",
+                                                                        "s",
+                                                                        "counter",
+                                                                        "utilization",
+                                                                        false,"600", "foo","8s");
+        ModelMBeanOperationInfo[] operationInfos = createOperationInfos("ResetMetrics");
+        Set serviceTypes = createServiceTypes(attributeInfos, operationInfos, true);
+        assertEquals(1, serviceTypes.size());
+        ServiceType expected = createExpectedServiceType("MonitoringEnabled",
+                                                         "AverageExecutionTime(s)",
+                                                         "Average Execution Time",
+                                                         "ResetMetrics",
+                                                         "sec",
+                                                         "counter",
+                                                         "utilization",
+                                                         false, 600l,false, "8s");
+        ServiceType actual = (ServiceType) serviceTypes.iterator().next();
+
+        assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
+    }
+    
+    /**
+     * Verifies default collection interval is used if non-numeric interval specified
+     * @throws Exception
+     */
+    public void testCreateInvalidCollectionInterval() throws Exception {
+        ModelMBeanAttributeInfo[] attributeInfos = createAttributeInfos("MonitoringEnabled",
+                                                                        "AverageExecutionTime(s)",
+                                                                        "Average Execution Time",
+                                                                        "s",
+                                                                        "counter",
+                                                                        "utilization",
+                                                                        false,"foo","false","9h");
+        ModelMBeanOperationInfo[] operationInfos = createOperationInfos("ResetMetrics");
+        Set serviceTypes = createServiceTypes(attributeInfos, operationInfos, true);
+        assertEquals(1, serviceTypes.size());
+        ServiceType expected = createExpectedServiceType("MonitoringEnabled",
+                                                         "AverageExecutionTime(s)",
+                                                         "Average Execution Time",
+                                                         "ResetMetrics",
+                                                         "sec",
+                                                         "counter",
+                                                         "utilization",
+                                                         false, 600000l, false, "9h");
         ServiceType actual = (ServiceType) serviceTypes.iterator().next();
 
         assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
@@ -434,7 +520,7 @@ public class ServiceTypeFactoryTest
                                                          "ms",
                                                          "gauge",
                                                          "performance",
-                                                         true);
+                                                         true,300000l, true, null);
         ServiceType actual = (ServiceType) serviceTypes.iterator().next();
 
         assertTrue(AICompare.compareAiServiceType(expected.getAIServiceTypeValue(), actual.getAIServiceTypeValue()));
@@ -457,7 +543,7 @@ public class ServiceTypeFactoryTest
                                                           "ms",
                                                           "gauge",
                                                           "performance",
-                                                          true);
+                                                          true, 300000l, true, null);
         ServiceType actual2 = (ServiceType) serviceTypes.iterator().next();
 
         assertTrue(AICompare.compareAiServiceType(expected2.getAIServiceTypeValue(), actual2.getAIServiceTypeValue()));

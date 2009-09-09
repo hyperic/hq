@@ -287,10 +287,24 @@ public class ServiceTypeFactory {
 			//COUNTER
 			measurementProperties.put(MeasurementInfo.ATTR_COLLECTION_TYPE,
 					"trendsup");
-			measurementProperties.put(MeasurementInfo.ATTR_RATE, "none");
+			String rate = (String) descriptor.getFieldValue("rate");
+			if(rate != null) {
+			    measurementProperties.put(MeasurementInfo.ATTR_RATE, rate);
+			}else {
+			    measurementProperties.put(MeasurementInfo.ATTR_RATE, "none");
+			}
 			measurementProperties.put(MeasurementInfo.ATTR_INTERVAL, "600000");
 		}
-
+		String collectionInterval = (String) descriptor.getFieldValue("collectionInterval");
+		if(collectionInterval != null) {
+		    try {
+		        Long.valueOf(collectionInterval);
+		        measurementProperties.put(MeasurementInfo.ATTR_INTERVAL, collectionInterval);
+		    }catch(NumberFormatException e) {
+		        log.warn("Specified collection interval " + collectionInterval + " is not numeric.  Default value will be used instead.");
+		    }
+		}
+		
 		String category = (String) descriptor.getFieldValue("metricCategory");
 		if (category == null
 				|| !VALID_CATEGORIES.contains(category.toUpperCase())) {
@@ -301,7 +315,7 @@ public class ServiceTypeFactory {
 					.toUpperCase());
 		}
 		String indicator = (String) descriptor.getFieldValue("indicator");
-		if(indicator == null || "true".equals(indicator)) {
+		if(indicator == null || "true".equals(indicator.toLowerCase())) {
 			//indicator is not in Spring 3.0 @ManagedMetric.  Turn measurement on and make indicator by default
 			measurementProperties.put(MeasurementInfo.ATTR_INDICATOR, "true");
 			measurementProperties.put(MeasurementInfo.ATTR_DEFAULTON, "true");
@@ -309,6 +323,14 @@ public class ServiceTypeFactory {
 			measurementProperties.put(MeasurementInfo.ATTR_INDICATOR, "false");
 			measurementProperties.put(MeasurementInfo.ATTR_DEFAULTON, "false");
 		}
+		String defaultOn = (String) descriptor.getFieldValue("defaultOn");
+        if(defaultOn != null) {
+            if("true".equals(defaultOn.toLowerCase()) || "false".equals(defaultOn.toLowerCase())) {
+                measurementProperties.put(MeasurementInfo.ATTR_DEFAULTON, defaultOn.toLowerCase());
+            } else{
+                log.warn("Invalid value of " + defaultOn + " specified for defaultOn.  Default value will be used instead.");
+            }
+        }
 		addMeasurementTemplate(measurementProperties, productPlugin,
 				serviceType);
 		return createMeasurementInfo(measurementProperties);
