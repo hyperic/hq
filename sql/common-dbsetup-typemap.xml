@@ -47,7 +47,7 @@
             <map db="mysql" type="CHAR" />
         </typemap>
         <typemap type="DOUBLE">
-            <map db="oracle" type="FLOAT(15)" />
+            <map db="oracle" type="FLOAT(126)" />
             <map db="pointbase" type="FLOAT(15)" />
             <map db="postgres" type="FLOAT8" />
             <map db="java" type="FLOAT" />
