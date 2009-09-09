@@ -10079,12 +10079,15 @@ has already been defined.
         ALTER TABLE HQ_AVAIL_DATA_RLE ADD CONSTRAINT FK6E8F9E9CB6E3839C
         FOREIGN KEY (MEASUREMENT_ID) REFERENCES EAM_MEASUREMENT (ID) ON DELETE CASCADE
       </statement>
-      <statement targetDB="oracle">
+      <statement targetDB="oracle" fail="false">
         ALTER TABLE HQ_AVAIL_DATA_RLE DROP CONSTRAINT FK6E8F9E9CAE18683B
       </statement>
-      <statement targetDB="oracle">
+      <statement targetDB="oracle" fail="false">
         ALTER TABLE HQ_AVAIL_DATA_RLE ADD CONSTRAINT FK6E8F9E9CB6E3839C
         FOREIGN KEY (MEASUREMENT_ID) REFERENCES EAM_MEASUREMENT (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX AVAIL_RLE_ENDTIME_IDX
       </statement>
     </schema-directSQL>  
   </schemaSpec>
@@ -10719,7 +10722,8 @@ has already been defined.
   <!-- Fixes upgrade inconsistencies on QRTZ_TRIGGERS for oracle -->
   <schemaSpec version="3.186">
     <schema-directSQL>  
-      <statement targetDB="oracle">
+      <!-- need fail="false" due to inconsistent entry points -->
+      <statement targetDB="oracle" fail="false">
         drop index EAM_FK_QT_QJD
       </statement>
     </schema-directSQL>  
