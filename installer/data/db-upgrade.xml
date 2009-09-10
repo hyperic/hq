@@ -10034,10 +10034,14 @@ has already been defined.
         ALTER TABLE EAM_RESOURCE_EDGE DROP INDEX FKD1FCB6C0CCC27921
       </statement>
       <!-- the following stmts are ensuring that the unique key is (FROM_ID,TO_ID,REL_ID,DISTANCE) -->
+      <!-- the next two stmts are due to case sensitivity issues on EAM_RESOURCE_EDGE_ibfk_1 -->
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP FOREIGN KEY EAM_RESOURCE_EDGE_ibfk_1
+      </statement>
       <statement targetDB="mysql" fail="false">
         ALTER TABLE EAM_RESOURCE_EDGE DROP FOREIGN KEY eam_resource_edge_ibfk_1
       </statement>
-      <statement targetDB="mysql">
+      <statement targetDB="mysql" fail="false">
         ALTER TABLE EAM_RESOURCE_EDGE DROP FOREIGN KEY FKD1FCB6C0A2BF2D92
       </statement>
       <statement targetDB="mysql" fail="false">
