@@ -10015,6 +10015,10 @@ has already been defined.
        entry points of deployments-->
   <schemaSpec version="3.155">
     <schema-directSQL>  
+      <!-- the next two stmts are due to case sensitivity issues on EAM_RESOURCE_EDGE_ibfk_1 -->
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE DROP FOREIGN KEY EAM_RESOURCE_ibfk_1
+      </statement>
       <statement targetDB="mysql" fail="false">
         ALTER TABLE EAM_RESOURCE DROP FOREIGN KEY eam_resource_ibfk_1
       </statement>
