@@ -158,12 +158,16 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
             RegisteredTrigger tv = (RegisteredTrigger) i.next();
             try {
                 AlertDefinition def = getDefinitionFromTrigger(tv);
-                if (def != null &&
-                    alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(def.getId()) != null)
-                {
-                    registerTrigger(tv.getRegisteredTriggerValue(),
-                                    (AlertConditionEvaluator) alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(def.getId()),
-                                    def.isEnabled());
+            
+                if (def != null) {
+                    AlertConditionEvaluator evaluator = 
+                        (AlertConditionEvaluator) alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(def.getId());
+                
+                    if (evaluator != null) {
+                        registerTrigger(tv.getRegisteredTriggerValue(),
+                                        evaluator,
+                                        def.isEnabled());
+                    }
                 }
             } catch (Exception e) {
                 log.error("Error registering trigger", e);
@@ -508,15 +512,19 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     }
 
     public void ejbCreate() {
+        if (log.isDebugEnabled()) {
+            log.debug("ejbCreate called on " + this);
+        }
+
         this.zeventEnqueuer = ZeventManager.getInstance();
-        AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository = new FileAlertConditionEvaluatorStateRepository(HQApp.getInstance()
-                                                                                                                                            .getRestartStorageDir());
-        this.alertConditionEvaluatorRepository = new AlertConditionEvaluatorRepositoryImpl(alertConditionEvaluatorStateRepository);
-        HQApp.getInstance().registerCallbackListener(ShutdownCallback.class, alertConditionEvaluatorRepository);
-        this.alertConditionEvaluatorFactory = new AlertConditionEvaluatorFactoryImpl(zeventEnqueuer,
-                                                                                     alertConditionEvaluatorStateRepository.getAlertConditionEvaluatorStates(),
-                                                                                     alertConditionEvaluatorStateRepository.getExecutionStrategyStates());
-        this.triggerDAO = DAOFactory.getDAOFactory().getTriggerDAO();
+        this.alertConditionEvaluatorRepository = AlertConditionEvaluatorRepositoryImpl.getInstance();
+        this.alertConditionEvaluatorFactory = 
+            new AlertConditionEvaluatorFactoryImpl(
+                    zeventEnqueuer,
+                    alertConditionEvaluatorRepository.getStateRepository().getAlertConditionEvaluatorStates(),
+                    alertConditionEvaluatorRepository.getStateRepository().getExecutionStrategyStates());
+        
+        this.triggerDAO = DAOFactory.getDAOFactory().getTriggerDAO();        
     }
 
     public void ejbRemove() {

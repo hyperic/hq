@@ -33,5 +33,10 @@
        </configuration>
     </attribute>
   </mbean>
+  
+    <!-- This deploys the alert diagnostic service -->
+  <mbean code="org.hyperic.hq.events.server.mbean.AlertConditionEvaluatorDiagnosticService"
+	 name="hyperic.jmx:type=Service,name=AlertConditionEvaluatorDiagnostic">
+  </mbean>
 
 </server>

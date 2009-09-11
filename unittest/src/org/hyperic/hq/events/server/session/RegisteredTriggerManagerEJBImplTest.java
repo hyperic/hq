@@ -306,7 +306,7 @@ public class RegisteredTriggerManagerEJBImplTest
         EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(null);
         EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef)).andReturn(alertConditionEvaluator);
         alertConditionEvaluatorRepository.addAlertConditionEvaluator(alertConditionEvaluator);
-        EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(alertConditionEvaluator).times(5);
+        EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(alertConditionEvaluator).times(3);
         registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
         EasyMock.expectLastCall().times(2);
         replay();
@@ -351,7 +351,7 @@ public class RegisteredTriggerManagerEJBImplTest
         EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(null);
         EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef)).andReturn(alertConditionEvaluator);
         alertConditionEvaluatorRepository.addAlertConditionEvaluator(alertConditionEvaluator);
-        EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(alertConditionEvaluator).times(2);
+        EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(alertConditionEvaluator);
         registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
         replay();
         registeredTriggerManager.initializeTriggers(registeredTriggerRepository);
@@ -395,7 +395,7 @@ public class RegisteredTriggerManagerEJBImplTest
         EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(null);
         EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef)).andReturn(alertConditionEvaluator);
         alertConditionEvaluatorRepository.addAlertConditionEvaluator(alertConditionEvaluator);
-        EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(alertConditionEvaluator).times(5);
+        EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(alertConditionEvaluator).times(3);
         registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
         registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
         EasyMock.expectLastCall().andThrow(new RuntimeException("Oh No!"));
@@ -445,7 +445,7 @@ public class RegisteredTriggerManagerEJBImplTest
         EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(null);
         EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef)).andReturn(alertConditionEvaluator);
         alertConditionEvaluatorRepository.addAlertConditionEvaluator(alertConditionEvaluator);
-        EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(alertConditionEvaluator).times(2);
+        EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(alertConditionEvaluator);
         EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinition2Id)).andReturn(null).times(2);
         EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef2)).andThrow(new RuntimeException("Yikes!"));
         registeredTriggerRepository.addTrigger(EasyMock.isA(MockTrigger.class));
@@ -489,7 +489,7 @@ public class RegisteredTriggerManagerEJBImplTest
         EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(null);
         EasyMock.expect(alertConditionEvaluatorFactory.create(alertDef)).andReturn(alertConditionEvaluator);
         alertConditionEvaluatorRepository.addAlertConditionEvaluator(alertConditionEvaluator);
-        EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(alertConditionEvaluator).times(2);
+        EasyMock.expect(alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(alertDefinitionId)).andReturn(alertConditionEvaluator);
         replay();
         registeredTriggerManager.initializeTriggers(registeredTriggerRepository);
         verify();

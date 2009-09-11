@@ -1,10 +1,15 @@
 package org.hyperic.hq.events.server.session;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.ShutdownCallback;
 
 /**
@@ -19,6 +24,11 @@ import org.hyperic.hq.application.ShutdownCallback;
  *
  */
 public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEvaluatorRepository, ShutdownCallback {
+    private static final Log log = LogFactory.getLog(AlertConditionEvaluatorRepositoryImpl.class);
+
+    private static final Object INIT_LOCK = new Object();
+    private static AlertConditionEvaluatorRepositoryImpl INSTANCE;
+
     private AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository;
     private Map alertConditionEvaluators = new HashMap();
 
@@ -28,25 +38,40 @@ public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEval
      *        {@link AlertConditionEvaluatorStateRepository} to use for
      *        persisting state on server shutdown
      */
-    public AlertConditionEvaluatorRepositoryImpl(AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository)
+    protected AlertConditionEvaluatorRepositoryImpl(AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository)
     {
         this.alertConditionEvaluatorStateRepository = alertConditionEvaluatorStateRepository;
     }
 
     public void addAlertConditionEvaluator(AlertConditionEvaluator alertConditionEvaluator) {
-        alertConditionEvaluators.put(alertConditionEvaluator.getAlertDefinitionId(), alertConditionEvaluator);
-
+        synchronized(alertConditionEvaluators) {
+            alertConditionEvaluators.put(alertConditionEvaluator.getAlertDefinitionId(), alertConditionEvaluator);
+        }
     }
-
+    
     public AlertConditionEvaluator getAlertConditionEvaluatorById(Integer alertDefinitionId) {
         return (AlertConditionEvaluator) alertConditionEvaluators.get(alertDefinitionId);
     }
 
+    public Map getAlertConditionEvaluators() {
+        return Collections.unmodifiableMap(alertConditionEvaluators);
+    }
+    
     public void removeAlertConditionEvaluator(Integer alertDefinitionId) {
-        alertConditionEvaluators.remove(alertDefinitionId);
+        synchronized(alertConditionEvaluators) {
+            alertConditionEvaluators.remove(alertDefinitionId);
+        }
+    }
+    
+    public AlertConditionEvaluatorStateRepository getStateRepository() {
+        return this.alertConditionEvaluatorStateRepository;
     }
 
     public void shutdown() {
+        if (log.isDebugEnabled()) {
+            log.debug("shutdown starting on " + this);
+        }
+        
         Map alertConditionEvaluatorStates = new HashMap();
         Map executionStrategyStates = new HashMap();
         for (Iterator iterator = alertConditionEvaluators.values().iterator(); iterator.hasNext();) {
@@ -68,5 +93,25 @@ public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEval
             alertConditionEvaluatorStateRepository.saveExecutionStrategyStates(executionStrategyStates);
         }
     }
+    
+    private void initialize() {
+        if (log.isDebugEnabled()) {
+            log.debug("initialize starting on " + this);
+        }
 
+        HQApp.getInstance().registerCallbackListener(ShutdownCallback.class, INSTANCE);
+    }
+    
+    public static AlertConditionEvaluatorRepository getInstance() {
+        synchronized (INIT_LOCK) {
+            if (INSTANCE == null) {
+                AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository = 
+                    new FileAlertConditionEvaluatorStateRepository(HQApp.getInstance().getRestartStorageDir());
+
+                INSTANCE = new AlertConditionEvaluatorRepositoryImpl(alertConditionEvaluatorStateRepository);
+                INSTANCE.initialize();
+            }
+        }
+        return INSTANCE;
+    }
 }

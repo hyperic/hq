@@ -1,5 +1,7 @@
 package org.hyperic.hq.events.server.session;
 
+import java.util.Map;
+
 /**
  * Repository of {@link AlertConditionEvaluator}s
  * @author jhickey
@@ -19,6 +21,16 @@ public interface AlertConditionEvaluatorRepository {
      * @return The corresponding {@link AlertConditionEvaluator} or null if none exists
      */
     AlertConditionEvaluator getAlertConditionEvaluatorById(Integer alertDefinitionId);
+
+    /**
+     * Get the {@link AlertConditionEvaluatorStateRepository}
+     */
+    AlertConditionEvaluatorStateRepository getStateRepository();
+    
+    /**
+     * Get all the alert condition evaluators
+     */
+    Map getAlertConditionEvaluators();
 
     /**
      * Remove from the repository
