@@ -49,6 +49,9 @@ public class HAService
     public void startSingleton() {
         MBeanServer server = MBeanUtil.getMBeanServer();
 
+        //Reset in-memory triggers
+        RegisteredTriggers.reset();
+        
         _log.info("Starting HA Services");
 
         startAvailCheckService(server);

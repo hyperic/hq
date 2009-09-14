@@ -172,6 +172,12 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
         }
         return INSTANCE;
     }
+    
+    public static void reset() {
+        synchronized (INIT_LOCK) {
+            INSTANCE = null;
+        }
+    }
 
     public static Collection getInterestedTriggers(AbstractEvent event) {
         HashSet trigs = new HashSet();
