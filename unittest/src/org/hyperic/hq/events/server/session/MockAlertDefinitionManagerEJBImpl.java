@@ -42,6 +42,11 @@ implements AlertDefinitionManagerLocal, Verifiable {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public AlertDefinitionValue createAlertDefinition(AlertDefinitionValue a)  {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	public void deleteAlertDefinitions(AuthzSubject subj, Integer[] ids)
 	throws RemoveException, PermissionException {
@@ -72,6 +77,11 @@ implements AlertDefinitionManagerLocal, Verifiable {
 
 	public SortedMap findAlertDefinitionNames(AuthzSubject subj, AppdefEntityID id,
 			Integer parentId) throws PermissionException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public SortedMap findAlertDefinitionNames(AppdefEntityID id,Integer parentId) {
 		// TODO Auto-generated method stub
 		return null;
 	}

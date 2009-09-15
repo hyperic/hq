@@ -25,11 +25,14 @@
 
 package org.hyperic.hq.product.server.session;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedMap;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -47,10 +50,12 @@ import javax.management.ReflectionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.alerts.AlertDefinitionXmlParser;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.CpropKey;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
@@ -60,8 +65,10 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
@@ -109,6 +116,9 @@ public class ProductManagerEJBImpl
     private CPropManagerLocal      cPropManagerLocal;
     private TemplateManagerLocal   templateManagerLocal;
     private PluginUpdater pluginUpdater = new PluginUpdater();
+    private AlertDefinitionXmlParser alertDefXmlParser   = new AlertDefinitionXmlParser();
+    private static final String ALERT_DEFINITIONS_XML_FILE = "etc/alert-definitions.xml";
+    private AlertDefinitionManagerLocal alertDefinitionManagerLocal;
     
 
     /*
@@ -428,8 +438,49 @@ public class ProductManagerEJBImpl
                  }
              }
          }
+         createAlertDefinitions(pInfo);
          pluginDeployed(pInfo);
          updateEJBPlugin(plHome, pInfo);
+    }
+    
+    private void createAlertDefinitions(final PluginInfo pInfo) throws FinderException, RemoveException, CreateException, VetoException {
+        final InputStream alertDefns = pInfo.resourceLoader.getResourceAsStream(ALERT_DEFINITIONS_XML_FILE);
+        if(alertDefns == null) {
+                   return;
+        }
+      
+       try {
+           final Set alertDefs = alertDefXmlParser.parse(alertDefns);
+           for(Iterator iterator=alertDefs.iterator();iterator.hasNext();) {
+               try {
+                   final AlertDefinitionValue alertDefinition =  (AlertDefinitionValue)iterator.next();
+                   final AppdefEntityID id = new AppdefEntityID(alertDefinition.getAppdefType(),alertDefinition.getAppdefId());
+                   final SortedMap existingAlertDefinitions = getAlertDefinitionManagerLocal().findAlertDefinitionNames(id, EventConstants.TYPE_ALERT_DEF_ID);
+                   //TODO update existing alert defs - for now, just create if one does not exist.  Be aware that this method is also called
+                   //when new service type metadata is discovered (from updateServiceTypes method), as well as when a new or modified plugin jar is detected
+                   if(!(existingAlertDefinitions.keySet().contains(alertDefinition.getName()))) {
+                       getAlertDefinitionManagerLocal().createAlertDefinition(alertDefinition);
+                   }
+               } catch (Exception e) {
+                   log.error("Unable to load some or all of alert definitions for plugin " + pInfo.name + ".  Cause: " + e.getMessage());
+               } 
+           }
+       } catch (Exception e) {
+           log.error("Unable to parse alert definitions for plugin " + pInfo.name + ".  Cause: " + e.getMessage());
+           }finally {
+               try {
+                   alertDefns.close();
+               } catch (IOException e) {
+                   log.warn("Error closing InputStream to alert definitions file of plugin " + pInfo.name + 
+                            ".  Cause: " + e.getMessage());
+               }
+           }
+     }
+    
+    private AlertDefinitionManagerLocal getAlertDefinitionManagerLocal() {
+        if(alertDefinitionManagerLocal == null)
+            alertDefinitionManagerLocal = AlertDefinitionManagerEJBImpl.getOne();
+        return alertDefinitionManagerLocal;
     }
 
     private ConfigManagerLocal getConfigManagerLocal() {

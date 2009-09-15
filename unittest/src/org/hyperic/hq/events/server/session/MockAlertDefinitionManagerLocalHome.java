@@ -27,8 +27,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
-public class MockAlertDefinitionManagerLocalHome implements
-        AlertDefinitionManagerLocal {
+public class MockAlertDefinitionManagerLocalHome implements AlertDefinitionManagerLocal {
 
     private MockAlertDefinitionManagerEJBImpl adMan;
 
@@ -41,21 +40,26 @@ public class MockAlertDefinitionManagerLocalHome implements
 
     }
 
-    public AlertDefinitionValue createAlertDefinition(AuthzSubject subj,
-            AlertDefinitionValue a) throws AlertDefinitionCreateException,
-            PermissionException {
+    public AlertDefinitionValue createAlertDefinition(AuthzSubject subj, AlertDefinitionValue a) throws AlertDefinitionCreateException,
+                                                                                                PermissionException
+    {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public void deleteAlertDefinitions(AuthzSubject subj, Integer[] ids)
-            throws RemoveException, PermissionException {
+    public AlertDefinitionValue createAlertDefinition(AlertDefinitionValue a) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public void deleteAlertDefinitions(AuthzSubject subj, Integer[] ids) throws RemoveException, PermissionException {
         // TODO Auto-generated method stub
 
     }
 
-    public void deleteAlertDefinitions(AuthzSubject subj, AppdefEntityID aeid)
-            throws RemoveException, PermissionException {
+    public void deleteAlertDefinitions(AuthzSubject subj, AppdefEntityID aeid) throws RemoveException,
+                                                                              PermissionException
+    {
         // TODO Auto-generated method stub
 
     }
@@ -70,40 +74,45 @@ public class MockAlertDefinitionManagerLocalHome implements
         return null;
     }
 
-    public SortedMap findAlertDefinitionNames(AuthzSubject subj,
-            AppdefEntityID id, Integer parentId) throws PermissionException {
+    public SortedMap findAlertDefinitionNames(AuthzSubject subj, AppdefEntityID id, Integer parentId) throws PermissionException
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    public SortedMap findAlertDefinitionNames(AppdefEntityID id, Integer parentId) {
         // TODO Auto-generated method stub
         return null;
     }
 
     public List findAlertDefinitions(AuthzSubject subj,
-            AlertSeverity minSeverity, Boolean enabled,
-            boolean excludeTypeBased, PageInfo info) {
+                                     AlertSeverity minSeverity,
+                                     Boolean enabled,
+                                     boolean excludeTypeBased,
+                                     PageInfo info)
+    {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public List findAlertDefinitions(AuthzSubject subject, AppdefEntityID id)
-            throws PermissionException {
+    public List findAlertDefinitions(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public PageList findAlertDefinitions(AuthzSubject subj, AppdefEntityID id,
-            PageControl pc) throws PermissionException {
+    public PageList findAlertDefinitions(AuthzSubject subj, AppdefEntityID id, PageControl pc) throws PermissionException
+    {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public List findAlertDefinitions(AuthzSubject subject, Resource prototype)
-            throws PermissionException {
+    public List findAlertDefinitions(AuthzSubject subject, Resource prototype) throws PermissionException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public PageList findAlertDefinitions(AuthzSubject subj,
-            AppdefEntityTypeID aetid, PageControl pc)
-            throws PermissionException {
+    public PageList findAlertDefinitions(AuthzSubject subj, AppdefEntityTypeID aetid, PageControl pc) throws PermissionException
+    {
         // TODO Auto-generated method stub
         return null;
     }
@@ -113,8 +122,7 @@ public class MockAlertDefinitionManagerLocalHome implements
         return null;
     }
 
-    public Integer findChildAlertDefinitionId(AppdefEntityID aeid, Integer pid,
-            boolean allowStale) {
+    public Integer findChildAlertDefinitionId(AppdefEntityID aeid, Integer pid, boolean allowStale) {
         // TODO Auto-generated method stub
         return null;
     }
@@ -129,20 +137,17 @@ public class MockAlertDefinitionManagerLocalHome implements
         return null;
     }
 
-    public List findTypeBasedDefinitions(AuthzSubject subj, Boolean enabled,
-            PageInfo info) throws PermissionException {
+    public List findTypeBasedDefinitions(AuthzSubject subj, Boolean enabled, PageInfo info) throws PermissionException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public AlertDefinitionValue getById(AuthzSubject subj, Integer id)
-            throws PermissionException {
+    public AlertDefinitionValue getById(AuthzSubject subj, Integer id) throws PermissionException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public AlertDefinition getByIdAndCheck(AuthzSubject subj, Integer id)
-            throws PermissionException {
+    public AlertDefinition getByIdAndCheck(AuthzSubject subj, Integer id) throws PermissionException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -152,8 +157,7 @@ public class MockAlertDefinitionManagerLocalHome implements
         return null;
     }
 
-    public AlertConditionValue[] getConditionsById(Integer id)
-            throws FinderException {
+    public AlertConditionValue[] getConditionsById(Integer id) throws FinderException {
         // TODO Auto-generated method stub
         return null;
     }
@@ -193,64 +197,67 @@ public class MockAlertDefinitionManagerLocalHome implements
         return false;
     }
 
-    public void setEscalation(AuthzSubject subj, Integer defId, Integer escId)
-            throws PermissionException {
+    public void setEscalation(AuthzSubject subj, Integer defId, Integer escId) throws PermissionException {
         // TODO Auto-generated method stub
 
     }
 
-        public int getActiveCount() {
-            // TODO Auto-generated method stub
-            return 0;
-        }
+    public int getActiveCount() {
+        // TODO Auto-generated method stub
+        return 0;
+    }
 
     public void startup() {
         // TODO Auto-generated method stub
 
     }
 
-    public AlertDefinitionValue updateAlertDefinition(AlertDefinitionValue adval)
-            throws AlertConditionCreateException, ActionCreateException,
-            RemoveException {
+    public AlertDefinitionValue updateAlertDefinition(AlertDefinitionValue adval) throws AlertConditionCreateException,
+                                                                                 ActionCreateException,
+                                                                                 RemoveException
+    {
         // TODO Auto-generated method stub
         return null;
     }
 
-    public void updateAlertDefinitionActiveStatus(AuthzSubject subj,
-            AlertDefinition def, boolean activate) throws PermissionException {
+    public void updateAlertDefinitionActiveStatus(AuthzSubject subj, AlertDefinition def, boolean activate) throws PermissionException
+    {
         // TODO Auto-generated method stub
 
     }
 
-    public void updateAlertDefinitionBasic(AuthzSubject subj, Integer id,
-            String name, String desc, int priority, boolean activate)
-            throws PermissionException {
+    public void updateAlertDefinitionBasic(AuthzSubject subj,
+                                           Integer id,
+                                           String name,
+                                           String desc,
+                                           int priority,
+                                           boolean activate) throws PermissionException
+    {
         // TODO Auto-generated method stub
 
     }
 
-    public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj,
-            AlertDefinition def, boolean enable) throws PermissionException {
-        // TODO Auto-generated method stub
-        return false;
-    }
-
-    public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj,
-            Integer defId, boolean enable) throws FinderException,
-            PermissionException {
+    public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj, AlertDefinition def, boolean enable) throws PermissionException
+    {
         // TODO Auto-generated method stub
         return false;
     }
 
-    public boolean updateAlertDefinitionInternalEnableForceNewTxn(
-            AuthzSubject subj, Integer defId, boolean enable)
-            throws PermissionException {
+    public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj, Integer defId, boolean enable) throws FinderException,
+                                                                                                        PermissionException
+    {
         // TODO Auto-generated method stub
         return false;
     }
 
-    public void updateAlertDefinitionsActiveStatus(AuthzSubject subj,
-            Integer[] ids, boolean activate) throws PermissionException {
+    public boolean updateAlertDefinitionInternalEnableForceNewTxn(AuthzSubject subj, Integer defId, boolean enable) throws PermissionException
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public void updateAlertDefinitionsActiveStatus(AuthzSubject subj, Integer[] ids, boolean activate) throws PermissionException
+    {
         // TODO Auto-generated method stub
 
     }

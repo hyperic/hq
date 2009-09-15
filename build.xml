@@ -195,6 +195,17 @@
           <path location="${basedir}/src" />
     </path>
     <compile-app classpath.id="compile.classpath" srcpath.id="src.path" output.dir="${build.dir}/classes"/>
+	
+   </target>
+
+	<target name="compile-jaxb-sources" depends="init">
+		<path id="compile.classpath">
+	            <path refid="alljars"/>
+	    </path>
+	    <path id="src.path">
+	          <path location="${basedir}/src" />
+	    </path>
+	<compile-jaxb classpath.id="compile.classpath" srcpath.id="src.path" output.dir="${build.dir}/classes"/>
    </target>
 
   <macrodef name="compile-app">
@@ -203,6 +214,7 @@
 		<attribute name="output.dir"/>
       <sequential>
 	  <antcall target="compile-txsnatch"/>
+	 <antcall target="compile-jaxb-sources"/>
       <mkdir dir="@{output.dir}" />
       <hq-javac destdir="@{output.dir}">
         <classpath refid="@{classpath.id}"/>
@@ -212,9 +224,23 @@
 		</src>
         <exclude name="org/hyperic/hq/ui/**/*.java" />
         <exclude name="org/hyperic/ui/tapestry/**/*.java" />
+		<exclude name="org/hyperic/hq/types/**/*.java" />
      </hq-javac>
      <antcall target="compile-plugins"/>
 	 <antcall target="compile-java5-plugins"/>
+	</sequential>
+  </macrodef>
+
+   <macrodef name="compile-jaxb">
+		<attribute name="classpath.id"/>
+		<attribute name="srcpath.id"/>
+		<attribute name="output.dir"/>
+      <sequential>
+      <hq-javac destdir="@{output.dir}" source="1.5" target="1.5">
+        <classpath refid="@{classpath.id}"/>
+        <src refid="@{srcpath.id}"/>
+		<include name="org/hyperic/hq/types/**/*.java" />
+     </hq-javac>
 	</sequential>
   </macrodef>
 
@@ -450,11 +476,16 @@
         <include name="ant.jar" />
         <include name="ant-lancher.jar" />
 
+		<include name="com.springsource.com.sun.xml.bind-*.jar"/>
+		<include name="com.springsource.javax.xml.bind-*.jar"/>
+		<include name="com.springsource.javax.xml.stream-*.jar"/>
+
         <!--  in container test jar files -->
         <include name="mockejb.jar" />
         <include name="mockrunner-ejb.jar" />
         <include name="easymock-2.3.jar" />
         <include name="easymockclassextension-2.3.jar" />
+	
       </fileset>
       <fileset dir="${sigar.lib}" >
         <include name="sigar.jar" />

@@ -217,6 +217,14 @@ public class AlertDefinitionManagerEJBImpl
             canManageAlerts(subj, new AppdefEntityID(a.getAppdefType(),
                                                      a.getAppdefId()));
         }
+		return createAlertDefinition(a);
+	}
+	
+	 /**
+     * Create a new alert definition
+     * @ejb:interface-method
+     */
+    public AlertDefinitionValue createAlertDefinition(AlertDefinitionValue a) {
 
         // HHQ-1054: since the alert definition mtime is managed explicitly,
         // let's initialize it
@@ -1052,6 +1060,19 @@ public class AlertDefinitionManagerEJBImpl
                                               Integer parentId)
         throws PermissionException
     {
+    	if(parentId == null) {
+    		canManageAlerts(subj, id);
+    	}
+    	return findAlertDefinitionNames(id, parentId);
+    }
+
+    /** 
+     * Get list of alert definition names for a resource
+     * @ejb:interface-method
+     */
+    public SortedMap findAlertDefinitionNames(AppdefEntityID id,
+                                              Integer parentId)
+    {
         AlertDefinitionDAO aDao = getAlertDefDAO();
         TreeMap ret = new TreeMap();
         Collection adefs;
@@ -1069,7 +1090,6 @@ public class AlertDefinitionManagerEJBImpl
                 adefs = def.getChildren();
             }
         } else {
-            canManageAlerts(subj, id);
             Resource res = findResource(id);
             adefs = aDao.findByResource(res);
         }

@@ -220,5 +220,7 @@
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jboss-j2ee.jar"/>
 	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jnpserver.jar"/>
+	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.com.sun.xml.bind-2.1.7.jar"/>
+	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.javax.xml.bind-2.1.7.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
