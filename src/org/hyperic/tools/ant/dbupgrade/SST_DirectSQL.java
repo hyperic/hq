@@ -225,7 +225,7 @@ public class SST_DirectSQL extends SchemaSpecTask {
                         log(">>>>> SQL failed (aborting): " + e);
                         throw e;
                     }
-                } 
+                }
             } catch ( Exception e ) {
                 throw new BuildException("Error executing statement " +
                                          "desc=["+desc+"] SQL=["+sqlStmt+"] "
