@@ -181,7 +181,8 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      */
     public List getActions(int sessionId, AppdefEntityID id)
         throws PluginNotFoundException, AppdefEntityNotFoundException,
-               SessionNotFoundException, SessionTimeoutException
+               SessionNotFoundException, SessionTimeoutException,
+               PermissionException
     {
         // fix 5874
         // controlManager.getActions needs to look up the platform

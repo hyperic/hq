@@ -285,11 +285,12 @@ public class ControlManagerEJBImpl implements SessionBean {
      * @ejb:interface-method view-type="local"
      */
     public List getActions(AuthzSubject subject, AppdefEntityID id)
-        throws PluginNotFoundException, AppdefEntityNotFoundException
+        throws PermissionException, PluginNotFoundException, 
+               AppdefEntityNotFoundException
     {
-        String pluginName;
-   
-        pluginName = getPlatformManager().getPlatformPluginName(id);
+        checkControlPermission(subject, id);
+        
+        String pluginName = getPlatformManager().getPlatformPluginName(id);
         return _controlManager.getActions(pluginName);
     }
 

@@ -404,8 +404,10 @@ public class ControlScheduleManagerEJBImpl
      */
     public PageList findJobHistory(AuthzSubject subject, 
                                    AppdefEntityID id, PageControl pc)
-        throws ApplicationException
+        throws PermissionException
     {
+        checkControlPermission(subject, id);
+        
         ControlHistoryDAO histLH;
         Collection hist;
 
