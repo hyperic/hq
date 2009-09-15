@@ -34,7 +34,6 @@ import java.util.Properties;
 import java.util.StringTokenizer;
 
 import javax.management.MBeanServer;
-import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
 
@@ -253,7 +252,7 @@ public class ServerQuery
         }
     }
 
-    private void getSSLAttrs(MBeanServerConnection mServer) {
+    private void getSSLAttrs(MBeanServer mServer) {
         try {
             //SSLListenPort attribute only exists in ServerRuntimeMBean
             //so we have to get it for the nodes via the SSLMBean
@@ -281,7 +280,7 @@ public class ServerQuery
         }
     }
     
-    public boolean getAttributes(MBeanServerConnection mServer,
+    public boolean getAttributes(MBeanServer mServer,
                                  ObjectName name) {
 
         setName(name.getKeyProperty("Name"));

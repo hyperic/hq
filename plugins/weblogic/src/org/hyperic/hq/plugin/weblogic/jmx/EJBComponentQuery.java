@@ -27,7 +27,7 @@ package org.hyperic.hq.plugin.weblogic.jmx;
 
 import java.util.Properties;
 
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
@@ -49,7 +49,7 @@ public abstract class EJBComponentQuery extends ComponentQuery {
         return this.ejbPrefix;
     }
 
-    public boolean getAttributes(MBeanServerConnection mServer, ObjectName name) {
+    public boolean getAttributes(MBeanServer mServer, ObjectName name) {
         this.component = name.getKeyProperty(MBEAN_TYPE);
         return super.getAttributes(mServer, name);
     }

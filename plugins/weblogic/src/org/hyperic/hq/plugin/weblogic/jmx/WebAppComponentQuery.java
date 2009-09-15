@@ -28,7 +28,7 @@ package org.hyperic.hq.plugin.weblogic.jmx;
 import java.io.File;
 import java.util.Properties;
 
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
@@ -93,7 +93,7 @@ public class WebAppComponentQuery extends ComponentQuery {
         return this.rtConfig;
     }
 
-    public boolean getAttributes(MBeanServerConnection mServer,
+    public boolean getAttributes(MBeanServer mServer,
                                  ObjectName name) {
         if (!super.getAttributes(mServer, name)) {
             return false;

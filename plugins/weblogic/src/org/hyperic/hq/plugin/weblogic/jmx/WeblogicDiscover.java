@@ -37,7 +37,6 @@ import java.util.Set;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
-import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
@@ -169,55 +168,49 @@ public class WeblogicDiscover {
 	}
 
 	public void find(MBeanServer mServer, WeblogicQuery query, List types) throws WeblogicDiscoverException {
-		find(getDomain(), mServer, query, types);
+	    ObjectName scope;
+
+        try {
+            scope = new ObjectName(domain + ":" + query.getScope() + ",*");
+        }
+        catch (MalformedObjectNameException e) {
+            // wont happen
+            throw new IllegalArgumentException(e.getMessage());
+        }
+
+       try{
+            for (Iterator it = mServer.queryNames(scope, null).iterator(); it.hasNext();) {
+                ObjectName obj = (ObjectName) it.next();
+                String name = obj.getKeyProperty("Name");
+                if (name != null) {
+                    if (name.startsWith("__") || (name.indexOf("uuid-") != -1)) // wierdo 9.1 stuff i.e __weblogic_admin_rmi_queue
+                    {
+                        continue;
+                    }
+                }
+                WeblogicQuery type = query.cloneInstance();
+                if (type.getAttributes(mServer, obj)) {
+                    types.add(type);
+                }
+                else {
+                    continue;
+                }
+
+                WeblogicQuery[] childQueries = query.getChildQueries();
+
+                for (int i = 0; i < childQueries.length; i++) {
+                    WeblogicQuery childQuery = childQueries[i];
+                    childQuery.setParent(type);
+                    childQuery.setVersion(type.getVersion());
+                    find( mServer, childQuery, types);
+                }
+            }
+        }
+        catch (Exception e) {
+            throw new WeblogicDiscoverException(e);
+        }
 	}
 	
-	
-	public void find(String domain, MBeanServerConnection mServer, WeblogicQuery query, List types)
-			throws WeblogicDiscoverException {
-
-		ObjectName scope;
-
-		try {
-			scope = new ObjectName(domain + ":" + query.getScope() + ",*");
-		}
-		catch (MalformedObjectNameException e) {
-			// wont happen
-			throw new IllegalArgumentException(e.getMessage());
-		}
-
-		try {
-			for (Iterator it = mServer.queryNames(scope, null).iterator(); it.hasNext();) {
-				ObjectName obj = (ObjectName) it.next();
-				String name = obj.getKeyProperty("Name");
-				if (name != null) {
-					if (name.startsWith("__") || (name.indexOf("uuid-") != -1)) // wierdo 9.1 stuff i.e __weblogic_admin_rmi_queue
-					{
-						continue;
-					}
-				}
-				WeblogicQuery type = query.cloneInstance();
-				if (type.getAttributes(mServer, obj)) {
-					types.add(type);
-				}
-				else {
-					continue;
-				}
-
-				WeblogicQuery[] childQueries = query.getChildQueries();
-
-				for (int i = 0; i < childQueries.length; i++) {
-					WeblogicQuery childQuery = childQueries[i];
-					childQuery.setParent(type);
-					childQuery.setVersion(type.getVersion());
-					find(domain, mServer, childQuery, types);
-				}
-			}
-		}
-		catch (IOException e) {
-			throw new WeblogicDiscoverException(e);
-		}
-	}
 
 	public void init(MBeanServer mServer) throws WeblogicDiscoverException {
 		try {

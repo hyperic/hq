@@ -28,7 +28,7 @@ package org.hyperic.hq.plugin.weblogic.jmx;
 import java.io.File;
 import java.util.Properties;
 
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
@@ -69,7 +69,7 @@ public class NodeManagerQuery extends BaseServerQuery {
         return WeblogicMetric.PROP_SERVER;
     }
 
-    public boolean getAttributes(MBeanServerConnection mServer,
+    public boolean getAttributes(MBeanServer mServer,
                                  ObjectName name) {
 
         String mgrName = name.getKeyProperty("Name");

@@ -329,7 +329,7 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 	}
 
 	private void discoverDynamicServices(WeblogicDiscover discover, MBeanServerConnection mServer, ServerQuery parent,
-			ArrayList types, Set serviceTypes) throws PluginException, WeblogicDiscoverException {
+			ArrayList services, Set serviceTypes) throws PluginException, WeblogicDiscoverException {
 		try {
 			final Set objectNames = mServer.queryNames(new ObjectName(MBeanUtil.DYNAMIC_SERVICE_DOMAIN + ":*"), null);
 			//Only WebLogic Admin servers have auto-inventory plugins - have to construct a ServerInfo for the WebLogic server
@@ -362,8 +362,8 @@ public class WeblogicRuntimeDiscoverer implements RuntimeDiscoverer, PrivilegedA
 						dynamicServiceQuery.setType(shortServiceType);
 						dynamicServiceQuery.setAttributeNames(serviceType.getCustomProperties().getOptionNames());
 						dynamicServiceQuery.setName(objectName.getKeyProperty("name"));
-						dynamicServiceQuery.getAttributes(mServer, objectName);
-						types.add(dynamicServiceQuery);
+						dynamicServiceQuery.getDynamicAttributes(mServer, objectName);
+						services.add(dynamicServiceQuery);
 					}
 				}
 			}

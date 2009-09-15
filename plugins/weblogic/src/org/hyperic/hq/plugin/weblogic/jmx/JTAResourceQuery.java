@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.plugin.weblogic.jmx;
 
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
@@ -48,7 +48,7 @@ public class JTAResourceQuery extends ServiceQuery {
         return WeblogicMetric.PROP_JTA_RES;
     }
 
-    public boolean getAttributes(MBeanServerConnection mServer,
+    public boolean getAttributes(MBeanServer mServer,
                                  ObjectName name) {
 
         String resource = name.getKeyProperty("Name");

@@ -98,7 +98,7 @@ public class JBossDetector
         "State.Name.sw=java,Args.*.eq=" + JBOSS_MAIN,};
     private static HashMap bindings = new HashMap();
     
-    private ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
+    
 
     private static File getFileFromURL(String name) {
         try {
@@ -366,6 +366,8 @@ public class JBossDetector
 	
 	    try {
 			final Set objectNames = mServer.queryNames(new ObjectName(org.hyperic.hq.product.jmx.MBeanUtil.DYNAMIC_SERVICE_DOMAIN + ":*"), null);
+			//TODO have to instantiate here due to classloading issues with MBeanServerConnection in 1.4 agent.  Can make an instance variable when agent can be 1.5 compliant.
+			ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
 			serviceTypes = serviceTypeFactory.create(getProductPlugin(), (ServerTypeInfo)getTypeInfo(), mServer, objectNames);
 		} catch (Exception e) {
 			throw new PluginException(e.getMessage(), e);

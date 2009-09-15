@@ -25,7 +25,7 @@
 
 package org.hyperic.hq.plugin.weblogic.jmx;
 
-import javax.management.MBeanServerConnection;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 public class ComponentQuery extends ChildServiceQuery {
@@ -39,7 +39,7 @@ public class ComponentQuery extends ChildServiceQuery {
         return null;
     }
 
-    public boolean getAttributes(MBeanServerConnection mServer,
+    public boolean getAttributes(MBeanServer mServer,
                                  ObjectName name) {
 
         //we could get these values using mServer.getAttribute to dig
