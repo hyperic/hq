@@ -27,6 +27,7 @@ import org.hyperic.hq.events.server.session.AlertManagerEJBImpl as AlertMan
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl as EventMan
 import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
 import org.hyperic.hq.control.server.session.ControlManagerEJBImpl as CMan
+import org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl as CSMan
 import org.hyperic.hq.product.PluginNotFoundException
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl as DMan
 
@@ -61,6 +62,7 @@ class ResourceCategory {
     private static alertMan = AlertMan.one
     private static eventMan = EventMan.one
     private static cMan     = CMan.one
+    private static csMan	= CSMan.one
 
     /**
      * Creates a URL for the resource.  This should typically only be called
@@ -185,6 +187,7 @@ class ResourceCategory {
 
     /**
      * Get the control actions for a Resource
+     * @throws PermissionException If the user does not have sufficient permissions
      */
     static List getControlActions(Resource r, AuthzSubject user) {
         try {
@@ -192,6 +195,14 @@ class ResourceCategory {
         } catch (PluginNotFoundException e) {
             return []
         }
+    }
+    
+    /**
+     * Get the control history for a Resource
+     * @throws PermissionException If the user does not have sufficient permissions
+     */
+    static List getControlHistory(Resource r, AuthzSubject user) {
+    	return csMan.findJobHistory(user, r.entityId, PageControl.PAGE_ALL)
     }
 
     /**
