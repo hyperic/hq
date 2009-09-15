@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
@@ -61,6 +62,8 @@ import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
 import org.hyperic.hq.control.shared.ScheduledJobNotFoundException;
 import org.hyperic.hq.control.shared.ScheduledJobRemoveException;
+import org.hyperic.hq.grouping.server.session.GroupUtil;
+import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.scheduler.ScheduleParseException;
 import org.hyperic.hq.scheduler.ScheduleParser;
@@ -404,9 +407,23 @@ public class ControlScheduleManagerEJBImpl
      */
     public PageList findJobHistory(AuthzSubject subject, 
                                    AppdefEntityID id, PageControl pc)
-        throws PermissionException
+        throws PermissionException, AppdefEntityNotFoundException,
+               GroupNotCompatibleException
     {
-        checkControlPermission(subject, id);
+        if (id.isGroup()) {
+            List groupMembers  = 
+                GroupUtil.getCompatGroupMembers(subject, id,
+                                                null, 
+                                                PageControl.PAGE_ALL);
+
+            // For each entity in the list, sanity check permissions
+            for (Iterator i = groupMembers.iterator(); i.hasNext();) {
+                AppdefEntityID entity = (AppdefEntityID) i.next();
+                checkControlPermission(subject, entity);
+            }
+        } else {
+            checkControlPermission(subject, id);
+        }
         
         ControlHistoryDAO histLH;
         Collection hist;

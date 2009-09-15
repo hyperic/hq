@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -49,6 +49,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -399,9 +400,13 @@ public class AlertDefUtil {
      * @throws AppdefEntityNotFoundException
      * @throws SessionTimeoutException
      * @throws SessionNotFoundException
+     * @throws GroupNotCompatibleException
      */
     public static List getControlActions(int sessionID, AppdefEntityID adeId, ControlBoss cb)
-        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PluginNotFoundException, PermissionException, RemoteException {
+        throws SessionNotFoundException, SessionTimeoutException,
+               AppdefEntityNotFoundException, PluginNotFoundException,
+               PermissionException, RemoteException, GroupNotCompatibleException
+    {
             List controlActions;
 
             if (adeId instanceof AppdefEntityTypeID)
@@ -411,7 +416,7 @@ public class AlertDefUtil {
                 controlActions = cb.getActions(sessionID, adeId);
 
             return controlActions;
-        }
+    }
 }
 
 // EOF

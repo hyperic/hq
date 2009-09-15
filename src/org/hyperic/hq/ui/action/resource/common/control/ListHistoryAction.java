@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -38,6 +38,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.product.PluginException;
@@ -110,6 +111,10 @@ public class ListHistoryAction extends TilesAction {
             RequestUtils.setError(request,
                 "resource.common.error.ControlNotEnabled");
             return null;                 
+        }
+        catch (PermissionException p) {
+            // let struts handle the exception
+            throw p;
         }
         catch (ApplicationException t) {
             throw new ServletException(ListHistoryAction.class.getName()
