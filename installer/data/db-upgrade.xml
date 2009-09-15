@@ -9821,7 +9821,7 @@ has already been defined.
           ALTER TABLE EAM_ESCALATION_STATE DROP UNIQUE (ALERT_DEF_ID, ALERT_TYPE)
         </statement>
         <statement targetDB="postgresql" fail="false">
-          DROP INDEX IF EXISTS STATE_IDX
+          DROP INDEX STATE_IDX
         </statement>
         <statement targetDB="mysql" fail="false">
           ALTER TABLE EAM_ESCALATION_STATE DROP INDEX STATE_IDX
