@@ -349,7 +349,7 @@ public class OracleMeasurementPlugin
                         "AND ts.tablespace_name='%tablespace%'");
         tempTspaceQueries.put("TSNumDataFiles",
                         "SELECT COUNT(*) FROM DBA_TEMP_FILES " +
-                        "WHERE TABLESPACE_NAME='%tablespace%''");
+                        "WHERE TABLESPACE_NAME='%tablespace%'");
         tempTspaceQueries.put("TSSpaceUsedPercent",
                         "SELECT 1-(SELECT sum(bytes_free)/1024 " +
                         "FROM V$temp_space_header " +
