@@ -227,6 +227,7 @@
             <exclude name="org/hyperic/ui/tapestry/**/*.java" />
           <exclude name="com/hyperic/hq/ui/**/*.java"/>
             <exclude name="com/hyperic/ui/**/*.java"/>
+ 			<exclude name="org/hyperic/hq/types/**/*.java"/>
         </fileset>
       </clover-instr>
       <copy todir="@{output.dir}">
@@ -248,6 +249,7 @@
               <include name="org/hyperic/ui/tapestry/**/*.java" />
             <include name="com/hyperic/hq/ui/**/*.java"/>
               <include name="com/hyperic/ui/**/*.java"/>
+			  <include name="org/hyperic/hq/types/**/*.java"/>
         </fileset>
       </clover-instr>
       <copy todir="@{output.dir}">
