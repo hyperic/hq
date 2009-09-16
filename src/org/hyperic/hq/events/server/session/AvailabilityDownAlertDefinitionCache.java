@@ -106,7 +106,7 @@ public class AvailabilityDownAlertDefinitionCache {
             for (Iterator it=alertDefs.iterator(); it.hasNext(); ) {
                 AlertDefinition def = (AlertDefinition) it.next();
 
-                if (def.isActive() && adm.isAvailability(def, false)) {
+                if (def.isActive() && def.isAvailability(false)) {
                     value = Boolean.TRUE;
                     break;
                 }

@@ -40,7 +40,7 @@ import org.hyperic.hq.events.TriggerNotFiredEvent;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertValue;
-
+import org.hyperic.hq.measurement.MeasurementConstants;
 
 public class AlertDefinition
     extends PersistedObject implements AlertDefinitionInterface, PerformsEscalations,
@@ -455,6 +455,70 @@ public class AlertDefinition
 
     public boolean isResourceTypeDefinition() {
         return getParent() != null && getParent().getId().equals(new Integer(0));
+    }
+    
+    /**
+     * Check if an alert definition is configured for only availability.
+     *
+     * @param up Indicates where the availability condition is up (true) or down (false)
+     * @return <code>true</code> if the alert definition has an availability condition.
+     */
+    public boolean isAvailability(boolean up) {
+        boolean isAvail = false;
+
+        // ignore multi-conditional alert definitions
+        if (_conditions.size() == 1) {
+            for (Iterator cit=_conditions.iterator(); cit.hasNext(); ) {
+                AlertCondition cond = (AlertCondition) cit.next();
+
+                if (cond != null
+                        && MeasurementConstants.CAT_AVAILABILITY.equalsIgnoreCase(cond.getName())) {
+
+                    if ("=".equals(cond.getComparator())) {
+                        if (up) {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_UP) {
+                                isAvail = true;
+                                break;
+                            }
+                        } else {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_DOWN) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    } else if ("!=".equals(cond.getComparator())) {
+                        if (up) {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_DOWN) {
+                                isAvail = true;
+                                break;
+                            }
+                        } else {
+                            if (cond.getThreshold() == MeasurementConstants.AVAIL_UP) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    } else if ("<".equals(cond.getComparator())) {
+                        if (!up) {
+                            if (cond.getThreshold() <= MeasurementConstants.AVAIL_UP
+                                    && cond.getThreshold() > MeasurementConstants.AVAIL_DOWN) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    } else if (">".equals(cond.getComparator())) {
+                        if (up) {
+                            if (cond.getThreshold() >= MeasurementConstants.AVAIL_DOWN
+                                    && cond.getThreshold() < MeasurementConstants.AVAIL_UP) {
+                                isAvail = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return isAvail;
     }
 
     public AppdefEntityID getAppdefEntityId() {

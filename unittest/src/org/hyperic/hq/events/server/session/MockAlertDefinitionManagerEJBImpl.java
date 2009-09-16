@@ -191,11 +191,6 @@ implements AlertDefinitionManagerLocal, Verifiable {
 		return false;
 	}
 
-	public boolean isAvailability(AlertDefinition def, boolean up) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 	public boolean isResourceTypeAlertDefinition(Integer id) {
 		// TODO Auto-generated method stub
 		return false;
