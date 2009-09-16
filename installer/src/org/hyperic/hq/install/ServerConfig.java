@@ -38,11 +38,13 @@ import org.hyperic.sigar.SigarException;
 import org.hyperic.util.InetPortPinger;
 import org.hyperic.util.JDK;
 import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigOptionDisplay;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EarlyExitException;
 import org.hyperic.util.config.EnumerationConfigOption;
 import org.hyperic.util.config.HiddenConfigOption;
+import org.hyperic.util.config.InstallConfigOption;
 import org.hyperic.util.config.InvalidOptionValueException;
 import org.hyperic.util.config.IpAddressConfigOption;
 import org.hyperic.util.config.PortConfigOption;
@@ -62,7 +64,10 @@ public class ServerConfig extends BaseConfig {
     public static final String DBC_ORA10    = "Oracle 10g/11g";
     public static final String DBC_PGSQL   = "PostgreSQL";
     public static final String DBC_BUILTIN = "HQ Built-in Database";
-    public static final String DBC_MYSQL   = "MySQL 5.x";
+    public static final String DBC_MYSQL   = "MySQL Enterprise / Community Server 5.x";
+    // This note has been added to met a condition of our MySQL license agreement
+    public static final String DBC_MYSQL_NOTE   = "*\n\n\t*Sign up for a MySQL Enterprise Trial subscription at http://www.mysql.com/trials/partner1569.\n";
+    
     
     // database names we need to use internally
     public static final String DB_ORA9  = "Oracle9i";
@@ -173,10 +178,11 @@ public class ServerConfig extends BaseConfig {
         StringConfigOption usernameOption;
         StringConfigOption passwordOption;
         String serverInstallDir;
-
-        InstallMode installMode =
-            new InstallMode(getProjectProperty("install.mode"));
-
+        InstallMode installMode = new InstallMode(getProjectProperty("install.mode"));
+        // ...this property allows us to change installer behavior so that it's .org or EE specific,
+        // currently the eula is only shown for EE, so it's a pretty good indicator right now...
+        boolean isEEInstall = Boolean.parseBoolean(getProjectProperty("eula.present"));
+        
         // Do we have an builtin-postgresql packaged with us?
         boolean haveBuiltinDB = getReleaseHasBuiltinDB();
 
@@ -197,6 +203,7 @@ public class ServerConfig extends BaseConfig {
         case 2:
             // Is there in fact an installation we should worry about?
             serverInstallDir = previous.getValue("server.installdir");
+            
             if ( serverAlreadyInstalled(serverInstallDir) ) {
                 schema.addOption
                     (new YesNoConfigOption("server.overwrite",
@@ -209,6 +216,7 @@ public class ServerConfig extends BaseConfig {
                     (new HiddenConfigOption("server.overwrite",
                                             YesNoConfigOption.NO));
             }
+            
             break;
 
         case 3:
@@ -244,7 +252,7 @@ public class ServerConfig extends BaseConfig {
                     (new PortConfigOption("server.webapp.secure.port",
                                           Q_PORT_WEBAPP_SECURE,
                                           new Integer(7443)));
-                
+            
                 schema.addOption
                     (new PortConfigOption("hq-engine.jnp.port",
                                           Q_PORT_JNP,
@@ -315,16 +323,18 @@ public class ServerConfig extends BaseConfig {
                     new HiddenConfigOption("server.database.choice",
                                            DBC_BUILTIN));
             } else {
-                String defaultDB = haveBuiltinDB ? DBC_BUILTIN : DBC_ORA10;
-                String[] dbs = haveBuiltinDB
-                    ? new String[] { DBC_BUILTIN, DBC_ORA10, 
-                                     DBC_PGSQL, DBC_MYSQL }
-                    : new String[] { DBC_ORA10, DBC_PGSQL, DBC_MYSQL };
-                schema.addOption(
-                    new EnumerationConfigOption("server.database.choice",
-                                                Q_DATABASE,
-                                                defaultDB,
-                                                dbs));
+                // ...setup the different ConfigOptionDisplay values for the databases
+                // we support...
+                ConfigOptionDisplay builtInOption = new ConfigOptionDisplay(DBC_BUILTIN);
+                ConfigOptionDisplay oracleOption = new ConfigOptionDisplay(DBC_ORA10);
+                ConfigOptionDisplay postgresOption = new ConfigOptionDisplay(DBC_PGSQL);
+                // ...check for the install type (.org or EE) and show the MySQL note accordingly...
+                ConfigOptionDisplay mysqlOption = (isEEInstall) ? new ConfigOptionDisplay(DBC_MYSQL, null, DBC_MYSQL_NOTE)
+                                                                : new ConfigOptionDisplay(DBC_MYSQL);
+                ConfigOptionDisplay defaultDB = haveBuiltinDB ? builtInOption : oracleOption;
+                ConfigOptionDisplay[] dbs = haveBuiltinDB ? new ConfigOptionDisplay[] { builtInOption, oracleOption, postgresOption, mysqlOption }
+                                                          : new ConfigOptionDisplay[] { oracleOption, postgresOption, mysqlOption };
+                schema.addOption(new InstallConfigOption("server.database.choice", Q_DATABASE, defaultDB, dbs));
             }
             break;
 

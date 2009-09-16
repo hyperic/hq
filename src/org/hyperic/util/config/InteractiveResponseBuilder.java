@@ -30,6 +30,9 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
+import org.hyperic.util.config.ConfigOptionDisplay;
+import org.hyperic.util.config.InstallConfigOption;
+
 public class InteractiveResponseBuilder implements ResponseBuilder {
 
     private InteractiveResponseBuilder_IOHandler inout;
@@ -158,22 +161,24 @@ public class InteractiveResponseBuilder implements ResponseBuilder {
                 }
                 
                 val = val.trim();
-                if(opt instanceof EnumerationConfigOption){
+                
+                if(opt instanceof InstallConfigOption) {
                     int index = -1;
-                    List values;
-
+                    
                     try {
                         index = Integer.parseInt(val) - 1;
                     } catch(NumberFormatException exc){
                         sendToErrStream("Value must be an integer");
                         continue;
                     }
-                    values = ((EnumerationConfigOption) opt).getValues();
+                    
+                    List values = ((InstallConfigOption) opt).getValues();
+                    
                     if(index < 0 || index >= values.size()){
                         sendToErrStream("Value not in range");
                         continue;
                     }
-                    val = values.get(index).toString();
+                    val = ((ConfigOptionDisplay) values.get(index)).getName();
                 }
                 
                 if (val.equals(opt.getConfirm())) {
@@ -224,38 +229,59 @@ public class InteractiveResponseBuilder implements ResponseBuilder {
      */
     private String getInputString ( ConfigOption opt, String defaultValue ) {
 
-        String inputStr, desc;
+        StringBuilder result = new StringBuilder();
+        String desc;
 
-        inputStr = "";
-
-        if(inout.isDeveloper())
-            inputStr += "("+opt.getName()+") ";
-
+        if(inout.isDeveloper()) {
+            result.append("(").append(opt.getName()).append(") ");
+        }
+        
         desc = opt.getDescription();
 
         // Treat these special, because we want to display the list
         // of valid options to the user.  
-        if ( opt instanceof EnumerationConfigOption ) {
-            inputStr += "Choices:";
-            List enumValues = ((EnumerationConfigOption) opt).getValues();
-            String enumValue;
+        if ( opt instanceof InstallConfigOption ) {
+            result.append("Choices:");
+            
+            List displayValues = ((InstallConfigOption) opt).getValues();
             int defaultIndex = -1;
-            for ( int i=0; i<enumValues.size(); i++ ) {
-                enumValue = enumValues.get(i).toString();
-                inputStr += "\n\t" + String.valueOf(i+1) + ": " + enumValue;
-                if ( enumValue.equals(defaultValue) ) defaultIndex = i;
+            
+            for ( int x = 0; x < displayValues.size(); x++ ) {
+                String name = ((ConfigOptionDisplay) displayValues.get(x)).getName();
+                String description = ((ConfigOptionDisplay) displayValues.get(x)).getDescription();
+                String note = ((ConfigOptionDisplay) displayValues.get(x)).getNote();
+                
+                result.append("\n\t").append(x + 1).append(": ").append(name);
+                
+                if ( name.equals(defaultValue) ) {
+                    defaultIndex = x;
+                }
+                
+                // ...display the description (the formatting is determined when the value is set)
+                // and should be a concern here...
+                if ( description != null && description.length() > 0) {
+                    result.append(description);
+                }
+                
+                // ...display the note (again, the formatting is determined when the value is set)...
+                if ( note != null && note.length() > 0) {
+                    result.append(note);
+                }                
             }
+            
             if ( defaultIndex != -1 ) {
-                inputStr += "\n" + desc + " [default '" 
-                    + String.valueOf(defaultIndex+1) + "']";
+                result.append("\n").append(desc).append(" [default '").append(defaultIndex + 1).append("']");
             } else {
-                inputStr += "\n" + desc;
+                result.append("\n").append(desc);
             }
         } else {
-            inputStr += desc;
-            if( defaultValue != null)
-                inputStr += " [default '" + defaultValue + "']";
+            result.append(desc);
+            
+            if( defaultValue != null) {
+                result.append(" [default '").append(defaultValue).append("']");
+            }
         }
-        return inputStr;
+
+        return result.toString();
     }
 }
