@@ -162,7 +162,26 @@ public class InteractiveResponseBuilder implements ResponseBuilder {
                 
                 val = val.trim();
                 
-                if(opt instanceof InstallConfigOption) {
+                if(opt instanceof EnumerationConfigOption){
+                    int index = -1;
+                    List values;
+
+                    try {
+                        index = Integer.parseInt(val) - 1;
+                    } catch(NumberFormatException exc){
+                        sendToErrStream("Value must be an integer");
+                        continue;
+                    }
+                    
+                    values = ((EnumerationConfigOption) opt).getValues();
+                    
+                    if(index < 0 || index >= values.size()){
+                        sendToErrStream("Value not in range");
+                        continue;
+                    }
+                    
+                    val = values.get(index).toString();
+                } else if(opt instanceof InstallConfigOption) {
                     int index = -1;
                     
                     try {
@@ -240,7 +259,26 @@ public class InteractiveResponseBuilder implements ResponseBuilder {
 
         // Treat these special, because we want to display the list
         // of valid options to the user.  
-        if ( opt instanceof InstallConfigOption ) {
+        if ( opt instanceof EnumerationConfigOption ) {
+            result.append("Choices:");
+            
+            List enumValues = ((EnumerationConfigOption) opt).getValues();
+            String enumValue;
+            int defaultIndex = -1;
+            
+            for ( int i=0; i<enumValues.size(); i++ ) {
+                enumValue = enumValues.get(i).toString();
+                result.append("\n\t").append(i+1).append(": ").append(enumValue);
+                
+                if ( enumValue.equals(defaultValue) ) defaultIndex = i;
+            }
+            
+            if ( defaultIndex != -1 ) {
+                result.append("\n").append(desc).append(" [default '" ).append(defaultIndex+1).append("']");
+            } else {
+                result.append("\n").append(desc);
+            }
+        } else if ( opt instanceof InstallConfigOption ) {
             result.append("Choices:");
             
             List displayValues = ((InstallConfigOption) opt).getValues();
