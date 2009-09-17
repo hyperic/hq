@@ -49,6 +49,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.TaglibUtils;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.util.RequestUtils;
@@ -434,6 +435,11 @@ public class TableTag extends TablePropertyTag {
                 } else {
                     value = this.lookup(pageContext, "smartRow",
                                         tag.getProperty(), null, true);
+
+                    if (value instanceof String) {
+                        // ...escape any HTML/XML text...
+                        value = StringEscapeUtils.escapeHtml((String) value);
+                    }
                     
                     if (colDecorators[i] != null) {
                         try {
