@@ -199,7 +199,7 @@ public class AppServiceDAO extends HibernateDAO
             "select distinct a from AppService a " +
             " join fetch a.service s " +
             "where a.application.id=? " +
-            "order by s.name " + (asc ? "asc" : "desc");
+            "order by s.resource.name " + (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .list();
@@ -212,7 +212,7 @@ public class AppServiceDAO extends HibernateDAO
             " join fetch a.service s " +
             " join fetch a.serviceType st " +
             "where a.application.id=? " +
-            "order by st.name " + (asc ? "asc" : "desc") + ", s.name";
+            "order by st.name " + (asc ? "asc" : "desc") + ", s.resource.name";
         return getSession().createQuery(sql)
             .setInteger(0, id.intValue())
             .list();
