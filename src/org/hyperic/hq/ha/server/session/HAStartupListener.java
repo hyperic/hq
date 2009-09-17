@@ -32,12 +32,13 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.common.server.mbean.ProductConfigService;
+import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.ha.server.mbean.HAService;
 import org.hyperic.hq.measurement.server.session.MeasurementStartupListener;
 import org.hyperic.hq.product.server.MBeanUtil;
 
 public class HAStartupListener
-    implements StartupListener
+    implements StartupListener, org.hyperic.hq.ha.HAService
 {
     private Log _log = LogFactory.getLog(HAStartupListener.class);
 
@@ -50,6 +51,12 @@ public class HAStartupListener
         startScheduler(server);
         startHAService(server);
         MeasurementStartupListener.startDataPurgeWorker();
+        HAUtil.setHAService(this);
+    }
+    
+    public boolean isMasterNode() {
+        // HA not implemented in .org
+        return true;
     }
 
     private void startHAService(MBeanServer server)
@@ -87,4 +94,6 @@ public class HAStartupListener
             _log.info("Unable to start service: "+e);
         }
     }
+
+   
 }
