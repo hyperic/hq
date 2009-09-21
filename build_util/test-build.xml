@@ -154,7 +154,7 @@
     <instrument-tests input.dir="${basedir}/unittest/src" output.dir="${test.clover.dir}"/>
   </target>
 
-  <target name="clover.compile">
+  <target name="clover.compile" depends="clover.pre,clover.instrument">
     <path id="clover.compile.classpath">
         <path refid="clover.classpath"/>
         <path refid="testjars"/>
