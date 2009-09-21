@@ -38,7 +38,7 @@
 
   <!-- UnitTest libs, initially empty and reset if the build is built
         for unitTests -->
-  <property name="unittest.lib" location="${hq.home}/unittest/emptydir"/>
+  <property name="unittest.lib" location=""/>
 
   <!-- Thirdparty libs -->
   <property name="thirdparty.lib" location="thirdparty/lib"/>
@@ -533,10 +533,6 @@
 
     <copy todir="${ear.dir}/alertTemplates">
        <fileset dir="${basedir}/etc/alertTemplates"/>
-    </copy>
-
-    <copy todir="${ear.dir}/gconsoleTemplates">
-       <fileset dir="${basedir}/etc/gconsoleTemplates"/>
     </copy>
 
     <copy todir="${ear.dir}/gconsoleTemplates" failonerror="false">
