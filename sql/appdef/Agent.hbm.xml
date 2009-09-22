@@ -16,14 +16,12 @@
       <column name="VERSION_COL" default="0"/>
     </version>
 
-    <properties name="agentId" unique="true">
-      <property name="address">
-        <column name="ADDRESS" not-null="true" length="255"/>
-      </property>
-      <property name="port">
-        <column name="PORT" not-null="true"/>
-      </property>
-    </properties>
+    <property name="address">
+      <column name="ADDRESS" not-null="true" length="255"/>
+    </property>
+    <property name="port">
+      <column name="PORT" not-null="true"/>
+    </property>
 
     <property name="authToken">
       <column name="AUTHTOKEN" not-null="true" length="100"/>
