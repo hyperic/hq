@@ -56,14 +56,14 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
@@ -192,7 +192,7 @@ public abstract class AppdefSessionEJB
         if (log.isDebugEnabled())
             log.debug("Removing authz resource: " + aeid);
         
-        ResourceManagerLocal rm = getResourceManager();
+        ResourceManager rm = getResourceManager();
         AuthzSubject s = 
             AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId()); 
         rm.removeResource(s, r);
@@ -1019,7 +1019,7 @@ public abstract class AppdefSessionEJB
         List idList = pm.findOperationScopeBySubject(whoami, op.getId());
 
         List valueList = new ArrayList(idList.size());
-        ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroupManager rgMan = ResourceGroupManagerImpl.getOne();
         for (int i = 0; i < idList.size(); i++) {
             valueList.add(rgMan.findResourceGroupById(whoami,
                                                       (Integer) idList.get(i)));
@@ -1079,7 +1079,7 @@ public abstract class AppdefSessionEJB
         sc.setGroup(group);
         
         Collection resources = 
-            ResourceGroupManagerEJBImpl.getOne().getMembers(group);
+            ResourceGroupManagerImpl.getOne().getMembers(group);
     
         Set services = new HashSet(resources.size());
         ServiceDAO dao = getServiceDAO();

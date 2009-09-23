@@ -56,9 +56,9 @@ import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
- * The startup listener that schedules the HQ DB Health task 
+ * The startup listener that schedules the HQ DB Health task
  */
-public class HQDBHealthStartupListener 
+public class HQDBHealthStartupListener
     implements StartupListener, PluginsDeployedCallback {
 
     private static final String BUNDLE = "org.hyperic.hq.events.Resources";
@@ -66,63 +66,64 @@ public class HQDBHealthStartupListener
     private static final int HEALTH_CHECK_PERIOD_MILLIS = 15*1000;
     private static final int FAILURE_CHECK_PERIOD_MILLIS = 1000;
     private static final int MAX_NUM_OF_FAILURE_CHECKS = 10;
-    
-    private final Log _log = 
+
+    private final Log _log =
         LogFactory.getLog(HQDBHealthStartupListener.class);
-        
+
     /**
      * @see org.hyperic.hq.application.StartupListener#hqStarted()
      */
     public void hqStarted() {
-        // We want to start the health check only after all plugins 
-        // have been deployed since this is when the server starts accepting 
+        // We want to start the health check only after all plugins
+        // have been deployed since this is when the server starts accepting
         // metrics from agents.
         HQApp.getInstance().
             registerCallbackListener(PluginsDeployedCallback.class, this);
     }
-    
+
     /**
      * @see org.hyperic.hq.product.server.session.PluginsDeployedCallback#pluginsDeployed(java.util.List)
      */
     public void pluginsDeployed(List plugins) {
         _log.info("Scheduling HQ DB Health to perform a health check every " +
                    (HEALTH_CHECK_PERIOD_MILLIS/1000) + " sec");
-        
+
         Scheduler scheduler = HQApp.getInstance().getScheduler();
-        
-        scheduler.scheduleAtFixedRate(new HQDBHealthTask(), 
-                                      Scheduler.NO_INITIAL_DELAY, 
-                                      HEALTH_CHECK_PERIOD_MILLIS);        
+
+        scheduler.scheduleAtFixedRate(new HQDBHealthTask(),
+                                      Scheduler.NO_INITIAL_DELAY,
+                                      HEALTH_CHECK_PERIOD_MILLIS);
     }
-    
+
     private static class HQDBHealthTask implements Runnable {
-        
+
         private final Log _log = LogFactory.getLog(HQDBHealthTask.class);
-                
+
         private long healthOkStartTime = 0; // time of first OK health check
         private long lastHealthOkTime = 0; // time of last OK health check
-        private int numOfHealthCheckFailures = 0;   
-        private final String HQADMIN_EMAIL_SQL = "SELECT email_address FROM EAM_SUBJECT WHERE id = " 
+        private int numOfHealthCheckFailures = 0;
+        private final String HQADMIN_EMAIL_SQL = "SELECT email_address FROM EAM_SUBJECT WHERE id = "
                                                     + AuthzConstants.rootSubjectId;
         private String hqadminEmail = null;
+        private DBUtil dbUtil;
 
         public void run() {
             Connection conn = null;
             Statement stmt = null;
             ResultSet rs = null;
-            
+
             synchronized (HEALTH_CHECK_LOCK) {
                 try {
-                    conn = DBUtil.getConnByContext(new InitialContext(), 
+                    conn = dbUtil.getConnByContext(new InitialContext(),
                                                    HQConstants.DATASOURCE);
                     stmt = conn.createStatement();
-                
+
                     if (healthOkStartTime == 0) {
                         healthOkStartTime = pingDatabase(conn, stmt, rs);
                     } else {
                         // get latest email address to send to in case of db failures
                         rs = stmt.executeQuery(HQADMIN_EMAIL_SQL);
-                
+
                         if (rs.next()) {
                             hqadminEmail = rs.getString(1);
                         }
@@ -132,11 +133,11 @@ public class HQDBHealthStartupListener
                     recordFailure(t);
                     performFailureCheck();
                 } finally {
-                    DBUtil.closeJDBCObjects(HQDBHealthTask.class, conn, stmt, rs);
-                }            
+                    dbUtil.closeJDBCObjects(HQDBHealthTask.class, conn, stmt, rs);
+                }
             }
         }
-        
+
         /**
          * Perform failure checks and shutdown HQ if necessary
          */
@@ -144,16 +145,16 @@ public class HQDBHealthStartupListener
             Connection conn = null;
             Statement stmt = null;
             ResultSet rs = null;
-            
+
             while (healthOkStartTime == 0) {
-                try {               
+                try {
                     // wait 1 second before trying
                     Thread.sleep(FAILURE_CHECK_PERIOD_MILLIS);
 
-                    conn = DBUtil.getConnByContext(new InitialContext(), 
+                    conn = dbUtil.getConnByContext(new InitialContext(),
                                                    HQConstants.DATASOURCE);
                     stmt = conn.createStatement();
-                    
+
                     healthOkStartTime = pingDatabase(conn, stmt, rs);
                     recordSuccess();
                 } catch (Throwable t) {
@@ -169,25 +170,25 @@ public class HQDBHealthStartupListener
                         System.exit(1);
                     }
                 } finally {
-                    DBUtil.closeJDBCObjects(HQDBHealthTask.class, conn, stmt, rs);
+                    dbUtil.closeJDBCObjects(HQDBHealthTask.class, conn, stmt, rs);
                 }
             }
-            
+
         } // end
 
         /**
          * Get database timestamp to check overall database health
          */
-        private long pingDatabase(Connection conn, Statement stmt, ResultSet rs) 
+        private long pingDatabase(Connection conn, Statement stmt, ResultSet rs)
             throws SQLException {
-        
+
             Dialect dialect = HQDialectUtil.getDialect(conn);
             rs = stmt.executeQuery(dialect.getCurrentTimestampSelectString());
-        
+
             if (rs.next()) {
                 rs.getString(1);
             }
-            
+
             return System.currentTimeMillis();
         }
 
@@ -199,16 +200,16 @@ public class HQDBHealthStartupListener
             numOfHealthCheckFailures = 0;
             logStatus(null);
         }
-        
+
         /**
          * Set fields and log failure status
          */
         private void recordFailure(Throwable t) {
-            healthOkStartTime = 0;            
+            healthOkStartTime = 0;
             numOfHealthCheckFailures++;
             logStatus(t);
         }
-        
+
         /**
          * Log the status of the current health check
          */
@@ -227,7 +228,7 @@ public class HQDBHealthStartupListener
                 }
             }
         }
-        
+
         /**
          * email notify of shutdown
          */
@@ -235,37 +236,37 @@ public class HQDBHealthStartupListener
             try {
                 InternetAddress addr = new InternetAddress(hqadminEmail);
                 EmailRecipient rec = new EmailRecipient(addr, false);
-                
+
                 EmailRecipient[] addresses = new EmailRecipient[] { rec };
-                
-                String[] body = new String[addresses.length];                
+
+                String[] body = new String[addresses.length];
                 StringWriter sw = new StringWriter();
                 PrintWriter pw = new PrintWriter(sw);
                 t.printStackTrace(pw);
 
                 StringBuffer sb = new StringBuffer();
-                MessageFormat messageFormat = 
+                MessageFormat messageFormat =
                     new MessageFormat((ResourceBundle.getBundle(BUNDLE)
                                             .getString("event.hqdbhealth.email.message")));
                 messageFormat.format(
                         new String[] {
-                                new Date().toString(), 
+                                new Date().toString(),
                                 sw.toString()},
-                        sb, null);      
+                        sb, null);
 
                 Arrays.fill(body, sb.toString());
-                
-                EmailFilter.sendEmail(addresses, 
+
+                EmailFilter.sendEmail(addresses,
                                       ResourceBundle.getBundle(BUNDLE)
-                                          .getString("event.hqdbhealth.email.subject"), 
+                                          .getString("event.hqdbhealth.email.subject"),
                                       body, null, null);
             } catch (AddressException e) {
                 _log.error("Invalid email address: " + hqadminEmail);
             } catch (SystemException e) {
                 _log.error("HQ services not available for sending emails");
-            }            
+            }
         }
-        
+
     }
 
 }

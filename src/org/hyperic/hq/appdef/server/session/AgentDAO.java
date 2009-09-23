@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.List;
 
 import org.hibernate.Query;
+import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
@@ -36,7 +37,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 
 public class AgentDAO extends HibernateDAO
 {
-    public AgentDAO(DAOFactory f) {
+    public AgentDAO(SessionFactory f) {
         super(Agent.class, f);
     }
 
@@ -56,16 +57,16 @@ public class AgentDAO extends HibernateDAO
         return (Agent)super.findById(id);
     }
 
-    public Agent create(AgentType type, String address, Integer port, 
+    public Agent create(AgentType type, String address, Integer port,
                         boolean unidirectional, String authToken,
                         String agentToken, String version)
     {
         Agent ag = new Agent(type, address, port, unidirectional, authToken,
-                             agentToken, version); 
+                             agentToken, version);
         save(ag);
         return ag;
     }
-    
+
     public List findByIP(String ip) {
         String hql = "from Agent where address=:address";
         return getSession()
@@ -78,9 +79,9 @@ public class AgentDAO extends HibernateDAO
         return ((Number)getSession()
             .createQuery("select count(distinct a) from Platform p " +
                          "join p.agent a").uniqueResult()).intValue();
-            
+
     }
-    
+
     public Agent findByIpAndPort(String address, int port) {
         String sql = "from Agent where address=? and port=?";
         return (Agent)getSession().createQuery(sql)
@@ -107,16 +108,16 @@ public class AgentDAO extends HibernateDAO
             .append(" WHERE r.resourceType is not null")
             .append(" ORDER BY ").append(sort.getSortString("a"))
             .append((pInfo.isAscending() ? "" : " DESC"));
-    
+
         // Secondary sort by CTime
         if (!sort.equals(AgentSortField.CTIME)) {
             sql.append(", ")
                .append(AgentSortField.CTIME.getSortString("a"))
-               .append(" DESC"); 
+               .append(" DESC");
         }
-        
+
         final Query q = getSession().createQuery(sql.toString());
-        
+
         return pInfo.pageResults(q).list();
     }
 }

@@ -1,7 +1,7 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as ResourceMan
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl as ResourceMan
 import org.hyperic.hq.appdef.server.session.AppdefResource
 import org.hyperic.hq.appdef.server.session.AppdefResourceType
 import org.hyperic.hq.authz.shared.PermissionManagerFactory as PermManFactory

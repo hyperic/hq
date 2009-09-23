@@ -25,14 +25,15 @@
 
 package org.hyperic.hq.galerts.server.session;
 
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
-class GtriggerTypeInfoDAO 
+class GtriggerTypeInfoDAO
     extends HibernateDAO
 {
-    GtriggerTypeInfoDAO(DAOFactory f) {
+    GtriggerTypeInfoDAO(SessionFactory f) {
         super(GtriggerTypeInfo.class, f);
     }
 
@@ -47,10 +48,10 @@ class GtriggerTypeInfoDAO
     void remove(GtriggerTypeInfo tInfo) {
         super.remove(tInfo);
     }
-    
+
     GtriggerTypeInfo find(GtriggerType type) {
         Class typeClass = type.getClass();
-        
+
         return (GtriggerTypeInfo) createCriteria()
             .add(Expression.eq("typeClass", typeClass))
             .uniqueResult();

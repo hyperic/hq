@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -77,13 +77,13 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -107,7 +107,7 @@ import org.hibernate.NonUniqueResultException;
 /**
  * This class is responsible for managing Platform objects in appdef and their
  * relationships
- * 
+ *
  * @ejb:bean name="PlatformManager" jndi-name="ejb/appdef/PlatformManager"
  *           local-jndi-name="LocalPlatformManager" view-type="local"
  *           type="Stateless"
@@ -129,7 +129,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Find a PlatformType by id
-     * 
+     *
      * @ejb:interface-method
      */
     public PlatformType findPlatformType(Integer id)
@@ -139,7 +139,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Find a platform type by name
-     * 
+     *
      * @param type
      *            - name of the platform type
      * @return platformTypeValue
@@ -169,16 +169,16 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public Collection findSupportedPlatformTypes() {
         Collection platformTypes = findAllPlatformTypes();
         PlatformType pType = null;
-        
+
         for (Iterator it=platformTypes.iterator(); it.hasNext();) {
-            pType = (PlatformType)it.next(); 
+            pType = (PlatformType)it.next();
             if (!PlatformDetector.isSupportedPlatform(pType.getName())) {
                 it.remove();
             }
         }
         return platformTypes;
     }
-    
+
     /**
      * @return {@link PlatformType}s
      * @ejb:interface-method
@@ -186,21 +186,21 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     public Collection findUnsupportedPlatformTypes() {
         Collection platformTypes = findAllPlatformTypes();
         PlatformType pType = null;
-        
+
         for (Iterator it=platformTypes.iterator(); it.hasNext();) {
-            pType = (PlatformType)it.next(); 
+            pType = (PlatformType)it.next();
             if (PlatformDetector.isSupportedPlatform(pType.getName())) {
                 it.remove();
             }
         }
         return platformTypes;
     }
-    
+
     /**
      * @ejb:interface-method
      */
     public Resource findResource(PlatformType pt) {
-        ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
+        ResourceManager rman = ResourceManagerImpl.getOne();
         ResourceType rType;
 
         String typeName = AuthzConstants.platformPrototypeTypeName;
@@ -214,7 +214,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Find all platform types
-     * 
+     *
      * @return List of PlatformTypeValues
      * @ejb:interface-method
      */
@@ -227,7 +227,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Find viewable platform types
-     * 
+     *
      * @return List of PlatformTypeValues
      * @ejb:interface-method
      */
@@ -253,7 +253,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get PlatformPluginName for an entity id. There is no authz in this method
      * because it is not needed.
-     * 
+     *
      * @return name of the plugin for the entity's platform such as
      *         "Apache 2.0 Linux". It is used as to look up plugins via a
      *         generic plugin manager.
@@ -285,7 +285,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             p = findPlatformById(id.getId());
             typeName = p.getPlatformType().getName();
         } else if (id.isGroup()) {
-            ResourceGroup g = ResourceGroupManagerEJBImpl.getOne()
+            ResourceGroup g = ResourceGroupManagerImpl.getOne()
                     .findResourceGroupById(id.getId());
             return g.getResourcePrototype().getName();
         } else {
@@ -301,7 +301,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Delete a platform
-     * 
+     *
      * @param subject
      *            The user performing the delete operation.
      * @param id
@@ -417,7 +417,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Create a Platform of a specified type
-     * 
+     *
      * @ejb:interface-method
      */
     public Platform createPlatform(AuthzSubject subject,
@@ -475,7 +475,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             }
 
             dao.getSession().flush();
-            
+
             // Send resource create event
             ResourceCreatedZevent zevent = new ResourceCreatedZevent(subject,
                     platform.getEntityId());
@@ -495,7 +495,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Create a Platform from an AIPlatform
-     * 
+     *
      * @param aipValue
      *            the AIPlatform to create as a regular appdef platform.
      * @ejb:interface-method
@@ -505,7 +505,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         throws ApplicationException, CreateException {
         counter.addCPUs(aipValue.getCpuCount().intValue());
 
-        PlatformTypeDAO tdao = new PlatformTypeDAO(DAOFactory.getDAOFactory());
+        PlatformTypeDAO tdao = getPlatformTypeDAO();
         PlatformType platType = tdao.findByName(aipValue.getPlatformTypeName());
         PlatformDAO dao = getPlatformDAO();
 
@@ -548,7 +548,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get all platforms.
-     * 
+     *
      * @ejb:interface-method
      * @param subject
      *            The subject trying to list platforms.
@@ -574,7 +574,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get platforms created within a given time range.
-     * 
+     *
      * @ejb:interface-method
      * @param subject
      *            The subject trying to list platforms.
@@ -612,14 +612,14 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get platform light value by id. Does not check permission.
-     * 
+     *
      * @ejb:interface-method
      */
     public Platform getPlatformById(AuthzSubject subject, Integer id)
         throws PlatformNotFoundException, PermissionException {
         Platform platform = findPlatformById(id);
         checkViewPermission(subject, platform.getEntityId());
-        // Make sure that resource is loaded as to not get 
+        // Make sure that resource is loaded as to not get
         // LazyInitializationException
         platform.getName();
         return platform;
@@ -627,7 +627,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Find a Platform by Id.
-     * 
+     *
      * @param id The id to look up.
      * @return A Platform object representing this Platform.
      * @throws PlatformNotFoundException
@@ -641,7 +641,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         if (platform == null)
             throw new PlatformNotFoundException(id);
 
-        // Make sure that resource is loaded as to not get 
+        // Make sure that resource is loaded as to not get
         // LazyInitializationException
         platform.getName();
 
@@ -652,7 +652,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Get the Platform object based on an AIPlatformValue. Checks against FQDN,
      * CertDN, then checks to see if all IP addresses match. If all of these
      * checks fail null is returned.
-     * 
+     *
      * @ejb:interface-method
      */
     public Platform getPlatformByAIPlatform(AuthzSubject subject,
@@ -673,7 +673,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             // to need to do better.
             for (int i = 0; i < ipvals.length; i++) {
                 AIIpValue qip = ipvals[i];
-                
+
                 String address = qip.getAddress();
                 // XXX This is a hack that we need to get rid of
                 // at some point.  The idea is simple.  Every platform
@@ -686,48 +686,48 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                     i < (ipvals.length - 1)) {
                     continue;
                 }
-                    
+
                 Collection platforms = getPlatformDAO().findByIpAddr(address);
-                
+
                 if (!platforms.isEmpty()) {
                     Platform ipMatch = null;
-                    
+
                     Platform plat;
                     for (Iterator it = platforms.iterator(); it.hasNext(); ) {
                         plat = (Platform) it.next();
-                        
+
                         // Make sure the types match
                         if (!plat.getPlatformType().getName()
                                 .equals(aiPlatform.getPlatformTypeName()))
                             continue;
-                        
+
                         // If we got any platforms that match this IP address, then
                         // we just take it and see if we can match up more criteria.
                         // We can assume that is a candidate for the platform we are
                         // looking for.  This should only fall apart if we have
                         // multiple platforms defined for the same IP address, which
                         // should be a rarity.
-                        
+
                         if (plat.getFqdn().equals(fqdn)) {  // Perfect
                             p = plat;
                             break;
                         }
-                        
+
                         // FQDN changed
                         if (platformMatchesAllIps(plat, Arrays.asList(ipvals)))
                             ipMatch = plat;
                     }
-                    
+
                     // If FQDN was not matched, but all IPs are
                     p = (p == null) ? ipMatch : p;
                 }
-                
+
                 // Found a match
                 if (p != null)
                     break;
             }
         }
-        
+
         // One more try
         if (p == null)
             p = getPlatformDAO().findByFQDN(fqdn);
@@ -744,7 +744,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 p = null;
             }
         }
-        
+
         return p;
     }
 
@@ -813,7 +813,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Find a platform by name
-     * 
+     *
      * @ejb:interface-method
      * @param subject
      *            - who is trying this
@@ -856,7 +856,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get the Platform that has the specified Fqdn
-     * 
+     *
      * @ejb:interface-method
      */
     public Platform findPlatformByFqdn(AuthzSubject subject, String fqdn)
@@ -878,7 +878,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get the Collection of platforms that have the specified Ip address
-     * 
+     *
      * @ejb:interface-method
      */
     public Collection getPlatformByIpAddr(AuthzSubject subject, String address)
@@ -888,7 +888,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get the platform by agent token
-     * 
+     *
      * @ejb:interface-method
      */
     public Collection getPlatformPksByAgentToken(AuthzSubject subject,
@@ -911,7 +911,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get the platform that hosts the server that provides the specified
      * service.
-     * 
+     *
      * @ejb:interface-method
      * @param subject
      *            The subject trying to list services.
@@ -935,7 +935,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get the platform ID that hosts the server that provides the specified
      * service.
-     * 
+     *
      * @ejb:interface-method
      * @param serviceId
      *            service ID.
@@ -953,7 +953,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get the platform for a server.
-     * 
+     *
      * @ejb:interface-method
      * @param subject
      *            The subject trying to list services.
@@ -979,7 +979,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get the platform ID for a server.
-     * 
+     *
      * @ejb:interface-method
      * @param serverId
      *            Server ID.
@@ -997,7 +997,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get the platforms for a list of servers.
-     * 
+     *
      * @ejb:interface-method
      * @param subject
      *            The subject trying to list services.
@@ -1033,9 +1033,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get all platforms by application.
-     * 
+     *
      * @ejb:interface-method
-     * 
+     *
      * @param subject
      *            The subject trying to list services.
      * @param appId
@@ -1101,9 +1101,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get server IDs by server type and platform.
-     * 
+     *
      * @ejb:interface-method
-     * 
+     *
      * @param subject
      *            The subject trying to list servers.
      * @return A PageList of ServerValue objects representing servers on the
@@ -1138,9 +1138,9 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get server IDs by server type and platform.
-     * 
+     *
      * @ejb:interface-method
-     * 
+     *
      * @param subject
      *            The subject trying to list servers.
      * @param pc
@@ -1184,7 +1184,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Get the platforms that have an IP with the specified address. If no
      * matches are found, this method DOES NOT throw a
      * PlatformNotFoundException, rather it returns an empty PageList.
-     * 
+     *
      * @ejb:interface-method
      */
     public PageList findPlatformsByIpAddr(AuthzSubject subject, String addr,
@@ -1210,7 +1210,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                                                Integer pType, String regEx) {
         return getPlatformDAO().findByTypeAndRegEx(pType, regEx);
     }
-    
+
     /**
      * @param subj
      * @param platformTypeIds
@@ -1228,7 +1228,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         List unsupportedPlatformTypes = new ArrayList(findUnsupportedPlatformTypes());
         List pTypeIds = new ArrayList();
         PlatformType pType = null;
-        
+
         if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
             for (Iterator it=platformTypeIds.iterator(); it.hasNext(); ) {
                 Integer pTypeId = (Integer) it.next();
@@ -1247,12 +1247,12 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                pTypeIds.add(pType.getId());
            }
         }
-        
+
         return getPlatformDAO()
                     .findParentByNetworkRelation(
                             pTypeIds, platformName, hasChildren);
     }
-    
+
     /**
      * @param subj
      * @param platformTypeIds
@@ -1266,7 +1266,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         List supportedPlatformTypes = new ArrayList(findSupportedPlatformTypes());
         List pTypeIds = new ArrayList();
         PlatformType pType = null;
-        
+
         if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
             for (Iterator it=platformTypeIds.iterator(); it.hasNext(); ) {
                 Integer pTypeId = (Integer) it.next();
@@ -1285,32 +1285,32 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                pTypeIds.add(pType.getId());
            }
         }
-        
+
         return getPlatformDAO().findByNoNetworkRelation(
                                         pTypeIds, platformName);
     }
 
     /**
      * Get the platforms that have an IP with the specified address.
-     * 
+     *
      * @return a list of {@link Platform}s
      * @ejb:interface-method
      */
     public Collection findPlatformPojosByIpAddr(String addr) {
         return getPlatformDAO().findByIpAddr(addr);
     }
-    
+
     /**
      * @ejb.interface-method
      */
     public Collection findDeletedPlatforms() {
         return getPlatformDAO().findDeletedPlatforms();
     }
-    
+
     /**
      * Update an existing Platform. Requires all Ip's to have been re-added via
      * the platformValue.addIpValue(IpValue) method due to bug 4924
-     * 
+     *
      * @param existing
      *            - the value object for the platform you want to save
      * @ejb:interface-method
@@ -1415,7 +1415,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Update an existing Platform. Requires all Ip's to have been re-added via
      * the platformValue.addIpValue(IpValue) method due to bug 4924
-     * 
+     *
      * @param existing
      *            - the value object for the platform you want to save
      * @ejb:interface-method
@@ -1430,7 +1430,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Private method to validate a new PlatformValue object
-     * 
+     *
      * @throws ValidationException
      */
     private void validateNewPlatform(PlatformValue pv)
@@ -1451,7 +1451,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * Create the Authz resource and verify that the subject has the
      * createPlatform permission.
-     * 
+     *
      * @param subject
      *            - the user creating
      */
@@ -1463,7 +1463,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         checkCreatePlatformPermission(subject);
 
         ResourceType platProtoType = getPlatformPrototypeResourceType();
-        Resource proto = ResourceManagerEJBImpl.getOne()
+        Resource proto = ResourceManagerImpl.getOne()
                 .findResourceByInstanceId(platProtoType,
                                           platform.getPlatformType().getId());
         _log.debug("User has permission to create platform. "
@@ -1478,15 +1478,15 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     /**
      * DevNote: This method was refactored out of updatePlatformTypes. It does
      * not work.
-     * 
+     *
      * @ejb:interface-method
      */
     public void deletePlatformType(PlatformType pt)
         throws VetoException, RemoveException {
-        ResourceGroupManagerLocal resGroupMan = ResourceGroupManagerEJBImpl
+        ResourceGroupManager resGroupMan = ResourceGroupManagerImpl
                 .getOne();
-        ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
-        Resource proto = 
+        ResourceManager resMan = ResourceManagerImpl.getOne();
+        Resource proto =
             resMan.findResourceByInstanceId(AuthzConstants.authzPlatformProto,
                                             pt.getId());
         AuthzSubject overlord = getOverlord();
@@ -1526,7 +1526,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Update platform types
-     * 
+     *
      * @ejb:interface-method
      */
     public void updatePlatformTypes(String plugin, PlatformTypeInfo[] infos)
@@ -1560,7 +1560,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             }
         }
 
-        Resource prototype = ResourceManagerEJBImpl.getOne().findRootResource();
+        Resource prototype = ResourceManagerImpl.getOne().findRootResource();
         AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne()
                 .getOverlordPojo();
 
@@ -1577,7 +1577,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Update an existing appdef platform with data from an AI platform.
-     * 
+     *
      * @param aiplatform
      *            the AI platform object to use for data
      * @ejb:interface-method
@@ -1599,13 +1599,13 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         if ((count != null) && (count.intValue() > prevCpuCount)) {
             counter.addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
         }
-        
+
         // Get the FQDN before we update
         String prevFqdn = platform.getFqdn();
-        
+
         platform.updateWithAI(aiplatform, subj.getName(),
                               platform.getResource());
-        
+
         // If FQDN has changed, we need to update servers' auto-inventory tokens
         if (!prevFqdn.equals(platform.getFqdn())) {
             for (Iterator it = platform.getServers().iterator(); it.hasNext();){
@@ -1617,7 +1617,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 }
             }
         }
-        
+
         // need to check if IPs have changed, if so update Agent
         List ips = Arrays.asList(aiplatform.getAIIpValues());
         AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
@@ -1699,7 +1699,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Add an IP to a platform
-     * 
+     *
      * @ejb:interface-method
      */
     public Ip addIp(Platform platform, String address, String netmask,
@@ -1709,7 +1709,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Update an IP on a platform
-     * 
+     *
      * @ejb:interface-method
      */
     public Ip updateIp(Platform platform, String address, String netmask,
@@ -1719,7 +1719,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Remove an IP on a platform
-     * 
+     *
      * @ejb:interface-method
      */
     public void removeIp(Platform platform, String address, String netmask,
@@ -1733,7 +1733,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      * Returns a list of 2 element arrays. The first element is the name of the
      * platform type, the second element is the # of platforms of that type in
      * the inventory.
-     * 
+     *
      * @ejb:interface-method
      */
     public List getPlatformTypeCounts() {
@@ -1764,7 +1764,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Create a platform manager session bean.
-     * 
+     *
      * @exception CreateException
      *                If an error occurs creating the pager for the bean.
      */

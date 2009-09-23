@@ -43,9 +43,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
 import org.hyperic.hq.galerts.processor.FireReason;
@@ -740,15 +740,15 @@ public class MeasurementGtrigger
         return MeasurementManagerEJBImpl.getOne();
     }
     
-    private ResourceGroupManagerLocal getRGMan() {
-        return ResourceGroupManagerEJBImpl.getOne();
+    private ResourceGroupManager getRGMan() {
+        return ResourceGroupManagerImpl.getOne();
     }
     
     public void setGroup(ResourceGroup rg) {
         _resourceGroup = rg;
         
         _interestedEvents.clear();
-        ResourceGroupManagerLocal gMan = ResourceGroupManagerEJBImpl.getOne(); 
+        ResourceGroupManager gMan = ResourceGroupManagerImpl.getOne(); 
         AuthzSubjectManagerLocal sMan = AuthzSubjectManagerEJBImpl.getOne(); 
         TemplateManagerLocal tMan = TemplateManagerEJBImpl.getOne(); 
             

@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -54,145 +54,162 @@ import org.hyperic.hq.events.server.session.TriggerDAO;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
 
 public class HibernateDAOFactory extends DAOFactory {
-    private static final SessionFactory sessionFactory = 
-        Util.getSessionFactory();
-    private static final HibernateDAOFactory singleton = 
-        new HibernateDAOFactory();
 
-    public static HibernateDAOFactory getInstance() {
-        return singleton;
-    }
+    private SessionFactory sessionFactory;
+
+    private ActionDAO actionDAO;
+    private AlertDefinitionDAO alertDefinitionDAO;
+    private AgentReportStatusDAO agentReportStatusDAO;
+    private ResourceGroupDAO resourceGroupDAO;
+    private AIHistoryDAO aiHistoryDAO;
+    private AIIpDAO aIpDAO;
+    private AIPlatformDAO aiPlatformDAO;
+    private AIScheduleDAO aiScheduleDAO;
+    private AIServerDAO aiServerDAO;
+    private AIServiceDAO aiServiceDAO;
+    private AlertActionLogDAO alertActionLogDAO;
+    private AlertConditionLogDAO alertConditionLogDAO;
+    private AppServiceDAO appServiceDAO;
+    private AppSvcDependencyDAO appDependencyDAO;
+    private ConfigPropertyDAO configPropertyDAO;
+    private ConfigResponseDAO configResponseDAO;
+    private CpropKeyDAO cpropKeyDAO;
+    private CrispoDAO crispoDAO;
+    private PlatformDAO platformDAO;
+    private ServerDAO serverDAO;
+    private ServerTypeDAO serverTypeDAO;
+    private ServiceDAO serviceDAO;
+    private TriggerDAO triggerDAO;
+    private ServiceTypeDAO serviceTypeDAO;
+    private ResourceDAO resourceDAO;
+    private ResourceTypeDAO resourceTypeDAO;
+    private RoleDAO roleDAO;
+    private VirtualDAO virtualDAO;
+    private CrispoOptionDAO crispoOptionDAO;
+    private ExecutionStrategyTypeInfoDAO executionStrategyTypeInfoDAO;
 
     public Session getCurrentSession() {
-        return getSessionFactory().getCurrentSession();
+        return sessionFactory.getCurrentSession();
     }
 
-    public SessionFactory getSessionFactory() {
-        if (sessionFactory == null) {
-            throw new IllegalStateException("SessionFactory not initialized");
-        }
-        return sessionFactory;
-    }
-
-    protected HibernateDAOFactory () {}
 
     public ActionDAO getActionDAO() {
-        return new ActionDAO(this);
+        return actionDAO;
     }
 
     public AlertDefinitionDAO getAlertDefDAO() {
-        return new AlertDefinitionDAO(this);
+        return alertDefinitionDAO;
     }
-    
+
     public AgentReportStatusDAO getAgentReportStatusDAO() {
-        return new AgentReportStatusDAO(this);
+        return agentReportStatusDAO;
     }
 
     public AppServiceDAO getAppServiceDAO() {
-        return new AppServiceDAO(this);
+        return appServiceDAO;
     }
 
     public AppSvcDependencyDAO getAppSvcDepencyDAO() {
-        return new AppSvcDependencyDAO(this);
+        return appDependencyDAO;
     }
 
     public ConfigResponseDAO getConfigResponseDAO() {
-        return new ConfigResponseDAO(this);
+        return configResponseDAO;
     }
 
     public CpropKeyDAO getCpropKeyDAO() {
-        return new CpropKeyDAO(this);
+        return cpropKeyDAO;
     }
 
     public PlatformDAO getPlatformDAO() {
-        return new PlatformDAO(this);
+        return platformDAO;
     }
 
     public ServerDAO getServerDAO() {
-        return new ServerDAO(this);
+        return serverDAO;
     }
 
     public ServerTypeDAO getServerTypeDAO() {
-        return new ServerTypeDAO(this);
+        return serverTypeDAO;
     }
 
     public ServiceDAO getServiceDAO() {
-        return new ServiceDAO(this);
+        return serviceDAO;
     }
 
     public TriggerDAO getTriggerDAO() {
-        return new TriggerDAO(this);
+        return triggerDAO;
     }
 
     public ServiceTypeDAO getServiceTypeDAO() {
-        return new ServiceTypeDAO(this);
+        return serviceTypeDAO;
     }
 
     public ResourceDAO getResourceDAO() {
-        return new ResourceDAO(this);
+        return resourceDAO;
     }
 
     public ResourceGroupDAO getResourceGroupDAO() {
-        return new ResourceGroupDAO(this);
+        return resourceGroupDAO;
     }
 
     public ResourceTypeDAO getResourceTypeDAO() {
-        return new ResourceTypeDAO(this);
+        return resourceTypeDAO;
     }
 
     public RoleDAO getRoleDAO() {
-        return new RoleDAO(this);
+        return roleDAO;
     }
 
     public AIPlatformDAO getAIPlatformDAO() {
-        return new AIPlatformDAO(this);
+        return aiPlatformDAO;
     }
 
     public AIServerDAO getAIServerDAO() {
-        return new AIServerDAO(this);
+        return aiServerDAO;
     }
 
     public AIServiceDAO getAIServiceDAO() {
-        return new AIServiceDAO(this);
+        return aiServiceDAO;
     }
 
     public AIIpDAO getAIIpDAO() {
-        return new AIIpDAO(this);
+        return aIpDAO;
     }
 
     public AIHistoryDAO getAIHistoryDAO() {
-        return new AIHistoryDAO(this);
+        return aiHistoryDAO;
     }
 
     public AIScheduleDAO getAIScheduleDAO() {
-        return new AIScheduleDAO(this);
+        return aiScheduleDAO;
     }
 
     public ConfigPropertyDAO getConfigPropertyDAO() {
-        return new ConfigPropertyDAO(this);
+        return configPropertyDAO;
     }
 
     public AlertActionLogDAO getAlertActionLogDAO() {
-        return new AlertActionLogDAO(this);
+        return alertActionLogDAO;
     }
 
     public AlertConditionLogDAO getAlertConditionLogDAO() {
-        return new AlertConditionLogDAO(this);
+        return alertConditionLogDAO;
     }
 
     public VirtualDAO getVirtualDAO() {
-        return new VirtualDAO(this);
+        return virtualDAO;
     }
 
     public CrispoDAO getCrispoDAO() {
-        return new CrispoDAO(this);
+        return crispoDAO;
     }
 
     public CrispoOptionDAO getCrispoOptionDAO() {
-        return new CrispoOptionDAO(this);
+        return crispoOptionDAO;
     }
 
     public ExecutionStrategyTypeInfoDAO getExecutionStrategyTypeInfoDAO() {
-        return new ExecutionStrategyTypeInfoDAO(this);
+        return executionStrategyTypeInfoDAO;
     }
 }

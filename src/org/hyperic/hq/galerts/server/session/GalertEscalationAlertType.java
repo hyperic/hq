@@ -35,7 +35,7 @@ import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.galerts.shared.GalertManagerLocal;
+import org.hyperic.hq.galerts.shared.GalertManager;
 
 public final class GalertEscalationAlertType 
     extends EscalationAlertType
@@ -47,12 +47,12 @@ public final class GalertEscalationAlertType
                                       "escalation.type.galert");
 
     private static Object INIT_LOCK = new Object();
-    private static GalertManagerLocal _alertMan;
+    private static GalertManager _alertMan;
     
-    private GalertManagerLocal getGalertMan() {
+    private GalertManager getGalertMan() {
         synchronized (INIT_LOCK) {
             if (_alertMan == null) {
-                _alertMan = GalertManagerEJBImpl.getOne();
+                _alertMan = GalertManagerImpl.getOne();
             }
         }
         return _alertMan;
@@ -67,7 +67,7 @@ public final class GalertEscalationAlertType
     }
 
     protected void setEscalation(Integer defId, Escalation escalation) {
-        GalertManagerLocal gMan = getGalertMan();
+        GalertManager gMan = getGalertMan();
         GalertDef def = gMan.findById(defId);
         gMan.update(def, escalation);
     }
@@ -77,7 +77,7 @@ public final class GalertEscalationAlertType
     {
         GalertLog alert = (GalertLog) esc.getAlertInfo();
         if (newState.isFixed()) {
-            GalertManagerLocal gAlertMan = getGalertMan();
+            GalertManager gAlertMan = getGalertMan();
             gAlertMan.fixAlert(alert);
             
             // HQ-1207: Reset the internal state of the group alert 

@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -62,13 +62,13 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
@@ -109,21 +109,22 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         = "org.hyperic.hq.appdef.server.session.PagerProcessor_service";
     private Pager valuePager = null;
     private final Integer APPDEF_RES_TYPE_UNDEFINED = new Integer(-1);
-    
+    private AppServiceDAO appServiceDAO;
+
     /**
      * @ejb:interface-method
      */
     public Service createService(AuthzSubject subject, Server server,
                                  ServiceType type, String name,  String desc,
-                                 String location, Service parent) 
+                                 String location, Service parent)
         throws PermissionException
     {
         name     = name.trim();
         desc     = desc == null ? "" : desc.trim();
         location = location == null ? "" : location.trim();
-        
-        Service service = getServiceDAO().create(type, server, name, desc, 
-                                                 subject.getName(), location, 
+
+        Service service = getServiceDAO().create(type, server, name, desc,
+                                                 subject.getName(), location,
                                                  subject.getName(), parent);
         // Create the authz resource type.  This also does permission checking
         createAuthzService(subject, service);
@@ -268,7 +269,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * Create the Authz service resource
      */
     private void createAuthzService(AuthzSubject subject, Service service)
-        throws PermissionException 
+        throws PermissionException
     {
         log.debug("Begin Authz CreateService");
         try {
@@ -286,12 +287,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                 AuthzConstants.serverOpAddService);
             }
 
-            ResourceManagerLocal rman = getResourceManager();
+            ResourceManager rman = getResourceManager();
             ResourceType serviceProto = getServicePrototypeResourceType();
-            Resource prototype = 
+            Resource prototype =
                 rman.findResourceByInstanceId(serviceProto,
                                               service.getServiceType().getId());
-        
+
             Resource parent = rman.findResource(server.getEntityId());
             if (parent == null) {
                 throw new SystemException("Unable to find parent server [id=" +
@@ -299,7 +300,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             }
             Resource resource = createAuthzResource(subject,
                                                     getServiceResourceType(),
-                                                    prototype, 
+                                                    prototype,
                                                     service.getId(),
                                                     service.getName(), parent);
             service.setResource(resource);
@@ -326,7 +327,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 return new Integer[0];
             }
             List serviceIds = new ArrayList(services.size());
-         
+
             // now get the list of PKs
             Set viewable = new HashSet(super.getViewableServices(subject));
             // and iterate over the ejbList to remove any item not in the
@@ -339,7 +340,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     serviceIds.add(aEJB.getId());
                 }
             }
-        
+
             return (Integer[]) serviceIds.toArray(new Integer[0]);
         } catch (FinderException e) {
             // There are no viewable servers
@@ -351,7 +352,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @return List of ServiceValue objects
      * @ejb:interface-method
      */
-    public List findServicesById(AuthzSubject subject, Integer[] serviceIds) 
+    public List findServicesById(AuthzSubject subject, Integer[] serviceIds)
         throws ServiceNotFoundException, PermissionException {
         List serviceList = new ArrayList(serviceIds.length);
         for(int i = 0; i < serviceIds.length; i++) {
@@ -378,7 +379,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get Service by Id.
-     * 
+     *
      * @ejb:interface-method
      * @return The Service identified by this id, or null if it does not exist.
      */
@@ -418,31 +419,31 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     public Service getServiceByName(Server server, String name) {
         return getServiceDAO().findByName(server, name);
     }
-    
+
     /**
      * @ejb:interface-method
      */
     public Service getServiceByName(Platform platform, String name) {
         return getServiceDAO().findByName(platform, name);
     }
-    
+
     /**
      * Find a ServiceType by id
      * @ejb:interface-method
      */
     public ServiceType findServiceType(Integer id)
         throws ObjectNotFoundException {
-        return getServiceTypeDAO().findById(id); 
+        return getServiceTypeDAO().findById(id);
     }
-    
+
     /**
      * Find service type by name
      * @ejb:interface-method
      */
-    public ServiceType findServiceTypeByName(String name) { 
+    public ServiceType findServiceTypeByName(String name) {
         return getServiceTypeDAO().findByName(name);
     }
-    
+
     /**
      * @ejb.interface-method
      */
@@ -461,7 +462,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         return valuePager.seek(serviceTypes, pc);
     }
 
-    /**     
+    /**
      * @return List of ServiceTypeValues
      * @ejb:interface-method
      */
@@ -472,7 +473,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         final List authzPks = getViewableServices(subject);
         final Collection serviceTypes =
             getServiceDAO().getServiceTypes(authzPks, true);
-        
+
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(serviceTypes, pc);
@@ -518,7 +519,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get the scope of viewable services for a given user
-     * @return List of ServiceLocals for which subject has 
+     * @return List of ServiceLocals for which subject has
      * AuthzConstants.serviceOpViewService
      */
     private Collection getViewableServices(AuthzSubject subject, PageControl pc)
@@ -600,7 +601,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * unassigned services that the given subject is allowed to view.
      * @ejb:interface-method
      */
-    public PageList getAllClusterAppUnassignedServices(AuthzSubject subject, 
+    public PageList getAllClusterAppUnassignedServices(AuthzSubject subject,
                                                        PageControl pc)
         throws FinderException, PermissionException {
         // get list of pks user can view
@@ -643,32 +644,32 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                                    AuthzSubject subject,
                                    Integer svcTypeId, PageControl pc)
         throws ServiceNotFoundException, PermissionException {
-        List services = new ArrayList();    
-        // iterate over the services and only include those whose pk is 
+        List services = new ArrayList();
+        // iterate over the services and only include those whose pk is
         // present in the viewablePKs list
         if (svcTypeId != null && svcTypeId != APPDEF_RES_TYPE_UNDEFINED) {
             for (Iterator it = svcCol.iterator(); it.hasNext(); ) {
-                Object o = it.next();                
+                Object o = it.next();
                 Integer thisSvcTypeId;
-                
+
                 if (o instanceof Service) {
                     thisSvcTypeId = ((Service)o).getServiceType().getId();
                 } else {
                     ResourceGroup cluster = (ResourceGroup) o;
                     thisSvcTypeId =
                         cluster.getResourcePrototype().getInstanceId();
-                }                
+                }
                 // first, if they specified a server type, then filter on it
                 if (!(thisSvcTypeId.equals(svcTypeId)))
                     continue;
-                
+
                 services.add(o instanceof Service ? o :
                              getServiceCluster((ResourceGroup) o));
             }
         } else {
             services.addAll(svcCol);
         }
-        
+
         List toBePaged = filterUnviewable(subject, services);
         return valuePager.seek(toBePaged, pc);
     }
@@ -682,15 +683,15 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             throw new ServiceNotFoundException(
                 "no viewable services for " + subject);
         }
-    
+
         List retVal = new ArrayList();
         // if a cluster has some members that aren't viewable then
         // the user can't get at them but we don't worry about it here
         // when the cluster members are accessed, the group subsystem
         // will filter them
-        // so here's the case for the ServiceLocal amongst the 
+        // so here's the case for the ServiceLocal amongst the
         // List of services
-        // ***************** 
+        // *****************
         // Note: yes, that's the case with regard to group members,
         // but not groups themselves. Clusters still need to be weeded
         // out here. - desmond
@@ -721,8 +722,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public PageList getServicesByServer(AuthzSubject subject, Integer serverId,
-                                        PageControl pc) 
-        throws ServiceNotFoundException, ServerNotFoundException, 
+                                        PageControl pc)
+        throws ServiceNotFoundException, ServerNotFoundException,
                PermissionException {
         return getServicesByServer(subject, serverId, null, pc);
     }
@@ -731,7 +732,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public PageList getServicesByServer(AuthzSubject subject, Integer serverId,
-                                        Integer svcTypeId, PageControl pc) 
+                                        Integer svcTypeId, PageControl pc)
         throws ServiceNotFoundException, PermissionException {
         List toBePaged = getServicesByServerImpl(subject, serverId, svcTypeId,
                                                  pc);
@@ -765,7 +766,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         if (pc != null && pc.isDescending()) {
             Collections.reverse(services);
         }
-            
+
         return filterUnviewable(subject, services);
     }
 
@@ -773,7 +774,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * Get service POJOs by server and type.
      * @ejb:interface-method
      */
-    public List getServicesByServer(AuthzSubject subject, Server server) 
+    public List getServicesByServer(AuthzSubject subject, Server server)
         throws PermissionException, ServiceNotFoundException {
         return filterUnviewable(subject, server.getServices());
     }
@@ -782,13 +783,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public Integer[] getServiceIdsByServer(AuthzSubject subject,
-                                          Integer serverId, Integer svcTypeId) 
+                                          Integer serverId, Integer svcTypeId)
         throws ServiceNotFoundException, PermissionException {
         if (svcTypeId == null)
             svcTypeId = APPDEF_RES_TYPE_UNDEFINED;
- 
+
         List services;
-            
+
         if (svcTypeId == APPDEF_RES_TYPE_UNDEFINED) {
             services = getServiceDAO().findByServer_orderType(serverId);
         }
@@ -806,7 +807,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             Service local = (Service) it.next();
             ids[i] = local.getId();
         }
-            
+
         return ids;
     }
 
@@ -814,13 +815,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public List getServicesByType(AuthzSubject subject, String svcName,
-                                  boolean asc) 
+                                  boolean asc)
         throws PermissionException, InvalidAppdefTypeException {
         ServiceType st = getServiceTypeDAO().findByName(svcName);
         if (st == null) {
             return new PageList();
         }
-    
+
         try {
             Collection services = getServiceDAO().findByType(st.getId(), asc);
             if (services.size() == 0) {
@@ -837,18 +838,18 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public PageList getServicesByService(AuthzSubject subject,
-                                         Integer serviceId, PageControl pc) 
+                                         Integer serviceId, PageControl pc)
         throws ServiceNotFoundException, PermissionException {
         return getServicesByService(subject, serviceId,
                                          APPDEF_RES_TYPE_UNDEFINED, pc);
     }
-    
+
     /**
      * Get services by server.
      * @ejb:interface-method
      */
     public PageList getServicesByService(AuthzSubject subject, Integer serviceId,
-                                         Integer svcTypeId, PageControl pc) 
+                                         Integer svcTypeId, PageControl pc)
         throws ServiceNotFoundException, PermissionException {
             // find any children
         Collection childSvcs =
@@ -862,21 +863,21 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     public Integer[] getServiceIdsByService(AuthzSubject subject,
                                             Integer serviceId,
-                                            Integer svcTypeId) 
+                                            Integer svcTypeId)
         throws ServiceNotFoundException, PermissionException {
         // find any children
         Collection childSvcs =
             getServiceDAO().findByParentAndType(serviceId, svcTypeId);
-        
+
         List viewables = filterUnviewable(subject, childSvcs);
-             
+
         Integer[] ids = new Integer[viewables.size()];
         Iterator it = viewables.iterator();
         for (int i = 0; it.hasNext(); i++) {
             Service local = (Service) it.next();
             ids[i] = local.getId();
         }
-            
+
         return ids;
     }
 
@@ -884,8 +885,8 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public PageList getServicesByPlatform(AuthzSubject subject, Integer platId,
-                                          PageControl pc) 
-        throws ServiceNotFoundException, PlatformNotFoundException, 
+                                          PageControl pc)
+        throws ServiceNotFoundException, PlatformNotFoundException,
                PermissionException {
         return getServicesByPlatform(subject, platId, APPDEF_RES_TYPE_UNDEFINED,
                                      pc);
@@ -896,39 +897,39 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public PageList getPlatformServices(AuthzSubject subject,
-                                        Integer platId, 
+                                        Integer platId,
                                         PageControl pc)
         throws PlatformNotFoundException, PermissionException,
-               ServiceNotFoundException {    
+               ServiceNotFoundException {
         return getPlatformServices(subject, platId, APPDEF_RES_TYPE_UNDEFINED,
                                    pc);
     }
 
     /**
      * Get platform services (children of virtual servers) of a specified type
-     * 
+     *
      * @ejb:interface-method
      */
     public PageList getPlatformServices(AuthzSubject subject, Integer platId,
                                         Integer typeId, PageControl pc)
-        throws PlatformNotFoundException, PermissionException, 
+        throws PlatformNotFoundException, PermissionException,
                ServiceNotFoundException {
         pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
         Collection allServices = getServiceDAO()
             .findPlatformServices_orderName(platId, pc.isAscending());
         return filterAndPage(allServices, subject, typeId, pc);
     }
-    
+
     /**
      * Get {@link Service}s which are children of the server, and of the
      * specified type.
      * @ejb:interface-method
      */
-    public List findServicesByType(Server server, ServiceType st) { 
+    public List findServicesByType(Server server, ServiceType st) {
         return getServiceDAO().findByServerAndType_orderName(server.getId(),
                                                              st.getId());
     }
-    
+
     /**
      * Get platform service POJOs
      * @ejb:interface-method
@@ -939,7 +940,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get platform service POJOs
-     * 
+     *
      * @ejb:interface-method
      */
     public Collection getPlatformServices(AuthzSubject subject, Integer platId)
@@ -948,59 +949,59 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
             getServiceDAO().findPlatformServices_orderName(platId, true);
         return filterUnviewable(subject, services);
     }
-    
+
     /**
      * Get platform services (children of virtual servers), mapped by type id
      * of a specified type
      * @ejb:interface-method
      */
     public Map getMappedPlatformServices(AuthzSubject subject,
-                                         Integer platId, 
+                                         Integer platId,
                                          PageControl pc)
-        throws PlatformNotFoundException, PermissionException, 
+        throws PlatformNotFoundException, PermissionException,
                ServiceNotFoundException
     {
         pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
-            
+
         Collection allServices = getServiceDAO()
             .findPlatformServices_orderName(platId, pc.isAscending());
         HashMap retMap = new HashMap();
-            
+
         // Map all services by type ID
         for (Iterator it = allServices.iterator(); it.hasNext(); ) {
             Service svc = (Service) it.next();
             Integer typeId = svc.getServiceType().getId();
             List addTo = (List)MapUtil.getOrCreate(retMap, typeId,
                                                    ArrayList.class);
-            
+
             addTo.add(svc);
         }
-            
+
         // Page the lists before returning
         for (Iterator it = retMap.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             Integer typeId = (Integer) entry.getKey();
             List svcs = (List) entry.getValue();
-                
+
             PageControl pcCheck =
                 svcs.size() <= pc.getPagesize() ? PageControl.PAGE_ALL : pc;
-                    
+
             svcs = filterAndPage(svcs, subject, typeId, pcCheck);
             entry.setValue(svcs);
         }
-            
+
         return retMap;
     }
 
     /**
      * Get services by platform.
-     * 
+     *
      * @ejb:interface-method
      */
     public PageList getServicesByPlatform(AuthzSubject subject, Integer platId,
-                                          Integer svcTypeId, PageControl pc) 
-        throws ServiceNotFoundException, PlatformNotFoundException, 
-               PermissionException 
+                                          Integer svcTypeId, PageControl pc)
+        throws ServiceNotFoundException, PlatformNotFoundException,
+               PermissionException
     {
         Collection allServices;
         pc = PageControl.initDefaults(pc,SortAttribute.SERVICE_NAME);
@@ -1022,27 +1023,27 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * @ejb:interface-method
-     * @return A List of ServiceValue and ServiceClusterValue objects 
+     * @return A List of ServiceValue and ServiceClusterValue objects
      * representing all of the services that the given subject is allowed to view.
      */
     public PageList getServicesByApplication(AuthzSubject subject,
-                                             Integer appId, PageControl pc ) 
+                                             Integer appId, PageControl pc )
         throws ApplicationNotFoundException, ServiceNotFoundException,
                PermissionException {
         return getServicesByApplication(subject, appId,
                                         APPDEF_RES_TYPE_UNDEFINED, pc);
     }
-    
+
     /**
      * @ejb:interface-method
-     * @return A List of ServiceValue and ServiceClusterValue objects 
+     * @return A List of ServiceValue and ServiceClusterValue objects
      * representing all of the services that the given subject is allowed to view.
      * @throws ApplicationNotFoundException if the appId is bogus
      * @throws ServiceNotFoundException if services could not be looked up
      */
     public PageList getServicesByApplication(AuthzSubject subject,
                                              Integer appId, Integer svcTypeId,
-                                             PageControl pc) 
+                                             PageControl pc)
         throws PermissionException, ApplicationNotFoundException,
                ServiceNotFoundException {
         return filterAndPage(getServicesByApplication(appId, pc), subject,
@@ -1051,12 +1052,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * @ejb:interface-method
-     * @return A List of Service and ServiceCluster objects 
+     * @return A List of Service and ServiceCluster objects
      * representing all of the services that the given subject is allowed to view.
      * @throws ApplicationNotFoundException if the appId is bogus
      * @throws ServiceNotFoundException if services could not be looked up
      */
-    public List getServicesByApplication(AuthzSubject subject, Integer appId) 
+    public List getServicesByApplication(AuthzSubject subject, Integer appId)
         throws PermissionException, ApplicationNotFoundException,
                ServiceNotFoundException {
         return filterUnviewable(subject,
@@ -1075,18 +1076,18 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         }
 
         Collection appServiceCollection;
-        AppServiceDAO dao = new AppServiceDAO(DAOFactory.getDAOFactory());
+
         pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
 
         switch (pc.getSortattribute()) {
         case SortAttribute.SERVICE_NAME:
         case SortAttribute.RESOURCE_NAME:
             appServiceCollection =
-                dao.findByApplication_orderSvcName(appId, pc.isAscending());
+                appServiceDAO.findByApplication_orderSvcName(appId, pc.isAscending());
             break;
         case SortAttribute.SERVICE_TYPE:
             appServiceCollection =
-                dao.findByApplication_orderSvcType(appId, pc.isAscending());
+                appServiceDAO.findByApplication_orderSvcType(appId, pc.isAscending());
             break;
         default:
             throw new IllegalArgumentException("Unsupported sort " +
@@ -1110,12 +1111,12 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
    /**
     * @ejb:interface-method
-    * @return A List of ServiceValue and ServiceClusterValue objects 
+    * @return A List of ServiceValue and ServiceClusterValue objects
     * representing all of the services that the given subject is allowed to view.
     */
    public PageList getServiceInventoryByApplication(AuthzSubject subject,
                                                     Integer appId,
-                                                    PageControl pc ) 
+                                                    PageControl pc )
         throws ApplicationNotFoundException, ServiceNotFoundException,
                PermissionException {
         return getServiceInventoryByApplication(subject, appId,
@@ -1127,9 +1128,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * Evident API.
      * @ejb:interface-method
      */
-    public PageList 
+    public PageList
         getFlattenedServicesByApplication(AuthzSubject subject, Integer appId,
-                                          Integer typeId, PageControl pc) 
+                                          Integer typeId, PageControl pc)
         throws ApplicationNotFoundException, ServiceNotFoundException,
                PermissionException
     {
@@ -1156,7 +1157,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     appService.getResourceGroup()).getServices());
             } else {
                 svcCollection.add(appService.getService());
-            } 
+            }
         }
 
         return filterAndPage(svcCollection, subject, typeId, pc);
@@ -1164,13 +1165,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * @ejb:interface-method
-     * @return A List of ServiceValue and ServiceClusterValue objects 
+     * @return A List of ServiceValue and ServiceClusterValue objects
      * representing all of the services that the given subject is allowed to view.
      */
     public PageList getServiceInventoryByApplication(AuthzSubject subject,
                                                      Integer appId,
                                                      Integer svcTypeId,
-                                                     PageControl pc ) 
+                                                     PageControl pc )
         throws ApplicationNotFoundException, ServiceNotFoundException,
                PermissionException {
         if (svcTypeId == null || svcTypeId.equals(APPDEF_RES_TYPE_UNDEFINED)) {
@@ -1187,26 +1188,26 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get all service inventory by application, including those inside an
      * associated cluster
-     * 
+     *
      * @ejb:interface-method
-     * 
+     *
      * @param subject The subject trying to list services.
      * @param appId Application id.
      * @return A List of ServiceValue objects representing all of the services
      *         that the given subject is allowed to view.
      */
     public Integer[] getFlattenedServiceIdsByApplication(AuthzSubject subject,
-                                                         Integer appId) 
+                                                         Integer appId)
         throws ServiceNotFoundException, PermissionException,
                ApplicationNotFoundException {
 
-        List serviceInventory = 
+        List serviceInventory =
             getUnflattenedServiceInventoryByApplication(
                 subject, appId, PageControl.PAGE_ALL);
-        
+
         List servicePKs = new ArrayList();
         // flattening: open up all of the groups (if any) and get their services as well
-        try {        
+        try {
             for (Iterator iter = serviceInventory.iterator(); iter.hasNext();) {
                 Object o = iter.next();
                 // applications can have both clusters and services
@@ -1218,7 +1219,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     // this only happens when entId is for an application and
                     // a cluster is bound to it
                     ResourceGroup cluster = (ResourceGroup) o;
-                    AppdefEntityID groupId = 
+                    AppdefEntityID groupId =
                         AppdefEntityID.newGroupID(cluster.getId());
                     // any authz resource filtering on the group members happens
                     // inside the group subsystem
@@ -1236,7 +1237,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                         log.debug("User " + subject + " not allowed to view " +
                                   "group " + groupId);
                     }
-                }            
+                }
             }
         } catch (GroupNotCompatibleException e){
             throw new InvalidAppdefTypeException(
@@ -1253,10 +1254,10 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     private List getUnflattenedServiceInventoryByApplication(
         AuthzSubject subject, Integer appId, PageControl pc)
         throws ApplicationNotFoundException, ServiceNotFoundException {
-        
+
         AppServiceDAO appServLocHome;
         List appServiceCollection;
-        
+
         try {
             getApplicationDAO().findById(appId);
         } catch (ObjectNotFoundException e) {
@@ -1266,18 +1267,18 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
         pc = PageControl.initDefaults(pc, SortAttribute.SERVICE_NAME);
 
-        appServLocHome = new AppServiceDAO(DAOFactory.getDAOFactory());
+
         switch (pc.getSortattribute()) {
         case SortAttribute.SERVICE_NAME :
         case SortAttribute.RESOURCE_NAME :
         case SortAttribute.NAME :
             // TODO: Not actually sorting
             appServiceCollection =
-                appServLocHome.findByApplication_orderName(appId);
+                appServiceDAO.findByApplication_orderName(appId);
             break;
         case SortAttribute.SERVICE_TYPE :
             appServiceCollection =
-                appServLocHome.findByApplication_orderType(appId,
+                appServiceDAO.findByApplication_orderType(appId,
                                                            pc.isAscending());
             break;
         default :
@@ -1317,16 +1318,16 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         svc.setModifiedBy(subject.getName());
         svc.setAutodiscoveryZombie(zombieStatus);
     }
-    
+
     /**
      * @ejb:interface-method
      */
     public Service updateService(AuthzSubject subject, ServiceValue existing)
-        throws PermissionException, UpdateException, 
+        throws PermissionException, UpdateException,
                AppdefDuplicateNameException, ServiceNotFoundException {
         checkModifyPermission(subject, existing.getEntityId());
         Service service = getServiceDAO().findById(existing.getId());
-        
+
         existing.setModifiedBy(subject.getName());
         if (existing.getDescription() != null)
             existing.setDescription(existing.getDescription().trim());
@@ -1350,9 +1351,9 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         throws CreateException, FinderException, RemoveException,
                VetoException
     {
-        AuthzSubject overlord = 
+        AuthzSubject overlord =
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-        
+
         // First, put all of the infos into a Hash
         HashMap infoMap = new HashMap();
         for (int i = 0; i < infos.length; i++) {
@@ -1362,14 +1363,14 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         HashMap serverTypes = new HashMap();
 
         ServiceTypeDAO stDao = getServiceTypeDAO();
-        ResourceGroupManagerLocal resGroupMan = 
-            ResourceGroupManagerEJBImpl.getOne();
-        ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
-        
+        ResourceGroupManager resGroupMan =
+            ResourceGroupManagerImpl.getOne();
+        ResourceManager resMan = ResourceManagerImpl.getOne();
+
         try {
             Collection curServices = stDao.findByPlugin(plugin);
             ServerTypeDAO stHome = getServerTypeDAO();
-            
+
             for (Iterator i = curServices.iterator(); i.hasNext();) {
                 ServiceType serviceType = (ServiceType) i.next();
 
@@ -1390,11 +1391,11 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     // XXX TODO MOVE THIS INTO THE ENTITY
                     if (!sinfo.getName().equals(serviceType.getName()))
                         serviceType.setName(sinfo.getName());
-                        
+
                     if (!sinfo.getDescription().equals(
                         serviceType.getDescription()))
                         serviceType.setDescription(sinfo.getDescription());
-                    
+
                     if (sinfo.getInternal() !=  serviceType.isIsInternal())
                         serviceType.setIsInternal(sinfo.getInternal());
 
@@ -1424,18 +1425,18 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                     }
                 }
             }
-            
-            Resource prototype = 
-                ResourceManagerEJBImpl.getOne().findRootResource();
-            
+
+            Resource prototype =
+                ResourceManagerImpl.getOne().findRootResource();
+
             // Now create the left-overs
             for (Iterator i = infoMap.values().iterator(); i.hasNext();) {
                 ServiceTypeInfo sinfo = (ServiceTypeInfo) i.next();
 
-                ServiceType stype = stDao.create(sinfo.getName(), plugin, 
+                ServiceType stype = stDao.create(sinfo.getName(), plugin,
                                                    sinfo.getDescription(),
                                                    sinfo.getInternal());
-                
+
                 // Lookup the server type
                 ServerType servTypeEJB;
                 if (serverTypes.containsKey(sinfo.getServerName())) {
@@ -1448,7 +1449,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                 stype.setServerType(servTypeEJB);
                 createAuthzResource(overlord, getServicePrototypeResourceType(),
                                     prototype, stype.getId(), stype.getName(),
-                                    null); 
+                                    null);
             }
         } finally {
             stDao.getSession().flush();
@@ -1460,31 +1461,31 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      */
     public void deleteServiceType(ServiceType serviceType,
                                   AuthzSubject overlord,
-                                  ResourceGroupManagerLocal resGroupMan,
-                                  ResourceManagerLocal resMan)
+                                  ResourceGroupManager resGroupMan,
+                                  ResourceManager resMan)
         throws VetoException, RemoveException {
-        Resource proto = 
+        Resource proto =
             resMan.findResourceByInstanceId(AuthzConstants.authzServiceProto,
                                             serviceType.getId());
-        
+
         try {
             // Delete compatible groups of this type.
             resGroupMan.removeGroupsCompatibleWith(proto);
-        
+
             // Remove all services
             for (Iterator svcIt = serviceType.getServices().iterator();
                  svcIt.hasNext(); ) {
                 Service svcLocal = (Service) svcIt.next();
                 removeService(overlord, svcLocal);
-            }           
+            }
         } catch (PermissionException e) {
             assert false :
                 "Overlord should not run into PermissionException";
         }
 
-        ServiceTypeDAO dao = new ServiceTypeDAO(DAOFactory.getDAOFactory());
+        ServiceTypeDAO dao = getServiceTypeDAO();
         dao.remove(serviceType);
-        
+
         resMan.removeResource(overlord, proto);
     }
 
@@ -1494,7 +1495,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * @ejb:interface-method
      */
     public void removeService(AuthzSubject subject, Service service)
-        throws RemoveException, PermissionException, VetoException  
+        throws RemoveException, PermissionException, VetoException
     {
         AppdefEntityID aeid = service.getEntityId();
         checkRemovePermission(subject, aeid);
@@ -1518,7 +1519,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
 
         // remove custom properties
         deleteCustomProperties(aeid);
-        
+
         // Remove authz resource.
         removeAuthzResource(subject, aeid, service.getResource());
 
@@ -1536,13 +1537,13 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
      * Returns a list of 2 element arrays.  The first element is the name of
      * the service type, the second element is the # of services of that
      * type in the inventory.
-     * 
+     *
      * @ejb:interface-method
      */
     public List getServiceTypeCounts() {
-        return getServiceDAO().getServiceTypeCounts(); 
+        return getServiceDAO().getServiceTypeCounts();
     }
-    
+
     /**
      * Get the # of services within HQ inventory
      * @ejb:interface-method
@@ -1550,11 +1551,11 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
     public Number getServiceCount() {
         return getServiceDAO().getServiceCount();
     }
-    
+
 
     public static ServiceManagerLocal getOne() {
         try {
-            return ServiceManagerUtil.getLocalHome().create();    
+            return ServiceManagerUtil.getLocalHome().create();
         } catch (Exception e) {
             throw new SystemException(e);
         }

@@ -28,13 +28,13 @@ import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.events.AlertDefinitionInterface;
-import org.hyperic.hq.galerts.shared.GalertManagerLocal;
+import org.hyperic.hq.galerts.shared.GalertManager;
 
 class GalertEscalatableCreator 
     implements EscalatableCreator
 {
-    private static final GalertManagerLocal _gMan = 
-        GalertManagerEJBImpl.getOne();
+    private static final GalertManager _gMan = 
+        GalertManagerImpl.getOne();
     
     private GalertDef          _def;
     private ExecutionReason    _reason;

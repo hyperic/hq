@@ -51,9 +51,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.events.EventConstants;
@@ -561,7 +561,7 @@ public class AvailabilityManagerEJBImpl
         final MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
         final Set midsToGet = new HashSet(resources.size());
         final List resToGet = new ArrayList(resources.size());
-        final ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
+        final ResourceManager resMan = ResourceManagerImpl.getOne();
         for (final Iterator it=resources.iterator(); it.hasNext(); ) {
             final Object o = it.next();
             Resource resource = null;

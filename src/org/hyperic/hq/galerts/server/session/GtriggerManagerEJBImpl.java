@@ -34,8 +34,8 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
 import org.hyperic.hq.galerts.server.session.GtriggerType;
-import org.hyperic.hq.galerts.shared.GalertManagerLocal;
-import org.hyperic.hq.galerts.shared.GalertManagerUtil;
+import org.hyperic.hq.galerts.shared.GalertManager;
+
 import org.hyperic.hq.galerts.shared.GtriggerManagerLocal;
 import org.hyperic.hq.galerts.shared.GtriggerManagerUtil;
 
@@ -48,15 +48,15 @@ import org.hyperic.hq.galerts.shared.GtriggerManagerUtil;
  * @ejb:util generate="physical"
  * @ejb:transaction type="Required"
  */
-public class GtriggerManagerEJBImpl 
-    implements SessionBean 
+public class GtriggerManagerEJBImpl
+    implements SessionBean
 {
     private final Log _log = LogFactory.getLog(GtriggerManagerEJBImpl.class);
 
     private GtriggerTypeInfoDAO _ttypeDAO;
-    
+
     public GtriggerManagerEJBImpl() {
-        _ttypeDAO = new GtriggerTypeInfoDAO(DAOFactory.getDAOFactory()); 
+        //_ttypeDAO = new GtriggerTypeInfoDAO(DAOFactory.getDAOFactory());
     }
 
     /**
@@ -65,21 +65,21 @@ public class GtriggerManagerEJBImpl
     public GtriggerTypeInfo findTriggerType(GtriggerType type) {
         return _ttypeDAO.find(type);
     }
-    
+
     /**
-     * Register a trigger type.  
-     * 
+     * Register a trigger type.
+     *
      * @param triggerType Trigger type to register
      * @return the persisted metadata about the trigger type
      * @ejb:interface-method
      */
     public GtriggerTypeInfo registerTriggerType(GtriggerType triggerType) {
         GtriggerTypeInfo res;
-     
+
         res = _ttypeDAO.find(triggerType);
         if (res != null) {
-            _log.warn("Attempted to register GtriggerType class [" + 
-                      triggerType.getClass() + "] but it was already " + 
+            _log.warn("Attempted to register GtriggerType class [" +
+                      triggerType.getClass() + "] but it was already " +
                       "registered");
             return res;
         }
@@ -87,26 +87,26 @@ public class GtriggerManagerEJBImpl
         _ttypeDAO.save(res);
         return res;
     }
-    
+
     /**
      * Unregister a trigger type.  This method will fail if any alert
      * definitions are using triggers of this type.
-     * 
+     *
      * @param triggerType Trigger type to unregister
      * @ejb:interface-method
      */
     public void unregisterTriggerType(GtriggerType triggerType) {
         GtriggerTypeInfo info = _ttypeDAO.find(triggerType);
-        
+
         if (info == null) {
-            _log.warn("Tried to unregister a trigger type which was not " + 
+            _log.warn("Tried to unregister a trigger type which was not " +
                       "registered");
             return;
         }
-            
+
         _ttypeDAO.remove(info);
     }
-    
+
     public static GtriggerManagerLocal getOne() {
         try {
             return GtriggerManagerUtil.getLocalHome().create();

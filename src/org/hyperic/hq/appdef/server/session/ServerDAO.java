@@ -1,26 +1,26 @@
-/*                                                                 
- * NOTE: This copyright does *not* cover user programs that use HQ 
- * program services by normal system calls through the application 
- * program interfaces provided as part of the Hyperic Plug-in Development 
- * Kit or the Hyperic Client Development Kit - this is merely considered 
- * normal use of the program, and does *not* fall under the heading of 
- * "derived work". 
- *  
- * Copyright (C) [2004-2009], Hyperic, Inc. 
- * This file is part of HQ.         
- *  
- * HQ is free software; you can redistribute it and/or modify 
- * it under the terms version 2 of the GNU General Public License as 
- * published by the Free Software Foundation. This program is distributed 
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. See the GNU General Public License for more 
- * details. 
- *                
- * You should have received a copy of the GNU General Public License 
- * along with this program; if not, write to the Free Software 
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 
- * USA. 
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ *
+ * Copyright (C) [2004-2009], Hyperic, Inc.
+ * This file is part of HQ.
+ *
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
  */
 
 package org.hyperic.hq.appdef.server.session;
@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.hibernate.Criteria;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
@@ -48,7 +49,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 
 public class ServerDAO extends HibernateDAO
 {
-    public ServerDAO(DAOFactory f) {
+    public ServerDAO(SessionFactory f) {
         super(Server.class, f);
     }
 
@@ -106,13 +107,13 @@ public class ServerDAO extends HibernateDAO
         s.setPlatform(p);
 
         Integer stid = sv.getServerType().getId();
-        ServerType st = 
+        ServerType st =
             DAOFactory.getDAOFactory().getServerTypeDAO().findById(stid);
         s.setServerType(st);
         save(s);
         return s;
     }
-    
+
     Server findServerByAIID(Platform platform, String autoinventoryID) {
         String sql = "from Server where autoinventoryIdentifier = :aiid" +
                      " and platform = :platform";
@@ -133,7 +134,7 @@ public class ServerDAO extends HibernateDAO
             .setCacheRegion("Server.findAll_orderName")
             .list();
     }
-    
+
     /**
      * @param serverIds - {@link List} of {@link Integer}
      * @return {@link Collection} of {@link ServerType}
@@ -233,15 +234,15 @@ public class ServerDAO extends HibernateDAO
     }
 
     public Server findByName(Platform plat, String name) {
-        String sql = "select s from Server s " + 
+        String sql = "select s from Server s " +
             "where s.platform = :plat and s.resource.sortName=:name";
-        
+
         return (Server)getSession().createQuery(sql)
             .setParameter("plat", plat)
             .setParameter("name", name.toUpperCase())
             .uniqueResult();
     }
-    
+
     public List findByName(String name)
     {
         String sql="from Server where resource.sortName=?";
@@ -278,15 +279,15 @@ public class ServerDAO extends HibernateDAO
         }
         return servers;
     }
-    
+
     public List getServerTypeCounts() {
-        String sql = "select t.name, count(*) from ServerType t, " + 
-                     "Server s where s.serverType = t " + 
+        String sql = "select t.name, count(*) from ServerType t, " +
+                     "Server s where s.serverType = t " +
                      "group by t.name order by t.name";
-        
+
         return getSession().createQuery(sql).list();
     }
-    
+
     public Number getServerCount() {
         String sql =
             "select count(*) from Server s join s.serverType st " +

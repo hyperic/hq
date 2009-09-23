@@ -41,16 +41,17 @@ public class PagerProcessor_control_schedule implements PagerProcessorExt {
 
     protected static Log log =
         LogFactory.getLog( PagerProcessor_control_schedule.class.getName() );
-    
+
+    private ControlScheduleDAO cdao;
+
     public PagerProcessor_control_schedule() {}
 
     public Object processElement(Object o) {
         if (o == null) return null;
         try {
             if (o instanceof ControlSchedule) {
-                ControlScheduleDAO cdao =
-                    new ControlScheduleDAO(DAOFactory.getDAOFactory());
-                SchedulerLocal scheduler = 
+
+                SchedulerLocal scheduler =
                     SchedulerUtil.getLocalHome().create();
                 ControlSchedule s = (ControlSchedule)o;
                 Trigger trigger;
@@ -68,7 +69,7 @@ public class PagerProcessor_control_schedule implements PagerProcessorExt {
                     }
                 } catch (Exception e) {
                     if (log.isDebugEnabled())
-                        log.debug("exception:", e);                    
+                        log.debug("exception:", e);
                     return null;
                 }
 

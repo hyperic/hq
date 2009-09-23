@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -61,14 +61,16 @@ public abstract class BaseScheduleManagerEJB {
     private String schedulePrefix;
 
     protected Pager historyPager;
-    protected Pager schedulePager; 
+    protected Pager schedulePager;
 
-    // Subclasses implement these method so that we can 
+    // Subclasses implement these method so that we can
     // do a lot of stuff uniformly at this common base-class level.
     protected abstract String getHistoryPagerClass ();
     protected abstract String getSchedulePagerClass ();
     protected abstract String getJobPrefix ();
     protected abstract String getSchedulePrefix ();
+
+    protected DBUtil dbUtil;
 
     // Helper methods
     protected String getPrefix(AppdefEntityID id)
@@ -79,20 +81,20 @@ public abstract class BaseScheduleManagerEJB {
     protected String getJobName(AuthzSubject subject,
                                 AppdefEntityID id, String instanceIdentifier)
     {
-        return jobPrefix + SCHED_SEPARATOR + getPrefix(id)  + 
-            SCHED_SEPARATOR + instanceIdentifier + SCHED_SEPARATOR + 
+        return jobPrefix + SCHED_SEPARATOR + getPrefix(id)  +
+            SCHED_SEPARATOR + instanceIdentifier + SCHED_SEPARATOR +
             System.currentTimeMillis();
     }
 
     protected String getTriggerName(AuthzSubject subject,
                                     AppdefEntityID id, String instanceIdentifier)
     {
-        return schedulePrefix + SCHED_SEPARATOR + getPrefix(id) + 
+        return schedulePrefix + SCHED_SEPARATOR + getPrefix(id) +
             SCHED_SEPARATOR + instanceIdentifier + SCHED_SEPARATOR +
             System.currentTimeMillis();
     }
 
-    protected void setupJobData(JobDetail jobDetail, 
+    protected void setupJobData(JobDetail jobDetail,
                                 AuthzSubject subject,
                                 AppdefEntityID id,
                                 String scheduleString,
@@ -149,15 +151,15 @@ public abstract class BaseScheduleManagerEJB {
     protected void setDbType () {
         Connection conn = null;
         try {
-            conn = DBUtil.getConnByContext(
+            conn = dbUtil.getConnByContext(
                 new InitialContext(), HQConstants.DATASOURCE);
-            this.dbType = DBUtil.getDBType(conn);
+            this.dbType = dbUtil.getDBType(conn);
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (SQLException e) {
             //log and continue
         } finally {
-            DBUtil.closeConnection(null,conn);
+            dbUtil.closeConnection(null,conn);
         }
     }
 }

@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -29,12 +29,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Query;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class ActionDAO extends HibernateDAO {
-    public ActionDAO(DAOFactory f) {
+    public ActionDAO(SessionFactory f) {
         super(Action.class, f);
     }
 
@@ -57,7 +58,7 @@ public class ActionDAO extends HibernateDAO {
     private void removeActionCascade(Action action) {
         if (action.getParent() != null) {
             action.getParent().getChildrenBag().remove(action);
-        }        
+        }
         remove(action);
     }
 
@@ -75,22 +76,22 @@ public class ActionDAO extends HibernateDAO {
         }
         removeActionCascade(action);
     }
-    
+
     void deleteAlertDefinition(AlertDefinition def) {
         // Find all actions
         List actions =
             createCriteria().add(Restrictions.eq("alertDefinition", def))
                             .list();
-        
+
         // Bulk update all actions
         String sql = "update Action set parent = null, deleted = true where " +
         		     (actions.size() > 0 ? "parent in (:acts) or" : "") +
         		             " alertDefinition = :def";
         Query q = createQuery(sql).setParameter("def", def);
-        
+
         if (actions.size() > 0)
             q.setParameterList("acts", actions);
-                        
+
         q.executeUpdate();
     }
 
@@ -99,9 +100,9 @@ public class ActionDAO extends HibernateDAO {
      * @return a collection of {@link Action}s
      */
     public List findByAlert(Alert a) {
-        String sql = "select a from Action a, AlertActionLog al " + 
+        String sql = "select a from Action a, AlertActionLog al " +
             "where a.id = al.action AND al.alert = :alert";
-            
+
         return getSession().createQuery(sql)
               .setParameter("alert", a)
               .list();

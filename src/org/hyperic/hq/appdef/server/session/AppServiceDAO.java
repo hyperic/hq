@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
@@ -23,10 +24,10 @@ import org.hyperic.hq.dao.HibernateDAO;
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -34,7 +35,7 @@ import org.hyperic.hq.dao.HibernateDAO;
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -46,8 +47,10 @@ public class AppServiceDAO extends HibernateDAO
     private static final Log log = LogFactory.getLog(AppServiceDAO.class);
     private static final String serviceResType = AuthzConstants.serviceResType;
     private static final String groupResType = AuthzConstants.groupResType;
+    private ResourceGroupDAO resourceGroupDAO;
+    private ServiceDAO serviceDAO;
 
-    public AppServiceDAO(DAOFactory f) {
+    public AppServiceDAO(SessionFactory f) {
         super(AppService.class, f);
     }
 
@@ -72,7 +75,7 @@ public class AppServiceDAO extends HibernateDAO
             appSvc.getAppSvcDependencies().remove(appDep);
             super.remove(appDep);
         }
-        
+
         for (Iterator it = entity.getAppSvcDependencies().iterator();
              it.hasNext(); ) {
             super.remove(it.next());
@@ -83,9 +86,9 @@ public class AppServiceDAO extends HibernateDAO
     public AppService create(Integer cpk, Application ap)
     {
         // reassociate service cluster
-        ResourceGroup gr = new ResourceGroupDAO(DAOFactory.getDAOFactory())
+        ResourceGroup gr = resourceGroupDAO
             .findById(cpk);
-    
+
         ServiceManagerLocal sMan = ServiceManagerEJBImpl.getOne();
         ServiceType type =
             sMan.findServiceType(gr.getResourcePrototype().getInstanceId());
@@ -100,7 +103,7 @@ public class AppServiceDAO extends HibernateDAO
 
     public AppService create(Integer spk, Application ap, boolean entryPoint) {
         // reassociate service
-        Service s = new ServiceDAO(DAOFactory.getDAOFactory()).findById(spk);
+        Service s = serviceDAO.findById(spk);
 
         AppService a = new AppService();
         a.setEntryPoint(entryPoint);
@@ -256,11 +259,11 @@ public class AppServiceDAO extends HibernateDAO
     {
         AppSvcDependencyDAO depdao =
             DAOFactory.getDAOFactory().getAppSvcDepencyDAO();
-        
+
         // Make sure there isn't already a dependency
         AppSvcDependency depEJB =
             depdao.findByDependentAndDependor(appSvcPK, depPK);
-        
+
         if (depEJB != null) {
             return depEJB;
         }

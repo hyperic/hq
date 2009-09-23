@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -45,7 +45,7 @@ public class IDGenerator {
     private int       itsSequenceInterval;
     private String    itsDSName = null;
     private String    itsTableName = null;
-    
+
     private String    itsAlterSQL  = null;
     private String    itsSelectSQL = null;
     private long      itsLastKey   = 1;
@@ -55,6 +55,8 @@ public class IDGenerator {
     private String ctx = null;
 
     private boolean isInitialized = false;
+
+    private DBUtil dbUtil;
 
     /**
      * This constructor is for use inside an entity bean.
@@ -75,8 +77,8 @@ public class IDGenerator {
         itsTableName        = getTableName(itsSequenceName);
         isInitialized       = false;
     }
-    
-    public synchronized long getNewID () 
+
+    public synchronized long getNewID ()
         throws ConfigPropertyException, NamingException, SequenceRetrievalException, SQLException {
 
         if ( !isInitialized ) init();
@@ -84,18 +86,18 @@ public class IDGenerator {
         return ++itsLastKey;
     }
 
-    private synchronized void getBatch () 
+    private synchronized void getBatch ()
         throws SequenceRetrievalException, NamingException, SQLException {
 
         // Go to database and set new values for itsLastKey and itsMaxKey
         Connection        conn     = null;
         PreparedStatement selectPS = null;
         ResultSet         rs       = null;
-        
+
         try {
             conn = getConnection();
             selectPS = conn.prepareStatement(itsSelectSQL);
-            
+
             rs = selectPS.executeQuery();
             if ( rs != null && rs.next() ) {
                 itsLastKey = rs.getLong(1) - 1;
@@ -106,7 +108,7 @@ public class IDGenerator {
             doAlterSequence(conn);
 
         } finally {
-            DBUtil.closeJDBCObjects(ctx, conn, selectPS, rs);
+            dbUtil.closeJDBCObjects(ctx, conn, selectPS, rs);
         }
     }
 
@@ -123,18 +125,18 @@ public class IDGenerator {
                 alterPS  = conn.prepareStatement(itsAlterSQL);
                 rs = alterPS.executeQuery();
                 break;
-                
+
             case DBUtil.DATABASE_ORACLE_8:
             case DBUtil.DATABASE_ORACLE_9:
             case DBUtil.DATABASE_ORACLE_10:
                 alterPS  = conn.prepareStatement(itsAlterSQL);
                 alterPS.executeUpdate();
                 break;
-            
+
             }
         } finally {
-            DBUtil.closeResultSet(ctx, rs);
-            DBUtil.closeStatement(ctx, alterPS);
+            dbUtil.closeResultSet(ctx, rs);
+            dbUtil.closeStatement(ctx, alterPS);
         }
     }
 
@@ -153,7 +155,7 @@ public class IDGenerator {
         return props;
     }
 
-    private synchronized void init () 
+    private synchronized void init ()
         throws ConfigPropertyException, NamingException, SQLException {
 
         if ( isInitialized ) return;
@@ -164,11 +166,11 @@ public class IDGenerator {
         Connection conn = null;
         try {
             conn = getConnection();
-            itsDBType = DBUtil.getDBType(conn);
+            itsDBType = dbUtil.getDBType(conn);
         } finally {
-            DBUtil.closeConnection(ctx, conn);
+            dbUtil.closeConnection(ctx, conn);
         }
-        
+
         switch (itsDBType) {
         case DBUtil.DATABASE_POSTGRESQL_7:
         case DBUtil.DATABASE_POSTGRESQL_8:
@@ -178,7 +180,7 @@ public class IDGenerator {
                 = "SELECT nextval('" + itsSequenceName + "'::text)";
 
             break;
-            
+
         case DBUtil.DATABASE_ORACLE_8:
         case DBUtil.DATABASE_ORACLE_9:
         case DBUtil.DATABASE_ORACLE_10:
@@ -188,7 +190,7 @@ public class IDGenerator {
             itsSelectSQL
                 = "SELECT " + itsSequenceName + ".nextval from DUAL";
             break;
-            
+
         case DBUtil.DATABASE_MYSQL5:
             itsAlterSQL
                 = "ALTER TABLE " + itsTableName + " AUTO_INCREMENT = " + itsMaxKey;
@@ -215,8 +217,8 @@ public class IDGenerator {
         }
         return sub;
     }
-    
+
     private Connection getConnection() throws NamingException, SQLException {
-        return DBUtil.getConnByContext(itsIC, itsDSName);
+        return dbUtil.getConnByContext(itsIC, itsDSName);
     }
 }

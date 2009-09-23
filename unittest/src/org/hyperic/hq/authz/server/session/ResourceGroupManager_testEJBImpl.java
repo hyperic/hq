@@ -39,7 +39,7 @@ import junit.framework.Assert;
 
 import org.hyperic.hq.authz.shared.ResourceGroupManager_testLocal;
 import org.hyperic.hq.authz.shared.ResourceGroupManager_testUtil;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -80,7 +80,7 @@ public class ResourceGroupManager_testEJBImpl implements SessionBean {
      */
     public void testDuplicateNameCreate() throws Exception {
         AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-        ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroupManager rgMan = ResourceGroupManagerImpl.getOne();
         ResourceGroup.ResourceGroupCreateInfo info =
             new ResourceGroup.ResourceGroupCreateInfo("Test Group",
                                                       "Test Group Description",
@@ -111,7 +111,7 @@ public class ResourceGroupManager_testEJBImpl implements SessionBean {
      */
     public void testUpdate() throws Exception {
         AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-        ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroupManager rgMan = ResourceGroupManagerImpl.getOne();
         ResourceGroup.ResourceGroupCreateInfo info1 =
             new ResourceGroup.ResourceGroupCreateInfo("Test Group 1",
                                                       "Test Group Description",
@@ -165,7 +165,7 @@ public class ResourceGroupManager_testEJBImpl implements SessionBean {
     public void testResourceGroupSetCriteria() throws Exception {
         AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne()
                 .getOverlordPojo();
-        ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroupManager rgMan = ResourceGroupManagerImpl.getOne();
         ResourceGroup.ResourceGroupCreateInfo info = new ResourceGroup.ResourceGroupCreateInfo(
                 "Test Criteria Group " + System.currentTimeMillis(),
                 "Test Criteria Group Description", ADHOC, null,

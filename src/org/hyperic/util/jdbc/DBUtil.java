@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -45,21 +45,29 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hibernate.dialect.HQDialectUtil;
 import org.hyperic.util.pager.PageControl;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
-public class DBUtil {
-    protected static final Log log = LogFactory.getLog(DBUtil.class);
+
+@Component
+public class DBUtil  {
+    protected  static final Log log = LogFactory.getLog(DBUtil.class);
 
     // Constants for DB Errors that we want to catch in other classes
-    public static final int ORACLE_ERROR_DIVIDE_BY_ZERO = 1476;
-    public static final int ORACLE_ERROR_NOT_AVAILABLE = 1034;
+    public  static final int ORACLE_ERROR_DIVIDE_BY_ZERO = 1476;
+    public  static final int ORACLE_ERROR_NOT_AVAILABLE = 1034;
 
     // Constants for PostgreSQL errors
     // May be found at:
-    // http://www.postgresql.org/docs/8.0/static/errcodes-appendix.html
-    public static final int POSTGRES_ERROR_DIVIDE_BY_ZERO = 22012;
-    public static final int POSTGRES_CONNECTION_EXCEPTION = 8000;
-    public static final int POSTGRES_CONNECTION_FAILURE = 8006;
-    public static final int POSTGRES_UNABLE_TO_CONNECT = 8001;
+    // http://www.postgresql.org/docs/8.0//errcodes-appendix.html
+    public  static final int POSTGRES_ERROR_DIVIDE_BY_ZERO = 22012;
+    public  static final int POSTGRES_CONNECTION_EXCEPTION = 8000;
+    public  static final int POSTGRES_CONNECTION_FAILURE = 8006;
+    public  static final int POSTGRES_UNABLE_TO_CONNECT = 8001;
 
     // Constants for MySQL errors
     // May be found at:
@@ -78,13 +86,20 @@ public class DBUtil {
     public static final int DATABASE_MYSQL5 = 9;
 
     public static final int IN_CHUNK_SIZE = 200;
-    
-    private static Map _dbTypes = new HashMap();
+
+    private  static Map _dbTypes = new HashMap();
+
+    private DataSource dataSource;
+
+    @Autowired
+    public DBUtil(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
 
     /**
      * Constructor is private because this class should never be instantiated.
      */
-    private DBUtil() {}
+    //private DBUtil() {}
 
     /**
      * Close a database connection. No exception is thrown if it fails, but a
@@ -93,7 +108,7 @@ public class DBUtil {
      * @param ctx The logging context to use if a warning should be issued.
      * @param c   The connection to close.
      */
-    public static void closeConnection(Object ctx, Connection c) {
+    public  static void closeConnection(Object ctx, Connection c) {
         if (c == null) return;
         try {
             c.close();
@@ -199,8 +214,8 @@ public class DBUtil {
                 throw new SequenceRetrievalException();
             }
         } finally {
-            DBUtil.closeResultSet(ctx, rs);
-            DBUtil.closeStatement(ctx, selectPS);
+            closeResultSet(ctx, rs);
+            closeStatement(ctx, selectPS);
         }
     }
 
@@ -223,7 +238,7 @@ public class DBUtil {
             DatabaseMetaData dbMetaData = conn.getMetaData();
             String dbName = dbMetaData.getDatabaseProductName().toLowerCase();
             String dbVersion = dbMetaData.getDatabaseProductVersion().toLowerCase();
-            log.debug("DBUtil.getDBType: dbName='" + dbName +
+            log.debug("getDBType: dbName='" + dbName +
                       "', version='" + dbVersion + "'");
 
             if (dbName.indexOf("postgresql") != -1) {
@@ -295,11 +310,9 @@ public class DBUtil {
     /**
      * get a connection for a datasource registered in JNDI
      */
-    public static Connection getConnByContext(Context jndiCtx, String dsName)
+    public Connection getConnByContext(Context jndiCtx, String dsName)
         throws SQLException, NamingException {
-
-        DataSource ds = (DataSource) jndiCtx.lookup(dsName);
-        return ds.getConnection();
+        return dataSource.getConnection();
     }
 
     /**
@@ -314,14 +327,14 @@ public class DBUtil {
         int dbType = getDBType(rs.getStatement().getConnection());
         byte[] rval;
         switch (dbType) {
-            case DBUtil.DATABASE_ORACLE_8:
-            case DBUtil.DATABASE_ORACLE_9:
-            case DBUtil.DATABASE_ORACLE_10:
-            case DBUtil.DATABASE_ORACLE_11:
+            case DATABASE_ORACLE_8:
+            case DATABASE_ORACLE_9:
+            case DATABASE_ORACLE_10:
+            case DATABASE_ORACLE_11:
                 rval = OracleBlobColumn.doSelect(rs, columnIndex);
                 break;
-            case DBUtil.DATABASE_POSTGRESQL_7:
-            case DBUtil.DATABASE_POSTGRESQL_8:
+            case DATABASE_POSTGRESQL_7:
+            case DATABASE_POSTGRESQL_8:
                 rval = PostgresBlobColumn.doSelect(rs, columnIndex);
                 break;
             default:
@@ -342,14 +355,14 @@ public class DBUtil {
      */
     public static String getBooleanType(Connection conn)
         throws SQLException {
-        int type = DBUtil.getDBType(conn);
+        int type = getDBType(conn);
         switch (type) {
-            case DBUtil.DATABASE_ORACLE_8:
-            case DBUtil.DATABASE_ORACLE_9:
-            case DBUtil.DATABASE_ORACLE_10:
-            case DBUtil.DATABASE_ORACLE_11:
+            case DATABASE_ORACLE_8:
+            case DATABASE_ORACLE_9:
+            case DATABASE_ORACLE_10:
+            case DATABASE_ORACLE_11:
                 return "NUMBER(1)";
-            case DBUtil.DATABASE_MYSQL5:
+            case DATABASE_MYSQL5:
                 return "BIT";
             default:
                 return "BOOLEAN";
@@ -367,13 +380,13 @@ public class DBUtil {
      */
     public static String getBooleanValue(boolean bool, Connection conn)
         throws SQLException {
-        int type = DBUtil.getDBType(conn);
+        int type = getDBType(conn);
         switch (type) {
-            case DBUtil.DATABASE_ORACLE_8:
-            case DBUtil.DATABASE_ORACLE_9:
-            case DBUtil.DATABASE_ORACLE_10:
-            case DBUtil.DATABASE_ORACLE_11:
-            case DBUtil.DATABASE_MYSQL5:
+            case DATABASE_ORACLE_8:
+            case DATABASE_ORACLE_9:
+            case DATABASE_ORACLE_10:
+            case DATABASE_ORACLE_11:
+            case DATABASE_MYSQL5:
                 return bool ? "1" : "0";
             default:
                 return bool ? "'1'" : "'0'";
@@ -391,13 +404,13 @@ public class DBUtil {
     public static void setBooleanValue(boolean bool, Connection conn,
                                        PreparedStatement ps, int idx)
         throws SQLException {
-        int type = DBUtil.getDBType(conn);
+        int type = getDBType(conn);
         switch (type) {
-            case DBUtil.DATABASE_ORACLE_8:
-            case DBUtil.DATABASE_ORACLE_9:
-            case DBUtil.DATABASE_ORACLE_10:
-            case DBUtil.DATABASE_ORACLE_11:
-            case DBUtil.DATABASE_MYSQL5:
+            case DATABASE_ORACLE_8:
+            case DATABASE_ORACLE_9:
+            case DATABASE_ORACLE_10:
+            case DATABASE_ORACLE_11:
+            case DATABASE_MYSQL5:
                 ps.setInt(idx, (bool) ? 1 : 0);
                 return;
             default:
@@ -479,7 +492,7 @@ public class DBUtil {
             return checkTableExists(conn, table);
 
         } finally {
-            DBUtil.closeConnection(log, conn);
+            closeConnection(log, conn);
         }
     }
 
@@ -490,14 +503,14 @@ public class DBUtil {
 
         Statement stmt = null;
         boolean exists = false;
-        
+
         try {
-            stmt = conn.createStatement();            
+            stmt = conn.createStatement();
             exists = dialect.tableExists(stmt, table);
         } finally {
-            DBUtil.closeStatement(log, stmt);
+            closeStatement(log, stmt);
         }
-        
+
         return exists;
     }
 
@@ -560,4 +573,8 @@ public class DBUtil {
         for (int i = 0; i < objs.length; i++)
             replacePlaceHolder(buf, objs[i].toString());
     }
+
+
+
+
 }

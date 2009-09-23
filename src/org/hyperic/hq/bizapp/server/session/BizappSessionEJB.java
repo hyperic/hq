@@ -51,11 +51,11 @@ import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl;
 import org.hyperic.hq.auth.shared.AuthManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerEJBImpl;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
 import org.hyperic.hq.bizapp.shared.AIBossLocal;
@@ -173,12 +173,12 @@ public abstract class BizappSessionEJB {
         return ServerConfigManagerEJBImpl.getOne();
     }
 
-    public ResourceManagerLocal getResourceManager() {
-        return ResourceManagerEJBImpl.getOne();
+    public ResourceManager getResourceManager() {
+        return ResourceManagerImpl.getOne();
     }
 
-    public ResourceGroupManagerLocal getResourceGroupManager() {
-        return ResourceGroupManagerEJBImpl.getOne();
+    public ResourceGroupManager getResourceGroupManager() {
+        return ResourceGroupManagerImpl.getOne();
     }
 
     public AppdefStatManagerLocal getAppdefStatManager() {

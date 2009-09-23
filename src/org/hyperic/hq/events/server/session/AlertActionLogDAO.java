@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -27,13 +27,13 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.Collection;
 
-import org.hyperic.dao.DAOFactory;
+import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class AlertActionLogDAO extends HibernateDAO {
-    public AlertActionLogDAO(DAOFactory f) {
+    public AlertActionLogDAO(SessionFactory f) {
         super(AlertActionLog.class, f);
     }
 
@@ -65,12 +65,12 @@ public class AlertActionLogDAO extends HibernateDAO {
             .setParameterList("alerts", alerts)
             .executeUpdate();
     }
-    
+
     void handleSubjectRemoval(AuthzSubject subject) {
         String sql = "update AlertActionLog set " +
                      "subject = null " +
                      "where subject = :subject";
-        
+
         getSession().createQuery(sql)
                     .setParameter("subject", subject)
                     .executeUpdate();

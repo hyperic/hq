@@ -42,6 +42,8 @@ public class SRNCache {
 
     private static SRNCache _singleton = new SRNCache();
 
+    private ScheduleRevNumDAO scheduleRevNumDAO;
+
     public static SRNCache getInstance() {
         return _singleton;
     }
@@ -52,7 +54,7 @@ public class SRNCache {
 
     /**
      * Get the current cache size.
-     * 
+     *
      * @return The size of the cache
      */
     public long getSize() {
@@ -79,10 +81,9 @@ public class SRNCache {
         if (el != null) {
             return (ScheduleRevNum)el.getObjectValue();
         }
-        
-        ScheduleRevNumDAO dao =
-            new ScheduleRevNumDAO(DAOFactory.getDAOFactory());
-        ScheduleRevNum srn = dao.get(id);
+
+
+        ScheduleRevNum srn = scheduleRevNumDAO.get(id);
         if (srn != null) {
             this.put(srn);
         }

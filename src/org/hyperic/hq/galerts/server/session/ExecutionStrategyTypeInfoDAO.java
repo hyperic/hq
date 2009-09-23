@@ -25,14 +25,15 @@
 
 package org.hyperic.hq.galerts.server.session;
 
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
-public class ExecutionStrategyTypeInfoDAO 
+public class ExecutionStrategyTypeInfoDAO
     extends HibernateDAO
 {
-    public ExecutionStrategyTypeInfoDAO(DAOFactory f) {
+    public ExecutionStrategyTypeInfoDAO(SessionFactory f) {
         super(ExecutionStrategyTypeInfo.class, f);
     }
 
@@ -43,7 +44,7 @@ public class ExecutionStrategyTypeInfoDAO
     void save(ExecutionStrategyTypeInfo tInfo) {
         super.save(tInfo);
     }
-    
+
     void save(ExecutionStrategyInfo info) {
         super.save(info);
     }
@@ -51,14 +52,14 @@ public class ExecutionStrategyTypeInfoDAO
     void remove(ExecutionStrategyTypeInfo tInfo) {
         super.remove(tInfo);
     }
-    
+
     void remove(ExecutionStrategyInfo info) {
         super.remove(info);
     }
-    
+
     public ExecutionStrategyTypeInfo find(ExecutionStrategyType sType) {
         Class strategyClass = sType.getClass();
-        
+
         return (ExecutionStrategyTypeInfo) createCriteria()
             .add(Expression.eq("typeClass", strategyClass))
             .uniqueResult();

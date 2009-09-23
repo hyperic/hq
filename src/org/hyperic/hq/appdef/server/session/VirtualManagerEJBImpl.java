@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -48,10 +48,10 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerUtil;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 
 /**
@@ -71,8 +71,10 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
     private Log log = LogFactory.getLog(
         "org.hyperic.hq.appdef.server.session.VirtualManagerEJBImpl");
 
+    private VirtualDAO virtualDAO;
+
     private VirtualDAO getVirtualDAO() {
-        return new VirtualDAO(DAOFactory.getDAOFactory());
+        return virtualDAO;
     }
 
     /**
@@ -151,7 +153,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
                 "Appdef Entity Type: " + aeid.getType() +
                 " does not support virtual resources");
         }
-        
+
         List resourcesList = new ArrayList();
         for (Iterator it = appResources.iterator(); it.hasNext(); ) {
             switch (aeid.getType()) {
@@ -171,7 +173,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
 
         return resourcesList;
     }
-    
+
     /**
      * Associate an array of entities to a VM
      * @ejb:interface-method
@@ -182,11 +184,11 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
                                   AppdefEntityID[] aeids)
         throws FinderException {
         VirtualDAO dao = getVirtualDAO();
+
         
-        try {
-            ResourceManagerLocal resMan =
-                ResourceManagerUtil.getLocalHome().create();
-            
+            ResourceManager resMan =
+                ResourceManagerImpl.getOne();
+
             for (int i = 0; i < aeids.length; i++) {
                String typeStr =
                    AppdefUtil.appdefTypeIdToAuthzTypeStr(aeids[i].getType());
@@ -195,16 +197,12 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
                                                           aeids[i].getId());
                dao.createVirtual(res, processId);
             }
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+     
     }
 
     /**
      * Associate an array of entities to a VM
-     * @throws FinderException 
+     * @throws FinderException
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
@@ -242,7 +240,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
         }
     }
 
-    public void ejbCreate() throws CreateException {}    
+    public void ejbCreate() throws CreateException {}
     public void ejbRemove() {}
     public void ejbActivate() {}
     public void ejbPassivate() {}

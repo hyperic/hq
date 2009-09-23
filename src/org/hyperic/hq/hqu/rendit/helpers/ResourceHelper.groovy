@@ -1,7 +1,7 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as ResMan
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as GroupMan
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl as ResMan
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl as GroupMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
@@ -15,7 +15,7 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl
 import org.hyperic.hq.authz.server.session.ResourceSortField
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup

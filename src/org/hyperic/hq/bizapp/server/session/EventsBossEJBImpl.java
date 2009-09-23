@@ -67,12 +67,12 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
 import org.hyperic.hq.bizapp.shared.EventsBossLocal;
 import org.hyperic.hq.bizapp.shared.EventsBossUtil;
@@ -123,8 +123,8 @@ import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertLogSortField;
-import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
-import org.hyperic.hq.galerts.shared.GalertManagerLocal;
+import org.hyperic.hq.galerts.server.session.GalertManagerImpl;
+import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.DefaultMetricEnableCallback;
@@ -336,7 +336,7 @@ public class EventsBossEJBImpl
         AuthzSubject subject = manager.getSubject(sessionID);
 
         int[] counts = getAM().getAlertCount(ids);
-        counts = GalertManagerEJBImpl.getOne().fillAlertCount(subject, ids,
+        counts = GalertManagerImpl.getOne().fillAlertCount(subject, ids,
                                                               counts);
         return counts;
     }
@@ -690,11 +690,11 @@ public class EventsBossEJBImpl
                 _log.debug("AppdefEntityID [" + eid + "]");
             }
             if (eid.isGroup()) {
-                ResourceGroupManagerLocal rgm = ResourceGroupManagerEJBImpl.getOne();
+                ResourceGroupManager rgm = ResourceGroupManagerImpl.getOne();
                 ResourceGroup group = rgm.findResourceGroupById(eid.getId());
 
                 // Get the group alerts
-                GalertManagerLocal gam = GalertManagerEJBImpl.getOne();
+                GalertManager gam = GalertManagerImpl.getOne();
                 Collection allAlerts = gam.findAlertDefs(group, PageControl.PAGE_ALL);
                 for (Iterator it = allAlerts.iterator(); it.hasNext(); ) {
                     GalertDef galertDef = (GalertDef) it.next();
@@ -1111,7 +1111,7 @@ public class EventsBossEJBImpl
             appentResources = getPlatformManager().checkAlertingScope(subject);
         }
 
-        GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
+        GalertManager gMan = GalertManagerImpl.getOne();
         List galerts = gMan.findEscalatables(subject, count, priority,
                                              timeRange, cur, appentResources);
         alerts.addAll(galerts);
@@ -1571,7 +1571,7 @@ public class EventsBossEJBImpl
                                        PageInfo.getAll(AlertSortField.DATE,
                                                        false));
         } else if (alertType.equals(GalertEscalationAlertType.GALERT)) {
-            GalertManagerLocal gMan = GalertManagerEJBImpl.getOne();
+            GalertManager gMan = GalertManagerImpl.getOne();
             alert = gMan.findAlertLog(alertID);
             alertsToFix = gMan.findAlerts(
                                     subject, AlertSeverity.LOW,

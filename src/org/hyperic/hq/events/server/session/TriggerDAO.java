@@ -21,6 +21,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.SessionFactory;
 import org.hibernate.dialect.Dialect;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
@@ -32,8 +33,8 @@ import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 public class TriggerDAO
     extends HibernateDAO implements TriggerDAOInterface
 {
-    public TriggerDAO(DAOFactory f) {
-        super(RegisteredTrigger.class, f);
+    public TriggerDAO(SessionFactory sessionFactory) {
+        super(RegisteredTrigger.class, sessionFactory);
     }
 
     public RegisteredTrigger create(RegisteredTriggerValue createInfo) {

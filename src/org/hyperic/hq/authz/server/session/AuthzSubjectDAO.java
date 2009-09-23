@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -28,6 +28,7 @@ package org.hyperic.hq.authz.server.session;
 import java.util.Collection;
 
 import org.hibernate.Criteria;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
@@ -40,17 +41,21 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-class AuthzSubjectDAO 
+@Repository
+public class AuthzSubjectDAO
     extends HibernateDAO
 {
-    AuthzSubjectDAO(DAOFactory f) {
+    @Autowired
+    public AuthzSubjectDAO(SessionFactory f) {
         super(AuthzSubject.class, f);
     }
 
-    AuthzSubject create(AuthzSubject creator, String name, boolean active, 
-                        String dsn, String dept, String email, String first, 
-                        String last, String phone,  
+    AuthzSubject create(AuthzSubject creator, String name, boolean active,
+                        String dsn, String dept, String email, String first,
+                        String last, String phone,
                         String sms, boolean html)
     {
         AuthzSubject subject = new AuthzSubject(active, dsn, dept, email,
@@ -69,9 +74,9 @@ class AuthzSubjectDAO
         }
 
         ResourceDAO rDao = daoFactory.getResourceDAO();
-        Resource r = rDao.create(rt, rDao.findRootResource(),  
+        Resource r = rDao.create(rt, rDao.findRootResource(),
                                  null, /* No Name? */
-                                 creator, subject.getId(), false); 
+                                 creator, subject.getId(), false);
 
         subject.setResource(r);
         Role role = daoFactory.getRoleDAO().findByName(
@@ -81,7 +86,7 @@ class AuthzSubjectDAO
                                                AuthzConstants.creatorRoleName);
         }
         subject.addRole(role);
-        
+
         // Insert an empty config response
         Crispo c = CrispoManagerEJBImpl.getOne().create(new ConfigResponse());
         subject.setPrefs(c);
@@ -122,7 +127,7 @@ class AuthzSubjectDAO
             .setCacheRegion("AuthzSubject.findByName")
             .uniqueResult();
     }
-    
+
     private Criteria findMatchingNameCriteria(String name) {
         name = '%' + name + '%';
         return createCriteria()
@@ -132,12 +137,12 @@ class AuthzSubjectDAO
                                      Restrictions.ilike("lastName", name))))
             .add(Restrictions.eq("system", Boolean.FALSE));
     }
-    
+
     public PageList findMatchingName(String name, PageControl pc) {
         Integer count = (Integer) findMatchingNameCriteria(name)
             .setProjection(Projections.rowCount())
             .uniqueResult();
-        
+
         Criteria crit =
             findMatchingNameCriteria(name).addOrder(Order.asc("sortName"));
         return getPagedResult(crit, count, pc);
@@ -150,24 +155,24 @@ class AuthzSubjectDAO
     private Criteria findById_orderNameCriteria(Integer[] ids) {
         return createCriteria().add(Restrictions.in("id", ids));
     }
-    
+
     public PageList findById_orderName(Integer[] ids, PageControl pc) {
         Integer count = (Integer) findById_orderNameCriteria(ids)
             .setProjection(Projections.rowCount())
-            .uniqueResult(); 
-        
+            .uniqueResult();
+
         Criteria crit = findById_orderNameCriteria(ids)
             .addOrder( pc.isAscending() ? Order.asc("sortName") :
                                           Order.desc("sortName"));
-        
+
         return getPagedResult(crit, count, pc);
     }
 
     public Collection findAll_order(boolean isRoot, String col,
-                                    boolean asc, Collection excludes) 
+                                    boolean asc, Collection excludes)
     {
         Criteria criteria = createCriteria();
-        
+
         if (isRoot) {
             Disjunction disjunctions = Restrictions.disjunction();
             disjunctions.add(Restrictions.eq("system", Boolean.FALSE));
@@ -177,15 +182,15 @@ class AuthzSubjectDAO
         } else {
             criteria.add(Restrictions.eq("system", Boolean.FALSE));
         }
-        
+
         criteria.addOrder( asc ? Order.asc(col) : Order.desc(col));
-        
+
         if (excludes != null && excludes.size() > 0) {
             criteria.add( Restrictions.not( Restrictions.in("id", excludes)));
         }
-        
+
         return criteria.list();
-    
+
     }
 
     public Collection findAll_orderName(Collection excludes, boolean asc) {

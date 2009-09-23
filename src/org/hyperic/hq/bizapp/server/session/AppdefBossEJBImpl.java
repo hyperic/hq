@@ -126,17 +126,17 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.MixedGroupType;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.bizapp.shared.AIBossLocal;
@@ -807,7 +807,7 @@ public class AppdefBossEJBImpl
         List appdefList = new ArrayList();
 
         // cheaper to find the resource first
-        ResourceManagerLocal resMan = getResourceManager();
+        ResourceManager resMan = getResourceManager();
         for (int i = 0; i < entities.length; i++) {
             if (pc != null) {
                 Resource res = resMan.findResource(entities[i]);
@@ -1315,7 +1315,7 @@ public class AppdefBossEJBImpl
         throws SessionNotFoundException, SessionTimeoutException,
                ApplicationException, VetoException {
         final StopWatch timer = new StopWatch();
-        final ResourceManagerLocal resMan = getResourceManager();
+        final ResourceManager resMan = getResourceManager();
         final AuthzSubject subject = manager.getSubject(sessionId);
         final Resource res = resMan.findResource(aeid);
         
@@ -1356,7 +1356,7 @@ public class AppdefBossEJBImpl
                     svcMan.removeService(subject, svcMan.findServiceById(id));
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
-                    final ResourceGroupManagerLocal rgMan =
+                    final ResourceGroupManager rgMan =
                         getResourceGroupManager();
                     rgMan.removeResourceGroup(
                         subject, rgMan.findResourceGroupById(id));
@@ -2029,7 +2029,7 @@ public class AppdefBossEJBImpl
             return Collections.EMPTY_LIST;
         
         List ret = new ArrayList(resources.length);
-        ResourceManagerLocal resMan = getResourceManager();
+        ResourceManager resMan = getResourceManager();
         for (int i = 0; i < resources.length; i++) {
             AppdefEntityID aeid = new AppdefEntityID(resources[i]);
             ret.add(resMan.findResource(aeid));
@@ -2218,7 +2218,7 @@ public class AppdefBossEJBImpl
         throws PermissionException, SessionException
     {
         AuthzSubject subject = manager.getSubject(sessionId);
-        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        ResourceGroupManager groupMan = getResourceGroupManager();
         ResourceGroup group = groupMan.findResourceGroupById(subject, id);
         return groupMan.getGroupConvert(subject, group);
     }
@@ -2229,7 +2229,7 @@ public class AppdefBossEJBImpl
     public Collection getGroupsForResource(int sessionId, Resource r)
         throws SessionNotFoundException, SessionTimeoutException {
         manager.authenticate(sessionId);
-        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        ResourceGroupManager groupMan = getResourceGroupManager();
         return groupMan.getGroups(r);
     }
     
@@ -2285,7 +2285,7 @@ public class AppdefBossEJBImpl
                SessionNotFoundException, ApplicationException
     {
         AuthzSubject subject = manager.getSubject(sessionId);
-        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        ResourceGroupManager groupMan = getResourceGroupManager();
         
         List excludeGroups = new ArrayList(excludeIds.length);
         for (int i=0; i<excludeIds.length; i++) {
@@ -2354,7 +2354,7 @@ public class AppdefBossEJBImpl
                SessionNotFoundException 
     {
         AuthzSubject subject = manager.getSubject(sessionId);
-        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        ResourceGroupManager groupMan = getResourceGroupManager();
         List excludeGroups = new ArrayList(removeIds.length);
         
         for (int i=0; i<removeIds.length; i++) {
@@ -2393,7 +2393,7 @@ public class AppdefBossEJBImpl
         List result = null;
         AppdefEntityID eid = null;
         Resource resource = null;
-        ResourceManagerLocal resourceMan = ResourceManagerEJBImpl.getOne();
+        ResourceManager resourceMan = ResourceManagerImpl.getOne();
         
         for (int i=0; i<entities.length; i++) {
             eid = entities[i];
@@ -2430,7 +2430,7 @@ public class AppdefBossEJBImpl
                SessionNotFoundException 
     {
         AuthzSubject subject = manager.getSubject(sessionId);
-        ResourceGroupManagerLocal mgr = ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroupManager mgr = ResourceGroupManagerImpl.getOne();
         
         Collection resGrps = mgr.getAllResourceGroups(subject, true);
         
@@ -2453,10 +2453,10 @@ public class AppdefBossEJBImpl
         throws SessionException, PermissionException 
     {
         AuthzSubject subject = manager.getSubject(sessionID);
-        ResourceGroupManagerLocal groupMan = 
-            ResourceGroupManagerEJBImpl.getOne();
-        ResourceManagerLocal resourceMan =
-            ResourceManagerEJBImpl.getOne();
+        ResourceGroupManager groupMan = 
+            ResourceGroupManagerImpl.getOne();
+        ResourceManager resourceMan =
+            ResourceManagerImpl.getOne();
         
         for (Iterator i = aeids.iterator(); i.hasNext(); ) {
             AppdefEntityID aeid = (AppdefEntityID)i.next();
@@ -2468,7 +2468,7 @@ public class AppdefBossEJBImpl
     /**
      * Update properties of a group.
      * 
-     * @see ResourceGroupManagerEJBImpl.updateGroup
+     * @see ResourceGroupManagerImpl.updateGroup
      * @ejb:interface-method
      */
     public void updateGroup(int sessionId, ResourceGroup group,
@@ -2489,7 +2489,7 @@ public class AppdefBossEJBImpl
     {
         List appentResources = new ArrayList();
 
-        ResourceManagerLocal resMgr = getResourceManager();
+        ResourceManager resMgr = getResourceManager();
 
         if (appdefTypeId != APPDEF_TYPE_UNDEFINED) {
             String authzResType = 
@@ -2873,7 +2873,7 @@ public class AppdefBossEJBImpl
         Critter tmp;
         Resource proto = null;
         if (appdefResType != null) {
-           ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
+           ResourceManager rman = ResourceManagerImpl.getOne();
            proto = rman.findResourcePrototype(appdefResType); 
         }
         boolean isGroup = (groupTypes == null) ? false : true;
@@ -2936,8 +2936,8 @@ public class AppdefBossEJBImpl
 
     private Critter getGrpMemCritter(AppdefEntityID grpId) {
         if (grpId != null) {
-            ResourceGroupManagerLocal rgman =
-                ResourceGroupManagerEJBImpl.getOne();
+            ResourceGroupManager rgman =
+                ResourceGroupManagerImpl.getOne();
             ResourceGroup group =
                 rgman.findResourceGroupById(grpId.getId());
             GroupMembershipCritterType groupMemType =
@@ -3121,8 +3121,8 @@ public class AppdefBossEJBImpl
         throws SessionException, PermissionException, VetoException
     {
         AuthzSubject subject = manager.getSubject(sessionId);
-        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
-        ResourceManagerLocal resourceMan = getResourceManager();
+        ResourceGroupManager groupMan = getResourceGroupManager();
+        ResourceManager resourceMan = getResourceManager();
         Resource resource = resourceMan.findResource(entityId);
         
         for (int i=0; i < groupIds.length; i++) {
@@ -3143,10 +3143,10 @@ public class AppdefBossEJBImpl
         throws UpdateException, PermissionException,
                AppdefEntityNotFoundException
     {
-        final ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        final ResourceGroupManager groupMan = getResourceGroupManager();
         
         // first look up the appdef resources by owner
-        final ResourceManagerLocal resMan = getResourceManager();
+        final ResourceManager resMan = getResourceManager();
         Collection resources = resMan.findResourceByOwner(currentOwner);
         AuthzSubject overlord = getAuthzSubjectManager().getOverlordPojo();
         for(Iterator it = resources.iterator(); it.hasNext(); ) {
@@ -3179,8 +3179,8 @@ public class AppdefBossEJBImpl
         throws PermissionException, SessionException, VetoException
     {
         AuthzSubject subject = manager.getSubject(sessionId);
-        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
-        ResourceManagerLocal resourceMan = getResourceManager();
+        ResourceGroupManager groupMan = getResourceGroupManager();
+        ResourceManager resourceMan = getResourceManager();
         Resource resource = resourceMan.findResource(entityId);
         
         for (int i=0;i<groupIds.length;i++) {

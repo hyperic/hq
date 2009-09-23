@@ -60,10 +60,10 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayConstants;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplayValue;
@@ -315,7 +315,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         throws AppdefEntityNotFoundException, PermissionException 
     {
         List res = new ArrayList();        
-        ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
+        ResourceManager rman = ResourceManagerImpl.getOne();
         Resource proto = rman.findResourcePrototype(ctype); 
 
         if (proto == null) {
@@ -364,7 +364,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
     
     private final List getResources(AppdefEntityID[] ids) {
         final List resources = new ArrayList(ids.length);
-        final ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+        final ResourceManager rMan = ResourceManagerImpl.getOne();
         for (int i = 0; i < ids.length; i++) {
             final Resource r = rMan.findResource(ids[i]);
             if (r == null || r.isInAsyncDeleteState()) {
@@ -412,7 +412,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         Arrays.fill(result, MeasurementConstants.AVAIL_UNKNOWN);
         final Map data = new HashMap();
         final MeasurementManagerLocal mMan = getMetricManager();
-        final ResourceManagerLocal rMan = getResourceManager();
+        final ResourceManager rMan = getResourceManager();
         final AvailabilityManagerLocal aMan = getAvailManager();
         if (midMap.size() > 0) {
             final List mids = new ArrayList();
@@ -606,7 +606,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
      */
     protected final Map getMidMap(AppdefEntityID[] ids, Map measCache) {
         final Map rtn = new HashMap(ids.length);
-        final ResourceManagerLocal rMan = getResourceManager();
+        final ResourceManager rMan = getResourceManager();
         final MeasurementManagerLocal mMan = getMetricManager();
         final List toGet = new ArrayList();
         for (final Iterator it=Arrays.asList(ids).iterator(); it.hasNext(); ) {
@@ -669,7 +669,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
                                           Map measCache, Map availCache)
         throws AppdefEntityNotFoundException,
                PermissionException {
-        final ResourceGroupManagerLocal resGrpMgr = getResourceGroupManager();
+        final ResourceGroupManager resGrpMgr = getResourceGroupManager();
         final ResourceGroup group =
             resGrpMgr.findResourceGroupById(subject, gid);
         if (group == null) {
@@ -1008,7 +1008,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         final List resources;
         if (ctype == null) {
             if (aeid.isGroup()) {
-                final ResourceGroupManagerLocal resGrpMgr =
+                final ResourceGroupManager resGrpMgr =
                     getResourceGroupManager();
                 final ResourceGroup group =
                     resGrpMgr.findResourceGroupById(subject, aeid.getId());

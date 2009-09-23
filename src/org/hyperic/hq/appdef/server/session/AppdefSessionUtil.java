@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -38,16 +38,25 @@ import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.product.TypeInfo;
 
 
 public abstract class AppdefSessionUtil {
     private AIQueueManagerLocal  aiqManagerLocal;
     private ConfigManagerLocal   configMgrL;
-    private ResourceManagerLocal rmLocal;
+    private ResourceManager rmLocal;
     private CPropManagerLocal    cpropLocal;
+    private AgentDAO agentDao;
+    private ApplicationDAO applicationDAO;
+    private ConfigResponseDAO configResponseDAO;
+    private PlatformDAO platformDAO;
+    private PlatformTypeDAO platformTypeDAO;
+    private ServerDAO serverDAO;
+    private ServerTypeDAO serverTypeDAO;
+    private ServiceTypeDAO serviceTypeDAO;
+    private ServiceDAO serviceDAO;
 
     protected CPropManagerLocal getCPropManager() {
         if (cpropLocal == null) {
@@ -79,9 +88,9 @@ public abstract class AppdefSessionUtil {
         return ServiceManagerEJBImpl.getOne();
     }
 
-    protected ResourceManagerLocal getResourceManager() {
+    protected ResourceManager getResourceManager() {
         if (rmLocal == null) {
-            rmLocal = ResourceManagerEJBImpl.getOne();
+            rmLocal = ResourceManagerImpl.getOne();
         }
         return rmLocal;
     }
@@ -94,39 +103,39 @@ public abstract class AppdefSessionUtil {
     }
 
     protected AgentDAO getAgentDAO() {
-        return new AgentDAO(DAOFactory.getDAOFactory());
+        return agentDao;
     }
 
     protected ConfigResponseDAO getConfigResponseDAO() {
-        return new ConfigResponseDAO(DAOFactory.getDAOFactory());
+        return configResponseDAO;
     }
 
     protected PlatformDAO getPlatformDAO() {
-        return new PlatformDAO(DAOFactory.getDAOFactory());
+        return platformDAO;
     }
 
     protected PlatformTypeDAO getPlatformTypeDAO() {
-        return new PlatformTypeDAO(DAOFactory.getDAOFactory());
+        return platformTypeDAO;
     }
 
     protected ServerDAO getServerDAO() {
-        return new ServerDAO(DAOFactory.getDAOFactory());
+        return serverDAO;
     }
 
     protected ServerTypeDAO getServerTypeDAO() {
-        return new ServerTypeDAO(DAOFactory.getDAOFactory());
+        return serverTypeDAO;
     }
 
     protected ServiceTypeDAO getServiceTypeDAO() {
-        return new ServiceTypeDAO(DAOFactory.getDAOFactory());
+        return serviceTypeDAO;
     }
 
     protected ServiceDAO getServiceDAO() {
-        return new ServiceDAO(DAOFactory.getDAOFactory());
+        return serviceDAO;
     }
 
     protected ApplicationDAO getApplicationDAO() {
-        return new ApplicationDAO(DAOFactory.getDAOFactory());
+        return applicationDAO;
     }
 
     protected AppdefResourceType findResourceType(int appdefType,
@@ -142,7 +151,7 @@ public abstract class AppdefSessionUtil {
                 return getServerManager().findServerType(id);
             } catch(ObjectNotFoundException exc){
                 throw new ServerNotFoundException("Server type id=" +
-                                                  appdefTypeId + 
+                                                  appdefTypeId +
                                                   " not found");
             }
         } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE){

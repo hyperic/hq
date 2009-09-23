@@ -31,7 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.explorer.ExplorerContext;
 import org.hyperic.hq.bizapp.explorer.ExplorerItem;
@@ -72,7 +72,7 @@ public class GroupItemType implements ExplorerItemType {
         AuthzSubject subject = ctx.getSubject();
         ResourceGroup group;
         try {
-            group = ResourceGroupManagerEJBImpl.getOne()
+            group = ResourceGroupManagerImpl.getOne()
                 .findResourceGroupById(subject, groupId);
         } catch(PermissionException e) {
             _log.warn("Permission denied, looking up group id=" + groupId +

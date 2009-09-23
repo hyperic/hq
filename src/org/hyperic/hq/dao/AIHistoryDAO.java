@@ -2,6 +2,7 @@ package org.hyperic.hq.dao;
 
 import java.util.Collection;
 
+import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.autoinventory.AIHistory;
@@ -15,10 +16,10 @@ import org.hyperic.hq.autoinventory.ScanConfigurationCore;
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -26,7 +27,7 @@ import org.hyperic.hq.autoinventory.ScanConfigurationCore;
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -35,7 +36,7 @@ import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 
 public class AIHistoryDAO extends HibernateDAO
 {
-    public AIHistoryDAO(DAOFactory f) {
+    public AIHistoryDAO(SessionFactory f) {
         super(AIHistory.class, f);
     }
 

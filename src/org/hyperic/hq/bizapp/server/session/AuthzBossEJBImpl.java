@@ -53,7 +53,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AuthzBossLocal;
 import org.hyperic.hq.bizapp.shared.AuthzBossUtil;
 import org.hyperic.hq.common.ApplicationException;
@@ -239,7 +239,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         Map appdefMap = new LinkedHashMap();
 
         // cheaper to find the resource first
-        ResourceManagerLocal resMan = getResourceManager();
+        ResourceManager resMan = getResourceManager();
         for (int i = 0; i < entities.length; i++) {
             Resource res = resMan.findResource(entities[i]);
             if (res != null && !res.isInAsyncDeleteState()) {

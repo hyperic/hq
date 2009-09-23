@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -42,11 +42,12 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This is the parent class for all Authz Session Beans
  */
-public abstract class AuthzSession { 
+public abstract class AuthzSession {
     public static final Log log
         = LogFactory.getLog(AuthzSession.class.getName());
 
@@ -54,34 +55,51 @@ public abstract class AuthzSession {
 
     protected SessionContext ctx;
 
+    @Autowired
+    protected ResourceGroupDAO resourceGroupDao;
+
+    protected AuthzSubjectDAO authzSubjectDAO;
+
+    protected ResourceTypeDAO resourceTypeDAO;
+
+    @Autowired
+    protected ResourceDAO resourceDAO;
+
+    @Autowired
+    protected ResourceRelationDAO resourceRelationDAO;
+
+    protected RoleDAO roleDAO;
+
+    protected OperationDAO operationDAO;
+
     protected ResourceTypeDAO getResourceTypeDAO() {
-        return new ResourceTypeDAO(DAOFactory.getDAOFactory());
+        return resourceTypeDAO;
     }
 
     protected ResourceDAO getResourceDAO() {
-        return new ResourceDAO(DAOFactory.getDAOFactory());
+        return resourceDAO;
     }
 
     protected ResourceGroupDAO getResourceGroupDAO() {
-        return new ResourceGroupDAO(DAOFactory.getDAOFactory());
+        return resourceGroupDao;
     }
 
     private ResourceRelationDAO getResourceRelationDAO() {
-        return new ResourceRelationDAO(DAOFactory.getDAOFactory());
+        return resourceRelationDAO;
     }
 
     protected AuthzSubjectDAO getSubjectDAO() {
-        return new AuthzSubjectDAO(DAOFactory.getDAOFactory());
+        return authzSubjectDAO;
     }
 
     protected RoleDAO getRoleDAO() {
-        return new RoleDAO(DAOFactory.getDAOFactory());
+        return roleDAO;
     }
 
     protected OperationDAO getOperationDAO() {
-        return new OperationDAO(DAOFactory.getDAOFactory());
+        return operationDAO;
     }
-    
+
     protected ResourceType getRootResourceType() {
        return getResourceTypeDAO().findTypeResourceType();
     }
@@ -96,9 +114,9 @@ public abstract class AuthzSession {
      * @ejb:transaction type="Required"
      */
     public AuthzSubject findSubjectByAuth(String name, String authDsn)
-        throws SubjectNotFoundException 
+        throws SubjectNotFoundException
     {
-         AuthzSubject subject = new AuthzSubjectDAO(DAOFactory.getDAOFactory())
+         AuthzSubject subject = authzSubjectDAO
             .findByAuth(name, authDsn);
         if (subject == null) {
             throw new SubjectNotFoundException(
@@ -112,9 +130,8 @@ public abstract class AuthzSession {
         if (vals == null || vals.length == 0) {
             return ret;
         }
-        
-        AuthzSubjectDAO subjDao = 
-            new AuthzSubjectDAO(DAOFactory.getDAOFactory());
+
+
         RoleDAO roleDao = null;
         ResourceGroupDAO resGrpDao = null;
         for (int i = 0; i < vals.length; i++) {
@@ -142,10 +159,10 @@ public abstract class AuthzSession {
             }
 
         }
-                
+
         return ret;
     }
-    
+
     protected AuthzSubject lookupSubject(Integer id) {
         return getSubjectDAO().findById(id);
     }
@@ -155,7 +172,7 @@ public abstract class AuthzSession {
             ResourceType type = resource.getResourceType();
             return getResourceDAO().findByInstanceId(type,
                                                      resource.getInstanceId());
-        } 
+        }
         return getResourceDAO().findById(resource.getId());
     }
 
@@ -168,13 +185,13 @@ public abstract class AuthzSession {
     public void setSessionContext(SessionContext ctx) {
         this.ctx = ctx;
     }
-    
+
     protected SessionContext getSessionContext() {
         return this.ctx;
     }
-    
+
     /**
-     * 
+     *
      * @ejb:interface-method
      */
     public ResourceRelation getContainmentRelation() {
@@ -182,7 +199,7 @@ public abstract class AuthzSession {
     }
 
     /**
-     * 
+     *
      * @ejb:interface-method
      */
     public ResourceRelation getNetworkRelation() {
@@ -190,12 +207,12 @@ public abstract class AuthzSession {
     }
 
     private ResourceRelation getResourceRelation(Integer relationId) {
-        return getResourceRelationDAO().findById(relationId); 
+        return getResourceRelationDAO().findById(relationId);
     }
 
     protected Resource findPrototype(AppdefEntityTypeID id) {
         Integer authzType;
-        
+
         switch(id.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             authzType = AuthzConstants.authzPlatformProto;

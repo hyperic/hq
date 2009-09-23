@@ -80,9 +80,8 @@ public class DashboardManagerEJBImpl implements SessionBean {
 
     protected SessionManager _manager = SessionManager.getInstance();
 
-    private DashboardConfigDAO _dashDAO =
-        new DashboardConfigDAO(DAOFactory.getDAOFactory());
-    
+    private DashboardConfigDAO _dashDAO;
+
     /** @ejb:create-method */
     public void ejbCreate() {}
     public void ejbActivate() {}
@@ -94,20 +93,20 @@ public class DashboardManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public UserDashboardConfig getUserDashboard(AuthzSubject me,
-                                                AuthzSubject user) 
+                                                AuthzSubject user)
         throws PermissionException
     {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
-        
+
         if (!me.equals(user) && !permMan.hasAdminPermission(me.getId()))
         {
             throw new PermissionException("You are unauthorized to see this " +
                                           "dashboard");
         }
-        
+
         return _dashDAO.findDashboard(user);
     }
-    
+
     /**
      * @ejb:interface-method
      */
@@ -125,23 +124,23 @@ public class DashboardManagerEJBImpl implements SessionBean {
     private ConfigResponse getDefaultConfig() {
         return new ConfigResponse();
     }
-    
+
     /**
      * @ejb:interface-method
      */
     public UserDashboardConfig createUserDashboard(AuthzSubject me,
                                                    AuthzSubject user,
-                                                   String name) 
+                                                   String name)
         throws PermissionException
     {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
-        
+
         if (!me.equals(user) && !permMan.hasAdminPermission(me.getId()))
         {
-            throw new PermissionException("You are unauthorized to create " + 
+            throw new PermissionException("You are unauthorized to create " +
                                           "this dashboard");
         }
-        
+
         Crispo cfg = CrispoManagerEJBImpl.getOne().create(getDefaultConfig());
         UserDashboardConfig dash = new UserDashboardConfig(user, name, cfg);
         _dashDAO.save(dash);
@@ -151,15 +150,15 @@ public class DashboardManagerEJBImpl implements SessionBean {
     /**
      * @ejb:interface-method
      */
-    public RoleDashboardConfig createRoleDashboard(AuthzSubject me, Role r, 
+    public RoleDashboardConfig createRoleDashboard(AuthzSubject me, Role r,
                                                    String name)
         throws PermissionException
     {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
-        
+
         permMan.check(me.getId(), r.getResource().getResourceType(),
                       r.getId(), AuthzConstants.roleOpModifyRole);
-        
+
         Crispo cfg = CrispoManagerEJBImpl.getOne().create(getDefaultConfig());
         RoleDashboardConfig dash = new RoleDashboardConfig(r, name, cfg);
         _dashDAO.save(dash);
@@ -168,43 +167,43 @@ public class DashboardManagerEJBImpl implements SessionBean {
 
     /**
      * Reconfigure a user's dashboard
-     * 
+     *
      * @ejb:interface-method
      */
-    public void configureDashboard(AuthzSubject me, DashboardConfig cfg, 
+    public void configureDashboard(AuthzSubject me, DashboardConfig cfg,
                                    ConfigResponse newCfg)
         throws PermissionException
     {
         if (!isEditable(me, cfg)) {
-            throw new PermissionException("You are unauthorized to modify " + 
+            throw new PermissionException("You are unauthorized to modify " +
                                           "this dashboard");
         }
         CrispoManagerEJBImpl.getOne().update(cfg.getCrispo(), newCfg);
     }
-    
+
     /**
      * @ejb:interface-method
      */
-    public void renameDashboard(AuthzSubject me, DashboardConfig cfg, 
-                                String name)  
+    public void renameDashboard(AuthzSubject me, DashboardConfig cfg,
+                                String name)
         throws PermissionException
     {
         if (!isEditable(me, cfg)) {
-            throw new PermissionException("You are unauthorized to modify " + 
+            throw new PermissionException("You are unauthorized to modify " +
                                           "this dashboard");
         }
         cfg.setName(name);
     }
-    
+
     /**
      * Determine if a dashboard is editable by the passed user
-     * 
+     *
      * @ejb:interface-method
      */
-    public boolean isEditable(AuthzSubject me, DashboardConfig dash) { 
+    public boolean isEditable(AuthzSubject me, DashboardConfig dash) {
         PermissionManager permMan = PermissionManagerFactory.getInstance();
 
-        if (permMan.hasAdminPermission(me.getId()))  
+        if (permMan.hasAdminPermission(me.getId()))
             return true;
 
         return dash.isEditable(me);
@@ -213,7 +212,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
     /**
      * @ejb:interface-method
      */
-    public Collection getDashboards(AuthzSubject me) 
+    public Collection getDashboards(AuthzSubject me)
         throws PermissionException
     {
         Collection res = new ArrayList();
@@ -223,22 +222,22 @@ public class DashboardManagerEJBImpl implements SessionBean {
             permMan.hasAdminPermission(me.getId())) {
             res.addAll(_dashDAO.findAllRoleDashboards());
             res.add(getUserDashboard(me, me));
-            return res; 
+            return res;
         }
-        
+
         UserDashboardConfig cfg = getUserDashboard(me, me);
         if (cfg != null)
             res.add(cfg);
-        
+
         if (permMan.hasGuestRole())
             res.addAll(_dashDAO.findRolesFor(me));
-        
+
         return res;
     }
 
     /**
      * Update dashboard and user configs to account for resource deletion
-     * 
+     *
      * @param ids An array of ID's of removed resources
      * @ejb:interface-method
      */
@@ -262,7 +261,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
             }
         }
     }
-    
+
     /**
      * @ejb:interface-method
      */
@@ -277,14 +276,14 @@ public class DashboardManagerEJBImpl implements SessionBean {
         catch (Exception e) {
             throw new LoginException("Username has no preferences");
         }
-    
+
         // Let's make sure that the rss auth token matches
         String prefToken = preferences.getValue(Constants.RSS_TOKEN);
         if (token == null || !token.equals(prefToken))
             throw new LoginException("Username and Auth token do not match");
-        
+
         return preferences;
-    }    
+    }
 
     /**
      * Yanked from DashboardUtils so we don't need to include anything other
@@ -297,7 +296,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
 
 	    return val;
     }
-    
+
     private String removeResource(String val, String resource) {
         val = StringUtil.remove(val, resource);
         val = StringUtil.replace(val, Constants.EMPTY_DELIMITER,
@@ -310,7 +309,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
      */
     public void startup() {
         _log.info("Dashboard Manager starting up");
-        
+
         // Register callback for subject removal
         HQApp.getInstance()
             .registerCallbackListener(SubjectRemoveCallback.class,
@@ -327,16 +326,16 @@ public class DashboardManagerEJBImpl implements SessionBean {
                 new RoleRemoveCallback() {
                     public void roleRemoved(Role r) {
                         RoleDashboardConfig cfg = _dashDAO.findDashboard(r);
-                        
+
                         if (cfg == null)
                             return;
-                        
+
                         CrispoManagerLocal crispMgr =
                             CrispoManagerEJBImpl.getOne();
-                        
+
                         List opts = crispMgr.findOptionByKey(
                             Constants.DEFAULT_DASHBOARD_ID);
-                        
+
                         for (Iterator it = opts.iterator(); it.hasNext(); ) {
                             CrispoOption opt = (CrispoOption) it.next();
                             if (Integer.valueOf(opt.getValue()).equals(
@@ -344,7 +343,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
                                 crispMgr.updateOption(opt, null);
                             }
                         }
-                        
+
                         _dashDAO.handleRoleRemoval(r);
                     }
                 }
@@ -395,7 +394,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
 
     public static DashboardManagerLocal getOne() {
         try {
-            return DashboardManagerUtil.getLocalHome().create();    
+            return DashboardManagerUtil.getLocalHome().create();
         } catch (Exception e) {
             throw new SystemException(e);
         }

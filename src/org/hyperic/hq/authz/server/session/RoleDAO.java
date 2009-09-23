@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 
+import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -39,7 +40,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class RoleDAO extends HibernateDAO {
-    public RoleDAO(DAOFactory f) {
+    public RoleDAO(SessionFactory f) {
         super(Role.class, f);
     }
 
@@ -49,7 +50,7 @@ public class RoleDAO extends HibernateDAO {
         // Save it at this point to get an ID
         save(role);
 
-        ResourceType resType = 
+        ResourceType resType =
             DAOFactory.getDAOFactory().getResourceTypeDAO()
             .findByName(AuthzConstants.roleResourceTypeName);
         if (resType == null) {
@@ -57,15 +58,15 @@ public class RoleDAO extends HibernateDAO {
                 "resource type not found "+AuthzConstants.roleResourceTypeName
             );
         }
-        
+
         ResourceDAO rDao = DAOFactory.getDAOFactory().getResourceDAO();
         Resource proto = rDao.findRootResource();
-        Resource myResource = rDao.create(resType, proto, null /* No name? */, 
-                                          creator, role.getId(), false); 
-            
+        Resource myResource = rDao.create(resType, proto, null /* No name? */,
+                                          creator, role.getId(), false);
+
         role.setResource(myResource);
 
-        ResourceGroupDAO resourceGroupDAO = 
+        ResourceGroupDAO resourceGroupDAO =
             DAOFactory.getDAOFactory().getResourceGroupDAO();
         HashSet groups = new HashSet(2);
 
@@ -90,9 +91,9 @@ public class RoleDAO extends HibernateDAO {
          Fix for Bug #5219
         **/
         ResourceGroupValue grpVal = new ResourceGroupValue();
-        String groupName = AuthzConstants.privateRoleGroupName + role.getId(); 
+        String groupName = AuthzConstants.privateRoleGroupName + role.getId();
         grpVal.setSystem(true);
-        ResourceGroupCreateInfo cInfo = 
+        ResourceGroupCreateInfo cInfo =
             new ResourceGroupCreateInfo(groupName,
                                         "",    // Description
                                         0,     // Group type
@@ -111,7 +112,7 @@ public class RoleDAO extends HibernateDAO {
             throw new SystemException("Should always be able to create a " +
                                       "group for roles, but got exceptin", e);
         }
-        
+
         resourceGroupDAO.addMembers(group, Collections.singleton(myResource));
 
         role.setResourceGroups(groups);
@@ -122,11 +123,11 @@ public class RoleDAO extends HibernateDAO {
     public Role get(Integer id) {
         return (Role) super.get(id);
     }
-    
+
     public Role findById(Integer id) {
         return (Role) super.findById(id);
     }
-    
+
     void save(Role entity) {
         super.save(entity);
     }
@@ -139,13 +140,13 @@ public class RoleDAO extends HibernateDAO {
     }
 
     public Role findByName(String name)
-    {            
+    {
         String sql = "from Role where name=?";
         return (Role)getSession().createQuery(sql)
             .setString(0, name)
             .uniqueResult();
     }
-    
+
     public Collection findAll_orderName(boolean asc) {
         return getSession()
             .createQuery("from Role order by sortName " +

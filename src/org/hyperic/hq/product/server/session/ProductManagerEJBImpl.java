@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -119,6 +119,7 @@ public class ProductManagerEJBImpl
     private AlertDefinitionXmlParser alertDefXmlParser   = new AlertDefinitionXmlParser();
     private static final String ALERT_DEFINITIONS_XML_FILE = "etc/alert-definitions.xml";
     private AlertDefinitionManagerLocal alertDefinitionManagerLocal;
+    private PluginDAO pluginDao;
     
 
     /*
@@ -156,10 +157,10 @@ public class ProductManagerEJBImpl
         try {
             ppm = getProductPluginManager();
         } catch (PluginException e) {
-            log.error("Unable to initialize plugin manager: " + 
+            log.error("Unable to initialize plugin manager: " +
                            e.getMessage());
         }
-    }       
+    }
 
     public static ProductManagerLocal getOne() {
         try {
@@ -206,7 +207,7 @@ public class ProductManagerEJBImpl
         return ppm.getTypeInfo(value.getBasePlatformName(),
                                     value.getTypeName());
     }
-    
+
     /**
      * @ejb:interface-method
      */
@@ -294,14 +295,14 @@ public class ProductManagerEJBImpl
                CreateException, RemoveException, VetoException
     {
         ProductPlugin pplugin = (ProductPlugin) ppm.getPlugin(pluginName);
-        PluginDAO plHome = getPluginDAO();
+        //PluginDAO pluginDao = pluginDao;
         PluginValue ejbPlugin;
         PluginInfo pInfo;
         boolean created = false;
         long start = System.currentTimeMillis();
-        
+
         pInfo = ppm.getPluginInfo(pluginName);
-        Plugin plugin = plHome.findByName(pluginName);
+        Plugin plugin = pluginDao.findByName(pluginName);
         ejbPlugin = plugin != null ?plugin.getPluginValue() : null;
 
         if(ejbPlugin != null &&
@@ -325,7 +326,7 @@ public class ProductManagerEJBImpl
         TypeInfo[] entities = pplugin.getTypes();
         if (entities == null) {
             log.info(pluginName + " does not define any resource types");
-            updateEJBPlugin(plHome, pInfo);
+            updateEJBPlugin(pluginDao, pInfo);
             if (created)
                 PluginAudit.deployAudit(pluginName, start, 
                                         System.currentTimeMillis());
@@ -382,7 +383,7 @@ public class ProductManagerEJBImpl
     	
     	PluginInfo pInfo = ppm.getPluginInfo(pluginName);
     	
-    	PluginDAO plHome = getPluginDAO();
+    	
     	TypeInfo[] entities = pplugin.getTypes();
     	getConfigManagerLocal().updateAppdefEntities(pluginName, entities);
 
@@ -440,7 +441,7 @@ public class ProductManagerEJBImpl
          }
          createAlertDefinitions(pInfo);
          pluginDeployed(pInfo);
-         updateEJBPlugin(plHome, pInfo);
+         updateEJBPlugin(pluginDao, pInfo);
     }
     
     private void createAlertDefinitions(final PluginInfo pInfo) throws FinderException, RemoveException, CreateException, VetoException {
@@ -502,7 +503,5 @@ public class ProductManagerEJBImpl
         return templateManagerLocal;
     }
 
-    private PluginDAO getPluginDAO(){
-        return new PluginDAO(DAOFactory.getDAOFactory());
-    }
+   
 }

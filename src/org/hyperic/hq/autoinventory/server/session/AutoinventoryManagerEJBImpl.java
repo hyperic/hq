@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -83,12 +83,12 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
@@ -134,13 +134,19 @@ import org.hyperic.util.config.ConfigResponse;
  * @ejb:util generate="physical"
  */
 public class AutoinventoryManagerEJBImpl implements SessionBean {
-    private Log _log = 
+    private Log _log =
         LogFactory.getLog(AutoinventoryManagerEJBImpl.class.getName());
-                          
+
     protected final String DATASOURCE_NAME = HQConstants.DATASOURCE;
 
     private AutoinventoryPluginManager aiPluginManager;
     private AIScheduleManagerLocal     aiScheduleManager;
+    private AgentReportStatusDAO statDAO;
+    private AIHistoryDAO aiHistoryDAO;
+
+    private AIHistoryDAO getHistoryDAO() {
+        return aiHistoryDAO;
+    }
 
     /**
      * Get server signatures for a set of servertypes.
@@ -166,7 +172,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                 stNames.put(stValue.getName(), stValue);
             }
         }
-        
+
         Map plugins = aiPluginManager.getPlugins();
         Iterator iter = plugins.keySet().iterator();
         Map results = new HashMap();
@@ -184,7 +190,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                 _log.debug("skipping unrequested AI plugin: " + pluginName);
                 continue;
             }
-            results.put(pluginName, 
+            results.put(pluginName,
                         ((ServerDetector) plugin).getServerSignature());
         }
 
@@ -210,7 +216,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             if (server == null) {
                 return false;
             }
-            
+
             String pluginName = server.getServerType().getName();
             aiPluginManager = (AutoinventoryPluginManager)productManager.
                 getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
@@ -231,7 +237,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
         return retVal;
     }
-    
+
     /**
      * Turn off runtime-autodiscovery for a server that no longer
      * exists.  Use this method when you know the appdefentity identified
@@ -256,7 +262,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
         try {
             client.pushRuntimeDiscoveryConfig(id.getType(), id.getID(),
-                                              null, null, null);            
+                                              null, null, null);
         } catch (AgentRemoteException e) {
             throw new SystemException("Error turning off runtime-autodiscovery " +
             		                  "for resource ("+id+"): "+e);
@@ -271,7 +277,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * the agent connection to use.
      * @param id The AppdefEntityID of the resource to turn
      * off runtime config for.
-     * @param agentToken Which agent controls the runtime AI scans for 
+     * @param agentToken Which agent controls the runtime AI scans for
      * this resource.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
@@ -282,17 +288,17 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         throws PermissionException
     {
         AICommandsClient client;
-        
+
         try {
             client = AICommandsClientFactory.getInstance().getClient(agentToken);
         } catch (AgentNotFoundException e) {
             throw new SystemException("Error looking up agent for resource " +
                                       "(" + id + "): " + e);
         }
-        
+
         try {
             client.pushRuntimeDiscoveryConfig(id.getType(), id.getID(),
-                                              null, null, null);            
+                                              null, null, null);
         } catch (AgentRemoteException e) {
             throw new SystemException("Error turning off runtime-autodiscovery " +
                                       "for resource ("+id+"): "+e);
@@ -307,7 +313,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                   AppdefEntityID id, boolean enable)
         throws PermissionException, AutoinventoryException,
                ResourceDeletedException {
-        ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+        ResourceManager rMan = ResourceManagerImpl.getOne();
         Resource res = rMan.findResource(id);
         // if resource is asynchronously deleted ignore
         if (res == null || res.isInAsyncDeleteState()) {
@@ -344,7 +350,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * Push the metric ConfigResponse out to an agent so it can perform 
+     * Push the metric ConfigResponse out to an agent so it can perform
      * runtime-autodiscovery
      * @param res The appdef entity ID of the server.
      * @param response The configuration info.
@@ -380,10 +386,10 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         if (!aeid.isServer()) {
             name = res.getName();
         }
-        
+
         try {
             client.pushRuntimeDiscoveryConfig(aeid.getType(), aeid.getID(),
-                                              typeName, name, response);            
+                                              typeName, name, response);
         } catch (AgentRemoteException e) {
             throw new SystemException("Error pushing metric config response to " +
             		                  "agent for server ("+res+"): "+e);
@@ -395,12 +401,12 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * Start an autoinventory scan.
      * @param aid The appdef entity whose agent we'll talk to.
      * @param scanConfig The scan configuration to use when scanning.
-     * @param scanName The name of the scan - this is ignored (i.e. it can be 
+     * @param scanName The name of the scan - this is ignored (i.e. it can be
      * null) for immediate, one-time scans.
-     * @param scanDesc The description of the scan - this is ignored (i.e. it 
+     * @param scanDesc The description of the scan - this is ignored (i.e. it
      * can be null) for immediate, one-time scans.
-     * @param schedule Described when and how often the scan should run.  If 
-     * this is null, then the scan will be run as an immediate, one-time only 
+     * @param schedule Described when and how often the scan should run.  If
+     * this is null, then the scan will be run as an immediate, one-time only
      * scan.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
@@ -417,13 +423,13 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         try {
             final AIQueueManagerEJBImpl authzChecker =
                 new AIQueueManagerEJBImpl();
-            final ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne(); 
+            final ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
 
             authzChecker.checkAIScanPermission(subject, aid);
 
             ConfigResponse config = cfgMan.
-                    getMergedConfigResponse(subject, 
-                                            ProductPlugin.TYPE_MEASUREMENT, 
+                    getMergedConfigResponse(subject,
+                                            ProductPlugin.TYPE_MEASUREMENT,
                                             aid, false);
 
             if (_log.isDebugEnabled()) {
@@ -482,7 +488,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             pValue = getAIQueueManagerLocal().getPlatformByAI
                 (subject, aipLocal.getId().intValue());
 
-            // It does exist.  Call the other startScan method so that 
+            // It does exist.  Call the other startScan method so that
             // authz checks will apply
             startScan(subject,
                       AppdefEntityID.newPlatformID(pValue.getId()),
@@ -499,9 +505,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
 
         try {
-            AICommandsClient client = 
+            AICommandsClient client =
                 AICommandsClientFactory.getInstance().getClient(agentToken);
-            
+
             client.startScan(scanConfig);
         } catch (AgentRemoteException e) {
             throw new AutoinventoryException(e);
@@ -518,8 +524,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         throws AutoinventoryException {
 
         _log.info("AutoinventoryManager.stopScan called");
-        try { 
-            AICommandsClient client = 
+        try {
+            AICommandsClient client =
                 AICommandsClientFactory.getInstance().getClient(aid);
             client.stopScan();
         } catch (Exception e) {
@@ -537,14 +543,14 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     public ScanStateCore getScanStatus(AuthzSubject subject, AppdefEntityID aid)
         throws AgentNotFoundException, AgentConnectionException,
                AgentRemoteException, AutoinventoryException {
-        
+
         _log.info("AutoinventoryManager.getScanStatus called");
         ScanStateCore core;
         try {
-            AICommandsClient client = 
+            AICommandsClient client =
                 AICommandsClientFactory.getInstance().getClient(aid);
             core = client.getScanStatus();
-        } 
+        }
         catch (AgentNotFoundException ae) {
             throw ae;
         } catch (AgentRemoteException ae) {
@@ -611,10 +617,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         local.setMessage(message);
     }
 
-    protected AIHistoryDAO getHistoryDAO()
-    {
-        return new AIHistoryDAO(DAOFactory.getDAOFactory());
-    }
+
 
     /**
      * Get status for an autoinventory scan, given the agentToken
@@ -629,7 +632,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         _log.info("AutoinventoryManager.getScanStatus called");
         ScanStateCore core;
         try {
-            AICommandsClient client = 
+            AICommandsClient client =
                 AICommandsClientFactory.getInstance().getClient(agentToken);
             core = client.getScanStatus();
         } catch (AgentNotFoundException ae) {
@@ -659,7 +662,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
         return ids;
     }
-    
+
     private String getIps(Collection aiipValues) {
         StringBuilder rtn = new StringBuilder();
         for (Iterator it=aiipValues.iterator(); it.hasNext(); ) {
@@ -672,11 +675,11 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * Called by agents to report platforms, servers, and services
      * detected via autoinventory scans.
-     * @param agentToken The token identifying the agent that sent 
+     * @param agentToken The token identifying the agent that sent
      * the report.
      * @param stateCore The ScanState that was detected during the autoinventory
      * scan.
-     * 
+     *
      * @ejb:interface-method
      * @ejb:transaction type="RequiresNew"
      */
@@ -695,7 +698,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
 
         _log.info("Received auto-inventory report from " + aiPlatform.getFqdn() +
-                 "; IPs -> " + getIps(aiPlatform.getAddedAIIpValues()) + 
+                 "; IPs -> " + getIps(aiPlatform.getAddedAIIpValues()) +
                  "; CertDN -> " + aiPlatform.getCertdn() +
                  "; (" + state.getAllServers(_log).size() +  " servers)");
 
@@ -706,11 +709,11 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
 
         // In the future we may want this method to act as
-        // another user besides "admin".  It might make sense to have 
-        // a user per-agent, so that actions that are agent-initiated 
+        // another user besides "admin".  It might make sense to have
+        // a user per-agent, so that actions that are agent-initiated
         // can be tracked.  Of course, this will be difficult when the
         // agent is reporting itself to the server for the first time.
-        // In that case, we'd have to act as admin and be careful about 
+        // In that case, we'd have to act as admin and be careful about
         // what we allow that codepath to do.
         AuthzSubject subject = getHQAdmin();
 
@@ -719,7 +722,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         if (_log.isDebugEnabled()) {
             _log.debug("AImgr.reportAIData: state.getPlatform()=" + aiPlatform);
         }
-        
+
         if (stateCore.getAreServersIncluded()) {
             Set serverSet = state.getAllServers(_log);
 
@@ -749,8 +752,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
 
         try {
-            aiPlatform = aiqLocal.queue(subject, aiPlatform, 
-                                        stateCore.getAreServersIncluded(), 
+            aiPlatform = aiqLocal.queue(subject, aiPlatform,
+                                        stateCore.getAreServersIncluded(),
                                         false, true);
         } catch ( SystemException cse ) {
             throw cse;
@@ -769,7 +772,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
             try {
                 aiqLocal.processQueue(subject,
-                                      platforms, servers, ips, 
+                                      platforms, servers, ips,
                                       AIQueueConstants.Q_DECISION_APPROVE);
             } catch (SystemException cse) {
                 throw cse;
@@ -780,9 +783,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * Called by agents to report resources detected at runtime via 
+     * Called by agents to report resources detected at runtime via
      * monitoring-based autoinventory scans.
-     * 
+     *
      * There are some interesting situations that can occur related
      * to synchronization between the server and agent.  If runtime scans
      * are turned off for a server, but the agent is never notified (for
@@ -792,21 +795,21 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * it and take the opportunity to tell the agent again that it should not
      * perform runtime AI scans for that server.
      * Any resources reported by that server will be ignored.
-     * 
-     * A similar situation occurs when the appdef server has been deleted but 
-     * the agent was never notified to turn off runtime AI.  We handle this in 
-     * the same way, by telling the agent to turn off runtime scans for that 
+     *
+     * A similar situation occurs when the appdef server has been deleted but
+     * the agent was never notified to turn off runtime AI.  We handle this in
+     * the same way, by telling the agent to turn off runtime scans for that
      * server, and ignoring anything in the report from that server.
-     * 
+     *
      * This method will process all platform and server merging, given by
-     * the report.  Any services will be added to Zevent queue to be 
+     * the report.  Any services will be added to Zevent queue to be
      * processed in their own transactions.
-     * 
-     * @param agentToken The token identifying the agent that sent 
+     *
+     * @param agentToken The token identifying the agent that sent
      * the report.
      * @param crrr The CompositeRuntimeResourceReport that was generated
      * during the runtime autoinventory scan.
-     * 
+     *
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
@@ -826,38 +829,37 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     public void _reportAIRuntimeReport(String agentToken,
                                       CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, PermissionException, ValidationException,
-               ApplicationException 
+               ApplicationException
     {
         List serviceMerges = mergePlatformsAndServers(agentToken, crrr);
-        
+
         Agent a = AgentManagerEJBImpl.getOne().getAgent(agentToken);
-        AgentReportStatusDAO statDAO = 
-            new AgentReportStatusDAO(DAOFactory.getDAOFactory());
+
         AgentReportStatus status = statDAO.getOrCreate(a);
-        
+
         if (serviceMerges.isEmpty()) {
             _log.debug("Agent [" + agentToken + "] reported no services.  " +
                        "Marking clean");
             status.markClean();
         } else {
-            _log.debug("Agent [" + agentToken + "] reported " + 
+            _log.debug("Agent [" + agentToken + "] reported " +
                        serviceMerges.size() + " services.  Marking dirty");
             status.markDirty();
         }
-        
+
         ServiceMerger.scheduleServiceMerges(agentToken, serviceMerges);
     }
-    
+
     /**
-     * Merge platforms and servers from the runtime report.  
-     * 
+     * Merge platforms and servers from the runtime report.
+     *
      * @return a List of {@link ServiceMergeInfo} -- information from the
      *         report about services still needing to be processed
-     * 
+     *
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public List mergePlatformsAndServers(String agentToken, 
+    public List mergePlatformsAndServers(String agentToken,
                                          CompositeRuntimeResourceReport crrr)
         throws ApplicationException, AutoinventoryException
     {
@@ -912,14 +914,14 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         throws PermissionException, ApplicationException {
         final ServerManagerLocal svrMan = ServerManagerEJBImpl.getOne();
         final CPropManagerLocal cpropMan = CPropManagerEJBImpl.getOne();
-    
+
         for (final Iterator i = mergeInfos.iterator(); i.hasNext();) {
             ServiceMergeInfo sInfo = (ServiceMergeInfo) i.next();
             AIServiceValue aiservice = sInfo.aiservice;
             Server server = svrMan.getServerById(sInfo.serverId);
-            
+
             _log.info("Checking for existing service: " + aiservice.getName());
-            
+
             final ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
             // this is a propagation of a bug that nobody really runs into.
             // Occurs when a set of services under a server have the same name
@@ -933,19 +935,19 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                 svcMan.getServicesByAIID(server, aiservice.getName());
             Service service = (tmp.size() > 0) ? (Service)tmp.get(0) : null;
             boolean update = false;
-            
+
             if (service == null) {
                 // CREATE SERVICE
                 _log.info("Creating new service: " + aiservice.getName());
-            
+
                 String typeName = aiservice.getServiceTypeName();
-                ServiceType serviceType = 
+                ServiceType serviceType =
                     svcMan.findServiceTypeByName(typeName);
                 service = svcMan.createService(sInfo.subject, server,
                                                serviceType, aiservice.getName(),
                                                aiservice.getDescription(), "",
                                                null);
-            
+
                 _log.debug("New service created: " + service);
             } else {
                 update = true;
@@ -967,7 +969,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                 if (aiservice.getDescription() != null)
                     service.setDescription(aiservice.getDescription().trim());
             }
-                    
+
             // CONFIGURE SERVICE
             final ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
             cfgMan.configureResponse(sInfo.subject,
@@ -980,43 +982,41 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                          null,
                                          update,
                                          false);
-                    
+
             // SET CUSTOM PROPERTIES FOR SERVICE
             if (aiservice.getCustomProperties() != null) {
                 int typeId = service.getServiceType().getId().intValue();
                 cpropMan.setConfigResponse(service.getEntityId(),
                                             typeId,
-                                            aiservice.getCustomProperties());            
+                                            aiservice.getCustomProperties());
             }
         }
     }
-    
+
     /**
-     * Returns a list of {@link Agent}s which still need to send in a 
+     * Returns a list of {@link Agent}s which still need to send in a
      * runtime scan (their last runtime scan was unsuccessfully processed)
-     *  
+     *
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public List findAgentsRequiringRuntimeScan() {
-        AgentReportStatusDAO statDAO = 
-            new AgentReportStatusDAO(DAOFactory.getDAOFactory());
-        
+
         Collection dirties = statDAO.findDirtyStatus();
         List res = new ArrayList(dirties.size());
-        
+
         _log.debug("Found " + dirties.size() + " agents with " +
                   "serviceDirty = true");
-        
+
         for (Iterator i=dirties.iterator(); i.hasNext(); ) {
             AgentReportStatus s = (AgentReportStatus)i.next();
-            
+
             if (!ServiceMerger.currentlyWorkingOn(s.getAgent())) {
                 _log.debug("Agent [" + s.getAgent().getAgentToken() +
                           "] is serviceDirty");
                 res.add(s.getAgent());
             } else {
-                _log.debug("Agent [" + s.getAgent().getAgentToken() + 
+                _log.debug("Agent [" + s.getAgent().getAgentToken() +
                           "] is serviceDirty, but in process");
             }
         }
@@ -1029,24 +1029,24 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      */
     public void notifyAgentsNeedingRuntimeScan() {
         List agents = findAgentsRequiringRuntimeScan();
-        
+
         for (Iterator i=agents.iterator(); i.hasNext(); ) {
             Agent a = (Agent)i.next();
             AICommandsClient client;
-            
+
             try {
-                client = 
+                client =
                     AICommandsClientFactory.getInstance().getClient(a.getAgentToken());
             } catch(AgentNotFoundException e) {
                 _log.warn("Unable to find agent [" + a.getAgentToken() + "]");
                 continue;
             }
-            
+
             int type = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
             ConfigResponse cfg = new ConfigResponse();
-            
+
             try {
-                client.pushRuntimeDiscoveryConfig(type, 0, null, null, cfg);                
+                client.pushRuntimeDiscoveryConfig(type, 0, null, null, cfg);
             } catch (AgentRemoteException e) {
                 _log.warn("Unable to notify agent needing runtime scan ["+
                           a.getAgentToken()+"]");
@@ -1054,21 +1054,21 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             }
         }
     }
-    
+
     /**
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
     public void markServiceClean(String agentToken) {
         Agent a;
-        
+
         try {
             a = AgentManagerEJBImpl.getOne().getAgent(agentToken);
         } catch(AgentNotFoundException e) {
             _log.error("Agent [" + agentToken + "] not found");
             return;
         }
-        
+
         markServiceClean(a, true);
     }
 
@@ -1077,16 +1077,14 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="Required"
      */
     public void markServiceClean(Agent agent, boolean serviceClean) {
-        AgentReportStatusDAO statDAO = 
-            new AgentReportStatusDAO(DAOFactory.getDAOFactory());
-        
+
         AgentReportStatus status = statDAO.getOrCreate(agent);
         if (serviceClean)
             status.markClean();
         else
             status.markDirty();
     }
-    
+
     /**
      * @ejb:interface-method
      * @ejb:transaction type="Required"
@@ -1124,7 +1122,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             }
 
             // Need to look up the AuthzSubject POJO
-            AuthzSubject subj = 
+            AuthzSubject subj =
                 azMan.findSubjectById(zevent.getAuthzSubjectId());
             if (isUpdate) {
                 Server s = serverMgr.getServerById(id.getId());
@@ -1151,7 +1149,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
     }
 
-    public void setSessionContext(SessionContext ctx) {} 
+    public void setSessionContext(SessionContext ctx) {}
 
     public static AutoinventoryManagerLocal getOne() {
         try {
@@ -1160,7 +1158,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             throw new SystemException(e);
         }
     }
-    
+
     /**
      * Create an autoinventory manager session bean.
      * @exception CreateException If an error occurs creating the pager
@@ -1170,7 +1168,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         // Get reference to the AI plugin manager
         try {
             ProductManagerLocal productManager = ProductManagerEJBImpl.getOne();
-            aiPluginManager = 
+            aiPluginManager =
                 (AutoinventoryPluginManager) productManager.
                 getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
 
@@ -1188,7 +1186,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     public void ejbRemove() { }
     public void ejbActivate() { }
     public void ejbPassivate() { }
-    
+
     private AuthzSubject getHQAdmin() throws AutoinventoryException {
         try {
              return AuthzSubjectManagerEJBImpl.getOne()

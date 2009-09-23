@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.server.session;
 
 import java.util.Collection;
 
+import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Role;
@@ -35,20 +36,20 @@ import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 
-class DashboardConfigDAO 
+class DashboardConfigDAO
     extends HibernateDAO
 {
-    DashboardConfigDAO(DAOFactory f) {
+    DashboardConfigDAO(SessionFactory f) {
         super(DashboardConfig.class, f);
     }
 
     void save(DashboardConfig cfg) {
         super.save(cfg);
     }
-    
+
     UserDashboardConfig findDashboard(AuthzSubject user) {
         String sql = "from UserDashboardConfig where user = :user";
-        
+
         return (UserDashboardConfig)getSession()
             .createQuery(sql)
             .setParameter("user", user)
@@ -56,10 +57,10 @@ class DashboardConfigDAO
             .setCacheRegion("UserDashboardConfig.findDashboard")
             .uniqueResult();
     }
-    
+
     RoleDashboardConfig findDashboard(Role role) {
         String sql = "from RoleDashboardConfig where role = :role";
-        
+
         return (RoleDashboardConfig)getSession()
             .createQuery(sql)
             .setParameter("role", role)
@@ -67,20 +68,20 @@ class DashboardConfigDAO
             .setCacheRegion("RoleDashboardConfig.findDashboard")
             .uniqueResult();
     }
-    
+
     Collection findAllRoleDashboards() {
         return getSession().createQuery("from RoleDashboardConfig order by name")
             .setCacheable(true)
             .setCacheRegion("RoleDashboardConfig.findAllRoleDashboards")
             .list();
     }
-    
+
     Collection findRolesFor(AuthzSubject me) {
-        String sql = "select rc from RoleDashboardConfig rc " + 
-            "join rc.role r " + 
-            "join r.subjects s " + 
+        String sql = "select rc from RoleDashboardConfig rc " +
+            "join rc.role r " +
+            "join r.subjects s " +
             "where s = :subject";
-        
+
         return getSession()
             .createQuery(sql)
             .setParameter("subject", me)
@@ -92,10 +93,10 @@ class DashboardConfigDAO
             .setParameter("user", s)
             .executeUpdate();
     }
-    
+
     void handleRoleRemoval(Role r) {
         getSession().createQuery("delete RoleDashboardConfig where role= :role")
             .setParameter("role", r)
             .executeUpdate();
-    }   
+    }
 }

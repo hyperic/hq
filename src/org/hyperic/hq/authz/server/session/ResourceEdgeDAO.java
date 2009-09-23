@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -32,7 +32,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.Query; 
+import org.hibernate.Query;
+import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
@@ -41,44 +42,48 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-public class ResourceEdgeDAO 
+@Repository
+public class ResourceEdgeDAO
     extends HibernateDAO
 {
-    ResourceEdgeDAO(DAOFactory f) { 
+    @Autowired
+    ResourceEdgeDAO(SessionFactory f) {
         super(ResourceEdge.class, f);
     }
 
     ResourceEdge create(Resource from, Resource to, int distance,
-                        ResourceRelation relation) 
+                        ResourceRelation relation)
     {
         ResourceEdge res = new ResourceEdge(from, to, distance, relation);
-        
+
         save(res);
         return res;
     }
-    
+
     Map findDescendantMap(Resource r) {
         String sql = "select e.to, e.distance from ResourceEdge e " +
-                     "where e.from = :from " + 
+                     "where e.from = :from " +
                      "and distance > :distance";
-                     
+
         List vals = getSession().createQuery(sql)
                                 .setParameter("from", r)
                                 .setInteger("distance", 0)
                                 .list();
         return convertDistanceListToMap(vals);
     }
-    
+
     Map convertDistanceListToMap(List vals) {
         Map res = new HashMap();
-        
+
         for (Iterator i=vals.iterator(); i.hasNext(); ) {
             Object[] ent = (Object[])i.next();
             Resource r = (Resource)ent[0];
             Integer distance = (Integer)ent[1];
             Collection c = (Collection)res.get(distance);
-            
+
             if (c == null) {
                 c = new ArrayList();
                 res.put(distance, c);
@@ -87,9 +92,9 @@ public class ResourceEdgeDAO
         }
         return res;
     }
-    
+
     Collection findDescendantEdges(Resource r, ResourceRelation rel) {
-        String sql = "from ResourceEdge e where e.from = :from " + 
+        String sql = "from ResourceEdge e where e.from = :from " +
                      "and distance > :distance " +
                      "and rel_id = :rel_id ";
 
@@ -99,7 +104,7 @@ public class ResourceEdgeDAO
                 .setInteger("rel_id", rel.getId().intValue())
                 .list();
     }
-    
+
     List findDescendantEdgesByNetworkRelation(Integer resourceId,
                                               List platformTypeIds,
                                               String platformName) {
@@ -109,7 +114,7 @@ public class ResourceEdgeDAO
                      " join EAM_PLATFORM p on p.resource_id = r.id " +
                      " where e.rel_id = " + AuthzConstants.RELATION_NETWORK_ID +
                      " and e.distance != 0 ";
-        
+
         if (resourceId != null) {
             sql += " and r.id = :rid ";
         }
@@ -144,7 +149,7 @@ public class ResourceEdgeDAO
     }
 
     Collection findAncestorEdges(Resource r, ResourceRelation rel) {
-        String sql = "from ResourceEdge e where e.from = :from " + 
+        String sql = "from ResourceEdge e where e.from = :from " +
                      "and distance < :distance " +
                      "and rel_id = :rel_id ";
 
@@ -154,7 +159,7 @@ public class ResourceEdgeDAO
                 .setInteger("rel_id", rel.getId().intValue())
                 .list();
     }
-    
+
     void deleteEdges(Resource r) {
         String sql = "delete ResourceEdge where to_id = :to or from_id = :from)";
         getSession().createQuery(sql)
@@ -162,7 +167,7 @@ public class ResourceEdgeDAO
                     .setParameter("from", r)
                     .executeUpdate();
     }
-    
+
     void deleteEdges(Resource r, ResourceRelation rel) {
         String sql = "delete ResourceEdge where (to_id = :to or from_id = :from) " +
                      "and rel_id = :rel_id ";
@@ -172,7 +177,7 @@ public class ResourceEdgeDAO
                     .setInteger("rel_id", rel.getId().intValue())
                     .executeUpdate();
     }
-    
+
     void deleteEdge(Resource parent, Resource child,
                     ResourceRelation rel) {
         String sql = "delete ResourceEdge where from_id = :from " +

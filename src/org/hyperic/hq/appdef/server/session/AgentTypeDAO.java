@@ -25,13 +25,14 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class AgentTypeDAO extends HibernateDAO
 {
-    public AgentTypeDAO(DAOFactory f) {
+    public AgentTypeDAO(SessionFactory f) {
         super(AgentType.class, f);
     }
 

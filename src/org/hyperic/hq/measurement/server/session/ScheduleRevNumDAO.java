@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -29,12 +29,13 @@ import java.util.Collection;
 
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
 
 public class ScheduleRevNumDAO extends HibernateDAO {
-    public ScheduleRevNumDAO(DAOFactory f) {
+    public ScheduleRevNumDAO(SessionFactory f) {
         super(ScheduleRevNum.class, f);
     }
 
@@ -62,7 +63,7 @@ public class ScheduleRevNumDAO extends HibernateDAO {
     }
 
     public ScheduleRevNum create(int entType, int entId) {
-        
+
         SrnId srnId = new SrnId(entType, entId);
         ScheduleRevNum srn = new ScheduleRevNum(srnId, 1);
         save(srn);
@@ -110,29 +111,29 @@ public class ScheduleRevNumDAO extends HibernateDAO {
             .setInteger(0, id.getID())
             .setInteger(1, id.getType()).uniqueResult();
     }
-    
+
     /**
-     * Find the minimum collection interval for the given entity, potentially 
+     * Find the minimum collection interval for the given entity, potentially
      * allowing for the query to return a stale value (for efficiency reasons).
-     * 
+     *
      * @param id The appdef entity to look up.
      * @param allowStale <code>true</code> to allow the query to return a stale
-     *                   value; <code>false</code> to never allow a stale value, 
+     *                   value; <code>false</code> to never allow a stale value,
      *                   potentially always forcing a sync with the database.
      * @return The minimum collection interval for the given entity.
      */
     public Long getMinInterval(AppdefEntityID id, boolean allowStale) {
         Session session = this.getSession();
         FlushMode oldFlushMode = session.getFlushMode();
-        
+
         try {
             if (allowStale) {
-                session.setFlushMode(FlushMode.MANUAL);                
+                session.setFlushMode(FlushMode.MANUAL);
             }
-            
+
             return getMinInterval(id);
         } finally {
             session.setFlushMode(oldFlushMode);
-        } 
-    }    
+        }
+    }
 }

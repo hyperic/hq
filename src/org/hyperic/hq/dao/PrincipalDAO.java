@@ -27,6 +27,7 @@ package org.hyperic.hq.dao;
 
 import java.util.Collection;
 
+import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.auth.Principal;
 
@@ -35,7 +36,7 @@ import org.hyperic.hq.auth.Principal;
  */
 public class PrincipalDAO extends HibernateDAO
 {
-    public PrincipalDAO(DAOFactory f) {
+    public PrincipalDAO(SessionFactory f) {
         super(Principal.class, f);
     }
 

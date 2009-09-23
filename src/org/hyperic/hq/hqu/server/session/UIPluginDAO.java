@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.hqu.server.session;
 
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -32,7 +33,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 class UIPluginDAO
     extends HibernateDAO
 {
-    UIPluginDAO(DAOFactory f) {
+    UIPluginDAO(SessionFactory f) {
         super(UIPlugin.class, f);
     }
 
@@ -47,16 +48,16 @@ class UIPluginDAO
     void remove(UIPlugin p) {
         super.remove(p);
     }
-    
+
     UIPlugin findByName(String name) {
         return (UIPlugin)createCriteria()
             .add(Restrictions.eq("name", name))
             .uniqueResult();
     }
-    
+
     UIPlugin create(String name, String version) {
         UIPlugin res = new UIPlugin(name, version);
-        
+
         save(res);
         return res;
     }

@@ -68,12 +68,12 @@ import org.jboss.invocation.Invocation;
 
 
 /**
- * This class represents the central concept of the Hyperic HQ application.  
+ * This class represents the central concept of the Hyperic HQ application.
  * (not the Application resource)
  */
-public class HQApp { 
+public class HQApp {
     private static final Log _log = LogFactory.getLog(HQApp.class);
-    private static final HQApp INSTANCE = new HQApp(); 
+    private static final HQApp INSTANCE = new HQApp();
 
     private static Map         _txSynchs       = new HashMap();
     private ThreadLocal        _txListeners    = new ThreadLocal();
@@ -86,7 +86,7 @@ public class HQApp {
     private ThreadWatchdog     _watchdog;
     private final Scheduler    _scheduler;
     private final ServerTransport _serverTransport;
-    
+
     private final Object       STAT_LOCK = new Object();
     private long               _numTx;
     private long               _numTxErrors;
@@ -96,29 +96,31 @@ public class HQApp {
     private Map _methInvokeStats      = new HashMap();
     private AtomicBoolean _collectMethStats = new AtomicBoolean();
     private static AtomicBoolean _isShutdown = new AtomicBoolean(false);
-    
+
     private StartupFinishedCallback _startupFinished;
-    
+
     private final HQHibernateLogger         _hiberLogger;
-    
-    
+
+    private DBUtil dbUtil;
+
+
     static {
         TxSnatch.setSnatcher(new Snatcher());
     }
-    
+
     private HQApp() {
         _callbacks = new CallbackDispatcher();
         _shutdown = (ShutdownCallback)
             _callbacks.generateCaller(ShutdownCallback.class);
         _startupFinished = (StartupFinishedCallback)
             _callbacks.generateCaller(StartupFinishedCallback.class);
-        
+
         _watchdog = new ThreadWatchdog("ThreadWatchdog");
         _watchdog.initialize();
-        
+
         _scheduler = new Scheduler(10);
         this.registerCallbackListener(ShutdownCallback.class, _scheduler);
-                
+
         try {
             _serverTransport = new ServerTransport(4);
             _serverTransport.start();
@@ -126,7 +128,7 @@ public class HQApp {
         } catch (Exception e) {
             throw new RuntimeException("Unable to start server transport", e);
         }
-                
+
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 _log.info("Running shutdown hooks");
@@ -134,22 +136,22 @@ public class HQApp {
                 _log.info("Done running shutdown hooks");
             }
         });
-        
+
         try {
             Properties p = HQApp.readTweakProperties();
             String prop = p.getProperty("hq.methodWarn.time");
             if (prop == null) {
-                _log.warn("Failed to read tweak properties.  Setting method " + 
+                _log.warn("Failed to read tweak properties.  Setting method " +
                           "warn time to 60000");
                 _methWarnTime = 60 * 1000;
-            } else { 
+            } else {
                 _methWarnTime = Long.parseLong(prop);
             }
         } catch(Exception e) {
             _log.error("Unable to read tweak properties", e);
             _methWarnTime = 60 * 1000;
         }
-    
+
         _hiberLogger = new HQHibernateLogger();
     }
 
@@ -158,33 +160,33 @@ public class HQApp {
             _methWarnTime = warnTime;
         }
     }
-    
+
     public long getMethodWarnTime() {
         synchronized (STAT_LOCK) {
             return _methWarnTime;
         }
     }
-    
+
     public ThreadWatchdog getWatchdog() {
         synchronized (_watchdog) {
             return _watchdog;
         }
     }
-    
+
     public AgentProxyFactory getAgentProxyFactory() {
         return _serverTransport.getAgentProxyFactory();
     }
-    
+
     public Scheduler getScheduler() {
         return _scheduler;
     }
-    
+
     public void setRestartStorageDir(File dir) {
         synchronized (_startupClasses) {
             _restartStorage = dir;
-        } 
+        }
     }
-    
+
     /**
      * Get a directory which can have files placed into it which will carry
      * over for a restart.  This should not be used to place files for
@@ -193,15 +195,15 @@ public class HQApp {
     public File getRestartStorageDir() {
         synchronized (_startupClasses) {
             return _restartStorage;
-        } 
+        }
     }
-    
+
     public void setResourceDir(File dir) {
         synchronized (_startupClasses) {
             _resourceDir = dir;
         }
     }
-    
+
     /**
      * Get a directory which contains resources that various parts of the
      * application may need (templates, reports, license files, etc.)
@@ -230,16 +232,16 @@ public class HQApp {
     public Properties getTweakProperties() throws IOException {
         return readTweakProperties();
     }
-    
-    private static Properties readTweakProperties() throws IOException { 
+
+    private static Properties readTweakProperties() throws IOException {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream is = 
+        InputStream is =
             loader.getResourceAsStream("META-INF/tweak.properties");
         Properties res = new Properties();
 
         if (is == null)
             return res;
-    
+
         try {
             res.load(is);
         } finally {
@@ -247,21 +249,21 @@ public class HQApp {
         }
         return res;
     }
-    
+
     /**
      * @see CallbackDispatcher#generateCaller(Class)
      */
     public Object registerCallbackCaller(Class iFace) {
         return _callbacks.generateCaller(iFace);
     }
-    
+
     /**
      * @see CallbackDispatcher#registerListener(Class, Object)
      */
     public void registerCallbackListener(Class iFace, Object listener) {
         _callbacks.registerListener(iFace, listener);
     }
-    
+
     /**
      * Adds a class to the list of classes to invoke when the application has
      * started.
@@ -271,7 +273,7 @@ public class HQApp {
             _startupClasses.add(className);
         }
     }
-    
+
     void incrementTxCount(boolean txFailed) {
         synchronized (STAT_LOCK) {
             _numTx++;
@@ -289,7 +291,7 @@ public class HQApp {
             return _numTx;
         }
     }
-    
+
     /**
      * Get the # of transactions which have failed since the start of the
      * application
@@ -306,10 +308,10 @@ public class HQApp {
                                    String className)
     {
         Map txPayload = v.getTransientPayload();
-        
+
         if (txPayload.containsKey("hq.methodWarned"))
             return;
-        
+
         txPayload.put("hq.methodWarned", Boolean.TRUE);
         StringBuffer warn = new StringBuffer("Method ran a long time.\n");
         warn.append("Class:   ")
@@ -319,12 +321,12 @@ public class HQApp {
             .append("\nRunTime: ")
             .append(total)
             .append("\n");
-        
+
         if (!_log.isDebugEnabled()) {
             _log.warn(warn);
             return;
         }
-        
+
         // if debug is enabled, log a lot more verbose stuff
         if (methodRes == null) {
             warn.append("Result:  null");
@@ -335,7 +337,7 @@ public class HQApp {
                 .append(methodRes.toString());
         }
         warn.append("\nArguments: \n");
-        
+
         Object[] args = v.getArguments();
         for (int i=0; i<args.length; i++) {
             warn.append("    Arg[")
@@ -348,7 +350,7 @@ public class HQApp {
         }
         _log.warn(warn);
     }
-    
+
 
     private String makeMethodStatKey(Class c, Method meth) {
         StringBuffer key = new StringBuffer();
@@ -365,26 +367,26 @@ public class HQApp {
     public void setCollectMethodStats(boolean enable) {
         _collectMethStats.set(enable);
     }
-    
+
     public boolean isCollectingMethodStats() {
         return _collectMethStats.get();
     }
-    
+
     public void clearMethodStats() {
         synchronized (STAT_LOCK) {
             _methInvokeStats.clear();
         }
     }
-    
+
     private void updateMethodStats(Class c, Method meth, long total,
-                                   boolean txFailed) 
-    { 
+                                   boolean txFailed)
+    {
         if (!_collectMethStats.get()) {
             return;
         }
-        
+
         String key = makeMethodStatKey(c, meth);
-        
+
         MethodStats stats;
         synchronized (STAT_LOCK) {
             stats = (MethodStats)_methInvokeStats.get(key);
@@ -396,24 +398,24 @@ public class HQApp {
         if (stats != null)
             stats.update(total, txFailed);
     }
-    
+
     public List getMethodStats() {
         synchronized (STAT_LOCK) {
             return new ArrayList(_methInvokeStats.values());
         }
     }
-    
+
     private TxSynch createTxSynch(javax.transaction.Transaction tx) {
         return new TxSynch(tx);
     }
 
     private class TxSynch implements Synchronization, Serializable {
         private javax.transaction.Transaction _me;
-        
+
         private TxSynch(javax.transaction.Transaction me) {
             _me   = me;
         }
-        
+
         public void afterCompletion(int status) {
             synchronized (_txSynchs) {
                 if (_txSynchs.remove(_me) == null) {
@@ -421,7 +423,7 @@ public class HQApp {
                                "but can't find myself.  Where am I?");
                 }
             }
-        
+
             if (status != Status.STATUS_COMMITTED) {
                 incrementTxCount(true);
                 if (_log.isTraceEnabled()) {
@@ -437,11 +439,11 @@ public class HQApp {
         public void beforeCompletion() {
         }
     }
-    
+
     private static class Snatcher implements TxSnatch.Snatcher  {
         private final Object SNATCH_LOCK = new Object();
         private HQApp _app;
-        
+
         private HQApp getAppInstance() {
             synchronized (SNATCH_LOCK) {
                 if (_app == null)
@@ -450,14 +452,14 @@ public class HQApp {
             }
         }
         private void attemptRegisterSynch(javax.transaction.Transaction tx,
-                                          Session s) 
+                                          Session s)
         {
             boolean newSynch = false;
 
             synchronized (_txSynchs) {
                 if (_txSynchs.containsKey(tx))
                     return;
-            
+
                 newSynch = true;
                 _txSynchs.put(tx, s);
             }
@@ -469,15 +471,15 @@ public class HQApp {
                     synchronized (_txSynchs) {
                         _txSynchs.remove(tx);
                     }
-                    
+
                     _log.error("Unable to register synchronization!", e);
                 }
             }
         }
-        
-        private Object invokeNextBoth(org.jboss.ejb.Interceptor next, 
-                                      org.jboss.proxy.Interceptor proxyNext,                                      
-                                      Invocation v, boolean isHome) 
+
+        private Object invokeNextBoth(org.jboss.ejb.Interceptor next,
+                                      org.jboss.proxy.Interceptor proxyNext,
+                                      Invocation v, boolean isHome)
             throws Throwable
         {
             Method meth           = v.getMethod();
@@ -487,27 +489,27 @@ public class HQApp {
             boolean readWrite     = false;
             boolean flush         = true;
             boolean sessCreated   = SessionManager.setupSession(methName);
-            
+
             if (sessCreated && _log.isDebugEnabled()) {
-                _log.debug("Created session, executing [" + methName + 
+                _log.debug("Created session, executing [" + methName +
                            "] on [" + className + "]");
             }
-                                                  
+
             try {
                 if (_log.isTraceEnabled()) {
-                    _log.trace("invokeNext: tx=" + v.getTransaction() + 
+                    _log.trace("invokeNext: tx=" + v.getTransaction() +
                                " meth=" + methName);
                 }
-                if (v.getTransaction() != null && 
+                if (v.getTransaction() != null &&
                     (v.getTransaction().getStatus() == Status.STATUS_ACTIVE ||
                      v.getTransaction().getStatus() == Status.STATUS_PREPARING)) {
-                    attemptRegisterSynch(v.getTransaction(), 
+                    attemptRegisterSynch(v.getTransaction(),
                                          SessionManager.currentSession());
                 }
 
                 if (!methIsReadOnly(methName)) {
                     if (_log.isDebugEnabled()) {
-                        _log.debug("Upgrading session, due to [" + methName + 
+                        _log.debug("Upgrading session, due to [" + methName +
                                    "] on [" + className + "]");
                     }
                     readWrite = true;
@@ -518,7 +520,7 @@ public class HQApp {
                 Object res = null;
                 boolean failed = true;
                 try {
-                    if (proxyNext != null) 
+                    if (proxyNext != null)
                         res = proxyNext.invoke(v);
                     else if (isHome)
                         res = next.invokeHome(v);
@@ -529,7 +531,7 @@ public class HQApp {
                     HQApp app = getAppInstance();
                     long total = System.currentTimeMillis() - startTime;
                     long warnTime = app.getMethodWarnTime();
-                    
+
                     app.updateMethodStats(c, meth, total, failed);
                     if (warnTime != -1 && total > warnTime) {
                         try {
@@ -542,21 +544,21 @@ public class HQApp {
                     }
                 }
                 return res;
-            } catch(Throwable e) { 
+            } catch(Throwable e) {
                 flush = false;
                 throw e;
-            } finally { 
+            } finally {
                 if (sessCreated) {
                     if (!readWrite && _log.isDebugEnabled()) {
-                        _log.debug("Successfully ran read-only transaction " + 
-                                   "for [" + methName + "] on [" + 
+                        _log.debug("Successfully ran read-only transaction " +
+                                   "for [" + methName + "] on [" +
                                    className + "]");
                     }
                     SessionManager.cleanupSession(flush);
                 }
             }
         }
-        
+
         private boolean methIsReadOnly(String methName) {
             return // 'create' is part of EJB session bean creation
                    methName.equals("create") ||
@@ -574,7 +576,7 @@ public class HQApp {
                    methName.equals("onMessage") ||
                    // masthead
                    methName.equals("resourcesExistOfType") ||
-                   methName.equals("search") || 
+                   methName.equals("search") ||
                    methName.startsWith("are") ||
                    methName.startsWith("check") ||
                    methName.startsWith("dispatch") ||
@@ -584,15 +586,15 @@ public class HQApp {
                    methName.startsWith("list");
         }
 
-        public Object invokeProxyNext(org.jboss.proxy.Interceptor next, 
-                                      Invocation v) 
-            throws Throwable 
+        public Object invokeProxyNext(org.jboss.proxy.Interceptor next,
+                                      Invocation v)
+            throws Throwable
         {
             return invokeNextBoth(null, next, v, false);
         }
 
-        public Object invokeNext(org.jboss.ejb.Interceptor next, Invocation v) 
-            throws Exception 
+        public Object invokeNext(org.jboss.ejb.Interceptor next, Invocation v)
+            throws Exception
         {
             try {
                 return invokeNextBoth(next, null, v, false);
@@ -601,11 +603,11 @@ public class HQApp {
             } catch(Throwable t) {
                 throw new RuntimeException(t);
             }
-            
+
         }
-        
-        public Object invokeHomeNext(org.jboss.ejb.Interceptor next, 
-                                     Invocation v) 
+
+        public Object invokeHomeNext(org.jboss.ejb.Interceptor next,
+                                     Invocation v)
             throws Exception
         {
             try {
@@ -617,7 +619,7 @@ public class HQApp {
             }
         }
     }
-    
+
     /**
      * Execute the registered startup classes.
      */
@@ -636,11 +638,11 @@ public class HQApp {
 
         for (Iterator i=classNames.iterator(); i.hasNext(); ) {
             String name = (String)i.next();
-            
+
             try {
                 Class c = Class.forName(name);
                 StartupListener l = (StartupListener)c.newInstance();
-     
+
                 _log.info("Executing startup: " + name);
                 l.hqStarted();
             } catch(Throwable e) {
@@ -649,23 +651,23 @@ public class HQApp {
                     throw (Error)e;
                 if (e instanceof RuntimeException)
                     throw (RuntimeException)e;
-            } 
+            }
         }
-        
+
         try {
             _startupFinished.startupFinished();
         } catch(Throwable t) {
             _log.error("Error calling startup finish listener", t);
         }
     }
-    
+
     private void checkDBSchemaState() {
         Connection conn = null;
         Statement stmt  = null;
         ResultSet rs    = null;
         try {
-            conn = DBUtil.getConnByContext(
-                new InitialContext(), HQConstants.DATASOURCE); 
+            conn = dbUtil.getConnByContext(
+                new InitialContext(), HQConstants.DATASOURCE);
             stmt = conn.createStatement();
             final String sql = "select propvalue from EAM_CONFIG_PROPS " +
                 "WHERE propkey = '" + HQConstants.SchemaVersion + "'";
@@ -689,16 +691,16 @@ public class HQApp {
         } catch (NamingException e) {
             _log.error(e, e);
         } finally {
-            DBUtil.closeJDBCObjects(HQApp.class.getName(), conn, stmt, rs);
+            dbUtil.closeJDBCObjects(HQApp.class.getName(), conn, stmt, rs);
         }
     }
 
     private void scheduleCommitCallback() {
-        Transaction t = 
+        Transaction t =
             Util.getSessionFactory().getCurrentSession().getTransaction();
         final long commitNo = getTransactions();
         final boolean debug = _log.isDebugEnabled();
-        
+
         if (debug) {
             _log.debug("Scheduling commit callback " + commitNo);
         }
@@ -718,80 +720,80 @@ public class HQApp {
             }
         });
     }
-    
+
     /**
      * Register a listener to be called after a tx has been committed.
      */
     public void addTransactionListener(TransactionListener listener) {
         List listeners = (List)_txListeners.get();
-        
+
         if (listeners == null) {
             listeners = new ArrayList(1);
             _txListeners.set(listeners);
             scheduleCommitCallback();
         }
-        
+
         listeners.add(listener);
-        
+
         // Unfortunately, it seems that the Tx synchronization will get called
         // before Hibernate does its flush.  This wasn't the behaviour before,
         // and looks like it will be fixed up again in 3.3.. :-(
         Util.getSessionFactory().getCurrentSession().flush();
     }
-    
+
     /**
      * Execute all the pre-commit listeners registered with the current thread.
      */
     private void runPreCommitListeners() {
         List list = (List)_txListeners.get();
-        
+
         if (list == null)
             return;
 
         for (Iterator i=list.iterator(); i.hasNext(); ) {
             TransactionListener l = (TransactionListener)i.next();
-        
+
             try {
                 l.beforeCommit();
             } catch(Exception e) {
                 _log.warn("Error running pre-commit listener [" + l + "]", e);
             }
-        } 
+        }
     }
-    
+
     /**
      * Execute all the post-commit listeners registered with the current thread
      */
     private void runPostCommitListeners(boolean success) {
         List list = (List)_txListeners.get();
-        
+
         if (list == null)
             return;
-        
+
         try {
             for (Iterator i=list.iterator(); i.hasNext(); ) {
                 TransactionListener l = (TransactionListener)i.next();
-            
+
                 try {
                     l.afterCommit(success);
                 } catch(Exception e) {
                     _log.warn("Error running post-commit listener [" + l + "]", e);
                 }
-            } 
+            }
         } finally {
             _txListeners.set(null);
         }
     }
-    
+
     /**
      * Get an interceptor to process hibernate lifecycle methods.
-     * 
+     *
      * This method is used by {@link HypericInterceptor}
      */
     public HibernateInterceptorChain getHibernateInterceptor() {
         return _hiberLogger;
     }
-    
+
     /**
      * Get the hibernate log manager, which allows the caller to execute
      * code within the context of a logging hibernate interceptor.
@@ -799,7 +801,7 @@ public class HQApp {
     public HibernateLogManager getHibernateLogManager() {
         return _hiberLogger;
     }
-    
+
     public static HQApp getInstance() {
         return INSTANCE;
     }

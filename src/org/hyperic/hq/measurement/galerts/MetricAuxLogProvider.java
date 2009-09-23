@@ -32,7 +32,7 @@ import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
-import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
+import org.hyperic.hq.galerts.server.session.GalertManagerImpl;
 import org.hyperic.hq.measurement.server.session.MetricAuxLogManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
 
@@ -57,7 +57,7 @@ public class MetricAuxLogProvider
     }
 
     private GalertAuxLog findGAuxLog(int id) {
-        return GalertManagerEJBImpl.getOne().findAuxLogById(new Integer(id));
+        return GalertManagerImpl.getOne().findAuxLogById(new Integer(id));
     }
 
     public AlertAuxLog load(int auxLogId, long timestamp, String desc) {

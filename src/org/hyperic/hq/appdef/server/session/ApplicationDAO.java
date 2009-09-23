@@ -1,26 +1,26 @@
-/*                                                                 
- * NOTE: This copyright does *not* cover user programs that use HQ 
- * program services by normal system calls through the application 
- * program interfaces provided as part of the Hyperic Plug-in Development 
- * Kit or the Hyperic Client Development Kit - this is merely considered 
- * normal use of the program, and does *not* fall under the heading of 
- * "derived work". 
- *  
- * Copyright (C) [2004-2008], Hyperic, Inc. 
- * This file is part of HQ.         
- *  
- * HQ is free software; you can redistribute it and/or modify 
- * it under the terms version 2 of the GNU General Public License as 
- * published by the Free Software Foundation. This program is distributed 
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. See the GNU General Public License for more 
- * details. 
- *                
- * You should have received a copy of the GNU General Public License 
- * along with this program; if not, write to the Free Software 
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 
- * USA. 
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ *
+ * Copyright (C) [2004-2008], Hyperic, Inc.
+ * This file is part of HQ.
+ *
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
  */
 
 package org.hyperic.hq.appdef.server.session;
@@ -31,6 +31,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
@@ -46,7 +47,9 @@ public class ApplicationDAO extends HibernateDAO
 {
     private static final Log log = LogFactory.getLog(ApplicationDAO.class);
 
-    public ApplicationDAO(DAOFactory f) {
+    private AppSvcDependencyDAO adao;
+
+    public ApplicationDAO(SessionFactory f) {
         super(Application.class, f);
     }
 
@@ -99,7 +102,7 @@ public class ApplicationDAO extends HibernateDAO
             // get the appservice it refers to
             AppService appService = aDep.getAppService();
             AppService depService = aDep.getDependentService();
-            
+
             if (log.isDebugEnabled())
                 log.debug("AppService: " + appService + "\n depends on: " +
                           depService);
@@ -113,8 +116,7 @@ public class ApplicationDAO extends HibernateDAO
     void setDependencyTree(Application a, DependencyTree newTree) {
         log.debug("Setting dependency tree for application: " + a.getName());
         List nodes = newTree.getNodes();
-        AppSvcDependencyDAO adao =
-            new AppSvcDependencyDAO(DAOFactory.getDAOFactory());
+
         AppServiceDAO asdao = DAOFactory.getDAOFactory().getAppServiceDAO();
 
         for (int i = 0; i < nodes.size(); i++) {
@@ -138,11 +140,11 @@ public class ApplicationDAO extends HibernateDAO
             AppService nodeAsv = aNode.getAppService();
             for (int j = 0; j < aNode.getChildren().size(); j++) {
                 AppService depAsv = (AppService) aNode.getChildren().get(j);
-                
+
                 // new dependency
                 asdao.addDependentService(nodeAsv.getId(), depAsv.getId());
             }
-            
+
             // finally set the entry point flag on the AppService
             boolean isEntryPoint = newTree.isEntryPoint(aNode.getAppService());
             asdao.findById(aNode.getAppService().getId())
@@ -192,10 +194,10 @@ public class ApplicationDAO extends HibernateDAO
     public Application create(ApplicationValue av) {
         Application app = new Application();
         setApplicationValue(app, av);
-        
+
         // Save application so that it would have a valid ID
         save(app);
-        
+
         return app;
     }
 
@@ -298,10 +300,10 @@ public class ApplicationDAO extends HibernateDAO
     }
 
     public Collection findUsingGroup(ResourceGroup g) {
-        String sql = "select a from Application a " + 
+        String sql = "select a from Application a " +
                      "join a.appServices s " +
                      "where s.resourceGroup = :group";
-                     
+
         return getSession().createQuery(sql)
             .setParameter("group", g)
             .list();

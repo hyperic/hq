@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -104,6 +104,8 @@ public class EmailAction extends EmailActionConfig
     private static final Log _log = LogFactory.getLog(EmailAction.class);
     private static final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
 
+    private ResourceDAO resourceDAO;
+
     static {
         ServerConfigManagerLocal sConf = ServerConfigManagerEJBImpl.getOne();
         int tmp = 0;
@@ -151,9 +153,9 @@ public class EmailAction extends EmailActionConfig
         File templateFile = new File(templateDir, filename);
         StringWriter output = new StringWriter();
         try {
-            RenditServer.getInstance().renderTemplate(templateFile, params, 
+            RenditServer.getInstance().renderTemplate(templateFile, params,
                                                       output);
-            
+
             if (_log.isDebugEnabled())
                 _log.debug("Template rendered\n" + output.toString());
         } catch(Exception e) {
@@ -176,37 +178,37 @@ public class EmailAction extends EmailActionConfig
     }
 
     private String createText(AlertDefinitionInterface alertdef,
-                              ActionExecutionInfo info, Resource resource, 
+                              ActionExecutionInfo info, Resource resource,
                               AlertInterface alert, String templateName,
                               AuthzSubject user)
         throws MeasurementNotFoundException
     {
         Map params = new HashMap();
-        
+
         params.put("alertDef", alertdef);
         params.put("alert", alert);
         params.put("action", info);
         params.put("resource", resource);
         params.put("user", user);
-        
+
         return renderTemplate(templateName, params);
     }
-    
+
     private AppdefEntityID getResource(AlertDefinitionInterface def) {
         return new AppdefEntityID(def.getResource());
     }
 
-    public String execute(AlertInterface alert, ActionExecutionInfo info) 
-        throws ActionExecuteException 
+    public String execute(AlertInterface alert, ActionExecutionInfo info)
+        throws ActionExecuteException
     {
         try {
             if (!AlertRegulator.getInstance().alertNotificationsAllowed()) {
                 return ResourceBundle.getBundle(BUNDLE)
                             .getString("action.email.error.notificationDisabled");
             }
-            
+
             Map addrs = lookupEmailAddr();
-            
+
             if (addrs.isEmpty()) {
                 return ResourceBundle.getBundle(BUNDLE)
                             .getString("action.email.error.noEmailAddress");
@@ -217,7 +219,7 @@ public class EmailAction extends EmailActionConfig
             AlertDefinitionInterface alertDef =
                 alert.getAlertDefinitionInterface();
             AppdefEntityID appEnt = getResource(alertDef);
-            
+
             String logStr = "No notifications sent, see server log for details.";
             if (appEnt != null) {
 
@@ -235,7 +237,7 @@ public class EmailAction extends EmailActionConfig
             				htmlBody[i] = createText(alertDef, info, resource, alert,
             						"html_email.gsp", user);
             			}
-            			body[i] = createText(alertDef, info, resource, alert, 
+            			body[i] = createText(alertDef, info, resource, alert,
             					isSms() ? "sms_email.gsp" :
             						"text_email.gsp", user);
             		}
@@ -246,7 +248,7 @@ public class EmailAction extends EmailActionConfig
 
             		StringBuffer result = getLog(to);
             		logStr = result.toString();
-            		
+
             	} else {
             		_log.warn("No resource for alert definition " + alertDef.getId() +
             		", perhaps the resource was deleted?  Email notification will not be sent.");
@@ -255,9 +257,9 @@ public class EmailAction extends EmailActionConfig
             	_log.warn("No appdef entity ID for alert definition " + alertDef.getId() +
             	", perhaps the related platform was deleted?  Email notification will not be sent.");
             }
-            
+
             return logStr;
-            
+
         } catch (Exception e) {
             throw new ActionExecuteException(e);
         }
@@ -275,7 +277,7 @@ public class EmailAction extends EmailActionConfig
             result.append(": ");
             break;
         }
-        
+
         for (int i = 0; i < to.length; i++) {
             result.append(to[i].getAddress().getPersonal());
             if (i < to.length - 1) {
@@ -297,12 +299,12 @@ public class EmailAction extends EmailActionConfig
                 InternetAddress addr;
                 boolean useHtml = false;
                 AuthzSubject who = null;
-                
+
                 switch (getType()) {
                 case TYPE_USERS:
                     Integer uid = (Integer) it.next();
                     who = getSubjMan().getSubjectById(uid);
-                    
+
                     if (who == null) {
                         _log.warn("User not found: " + uid);
                         continue;
@@ -322,7 +324,7 @@ public class EmailAction extends EmailActionConfig
                     addr.setPersonal(addr.getAddress());
                     break;
                 }
-                
+
                 // Don't send duplicate notifications
                 if (prevRecipients.add(addr)) {
                     validRecipients.put(new EmailRecipient(addr, useHtml), who);
@@ -344,17 +346,17 @@ public class EmailAction extends EmailActionConfig
     }
 
     public void setParentActionConfig(AppdefEntityID ent, ConfigResponse cfg)
-        throws InvalidActionDataException 
+        throws InvalidActionDataException
     {
         init(cfg);
     }
 
-    public void send(Escalatable alert, EscalationStateChange change, 
+    public void send(Escalatable alert, EscalationStateChange change,
                      String message, Set notified)
-        throws ActionExecuteException 
+        throws ActionExecuteException
     {
         PerformsEscalations def = alert.getDefinition();
-        
+
         Map addrs = lookupEmailAddr();
 
         EmailFilter filter = new EmailFilter();
@@ -362,26 +364,26 @@ public class EmailAction extends EmailActionConfig
         for (Iterator it = addrs.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             EmailRecipient rec = (EmailRecipient) entry.getKey();
-            
+
             // Don't notify again if already notified
             if (notified.contains(rec.getAddress())) {
                 it.remove();
                 continue;
             }
-            
+
             rec.setHtml(false);
             notified.add(rec.getAddress());
         }
         AlertDefinitionInterface defInfo = def.getDefinitionInfo();
         String[] messages = new String[addrs.size()];
         Arrays.fill(messages, message);
-        
+
         EmailRecipient[] to = (EmailRecipient[])
             addrs.keySet().toArray(new EmailRecipient[addrs.size()]);
 
         AppdefEntityID appEnt = getResource(defInfo);
-        ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
-        Resource resource = rDao.findByInstanceId(appEnt.getAuthzTypeId(),
+
+        Resource resource = resourceDAO.findByInstanceId(appEnt.getAuthzTypeId(),
                                                   appEnt.getId());
 
         final String subject = createSubject(
@@ -453,7 +455,7 @@ public class EmailAction extends EmailActionConfig
                     _emails.clear();
                 }
                 if (!_inThresholdWindow) {
-                    _inThresholdWindow = 
+                    _inThresholdWindow =
                         (toEmail.size() >= _alertThreshold) ? true : false;
                 }
                 if (_inThresholdWindow && lastEmailWithinThresholdWindow()) {

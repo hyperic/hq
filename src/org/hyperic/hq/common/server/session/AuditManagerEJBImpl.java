@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -61,82 +61,83 @@ import org.hyperic.hq.common.server.session.Audit;
 public class AuditManagerEJBImpl implements SessionBean {
     private final Log _log = LogFactory.getLog(AuditManagerEJBImpl.class);
     private static final ThreadLocal CONTAINERS = new ThreadLocal();
-    
-    private final AuditDAO _DAO = new AuditDAO(DAOFactory.getDAOFactory()); 
+
+    //private final AuditDAO _DAO = new AuditDAO(DAOFactory.getDAOFactory());
+    private AuditDAO _DAO;
 
     /**
-     * Save an audit and all of it's children.  
-     * 
+     * Save an audit and all of it's children.
+     *
      * @ejb:interface-method
      */
     public void saveAudit(Audit a) {
         if (a.getStartTime() == 0)
             a.setStartTime(System.currentTimeMillis());
-        
+
         if (getCurrentAudit() != null) {
             getCurrentAudit().addChild(a);
         } else {
             saveRecursively(a);
         }
     }
-    
+
     private void saveRecursively(Audit a) {
         _DAO.save(a);
-        
+
         if (_log.isDebugEnabled()) {
             _log.debug("Audit: " + a);
         }
-        
+
         for (Iterator i=a.getChildren().iterator(); i.hasNext(); ) {
             Audit child = (Audit)i.next();
-            
+
             saveRecursively(child);
         }
     }
 
     /**
      * If there is currently an audit in progress (a container), fetch it.
-     * 
+     *
      * @ejb:interface-method
      */
     public Audit getCurrentAudit() {
-        return (Audit)CONTAINERS.get(); 
+        return (Audit)CONTAINERS.get();
     }
-    
+
     /**
      * Delete an audit and all its children.
-     * 
+     *
      * @ejb:interface-method
      */
     public void deleteAudit(Audit a) {
         deleteRecursively(a);
     }
-    
+
     private void deleteRecursively(Audit a) {
         for (Iterator i=a.getChildren().iterator(); i.hasNext(); ) {
             Audit child = (Audit)i.next();
-            
+
             deleteRecursively(child);
         }
         _DAO.remove(a);
     }
-    
+
     /**
      * @ejb:interface-method
      */
     public void popAll() {
         Audit a = getCurrentAudit();
         long now = System.currentTimeMillis();
-        
+
         try {
             while (a != null && a.getParent() != null) {
                 if (a.getEndTime() == 0)
                     a.setEndTime(now);
                 a = a.getParent();
             }
-            
+
             if (a != null) {
-                _log.warn("Unpopped audit container: " + a.getMessage() + 
+                _log.warn("Unpopped audit container: " + a.getMessage() +
                           ":  This should be closed manually!");
                 if (a.getEndTime() != 0)
                     a.setEndTime(now);
@@ -146,10 +147,10 @@ public class AuditManagerEJBImpl implements SessionBean {
             CONTAINERS.set(null);
         }
     }
-    
+
     /**
-     * Pop the audit container off the stack.  
-     * 
+     * Pop the audit container off the stack.
+     *
      * @param allowEmpty If true, allow the container to pop and be saved
      *                   with no children.  If the container is empty, and
      *                   this is true, simply delete it
@@ -157,12 +158,12 @@ public class AuditManagerEJBImpl implements SessionBean {
      */
     public void popContainer(boolean allowEmpty) {
         Audit a = getCurrentAudit();
-        
+
         if (a == null) {
             throw new RuntimeException("Expected to pop a container, but had " +
                                        "none");
         }
-        
+
         a.setEndTime(System.currentTimeMillis());
         if (a.getParent() == null) {
             // Root level container.  Save off
@@ -183,16 +184,16 @@ public class AuditManagerEJBImpl implements SessionBean {
             }
         }
     }
-    
+
     /**
      * Push a global audit container onto the stack.  Any subsequent audits
      * created (via saveAudit) will be added to this container.
-     * 
+     *
      * @ejb:interface-method
      */
     public void pushContainer(Audit newContainer) {
         Audit currentContainer = getCurrentAudit();
-        
+
         newContainer.setStartTime(System.currentTimeMillis());
         if (currentContainer == null) {
             HQApp.getInstance().addTransactionListener(new TransactionListener()
@@ -214,50 +215,50 @@ public class AuditManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public List find(AuthzSubject me, PageInfo pInfo,
-                     long startTime, long endTime, 
-                     AuditImportance minImportance, AuditPurpose purpose, 
-                     AuthzSubject target, String klazz) 
+                     long startTime, long endTime,
+                     AuditImportance minImportance, AuditPurpose purpose,
+                     AuthzSubject target, String klazz)
     {
-        return _DAO.find(pInfo, me, startTime, endTime, minImportance, purpose, 
+        return _DAO.find(pInfo, me, startTime, endTime, minImportance, purpose,
                          target, klazz);
     }
-    
+
     /**
      * @ejb:interface-method
      */
     public void handleResourceDelete(Resource r) {
         _DAO.handleResourceDelete(r);
     }
-    
+
     /**
      * @ejb:interface-method
      */
     public void handleSubjectDelete(AuthzSubject s) {
         _DAO.handleSubjectDelete(s);
     }
-    
-    private static class ResourceDeleteWatcher 
-        implements ResourceDeleteCallback 
+
+    private static class ResourceDeleteWatcher
+        implements ResourceDeleteCallback
     {
         public void preResourceDelete(Resource r) {
             AuditManagerEJBImpl.getOne().handleResourceDelete(r);
         }
     }
-    
-    private static class SubjectDeleteWatcher 
-        implements SubjectRemoveCallback 
+
+    private static class SubjectDeleteWatcher
+        implements SubjectRemoveCallback
     {
         public void subjectRemoved(AuthzSubject toDelete) {
             AuditManagerEJBImpl.getOne().handleSubjectDelete(toDelete);
         }
     }
-    
+
     /**
      * @ejb:interface-method
      */
     public void startup() {
         _log.info("Audit Manager starting up");
-        
+
         HQApp.getInstance()
                 .registerCallbackListener(ResourceDeleteCallback.class,
                                           new ResourceDeleteWatcher());
@@ -274,7 +275,7 @@ public class AuditManagerEJBImpl implements SessionBean {
             throw new SystemException(e);
         }
     }
-    
+
     public void ejbCreate() { }
     public void ejbRemove() { }
     public void ejbActivate() { }

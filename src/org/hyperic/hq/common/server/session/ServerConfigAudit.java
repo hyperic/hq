@@ -26,7 +26,7 @@ package org.hyperic.hq.common.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 import org.hyperic.util.i18n.MessageBundle;
@@ -54,7 +54,7 @@ public class ServerConfigAudit extends Audit {
     }
 
     private static Resource getSystemResource() {
-        return ResourceManagerEJBImpl.getOne()
+        return ResourceManagerImpl.getOne()
                 .findResourceById(AuthzConstants.authzHQSystem);
     }
     

@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.hqu.rendit.html.FormGenerator
 import org.hyperic.hq.hqu.rendit.html.HtmlUtil

@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -84,15 +84,18 @@ public class CPropManagerEJBImpl
     private final int    CHUNKSIZE      = 1000; // Max size for each row
     private final String CPROP_TABLE    = "EAM_CPROP";
     private final String CPROPKEY_TABLE = "EAM_CPROP_KEY";
-    
-    private Log log = 
+
+    private Log log =
         LogFactory.getLog(CPropManagerEJBImpl.class.getName());
 
     private Messenger sender = new Messenger();
-    
+    private AgentReportStatusDAO agentReportStatusDAO;
+    private AgentTypeDAO agentTypeDAO;
+    private CpropDAO cPropDAO;
+
     /**
      * Get all the keys associated with an appdef resource type.
-     * 
+     *
      * @param appdefType   One of AppdefEntityConstants.APPDEF_TYPE_*
      * @param appdefTypeId The ID of the appdef resource type
      *
@@ -213,7 +216,7 @@ public class CPropManagerEJBImpl
     }
 
     /**
-     * Set (or delete) a custom property for a resource.  If the 
+     * Set (or delete) a custom property for a resource.  If the
      * property already exists, it will be overwritten.
      *
      * @param aID Appdef entity id to set the value for
@@ -231,7 +234,7 @@ public class CPropManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void setValue(AppdefEntityID aID, int typeId, String key, 
+    public void setValue(AppdefEntityID aID, int typeId, String key,
                          String val)
         throws CPropKeyNotFoundException, AppdefEntityNotFoundException,
                PermissionException
@@ -242,7 +245,7 @@ public class CPropManagerEJBImpl
         Connection conn = null;
         ResultSet rs = null;
         StringBuilder sql;
-        
+
         propKey = getKey(aID, typeId, key);
 
         try {
@@ -251,7 +254,7 @@ public class CPropManagerEJBImpl
 
             conn = Util.getConnection();
             stmt = conn.createStatement();
-                                    
+
             // no need to grab the for update since we are in a transaction
             // and therefore automatically get a shared lock
             sql = new StringBuilder()
@@ -276,7 +279,7 @@ public class CPropManagerEJBImpl
                     .append(" AND APPDEF_ID=").append(aID.getID());
                 stmt.executeUpdate(sql.toString());
             }
-            
+
             // Optionally add new values
             if (val != null){
                 String[] chunks = chunk(val, CHUNKSIZE);
@@ -286,7 +289,7 @@ public class CPropManagerEJBImpl
                 Cprop nprop = new Cprop();
                 sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES ")
                    .append("(?, ?, ?, ?, ?)");
-                
+
                 pstmt = conn.prepareStatement(sql.toString());
                 pstmt.setInt(2, keyId);
                 pstmt.setInt(3, aID.getID());
@@ -305,15 +308,15 @@ public class CPropManagerEJBImpl
             if (log.isDebugEnabled())
                 log.debug("Entity " + aID.getAppdefKey() + " " + key +
                           " changed from " + oldval + " to " + val);
-            
+
             // Send cprop value changed event
-            CPropChangeEvent event = new CPropChangeEvent(aID, key, oldval, 
+            CPropChangeEvent event = new CPropChangeEvent(aID, key, oldval,
                                                           val);
-            
+
             // Now publish the event
             sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
         } catch(SQLException exc){
-            log.error("Unable to update CPropKey values: " + 
+            log.error("Unable to update CPropKey values: " +
                       exc.getMessage(), exc);
             throw new SystemException(exc);
         } finally {
@@ -328,7 +331,7 @@ public class CPropManagerEJBImpl
     }
 
     /**
-     * Get a custom property for a resource.  
+     * Get a custom property for a resource.
      *
      * @param aVal Appdef entity to get the value for
      * @param key  Key of the value to get
@@ -354,7 +357,7 @@ public class CPropManagerEJBImpl
         AppdefEntityID aID = aVal.getID();
         AppdefResourceType recType = aVal.getAppdefResourceType();
         int typeId  = recType.getId().intValue();
-        
+
         propKey = this.getKey(aID, typeId, key);
         try {
             Integer pk = propKey.getId();
@@ -363,14 +366,14 @@ public class CPropManagerEJBImpl
             boolean didSomething;
 
             conn = Util.getConnection();
-            stmt = conn.prepareStatement("SELECT PROPVALUE FROM " + 
+            stmt = conn.prepareStatement("SELECT PROPVALUE FROM " +
                                          CPROP_TABLE +
                                          " WHERE KEYID=? AND APPDEF_ID=? " +
                                          "ORDER BY VALUE_IDX");
             stmt.setInt(1, keyId);
             stmt.setInt(2, aID.getID());
             rs = stmt.executeQuery();
-            
+
             didSomething = false;
             while(rs.next()){
                 didSomething = true;
@@ -404,11 +407,11 @@ public class CPropManagerEJBImpl
 
             conn = Util.getConnection();
             stmt = conn.prepareStatement("SELECT A." + column +
-                                         ", B.propvalue FROM " + 
+                                         ", B.propvalue FROM " +
                                          CPROPKEY_TABLE + " A, " +
                                          CPROP_TABLE + " B WHERE " +
                                          "B.keyid=A.id AND A.appdef_type=? " +
-                                         "AND B.appdef_id=? " + 
+                                         "AND B.appdef_id=? " +
                                          "ORDER BY B.value_idx");
             stmt.setInt(1, aID.getType());
             stmt.setInt(2, aID.getID());
@@ -419,7 +422,7 @@ public class CPropManagerEJBImpl
             while(rs.next()){
                 String keyName = rs.getString(1);
                 String valChunk = rs.getString(2);
-                
+
                 if(lastKey == null || lastKey.equals(keyName) == false){
                     if(lastKey != null){
                         res.setProperty(lastKey, buf.toString());
@@ -428,7 +431,7 @@ public class CPropManagerEJBImpl
                     buf     = new StringBuffer();
                     lastKey = keyName;
                 }
-                
+
                 buf.append(valChunk);
             }
 
@@ -448,14 +451,14 @@ public class CPropManagerEJBImpl
 
         return res;
     }
-    
+
     /**
      * Get a map which holds the keys & their associated values
      * for an appdef entity.
      *
      * @param aID Appdef entity id to get the custom properties for
      *
-     * @return The properties stored for a specific entity ID. 
+     * @return The properties stored for a specific entity ID.
      *         An empty Properties object will be returned if there are
      *         no custom properties defined for the resource
      *
@@ -486,7 +489,7 @@ public class CPropManagerEJBImpl
     }
 
     /**
-     * Set custom properties for a resource.  If the 
+     * Set custom properties for a resource.  If the
      * property already exists, it will be overwritten.
      *
      * @param aID Appdef entity id to set the value for
@@ -496,7 +499,7 @@ public class CPropManagerEJBImpl
      * @ejb:interface-method
      */
     public void setConfigResponse(AppdefEntityID aID, int typeId, byte[] data)
-        throws PermissionException, AppdefEntityNotFoundException 
+        throws PermissionException, AppdefEntityNotFoundException
     {
         if (data == null) {
             return;
@@ -508,7 +511,7 @@ public class CPropManagerEJBImpl
         } catch (EncodingException e) {
             throw new SystemException(e);
         }
-        
+
         if (log.isDebugEnabled()) {
             log.debug("cprops=" + cprops);
             log.debug("aID=" + aID.toString() + ", typeId=" + typeId);
@@ -544,7 +547,7 @@ public class CPropManagerEJBImpl
                                          "AND appdef_id = ?");
             stmt.setInt(1, appdefType);
             stmt.setInt(2, id);
-                                         
+
             stmt.executeUpdate();
         } catch(SQLException exc){
             log.error("Unable to delete CProp values: " +
@@ -555,7 +558,7 @@ public class CPropManagerEJBImpl
             Util.endConnection();
         }
     }
-    
+
     /**
      * Get all Cprops values with specified key name, irregardless of type
      * @ejb:interface-method
@@ -566,9 +569,9 @@ public class CPropManagerEJBImpl
         int instanceId = appdefType.getId().intValue();
 
         CpropKey pkey = getCPropKeyDAO().findByKey(type, instanceId, key);
-        
-        CpropDAO dao = new CpropDAO(DAOFactory.getDAOFactory()); 
-        return dao.findByKeyName(pkey, asc);
+
+
+        return cPropDAO.findByKeyName(pkey, asc);
     }
 
     private CpropKeyDAO getCPropKeyDAO(){
@@ -605,21 +608,14 @@ public class CPropManagerEJBImpl
     public void ejbPassivate() {}
     public void setSessionContext(SessionContext ctx) {}
 
-    protected AgentTypeDAO getAgentTypeDAO() {
-        return new AgentTypeDAO(DAOFactory.getDAOFactory());
-    }
 
-    protected AgentReportStatusDAO getAgentReportStatusDAO() {
-        return new AgentReportStatusDAO(DAOFactory.getDAOFactory());
-    }
 
-    protected AIServerDAO getAIServerDAO() {
-        return new AIServerDAO(DAOFactory.getDAOFactory());
-    }
+
+
 
     /**
-     * Split a string into a list of same sized chunks, and 
-     * a chunk of potentially different size at the end, 
+     * Split a string into a list of same sized chunks, and
+     * a chunk of potentially different size at the end,
      * which contains the remainder.
      *
      * e.g. chunk("11223", 2) -> { "11", "22", "3" }
@@ -632,25 +628,25 @@ public class CPropManagerEJBImpl
     private static String[] chunk(String src, int chunkSize){
         String[] res;
         int strLen, nAlloc;
-    
+
         if(chunkSize <= 0){
             throw new IllegalArgumentException("chunkSize must be >= 1");
         }
-    
+
         strLen = src.length();
         nAlloc = strLen / chunkSize;
         if((strLen % chunkSize) != 0)
             nAlloc++;
-    
+
         res = new String[nAlloc];
         for(int i=0; i<nAlloc; i++){
             int begIdx, endIdx;
-    
+
             begIdx = i * chunkSize;
             endIdx = (i + 1) * chunkSize;
             if(endIdx > strLen)
                 endIdx = strLen;
-    
+
             res[i] = src.substring(begIdx, endIdx);
         }
         return res;

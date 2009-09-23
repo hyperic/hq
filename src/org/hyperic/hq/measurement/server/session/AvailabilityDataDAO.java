@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -37,6 +37,7 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
+import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -44,10 +45,10 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 
 public class AvailabilityDataDAO extends HibernateDAO {
-    
+
     private static final String logCtx = AvailabilityDataDAO.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
-    
+
     private static final long MAX_TIMESTAMP =
         AvailabilityDataRLE.getLastTimestamp();
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
@@ -62,13 +63,13 @@ public class AvailabilityDataDAO extends HibernateDAO {
         "- greatest(rle.availabilityDataId.startime,:startime)";
     private static final String TOTAL_UPTIME =
         "(" + TOTAL_TIME + ") * rle.availVal";
-    
-    public AvailabilityDataDAO(DAOFactory f) {
+
+    public AvailabilityDataDAO(SessionFactory f) {
         super(AvailabilityDataDAO.class, f);
     }
 
     List findLastAvail(List mids, long after) {
-        // sort so that the cache has the best opportunity use the query 
+        // sort so that the cache has the best opportunity use the query
         // multiple times
         mids = new ArrayList(mids);
         Collections.sort(mids);
@@ -92,7 +93,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     }
 
     List findLastAvail(List mids) {
-        // sort so that the cache has the best opportunity use the query 
+        // sort so that the cache has the best opportunity use the query
         // multiple times
         mids = new ArrayList(mids);
         Collections.sort(mids);
@@ -135,7 +136,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         }
         return (AvailabilityDataRLE)list.get(0);
     }
-    
+
     List findAllAvailsAfter(DataPoint state) {
         String sql = new StringBuilder()
                      .append("FROM AvailabilityDataRLE")
@@ -230,7 +231,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
             .setParameterList("mids", mids, new IntegerType())
             .list();
     }
-    
+
     /**
      * @return {@link Map} of {@link Integer} to ({@link TreeSet} of
      *  {@link AvailabilityDataRLE}).
@@ -286,7 +287,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         }
         return rtn;
     }
-    
+
     /**
      * @return List of AvailabilityDataRLE objs
      */
@@ -359,7 +360,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
             // Nothing to do
             return new ArrayList(0);
         }
-        
+
         String sql = new StringBuilder()
                     .append("SELECT m.template.id, min(rle.availVal),")
                     .append(" max(rle.availVal),")

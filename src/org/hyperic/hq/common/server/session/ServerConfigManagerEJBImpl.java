@@ -77,6 +77,8 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
     private final String SQL_VACUUM  = "VACUUM ANALYZE {0}";
 
     private final int DEFAULT_COST = 15;
+    
+    private DBUtil dbUtil;
 
     private final String[] APPDEF_TABLES
         = { "EAM_PLATFORM", "EAM_SERVER", "EAM_SERVICE", "EAM_CONFIG_RESPONSE",
@@ -327,7 +329,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
 
         Connection conn  = null;
         try {
-            conn = DBUtil.getConnByContext(getInitialContext(),
+            conn = dbUtil.getConnByContext(getInitialContext(),
                                            HQConstants.DATASOURCE);
 
             for (Iterator i = Util.getTableMappings(); i.hasNext();) {
@@ -346,7 +348,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         } catch (NamingException e) {
             throw new SystemException(e);
         } finally{
-            DBUtil.closeConnection(logCtx, conn);
+            dbUtil.closeConnection(logCtx, conn);
         }
 
         return duration;
@@ -375,7 +377,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         Connection conn = null;
         try {
             String sql;
-            conn = DBUtil.getConnByContext(
+            conn = dbUtil.getConnByContext(
                 getInitialContext(), HQConstants.DATASOURCE);
             sql = dialect.getOptimizeStmt(currMetricDataTable, DEFAULT_COST);
             duration += doCommand(conn, sql, null);
@@ -389,7 +391,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         } catch (NamingException e) {
             throw new SystemException(e);
         } finally {
-            DBUtil.closeConnection(logCtx, conn);
+            dbUtil.closeConnection(logCtx, conn);
         }
         return duration;
     }
@@ -409,9 +411,9 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         Connection conn = null;
         long duration = 0;
         try {
-            conn = DBUtil.getConnByContext(getInitialContext(),
+            conn = dbUtil.getConnByContext(getInitialContext(),
                                            HQConstants.DATASOURCE);
-            if (!DBUtil.isPostgreSQL(conn))
+            if (!dbUtil.isPostgreSQL(conn))
                 return -1;
 
             for (int i = 0; i < DATA_TABLES.length; i++) {
@@ -441,7 +443,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         Connection conn = null;
         long duration = 0;
         try {
-            conn = DBUtil.getConnByContext(getInitialContext(),
+            conn = dbUtil.getConnByContext(getInitialContext(),
                                            HQConstants.DATASOURCE);
             if (!DBUtil.isPostgreSQL(conn))
                 return -1;
@@ -456,7 +458,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
         } catch (NamingException e) {
             throw new SystemException(e);
         } finally {
-            DBUtil.closeConnection(logCtx, conn);
+            dbUtil.closeConnection(logCtx, conn);
         }
     }
 
@@ -480,7 +482,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
             stmt.execute(sql);
             return watch.getElapsed();
         } finally {
-            DBUtil.closeStatement(logCtx, stmt);
+            dbUtil.closeStatement(logCtx, stmt);
         }
     }
 

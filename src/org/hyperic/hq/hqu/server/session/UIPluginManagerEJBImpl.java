@@ -41,9 +41,9 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.ViewDescriptor;
@@ -70,8 +70,8 @@ import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
  * @ejb:util generate="physical"
  * @ejb:transaction type="Required"
  */
-public class UIPluginManagerEJBImpl 
-    implements SessionBean 
+public class UIPluginManagerEJBImpl
+    implements SessionBean
 {
     private final Log _log = LogFactory.getLog(UIPluginManagerEJBImpl.class);
 
@@ -79,13 +79,13 @@ public class UIPluginManagerEJBImpl
     private ViewDAO               _viewDAO;
     private AttachmentDAO         _attachDAO;
     private AttachmentResourceDAO _attachRsrcDAO;
-    
+
     public UIPluginManagerEJBImpl() {
-        DAOFactory fact = DAOFactory.getDAOFactory();
-        _pluginDAO     = new UIPluginDAO(fact);
-        _viewDAO       = new ViewDAO(fact);
-        _attachDAO     = new AttachmentDAO(fact);
-        _attachRsrcDAO = new AttachmentResourceDAO(fact);
+//        DAOFactory fact = DAOFactory.getDAOFactory();
+//        _pluginDAO     = new UIPluginDAO(fact);
+//        _viewDAO       = new ViewDAO(fact);
+//        _attachDAO     = new AttachmentDAO(fact);
+//        _attachRsrcDAO = new AttachmentResourceDAO(fact);
     }
 
     /**
@@ -94,13 +94,13 @@ public class UIPluginManagerEJBImpl
     public UIPlugin createPlugin(String name, String ver) {
         return _pluginDAO.create(name, ver);
     }
-    
+
     /**
      * @ejb:interface-method
      */
     public UIPlugin createOrUpdate(String name, String version) {
         UIPlugin p = findPluginByName(name);
-        
+
         if (p == null) {
             _log.info("Creating plugin [" + name + "]");
             p = _pluginDAO.create(name, version);
@@ -110,7 +110,7 @@ public class UIPluginManagerEJBImpl
         }
         return p;
     }
-    
+
     /**
      * @ejb:interface-method
      */
@@ -128,7 +128,7 @@ public class UIPluginManagerEJBImpl
         p.addView(res);
         return res;
     }
-    
+
     /**
      * @ejb:interface-method
      */
@@ -144,14 +144,14 @@ public class UIPluginManagerEJBImpl
     public UIPlugin findPluginByName(String name) {
         return _pluginDAO.findByName(name);
     }
-    
+
     /**
      * @ejb:interface-method
      */
     public UIPlugin findPluginById(Integer id) {
         return _pluginDAO.findById(id);
     }
-    
+
     /**
      * @ejb:interface-method
      */
@@ -188,7 +188,7 @@ public class UIPluginManagerEJBImpl
      */
     public void attachView(ViewMasthead view, ViewMastheadCategory cat) {
         if (!view.getAttachments().isEmpty()) {
-            throw new IllegalArgumentException("View [" + view + "] already " + 
+            throw new IllegalArgumentException("View [" + view + "] already " +
                                                "attached");
         }
         view.addAttachment(new AttachmentMasthead(view, cat));
@@ -200,22 +200,22 @@ public class UIPluginManagerEJBImpl
      */
     public void attachView(ViewAdmin view, ViewAdminCategory cat) {
         if (!view.getAttachments().isEmpty()) {
-            throw new IllegalArgumentException("View [" + view + "] already " + 
+            throw new IllegalArgumentException("View [" + view + "] already " +
                                                "attached");
         }
         view.addAttachment(new AttachmentAdmin(view, cat));
         _log.info("Attaching [" + view + "] via [" + cat + "]");
     }
-    
+
     /**
      * @ejb:interface-method
      */
     public void attachView(ViewResource view, ViewResourceCategory cat,
-                           Resource r) 
+                           Resource r)
     {
         for (Iterator i=view.getAttachments().iterator(); i.hasNext(); ) {
             AttachmentResource a = (AttachmentResource)i.next();
-            
+
             if (a.getCategory().equals(cat) && a.getResource().equals(r)) {
                 throw new IllegalArgumentException("View [" + view + "] is " +
                             "already attached to [" + r + "] in [" + cat + "]");
@@ -243,25 +243,25 @@ public class UIPluginManagerEJBImpl
     public Collection findAll() {
         return _pluginDAO.findAll();
     }
-    
+
     /**
      * Find all the views attached via a specific attach type
-     * 
+     *
      * @return a collection of {@link AttachType}s
      * @ejb:interface-method
      */
     public Collection findViews(AttachType type) {
         return _viewDAO.findFor(type);
     }
-    
+
     /**
      * Find all attachments for a specific type
-     * 
+     *
      * @return a collection of {@link AttachmentDescriptor}s
      * @ejb:interface-method
      */
     public Collection findAttachments(AttachType type, AuthzSubject user) {
-        Resource root = ResourceManagerEJBImpl.getOne().findRootResource();
+        Resource root = ResourceManagerImpl.getOne().findRootResource();
 
         return convertAttachmentsToDescriptors(_attachDAO.findFor(type), root,
                                                user);
@@ -271,21 +271,21 @@ public class UIPluginManagerEJBImpl
      * @ejb:interface-method
      */
     public AttachmentDescriptor findAttachmentDescriptorById(Integer id,
-                                                             AuthzSubject user) 
+                                                             AuthzSubject user)
     {
         Attachment a = findAttachmentById(id);
         List c = new ArrayList(1);
         Collection res;
-        Resource root = ResourceManagerEJBImpl.getOne().findRootResource();
+        Resource root = ResourceManagerImpl.getOne().findRootResource();
         c.add(a);
-        
+
         res = convertAttachmentsToDescriptors(c, root, user);
         if (res.isEmpty())
             return null;
-        
+
         return (AttachmentDescriptor)res.iterator().next();
     }
-    
+
     /**
      * Find attachments for a resource.
      * @return a collection of {@link AttachmentDescriptor}s
@@ -293,14 +293,14 @@ public class UIPluginManagerEJBImpl
      */
     public Collection findAttachments(AppdefEntityID ent,
                                       ViewResourceCategory cat,
-                                      AuthzSubject user) 
+                                      AuthzSubject user)
     {
-        ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
+        ResourceManager rman = ResourceManagerImpl.getOne();
         Collection attachments;
-        
+
         if (ent.isGroup()) {
             ResourceGroup group =
-                ResourceGroupManagerEJBImpl.getOne()
+                ResourceGroupManagerImpl.getOne()
                     .findResourceGroupById(ent.getId());
             attachments = _attachRsrcDAO.findFor(rman.findRootResource(), cat);
 
@@ -314,34 +314,34 @@ public class UIPluginManagerEJBImpl
         } else {
             attachments = _attachRsrcDAO.findFor(rman.findResource(ent), cat);
         }
-        
+
         Resource viewedResource =
-            ResourceManagerEJBImpl.getOne().findResource(ent);
-        return convertAttachmentsToDescriptors(attachments, viewedResource, 
+            ResourceManagerImpl.getOne().findResource(ent);
+        return convertAttachmentsToDescriptors(attachments, viewedResource,
                                                user);
     }
-    
+
     private Collection convertAttachmentsToDescriptors(Collection attachments,
                                                        Resource viewedRsrc,
                                                        AuthzSubject user)
     {
         RenditServer rs = RenditServer.getInstance();
-        
+
         Collection res = new ArrayList();
         for (Iterator i=attachments.iterator(); i.hasNext(); ) {
             Attachment a = (Attachment)i.next();
             String pluginName = a.getView().getPlugin().getName();
             AttachmentDescriptor d;
-            
+
             try {
                 d = (AttachmentDescriptor)
-                    rs.getAttachmentDescriptor(pluginName, a, viewedRsrc, user); 
+                    rs.getAttachmentDescriptor(pluginName, a, viewedRsrc, user);
             } catch(Exception e) {
-                _log.warn("Not returning attachment for [" + a + "], it " + 
+                _log.warn("Not returning attachment for [" + a + "], it " +
                           "threw an exception", e);
                 continue;
             }
-            
+
             if (d != null) {
                 res.add(d);
             } else {
@@ -349,9 +349,9 @@ public class UIPluginManagerEJBImpl
                            "plugin says not to render it");
             }
         }
-        return res; 
+        return res;
     }
-    
+
     public static UIPluginManagerLocal getOne() {
         try {
             return UIPluginManagerUtil.getLocalHome().create();
@@ -359,7 +359,7 @@ public class UIPluginManagerEJBImpl
             throw new SystemException(e);
         }
     }
-    
+
     public void ejbCreate() {}
     public void ejbRemove() {}
     public void ejbActivate() {}

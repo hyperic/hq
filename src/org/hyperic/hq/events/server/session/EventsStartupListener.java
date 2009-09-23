@@ -52,6 +52,7 @@ public class EventsStartupListener
         LogFactory.getLog(EventsStartupListener.class);
     private static final Object LOCK = new Object();
     private static AlertDefinitionChangeCallback _alertDefChangeCallback;
+    private DBUtil dbUtil;
 
     public void hqStarted() {
         // Make sure the escalation enumeration is loaded and registered so
@@ -92,7 +93,7 @@ public class EventsStartupListener
         Connection conn = null;
         Statement stmt = null;
         try {
-            conn = DBUtil.getConnByContext(
+            conn = dbUtil.getConnByContext(
                 new InitialContext(), HQConstants.DATASOURCE);
             stmt = conn.createStatement();
             int rows = stmt.executeUpdate(
@@ -114,7 +115,7 @@ public class EventsStartupListener
         } catch (NamingException e) {
             _log.error(e, e);
         } finally {
-            DBUtil.closeJDBCObjects(
+            dbUtil.closeJDBCObjects(
                 EventsStartupListener.class.getName(), conn, stmt, null);
         }
     }

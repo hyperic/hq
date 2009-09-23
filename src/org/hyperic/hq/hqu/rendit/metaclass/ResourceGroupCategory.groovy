@@ -2,10 +2,10 @@ package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as RsrcMan
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl as RsrcMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as GroupMan
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl as GroupMan
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface
 import org.hyperic.hq.authz.shared.PermissionManagerFactory

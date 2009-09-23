@@ -1,26 +1,26 @@
-/*                                                                 
- * NOTE: This copyright does *not* cover user programs that use HQ 
- * program services by normal system calls through the application 
- * program interfaces provided as part of the Hyperic Plug-in Development 
- * Kit or the Hyperic Client Development Kit - this is merely considered 
- * normal use of the program, and does *not* fall under the heading of 
- * "derived work". 
- *  
- * Copyright (C) [2004-2009], Hyperic, Inc. 
- * This file is part of HQ.         
- *  
- * HQ is free software; you can redistribute it and/or modify 
- * it under the terms version 2 of the GNU General Public License as 
- * published by the Free Software Foundation. This program is distributed 
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. See the GNU General Public License for more 
- * details. 
- *                
- * You should have received a copy of the GNU General Public License 
- * along with this program; if not, write to the Free Software 
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 
- * USA. 
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ *
+ * Copyright (C) [2004-2009], Hyperic, Inc.
+ * This file is part of HQ.
+ *
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
  */
 
 package org.hyperic.hq.appdef.server.session;
@@ -31,7 +31,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Criteria;
-import org.hibernate.Query; 
+import org.hibernate.Query;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
@@ -49,7 +50,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 
 public class PlatformDAO extends HibernateDAO {
 
-    public PlatformDAO(DAOFactory f) {
+    public PlatformDAO(SessionFactory f) {
         super(Platform.class, f);
     }
 
@@ -69,11 +70,11 @@ public class PlatformDAO extends HibernateDAO {
     public void remove(Platform entity) {
         super.remove(entity);
     }
-    
+
     public void remove(Ip ip) {
         super.remove(ip);
     }
- 
+
     /**
      * A method to update a platform based on a PlatformValue object
      * Ideally, this should be done via the xdoclet generated setPlatformValue
@@ -224,7 +225,7 @@ public class PlatformDAO extends HibernateDAO {
             .setString(0, name.toUpperCase())
             .uniqueResult();
     }
-    
+
     public List findByTypeAndRegEx(Integer pType, String regex) {
         HQDialect dialect = Util.getHQDialect();
         String fqdnEx = dialect.getRegExSQL("p.fqdn", ":regex", true, false);
@@ -240,15 +241,15 @@ public class PlatformDAO extends HibernateDAO {
             .setString("regex", regex)
             .list();
     }
-    
+
     public List findParentByNetworkRelation(List platformTypeIds,
                                             String platformName,
                                             Boolean hasChildren) {
         String nameEx = null;
         StringBuffer sql = new StringBuffer("select {p.*} from EAM_PLATFORM p ");
-                         
+
         sql.append("join EAM_RESOURCE r on p.resource_id = r.id ");
-        
+
         StringBuffer whereClause = new StringBuffer();
 
         if (hasChildren != null) {
@@ -258,7 +259,7 @@ public class PlatformDAO extends HibernateDAO {
                        .append(" and e.rel_id = ").append(AuthzConstants.RELATION_NETWORK_ID)
                        .append(" and e.distance = 0) ");
         }
-        
+
         if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
         	whereClause.append((whereClause.length() > 0) ? " and" : "")
         	           .append(" p.platform_type_id in (:ids) ");
@@ -271,35 +272,35 @@ public class PlatformDAO extends HibernateDAO {
             whereClause.append((whereClause.length() > 0) ? " and" : "")
                        .append(" (").append(nameEx).append(") ");
         }
-        
+
         if (whereClause.length() > 0) {
         	sql.append("where ").append(whereClause);
         }
-        
+
         sql.append(" order by r.sort_name ");
-        
+
         Query query = getSession()
                         .createSQLQuery(sql.toString())
                         .addEntity("p", Platform.class);
-        
+
         if (platformTypeIds != null && !platformTypeIds.isEmpty()) {
             query.setParameterList("ids", platformTypeIds, new IntegerType());
         }
-        
+
         if (nameEx != null) {
             query.setString("regex", platformName);
         }
-        
+
         return query.list();
     }
-    
+
     public List findByNoNetworkRelation(List platformTypeIds,
                                         String platformName) {
         String nameEx = null;
         String sql = "select {p.*} from EAM_PLATFORM p " +
                      "join EAM_RESOURCE r on p.resource_id = r.id " +
                      "where p.platform_type_id in (:ids) " +
-                     "and not exists (" + 
+                     "and not exists (" +
                          " select from_id from EAM_RESOURCE_EDGE e " +
                          " where e.rel_id = " + AuthzConstants.RELATION_NETWORK_ID +
                          " and e.to_id = p.resource_id ) ";
@@ -311,7 +312,7 @@ public class PlatformDAO extends HibernateDAO {
 
             sql += " and (" + fqdnEx + " or " + nameEx + ") ";
         }
-        
+
         Query query = getSession()
                         .createSQLQuery(sql)
                         .addEntity("p", Platform.class)
@@ -320,10 +321,10 @@ public class PlatformDAO extends HibernateDAO {
         if (nameEx != null) {
             query.setString("regex", platformName);
         }
-        
+
         return query.list();
     }
-    
+
     public List findByType(Integer pid)
     {
         String sql = "select distinct p from Platform p "+
@@ -418,13 +419,13 @@ public class PlatformDAO extends HibernateDAO {
     }
 
     public Resource findVirtualByInstanceId(Integer id) {
-        VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO(); 
-            
+        VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO();
+
         return dao.findVirtualByInstanceId(id, AuthzConstants.platformResType);
     }
 
     public Collection findVirtualByProcessId(Integer id) {
-        VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO(); 
+        VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO();
         Collection resources =
             dao.findVirtualByProcessId(id, AuthzConstants.platformResType);
         List platforms = new ArrayList();
@@ -436,7 +437,7 @@ public class PlatformDAO extends HibernateDAO {
     }
 
     public Collection findVirtualByPhysicalId(Integer id) {
-        VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO(); 
+        VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO();
         Collection resources =
             dao.findVirtualByPysicalId(id, AuthzConstants.platformResType);
         List platforms = new ArrayList();
@@ -446,27 +447,27 @@ public class PlatformDAO extends HibernateDAO {
         }
         return platforms;
     }
-    
+
     public List getPlatformTypeCounts() {
-        String sql = "select t.name, count(*) from PlatformType t, " + 
-                     "Platform p where p.platformType = t " + 
+        String sql = "select t.name, count(*) from PlatformType t, " +
+                     "Platform p where p.platformType = t " +
                      "group by t.name order by t.name";
-        
+
         return getSession().createQuery(sql).list();
     }
-    
+
     public Number getPlatformCount() {
         return (Number)getSession().createQuery("select count(*) from Platform")
             .uniqueResult();
     }
-    
+
     public Number getCpuCount() {
-        Number rslt = 
+        Number rslt =
             (Number)getSession().createQuery("select sum(p.cpuCount) from Platform p")
         .uniqueResult();
         return (rslt == null) ? new Integer(0) : rslt;
     }
-    
+
     void clearResource(Resource res) {
         createQuery("update Platform set resource = null where resource = ?")
             .setParameter(0, res)

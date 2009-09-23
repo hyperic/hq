@@ -32,6 +32,7 @@ import org.hibernate.FlushMode;
 import org.hibernate.ObjectNotFoundException;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
@@ -42,6 +43,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.EdgePermCheck;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.dao.HibernateDAOFactory;
@@ -52,16 +54,43 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
-
+import org.springframework.stereotype.Repository;
+@Repository
 public class AlertDefinitionDAO extends HibernateDAO {
+    
+      private PermissionManager permissionManager;
+      private  ActionDAO actDAO;
+      private TriggerDAO tDAO;
+    
+       private AlertConditionDAO alertConditionDAO;
+   
+       private ResourceDAO rDao;
+       
+       
+    public AlertDefinitionDAO(
+                              SessionFactory f,
+                              PermissionManager permissionManager,
+                              ActionDAO actDAO,
+                              TriggerDAO tDAO,
+                              AlertConditionDAO alertConditionDAO,
+                              ResourceDAO rDao)
+    {
+        super(AlertDefinition.class, f);
+        this.permissionManager = permissionManager;
+        this.actDAO = actDAO;
+        this.tDAO = tDAO;
+        this.alertConditionDAO = alertConditionDAO;
+        this.rDao = rDao;
+    }
+
     private static final String[] MANAGE_ALERTS_OPS = new String[] {
         AuthzConstants.platformOpManageAlerts,
         AuthzConstants.serverOpManageAlerts,
         AuthzConstants.serviceOpManageAlerts
     };
 
-    public AlertDefinitionDAO(DAOFactory f) {
-        super(AlertDefinition.class, f);
+    public AlertDefinitionDAO(SessionFactory sessionFactory) {
+        super(AlertDefinition.class, sessionFactory);
     }
 
     void remove(AlertDefinition def) {
@@ -69,11 +98,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
         super.remove(def);
     }
 
-    Session getNewSession() {
-        return HibernateDAOFactory.getInstance()
-                .getSessionFactory().openSession();
-    }
-
+    
     public List findAllByResource(Resource r) {
         return createCriteria().add(Restrictions.eq("resource", r)).list();
     }
@@ -192,7 +217,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
      */
     public List findByRootResource(AuthzSubject subject, Resource r) {
         EdgePermCheck wherePermCheck =
-            getPermissionManager().makePermCheckHql("rez", true);
+           permissionManager.makePermCheckHql("rez", true);
         String hql = "select ad from AlertDefinition ad join ad.resource rez "
                         + wherePermCheck
                         + " and ad.deleted = false and ad.resource is not null ";
@@ -229,10 +254,8 @@ public class AlertDefinitionDAO extends HibernateDAO {
 
     void setAlertDefinitionValue(AlertDefinition def, AlertDefinitionValue val)
     {
-        AlertConditionDAO cDAO =
-            new AlertConditionDAO(DAOFactory.getDAOFactory());
-        ActionDAO actDAO = new ActionDAO(DAOFactory.getDAOFactory());
-        TriggerDAO tDAO = new TriggerDAO(DAOFactory.getDAOFactory());
+       
+       
 
         // Set parent alert definition
         if (val.parentIdHasBeenSet() && val.getParentId() != null) {
@@ -242,7 +265,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
         setAlertDefinitionValueNoRels(def, val);
 
         // def.set the resource based on the entity ID
-        ResourceDAO rDao = new ResourceDAO(DAOFactory.getDAOFactory());
+     
         // Don't need to synch the Resource with the db since changes
         // to the Resource aren't cascaded on saving the AlertDefinition.
         Integer authzTypeId;
@@ -282,12 +305,12 @@ public class AlertDefinitionDAO extends HibernateDAO {
 
         for (Iterator i=val.getAddedConditions().iterator(); i.hasNext(); ) {
             AlertConditionValue cVal = (AlertConditionValue)i.next();
-            def.addCondition(cDAO.findById(cVal.getId()));
+            def.addCondition(alertConditionDAO.findById(cVal.getId()));
         }
 
         for (Iterator i=val.getRemovedConditions().iterator(); i.hasNext(); ) {
             AlertConditionValue cVal = (AlertConditionValue)i.next();
-            def.removeCondition(cDAO.findById(cVal.getId()));
+            def.removeCondition(alertConditionDAO.findById(cVal.getId()));
         }
 
         for (Iterator i=val.getAddedActions().iterator(); i.hasNext(); ) {
@@ -311,7 +334,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
      */
     void setAlertDefinitionValueNoRels(final AlertDefinition clone,
                                        final AlertDefinitionValue master) {
-        final TriggerDAO tDAO = new TriggerDAO(DAOFactory.getDAOFactory());
+      
 
         clone.setName(master.getName());
         clone.setDescription(master.getDescription());

@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.escalation.server.session;
 
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -31,7 +32,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 class EscalationDAO
     extends HibernateDAO
 {
-    EscalationDAO(DAOFactory f) {
+    EscalationDAO(SessionFactory f) {
         super(Escalation.class, f);
     }
 
@@ -46,9 +47,9 @@ class EscalationDAO
     void remove(Escalation e) {
         super.remove(e);
     }
-    
+
     Escalation findByName(String name) {
-        return (Escalation) 
+        return (Escalation)
             createCriteria().add(Expression.eq("name", name))
                             .uniqueResult();
     }

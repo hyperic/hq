@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -64,12 +64,13 @@ public class AuthManagerEJBImpl implements SessionBean {
 
     // Always authenticate against the HQ application realm
     private final String appName = HQConstants.ApplicationName;
+    private PrincipalDAO principalDAO;
 
     public AuthManagerEJBImpl() {}
 
 
     private PrincipalDAO getPrincipalDAO() {
-        return new PrincipalDAO(DAOFactory.getDAOFactory());
+        return principalDAO;
     }
 
 
@@ -87,7 +88,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      */
     public int getSessionId(String user, String password)
         throws SecurityException, LoginException, ConfigPropertyException,
-               ApplicationException 
+               ApplicationException
     {
         if(password == null)
             throw new LoginException("No password was given");
@@ -105,9 +106,9 @@ public class AuthManagerEJBImpl implements SessionBean {
 
         // User is authenticated, get the id from the authz system
         // and return an id from the Session Manager
-        AuthzSubjectManagerLocal subjMan = 
+        AuthzSubjectManagerLocal subjMan =
             AuthzSubjectManagerEJBImpl.getOne();
-        
+
         AuthzSubject subject;
         try {
             subject = subjMan.findSubjectByAuth(user, appName);
@@ -139,7 +140,7 @@ public class AuthManagerEJBImpl implements SessionBean {
      * @ejb:transaction type="Supports"
      */
     public int getUnauthSessionId(String user)
-        throws ApplicationException 
+        throws ApplicationException
     {
         try {
             SessionManager mgr = SessionManager.getInstance();
@@ -148,14 +149,14 @@ public class AuthManagerEJBImpl implements SessionBean {
                 if (sessionId > 0)
                     return sessionId;
             } catch (SessionNotFoundException e) {
-                // Continue   
+                // Continue
             }
 
             // Get the id from the authz system and return an id from the
             // Session Manager
-            AuthzSubjectManagerLocal subjMgrLocal = 
-                AuthzSubjectManagerEJBImpl.getOne(); 
-        
+            AuthzSubjectManagerLocal subjMgrLocal =
+                AuthzSubjectManagerEJBImpl.getOne();
+
             AuthzSubject subject =
                 subjMgrLocal.findSubjectByAuth(user, appName);
             if (!subject.getActive()) {
@@ -189,7 +190,7 @@ public class AuthManagerEJBImpl implements SessionBean {
                                                       null, null, password);
         getPrincipalDAO().create(username, passwordHash);
     }
-    
+
     /**
      * Change the password for a user.
      *
@@ -207,7 +208,7 @@ public class AuthManagerEJBImpl implements SessionBean {
         // AUTHZ check
         if(!subject.getName().equals(username)) {
             // users can change their own passwords... only
-            // peeps with modifyUsers can modify other 
+            // peeps with modifyUsers can modify other
             AuthzSubjectManagerEJBImpl.getOne().checkModifyUsers(subject);
         }
         Principal local = getPrincipalDAO().findByUsername(username);
@@ -234,7 +235,7 @@ public class AuthManagerEJBImpl implements SessionBean {
         // AUTHZ check
         if(!subject.getName().equals(username)) {
             // users can change their own passwords... only
-            // peeps with modifyUsers can modify other 
+            // peeps with modifyUsers can modify other
             AuthzSubjectManagerEJBImpl.getOne().checkModifyUsers(subject);
         }
         PrincipalDAO dao = getPrincipalDAO();

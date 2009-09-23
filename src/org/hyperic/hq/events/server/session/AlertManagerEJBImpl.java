@@ -42,7 +42,6 @@ import javax.ejb.SessionContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Hibernate;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -52,11 +51,13 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
@@ -84,30 +85,33 @@ import org.hyperic.util.stats.ConcurrentStatsCollector;
  *
  * @ejb:transaction type="REQUIRED"
  */
-public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
+public class AlertManagerEJBImpl implements SessionBean {
     private final String NOTAVAIL = "Not Available";
+    
+         private AlertPermissionManager alertPermissionManager;
+  
+   
+      private final Log log =
+              LogFactory.getLog(AlertManagerEJBImpl.class.getName());
+          private final String VALUE_PROCESSOR =
+              PagerProcessor_events.class.getName();
+      
+          private Pager valuePager;
+          private Pager pojoPager;
+    
+         private AlertDefinitionDAO alertDefDao;
+   
+         private AlertActionLogDAO alertActionLogDAO;
+    
+        private AlertDAO alertDAO;
+    
+         private AlertConditionDAO alertConditionDAO;
+     
+        private MeasurementDAO measurementDAO;
+        
+        private ResourceManager resourceManager;
 
-    private final Log _log =
-        LogFactory.getLog(AlertManagerEJBImpl.class.getName());
-    private final String VALUE_PROCESSOR =
-        PagerProcessor_events.class.getName();
-
-    private Pager valuePager;
-    private Pager pojoPager;
-
-    public AlertManagerEJBImpl() {}
-
-    private AlertDefinitionDAO getAlertDefDAO() {
-        return new AlertDefinitionDAO(DAOFactory.getDAOFactory());
-    }
-
-    private AlertDAO getAlertDAO() {
-        return new AlertDAO(DAOFactory.getDAOFactory());
-    }
-
-    private AlertConditionDAO getAlertConDAO() {
-        return new AlertConditionDAO(DAOFactory.getDAOFactory());
-    }
+    
 
     /**
      * Create a new alert.
@@ -120,7 +124,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         Alert alert = new Alert();
         alert.setAlertDefinition(def);
         alert.setCtime(ctime);
-        getAlertDAO().save(alert);
+       alertDAO.save(alert);
         return alert;
     }
 
@@ -139,7 +143,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             try {
                 AlertDefinitionManagerEJBImpl.getOne().updateAlertDefinitionInternalEnable( AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(), def, true);
             } catch (PermissionException e) {
-                _log.error("Error re-enabling alert with ID: " + def.getId() + " after it was fixed.",e);
+                log.error("Error re-enabling alert with ID: " + def.getId() + " after it was fixed.",e);
             }
         }
     }
@@ -156,7 +160,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     public void addConditionLogs(Alert alert, AlertConditionLogValue[] logs) {
-        AlertConditionDAO dao = getAlertConDAO();
+        AlertConditionDAO dao = alertConditionDAO;
         for (int i = 0; i < logs.length; i++) {
             AlertCondition cond = dao.findById(logs[i].getCondition().getId());
             alert.createConditionLog(logs[i].getValue(), cond);
@@ -167,7 +171,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public void deleteAlerts(Integer[] ids) {
-        getAlertDAO().deleteByIds(ids);
+       alertDAO.deleteByIds(ids);
     }
 
     /**
@@ -177,8 +181,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public int deleteAlerts(AuthzSubject subj, AppdefEntityID id)
         throws PermissionException {
-        canManageAlerts(subj, id);
-        return getAlertDAO().deleteByResource(findResource(id));
+        alertPermissionManager.canManageAlerts(subj, id);
+        return alertDAO.deleteByResource(resourceManager.findResource(id));
     }
 
     /**
@@ -188,8 +192,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public int deleteAlerts(AuthzSubject subj, AlertDefinition ad)
         throws RemoveException, PermissionException {
-        canManageAlerts(subj, ad);
-        return getAlertDAO().deleteByAlertDefinition(ad);
+        alertPermissionManager.canManageAlerts(subj, ad);
+        return alertDAO.deleteByAlertDefinition(ad);
     }
 
     /**
@@ -197,7 +201,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public int deleteAlerts(long begin, long end) {
-        return getAlertDAO().deleteByCreateTime(begin, end);
+        return alertDAO.deleteByCreateTime(begin, end);
     }
 
     /**
@@ -206,7 +210,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public AlertValue getById(Integer id) {
-        return (AlertValue) valuePager.processOne(getAlertDAO().get(id));
+        return (AlertValue) valuePager.processOne(alertDAO.get(id));
     }
 
     /**
@@ -215,7 +219,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public Alert findAlertById(Integer id) {
-        Alert alert = getAlertDAO().findById(id);
+        Alert alert =alertDAO.findById(id);
         Hibernate.initialize(alert);
 
         alert.setAckable(EscalationManagerEJBImpl.getOne()
@@ -234,8 +238,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public Alert findLastUnfixedByDefinition(AuthzSubject subj, Integer id)
     {
         try {
-            AlertDefinition def = getAlertDefDAO().findById(id);
-            return getAlertDAO().findLastByDefinition(def, false);
+            AlertDefinition def = alertDefDao.findById(id);
+            return alertDAO.findLastByDefinition(def, false);
         } catch (Exception e) {
             return null;
         }
@@ -249,7 +253,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public Alert findLastFixedByDefinition(AlertDefinition def) {
         try {
-            return getAlertDAO().findLastByDefinition(def, true);
+            return alertDAO.findLastByDefinition(def, true);
         } catch (Exception e) {
             return null;
         }
@@ -260,7 +264,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public Number getAlertCount() {
-        return new Integer(getAlertDAO().size());
+        return new Integer(alertDAO.size());
     }
 
     /**
@@ -268,11 +272,11 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public int[] getAlertCount(AppdefEntityID[] ids) {
-        AlertDAO dao = getAlertDAO();
+        AlertDAO dao =alertDAO;
         int[] counts = new int[ids.length];
         for (int i = 0; i < ids.length; i++) {
             if (ids[i].isPlatform() || ids[i].isServer() || ids[i].isService()){
-                counts[i] = dao.countAlerts(findResource(ids[i])).intValue();
+                counts[i] = dao.countAlerts(resourceManager.findResource(ids[i])).intValue();
             }
         }
         return counts;
@@ -287,7 +291,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public void fireAlert(AlertConditionsSatisfiedZEvent event) {
         if (!AlertRegulator.getInstance().alertsAllowed()) {
-            _log.debug("Alert not firing because they are not allowed");
+            log.debug("Alert not firing because they are not allowed");
             return;
         }
         long startTime = System.currentTimeMillis();
@@ -331,16 +335,16 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 creator.createEscalatable();
             }
             
-            if (_log.isDebugEnabled()) {
-                _log.debug("Alert definition " + alertDef.getName() +
+            if (log.isDebugEnabled()) {
+                log.debug("Alert definition " + alertDef.getName() +
                            " (id=" + alertDef.getId() + ") fired.");
             }
             
             ConcurrentStatsCollector.getInstance().addStat(System.currentTimeMillis() - startTime,ConcurrentStatsCollector.FIRE_ALERT_TIME);
         } catch (PermissionException e) {
-            _log.error("Alert not firing due to a permissions issue",e);
+            log.error("Alert not firing due to a permissions issue",e);
         } catch (ResourceDeletedException e) {
-            _log.debug(e,e);
+            log.debug(e,e);
         }
     }
 
@@ -356,8 +360,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         //        don't forget to come back to it.
         Collection res;
 
-        res = getAlertDAO().findAll();
-        for (Iterator i = getAlertDAO().findAll().iterator(); i.hasNext();) {
+        res = alertDAO.findAll();
+        for (Iterator i = alertDAO.findAll().iterator(); i.hasNext();) {
             Alert alert = (Alert) i.next();
 
             res.add(alert.getAlertValue());
@@ -375,14 +379,14 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public PageList findAlerts(AuthzSubject subj, AppdefEntityID id,
                                PageControl pc)
         throws PermissionException {
-        canManageAlerts(subj, id);
+        alertPermissionManager.canManageAlerts(subj, id);
         List alerts;
 
-        final Resource resource = findResource(id);
+        final Resource resource = resourceManager.findResource(id);
         if (pc.getSortattribute() == SortAttribute.NAME) {
-            alerts = getAlertDAO().findByResourceSortByAlertDef(resource);
+            alerts =alertDAO.findByResourceSortByAlertDef(resource);
         } else {
-            alerts = getAlertDAO().findByResource(resource);
+            alerts =alertDAO.findByResource(resource);
         }
 
         if (pc.getSortorder() == PageControl.SORT_DESC)
@@ -401,9 +405,9 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                                long begin, long end, PageControl pc)
         throws PermissionException
     {
-        canManageAlerts(subj, id);
+        alertPermissionManager.canManageAlerts(subj, id);
         List alerts =
-            getAlertDAO().findByAppdefEntityInRange(findResource(id),
+           alertDAO.findByAppdefEntityInRange(resourceManager.findResource(id),
                                                     begin, end,
                                                     pc.getSortattribute() ==
                                                         SortAttribute.NAME,
@@ -443,7 +447,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             // be able to use cached results.
             endTime = TimingVoodoo.roundUpTime(endTime, 60000);
         }
-        return getAlertDAO().findByCreateTimeAndPriority(subj,
+        return alertDAO.findByCreateTimeAndPriority(subj,
                                                          endTime - timeRange,
                                                          endTime, priority,
                                                          inEsc, notFixed,
@@ -540,7 +544,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         // Time voodoo the end time to the nearest minute so that we might
         // be able to use cached results
         endTime = TimingVoodoo.roundUpTime(endTime, 60000);
-        Integer count = getAlertDAO().countByCreateTimeAndPriority(subj,
+        Integer count =alertDAO.countByCreateTimeAndPriority(subj,
                                                          endTime - timeRange,
                                                          endTime, 0,
                                                          false, true,
@@ -601,8 +605,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 .append(name)
                 .append(" ");
 
-        MeasurementDAO dmDao =
-            new MeasurementDAO(DAOFactory.getDAOFactory());
+      
         for (Iterator it = clogs.iterator(); it.hasNext(); ) {
             AlertConditionLog log = (AlertConditionLog) it.next();
             AlertCondition cond = log.getCondition();
@@ -612,7 +615,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             switch (cond.getType()) {
             case EventConstants.TYPE_THRESHOLD:
             case EventConstants.TYPE_BASELINE:
-                dm = dmDao.findById(new Integer(cond.getMeasurementId()));
+                dm = measurementDAO.findById(new Integer(cond.getMeasurementId()));
                 // Value is already formatted by HHQ-2573
                 String actualValue = log.getValue();
 
@@ -623,7 +626,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 text.append(cond.getName());
                 break;
             case EventConstants.TYPE_CHANGE:
-                dm = dmDao.findById(new Integer(cond.getMeasurementId()));
+                dm = measurementDAO.findById(new Integer(cond.getMeasurementId()));
                 text.append(cond.getName())
                     .append(" (")
                     .append(log.getValue())
@@ -666,8 +669,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             clogs.toArray(new AlertConditionLog[clogs.size()]);
 
         StringBuffer text = new StringBuffer();
-        MeasurementDAO dmDao =
-            new MeasurementDAO(DAOFactory.getDAOFactory());
+      
         for (int i = 0; i < logs.length; i++) {
             AlertCondition cond = logs[i].getCondition();
 
@@ -687,33 +689,33 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             switch (cond.getType()) {
             case EventConstants.TYPE_THRESHOLD:
             case EventConstants.TYPE_BASELINE:
-                dm = dmDao.findById(new Integer(cond.getMeasurementId()));
-                text.append(describeCondition(cond, dm));
+                dm = measurementDAO.findById(new Integer(cond.getMeasurementId()));
+                text.append(cond.describe(dm.getTemplate().getUnits()));
 
                 // Value is already formatted by HHQ-2573
                 String actualValue = logs[i].getValue();
                 text.append(" (actual value = ").append(actualValue).append(")");
                 break;
             case EventConstants.TYPE_CONTROL:
-                text.append(describeCondition(cond, dm));
+                text.append(cond.describe(dm.getTemplate().getUnits()));
                 break;
             case EventConstants.TYPE_CHANGE:
-                text.append(describeCondition(cond, dm))
+                text.append(cond.describe(dm.getTemplate().getUnits()))
                     .append(" (New value: ")
                     .append(logs[i].getValue())
                     .append(")");
                 break;
             case EventConstants.TYPE_CUST_PROP:
-                text.append(describeCondition(cond, dm))
+                text.append(cond.describe(dm.getTemplate().getUnits()))
                     .append("\n").append(indent).append(logs[i].getValue());
                 break;
             case EventConstants.TYPE_LOG:
-                text.append(describeCondition(cond, dm))
+                text.append(cond.describe(dm.getTemplate().getUnits()))
                     .append("\n").append(indent).append("Log: ")
                     .append(logs[i].getValue());
                 break;
             case EventConstants.TYPE_CFG_CHG:
-                text.append(describeCondition(cond, dm))
+                text.append(cond.describe(dm.getTemplate().getUnits()))
                     .append("\n").append(indent).append("Details: ")
                     .append(logs[i].getValue());
                 break;
@@ -729,9 +731,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public void handleSubjectRemoval(AuthzSubject subject) {
-        AlertActionLogDAO dao =
-            new AlertActionLogDAO(DAOFactory.getDAOFactory());
-        dao.handleSubjectRemoval(subject);
+
+        alertActionLogDAO.handleSubjectRemoval(subject);
     }
 
     public static AlertManagerLocal getOne() {

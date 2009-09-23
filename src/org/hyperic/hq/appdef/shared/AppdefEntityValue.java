@@ -41,9 +41,9 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -171,8 +171,8 @@ public class AppdefEntityValue {
 
     private ResourceGroup getGroup()
         throws PermissionException, AppdefGroupNotFoundException {
-        ResourceGroupManagerLocal groupMan = 
-            ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroupManager groupMan = 
+            ResourceGroupManagerImpl.getOne();
         ResourceGroup g = 
             groupMan.findResourceGroupById(getSubject(), _id.getId());
         if (g == null) {
@@ -186,8 +186,8 @@ public class AppdefEntityValue {
         throws PermissionException, AppdefGroupNotFoundException 
     {
         if (group == null) {
-            ResourceGroupManagerLocal groupMan = 
-                ResourceGroupManagerEJBImpl.getOne();
+            ResourceGroupManager groupMan = 
+                ResourceGroupManagerImpl.getOne();
             group = groupMan.getGroupConvert(getSubject(), getGroup());
         }
         return group;
@@ -368,8 +368,8 @@ public class AppdefEntityValue {
             if (g.isMixed())
                 throw new IllegalStateException("Can't return for mixed group: "
                                                 + _id);
-            ResourceGroupManagerLocal groupMan = 
-                ResourceGroupManagerEJBImpl.getOne();
+            ResourceGroupManager groupMan = 
+                ResourceGroupManagerImpl.getOne();
             return groupMan.getAppdefResourceType(getSubject(), g);
         default:
             throw new IllegalStateException("Unknown appdef entity type");

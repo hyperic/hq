@@ -38,6 +38,9 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
 
     private static Log _log = LogFactory.getLog(DataPopulatorService.class);
 
+    private DBUtil dbUtil;
+
+
     public DataPopulatorService() {}
 
     /**
@@ -85,7 +88,7 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
         _log.info("Loaded " + measurements.size() + " measurements");
 
         List dps = new ArrayList();
-        max = (max < measurements.size()) ? max : measurements.size(); 
+        max = (max < measurements.size()) ? max : measurements.size();
         for (int i = 0; i < max; i++ ) {
             Measurement m = (Measurement)measurements.get(i);
             _log.info("Loaded last data point for " + m.getId());
@@ -128,7 +131,7 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
         ResultSet rs = null;
 
         try {
-            conn = DBUtil.getConnByContext(new InitialContext(),
+            conn = dbUtil.getConnByContext(new InitialContext(),
                                            HQConstants.DATASOURCE);
 
             stmt = conn.prepareStatement(SQL);
@@ -151,7 +154,7 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
             _log.error("Error querying last data points", e);
             throw e;
         } finally {
-            DBUtil.closeConnection(_log, conn);
+            dbUtil.closeConnection(_log, conn);
         }
     }
 

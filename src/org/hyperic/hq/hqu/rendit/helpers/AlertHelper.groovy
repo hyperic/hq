@@ -6,7 +6,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl
-import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl
+import org.hyperic.hq.galerts.server.session.GalertManagerImpl
 import org.hyperic.hq.events.AlertSeverity
 
 class AlertHelper extends BaseHelper {

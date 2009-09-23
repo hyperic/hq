@@ -7,7 +7,7 @@ import org.apache.commons.logging.LogFactory
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as ResourceMan
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl as ResourceMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.server.session.Attachment

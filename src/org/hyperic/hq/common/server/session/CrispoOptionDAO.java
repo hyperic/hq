@@ -2,13 +2,14 @@ package org.hyperic.hq.common.server.session;
 
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.dao.DAOFactory;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 
 import java.util.List;
 
 public class CrispoOptionDAO extends HibernateDAO {
 
-    public CrispoOptionDAO(DAOFactory f) {
+    public CrispoOptionDAO(SessionFactory f) {
         super(CrispoOption.class, f);
     }
 
@@ -19,7 +20,7 @@ public class CrispoOptionDAO extends HibernateDAO {
     void save(CrispoOption o) {
         super.save(o);
     }
-    
+
     /**
      * Return a list of CrispoOption's that have a key that contains the
      * given String key
@@ -31,7 +32,7 @@ public class CrispoOptionDAO extends HibernateDAO {
         return createCriteria().add(Restrictions.like("key",
                                                       "%" + key + "%")).list();
     }
-    
+
     List findOptionsByValue(String val) {
         String hql = "from CrispoOption o join o.array a where " +
         		     "o.optionValue = :val or a = :val";

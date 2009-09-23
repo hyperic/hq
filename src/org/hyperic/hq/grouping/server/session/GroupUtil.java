@@ -35,9 +35,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -125,8 +125,8 @@ public class GroupUtil {
                                               PageControl pc )
         throws AppdefEntityNotFoundException, PermissionException 
     {
-        ResourceGroupManagerLocal groupMan = 
-            ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroupManager groupMan = 
+            ResourceGroupManagerImpl.getOne();
 
         ResourceGroup group = groupMan.findResourceGroupById(entity.getId());
         return groupMan.getGroupConvert(subject, group);

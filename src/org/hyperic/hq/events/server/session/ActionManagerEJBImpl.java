@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -46,7 +46,7 @@ import org.hyperic.util.config.EncodingException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/** 
+/**
  * The action manager.
  *
  * @ejb:bean name="ActionManager"
@@ -60,12 +60,12 @@ import org.json.JSONObject;
 public class ActionManagerEJBImpl implements SessionBean {
     private ActionDAO          _actDAO;
     private AlertDAO           _alertDAO;
-    
+
     public ActionManagerEJBImpl() {
-        DAOFactory f = DAOFactory.getDAOFactory();
-        
-        _actDAO   = new ActionDAO(f);
-        _alertDAO = new AlertDAO(f);
+//        DAOFactory f = DAOFactory.getDAOFactory();
+//
+//        _actDAO   = new ActionDAO(f);
+//        _alertDAO = new AlertDAO(f);
     }
 
     /**
@@ -75,12 +75,12 @@ public class ActionManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public List getActionsForAlert(int alertId) {
-        Alert a = _alertDAO.findById(new Integer(alertId)); 
+        Alert a = _alertDAO.findById(new Integer(alertId));
         Collection actions = _actDAO.findByAlert(a);
-        
+
         return actionsToActionValues(actions);
     }
-    
+
     private List actionsToActionValues(Collection actions) {
         List res = new ArrayList(actions.size());
 
@@ -110,10 +110,10 @@ public class ActionManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public Action updateAction(ActionValue val) { 
+    public Action updateAction(ActionValue val) {
         // First update the primary action
         Action action = _actDAO.findById(val.getId());
-        
+
         // Delete it if no configuration or logs
         if (val.getConfig() == null) {
             if (action.getLogEntriesBag().size() == 0) {
@@ -124,7 +124,7 @@ public class ActionManagerEJBImpl implements SessionBean {
                     action.getAlertDefinition().getActionsBag().remove(action);
                     action.setAlertDefinition(null);
                 }
-                
+
                 if (action.getParent() != null) {
                     action.getParent().getChildrenBag().remove(action);
                     action.setParent(null);
@@ -140,51 +140,51 @@ public class ActionManagerEJBImpl implements SessionBean {
         action.setConfig(val.getConfig());
         setParentAction(action, val.getParentId());
         long mtime = System.currentTimeMillis();
-        
-        // HQ 942: We have seen orphaned actions on upgrade from 
+
+        // HQ 942: We have seen orphaned actions on upgrade from
         // 3.0.5 to 3.1.1 where the action has no associated alert def.
         // Prevent the NPE.
         if (action.getAlertDefinition() != null) {
-            action.getAlertDefinition().setMtime(mtime);            
+            action.getAlertDefinition().setMtime(mtime);
         }
 
         // Then find and update the child actions.
 
         /* It would be nice to have a more explicit method that
-           does this kind of update.  XXX -- JMT */ 
+           does this kind of update.  XXX -- JMT */
         Collection children = action.getChildren();
-            
+
         val.setParentId(val.getId());
         for (Iterator i = children.iterator(); i.hasNext(); ) {
             Action act = (Action) i.next();
             act.setClassName(val.getClassname());
             act.setConfig(val.getConfig());
             setParentAction(act, val.getParentId());
-            
-            // HQ 942: We have seen orphaned actions on upgrade from 
+
+            // HQ 942: We have seen orphaned actions on upgrade from
             // 3.0.5 to 3.1.1 where the action has no associated alert def.
             // Prevent the NPE.
             if (act.getAlertDefinition() != null) {
-                act.getAlertDefinition().setMtime(mtime);                
+                act.getAlertDefinition().setMtime(mtime);
             }
         }
-        
+
         return action;
     }
 
     /**
      * Create a free-standing action.  These are linked to from things like
      * escalations actions.
-     * 
+     *
      * XXX:  This should really be removed -- the JSON object sucks.
      *
      * @ejb:interface-method
      */
-    public Action createAction(JSONObject json) 
+    public Action createAction(JSONObject json)
         throws JSONException
     {
-        Action a = Action.newInstance(json); 
-        
+        Action a = Action.newInstance(json);
+
         _actDAO.save(a);
         return a;
     }
@@ -192,26 +192,26 @@ public class ActionManagerEJBImpl implements SessionBean {
     /**
      * Create a free-standing action.  These are linked to from things like
      * escalations actions.
-     * 
+     *
      * @ejb:interface-method
      */
     public Action createAction(ActionConfigInterface cfg) {
-        Action a = Action.createAction(cfg); 
-        
+        Action a = Action.createAction(cfg);
+
         _actDAO.save(a);
         return a;
     }
 
     /**
-     * Mark a free-standing action as deleted.  These actions will later be 
-     * deleted by a cleanup thread. 
+     * Mark a free-standing action as deleted.  These actions will later be
+     * deleted by a cleanup thread.
      *
      * @ejb:interface-method
      */
     public void markActionDeleted(Action a) {
         a.setDeleted(true);
     }
-    
+
     private void setParentAction(Action action, Integer parent) {
         if (parent == null) {
             action.setParent(null);
@@ -219,7 +219,7 @@ public class ActionManagerEJBImpl implements SessionBean {
             action.setParent(_actDAO.findById(parent));
         }
     }
-    
+
     public static ActionManagerLocal getOne() {
         try {
             return ActionManagerUtil.getLocalHome().create();

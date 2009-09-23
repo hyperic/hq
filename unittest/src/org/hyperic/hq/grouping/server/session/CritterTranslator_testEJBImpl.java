@@ -41,11 +41,11 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.MixedGroupType;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterList;
@@ -163,7 +163,7 @@ public class CritterTranslator_testEJBImpl implements SessionBean {
     }
 
     private void testCompatCritter(String ProtoName, int expectedSize) {
-        ResourceManagerLocal rman = ResourceManagerEJBImpl.getOne();
+        ResourceManager rman = ResourceManagerImpl.getOne();
         Resource proto = rman.findResourcePrototypeByName(ProtoName);
         CompatGroupTypeCritterType type = new CompatGroupTypeCritterType();
         testCritter(ProtoName, type.newInstance(proto), expectedSize);

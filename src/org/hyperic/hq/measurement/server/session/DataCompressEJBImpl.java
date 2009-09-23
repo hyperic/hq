@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -69,12 +69,13 @@ import org.apache.commons.logging.LogFactory;
  *
  * @ejb:transaction type="NotSupported"
  */
-public class DataCompressEJBImpl 
-    extends SessionEJB 
+public class DataCompressEJBImpl
+    extends SessionEJB
     implements SessionBean {
 
     private final String logCtx = DataCompressEJBImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
+    private DBUtil dbUtil;
 
     // Data tables
     private final String TAB_DATA    = MeasurementConstants.TAB_DATA;
@@ -95,7 +96,7 @@ public class DataCompressEJBImpl
     /**
      * Get the server purge configuration, loaded on startup.
      */
-    private void loadPurgeDefaults() 
+    private void loadPurgeDefaults()
     {
         this.log.info("Loading default purge intervals");
         Properties conf;
@@ -149,7 +150,7 @@ public class DataCompressEJBImpl
         Connection conn = null;
         Statement stmt = null;
         try {
-            conn = DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            conn = dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
             // check out HHQ-2789 for more info on why setAutoCommit(false)
             // was added
             conn.setAutoCommit(false);
@@ -177,16 +178,16 @@ public class DataCompressEJBImpl
             log.info("Done Purging Raw Measurement Data (" +
                      ((watch.getElapsed()) / 1000) + " seconds)");
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+            dbUtil.closeJDBCObjects(logCtx, conn, stmt, null);
         }
     }
 
     /**
      * Entry point for data compression routines
-     * 
+     *
      * @ejb:interface-method
      */
-    public void compressData() 
+    public void compressData()
         throws NamingException, SQLException
     {
         // Load defaults if not already loaded
@@ -210,13 +211,13 @@ public class DataCompressEJBImpl
         // Compress 6 hour data
         last = compressData(TAB_DATA_1H, TAB_DATA_6H, SIX_HOUR, now);
         // Purge, ensuring we don't purge data not yet compressed.
-        purgeMeasurements(TAB_DATA_1H, 
+        purgeMeasurements(TAB_DATA_1H,
                           Math.min(now - this.purge1h, last));
 
         // Compress daily data
         last = compressData(TAB_DATA_6H, TAB_DATA_1D, DAY, now);
         // Purge, ensuring we don't purge data not yet compressed.
-        purgeMeasurements(TAB_DATA_6H, 
+        purgeMeasurements(TAB_DATA_6H,
                           Math.min(now - this.purge6h, last));
 
         // Purge, we never store more than 1 year of data.
@@ -238,7 +239,7 @@ public class DataCompressEJBImpl
      * @return The last timestamp that was compressed
      */
     private long compressData(String fromTable, String toTable, long interval,
-                              long now) 
+                              long now)
         throws NamingException, SQLException
     {
         // First determine the window to operate on.  If no previous
@@ -249,7 +250,7 @@ public class DataCompressEJBImpl
         if (start == 0) {
             // No compressed data found, start from scratch.
             // Need to validate this behaviour with the oracle
-            // JDBC driver.  If no data exists the Postgres driver 
+            // JDBC driver.  If no data exists the Postgres driver
             // returns 0 for MIN() or MAX().
             start = getMinTimestamp(fromTable);
 
@@ -267,19 +268,19 @@ public class DataCompressEJBImpl
 
         // Compress all the way up to now.
         log.info("Compressing from: " + fromTable + " to " + toTable);
-        
+
         return compactData(fromTable, toTable, begin, now, interval);
     }
-    
+
     private long compactData(String fromTable, String toTable,
                              long begin, long now, long interval)
         throws SQLException, NamingException {
         Connection        conn    = null;
         PreparedStatement insStmt = null;
-    
+
         try {
             conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+                dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
 
             // One special case.. If we are compressing from an
             // already compressed table, we'll take the MIN and
@@ -309,7 +310,7 @@ public class DataCompressEJBImpl
 
                 // Compress.
                 watch.reset();
-                
+
                 int i = 1;
                 try {
                     insStmt.setLong(i++, begin);
@@ -328,30 +329,30 @@ public class DataCompressEJBImpl
                 begin = end;
             }
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, insStmt, null);
+            dbUtil.closeJDBCObjects(logCtx, conn, insStmt, null);
         }
-        
+
         // Return the last interval that was compressed.
         return begin;
     }
 
     /**
      * Get the oldest timestamp in the database.  Getting the minimum time
-     * is expensive, so this is only called once when the compression 
+     * is expensive, so this is only called once when the compression
      * routine runs for the first time.  After the first call, the range
      * is cached.
      */
-    private long getMinTimestamp(String dataTable) 
+    private long getMinTimestamp(String dataTable)
         throws SQLException, NamingException
     {
         Connection        conn = null;
         Statement         stmt = null;
         ResultSet         rs   = null;
-    
+
         try {
             String sql = "SELECT MIN(timestamp) FROM " + dataTable;
             conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+                dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
 
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
@@ -364,26 +365,26 @@ public class DataCompressEJBImpl
                                        "measurement");
             }
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            dbUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
     }
 
     /**
      * Get the most recent measurement.
      */
-    private long getMaxTimestamp(String dataTable) 
+    private long getMaxTimestamp(String dataTable)
         throws SQLException, NamingException
     {
         Connection        conn = null;
         Statement         stmt = null;
         ResultSet         rs   = null;
-    
+
         try {
             conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+                dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
 
             String sql;
-            if (DBUtil.isPostgreSQL(conn)) {
+            if (dbUtil.isPostgreSQL(conn)) {
                 // Postgres handles this much better
                 sql = "SELECT timestamp FROM " + dataTable +
                     " ORDER BY timestamp DESC LIMIT 1";
@@ -402,7 +403,7 @@ public class DataCompressEJBImpl
                 return 0l;
             }
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            dbUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
     }
 
@@ -421,7 +422,7 @@ public class DataCompressEJBImpl
         if (min == 0) {
             return;
         }
-        
+
         log.info("Purging data older than " +
                  TimeUtil.toString(purgeAfter) + " in " +
                  tableName);
@@ -429,11 +430,11 @@ public class DataCompressEJBImpl
         StopWatch watch = new StopWatch();
         try {
             conn =
-                DBUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+                dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
             conn.setAutoCommit(false);
 
             long endWindow = purgeAfter;
-            long startWindow = endWindow - interval; 
+            long startWindow = endWindow - interval;
             String sql = "DELETE FROM " + tableName +
                          " WHERE timestamp BETWEEN ? AND ?";
             stmt = conn.prepareStatement(sql);
@@ -443,7 +444,7 @@ public class DataCompressEJBImpl
                           TimeUtil.toString(startWindow) + " and " +
                           TimeUtil.toString(endWindow) + " in " +
                           tableName);
-                
+
                 stmt.setLong(1, startWindow);
                 stmt.setLong(2, endWindow);
                 stmt.execute();
@@ -453,7 +454,7 @@ public class DataCompressEJBImpl
                 startWindow -= interval;
             }
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+            dbUtil.closeJDBCObjects(logCtx, conn, stmt, null);
         }
 
         log.info("Done (" + ((watch.getElapsed()) / 1000) + " seconds)");
@@ -466,7 +467,7 @@ public class DataCompressEJBImpl
             throw new SystemException(e);
         }
     }
-    
+
     /**
      * @ejb:create-method
      */

@@ -53,12 +53,10 @@ import org.hyperic.hq.zevents.ZeventManager;
  * @ejb:transaction type="NotSupported"
  *
  */
-public class HeartBeatServiceEJBImpl     
-    extends SessionBase
-    implements SessionBean {
-    
+public class HeartBeatServiceEJBImpl implements SessionBean {
+
     private final Log log = LogFactory.getLog(HeartBeatServiceEJBImpl.class);
-    
+
     private String topicName = EventConstants.EVENTS_TOPIC;
 
     public static HeartBeatServiceLocal getOne() {
@@ -68,37 +66,37 @@ public class HeartBeatServiceEJBImpl
             throw new SystemException(e);
         }
     }
-    
+
     /**
      * Dispatch a heart beat.
-     * 
+     *
      * @param beatTime The heart beat time.
      * @ejb:interface-method
      */
     public void dispatchHeartBeat(Date beatTime) {
         log.debug("Heart Beat Service started dispatching a heart beat: "+
-                   beatTime+", timestamp="+beatTime.getTime());            
-        
+                   beatTime+", timestamp="+beatTime.getTime());
+
         HeartBeatEvent event = new HeartBeatEvent(beatTime);
-        
+
         try {
             // Try to see if RegisteredTriggerManager is available
             RegisteredTriggerManagerUtil.getLocalHome();
-            
+
             // Send the heart beat event
             Messenger sender = new Messenger();
             sender.publishMessage(topicName, event);
         } catch (Exception e) {
             // Do not send out heart beat if services are not up
         }
-        
+
         try {
             ZeventManager.getInstance().enqueueEvent(event.toZevent());
         } catch(InterruptedException e) {
             // Do not send out heart beat if thread is interrupted
         }
-        
-        log.debug("Heart Beat Service finished dispatching a heart beat: "+beatTime);            
+
+        log.debug("Heart Beat Service finished dispatching a heart beat: "+beatTime);
     }
 
     /**

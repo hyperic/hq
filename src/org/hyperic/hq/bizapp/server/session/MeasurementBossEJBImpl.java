@@ -82,10 +82,10 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
 import org.hyperic.hq.bizapp.shared.uibeans.AutogroupDisplaySummary;
@@ -1702,7 +1702,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         HashMap seen = new HashMap();      
         
         // Now, iterate through each AppdefEntityID
-        ResourceManagerLocal resMan = getResourceManager();
+        ResourceManager resMan = getResourceManager();
         final DataManagerLocal dMan = DataManagerEJBImpl.getOne();
         for (int i = 0; i < entIds.length; i++) {            
             Integer[] eids = new Integer[] { entIds[i].getId() };
@@ -2264,7 +2264,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         final ServerManagerLocal serverMan = getServerManager();
         
         // Find the group
-        final ResourceGroupManagerLocal resGrpMgr = getResourceGroupManager();
+        final ResourceGroupManager resGrpMgr = getResourceGroupManager();
         final ResourceGroup group =
             resGrpMgr.findResourceGroupById(subject, id);
 

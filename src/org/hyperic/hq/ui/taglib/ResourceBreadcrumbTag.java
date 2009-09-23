@@ -26,11 +26,11 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.hub.BreadcrumbUtil;
@@ -363,7 +363,7 @@ public class ResourceBreadcrumbTag
             ((parent.isPlatform() && child.isServer()) ||
              (parent.isPlatform() && child.isService()) ||
              (parent.isServer() && child.isService()))) {
-            ResourceManagerLocal resourceManager = ResourceManagerEJBImpl.getOne();
+            ResourceManager resourceManager = ResourceManagerImpl.getOne();
             Resource parentResource = resourceManager.findResource(parent.getAppdefEntityId());
             Resource childResource = resourceManager.findResource(child.getAppdefEntityId());
     
@@ -379,7 +379,7 @@ public class ResourceBreadcrumbTag
         if ((parent.isPlatform() || 
              parent.isServer()   || 
              parent.isApplication()) && group.isAutoGroup()) {
-            ResourceManagerLocal resourceManager = ResourceManagerEJBImpl.getOne();
+            ResourceManager resourceManager = ResourceManagerImpl.getOne();
             Resource parentResource = resourceManager.findResource(parent.getAppdefEntityId());
             Resource parentOfAutoGroupResource = resourceManager.findResource(new AppdefEntityID(group.getResourceId()));
     
@@ -406,10 +406,10 @@ public class ResourceBreadcrumbTag
         boolean result = false;
         
         if (group.isGroup()) {
-            ResourceManagerLocal resourceManager = ResourceManagerEJBImpl.getOne();
+            ResourceManager resourceManager = ResourceManagerImpl.getOne();
             Resource groupResource = resourceManager.findResource(group.getAppdefEntityId());
             Resource memberResource = resourceManager.findResource(member.getAppdefEntityId());
-            ResourceGroupManagerLocal resourceGroupManager = ResourceGroupManagerEJBImpl.getOne();
+            ResourceGroupManager resourceGroupManager = ResourceGroupManagerImpl.getOne();
             ResourceGroup resourceGroup = resourceGroupManager.getResourceGroupByResource(groupResource);
             
             result = resourceGroupManager.isMember(resourceGroup, memberResource);
@@ -434,7 +434,7 @@ public class ResourceBreadcrumbTag
             ServletContext ctx = pageContext.getServletContext();
             AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
             int sessionId = RequestUtils.getSessionId(request).intValue();
-            ResourceManagerLocal resourceManager = ResourceManagerEJBImpl.getOne();
+            ResourceManager resourceManager = ResourceManagerImpl.getOne();
             AppdefResourceTypeValue autoGroupResourceType = appdefBoss.findResourceTypeById(sessionId, (AppdefEntityTypeID) group.getAppdefEntityId());
             Resource memberResource = resourceManager.findResource(member.getAppdefEntityId());
 

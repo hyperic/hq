@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
@@ -49,7 +50,7 @@ import org.hyperic.util.pager.PageList;
 class GalertLogDAO
     extends HibernateDAO
 {
-    GalertLogDAO(DAOFactory f) {
+    GalertLogDAO(SessionFactory f) {
         super(GalertLog.class, f);
     }
 
@@ -60,7 +61,7 @@ class GalertLogDAO
     void save(GalertLog log) {
         super.save(log);
     }
-    
+
     void save(GalertAuxLog log) {
         super.save(log);
     }
@@ -68,16 +69,16 @@ class GalertLogDAO
     void remove(GalertLog log) {
         super.remove(log);
     }
-    
+
     List findAll(ResourceGroup g) {
-        String sql = "from GalertLog l where l.alertDef.group = :group " + 
+        String sql = "from GalertLog l where l.alertDef.group = :group " +
                      "order by l.timestamp";
-        
+
         return getSession().createQuery(sql)
             .setParameter("group", g)
             .list();
     }
-    
+
     public GalertLog findLastByDefinition(GalertDef def, boolean fixed) {
         return (GalertLog) createCriteria()
             .add(Expression.eq("alertDef", def))
@@ -106,11 +107,11 @@ class GalertLogDAO
                 .add(Restrictions.le(tsProp, new Long(end)))
                 .addOrder(pc.isDescending() ? Order.desc(tsProp) :
                                               Order.asc(tsProp));
-            
+
             return getPagedResult(crit, count, pc);
         }
 
-        
+
         return new PageList();
     }
 
@@ -127,7 +128,7 @@ class GalertLogDAO
 
     List findByCreateTime(long startTime, long endTime, int count) {
         Criteria criteria = createCriteria()
-            .add(Expression.between("timestamp", new Long(startTime), 
+            .add(Expression.between("timestamp", new Long(startTime),
                                     new Long(endTime)))
             .addOrder(Order.desc("timestamp"));
         if (count >= 0) {
@@ -135,30 +136,30 @@ class GalertLogDAO
         }
         return criteria.list();
     }
-    
-    List findByCreateTimeAndPriority(Integer subjectId, long begin, long end, 
+
+    List findByCreateTimeAndPriority(Integer subjectId, long begin, long end,
                                      AlertSeverity severity, boolean inEsc,
                                      boolean notFixed, Integer groupId,
-                                     Integer galertDefId, PageInfo pageInfo) 
+                                     Integer galertDefId, PageInfo pageInfo)
     {
         GalertLogSortField sort = (GalertLogSortField)pageInfo.getSort();
         String op = AuthzConstants.groupOpManageAlerts;
         String sql =  PermissionManagerFactory.getInstance()
                 .getGroupAlertsHQL(inEsc, notFixed, groupId, galertDefId) +
-            " order by " + sort.getSortString("a", "d", "g") + 
+            " order by " + sort.getSortString("a", "d", "g") +
             (pageInfo.isAscending() ? "" : " DESC");
 
-               
+
         if (!sort.equals(GalertLogSortField.DATE)) {
             sql += ", " + GalertLogSortField.DATE.getSortString("a", "d", "g") +
                    " DESC";
         }
-               
+
         Query q = getSession().createQuery(sql)
                               .setLong("begin", begin)
                               .setLong("end", end)
                               .setInteger("priority", severity.getCode());
-                              
+
         if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subjectId.intValue())
              .setParameter("op", op);
@@ -169,15 +170,15 @@ class GalertLogDAO
 
     void removeAll(ResourceGroup g) {
         String sql = "delete from GalertLog l where l.alertDef.group = :group";
-        
+
         getSession().createQuery(sql)
             .setParameter("group", g)
             .executeUpdate();
     }
-    
+
     void removeAll(GalertDef d) {
         String sql = "delete from GalertLog l where l.alertDef = :def";
-        
+
         getSession().createQuery(sql)
                     .setParameter("def", d)
                     .executeUpdate();

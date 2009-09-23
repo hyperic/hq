@@ -16,11 +16,11 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -54,19 +54,19 @@ public class AlertDefinitionXmlParser {
         EVENT_LEVEL_TO_NUM.put("DBG", Integer.valueOf(LogTrackPlugin.LOGLEVEL_DEBUG));
     }
 
-    private final ResourceManagerLocal resourceManager;
+    private final ResourceManager resourceManager;
     private final TemplateManagerLocal templateManager;
     private final AuthzSubjectManagerLocal authzSubjectManager;
     private final AlertDefinitionManagerLocal alertDefinitionManager;
 
     public AlertDefinitionXmlParser() {
         this.authzSubjectManager = AuthzSubjectManagerEJBImpl.getOne();
-        this.resourceManager = ResourceManagerEJBImpl.getOne();
+        this.resourceManager = ResourceManagerImpl.getOne();
         this.templateManager = TemplateManagerEJBImpl.getOne();
         this.alertDefinitionManager = AlertDefinitionManagerEJBImpl.getOne();
     }
 
-    public AlertDefinitionXmlParser(ResourceManagerLocal resourceManager,
+    public AlertDefinitionXmlParser(ResourceManager resourceManager,
                                     TemplateManagerLocal templateManager,
                                     AuthzSubjectManagerLocal authzSubjectManager,
                                     AlertDefinitionManagerLocal alertDefinitionManager)

@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -61,13 +61,15 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 
-public class PermissionManagerImpl 
+public class PermissionManagerImpl
     extends PermissionManager
 {
     private static final Log _log =
         LogFactory.getLog(PermissionManagerImpl.class.getName());
 
     private final String _falseToken;
+
+    private DBUtil dbUtil;
 
     private static final String VIEWABLE_SELECT =
         "SELECT instance_id, EAM_RESOURCE.sort_name, EAM_RESOURCE.id, " +
@@ -85,7 +87,7 @@ public class PermissionManagerImpl
         " EAM_CPROP_KEY WHERE keyid = EAM_CPROP_KEY.id AND " +
         " appdef_type = ? AND lower(propvalue) like lower('%$$resName$$%'))) ";
 
-    private static final String ALL_RESOURCE_SQL = 
+    private static final String ALL_RESOURCE_SQL =
         "SELECT res.instance_id FROM EAM_RESOURCE res, EAM_OPERATION o " +
         "WHERE o.resource_type_id = res.resource_type_id and o.id = ?";
 
@@ -98,24 +100,24 @@ public class PermissionManagerImpl
 
     private Connection getConnection() throws SQLException {
         try {
-            return DBUtil.getConnByContext(getInitialContext(),
-                                           HQConstants.DATASOURCE);            
+            return dbUtil.getConnByContext(getInitialContext(),
+                                           HQConstants.DATASOURCE);
         } catch (NamingException e) {
             throw new SQLException("Failed to retrieve datasource: "+e);
         }
     }
 
-    public PermissionManagerImpl() { 
+    public PermissionManagerImpl() {
         Connection conn = null;
-        
+
         try {
             conn = getConnection();
-            _falseToken = DBUtil.getBooleanValue(false, conn);                
+            _falseToken = dbUtil.getBooleanValue(false, conn);
         } catch (Exception e) {
             throw new SystemException("Unable to initialize " +
                                       "PermissionManager:" + e, e);
         } finally {
-            DBUtil.closeConnection(ctx, conn);
+            dbUtil.closeConnection(ctx, conn);
         }
     }
 
@@ -134,12 +136,12 @@ public class PermissionManagerImpl
     public boolean hasAdminPermission(Integer who) {
         return true;
     }
-    
+
     public List findOperationScopeBySubject(AuthzSubject subj, String opName,
-                                            String resType) 
+                                            String resType)
         throws FinderException, PermissionException
     {
-        if (_log.isDebugEnabled()) { 
+        if (_log.isDebugEnabled()) {
             _log.debug("Checking Scope for Operation: " + opName +
                        " subject: " + subj);
         }
@@ -154,11 +156,11 @@ public class PermissionManagerImpl
         return new ArrayList();
     }
 
-    public List findOperationScopeBySubject(AuthzSubject subj, Integer opId) 
+    public List findOperationScopeBySubject(AuthzSubject subj, Integer opId)
         throws FinderException, PermissionException
     {
         if (_log.isDebugEnabled()) {
-            _log.debug("Checking Scope for Operation: " + opId + " subject: " + 
+            _log.debug("Checking Scope for Operation: " + opId + " subject: " +
                        subj);
         }
         List scope = findScopeBySQL(subj, opId);
@@ -172,7 +174,7 @@ public class PermissionManagerImpl
 
     public Resource[]
         findOperationScopeBySubjectBatch(AuthzSubject whoami,
-                                         ResourceValue[] resArr, 
+                                         ResourceValue[] resArr,
                                          String[] opArr)
         throws FinderException
     {
@@ -181,7 +183,7 @@ public class PermissionManagerImpl
         }
 
         Set resLocArr = toPojos(resArr);
-        
+
         return (Resource[]) resLocArr.toArray(new Resource[resLocArr.size()]);
     }
 
@@ -193,7 +195,7 @@ public class PermissionManagerImpl
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        
+
         try {
             conn = getConnection();
             String sql = VIEWABLE_SELECT;
@@ -206,7 +208,7 @@ public class PermissionManagerImpl
                 sql += " WHERE ";
             }
             sql += VIEWABLE_CLAUSE;
-            
+
             if (resName != null)
             {
                 // Support wildcards
@@ -216,26 +218,26 @@ public class PermissionManagerImpl
                 sql += VIEWABLE_BYNAME_SQL;
                 sql = StringUtil.replace(sql, "$$resName$$", resName);
             }
-            
+
             sql += "ORDER BY EAM_RESOURCE.sort_name ";
 
             if(!pc.isAscending()) {
                 sql = sql + "DESC";
             }
             sql = StringUtil.replace(sql, "DB_FALSE_TOKEN", _falseToken);
- 
+
             stmt = conn.prepareStatement(sql);
             int i = 1;
-            
+
             if (appdefTypeStr != null && typeId != null) {
                 stmt.setInt(i++, typeId.intValue());
             }
             stmt.setString(i++, resType);
-            
+
             if (resName != null) {
                 stmt.setInt(i++, AppdefUtil.resNameToAppdefTypeId(resType));
             }
-            
+
             _log.debug("Viewable SQL: " + sql);
             rs = stmt.executeQuery();
 
@@ -247,30 +249,30 @@ public class PermissionManagerImpl
             _log.error("Error getting scope by SQL", e);
             throw new SystemException("SQL Error getting scope: " + e.getMessage());
         } finally {
-            DBUtil.closeJDBCObjects(ctx, conn, stmt, rs);
+            dbUtil.closeJDBCObjects(ctx, conn, stmt, rs);
         }
     }
 
     public List findViewableResources(AuthzSubject subj, String searchFor,
                                       PageControl pc) {
         List viewableInstances = new ArrayList();
-        
+
         Connection conn = null;
         PreparedStatement stmt = null;
-        ResultSet rs = null;        
+        ResultSet rs = null;
         try {
             conn = getConnection();
             String sql = VIEWABLE_SELECT + VIEWABLE_SEARCH;
-            
+
             // TODO: change sort by
             sql += "ORDER BY EAM_RESOURCE.resource_type_id, " +
             		        "EAM_RESOURCE.sort_name ";
-            
+
             if(!pc.isAscending()) {
                 sql = sql + "DESC";
             }
             sql = StringUtil.replace(sql, "DB_FALSE_TOKEN", _falseToken);
- 
+
             if (searchFor == null) {
                 searchFor = "%";
             }
@@ -278,17 +280,17 @@ public class PermissionManagerImpl
                 // Support wildcards
                 searchFor = '%' + searchFor.replace('*', '%') + '%';
             }
-            
+
             stmt = conn.prepareStatement(sql);
             int i = 1;
-            
+
             stmt.setString(i++, searchFor);
             stmt.setString(i++, searchFor);
-            
+
             if (_log.isDebugEnabled())
                 _log.debug("Viewable search for (" + searchFor + ") SQL: " +
                            sql);
-            
+
             rs = stmt.executeQuery();
 
             for(i = 1; rs.next(); i++) {
@@ -299,12 +301,12 @@ public class PermissionManagerImpl
             _log.error("Error search by SQL", e);
             throw new SystemException("SQL Error search: " + e.getMessage());
         } finally {
-            DBUtil.closeJDBCObjects(ctx, conn, stmt, rs);
+            dbUtil.closeJDBCObjects(ctx, conn, stmt, rs);
         }
     }
 
     private List findScopeBySQL(AuthzSubject subj, Integer opId)
-        throws FinderException, PermissionException 
+        throws FinderException, PermissionException
     {
         Pager defaultPager = Pager.getDefaultPager();
         Connection conn = null;
@@ -327,7 +329,7 @@ public class PermissionManagerImpl
             _log.error("Error getting scope by SQL", e);
             throw new FinderException("Error getting scope: " + e.getMessage());
         } finally {
-            DBUtil.closeJDBCObjects(ctx, conn, stmt, rs);
+            dbUtil.closeJDBCObjects(ctx, conn, stmt, rs);
         }
     }
 
@@ -337,13 +339,13 @@ public class PermissionManagerImpl
             "SELECT RES.ID FROM EAM_RESOURCE RES, " +
             " EAM_RESOURCE_TYPE RT " +
             "WHERE " + instanceId + " = RES.INSTANCE_ID " +
-            "  AND RES.FSYSTEM = " + _falseToken + 
+            "  AND RES.FSYSTEM = " + _falseToken +
             "  AND RES.RESOURCE_TYPE_ID = RT.ID " +
             "  AND RT.NAME = '" + resType + "'";
     }
 
     public List getAllOperations(AuthzSubject subject, PageControl pc)
-        throws PermissionException, FinderException 
+        throws PermissionException, FinderException
     {
         Role rootRole = getRoleDAO().findById(AuthzConstants.rootRoleId);
         Set ops = new HashSet();
@@ -369,22 +371,22 @@ public class PermissionManagerImpl
 
     public RolePermNativeSQL getRolePermissionNativeSQL(String resourceVar,
                                                         String subjectParam,
-                                                        String opListParam) 
+                                                        String opListParam)
     {
         return new RolePermNativeSQL() {
             public String getSQL() {
                 return "";
             }
-                                                                           
+
             public Query bindParams(Query q, AuthzSubject subject, List ops) {
                 return q;
             }
         };
     }
-                                                                   
-    
+
+
     public String getAlertsHQL(boolean inEscalation, boolean notFixed,
-                               Integer groupId, Integer alertDefId, 
+                               Integer groupId, Integer alertDefId,
                                boolean count) {
         // Join with Resource for sorting
         return "select " + (count ? "count(a)" : "a") + " from " +
@@ -417,8 +419,8 @@ public class PermissionManagerImpl
                 "GalertLog a " +
                "join a.alertDef d " +
          "where " +
-          (groupId != null ? " g.id = " + groupId + " and " : "") + 
-          "a.timestamp between :begin and :end " + 
+          (groupId != null ? " g.id = " + groupId + " and " : "") +
+          "a.timestamp between :begin and :end " +
            (notFixed ? " and a.fixed = false " : "") +
            (galertDefId == null ? "" : "and d.id = " + galertDefId + " ") +
            "and d.severityEnum >= :priority " +
@@ -436,7 +438,7 @@ public class PermissionManagerImpl
     public boolean hasGuestRole() {
         return false;
     }
-    
+
     public EdgePermCheck makePermCheckSql(String subjectParam,
                                              String resVar,
                                              String resParam,
@@ -466,7 +468,7 @@ public class PermissionManagerImpl
         };
     }
 
-    public EdgePermCheck makePermCheckHql(String subjectParam, 
+    public EdgePermCheck makePermCheckHql(String subjectParam,
                                           String resourceVar,
                                           String resourceParam,
                                           String distanceParam,
@@ -485,20 +487,20 @@ public class PermissionManagerImpl
             .toString();
 
         return new EdgePermCheck(sql, subjectParam, resourceVar,
-                                 resourceParam, distanceParam, opsParam) 
+                                 resourceParam, distanceParam, opsParam)
         {
             public Query addQueryParameters(Query q, AuthzSubject subject,
-                                            Resource r, int distance, List ops) 
+                                            Resource r, int distance, List ops)
             {
                 return q.setInteger(getDistanceParam(), distance)
                         .setParameter(getResourceParam(), r);
-            }  
+            }
         };
     }
 
     public String getOperableGroupsHQL(AuthzSubject subject,
-                                       String alias, 
-                                       String oper) { 
+                                       String alias,
+                                       String oper) {
         return "";
     }
 
@@ -513,7 +515,7 @@ public class PermissionManagerImpl
     public CloningBossInterface getCloningBoss() {
     	return CloningBossEJBImpl.getOne();
     }
-    
+
     public HierarchicalAlertingManagerInterface getHierarchicalAlertingManager() {
         return HierarchicalAlertingManagerEJBImpl.getOne();
     }

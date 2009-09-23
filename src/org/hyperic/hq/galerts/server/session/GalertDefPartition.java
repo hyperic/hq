@@ -38,7 +38,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
-import org.hyperic.hq.galerts.shared.GalertManagerLocal;
+import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.util.HypericEnum;
 
 /**
@@ -62,10 +62,10 @@ public abstract class GalertDefPartition
         new GalertDefPartition(0, "NORMAL", "galert.partition.normal") 
     {
         public void execute(Integer id, ExecutionReason execReason) {
-            GalertManagerLocal gman = GalertManagerEJBImpl.getOne();
+            GalertManager gman = GalertManagerImpl.getOne();
             GalertDef def = gman.findById(id);
 
-            GalertManagerEJBImpl.getOne().startEscalation(def, execReason);
+            GalertManagerImpl.getOne().startEscalation(def, execReason);
         }
     };
     
@@ -75,7 +75,7 @@ public abstract class GalertDefPartition
     {
         public void execute(Integer id, ExecutionReason execReason) {
             EscalationManagerLocal eman = EscalationManagerEJBImpl.getOne();
-            GalertManagerLocal gman = GalertManagerEJBImpl.getOne();
+            GalertManager gman = GalertManagerImpl.getOne();
             AuthzSubjectManagerLocal aman = AuthzSubjectManagerEJBImpl.getOne();
             AuthzSubject overlord = aman.getOverlordPojo();
             

@@ -32,17 +32,17 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.bizapp.explorer.ExplorerContext;
 import org.hyperic.hq.bizapp.explorer.ExplorerItem;
 import org.hyperic.hq.bizapp.explorer.ExplorerItemType;
 import org.hyperic.hq.common.SystemException;
 
 public class GroupManagerRootItem implements ExplorerItem {
-    private final ResourceGroupManagerLocal _groupMan =
-        ResourceGroupManagerEJBImpl.getOne();
+    private final ResourceGroupManager _groupMan =
+        ResourceGroupManagerImpl.getOne();
     
     private final ExplorerContext _ctx;
     private final ExplorerItem    _parent;

@@ -27,6 +27,7 @@ package org.hyperic.hq.hqu.server.session;
 
 import java.util.Collection;
 
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -34,14 +35,14 @@ import org.hyperic.hq.dao.HibernateDAO;
 class AttachmentDAO
     extends HibernateDAO
 {
-    AttachmentDAO(DAOFactory f) {
+    AttachmentDAO(SessionFactory f) {
         super(Attachment.class, f);
     }
 
     Attachment findById(Integer id) {
         return (Attachment)super.findById(id);
     }
-    
+
     Collection findFor(AttachType type) {
         Integer typeCode = new Integer(type.getCode());
         return createCriteria()

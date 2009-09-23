@@ -6,8 +6,8 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMa
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as ResMan
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as GroupMan
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl as ResMan
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl as GroupMan
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants

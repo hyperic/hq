@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -27,14 +27,22 @@ package org.hyperic.hq.authz.server.session;
 
 import java.util.Collections;
 
+import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-public class ResourceTypeDAO 
-    extends HibernateDAO 
+@Repository
+public class ResourceTypeDAO
+    extends HibernateDAO
 {
-    public ResourceTypeDAO(DAOFactory f) {
+    private ResourceDAO rDao;
+    private ResourceGroupDAO gDao;
+
+    @Autowired
+    public ResourceTypeDAO(SessionFactory f) {
         super(ResourceType.class, f);
     }
 
@@ -46,23 +54,23 @@ public class ResourceTypeDAO
         // ResourceTypes also have Resources associated with them, so create
         // that and link  'em up.
         DAOFactory fact = DAOFactory.getDAOFactory();
-        ResourceDAO rDao = new ResourceDAO(fact);
-        ResourceGroupDAO gDao = new ResourceGroupDAO(fact);
+
+
         ResourceType typeResType = findTypeResourceType();
-        Resource prototype = rDao.findById(AuthzConstants.rootResourceId); 
-        Resource res = rDao.create(typeResType, prototype, resType.getName(), 
-                                   creator, resType.getId(), false); 
+        Resource prototype = rDao.findById(AuthzConstants.rootResourceId);
+        Resource res = rDao.create(typeResType, prototype, resType.getName(),
+                                   creator, resType.getId(), false);
 
         resType.setResource(res);
 
-        ResourceGroup authzGroup = 
+        ResourceGroup authzGroup =
             DAOFactory.getDAOFactory().getResourceGroupDAO()
             .findByName(AuthzConstants.authzResourceGroupName);
         if (authzGroup == null) {
             throw new IllegalArgumentException("Resource Group not found: " +
                                                AuthzConstants.authzResourceGroupName);
         }
-        
+
         gDao.addMembers(authzGroup, Collections.singleton(res));
         return resType;
     }

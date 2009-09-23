@@ -46,10 +46,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBossLocal;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBossUtil;
 import org.hyperic.hq.common.SystemException;
@@ -65,8 +65,8 @@ import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.galerts.server.session.GalertLog;
-import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl;
-import org.hyperic.hq.galerts.shared.GalertManagerLocal;
+import org.hyperic.hq.galerts.server.session.GalertManagerImpl;
+import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -118,7 +118,7 @@ public class DashboardPortletBossEJBImpl
         throws PermissionException
     {
         JSONArray rtn = new JSONArray();
-        ResourceManagerLocal resMan = getResourceManager();
+        ResourceManager resMan = getResourceManager();
         MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
         DataManagerLocal dMan = DataManagerEJBImpl.getOne();
         DateFormat dateFmt =
@@ -195,7 +195,7 @@ public class DashboardPortletBossEJBImpl
     {
         JSONObject rtn = new JSONObject();
         Collection groups =
-            ResourceGroupManagerEJBImpl.getOne().getAllResourceGroups(subj, true);
+            ResourceGroupManagerImpl.getOne().getAllResourceGroups(subj, true);
         for (Iterator i=groups.iterator(); i.hasNext(); ) {
             ResourceGroup group = (ResourceGroup)i.next();
             rtn.put(group.getId().toString(), group.getName());
@@ -213,7 +213,7 @@ public class DashboardPortletBossEJBImpl
         final long PORTLET_RANGE = MeasurementConstants.DAY * 3;
         
         JSONObject rtn = new JSONObject();
-        ResourceGroupManagerLocal rgMan = ResourceGroupManagerEJBImpl.getOne();
+        ResourceGroupManager rgMan = ResourceGroupManagerImpl.getOne();
         final int maxRecords = pageInfo.getStartRow() + pageInfo.getPageSize();
         int i=0;
         for (Iterator it=groupIds.iterator(); it.hasNext(); i++) {
@@ -244,7 +244,7 @@ public class DashboardPortletBossEJBImpl
 
         try {
             long begin = now - range;
-            GalertManagerLocal gaMan = GalertManagerEJBImpl.getOne();
+            GalertManager gaMan = GalertManagerImpl.getOne();
             List galerts = gaMan.findUnfixedAlertLogsByTimeWindow(group, begin,
                                                                    now);
             if (debug) {
@@ -330,8 +330,8 @@ public class DashboardPortletBossEJBImpl
             else {
                 // Is it that there are no alerts or that there are no alert
                 // definitions?
-                ResourceGroupManagerLocal rgMan =
-                    ResourceGroupManagerEJBImpl.getOne();
+                ResourceGroupManager rgMan =
+                    ResourceGroupManagerImpl.getOne();
                 AlertDefinitionManagerLocal adMan =
                     AlertDefinitionManagerEJBImpl.getOne();
                 Collection resources = rgMan.getMembers(group);

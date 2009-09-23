@@ -68,14 +68,14 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
@@ -510,8 +510,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     {
         Map rtn = new HashMap();
         MeasurementDAO dao = getMeasurementDAO();
-        ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
-        ResourceGroupManagerLocal gMan = ResourceGroupManagerEJBImpl.getOne();
+        ResourceManager rMan = ResourceManagerImpl.getOne();
+        ResourceGroupManager gMan = ResourceGroupManagerImpl.getOne();
         for (Iterator i=resIdsToTemplIds.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry entry = (Map.Entry)i.next();
             Integer resId = (Integer)entry.getKey();
@@ -787,7 +787,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     public Map getAvailMeasurements(Collection resources) {
         final Map rtn = new HashMap(resources.size());
         final List res = new ArrayList(resources.size());
-        final ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
+        final ResourceManager resMan = ResourceManagerImpl.getOne();
         final MeasurementDAO dao = getMeasurementDAO();
         for (Iterator it=resources.iterator(); it.hasNext(); ) {
             Object o = it.next();
@@ -823,8 +823,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             }
             final ResourceType type = resource.getResourceType();
             if (type.getId().equals(AuthzConstants.authzGroup)) {
-                final ResourceGroupManagerLocal resGrpMan =
-                    ResourceGroupManagerEJBImpl.getOne();
+                final ResourceGroupManager resGrpMan =
+                    ResourceGroupManagerImpl.getOne();
                 ResourceGroup grp =
                     resGrpMan.getResourceGroupByResource(resource);
                 rtn.put(resource.getId(), dao.findAvailMeasurements(grp));
@@ -889,8 +889,8 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         if (resource == null || resource.isInAsyncDeleteState()) {
             return Collections.EMPTY_LIST;
         }
-        final ResourceGroupManagerLocal rgMan =
-            ResourceGroupManagerEJBImpl.getOne();
+        final ResourceGroupManager rgMan =
+            ResourceGroupManagerImpl.getOne();
         return new ArrayList(rgMan.getMembers(group));
     }
 
@@ -911,7 +911,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         MeasurementDAO ddao = getMeasurementDAO();
         Map intervals = new HashMap(tids.length);
         
-        ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
+        ResourceManager resMan = ResourceManagerImpl.getOne();
 
         for (int ind = 0; ind < aeids.length; ind++) {
             Resource res = resMan.findResource(aeids[ind]);

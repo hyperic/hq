@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -52,12 +52,12 @@ import org.hyperic.util.config.InvalidOptionValueException;
  */
 public class MetricAlertAction implements ActionInterface {
     private final Log log = LogFactory.getLog(MetricAlertAction.class);
+    private MetricProblemDAO metricProblemDAO;
 
-    public String execute(AlertInterface aIface, ActionExecutionInfo info) 
-        throws ActionExecuteException 
+    public String execute(AlertInterface aIface, ActionExecutionInfo info)
+        throws ActionExecuteException
     {
-        final MetricProblemDAO dao =
-            new MetricProblemDAO(DAOFactory.getDAOFactory());
+
         final StringBuilder actLog = new StringBuilder();
 
         // XXX -- This is probably not a safe cast.  The information here
@@ -75,7 +75,7 @@ public class MetricAlertAction implements ActionInterface {
                     continue;
 
                 track.add(mid);
-                dao.create(mid, alert.getCtime(),
+                metricProblemDAO.create(mid, alert.getCtime(),
                            MeasurementConstants.PROBLEM_TYPE_ALERT,
                            alert.getId());
 

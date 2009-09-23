@@ -36,12 +36,14 @@ import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.SystemException;
@@ -65,29 +67,34 @@ import org.hyperic.hq.product.TrackEvent;
  *
  * @ejb:transaction type="Required"
  */
-public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
-    
+public class EventLogManagerEJBImpl implements SessionBean {
+
     private final int MSGMAX = TrackEvent.MESSAGE_MAXLEN;
     private final int SRCMAX = TrackEvent.SOURCE_MAXLEN;
-    
+
+    private final Log log =
+        LogFactory.getLog(EventLogManagerEJBImpl.class.getName());
+
+    private EventLogDAO eventLogDAO;
+
     private EventLogDAO getEventLogDAO() {
-        return new EventLogDAO(DAOFactory.getDAOFactory());
+        return eventLogDAO;
     }
-    
-    /** 
+
+    /**
      * Create a new vanilla log item.
-     * 
+     *
      * @param event The event to log.
      * @param subject The log item subject.
      * @param status The log item status.
-     * @param save <code>true</code> to persist the log item; 
+     * @param save <code>true</code> to persist the log item;
      *             <code>false</code> to create a transient log item only.
-     * 
+     *
      * @ejb:interface-method
      */
-    public EventLog createLog(AbstractEvent event, 
+    public EventLog createLog(AbstractEvent event,
                               String subject,
-                              String status, 
+                              String status,
                               boolean save)
         throws ResourceDeletedException
     {
@@ -106,7 +113,7 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         if (event instanceof ResourceEventInterface) {
             AppdefEntityID aeId =
                 ((ResourceEventInterface) event).getResource();
-            r = ResourceManagerEJBImpl.getOne().findResource(aeId);
+            r = ResourceManagerImpl.getOne().findResource(aeId);
             if (r == null || r.isInAsyncDeleteState()) {
                 final String m = aeId + " has already been deleted";
                 throw new ResourceDeletedException(m);
@@ -174,7 +181,7 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
                          String[] eventTypes, long begin, long end)
     {
         EventLogDAO eDAO = getEventLogDAO();
-        Resource r = ResourceManagerEJBImpl.getOne().findResource(ent);
+        Resource r = ResourceManagerImpl.getOne().findResource(ent);
         
         if (r == null || r.isInAsyncDeleteState()) {
             return new ArrayList(0);
@@ -195,7 +202,7 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         }
     }
 
-    /** 
+    /**
      * Get a list of log records based on resource, status and time range.
      * All resources which are descendants of the passed resource will also
      * have their event logs included
@@ -203,46 +210,46 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public List findLogs(AppdefEntityID ent, AuthzSubject user, String status,
-                         long begin, long end) 
+                         long begin, long end)
     {
-        Resource r = ResourceManagerEJBImpl.getOne().findResource(ent);
-        return getEventLogDAO().findByEntityAndStatus(r, user, begin, end, 
+        Resource r = ResourceManagerImpl.getOne().findResource(ent);
+        return getEventLogDAO().findByEntityAndStatus(r, user, begin, end,
                                                       status);
     }
 
     /**
      * Retrieve the total number of event logs.
-     * 
+     *
      * @return The total number of event logs.
      * @ejb:interface-method
      */
     public int getTotalNumberLogs() {
         return getEventLogDAO().getTotalNumberLogs();
     }
-    
+
     /**
-     * Get an array of booleans, each element indicating whether or not there 
-     * are log records for that respective interval, for a particular entity 
+     * Get an array of booleans, each element indicating whether or not there
+     * are log records for that respective interval, for a particular entity
      * over a given time range.
-     * 
+     *
      * This method also takes descendents of the passed-resource into
      * consideration.
-     * 
+     *
      * @param entityId The entity.
      * @param begin The begin timestamp for the time range.
      * @param end The end timestamp for the time range.
      * @param intervals The number of intervals.
-     * @return The boolean array with length equal to the number of intervals 
+     * @return The boolean array with length equal to the number of intervals
      *         specified.
      * @ejb:interface-method
      */
     public boolean[] logsExistPerInterval(AppdefEntityID entityId,
                                           AuthzSubject subject,
-                                          long begin, long end,  
-                                          int intervals) 
+                                          long begin, long end,
+                                          int intervals)
     {
-        Resource r = ResourceManagerEJBImpl.getOne().findResource(entityId);
-        return getEventLogDAO().logsExistPerInterval(r, subject, begin, end, 
+        Resource r = ResourceManagerImpl.getOne().findResource(entityId);
+        return getEventLogDAO().logsExistPerInterval(r, subject, begin, end,
                                                      intervals);
     }
 
@@ -257,48 +264,48 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
 
     /**
      * Purge old event logs.
-     * 
+     *
      * @param from Delete all records starting from (and including) this time.
      * If set to -1, then this method will delete all records from the
      * earliest record forward.
-     * @param to Delete all records up to (and including) this time. 
-     * If set to -1, then this method will delete all records up to and 
+     * @param to Delete all records up to (and including) this time.
+     * If set to -1, then this method will delete all records up to and
      * including the most recent record.
      * @return The number of records removed.
      * @ejb:interface-method
      * @ejb:transaction type="NotSupported"
      */
-    public int deleteLogs(long from, long to) { 
+    public int deleteLogs(long from, long to) {
         if (log.isDebugEnabled()) {
             log.debug("deleteLogs(" + from + ", " + to + ")");
         }
-        
+
         if (from == -1) {
             from = getEventLogDAO().getMinimumTimeStamp();
-            
+
             if (from == -1) {
                 return 0;
             }
         }
-        
+
         if (to == -1) {
             to = System.currentTimeMillis();
         }
-        
+
         if (log.isDebugEnabled()) {
             log.debug("updated deleteLogs(" + from + ", " + to + ")");
         }
-        
+
         if (from > to) {
             log.debug("deleteLogs range has (from > to). There are no rows to delete.");
             return 0;
         }
-        
+
         // Now that we have valid from/to values, figure out what the
         // interval is (don't loop more than 60 times)
         long interval = Math.max(MeasurementConstants.DAY,
                                  (to - from) / 60);
-        
+
         return getEventLogDAO().deleteLogs(from, to, interval);
     }
 

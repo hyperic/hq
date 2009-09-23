@@ -46,8 +46,8 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -86,7 +86,7 @@ public class RemoveAction extends BaseAction {
             ResourceGroup group = boss.findGroupById(sessionId.intValue(), 
                                                      groupId);
 
-            ResourceManagerLocal rMan = ResourceManagerEJBImpl.getOne();
+            ResourceManager rMan = ResourceManagerImpl.getOne();
             List resources = new ArrayList(rsrcIds.length);
             for (int i = 0; i < rsrcIds.length; i++) {
                 AppdefEntityID entity = new AppdefEntityID(rsrcIds[i]);

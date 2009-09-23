@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -51,10 +51,12 @@ public class DatabaseInitializer {
     private static final String TAB_DATA = MeasurementConstants.TAB_DATA,
                                 MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
 
+    private DBUtil dbUtil;
+
     public static void init() {
         new DatabaseInitializer();
     }
-    
+
     private DatabaseInitializer() {
         InitialContext ic;
         try {
@@ -65,12 +67,12 @@ public class DatabaseInitializer {
         }
 
         Connection conn = null;
-        
+
         try {
-            conn = DBUtil.getConnByContext(ic, HQConstants.DATASOURCE);
-            
+            conn = dbUtil.getConnByContext(ic, HQConstants.DATASOURCE);
+
             DatabaseRoutines[] dbrs = getDBRoutines(conn);
-            
+
             for (int i = 0; i < dbrs.length; i++) {
                 dbrs[i].runRoutines(conn);
             }
@@ -81,10 +83,10 @@ public class DatabaseInitializer {
             log.error("NamingException creating connection to " +
                       HQConstants.DATASOURCE, e);
         } finally {
-            DBUtil.closeConnection(DatabaseInitializer.class, conn);
-        }        
+            dbUtil.closeConnection(DatabaseInitializer.class, conn);
+        }
     }
-    
+
     interface DatabaseRoutines {
         public void runRoutines(Connection conn) throws SQLException;
     }
@@ -92,12 +94,12 @@ public class DatabaseInitializer {
     private DatabaseRoutines[] getDBRoutines(Connection conn)
         throws SQLException {
         ArrayList routines = new ArrayList(2);
-        
+
         routines.add(new CommonRoutines());
-        
+
         return (DatabaseRoutines[]) routines.toArray(new DatabaseRoutines[0]);
     }
-    
+
     class CommonRoutines implements DatabaseRoutines {
         public void runRoutines(Connection conn) throws SQLException {
             final String UNION_BODY =
@@ -119,10 +121,10 @@ public class DatabaseInitializer {
                 "SELECT * FROM HQ_METRIC_DATA_7D_1S UNION ALL " +
                 "SELECT * FROM HQ_METRIC_DATA_8D_0S UNION ALL " +
                 "SELECT * FROM HQ_METRIC_DATA_8D_1S";
-            
+
             final String HQ_METRIC_DATA_VIEW =
                 "CREATE VIEW "+MEAS_VIEW+" AS " + UNION_BODY;
-                        
+
             final String EAM_METRIC_DATA_VIEW =
                 "CREATE VIEW "+TAB_DATA+" AS " + UNION_BODY +
                 " UNION ALL SELECT * FROM HQ_METRIC_DATA_COMPAT";
@@ -138,8 +140,8 @@ public class DatabaseInitializer {
             } catch (SQLException e) {
                 log.debug("Error Creating Metric Data Views", e);
             } finally {
-                DBUtil.closeStatement(logCtx, stmt);
+                dbUtil.closeStatement(logCtx, stmt);
             }
-        } 
+        }
     }
 }

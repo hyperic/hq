@@ -28,23 +28,24 @@ package org.hyperic.hq.galerts.server.session;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
 class GalertAuxLogDAO
     extends HibernateDAO
 {
-    GalertAuxLogDAO(DAOFactory f) {
+    GalertAuxLogDAO(SessionFactory f) {
         super(GalertAuxLog.class, f);
     }
 
     GalertAuxLog findById(Integer id) {
         return (GalertAuxLog)super.findById(id);
     }
-    
+
     List findAll(GalertDef def) {
         String sql = "from GalertAuxLog l where l.alert.alertDef = :def";
-        
+
         return getSession().createQuery(sql)
                    .setParameter("def", def)
                    .list();
@@ -52,7 +53,7 @@ class GalertAuxLogDAO
 
     void removeAll(GalertDef def) {
         String sql = "delete from GalertAuxLog l where l.alertDef = :def";
-        
+
         getSession().createQuery(sql)
                     .setParameter("def", def)
                     .executeUpdate();

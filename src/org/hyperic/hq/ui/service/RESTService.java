@@ -29,12 +29,12 @@ import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl;
 import org.hyperic.hq.bizapp.server.session.DashboardPortletBossEJBImpl;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -218,8 +218,8 @@ public class RESTService extends BaseService {
                     .put("data", avails)
                     .toString();
             } else if (resourceIdParam != null) {
-                ResourceGroupManagerLocal rgman = 
-                    ResourceGroupManagerEJBImpl.getOne();
+                ResourceGroupManager rgman = 
+                    ResourceGroupManagerImpl.getOne();
                 JSONArray arr = new JSONArray();
                 for (String group : groupsList)
                 {
@@ -385,7 +385,7 @@ public class RESTService extends BaseService {
                 try {
                     chartList = StringUtil.explode(res, Constants.DASHBOARD_DELIMITER);
                     if (chartList != null) {
-                        ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
+                        ResourceManager resMan = ResourceManagerImpl.getOne();
                         for (String chartCfg : chartList) {
                             List<String> chart =
                                 StringUtil.explode(chartCfg, ",");
@@ -445,8 +445,8 @@ public class RESTService extends BaseService {
                     if (chartList != null) {
                         JSONArray arr = new JSONArray();
     
-                        ResourceManagerLocal resMan =
-                            ResourceManagerEJBImpl.getOne();
+                        ResourceManager resMan =
+                            ResourceManagerImpl.getOne();
                         
 
                         Matcher matcher;
@@ -547,7 +547,7 @@ public class RESTService extends BaseService {
                 for (int i=0; i<aeidJArray.length(); i++) {
                     AppdefEntityID aeid = new AppdefEntityID(aeidJArray.getString(i));
                     if (!aeid.isGroup()) {
-                        Resource resource = ResourceManagerEJBImpl.getOne()
+                        Resource resource = ResourceManagerImpl.getOne()
                                                 .findResource(aeid);                   
                     
                         AppdefBossEJBImpl.getOne()

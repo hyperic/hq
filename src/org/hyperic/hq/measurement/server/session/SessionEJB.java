@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -40,7 +40,7 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -58,7 +58,7 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
 import org.hyperic.hq.product.shared.ProductManagerLocal;
 
-/** 
+/**
  *This is the base class to Measurement Session EJB's
  */
 public abstract class SessionEJB {
@@ -77,38 +77,47 @@ public abstract class SessionEJB {
     private TemplateManagerLocal _templateMan;
     private SRNManagerLocal s_rnManager;
 
+    private AvailabilityDataDAO availabilityDataDAO;
+    private BaselineDAO baselineDAO;
+    private CategoryDAO categoryDAO;
+    private MeasurementDAO measurementDAO;
+    private MeasurementTemplateDAO measurementTemplateDAO;
+    private MetricProblemDAO metricProblemDAO;
+    private MonitorableTypeDAO monitorableTypeDAO;
+    private ScheduleRevNumDAO scheduleRevNumDAO;
+
     private InitialContext _ic;
 
     protected BaselineDAO getBaselineDAO() {
-        return new BaselineDAO(DAOFactory.getDAOFactory());
+        return baselineDAO;
     }
 
     protected CategoryDAO getCategoryDAO() {
-        return new CategoryDAO(DAOFactory.getDAOFactory());
+        return categoryDAO;
     }
 
     protected AvailabilityDataDAO getAvailabilityDataDAO() {
-        return new AvailabilityDataDAO(DAOFactory.getDAOFactory());
+        return availabilityDataDAO;
     }
 
     protected MeasurementDAO getMeasurementDAO() {
-        return new MeasurementDAO(DAOFactory.getDAOFactory());
+        return measurementDAO;
     }
 
     protected MeasurementTemplateDAO getMeasurementTemplateDAO() {
-        return new MeasurementTemplateDAO(DAOFactory.getDAOFactory());
+        return measurementTemplateDAO;
     }
 
     protected MetricProblemDAO getMetricProblemDAO() {
-        return new MetricProblemDAO(DAOFactory.getDAOFactory());
+        return metricProblemDAO;
     }
-    
+
     protected MonitorableTypeDAO getMonitorableTypeDAO() {
-        return new MonitorableTypeDAO(DAOFactory.getDAOFactory());
+        return monitorableTypeDAO;
     }
 
     protected ScheduleRevNumDAO getScheduleRevNumDAO() {
-        return new ScheduleRevNumDAO(DAOFactory.getDAOFactory());
+        return scheduleRevNumDAO;
     }
 
     // Exposed accessor methods
@@ -208,7 +217,7 @@ public abstract class SessionEJB {
         PermissionManager pm = PermissionManagerFactory.getInstance();
         pm.check(subjectId, resType, id.getId(), opName);
     }
-    
+
     /**
      * Check for modify permission for a given resource
      */
@@ -233,7 +242,7 @@ public abstract class SessionEJB {
                 throw new InvalidAppdefTypeException("Unknown type: " +
                                                      id.getType());
         }
-        
+
         checkPermission(subjectId, id, id.getAuthzTypeName(), opName);
     }
 
@@ -263,10 +272,10 @@ public abstract class SessionEJB {
             default:
                 throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
-        
+
         checkPermission(subjectId, id, resType, opName);
     }
-    
+
     protected void checkTimeArguments(long begin, long end)
         throws IllegalArgumentException {
         if (begin > end)
@@ -281,6 +290,6 @@ public abstract class SessionEJB {
     }
 
     protected Resource getResource(AppdefEntityID id) {
-        return ResourceManagerEJBImpl.getOne().findResource(id);
+        return ResourceManagerImpl.getOne().findResource(id);
     }
 }

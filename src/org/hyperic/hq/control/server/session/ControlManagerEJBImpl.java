@@ -90,6 +90,8 @@ import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.quartz.SchedulerException;
 
+import sun.reflect.ReflectionFactory.GetReflectionFactoryAction;
+
 /** The server-side control system.
  *
  * @ejb:bean name="ControlManager"
@@ -106,14 +108,13 @@ public class ControlManagerEJBImpl implements SessionBean {
 
     private ControlPluginManager _controlManager;
     private ControlScheduleManagerLocal _controlScheduleManager;
+    private ControlHistoryDAO controlHistoryDAO;
+    private ResourceTypeDAO typeDao;
 
-    private ControlHistoryDAO getControlHistoryDAO() {
-        return new ControlHistoryDAO(DAOFactory.getDAOFactory());
-    }
 
     /** @ejb:create-method */
     public void ejbCreate() {
-       
+
         // Get reference to the control plugin manager
         try {
             _controlManager = (ControlPluginManager)ProductManagerEJBImpl.
@@ -147,17 +148,17 @@ public class ControlManagerEJBImpl implements SessionBean {
 
         String pluginName, pluginType;
         ConfigResponse mergedResponse;
-        
+
         pluginName = id.toString();
-        
+
         try {
             pluginType = getPlatformManager().getPlatformPluginName(id);
             ConfigManagerLocal cMan = ConfigManagerEJBImpl.getOne();
-            mergedResponse = 
-                cMan.getMergedConfigResponse(subject, 
+            mergedResponse =
+                cMan.getMergedConfigResponse(subject,
                                              ProductPlugin.TYPE_CONTROL,
                                              id, true);
-            
+
             ControlCommandsClient client =
                 ControlCommandsClientFactory.getInstance().getClient(id);
             client.controlPluginAdd(pluginName, pluginType, mergedResponse);
@@ -169,7 +170,7 @@ public class ControlManagerEJBImpl implements SessionBean {
             throw new PluginException("Agent error: " + e.getMessage(), e);
         }
     }
-                  
+
     /**
      * Execute a single control action on a given entity.
      *
@@ -214,27 +215,27 @@ public class ControlManagerEJBImpl implements SessionBean {
         if (id.isGroup())
             throw new IllegalArgumentException ("Cannot perform single "+
                                                 "action on a group.");
-    
+
         checkControlEnabled(subject, id);
         checkControlPermission(subject, id);
-    
+
         _controlScheduleManager.doScheduledAction(id, subject, action,
                                                   schedule, null);
     }
 
     /**
-     * Single control action for a group of given entities. 
+     * Single control action for a group of given entities.
      *
      * @ejb:interface-method view-type="local"
      */
-    public void doGroupAction(AuthzSubject subject, 
-                              AppdefEntityID id, String action, 
+    public void doGroupAction(AuthzSubject subject,
+                              AppdefEntityID id, String action,
                               String args, int[] order)
-        throws PluginException, PermissionException, 
+        throws PluginException, PermissionException,
                AppdefEntityNotFoundException, GroupNotCompatibleException
     {
         List groupMembers  = GroupUtil.getCompatGroupMembers(subject, id,
-                                                             order, 
+                                                             order,
                                                              PageControl.PAGE_ALL);
 
         // For each entity in the list, sanity check config and permissions
@@ -244,25 +245,25 @@ public class ControlManagerEJBImpl implements SessionBean {
             checkControlEnabled(subject, entity);
             checkControlPermission(subject, entity);
         }
-       
+
         _controlScheduleManager.doSingleAction(id, subject, action,
                                                args, order);
     }
 
     /**
      * Schedule a single control action for a group of given entities.
-     * @throws SchedulerException 
-     * 
+     * @throws SchedulerException
+     *
      * @ejb:interface-method view-type="local"
      */
-    public void doGroupAction(AuthzSubject subject, 
+    public void doGroupAction(AuthzSubject subject,
                               AppdefEntityID id,
-                              String action, int[] order, 
+                              String action, int[] order,
                               ScheduleValue schedule)
         throws PluginException, PermissionException, SchedulerException,
                GroupNotCompatibleException, AppdefEntityNotFoundException
     {
-        List groupMembers = GroupUtil.getCompatGroupMembers(subject, id, 
+        List groupMembers = GroupUtil.getCompatGroupMembers(subject, id,
                                                             order,
                                                             PageControl.PAGE_ALL);
 
@@ -315,7 +316,7 @@ public class ControlManagerEJBImpl implements SessionBean {
      */
     public List getActions(AuthzSubject subject, AppdefEntityTypeID aetid)
         throws PluginNotFoundException {
-        String pluginName = aetid.getAppdefResourceType().getName();        
+        String pluginName = aetid.getAppdefResourceType().getName();
         return _controlManager.getActions(pluginName);
     }
 
@@ -327,8 +328,8 @@ public class ControlManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public boolean isGroupControlEnabled(AuthzSubject subject,
-                                         AppdefEntityID id) 
-        throws AppdefEntityNotFoundException, PermissionException 
+                                         AppdefEntityID id)
+        throws AppdefEntityNotFoundException, PermissionException
     {
         if (!id.isGroup()) {
             throw new IllegalArgumentException ("Expecting entity of type "+
@@ -475,7 +476,7 @@ public class ControlManagerEJBImpl implements SessionBean {
         }
 
         controlResponse = config.getControlResponse();
-        
+
         try {
             configResponse = ConfigResponse.decode(controlResponse);
         } catch (Exception e) {
@@ -484,7 +485,7 @@ public class ControlManagerEJBImpl implements SessionBean {
 
         return configResponse;
     }
-        
+
 
     // Remote EJB methods for use by agents.
 
@@ -504,13 +505,13 @@ public class ControlManagerEJBImpl implements SessionBean {
         AppdefEntityID id;
 
         try {
-            id = new AppdefEntityID(pluginName); 
+            id = new AppdefEntityID(pluginName);
             cLocal = ConfigManagerEJBImpl.getOne();
 
             // We use the overlord to grab config schemas
             AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne()
                 .getOverlordPojo();
-            
+
             ConfigResponse config = cLocal.
                 getMergedConfigResponse(overlord,
                                         ProductPlugin.TYPE_CONTROL,
@@ -532,7 +533,7 @@ public class ControlManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public void sendCommandResult(int id, int result, long startTime, 
+    public void sendCommandResult(int id, int result, long startTime,
                                   long endTime, String message) {
         ControlHistory cLocal;
         String status;
@@ -553,9 +554,9 @@ public class ControlManagerEJBImpl implements SessionBean {
 
         // Update the control history
         try {
-            ControlHistoryDAO historyLocalHome = getControlHistoryDAO();
+
             Integer pk = new Integer(id);
-            cLocal = historyLocalHome.findById(pk);
+            cLocal = controlHistoryDAO.findById(pk);
         } catch (ObjectNotFoundException e) {
             // We know the ID, this won't happen
             throw new SystemException(e);
@@ -567,7 +568,7 @@ public class ControlManagerEJBImpl implements SessionBean {
         cLocal.setMessage(msg);
 
         // Send a control event
-        ControlEvent event = 
+        ControlEvent event =
             new ControlEvent(cLocal.getSubject(),
                              cLocal.getEntityType().intValue(),
                              cLocal.getEntityId(),
@@ -608,8 +609,7 @@ public class ControlManagerEJBImpl implements SessionBean {
         resList = new ArrayList();
         opList = new ArrayList();
 
-        ResourceTypeDAO typeDao =
-            new ResourceTypeDAO(DAOFactory.getDAOFactory());
+
         // package up the args for verification
         for (int x=0;x<entities.length;x++) {
 
@@ -622,7 +622,7 @@ public class ControlManagerEJBImpl implements SessionBean {
                     retVal.add(entities[x]);
                 }
                 continue;
-            } 
+            }
             // Build up the arguments -- operation name array correlated
             // with resource (i.e. type specific operation names)
             opList.add(getControlPermissionByType(entities[x]));
@@ -635,7 +635,7 @@ public class ControlManagerEJBImpl implements SessionBean {
         if (resList.size() > 0) {
             opArr = (String[]) opList.toArray(new String[0]);
             resArr= (ResourceValue[]) resList.toArray(new ResourceValue[0]);
-    
+
             // fetch authz resources and add to return list
             try {
                 PermissionManager pm = PermissionManagerFactory.getInstance();
@@ -686,7 +686,7 @@ public class ControlManagerEJBImpl implements SessionBean {
     /** Check control permission for an appdef entity */
     protected void checkControlPermission(AuthzSubject caller,
                                           AppdefEntityID id)
-        throws PermissionException 
+        throws PermissionException
     {
         int type = id.getType();
         switch(type) {
@@ -708,7 +708,7 @@ public class ControlManagerEJBImpl implements SessionBean {
             default:
                 throw new InvalidAppdefTypeException("Unknown type: " + type);
         }
-    } 
+    }
 
     // Lookup the appropriate control permission based on entity type.
     // Groups are fetched and appropriate type is returned.
@@ -723,7 +723,7 @@ public class ControlManagerEJBImpl implements SessionBean {
         case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             return AuthzConstants.appOpControlApplication;
         default:
-            throw new IllegalArgumentException("Invalid appdef type:" + 
+            throw new IllegalArgumentException("Invalid appdef type:" +
                                                id.getType());
         }
     }

@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -89,7 +89,7 @@ public class ConfigManagerEJBImpl
     private ServiceManagerLocal getServiceManagerLocal(){
         return ServiceManagerEJBImpl.getOne();
     }
-    
+
     /**
      * @ejb:interface-method
      */
@@ -114,9 +114,8 @@ public class ConfigManagerEJBImpl
      * @ejb:transaction type="Required"
      */
     public ConfigResponseDB getConfigResponse(AppdefEntityID id) {
-        ConfigResponseDAO dao =
-            new ConfigResponseDAO(DAOFactory.getDAOFactory());
-        return getConfigResponse(dao, id);
+
+        return getConfigResponse(getConfigResponseDAO(), id);
     }
 
     private ConfigResponseDB getConfigResponse(ConfigResponseDAO dao,
@@ -191,7 +190,7 @@ public class ConfigManagerEJBImpl
      *
      * Example:  Get the SERVICE MEASUREMENT merged response:
      *              PRODUCT[platform] + MEASUREMENT[platform]
-     *              PRODUCT[server] + MEASUREMENT[server] + 
+     *              PRODUCT[server] + MEASUREMENT[server] +
      *              PRODUCT[service] + MEASUREMENT[service]
      *
      *           Get the SERVER PRODUCT merged response:
@@ -274,7 +273,7 @@ public class ConfigManagerEJBImpl
             // Just the platform
             platformId = id;
             platform = getPlatformStuffForPlatform(platformId.getId());
-        } 
+        }
 
         // Platform config
         if (platformId != null) {
@@ -287,7 +286,7 @@ public class ConfigManagerEJBImpl
             data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT,
                                     platformId, platformConfigRequired);
             responseList[responseIdx++] = data;
-        
+
             if(!isProductType) {
                 if(productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
                     // Skip merging of response time configuration
@@ -299,12 +298,12 @@ public class ConfigManagerEJBImpl
                 }
             }
         }
-        
+
         // Server config (if necessary)
         if (serverId != null) {
             if (id.isServer())
                 required = isProductType ? origReq : false;
-            
+
             configValue = getConfigResponse(serverId);
             data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT,
                                     serverId, required);
@@ -323,16 +322,16 @@ public class ConfigManagerEJBImpl
                 }
             }
         }
-                                
+
         // Service config (if necessary)
         if (serviceId != null) {
             required = isProductType ? origReq : false;
-            
+
             configValue = getConfigResponse(id);
             data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT, id,
                                     required);
             responseList[responseIdx++] = data;
-        
+
             if (!isProductType) {
                 required = origReq;     // Reset the required flag
                 data = getConfigForType(configValue, productType, id, required);
@@ -371,7 +370,7 @@ public class ConfigManagerEJBImpl
                              server.installPath);
             } catch(Exception exc){
                 log.warn("Error setting installpath property: " + exc, exc);
-            } 
+            }
         }
 
         return res;
@@ -410,7 +409,7 @@ public class ConfigManagerEJBImpl
             //is left unchanged.
             return existingBytes;
         }
-        
+
         try {
             ConfigResponse existingConfig =
                 ConfigResponse.decode(existingBytes);
@@ -427,7 +426,7 @@ public class ConfigManagerEJBImpl
      * Update the validation error string for a config response
      * @param validationError The error string that occured during validation.
      * If this is null, that means that no error occurred and the config is
-     * valid. 
+     * valid.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
@@ -435,7 +434,7 @@ public class ConfigManagerEJBImpl
                                    AppdefEntityID id,
                                    String validationError) {
         ConfigResponseDB config = getConfigResponse(id);
-    
+
         if (validationError != null) {
             if (validationError.length() > MAX_VALIDATION_ERR_LEN) {
                 validationError =
@@ -443,9 +442,8 @@ public class ConfigManagerEJBImpl
                         "...";
             }
         }
-        ConfigResponseDAO dao =
-            new ConfigResponseDAO(DAOFactory.getDAOFactory());
-        dao.setValidationError(config, validationError);
+
+        getConfigResponseDAO().setValidationError(config, validationError);
     }
 
     /**
@@ -477,7 +475,7 @@ public class ConfigManagerEJBImpl
         byte[] measurementBytes = null;
         byte[] controlBytes = null;
         byte[] rtBytes = null;
-        
+
         if(type.equals(ProductPlugin.TYPE_PRODUCT)) {
             productBytes = response.encode();
         } else if (type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
@@ -491,15 +489,14 @@ public class ConfigManagerEJBImpl
             throw new IllegalArgumentException("Unknown config type: " + type);
         }
 
-        ConfigResponseDAO dao =
-            new ConfigResponseDAO(DAOFactory.getDAOFactory());
-        ConfigResponseDB existingConfig = getConfigResponse(dao, id);
+
+        ConfigResponseDB existingConfig = getConfigResponse(getConfigResponseDAO(), id);
         return configureResponse(subject, existingConfig, id,
                                  productBytes, measurementBytes,
                                  controlBytes, rtBytes, null,
                                  sendConfigEvent, false);
     }
-        
+
     /**
      * @ejb:interface-method
      * @ejb:transaction type="Required"
@@ -567,7 +564,7 @@ public class ConfigManagerEJBImpl
                     new ResourceUpdatedZevent(subject, appdefID);
                 ZeventManager.getInstance().enqueueEventAfterCommit(event);
             }
-            
+
             return appdefID;
         } else {
             return null;
@@ -611,13 +608,13 @@ public class ConfigManagerEJBImpl
                 pluginName, (PlatformTypeInfo[])
                 platforms.toArray(new PlatformTypeInfo[0]));
         }
-        
+
         // Update servers
         if (servers.size() > 0) {
             this.getServerManagerLocal().updateServerTypes(pluginName,
                 (ServerTypeInfo[]) servers.toArray(new ServerTypeInfo[0]));
         }
-        
+
         // Update services
         if (services.size() > 0) {
             this.getServiceManagerLocal().updateServiceTypes(pluginName,
@@ -626,7 +623,7 @@ public class ConfigManagerEJBImpl
     }
 
     private byte[] getConfigForType(ConfigResponseDB val,
-                                    String productType, 
+                                    String productType,
                                     AppdefEntityID id,
                                     boolean fail)
         throws ConfigFetchException
@@ -679,7 +676,7 @@ public class ConfigManagerEJBImpl
                                      server.getInstallPath());
     }
 
-    private ServerConfigStuff getServerStuffForServer(Integer id) 
+    private ServerConfigStuff getServerStuffForServer(Integer id)
         throws AppdefEntityNotFoundException {
 
         ServerDAO dao = DAOFactory.getDAOFactory().getServerDAO();
@@ -689,7 +686,7 @@ public class ConfigManagerEJBImpl
                                      server.getInstallPath());
     }
 
-    private PlatformConfigStuff getPlatformStuffForServer(Integer id) 
+    private PlatformConfigStuff getPlatformStuffForServer(Integer id)
         throws AppdefEntityNotFoundException {
 
         ServerDAO dao = DAOFactory.getDAOFactory().getServerDAO();
@@ -708,7 +705,7 @@ public class ConfigManagerEJBImpl
         return pConfig;
     }
 
-    private PlatformConfigStuff getPlatformStuffForPlatform(Integer id) 
+    private PlatformConfigStuff getPlatformStuffForPlatform(Integer id)
         throws AppdefEntityNotFoundException {
 
         PlatformDAO dao = DAOFactory.getDAOFactory().getPlatformDAO();
@@ -754,8 +751,8 @@ public class ConfigManagerEJBImpl
         public String name;
         public String fqdn;
         public String typeName;
-            
-        public PlatformConfigStuff(int id, String name, String fqdn, 
+
+        public PlatformConfigStuff(int id, String name, String fqdn,
                                    String typeName) {
             this.id = id;
             this.name = name;

@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2007], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Query;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
@@ -37,10 +38,16 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class AlertDAO extends HibernateDAO {
-    public AlertDAO(DAOFactory f) {
+    
+    private AlertActionLogDAO alertActionLogDAO;
+    
+    @Autowired
+    public AlertDAO(SessionFactory f, AlertActionLogDAO alertActionLogDAO) {
         super(Alert.class, f);
+        this.alertActionLogDAO = alertActionLogDAO;
     }
 
     public Alert findById(Integer id) {
@@ -69,7 +76,7 @@ public class AlertDAO extends HibernateDAO {
             .append("not id in (select alertId from EscalationState es ")
             .append("where alertTypeEnum = :type)")
             .toString();
-        final AlertActionLogDAO dao = getFactory().getAlertActionLogDAO();
+       
         List list = null;
         int rtn = 0;
         // due to http://opensource.atlassian.com/projects/hibernate/browse/HHH-1985
@@ -81,7 +88,7 @@ public class AlertDAO extends HibernateDAO {
                 .setInteger("type", ClassicEscalationAlertType.CLASSIC.getCode())
                 .setMaxResults(1000)
                 .list();
-            dao.deleteAlertActions(list);
+            alertActionLogDAO.deleteAlertActions(list);
             for (final Iterator it=list.iterator(); it.hasNext(); ) {
                 final Alert alert = (Alert)it.next();
                 rtn++;
@@ -90,14 +97,14 @@ public class AlertDAO extends HibernateDAO {
         }
         return rtn;
     }
-    
+
     public List findByResource(Resource res) {
         return findByResource(res, "a.ctime DESC");
     }
-    
+
     List findEscalatables() {
-        String sql = "from Alert a"; 
-    
+        String sql = "from Alert a";
+
         return getSession().createQuery(sql)
             .list();
     }
@@ -119,19 +126,19 @@ public class AlertDAO extends HibernateDAO {
                            AuthzConstants.serviceOpManageAlerts };
         AlertSortField sort = (AlertSortField)pageInfo.getSort();
         Query q;
-        
+
         String sql = PermissionManagerFactory.getInstance()
                         .getAlertsHQL(inEsc, notFixed, groupId, alertDefId, false)
                      + " order by " + sort.getSortString("a", "d", "r")
                      + (pageInfo.isAscending() ? "" : " DESC");
-        
+
         // If sorting by something other than date, do a secondary sort by
         // date, descending
         if (!sort.equals(AlertSortField.DATE)) {
             sql += ", " + AlertSortField.DATE.getSortString("a", "d", "r") +
                    " DESC";
         }
-            
+
         q = getSession().createQuery(sql)
             .setLong("begin", begin)
             .setLong("end", end)
@@ -147,31 +154,31 @@ public class AlertDAO extends HibernateDAO {
 
         return pageInfo.pageResults(q).list();
     }
-    
+
     Integer countByCreateTimeAndPriority(Integer subj, long begin, long end,
                                          int priority, boolean inEsc,
                                          boolean notFixed, Integer groupId,
-                                         Integer alertDefId)   
+                                         Integer alertDefId)
     {
         String[] ops =
             new String[] { AuthzConstants.platformOpManageAlerts,
                            AuthzConstants.serverOpManageAlerts,
                            AuthzConstants.serviceOpManageAlerts };
         Query q;
-        
+
         String sql = PermissionManagerFactory.getInstance()
                         .getAlertsHQL(inEsc, notFixed, groupId, alertDefId, true);
-            
+
         q = getSession().createQuery(sql)
             .setLong("begin", begin)
             .setLong("end", end)
             .setInteger("priority", priority);
-    
+
         if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subj.intValue())
              .setParameterList("ops", ops);
         }
-    
+
         return (Integer) q.uniqueResult();
     }
 
@@ -181,20 +188,20 @@ public class AlertDAO extends HibernateDAO {
     {
         String sql = "from Alert a where a.alertDefinition.resource = :res " +
             "and a.ctime between :begin and :end order by " +
-            (nameSort ? "a.alertDefinition.name" : "a.ctime") + 
+            (nameSort ? "a.alertDefinition.name" : "a.ctime") +
             (asc ? " asc" : " desc");
-        
+
         return getSession().createQuery(sql)
             .setParameter("res", res)
             .setLong("begin", begin)
             .setLong("end", end)
             .list();
     }
-    
+
     private List findByResource(Resource res, String orderBy) {
         String sql = "from Alert a WHERE a.alertDefinition.resource = :res " +
             "ORDER BY " + orderBy;
-        
+
         return getSession().createQuery(sql)
             .setParameter("res", res)
             .setCacheable(true)
@@ -213,11 +220,11 @@ public class AlertDAO extends HibernateDAO {
     public List findByResourceSortByAlertDef(Resource res) {
         return findByResource(res, "a.alertDefinition.name DESC");
     }
-    
+
     public Alert findByAlertDefinitionAndCtime(AlertDefinition def, long ctime){
         String sql = "from Alert a WHERE a.alertDefinition = :alertDef " +
             "and a.ctime = :ctime";
-        
+
         return (Alert)getSession().createQuery(sql)
             .setParameter("alertDef", def)
             .setLong("ctime", ctime)
@@ -226,7 +233,7 @@ public class AlertDAO extends HibernateDAO {
 
     public List findByAlertDefinition(AlertDefinition def) {
         String sql = "from Alert a WHERE a.alertDefinition = :alertDef";
-        
+
         return getSession().createQuery(sql)
             .setParameter("alertDef", def)
             .list();
@@ -252,31 +259,31 @@ public class AlertDAO extends HibernateDAO {
             .setParameter("alertDef", def)
             .executeUpdate();
     }
-    
+
     public Integer countAlerts(AlertDefinition def) {
         return (Integer) createCriteria()
             .add(Restrictions.eq("alertDefinition", def))
             .setProjection(Projections.rowCount())
-            .uniqueResult(); 
+            .uniqueResult();
     }
-    
+
     public Integer countAlerts(Resource res) {
         return (Integer) createCriteria()
             .createAlias("alertDefinition", "d")
             .add(Restrictions.eq("d.resource", res))
             .setProjection(Projections.rowCount())
-            .uniqueResult(); 
+            .uniqueResult();
     }
-    
+
     void remove(Alert alert) {
         super.remove(alert);
     }
-    
-    void save(Alert alert) { 
+
+    void save(Alert alert) {
         super.save(alert);
-        
+
         AlertDefinition def = alert.getAlertDefinition();
-        
+
         // Update the last fired time
         if (def.getLastFired() < alert.getCtime())
             def.setLastFired(alert.getCtime());

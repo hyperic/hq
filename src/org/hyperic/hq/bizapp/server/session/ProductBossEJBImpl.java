@@ -57,7 +57,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
 import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl.ConfigSchemaAndBaseResponse;
@@ -117,7 +117,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                ConfigFetchException, SessionNotFoundException, 
                SessionTimeoutException, EncodingException
     {
-        ResourceGroupManagerLocal groupMan = getResourceGroupManager();
+        ResourceGroupManager groupMan = getResourceGroupManager();
         AuthzSubject subject;
         ResourceGroup group;
         ConfigResponse[] res;

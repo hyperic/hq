@@ -95,7 +95,7 @@
     </switch>
   </target>
 
-  <target name="hibernate-prep" depends="xdoclet,hibernate-taskdefs,hibernate-check" unless="hibernate.notrequired">
+  <target name="hibernate-prep" depends="hibernate-taskdefs,hibernate-check" unless="hibernate.notrequired">
     <delete failonerror="false">
       <fileset dir="${build.dir}/classes/META-INF" includes="**/*.hbm.xml,**/*.cfg.xml" />
       <fileset dir="${build.dir}/dd/hibernate" />
@@ -184,7 +184,7 @@
     <mkdir dir="${build.dir}/sql" />
   </target>
 
-  <target name="hibernate-schema-create" depends="hibernate-prep,compile,hibernate-schema-create-init">
+  <target name="hibernate-schema-create" depends="hibernate-prep,hibernate-schema-create-init">
     <!-- the second pass.  all tables will be created -->
     <hibernatetool>
       <classpath>
@@ -211,7 +211,7 @@
     </hibernatetool>
   </target>
 
-  <target name="hibernate-schema-drop" depends="hibernate-prep,compile">
+  <target name="hibernate-schema-drop" depends="hibernate-prep">
 
     <delete failonerror="false" file="${build.dir}/sql/hibernate-drop.sql" />
     <mkdir dir="${build.dir}/sql" />
@@ -239,7 +239,7 @@
     </hibernatetool>
   </target>
 
-  <target name="hibernate-schema-validation" depends="hibernate-prep,compile">
+  <target name="hibernate-schema-validation" depends="hibernate-prep">
     <taskdef name="validate-schema"
              classname="org.hibernate.tool.hbm2ddl.SchemaValidatorTask">
       <classpath>

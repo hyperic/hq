@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -50,65 +50,63 @@ import org.hyperic.hq.common.shared.CalendarManagerUtil;
  * @ejb:transaction type="Required"
  */
 public class CalendarManagerEJBImpl implements SessionBean {
-    private final CalendarDAO _calDAO = 
-        new CalendarDAO(DAOFactory.getDAOFactory());
-    private final CalendarEntryDAO _entryDAO = 
-        new CalendarEntryDAO(DAOFactory.getDAOFactory());
-    
+    private CalendarDAO _calDAO;
+    private CalendarEntryDAO _entryDAO;
+
     /**
      * Create a calendar with the specified name.  This name is only used
      * to distinguish between calendars and must be unique, however it
      * will be changed in the future to be used in the UI.
-     * 
+     *
      * @ejb:interface-method
      */
     public Calendar createCalendar(String name) {
         Calendar c = new Calendar(name);
-        
+
         _calDAO.save(c);
         return c;
     }
-    
+
     /**
      * Find all calendars in the system
-     * 
+     *
      * @return {@link Calendar}s
      * @ejb:interface-method
      */
     public Collection findAll() {
         return _calDAO.findAll();
     }
-    
-    /** 
+
+    /**
      * Delete a calendar and all of its entries
-     * 
+     *
      * @ejb:interface-method
      */
     public void remove(Calendar c) {
         _calDAO.remove(c);
     }
-    
+
     /**
-     * Add a weekly entry to a calendar.  
-     * 
+     * Add a weekly entry to a calendar.
+     *
      * @param weekDay    Day of the week (0 to 6)
      * @param startTime  # of minutes since midnight
      * @param endTime    # of minutes since midnight
-     *  
+     *
      * @ejb:interface-method
      */
     public WeekEntry addWeekEntry(Calendar c, int weekDay, int startTime,
-                                  int endTime) 
+                                  int endTime)
     {
         WeekEntry res = c.addWeekEntry(weekDay, startTime, endTime);
-        
+
         _entryDAO.save(res); // In order to pick up an ID
         return res;
     }
-    
+
     /**
      * Remove a calendar entry from a calendar
-     *  
+     *
      * @ejb:interface-method
      */
     public void removeEntry(Calendar c, CalendarEntry ent) {
@@ -120,27 +118,27 @@ public class CalendarManagerEJBImpl implements SessionBean {
 
     /**
      * Remove calendar entries from a calendar
-     *  
+     *
      * @ejb:interface-method
      */
     public void removeEntries(Calendar c) {
         _calDAO.removeEntries(c);
     }
 
-    /** 
+    /**
      * @ejb:interface-method
      */
     public Calendar findCalendarById(int id) {
         return _calDAO.findById(new Integer(id));
     }
 
-    /** 
+    /**
      * @ejb:interface-method
      */
     public CalendarEntry findEntryById(int id) {
         return _entryDAO.findById(new Integer(id));
     }
-    
+
     public static CalendarManagerLocal getOne() {
         try {
             return CalendarManagerUtil.getLocalHome().create();

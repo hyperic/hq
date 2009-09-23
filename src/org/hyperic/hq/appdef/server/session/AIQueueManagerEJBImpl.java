@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -104,10 +104,15 @@ public class AIQueueManagerEJBImpl
 
     private final AI2AppdefDiff appdefDiffProcessor = new AI2AppdefDiff();
     private final AIQSynchronizer queueSynchronizer = new AIQSynchronizer();
+    private AIServerDAO aIServerDAO;
 
     public AIQueueManagerEJBImpl () {}
 
     protected Log log = LogFactory.getLog(AIQueueManagerEJBImpl.class.getName());
+
+    private AIServerDAO getAIServerDAO() {
+        return aIServerDAO;
+    }
 
     /**
      * Try to queue a candidate platform discovered via autoinventory.
@@ -130,14 +135,14 @@ public class AIQueueManagerEJBImpl
         ConfigManagerLocal crmLocal = getConfigManager();
         CPropManagerLocal cpropMgr = getCPropManager();
 
-        // First, calculate queuestatus and diff with respect to 
+        // First, calculate queuestatus and diff with respect to
         // existing appdef data.
         AIPlatformValue revisedAIplatform
             = appdefDiffProcessor.diffAgainstAppdef(subject,
                                                     pmLocal, crmLocal, cpropMgr,
                                                     aiplatform);
 
-        // A null return from diffAgainstAppdef means that 
+        // A null return from diffAgainstAppdef means that
         // the platform no longer exists in appdef, AND that the aiplatform
         // had status "removed", so everything is kosher we just need to
         // nuke the queue entry.
@@ -177,10 +182,10 @@ public class AIQueueManagerEJBImpl
      * Re-sync an existing queued platform against appdef.
      * @param aiplatform The platform that we got from the recent autoinventory
      *                   data that we are wanting to queue.
-     * @param isApproval If true, the platform's servers will be updated as 
+     * @param isApproval If true, the platform's servers will be updated as
      *                   well.
      */
-    private AIPlatformValue syncQueue(AIPlatform aiplatform, boolean isApproval) 
+    private AIPlatformValue syncQueue(AIPlatform aiplatform, boolean isApproval)
     {
         // XXX: Fix this..
         AuthzSubject subject =
@@ -192,10 +197,10 @@ public class AIQueueManagerEJBImpl
 
     /**
      * Retrieve the contents of the AI queue.
-     * @param showIgnored If true, even resources in the AI queue that have 
+     * @param showIgnored If true, even resources in the AI queue that have
      * the 'ignored' flag set will be returned.  By default, resources with
      * the 'ignored' flag set are excluded when the queue is retrieved.
-     * @param showPlaceholders If true, even resources in the AI queue that are 
+     * @param showPlaceholders If true, even resources in the AI queue that are
      * unchanged with respect to appdef will be returned.  By default, resources
      * that are unchanged with respect to appdef are excluded when the queue is
      * retrieved.
@@ -239,7 +244,7 @@ public class AIQueueManagerEJBImpl
 
             // Walk the collection.  If the aiplatform is "new", then only
             // keep it if the user has canCreatePlatforms permission.
-            // If the aiplatform is not new, then make sure the user has 
+            // If the aiplatform is not new, then make sure the user has
             // view permissions on the platform that backs the aiplatform.
             Iterator iter = queue.iterator();
             AIPlatform aipLocal;
@@ -262,7 +267,7 @@ public class AIQueueManagerEJBImpl
                     if (log.isDebugEnabled()) {
                         log.debug("Removing platform because it doesn't exist"
                                   + " and the current user doesn't have the "
-                                  + "'createPlatform' permission: " 
+                                  + "'createPlatform' permission: "
                                   + aipLocal.getId());
                     }
                     iter.remove();
@@ -284,15 +289,15 @@ public class AIQueueManagerEJBImpl
                     }
                 }
             }
-            
+
             // Do paging here
             if (showPlaceholders) {
-                results = aiplatformPager.seek(queue, 
-                                               pc.getPagenum(), 
+                results = aiplatformPager.seek(queue,
+                                               pc.getPagenum(),
                                                pc.getPagesize());
             } else {
-                results = aiplatformPager_noplaceholders.seek(queue, 
-                                                              pc.getPagenum(), 
+                results = aiplatformPager_noplaceholders.seek(queue,
+                                                              pc.getPagenum(),
                                                               pc.getPagesize());
             }
 
@@ -300,7 +305,7 @@ public class AIQueueManagerEJBImpl
             throw new SystemException(e);
         }
 
-        return results; 
+        return results;
     }
 
     /**
@@ -344,7 +349,7 @@ public class AIQueueManagerEJBImpl
         if (aiplatformValue == null) {
             return null;
         }
-                        
+
         aiplatformValue = syncQueue(aiplatform, false);
         return aiplatformValue;
     }
@@ -464,12 +469,12 @@ public class AIQueueManagerEJBImpl
                              List ipList,
                              int action)
         throws FinderException, PermissionException, ValidationException,
-               RemoveException, AIQApprovalException 
+               RemoveException, AIQApprovalException
     {
-        AuthzSubject s = 
+        AuthzSubject s =
             AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId());
         boolean approved = false;
-        
+
         try {
             if (action == AIQueueConstants.Q_DECISION_APPROVE) {
                 approved = true;
@@ -482,17 +487,17 @@ public class AIQueueManagerEJBImpl
             if (approved)
                 AuditManagerEJBImpl.getOne().popContainer(false);
         }
-    } 
-    
+    }
+
     private List _processQueue(AuthzSubject subject,
                                List platformList,
                                List serverList,
                                List ipList,
-                               int action, 
+                               int action,
                                boolean verifyLiveAgent)
         throws FinderException, PermissionException, ValidationException,
                RemoveException, AIQApprovalException
-    { 
+    {
         boolean isApproveAction
             = (action == AIQueueConstants.Q_DECISION_APPROVE);
         boolean isPurgeAction
@@ -528,7 +533,7 @@ public class AIQueueManagerEJBImpl
                     log.error("processQueue: platform with ID=null");
                     continue;
                 }
-                
+
                 aiplatform = aiplatformDao.get(id);
 
                 if (aiplatform == null) {
@@ -541,7 +546,7 @@ public class AIQueueManagerEJBImpl
                 }
 
                 // Before processing platforms, ensure the agent is up since
-                // the approval process depends on being able to schedule 
+                // the approval process depends on being able to schedule
                 // runtime discovery and enable metrics.
                 if (isApproveAction && verifyLiveAgent) {
                     try {
@@ -738,9 +743,9 @@ public class AIQueueManagerEJBImpl
         // to need to do better.
         for (Iterator i = ips.iterator(); i.hasNext(); ) {
             Ip qip = (Ip) i.next();
-            
+
             String mac = qip.getMacAddress();
-            
+
             if (mac != null && mac.length() > 0 &&
                 !mac.equals(NetFlags.NULL_HWADDR)) {
                 List addrs = getAIIpDAO().findByMACAddress(qip.getMacAddress());
@@ -770,14 +775,14 @@ public class AIQueueManagerEJBImpl
             }
         }
 
-        return null;        
+        return null;
     }
 
     /**
-     * Find an AI platform given an platform 
+     * Find an AI platform given an platform
      * @ejb:interface-method
      */
-    public Platform getPlatformByAI(AuthzSubject subject, 
+    public Platform getPlatformByAI(AuthzSubject subject,
                                          AIPlatform aipLocal)
         throws PermissionException, PlatformNotFoundException
     {
@@ -788,7 +793,7 @@ public class AIQueueManagerEJBImpl
 
         if (p != null)
             return p;
-        
+
         throw new PlatformNotFoundException("platform not found for ai " +
                                             "platform: " +
                                             aipLocal.getId());
@@ -825,7 +830,7 @@ public class AIQueueManagerEJBImpl
             throw new CreateException("Could not create value pager:" + e);
         }
     }
-    
+
     public void ejbRemove   () {}
     public void ejbActivate () {}
     public void ejbPassivate() {}
@@ -840,7 +845,5 @@ public class AIQueueManagerEJBImpl
         return DAOFactory.getDAOFactory().getAIIpDAO();
     }
 
-    protected AIServerDAO getAIServerDAO() {
-        return new AIServerDAO(DAOFactory.getDAOFactory());
-    }
+
 }

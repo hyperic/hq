@@ -46,10 +46,10 @@ import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
-import org.hyperic.hq.authz.shared.ResourceGroupManagerLocal;
-import org.hyperic.hq.authz.shared.ResourceManagerLocal;
+import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
@@ -135,10 +135,10 @@ public class AddGroupResourcesAction extends BaseAction {
                                                      agroup.getId());
             
             List newIds = new ArrayList();
-            ResourceGroupManagerLocal groupMan = 
-                ResourceGroupManagerEJBImpl.getOne();
-            ResourceManagerLocal resourceMan = 
-                ResourceManagerEJBImpl.getOne();
+            ResourceGroupManager groupMan = 
+                ResourceGroupManagerImpl.getOne();
+            ResourceManager resourceMan = 
+                ResourceManagerImpl.getOne();
             for (Iterator i=pendingResourceIds.iterator(); i.hasNext(); ) {
                 String id = (String) i.next();
                 AppdefEntityID entity = new AppdefEntityID(id);

@@ -27,7 +27,7 @@ package org.hyperic.hq.bizapp.server.session;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
@@ -61,7 +61,7 @@ public class SystemAudit extends Audit {
     }
 
     private static Resource getSystemResource() {
-        return ResourceManagerEJBImpl.getOne()
+        return ResourceManagerImpl.getOne()
                 .findResourceById(AuthzConstants.authzHQSystem);
     }
     

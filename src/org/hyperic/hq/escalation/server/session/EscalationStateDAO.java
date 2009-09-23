@@ -28,6 +28,7 @@ package org.hyperic.hq.escalation.server.session;
 import java.util.Collection;
 import java.util.List;
 
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
@@ -37,14 +38,14 @@ import org.hyperic.hq.dao.HibernateDAO;
 class EscalationStateDAO
     extends HibernateDAO
 {
-    EscalationStateDAO(DAOFactory f) {
+    EscalationStateDAO(SessionFactory f) {
         super(EscalationState.class, f);
     }
 
     EscalationState findById(Integer id) {
         return (EscalationState)super.findById(id);
     }
-    
+
     EscalationState get(Integer id) {
         return (EscalationState)super.get(id);
     }
@@ -59,38 +60,38 @@ class EscalationStateDAO
 
     /**
      * Find the current escalation state.
-     * 
+     *
      * @param def The entity performing escalations.
-     * @return The current escalation state or <code>null</code> if none 
+     * @return The current escalation state or <code>null</code> if none
      *          exists for the entity performing escalations.
      */
-    EscalationState find(PerformsEscalations def) { 
+    EscalationState find(PerformsEscalations def) {
         return (EscalationState)createCriteria()
             .add(Expression.eq("alertDefinitionId", def.getId()))
-            .add(Expression.eq("alertTypeEnum", 
+            .add(Expression.eq("alertTypeEnum",
                                new Integer(def.getAlertType().getCode())))
             .setCacheable(true)
             .setCacheRegion("EscalationState.findByTypeAndDef")
             .uniqueResult();
     }
-    
+
     EscalationState find(Escalatable esc) {
         Integer alertId = esc.getAlertInfo().getId();
-        Integer alertType = 
+        Integer alertType =
             new Integer(esc.getDefinition().getAlertType().getCode());
-        
+
         return (EscalationState)createCriteria()
             .add(Expression.eq("alertTypeEnum", alertType))
             .add(Expression.eq("alertId", alertId))
             .uniqueResult();
     }
-    
+
     Collection findStatesFor(Escalation mesc) {
         return createCriteria()
             .add(Expression.eq("escalation", mesc))
             .list();
     }
-    
+
     List getActiveEscalations(int maxEscalations) {
         return createCriteria()
             .addOrder(Order.asc("nextActionTime"))
@@ -102,7 +103,7 @@ class EscalationStateDAO
         String sql = "update EscalationState set " +
                      "acknowledgedBy = null " +
                      "where acknowledgedBy = :subject";
-        
+
         getSession().createQuery(sql)
                     .setParameter("subject", subject)
                     .executeUpdate();
@@ -110,18 +111,18 @@ class EscalationStateDAO
 
     /**
      * Delete in batch the given escalation states.
-     * 
+     *
      * @param stateIds The Ids for the escalation states to delete.
      */
     void removeAllEscalationStates(Integer[] stateIds) {
         if (stateIds.length==0) {
             return;
         }
-        
+
         getSession()
          .createQuery("delete from EscalationState s where s.id in (:stateIds)")
          .setParameterList("stateIds", stateIds)
          .executeUpdate();
     }
-    
+
 }

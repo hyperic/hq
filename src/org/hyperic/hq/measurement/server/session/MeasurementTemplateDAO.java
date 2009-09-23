@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -30,6 +30,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Query;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
@@ -37,7 +38,10 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.MeasurementInfo;
 
 public class MeasurementTemplateDAO extends HibernateDAO {
-    public MeasurementTemplateDAO(DAOFactory f) {
+
+    private CategoryDAO catDAO;
+
+    public MeasurementTemplateDAO(SessionFactory f) {
         super(MeasurementTemplate.class, f);
     }
 
@@ -79,7 +83,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         Category cat;
         if (info.getCategory() != null) {
             if (!mt.getCategory().getName().equals(info.getCategory())) {
-                CategoryDAO catDAO = new CategoryDAO(DAOFactory.getDAOFactory());
+
                 cat = catDAO.findByName(info.getCategory());
                 if (cat == null) {
                     cat = catDAO.create(info.getCategory());
@@ -96,45 +100,45 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         mt.setCollectionType(info.getCollectionType());
         mt.setPlugin(pluginName);
         mt.setCategory(cat);
-        
+
         // Don't reset indicator, defaultOn or interval if it's been
         // changed
-        if (mt.getMtime() == mt.getCtime()) {        
+        if (mt.getMtime() == mt.getCtime()) {
             mt.setDesignate(info.isIndicator());
             mt.setDefaultOn(info.isDefaultOn());
             mt.setDefaultInterval(info.getInterval());
         }
-        
+
         save(mt);
     }
 
     List findAllTemplates(PageInfo pInfo, Boolean defaultOn) {
         String sql = "select t from MeasurementTemplate t";
-        
+
         if (defaultOn != null) {
             sql += " where t.defaultOn = :defaultOn ";
         }
-        
-        sql += " order by " + 
+
+        sql += " order by " +
             ((MeasurementTemplateSortField)pInfo.getSort()).getSortString("t");
-        
+
         Query q = getSession().createQuery(sql);
         if (defaultOn != null) {
             q.setParameter("defaultOn", defaultOn);
         }
         return pInfo.pageResults(q).list();
     }
-    
+
     List findTemplates(Integer[] ids) {
         if (ids.length == 1) {
             Object res = get(ids[0]);
-            
+
             if (res == null)
                 return new ArrayList();
-            
+
             return Collections.singletonList(res);
         }
-        
+
         return createCriteria()
             .add(Restrictions.in("id", ids))
             .setCacheable(true)
@@ -143,15 +147,15 @@ public class MeasurementTemplateDAO extends HibernateDAO {
     }
 
     List findTemplatesByMonitorableType(String type) {
-        PageInfo pInfo = 
+        PageInfo pInfo =
             PageInfo.getAll(MeasurementTemplateSortField.TEMPLATE_NAME, true);
         return findTemplatesByMonitorableType(pInfo, type, null);
     }
 
     List findTemplatesByMonitorableType(PageInfo pInfo, String type,
-                                        Boolean defaultOn) 
+                                        Boolean defaultOn)
     {
-        String sql = 
+        String sql =
             "select t from MeasurementTemplate t " +
             "join fetch t.monitorableType mt " +
             "where mt.name=:typeName";
@@ -159,27 +163,27 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         if (defaultOn != null) {
             sql += " and t.defaultOn = :defaultOn";
         }
-        
+
         sql += " order by " +
             ((MeasurementTemplateSortField)pInfo.getSort()).getSortString("t");
-            
+
         Query q = getSession().createQuery(sql)
             .setString("typeName", type);
-        
+
         if (defaultOn != null)
             q.setParameter("defaultOn", defaultOn);
-        
+
         return pInfo.pageResults(q).list();
     }
-    
+
     List findTemplatesByMonitorableTypeAndCategory(String type,
                                                    String cat) {
-        String sql = 
+        String sql =
             "select t from MeasurementTemplate t " +
             "where t.monitorableType.name=? " +
             "and t.category.name=? " +
             "order by t.name";
-        
+
         return getSession().createQuery(sql)
             .setString(0, type)
             .setString(1, cat).list();
@@ -192,7 +196,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             "where mt.name=? and mt.appdefType=? " +
             "and t.defaultOn = true " +
             "order by mt.name";
- 
+
         return getSession().createQuery(sql)
             .setString(0, mt)
             .setInteger(1, appdefType).list();
@@ -205,7 +209,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             "where mt.name=? and mt.appdefType=? " +
             "and t.designate = true " +
             "order by mt.name";
- 
+
         return getSession().createQuery(sql)
             .setString(0, mt)
             .setInteger(1, appdefType).list();
@@ -219,7 +223,7 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         return getSession().createQuery(sql)
             .setParameter(0, mt).list();
     }
-    
+
     List findDerivedByMonitorableType(String name) {
         // Oracle doesn't like 'distinct' qualifier on select when
         // there are BLOB attributes.  The Oracle exception is

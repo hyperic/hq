@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -52,14 +52,16 @@ import org.hyperic.hq.measurement.shared.MetricAuxLogManagerUtil;
  * @ejb:util generate="physical"
  * @ejb:transaction type="Required"
  */
-public class MetricAuxLogManagerEJBImpl 
+public class MetricAuxLogManagerEJBImpl
     implements SessionBean
 {
     private static final int CHUNKSIZE = 500;
 
-    private final Log _log = 
+    private final Log _log =
         LogFactory.getLog(MetricAuxLogManagerEJBImpl.class);
-    
+
+    private MetricAuxLogDAO metricAuxLogDAO;
+
     public static MetricAuxLogManagerLocal getOne() {
         try {
             return MetricAuxLogManagerUtil.getLocalHome().create();
@@ -67,22 +69,22 @@ public class MetricAuxLogManagerEJBImpl
             throw new SystemException(e);
         }
     }
-    
+
     private MetricAuxLogDAO getDAO() {
-        return new MetricAuxLogDAO(DAOFactory.getDAOFactory()); 
+        return metricAuxLogDAO;
     }
-    
+
     /**
      * @ejb:interface-method
      */
-    public MetricAuxLogPojo create(GalertAuxLog log, MetricAuxLog logInfo) {  
-        MetricAuxLogPojo metricLog = 
+    public MetricAuxLogPojo create(GalertAuxLog log, MetricAuxLog logInfo) {
+        MetricAuxLogPojo metricLog =
             new MetricAuxLogPojo(log, logInfo, log.getAlert().getAlertDef());
-        
+
         getDAO().save(metricLog);
         return metricLog;
     }
-    
+
     /**
      * @ejb:interface-method
      */
@@ -93,7 +95,7 @@ public class MetricAuxLogManagerEJBImpl
     /**
      * @ejb:interface-method
      */
-    public MetricAuxLogPojo find(GalertAuxLog log) { 
+    public MetricAuxLogPojo find(GalertAuxLog log) {
         return getDAO().find(log);
     }
 
@@ -101,14 +103,14 @@ public class MetricAuxLogManagerEJBImpl
      * Callback, invoked when metrics are deleted.  Since we still want to keep
      * the measurement around, we delete the value from the metric_aux_log and
      * transform the entry in the galert_aux_log to a regular entry.
-     * 
+     *
      * @ejb:interface-method
      */
     public void metricsDeleted(Collection mids) {
     	if (mids != null) {
     		MetricAuxLogDAO dao = getDAO();
     		List asList = (mids instanceof List ? (List) mids : new ArrayList(mids));
-    		
+
             for (int i = 0; i < asList.size(); i += CHUNKSIZE) {
                 int end = Math.min(i + CHUNKSIZE, asList.size());
             	dao.resetAuxType(asList.subList(i, end));

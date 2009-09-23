@@ -1,26 +1,26 @@
-/*                                                                 
- * NOTE: This copyright does *not* cover user programs that use HQ 
- * program services by normal system calls through the application 
- * program interfaces provided as part of the Hyperic Plug-in Development 
- * Kit or the Hyperic Client Development Kit - this is merely considered 
- * normal use of the program, and does *not* fall under the heading of 
- * "derived work". 
- *  
- * Copyright (C) [2004-2009], Hyperic, Inc. 
- * This file is part of HQ.         
- *  
- * HQ is free software; you can redistribute it and/or modify 
- * it under the terms version 2 of the GNU General Public License as 
- * published by the Free Software Foundation. This program is distributed 
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. See the GNU General Public License for more 
- * details. 
- *                
- * You should have received a copy of the GNU General Public License 
- * along with this program; if not, write to the Free Software 
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 
- * USA. 
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ *
+ * Copyright (C) [2004-2009], Hyperic, Inc.
+ * This file is part of HQ.
+ *
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
  */
 
 package org.hyperic.hq.appdef.server.session;
@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
@@ -48,7 +49,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 
 public class ServiceDAO extends HibernateDAO
 {
-    public ServiceDAO(DAOFactory f) {
+    public ServiceDAO(SessionFactory f) {
         super(Service.class, f);
     }
 
@@ -59,7 +60,7 @@ public class ServiceDAO extends HibernateDAO
     public Service get(Integer id) {
         return (Service)super.get(id);
     }
-    
+
     public void save(Service entity) {
         super.save(entity);
     }
@@ -71,9 +72,9 @@ public class ServiceDAO extends HibernateDAO
     /**
      * NOTE: this method automatically sets the autoinventoryIdentifier = name
      */
-    public Service create(ServiceType type, Server server, String name, 
-                          String desc, String modifiedBy, String location, 
-                          String owner, Service parent)  
+    public Service create(ServiceType type, Server server, String name,
+                          String desc, String modifiedBy, String location,
+                          String owner, Service parent)
     {
         ConfigResponseDB configResponse =
             DAOFactory.getDAOFactory().getConfigResponseDAO().create();
@@ -92,16 +93,16 @@ public class ServiceDAO extends HibernateDAO
         s.setServer(server);
         s.setConfigResponse(configResponse);
         save(s);
-        
+
         server.addService(s);
-        
+
         return s;
     }
 
     public Service create(ServiceValue sv, Server parent) {
         ConfigResponseDB configResponse =
             DAOFactory.getDAOFactory().getConfigResponseDAO().create();
-        
+
         Service s = new Service();
         s.setName(sv.getName());
         s.setAutodiscoveryZombie(false);
@@ -114,7 +115,7 @@ public class ServiceDAO extends HibernateDAO
 
         if (sv.getServiceType() != null) {
             Integer stId = sv.getServiceType().getId();
-            ServiceType st = 
+            ServiceType st =
                 DAOFactory.getDAOFactory().getServiceTypeDAO().findById(stId);
             s.setServiceType(st);
         }
@@ -214,7 +215,7 @@ public class ServiceDAO extends HibernateDAO
             .setString(0, name.toUpperCase())
             .list();
     }
-    
+
     public Service findByName(Platform platform, String serviceName) {
         String sql = "select v from Service v join v.server s " +
                      "where s.platform = :platform and " +
@@ -229,7 +230,7 @@ public class ServiceDAO extends HibernateDAO
     public Service findByName(Server server, String serviceName) {
         String sql = "select v from Service v " +
             "where v.server = :server and v.resource.sortName = :name";
-        
+
         return (Service) createQuery(sql)
             .setParameter("server", server)
             .setParameter("name", serviceName.toUpperCase())
@@ -280,20 +281,20 @@ public class ServiceDAO extends HibernateDAO
     }
 
     public List findPlatformServicesByType(Platform p, ServiceType st) {
-        String sql = "select v from Service v " +  
-                  " join v.server s " +  
-                  " join s.platform p " + 
-                  " where " +  
-                  "     p = :platform " + 
-                  " and v.serviceType = :serviceType " + 
+        String sql = "select v from Service v " +
+                  " join v.server s " +
+                  " join s.platform p " +
+                  " where " +
+                  "     p = :platform " +
+                  " and v.serviceType = :serviceType " +
                   " order by v.resource.sortName";
-        
+
         return createQuery(sql)
             .setParameter("platform", p)
             .setParameter("serviceType", st)
             .list();
     }
-    
+
     public Collection findPlatformServices_orderName(Integer platId,
                                                      boolean asc)
     {
@@ -370,7 +371,7 @@ public class ServiceDAO extends HibernateDAO
                    (asc ? "asc" : "desc");
         return createQuery(sql).list();
     }
-    
+
     public Resource findVirtualByInstanceId(Integer id) {
         VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO();
         return dao.findVirtualByInstanceId(id, AuthzConstants.serviceResType);
@@ -399,15 +400,15 @@ public class ServiceDAO extends HibernateDAO
         }
         return services;
     }
-    
+
     public List getServiceTypeCounts() {
-        String sql = "select t.name, count(*) from ServiceType t, " + 
-                     "Service s where s.serviceType = t " + 
+        String sql = "select t.name, count(*) from ServiceType t, " +
+                     "Service s where s.serviceType = t " +
                      "group by t.name order by t.name";
-        
+
         return createQuery(sql).list();
     }
-    
+
     public Number getServiceCount() {
         return (Number) createQuery("select count(*) from Service")
             .uniqueResult();
@@ -423,7 +424,7 @@ public class ServiceDAO extends HibernateDAO
         String hql = "from Service where resource.resourceType = null";
         return createQuery(hql).list();
     }
-    
+
     public Service findByResource(Resource res) {
         return (Service) createCriteria().add(Restrictions.eq("resource", res))
             .uniqueResult();

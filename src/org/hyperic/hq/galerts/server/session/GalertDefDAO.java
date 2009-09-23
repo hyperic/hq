@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.Query;
+import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -38,12 +39,17 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.events.AlertSeverity;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-class GalertDefDAO
+@Repository
+public class GalertDefDAO
     extends HibernateDAO
 {
-    GalertDefDAO(DAOFactory f) {
-        super(GalertDef.class, f);
+
+    @Autowired
+    public GalertDefDAO(SessionFactory sessionFactory) {
+        super(GalertDef.class, sessionFactory);
     }
 
     GalertDef findById(Integer id) {
@@ -57,7 +63,7 @@ class GalertDefDAO
     void remove(GalertDef def) {
         super.remove(def);
     }
-    
+
     void remove(GtriggerInfo t) {
         super.remove(t);
     }
@@ -67,11 +73,11 @@ class GalertDefDAO
     }
 
     Collection findAbsolutelyAllGalertDefs() {
-        return super.findAll(); 
+        return super.findAll();
     }
-    
+
     Collection findAbsolutelyAllGalertDefs(ResourceGroup g) {
-        String sql = "from GalertDef d where d.group = :group"; 
+        String sql = "from GalertDef d where d.group = :group";
 
         return getSession().createQuery(sql)
             .setParameter("group", g)
@@ -83,34 +89,34 @@ class GalertDefDAO
      * Typically this is what people want to use.
      */
     public List findAll() {
-        return getSession().createQuery("from GalertDef d " + 
+        return getSession().createQuery("from GalertDef d " +
                                         "where d.deleted = false " +
                                         "order by name").list();
     }
 
     Collection findAll(ResourceGroup g) {
-        String sql = "from GalertDef d where d.group = :group " + 
+        String sql = "from GalertDef d where d.group = :group " +
                      "and d.deleted = false order by name";
-        
+
         return getSession().createQuery(sql)
             .setParameter("group", g)
             .list();
     }
-    
-    List findAll(AuthzSubject subj, AlertSeverity minSeverity, 
+
+    List findAll(AuthzSubject subj, AlertSeverity minSeverity,
                  Boolean enabled, PageInfo pInfo)
     {
         String sql = PermissionManagerFactory.getInstance()
             .getGroupAlertDefsHQL();
-        
+
         sql += " and d.deleted = false";
         if (enabled != null) {
-            sql += " and d.enabled = " + 
+            sql += " and d.enabled = " +
                    (enabled.booleanValue() ? "true" : "false");
         }
 
         sql += getOrderByClause(pInfo);
-               
+
         Query q = getSession().createQuery(sql)
             .setInteger("priority", minSeverity.getCode());
 
@@ -118,35 +124,35 @@ class GalertDefDAO
             q.setInteger("subj", subj.getId().intValue())
              .setParameter("op", AuthzConstants.groupOpManageAlerts);
         }
-        
+
         return pInfo.pageResults(q).list();
     }
 
     private String getOrderByClause(PageInfo pInfo) {
         GalertDefSortField sort = (GalertDefSortField)pInfo.getSort();
-        String res = " order by " + sort.getSortString("d", "g", "e") + 
+        String res = " order by " + sort.getSortString("d", "g", "e") +
             (pInfo.isAscending() ? "" : " DESC");
-        
+
         if (!sort.equals(GalertDefSortField.CTIME)) {
-            res += ", " + GalertDefSortField.CTIME.getSortString("d", "g", "e")+ 
+            res += ", " + GalertDefSortField.CTIME.getSortString("d", "g", "e")+
                    " DESC";
         }
         return res;
     }
-    
+
     int countByStrategy(ExecutionStrategyTypeInfo strat) {
         String sql = "select count(*) from GalertDef d " +
             "where d.strategyInfo.type = :type";
-        
+
         return ((Integer)getSession().createQuery(sql)
             .setParameter("type", strat)
             .uniqueResult()).intValue();
     }
-    
+
     Collection getUsing(Escalation e) {
         return getSession()
             .createQuery("from GalertDef where escalation = :esc")
             .setParameter("esc", e).list();
     }
-    
+
 }

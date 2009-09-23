@@ -64,7 +64,7 @@ import org.hyperic.util.jdbc.DBUtil;
 
 public class AppdefManagerEJBImpl
     extends AppdefSessionEJB implements SessionBean {
-    
+
     public static AppdefManagerLocal getOne() {
         try {
             return AppdefManagerUtil.getLocalHome().create();
@@ -72,7 +72,9 @@ public class AppdefManagerEJBImpl
             throw new SystemException(e);
         }
     }
-    
+
+
+    private DBUtil dbUtil;
 
     private final String OPERABLE_SQL =
     /* ex. "SELECT DISTINCT(server_type_id) FROM eam_server " + */
@@ -98,21 +100,21 @@ public class AppdefManagerEJBImpl
                                             String addCond) {
         List resTypeIds = new ArrayList();
         PreparedStatement stmt = null;
-        ResultSet rs = null;        
+        ResultSet rs = null;
         try {
             Connection conn = Util.getConnection();
-            
+
             StringBuffer sql = new StringBuffer("SELECT DISTINCT(s.")
                 .append(resourceColumn)
                 .append(") FROM ")
                 .append(resourceTable)
                 .append(OPERABLE_SQL);
-            
+
             if (addCond != null) {
                 sql.append(" AND s.")
                    .append(addCond);
             }
-            
+
             stmt = conn.prepareStatement(sql.toString());
             int i = 1;
             stmt.setString(i++, resType);
@@ -120,9 +122,9 @@ public class AppdefManagerEJBImpl
             stmt.setInt(i++, subj.getId().intValue());
             stmt.setInt(i++, subj.getId().intValue());
             log.debug("Operable SQL: " + sql);
-    
+
             rs = stmt.executeQuery();
-    
+
             // now build the list
             for (i = 1; rs.next(); i++) {
                 resTypeIds.add(new Integer(rs.getInt(1)));
@@ -133,7 +135,7 @@ public class AppdefManagerEJBImpl
             throw new SystemException("SQL Error getting scope: " +
                                       e.getMessage());
         } finally {
-            DBUtil.closeJDBCObjects(getSessionContext(), null, stmt, rs);
+            dbUtil.closeJDBCObjects(getSessionContext(), null, stmt, rs);
             Util.endConnection();
         }
     }
@@ -154,7 +156,7 @@ public class AppdefManagerEJBImpl
                                        AuthzConstants.platformResType,
                                        AuthzConstants.platformOpControlPlatform,
                                        null);
-    
+
         TreeMap platformTypes = new TreeMap();
         for (Iterator it = typeIds.iterator(); it.hasNext(); ) {
             Integer typeId = (Integer) it.next();
@@ -166,10 +168,10 @@ public class AppdefManagerEJBImpl
                 continue;
             }
         }
-        
+
         return platformTypes;
     }
-    
+
     /**
      * Get controllable platform types
      * @param subject
@@ -185,7 +187,7 @@ public class AppdefManagerEJBImpl
                                        AuthzConstants.platformResType,
                                        AuthzConstants.platformOpControlPlatform,
                                        "platform_type_id=" + tid);
-        
+
         TreeMap platformNames = new TreeMap();
         for (Iterator it = ids.iterator(); it.hasNext(); ) {
             Integer id = (Integer) it.next();
@@ -197,7 +199,7 @@ public class AppdefManagerEJBImpl
                 continue;
             }
         }
-        
+
         return platformNames;
     }
 
@@ -217,7 +219,7 @@ public class AppdefManagerEJBImpl
                                        AuthzConstants.serverResType,
                                        AuthzConstants.serverOpControlServer,
                                        null);
-    
+
         TreeMap serverTypes = new TreeMap();
         for (Iterator it = typeIds.iterator(); it.hasNext(); ) {
             Integer typeId = (Integer) it.next();
@@ -230,7 +232,7 @@ public class AppdefManagerEJBImpl
                 continue;
             }
         }
-        
+
         return serverTypes;
     }
 
@@ -248,7 +250,7 @@ public class AppdefManagerEJBImpl
                                        AuthzConstants.serverResType,
                                        AuthzConstants.serverOpControlServer,
                                        "server_type_id=" + tid);
-    
+
         TreeMap serverNames = new TreeMap();
         for (Iterator it = ids.iterator(); it.hasNext(); ) {
             Integer id = (Integer) it.next();
@@ -259,7 +261,7 @@ public class AppdefManagerEJBImpl
                 continue;
             }
         }
-        
+
         return serverNames;
     }
 
@@ -279,7 +281,7 @@ public class AppdefManagerEJBImpl
                                        AuthzConstants.serviceResType,
                                        AuthzConstants.serviceOpControlService,
                                        null);
-    
+
         TreeMap serviceTypes = new TreeMap();
         for (Iterator it = typeIds.iterator(); it.hasNext(); ) {
             Integer typeId = (Integer) it.next();
@@ -291,7 +293,7 @@ public class AppdefManagerEJBImpl
                 continue;
             }
         }
-        
+
         return serviceTypes;
     }
 
@@ -304,12 +306,12 @@ public class AppdefManagerEJBImpl
      */
     public Map getControllableServiceNames(AuthzSubject subject, int tid)
         throws PermissionException {
-        List ids = 
+        List ids =
             findOperableResourceColumn(subject, "EAM_SERVICE", "id",
                                        AuthzConstants.serviceResType,
                                        AuthzConstants.serviceOpControlService,
                                        "service_type_id=" + tid);
-    
+
         TreeMap serviceNames = new TreeMap();
         for (Iterator it = ids.iterator(); it.hasNext(); ) {
             Integer id = (Integer) it.next();
@@ -321,7 +323,7 @@ public class AppdefManagerEJBImpl
                 continue;
             }
         }
-        
+
         return serviceNames;
     }
 

@@ -69,8 +69,10 @@ public class ControlActionGroupJob extends ControlJob {
     // own timeout, this is the value that will be used.
     private static final int DEFAULT_TIMEOUT = 10 * 60 * 1000;
 
-    protected Log log = 
-        LogFactory.getLog(ControlActionGroupJob.class.getName());    
+    protected Log log =
+        LogFactory.getLog(ControlActionGroupJob.class.getName());
+
+    private ControlHistoryDAO controlHistoryDAO;
 
     public void executeInSession(JobExecutionContext context)
         throws JobExecutionException
@@ -82,11 +84,11 @@ public class ControlActionGroupJob extends ControlJob {
         AppdefEntityID id = new AppdefEntityID(type.intValue(), idVal);
         Integer subjectId = new Integer(dataMap.getString(PROP_SUBJECT));
         AuthzSubject subject = getSubject(subjectId);
-        
+
         String action     = dataMap.getString(PROP_ACTION);
         String args = dataMap.getString(PROP_ARGS);
         Boolean scheduled = Boolean.valueOf(dataMap.getString(PROP_SCHEDULED));
-        
+
         int[] order   = getOrder(dataMap.getString(PROP_ORDER));
         String description = dataMap.getString(PROP_DESCRIPTION);
 
@@ -106,7 +108,7 @@ public class ControlActionGroupJob extends ControlJob {
             ControlScheduleManagerLocal cLocal =
                 ControlScheduleManagerUtil.getLocalHome().create();
             ControlHistory historyValue =
-                cLocal.createHistory(id, null, null, subject.getName(), 
+                cLocal.createHistory(id, null, null, subject.getName(),
                                      action, args, scheduled, startTime,
                                      startTime, dateScheduled.getTime(),
                                      ControlConstants.STATUS_INPROGRESS,
@@ -123,7 +125,7 @@ public class ControlActionGroupJob extends ControlJob {
             }
 
             ArrayList jobIds = new ArrayList();
-            
+
             for (Iterator i = groupMembers.iterator(); i.hasNext();) {
                 AppdefEntityID entity = (AppdefEntityID) i.next();
 
@@ -136,10 +138,10 @@ public class ControlActionGroupJob extends ControlJob {
                                               historyValue.getId(),
                                               subject,
                                               dateScheduled,
-                                              scheduled, 
+                                              scheduled,
                                               description,
                                               action, args);
-                
+
                 // Keep a reference to all the job ids in case we need to
                 // verify later they have completed successfully.
 
@@ -153,7 +155,7 @@ public class ControlActionGroupJob extends ControlJob {
 
             if (order.length == 0) {
                 waitForAllJobs(jobIds, longestTimeout);
-            }               
+            }
 
         } catch (GroupNotCompatibleException e) {
             errMsg = e.getMessage();
@@ -161,7 +163,7 @@ public class ControlActionGroupJob extends ControlJob {
             errMsg = e.getMessage();
         } catch (PluginException e) {
             errMsg = e.getMessage();
-        } catch (PermissionException e) { 
+        } catch (PermissionException e) {
             // This will only happen if the permisions on a resource change
             // after the job was scheudled.
             errMsg = "Permission denied: " + e.getMessage();
@@ -180,7 +182,7 @@ public class ControlActionGroupJob extends ControlJob {
         } finally {
 
             if (groupId != null) {
-          
+
                 if (errMsg != null)
                     status = ControlConstants.STATUS_FAILED;
 
@@ -190,11 +192,11 @@ public class ControlActionGroupJob extends ControlJob {
                         ControlScheduleManagerUtil.getLocalHome().create();
                     cLocal.updateHistory(groupId, System.currentTimeMillis(),
                                          status, errMsg);
-                
+
                     ControlHistory cv = cLocal.getJobHistoryValue(groupId);
-                    
+
                     // Send a control event
-                    ControlEvent event = 
+                    ControlEvent event =
                         new ControlEvent(cv.getSubject(),
                                          cv.getEntityType().intValue(),
                                          cv.getEntityId(),
@@ -222,7 +224,7 @@ public class ControlActionGroupJob extends ControlJob {
         ControlScheduleManagerLocal cMan = ControlScheduleManagerEJBImpl.getOne();
 
         long start = System.currentTimeMillis();
-        
+
         while (System.currentTimeMillis() < start + timeout) {
             ControlHistory hist = cMan.getJobHistoryValue(jobId);
             refresh(hist);
@@ -255,21 +257,21 @@ public class ControlActionGroupJob extends ControlJob {
         long start = System.currentTimeMillis();
 
         while (System.currentTimeMillis() < start + timeout) {
-            
+
             // Run through all the jobs, removing each job that completes
             // successfully.  If we run across any job that fails, the entire
             // group action fails
-            
+
             if(ids.isEmpty())
                 return;
 
             for (Iterator i = ids.iterator(); i.hasNext(); ) {
                 Integer jobId = (Integer)i.next();
-                
+
                 ControlHistory hist = cMan.getJobHistoryValue(jobId);
                 refresh(hist);
                 String status = hist.getStatus();
-                    
+
                 if (status.equals(ControlConstants.STATUS_COMPLETED)) {
                     i.remove();
                     continue;
@@ -313,8 +315,7 @@ public class ControlActionGroupJob extends ControlJob {
     }
 
     private void refresh(ControlHistory hist) {
-        ControlHistoryDAO dao =
-            new ControlHistoryDAO(DAOFactory.getDAOFactory());
-        dao.getSession().refresh(hist);
+
+        controlHistoryDAO.getSession().refresh(hist);
     }
 }

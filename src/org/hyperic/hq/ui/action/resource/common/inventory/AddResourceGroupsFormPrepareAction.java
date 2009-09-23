@@ -37,7 +37,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.ContextUtils;
@@ -124,7 +124,7 @@ public class AddResourceGroupsFormPrepareAction extends Action {
             SessionUtils.getList(request.getSession(),
                                  Constants.PENDING_RESGRPS_SES_ATTR);
 
-        Resource r = ResourceManagerEJBImpl.getOne()
+        Resource r = ResourceManagerImpl.getOne()
                          .findResource(resource.getEntityId()); 
         PageList availableGroups = 
             boss.findAllGroupsMemberExclusive(

@@ -27,6 +27,7 @@ package org.hyperic.hq.hqu.server.session;
 
 import java.util.Collection;
 
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -34,14 +35,14 @@ import org.hyperic.hq.dao.HibernateDAO;
 class ViewDAO
     extends HibernateDAO
 {
-    ViewDAO(DAOFactory f) {
+    ViewDAO(SessionFactory f) {
         super(View.class, f);
     }
 
     View findById(Integer id) {
         return (View)super.findById(id);
     }
-    
+
     Collection findFor(AttachType type) {
         return createCriteria()
             .add(Restrictions.eq("attachTypeEnum", new Integer(type.getCode())))

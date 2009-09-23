@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -38,57 +38,67 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
+import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.EdgePermCheck;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-public class ResourceDAO 
+@Repository
+public class ResourceDAO
     extends HibernateDAO
 {
     private Log _log = LogFactory.getLog(ResourceDAO.class);
 
-    public ResourceDAO(DAOFactory f) { 
+    @Autowired
+    private ResourceGroupDAO resourceGroupDAO;
+    private PermissionManager permissionManager;
+
+    @Autowired
+    public ResourceDAO(SessionFactory f) {
         super(Resource.class, f);
     }
 
-    Resource create(ResourceType type, Resource prototype, String name, 
-                    AuthzSubject creator, Integer instanceId, boolean system) 
+    Resource create(ResourceType type, Resource prototype, String name,
+                    AuthzSubject creator, Integer instanceId, boolean system)
     {
-        Resource resource = createPrivate(type, prototype, name, creator, 
+        Resource resource = createPrivate(type, prototype, name, creator,
                                           instanceId, system);
-                                         
+
         /* add it to the root resource group */
-        ResourceGroupDAO gDao = new ResourceGroupDAO(DAOFactory.getDAOFactory());
-        ResourceGroup authzGroup = gDao.findRootGroup();
-        gDao.addMembers(authzGroup, Collections.singleton(resource));
-        
+
+        ResourceGroup authzGroup = resourceGroupDAO.findRootGroup();
+        resourceGroupDAO.addMembers(authzGroup, Collections.singleton(resource));
+
         return resource;
     }
 
-    Resource createPrivate(ResourceType type, Resource prototype, String name, 
+    Resource createPrivate(ResourceType type, Resource prototype, String name,
                            AuthzSubject creator, Integer instanceId,
-                           boolean system) 
+                           boolean system)
     {
         if (type == null) {
             throw new IllegalArgumentException("ResourceType not set");
         }
-        Resource resource = new Resource(type, prototype, name, creator, 
+        Resource resource = new Resource(type, prototype, name, creator,
                                          instanceId, system);
-                                         
-        save(resource);    
+
+        save(resource);
 
         // Need to flush so that later permission checking can succeed
         getSession().flush();
-        
+
         return resource;
     }
 
     public Resource findRootResource() {
         return findById(AuthzConstants.rootResourceId);
     }
-    
+
     public Resource findById(Integer id) {
         return (Resource) super.findById(id);
     }
@@ -134,10 +144,10 @@ public class ResourceDAO
     List findResourcesOfType(int typeId, PageInfo pInfo) {
         String sql = "from Resource r where resourceType.id = :typeId ";
         ResourceSortField sort = (ResourceSortField) pInfo.getSort();
-        
-        sql += " order by " + sort.getSortString("r") + 
+
+        sql += " order by " + sort.getSortString("r") +
                (pInfo.isAscending() ? "" : " DESC");
-        
+
         return pInfo.pageResults(getSession().createQuery(sql)
                                              .setInteger("typeId", typeId))
                     .list();
@@ -172,43 +182,43 @@ public class ResourceDAO
     }
 
     /**
-     * Find a Resource by type Id and instance Id, allowing for the query to 
+     * Find a Resource by type Id and instance Id, allowing for the query to
      * return a stale copy of the resource (for efficiency reasons).
-     * 
+     *
      * @param typeId The type Id.
      * @param id The instance Id.
-     * @param allowStale <code>true</code> to allow stale copies of an alert 
-     *                   definition in the query results; <code>false</code> to 
-     *                   never allow stale copies, potentially always forcing a 
+     * @param allowStale <code>true</code> to allow stale copies of an alert
+     *                   definition in the query results; <code>false</code> to
+     *                   never allow stale copies, potentially always forcing a
      *                   sync with the database.
      * @return The Resource.
      */
     public Resource findByInstanceId(Integer typeId, Integer id,
-                                     boolean allowStale) {                    
+                                     boolean allowStale) {
         FlushMode oldFlushMode = this.getSession().getFlushMode();
-        
+
         try {
             if (allowStale) {
-                this.getSession().setFlushMode(FlushMode.MANUAL);                
+                this.getSession().setFlushMode(FlushMode.MANUAL);
             }
-            
-            return findByInstanceId(typeId, id);            
+
+            return findByInstanceId(typeId, id);
         } finally {
             this.getSession().setFlushMode(oldFlushMode);
         }
     }
 
     public List findByResource(AuthzSubject subject, Resource r) {
-        final String[] VIEW_APPDEFS = new String[] { 
+        final String[] VIEW_APPDEFS = new String[] {
             AuthzConstants.platformOpViewPlatform,
             AuthzConstants.serverOpViewServer,
             AuthzConstants.serviceOpViewService,
         };
 
-        EdgePermCheck wherePermCheck = 
-            getPermissionManager().makePermCheckHql("rez", true);
-        String hql = "select rez from Resource rez " + wherePermCheck; 
-        
+        EdgePermCheck wherePermCheck =
+            permissionManager.makePermCheckHql("rez", true);
+        String hql = "select rez from Resource rez " + wherePermCheck;
+
         Query q = createQuery(hql);
         return wherePermCheck
             .addQueryParameters(q, subject, r, 0, Arrays.asList(VIEW_APPDEFS))
@@ -285,13 +295,13 @@ public class ResourceDAO
                                      "join rg.resource r2 " +
                            "where r = r2 and rg.groupType = 15)) " +
                    "order by r.sortName ";
-        
+
         List resources =
             getSession().createQuery(sql)
                         .setBoolean("system", fSystem.booleanValue())
                         .setString("resSvcType", AuthzConstants.serviceResType)
                         .list();
-        
+
         return resources;
     }
 
@@ -382,21 +392,21 @@ public class ResourceDAO
             .setInteger(0, subjLoc.getId().intValue())
             .list();
     }
-    
+
     /**
      * Returns an ordered list of instance IDs for a given operation.
      */
     public List findAllResourcesInstancesForOperation(int opId) {
-        final String sql = 
+        final String sql =
             "SELECT r.instanceId FROM Resource r, Operation o " +
-            "WHERE     o.resourceType = r.resourceType" + 
+            "WHERE     o.resourceType = r.resourceType" +
             "      AND o.id = :opId";
-        
+
         return getSession().createQuery(sql)
             .setInteger("opId", opId)
             .list();
     }
-    
+
     int reassignResources(int oldOwner, int newOwner) {
         return getSession().createQuery("UPDATE Resource " +
                                         "SET owner.id = :newOwner " +
@@ -405,30 +415,30 @@ public class ResourceDAO
             .setInteger("newOwner", newOwner)
             .executeUpdate();
     }
-    
+
     boolean resourcesExistOfType(String typeName) {
-        String sql = "select r from Resource r " + 
+        String sql = "select r from Resource r " +
                      "join r.prototype p " +
                      "where p.name = :protoName";
-        
+
         return getSession().createQuery(sql)
             .setParameter("protoName", typeName)
             .setMaxResults(1)
             .list().isEmpty() == false;
     }
-    
+
     List findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
         String sql = "select r from Resource r where r.prototype = :proto";
-        
+
         return pInfo.pageResults(getSession().createQuery(sql)
                                      .setParameter("proto", proto)).list();
     }
-    
+
     Resource findResourcePrototypeByName(String name) {
-        String sql = "select r from Resource r " + 
+        String sql = "select r from Resource r " +
             "where r.name = :name " +
-            " AND r.resourceType.id in (:platProto, :svrProto, :svcProto)"; 
-        
+            " AND r.resourceType.id in (:platProto, :svrProto, :svcProto)";
+
         return (Resource)getSession().createQuery(sql)
             .setParameter("name", name)
             .setParameter("platProto", AuthzConstants.authzPlatformProto)
@@ -436,11 +446,11 @@ public class ResourceDAO
             .setParameter("svcProto", AuthzConstants.authzServiceProto)
             .uniqueResult();
     }
-    
+
     List findAllAppdefPrototypes() {
         String sql = "select r from Resource r " +
             "where r.resourceType.id in (:platProto, :svrProto, :svcProto)";
-        
+
         return (List)getSession().createQuery(sql)
             .setParameter("platProto", AuthzConstants.authzPlatformProto)
             .setParameter("svrProto", AuthzConstants.authzServerProto)
