@@ -13,6 +13,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -476,7 +477,7 @@ public class ResourceBreadcrumbTag
             setUrl(url);
             setResourceId(resourceId);
             setAutoGroupId(autoGroupId);
-            setLabel(label);
+            setLabel(StringEscapeUtils.escapeHtml(label));
             setAppdefEntityId(appdefEntityId);
         }
 

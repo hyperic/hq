@@ -886,8 +886,11 @@ function editEscalation (row) {
           Step 1 - <fmt:message key="common.label.CreateNew" />
           <c:choose>
             <c:when test="${not empty param.aname}">
+              <c:set var="escapedAlertDefName">
+              	<c:out value="${param.aname}" />
+              </c:set>
               <fmt:message key="alert.config.escalation.scheme.for">
-                <fmt:param value="${param.aname}"/>
+                <fmt:param value="${escapedAlertDefName}"/>
               </fmt:message>
               <c:choose>
                 <c:when test="${not empty param.ad}">
