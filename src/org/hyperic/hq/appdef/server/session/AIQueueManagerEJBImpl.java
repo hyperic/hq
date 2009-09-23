@@ -45,8 +45,8 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
@@ -666,21 +666,19 @@ public class AIQueueManagerEJBImpl
         if (AIQueueConstants.Q_STATUS_CHANGED != aiplatform.getQueueStatus()) {
             return false;
         }
+        final Agent agent =
+            getAgentDAO().findByAgentToken(aiplatform.getAgentToken());
+        if (agent == null) {
+            return false;
+        }
         final AIIpDAO dao = getAIIpDAO();
-        boolean added = false;
-        boolean removed = false;
         for (final Iterator it=ipList.iterator(); it.hasNext(); ) {
             final Integer id = (Integer)it.next();
             final AIIp aiip = dao.get(id);
-            if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus()) {
-                removed = true;
+            if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus()
+                && aiip.getAddress().equals(agent.getAddress())) {
+                return true;
             }
-            if (AIQueueConstants.Q_STATUS_ADDED == aiip.getQueueStatus()) {
-                added = true;
-            }
-        }
-        if (added && removed) {
-            return true;
         }
         return false;
     }
