@@ -127,7 +127,7 @@
 								</fmt:message>
 							</c:when>
 							<c:otherwise>
-								<c:out value="${titleName}" />
+								<c:out value="${titleName}" escapeXml="false" />
 								
 								<c:if test="${not empty subTitleName}">
 									<span class="resourceSubTitle"> 

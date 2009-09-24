@@ -265,10 +265,10 @@ public class ResourceBreadcrumbTag
 
             if (x < (breadcrumbs.size() - 1)) {
                 markup.append("<a href=\"").append(item.getUrl()).append("\">");
-                markup.append(item.getLabel());
+                markup.append(StringEscapeUtils.escapeHtml(item.getLabel()));
                 markup.append("</a>&nbsp;&rsaquo;&nbsp;");
             } else {
-                markup.append(item.getLabel());
+                markup.append(StringEscapeUtils.escapeHtml(item.getLabel()));
             }
 
             markup.append("</li>");
@@ -285,7 +285,7 @@ public class ResourceBreadcrumbTag
             String returnTo = RequestUtils.message(request, "breadcrumb.returnTo");
             
             markup.append("<span class=\"returnToLink\"><a href=\"").append(BreadcrumbUtil.createReturnToURL(crumb.getUrl())).append("\">");
-            markup.append(returnTo).append(" ").append(crumb.getLabel());
+            markup.append(returnTo).append(" ").append(StringEscapeUtils.escapeHtml(crumb.getLabel()));
             markup.append("</a></span>");
         }
 
@@ -477,7 +477,7 @@ public class ResourceBreadcrumbTag
             setUrl(url);
             setResourceId(resourceId);
             setAutoGroupId(autoGroupId);
-            setLabel(StringEscapeUtils.escapeHtml(label));
+            setLabel(label);
             setAppdefEntityId(appdefEntityId);
         }
 
