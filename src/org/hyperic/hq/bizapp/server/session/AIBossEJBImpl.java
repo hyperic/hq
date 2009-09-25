@@ -62,7 +62,11 @@ import org.hyperic.hq.autoinventory.server.session.AIScheduleManagerEJBImpl;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
+import org.hyperic.hq.bizapp.shared.AIBossLocal;
+import org.hyperic.hq.bizapp.shared.AIBossUtil;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
@@ -516,6 +520,14 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         }
 
         throw new PlatformNotFoundException(platformID);
+    }
+    
+    public static AIBossLocal getOne() {
+        try {
+            return AIBossUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     /** @ejb:create-method */

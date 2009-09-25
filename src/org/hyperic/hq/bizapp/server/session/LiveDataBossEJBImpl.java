@@ -42,6 +42,11 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.bizapp.shared.LiveDataBossLocal;
+import org.hyperic.hq.bizapp.shared.LiveDataBossUtil;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 
@@ -131,5 +136,13 @@ public class LiveDataBossEJBImpl implements SessionBean {
         AuthzSubject subject = _manager.getSubject(sessionId);
         LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
         return manager.getConfigSchema(subject, id, command);
+    }
+    
+    public static LiveDataBossLocal getOne() {
+        try {
+            return LiveDataBossUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
 }

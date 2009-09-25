@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE jboss PUBLIC "-//JBoss//DTD JBOSS 3.0//EN" "http://www.jboss.org/j2ee/dtd/jboss_3_0.dtd">
+
+<jboss>
+
+   <enterprise-beans>
+
+     <!--
+       To add beans that you have deployment descriptor info for, add
+       a file to your XDoclet merge directory called jboss-beans.xml that contains
+       the <session></session>, <entity></entity> and <message-driven></message-driven>
+       markup for those beans.
+     -->
+
+      <session>
+         <ejb-name>ProductManager</ejb-name>
+         <local-jndi-name>LocalProductManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>SRNManager</ejb-name>
+         <local-jndi-name>SRNManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>RoleManager</ejb-name>
+         <local-jndi-name>LocalRoleManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AuthzSubjectManager</ejb-name>
+         <local-jndi-name>LocalAuthzSubjectManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>RegisteredTriggerManager</ejb-name>
+         <local-jndi-name>LocalRegisteredTriggerManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>CPropManager</ejb-name>
+         <local-jndi-name>LocalCPropManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AuthManager</ejb-name>
+         <local-jndi-name>LocalAuthManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ControlScheduleManager</ejb-name>
+         <local-jndi-name>LocalControlScheduleManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>MeasurementProcessor</ejb-name>
+         <local-jndi-name>LocalMeasurementProcessor</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>UpdateBoss</ejb-name>
+         <jndi-name>ejb/bizapp/UpdateBoss</jndi-name>
+         <local-jndi-name>LocalUpdateBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>SchedulerBoss</ejb-name>
+         <jndi-name>ejb/bizapp/SchedulerBoss</jndi-name>
+         <local-jndi-name>LocalSchedulerBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ResourceAuxLogManager</ejb-name>
+         <local-jndi-name>LocalResourceAuxLogManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ConfigManager</ejb-name>
+         <local-jndi-name>LocalConfigManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>EventLogManager</ejb-name>
+         <local-jndi-name>LocalEventLogManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ResourceManager</ejb-name>
+         <local-jndi-name>LocalResourceManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AIScheduleManager</ejb-name>
+         <local-jndi-name>LocalAIScheduleManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>Scheduler</ejb-name>
+         <local-jndi-name>LocalQuartzScheduler</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AutoinventoryManager</ejb-name>
+         <jndi-name>ejb/autoinventory/AutoinventoryManager</jndi-name>
+         <local-jndi-name>LocalAutoinventoryManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>HierarchicalAlertingManager</ejb-name>
+         <local-jndi-name>LocalHierarchicalAlertingManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>GalertBoss</ejb-name>
+         <jndi-name>ejb/bizapp/GalertBoss</jndi-name>
+         <local-jndi-name>LocalGalertBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>DashboardPortletBoss</ejb-name>
+         <jndi-name>ejb/bizapp/DashboardPortletBoss</jndi-name>
+         <local-jndi-name>LocalDashboardPortletBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>EscalationManager</ejb-name>
+         <local-jndi-name>LocalEscalationManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AIBoss</ejb-name>
+         <jndi-name>ejb/bizapp/AIBoss</jndi-name>
+         <local-jndi-name>LocalAIBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>CalendarManager</ejb-name>
+         <local-jndi-name>LocalCalendarManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>TrackerManager</ejb-name>
+         <local-jndi-name>LocalTrackerManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ConfigBoss</ejb-name>
+         <jndi-name>ejb/bizapp/ConfigBoss</jndi-name>
+         <local-jndi-name>LocalConfigBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>EventLogBoss</ejb-name>
+         <jndi-name>ejb/bizapp/EventLogBoss</jndi-name>
+         <local-jndi-name>LocalEventLogBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AuthBoss</ejb-name>
+         <jndi-name>ejb/bizapp/AuthBoss</jndi-name>
+         <local-jndi-name>LocalAuthBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AppdefStatManager</ejb-name>
+         <local-jndi-name>LocalAppdefStatManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AlertManager</ejb-name>
+         <local-jndi-name>LocalAlertManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ServiceManager</ejb-name>
+         <local-jndi-name>LocalServiceManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>LatherBoss</ejb-name>
+         <jndi-name>ejb/bizapp/LatherBoss</jndi-name>
+         <local-jndi-name>LocalLatherBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ApplicationManager</ejb-name>
+         <local-jndi-name>LocalApplicationManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>MetricAuxLogManager</ejb-name>
+         <local-jndi-name>LocalMetricAuxLogManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ProductBoss</ejb-name>
+         <jndi-name>ejb/bizapp/ProductBoss</jndi-name>
+         <local-jndi-name>LocalProductBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>MaintenanceEventManager</ejb-name>
+         <local-jndi-name>LocalMaintenanceEventManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ActionManager</ejb-name>
+         <local-jndi-name>LocalActionManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>TestManager</ejb-name>
+         <local-jndi-name>LocalTestManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>TransactionManager</ejb-name>
+         <local-jndi-name>LocalTransactionManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ControlManager</ejb-name>
+         <local-jndi-name>LocalControlManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ControlBoss</ejb-name>
+         <jndi-name>ejb/bizapp/ControlBoss</jndi-name>
+         <local-jndi-name>LocalControlBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>LiveDataManager</ejb-name>
+         <local-jndi-name>LocalLiveDataManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AvailabilityManager</ejb-name>
+         <local-jndi-name>LocalAvailabilityManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AlertDefinitionManager</ejb-name>
+         <local-jndi-name>LocalAlertDefinitionManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ResourceGroupManager</ejb-name>
+         <local-jndi-name>LocalResourceGroupManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>CrispoManager</ejb-name>
+         <local-jndi-name>LocalCrispoManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>DataManager</ejb-name>
+         <local-jndi-name>LocalDataManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>VirtualManager</ejb-name>
+         <local-jndi-name>LocalVirtualManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AuthzBoss</ejb-name>
+         <jndi-name>ejb/bizapp/AuthzBoss</jndi-name>
+         <local-jndi-name>LocalAuthzBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>DataCompress</ejb-name>
+         <local-jndi-name>LocalDataCompress</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>LiveDataBoss</ejb-name>
+         <local-jndi-name>LocalLiveDataBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AppdefManager</ejb-name>
+         <local-jndi-name>LocalAppdefManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>PlatformManager</ejb-name>
+         <local-jndi-name>LocalPlatformManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>MeasurementManager</ejb-name>
+         <local-jndi-name>LocalMeasurementManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>EmailManager</ejb-name>
+         <local-jndi-name>LocalEmailManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ServerConfigManager</ejb-name>
+         <local-jndi-name>LocalServerConfigManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ReportProcessor</ejb-name>
+         <local-jndi-name>LocalReportProcessor</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>GtriggerManager</ejb-name>
+         <local-jndi-name>LocalGtriggerManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>DashboardManager</ejb-name>
+         <local-jndi-name>LocalDashboardManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AppdefBoss</ejb-name>
+         <jndi-name>ejb/bizapp/AppdefBoss</jndi-name>
+         <local-jndi-name>LocalAppdefBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>TemplateManager</ejb-name>
+         <local-jndi-name>LocalTemplateManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>ServerManager</ejb-name>
+         <local-jndi-name>LocalServerManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AIQueueManager</ejb-name>
+         <local-jndi-name>LocalAIQueueManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>UIPluginManager</ejb-name>
+         <local-jndi-name>LocalUIPluginManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AgentManager</ejb-name>
+         <local-jndi-name>LocalAgentManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>EventsBoss</ejb-name>
+         <jndi-name>ejb/bizapp/EventsBoss</jndi-name>
+         <local-jndi-name>LocalEventsBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>HeartBeatService</ejb-name>
+         <local-jndi-name>LocalHeartBeatService</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>GalertManager</ejb-name>
+         <local-jndi-name>LocalGalertManager</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>MeasurementBoss</ejb-name>
+         <jndi-name>ejb/bizapp/MeasurementBoss</jndi-name>
+         <local-jndi-name>LocalMeasurementBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>CloningBoss</ejb-name>
+         <jndi-name>ejb/appdef/CloningBoss</jndi-name>
+         <local-jndi-name>LocalCloningBoss</local-jndi-name>
+
+      </session>
+      <session>
+         <ejb-name>AuditManager</ejb-name>
+         <local-jndi-name>LocalAuditManager</local-jndi-name>
+
+      </session>
+
+    <!--
+      write a merge file jboss-webservices.ent for webservice-description 
+    -->
+
+   </enterprise-beans>
+
+   <resource-managers>
+   </resource-managers>
+
+  <!--
+    | for container settings, you can merge in jboss-container.xml
+    | this can contain <invoker-proxy-bindings/> and <container-configurations/>
+  -->
+
+</jboss>

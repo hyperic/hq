@@ -149,7 +149,7 @@ public class ResourceGroupManagerImpl
             .create(res.getResource(), res.getResource(), 0,
                     getContainmentRelation());  // Self-edge
 
-        groupChangeCallback.postGroupCreate(res);
+        //groupChangeCallback.postGroupCreate(res);
         return res;
     }
 

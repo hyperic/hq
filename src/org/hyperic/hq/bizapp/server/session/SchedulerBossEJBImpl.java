@@ -33,6 +33,11 @@ import javax.ejb.SessionContext;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.bizapp.shared.SchedulerBossLocal;
+import org.hyperic.hq.bizapp.shared.SchedulerBossUtil;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.quartz.JobDetail;
@@ -221,6 +226,14 @@ public class SchedulerBossEJBImpl implements SessionBean {
         }
 
         return numDeleted;
+    }
+    
+    public static SchedulerBossLocal getOne() {
+        try {
+            return SchedulerBossUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     //-------------------------------------------------------------------------

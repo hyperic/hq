@@ -135,7 +135,7 @@ public abstract class BizappSessionEJB {
     public AIBossLocal getAIBoss() {
 
         try {
-            return AIBossUtil.getLocalHome().create();
+            return AIBossEJBImpl.getOne();
         } catch (Exception exc) {
             throw new SystemException(exc);
         }
@@ -151,7 +151,7 @@ public abstract class BizappSessionEJB {
 
     public ControlBossLocal getControlBoss() {
         try {
-            return ControlBossUtil.getLocalHome().create();
+            return ControlBossEJBImpl.getOne();
         } catch (Exception e) {
             throw new SystemException(e);
         }

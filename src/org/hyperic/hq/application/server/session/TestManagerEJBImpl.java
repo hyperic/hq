@@ -28,6 +28,12 @@ package org.hyperic.hq.application.server.session;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
+import org.hyperic.hq.application.shared.TestManagerLocal;
+import org.hyperic.hq.application.shared.TestManagerUtil;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
+
 /**
  * @ejb:bean name="TestManager"
  *      jndi-name="ejb/appdef/TestManager"
@@ -54,6 +60,13 @@ public class TestManagerEJBImpl
         return;
     }
     
+    public static TestManagerLocal getOne() {
+        try {
+            return TestManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
+    }
     public void setSessionContext(SessionContext ctx) {}
     public void ejbCreate() {}
     public void ejbRemove() {}

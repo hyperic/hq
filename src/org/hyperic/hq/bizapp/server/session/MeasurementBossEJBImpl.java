@@ -55,6 +55,7 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.VirtualManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -2388,18 +2389,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         final AuthzSubject subject = manager.getSubject(sessionId);
 
-        try {
+        
             VirtualManagerLocal vman =
-                VirtualManagerUtil.getLocalHome().create();
+                VirtualManagerEJBImpl.getOne();
             List resources =
                 vman.findVirtualResourcesByPhysical(subject, entId);
             PageList resPageList = new PageList(resources, resources.size());
             return getResourcesCurrentHealth(subject, resPageList);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+        
     }
 
     private void setResourceDisplaySummary(ResourceDisplaySummary rds, 

@@ -42,7 +42,6 @@
 
   <!-- Thirdparty libs -->
   <property name="thirdparty.lib" location="thirdparty/lib"/>
-  <property name="xdoclet.lib" location="${thirdparty.lib}/xdoclet"/>
   <property name="hibernate.lib" location="${thirdparty.lib}/hibernate"/>
   <property name="tapestry_lib" location="${thirdparty.lib}/tapestry"/>
 
@@ -103,9 +102,9 @@
              includes="postgresql-8.2-*.jdbc3.jar"/>
     <fileset dir="${thirdparty.lib}/mysql_jdbc" includes="mysql*.jar"/>
     <fileset dir="${thirdparty.lib}/mx4j" includes="*.jar" />
+ 	<fileset dir="${thirdparty.lib}/spring" includes="*.jar" />
     <fileset dir="${thirdparty.lib}/tapestry" includes="*.jar" />
     <fileset dir="${wrapper.lib}" includes="*.jar" />
-    <fileset dir="${xdoclet.lib}" includes="*.jar" />
     <fileset dir="${hibernate.lib}" includes="*.jar" />
     <fileset dir="${jboss.home}/server/default/lib"
              includes="*.jar"
@@ -193,19 +192,10 @@
     <path id="src.path">
 		  <path location="${build.dir}/src" />
           <path location="${basedir}/src" />
+		  <path location="${basedir}/generated-src" />
     </path>
     <compile-app classpath.id="compile.classpath" srcpath.id="src.path" output.dir="${build.dir}/classes"/>
 	
-   </target>
-
-	<target name="compile-jaxb-sources" depends="init">
-		<path id="compile.classpath">
-	            <path refid="alljars"/>
-	    </path>
-	    <path id="src.path">
-	          <path location="${basedir}/src" />
-	    </path>
-	<compile-jaxb classpath.id="compile.classpath" srcpath.id="src.path" output.dir="${build.dir}/classes"/>
    </target>
 
   <macrodef name="compile-app">
@@ -214,33 +204,16 @@
 		<attribute name="output.dir"/>
       <sequential>
 	  <antcall target="compile-txsnatch"/>
-	 <antcall target="compile-jaxb-sources"/>
       <mkdir dir="@{output.dir}" />
+	  <mkdir dir="${war.dir}/WEB-INF/lib" />
       <hq-javac destdir="@{output.dir}">
         <classpath refid="@{classpath.id}"/>
         <src refid="@{srcpath.id}"/>
         <src>
 			<path location="${basedir}/plugins/system/src"/>
 		</src>
-        <exclude name="org/hyperic/hq/ui/**/*.java" />
-        <exclude name="org/hyperic/ui/tapestry/**/*.java" />
-		<exclude name="org/hyperic/hq/types/**/*.java" />
      </hq-javac>
      <antcall target="compile-plugins"/>
-	 <antcall target="compile-java5-plugins"/>
-	</sequential>
-  </macrodef>
-
-   <macrodef name="compile-jaxb">
-		<attribute name="classpath.id"/>
-		<attribute name="srcpath.id"/>
-		<attribute name="output.dir"/>
-      <sequential>
-      <hq-javac destdir="@{output.dir}" source="1.5" target="1.5">
-        <classpath refid="@{classpath.id}"/>
-        <src refid="@{srcpath.id}"/>
-		<include name="org/hyperic/hq/types/**/*.java" />
-     </hq-javac>
 	</sequential>
   </macrodef>
 
@@ -254,34 +227,13 @@
         <src>
           <dirset dir="${basedir}/plugins">
             <include name="*/src"/>
-            <exclude name="xen/src"/>
-            <exclude name="vim/src"/>
-			<exclude name="spring/src"/>
+            <include name="*/src/main/java"/>
           </dirset>
         </src>
       </hq-javac>
   </target>
 
-   <target name="compile-java5-plugins">
-	    <hq-javac destdir="${build.dir}/classes" source="1.5" target="1.5">
-	      <classpath>
-			<path refid="alljars" />
-			<path refid="testjars" />
-			<path location="${build.dir}/classes"/>
-		  </classpath>
-	      <src>
-	        <path location="${basedir}/plugins/xen/src" />
-	        <path location="${basedir}/plugins/vim/src" />
-			<path location="${basedir}/plugins/spring/src/main/java" />
-	      </src>
-	      <include name="org/hyperic/hq/plugin/xen/**"/>
-	      <include name="com/xensource/**"/>
-	      <include name="org/hyperic/hq/plugin/vim/**"/>
-	 	  <include name="org/hyperic/hq/plugin/spring/**"/>
-	    </hq-javac>
-  </target>
-    
-
+   
  <target name="copy-resources" depends="init">
 	
       <!-- Copy resources -->
@@ -305,7 +257,7 @@
       </copy>
       <copy toDir="${build.dir}/classes">
         <fileset dir="${hq.home}/etc" 
-                 includes="cactus.properties,log_client.properties" />
+                 includes="cactus.properties,log_client.properties,spring-*.properties,META-INF/spring/**/*-context.xml" />
       </copy>
   </target>
     
@@ -322,7 +274,7 @@
   </target>
 
   <target name="compile" description="Compile sources" 
-          depends="compile-app-sources,copy-resources,compile-ui"/>
+          depends="compile-app-sources,copy-resources"/>
 
   <!-- ==================== JSP precompile ============================ -->
   
@@ -330,7 +282,7 @@
 
   <!-- ==================== Source code generation ==================== -->
 
-  <import file="${hq.home}/build_util/xdoclet-build.xml"/>
+ 
   <import file="${hq.home}/build_util/hibernate-build.xml"/>
  
   <!-- HQU -->
@@ -361,13 +313,13 @@
     <mkdir dir="${ear.dir}/hq-message.jar/META-INF" />
 
     <copy todir="${ear.dir}/hq-session.jar/META-INF" >
-      <fileset dir="${build.dir}/dd/session" includes="*" />
+      <fileset dir="${basedir}/dd/session" includes="*" />
     </copy>
     <copy todir="${ear.dir}/hq-agent-session.jar/META-INF" >
-      <fileset dir="${build.dir}/dd/agent-session" includes="*" />
+      <fileset dir="${basedir}/dd/agent-session" includes="*" />
     </copy>
     <copy todir="${ear.dir}/hq-message.jar/META-INF" >
-      <fileset dir="${build.dir}/dd/mdb" includes="*" />
+      <fileset dir="${basedir}/dd/mdb" includes="*" />
     </copy>
 
     <copy todir="${ear.dir}/META-INF" overwrite="true">
@@ -379,7 +331,16 @@
         </fileset>
     </copy>
 
+   <copy todir="${ear.dir}">
+    <fileset dir="etc" includes="META-INF/spring/*-context.xml"/>
+    </copy>
+
+    <copy todir="${ear.dir}">
+	 <fileset dir="etc" includes="spring-*.properties"/>
+	</copy>
+	
     <copy file="etc/ehcache.xml" todir="${ear.dir}"/>
+
 
     <copy file="etc/jboss/events/alertdef-prop-service.xml" tofile="${ear.dir}/alertdef-prop-service.xml" />
     <copy file="etc/jboss/measurement/measurement-mq-service.xml" tofile="${ear.dir}/measurement-mq-service.xml" />
@@ -479,6 +440,9 @@
 		<include name="com.springsource.com.sun.xml.bind-*.jar"/>
 		<include name="com.springsource.javax.xml.bind-*.jar"/>
 		<include name="com.springsource.javax.xml.stream-*.jar"/>
+		
+		<include name="*aopalliance*.jar"/>
+	    <include name="*dbcp*.jar"/>
 
         <!--  in container test jar files -->
         <include name="mockejb.jar" />
@@ -487,6 +451,7 @@
         <include name="easymockclassextension-2.3.jar" />
 	
       </fileset>
+      <fileset dir="${thirdparty.lib}/spring" includes="*.jar"/>
       <fileset dir="${sigar.lib}" >
         <include name="sigar.jar" />
       </fileset> 
@@ -601,18 +566,7 @@
   
   <!-- ==================== UI packaging ==================== -->
 
-  <target name="compile-ui" description="compiles the ui classes" depends="init">
- 		<mkdir dir="${war.dir}/WEB-INF/lib" />
-		<path id="compile.classpath">
-			<path refid="alljars" />
-		    <path refid="testjars" />
-	     </path>
-	     <path id="src.path">
-			<path location="${build.dir}/src" />
-		    <path location="${basedir}/src" />
-		 </path>
-		<compile-ui-sources srcpath.id="src.path" output.dir="${build.dir}/classes" classpath.id="compile.classpath"/>
-  </target>
+  
 
 
   <target name="compile-tests">
@@ -630,34 +584,13 @@
 		<attribute name="srcpath.id"/>
 		<attribute name="classpath.id"/>
 	<sequential>
-		<hq-javac destdir="@{output.dir}" source="1.5" target="1.5">
-	      <!-- The tests need to be built with 1.5 features -->
+		<hq-javac destdir="@{output.dir}">
 	       <classpath refid="@{classpath.id}"/>
 			<src refid="@{srcpath.id}"/>
 	    </hq-javac>
 	</sequential>
 </macrodef>
-	
-  <macrodef name="compile-ui-sources">
-		<attribute name="output.dir"/>
-		<attribute name="srcpath.id"/>
-		<attribute name="classpath.id"/>
-	<sequential>
-    <taskdef resource="net/sf/antcontrib/antcontrib.properties"
-             classpathref="alljars"/>
-    <mkdir dir="@{output.dir}" />
-    <!-- The UI needs to be built with 1.5 features -->
-    <hq-javac destdir="@{output.dir}" source="1.5" target="1.5">
-      <!-- The UI needs to be built with 1.5 features -->
-      <classpath refid="@{classpath.id}"/>
-      <src refid="@{srcpath.id}"/>
-      <include name="org/hyperic/hq/ui/**" />
-      <include name="org/hyperic/ui/tapestry/**" />
-    </hq-javac>
-  </sequential>
-</macrodef>
- 
-  
+	 
   <target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )"
           depends="pack-ear,pack-test">
     <mkdir dir="${war.dir}" />
@@ -767,7 +700,7 @@
     </antcall>
   </target>
 
-  <target name="deploy-ui" description="" depends="compile-ui">
+  <target name="deploy-ui" description="">
     <echo>deploying files from ${hq.home}</echo>
     <!-- Copy updated assets -->
     <copy todir="${jboss.deploy.war.dir}" >
@@ -1486,8 +1419,8 @@
           depends="init,pack-agent,pack-pdk,pack-ear,pack-war,pack-servlet" >
   </target>
 
-  <target name="all" description="xdoclet, compile and pack for everything" 
-          depends="init,xdoclet,hibernate-prep,build" >
+  <target name="all" description="compile and pack for everything" 
+          depends="init,hibernate-prep,build" >
   </target>
 
    <target name="pack-test-coverage">
@@ -1523,7 +1456,7 @@
  
     <mkdir dir="${ear.dir}/hq-session-test.jar/META-INF" />
     <copy todir="${ear.dir}/hq-session-test.jar/META-INF" >
-      <fileset dir="${build.dir}/dd/session-test" includes="*" />
+      <fileset dir="${basedir}/dd/session-test" includes="*" />
     </copy>
 
     <copy todir="${ear.dir}/lib">
@@ -2023,7 +1956,7 @@
     <unzip src="${jboss.zip}" dest="${jboss.home}/.."/>
   </target>
 
-  <target name="hq-javadoc" depends="xdoclet,hibernate-prep">
+  <target name="hq-javadoc" depends="hibernate-prep">
     <!-- 
     set this in ~/hq/build.properties if you want it someplace other than 
     your source tree 

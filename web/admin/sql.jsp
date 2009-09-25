@@ -40,6 +40,7 @@ $Header: /var/cvsroot/hyperic_hq/web/admin/sql.jsp,v 1.3 2005/04/21 20:38:26 dou
 <%@ page import="javax.servlet.ServletRequest" %>
 <%@ page import="org.hyperic.util.StringUtil" %>
 <%@ page import="org.hyperic.util.jdbc.DBUtil" %>
+<%@ page import="org.hyperic.hq.context.Bootstrap" %>
 
 <%@ page import="org.hyperic.hq.bizapp.shared.AuthzBoss" %>
 <%@ page import="org.hyperic.hq.bizapp.shared.AuthzBossUtil" %>
@@ -289,7 +290,7 @@ try {
             }
         }
 
-        conn = DBUtil.getConnByContext(ctx, HQConstants.DATASOURCE);
+        conn = Bootstrap.getBean(DBUtil.class).getConnByContext(ctx, HQConstants.DATASOURCE);
 
         int numStatements = sqlList.size();
         for ( int i=0; i<numStatements; i++ ) {

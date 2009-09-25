@@ -46,6 +46,8 @@ import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
+import org.hyperic.hq.appdef.shared.VirtualManagerLocal;
+import org.hyperic.hq.appdef.shared.VirtualManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
@@ -53,6 +55,8 @@ import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 
 /**
  * This class is responsible for managing Server objects in appdef
@@ -237,6 +241,14 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
         else {
             throw new FinderException(aeid.toString() +
                 " is not registered as a virtual resource");
+        }
+    }
+    
+    public static VirtualManagerLocal getOne() {
+        try {
+            return VirtualManagerUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
         }
     }
 
