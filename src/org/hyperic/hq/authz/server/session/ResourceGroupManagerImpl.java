@@ -107,8 +107,8 @@ public class ResourceGroupManagerImpl
     
     
     @Autowired
-    public ResourceGroupManagerImpl(GroupChangeCallback groupChangeCallback, ResourceEdgeDAO resourceEdgeDAO) {
-        this.groupChangeCallback = groupChangeCallback;
+    public ResourceGroupManagerImpl( ResourceEdgeDAO resourceEdgeDAO) {
+        //this.groupChangeCallback = groupChangeCallback;
         this.resourceEdgeDAO = resourceEdgeDAO;
     }
 

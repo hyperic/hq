@@ -33,8 +33,12 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class ActionDAO extends HibernateDAO {
+    
+    @Autowired
     public ActionDAO(SessionFactory f) {
         super(Action.class, f);
     }

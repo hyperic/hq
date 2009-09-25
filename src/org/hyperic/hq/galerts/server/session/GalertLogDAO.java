@@ -34,11 +34,7 @@ import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hibernate.SortField;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -46,10 +42,14 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-class GalertLogDAO
+@Repository
+public class GalertLogDAO
     extends HibernateDAO
 {
+    @Autowired
     GalertLogDAO(SessionFactory f) {
         super(GalertLog.class, f);
     }

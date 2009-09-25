@@ -54,6 +54,7 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
 public class AlertDefinitionDAO extends HibernateDAO {
@@ -66,7 +67,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
    
        private ResourceDAO rDao;
        
-       
+      @Autowired 
     public AlertDefinitionDAO(
                               SessionFactory f,
                               PermissionManager permissionManager,

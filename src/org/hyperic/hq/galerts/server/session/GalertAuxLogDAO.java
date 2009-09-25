@@ -25,16 +25,17 @@
 
 package org.hyperic.hq.galerts.server.session;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
-
-class GalertAuxLogDAO
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
+public class GalertAuxLogDAO
     extends HibernateDAO
 {
+    @Autowired
     GalertAuxLogDAO(SessionFactory f) {
         super(GalertAuxLog.class, f);
     }

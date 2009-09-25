@@ -6,52 +6,11 @@
 		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
-	<context:property-placeholder location="classpath:/*.properties" />
-	<context:annotation-config />
-	<context:component-scan base-package="org.hyperic,com.hyperic" />
-	<tx:annotation-driven />
-	<bean id="sessionFactory"
-		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean"
-		p:dataSource-ref="dataSource"
-		p:mappingLocations="classpath:/**/*.hbm.xml">
-		<!--  p:mappingResources="appdef/Agent.hbm.xml,appdef/AgentType.hbm.xml,appdef/AppService.hbm.xml,appdef/AppSvcDependency.hbm.xml,appdef/Application.hbm.xml,
-		appdef/ApplicationType.hbm.xml,appdef/ConfigResponseDB.hbm.xml,appdef/Cprop.hbm.xml,appdef/CpropKey.hbm.xml,appdef/Ip.hbm.xml,appdef/Platform.hbm.xml,
-		appdef/PlatformType.hbm.xml,appdef/ResourceAuxLogPojo.hbm.xml,appdef/Server.hbm.xml,appdef/ServerType.hbm.xml,appdef/Service.hbm.xml,appdef/ServiceType.hbm.xml,
-		auth/Principal.hbm.xml,authz/AuthzSubject.hbm.xml,authz/GroupMember.hbm.xml,authz/Operation.hbm.xml,authz/PersistedCritter.hbm.xml,authz/Resource.hbm.xml,
-		authz/ResourceEdge.hbm.xml,authz/ResourceGroup.hbm.xml,authz/ResourceRelation.hbm.xml,authz/ResourceType.hbm.xml,authz/Role.hbm.xml,authz/RoleCalendar.hbm.xml,
-		authz/Virtual.hbm.xml,autoinventory/AIHistory.hbm.xml,autoinventory/AIIp.hbm.xml,autoinventory/AIPlatform.hbm.xml,autoinventory/AISchedule.hbm.xml,
-		autoinventory/AIServer.hbm.xml,autoinventory/AIService.hbm.xml,autoinventory/AgentReportStatus.hbm.xml,bizapp/UpdateStatus.hbm.xml,common/Audit.hbm.xml,
-		common/Calendar.hbm.xml,common/CalendarEntry.hbm.xml,common/ConfigProperty.hbm.xml,common/Crispo.hbm.xml,common/CrispoOption.hbm.xml,control/ControlHistory.hbm.xml,
-		control/ControlSchedule.hbm.xml,escalation/Escalation.hbm.xml,escalation/EscalationState.hbm.xml,events/Action.hbm.xml,events/Alert.hbm.xml,events/AlertActionLog.hbm.xml,
-		events/AlertCondition.hbm.xml,events/AlertConditionLog.hbm.xml,events/AlertDefinition.hbm.xml,events/AlertDefinitionState.hbm.xml,events/EventLog.hbm.xml,
-		events/FiredTrigger.hbm.xml,events/RegisteredTrigger.hbm.xml,events/TriggerEvent.hbm.xml,galerts/ExecutionStrategyInfo.hbm.xml,galerts/ExecutionStrategyTypeInfo.hbm.xml,
-		galerts/GalertActionLog.hbm.xml,galerts/GalertAuxLog.hbm.xml,galerts/GalertDef.hbm.xml,galerts/GalertLog.hbm.xml,galerts/GtriggerInfo.hbm.xml,galerts/GtriggerTypeInfo.hbm.xml,
-		hqu/Attachment.hbm.xml,hqu/UIPlugin.hbm.xml,hqu/View.hbm.xml,measurement/AvailabilityDataRLE.hbm.xml,measurement/Baseline.hbm.xml,measurement/Category.hbm.xml,measurement/Measurement.hbm.xml,
-		measurement/MeasurementData.hbm.xml,measurement/MeasurementHistData.hbm.xml,measurement/MeasurementTemplate.hbm.xml,measurement/MetricAuxLogPojo.hbm.xml,
-		measurement/MetricProblem.hbm.xml,measurement/MonitorableType.hbm.xml,measurement/Number.hbm.xml,measurement/ScheduleRevNum.hbm.xml,pdk/Plugin.hbm.xml,rt/RtErrorCode.hbm.xml,
-		rt/RtRequestStat.hbm.xml,rt/RtStatError.hbm.xml,rt/RtSvcReq.hbm.xml,scheduler/QzCalendar.hbm.xml,scheduler/QzFiredTrigger.hbm.xml,scheduler/QzJobDetail.hbm.xml,
-		scheduler/QzLock.hbm.xml,scheduler/QzPausedTriggerGrp.hbm.xml,scheduler/QzSchedulerState.hbm.xml,ui/DashboardConfig.hbm.xml"-->
-		<!--
-			TODO using below classpath scanning instead of explicit mapping file
-			locations doesn't seem to work with code coverage tool in STS. Find
-			out why.
-		-->
-	  
-		<property name="hibernateProperties">
-			<bean
-				class="org.springframework.beans.factory.config.PropertiesFactoryBean">
-				<property name="location" value="classpath:/etc/spring-hibernate.properties" />
-			</bean>
-		</property>
-	</bean>
-	
-	<bean id="transactionManager"
-		class="org.springframework.orm.hibernate3.HibernateTransactionManager"
-		p:sessionFactory-ref="sessionFactory" />
-		
-	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
-		p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}"
-		p:username="${jdbc.username}" p:password="${jdbc.password}" />
+		<context:property-placeholder location="classpath:/spring-jdbc.properties" />
+
+		<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+				p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}"
+				p:username="${jdbc.username}" p:password="${jdbc.password}" />
 		
 	
 </beans>

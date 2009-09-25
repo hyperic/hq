@@ -23,16 +23,18 @@ import java.util.Set;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.dialect.Dialect;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 
-
+@Repository
 public class TriggerDAO
     extends HibernateDAO implements TriggerDAOInterface
 {
+    @Autowired
     public TriggerDAO(SessionFactory sessionFactory) {
         super(RegisteredTrigger.class, sessionFactory);
     }

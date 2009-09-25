@@ -44,6 +44,8 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.GalertBossLocal;
+import org.hyperic.hq.bizapp.shared.GalertBossUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
@@ -421,6 +423,14 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         throws SessionNotFoundException, SessionTimeoutException {
         // Look for the last fixed alert
         return EscalationManagerEJBImpl.getOne().getLastFix(def);
+    }
+    
+    public static GalertBossLocal getOne() {
+        try {
+            return GalertBossUtil.getLocalHome().create();
+        } catch(Exception e) {
+            throw new SystemException(e);
+        }
     }
 
     /**
