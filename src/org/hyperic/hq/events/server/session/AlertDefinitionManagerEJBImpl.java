@@ -166,6 +166,7 @@ public class AlertDefinitionManagerEJBImpl
             for (int i = 0; i < childBag.size(); i++) {
                 AlertDefinition child = (AlertDefinition) childBag.get(i);
                 deleteAlertDefinitionStuff(subj, child, escMan);
+                registeredTriggerManager.deleteTriggers(child);
             }
             getAlertDefDAO().deleteByAlertDefinition(alertdef);
             watch.markTimeEnd("delete children");

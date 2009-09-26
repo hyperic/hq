@@ -218,7 +218,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
     int deleteByAlertDefinition(AlertDefinition def) {
         String sql = "update AlertDefinition " +
         		     "set escalation = null, deleted = true, parent = null, " +
-        		         "active = false where parent = :def";
+        		         "active = false, enabled = false where parent = :def";
 
         int ret = getSession().createQuery(sql).setParameter("def", def)
                               .executeUpdate();
