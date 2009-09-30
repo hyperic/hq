@@ -28,6 +28,13 @@ public interface RegisterableTriggerRepository {
      * @return The {@link RegisterableTriggerInterface} with the specified ID or null if none exists
      */
     RegisterableTriggerInterface getTriggerById(Integer triggerId);
+    
+    /**
+     * 
+     * @return true if the repository has been intialized.  This typically occurs shortly after server startup, before the event is processed.  
+     * Repository contents should be re-created from database.
+     */
+    boolean isInitialized();
 
     /**
      *

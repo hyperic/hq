@@ -9,6 +9,7 @@ import org.easymock.EasyMock;
 import org.hyperic.hq.events.MockEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
+import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 
 import junit.framework.TestCase;
@@ -27,11 +28,20 @@ public class RecoveryConditionEvaluatorTest
     private Map events = new LinkedHashMap();
 
     private static final Integer TEST_ALERT_DEF_ID = Integer.valueOf(1234);
+    
+    private static final Integer TEST_RECOVERING_FROM_ALERT_DEF_ID = Integer.valueOf(2);
+    
+    private AlertManagerLocal alertManager;
+    
+   
+    private void replay() {
+        EasyMock.replay(executionStrategy, alertManager);
+    }
 
     public void setUp() throws Exception {
         super.setUp();
         this.executionStrategy = EasyMock.createMock(ExecutionStrategy.class);
-
+        this.alertManager = EasyMock.createMock(AlertManagerLocal.class);
     }
 
     /**
@@ -47,12 +57,15 @@ public class RecoveryConditionEvaluatorTest
         mockEvent.setTimestamp(System.currentTimeMillis() - (3 * 60 * 1000));
         TriggerFiredEvent triggerFired = new TriggerFiredEvent(trigger2Id, mockEvent);
         RecoveryConditionEvaluator evaluator = new RecoveryConditionEvaluator(TEST_ALERT_DEF_ID,
-                                                                              alertTriggerId,
+                                                                              alertTriggerId, TEST_RECOVERING_FROM_ALERT_DEF_ID,
                                                                               conditions,
-                                                                              executionStrategy,
+                                                                              executionStrategy, alertManager,
                                                                               events);
-        evaluator.initialize(triggerFired);
-        assertEquals(triggerFired, evaluator.getState());
+        EasyMock.expect(alertManager.getUnfixedAlertTriggerFiredEvent(TEST_RECOVERING_FROM_ALERT_DEF_ID, alertTriggerId)).andReturn(triggerFired);
+        replay();
+        evaluator.initialize(null);
+        verify();
+        assertEquals(triggerFired, evaluator.getLastAlertFired());
     }
 
     /**
@@ -65,12 +78,12 @@ public class RecoveryConditionEvaluatorTest
         List conditions = new ArrayList();
 
         RecoveryConditionEvaluator evaluator = new RecoveryConditionEvaluator(TEST_ALERT_DEF_ID,
-                                                                              alertTriggerId,
+                                                                              alertTriggerId, TEST_RECOVERING_FROM_ALERT_DEF_ID,
                                                                               conditions,
-                                                                              executionStrategy,
+                                                                              executionStrategy, alertManager,
                                                                               events);
         evaluator.initialize(null);
-        assertNull(evaluator.getState());
+        assertNull(evaluator.getLastAlertFired());
     }
 
     /**
@@ -92,9 +105,9 @@ public class RecoveryConditionEvaluatorTest
         conditions.add(condition2);
 
         RecoveryConditionEvaluator evaluator = new RecoveryConditionEvaluator(TEST_ALERT_DEF_ID,
-                                                                              alertTriggerId,
+                                                                              alertTriggerId, TEST_RECOVERING_FROM_ALERT_DEF_ID,
                                                                               conditions,
-                                                                              executionStrategy,
+                                                                              executionStrategy, alertManager,
                                                                               events);
 
         MockEvent mockEvent = new MockEvent(2l, 3);
@@ -117,15 +130,15 @@ public class RecoveryConditionEvaluatorTest
                                                                                                            alertTriggerFired });
 
         executionStrategy.conditionsSatisfied(event);
-        EasyMock.replay(executionStrategy);
+        replay();
         evaluator.triggerFired(triggerFired);
         evaluator.triggerFired(alertTriggerFired);
         evaluator.triggerFired(triggerFired2);
-        EasyMock.verify(executionStrategy);
+        verify();
         Map expectedEvents = new LinkedHashMap();
         expectedEvents.put(trigger2Id, triggerFired2);
         assertEquals(expectedEvents, events);
-        assertNull(evaluator.getState());
+        assertNull(evaluator.getLastAlertFired());
     }
 
     /**
@@ -147,9 +160,9 @@ public class RecoveryConditionEvaluatorTest
         conditions.add(condition2);
 
         RecoveryConditionEvaluator evaluator = new RecoveryConditionEvaluator(TEST_ALERT_DEF_ID,
-                                                                              alertTriggerId,
+                                                                              alertTriggerId, TEST_RECOVERING_FROM_ALERT_DEF_ID,
                                                                               conditions,
-                                                                              executionStrategy,
+                                                                              executionStrategy, alertManager,
                                                                               events);
 
         MockEvent mockEvent = new MockEvent(2l, 3);
@@ -172,13 +185,13 @@ public class RecoveryConditionEvaluatorTest
                                                                                                            alertTriggerFired });
 
         executionStrategy.conditionsSatisfied(event);
-        EasyMock.replay(executionStrategy);
+        replay();
         evaluator.triggerFired(triggerFired);
         evaluator.triggerFired(alertTriggerFired);
         evaluator.triggerFired(alertTriggerFired2);
-        EasyMock.verify(executionStrategy);
+        verify();
         assertTrue(events.isEmpty());
-        assertEquals(alertTriggerFired2, evaluator.getState());
+        assertEquals(alertTriggerFired2, evaluator.getLastAlertFired());
     }
 
     /**
@@ -199,9 +212,9 @@ public class RecoveryConditionEvaluatorTest
         conditions.add(condition2);
 
         RecoveryConditionEvaluator evaluator = new RecoveryConditionEvaluator(TEST_ALERT_DEF_ID,
-                                                                              alertTriggerId,
+                                                                              alertTriggerId, TEST_RECOVERING_FROM_ALERT_DEF_ID,
                                                                               conditions,
-                                                                              executionStrategy,
+                                                                              executionStrategy, alertManager,
                                                                               events);
 
         MockEvent alertFired = new MockEvent(3l, 4);
@@ -214,12 +227,12 @@ public class RecoveryConditionEvaluatorTest
         alertFired2.setTimestamp(System.currentTimeMillis() - (5 * 60 * 1000));
         TriggerFiredEvent alertTriggerFired2 = new TriggerFiredEvent(alertTriggerId, alertFired2);
 
-        EasyMock.replay(executionStrategy);
+        replay();
         evaluator.triggerFired(alertTriggerFired);
         evaluator.triggerFired(alertTriggerFired2);
-        EasyMock.verify(executionStrategy);
+        verify();
         assertTrue(events.isEmpty());
-        assertEquals(alertTriggerFired, evaluator.getState());
+        assertEquals(alertTriggerFired, evaluator.getLastAlertFired());
     }
 
     /**
@@ -242,9 +255,9 @@ public class RecoveryConditionEvaluatorTest
         conditions.add(condition2);
 
         RecoveryConditionEvaluator evaluator = new RecoveryConditionEvaluator(TEST_ALERT_DEF_ID,
-                                                                              alertTriggerId,
+                                                                              alertTriggerId, TEST_RECOVERING_FROM_ALERT_DEF_ID,
                                                                               conditions,
-                                                                              executionStrategy,
+                                                                              executionStrategy, alertManager,
                                                                               events);
 
         MockEvent mockEvent = new MockEvent(2l, 3);
@@ -268,14 +281,14 @@ public class RecoveryConditionEvaluatorTest
 
         executionStrategy.conditionsSatisfied(event);
 
-        EasyMock.replay(executionStrategy);
+        replay();
         evaluator.triggerFired(triggerFired);
         evaluator.triggerNotFired(triggerNotFired);
         evaluator.triggerFired(alertTriggerFired);
-        EasyMock.verify(executionStrategy);
+        verify();
 
         assertTrue(events.isEmpty());
-        assertNull(evaluator.getState());
+        assertNull(evaluator.getLastAlertFired());
     }
 
     /**
@@ -296,9 +309,9 @@ public class RecoveryConditionEvaluatorTest
         conditions.add(condition2);
 
         RecoveryConditionEvaluator evaluator = new RecoveryConditionEvaluator(TEST_ALERT_DEF_ID,
-                                                                              alertTriggerId,
+                                                                              alertTriggerId, TEST_RECOVERING_FROM_ALERT_DEF_ID,
                                                                               conditions,
-                                                                              executionStrategy,
+                                                                              executionStrategy, alertManager,
                                                                               events);
 
         MockEvent mockEvent = new MockEvent(2l, 3);
@@ -316,12 +329,12 @@ public class RecoveryConditionEvaluatorTest
                                                                                                            alertTriggerFired });
 
         executionStrategy.conditionsSatisfied(event);
-        EasyMock.replay(executionStrategy);
+        replay();
         evaluator.triggerFired(triggerFired);
         evaluator.triggerFired(alertTriggerFired);
-        EasyMock.verify(executionStrategy);
+        verify();
         assertTrue(events.isEmpty());
-        assertNull(evaluator.getState());
+        assertNull(evaluator.getLastAlertFired());
     }
 
     /**
@@ -343,9 +356,9 @@ public class RecoveryConditionEvaluatorTest
         conditions.add(condition2);
 
         RecoveryConditionEvaluator evaluator = new RecoveryConditionEvaluator(TEST_ALERT_DEF_ID,
-                                                                              alertTriggerId,
+                                                                              alertTriggerId, TEST_RECOVERING_FROM_ALERT_DEF_ID,
                                                                               conditions,
-                                                                              executionStrategy,
+                                                                              executionStrategy, alertManager,
                                                                               events);
 
         MockEvent mockEvent = new MockEvent(Long.valueOf(2l), Integer.valueOf(3));
@@ -364,16 +377,16 @@ public class RecoveryConditionEvaluatorTest
 
         executionStrategy.conditionsSatisfied(event);
 
-        EasyMock.replay(executionStrategy);
+        replay();
         evaluator.triggerFired(triggerFired);
         evaluator.triggerFired(alertTriggerFired);
-        EasyMock.verify(executionStrategy);
+        verify();
 
         Map expectedEvents = new LinkedHashMap();
         expectedEvents.put(trigger2Id, triggerFired);
 
         assertTrue(events.isEmpty());
-        assertNull(evaluator.getState());
+        assertNull(evaluator.getLastAlertFired());
     }
 
     /**
@@ -395,9 +408,9 @@ public class RecoveryConditionEvaluatorTest
         conditions.add(condition2);
 
         RecoveryConditionEvaluator evaluator = new RecoveryConditionEvaluator(TEST_ALERT_DEF_ID,
-                                                                              alertTriggerId,
+                                                                              alertTriggerId, TEST_RECOVERING_FROM_ALERT_DEF_ID,
                                                                               conditions,
-                                                                              executionStrategy,
+                                                                              executionStrategy, alertManager,
                                                                               events);
 
         MockEvent mockEvent = new MockEvent(2l, 3);
@@ -410,16 +423,16 @@ public class RecoveryConditionEvaluatorTest
         alertFired.setTimestamp(System.currentTimeMillis() - (3 * 60 * 1000));
         TriggerFiredEvent alertTriggerFired = new TriggerFiredEvent(alertTriggerId, alertFired);
 
-        EasyMock.replay(executionStrategy);
+        replay();
         evaluator.triggerFired(triggerFired);
         evaluator.triggerFired(alertTriggerFired);
-        EasyMock.verify(executionStrategy);
+        verify();
 
         Map expectedEvents = new LinkedHashMap();
         expectedEvents.put(trigger2Id, triggerFired);
 
         assertEquals(expectedEvents, events);
-        assertEquals(alertTriggerFired, evaluator.getState());
+        assertEquals(alertTriggerFired, evaluator.getLastAlertFired());
     }
 
     /**
@@ -441,9 +454,9 @@ public class RecoveryConditionEvaluatorTest
         conditions.add(condition2);
 
         RecoveryConditionEvaluator evaluator = new RecoveryConditionEvaluator(TEST_ALERT_DEF_ID,
-                                                                              alertTriggerId,
+                                                                              alertTriggerId, TEST_RECOVERING_FROM_ALERT_DEF_ID,
                                                                               conditions,
-                                                                              executionStrategy,
+                                                                              executionStrategy, alertManager,
                                                                               events);
 
         MockEvent mockEvent = new MockEvent(Long.valueOf(2l), Integer.valueOf(3));
@@ -466,14 +479,14 @@ public class RecoveryConditionEvaluatorTest
                                                                                                            alertTriggerFired });
 
         executionStrategy.conditionsSatisfied(event);
-        EasyMock.replay(executionStrategy);
+        replay();
         evaluator.triggerFired(triggerFired);
         evaluator.triggerFired(alertTriggerFired);
         evaluator.triggerFired(triggerFired2);
-        EasyMock.verify(executionStrategy);
+        verify();
 
         assertTrue(events.isEmpty());
-        assertNull(evaluator.getState());
+        assertNull(evaluator.getLastAlertFired());
     }
 
     /**
@@ -494,9 +507,9 @@ public class RecoveryConditionEvaluatorTest
         conditions.add(condition2);
 
         RecoveryConditionEvaluator evaluator = new RecoveryConditionEvaluator(TEST_ALERT_DEF_ID,
-                                                                              alertTriggerId,
+                                                                              alertTriggerId, TEST_RECOVERING_FROM_ALERT_DEF_ID,
                                                                               conditions,
-                                                                              executionStrategy,
+                                                                              executionStrategy, alertManager,
                                                                               events);
 
         MockEvent mockEvent = new MockEvent(2l, 3);
@@ -519,13 +532,17 @@ public class RecoveryConditionEvaluatorTest
                                                                                                            alertTriggerFired });
 
         executionStrategy.conditionsSatisfied(event);
-        EasyMock.replay(executionStrategy);
+        replay();
         evaluator.triggerFired(triggerFired);
         evaluator.triggerFired(alertTriggerFired);
         evaluator.triggerFired(alertTriggerFired2);
-        EasyMock.verify(executionStrategy);
+        verify();
         assertTrue(events.isEmpty());
-        assertEquals(alertTriggerFired2, evaluator.getState());
+        assertEquals(alertTriggerFired2, evaluator.getLastAlertFired());
+    }
+    
+    private void verify() {
+        EasyMock.verify(alertManager, executionStrategy);
     }
 
 }

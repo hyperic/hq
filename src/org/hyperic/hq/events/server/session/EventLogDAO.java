@@ -30,6 +30,8 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
@@ -52,6 +54,8 @@ import org.hyperic.hq.measurement.server.session.Number;
 public class EventLogDAO extends HibernateDAO {
     private final String TABLE_EVENT_LOG = "EAM_EVENT_LOG";
     private final String TABLE_EAM_NUMBERS = "EAM_NUMBERS";
+    private final Log log =
+        LogFactory.getLog(EventLogDAO.class.getName());
 
     private static final List VIEW_PERMISSIONS = 
         Arrays.asList(new String[] { 
@@ -91,6 +95,24 @@ public class EventLogDAO extends HibernateDAO {
         public EventLog getEventLog() {
             return _e;
         }
+    }
+    
+    EventLog findLog(String typeClass, int instanceId, long timestamp) {
+        String hql = "select l from EventLog l where l.timestamp = :ts and l.instanceId = :instId and l.type = :type";
+        Query q = createQuery(hql)
+        .setLong("ts", timestamp)
+        .setInteger("instId", instanceId)
+        .setString("type",typeClass);
+        
+        List events = q.list();
+        if(events.isEmpty()) {
+            return null;
+        }
+        if(events.size() > 1) {
+            log.warn("Found multiple log entries matching the specified criteria (typeClass=" + typeClass +", instanceId=" + instanceId + 
+                     ", timestamp=" + timestamp + "). Returning the first one.");
+        }
+        return (EventLog) events.iterator().next();
     }
          
     /**

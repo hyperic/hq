@@ -33,6 +33,10 @@
     <property name="status" type="string">
       <column name="STATUS" length="100"/>
     </property>
+    
+    <property name="instanceId" type="integer">
+    	<column name="INSTANCE_ID" />
+    </property>
   </class>
 
 </hibernate-mapping>

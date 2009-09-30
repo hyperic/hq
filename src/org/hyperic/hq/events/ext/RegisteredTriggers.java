@@ -47,17 +47,15 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
     private static final Object INIT_LOCK = new Object();
 
     private static RegisteredTriggers INSTANCE;
+    
+    private boolean initialized = false;
 
     private Object triggerUpdateLock = new Object();
 
     private Map triggers = new ConcurrentHashMap();
 
-    private RegisteredTriggerManagerLocal registeredTriggerManager;
-
-    /** Creates a new instance of RegisteredTriggers */
-    RegisteredTriggers(RegisteredTriggerManagerLocal registeredTriggerManager) {
-        this.registeredTriggerManager = registeredTriggerManager;
-
+    RegisteredTriggers() {
+        
     }
 
     Map getTriggers() {
@@ -65,7 +63,17 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
     }
 
     void init() {
-        registeredTriggerManager.initializeTriggers(this);
+        synchronized (INIT_LOCK) {
+            this.triggers = new ConcurrentHashMap();
+            RegisteredTriggerManagerEJBImpl.getOne().initializeTriggers();
+            initialized = true;
+        }
+    }
+    
+    void setInitialized(boolean initialized) {
+        synchronized (INIT_LOCK) {
+            this.initialized = initialized;
+        }
     }
 
     public Collection getInterestedTriggers(Class eventClass, Integer instanceId) {
@@ -162,12 +170,27 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
             trigger.setEnabled(enabled);
         }
     }
+    
+    public boolean isInitialized() {
+        synchronized (INIT_LOCK) {
+            return initialized;
+        }
+    }
+    
+   private static RegisteredTriggers getAndInitialize() {
+       synchronized (INIT_LOCK) {
+           RegisteredTriggers instance = getInstance();
+           if(!instance.isInitialized()) {
+               instance.init();
+           }
+           return instance;
+       }
+   }
 
-    private static RegisteredTriggers getInstance() {
+    public static RegisteredTriggers getInstance() {
         synchronized (INIT_LOCK) {
             if (INSTANCE == null) {
-                INSTANCE = new RegisteredTriggers(RegisteredTriggerManagerEJBImpl.getOne());
-                INSTANCE.init();
+                INSTANCE = new RegisteredTriggers();
             }
         }
         return INSTANCE;
@@ -175,7 +198,7 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
     
     public static void reset() {
         synchronized (INIT_LOCK) {
-            INSTANCE = null;
+            getInstance().setInitialized(false);
         }
     }
 
@@ -185,11 +208,11 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
         // Can't very well look up a null object
         if (event.getInstanceId() != null) {
             // Get the triggers that are interested in this instance
-            trigs.addAll(RegisteredTriggers.getInstance()
+            trigs.addAll(RegisteredTriggers.getAndInitialize()
                                            .getInterestedTriggers(event.getClass(), event.getInstanceId()));
         }
         // Get the triggers that are interested in all instances
-        trigs.addAll(RegisteredTriggers.getInstance().getInterestedTriggers(event.getClass(), KEY_ALL));
+        trigs.addAll(RegisteredTriggers.getAndInitialize().getInterestedTriggers(event.getClass(), KEY_ALL));
         return trigs;
     }
 
@@ -203,14 +226,14 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
         // Can't very well look up a null object
         if (event.getInstanceId() != null) {
             // Get the triggers that are interested in this instance
-            Collection trigs = RegisteredTriggers.getInstance().getInterestedTriggers(event.getClass(),
+            Collection trigs = RegisteredTriggers.getAndInitialize().getInterestedTriggers(event.getClass(),
                                                                                       event.getInstanceId());
             if (trigs.size() > 0)
                 return true;
         }
 
         // Check the triggers that are interested in all instances
-        Collection trigs = RegisteredTriggers.getInstance().getInterestedTriggers(event.getClass(), KEY_ALL);
+        Collection trigs = RegisteredTriggers.getAndInitialize().getInterestedTriggers(event.getClass(), KEY_ALL);
         return (trigs.size() > 0);
     }
 

@@ -1,14 +1,13 @@
 package org.hyperic.hq.events.server.session;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 
 /**
@@ -19,31 +18,20 @@ import org.hyperic.hq.zevents.ZeventEnqueuer;
 public class AlertConditionEvaluatorFactoryImpl implements AlertConditionEvaluatorFactory {
 
     private final ZeventEnqueuer zeventEnqueuer;
+    
+    private final AlertManagerLocal alertManager;
 
     private final Log log = LogFactory.getLog(AlertConditionEvaluatorFactoryImpl.class);
-
-    private final Map alertConditionEvaluatorStates;
-
-    private final Map executionStrategyStates;
 
     /**
      * 
      * @param zeventEnqueuer The {@link ZeventEnqueuer} to pass to created
      *        {@link AlertConditionEvaluator}s
-     * @param evaluatorStates The saved state (if any) of
-     *        {@link AlertConditionEvaluator}s created the last time the server
-     *        was running. Keyed by alert definition ID.
-     * @param executionStrategyStates The saved state (if any) of
-     *        {@link ExecutionStrategy}s created the last time the server was
-     *        running. Keyed by alert definition ID.
      */
-    public AlertConditionEvaluatorFactoryImpl(ZeventEnqueuer zeventEnqueuer,
-                                              Map evaluatorStates,
-                                              Map executionStrategyStates)
+    public AlertConditionEvaluatorFactoryImpl(ZeventEnqueuer zeventEnqueuer, AlertManagerLocal alertManager)
     {
         this.zeventEnqueuer = zeventEnqueuer;
-        this.alertConditionEvaluatorStates = evaluatorStates;
-        this.executionStrategyStates = executionStrategyStates;
+        this.alertManager = alertManager;
     }
 
     public AlertConditionEvaluator create(AlertDefinition alertDefinition) {
@@ -56,19 +44,21 @@ public class AlertConditionEvaluatorFactoryImpl implements AlertConditionEvaluat
         AlertConditionEvaluator evaluator;
         if (alertDefinition.isRecoveryDefinition()) {
             Integer alertTriggerId = Integer.valueOf(0);
+            Integer recoveringFromAlertDefId = Integer.valueOf(0);
             List conditions = new ArrayList();
             for (Iterator iter = alertDefinition.getConditions().iterator(); iter.hasNext();) {
                 AlertCondition condition = (AlertCondition) iter.next();
                 if (condition.getType() == EventConstants.TYPE_ALERT) {
                     alertTriggerId = condition.getTrigger().getId();
+                    recoveringFromAlertDefId = Integer.valueOf(condition.getMeasurementId());
                 } else {
                     conditions.add(condition);
                 }
             }
             evaluator = new RecoveryConditionEvaluator(alertDefinition.getId(),
-                                                       alertTriggerId,
+                                                       alertTriggerId, recoveringFromAlertDefId,
                                                        conditions,
-                                                       createExecutionStrategy(alertDefinition));
+                                                       createExecutionStrategy(alertDefinition), alertManager);
         } else if (alertDefinition.getConditions().size() > 1) {
             evaluator = new MultiConditionEvaluator(alertDefinition.getId(),
                                                     alertDefinition.getConditions(),
@@ -77,12 +67,7 @@ public class AlertConditionEvaluatorFactoryImpl implements AlertConditionEvaluat
         } else {
             evaluator = new SingleConditionEvaluator(alertDefinition.getId(), createExecutionStrategy(alertDefinition));
         }
-        // take state out of the map so if the ACE is re-created on modification
-        // of alert def, we don't use the initial state
-        Serializable initialState = (Serializable) alertConditionEvaluatorStates.remove(alertDefinition.getId());
-        if (initialState != null) {
-            evaluator.initialize(initialState);
-        }
+      
         return evaluator;
     }
 
@@ -100,12 +85,6 @@ public class AlertConditionEvaluatorFactoryImpl implements AlertConditionEvaluat
             log.warn("Encountered an alert with unsupported frequency type: " + alertDefinition.getFrequencyType() +
                      ".  This alert will be treated as frequency type everytime.");
             executionStrategy = new SingleAlertExecutionStrategy(zeventEnqueuer);
-        }
-        // take state out of the map so if the ACE is re-created on modification
-        // of alert def, we don't use the initial state
-        Serializable initialState = (Serializable) executionStrategyStates.remove(alertDefinition.getId());
-        if (initialState != null) {
-            executionStrategy.initialize(initialState);
         }
         return executionStrategy;
     }

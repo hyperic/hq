@@ -57,13 +57,16 @@ import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEventSource;
@@ -94,6 +97,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
     private Pager valuePager;
     private Pager pojoPager;
+    private EventLogManagerLocal eventLogManager;
 
     public AlertManagerEJBImpl() {}
 
@@ -153,6 +157,28 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                                 AuthzSubject subject)
     {
         alert.createActionLog(detail, action, subject);
+    }
+    
+    /**
+     * @param alertDefinitionId The ID of the alert definition
+     * @param alertTriggerID The ID of the alert trigger that creates the {@link TriggerFiredEvent}s
+     * @return If the most recently created alert with specified definition ID is unfixed, returns the TriggerFiredEvent from the alert trigger (wrapping an AlertFiredEvent).  Else returns null.
+     * May return null if alerts or event log entries have been purged.  
+     * @ejb:interface-method
+     */
+    public TriggerFiredEvent getUnfixedAlertTriggerFiredEvent(Integer alertDefinitionId, Integer alertTriggerId) {
+        Alert mostRecentAlert = findLastByDefinition(alertDefinitionId);
+        if(mostRecentAlert != null && !(mostRecentAlert.isFixed())) {
+            EventLog eventLog = eventLogManager.findLog(AlertFiredEvent.class.getName(), alertDefinitionId.intValue(), mostRecentAlert.getCtime());
+            if(eventLog == null) {
+                log.warn("Could not find log event corresponding to an unfixed alert with definition ID " + alertDefinitionId + 
+                         ".  This could be due to event log purging.  An initial recovery alert may not fire.");
+                return null;
+            }
+            AlertFiredEvent alertFired = new AlertFiredEvent(mostRecentAlert.getId(),alertDefinitionId, new AppdefEntityID(eventLog.getResource()),eventLog.getSubject(),eventLog.getTimestamp(),eventLog.getDetail());
+            return new TriggerFiredEvent(alertTriggerId,alertFired);
+        }
+        return null;
     }
 
     public void addConditionLogs(Alert alert, AlertConditionLogValue[] logs) {
@@ -236,6 +262,21 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         try {
             AlertDefinition def = getAlertDefDAO().findById(id);
             return getAlertDAO().findLastByDefinition(def, false);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    /**
+     * Find the last alert by definition ID
+     * @throws PermissionException
+     *
+     * @ejb:interface-method
+     */
+    public Alert findLastByDefinition(Integer id) {
+        try {
+            AlertDefinition def = getAlertDefDAO().findById(id);
+            return getAlertDAO().findLastByDefinition(def);
         } catch (Exception e) {
             return null;
         }
@@ -742,6 +783,10 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         }
     }
 
+    void setEventLogManager(EventLogManagerLocal eventLogManager) {
+        this.eventLogManager = eventLogManager;
+    }
+
     public void ejbCreate() throws CreateException {
         try {
         	// We need to phase out the Value objects...
@@ -752,6 +797,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         } catch ( Exception e ) {
             throw new CreateException("Could not create value pager:" + e);
         }
+        this.eventLogManager = EventLogManagerEJBImpl.getOne();
     }
 
     public void ejbRemove() {}

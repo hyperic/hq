@@ -114,7 +114,7 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         }
 
         EventLog e = new EventLog(r, subject, event.getClass().getName(),
-                                  detail, event.getTimestamp(), status);
+                                  detail, event.getTimestamp(), status, event.getInstanceId());
         if (save) {
             return getEventLogDAO().create(e);
         } else {
@@ -131,6 +131,16 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public void insertEventLogs(EventLog[] eventLogs) {
         getEventLogDAO().insertLogs(eventLogs);
+    }
+    
+    
+    /**
+     * Finds a unique log entry with the specified event type, instance ID, and timestamp.  Returns null if no such entry found.  
+     * If multiple entries are found, returns first one found.
+     * @ejb:interface-method
+     */
+    public EventLog findLog(String typeClass, int instanceId, long timestamp) {
+        return getEventLogDAO().findLog(typeClass, instanceId, timestamp);
     }
     
     /** 

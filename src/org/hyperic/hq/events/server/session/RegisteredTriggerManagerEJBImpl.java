@@ -17,6 +17,7 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -40,6 +41,7 @@ import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisterableTriggerRepository;
+import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
@@ -104,10 +106,9 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public void initializeTriggers(RegisterableTriggerRepository registeredTriggerRepository) {
+    public void initializeTriggers() {
         log.debug("Initializing triggers");
         long startTime = System.currentTimeMillis();
-        this.registeredTriggerRepository = registeredTriggerRepository;
         // Only initialize the enabled triggers. If disabled ones become enabled
         // we will lazy init
         log.debug("Fetching enabled triggers");
@@ -122,7 +123,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     }
 
     private void registerTriggers(Integer alertDefId) {
-        if (this.registeredTriggerRepository == null) {
+        if (! this.registeredTriggerRepository.isInitialized()) {
             // The repository hasn't been initialized yet. Triggers will be
             // created when that occurs.
             return;
@@ -186,7 +187,12 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
                     log.warn("Unable to find AlertDefinition for trigger with id " + tv.getId() +
                              ".  These alerts will not fire.");
                 } else if (alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(def.getId()) == null) {
-                    alertConditionEvaluatorRepository.addAlertConditionEvaluator(alertConditionEvaluatorFactory.create(def));
+                    AlertConditionEvaluator alertConditionEvaluator = alertConditionEvaluatorFactory.create(def);
+                    Serializable initialState = (Serializable) alertConditionEvaluatorRepository.getStateRepository().getAlertConditionEvaluatorStates().get(def.getId());
+                    alertConditionEvaluator.initialize(initialState);
+                    Serializable initialExStrategyState = (Serializable) alertConditionEvaluatorRepository.getStateRepository().getExecutionStrategyStates().get(def.getId());
+                    alertConditionEvaluator.getExecutionStrategy().initialize(initialExStrategyState);
+                    alertConditionEvaluatorRepository.addAlertConditionEvaluator(alertConditionEvaluator);
                 }
             } catch (Exception e) {
                 log.error("Error retrieving alert definition for trigger", e);
@@ -260,7 +266,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     }
 
     void setTriggersEnabled(final Integer alertDefinitionId, final Collection triggerIds, final boolean enabled) {
-        if (this.registeredTriggerRepository != null) {
+        if (this.registeredTriggerRepository.isInitialized()) {
             if (enabled == true && !(triggerIds.isEmpty())) {
                 Integer triggerId = (Integer) triggerIds.iterator().next();
                 if (registeredTriggerRepository.getTriggerById(triggerId) == null) {
@@ -300,7 +306,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
 
     void unregisterTriggers(Integer alertDefinitionId, Collection triggers) {
         // No point unregistering if repository has not been intialized
-        if (this.registeredTriggerRepository != null) {
+        if (this.registeredTriggerRepository.isInitialized()) {
             for (Iterator it = triggers.iterator(); it.hasNext();) {
                 RegisteredTrigger trigger = (RegisteredTrigger) it.next();
                 this.registeredTriggerRepository.removeTrigger(trigger.getId());
@@ -515,15 +521,10 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         if (log.isDebugEnabled()) {
             log.debug("ejbCreate called on " + this);
         }
-
+        this.registeredTriggerRepository = RegisteredTriggers.getInstance();
         this.zeventEnqueuer = ZeventManager.getInstance();
         this.alertConditionEvaluatorRepository = AlertConditionEvaluatorRepositoryImpl.getInstance();
-        this.alertConditionEvaluatorFactory = 
-            new AlertConditionEvaluatorFactoryImpl(
-                    zeventEnqueuer,
-                    alertConditionEvaluatorRepository.getStateRepository().getAlertConditionEvaluatorStates(),
-                    alertConditionEvaluatorRepository.getStateRepository().getExecutionStrategyStates());
-        
+        this.alertConditionEvaluatorFactory = new AlertConditionEvaluatorFactoryImpl(zeventEnqueuer, AlertManagerEJBImpl.getOne());
         this.triggerDAO = DAOFactory.getDAOFactory().getTriggerDAO();        
     }
 

@@ -54,7 +54,8 @@ public class RegisteredTriggersTest
     public void setUp() throws Exception {
         super.setUp();
         this.registeredTriggerManager = EasyMock.createMock(RegisteredTriggerManagerLocal.class);
-        this.registeredTriggers = new RegisteredTriggers(registeredTriggerManager);
+        this.registeredTriggers = new RegisteredTriggers();
+        this.registeredTriggers.setInitialized(true);
         AlertRegulator.setInstance(new MockAlertRegulator(true));
     }
 
@@ -119,17 +120,7 @@ public class RegisteredTriggersTest
         EasyMock.verify(trigger1);
     }
 
-    /**
-     * Verifies that the init method makes the proper call to its RTM
-     */
-    public void testInit() {
-        registeredTriggerManager.initializeTriggers(registeredTriggers);
-        replay();
-        registeredTriggers.init();
-        verify();
-    }
-
-
+  
     /**
      * Verifies successful register of triggers and retrieval through instance
      * and static methods
