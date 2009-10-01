@@ -39,10 +39,13 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.jdbc.DBUtil;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class BaselineDAO extends HibernateDAO {
     private Log _log = LogFactory.getLog(BaselineDAO.class);
 
+    @Autowired
     public BaselineDAO(SessionFactory f) {
         super(Baseline.class, f);
     }

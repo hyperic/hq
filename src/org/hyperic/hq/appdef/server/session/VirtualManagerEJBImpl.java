@@ -55,6 +55,7 @@ import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 
@@ -75,7 +76,7 @@ public class VirtualManagerEJBImpl extends AppdefSessionEJB
     private Log log = LogFactory.getLog(
         "org.hyperic.hq.appdef.server.session.VirtualManagerEJBImpl");
 
-    private VirtualDAO virtualDAO;
+    private VirtualDAO virtualDAO = Bootstrap.getBean(VirtualDAO.class);
 
     private VirtualDAO getVirtualDAO() {
         return virtualDAO;

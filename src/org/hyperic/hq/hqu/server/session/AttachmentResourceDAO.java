@@ -33,10 +33,13 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
-
-class AttachmentResourceDAO
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
+public class AttachmentResourceDAO
     extends HibernateDAO
 {
+    @Autowired
     AttachmentResourceDAO(SessionFactory f) {
         super(AttachmentResource.class, f);
     }

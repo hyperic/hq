@@ -9,10 +9,6 @@
 	<configs>
 		<config>etc/META-INF/spring/dao-context.xml</config>
 		<config>etc/META-INF/spring/ejb-context.xml</config>
-		<config>unittest/resources/test-context.xml</config>
-		<config>etc/META-INF/spring/transaction-context.xml</config>
-		<config>etc/META-INF/spring/infrastructure-context.xml</config>
-		<config>etc/META-INF/spring/core-context.xml</config>
 	</configs>
 	<configSets>
 	</configSets>

@@ -3,7 +3,6 @@ package org.hyperic.hq.events;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -19,6 +18,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -37,6 +37,13 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
     private  Map operations = new HashMap();
     private OperationDAO operationDAO;
     private ResourceTypeDAO resourceTypeDAO;
+    
+    
+    @Autowired
+    public DefaultAlertPermissionManager(OperationDAO operationDAO, ResourceTypeDAO resourceTypeDAO) {
+        this.operationDAO = operationDAO;
+        this.resourceTypeDAO = resourceTypeDAO;
+    }
 
     private  void checkPermission(Integer subjectId, String rtName, Integer instId, String opName) throws PermissionException
     {

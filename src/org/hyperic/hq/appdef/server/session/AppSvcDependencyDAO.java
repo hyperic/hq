@@ -7,6 +7,8 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -32,9 +34,10 @@ import org.hyperic.hq.dao.HibernateDAO;
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
+@Repository
 public class AppSvcDependencyDAO extends HibernateDAO
 {
+    @Autowired
     public AppSvcDependencyDAO(SessionFactory f) {
         super(AppSvcDependency.class, f);
     }

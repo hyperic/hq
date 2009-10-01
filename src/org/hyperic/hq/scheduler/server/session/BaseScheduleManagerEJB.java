@@ -37,6 +37,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.hyperic.hq.scheduler.shared.SchedulerUtil;
 import org.hyperic.util.StringUtil;
@@ -70,7 +71,7 @@ public abstract class BaseScheduleManagerEJB {
     protected abstract String getJobPrefix ();
     protected abstract String getSchedulePrefix ();
 
-    protected DBUtil dbUtil;
+    protected DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
 
     // Helper methods
     protected String getPrefix(AppdefEntityID id)

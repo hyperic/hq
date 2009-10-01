@@ -60,6 +60,7 @@ import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PermissionManagerImpl
     extends PermissionManager
@@ -69,6 +70,7 @@ public class PermissionManagerImpl
 
     private final String _falseToken;
 
+   
     private DBUtil dbUtil;
 
     private static final String VIEWABLE_SELECT =
@@ -107,9 +109,10 @@ public class PermissionManagerImpl
         }
     }
 
-    public PermissionManagerImpl() {
+    @Autowired
+    public PermissionManagerImpl(DBUtil dbUtil) {
         Connection conn = null;
-
+        this.dbUtil = dbUtil;
         try {
             conn = getConnection();
             _falseToken = dbUtil.getBooleanValue(false, conn);

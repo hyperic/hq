@@ -32,9 +32,12 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class ServiceTypeDAO extends HibernateDAO
 {
+    @Autowired
     public ServiceTypeDAO(SessionFactory f) {
         super(ServiceType.class, f);
     }

@@ -52,6 +52,7 @@ import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
 import org.hyperic.util.jdbc.DBUtil;
 
@@ -105,7 +106,7 @@ public class HQDBHealthStartupListener
         private final String HQADMIN_EMAIL_SQL = "SELECT email_address FROM EAM_SUBJECT WHERE id = "
                                                     + AuthzConstants.rootSubjectId;
         private String hqadminEmail = null;
-        private DBUtil dbUtil;
+        private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
 
         public void run() {
             Connection conn = null;

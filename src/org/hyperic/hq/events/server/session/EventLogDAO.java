@@ -50,7 +50,9 @@ import org.hyperic.hq.authz.shared.PermissionManager.RolePermNativeSQL;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.measurement.server.session.Number;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class EventLogDAO extends HibernateDAO {
     private final String TABLE_EVENT_LOG = "EAM_EVENT_LOG";
     private final String TABLE_EAM_NUMBERS = "EAM_NUMBERS";
@@ -64,6 +66,7 @@ public class EventLogDAO extends HibernateDAO {
             AuthzConstants.groupOpViewResourceGroup,
         });
 
+    @Autowired
     public EventLogDAO(SessionFactory f) {
         super(EventLog.class, f);
     }

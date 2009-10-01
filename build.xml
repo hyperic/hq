@@ -374,24 +374,7 @@
       <replacefilter token="@@@server.quartzDelegate@@@" value="${quartz.delegate}"/>
     </replace>
 
-    <!-- TODO: Create separate jars for each component -->
-    <jar file="${ear.dir}/hq.jar" basedir="${build.dir}/classes" >
-      <include name="images/**" />
-      <include name="org/hyperic/**" />
-      <exclude name="org/hyperic/hq/ui/**" />
-      <exclude name="org/hyperic/tools/ant/**" />
-      <exclude name="org/hyperic/tools/db/**" />
-      <exclude name="org/hyperic/hq/plugin/**"/>
-      <!-- Exclude unit tests -->
-      <exclude name="org/hyperic/**/*_test*"/>
-    </jar>
-
-    <!-- We only want server and shared classes for the UI -->
-    <jar file="${ear.dir}/hq.jar" basedir="${build.dir}/classes"
-         update="true">
-      <include name="org/hyperic/hq/ui/server/session/**"/>
-      <include name="org/hyperic/hq/ui/shared/**"/>
-    </jar>
+   
 
     <!-- Write version resource -->
     <antcall target="write-version-file">
@@ -403,12 +386,7 @@
       <fileset dir="etc" includes="product.properties" />
     </copy>
 
-    <jar basedir="${build.dir}/src" 
-         jarfile="${ear.dir}/hq.jar"
-         update="true">
-      <include name="version.properties"/>
-      <include name="product.properties"/>
-    </jar>
+    <antcall target="pack-hq-jar"/>
 
     <copy todir="${ear.dir}/lib" >
       <fileset dir="${thirdparty.lib}" >
@@ -511,6 +489,34 @@
           file="${thirdparty.lib}/jdom-1.1.jar" />
 
     <touch file="${ear.dir}/META-INF/application.xml" />
+  </target>
+	
+  <target name="pack-hq-jar">
+  	 <!-- TODO: Create separate jars for each component -->
+  	    <jar file="${ear.dir}/hq.jar" basedir="${build.dir}/classes" >
+  	      <include name="images/**" />
+  	      <include name="org/hyperic/**" />
+  	      <exclude name="org/hyperic/hq/ui/**" />
+  	      <exclude name="org/hyperic/tools/ant/**" />
+  	      <exclude name="org/hyperic/tools/db/**" />
+  	      <exclude name="org/hyperic/hq/plugin/**"/>
+  	      <!-- Exclude unit tests -->
+  	      <exclude name="org/hyperic/**/*_test*"/>
+  	    </jar>
+
+  	    <!-- We only want server and shared classes for the UI -->
+  	    <jar file="${ear.dir}/hq.jar" basedir="${build.dir}/classes"
+  	         update="true">
+  	      <include name="org/hyperic/hq/ui/server/session/**"/>
+  	      <include name="org/hyperic/hq/ui/shared/**"/>
+  	    </jar>
+  	
+  		<jar basedir="${build.dir}/src" 
+  	         jarfile="${ear.dir}/hq.jar"
+  	         update="true">
+  	      <include name="version.properties"/>
+  	      <include name="product.properties"/>
+  	    </jar>
   </target>
 
   <target name="pack-ear" depends="pack-ear-files,write-ear-manifest"/>

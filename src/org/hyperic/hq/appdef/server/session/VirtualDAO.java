@@ -33,12 +33,16 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.Virtual;
 import org.hyperic.hq.dao.HibernateDAO;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class VirtualDAO extends HibernateDAO {
     private ResourceDAO resourceDAO;
 
-    public VirtualDAO(SessionFactory f) {
+    @Autowired
+    public VirtualDAO(SessionFactory f, ResourceDAO resourceDAO) {
         super(Virtual.class, f);
+        this.resourceDAO = resourceDAO;
     }
 
     public void save(Virtual entity) {

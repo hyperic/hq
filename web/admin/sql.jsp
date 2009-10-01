@@ -290,7 +290,7 @@ try {
             }
         }
 
-        conn = Bootstrap.getBean(DBUtil.class).getConnByContext(ctx, HQConstants.DATASOURCE);
+        conn = ((DBUtil)Bootstrap.getBean(DBUtil.class)).getConnByContext(ctx, HQConstants.DATASOURCE);
 
         int numStatements = sqlList.size();
         for ( int i=0; i<numStatements; i++ ) {

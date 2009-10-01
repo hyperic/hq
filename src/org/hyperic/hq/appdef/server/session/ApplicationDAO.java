@@ -41,16 +41,21 @@ import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.HibernateDAO;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class ApplicationDAO extends HibernateDAO
 {
     private static final Log log = LogFactory.getLog(ApplicationDAO.class);
 
-    private AppSvcDependencyDAO adao;
+    private AppSvcDependencyDAO adao; 
 
-    public ApplicationDAO(SessionFactory f) {
+    @Autowired
+    public ApplicationDAO(SessionFactory f, AppSvcDependencyDAO appSvcDependencyDAO) {
         super(Application.class, f);
+        this.adao = appSvcDependencyDAO;
     }
 
     public Application findById(Integer id) {

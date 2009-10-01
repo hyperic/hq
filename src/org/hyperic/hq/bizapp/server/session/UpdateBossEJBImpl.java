@@ -55,6 +55,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigAudit;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
 import org.hyperic.util.thread.LoggingThreadGroup;
@@ -72,7 +73,7 @@ public class UpdateBossEJBImpl
     extends BizappSessionEJB
     implements SessionBean
 {
-    private UpdateStatusDAO _updateDAO;
+    private UpdateStatusDAO _updateDAO = Bootstrap.getBean(UpdateStatusDAO.class);
     private final String CHECK_URL =  "http://updates.hyperic.com/hq-updates";
 
     private final Log _log = LogFactory.getLog(UpdateBossEJBImpl.class);

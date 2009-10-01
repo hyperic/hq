@@ -38,8 +38,11 @@ import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class RoleDAO extends HibernateDAO {
+    @Autowired
     public RoleDAO(SessionFactory f) {
         super(Role.class, f);
     }

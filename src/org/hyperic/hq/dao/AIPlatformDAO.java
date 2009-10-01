@@ -19,6 +19,8 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -44,11 +46,12 @@ import org.hyperic.hq.autoinventory.AIServer;
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
+@Repository
 public class AIPlatformDAO extends HibernateDAO
 {
     private static final Log log = LogFactory.getLog(AIPlatformDAO.class);
 
+    @Autowired
     public AIPlatformDAO(SessionFactory f) {
         super(AIPlatform.class, f);
     }

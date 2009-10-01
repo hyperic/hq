@@ -42,6 +42,7 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
+import org.hyperic.hq.context.Bootstrap;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -55,49 +56,34 @@ public abstract class AuthzSession {
 
     protected SessionContext ctx;
 
-    @Autowired
-    protected ResourceGroupDAO resourceGroupDao;
-
-    protected AuthzSubjectDAO authzSubjectDAO;
-
-    protected ResourceTypeDAO resourceTypeDAO;
-
-    @Autowired
-    protected ResourceDAO resourceDAO;
-
-    @Autowired
-    protected ResourceRelationDAO resourceRelationDAO;
-
-    protected RoleDAO roleDAO;
-
-    protected OperationDAO operationDAO;
-
+    
+   
     protected ResourceTypeDAO getResourceTypeDAO() {
-        return resourceTypeDAO;
+        return Bootstrap.getBean(ResourceTypeDAO.class);
     }
 
     protected ResourceDAO getResourceDAO() {
-        return resourceDAO;
+        return Bootstrap.getBean(ResourceDAO.class);
     }
 
     protected ResourceGroupDAO getResourceGroupDAO() {
-        return resourceGroupDao;
+        return Bootstrap.getBean(ResourceGroupDAO.class);
     }
 
     private ResourceRelationDAO getResourceRelationDAO() {
-        return resourceRelationDAO;
+        return Bootstrap.getBean(ResourceRelationDAO.class);
     }
 
     protected AuthzSubjectDAO getSubjectDAO() {
-        return authzSubjectDAO;
+        return Bootstrap.getBean(AuthzSubjectDAO.class);
     }
 
     protected RoleDAO getRoleDAO() {
-        return roleDAO;
+        return Bootstrap.getBean(RoleDAO.class);
     }
 
     protected OperationDAO getOperationDAO() {
-        return operationDAO;
+        return Bootstrap.getBean(OperationDAO.class);
     }
 
     protected ResourceType getRootResourceType() {
@@ -116,7 +102,7 @@ public abstract class AuthzSession {
     public AuthzSubject findSubjectByAuth(String name, String authDsn)
         throws SubjectNotFoundException
     {
-         AuthzSubject subject = authzSubjectDAO
+         AuthzSubject subject = getSubjectDAO()
             .findByAuth(name, authDsn);
         if (subject == null) {
             throw new SubjectNotFoundException(

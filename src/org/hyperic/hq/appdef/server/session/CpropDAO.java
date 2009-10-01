@@ -35,9 +35,12 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Cprop;
 import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.dao.HibernateDAO;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class CpropDAO extends HibernateDAO
 {
+    @Autowired
     public CpropDAO(SessionFactory f) {
         super(Cprop.class, f);
     }

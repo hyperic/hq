@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.CreateException;
+import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
@@ -47,6 +48,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.GalertBossLocal;
 import org.hyperic.hq.bizapp.shared.GalertBossUtil;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
@@ -86,33 +88,34 @@ import org.springframework.ejb.support.AbstractStatelessSessionBean;
 * @ejb:home local-extends="javax.ejb.EJBLocalHome"
 * @ejb:transaction type="Required"
 */
-public class GalertBossEJBImpl extends AbstractStatelessSessionBean
+public class GalertBossEJBImpl  implements SessionBean 
 {
     private final Log _log = LogFactory.getLog(GalertBossEJBImpl.class);
 
     private SessionManager          _sessMan;
-    private GalertManager      _galertMan;
-    private GtriggerManagerLocal    _triggerMan;
-
-    private AlertPermissionManager alertPermissionManager;
-    private static final String CONTEXT_ALERT_PERM_MGR_ID = "alertPermissionManager";
+   
+    
+   
 
     public GalertBossEJBImpl() {
         _sessMan = SessionManager.getInstance();
-        try {
-            _galertMan  = GalertManagerImpl.getOne();
-            _triggerMan = GtriggerManagerEJBImpl.getOne();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+       
+    }
+
+    public GalertManager getGalertMan() {
+        return Bootstrap.getBean(GalertManager.class);
+    }
+
+    public GtriggerManagerLocal getTriggerMan() {
+        return  Bootstrap.getBean(GtriggerManagerLocal.class);
     }
 
 
 
-    @Override
-    protected void onEjbCreate() throws CreateException {
-        this.alertPermissionManager = (AlertPermissionManager) getBeanFactory().getBean(CONTEXT_ALERT_PERM_MGR_ID);
+    public AlertPermissionManager getAlertPermissionManager() {
+        return  Bootstrap.getBean(AlertPermissionManager.class);
     }
+
 
 
 
@@ -125,7 +128,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         throws PermissionException, SessionException
     {
         _sessMan.authenticate(sessionId);
-        return _galertMan.registerExecutionStrategy(stratType);
+        return getGalertMan().registerExecutionStrategy(stratType);
 
     }
 
@@ -137,7 +140,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         throws PermissionException, SessionException
     {
         _sessMan.authenticate(sessionId);
-        return _galertMan.findStrategyType(type);
+        return getGalertMan().findStrategyType(type);
 
     }
 
@@ -148,7 +151,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         throws SessionException
     {
         _sessMan.authenticate(sessionId);
-        return _triggerMan.findTriggerType(type);
+        return getTriggerMan().findTriggerType(type);
     }
 
     /**
@@ -159,7 +162,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         throws SessionException
     {
         _sessMan.authenticate(sessionId);
-        return _triggerMan.registerTriggerType(type);
+        return getTriggerMan().registerTriggerType(type);
     }
 
 
@@ -173,7 +176,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         throws SessionException
     {
         _sessMan.authenticate(sessionId);
-        return _galertMan.addPartition(def, partition, stratType, stratConfig);
+        return getGalertMan().addPartition(def, partition, stratType, stratConfig);
     }
 
 
@@ -187,7 +190,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
     {
         AuthzSubject subject = _sessMan.getSubject(sessionId);
 
-        return _galertMan.createAlertDef(subject, name, description,
+        return getGalertMan().createAlertDef(subject, name, description,
                                          severity, enabled, group);
     }
 
@@ -200,7 +203,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         throws SessionException
     {
         _sessMan.authenticate(sessionId);
-        _galertMan.configureTriggers(def, partition, triggerInfos, configs);
+        getGalertMan().configureTriggers(def, partition, triggerInfos, configs);
     }
 
     /**
@@ -220,10 +223,10 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
                                 .getOne().findResourceGroupById(subj, gid);
         PageList defList = null;
         try {
-            alertPermissionManager.canManageAlerts(subj,
+            getAlertPermissionManager().canManageAlerts(subj,
                                         new AppdefEntityID(g.getResource()));
 
-            defList = _galertMan.findAlertDefs(g, pc);
+            defList = getGalertMan().findAlertDefs(g, pc);
         } catch (PermissionException e) {
             // user does not have sufficient permissions, so display no definitions
             defList = new PageList();
@@ -239,7 +242,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         throws SessionException
     {
         _sessMan.authenticate(sessionId);
-        _galertMan.markDefDeleted(def);
+        getGalertMan().markDefDeleted(def);
     }
 
     /**
@@ -251,8 +254,8 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         _sessMan.authenticate(sessionId);
 
         for (int i = 0; i < defIds.length; i++) {
-            GalertDef def = _galertMan.findById(defIds[i]);
-            _galertMan.markDefDeleted(def);
+            GalertDef def = getGalertMan().findById(defIds[i]);
+            getGalertMan().markDefDeleted(def);
         }
     }
 
@@ -263,7 +266,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         throws SessionException
     {
         _sessMan.authenticate(sessionId);
-        return _galertMan.findById(id);
+        return getGalertMan().findById(id);
     }
 
     /**
@@ -273,10 +276,10 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         throws SessionException, PermissionException
     {
         AuthzSubject subject = _sessMan.getSubject(sessionId);
-        Escalatable esc = _galertMan.findEscalatableAlert(id);
+        Escalatable esc = getGalertMan().findEscalatableAlert(id);
 
         // HQ-1295: Does user have sufficient permissions?
-        alertPermissionManager.canManageAlerts(subject,
+        getAlertPermissionManager().canManageAlerts(subject,
                                     esc.getDefinition().getDefinitionInfo());
 
         return esc;
@@ -290,7 +293,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         throws SessionException
     {
         _sessMan.authenticate(sessionId);
-        _galertMan.update(def, name, desc, severity, enabled);
+        getGalertMan().update(def, name, desc, severity, enabled);
     }
 
     /**
@@ -300,7 +303,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         throws SessionException
     {
         _sessMan.authenticate(sessionId);
-        _galertMan.update(def, escalation);
+        getGalertMan().update(def, escalation);
     }
 
     /**
@@ -313,7 +316,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
     {
         _sessMan.authenticate(sessionId);
         for (int i = 0; i < defs.length; i++) {
-            _galertMan.enable(defs[i], enable);
+            getGalertMan().enable(defs[i], enable);
         }
     }
 
@@ -333,7 +336,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         PageList alertLogs = null;
 
         try {
-            alertPermissionManager.canManageAlerts(subj,
+            getAlertPermissionManager().canManageAlerts(subj,
                                         new AppdefEntityID(g.getResource()));
 
             // Don't need to have any results
@@ -341,7 +344,7 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
             pc.setPagesize(0);
 
             alertLogs =
-                _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
+                getGalertMan().findAlertLogsByTimeWindow(g, begin, end, pc);
         } catch (PermissionException e) {
             // user does not have sufficient permissions, so display no alerts
             alertLogs = new PageList();
@@ -372,10 +375,10 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
         JSONArray jarr = new JSONArray();
 
         try {
-            alertPermissionManager.canManageAlerts(subj,
+            getAlertPermissionManager().canManageAlerts(subj,
                                         new AppdefEntityID(g.getResource()));
             alertLogs =
-                _galertMan.findAlertLogsByTimeWindow(g, begin, end, pc);
+                getGalertMan().findAlertLogsByTimeWindow(g, begin, end, pc);
 
             for (Iterator i = alertLogs.iterator(); i.hasNext(); ) {
                 GalertLog alert = (GalertLog) i.next();
@@ -436,7 +439,10 @@ public class GalertBossEJBImpl extends AbstractStatelessSessionBean
     /**
      * @ejb:create-method
      */
-    public void ejbCreate() {}
+    public void ejbCreate() {
+     
+        
+    }
     public void ejbRemove() {}
     public void ejbActivate() {}
     public void ejbPassivate() {}

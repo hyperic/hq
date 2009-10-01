@@ -58,6 +58,7 @@ import org.hyperic.hq.bizapp.shared.EmailManagerLocal;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
@@ -104,7 +105,8 @@ public class EmailAction extends EmailActionConfig
     private static final Log _log = LogFactory.getLog(EmailAction.class);
     private static final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
 
-    private ResourceDAO resourceDAO;
+    
+    private ResourceDAO resourceDAO = Bootstrap.getBean(ResourceDAO.class);
 
     static {
         ServerConfigManagerLocal sConf = ServerConfigManagerEJBImpl.getOne();

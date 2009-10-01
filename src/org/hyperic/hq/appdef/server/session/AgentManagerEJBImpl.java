@@ -72,6 +72,7 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
@@ -101,8 +102,8 @@ public class AgentManagerEJBImpl
     private final String PLUGINS_EXTENSION = "-plugin";
 
     private Log log = LogFactory.getLog(AgentManagerEJBImpl.class.getName());
-    private AgentReportStatusDAO agentReportStatusDao;
-    private AgentTypeDAO agentTypeDAO;
+    private AgentReportStatusDAO agentReportStatusDao = Bootstrap.getBean(AgentReportStatusDAO.class);
+    private AgentTypeDAO agentTypeDAO = Bootstrap.getBean(AgentTypeDAO.class);
 
     private AgentTypeDAO getAgentTypeDAO() {
         return agentTypeDAO;

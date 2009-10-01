@@ -66,6 +66,7 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
 
@@ -121,7 +122,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
 
     private final PermissionManager pm = PermissionManagerFactory.getInstance();
 
-    private DBUtil dbUtil;
+    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
 
     /**
      * <p>Return map of platform counts.</p>

@@ -31,10 +31,13 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
-
-class AttachmentDAO
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
+public class AttachmentDAO
     extends HibernateDAO
 {
+    @Autowired
     AttachmentDAO(SessionFactory f) {
         super(Attachment.class, f);
     }

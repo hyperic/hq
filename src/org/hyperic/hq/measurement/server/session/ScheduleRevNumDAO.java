@@ -33,8 +33,12 @@ import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class ScheduleRevNumDAO extends HibernateDAO {
+    
+    @Autowired
     public ScheduleRevNumDAO(SessionFactory f) {
         super(ScheduleRevNum.class, f);
     }

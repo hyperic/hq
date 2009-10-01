@@ -47,6 +47,7 @@ import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.events.ResourceEventInterface;
@@ -75,7 +76,7 @@ public class EventLogManagerEJBImpl implements SessionBean {
     private final Log log =
         LogFactory.getLog(EventLogManagerEJBImpl.class.getName());
 
-    private EventLogDAO eventLogDAO;
+    private EventLogDAO eventLogDAO = Bootstrap.getBean(EventLogDAO.class);
 
     private EventLogDAO getEventLogDAO() {
         return eventLogDAO;

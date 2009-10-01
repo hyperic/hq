@@ -30,12 +30,16 @@ import java.util.Collection;
 import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.auth.Principal;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /**
  *
  */
+@Repository
 public class PrincipalDAO extends HibernateDAO
 {
+    @Autowired
     public PrincipalDAO(SessionFactory f) {
         super(Principal.class, f);
     }

@@ -51,7 +51,7 @@
 
     <javac destdir="${build.dir}/jsp/classes"
            optimize="off"
-           source="${hq.javac.source}"
+           source="1.4"
            debug="off">
        <classpath refid="jsp-jars"/>
        <src path="${build.dir}/jsp/src"/>

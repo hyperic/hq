@@ -37,6 +37,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.measurement.galerts.MetricAuxLog;
@@ -60,7 +61,7 @@ public class MetricAuxLogManagerEJBImpl
     private final Log _log =
         LogFactory.getLog(MetricAuxLogManagerEJBImpl.class);
 
-    private MetricAuxLogDAO metricAuxLogDAO;
+    private MetricAuxLogDAO metricAuxLogDAO = Bootstrap.getBean(MetricAuxLogDAO.class);
 
     public static MetricAuxLogManagerLocal getOne() {
         try {

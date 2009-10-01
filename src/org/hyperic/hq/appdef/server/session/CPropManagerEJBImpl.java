@@ -59,6 +59,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.server.session.AgentReportStatusDAO;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.AIServerDAO;
 import org.hyperic.hq.appdef.server.session.CpropDAO;
 import org.hyperic.hq.appdef.server.session.CpropKeyDAO;
@@ -89,9 +90,9 @@ public class CPropManagerEJBImpl
         LogFactory.getLog(CPropManagerEJBImpl.class.getName());
 
     private Messenger sender = new Messenger();
-    private AgentReportStatusDAO agentReportStatusDAO;
-    private AgentTypeDAO agentTypeDAO;
-    private CpropDAO cPropDAO;
+    private AgentReportStatusDAO agentReportStatusDAO = Bootstrap.getBean(AgentReportStatusDAO.class);
+    private AgentTypeDAO agentTypeDAO = Bootstrap.getBean(AgentTypeDAO.class);
+    private CpropDAO cPropDAO = Bootstrap.getBean(CpropDAO.class);
 
     /**
      * Get all the keys associated with an appdef resource type.

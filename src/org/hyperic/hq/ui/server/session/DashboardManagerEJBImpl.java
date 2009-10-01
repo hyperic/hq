@@ -56,6 +56,7 @@ import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.common.server.session.CrispoOption;
 import org.hyperic.hq.common.shared.CrispoManagerLocal;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.shared.DashboardManagerUtil;
@@ -80,7 +81,7 @@ public class DashboardManagerEJBImpl implements SessionBean {
 
     protected SessionManager _manager = SessionManager.getInstance();
 
-    private DashboardConfigDAO _dashDAO;
+    private DashboardConfigDAO _dashDAO = Bootstrap.getBean(DashboardConfigDAO.class);
 
     /** @ejb:create-method */
     public void ejbCreate() {}

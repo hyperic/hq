@@ -33,13 +33,14 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.autoinventory.AIPlatform;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.AIPlatformDAO;
 
 public class PagerProcessor_aiplatform implements PagerProcessorExt {
 
     protected AIQueueManagerLocal aiqManagerLocal;
 
-    private AIPlatformDAO aPlatformDAO;
+    private AIPlatformDAO aPlatformDAO = Bootstrap.getBean(AIPlatformDAO.class);
 
     public PagerProcessor_aiplatform () {}
 

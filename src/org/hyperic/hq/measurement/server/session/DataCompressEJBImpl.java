@@ -42,6 +42,7 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 
@@ -75,7 +76,7 @@ public class DataCompressEJBImpl
 
     private final String logCtx = DataCompressEJBImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
-    private DBUtil dbUtil;
+    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
 
     // Data tables
     private final String TAB_DATA    = MeasurementConstants.TAB_DATA;

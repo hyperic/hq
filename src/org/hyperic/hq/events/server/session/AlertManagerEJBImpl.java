@@ -49,11 +49,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
@@ -88,7 +90,7 @@ import org.hyperic.util.stats.ConcurrentStatsCollector;
 public class AlertManagerEJBImpl implements SessionBean {
     private final String NOTAVAIL = "Not Available";
     
-         private AlertPermissionManager alertPermissionManager;
+         private AlertPermissionManager alertPermissionManager = Bootstrap.getBean(AlertPermissionManager.class);
   
    
       private final Log log =
@@ -99,19 +101,21 @@ public class AlertManagerEJBImpl implements SessionBean {
           private Pager valuePager;
           private Pager pojoPager;
     
-         private AlertDefinitionDAO alertDefDao;
+         private AlertDefinitionDAO alertDefDao = Bootstrap.getBean(AlertDefinitionDAO.class);
    
-         private AlertActionLogDAO alertActionLogDAO;
+         private AlertActionLogDAO alertActionLogDAO = Bootstrap.getBean(AlertActionLogDAO.class);
     
-        private AlertDAO alertDAO;
+        private AlertDAO alertDAO = Bootstrap.getBean(AlertDAO.class);
     
-         private AlertConditionDAO alertConditionDAO;
+         private AlertConditionDAO alertConditionDAO = Bootstrap.getBean(AlertConditionDAO.class);
      
-        private MeasurementDAO measurementDAO;
+        private MeasurementDAO measurementDAO = Bootstrap.getBean(MeasurementDAO.class);
         
-        private ResourceManager resourceManager;
-
     
+
+    public ResourceManager getResourceManager() {
+            return ResourceManagerImpl.getOne();
+     }
 
     /**
      * Create a new alert.
@@ -182,7 +186,7 @@ public class AlertManagerEJBImpl implements SessionBean {
     public int deleteAlerts(AuthzSubject subj, AppdefEntityID id)
         throws PermissionException {
         alertPermissionManager.canManageAlerts(subj, id);
-        return alertDAO.deleteByResource(resourceManager.findResource(id));
+        return alertDAO.deleteByResource(getResourceManager().findResource(id));
     }
 
     /**
@@ -276,7 +280,7 @@ public class AlertManagerEJBImpl implements SessionBean {
         int[] counts = new int[ids.length];
         for (int i = 0; i < ids.length; i++) {
             if (ids[i].isPlatform() || ids[i].isServer() || ids[i].isService()){
-                counts[i] = dao.countAlerts(resourceManager.findResource(ids[i])).intValue();
+                counts[i] = dao.countAlerts(getResourceManager().findResource(ids[i])).intValue();
             }
         }
         return counts;
@@ -382,7 +386,7 @@ public class AlertManagerEJBImpl implements SessionBean {
         alertPermissionManager.canManageAlerts(subj, id);
         List alerts;
 
-        final Resource resource = resourceManager.findResource(id);
+        final Resource resource = getResourceManager().findResource(id);
         if (pc.getSortattribute() == SortAttribute.NAME) {
             alerts =alertDAO.findByResourceSortByAlertDef(resource);
         } else {
@@ -407,7 +411,7 @@ public class AlertManagerEJBImpl implements SessionBean {
     {
         alertPermissionManager.canManageAlerts(subj, id);
         List alerts =
-           alertDAO.findByAppdefEntityInRange(resourceManager.findResource(id),
+           alertDAO.findByAppdefEntityInRange(getResourceManager().findResource(id),
                                                     begin, end,
                                                     pc.getSortattribute() ==
                                                         SortAttribute.NAME,

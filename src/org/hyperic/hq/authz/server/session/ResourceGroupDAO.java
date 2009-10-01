@@ -72,6 +72,7 @@ public class ResourceGroupDAO extends HibernateDAO
         super(ResourceGroup.class, sessionFactory);
     }
 
+
     private void assertNameConstraints(String name)
         throws GroupCreationException
     {

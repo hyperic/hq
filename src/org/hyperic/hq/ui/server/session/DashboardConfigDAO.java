@@ -35,10 +35,13 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
-
-class DashboardConfigDAO
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
+public class DashboardConfigDAO
     extends HibernateDAO
 {
+    @Autowired
     DashboardConfigDAO(SessionFactory f) {
         super(DashboardConfig.class, f);
     }

@@ -27,7 +27,6 @@ package org.hyperic.hq.dao;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.server.session.AppServiceDAO;
 import org.hyperic.hq.appdef.server.session.AppSvcDependencyDAO;
 import org.hyperic.hq.appdef.server.session.ConfigResponseDAO;
@@ -46,6 +45,7 @@ import org.hyperic.hq.autoinventory.server.session.AgentReportStatusDAO;
 import org.hyperic.hq.common.server.session.ConfigPropertyDAO;
 import org.hyperic.hq.common.server.session.CrispoDAO;
 import org.hyperic.hq.common.server.session.CrispoOptionDAO;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.server.session.ActionDAO;
 import org.hyperic.hq.events.server.session.AlertActionLogDAO;
 import org.hyperic.hq.events.server.session.AlertConditionLogDAO;
@@ -55,38 +55,8 @@ import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfoDAO;
 
 public class HibernateDAOFactory extends DAOFactory {
 
-    private SessionFactory sessionFactory;
-
-    private ActionDAO actionDAO;
-    private AlertDefinitionDAO alertDefinitionDAO;
-    private AgentReportStatusDAO agentReportStatusDAO;
-    private ResourceGroupDAO resourceGroupDAO;
-    private AIHistoryDAO aiHistoryDAO;
-    private AIIpDAO aIpDAO;
-    private AIPlatformDAO aiPlatformDAO;
-    private AIScheduleDAO aiScheduleDAO;
-    private AIServerDAO aiServerDAO;
-    private AIServiceDAO aiServiceDAO;
-    private AlertActionLogDAO alertActionLogDAO;
-    private AlertConditionLogDAO alertConditionLogDAO;
-    private AppServiceDAO appServiceDAO;
-    private AppSvcDependencyDAO appDependencyDAO;
-    private ConfigPropertyDAO configPropertyDAO;
-    private ConfigResponseDAO configResponseDAO;
-    private CpropKeyDAO cpropKeyDAO;
-    private CrispoDAO crispoDAO;
-    private PlatformDAO platformDAO;
-    private ServerDAO serverDAO;
-    private ServerTypeDAO serverTypeDAO;
-    private ServiceDAO serviceDAO;
-    private TriggerDAO triggerDAO;
-    private ServiceTypeDAO serviceTypeDAO;
-    private ResourceDAO resourceDAO;
-    private ResourceTypeDAO resourceTypeDAO;
-    private RoleDAO roleDAO;
-    private VirtualDAO virtualDAO;
-    private CrispoOptionDAO crispoOptionDAO;
-    private ExecutionStrategyTypeInfoDAO executionStrategyTypeInfoDAO;
+    private SessionFactory sessionFactory = Bootstrap.getBean(SessionFactory.class);
+    
 
     public Session getCurrentSession() {
         return sessionFactory.getCurrentSession();
@@ -94,122 +64,122 @@ public class HibernateDAOFactory extends DAOFactory {
 
 
     public ActionDAO getActionDAO() {
-        return actionDAO;
+        return Bootstrap.getBean(ActionDAO.class);
     }
 
     public AlertDefinitionDAO getAlertDefDAO() {
-        return alertDefinitionDAO;
+        return Bootstrap.getBean(AlertDefinitionDAO.class);
     }
 
     public AgentReportStatusDAO getAgentReportStatusDAO() {
-        return agentReportStatusDAO;
+        return Bootstrap.getBean(AgentReportStatusDAO.class);
     }
 
     public AppServiceDAO getAppServiceDAO() {
-        return appServiceDAO;
+        return Bootstrap.getBean(AppServiceDAO.class);
     }
 
     public AppSvcDependencyDAO getAppSvcDepencyDAO() {
-        return appDependencyDAO;
+        return Bootstrap.getBean(AppSvcDependencyDAO.class);
     }
 
     public ConfigResponseDAO getConfigResponseDAO() {
-        return configResponseDAO;
+        return Bootstrap.getBean(ConfigResponseDAO.class);
     }
 
     public CpropKeyDAO getCpropKeyDAO() {
-        return cpropKeyDAO;
+        return Bootstrap.getBean(CpropKeyDAO .class);
     }
 
     public PlatformDAO getPlatformDAO() {
-        return platformDAO;
+        return Bootstrap.getBean(PlatformDAO.class);
     }
 
     public ServerDAO getServerDAO() {
-        return serverDAO;
+        return Bootstrap.getBean( ServerDAO.class);
     }
 
     public ServerTypeDAO getServerTypeDAO() {
-        return serverTypeDAO;
+        return Bootstrap.getBean(ServerTypeDAO.class);
     }
 
     public ServiceDAO getServiceDAO() {
-        return serviceDAO;
+        return Bootstrap.getBean(ServiceDAO.class);
     }
 
     public TriggerDAO getTriggerDAO() {
-        return triggerDAO;
+        return Bootstrap.getBean(TriggerDAO.class);
     }
 
     public ServiceTypeDAO getServiceTypeDAO() {
-        return serviceTypeDAO;
+        return Bootstrap.getBean(ServiceTypeDAO.class);
     }
 
     public ResourceDAO getResourceDAO() {
-        return resourceDAO;
+        return Bootstrap.getBean(ResourceDAO.class);
     }
 
     public ResourceGroupDAO getResourceGroupDAO() {
-        return resourceGroupDAO;
+        return Bootstrap.getBean(ResourceGroupDAO.class);
     }
 
     public ResourceTypeDAO getResourceTypeDAO() {
-        return resourceTypeDAO;
+        return Bootstrap.getBean(ResourceTypeDAO.class);
     }
 
     public RoleDAO getRoleDAO() {
-        return roleDAO;
+        return Bootstrap.getBean(RoleDAO.class);
     }
 
     public AIPlatformDAO getAIPlatformDAO() {
-        return aiPlatformDAO;
+        return Bootstrap.getBean(AIPlatformDAO.class);
     }
 
     public AIServerDAO getAIServerDAO() {
-        return aiServerDAO;
+        return Bootstrap.getBean(AIServerDAO.class);
     }
 
     public AIServiceDAO getAIServiceDAO() {
-        return aiServiceDAO;
+        return Bootstrap.getBean(AIServiceDAO.class);
     }
 
     public AIIpDAO getAIIpDAO() {
-        return aIpDAO;
+        return Bootstrap.getBean(AIIpDAO.class);
     }
 
     public AIHistoryDAO getAIHistoryDAO() {
-        return aiHistoryDAO;
+        return Bootstrap.getBean(AIHistoryDAO.class);
     }
 
     public AIScheduleDAO getAIScheduleDAO() {
-        return aiScheduleDAO;
+        return Bootstrap.getBean(AIScheduleDAO.class);
     }
 
     public ConfigPropertyDAO getConfigPropertyDAO() {
-        return configPropertyDAO;
+        return Bootstrap.getBean(ConfigPropertyDAO.class);
     }
 
     public AlertActionLogDAO getAlertActionLogDAO() {
-        return alertActionLogDAO;
+        return Bootstrap.getBean(AlertActionLogDAO.class);
     }
 
     public AlertConditionLogDAO getAlertConditionLogDAO() {
-        return alertConditionLogDAO;
+        return Bootstrap.getBean(AlertConditionLogDAO .class);
     }
 
     public VirtualDAO getVirtualDAO() {
-        return virtualDAO;
+        return Bootstrap.getBean(VirtualDAO.class);
     }
 
     public CrispoDAO getCrispoDAO() {
-        return crispoDAO;
+        return Bootstrap.getBean(CrispoDAO.class);
     }
 
     public CrispoOptionDAO getCrispoOptionDAO() {
-        return crispoOptionDAO;
+        return Bootstrap.getBean(CrispoOptionDAO.class);
     }
 
     public ExecutionStrategyTypeInfoDAO getExecutionStrategyTypeInfoDAO() {
-        return executionStrategyTypeInfoDAO;
+        return Bootstrap.getBean(ExecutionStrategyTypeInfoDAO.class);
     }
 }

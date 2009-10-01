@@ -59,7 +59,7 @@ import org.hyperic.hq.events.server.session.TriggerDAO;
 public abstract class DAOFactory {
     public abstract Session getCurrentSession();
     //TODO something better
-    private static HibernateDAOFactory hibernateDAOFactory;
+    private static HibernateDAOFactory hibernateDAOFactory = new HibernateDAOFactory();
 
     public abstract AppServiceDAO       getAppServiceDAO();
     public abstract AppSvcDependencyDAO getAppSvcDepencyDAO();

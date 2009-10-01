@@ -48,6 +48,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
@@ -77,14 +78,14 @@ public abstract class SessionEJB {
     private TemplateManagerLocal _templateMan;
     private SRNManagerLocal s_rnManager;
 
-    private AvailabilityDataDAO availabilityDataDAO;
-    private BaselineDAO baselineDAO;
-    private CategoryDAO categoryDAO;
-    private MeasurementDAO measurementDAO;
-    private MeasurementTemplateDAO measurementTemplateDAO;
-    private MetricProblemDAO metricProblemDAO;
-    private MonitorableTypeDAO monitorableTypeDAO;
-    private ScheduleRevNumDAO scheduleRevNumDAO;
+    private AvailabilityDataDAO availabilityDataDAO = Bootstrap.getBean(AvailabilityDataDAO.class);
+    private BaselineDAO baselineDAO = Bootstrap.getBean(BaselineDAO.class);
+    private CategoryDAO categoryDAO = Bootstrap.getBean(CategoryDAO.class); 
+    private MeasurementDAO measurementDAO = Bootstrap.getBean(MeasurementDAO.class);
+    private MeasurementTemplateDAO measurementTemplateDAO = Bootstrap.getBean(MeasurementTemplateDAO.class);
+    private MetricProblemDAO metricProblemDAO = Bootstrap.getBean(MetricProblemDAO.class);
+    private MonitorableTypeDAO monitorableTypeDAO = Bootstrap.getBean(MonitorableTypeDAO.class);
+    private ScheduleRevNumDAO scheduleRevNumDAO = Bootstrap.getBean(ScheduleRevNumDAO.class);
 
     private InitialContext _ic;
 

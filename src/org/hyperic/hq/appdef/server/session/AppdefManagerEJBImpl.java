@@ -49,6 +49,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.jdbc.DBUtil;
 
 /**
@@ -74,7 +75,7 @@ public class AppdefManagerEJBImpl
     }
 
 
-    private DBUtil dbUtil;
+    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
 
     private final String OPERABLE_SQL =
     /* ex. "SELECT DISTINCT(server_type_id) FROM eam_server " + */

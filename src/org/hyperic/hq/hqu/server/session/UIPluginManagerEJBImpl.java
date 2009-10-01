@@ -45,6 +45,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.ViewDescriptor;
 import org.hyperic.hq.hqu.rendit.RenditServer;
@@ -75,17 +76,13 @@ public class UIPluginManagerEJBImpl
 {
     private final Log _log = LogFactory.getLog(UIPluginManagerEJBImpl.class);
 
-    private UIPluginDAO           _pluginDAO;
-    private ViewDAO               _viewDAO;
-    private AttachmentDAO         _attachDAO;
-    private AttachmentResourceDAO _attachRsrcDAO;
+    private UIPluginDAO           _pluginDAO = Bootstrap.getBean(UIPluginDAO.class);
+    private ViewDAO               _viewDAO = Bootstrap.getBean(ViewDAO.class);
+    private AttachmentDAO         _attachDAO = Bootstrap.getBean(AttachmentDAO.class);
+    private AttachmentResourceDAO _attachRsrcDAO = Bootstrap.getBean(AttachmentResourceDAO.class);
 
     public UIPluginManagerEJBImpl() {
-//        DAOFactory fact = DAOFactory.getDAOFactory();
-//        _pluginDAO     = new UIPluginDAO(fact);
-//        _viewDAO       = new ViewDAO(fact);
-//        _attachDAO     = new AttachmentDAO(fact);
-//        _attachRsrcDAO = new AttachmentResourceDAO(fact);
+
     }
 
     /**

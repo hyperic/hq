@@ -5,6 +5,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -30,11 +32,12 @@ import org.hyperic.hq.dao.HibernateDAO;
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
+@Repository
 public class ApplicationTypeDAO extends HibernateDAO
 {
     private static final Log log = LogFactory.getLog(ApplicationTypeDAO.class);
 
+    @Autowired
     public ApplicationTypeDAO(SessionFactory f) {
         super(ApplicationType.class, f);
     }

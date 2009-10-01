@@ -1,3 +1,6 @@
 build
 junit_results
+ui_plugins/*/bin
+**/.DS_Store
+
 

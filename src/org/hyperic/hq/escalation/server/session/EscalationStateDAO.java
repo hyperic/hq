@@ -34,10 +34,13 @@ import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.dao.HibernateDAO;
-
-class EscalationStateDAO
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
+public class EscalationStateDAO
     extends HibernateDAO
 {
+    @Autowired
     EscalationStateDAO(SessionFactory f) {
         super(EscalationState.class, f);
     }

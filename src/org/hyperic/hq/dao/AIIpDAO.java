@@ -6,6 +6,8 @@ import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.autoinventory.AIIp;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -31,9 +33,10 @@ import org.hyperic.hq.autoinventory.AIIp;
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
+@Repository
 public class AIIpDAO extends HibernateDAO
 {
+    @Autowired
     public AIIpDAO(SessionFactory f) {
         super(AIIp.class, f);
     }

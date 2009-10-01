@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.escalation.server.session;
 
+import java.rmi.RemoteException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -33,6 +34,9 @@ import java.util.Random;
 import java.util.Set;
 
 import javax.ejb.CreateException;
+import javax.ejb.EJBException;
+import javax.ejb.SessionBean;
+import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,6 +49,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.EscalationEvent;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.escalation.shared.EscalationManagerUtil;
@@ -75,34 +80,30 @@ import org.springframework.ejb.support.AbstractStatelessSessionBean;
  * @ejb:util generate="physical"
  * @ejb:transaction type="Required"
  */
-public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
+public class EscalationManagerEJBImpl implements SessionBean
 {
     private final Log _log = LogFactory.getLog(EscalationManagerEJBImpl.class);
 
-    private AlertPermissionManager alertPermissionManager;
-
-    private EscalationDAO       _esclDAO;
-    private EscalationStateDAO  _stateDAO;
-
-    private static final String CONTEXT_ALERT_PERM_MGR_ID = "alertPermissionManager";
-
-    public EscalationManagerEJBImpl() {
-//        DAOFactory f = DAOFactory.getDAOFactory();
-//
-//        _esclDAO  = new EscalationDAO(f);
-//        _stateDAO = new EscalationStateDAO(f);
+   
+    public AlertPermissionManager getAlertPermissionManager()  {
+        return Bootstrap.getBean(AlertPermissionManager.class);
+    }
+    
+    public EscalationDAO getEsclDAO() {
+        return Bootstrap.getBean(EscalationDAO.class);
     }
 
-    protected void onEjbCreate() throws CreateException {
-        this.alertPermissionManager = (AlertPermissionManager) getBeanFactory().getBean(CONTEXT_ALERT_PERM_MGR_ID);
+    public EscalationStateDAO getStateDAO() {
+        return Bootstrap.getBean(EscalationStateDAO.class);
     }
+
 
     private void assertEscalationNameIsUnique(String name)
         throws DuplicateObjectException
     {
         Escalation res;
 
-        if ((res = _esclDAO.findByName(name)) != null) {
+        if ((res = getEsclDAO().findByName(name)) != null) {
             throw new DuplicateObjectException("An escalation with that name " +
                                                "already exists", res);
         }
@@ -125,7 +126,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
         res = new Escalation(name, description, pauseAllowed, maxWaitTime,
                              notifyAll, repeat);
 
-        _esclDAO.save(res);
+        getEsclDAO().save(res);
         return res;
     }
 
@@ -133,7 +134,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
      * @ejb:interface-method
      */
     public EscalationState findEscalationState(PerformsEscalations def) {
-        return _stateDAO.find(def);
+        return getStateDAO().find(def);
     }
 
     /**
@@ -148,7 +149,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
                                  boolean notifyAll, boolean repeat)
         throws DuplicateObjectException, PermissionException
     {
-        alertPermissionManager.canModifyEscalation(subject.getId());
+        getAlertPermissionManager().canModifyEscalation(subject.getId());
 
         if (!esc.getName().equals(name)) {
             assertEscalationNameIsUnique(name);
@@ -163,7 +164,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
     }
 
     private void unscheduleEscalation(Escalation e) {
-        Collection states = _stateDAO.findStatesFor(e);
+        Collection states = getStateDAO().findStatesFor(e);
 
         // Unschedule any escalations currently in progress
         for (Iterator i=states.iterator(); i.hasNext(); ) {
@@ -224,7 +225,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
     public void deleteEscalation(AuthzSubject subject, Escalation e)
         throws PermissionException, ApplicationException
     {
-        alertPermissionManager.canRemoveEscalation(subject.getId());
+        getAlertPermissionManager().canRemoveEscalation(subject.getId());
 
         List alertTypes = EscalationAlertType.getAll();
         for (Iterator i=alertTypes.iterator(); i.hasNext(); ) {
@@ -245,14 +246,14 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
                                                "in use");
             }
         }
-        _esclDAO.remove(e);
+        getEsclDAO().remove(e);
     }
 
     /**
      * @ejb:interface-method
      */
     public Escalation findById(Integer id) {
-        return _esclDAO.findById(id);
+        return getEsclDAO().findById(id);
     }
 
     /**
@@ -261,7 +262,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
     public Escalation findById(AuthzSubject subject, Integer id)
         throws PermissionException
     {
-        return _esclDAO.findById(id);
+        return getEsclDAO().findById(id);
     }
 
     /**
@@ -270,7 +271,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
     public Collection findAll(AuthzSubject subject)
         throws PermissionException
     {
-        return _esclDAO.findAllOrderByName();
+        return getEsclDAO().findAllOrderByName();
     }
 
     /**
@@ -279,14 +280,14 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
     public Escalation findByName(AuthzSubject subject, String name)
         throws PermissionException
     {
-        return _esclDAO.findByName(name);
+        return getEsclDAO().findByName(name);
     }
 
     /**
      * @ejb:interface-method
      */
     public Escalation findByName(String name) {
-        return _esclDAO.findByName(name);
+        return getEsclDAO().findByName(name);
     }
 
     /**
@@ -343,7 +344,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
                 // so don't start escalation if the alert is fixed
                 if (!alert.getAlertInfo().isFixed()) {
 	                EscalationState curState = new EscalationState(alert);
-	                _stateDAO.save(curState);
+	                getStateDAO().save(curState);
 	                _log.debug("Escalation started: state=" + curState.getId());
 	                EscalationRuntime.getInstance().scheduleEscalation(curState);
 	                started = true;
@@ -375,7 +376,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
 
         try {
             // Checks if there is a committed escalation state for this def.
-            existsInDb = _stateDAO.find(def) != null;
+            existsInDb = getStateDAO().find(def) != null;
         } catch (Exception e) {
             _log.warn("There is already one escalation in progress for " +
                     "alert def id="+def.getId()+
@@ -438,7 +439,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
 
     private void endEscalation(EscalationState state) {
         if (state != null) {
-            _stateDAO.remove(state);
+            getStateDAO().remove(state);
             EscalationRuntime.getInstance().unscheduleEscalation(state);
         }
     }
@@ -452,7 +453,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
      * @ejb:interface-method
      */
     public void deleteAllEscalationStates(Integer[] stateIds) {
-        _stateDAO.removeAllEscalationStates(stateIds);
+        getStateDAO().removeAllEscalationStates(stateIds);
     }
 
     /**
@@ -471,7 +472,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
         // in a separate session when ending an escalation).
         // The get() will return null if the escalation state
         // does not exist.
-        EscalationState s = _stateDAO.get(stateId);
+        EscalationState s = getStateDAO().get(stateId);
 
         if (hasEscalationStateOrEscalatingEntityBeenDeleted(s)) {
             // just to be safe
@@ -619,7 +620,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
             moreInfo = "";
         }
 
-        EscalationState state = _stateDAO.find(esc);
+        EscalationState state = getStateDAO().find(esc);
         Escalation escalation = def.getEscalation();
 
         if (pause > 0 && escalation.isPauseAllowed()) {
@@ -662,7 +663,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
     public boolean isAlertAcknowledgeable(Integer alertId,
                                           PerformsEscalations def) {
         if (def.getEscalation() != null) {
-            EscalationState escState = _stateDAO.find(def);
+            EscalationState escState = getStateDAO().find(def);
 
             if (escState != null) {
                 if (escState.getAlertId() == alertId.intValue() &&
@@ -685,7 +686,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
                             String moreInfo)
         throws PermissionException
     {
-        EscalationState state = _stateDAO.find(def);
+        EscalationState state = getStateDAO().find(def);
         Escalatable e;
 
         if (state == null)
@@ -737,7 +738,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
         throws PermissionException
     {
         Escalatable esc = type.findEscalatable(alertId);
-        EscalationState state = _stateDAO.find(esc);
+        EscalationState state = getStateDAO().find(esc);
         fixOrNotify(subject, esc, state, type, true, moreInfo, suppressNotification);
     }
 
@@ -766,7 +767,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
         }
 
         // HQ-1295: Does user have sufficient permissions?
-        alertPermissionManager.canManageAlerts(subject,
+        getAlertPermissionManager().canManageAlerts(subject,
                                     esc.getDefinition().getDefinitionInfo());
 
         if (fixed) {
@@ -922,7 +923,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
      * @ejb:interface-method
      */
     public Number getActiveEscalationCount() {
-        return new Integer(_stateDAO.size());
+        return new Integer(getStateDAO().size());
     }
 
     /**
@@ -930,14 +931,14 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
      * @ejb:interface-method
      */
     public Number getEscalationCount() {
-        return new Integer(_esclDAO.size());
+        return new Integer(getEsclDAO().size());
     }
 
     /**
      * @ejb:interface-method
      */
     public List getActiveEscalations(int maxEscalations) {
-        return _stateDAO.getActiveEscalations(maxEscalations);
+        return getStateDAO().getActiveEscalations(maxEscalations);
     }
 
     /**
@@ -957,7 +958,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
      * @ejb:interface-method
      */
     public void handleSubjectRemoval(AuthzSubject subject) {
-        _stateDAO.handleSubjectRemoval(subject);
+        getStateDAO().handleSubjectRemoval(subject);
     }
 
     /**
@@ -974,7 +975,7 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
 
         boolean debugLog = _log.isDebugEnabled();
 
-        for (Iterator i=_stateDAO.findAll().iterator(); i.hasNext(); ) {
+        for (Iterator i=getStateDAO().findAll().iterator(); i.hasNext(); ) {
             EscalationState state = (EscalationState)i.next();
 
             if (debugLog) {
@@ -990,6 +991,28 @@ public class EscalationManagerEJBImpl extends AbstractStatelessSessionBean
         } catch(Exception e) {
             throw new SystemException(e);
         }
+    }
+
+    public void ejbCreate() { }
+   
+    public void ejbActivate() throws EJBException, RemoteException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void ejbPassivate() throws EJBException, RemoteException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void ejbRemove() throws EJBException, RemoteException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    public void setSessionContext(SessionContext arg0) throws EJBException, RemoteException {
+        // TODO Auto-generated method stub
+        
     }
 
 

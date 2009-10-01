@@ -53,13 +53,16 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class MeasurementDAO extends HibernateDAO {
     private final Log _log = LogFactory.getLog(MeasurementDAO.class);
 
     private static final String ALIAS_CLAUSE = " upper(t.alias) = '" +
     				MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
 
+    @Autowired
     public MeasurementDAO(SessionFactory f) {
         super(Measurement.class, f);
     }

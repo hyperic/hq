@@ -47,6 +47,7 @@ import org.hyperic.hq.common.shared.AuditManagerUtil;
 import org.hyperic.hq.common.server.session.AuditImportance;
 import org.hyperic.hq.common.server.session.AuditPurpose;
 import org.hyperic.hq.common.server.session.Audit;
+import org.hyperic.hq.context.Bootstrap;
 
 
 /**
@@ -62,8 +63,8 @@ public class AuditManagerEJBImpl implements SessionBean {
     private final Log _log = LogFactory.getLog(AuditManagerEJBImpl.class);
     private static final ThreadLocal CONTAINERS = new ThreadLocal();
 
-    //private final AuditDAO _DAO = new AuditDAO(DAOFactory.getDAOFactory());
-    private AuditDAO _DAO;
+   
+    private AuditDAO _DAO = Bootstrap.getBean(AuditDAO.class);
 
     /**
      * Save an audit and all of it's children.

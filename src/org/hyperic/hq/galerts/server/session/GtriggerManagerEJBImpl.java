@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
 import org.hyperic.hq.galerts.server.session.GtriggerType;
 import org.hyperic.hq.galerts.shared.GalertManager;
@@ -53,7 +54,7 @@ public class GtriggerManagerEJBImpl
 {
     private final Log _log = LogFactory.getLog(GtriggerManagerEJBImpl.class);
 
-    private GtriggerTypeInfoDAO _ttypeDAO;
+    private GtriggerTypeInfoDAO _ttypeDAO = Bootstrap.getBean(GtriggerTypeInfoDAO.class);
 
     public GtriggerManagerEJBImpl() {
         //_ttypeDAO = new GtriggerTypeInfoDAO(DAOFactory.getDAOFactory());

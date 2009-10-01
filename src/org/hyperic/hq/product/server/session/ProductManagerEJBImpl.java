@@ -65,6 +65,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
@@ -116,10 +117,9 @@ public class ProductManagerEJBImpl
     private CPropManagerLocal      cPropManagerLocal;
     private TemplateManagerLocal   templateManagerLocal;
     private PluginUpdater pluginUpdater = new PluginUpdater();
-    private AlertDefinitionXmlParser alertDefXmlParser   = new AlertDefinitionXmlParser();
     private static final String ALERT_DEFINITIONS_XML_FILE = "etc/alert-definitions.xml";
     private AlertDefinitionManagerLocal alertDefinitionManagerLocal;
-    private PluginDAO pluginDao;
+    private PluginDAO pluginDao = Bootstrap.getBean(PluginDAO.class);
     
 
     /*
@@ -449,7 +449,8 @@ public class ProductManagerEJBImpl
         if(alertDefns == null) {
                    return;
         }
-      
+        //TODO DI
+        AlertDefinitionXmlParser alertDefXmlParser   = new AlertDefinitionXmlParser();
        try {
            final Set alertDefs = alertDefXmlParser.parse(alertDefns);
            for(Iterator iterator=alertDefs.iterator();iterator.hasNext();) {

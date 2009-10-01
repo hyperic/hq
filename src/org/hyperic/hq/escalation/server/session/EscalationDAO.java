@@ -28,10 +28,13 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
-
-class EscalationDAO
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
+public class EscalationDAO
     extends HibernateDAO
 {
+    @Autowired
     EscalationDAO(SessionFactory f) {
         super(Escalation.class, f);
     }

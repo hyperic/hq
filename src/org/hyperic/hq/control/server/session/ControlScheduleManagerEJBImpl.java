@@ -56,6 +56,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlFrequencyValue;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
@@ -115,9 +116,9 @@ public class ControlScheduleManagerEJBImpl
     protected String getJobPrefix ()          { return JOB_PREFIX; }
     protected String getSchedulePrefix ()     { return SCHEDULE_PREFIX; }
 
-    private ControlHistoryDAO controlHistoryDAO;
+    private ControlHistoryDAO controlHistoryDAO = Bootstrap.getBean(ControlHistoryDAO.class);
 
-    private ControlScheduleDAO controlScheduleDAO;
+    private ControlScheduleDAO controlScheduleDAO = Bootstrap.getBean(ControlScheduleDAO.class);
 
     public static ControlScheduleManagerLocal getOne() {
         try {
@@ -128,7 +129,7 @@ public class ControlScheduleManagerEJBImpl
     }
 
     private AppdefManagerLocal appdefMan = null;
-    private DBUtil dbUtil;
+    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
     private AppdefManagerLocal getAppdefMan() {
         if (appdefMan == null) {
             appdefMan = AppdefManagerEJBImpl.getOne();

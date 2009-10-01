@@ -53,6 +53,7 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.action.EnableAlertDefActionConfig;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
@@ -107,17 +108,15 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
       
           private Pager _valuePager;
    
-       private AlertDefinitionDAO alertDefDao;
+       private AlertDefinitionDAO alertDefDao = Bootstrap.getBean(AlertDefinitionDAO.class);
      
-         private ActionDAO actionDao;
+         private ActionDAO actionDao = Bootstrap.getBean(ActionDAO.class);
      
-        private AlertConditionDAO acDAO;
-    
-        private AlertDAO alertDAO;
+        private AlertConditionDAO acDAO = Bootstrap.getBean(AlertConditionDAO.class);
    
-         private TriggerDAO triggerDAO;
+         private TriggerDAO triggerDAO = Bootstrap.getBean(TriggerDAO.class);
     
-        private MeasurementDAO measurementDAO;
+        private MeasurementDAO measurementDAO = Bootstrap.getBean(MeasurementDAO.class);
         
         private RegisteredTriggerManagerLocal registeredTriggerManager;
       
@@ -125,8 +124,8 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
           return triggerDAO;
           }
       
-        @Autowired
-        public AlertDefinitionManagerEJBImpl(AlertDefinitionDAO alertDefDao, AlertPermissionManager alertPermissionManager)
+        
+        public AlertDefinitionManagerEJBImpl()
          {
             this.alertDefDao = alertDefDao;
              this.alertPermissionManager = alertPermissionManager;

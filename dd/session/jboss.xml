@@ -85,11 +85,6 @@
 
       </session>
       <session>
-         <ejb-name>ResourceManager</ejb-name>
-         <local-jndi-name>LocalResourceManager</local-jndi-name>
-
-      </session>
-      <session>
          <ejb-name>AIScheduleManager</ejb-name>
          <local-jndi-name>LocalAIScheduleManager</local-jndi-name>
 
@@ -245,11 +240,6 @@
 
       </session>
       <session>
-         <ejb-name>ResourceGroupManager</ejb-name>
-         <local-jndi-name>LocalResourceGroupManager</local-jndi-name>
-
-      </session>
-      <session>
          <ejb-name>CrispoManager</ejb-name>
          <local-jndi-name>LocalCrispoManager</local-jndi-name>
 
@@ -360,11 +350,6 @@
       <session>
          <ejb-name>HeartBeatService</ejb-name>
          <local-jndi-name>LocalHeartBeatService</local-jndi-name>
-
-      </session>
-      <session>
-         <ejb-name>GalertManager</ejb-name>
-         <local-jndi-name>LocalGalertManager</local-jndi-name>
 
       </session>
       <session>

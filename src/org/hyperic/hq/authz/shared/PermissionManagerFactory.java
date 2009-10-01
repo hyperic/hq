@@ -27,12 +27,18 @@ package org.hyperic.hq.authz.shared;
 
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.util.jdbc.DBUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public class PermissionManagerFactory {
 
     private static String CLASS_PROP = "hyperic.hq.authz.permissionManager";
     private static PermissionManager pm = null;
+    
+   
 
+    
     public static PermissionManager getInstance() 
         throws SystemException
     {
@@ -42,7 +48,7 @@ public class PermissionManagerFactory {
                 ProductProperties.getProperty(CLASS_PROP);
             
             try {
-                pm = (PermissionManager)Class.forName(pmClass).newInstance();
+                pm = Bootstrap.getBean(PermissionManager.class);
             } catch (Exception e) {
                 // Should not happen
                 throw new SystemException("Unable to load Permission " +

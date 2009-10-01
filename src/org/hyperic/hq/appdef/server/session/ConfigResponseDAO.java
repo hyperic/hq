@@ -30,7 +30,9 @@ import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class ConfigResponseDAO extends HibernateDAO
 {
     private PlatformDAO platformDAO;
@@ -39,8 +41,12 @@ public class ConfigResponseDAO extends HibernateDAO
 
     private ServiceDAO serviceDAO;
 
-    public ConfigResponseDAO(SessionFactory f) {
+    @Autowired
+    public ConfigResponseDAO(SessionFactory f, PlatformDAO platformDAO, ServerDAO serverDAO, ServiceDAO serviceDAO) {
         super(ConfigResponseDB.class, f);
+        this.platformDAO = platformDAO;
+        this.serverDAO = serverDAO;
+        this.serviceDAO = serviceDAO;
     }
 
     public ConfigResponseDB findById(Integer id) {

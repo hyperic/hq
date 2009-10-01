@@ -62,6 +62,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.bizapp.server.session.SystemAudit;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.rendit.RenditServer;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
@@ -204,7 +205,10 @@ public class ProductPluginDeployer
      * @jmx:managed-operation
      */
     public void handleNotification(Notification n, Object o) {
+        loadConfig();
+        Bootstrap.loadEJBApplicationContext();
         loadStartupClasses();
+     
 
         pluginNotify("deployer", DEPLOYER_READY);
 
@@ -591,6 +595,16 @@ public class ProductPluginDeployer
 
         return isReady.booleanValue();
     }
+    
+    private void loadConfig() {
+        ServerConfig sc = ServerConfigLocator.locate();
+        _app.setRestartStorageDir(sc.getHomeDir());
+        File deployDir = new File(sc.getServerHomeDir(), "deploy");
+        File earDir    = new File(deployDir, "hq.ear");
+        _app.setResourceDir(earDir);
+        File warDir    = new File(earDir, "hq.war");
+        _app.setWebAccessibleDir(warDir);
+    }
 
     private void loadStartupClasses() {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -604,13 +618,7 @@ public class ProductPluginDeployer
             throw new SystemException(e);
         }
 
-        ServerConfig sc = ServerConfigLocator.locate();
-        _app.setRestartStorageDir(sc.getHomeDir());
-        File deployDir = new File(sc.getServerHomeDir(), "deploy");
-        File earDir    = new File(deployDir, "hq.ear");
-        _app.setResourceDir(earDir);
-        File warDir    = new File(earDir, "hq.war");
-        _app.setWebAccessibleDir(warDir);
+     
         for (Iterator i=lines.iterator(); i.hasNext(); ) {
             String className = (String)i.next();
 

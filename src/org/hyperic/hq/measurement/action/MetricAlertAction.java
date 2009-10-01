@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.ActionExecuteException;
 import org.hyperic.hq.events.ActionExecutionInfo;
 import org.hyperic.hq.events.ActionInterface;
@@ -52,7 +53,7 @@ import org.hyperic.util.config.InvalidOptionValueException;
  */
 public class MetricAlertAction implements ActionInterface {
     private final Log log = LogFactory.getLog(MetricAlertAction.class);
-    private MetricProblemDAO metricProblemDAO;
+    private MetricProblemDAO metricProblemDAO = Bootstrap.getBean(MetricProblemDAO.class);
 
     public String execute(AlertInterface aIface, ActionExecutionInfo info)
         throws ActionExecuteException

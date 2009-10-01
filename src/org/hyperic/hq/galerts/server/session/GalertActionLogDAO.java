@@ -25,11 +25,13 @@
 package org.hyperic.hq.galerts.server.session;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.dao.HibernateDAO;
-
-class GalertActionLogDAO extends HibernateDAO {
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
+public class GalertActionLogDAO extends HibernateDAO {
+    @Autowired
     GalertActionLogDAO(SessionFactory f) {
         super(GalertActionLog.class, f);
     }

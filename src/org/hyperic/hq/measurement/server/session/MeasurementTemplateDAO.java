@@ -36,13 +36,17 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.MeasurementInfo;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class MeasurementTemplateDAO extends HibernateDAO {
 
     private CategoryDAO catDAO;
 
-    public MeasurementTemplateDAO(SessionFactory f) {
+    @Autowired
+    public MeasurementTemplateDAO(SessionFactory f, CategoryDAO categoryDAO) {
         super(MeasurementTemplate.class, f);
+        this.catDAO = categoryDAO;
     }
 
     public MeasurementTemplate get(Integer id) {

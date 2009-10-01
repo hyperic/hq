@@ -71,6 +71,7 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.ServiceTypeInfo;
@@ -109,7 +110,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
         = "org.hyperic.hq.appdef.server.session.PagerProcessor_service";
     private Pager valuePager = null;
     private final Integer APPDEF_RES_TYPE_UNDEFINED = new Integer(-1);
-    private AppServiceDAO appServiceDAO;
+    private AppServiceDAO appServiceDAO = Bootstrap.getBean(AppServiceDAO.class);
 
     /**
      * @ejb:interface-method

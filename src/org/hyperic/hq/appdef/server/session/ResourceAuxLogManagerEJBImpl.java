@@ -34,6 +34,7 @@ import org.hyperic.hq.appdef.shared.ResourceAuxLogManagerLocal;
 import org.hyperic.hq.appdef.shared.ResourceAuxLogManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo;
@@ -58,7 +59,7 @@ public class ResourceAuxLogManagerEJBImpl
         }
     }
 
-    private ResourceAuxLogDAO resourceAuxLogDAO;
+    private ResourceAuxLogDAO resourceAuxLogDAO = Bootstrap.getBean(ResourceAuxLogDAO.class);
 
     private ResourceAuxLogDAO getDAO() {
         return resourceAuxLogDAO;

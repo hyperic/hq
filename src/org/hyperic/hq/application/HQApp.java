@@ -56,6 +56,7 @@ import org.hyperic.hibernate.HypericInterceptor;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.hyperic.hq.transport.ServerTransport;
@@ -71,7 +72,7 @@ import org.jboss.invocation.Invocation;
  * This class represents the central concept of the Hyperic HQ application.
  * (not the Application resource)
  */
-public class HQApp {
+public class HQApp  {
     private static final Log _log = LogFactory.getLog(HQApp.class);
     private static final HQApp INSTANCE = new HQApp();
 
@@ -101,7 +102,7 @@ public class HQApp {
 
     private final HQHibernateLogger         _hiberLogger;
 
-    private DBUtil dbUtil;
+    
 
 
     static {
@@ -429,8 +430,6 @@ public class HQApp {
                 if (_log.isTraceEnabled()) {
                     _log.trace("Transaction [" + _me + "] failed!");
                 }
-                // Failed Tx -- kill the session.
-                SessionManager.cleanupSession(false);
             } else {
                 incrementTxCount(false);
             }
@@ -488,13 +487,7 @@ public class HQApp {
             String className      = meth.getClass().getName();
             boolean readWrite     = false;
             boolean flush         = true;
-            boolean sessCreated   = SessionManager.setupSession(methName);
-
-            if (sessCreated && _log.isDebugEnabled()) {
-                _log.debug("Created session, executing [" + methName +
-                           "] on [" + className + "]");
-            }
-
+           
             try {
                 if (_log.isTraceEnabled()) {
                     _log.trace("invokeNext: tx=" + v.getTransaction() +
@@ -507,14 +500,7 @@ public class HQApp {
                                          SessionManager.currentSession());
                 }
 
-                if (!methIsReadOnly(methName)) {
-                    if (_log.isDebugEnabled()) {
-                        _log.debug("Upgrading session, due to [" + methName +
-                                   "] on [" + className + "]");
-                    }
-                    readWrite = true;
-                    SessionManager.setSessionReadWrite();
-                }
+              
 
                 long startTime = System.currentTimeMillis();
                 Object res = null;
@@ -547,16 +533,7 @@ public class HQApp {
             } catch(Throwable e) {
                 flush = false;
                 throw e;
-            } finally {
-                if (sessCreated) {
-                    if (!readWrite && _log.isDebugEnabled()) {
-                        _log.debug("Successfully ran read-only transaction " +
-                                   "for [" + methName + "] on [" +
-                                   className + "]");
-                    }
-                    SessionManager.cleanupSession(flush);
-                }
-            }
+            } 
         }
 
         private boolean methIsReadOnly(String methName) {
@@ -665,6 +642,7 @@ public class HQApp {
         Connection conn = null;
         Statement stmt  = null;
         ResultSet rs    = null;
+        DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
         try {
             conn = dbUtil.getConnByContext(
                 new InitialContext(), HQConstants.DATASOURCE);

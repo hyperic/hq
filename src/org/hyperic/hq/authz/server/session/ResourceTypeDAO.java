@@ -42,9 +42,18 @@ public class ResourceTypeDAO
     private ResourceGroupDAO gDao;
 
     @Autowired
-    public ResourceTypeDAO(SessionFactory f) {
+    public ResourceTypeDAO(SessionFactory f, ResourceDAO resourceDAO) {
         super(ResourceType.class, f);
+        this.rDao =resourceDAO;
     }
+    
+    
+    @Autowired
+    public void setResourceGroupDao(ResourceGroupDAO gDao) {
+        this.gDao = gDao;
+    }
+
+
 
     ResourceType create(AuthzSubject creator, String name, boolean system) {
         ResourceType resType = new ResourceType(name, null, system);

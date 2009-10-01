@@ -45,6 +45,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.PrincipalDAO;
 import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
 import org.hyperic.util.ConfigPropertyException;
@@ -64,7 +65,7 @@ public class AuthManagerEJBImpl implements SessionBean {
 
     // Always authenticate against the HQ application realm
     private final String appName = HQConstants.ApplicationName;
-    private PrincipalDAO principalDAO;
+    private PrincipalDAO principalDAO = Bootstrap.getBean(PrincipalDAO.class);
 
     public AuthManagerEJBImpl() {}
 

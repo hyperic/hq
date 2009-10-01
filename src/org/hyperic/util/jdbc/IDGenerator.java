@@ -34,6 +34,7 @@ import java.util.Hashtable;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.ConfigPropertyException;
 
 public class IDGenerator {
@@ -56,7 +57,7 @@ public class IDGenerator {
 
     private boolean isInitialized = false;
 
-    private DBUtil dbUtil;
+    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
 
     /**
      * This constructor is for use inside an entity bean.

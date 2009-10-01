@@ -107,6 +107,7 @@ import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.GenericPlugin;
 import org.hyperic.hq.product.PluginManager;
@@ -141,8 +142,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     private AutoinventoryPluginManager aiPluginManager;
     private AIScheduleManagerLocal     aiScheduleManager;
-    private AgentReportStatusDAO statDAO;
-    private AIHistoryDAO aiHistoryDAO;
+    private AgentReportStatusDAO statDAO = Bootstrap.getBean(AgentReportStatusDAO.class);
+    private AIHistoryDAO aiHistoryDAO = Bootstrap.getBean(AIHistoryDAO.class);
 
     private AIHistoryDAO getHistoryDAO() {
         return aiHistoryDAO;

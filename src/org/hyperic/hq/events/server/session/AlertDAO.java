@@ -39,7 +39,8 @@ import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.stereotype.Repository;
+@Repository
 public class AlertDAO extends HibernateDAO {
     
     private AlertActionLogDAO alertActionLogDAO;

@@ -29,6 +29,7 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.dao.DAOFactory;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class SRNCache {
 
     private static SRNCache _singleton = new SRNCache();
 
-    private ScheduleRevNumDAO scheduleRevNumDAO;
+    private ScheduleRevNumDAO scheduleRevNumDAO = Bootstrap.getBean(ScheduleRevNumDAO.class);
 
     public static SRNCache getInstance() {
         return _singleton;

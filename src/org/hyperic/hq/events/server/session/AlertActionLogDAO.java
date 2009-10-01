@@ -31,8 +31,11 @@ import org.hibernate.SessionFactory;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.dao.HibernateDAO;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class AlertActionLogDAO extends HibernateDAO {
+    @Autowired
     public AlertActionLogDAO(SessionFactory f) {
         super(AlertActionLog.class, f);
     }

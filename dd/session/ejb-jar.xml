@@ -888,19 +888,6 @@
       </session>
 
       <session >
-         <description><![CDATA[]]></description>
-
-         <ejb-name>GalertManager</ejb-name>
-
-         <local-home>org.hyperic.hq.galerts.shared.GalertManagerLocalHome</local-home>
-         <local>org.hyperic.hq.galerts.shared.GalertManagerLocal</local>
-         <ejb-class>org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
-      <session >
          <description><![CDATA[BizApp interface to the Measurement subsystem]]></description>
 
          <ejb-name>MeasurementBoss</ejb-name>
@@ -6285,13 +6272,6 @@
           <method-name>*</method-name>
        </method>
        <trans-attribute>NotSupported</trans-attribute>
-    </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>GalertManager</ejb-name>
-          <method-name>*</method-name>
-       </method>
-       <trans-attribute>Required</trans-attribute>
     </container-transaction>
    <container-transaction >
       <method >

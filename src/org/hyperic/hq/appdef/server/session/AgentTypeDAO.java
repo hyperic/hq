@@ -29,9 +29,12 @@ import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.dao.HibernateDAO;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class AgentTypeDAO extends HibernateDAO
 {
+    @Autowired
     public AgentTypeDAO(SessionFactory f) {
         super(AgentType.class, f);
     }

@@ -38,6 +38,7 @@ import org.hyperic.hq.common.server.session.CalendarEntry;
 import org.hyperic.hq.common.server.session.WeekEntry;
 import org.hyperic.hq.common.shared.CalendarManagerLocal;
 import org.hyperic.hq.common.shared.CalendarManagerUtil;
+import org.hyperic.hq.context.Bootstrap;
 
 
 /**
@@ -50,8 +51,8 @@ import org.hyperic.hq.common.shared.CalendarManagerUtil;
  * @ejb:transaction type="Required"
  */
 public class CalendarManagerEJBImpl implements SessionBean {
-    private CalendarDAO _calDAO;
-    private CalendarEntryDAO _entryDAO;
+    private CalendarDAO _calDAO  = Bootstrap.getBean(CalendarDAO.class);
+    private CalendarEntryDAO _entryDAO = Bootstrap.getBean(CalendarEntryDAO.class);
 
     /**
      * Create a calendar with the specified name.  This name is only used

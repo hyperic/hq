@@ -28,8 +28,11 @@ package org.hyperic.hq.authz.server.session;
 import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
-
-class RoleCalendarDAO extends HibernateDAO {
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
+public class RoleCalendarDAO extends HibernateDAO {
+    @Autowired
     public RoleCalendarDAO(SessionFactory f) {
         super(Role.class, f);
     }

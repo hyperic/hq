@@ -135,7 +135,7 @@
 	<classpathentry kind="lib" path="thirdparty/lib/postgresql/postgresql-7.4.3.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/postgresql/postgresql-8.1-407.jdbc3.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/postgresql/postgresql-8.2-505.jdbc3.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/quartz-1.6.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/quartz-1.6.5.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/quartz-jboss-1.6.5.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/quartz-oracle-1.6.5.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/snmp4j.jar"/>
@@ -224,27 +224,28 @@
 	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jnpserver.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.com.sun.xml.bind-2.1.7.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.javax.xml.bind-2.1.7.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.aop-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.asm-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.aspects-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.beans-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.context-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.context.support-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.core-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.expression-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.instrument-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.instrument.classloading-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.integration-tests-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.jdbc-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.jms-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.orm-3.0.0.M4.jar" sourcepath="thirdparty/lib-src/org.springframework.orm-sources-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.oxm-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.test-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.transaction-3.0.0.M4.jar" sourcepath="thirdparty/lib-src/org.springframework.transaction-sources-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.web-3.0.0.M4.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/spring/org.springframework.web.servlet-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.aop-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.asm-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.aspects-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.beans-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.context-3.0.0.M4.jar" sourcepath="thirdparty/lib-src/org.springframework.context-sources-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.context.support-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.core-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.expression-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.instrument-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.instrument.classloading-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.integration-tests-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.jdbc-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.jms-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.orm-3.0.0.M4.jar" sourcepath="thirdparty/lib-src/org.springframework.orm-sources-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.oxm-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.test-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.transaction-3.0.0.M4.jar" sourcepath="thirdparty/lib-src/org.springframework.transaction-sources-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web.servlet-3.0.0.M4.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.org.apache.commons.dbcp-1.2.2.osgi.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/com.springsource.org.aopalliance-1.0.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/com.springsource.org.junit-4.6.0.jar"/>
+	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.javax.xml.stream-1.0.1.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

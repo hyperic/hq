@@ -72,6 +72,7 @@ import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.dao.AIServerDAO;
@@ -104,7 +105,7 @@ public class AIQueueManagerEJBImpl
 
     private final AI2AppdefDiff appdefDiffProcessor = new AI2AppdefDiff();
     private final AIQSynchronizer queueSynchronizer = new AIQSynchronizer();
-    private AIServerDAO aIServerDAO;
+    private AIServerDAO aIServerDAO = Bootstrap.getBean(AIServerDAO.class);
 
     public AIQueueManagerEJBImpl () {}
 

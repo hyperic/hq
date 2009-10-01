@@ -41,6 +41,7 @@ import org.hibernate.PropertyNotFoundException;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.jdbc.DBUtil;
@@ -52,7 +53,7 @@ public class EventsStartupListener
         LogFactory.getLog(EventsStartupListener.class);
     private static final Object LOCK = new Object();
     private static AlertDefinitionChangeCallback _alertDefChangeCallback;
-    private DBUtil dbUtil;
+    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
 
     public void hqStarted() {
         // Make sure the escalation enumeration is loaded and registered so

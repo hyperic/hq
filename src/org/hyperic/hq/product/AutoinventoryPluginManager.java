@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.stereotype.Component;
 
 public class AutoinventoryPluginManager extends PluginManager {
 

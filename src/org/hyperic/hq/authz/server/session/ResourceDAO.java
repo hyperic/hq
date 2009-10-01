@@ -54,13 +54,14 @@ public class ResourceDAO
 {
     private Log _log = LogFactory.getLog(ResourceDAO.class);
 
-    @Autowired
+    
     private ResourceGroupDAO resourceGroupDAO;
     private PermissionManager permissionManager;
 
     @Autowired
-    public ResourceDAO(SessionFactory f) {
+    public ResourceDAO(SessionFactory f, ResourceGroupDAO resourceGroupDAO) {
         super(Resource.class, f);
+        this.resourceGroupDAO = resourceGroupDAO;
     }
 
     Resource create(ResourceType type, Resource prototype, String name,

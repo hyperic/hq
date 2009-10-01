@@ -43,7 +43,9 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class AvailabilityDataDAO extends HibernateDAO {
 
     private static final String logCtx = AvailabilityDataDAO.class.getName();
@@ -64,6 +66,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
     private static final String TOTAL_UPTIME =
         "(" + TOTAL_TIME + ") * rle.availVal";
 
+    @Autowired
     public AvailabilityDataDAO(SessionFactory f) {
         super(AvailabilityDataDAO.class, f);
     }

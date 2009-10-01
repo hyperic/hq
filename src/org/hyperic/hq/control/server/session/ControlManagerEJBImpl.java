@@ -68,6 +68,7 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
@@ -108,8 +109,8 @@ public class ControlManagerEJBImpl implements SessionBean {
 
     private ControlPluginManager _controlManager;
     private ControlScheduleManagerLocal _controlScheduleManager;
-    private ControlHistoryDAO controlHistoryDAO;
-    private ResourceTypeDAO typeDao;
+    private ControlHistoryDAO controlHistoryDAO = Bootstrap.getBean(ControlHistoryDAO.class);
+    private ResourceTypeDAO typeDao = Bootstrap.getBean(ResourceTypeDAO.class);
 
 
     /** @ejb:create-method */

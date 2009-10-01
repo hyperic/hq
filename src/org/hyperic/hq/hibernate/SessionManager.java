@@ -25,14 +25,20 @@
 
 package org.hyperic.hq.hibernate;
 
+import java.sql.SQLException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ConnectionReleaseMode;
 import org.hibernate.FlushMode;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hq.context.Bootstrap;
+import org.springframework.orm.hibernate3.HibernateCallback;
+import org.springframework.orm.hibernate3.HibernateTemplate;
 
 /**
  * This class manages the creation and deletion of Hibernate sessions.
@@ -44,10 +50,16 @@ public class SessionManager {
     private static final SessionManager INSTANCE =
         new SessionManager();
 
-    private ThreadLocal _sessions = new ThreadLocal();
-    private SessionFactoryImplementor _factory = 
-        (SessionFactoryImplementor)Util.getSessionFactory();
+   
+   
+    private SessionFactory getSessionFactory() {
+        return Bootstrap.getBean(SessionFactory.class);
+    }
     
+    private HibernateTemplate getHibernateTemplate() {
+        return Bootstrap.getBean(HibernateTemplate.class);
+    }
+
     private SessionManager() {
     }
 
@@ -68,113 +80,26 @@ public class SessionManager {
         INSTANCE.runInSessionInternal(r);
     }
     
-    private void runInSessionInternal(SessionRunner r) 
+    private void runInSessionInternal(final SessionRunner r) 
         throws Exception
     {
-        boolean setup = false;
-        boolean flush = true;
         
-        try {
-            setup = setupSessionInternal(r.getName());
-            r.run(); 
-        } catch(Exception e) {
-            flush = false;
-            throw e;
-        } finally {
-            if (setup)
-                cleanupSessionInternal(flush);
-        }
-    }
-
-    private boolean setupSessionInternal(String dbgTxt) {
-        Session s = (Session)_sessions.get();
-        
-        if (s == null) {
-            if (dbgTxt != null && false /* Disabled for now */) {
-                _log.info("New Session [" + dbgTxt + "]");
-            }
-            
-            if (_log.isDebugEnabled()) {
-                _log.debug("Setting up session for Thread[" + 
-                           Thread.currentThread().getName() + "]");
-            }
-            
-            s = _factory.openSession(null, true, false, 
-                                     ConnectionReleaseMode.AFTER_STATEMENT);
-            
-            // Start out sessions as read-only.  They can be upgraded to
-            // read-write if a transaction requires it
-            s.setFlushMode(FlushMode.MANUAL);
-            _sessions.set(s);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Upgrade the current running session (if there is one) to read-write
-     */
-    public static void setSessionReadWrite() {
-        INSTANCE.setSessionReadWriteInternal();
-    }
-    
-    private void setSessionReadWriteInternal() {
-        Session s = (Session)_sessions.get();
-    
-        if (s != null) {
-            s.setFlushMode(FlushMode.AUTO);
-        }
-    }
-    
-    /**
-     * Create a session if it does not exist.
-     * @param dbgTxt text to print when creating a session
-     * @return true if a session was created
-     */
-    public static boolean setupSession(String dbgTxt) {
-        return INSTANCE.setupSessionInternal(dbgTxt);
-    }
-    
-    private void cleanupSessionInternal(boolean flush) {
-        Session s = (Session)_sessions.get();
-
-        if (s == null) {
-            // No session -- someone else must have closed it.  This can happen
-            // when we create a session at the web layer, and a transaction
-            // fails, blowing it away.
-            return;
-        }
-        
-        try {
-            if (_log.isDebugEnabled()) {
-                _log.debug("Closing session for Thread[" + 
-                           Thread.currentThread().getName() + "]");
-            }
-            
-            _sessions.set(null);
-            
-            if (s.getFlushMode().equals(FlushMode.MANUAL)) {
-                _log.debug("Completed read-only session for " +
-                           Thread.currentThread().getName() + "]");
-            } else if (flush && s.isDirty()) {
-                s.flush();
-            }
-            
-            s.close();
-        } catch(HibernateException e) {
-            _log.warn("Error closing session", e);
-        }
-    }
-
-    /**
-     * Close the current session.
-     */
-    public static void cleanupSession(boolean flush) {
-        INSTANCE.cleanupSessionInternal(flush);
+        HibernateTemplate template = getHibernateTemplate();
+        template.execute(new HibernateCallback() {
+                public Object doInHibernate(Session session) throws HibernateException, SQLException {
+                    try {
+                        r.run();
+                    } catch (Exception e) {
+                        throw new HibernateException(e);
+                    }
+                    return null;
+                }
+            });
+ 
     }
     
     public static Session currentSession() {
-        Session res = (Session)INSTANCE._sessions.get();
+        Session res = INSTANCE.getSessionFactory().getCurrentSession();
         
         if (res == null) {
             throw new HibernateException("Unable to find current session");

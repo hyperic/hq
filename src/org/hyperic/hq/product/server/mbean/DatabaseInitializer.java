@@ -32,6 +32,7 @@ import java.util.ArrayList;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,6 +55,8 @@ public class DatabaseInitializer {
 
     private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
 
+   
+    
     public static void init() {
         new DatabaseInitializer();
     }
@@ -70,6 +73,7 @@ public class DatabaseInitializer {
         Connection conn = null;
 
         try {
+         
             conn = dbUtil.getConnByContext(ic, HQConstants.DATASOURCE);
 
             DatabaseRoutines[] dbrs = getDBRoutines(conn);

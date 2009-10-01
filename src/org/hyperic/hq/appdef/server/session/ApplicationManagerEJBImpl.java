@@ -66,6 +66,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -98,9 +99,9 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         = "org.hyperic.hq.appdef.server.session.PagerProcessor_app";
     private Pager valuePager = null;
 
-    private ApplicationTypeDAO applicationTypeDAO;
+    private ApplicationTypeDAO applicationTypeDAO = Bootstrap.getBean(ApplicationTypeDAO.class);
 
-    private AppServiceDAO appServiceDAO;
+    private AppServiceDAO appServiceDAO = Bootstrap.getBean(AppServiceDAO.class);
 
     /**
      * Get all Application types

@@ -59,6 +59,7 @@ import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -129,7 +130,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private final int IND_MAX       = MeasurementConstants.IND_MAX;
     private final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
 
-    private DBUtil dbUtil;
+    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
 
     // Pager class name
     private boolean confDefaultsLoaded = false;

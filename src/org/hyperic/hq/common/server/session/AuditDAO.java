@@ -35,8 +35,11 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class AuditDAO extends HibernateDAO {
+    @Autowired
     public AuditDAO(SessionFactory f) {
         super(Audit.class, f);
     }

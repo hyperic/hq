@@ -2,6 +2,7 @@ package org.hyperic.hq.measurement.server.mbean;
 
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
@@ -38,7 +39,7 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
 
     private static Log _log = LogFactory.getLog(DataPopulatorService.class);
 
-    private DBUtil dbUtil;
+    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
 
 
     public DataPopulatorService() {}

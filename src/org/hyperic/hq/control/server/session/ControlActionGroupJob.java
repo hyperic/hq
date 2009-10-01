@@ -42,6 +42,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.shared.ControlActionTimeoutException;
 import org.hyperic.hq.control.shared.ControlConstants;
@@ -59,10 +60,14 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.Trigger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 /**
  * A quartz job class for handling control actions on a group entity
  */
+
 public class ControlActionGroupJob extends ControlJob {
 
     // Default timeout is 10 minutes.  If a plugin does not define its
@@ -72,7 +77,8 @@ public class ControlActionGroupJob extends ControlJob {
     protected Log log =
         LogFactory.getLog(ControlActionGroupJob.class.getName());
 
-    private ControlHistoryDAO controlHistoryDAO;
+   
+    private ControlHistoryDAO controlHistoryDAO = Bootstrap.getBean(ControlHistoryDAO.class);
 
     public void executeInSession(JobExecutionContext context)
         throws JobExecutionException

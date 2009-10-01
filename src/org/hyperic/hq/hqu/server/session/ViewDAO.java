@@ -31,10 +31,14 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
-class ViewDAO
+@Repository
+public class ViewDAO
     extends HibernateDAO
 {
+    @Autowired
     ViewDAO(SessionFactory f) {
         super(View.class, f);
     }

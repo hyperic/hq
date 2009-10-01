@@ -35,6 +35,7 @@ import javax.ejb.SessionContext;
 
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionManagerUtil;
@@ -58,14 +59,11 @@ import org.json.JSONObject;
  */
 
 public class ActionManagerEJBImpl implements SessionBean {
-    private ActionDAO          _actDAO;
-    private AlertDAO           _alertDAO;
+    private ActionDAO          _actDAO = Bootstrap.getBean(ActionDAO.class);
+    private AlertDAO           _alertDAO = Bootstrap.getBean(AlertDAO.class);
 
     public ActionManagerEJBImpl() {
-//        DAOFactory f = DAOFactory.getDAOFactory();
-//
-//        _actDAO   = new ActionDAO(f);
-//        _alertDAO = new AlertDAO(f);
+
     }
 
     /**

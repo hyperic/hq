@@ -15,7 +15,10 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
 
 /*
  * NOTE: This copyright does *not* cover user programs that use HQ
@@ -41,7 +44,7 @@ import org.hyperic.hq.dao.HibernateDAO;
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-
+@Repository
 public class AppServiceDAO extends HibernateDAO
 {
     private static final Log log = LogFactory.getLog(AppServiceDAO.class);
@@ -50,8 +53,11 @@ public class AppServiceDAO extends HibernateDAO
     private ResourceGroupDAO resourceGroupDAO;
     private ServiceDAO serviceDAO;
 
-    public AppServiceDAO(SessionFactory f) {
+    @Autowired
+    public AppServiceDAO(SessionFactory f, ResourceGroupDAO resourceGroupDAO, ServiceDAO serviceDAO) {
         super(AppService.class, f);
+        this.resourceGroupDAO = resourceGroupDAO;
+        this.serviceDAO = serviceDAO;
     }
 
     public AppService findById(Integer id)

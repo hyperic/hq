@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd">
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
 <bean class="org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl" factory-method="getOne"/>
@@ -71,5 +75,17 @@
 <bean class="org.hyperic.hq.product.server.session.ProductManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl" factory-method="getOne"/>
+
+<tx:jta-transaction-manager />
+
+<tx:annotation-driven />
+
+
+
+<context:annotation-config />
+
+<context:component-scan base-package="org.hyperic,com.hyperic">
+	<context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+</context:component-scan>
 
 </beans>

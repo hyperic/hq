@@ -53,6 +53,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
@@ -78,7 +79,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
 
     private final int DEFAULT_COST = 15;
     
-    private DBUtil dbUtil;
+    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);;
 
     private final String[] APPDEF_TABLES
         = { "EAM_PLATFORM", "EAM_SERVER", "EAM_SERVICE", "EAM_CONFIG_RESPONSE",

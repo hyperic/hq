@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="app"/>
+	<classpathentry excluding="app/|views/|etc/" kind="src" path=""/>
+	<classpathentry kind="src" path="views"/>
+	<classpathentry kind="src" path="etc"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/HQ"/>
+	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
+	<classpathentry kind="lib" path="/HQ/thirdparty/lib/commons-logging.jar"/>
+	<classpathentry kind="lib" path="/HQ/thirdparty/lib/json.jar"/>
+	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jboss-j2ee.jar"/>
+	<classpathentry kind="lib" path="lib/hqapi1-2.2.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>

@@ -63,6 +63,7 @@ import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Calendar;
 import org.hyperic.hq.common.server.session.CalendarManagerEJBImpl;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -97,7 +98,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
         "org.hyperic.hq.authz.server.session.PagerProcessor_ownedRole";
     private final String GROUP_PAGER =
         "org.hyperic.hq.authz.server.session.PagerProcessor_resourceGroup";
-    private RoleCalendarDAO roleCalendarDAO;
+    private RoleCalendarDAO roleCalendarDAO = Bootstrap.getBean(RoleCalendarDAO.class);
 
     /**
      * Validate that a role is ok to be added or updated
@@ -509,7 +510,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
       * @ejb:interface-method
       */
      public Number getSubjectCount() {
-         return new Integer(authzSubjectDAO.size());
+         return new Integer(getSubjectDAO().size());
      }
 
     /**
@@ -1340,7 +1341,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 
         switch (pc.getSortattribute()) {
         case SortAttribute.SUBJECT_NAME:
-            subjects = authzSubjectDAO.findByRoleId_orderName(roleLocal.getId(),
+            subjects = getSubjectDAO().findByRoleId_orderName(roleLocal.getId(),
                                                   pc.isAscending());
             break;
         default:
@@ -1380,7 +1381,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
 
         switch (pc.getSortattribute()) {
         case SortAttribute.SUBJECT_NAME:
-            otherRoles = authzSubjectDAO.findByNotRoleId_orderName(roleLocal.getId(),
+            otherRoles = getSubjectDAO().findByNotRoleId_orderName(roleLocal.getId(),
                                                        pc.isAscending());
             break;
         default:

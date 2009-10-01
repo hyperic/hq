@@ -40,6 +40,7 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.TypeInfo;
 
 
@@ -48,15 +49,15 @@ public abstract class AppdefSessionUtil {
     private ConfigManagerLocal   configMgrL;
     private ResourceManager rmLocal;
     private CPropManagerLocal    cpropLocal;
-    private AgentDAO agentDao;
-    private ApplicationDAO applicationDAO;
-    private ConfigResponseDAO configResponseDAO;
-    private PlatformDAO platformDAO;
-    private PlatformTypeDAO platformTypeDAO;
-    private ServerDAO serverDAO;
-    private ServerTypeDAO serverTypeDAO;
-    private ServiceTypeDAO serviceTypeDAO;
-    private ServiceDAO serviceDAO;
+    private AgentDAO agentDao = Bootstrap.getBean(AgentDAO.class);
+    private ApplicationDAO applicationDAO = Bootstrap.getBean(ApplicationDAO.class);
+    private ConfigResponseDAO configResponseDAO = Bootstrap.getBean(ConfigResponseDAO.class);
+    private PlatformDAO platformDAO = Bootstrap.getBean(PlatformDAO.class);
+    private PlatformTypeDAO platformTypeDAO = Bootstrap.getBean(PlatformTypeDAO.class);
+    private ServerDAO serverDAO = Bootstrap.getBean(ServerDAO.class);
+    private ServerTypeDAO serverTypeDAO = Bootstrap.getBean(ServerTypeDAO.class);
+    private ServiceTypeDAO serviceTypeDAO = Bootstrap.getBean(ServiceTypeDAO.class);
+    private ServiceDAO serviceDAO = Bootstrap.getBean(ServiceDAO.class);
 
     protected CPropManagerLocal getCPropManager() {
         if (cpropLocal == null) {

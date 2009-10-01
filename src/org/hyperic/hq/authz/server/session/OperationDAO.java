@@ -30,8 +30,12 @@ import java.util.Collection;
 import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class OperationDAO extends HibernateDAO {
+    
+    @Autowired
     public OperationDAO(SessionFactory f) {
         super(Operation.class, f);
     }

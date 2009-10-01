@@ -36,10 +36,13 @@ import org.hibernate.SessionFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.jdbc.DBUtil;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+@Repository
 public class MetricProblemDAO extends HibernateDAO {
     private static Log _log = LogFactory.getLog(MetricProblemDAO.class);
 
+    @Autowired
     public MetricProblemDAO(SessionFactory f) {
         super(MetricProblem.class, f);
     }
