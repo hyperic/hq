@@ -25,9 +25,8 @@
 
 package org.hyperic.hq.authz.shared;
 
-import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -36,25 +35,29 @@ public class PermissionManagerFactory {
     private static String CLASS_PROP = "hyperic.hq.authz.permissionManager";
     private static PermissionManager pm = null;
     
-   
-
-    
-    public static PermissionManager getInstance() 
-        throws SystemException
-    {
-        
+    //TODO better way to create appropriate PermissionManager
+    public static PermissionManager getPermissionManager(DBUtil dbUtil) {
         if (pm == null) {
             String pmClass =
                 ProductProperties.getProperty(CLASS_PROP);
             
             try {
-                pm = Bootstrap.getBean(PermissionManager.class);
+                Class clazz = Class.forName(pmClass);
+                pm = (PermissionManager)clazz.getConstructor(DBUtil.class).newInstance(dbUtil);
             } catch (Exception e) {
                 // Should not happen
                 throw new SystemException("Unable to load Permission " +
                                           "Manager: " + e, e);
             }
         }
+        
+        return pm;
+    }
+
+    
+    public static PermissionManager getInstance() 
+        throws SystemException
+    {
         
         return pm;
     }

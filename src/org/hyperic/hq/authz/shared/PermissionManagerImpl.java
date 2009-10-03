@@ -60,7 +60,7 @@ import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-import org.springframework.beans.factory.annotation.Autowired;
+
 
 public class PermissionManagerImpl
     extends PermissionManager
@@ -109,7 +109,7 @@ public class PermissionManagerImpl
         }
     }
 
-    @Autowired
+    
     public PermissionManagerImpl(DBUtil dbUtil) {
         Connection conn = null;
         this.dbUtil = dbUtil;

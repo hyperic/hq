@@ -22,11 +22,13 @@
 		
 		<jee:jndi-lookup id="sessionFactory" jndi-name="java:/HibernateSessionFactory"></jee:jndi-lookup>
 		
-		<bean class="org.hyperic.hq.authz.shared.PermissionManagerImpl"/>
+		
 		
 		<bean class="org.springframework.orm.hibernate3.HibernateTemplate">
 			<constructor-arg ref="sessionFactory"/>
 		</bean>
+		
+		<bean class="org.hyperic.hq.authz.shared.PermissionManagerFactory" factory-method="getInstance" autowire="constructor"/>
 		
 	
 </beans>
