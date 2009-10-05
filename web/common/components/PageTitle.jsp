@@ -97,21 +97,19 @@
     <td colspan="2" nowrap>
 <c:choose>
   <c:when test="${not empty titleKey}">
+    <c:set var="escapedTitleName">
+  		<c:out value="${titleName}" />
+    </c:set>
+    <c:set var="escapedSubTitleName">
+      	<c:out value="${subTitleName}" />
+    </c:set>
     <fmt:message key="${titleKey}">
-      <c:if test="${not empty titleName}">
-        <span class="resourceTitle">
-        <fmt:param value="${titleName}"/>
-        </span>
-      </c:if>
-      <c:if test="${not empty subTitleName}">
-        <span class="resourceSubTitle">
-        <fmt:param value="${subTitleName}"/>
-        </span>
-      </c:if>
+		<fmt:param value="${escapedTitleName}" />
+		<fmt:param value="${escapedSubTitleName}" />      
     </fmt:message>
   </c:when>
   <c:otherwise>
-    <c:out value="${titleName}" escapeXml="false"/>
+    <c:out value="${titleName}" />
       <c:if test="${not empty subTitleName}">
         <span class="resourceSubTitle">
         <c:out value="${subTitleName}"/>
