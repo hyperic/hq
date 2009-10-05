@@ -40,6 +40,7 @@ import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.action.ActionForm;
@@ -204,7 +205,7 @@ public class ViewAction extends BaseAction {
             val.put("resourceId", s.getAppdefResourceValue().getId());
             val.put("resourceTypeId",
                     s.getAppdefResourceValue().getEntityId().getType());
-            val.put("resourceName", s.getAppdefResourceValue().getName());
+            val.put("resourceName", StringEscapeUtils.escapeHtml(s.getAppdefResourceValue().getName()));
             values.add(val);
         }
         metricValues.put("values", values);
