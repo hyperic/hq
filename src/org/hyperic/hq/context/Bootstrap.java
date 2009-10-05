@@ -27,7 +27,11 @@ public class Bootstrap {
     }
     
     public static synchronized void loadEJBApplicationContext() {
-        APP_CONTEXT = new ClassPathXmlApplicationContext(EJB_APP_CONTEXT_FILES,APP_CONTEXT);
+        try {
+            APP_CONTEXT = new ClassPathXmlApplicationContext(EJB_APP_CONTEXT_FILES,APP_CONTEXT);
+        }catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static <T> T getBean(Class<T> beanClass)  {
