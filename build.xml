@@ -492,6 +492,8 @@
   </target>
 	
   <target name="pack-hq-jar">
+	 <copy file="${pdk.productStub}"
+	          toDir="${build.dir}/classes/org/hyperic/hq/product"/>
   	 <!-- TODO: Create separate jars for each component -->
   	    <jar file="${ear.dir}/hq.jar" basedir="${build.dir}/classes" >
   	      <include name="images/**" />
