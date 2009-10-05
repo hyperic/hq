@@ -65,7 +65,7 @@
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="BlockBg">
   <tr>
     <td class="BlockLabel"><fmt:message key="common.label.Description"/>
-    <td width="30%" class="BlockContent"><c:out value="${resource.description}" escapeXml="false"/></td>
+    <td width="30%" class="BlockContent"><c:out value="${resource.description}" /></td>
     <td width="20%" class="BlockLabel"><fmt:message key="resource.common.inventory.props.DateCreatedLabel"/></td>
     <td width="30%" class="BlockContent"><hq:dateFormatter value="${resource.CTime}"/></td>
   </tr>
@@ -104,7 +104,7 @@
       </c:choose>
     </td>
     <td class="BlockLabel"><fmt:message key="resource.common.inventory.props.ModByLabel"/></td>
-    <td class="BlockContent"><c:out value="${modifierStr}" escapeXml="false"/></td>
+    <td class="BlockContent"><c:out value="${modifierStr}" /></td>
   </tr>
   <tr>
     <td colspan="4" class="BlockBottomLine"><html:img page="/images/spacer.gif" width="1" height="1" border="0"/></td>

@@ -122,7 +122,7 @@ function skipResources() {
                   - <c:out value="${resource.platformTypeName}"/>
                   </c:when>
                   <c:otherwise>
-                  - <c:out value="${resource.description}" escapeXml="false"/>
+                  - <c:out value="${resource.description}" />
                   </c:otherwise>
                 </c:choose>
             </td>

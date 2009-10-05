@@ -42,6 +42,7 @@ import org.hyperic.util.StringUtil;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 
 /**
@@ -149,7 +150,7 @@ public class InventoryHierarchyTag extends TagSupport {
                 sb.append(StringUtil.replace(StringUtil.replace(
                             StringUtil.replace(
                                     getResourceAnchor(webapp), "@@RID@@", String.valueOf(resourceId.getID()))
-                            , "@@TYPE@@", String.valueOf(resourceId.getType())), "@@NAME@@", arv.getName()));
+                            , "@@TYPE@@", String.valueOf(resourceId.getType())), "@@NAME@@", StringEscapeUtils.escapeHtml(arv.getName())));
                         
             } else {
                 // autogroup
@@ -165,7 +166,7 @@ public class InventoryHierarchyTag extends TagSupport {
                 sb.append(StringUtil.replace(StringUtil.replace(
                         StringUtil.replace(
                                 getResourceAnchor(webapp), "@@RID@@", String.valueOf(resourceId.getID()))
-                        , "@@TYPE@@", String.valueOf(resourceId.getType())), "@@NAME@@", arv.getName()));
+                        , "@@TYPE@@", String.valueOf(resourceId.getType())), "@@NAME@@", StringEscapeUtils.escapeHtml(arv.getName())));
                 
             }
             pageContext.getOut().write(sb.toString());
