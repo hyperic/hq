@@ -50,7 +50,8 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
-
+import org.springframework.stereotype.Component;
+@Component
 public class Messenger implements MessagePublisher {
     private static Log _log = LogFactory.getLog(Messenger.class);
 

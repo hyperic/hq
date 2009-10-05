@@ -1,6 +1,6 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl as ResMan
+
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl as GroupMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
@@ -26,7 +26,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 
 class ResourceHelper extends BaseHelper {
-    private rman = ResourceManagerEJBImpl.one
+    private rman = ResourceManagerImpl.one
     private groupMan = GroupMan.one
     
     ResourceHelper(AuthzSubject user) {
