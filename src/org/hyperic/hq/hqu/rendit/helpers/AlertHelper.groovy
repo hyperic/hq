@@ -11,7 +11,7 @@ import org.hyperic.hq.events.AlertSeverity
 
 class AlertHelper extends BaseHelper {
     private alertMan  = AlertManagerEJBImpl.one
-    private galertMan = GalertManagerEJBImpl.one
+    private galertMan = GalertManagerImpl.one
     private defMan    = AlertDefinitionManagerEJBImpl.one
     
     AlertHelper(AuthzSubject user) {
