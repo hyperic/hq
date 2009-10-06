@@ -88,7 +88,6 @@ public class MeasurementProcessorEJBImpl
 
     /**
      * @param aeids {@link List} of {@link AppdefEntityID}
-     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public void scheduleSynchronous(List aeids) {

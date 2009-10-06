@@ -1521,17 +1521,6 @@
     </container-transaction>
    <container-transaction >
       <method >
-         <ejb-name>MeasurementProcessor</ejb-name>
-         <method-intf>Local</method-intf>
-         <method-name>scheduleSynchronous</method-name>
-         <method-params>
-            <method-param>java.util.List</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>NotSupported</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
          <ejb-name>UpdateBoss</ejb-name>
           <method-name>*</method-name>
        </method>
@@ -1879,18 +1868,6 @@
        </method>
        <trans-attribute>Required</trans-attribute>
     </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>EventLogManager</ejb-name>
-         <method-intf>Local</method-intf>
-         <method-name>deleteLogs</method-name>
-         <method-params>
-            <method-param>long</method-param>
-            <method-param>long</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>NotSupported</trans-attribute>
-   </container-transaction>
    <container-transaction >
       <method >
          <ejb-name>AIScheduleManager</ejb-name>

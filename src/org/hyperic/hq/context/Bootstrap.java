@@ -19,8 +19,6 @@ public class Bootstrap {
 
     public synchronized static ApplicationContext getContext() throws Exception {
         if (APP_CONTEXT == null) {
-            //Needed to bind SessionFactory to JNDI through static initialize
-            Class.forName(Util.class.getName());
             APP_CONTEXT = new ClassPathXmlApplicationContext(APP_CONTEXT_FILES);
         }
         return APP_CONTEXT;

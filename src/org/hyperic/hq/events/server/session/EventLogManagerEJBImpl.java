@@ -274,7 +274,6 @@ public class EventLogManagerEJBImpl implements SessionBean {
      * including the most recent record.
      * @return The number of records removed.
      * @ejb:interface-method
-     * @ejb:transaction type="NotSupported"
      */
     public int deleteLogs(long from, long to) {
         if (log.isDebugEnabled()) {

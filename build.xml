@@ -339,6 +339,9 @@
 	 <fileset dir="etc" includes="spring-*.properties"/>
 	</copy>
 	
+	<copy file="${hq.home}/etc/hibernate.properties"
+          todir="${ear.dir}"/>
+	
     <copy file="etc/ehcache.xml" todir="${ear.dir}"/>
 
 

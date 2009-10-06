@@ -59,9 +59,10 @@ public class ResourceDAO
     private PermissionManager permissionManager;
 
     @Autowired
-    public ResourceDAO(SessionFactory f, ResourceGroupDAO resourceGroupDAO) {
+    public ResourceDAO(SessionFactory f, ResourceGroupDAO resourceGroupDAO, PermissionManager permissionManager) {
         super(Resource.class, f);
         this.resourceGroupDAO = resourceGroupDAO;
+        this.permissionManager = permissionManager;
     }
 
     Resource create(ResourceType type, Resource prototype, String name,

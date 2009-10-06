@@ -67,8 +67,9 @@ public class EventLogDAO extends HibernateDAO {
         });
 
     @Autowired
-    public EventLogDAO(SessionFactory f) {
+    public EventLogDAO(SessionFactory f, PermissionManager permissionManager) {
         super(EventLog.class, f);
+        this.permissionManager = permissionManager;
     }
 
     public EventLog findById(Integer id) {
