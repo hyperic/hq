@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="installer/src"/>
-	<classpathentry kind="src" path="unittest/resources"/>
 	<classpathentry kind="src" path="generated-src"/>
 	<classpathentry kind="src" path="etc"/>
 	<classpathentry kind="src" path="plugins/spring/src/main/java"/>
