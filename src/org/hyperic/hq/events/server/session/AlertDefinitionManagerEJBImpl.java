@@ -1,26 +1,18 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
- * program services by normal system calls through the application
- * program interfaces provided as part of the Hyperic Plug-in Development
- * Kit or the Hyperic Client Development Kit - this is merely considered
- * normal use of the program, and does *not* fall under the heading of
- * "derived work".
- *
- * Copyright (C) [2004-2009], Hyperic, Inc.
- * This file is part of HQ.
- *
- * HQ is free software; you can redistribute it and/or modify
- * it under the terms version 2 of the GNU General Public License as
- * published by the Free Software Foundation. This program is distributed
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA.
+ * NOTE: This copyright does *not* cover user programs that use HQ program
+ * services by normal system calls through the application program interfaces
+ * provided as part of the Hyperic Plug-in Development Kit or the Hyperic Client
+ * Development Kit - this is merely considered normal use of the program, and
+ * does *not* fall under the heading of "derived work". Copyright (C)
+ * [2004-2009], Hyperic, Inc. This file is part of HQ. HQ is free software; you
+ * can redistribute it and/or modify it under the terms version 2 of the GNU
+ * General Public License as published by the Free Software Foundation. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+ * Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
 package org.hyperic.hq.events.server.session;
@@ -84,73 +76,68 @@ import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
- * <p> Stores Events to and deletes Events from storage
- *
+ * <p>
+ * Stores Events to and deletes Events from storage
+ * 
  * </p>
  * @ejb:bean name="AlertDefinitionManager"
- *      jndi-name="ejb/events/AlertDefinitionManager"
- *      local-jndi-name="LocalAlertDefinitionManager"
- *      view-type="local"
- *      type="Stateless"
+ *           jndi-name="ejb/events/AlertDefinitionManager"
+ *           local-jndi-name="LocalAlertDefinitionManager" view-type="local"
+ *           type="Stateless"
  * @ejb:transaction type="Required"
- *
+ * 
  */
-public class AlertDefinitionManagerEJBImpl implements SessionBean
-{
+public class AlertDefinitionManagerEJBImpl implements SessionBean {
     private Log log = LogFactory.getLog(AlertDefinitionManagerEJBImpl.class);
 
-   private  EscalationManagerLocal escMan;
-       private AlertPermissionManager alertPermissionManager;
-     private ResourceManager resourceManager;
+    private AlertPermissionManager alertPermissionManager = Bootstrap.getBean(AlertPermissionManager.class);
     
-          private final String VALUE_PROCESSOR =
-              PagerProcessor_events.class.getName();
-      
-          private Pager _valuePager;
-   
-       private AlertDefinitionDAO alertDefDao = Bootstrap.getBean(AlertDefinitionDAO.class);
-     
-         private ActionDAO actionDao = Bootstrap.getBean(ActionDAO.class);
-     
-        private AlertConditionDAO acDAO = Bootstrap.getBean(AlertConditionDAO.class);
-   
-         private TriggerDAO triggerDAO = Bootstrap.getBean(TriggerDAO.class);
+    private ResourceManager resourceManager;
+
+    private final String VALUE_PROCESSOR = PagerProcessor_events.class.getName();
+
+    private Pager _valuePager;
+
+    private AlertDefinitionDAO alertDefDao = Bootstrap.getBean(AlertDefinitionDAO.class);
+
+    private ActionDAO actionDao = Bootstrap.getBean(ActionDAO.class);
+
+    private AlertConditionDAO acDAO = Bootstrap.getBean(AlertConditionDAO.class);
+
+    private TriggerDAO triggerDAO = Bootstrap.getBean(TriggerDAO.class);
+
+    private MeasurementDAO measurementDAO = Bootstrap.getBean(MeasurementDAO.class);
+
+    private TriggerDAO getTriggerDAO() {
+        return triggerDAO;
+    }
     
-        private MeasurementDAO measurementDAO = Bootstrap.getBean(MeasurementDAO.class);
-        
-        private RegisteredTriggerManagerLocal registeredTriggerManager;
+    private RegisteredTriggerManagerLocal getRegisteredTriggerManager() {
+        return Bootstrap.getBean(RegisteredTriggerManagerLocal.class);
+    }
+    
+    private ResourceManager getResourceManager() {
+        return Bootstrap.getBean(ResourceManager.class);
+    }
+
+    public AlertDefinitionManagerEJBImpl() {
       
-         private TriggerDAO getTriggerDAO() {
-          return triggerDAO;
-          }
-      
-        
-        public AlertDefinitionManagerEJBImpl()
-         {
-            this.alertDefDao = alertDefDao;
-             this.alertPermissionManager = alertPermissionManager;
-           try {
-                 _valuePager = Pager.getPager(VALUE_PROCESSOR);
-             } catch ( Exception e ) {
-                 //TODO
-             //throw new CreateException("Could not create value pager:" + e);
-            }
-          }
+    }
+
     private boolean deleteAlertDefinitionStuff(AuthzSubject subj,
                                                AlertDefinition alertdef,
-                                               EscalationManagerLocal escMan) {
+                                               EscalationManagerLocal escMan)
+    {
         StopWatch watch = new StopWatch();
 
         // Delete escalation state
         watch.markTimeBegin("endEscalation");
-        if (alertdef.getEscalation() != null &&
-            !alertdef.isResourceTypeDefinition()) {
+        if (alertdef.getEscalation() != null && !alertdef.isResourceTypeDefinition()) {
             escMan.endEscalation(alertdef);
         }
         watch.markTimeEnd("endEscalation");
 
-        EventsStartupListener.getAlertDefinitionChangeCallback()
-            .postDelete(alertdef);
+        EventsStartupListener.getAlertDefinitionChangeCallback().postDelete(alertdef);
 
         if (log.isDebugEnabled()) {
             log.debug("deleteAlertDefinitionStuff: " + watch);
@@ -163,10 +150,9 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
      * Remove alert definitions. It is assumed that the subject has permission
      * to remove this alert definition and any of its' child alert definitions.
      */
-    private boolean deleteAlertDefinition(AuthzSubject subj,
-                                          AlertDefinition alertdef,
-                                          boolean force)
-        throws RemoveException, PermissionException {
+    private boolean deleteAlertDefinition(AuthzSubject subj, AlertDefinition alertdef, boolean force) throws RemoveException,
+                                                                                                     PermissionException
+    {
         StopWatch watch = new StopWatch();
 
         EscalationManagerLocal escMan = EscalationManagerEJBImpl.getOne();
@@ -218,24 +204,21 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
      * Create a new alert definition
      * @ejb:interface-method
      */
-    public AlertDefinitionValue createAlertDefinition(AuthzSubject subj,
-                                                      AlertDefinitionValue a)
-        throws AlertDefinitionCreateException,
-               PermissionException
+    public AlertDefinitionValue createAlertDefinition(AuthzSubject subj, AlertDefinitionValue a) throws AlertDefinitionCreateException,
+                                                                                                PermissionException
     {
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(a.getParentId())) {
-            alertPermissionManager.canManageAlerts(subj, new AppdefEntityTypeID(a.getAppdefType(),
-                                                         a.getAppdefId()));
-        // Subject permissions should have already been checked when creating
-        // the parent (resource type) alert definition.
+            alertPermissionManager.canManageAlerts(subj, new AppdefEntityTypeID(a.getAppdefType(), a.getAppdefId()));
+            // Subject permissions should have already been checked when
+            // creating
+            // the parent (resource type) alert definition.
         } else if (!a.parentIdHasBeenSet()) {
-            alertPermissionManager.canManageAlerts(subj, new AppdefEntityID(a.getAppdefType(),
-                                                     a.getAppdefId()));
+            alertPermissionManager.canManageAlerts(subj, new AppdefEntityID(a.getAppdefType(), a.getAppdefId()));
         }
-		return createAlertDefinition(a);
-	}
-	
-	 /**
+        return createAlertDefinition(a);
+    }
+
+    /**
      * Create a new alert definition
      * @ejb:interface-method
      */
@@ -246,9 +229,8 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         a.initializeMTimeToNow();
 
         AlertDefinition res = new AlertDefinition();
-      
 
-        // The following is duplicated out of what the EJBImpl did.  Makes sense
+        // The following is duplicated out of what the EJBImpl did. Makes sense
         a.cleanAction();
         a.cleanCondition();
         a.cleanTrigger();
@@ -256,24 +238,22 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
 
         // Create new conditions
         AlertConditionValue[] conds = a.getConditions();
-       
+
         for (int i = 0; i < conds.length; i++) {
-            RegisteredTrigger trigger = conds[i].getTriggerId() != null ?
-                registeredTriggerManager.findById(conds[i].getTriggerId()) : null;
+            RegisteredTrigger trigger = conds[i].getTriggerId() != null ? getRegisteredTriggerManager().findById(conds[i].getTriggerId())
+                                                                       : null;
 
             AlertCondition cond = res.createCondition(conds[i], trigger);
 
             if (res.getName() == null || res.getName().length() == 0) {
                 Measurement dm = null;
-                if (cond.getType() == EventConstants.TYPE_THRESHOLD ||
-                    cond.getType() == EventConstants.TYPE_BASELINE) {
-                   
+                if (cond.getType() == EventConstants.TYPE_THRESHOLD || cond.getType() == EventConstants.TYPE_BASELINE) {
+
                     dm = measurementDAO.findById(new Integer(cond.getMeasurementId()));
                 }
                 if (dm == null) {
-                    log.warn("AlertCondition (id=" + cond.getId() + ") has an " +
-                        "associated Measurement (id=" + cond.getMeasurementId() +
-                        ") that does not exist, ignoring");
+                    log.warn("AlertCondition (id=" + cond.getId() + ") has an " + "associated Measurement (id=" +
+                             cond.getMeasurementId() + ") that does not exist, ignoring");
                     continue;
                 }
                 res.setName(cond.describe(dm.getTemplate().getUnits()));
@@ -282,14 +262,12 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
             if (cond.getType() == EventConstants.TYPE_ALERT) {
                 ActionValue recoverAction = new ActionValue();
 
-                EnableAlertDefActionConfig action =
-                    new EnableAlertDefActionConfig();
+                EnableAlertDefActionConfig action = new EnableAlertDefActionConfig();
                 action.setAlertDefId(cond.getMeasurementId());
 
                 recoverAction.setClassname(action.getImplementor());
                 try {
-                    recoverAction
-                        .setConfig(action.getConfigResponse().encode());
+                    recoverAction.setConfig(action.getConfigResponse().encode());
                 } catch (EncodingException e) {
                     log.debug("Error encoding EnableAlertDefAction", e);
                 } catch (InvalidOptionException e) {
@@ -306,15 +284,14 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
 
         // Create actions
         ActionValue[] actions = a.getActions();
-       
+
         for (int i = 0; i < actions.length; i++) {
             Action parent = null;
 
             if (actions[i].getParentId() != null)
                 parent = actionDao.findById(actions[i].getParentId());
 
-            Action act = res.createAction(actions[i].getClassname(),
-                                          actions[i].getConfig(), parent);
+            Action act = res.createAction(actions[i].getClassname(), actions[i].getConfig(), parent);
             actionDao.save(act);
         }
 
@@ -322,29 +299,26 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         RegisteredTriggerValue[] triggers = a.getTriggers();
         if (triggers.length != 0) {
 
-
             for (int i = 0; i < triggers.length; i++) {
                 RegisteredTrigger trig;
 
                 // Triggers were already created by bizapp, so we only need
                 // to add them to our list
-                trig = registeredTriggerManager.findById(triggers[i].getId());
+                trig = getRegisteredTriggerManager().findById(triggers[i].getId());
                 trig.setAlertDefinition(res);
             }
         }
 
         Integer esclId = a.getEscalationId();
         if (esclId != null) {
-            Escalation escalation =
-                EscalationManagerEJBImpl.getOne().findById(esclId);
+            Escalation escalation = EscalationManagerEJBImpl.getOne().findById(esclId);
             res.setEscalation(escalation);
         }
         // Alert definitions are the root of the cascade relationship, so
         // we must explicitly save them
         alertDefDao.save(res);
 
-        EventsStartupListener.getAlertDefinitionChangeCallback()
-            .postCreate(res);
+        EventsStartupListener.getAlertDefinitionChangeCallback().postCreate(res);
 
         return res.getAlertDefinitionValue();
     }
@@ -352,13 +326,15 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
     /**
      * Update just the basics
      * @throws PermissionException
-     *
+     * 
      * @ejb:interface-method
      */
-    public void updateAlertDefinitionBasic(AuthzSubject subj, Integer id,
-                                           String name, String desc,
-                                           int priority, boolean activate)
-        throws PermissionException
+    public void updateAlertDefinitionBasic(AuthzSubject subj,
+                                           Integer id,
+                                           String name,
+                                           String desc,
+                                           int priority,
+                                           boolean activate) throws PermissionException
     {
         AlertDefinition def = alertDefDao.findById(id);
         alertPermissionManager.canManageAlerts(subj, def);
@@ -368,7 +344,7 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         // If there are any children, add them, too
         alertdefs.addAll(def.getChildren());
 
-        for (Iterator it = alertdefs.iterator(); it.hasNext(); ) {
+        for (Iterator it = alertdefs.iterator(); it.hasNext();) {
             def = (AlertDefinition) it.next();
 
             def.setName(name);
@@ -378,18 +354,17 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
             if (def.isActive() != activate || def.isEnabled() != activate) {
                 def.setActiveStatus(activate);
                 AlertAudit.enableAlert(def, subj);
-                registeredTriggerManager.setAlertDefinitionTriggersEnabled(def.getId(), activate);
+                getRegisteredTriggerManager().setAlertDefinitionTriggersEnabled(def.getId(), activate);
             }
             def.setMtime(System.currentTimeMillis());
 
-            EventsStartupListener.getAlertDefinitionChangeCallback()
-                .postUpdate(def);
+            EventsStartupListener.getAlertDefinitionChangeCallback().postUpdate(def);
         }
     }
 
     /**
-     * Get the EnableAlertDefAction ActionValue from an
-     * AlertDefinitionValue.  If none exists, return null.
+     * Get the EnableAlertDefAction ActionValue from an AlertDefinitionValue. If
+     * none exists, return null.
      */
     private ActionValue getEnableAction(AlertDefinitionValue adv) {
         ActionValue[] actions = adv.getActions();
@@ -406,11 +381,11 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
      * Update an alert definition
      * @ejb:interface-method
      */
-    public AlertDefinitionValue updateAlertDefinition(AlertDefinitionValue adval)
-        throws AlertConditionCreateException, ActionCreateException,
-               RemoveException
+    public AlertDefinitionValue updateAlertDefinition(AlertDefinitionValue adval) throws AlertConditionCreateException,
+                                                                                 ActionCreateException,
+                                                                                 RemoveException
     {
-       
+
         AlertDefinition aldef = alertDefDao.findById(adval.getId());
 
         // Find recovery actions first
@@ -418,11 +393,10 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         adval.removeAction(recoverAction);
 
         // See if the conditions changed
-        if (adval.getAddedConditions().size()   > 0 ||
-            adval.getUpdatedConditions().size() > 0 ||
-            adval.getRemovedConditions().size() > 0 )
+        if (adval.getAddedConditions().size() > 0 || adval.getUpdatedConditions().size() > 0 ||
+            adval.getRemovedConditions().size() > 0)
         {
-            // We need to keep old conditions around for the logs.  So
+            // We need to keep old conditions around for the logs. So
             // we'll create new conditions and update the alert
             // definition, but we won't remove the old conditions.
             AlertConditionValue[] conds = adval.getConditions();
@@ -432,23 +406,18 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
 
                 // Trigger ID is null for resource type alerts
                 if (conds[i].getTriggerId() != null)
-                    trigger = registeredTriggerManager.findById(conds[i].getTriggerId());
+                    trigger = getRegisteredTriggerManager().findById(conds[i].getTriggerId());
 
                 if (conds[i].getType() == EventConstants.TYPE_ALERT) {
-                    EnableAlertDefActionConfig action =
-                        new EnableAlertDefActionConfig();
+                    EnableAlertDefActionConfig action = new EnableAlertDefActionConfig();
                     if (recoverAction != null) {
                         try {
-                            ConfigResponse configResponse =
-                                ConfigResponse.decode(recoverAction.getConfig());
+                            ConfigResponse configResponse = ConfigResponse.decode(recoverAction.getConfig());
                             action.init(configResponse);
 
-                            if (action.getAlertDefId() !=
-                                conds[i].getMeasurementId()) {
+                            if (action.getAlertDefId() != conds[i].getMeasurementId()) {
                                 action.setAlertDefId(conds[i].getMeasurementId());
-                                recoverAction.setConfig(action
-                                                            .getConfigResponse()
-                                                            .encode());
+                                recoverAction.setConfig(action.getConfigResponse().encode());
                                 adval.updateAction(recoverAction);
                             }
                         } catch (Exception e) {
@@ -463,8 +432,7 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
                         recoverAction.setClassname(action.getImplementor());
 
                         try {
-                            recoverAction
-                            .setConfig(action.getConfigResponse().encode());
+                            recoverAction.setConfig(action.getConfigResponse().encode());
                         } catch (EncodingException e) {
                             log.debug("Error encoding EnableAlertDefAction", e);
                         } catch (InvalidOptionException e) {
@@ -482,23 +450,21 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         }
 
         // See if the actions changed
-        if (adval.getAddedActions().size()   > 0 ||
-            adval.getUpdatedActions().size() > 0 ||
+        if (adval.getAddedActions().size() > 0 || adval.getUpdatedActions().size() > 0 ||
             adval.getRemovedActions().size() > 0)
         {
-            // We need to keep old actions around for the logs.  So
+            // We need to keep old actions around for the logs. So
             // we'll create new actions and update the alert
             // definition, but we won't remove the old conditions.
             ActionValue[] actions = adval.getActions();
             aldef.clearActions();
-            for (int i = 0; i <  actions.length; i++) {
+            for (int i = 0; i < actions.length; i++) {
                 Action parent = null;
 
                 if (actions[i].getParentId() != null)
                     parent = actionDao.findById(actions[i].getParentId());
 
-                actionDao.save(aldef.createAction(actions[i].getClassname(),
-                                               actions[i].getConfig(), parent));
+                actionDao.save(aldef.createAction(actions[i].getClassname(), actions[i].getConfig(), parent));
             }
         }
 
@@ -506,7 +472,7 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         RegisteredTriggerValue[] triggers = adval.getTriggers();
         if (triggers.length > 0) {
             for (int i = 0; i < triggers.length; i++) {
-                RegisteredTrigger t = registeredTriggerManager.findById(triggers[i].getId());
+                RegisteredTrigger t = getRegisteredTriggerManager().findById(triggers[i].getId());
                 t.setAlertDefinition(aldef);
             }
         }
@@ -518,8 +484,7 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         alertDefDao.setAlertDefinitionValueNoRels(aldef, adval);
         if (adval.isEscalationIdHasBeenSet()) {
             Integer esclId = adval.getEscalationId();
-            Escalation escl =
-                EscalationManagerEJBImpl.getOne().findById(esclId);
+            Escalation escl = EscalationManagerEJBImpl.getOne().findById(esclId);
 
             aldef.setEscalation(escl);
         }
@@ -528,31 +493,26 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         // we must explicitly save them
         alertDefDao.save(aldef);
 
-        EventsStartupListener.getAlertDefinitionChangeCallback()
-            .postUpdate(aldef);
+        EventsStartupListener.getAlertDefinitionChangeCallback().postUpdate(aldef);
 
         return aldef.getAlertDefinitionValue();
     }
 
     /**
      * Activate/deactivate an alert definitions.
-     *
+     * 
      * @ejb:interface-method
      */
-    public void updateAlertDefinitionsActiveStatus(AuthzSubject subj,
-                                                   Integer[] ids,
-                                                   boolean activate)
-        throws PermissionException
+    public void updateAlertDefinitionsActiveStatus(AuthzSubject subj, Integer[] ids, boolean activate) throws PermissionException
     {
         List alertdefs = new ArrayList();
-       
+
         for (int i = 0; i < ids.length; i++) {
             alertdefs.add((alertDefDao.get(ids[i])));
         }
 
-        for (Iterator i = alertdefs.iterator(); i.hasNext(); ) {
-            updateAlertDefinitionActiveStatus(subj, (AlertDefinition) i.next(),
-                                              activate);
+        for (Iterator i = alertdefs.iterator(); i.hasNext();) {
+            updateAlertDefinitionActiveStatus(subj, (AlertDefinition) i.next(), activate);
         }
     }
 
@@ -560,10 +520,8 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
      * Activate/deactivate an alert definition.
      *@ejb:interface-method
      */
-    public void updateAlertDefinitionActiveStatus(AuthzSubject subj,
-                                                  AlertDefinition def,
-                                                  boolean activate)
-        throws PermissionException {
+    public void updateAlertDefinitionActiveStatus(AuthzSubject subj, AlertDefinition def, boolean activate) throws PermissionException
+    {
 
         alertPermissionManager.canManageAlerts(subj, def);
 
@@ -571,33 +529,30 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
             def.setActiveStatus(activate);
             def.setMtime(System.currentTimeMillis());
             AlertAudit.enableAlert(def, subj);
-            registeredTriggerManager.setAlertDefinitionTriggersEnabled(def.getId(), activate);
+            getRegisteredTriggerManager().setAlertDefinitionTriggersEnabled(def.getId(), activate);
         }
 
         alertDefDao.setChildrenActive(def, activate);
 
-        EventsStartupListener.getAlertDefinitionChangeCallback()
-            .postUpdate(def);
+        EventsStartupListener.getAlertDefinitionChangeCallback().postUpdate(def);
     }
 
     /**
      * Enable/Disable an alert definition. For internal use only where the mtime
      * does not need to be reset on each update.
-     *
+     * 
      * @return <code>true</code> if the enable/disable succeeded.
      * @ejb:interface-method
      */
-    public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj,
-                                                       AlertDefinition def,
-                                                       boolean enable)
-        throws PermissionException {
+    public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj, AlertDefinition def, boolean enable) throws PermissionException
+    {
 
         boolean succeeded = false;
 
         if (def.isEnabled() != enable) {
             alertPermissionManager.canManageAlerts(subj, def.getAppdefEntityId());
             def.setEnabledStatus(enable);
-            registeredTriggerManager.setAlertDefinitionTriggersEnabled(def.getId(), enable);
+            getRegisteredTriggerManager().setAlertDefinitionTriggersEnabled(def.getId(), enable);
             succeeded = true;
         }
 
@@ -607,14 +562,13 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
     /**
      * Enable/Disable an alert definition. For internal use only where the mtime
      * does not need to be reset on each update.
-     *
+     * 
      * @return <code>true</code> if the enable/disable succeeded.
      * @ejb:interface-method
      */
-    public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj,
-                                                       Integer defId,
-                                                       boolean enable)
-        throws FinderException, PermissionException {
+    public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj, Integer defId, boolean enable) throws FinderException,
+                                                                                                        PermissionException
+    {
 
         AlertDefinition def = alertDefDao.get(defId);
 
@@ -623,12 +577,10 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
 
     /**
      * Set the escalation on the alert definition
-     *
+     * 
      * @ejb:interface-method
      */
-    public void setEscalation(AuthzSubject subj, Integer defId, Integer escId)
-        throws PermissionException
-    {
+    public void setEscalation(AuthzSubject subj, Integer defId, Integer escId) throws PermissionException {
         AlertDefinition def = alertDefDao.findById(defId);
         alertPermissionManager.canManageAlerts(subj, def);
 
@@ -642,7 +594,7 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         def.setMtime(System.currentTimeMillis());
 
         // End all children's escalation
-        for (Iterator it = def.getChildren().iterator(); it.hasNext(); ) {
+        for (Iterator it = def.getChildren().iterator(); it.hasNext();) {
             AlertDefinition child = (AlertDefinition) it.next();
             escMan.endEscalation(child);
         }
@@ -658,21 +610,17 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         return alertDefDao.getUsing(e);
     }
 
-
     /**
      * Remove alert definitions
      * @ejb:interface-method
      */
-    public void deleteAlertDefinitions(AuthzSubject subj, Integer[] ids)
-        throws RemoveException, PermissionException
-    {
+    public void deleteAlertDefinitions(AuthzSubject subj, Integer[] ids) throws RemoveException, PermissionException {
         for (int i = 0; i < ids.length; i++) {
             AlertDefinition alertdef = alertDefDao.findById(ids[i]);
 
             // Don't delete child alert definitions
-            if (alertdef.getParent() != null &&
-                !EventConstants.TYPE_ALERT_DEF_ID
-                    .equals(alertdef.getParent().getId())) {
+            if (alertdef.getParent() != null && !EventConstants.TYPE_ALERT_DEF_ID.equals(alertdef.getParent().getId()))
+            {
                 continue;
             }
 
@@ -682,8 +630,6 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         }
     }
 
-
-
     /**
      * Set Resource to null on entity's alert definitions
      * @ejb:interface-method
@@ -692,7 +638,7 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         AlertDefinitionDAO aDao = alertDefDao;
         List adefs = aDao.findAllByResource(r);
 
-        for (Iterator i = adefs.iterator(); i.hasNext(); ) {
+        for (Iterator i = adefs.iterator(); i.hasNext();) {
             AlertDefinition alertdef = (AlertDefinition) i.next();
             alertdef.setResource(null);
             alertdef.setDeleted(true);
@@ -700,14 +646,13 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         aDao.getSession().flush();
     }
 
-    /** Clean up alert definitions and alerts for removed resources
-     *
+    /**
+     * Clean up alert definitions and alerts for removed resources
+     * 
      * @ejb:interface-method
      */
     public void cleanupAlertDefinitions(AppdefEntityID aeid) {
         StopWatch watch = new StopWatch();
-
-       
 
         List adefs = alertDefDao.findAllDeletedResources();
         for (Iterator i = adefs.iterator(); i.hasNext();) {
@@ -749,14 +694,13 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         }
     }
 
-    /** Find an alert definition and return a value object
+    /**
+     * Find an alert definition and return a value object
      * @throws PermissionException if user does not have permission to manage
-     * alerts
+     *         alerts
      * @ejb:interface-method
      */
-    public AlertDefinitionValue getById(AuthzSubject subj, Integer id)
-        throws PermissionException
-    {
+    public AlertDefinitionValue getById(AuthzSubject subj, Integer id) throws PermissionException {
         AlertDefinitionValue adv = null;
         AlertDefinition ad = getByIdAndCheck(subj, id);
         if (ad != null) {
@@ -765,14 +709,13 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         return adv;
     }
 
-    /** Find an alert definition
+    /**
+     * Find an alert definition
      * @throws PermissionException if user does not have permission to manage
-     * alerts
+     *         alerts
      * @ejb:interface-method
      */
-    public AlertDefinition getByIdAndCheck(AuthzSubject subj, Integer id)
-        throws PermissionException
-    {
+    public AlertDefinition getByIdAndCheck(AuthzSubject subj, Integer id) throws PermissionException {
         AlertDefinition ad = alertDefDao.get(id);
         if (ad != null) {
             if (ad.isDeleted()) {
@@ -791,9 +734,10 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         return ad;
     }
 
-    /** Find an alert definition and return a basic value.  This is called by
-     * the abstract trigger, so it does no permission checking.
-     *
+    /**
+     * Find an alert definition and return a basic value. This is called by the
+     * abstract trigger, so it does no permission checking.
+     * 
      * @param id The alert def Id.
      * @ejb:interface-method
      */
@@ -803,7 +747,7 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
 
     /**
      * Check if an alert definition is a resource type alert definition.
-     *
+     * 
      * @param id The alert def Id.
      * @return <code>true</code> if the alert definition is a resource type
      *         alert definition.
@@ -815,8 +759,6 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         return ad.isResourceTypeDefinition();
     }
 
-
-
     /**
      * @ejb:interface-method
      */
@@ -824,21 +766,19 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         return alertDefDao.findById(id);
     }
 
-    /** Get an alert definition's name
+    /**
+     * Get an alert definition's name
      * @ejb:interface-method
      */
-    public String getNameById(Integer id)
-        throws FinderException
-    {
+    public String getNameById(Integer id) throws FinderException {
         return alertDefDao.get(id).getName();
     }
 
-    /** Get an alert definition's conditions
+    /**
+     * Get an alert definition's conditions
      * @ejb:interface-method
      */
-    public AlertConditionValue[] getConditionsById(Integer id)
-        throws FinderException
-    {
+    public AlertConditionValue[] getConditionsById(Integer id) throws FinderException {
         AlertDefinition def = alertDefDao.get(id);
         Collection conds = def.getConditions();
         AlertConditionValue[] condVals = new AlertConditionValue[conds.size()];
@@ -851,17 +791,18 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         return condVals;
     }
 
-    /** Get list of alert conditions for a resource or resource type
+    /**
+     * Get list of alert conditions for a resource or resource type
      * @ejb:interface-method
      */
     public boolean isAlertDefined(AppdefEntityID id, Integer parentId) {
-        Resource res = resourceManager.findResource(id);
+        Resource res = getResourceManager().findResource(id);
         return alertDefDao.findChildAlertDef(res, parentId) != null;
     }
 
     /**
      * Get list of all alert conditions
-     *
+     * 
      * @return a PageList of {@link AlertDefinitionValue} objects
      * @ejb:interface-method
      */
@@ -881,15 +822,16 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         return new PageList(vals, vals.size());
     }
 
-    /** Get list of all child conditions
+    /**
+     * Get list of all child conditions
      * @ejb:interface-method
      */
     public PageList findChildAlertDefinitions(Integer id) {
         AlertDefinition def = alertDefDao.findById(id);
         List vals = new ArrayList();
         Collection ads = def.getChildren();
-        for (Iterator i=ads.iterator(); i.hasNext(); ) {
-            AlertDefinition child = (AlertDefinition)i.next();
+        for (Iterator i = ads.iterator(); i.hasNext();) {
+            AlertDefinition child = (AlertDefinition) i.next();
             // Don't touch the deleted children
             if (!child.isDeleted() && child.getResource() != null) {
                 vals.add(child.getAlertDefinitionValue());
@@ -903,64 +845,57 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
      * Get the resource-specific alert definition ID by parent ID, allowing for
      * the query to return a stale copy of the alert definition (for efficiency
      * reasons).
-     *
+     * 
      * @param aeid The resource.
      * @param pid The ID of the resource type alert definition (parent ID).
      * @param allowStale <code>true</code> to allow stale copies of an alert
-     *                   definition in the query results; <code>false</code> to
-     *                   never allow stale copies, potentially always forcing a
-     *                   sync with the database.
-     * @return The alert definition ID or <code>null</code> if no alert definition
-     *         is found for the resource.
+     *        definition in the query results; <code>false</code> to never allow
+     *        stale copies, potentially always forcing a sync with the database.
+     * @return The alert definition ID or <code>null</code> if no alert
+     *         definition is found for the resource.
      * @ejb:interface-method
      */
-    public Integer findChildAlertDefinitionId(AppdefEntityID aeid,
-                                              Integer pid,
-                                              boolean allowStale) {
-        Resource res = resourceManager.findResource(aeid);
+    public Integer findChildAlertDefinitionId(AppdefEntityID aeid, Integer pid, boolean allowStale) {
+        Resource res = getResourceManager().findResource(aeid);
         AlertDefinition def = alertDefDao.findChildAlertDef(res, pid, true);
 
         return def == null ? null : def.getId();
     }
 
-
     /**
      * Find alert definitions passing the criteria.
-     *
-     * @param minSeverity  Specifies the minimum severity that the defs should
-     *                     be set for
-     * @param enabled      If non-null, specifies the nature of the returned
-     *                     definitions (i.e. only return enabled or disabled
-     *                     defs)
-     * @param excludeTypeBased  If true, exclude any alert definitions
-     *                          associated with a type-based def.
-     * @param pInfo        Paging information.  The sort field must be a
-     *                     value from {@link AlertDefSortField}
-     *
+     * 
+     * @param minSeverity Specifies the minimum severity that the defs should be
+     *        set for
+     * @param enabled If non-null, specifies the nature of the returned
+     *        definitions (i.e. only return enabled or disabled defs)
+     * @param excludeTypeBased If true, exclude any alert definitions associated
+     *        with a type-based def.
+     * @param pInfo Paging information. The sort field must be a value from
+     *        {@link AlertDefSortField}
+     * 
      * @ejb:interface-method
      */
     public List findAlertDefinitions(AuthzSubject subj,
-                                     AlertSeverity minSeverity, Boolean enabled,
-                                     boolean excludeTypeBased, PageInfo pInfo)
+                                     AlertSeverity minSeverity,
+                                     Boolean enabled,
+                                     boolean excludeTypeBased,
+                                     PageInfo pInfo)
     {
-        return alertDefDao.findDefinitions(subj, minSeverity, enabled,
-                                                excludeTypeBased, pInfo);
+        return alertDefDao.findDefinitions(subj, minSeverity, enabled, excludeTypeBased, pInfo);
     }
 
     /**
      * Get the list of type-based alert definitions.
-     *
+     * 
      * @param enabled If non-null, specifies the nature of the returned defs.
-     * @param pInfo Paging information.  The sort field must be a value from
-     *              {@link AlertDefSortField}
+     * @param pInfo Paging information. The sort field must be a value from
+     *        {@link AlertDefSortField}
      * @ejb:interface-method
      */
-    public List findTypeBasedDefinitions(AuthzSubject subj, Boolean enabled,
-                                         PageInfo pInfo)
-        throws PermissionException
+    public List findTypeBasedDefinitions(AuthzSubject subj, Boolean enabled, PageInfo pInfo) throws PermissionException
     {
-        if (!PermissionManagerFactory.getInstance()
-                .hasAdminPermission(subj.getId())) {
+        if (!PermissionManagerFactory.getInstance().hasAdminPermission(subj.getId())) {
             throw new PermissionException("Only administrators can do this");
         }
         return alertDefDao.findTypeBased(enabled, pInfo);
@@ -971,22 +906,19 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
      * @throws PermissionException if user cannot manage alerts for resource
      * @ejb:interface-method
      */
-    public List findAlertDefinitions(AuthzSubject subject, AppdefEntityID id)
-        throws PermissionException {
+    public List findAlertDefinitions(AuthzSubject subject, AppdefEntityID id) throws PermissionException {
         alertPermissionManager.canManageAlerts(subject, id);
-        Resource res = resourceManager.findResource(id);
+        Resource res = getResourceManager().findResource(id);
         return alertDefDao.findByResource(res);
     }
 
     /**
      * @ejb:interface-method
      */
-    public PageList findAlertDefinitions(AuthzSubject subj, AppdefEntityID id,
-                                         PageControl pc)
-        throws PermissionException
+    public PageList findAlertDefinitions(AuthzSubject subj, AppdefEntityID id, PageControl pc) throws PermissionException
     {
         alertPermissionManager.canManageAlerts(subj, id);
-        Resource res = resourceManager.findResource(id);
+        Resource res = getResourceManager().findResource(id);
 
         AlertDefinitionDAO aDao = alertDefDao;
 
@@ -1004,9 +936,7 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
      * Get list of alert definitions for a resource type.
      * @ejb:interface-method
      */
-    public List findAlertDefinitions(AuthzSubject subject, Resource prototype)
-        throws PermissionException
-    {
+    public List findAlertDefinitions(AuthzSubject subject, Resource prototype) throws PermissionException {
         AlertDefinitionDAO aDao = alertDefDao;
         // TODO: Check admin permission?
         return aDao.findAllByResource(prototype);
@@ -1016,21 +946,15 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
      * Get list of alert conditions for a resource or resource type
      * @ejb:interface-method
      */
-    public PageList findAlertDefinitions(AuthzSubject subj,
-                                         AppdefEntityTypeID aetid,
-                                         PageControl pc)
-        throws PermissionException
+    public PageList findAlertDefinitions(AuthzSubject subj, AppdefEntityTypeID aetid, PageControl pc) throws PermissionException
     {
         AlertDefinitionDAO aDao = alertDefDao;
 
-        Resource res =
-            ResourceManagerImpl.getOne().findResourcePrototype(aetid);
+        Resource res = getResourceManager().findResourcePrototype(aetid);
         Collection adefs;
         if (pc.getSortattribute() == SortAttribute.CTIME) {
-            adefs =
-                aDao.findByResourceSortByCtime(res, pc.isAscending());
-        }
-        else {
+            adefs = aDao.findByResourceSortByCtime(res, pc.isAscending());
+        } else {
             adefs = aDao.findByResource(res, pc.isAscending());
         }
 
@@ -1057,55 +981,46 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
         AlertDefinition def = alertDefDao.findById(id);
 
         PageControl pc = PageControl.PAGE_ALL;
-        return _valuePager.seek(def.getChildren(), pc.getPagenum(),
-                               pc.getPagesize());
+        return _valuePager.seek(def.getChildren(), pc.getPagenum(), pc.getPagesize());
     }
 
     /**
      * Get list of alert definition names for a resource
      * @ejb:interface-method
      */
-    public SortedMap findAlertDefinitionNames(AuthzSubject subj,
-                                              AppdefEntityID id,
-                                              Integer parentId)
-        throws PermissionException
+    public SortedMap findAlertDefinitionNames(AuthzSubject subj, AppdefEntityID id, Integer parentId) throws PermissionException
     {
-    	if(parentId == null) {
-    		alertPermissionManager.canManageAlerts(subj, id);
-    	}
-    	return findAlertDefinitionNames(id, parentId);
+        if (parentId == null) {
+            alertPermissionManager.canManageAlerts(subj, id);
+        }
+        return findAlertDefinitionNames(id, parentId);
     }
 
-    /** 
+    /**
      * Get list of alert definition names for a resource
      * @ejb:interface-method
      */
-    public SortedMap findAlertDefinitionNames(AppdefEntityID id,
-                                              Integer parentId)
-    {
+    public SortedMap findAlertDefinitionNames(AppdefEntityID id, Integer parentId) {
         AlertDefinitionDAO aDao = alertDefDao;
         TreeMap ret = new TreeMap();
         Collection adefs;
 
         if (parentId != null) {
             if (EventConstants.TYPE_ALERT_DEF_ID.equals(parentId)) {
-                AppdefEntityTypeID aetid = new AppdefEntityTypeID(id.getType(),
-                                                                  id.getId());
-                Resource res =
-                    ResourceManagerImpl.getOne().findResourcePrototype(aetid);
+                AppdefEntityTypeID aetid = new AppdefEntityTypeID(id.getType(), id.getId());
+                Resource res = getResourceManager().findResourcePrototype(aetid);
                 adefs = aDao.findByResource(res);
-            }
-            else  {
+            } else {
                 AlertDefinition def = alertDefDao.findById(parentId);
                 adefs = def.getChildren();
             }
         } else {
-            Resource res = resourceManager.findResource(id);
+            Resource res = getResourceManager().findResource(id);
             adefs = aDao.findByResource(res);
         }
 
         // Use name as key so that map is sorted
-        for (Iterator i = adefs.iterator(); i.hasNext(); ) {
+        for (Iterator i = adefs.iterator(); i.hasNext();) {
             AlertDefinition adLocal = (AlertDefinition) i.next();
             ret.put(adLocal.getName(), adLocal.getId());
         }
@@ -1135,39 +1050,39 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
 
         HQApp.getInstance().registerCallbackListener(AlertDefinitionChangeCallback.class,
                                                      new AlertDefinitionChangeCallback() {
-            public void postCreate(AlertDefinition def) {
-                removeFromCache(def);
-            }
+                                                         public void postCreate(AlertDefinition def) {
+                                                             removeFromCache(def);
+                                                         }
 
-            public void postDelete(AlertDefinition def) {
-                removeFromCache(def);
-            }
+                                                         public void postDelete(AlertDefinition def) {
+                                                             removeFromCache(def);
+                                                         }
 
-            public void postUpdate(AlertDefinition def) {
-                removeFromCache(def);
-            }
+                                                         public void postUpdate(AlertDefinition def) {
+                                                             removeFromCache(def);
+                                                         }
 
-            private void removeFromCache(AlertDefinition def) {
-                AvailabilityDownAlertDefinitionCache cache =
-                        AvailabilityDownAlertDefinitionCache.getInstance();
+                                                         private void removeFromCache(AlertDefinition def) {
+                                                             AvailabilityDownAlertDefinitionCache cache = AvailabilityDownAlertDefinitionCache.getInstance();
 
-                synchronized (cache) {
-                    cache.remove(def.getAppdefEntityId());
+                                                             synchronized (cache) {
+                                                                 cache.remove(def.getAppdefEntityId());
 
-                    AlertDefinition childDef = null;
-                    for (Iterator it=def.getChildren().iterator(); it.hasNext(); ) {
-                        childDef = (AlertDefinition) it.next();
-                        cache.remove(childDef.getAppdefEntityId());
-                    }
-                }
-            }
-        });
+                                                                 AlertDefinition childDef = null;
+                                                                 for (Iterator it = def.getChildren().iterator(); it.hasNext();)
+                                                                 {
+                                                                     childDef = (AlertDefinition) it.next();
+                                                                     cache.remove(childDef.getAppdefEntityId());
+                                                                 }
+                                                             }
+                                                         }
+                                                     });
     }
 
     public static AlertDefinitionManagerLocal getOne() {
         try {
             return AlertDefinitionManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new SystemException(e);
         }
     }
@@ -1178,14 +1093,23 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean
     public void ejbCreate() throws CreateException {
         try {
             _valuePager = Pager.getPager(VALUE_PROCESSOR);
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             throw new CreateException("Could not create value pager:" + e);
         }
     }
 
-    public void ejbPostCreate() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {}
+    public void ejbPostCreate() {
+    }
+
+    public void ejbActivate() {
+    }
+
+    public void ejbPassivate() {
+    }
+
+    public void ejbRemove() {
+    }
+
+    public void setSessionContext(SessionContext ctx) {
+    }
 }
