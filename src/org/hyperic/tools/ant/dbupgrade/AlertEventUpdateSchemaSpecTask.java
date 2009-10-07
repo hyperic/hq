@@ -34,7 +34,7 @@ public class AlertEventUpdateSchemaSpecTask
             conn = getConnection();
             //Update all events with the alert definition ID.  We match by alert def name, resource id, and match of event timestamp with creation of an alert from that definition.
             //This is done to ensure we are matching the proper alert def, since we are allowed to define an alert against the same resource with the same name.
-            String updateSQL = "UPDATE EAM_EVENT_LOG el, EAM_ALERT_DEFINITION ad, EAM_ALERT al set el.INSTANCE_ID=ad.ID where TYPE='org.hyperic.hq.events.AlertFiredEvent' AND " + 
+            String updateSQL = "UPDATE EAM_EVENT_LOG el, EAM_ALERT_DEFINITION ad, EAM_ALERT al SET el.INSTANCE_ID=ad.ID WHERE TYPE='org.hyperic.hq.events.AlertFiredEvent' AND " + 
                 "el.SUBJECT=ad.NAME AND ad.RESOURCE_ID=el.RESOURCE_ID AND al.ALERT_DEFINITION_ID=ad.ID AND el.TIMESTAMP=al.CTIME";
             stmt = conn.createStatement();
             int rowsUpdated = stmt.executeUpdate(updateSQL);
