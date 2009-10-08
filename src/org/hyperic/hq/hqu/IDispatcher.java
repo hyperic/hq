@@ -22,16 +22,37 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.hqu.rendit;
+package org.hyperic.hq.hqu;
 
-public class PluginLoadException 
-    extends RuntimeException
-{
-    public PluginLoadException(String msg) {
-        super(msg);
-    }
+import java.io.File;
+import java.util.Properties;
 
-    public PluginLoadException(String msg, Throwable t) {
-        super(msg, t);
-    }
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.hqu.server.session.Attachment;
+import org.hyperic.hq.hqu.server.session.UIPlugin;
+
+/**
+ * This interface is implemented by the Groovy HQU dispatcher 
+ * (dispatcher.groovy) and acts as a recipient of messages sent from HQ.
+ * 
+ * Many of these methods correlate to things going on in {@link IHQUPlugin}
+ */
+public interface IDispatcher {
+    /**
+     * Called when HQ wants to load a plugin
+     */
+    Properties loadPlugin(File pluginDir);
+    
+    /**
+     * Called when a plugin is to be deployedn
+     */
+    void deploy(UIPlugin p);
+    
+    void handleRequest(RequestInvocationBindings b);
+    
+    Object invokeMethod(InvokeMethodInvocationBindings invokeArgs);
+    
+    AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r,
+                                                 AuthzSubject u);
 }

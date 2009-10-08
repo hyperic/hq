@@ -63,7 +63,7 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.bizapp.server.session.SystemAudit;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.hqu.rendit.RenditServer;
+import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;

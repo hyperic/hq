@@ -44,7 +44,6 @@ import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.Scheduler;
@@ -71,7 +70,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.AlertRegulator;
-import org.hyperic.hq.hqu.rendit.RenditServer;
+import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;

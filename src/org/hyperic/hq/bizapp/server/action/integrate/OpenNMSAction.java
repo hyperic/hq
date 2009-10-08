@@ -48,7 +48,7 @@ import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.InvalidActionDataException;
-import org.hyperic.hq.hqu.rendit.RenditServer;
+import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.InvalidOptionException;

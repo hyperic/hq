@@ -507,6 +507,8 @@
   	      <exclude name="org/hyperic/hq/plugin/**"/>
   	      <!-- Exclude unit tests -->
   	      <exclude name="org/hyperic/**/*_test*"/>
+		  <!-- Exclude groovy classes -->
+		  <exclude name="org/hyperic/hq/hqu/rendit/**"/>
   	    </jar>
 
   	    <!-- We only want server and shared classes for the UI -->

@@ -1,11 +1,11 @@
 package org.hyperic.hq.hqu.rendit
 
-import org.codehaus.groovy.runtime.InvokerHelper
-import groovy.lang.Script
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.hqu.AttachmentDescriptor
+import org.hyperic.hq.hqu.IDispatcher;
+import org.hyperic.hq.hqu.IHQUPlugin;
 import org.hyperic.hq.hqu.server.session.Attachment
 import org.hyperic.hq.hqu.server.session.UIPlugin
 import org.hyperic.hq.hqu.rendit.metaclass.AuthzSubjectCategory
@@ -21,6 +21,8 @@ import org.hyperic.hq.hqu.rendit.metaclass.ResourceGroupCategory
 import org.hyperic.hq.hqu.rendit.metaclass.RoleCategory
 import org.hyperic.hq.hqu.rendit.metaclass.StringCategory
 import org.hyperic.hq.hqu.rendit.metaclass.AgentCategory
+import org.hyperic.hq.hqu.InvokeMethodInvocationBindings
+import org.hyperic.hq.hqu.RequestInvocationBindings
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory

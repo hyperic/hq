@@ -17,7 +17,6 @@
 					<fileset dir="${rendit_sys.dir}">
 						<include name="**/*.groovy" />
 						<include name="**/*.properties" />
-						<exclude name="**/*.java" />
 					</fileset>
 				</copy>
 				<mkdir dir="@{wardir}/hqu" />
@@ -26,6 +25,9 @@
 						<exclude name="scaffold/**" />
 						<exclude name="extra/**" />
 						<exclude name="old/**" />
+						<exclude name="**/.classpath"/>
+						<exclude name="**/.project"/>
+						<exclude name="**/bin/**"/>
 					</fileset>
 				</copy>
 			</sequential>

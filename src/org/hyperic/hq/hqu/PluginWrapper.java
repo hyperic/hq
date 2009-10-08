@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.hqu.rendit;
+package org.hyperic.hq.hqu;
 
 import groovy.lang.GroovyClassLoader;
 
@@ -41,6 +41,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
+import org.hyperic.hq.hqu.IDispatcher;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.util.Runnee;

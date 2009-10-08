@@ -22,38 +22,32 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.hqu.rendit;
+package org.hyperic.hq.hqu;
 
-import java.io.File;
-import java.util.Properties;
+import java.util.List;
 
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.hqu.AttachmentDescriptor;
-import org.hyperic.hq.hqu.server.session.Attachment;
-import org.hyperic.hq.hqu.server.session.UIPlugin;
-
-/**
- * This interface is implemented by the Groovy HQU dispatcher 
- * (dispatcher.groovy) and acts as a recipient of messages sent from HQ.
- * 
- * Many of these methods correlate to things going on in {@link IHQUPlugin}
- */
-public interface IDispatcher {
-    /**
-     * Called when HQ wants to load a plugin
-     */
-    Properties loadPlugin(File pluginDir);
+public class InvokeMethodInvocationBindings {
+    private String _className;
+    private String _methName;
+    private List   _args;
     
-    /**
-     * Called when a plugin is to be deployedn
-     */
-    void deploy(UIPlugin p);
+    public InvokeMethodInvocationBindings(String className, String methName, 
+                                          List args) 
+    {
+        _className = className;
+        _methName  = methName;
+        _args      = args;
+    }
     
-    void handleRequest(RequestInvocationBindings b);
+    public String getClassName() {
+        return _className;
+    }
     
-    Object invokeMethod(InvokeMethodInvocationBindings invokeArgs);
+    public String getMethodName() {
+        return _methName;
+    }
     
-    AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r,
-                                                 AuthzSubject u);
+    public List getArgs() {
+        return _args;
+    }
 }

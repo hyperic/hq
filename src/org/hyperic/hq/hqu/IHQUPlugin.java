@@ -22,7 +22,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.hqu.rendit;
+package org.hyperic.hq.hqu;
 
 import java.io.File;
 import java.util.Properties;

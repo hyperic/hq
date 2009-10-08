@@ -34,7 +34,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.hqu.rendit.RenditServer;
+import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.file.DirWatcher;

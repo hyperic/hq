@@ -22,32 +22,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
  * USA.
  */
-package org.hyperic.hq.hqu.rendit;
+package org.hyperic.hq.hqu;
 
-import java.util.List;
+public class PluginLoadException 
+    extends RuntimeException
+{
+    public PluginLoadException(String msg) {
+        super(msg);
+    }
 
-public class InvokeMethodInvocationBindings {
-    private String _className;
-    private String _methName;
-    private List   _args;
-    
-    public InvokeMethodInvocationBindings(String className, String methName, 
-                                          List args) 
-    {
-        _className = className;
-        _methName  = methName;
-        _args      = args;
-    }
-    
-    public String getClassName() {
-        return _className;
-    }
-    
-    public String getMethodName() {
-        return _methName;
-    }
-    
-    public List getArgs() {
-        return _args;
+    public PluginLoadException(String msg, Throwable t) {
+        super(msg, t);
     }
 }

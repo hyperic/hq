@@ -13,6 +13,7 @@ import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.server.session.Attachment
 import org.hyperic.hq.hqu.server.session.UIPlugin
 import org.hyperic.hq.hqu.AttachmentDescriptor
+import org.hyperic.hq.hqu.IHQUPlugin;
 import org.hyperic.hq.hqu.SimpleAttachmentDescriptor
 import org.hyperic.hq.hqu.ViewDescriptor
 import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl as PluginMan 

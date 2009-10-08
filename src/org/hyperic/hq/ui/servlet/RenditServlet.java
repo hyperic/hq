@@ -39,8 +39,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.session.AuthzBossEJBImpl;
-import org.hyperic.hq.hqu.rendit.RenditServer;
-import org.hyperic.hq.hqu.rendit.RequestInvocationBindings;
+import org.hyperic.hq.hqu.RenditServer;
+import org.hyperic.hq.hqu.RequestInvocationBindings;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
 

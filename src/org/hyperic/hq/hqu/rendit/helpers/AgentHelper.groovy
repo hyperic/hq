@@ -4,9 +4,12 @@ import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl as AgentMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.appdef.shared.AgentNotFoundException
 
+
 class AgentHelper extends BaseHelper {
 
     private aMan = AgentMan.one
+
+    
 
     AgentHelper(AuthzSubject user) {
         super(user)

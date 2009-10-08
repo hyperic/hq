@@ -48,7 +48,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.ViewDescriptor;
-import org.hyperic.hq.hqu.rendit.RenditServer;
+import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
 import org.hyperic.hq.hqu.shared.UIPluginManagerUtil;
 import org.hyperic.hq.hqu.server.session.AttachType;
