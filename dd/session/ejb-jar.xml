@@ -4742,26 +4742,6 @@
       <method >
          <ejb-name>AppdefBoss</ejb-name>
          <method-intf>Local</method-intf>
-         <method-name>removeDeletedResources</method-name>
-         <method-params>
-         </method-params>
-      </method>
-      <trans-attribute>NotSupported</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Remote</method-intf>
-         <method-name>removeDeletedResources</method-name>
-         <method-params>
-         </method-params>
-      </method>
-      <trans-attribute>NotSupported</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Local</method-intf>
          <method-name>_removePlatformInNewTran</method-name>
          <method-params>
             <method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>

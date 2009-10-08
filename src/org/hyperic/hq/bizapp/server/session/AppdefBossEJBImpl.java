@@ -1387,7 +1387,6 @@ public class AppdefBossEJBImpl
      * Method is "NotSupported" since all the resource deletes may take longer
      * than the jboss transaction timeout.  No need for a transaction in this
      * context.
-     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public void removeDeletedResources()
