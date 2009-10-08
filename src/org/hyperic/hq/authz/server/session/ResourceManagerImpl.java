@@ -418,6 +418,8 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         if (debug) {
             log.debug(watch);
         }
+        
+        
         return (AppdefEntityID[]) removed.toArray(new AppdefEntityID[0]);
     }
 
