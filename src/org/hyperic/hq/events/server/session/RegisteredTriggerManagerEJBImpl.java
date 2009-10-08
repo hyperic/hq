@@ -536,9 +536,26 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public void deleteAlertDefinitionTriggers(Integer adId) {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
         AlertDefinition def = getAlertDefDAO().findById(adId);
+        
+        if (debug) watch.markTimeBegin("unregisterTriggers");
+        
         unregisterTriggers(adId, def.getTriggers());
+        
+        if (debug) {
+            watch.markTimeEnd("unregisterTriggers");
+            watch.markTimeBegin("removeTriggers");
+        }
+        
         getTriggerDAO().removeTriggers(def);
+        
+        if (debug) {
+            watch.markTimeEnd("removeTriggers");
+            log.debug("deleteAlertDefinitionTriggers: time=" + watch);
+        }        
     }
 
     /**
