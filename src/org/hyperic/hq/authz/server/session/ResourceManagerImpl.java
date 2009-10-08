@@ -408,9 +408,13 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         }
 
         removed.add(new AppdefEntityID(r));
-        if (debug) watch.markTimeBegin("removeResource");
-        getOne()._removeResource(subj, r, nullResourceType);
-        if (debug) watch.markTimeBegin("removeResource");
+        if (debug) {
+            watch.markTimeBegin("removeResource");
+        }
+        _removeResource(subj, r, nullResourceType);
+        if (debug) {
+            watch.markTimeBegin("removeResource"); 
+        }
         if (debug) {
             log.debug(watch);
         }
