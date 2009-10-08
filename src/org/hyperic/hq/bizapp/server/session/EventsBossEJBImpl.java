@@ -111,6 +111,7 @@ import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.server.session.EventsStartupListener;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
+import org.hyperic.hq.events.server.session.TriggersCreatedZevent;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -438,6 +439,10 @@ public class EventsBossEJBImpl
                PermissionException, InvalidOptionException,
                InvalidOptionValueException,
                SessionNotFoundException, SessionTimeoutException {
+        
+        final boolean debug = _log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+        
         AuthzSubject subject = manager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
@@ -454,9 +459,13 @@ public class EventsBossEJBImpl
         adval.setParentId(EventConstants.TYPE_ALERT_DEF_ID);
 
         // Now create the alert definition
+        if (debug) watch.markTimeBegin("createParentAlertDefinition");
         parent = getADM().createAlertDefinition(subject, adval);
+        if (debug) watch.markTimeEnd("createParentAlertDefinition");
 
         adval.setParentId(parent.getId());
+
+        if (debug) watch.markTimeBegin("lookupResources");
 
         // Lookup resources
         Integer[] entIds;
@@ -479,11 +488,18 @@ public class EventsBossEJBImpl
                 aetid.getType());
         }
 
-        ArrayList triggers = new ArrayList();
+        if (debug) watch.markTimeEnd("lookupResources");
+
+        List zevents = new ArrayList(entIds.length);
+
+        if (debug) watch.markTimeBegin("createChildAlertDefinitions[" + entIds.length + "]");
 
         // Iterate through to create the appropriate triggers and alertdef
         AlertDefinitionManagerLocal adm = getADM();
+        RegisteredTriggerManagerLocal rtm = getRTM();
         for (int ei = 0; ei < entIds.length; ei++) {
+            StopWatch childWatch = new StopWatch();
+
             AppdefEntityID id = new AppdefEntityID(aetid.getType(), entIds[ei]);
 
             // Reset the value object with this entity ID
@@ -506,8 +522,11 @@ public class EventsBossEJBImpl
             }
 
             // Create the triggers
-            createTriggers(subject, adval);
-            triggers.addAll(Arrays.asList(adval.getTriggers()));
+            if (debug) childWatch.markTimeBegin("createTriggers");
+            // HHQ-3423: Do not add the TriggersCreatedListener here.
+            // Add it at the end after all the triggers are created.
+            rtm.createTriggers(subject, adval, false);
+            if (debug) childWatch.markTimeEnd("createTriggers");
 
             // Make sure the actions have the proper parentId
             cloneParentActions(id, adval, parent.getActions());
@@ -516,9 +535,28 @@ public class EventsBossEJBImpl
             setMetricAlertAction(adval);
 
             // Now create the alert definition
-            adm.createAlertDefinition(subject, adval);
+            if (debug) childWatch.markTimeBegin("createAlertDefinition");
+            AlertDefinitionValue newAdval = adm.createAlertDefinition(subject, adval);            
+            if (debug) {
+                childWatch.markTimeEnd("createAlertDefinition");
+                _log.debug("createChildAlertDefinition[" + id + "]: time=" + childWatch);
+            }
+            zevents.add(new TriggersCreatedZevent(newAdval.getId()));
         }
-
+        
+        if (debug) watch.markTimeEnd("createChildAlertDefinitions[" + entIds.length + "]");
+        
+        // HHQ-3423: Add the TransactionListener after all the triggers are created
+        if (!zevents.isEmpty()) {
+            if (debug) watch.markTimeBegin("addTriggersCreatedTxListener");
+            rtm.addTriggersCreatedTxListener(zevents);
+            if (debug) watch.markTimeEnd("addTriggersCreatedTxListener");
+        }
+        
+        if (debug) {            
+            _log.debug("createResourceTypeAlertDefinition: time=" + watch);
+        }
+        
         return parent;
     }
 

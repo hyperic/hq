@@ -47,12 +47,14 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
+import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.config.InvalidOptionValueException;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * The trigger manager.
@@ -357,11 +359,34 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef) throws TriggerCreateException,
-                                                                                   InvalidOptionException,
-                                                                                   InvalidOptionValueException
+    public void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef)
+        throws TriggerCreateException, InvalidOptionException, InvalidOptionValueException
     {
-        final ArrayList triggers = new ArrayList();
+        createTriggers(subject, alertdef, true);
+    }
+    
+    /**
+     * Create new triggers
+     *
+     * @param subject The user creating the trigger
+     * @param alertdef The alert definition value object
+     * @param addTxListener Indicates whether a TriggersCreatedListener should be added.
+     *                      The default value is true. HHQ-3423: To improve performance when
+     *                      creating resource type alert definitions, this should be set to false.
+     *                      If false, it is the caller's responsibility to call
+     *                      addTriggersCreatedListener() to ensure triggers are registered.
+     *  
+     * @return a RegisteredTriggerValue
+     *
+     * @ejb:interface-method
+     */
+    public void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef, boolean addTxListener) 
+        throws TriggerCreateException, InvalidOptionException, InvalidOptionValueException
+    {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
+        final List triggers = new ArrayList();
 
         // Create AppdefEntityID from the alert definition
         AppdefEntityID id = new AppdefEntityID(alertdef.getAppdefType(), alertdef.getAppdefId());
@@ -370,6 +395,9 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         long range = freqType == EventConstants.FREQ_COUNTER ? alertdef.getRange() : 0;
 
         AlertConditionValue[] conds = alertdef.getConditions();
+        
+        if (debug) watch.markTimeBegin("createTrigger");
+
         if (conds.length == 1) {
             // Transform into registered trigger
             RegisteredTriggerValue triggerVal = convertToTriggerValue(id, conds[0]);
@@ -391,32 +419,66 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
 
             }
         }
+        
+        if (debug) watch.markTimeEnd("createTrigger");
 
         for (Iterator it = triggers.iterator(); it.hasNext();) {
             RegisteredTrigger tval = (RegisteredTrigger) it.next();
             alertdef.addTrigger(tval.getRegisteredTriggerValue());
         }
-        addCommitListener(triggers);
+        
+        // HHQ-3423: Add the TransactionListener after all the triggers are created
+        if (addTxListener) {
+            if (debug) watch.markTimeBegin("addTriggersCreatedTxListener");
+            addTriggersCreatedTxListener(triggers);
+            if (debug) watch.markTimeEnd("addTriggersCreatedTxListener");
+        }
+        
+        if (debug) {
+            log.debug("createTriggers: time=" + watch);
+        }        
     }
 
-    private void addCommitListener(final Collection triggers) {
+    /**
+     * Add a TransactionListener to register triggers post commit.
+     * 
+     * @param list A list of either Zevent or RegisteredTrigger objects
+     * 
+     * @ejb:interface-method
+     */
+    public void addTriggersCreatedTxListener(final List list) {
         try {
             HQApp.getInstance().addTransactionListener(new TransactionListener() {
                 public void afterCommit(boolean success) {
                     if (success) {
+                        final boolean debug = log.isDebugEnabled();
+                        StopWatch watch = new StopWatch();
                         try {
                             // We need to process this in a new transaction,
                             // AlertDef ID should be set now that original tx is
                             // committed
-                            if (!(triggers.isEmpty())) {
-                                AlertDefinition alertDefinition = getDefinitionFromTrigger((RegisteredTrigger) triggers.iterator()
-                                                                                                                       .next());
-                                if (alertDefinition != null) {
-                                    zeventEnqueuer.enqueueEvent(new TriggersCreatedZevent(alertDefinition.getId()));
+                            if (!list.isEmpty()) {
+                                Object object = list.get(0);
+                                if (object instanceof Zevent) {
+                                    if (debug) watch.markTimeBegin("enqueueEvents[" + list.size() + "]");
+                                    zeventEnqueuer.enqueueEvents(list);                             
+                                    if (debug) watch.markTimeEnd("enqueueEvents[" + list.size() + "]");                                
+                                } else if (object instanceof RegisteredTrigger) {
+                                    RegisteredTrigger trigger = (RegisteredTrigger) object;
+                                    AlertDefinition alertDefinition = getDefinitionFromTrigger(trigger);
+                                    if (alertDefinition != null) {
+                                        if (debug) watch.markTimeBegin("enqueueEvent");
+                                        zeventEnqueuer.enqueueEvent(new TriggersCreatedZevent(alertDefinition.getId()));                             
+                                        if (debug) watch.markTimeEnd("enqueueEvent");
+                                    }
                                 }
                             }
                         } catch (Exception e) {
                             log.error("Error creating triggers for alert definition.", e);
+                        } finally {
+                            if (debug) {
+                                log.debug("TransactionListener.afterCommit: time=" + watch);
+                            }
                         }
                     }
                 }
