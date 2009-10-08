@@ -64,6 +64,7 @@ import org.hyperic.txsnatch.TxSnatch;
 import org.hyperic.util.callback.CallbackDispatcher;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.thread.ThreadWatchdog;
+import org.hyperic.util.timer.StopWatch;
 import org.jboss.invocation.Invocation;
 
 
@@ -723,12 +724,17 @@ public class HQApp {
      * Register a listener to be called after a tx has been committed.
      */
     public void addTransactionListener(TransactionListener listener) {
+        final boolean debug = _log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
         List listeners = (List)_txListeners.get();
         
         if (listeners == null) {
             listeners = new ArrayList(1);
             _txListeners.set(listeners);
+            if (debug) watch.markTimeBegin("scheduleCommitCallback");
             scheduleCommitCallback();
+            if (debug) watch.markTimeEnd("scheduleCommitCallback");
         }
         
         listeners.add(listener);
@@ -736,7 +742,12 @@ public class HQApp {
         // Unfortunately, it seems that the Tx synchronization will get called
         // before Hibernate does its flush.  This wasn't the behaviour before,
         // and looks like it will be fixed up again in 3.3.. :-(
+        if (debug) watch.markTimeBegin("flushCurrentSession");
         Util.getSessionFactory().getCurrentSession().flush();
+        if (debug) {
+            watch.markTimeEnd("flushCurrentSession");
+            _log.debug("addTransactionListener: time=" + watch);
+        }
     }
     
     /**
