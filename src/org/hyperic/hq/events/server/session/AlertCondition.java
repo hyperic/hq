@@ -188,7 +188,7 @@ public class AlertCondition
         setTrigger(tDAO.findById(val.getTriggerId()));
     }
 
-    public String describe(String units) {
+    public String describe(Measurement dm) {
         StringBuffer text = new StringBuffer();
         switch (getType()) {
         case EventConstants.TYPE_THRESHOLD:
@@ -211,7 +211,7 @@ public class AlertCondition
             } else {
                 FormattedNumber th =
                     UnitsConvert.convert(getThreshold(),
-                                         units);
+                                         dm.getTemplate().getUnits());
                 text.append(th.toString());
             }
             break;

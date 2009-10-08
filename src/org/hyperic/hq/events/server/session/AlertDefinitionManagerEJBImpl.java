@@ -256,7 +256,7 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean {
                              cond.getMeasurementId() + ") that does not exist, ignoring");
                     continue;
                 }
-                res.setName(cond.describe(dm.getTemplate().getUnits()));
+                res.setName(cond.describe(dm));
             }
 
             if (cond.getType() == EventConstants.TYPE_ALERT) {

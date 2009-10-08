@@ -694,32 +694,32 @@ public class AlertManagerEJBImpl implements SessionBean {
             case EventConstants.TYPE_THRESHOLD:
             case EventConstants.TYPE_BASELINE:
                 dm = measurementDAO.findById(new Integer(cond.getMeasurementId()));
-                text.append(cond.describe(dm.getTemplate().getUnits()));
+                text.append(cond.describe(dm));
 
                 // Value is already formatted by HHQ-2573
                 String actualValue = logs[i].getValue();
                 text.append(" (actual value = ").append(actualValue).append(")");
                 break;
             case EventConstants.TYPE_CONTROL:
-                text.append(cond.describe(dm.getTemplate().getUnits()));
+                text.append(cond.describe(dm));
                 break;
             case EventConstants.TYPE_CHANGE:
-                text.append(cond.describe(dm.getTemplate().getUnits()))
+                text.append(cond.describe(dm))
                     .append(" (New value: ")
                     .append(logs[i].getValue())
                     .append(")");
                 break;
             case EventConstants.TYPE_CUST_PROP:
-                text.append(cond.describe(dm.getTemplate().getUnits()))
+                text.append(cond.describe(dm))
                     .append("\n").append(indent).append(logs[i].getValue());
                 break;
             case EventConstants.TYPE_LOG:
-                text.append(cond.describe(dm.getTemplate().getUnits()))
+                text.append(cond.describe(dm))
                     .append("\n").append(indent).append("Log: ")
                     .append(logs[i].getValue());
                 break;
             case EventConstants.TYPE_CFG_CHG:
-                text.append(cond.describe(dm.getTemplate().getUnits()))
+                text.append(cond.describe(dm))
                     .append("\n").append(indent).append("Details: ")
                     .append(logs[i].getValue());
                 break;
