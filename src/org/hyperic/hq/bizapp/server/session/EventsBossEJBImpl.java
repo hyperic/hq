@@ -523,7 +523,7 @@ public class EventsBossEJBImpl
 
             // Create the triggers
             if (debug) childWatch.markTimeBegin("createTriggers");
-            // HHQ-3423: Do not add the TriggersCreatedListener here.
+            // HHQ-3423: Do not add the TransactionListener here.
             // Add it at the end after all the triggers are created.
             rtm.createTriggers(subject, adval, false);
             if (debug) childWatch.markTimeEnd("createTriggers");
@@ -797,6 +797,10 @@ public class EventsBossEJBImpl
                InvalidOptionValueException, AlertConditionCreateException,
                ActionCreateException, FinderException, RemoveException,
                SessionNotFoundException, SessionTimeoutException {
+
+        final boolean debug = _log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
         AuthzSubject subject = manager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
@@ -806,15 +810,33 @@ public class EventsBossEJBImpl
         }
 
         AlertDefinitionManagerLocal adm = getADM();
-        ArrayList triggers = new ArrayList();
+        RegisteredTriggerManagerLocal rtm = getRTM();
+
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(adval.getParentId()) ||
             adval.getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             // A little more work to do for group and type alert definition
-            adval = getADM().updateAlertDefinition(adval);
+            
+            if (debug) watch.markTimeBegin("updateParentAlertDefinition");
+            
+            adval = adm.updateAlertDefinition(adval);
+            
+            if (debug) {
+                watch.markTimeEnd("updateParentAlertDefinition");
+                watch.markTimeBegin("findAlertDefinitionChildren");
+            }
 
-            List children = getADM().findAlertDefinitionChildren(adval.getId());
+            List children = adm.findAlertDefinitionChildren(adval.getId());
+            
+            if (debug) {
+                watch.markTimeEnd("findAlertDefinitionChildren");
+                watch.markTimeBegin("updateChildAlertDefinitions[" + children.size() + "]");
+            }
+            
+            List zevents = new ArrayList(children.size());
 
             for (Iterator it = children.iterator(); it.hasNext();) {
+                StopWatch childWatch = new StopWatch();
+
                 AlertDefinitionValue child = (AlertDefinitionValue) it.next();
 
                 AppdefEntityID id = new AppdefEntityID(child.getAppdefType(),
@@ -842,26 +864,51 @@ public class EventsBossEJBImpl
                 child.setControlFiltered(adval.getControlFiltered());
 
                 // Triggers are deleted by the manager
-                getRTM().deleteAlertDefinitionTriggers(child.getId());
+                if (debug) childWatch.markTimeBegin("deleteAlertDefinitionTriggers");
+                rtm.deleteAlertDefinitionTriggers(child.getId());
+                if (debug) childWatch.markTimeEnd("deleteAlertDefinitionTriggers");
+                
                 child.removeAllTriggers();
-                createTriggers(subject, child);
-                triggers.addAll(Arrays.asList(adval.getTriggers()));
+
+                if (debug) childWatch.markTimeBegin("createTriggers");
+                // HHQ-3423: Do not add the TransactionListener here.
+                // Add it at the end after all the triggers are created.
+                rtm.createTriggers(subject, child, false);
+                if (debug) childWatch.markTimeEnd("createTriggers");
 
                 // Now update the alert definition
-                adm.updateAlertDefinition(child);
+                if (debug) childWatch.markTimeBegin("updateAlertDefinition");
+                AlertDefinitionValue updatedChild = adm.updateAlertDefinition(child);                
+                if (debug) {
+                    childWatch.markTimeEnd("updateAlertDefinition");
+                    _log.debug("updateChildAlertDefinition[" + id + "]: time=" + childWatch);
+                }
+                zevents.add(new TriggersCreatedZevent(updatedChild.getId()));
+            }
+            
+            if (debug) watch.markTimeEnd("updateChildAlertDefinitions[" + children.size() + "]");
+            
+            // HHQ-3423: Add the TransactionListener after all the triggers are created
+            if (!zevents.isEmpty()) {
+                if (debug) watch.markTimeBegin("addTriggersCreatedTxListener");
+                rtm.addTriggersCreatedTxListener(zevents);
+                if (debug) watch.markTimeEnd("addTriggersCreatedTxListener");
             }
         }
         else {
             // First, get rid of the current triggers
-            getRTM().deleteAlertDefinitionTriggers(adval.getId());
+            rtm.deleteAlertDefinitionTriggers(adval.getId());
             adval.removeAllTriggers();
 
             // Now create the new triggers
             createTriggers(subject, adval);
-            triggers.addAll(Arrays.asList(adval.getTriggers()));
 
             // Now update the alert definition
             adm.updateAlertDefinition(adval);
+        }
+        
+        if (debug) {            
+            _log.debug("updateAlertDefinition: time=" + watch);
         }
     }
 
