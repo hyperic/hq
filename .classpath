@@ -107,7 +107,7 @@
 	<classpathentry kind="lib" path="thirdparty/lib/JMTUnit.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/jsch-0.1.34.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/jsdoc/jsrun.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/json.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/json.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/jsr107cache-1.0.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/jstl.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/jug-asl-2.0.0.jar"/>
@@ -218,7 +218,7 @@
 	<classpathentry kind="var" path="JBOSS_HOME/server/default/deploy/jboss-web.deployer/jbossweb.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/tomcat/catalina.jar"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
-	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jboss-j2ee.jar"/>
+	<classpathentry exported="true" kind="var" path="JBOSS_HOME/server/default/lib/jboss-j2ee.jar"/>
 	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jnpserver.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.com.sun.xml.bind-2.1.7.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.javax.xml.bind-2.1.7.jar"/>
