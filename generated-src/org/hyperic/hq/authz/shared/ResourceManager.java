@@ -3,197 +3,243 @@
  */
 package org.hyperic.hq.authz.shared;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.FinderException;
+
+import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
+import org.hyperic.hq.auth.shared.SubjectNotFoundException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceRelation;
+import org.hyperic.hq.authz.server.session.ResourceSortField;
+import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl;
+import org.hyperic.hq.common.VetoException;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
+
 /**
  * Local interface for ResourceManager.
  */
-public interface ResourceManager
- 
-{
-   /**
-    * Find the type that has the given name.
-    * @param name The name of the type you're looking for.
-    * @return The value-object of the type of the given name.
-    * @throws FinderException Unable to find a given or dependent entities.
-    */
-   public org.hyperic.hq.authz.server.session.ResourceType findResourceTypeByName( java.lang.String name ) throws javax.ejb.FinderException;
+public interface ResourceManager {
+    /**
+     * Find the type that has the given name.
+     * @param name The name of the type you're looking for.
+     * @return The value-object of the type of the given name.
+     * @throws FinderException Unable to find a given or dependent entities.
+     */
+    public ResourceType findResourceTypeByName(String name) throws FinderException;
 
-   /**
-    * Find a resource, acting as a resource prototype.
-    */
-   public org.hyperic.hq.authz.server.session.Resource findResourcePrototypeByName( java.lang.String name ) ;
+    /**
+     * Find a resource, acting as a resource prototype.
+     */
+    public Resource findResourcePrototypeByName(String name);
 
-   /**
-    * Check if there are any resources of a given type
-    */
-   public boolean resourcesExistOfType( java.lang.String typeName ) ;
+    /**
+     * Check if there are any resources of a given type
+     */
+    public boolean resourcesExistOfType(String typeName);
 
-   /**
-    * Create a resource.
-    */
-   public org.hyperic.hq.authz.server.session.Resource createResource( org.hyperic.hq.authz.server.session.AuthzSubject owner,org.hyperic.hq.authz.server.session.ResourceType rt,org.hyperic.hq.authz.server.session.Resource prototype,java.lang.Integer instanceId,java.lang.String name,boolean system,org.hyperic.hq.authz.server.session.Resource parent ) ;
+    /**
+     * Create a resource.
+     */
+    public Resource createResource(AuthzSubject owner, ResourceType rt, Resource prototype, Integer instanceId,
+                                   String name, boolean system, Resource parent);
 
-   /**
-    * Move a resource. It is the responsibility of the caller (AppdefManager) to ensure that this resource can be moved to the destination. It's also of note that this method only deals with relinking resource edges to the ancestors of the destination resource. This means that in the case of Server moves, it's up to the caller to re-link dependent chilren.
-    */
-   public void moveResource( org.hyperic.hq.authz.server.session.AuthzSubject owner,org.hyperic.hq.authz.server.session.Resource target,org.hyperic.hq.authz.server.session.Resource destination ) ;
+    /**
+     * Move a resource. It is the responsibility of the caller (AppdefManager)
+     * to ensure that this resource can be moved to the destination. It's also
+     * of note that this method only deals with relinking resource edges to the
+     * ancestors of the destination resource. This means that in the case of
+     * Server moves, it's up to the caller to re-link dependent chilren.
+     */
+    public void moveResource(AuthzSubject owner, Resource target, Resource destination);
 
-   /**
-    * Get the # of resources within HQ inventory
-    */
-   public java.lang.Number getResourceCount(  ) ;
+    /**
+     * Get the # of resources within HQ inventory
+     */
+    public Number getResourceCount();
 
-   /**
-    * Get the # of resource types within HQ inventory
-    */
-   public java.lang.Number getResourceTypeCount(  ) ;
+    /**
+     * Get the # of resource types within HQ inventory
+     */
+    public Number getResourceTypeCount();
 
-   /**
-    * Get the Resource entity associated with this ResourceType.
-    * @param type This ResourceType.
-    */
-   public org.hyperic.hq.authz.server.session.Resource getResourceTypeResource( java.lang.Integer typeId ) ;
+    /**
+     * Get the Resource entity associated with this ResourceType.
+     * @param type This ResourceType.
+     */
+    public Resource getResourceTypeResource(Integer typeId);
 
-   /**
-    * Find the Resource that has the given instance ID and ResourceType.
-    * @param type The ResourceType of the Resource you're looking for.
-    * @param instanceId Your ID for the resource you're looking for.
-    * @return The value-object of the Resource of the given ID.
-    */
-   public org.hyperic.hq.authz.server.session.Resource findResourceByInstanceId( org.hyperic.hq.authz.server.session.ResourceType type,java.lang.Integer instanceId ) ;
+    /**
+     * Find the Resource that has the given instance ID and ResourceType.
+     * @param type The ResourceType of the Resource you're looking for.
+     * @param instanceId Your ID for the resource you're looking for.
+     * @return The value-object of the Resource of the given ID.
+     */
+    public Resource findResourceByInstanceId(ResourceType type, Integer instanceId);
 
-   public org.hyperic.hq.authz.server.session.Resource findResourceByInstanceId( java.lang.Integer typeId,java.lang.Integer instanceId ) ;
+    public Resource findResourceByInstanceId(Integer typeId, Integer instanceId);
 
-   /**
-    * Find's the root (id=0) resource
-    */
-   public org.hyperic.hq.authz.server.session.Resource findRootResource(  ) ;
+    /**
+     * Find's the root (id=0) resource
+     */
+    public Resource findRootResource();
 
-   public org.hyperic.hq.authz.server.session.Resource findResourceById( java.lang.Integer id ) ;
+    public Resource findResourceById(Integer id);
 
-   /**
-    * Find the Resource that has the given instance ID and ResourceType name.
-    * @param type The ResourceType of the Resource you're looking for.
-    * @param instanceId Your ID for the resource you're looking for.
-    * @return The value-object of the Resource of the given ID.
-    */
-   public org.hyperic.hq.authz.server.session.Resource findResourceByTypeAndInstanceId( java.lang.String type,java.lang.Integer instanceId ) ;
+    /**
+     * Find the Resource that has the given instance ID and ResourceType name.
+     * @param type The ResourceType of the Resource you're looking for.
+     * @param instanceId Your ID for the resource you're looking for.
+     * @return The value-object of the Resource of the given ID.
+     */
+    public Resource findResourceByTypeAndInstanceId(String type, Integer instanceId);
 
-   public org.hyperic.hq.authz.server.session.Resource findResource( org.hyperic.hq.appdef.shared.AppdefEntityID aeid ) ;
+    public Resource findResource(AppdefEntityID aeid);
 
-   public org.hyperic.hq.authz.server.session.Resource findResourcePrototype( org.hyperic.hq.appdef.shared.AppdefEntityTypeID id ) ;
+    public Resource findResourcePrototype(AppdefEntityTypeID id);
 
-   /**
-    * Removes the specified resource by nulling out its resourceType. Will not null the resourceType of the resource which is passed in. These resources need to be cleaned up eventually by {@link AppdefBossEJBImpl.removeDeletedResources}. This may be done in the background via zevent by issuing a {@link ResourcesCleanupZevent}.
-    * @see {@link AppdefBossEJBImpl.removeDeletedResources}
-    * @see {@link ResourcesCleanupZevent}
-    * @param r {@link Resource} resource to be removed.
-    * @param nullResourceType tells the method to null out the resourceType
-    * @return AppdefEntityID[] - an array of the resources (including children) deleted
-    */
-   public org.hyperic.hq.appdef.shared.AppdefEntityID[] removeResourcePerms( org.hyperic.hq.authz.server.session.AuthzSubject subj,org.hyperic.hq.authz.server.session.Resource r,boolean nullResourceType ) throws org.hyperic.hq.common.VetoException, org.hyperic.hq.authz.shared.PermissionException;
+    /**
+     * Removes the specified resource by nulling out its resourceType. Will not
+     * null the resourceType of the resource which is passed in. These resources
+     * need to be cleaned up eventually by
+     * {@link AppdefBossEJBImpl.removeDeletedResources}. This may be done in the
+     * background via zevent by issuing a {@link ResourcesCleanupZevent}.
+     * @see {@link AppdefBossEJBImpl.removeDeletedResources}
+     * @see {@link ResourcesCleanupZevent}
+     * @param r {@link Resource} resource to be removed.
+     * @param nullResourceType tells the method to null out the resourceType
+     * @return AppdefEntityID[] - an array of the resources (including children)
+     *         deleted
+     */
+    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r, boolean nullResourceType)
+        throws VetoException, PermissionException;
 
-   public void _removeResource( org.hyperic.hq.authz.server.session.AuthzSubject subj,org.hyperic.hq.authz.server.session.Resource r,boolean nullResourceType ) ;
+    public void _removeResource(AuthzSubject subj, Resource r, boolean nullResourceType);
 
-   public void removeResource( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.authz.server.session.Resource r ) throws org.hyperic.hq.common.VetoException;
+    public void removeResource(AuthzSubject subject, Resource r) throws VetoException;
 
-   public void setResourceOwner( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.Resource resource,org.hyperic.hq.authz.server.session.AuthzSubject newOwner ) throws org.hyperic.hq.authz.shared.PermissionException;
+    public void setResourceOwner(AuthzSubject whoami, Resource resource, AuthzSubject newOwner)
+        throws PermissionException;
 
-   /**
-    * Get all the resource types
-    * @param subject
-    * @param pc Paging information for the request
-    */
-   public java.util.List getAllResourceTypes( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) ;
+    /**
+     * Get all the resource types
+     * @param subject
+     * @param pc Paging information for the request
+     */
+    public List getAllResourceTypes(AuthzSubject subject, PageControl pc);
 
-   /**
-    * Get viewable resources either by "type" OR "resource name" OR "type AND resource name".
-    * @param subject
-    * @return Map of resource values
-    */
-   public java.util.List findViewableInstances( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String typeName,java.lang.String resName,java.lang.String appdefTypeStr,java.lang.Integer typeId,org.hyperic.util.pager.PageControl pc ) ;
+    /**
+     * Get viewable resources either by "type" OR "resource name" OR
+     * "type AND resource name".
+     * @param subject
+     * @return Map of resource values
+     */
+    public List findViewableInstances(AuthzSubject subject, String typeName, String resName, String appdefTypeStr,
+                                      Integer typeId, PageControl pc);
 
-   /**
-    * Get viewable resources by "type" OR "resource name"
-    * @param subject
-    * @return Map of resource values
-    */
-   public org.hyperic.util.pager.PageList findViewables( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String searchFor,org.hyperic.util.pager.PageControl pc ) ;
+    /**
+     * Get viewable resources by "type" OR "resource name"
+     * @param subject
+     * @return Map of resource values
+     */
+    public PageList findViewables(AuthzSubject subject, String searchFor, PageControl pc);
 
-   /**
-    * Get viewable resources either by "type" OR "resource name" OR "type AND resource name".
-    * @param subject
-    * @return Map of resource values
-    */
-   public java.util.Map findAllViewableInstances( org.hyperic.hq.authz.server.session.AuthzSubject subject ) ;
+    /**
+     * Get viewable resources either by "type" OR "resource name" OR
+     * "type AND resource name".
+     * @param subject
+     * @return Map of resource values
+     */
+    public Map findAllViewableInstances(AuthzSubject subject);
 
-   /**
-    * Find all the resources which are descendents of the given resource
-    */
-   public java.util.List findResourcesByParent( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.authz.server.session.Resource res ) ;
+    /**
+     * Find all the resources which are descendents of the given resource
+     */
+    public List findResourcesByParent(AuthzSubject subject, Resource res);
 
-   /**
-    * Find all the resources of an authz resource type
-    * @param resourceType 301 for platforms, etc.
-    * @param pInfo A pager, using a sort field of {@link ResourceSortField}
-    * @return a list of {@link Resource}s
-    */
-   public java.util.List findResourcesOfType( int resourceType,org.hyperic.hibernate.PageInfo pInfo ) ;
+    /**
+     * Find all the resources of an authz resource type
+     * @param resourceType 301 for platforms, etc.
+     * @param pInfo A pager, using a sort field of {@link ResourceSortField}
+     * @return a list of {@link Resource}s
+     */
+    public List findResourcesOfType(int resourceType, PageInfo pInfo);
 
-   /**
-    * Find all the resources which have the specified prototype
-    * @return a list of {@link Resource}s
-    */
-   public java.util.List findResourcesOfPrototype( org.hyperic.hq.authz.server.session.Resource proto,org.hyperic.hibernate.PageInfo pInfo ) ;
+    /**
+     * Find all the resources which have the specified prototype
+     * @return a list of {@link Resource}s
+     */
+    public List findResourcesOfPrototype(Resource proto, PageInfo pInfo);
 
-   /**
-    * Get all resources which are prototypes of platforms, servers, and services and have a resource of that type in the inventory.
-    */
-   public java.util.List findAppdefPrototypes(  ) ;
+    /**
+     * Get all resources which are prototypes of platforms, servers, and
+     * services and have a resource of that type in the inventory.
+     */
+    public List findAppdefPrototypes();
 
-   /**
-    * Get all resources which are prototypes of platforms, servers, and services.
-    */
-   public java.util.List findAllAppdefPrototypes(  ) ;
+    /**
+     * Get all resources which are prototypes of platforms, servers, and
+     * services.
+     */
+    public List findAllAppdefPrototypes();
 
-   /**
-    * Get viewable service resources. Service resources include individual cluster unassigned services as well as service clusters.
-    * @param subject
-    * @param pc control
-    * @return PageList of resource values
-    */
-   public org.hyperic.util.pager.PageList findViewableSvcResources( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String resourceName,org.hyperic.util.pager.PageControl pc ) ;
+    /**
+     * Get viewable service resources. Service resources include individual
+     * cluster unassigned services as well as service clusters.
+     * @param subject
+     * @param pc control
+     * @return PageList of resource values
+     */
+    public PageList findViewableSvcResources(AuthzSubject subject, String resourceName, PageControl pc);
 
-   /**
-    * Gets all the Resources owned by the given Subject.
-    * @param subject The owner.
-    * @return Array of resources owned by the given subject.
-    */
-   public java.util.Collection findResourceByOwner( org.hyperic.hq.authz.server.session.AuthzSubject owner ) ;
+    /**
+     * Gets all the Resources owned by the given Subject.
+     * @param subject The owner.
+     * @return Array of resources owned by the given subject.
+     */
+    public Collection findResourceByOwner(AuthzSubject owner);
 
-   public java.util.Collection findResourceEdges( org.hyperic.hq.authz.server.session.ResourceRelation relation,org.hyperic.hq.authz.server.session.Resource parent ) ;
+    public Collection findResourceEdges(ResourceRelation relation, Resource parent);
 
-   public boolean isResourceChildOf( org.hyperic.hq.authz.server.session.Resource parent,org.hyperic.hq.authz.server.session.Resource child ) ;
+    public boolean isResourceChildOf(Resource parent, Resource child);
 
-   public java.util.List findResourceEdges( org.hyperic.hq.authz.server.session.ResourceRelation relation,java.lang.Integer resourceId,java.util.List platformTypeIds,java.lang.String platformName ) ;
+    public List findResourceEdges(ResourceRelation relation, Integer resourceId, List<Integer> platformTypeIds,
+                                  String platformName);
 
-   public void createResourceEdges( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.authz.server.session.ResourceRelation relation,org.hyperic.hq.appdef.shared.AppdefEntityID parent,org.hyperic.hq.appdef.shared.AppdefEntityID[] children ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.authz.shared.ResourceEdgeCreateException;
+    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,
+                                    AppdefEntityID[] children) throws PermissionException, ResourceEdgeCreateException;
 
-   public void createResourceEdges( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.authz.server.session.ResourceRelation relation,org.hyperic.hq.appdef.shared.AppdefEntityID parent,org.hyperic.hq.appdef.shared.AppdefEntityID[] children,boolean deleteExisting ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.authz.shared.ResourceEdgeCreateException;
+    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,
+                                    AppdefEntityID[] children, boolean deleteExisting) throws PermissionException,
+        ResourceEdgeCreateException;
 
-   public void removeResourceEdges( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.authz.server.session.ResourceRelation relation,org.hyperic.hq.appdef.shared.AppdefEntityID parent,org.hyperic.hq.appdef.shared.AppdefEntityID[] children ) throws org.hyperic.hq.authz.shared.PermissionException;
+    public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,
+                                    AppdefEntityID[] children) throws PermissionException;
 
-   public void removeResourceEdges( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.authz.server.session.ResourceRelation relation,org.hyperic.hq.authz.server.session.Resource parent ) throws org.hyperic.hq.authz.shared.PermissionException;
+    public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation, Resource parent)
+        throws PermissionException;
 
-   /**
-    * Find the subject that has the given name and authentication source.
-    * @param name Name of the subject.
-    * @param authDsn DSN of the authentication source. Authentication sources are defined externally.
-    * @return The value-object of the subject of the given name and authenticating source.
-    */
-   public org.hyperic.hq.authz.server.session.AuthzSubject findSubjectByAuth( java.lang.String name,java.lang.String authDsn ) throws org.hyperic.hq.auth.shared.SubjectNotFoundException;
+    /**
+     * Find the subject that has the given name and authentication source.
+     * @param name Name of the subject.
+     * @param authDsn DSN of the authentication source. Authentication sources
+     *        are defined externally.
+     * @return The value-object of the subject of the given name and
+     *         authenticating source.
+     */
+    public org.hyperic.hq.authz.server.session.AuthzSubject findSubjectByAuth(String name, String authDsn)
+        throws SubjectNotFoundException;
 
-   public org.hyperic.hq.authz.server.session.ResourceRelation getContainmentRelation(  ) ;
+    public ResourceRelation getContainmentRelation();
 
-   public org.hyperic.hq.authz.server.session.ResourceRelation getNetworkRelation(  ) ;
+    public ResourceRelation getNetworkRelation();
 
 }

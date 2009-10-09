@@ -35,8 +35,6 @@ import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
-import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -46,18 +44,18 @@ import org.hyperic.util.pager.PageList;
  * This class should actually be implemented with J2SE 5 Generics,
  * but we have to support JDK 1.4, :(
  */
-public abstract class HibernateDAO {
-    private Class      _persistentClass;
+public abstract class HibernateDAO<T> {
+    private Class<T>      _persistentClass;
     protected static final int BATCH_SIZE = 500;
 
     protected SessionFactory sessionFactory;
 
-    protected HibernateDAO(Class persistentClass, SessionFactory f) {
+    protected HibernateDAO(Class<T> persistentClass, SessionFactory f) {
         _persistentClass = persistentClass;
         sessionFactory      = f;
     }
 
-    public Class getPersistentClass() {
+    public Class<T> getPersistentClass() {
         return _persistentClass;
     }
 
@@ -110,7 +108,8 @@ public abstract class HibernateDAO {
         return false;
     }
 
-    public List findAll() {
+    @SuppressWarnings("unchecked")
+    public List<T> findAll() {
         if (cacheFindAll()) {
             String region = getPersistentClass().getName() + ".findAll";
             return getSession().createCriteria(getPersistentClass())
@@ -121,7 +120,8 @@ public abstract class HibernateDAO {
         return getSession().createCriteria(getPersistentClass()).list();
     }
 
-    public Collection findAllOrderByName() {
+    @SuppressWarnings("unchecked")
+    public Collection<T> findAllOrderByName() {
         return getSession()
             .createCriteria(getPersistentClass())
             .addOrder(Order.asc("name"))
@@ -135,7 +135,7 @@ public abstract class HibernateDAO {
             .intValue();
     }
 
-    public int size(Collection coll) {
+    public int size(Collection<T> coll) {
         return ((Number)getSession()
             .createFilter(coll, "select count(*)")
             .uniqueResult())

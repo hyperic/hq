@@ -50,7 +50,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class ResourceDAO
-    extends HibernateDAO
+    extends HibernateDAO<Resource>
 {
     private Log _log = LogFactory.getLog(ResourceDAO.class);
 
@@ -143,7 +143,8 @@ public class ResourceDAO
         return findByInstanceId(type.getId(), id);
     }
 
-    List findResourcesOfType(int typeId, PageInfo pInfo) {
+    @SuppressWarnings("unchecked")
+    List<Resource> findResourcesOfType(int typeId, PageInfo pInfo) {
         String sql = "from Resource r where resourceType.id = :typeId ";
         ResourceSortField sort = (ResourceSortField) pInfo.getSort();
 
@@ -210,7 +211,7 @@ public class ResourceDAO
         }
     }
 
-    public List findByResource(AuthzSubject subject, Resource r) {
+    public List<Resource> findByResource(AuthzSubject subject, Resource r) {
         final String[] VIEW_APPDEFS = new String[] {
             AuthzConstants.platformOpViewPlatform,
             AuthzConstants.serverOpViewServer,
@@ -227,7 +228,8 @@ public class ResourceDAO
             .list();
     }
 
-    public Collection findByOwner(AuthzSubject owner) {
+    @SuppressWarnings("unchecked")
+    public Collection<Resource> findByOwner(AuthzSubject owner) {
         String sql = "from Resource where owner.id = ?";
         return getSession().createQuery(sql)
                 .setInteger(0, owner.getId().intValue())
@@ -429,7 +431,8 @@ public class ResourceDAO
             .list().isEmpty() == false;
     }
 
-    List findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
+    @SuppressWarnings("unchecked")
+    List<Resource> findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
         String sql = "select r from Resource r where r.prototype = :proto";
 
         return pInfo.pageResults(getSession().createQuery(sql)
@@ -449,7 +452,8 @@ public class ResourceDAO
             .uniqueResult();
     }
 
-    List findAllAppdefPrototypes() {
+    @SuppressWarnings("unchecked")
+    List<Resource> findAllAppdefPrototypes() {
         String sql = "select r from Resource r " +
             "where r.resourceType.id in (:platProto, :svrProto, :svcProto)";
 
@@ -461,7 +465,8 @@ public class ResourceDAO
     }
 
 
-    List findAppdefPrototypes() {
+    @SuppressWarnings("unchecked")
+    List<Resource> findAppdefPrototypes() {
         String sql = "select distinct r.prototype from Resource r " +
             "where r.resourceType.id in (:platProto, :svrProto, :svcProto) ";
 
