@@ -195,8 +195,8 @@ public abstract class AuthzSession {
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 authzType = AuthzConstants.authzServiceProto;
                 break;
-            default:
-                throw new IllegalArgumentException("Unsupported prototype type: " + id.getType());
+        default:
+            throw new IllegalArgumentException("Unsupported prototype type: " + id.getType());
         }
         return getResourceDAO().findByInstanceId(authzType, id.getId());
     }
