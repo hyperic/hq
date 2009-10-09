@@ -39,17 +39,13 @@ import javax.ejb.FinderException;
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
@@ -58,6 +54,7 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -92,10 +89,25 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
 {
     private Pager resourceTypePager = null;
     private ResourceEdgeDAO resourceEdgeDAO;
+    private PlatformManagerLocal platformManager;
+    private ServerManagerLocal serverManager;
+    private ServiceManagerLocal serviceManager;
+    private ApplicationManagerLocal applicationManager;
+    private AuthzSubjectManagerLocal authzSubjectManager;
+    private ConfigManagerLocal configManager;
     
     @Autowired
-    public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO) {
+    public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformManagerLocal platformManager,
+                               ServerManagerLocal serverManager, ServiceManagerLocal serviceManager,
+                               ApplicationManagerLocal applicationManager, AuthzSubjectManagerLocal authzSubjectManager,
+                               ConfigManagerLocal configManager) {
         this.resourceEdgeDAO = resourceEdgeDAO;
+        this.platformManager = platformManager;
+        this.serverManager = serverManager;
+        this.serviceManager = serviceManager;
+        this.applicationManager = applicationManager;
+        this.authzSubjectManager = authzSubjectManager;
+        this.configManager = configManager;
     }
 
     private ResourceEdgeDAO getResourceEdgeDAO() {
@@ -304,24 +316,19 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
             final Integer id = aeid.getId();
             switch (aeid.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-                    ServerManagerLocal sMan = ServerManagerEJBImpl.getOne();
-                    return sMan.findServerById(id).getResource();
+                   return serverManager.findServerById(id).getResource();
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    PlatformManagerLocal pMan = PlatformManagerEJBImpl.getOne();
-                    return pMan.findPlatformById(id).getResource();
+                    return platformManager.findPlatformById(id).getResource();
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
-                    ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
-                    return svcMan.findServiceById(id).getResource();
+                    return serviceManager.findServiceById(id).getResource();
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                     // XXX not sure about appdef group mapping since 4.0
                     return getResourceDAO().findByInstanceId(
                         aeid.getAuthzTypeId(), id);
                 case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                    ApplicationManagerLocal appMan =
-                        ApplicationManagerEJBImpl.getOne();
                     AuthzSubject overlord =
-                        AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-                    return appMan.findApplicationById(overlord, id).getResource();
+                        authzSubjectManager.getOverlordPojo();
+                    return applicationManager.findApplicationById(overlord, id).getResource();
                 default:
                     return getResourceDAO().findByInstanceId(
                         aeid.getAuthzTypeId(), id);
@@ -745,16 +752,15 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
             throw new ResourceEdgeCreateException("Only platforms are supported.");
         }
 
-        PlatformManagerLocal platMan = PlatformManagerEJBImpl.getOne();
         Platform parentPlatform = null;
 
         try {
-            parentPlatform = platMan.findPlatformById(parent.getId());
+            parentPlatform = platformManager.findPlatformById(parent.getId());
         } catch (PlatformNotFoundException pe) {
             throw new ResourceEdgeCreateException("Platform id " + parent.getId() + " not found.");
         }
         // TODO: G
-        List supportedPlatformTypes = new ArrayList(platMan.findSupportedPlatformTypes());
+        List supportedPlatformTypes = new ArrayList(platformManager.findSupportedPlatformTypes());
 
         if (supportedPlatformTypes.contains(parentPlatform.getPlatformType())) {
             throw new ResourceEdgeCreateException(parentPlatform.getPlatformType().getName()
@@ -771,9 +777,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
                  parentResource.getInstanceId(),
                  AuthzConstants.platformOpModifyPlatform);
 
-        // HQ-1670: Should not be able to add a parent resource to
-        // a network hierarchy if it has not been configured yet
-        ConfigResponseDB config = ConfigManagerEJBImpl.getOne().getConfigResponse(parent);
+        ConfigResponseDB config = configManager.getConfigResponse(parent);
         if (config != null) {
             String validationError = config.getValidationError();
             if (validationError != null) {
@@ -807,7 +811,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
                         throw new ResourceEdgeCreateException("Only platforms are supported.");
                     }
                     try {
-                        childPlatform = platMan.findPlatformById(children[i].getId());
+                        childPlatform = platformManager.findPlatformById(children[i].getId());
                         childResource = childPlatform.getResource();
 
                         if (!supportedPlatformTypes.contains(childPlatform.getPlatformType())) {
