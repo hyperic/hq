@@ -280,9 +280,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
           <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"fromToggleAll\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
             <display:checkboxdecorator name="availableUser" onclick="ToggleSelection(this, widgetProperties)" styleClass="availableListMember"/>
           </display:column>
-          <display:column value="${user.firstName}" title="admin.role.users.FirstNameTH" width="33%"/>
-          <display:column value="${user.lastName}" title="admin.role.users.LastNameTH" width="33%"/>
-          <display:column value="${user.name}" title="admin.role.users.UsernameTH" sort="true" sortAttr="3" defaultSort="true" width="33%"/>
+          <display:column property="firstName" title="admin.role.users.FirstNameTH" width="33%"/>
+          <display:column property="lastName" title="admin.role.users.LastNameTH" width="33%"/>
+          <display:column property="name" title="admin.role.users.UsernameTH" sort="true" sortAttr="3" defaultSort="true" width="33%"/>
         </display:table>
 
       </div>
@@ -318,9 +318,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
           <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"toToggleAll\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
             <display:checkboxdecorator name="pendingUser" onclick="ToggleSelection(this, widgetProperties)" styleClass="pendingListMember"/>
           </display:column>
-          <display:column value="${user.firstName}" title="admin.role.users.FirstNameTH" width="33%"/>
-          <display:column value="${user.lastName}" title="admin.role.users.LastNameTH" width="33%"/>
-          <display:column value="${user.name}" title="admin.role.users.UsernameTH" sort="true" sortAttr="3" defaultSort="true" width="33%"/>
+          <display:column property="firstName" title="admin.role.users.FirstNameTH" width="33%"/>
+          <display:column property="lastName" title="admin.role.users.LastNameTH" width="33%"/>
+          <display:column property="name" title="admin.role.users.UsernameTH" sort="true" sortAttr="3" defaultSort="true" width="33%"/>
         </display:table>
 
       </div>
