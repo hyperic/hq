@@ -36,7 +36,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class ResourceTypeDAO
-    extends HibernateDAO
+    extends HibernateDAO<ResourceType>
 {
     private ResourceDAO rDao;
     private ResourceGroupDAO gDao;

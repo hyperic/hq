@@ -32,8 +32,8 @@ import java.util.Collection;
 /**
  * A utility class that contains all a "page" of data that is viewable
  * <br>
- * this list may or may not conain the entire list of information. 
- * generally this list conains a subset of data. 
+ * this list may or may not contain the entire list of information. 
+ * generally this list contains a subset of data. 
  * <br>
  * ex. say we have a list of 5000 users. the entire list does not need to be 
  * returned to only display the first 15 items, the user is only going to see 
@@ -42,7 +42,7 @@ import java.util.Collection;
  * <br> 
  * 
  */
-public class PageList extends ArrayList implements Serializable {
+public class PageList<T> extends ArrayList<T> implements Serializable {
     private int          totalSize = 0;
     private boolean      isUnbounded;   // Is the total size of the list known?
     private Serializable metaData;
@@ -52,7 +52,7 @@ public class PageList extends ArrayList implements Serializable {
         this.isUnbounded = false;
     }
 
-    public PageList(Collection c, int totalSize) {
+    public PageList(Collection<T> c, int totalSize) {
         super(c);
         this.totalSize   = totalSize;
         this.isUnbounded = false;

@@ -174,7 +174,7 @@ public interface ResourceManager
 
    public boolean isResourceChildOf( org.hyperic.hq.authz.server.session.Resource parent,org.hyperic.hq.authz.server.session.Resource child ) ;
 
-   public java.util.List findResourceEdges( org.hyperic.hq.authz.server.session.ResourceRelation relation,java.lang.Integer resourceId,java.util.List platformTypeIds,java.lang.String platformName ) ;
+   public java.util.List findResourceEdges( org.hyperic.hq.authz.server.session.ResourceRelation relation,java.lang.Integer resourceId,java.util.List<Integer> platformTypeIds,java.lang.String platformName ) ;
 
    public void createResourceEdges( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.authz.server.session.ResourceRelation relation,org.hyperic.hq.appdef.shared.AppdefEntityID parent,org.hyperic.hq.appdef.shared.AppdefEntityID[] children ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.authz.shared.ResourceEdgeCreateException;
 

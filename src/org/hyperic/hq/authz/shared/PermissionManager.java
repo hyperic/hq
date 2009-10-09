@@ -154,7 +154,7 @@ public abstract class PermissionManager  extends AuthzSession {
      *
      * @return a list of Integers representing instance ids
      */
-    public abstract List findViewableResources(AuthzSubject subj,
+    public abstract List<Integer> findViewableResources(AuthzSubject subj,
                                                String resType,
                                                String resName,
                                                String appdefTypeStr,
@@ -165,7 +165,7 @@ public abstract class PermissionManager  extends AuthzSession {
      * Search viewable resources of any type
      * @return a list of Integers representing instance ids
      */
-    public abstract List findViewableResources(AuthzSubject subj,
+    public abstract List<Integer> findViewableResources(AuthzSubject subj,
                                                String searchFor,
                                                PageControl pc);
 
@@ -198,10 +198,10 @@ public abstract class PermissionManager  extends AuthzSession {
                                                 String alias,
                                                 String oper);
 
-    public abstract Collection
+    public abstract Collection<Resource>
         getGroupResources(Integer subjectId, Integer groupId, Boolean fsystem);
 
-    public abstract Collection
+    public abstract Collection<Resource>
         findServiceResources(AuthzSubject subj, Boolean fsystem);
 
     public interface RolePermNativeSQL {

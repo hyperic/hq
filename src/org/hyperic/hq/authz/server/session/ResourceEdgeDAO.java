@@ -35,11 +35,9 @@ import java.util.Map;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.type.IntegerType;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +45,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class ResourceEdgeDAO
-    extends HibernateDAO
+    extends HibernateDAO<ResourceEdge>
 {
     @Autowired
     ResourceEdgeDAO(SessionFactory f) {
@@ -93,7 +91,8 @@ public class ResourceEdgeDAO
         return res;
     }
 
-    Collection findDescendantEdges(Resource r, ResourceRelation rel) {
+    @SuppressWarnings("unchecked")
+    Collection<ResourceEdge> findDescendantEdges(Resource r, ResourceRelation rel) {
         String sql = "from ResourceEdge e where e.from = :from " +
                      "and distance > :distance " +
                      "and rel_id = :rel_id ";
@@ -105,8 +104,8 @@ public class ResourceEdgeDAO
                 .list();
     }
 
-    List findDescendantEdgesByNetworkRelation(Integer resourceId,
-                                              List platformTypeIds,
+    List<ResourceEdge> findDescendantEdgesByNetworkRelation(Integer resourceId,
+                                              List<Integer> platformTypeIds,
                                               String platformName) {
         String nameEx = null;
         String sql = "select {e.*} from EAM_RESOURCE_EDGE e " +
@@ -148,7 +147,8 @@ public class ResourceEdgeDAO
         return query.list();
     }
 
-    Collection findAncestorEdges(Resource r, ResourceRelation rel) {
+    @SuppressWarnings("unchecked")
+    Collection<ResourceEdge> findAncestorEdges(Resource r, ResourceRelation rel) {
         String sql = "from ResourceEdge e where e.from = :from " +
                      "and distance < :distance " +
                      "and rel_id = :rel_id ";

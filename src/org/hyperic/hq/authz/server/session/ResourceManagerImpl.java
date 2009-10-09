@@ -30,11 +30,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.FinderException;
 
 import org.hyperic.hibernate.PageInfo;
@@ -73,7 +73,6 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -82,19 +81,17 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Use this session bean to manipulate Resources, ResourceTypes and
  * ResourceGroups. That is to say, Resources and their derivatives.
- * Alteratively you can say, anything enity that starts with the word Resource.
+ * Alternatively you can say, anything entity that starts with the word Resource.
  *
  * All arguments and return values are value-objects.
  *
  */
 @Transactional
 @Service
-public class ResourceManagerImpl extends AuthzSession implements ResourceManager, InitializingBean
+public class ResourceManagerImpl extends AuthzSession implements ResourceManager
 {
     private Pager resourceTypePager = null;
-
     private ResourceEdgeDAO resourceEdgeDAO;
-    
     
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO) {
@@ -116,9 +113,10 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         throws FinderException {
         ResourceType rt = getResourceTypeDAO().findByName(name);
 
-        if (rt == null)
+        if (rt == null) {
             throw new FinderException("ResourceType " + name + " not found");
-
+        }
+        
         return rt;
     }
 
@@ -158,13 +156,11 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
 
         eDAO.create(res, res, 0, relation);  // Self-edge
         if (parent != null) {
-            Collection ancestors = eDAO.findAncestorEdges(parent, relation);
+            Collection<ResourceEdge> ancestors = eDAO.findAncestorEdges(parent, relation);
             eDAO.create(res, parent, -1, relation);
             eDAO.create(parent, res, 1, relation);
 
-            for (Iterator i = ancestors.iterator(); i.hasNext();) {
-                ResourceEdge ancestorEdge = (ResourceEdge)i.next();
-
+            for (ResourceEdge ancestorEdge : ancestors) {
                 int distance = ancestorEdge.getDistance() - 1;
 
                 eDAO.create(res, ancestorEdge.getTo(), distance, relation);
@@ -184,7 +180,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      * It's also of note that this method only deals with relinking resource
      * edges to the ancestors of the destination resource.  This means that in
      * the case of Server moves, it's up to the caller to re-link dependent
-     * chilren.
+     * children.
      *
      * 
      */
@@ -207,10 +203,8 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         eDAO.create(destination, target, 1, relation);
 
         // Ancestor edges to new destination resource
-        Collection ancestors = eDAO.findAncestorEdges(destination, relation);
-        for (Iterator i = ancestors.iterator(); i.hasNext();) {
-            ResourceEdge ancestorEdge = (ResourceEdge)i.next();
-
+        Collection<ResourceEdge> ancestors = eDAO.findAncestorEdges(destination, relation);
+        for (ResourceEdge ancestorEdge : ancestors) {
             int distance = ancestorEdge.getDistance() - 1;
 
             eDAO.create(target, ancestorEdge.getTo(), distance, relation);
@@ -376,8 +370,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         // Make sure user has permission to remove this resource
         final PermissionManager pm = PermissionManagerFactory.getInstance();
         String opName = null;
-        Set removed = new HashSet();
-
+ 
         if (resourceType.getId().equals(AuthzConstants.authzPlatform)) {
             opName = AuthzConstants.platformOpRemovePlatform;
         } else if (resourceType.getId().equals(AuthzConstants.authzServer)) {
@@ -398,11 +391,11 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
 
         ResourceEdgeDAO edgeDao = getResourceEdgeDAO();
         if (debug) watch.markTimeBegin("removeResourcePerms.findEdges");
-        Collection edges = edgeDao.findDescendantEdges(r, getContainmentRelation());
         if (debug) watch.markTimeEnd("removeResourcePerms.findEdges");
-        for (Iterator it = edges.iterator(); it.hasNext(); ) {
-            ResourceEdge edge = (ResourceEdge) it.next();
-            // Remove descendents' permissions
+        Collection<ResourceEdge> edges = edgeDao.findDescendantEdges(r, getContainmentRelation());
+        Set<AppdefEntityID> removed = new HashSet<AppdefEntityID>();
+       for (ResourceEdge edge : edges) {
+            // Remove descendants' permissions
             removed.addAll(
                 Arrays.asList(removeResourcePerms(subj, edge.getTo(), true)));
         }
@@ -420,7 +413,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         }
         
         
-        return (AppdefEntityID[]) removed.toArray(new AppdefEntityID[0]);
+        return removed.toArray(new AppdefEntityID[0]);
     }
 
     /**
@@ -434,15 +427,19 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         if (debug) watch.markTimeBegin("removeResourcePerms.removeEdges");
         // Delete the edges and resource groups
         edgeDao.deleteEdges(r);
-        if (debug) watch.markTimeEnd("removeResourcePerms.removeEdges");
+        if (debug) {
+            watch.markTimeEnd("removeResourcePerms.removeEdges");
+        }
         if (nullResourceType) {
             r.setResourceType(null);
         }
         final long now = System.currentTimeMillis();
-        if (debug) watch.markTimeBegin("removeResourcePerms.audit");
-        ResourceAudit.deleteResource(r, subj, now, now);
-        if (debug) watch.markTimeEnd("removeResourcePerms.audit");
         if (debug) {
+            watch.markTimeBegin("removeResourcePerms.audit");
+        }
+        ResourceAudit.deleteResource(r, subj, now, now);
+        if (debug) {
+            watch.markTimeEnd("removeResourcePerms.audit");
             log.debug(watch);
         }
     }
@@ -488,8 +485,9 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      * @param pc Paging information for the request
      * 
      */
+    // TODO: G
     public List getAllResourceTypes(AuthzSubject subject, PageControl pc) {
-        Collection resTypes = getResourceTypeDAO().findAll();
+        Collection<ResourceType> resTypes = getResourceTypeDAO().findAll();
         pc = PageControl.initDefaults(pc, SortAttribute.RESTYPE_NAME);
         return resourceTypePager.seek(resTypes, pc.getPagenum(),
                                       pc.getPagesize());
@@ -503,7 +501,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      * @return Map of resource values
      * 
      */
-    public List findViewableInstances(AuthzSubject subject,
+    public List<Integer> findViewableInstances(AuthzSubject subject,
                                       String typeName,
                                       String resName,
                                       String appdefTypeStr,
@@ -527,17 +525,16 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      * @return Map of resource values
      * 
      */
-    public PageList findViewables(AuthzSubject subject, String searchFor,
+    public PageList<Resource> findViewables(AuthzSubject subject, String searchFor,
                                   PageControl pc) {
         ResourceDAO dao = getResourceDAO();
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        List resIds = pm.findViewableResources(subject, searchFor, pc);
+        List<Integer> resIds = pm.findViewableResources(subject, searchFor, pc);
         Pager pager = Pager.getDefaultPager();
-        List paged = pager.seek(resIds, pc);
+        List<Integer> paged = pager.seek(resIds, pc);
 
-        PageList resources = new PageList();
-        for (Iterator it = paged.iterator(); it.hasNext(); ) {
-            Integer id = (Integer) it.next();
+        PageList<Resource> resources = new PageList<Resource>();
+        for (Integer id : paged) {
             resources.add(dao.findById(id));
         }
 
@@ -553,31 +550,29 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      * @return Map of resource values
      * 
      */
-    public Map findAllViewableInstances(AuthzSubject subject) {
+    public Map<String, List<Integer>> findAllViewableInstances(AuthzSubject subject) {
         // First get all resource types
-        HashMap resourceMap = new HashMap();
+        Map<String, List<Integer>> resourceMap = new HashMap<String, List<Integer>>();
 
-        Collection resTypes = getResourceTypeDAO().findAll();
-        for (Iterator it = resTypes.iterator(); it.hasNext(); ) {
-            ResourceType type = (ResourceType) it.next();
-
+        Collection<ResourceType> resTypes = getResourceTypeDAO().findAll();
+        for (ResourceType type : resTypes) {
             String typeName = type.getName();
 
             // Now fetch list by the type
-            List ids = findViewableInstances(subject,  typeName,  null, null,
+            List<Integer> ids = findViewableInstances(subject,  typeName,  null, null,
                                              null, PageControl.PAGE_ALL);
-            if (ids.size() > 0)
+            if (ids.size() > 0) {
                 resourceMap.put(typeName, ids);
+            }
         }
-
         return resourceMap;
     }
 
     /**
-     * Find all the resources which are descendents of the given resource
+     * Find all the resources which are descendants of the given resource
      * 
      */
-    public List findResourcesByParent(AuthzSubject subject, Resource res) {
+    public List<Resource> findResourcesByParent(AuthzSubject subject, Resource res) {
         return getResourceDAO().findByResource(subject, res);
     }
 
@@ -589,7 +584,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      * @return a list of {@link Resource}s
      * 
      */
-    public List findResourcesOfType(int resourceType, PageInfo pInfo) {
+    public List<Resource> findResourcesOfType(int resourceType, PageInfo pInfo) {
         return getResourceDAO().findResourcesOfType(resourceType, pInfo);
     }
 
@@ -598,7 +593,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      * @return a list of {@link Resource}s
      * 
      */
-    public List findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
+    public List<Resource> findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
         return getResourceDAO().findResourcesOfPrototype(proto, pInfo);
     }
 
@@ -608,7 +603,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      *
      * 
      */
-    public List findAppdefPrototypes() {
+    public List<Resource> findAppdefPrototypes() {
         return getResourceDAO().findAppdefPrototypes();
     }
 
@@ -618,7 +613,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      *
      * 
      */
-    public List findAllAppdefPrototypes() {
+    public List<Resource> findAllAppdefPrototypes() {
         return getResourceDAO().findAllAppdefPrototypes();
     }
 
@@ -631,10 +626,10 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      * @return PageList of resource values
      * 
      */
-    public PageList findViewableSvcResources(AuthzSubject subject,
+    public PageList<Resource> findViewableSvcResources(AuthzSubject subject,
                                              String resourceName,
                                              PageControl pc) {
-        Collection resources;
+        Collection<Resource> resources;
 
         AuthzSubject subj = getSubjectDAO().findById(subject.getId());
 
@@ -651,20 +646,20 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         }
 
         // TODO: Move filtering into EJBQL
-        ArrayList ordResources = new ArrayList(resources.size());
-        for (Iterator it = resources.iterator(); it.hasNext();) {
-            Resource res = (Resource) it.next();
-
-            if (StringUtil.stringDoesNotExist(res.getName(), resourceName))
+        ArrayList<Resource> ordResources = new ArrayList<Resource>(resources.size());
+        for (Resource res : ordResources) {
+            if (StringUtil.stringDoesNotExist(res.getName(), resourceName)) {
                 continue;
+            }
 
-            if (pc.isDescending())  // Add to head of array list
+            if (pc.isDescending())  { // Add to head of array list
                 ordResources.add(0, res);
-            else                    // Add to tail of array list
+            } else {                   // Add to tail of array list
                 ordResources.add(res);
+            }
         }
 
-        return new PageList(ordResources, ordResources.size());
+        return new PageList<Resource>(ordResources, ordResources.size());
     }
 
     /**
@@ -673,7 +668,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      * @return Array of resources owned by the given subject.
      * 
      */
-    public Collection findResourceByOwner(AuthzSubject owner) {
+    public Collection<Resource> findResourceByOwner(AuthzSubject owner) {
         return getResourceDAO().findByOwner(owner);
     }
 
@@ -681,7 +676,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      *
      * 
      */
-    public Collection findResourceEdges(ResourceRelation relation,
+    public Collection<ResourceEdge> findResourceEdges(ResourceRelation relation,
                                         Resource parent) {
         return getResourceEdgeDAO()
                     .findDescendantEdges(parent, relation);
@@ -699,9 +694,9 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      *
      * 
      */
-    public List findResourceEdges(ResourceRelation relation,
+    public List<ResourceEdge> findResourceEdges(ResourceRelation relation,
                                   Integer resourceId,
-                                  List platformTypeIds,
+                                  List<Integer> platformTypeIds,
                                   String platformName) {
         if (relation == null
                 || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
@@ -758,6 +753,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         } catch (PlatformNotFoundException pe) {
             throw new ResourceEdgeCreateException("Platform id " + parent.getId() + " not found.");
         }
+        // TODO: G
         List supportedPlatformTypes = new ArrayList(platMan.findSupportedPlatformTypes());
 
         if (supportedPlatformTypes.contains(parentPlatform.getPlatformType())) {
@@ -797,8 +793,8 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
                 }
 
                 ResourceEdgeDAO eDAO = getResourceEdgeDAO();
-                Collection edges = findResourceEdges(relation, parentResource);
-                List existing = null;
+                Collection<ResourceEdge> edges = findResourceEdges(relation, parentResource);
+                List<ResourceEdge> existing = null;
                 Platform childPlatform = null;
                 Resource childResource = null;
 
@@ -894,7 +890,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
                     eDAO.deleteEdge(childResource, parentResource, relation);
                 }
             }
-            Collection edges = findResourceEdges(relation, parentResource);
+            Collection<ResourceEdge> edges = findResourceEdges(relation, parentResource);
             if (edges.isEmpty()) {
                 // remove self-edge for parent of network hierarchy
                 eDAO.deleteEdges(parentResource, relation);
@@ -933,11 +929,8 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         return Bootstrap.getBean(ResourceManager.class);
     }
 
-
-
-    public void afterPropertiesSet() throws Exception {
+    @PostConstruct
+    public void initializePager() throws Exception {
        resourceTypePager = Pager.getDefaultPager();
     }
-
-
 }

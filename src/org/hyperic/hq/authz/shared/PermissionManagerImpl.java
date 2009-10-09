@@ -190,10 +190,10 @@ public class PermissionManagerImpl
         return (Resource[]) resLocArr.toArray(new Resource[resLocArr.size()]);
     }
 
-    public List findViewableResources(AuthzSubject subj, String resType,
+    public List<Integer> findViewableResources(AuthzSubject subj, String resType,
                                       String resName, String appdefTypeStr,
                                       Integer typeId, PageControl pc) {
-        List viewableInstances = new ArrayList();
+        List<Integer> viewableInstances = new ArrayList<Integer>();
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -252,13 +252,13 @@ public class PermissionManagerImpl
             _log.error("Error getting scope by SQL", e);
             throw new SystemException("SQL Error getting scope: " + e.getMessage());
         } finally {
-            dbUtil.closeJDBCObjects(ctx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(ctx, conn, stmt, rs);
         }
     }
 
-    public List findViewableResources(AuthzSubject subj, String searchFor,
+    public List<Integer> findViewableResources(AuthzSubject subj, String searchFor,
                                       PageControl pc) {
-        List viewableInstances = new ArrayList();
+        List<Integer> viewableInstances = new ArrayList<Integer>();
 
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -304,7 +304,7 @@ public class PermissionManagerImpl
             _log.error("Error search by SQL", e);
             throw new SystemException("SQL Error search: " + e.getMessage());
         } finally {
-            dbUtil.closeJDBCObjects(ctx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(ctx, conn, stmt, rs);
         }
     }
 
@@ -363,12 +363,12 @@ public class PermissionManagerImpl
         return operationPager.seek(ops, pc.getPagenum(), pc.getPagesize());
     }
 
-    public Collection getGroupResources(Integer subjectId,
+    public Collection<Resource> getGroupResources(Integer subjectId,
                                         Integer groupId, Boolean fsystem) {
         return getResourceDAO().findInGroup_orderName(groupId, fsystem);
     }
 
-    public Collection findServiceResources(AuthzSubject subj, Boolean fsystem) {
+    public Collection<Resource> findServiceResources(AuthzSubject subj, Boolean fsystem) {
         return getResourceDAO().findSvcRes_orderName(fsystem);
     }
 
