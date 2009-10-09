@@ -1,26 +1,22 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
- * program services by normal system calls through the application
- * program interfaces provided as part of the Hyperic Plug-in Development
- * Kit or the Hyperic Client Development Kit - this is merely considered
- * normal use of the program, and does *not* fall under the heading of
- * "derived work".
- *
- * Copyright (C) [2004-2008], Hyperic, Inc.
- * This file is part of HQ.
- *
- * HQ is free software; you can redistribute it and/or modify
- * it under the terms version 2 of the GNU General Public License as
- * published by the Free Software Foundation. This program is distributed
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA.
+ * NOTE: This copyright does *not* cover user programs that use HQ program
+ * services by normal system calls through the application program interfaces
+ * provided as part of the Hyperic Plug-in Development Kit or the Hyperic Client
+ * Development Kit - this is merely considered normal use of the program, and
+ * does *not* fall under the heading of "derived work".
+ * 
+ * Copyright (C) [2004-2008], Hyperic, Inc. This file is part of HQ.
+ * 
+ * HQ is free software; you can redistribute it and/or modify it under the terms
+ * version 2 of the GNU General Public License as published by the Free Software
+ * Foundation. This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+ * Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
 package org.hyperic.hq.authz.server.session;
@@ -47,20 +43,19 @@ import org.hyperic.hq.context.Bootstrap;
  * This is the parent class for all Authz Session Beans
  */
 public abstract class AuthzSession {
-    public static final Log log
-        = LogFactory.getLog(AuthzSession.class.getName());
+    public static final Log log = LogFactory.getLog(AuthzSession.class.getName());
 
     private static InitialContext _ic = null;
 
     protected SessionContext ctx;
-    
+
     protected ResourceTypeDAO resourceTypeDAO = Bootstrap.getBean(ResourceTypeDAO.class);
-    protected ResourceDAO resourceDAO = Bootstrap.getBean(ResourceDAO.class); 
+    protected ResourceDAO resourceDAO = Bootstrap.getBean(ResourceDAO.class);
     protected ResourceGroupDAO resourceGroupDAO = Bootstrap.getBean(ResourceGroupDAO.class);
     protected AuthzSubjectDAO authzSubjectDAO = Bootstrap.getBean(AuthzSubjectDAO.class);
     protected RoleDAO roleDAO = Bootstrap.getBean(RoleDAO.class);
     protected OperationDAO operationDAO = Bootstrap.getBean(OperationDAO.class);
-    
+
     private ResourceRelationDAO resourceRelationDAO = Bootstrap.getBean(ResourceRelationDAO.class);
 
     protected ResourceTypeDAO getResourceTypeDAO() {
@@ -88,25 +83,23 @@ public abstract class AuthzSession {
     }
 
     protected ResourceType getRootResourceType() {
-       return resourceTypeDAO.findTypeResourceType();
+        return resourceTypeDAO.findTypeResourceType();
     }
 
     /**
      * Find the subject that has the given name and authentication source.
      * @param name Name of the subject.
      * @param authDsn DSN of the authentication source. Authentication sources
-     * are defined externally.
-     * @return The value-object of the subject of the given name and authenticating source.
+     *        are defined externally.
+     * @return The value-object of the subject of the given name and
+     *         authenticating source.
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public AuthzSubject findSubjectByAuth(String name, String authDsn)
-        throws SubjectNotFoundException
-    {
-         AuthzSubject subject = authzSubjectDAO.findByAuth(name, authDsn);
+    public AuthzSubject findSubjectByAuth(String name, String authDsn) throws SubjectNotFoundException {
+        AuthzSubject subject = authzSubjectDAO.findByAuth(name, authDsn);
         if (subject == null) {
-            throw new SubjectNotFoundException(
-                "Can't find subject: name=" + name + ",authDsn=" + authDsn);
+            throw new SubjectNotFoundException("Can't find subject: name=" + name + ",authDsn=" + authDsn);
         }
         return subject;
     }
@@ -117,30 +110,24 @@ public abstract class AuthzSession {
             return ret;
         }
 
-
         RoleDAO roleDao = null;
         ResourceGroupDAO resGrpDao = null;
         for (int i = 0; i < vals.length; i++) {
             if (vals[i] instanceof Operation) {
                 ret.add(vals[i]);
-            }
-            else if (vals[i] instanceof ResourceValue) {
+            } else if (vals[i] instanceof ResourceValue) {
                 ret.add(lookupResource((ResourceValue) vals[i]));
-            }
-            else if (vals[i] instanceof RoleValue) {
+            } else if (vals[i] instanceof RoleValue) {
                 if (roleDao == null) {
                     roleDao = getRoleDAO();
                 }
                 ret.add(roleDao.findById(((RoleValue) vals[i]).getId()));
-            }
-            else if (vals[i] instanceof ResourceGroupValue) {
+            } else if (vals[i] instanceof ResourceGroupValue) {
                 if (resGrpDao == null) {
                     resGrpDao = getResourceGroupDAO();
                 }
-                ret.add(resGrpDao.findById(
-                    ((ResourceGroupValue) vals[i]).getId()));
-            }
-            else {
+                ret.add(resGrpDao.findById(((ResourceGroupValue) vals[i]).getId()));
+            } else {
                 log.error("Invalid type.");
             }
 
@@ -156,8 +143,7 @@ public abstract class AuthzSession {
     private Resource lookupResource(ResourceValue resource) {
         if (resource.getId() == null) {
             ResourceType type = resource.getResourceType();
-            return resourceDAO.findByInstanceId(type,
-                                                     resource.getInstanceId());
+            return resourceDAO.findByInstanceId(type, resource.getInstanceId());
         }
         return resourceDAO.findById(resource.getId());
     }
@@ -177,7 +163,7 @@ public abstract class AuthzSession {
     }
 
     /**
-     *
+     * 
      * @ejb:interface-method
      */
     public ResourceRelation getContainmentRelation() {
@@ -185,7 +171,7 @@ public abstract class AuthzSession {
     }
 
     /**
-     *
+     * 
      * @ejb:interface-method
      */
     public ResourceRelation getNetworkRelation() {
@@ -199,19 +185,18 @@ public abstract class AuthzSession {
     protected Resource findPrototype(AppdefEntityTypeID id) {
         Integer authzType;
 
-        switch(id.getType()) {
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            authzType = AuthzConstants.authzPlatformProto;
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            authzType = AuthzConstants.authzServerProto;
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            authzType = AuthzConstants.authzServiceProto;
-            break;
-        default:
-            throw new IllegalArgumentException("Unsupported prototype type: " +
-                                               id.getType());
+        switch (id.getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                authzType = AuthzConstants.authzPlatformProto;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                authzType = AuthzConstants.authzServerProto;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                authzType = AuthzConstants.authzServiceProto;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported prototype type: " + id.getType());
         }
         return getResourceDAO().findByInstanceId(authzType, id.getId());
     }
