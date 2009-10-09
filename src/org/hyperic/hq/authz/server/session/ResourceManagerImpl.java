@@ -1,26 +1,22 @@
 /*
- * NOTE: This copyright does *not* cover user programs that use HQ
- * program services by normal system calls through the application
- * program interfaces provided as part of the Hyperic Plug-in Development
- * Kit or the Hyperic Client Development Kit - this is merely considered
- * normal use of the program, and does *not* fall under the heading of
- * "derived work".
- *
- * Copyright (C) [2004-2009], Hyperic, Inc.
- * This file is part of HQ.
- *
- * HQ is free software; you can redistribute it and/or modify
- * it under the terms version 2 of the GNU General Public License as
- * published by the Free Software Foundation. This program is distributed
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more
- * details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
- * USA.
+ * NOTE: This copyright does *not* cover user programs that use HQ program
+ * services by normal system calls through the application program interfaces
+ * provided as part of the Hyperic Plug-in Development Kit or the Hyperic Client
+ * Development Kit - this is merely considered normal use of the program, and
+ * does *not* fall under the heading of "derived work".
+ * 
+ * Copyright (C) [2004-2009], Hyperic, Inc. This file is part of HQ.
+ * 
+ * HQ is free software; you can redistribute it and/or modify it under the terms
+ * version 2 of the GNU General Public License as published by the Free Software
+ * Foundation. This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+ * Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+ * Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
 package org.hyperic.hq.authz.server.session;
@@ -78,15 +74,16 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Use this session bean to manipulate Resources, ResourceTypes and
  * ResourceGroups. That is to say, Resources and their derivatives.
- * Alternatively you can say, anything entity that starts with the word Resource.
- *
+ * Alternatively you can say, anything entity that starts with the word
+ * Resource.
+ * 
  * All arguments and return values are value-objects.
- *
+ * 
  */
 @Transactional
 @Service
-public class ResourceManagerImpl extends AuthzSession implements ResourceManager
-{
+public class ResourceManagerImpl
+    extends AuthzSession implements ResourceManager {
     private Pager resourceTypePager = null;
     private ResourceEdgeDAO resourceEdgeDAO;
     private PlatformManagerLocal platformManager;
@@ -95,12 +92,12 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
     private ApplicationManagerLocal applicationManager;
     private AuthzSubjectManagerLocal authzSubjectManager;
     private ConfigManagerLocal configManager;
-    
+
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformManagerLocal platformManager,
                                ServerManagerLocal serverManager, ServiceManagerLocal serviceManager,
-                               ApplicationManagerLocal applicationManager, AuthzSubjectManagerLocal authzSubjectManager,
-                               ConfigManagerLocal configManager) {
+                               ApplicationManagerLocal applicationManager,
+                               AuthzSubjectManagerLocal authzSubjectManager, ConfigManagerLocal configManager) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
@@ -110,10 +107,6 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         this.configManager = configManager;
     }
 
-    private ResourceEdgeDAO getResourceEdgeDAO() {
-       return resourceEdgeDAO;
-    }
-
     /**
      * Find the type that has the given name.
      * @param name The name of the type you're looking for.
@@ -121,14 +114,13 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      * @throws FinderException Unable to find a given or dependent entities.
      * 
      */
-    public ResourceType findResourceTypeByName(String name)
-        throws FinderException {
+    public ResourceType findResourceTypeByName(String name) throws FinderException {
         ResourceType rt = getResourceTypeDAO().findByName(name);
 
         if (rt == null) {
             throw new FinderException("ResourceType " + name + " not found");
         }
-        
+
         return rt;
     }
 
@@ -142,7 +134,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
 
     /**
      * Check if there are any resources of a given type
-     *
+     * 
      * 
      */
     public boolean resourcesExistOfType(String typeName) {
@@ -151,80 +143,73 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
 
     /**
      * Create a resource.
-     *
+     * 
      * 
      */
-    public Resource createResource(AuthzSubject owner, ResourceType rt,
-                                   Resource prototype, Integer instanceId,
-                                   String name, boolean system, Resource parent)
-    {
+    public Resource createResource(AuthzSubject owner, ResourceType rt, Resource prototype, Integer instanceId,
+                                   String name, boolean system, Resource parent) {
         long start = System.currentTimeMillis();
 
-        Resource res = getResourceDAO().create(rt, prototype, name, owner,
-                                               instanceId, system);
+        Resource res = getResourceDAO().create(rt, prototype, name, owner, instanceId, system);
 
-        ResourceEdgeDAO eDAO = getResourceEdgeDAO();
         ResourceRelation relation = getContainmentRelation();
 
-        eDAO.create(res, res, 0, relation);  // Self-edge
+        resourceEdgeDAO.create(res, res, 0, relation); // Self-edge
         if (parent != null) {
-            Collection<ResourceEdge> ancestors = eDAO.findAncestorEdges(parent, relation);
-            eDAO.create(res, parent, -1, relation);
-            eDAO.create(parent, res, 1, relation);
+            Collection<ResourceEdge> ancestors = resourceEdgeDAO.findAncestorEdges(parent, relation);
+            resourceEdgeDAO.create(res, parent, -1, relation);
+            resourceEdgeDAO.create(parent, res, 1, relation);
 
             for (ResourceEdge ancestorEdge : ancestors) {
                 int distance = ancestorEdge.getDistance() - 1;
 
-                eDAO.create(res, ancestorEdge.getTo(), distance, relation);
-                eDAO.create(ancestorEdge.getTo(), res, -distance, relation);
+                resourceEdgeDAO.create(res, ancestorEdge.getTo(), distance, relation);
+                resourceEdgeDAO.create(ancestorEdge.getTo(), res, -distance, relation);
             }
         }
 
-        ResourceAudit.createResource(res, owner, start,
-                                     System.currentTimeMillis());
+        ResourceAudit.createResource(res, owner, start, System.currentTimeMillis());
         return res;
     }
 
     /**
-     * Move a resource.  It is the responsibility of the caller (AppdefManager) to
-     * ensure that this resource can be moved to the destination.
-     *
+     * Move a resource. It is the responsibility of the caller (AppdefManager)
+     * to ensure that this resource can be moved to the destination.
+     * 
      * It's also of note that this method only deals with relinking resource
-     * edges to the ancestors of the destination resource.  This means that in
+     * edges to the ancestors of the destination resource. This means that in
      * the case of Server moves, it's up to the caller to re-link dependent
      * children.
-     *
+     * 
      * 
      */
-    public void moveResource(AuthzSubject owner,
-                             Resource target, Resource destination) {
+    public void moveResource(AuthzSubject owner, Resource target, Resource destination) {
 
         long start = System.currentTimeMillis();
 
-        ResourceEdgeDAO eDAO = getResourceEdgeDAO();
+        ResourceEdgeDAO eDAO = resourceEdgeDAO;
         ResourceRelation relation = getContainmentRelation();
 
         // Clean out edges for the current target
-        eDAO.deleteEdges(target);
+        resourceEdgeDAO.deleteEdges(target);
 
         // Self-edge
-        eDAO.create(target, target, 0, relation);
+        resourceEdgeDAO.create(target, target, 0, relation);
 
         // Direct edges
-        eDAO.create(target, destination, -1, relation);
-        eDAO.create(destination, target, 1, relation);
+        resourceEdgeDAO.create(target, destination, -1, relation);
+        resourceEdgeDAO.create(destination, target, 1, relation);
 
         // Ancestor edges to new destination resource
-        Collection<ResourceEdge> ancestors = eDAO.findAncestorEdges(destination, relation);
+        Collection<ResourceEdge> ancestors = resourceEdgeDAO.findAncestorEdges(destination, relation);
         for (ResourceEdge ancestorEdge : ancestors) {
             int distance = ancestorEdge.getDistance() - 1;
 
-            eDAO.create(target, ancestorEdge.getTo(), distance, relation);
-            eDAO.create(ancestorEdge.getTo(), target, -distance, relation);
+            resourceEdgeDAO.create(target, ancestorEdge.getTo(), distance, relation);
+            resourceEdgeDAO.create(ancestorEdge.getTo(), target, -distance, relation);
         }
 
-        ResourceAudit.moveResource(target, destination, owner, start,
-                                   System.currentTimeMillis());
+        ResourceAudit.moveResource(target, destination, owner, start, System.currentTimeMillis());
     }
 
     /**
@@ -260,14 +245,11 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      * @return The value-object of the Resource of the given ID.
      * 
      */
-    public Resource findResourceByInstanceId(ResourceType type,
-                                             Integer instanceId) {
+    public Resource findResourceByInstanceId(ResourceType type, Integer instanceId) {
         Resource resource = findResourceByInstanceId(type.getId(), instanceId);
 
         if (resource == null) {
-            throw new RuntimeException("Unable to find resourceType=" +
-                                       type.getId() + " instanceId=" +
-                                       instanceId);
+            throw new RuntimeException("Unable to find resourceType=" + type.getId() + " instanceId=" + instanceId);
         }
         return resource;
     }
@@ -275,8 +257,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
     /**
      * 
      */
-    public Resource findResourceByInstanceId(Integer typeId, Integer instanceId)
-    {
+    public Resource findResourceByInstanceId(Integer typeId, Integer instanceId) {
         return getResourceDAO().findByInstanceId(typeId, instanceId);
     }
 
@@ -302,8 +283,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      * @return The value-object of the Resource of the given ID.
      * 
      */
-    public Resource findResourceByTypeAndInstanceId(String type,
-                                                    Integer instanceId) {
+    public Resource findResourceByTypeAndInstanceId(String type, Integer instanceId) {
         ResourceType resType = getResourceTypeDAO().findByName(type);
         return getResourceDAO().findByInstanceId(resType.getId(), instanceId);
     }
@@ -315,23 +295,20 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         try {
             final Integer id = aeid.getId();
             switch (aeid.getType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-                   return serverManager.findServerById(id).getResource();
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                    return serverManager.findServerById(id).getResource();
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                     return platformManager.findPlatformById(id).getResource();
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                     return serviceManager.findServiceById(id).getResource();
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                     // XXX not sure about appdef group mapping since 4.0
-                    return getResourceDAO().findByInstanceId(
-                        aeid.getAuthzTypeId(), id);
+                    return getResourceDAO().findByInstanceId(aeid.getAuthzTypeId(), id);
                 case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                    AuthzSubject overlord =
-                        authzSubjectManager.getOverlordPojo();
+                    AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
                     return applicationManager.findApplicationById(overlord, id).getResource();
                 default:
-                    return getResourceDAO().findByInstanceId(
-                        aeid.getAuthzTypeId(), id);
+                    return getResourceDAO().findByInstanceId(aeid.getAuthzTypeId(), id);
             }
         } catch (ServerNotFoundException e) {
         } catch (PlatformNotFoundException e) {
@@ -350,23 +327,22 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
     }
 
     /**
-     * Removes the specified resource by nulling out its resourceType.
-     * Will not null the resourceType of the resource which is passed in.
-     * These resources need to be cleaned up eventually by
-     * {@link AppdefBossEJBImpl.removeDeletedResources}.  This may be done in
-     * the background via zevent by issuing a {@link ResourcesCleanupZevent}.
+     * Removes the specified resource by nulling out its resourceType. Will not
+     * null the resourceType of the resource which is passed in. These resources
+     * need to be cleaned up eventually by
+     * {@link AppdefBossEJBImpl.removeDeletedResources}. This may be done in the
+     * background via zevent by issuing a {@link ResourcesCleanupZevent}.
      * @see {@link AppdefBossEJBImpl.removeDeletedResources}
      * @see {@link ResourcesCleanupZevent}
      * @param r {@link Resource} resource to be removed.
      * @param nullResourceType tells the method to null out the resourceType
-     * @return AppdefEntityID[] - an array of the resources (including children) deleted
+     * @return AppdefEntityID[] - an array of the resources (including children)
+     *         deleted
      * 
      */
-    @Transactional(propagation=Propagation.NOT_SUPPORTED)
-    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
-                                                boolean nullResourceType)
-        throws VetoException, PermissionException
-    {
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r, boolean nullResourceType)
+        throws VetoException, PermissionException {
         final ResourceType resourceType = r.getResourceType();
 
         // Possible this resource has already been marked for deletion
@@ -377,7 +353,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         // Make sure user has permission to remove this resource
         final PermissionManager pm = PermissionManagerFactory.getInstance();
         String opName = null;
- 
+
         if (resourceType.getId().equals(AuthzConstants.authzPlatform)) {
             opName = AuthzConstants.platformOpRemovePlatform;
         } else if (resourceType.getId().equals(AuthzConstants.authzServer)) {
@@ -392,19 +368,22 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
 
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
-        if (debug) watch.markTimeBegin("removeResourcePerms.pmCheck");
+        if (debug)
+            watch.markTimeBegin("removeResourcePerms.pmCheck");
         pm.check(subj.getId(), resourceType, r.getInstanceId(), opName);
-        if (debug) watch.markTimeEnd("removeResourcePerms.pmCheck");
+        if (debug)
+            watch.markTimeEnd("removeResourcePerms.pmCheck");
 
-        ResourceEdgeDAO edgeDao = getResourceEdgeDAO();
-        if (debug) watch.markTimeBegin("removeResourcePerms.findEdges");
-        if (debug) watch.markTimeEnd("removeResourcePerms.findEdges");
+        ResourceEdgeDAO edgeDao = resourceEdgeDAO;
+        if (debug)
+            watch.markTimeBegin("removeResourcePerms.findEdges");
+        if (debug)
+            watch.markTimeEnd("removeResourcePerms.findEdges");
         Collection<ResourceEdge> edges = edgeDao.findDescendantEdges(r, getContainmentRelation());
         Set<AppdefEntityID> removed = new HashSet<AppdefEntityID>();
-       for (ResourceEdge edge : edges) {
+        for (ResourceEdge edge : edges) {
             // Remove descendants' permissions
-            removed.addAll(
-                Arrays.asList(removeResourcePerms(subj, edge.getTo(), true)));
+            removed.addAll(Arrays.asList(removeResourcePerms(subj, edge.getTo(), true)));
         }
 
         removed.add(new AppdefEntityID(r));
@@ -413,25 +392,24 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         }
         _removeResource(subj, r, nullResourceType);
         if (debug) {
-            watch.markTimeBegin("removeResource"); 
+            watch.markTimeBegin("removeResource");
         }
         if (debug) {
             log.debug(watch);
         }
-        
-        
+
         return removed.toArray(new AppdefEntityID[0]);
     }
 
     /**
      * 
      */
-    public void _removeResource(AuthzSubject subj, Resource r,
-                                boolean nullResourceType) {
+    public void _removeResource(AuthzSubject subj, Resource r, boolean nullResourceType) {
         final boolean debug = log.isDebugEnabled();
-        final ResourceEdgeDAO edgeDao = getResourceEdgeDAO();
+        final ResourceEdgeDAO edgeDao = resourceEdgeDAO;
         final StopWatch watch = new StopWatch();
-        if (debug) watch.markTimeBegin("removeResourcePerms.removeEdges");
+        if (debug)
+            watch.markTimeBegin("removeResourcePerms.removeEdges");
         // Delete the edges and resource groups
         edgeDao.deleteEdges(r);
         if (debug) {
@@ -454,11 +432,8 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
     /**
      * 
      */
-    public void removeResource(AuthzSubject subject, Resource r)
-        throws VetoException
-    {
-        ResourceDeleteCallback cb =
-            AuthzStartupListener.getResourceDeleteCallback();
+    public void removeResource(AuthzSubject subject, Resource r) throws VetoException {
+        ResourceDeleteCallback cb = AuthzStartupListener.getResourceDeleteCallback();
         cb.preResourceDelete(r);
 
         final long now = System.currentTimeMillis();
@@ -470,21 +445,16 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
     /**
      * 
      */
-    public void setResourceOwner(AuthzSubject whoami, Resource resource,
-                                 AuthzSubject newOwner)
-        throws PermissionException
-    {
+    public void setResourceOwner(AuthzSubject whoami, Resource resource, AuthzSubject newOwner)
+        throws PermissionException {
         PermissionManager pm = PermissionManagerFactory.getInstance();
 
-        if (pm.hasAdminPermission(whoami.getId()) ||
-            getResourceDAO().isOwner(resource, whoami.getId())) {
+        if (pm.hasAdminPermission(whoami.getId()) || getResourceDAO().isOwner(resource, whoami.getId())) {
             resource.setOwner(newOwner);
         } else {
-            throw new PermissionException("Only an owner or admin may " +
-                                          "reassign ownership.");
+            throw new PermissionException("Only an owner or admin may " + "reassign ownership.");
         }
     }
-
 
     /**
      * Get all the resource types
@@ -496,44 +466,36 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
     public List getAllResourceTypes(AuthzSubject subject, PageControl pc) {
         Collection<ResourceType> resTypes = getResourceTypeDAO().findAll();
         pc = PageControl.initDefaults(pc, SortAttribute.RESTYPE_NAME);
-        return resourceTypePager.seek(resTypes, pc.getPagenum(),
-                                      pc.getPagesize());
+        return resourceTypePager.seek(resTypes, pc.getPagenum(), pc.getPagesize());
     }
 
     /**
-     * Get viewable resources either by "type" OR "resource name"
-     * OR "type AND resource name".
-     *
+     * Get viewable resources either by "type" OR "resource name" OR
+     * "type AND resource name".
+     * 
      * @param subject
      * @return Map of resource values
      * 
      */
-    public List<Integer> findViewableInstances(AuthzSubject subject,
-                                      String typeName,
-                                      String resName,
-                                      String appdefTypeStr,
-                                      Integer typeId,
-                                      PageControl pc) {
+    public List<Integer> findViewableInstances(AuthzSubject subject, String typeName, String resName,
+                                               String appdefTypeStr, Integer typeId, PageControl pc) {
         // Authz type and/or resource name must be specified.
         if (typeName == null) {
-            throw new IllegalArgumentException(
-                "This method requires a valid authz type name argument");
+            throw new IllegalArgumentException("This method requires a valid authz type name argument");
         }
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
-        return pm.findViewableResources(subject, typeName, resName,
-                                        appdefTypeStr, typeId, pc);
+        return pm.findViewableResources(subject, typeName, resName, appdefTypeStr, typeId, pc);
     }
 
     /**
-     * Get viewable resources  by "type" OR "resource name"
-     *
+     * Get viewable resources by "type" OR "resource name"
+     * 
      * @param subject
      * @return Map of resource values
      * 
      */
-    public PageList<Resource> findViewables(AuthzSubject subject, String searchFor,
-                                  PageControl pc) {
+    public PageList<Resource> findViewables(AuthzSubject subject, String searchFor, PageControl pc) {
         ResourceDAO dao = getResourceDAO();
         PermissionManager pm = PermissionManagerFactory.getInstance();
         List<Integer> resIds = pm.findViewableResources(subject, searchFor, pc);
@@ -550,9 +512,9 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
     }
 
     /**
-     * Get viewable resources either by "type" OR "resource name"
-     * OR "type AND resource name".
-     *
+     * Get viewable resources either by "type" OR "resource name" OR
+     * "type AND resource name".
+     * 
      * @param subject
      * @return Map of resource values
      * 
@@ -566,8 +528,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
             String typeName = type.getName();
 
             // Now fetch list by the type
-            List<Integer> ids = findViewableInstances(subject,  typeName,  null, null,
-                                             null, PageControl.PAGE_ALL);
+            List<Integer> ids = findViewableInstances(subject, typeName, null, null, null, PageControl.PAGE_ALL);
             if (ids.size() > 0) {
                 resourceMap.put(typeName, ids);
             }
@@ -585,7 +546,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
 
     /**
      * Find all the resources of an authz resource type
-     *
+     * 
      * @param resourceType 301 for platforms, etc.
      * @param pInfo A pager, using a sort field of {@link ResourceSortField}
      * @return a list of {@link Resource}s
@@ -607,7 +568,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
     /**
      * Get all resources which are prototypes of platforms, servers, and
      * services and have a resource of that type in the inventory.
-     *
+     * 
      * 
      */
     public List<Resource> findAppdefPrototypes() {
@@ -617,7 +578,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
     /**
      * Get all resources which are prototypes of platforms, servers, and
      * services.
-     *
+     * 
      * 
      */
     public List<Resource> findAllAppdefPrototypes() {
@@ -627,15 +588,13 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
     /**
      * Get viewable service resources. Service resources include individual
      * cluster unassigned services as well as service clusters.
-     *
+     * 
      * @param subject
      * @param pc control
      * @return PageList of resource values
      * 
      */
-    public PageList<Resource> findViewableSvcResources(AuthzSubject subject,
-                                             String resourceName,
-                                             PageControl pc) {
+    public PageList<Resource> findViewableSvcResources(AuthzSubject subject, String resourceName, PageControl pc) {
         Collection<Resource> resources;
 
         AuthzSubject subj = getSubjectDAO().findById(subject.getId());
@@ -644,8 +603,8 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
 
         PermissionManager pm = PermissionManagerFactory.getInstance();
 
-        // Damn I love this code.  -- JMT
-        switch(pc.getSortattribute()) {
+        // Damn I love this code. -- JMT
+        switch (pc.getSortattribute()) {
             case SortAttribute.RESOURCE_NAME:
             default:
                 resources = pm.findServiceResources(subj, Boolean.FALSE);
@@ -659,9 +618,9 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
                 continue;
             }
 
-            if (pc.isDescending())  { // Add to head of array list
+            if (pc.isDescending()) { // Add to head of array list
                 ordResources.add(0, res);
-            } else {                   // Add to tail of array list
+            } else { // Add to tail of array list
                 ordResources.add(res);
             }
         }
@@ -683,50 +642,38 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      *
      * 
      */
-    public Collection<ResourceEdge> findResourceEdges(ResourceRelation relation,
-                                        Resource parent) {
-        return getResourceEdgeDAO()
-                    .findDescendantEdges(parent, relation);
+    public Collection<ResourceEdge> findResourceEdges(ResourceRelation relation, Resource parent) {
+        return resourceEdgeDAO.findDescendantEdges(parent, relation);
     }
-    
+
     /**
      * 
      * 
      */
     public boolean isResourceChildOf(Resource parent, Resource child) {
-        return getResourceEdgeDAO().isResourceChildOf(parent, child);
+        return resourceEdgeDAO.isResourceChildOf(parent, child);
     }
-    
+
     /**
      *
      * 
      */
-    public List<ResourceEdge> findResourceEdges(ResourceRelation relation,
-                                  Integer resourceId,
-                                  List<Integer> platformTypeIds,
-                                  String platformName) {
-        if (relation == null
-                || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
-            throw new IllegalArgumentException(
-                        "Only " + AuthzConstants.ResourceEdgeNetworkRelation
-                        + " resource relationships are supported.");
+    public List<ResourceEdge> findResourceEdges(ResourceRelation relation, Integer resourceId,
+                                                List<Integer> platformTypeIds, String platformName) {
+        if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
+            throw new IllegalArgumentException("Only " + AuthzConstants.ResourceEdgeNetworkRelation +
+                                               " resource relationships are supported.");
         }
 
-        return getResourceEdgeDAO()
-                    .findDescendantEdgesByNetworkRelation(
-                                resourceId, platformTypeIds, platformName);
+        return resourceEdgeDAO.findDescendantEdgesByNetworkRelation(resourceId, platformTypeIds, platformName);
     }
 
     /**
      *
      * 
      */
-    public void createResourceEdges(AuthzSubject subject,
-                                    ResourceRelation relation,
-                                    AppdefEntityID parent,
-                                    AppdefEntityID[] children)
-        throws PermissionException, ResourceEdgeCreateException {
-
+    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,
+                                    AppdefEntityID[] children) throws PermissionException, ResourceEdgeCreateException {
         createResourceEdges(subject, relation, parent, children, false);
     }
 
@@ -734,18 +681,13 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      *
      * 
      */
-    public void createResourceEdges(AuthzSubject subject,
-                                    ResourceRelation relation,
-                                    AppdefEntityID parent,
-                                    AppdefEntityID[] children,
-                                    boolean deleteExisting)
-        throws PermissionException, ResourceEdgeCreateException {
+    public void createResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,
+                                    AppdefEntityID[] children, boolean deleteExisting) throws PermissionException,
+        ResourceEdgeCreateException {
 
-        if (relation == null
-                || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
-            throw new ResourceEdgeCreateException(
-                        "Only " + AuthzConstants.ResourceEdgeNetworkRelation
-                        + " resource relationships are supported.");
+        if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
+            throw new ResourceEdgeCreateException("Only " + AuthzConstants.ResourceEdgeNetworkRelation +
+                                                  " resource relationships are supported.");
         }
 
         if (parent == null || !parent.isPlatform()) {
@@ -763,8 +705,8 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         List supportedPlatformTypes = new ArrayList(platformManager.findSupportedPlatformTypes());
 
         if (supportedPlatformTypes.contains(parentPlatform.getPlatformType())) {
-            throw new ResourceEdgeCreateException(parentPlatform.getPlatformType().getName()
-                                + " not supported as a top-level platform type.");
+            throw new ResourceEdgeCreateException(parentPlatform.getPlatformType().getName() +
+                                                  " not supported as a top-level platform type.");
         }
 
         Resource parentResource = parentPlatform.getResource();
@@ -772,31 +714,25 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         // Make sure user has permission to modify resource edges
         final PermissionManager pm = PermissionManagerFactory.getInstance();
 
-        pm.check(subject.getId(),
-                 parentResource.getResourceType(),
-                 parentResource.getInstanceId(),
+        pm.check(subject.getId(), parentResource.getResourceType(), parentResource.getInstanceId(),
                  AuthzConstants.platformOpModifyPlatform);
 
         ConfigResponseDB config = configManager.getConfigResponse(parent);
         if (config != null) {
             String validationError = config.getValidationError();
             if (validationError != null) {
-                throw new ResourceEdgeCreateException("Resource id " + parentResource.getId()
-                                                        + ": " + validationError);
+                throw new ResourceEdgeCreateException("Resource id " + parentResource.getId() + ": " + validationError);
             }
         }
 
-        if (parentResource != null
-                && !parentResource.isInAsyncDeleteState()
-                && children != null
-                && children.length > 0) {
+        if (parentResource != null && !parentResource.isInAsyncDeleteState() && children != null && children.length > 0) {
 
             try {
                 if (deleteExisting) {
                     removeResourceEdges(subject, relation, parentResource);
                 }
 
-                ResourceEdgeDAO eDAO = getResourceEdgeDAO();
+                ResourceEdgeDAO eDAO = resourceEdgeDAO;
                 Collection<ResourceEdge> edges = findResourceEdges(relation, parentResource);
                 List<ResourceEdge> existing = null;
                 Platform childPlatform = null;
@@ -806,7 +742,7 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
                     // create self-edge for parent of network hierarchy
                     eDAO.create(parentResource, parentResource, 0, relation);
                 }
-                for (int i=0; i< children.length; i++) {
+                for (int i = 0; i < children.length; i++) {
                     if (!children[i].isPlatform()) {
                         throw new ResourceEdgeCreateException("Only platforms are supported.");
                     }
@@ -815,14 +751,15 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
                         childResource = childPlatform.getResource();
 
                         if (!supportedPlatformTypes.contains(childPlatform.getPlatformType())) {
-                            throw new ResourceEdgeCreateException(childPlatform.getPlatformType().getName()
-                                        + " not supported as a dependent platform type.");
+                            throw new ResourceEdgeCreateException(childPlatform.getPlatformType().getName() +
+                                                                  " not supported as a dependent platform type.");
                         }
                     } catch (PlatformNotFoundException pe) {
-                        throw new ResourceEdgeCreateException ("Platform id " + children[i].getId() + " not found.");
+                        throw new ResourceEdgeCreateException("Platform id " + children[i].getId() + " not found.");
                     }
 
-                    // Check if child resource already exists in a network hierarchy
+                    // Check if child resource already exists in a network
+                    // hierarchy
                     // TODO: This needs to be optimized
                     existing = findResourceEdges(relation, childResource.getId(), null, null);
 
@@ -834,14 +771,14 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
                             continue;
                         } else {
                             // already exists with different parent
-                            throw new ResourceEdgeCreateException("Resource id " + childResource.getId()
-                                        + " already exists in another network hierarchy.");
+                            throw new ResourceEdgeCreateException("Resource id " + childResource.getId() +
+                                                                  " already exists in another network hierarchy.");
                         }
                     } else if (existing.size() > 1) {
                         // a resource can only belong to one network hierarchy
                         // this is a data integrity issue if it happens
-                        throw new ResourceEdgeCreateException("Resource id " + childResource.getId()
-                                        + " exists in " + existing.size() + " network hierarchies.");
+                        throw new ResourceEdgeCreateException("Resource id " + childResource.getId() + " exists in " +
+                                                              existing.size() + " network hierarchies.");
                     }
 
                     if (childResource != null && !childResource.isInAsyncDeleteState()) {
@@ -859,17 +796,12 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      *
      * 
      */
-    public void removeResourceEdges(AuthzSubject subject,
-                                    ResourceRelation relation,
-                                    AppdefEntityID parent,
-                                    AppdefEntityID[] children)
-        throws PermissionException {
+    public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,
+                                    AppdefEntityID[] children) throws PermissionException {
 
-        if (relation == null
-                || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
-            throw new IllegalArgumentException(
-                        "Only " + AuthzConstants.ResourceEdgeNetworkRelation
-                        + " resource relationships are supported.");
+        if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
+            throw new IllegalArgumentException("Only " + AuthzConstants.ResourceEdgeNetworkRelation +
+                                               " resource relationships are supported.");
         }
 
         Resource parentResource = findResource(parent);
@@ -878,15 +810,13 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
         // Make sure user has permission to modify resource edges
         final PermissionManager pm = PermissionManagerFactory.getInstance();
 
-        pm.check(subject.getId(),
-                 parentResource.getResourceType(),
-                 parentResource.getInstanceId(),
+        pm.check(subject.getId(), parentResource.getResourceType(), parentResource.getInstanceId(),
                  AuthzConstants.platformOpModifyPlatform);
 
         if (parentResource != null && !parentResource.isInAsyncDeleteState()) {
-            ResourceEdgeDAO eDAO = getResourceEdgeDAO();
+            ResourceEdgeDAO eDAO = resourceEdgeDAO;
 
-            for (int i=0; i< children.length; i++) {
+            for (int i = 0; i < children.length; i++) {
                 childResource = findResource(children[i]);
 
                 if (childResource != null && !childResource.isInAsyncDeleteState()) {
@@ -906,27 +836,21 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      *
      * 
      */
-    public void removeResourceEdges(AuthzSubject subject,
-                                    ResourceRelation relation,
-                                    Resource parent)
+    public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation, Resource parent)
         throws PermissionException {
 
-        if (relation == null
-                || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
-            throw new IllegalArgumentException(
-                        "Only " + AuthzConstants.ResourceEdgeNetworkRelation
-                        + " resource relationships are supported.");
+        if (relation == null || !relation.getId().equals(AuthzConstants.RELATION_NETWORK_ID)) {
+            throw new IllegalArgumentException("Only " + AuthzConstants.ResourceEdgeNetworkRelation +
+                                               " resource relationships are supported.");
         }
 
         // Make sure user has permission to modify resource edges
         final PermissionManager pm = PermissionManagerFactory.getInstance();
 
-        pm.check(subject.getId(),
-                 parent.getResourceType(),
-                 parent.getInstanceId(),
+        pm.check(subject.getId(), parent.getResourceType(), parent.getInstanceId(),
                  AuthzConstants.platformOpModifyPlatform);
 
-        getResourceEdgeDAO().deleteEdges(parent, relation);
+        resourceEdgeDAO.deleteEdges(parent, relation);
     }
 
     public static ResourceManager getOne() {
@@ -935,6 +859,6 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
 
     @PostConstruct
     public void initializePager() throws Exception {
-       resourceTypePager = Pager.getDefaultPager();
+        resourceTypePager = Pager.getDefaultPager();
     }
 }
