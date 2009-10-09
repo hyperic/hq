@@ -23,6 +23,8 @@ import org.hyperic.hq.hqu.rendit.metaclass.StringCategory
 import org.hyperic.hq.hqu.rendit.metaclass.AgentCategory
 import org.hyperic.hq.hqu.InvokeMethodInvocationBindings
 import org.hyperic.hq.hqu.RequestInvocationBindings
+import org.codehaus.groovy.runtime.InvokerHelper
+import groovy.lang.Script
 
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
