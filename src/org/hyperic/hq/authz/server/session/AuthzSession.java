@@ -34,7 +34,6 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
@@ -43,7 +42,6 @@ import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.context.Bootstrap;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * This is the parent class for all Authz Session Beans
@@ -55,39 +53,42 @@ public abstract class AuthzSession {
     private static InitialContext _ic = null;
 
     protected SessionContext ctx;
-
     
-   
+    protected ResourceTypeDAO resourceTypeDAO = Bootstrap.getBean(ResourceTypeDAO.class);
+    protected ResourceDAO resourceDAO = Bootstrap.getBean(ResourceDAO.class); 
+    protected ResourceGroupDAO resourceGroupDAO = Bootstrap.getBean(ResourceGroupDAO.class);
+    protected AuthzSubjectDAO authzSubjectDAO = Bootstrap.getBean(AuthzSubjectDAO.class);
+    protected RoleDAO roleDAO = Bootstrap.getBean(RoleDAO.class);
+    protected OperationDAO operationDAO = Bootstrap.getBean(OperationDAO.class);
+    
+    private ResourceRelationDAO resourceRelationDAO = Bootstrap.getBean(ResourceRelationDAO.class);
+
     protected ResourceTypeDAO getResourceTypeDAO() {
-        return Bootstrap.getBean(ResourceTypeDAO.class);
+        return resourceTypeDAO;
     }
 
     protected ResourceDAO getResourceDAO() {
-        return Bootstrap.getBean(ResourceDAO.class);
+        return resourceDAO;
     }
 
     protected ResourceGroupDAO getResourceGroupDAO() {
-        return Bootstrap.getBean(ResourceGroupDAO.class);
-    }
-
-    private ResourceRelationDAO getResourceRelationDAO() {
-        return Bootstrap.getBean(ResourceRelationDAO.class);
+        return resourceGroupDAO;
     }
 
     protected AuthzSubjectDAO getSubjectDAO() {
-        return Bootstrap.getBean(AuthzSubjectDAO.class);
+        return authzSubjectDAO;
     }
 
     protected RoleDAO getRoleDAO() {
-        return Bootstrap.getBean(RoleDAO.class);
+        return roleDAO;
     }
 
     protected OperationDAO getOperationDAO() {
-        return Bootstrap.getBean(OperationDAO.class);
+        return operationDAO;
     }
 
     protected ResourceType getRootResourceType() {
-       return getResourceTypeDAO().findTypeResourceType();
+       return resourceTypeDAO.findTypeResourceType();
     }
 
     /**
@@ -102,8 +103,7 @@ public abstract class AuthzSession {
     public AuthzSubject findSubjectByAuth(String name, String authDsn)
         throws SubjectNotFoundException
     {
-         AuthzSubject subject = getSubjectDAO()
-            .findByAuth(name, authDsn);
+         AuthzSubject subject = authzSubjectDAO.findByAuth(name, authDsn);
         if (subject == null) {
             throw new SubjectNotFoundException(
                 "Can't find subject: name=" + name + ",authDsn=" + authDsn);
@@ -150,16 +150,16 @@ public abstract class AuthzSession {
     }
 
     protected AuthzSubject lookupSubject(Integer id) {
-        return getSubjectDAO().findById(id);
+        return authzSubjectDAO.findById(id);
     }
 
     private Resource lookupResource(ResourceValue resource) {
         if (resource.getId() == null) {
             ResourceType type = resource.getResourceType();
-            return getResourceDAO().findByInstanceId(type,
+            return resourceDAO.findByInstanceId(type,
                                                      resource.getInstanceId());
         }
-        return getResourceDAO().findById(resource.getId());
+        return resourceDAO.findById(resource.getId());
     }
 
     protected InitialContext getInitialContext() throws NamingException {
@@ -193,7 +193,7 @@ public abstract class AuthzSession {
     }
 
     private ResourceRelation getResourceRelation(Integer relationId) {
-        return getResourceRelationDAO().findById(relationId);
+        return resourceRelationDAO.findById(relationId);
     }
 
     protected Resource findPrototype(AppdefEntityTypeID id) {

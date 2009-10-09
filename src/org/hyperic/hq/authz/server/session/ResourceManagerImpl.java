@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.FinderException;
 
 import org.hyperic.hibernate.PageInfo;
@@ -105,6 +104,8 @@ public class ResourceManagerImpl
         this.applicationManager = applicationManager;
         this.authzSubjectManager = authzSubjectManager;
         this.configManager = configManager;
+        
+        resourceTypePager = Pager.getDefaultPager();
     }
 
     /**
@@ -115,7 +116,7 @@ public class ResourceManagerImpl
      * 
      */
     public ResourceType findResourceTypeByName(String name) throws FinderException {
-        ResourceType rt = getResourceTypeDAO().findByName(name);
+        ResourceType rt = resourceTypeDAO.findByName(name);
 
         if (rt == null) {
             throw new FinderException("ResourceType " + name + " not found");
@@ -129,7 +130,7 @@ public class ResourceManagerImpl
      * 
      */
     public Resource findResourcePrototypeByName(String name) {
-        return getResourceDAO().findResourcePrototypeByName(name);
+        return resourceDAO.findResourcePrototypeByName(name);
     }
 
     /**
@@ -138,7 +139,7 @@ public class ResourceManagerImpl
      * 
      */
     public boolean resourcesExistOfType(String typeName) {
-        return getResourceDAO().resourcesExistOfType(typeName);
+        return resourceDAO.resourcesExistOfType(typeName);
     }
 
     /**
@@ -150,7 +151,7 @@ public class ResourceManagerImpl
                                    String name, boolean system, Resource parent) {
         long start = System.currentTimeMillis();
 
-        Resource res = getResourceDAO().create(rt, prototype, name, owner, instanceId, system);
+        Resource res = resourceDAO.create(rt, prototype, name, owner, instanceId, system);
 
         ResourceRelation relation = getContainmentRelation();
 
@@ -184,10 +185,8 @@ public class ResourceManagerImpl
      * 
      */
     public void moveResource(AuthzSubject owner, Resource target, Resource destination) {
-
         long start = System.currentTimeMillis();
-
-        ResourceEdgeDAO eDAO = resourceEdgeDAO;
+        
         ResourceRelation relation = getContainmentRelation();
 
         // Clean out edges for the current target
@@ -217,7 +216,7 @@ public class ResourceManagerImpl
      * 
      */
     public Number getResourceCount() {
-        return new Integer(getResourceDAO().size());
+        return new Integer(resourceDAO.size());
     }
 
     /**
@@ -225,7 +224,7 @@ public class ResourceManagerImpl
      * 
      */
     public Number getResourceTypeCount() {
-        return new Integer(getResourceTypeDAO().size());
+        return new Integer(resourceTypeDAO.size());
     }
 
     /**
@@ -234,7 +233,7 @@ public class ResourceManagerImpl
      * 
      */
     public Resource getResourceTypeResource(Integer typeId) {
-        ResourceType resourceType = getResourceTypeDAO().findById(typeId);
+        ResourceType resourceType = resourceTypeDAO.findById(typeId);
         return resourceType.getResource();
     }
 
@@ -258,7 +257,7 @@ public class ResourceManagerImpl
      * 
      */
     public Resource findResourceByInstanceId(Integer typeId, Integer instanceId) {
-        return getResourceDAO().findByInstanceId(typeId, instanceId);
+        return resourceDAO.findByInstanceId(typeId, instanceId);
     }
 
     /**
@@ -266,14 +265,14 @@ public class ResourceManagerImpl
      * 
      */
     public Resource findRootResource() {
-        return getResourceDAO().findRootResource();
+        return resourceDAO.findRootResource();
     }
 
     /**
      * 
      */
     public Resource findResourceById(Integer id) {
-        return getResourceDAO().findById(id);
+        return resourceDAO.findById(id);
     }
 
     /**
@@ -284,8 +283,8 @@ public class ResourceManagerImpl
      * 
      */
     public Resource findResourceByTypeAndInstanceId(String type, Integer instanceId) {
-        ResourceType resType = getResourceTypeDAO().findByName(type);
-        return getResourceDAO().findByInstanceId(resType.getId(), instanceId);
+        ResourceType resType = resourceTypeDAO.findByName(type);
+        return resourceDAO.findByInstanceId(resType.getId(), instanceId);
     }
 
     /**
@@ -303,12 +302,12 @@ public class ResourceManagerImpl
                     return serviceManager.findServiceById(id).getResource();
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                     // XXX not sure about appdef group mapping since 4.0
-                    return getResourceDAO().findByInstanceId(aeid.getAuthzTypeId(), id);
+                    return resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
                 case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                     AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
                     return applicationManager.findApplicationById(overlord, id).getResource();
                 default:
-                    return getResourceDAO().findByInstanceId(aeid.getAuthzTypeId(), id);
+                    return resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
             }
         } catch (ServerNotFoundException e) {
         } catch (PlatformNotFoundException e) {
@@ -371,14 +370,15 @@ public class ResourceManagerImpl
         if (debug)
             watch.markTimeBegin("removeResourcePerms.pmCheck");
         pm.check(subj.getId(), resourceType, r.getInstanceId(), opName);
-        if (debug)
+        if (debug) {
             watch.markTimeEnd("removeResourcePerms.pmCheck");
-
+        }
+        
         ResourceEdgeDAO edgeDao = resourceEdgeDAO;
-        if (debug)
+        if (debug) {
             watch.markTimeBegin("removeResourcePerms.findEdges");
-        if (debug)
             watch.markTimeEnd("removeResourcePerms.findEdges");
+        }
         Collection<ResourceEdge> edges = edgeDao.findDescendantEdges(r, getContainmentRelation());
         Set<AppdefEntityID> removed = new HashSet<AppdefEntityID>();
         for (ResourceEdge edge : edges) {
@@ -393,11 +393,8 @@ public class ResourceManagerImpl
         _removeResource(subj, r, nullResourceType);
         if (debug) {
             watch.markTimeBegin("removeResource");
-        }
-        if (debug) {
             log.debug(watch);
         }
-
         return removed.toArray(new AppdefEntityID[0]);
     }
 
@@ -408,8 +405,9 @@ public class ResourceManagerImpl
         final boolean debug = log.isDebugEnabled();
         final ResourceEdgeDAO edgeDao = resourceEdgeDAO;
         final StopWatch watch = new StopWatch();
-        if (debug)
+        if (debug) {
             watch.markTimeBegin("removeResourcePerms.removeEdges");
+        }
         // Delete the edges and resource groups
         edgeDao.deleteEdges(r);
         if (debug) {
@@ -439,7 +437,7 @@ public class ResourceManagerImpl
         final long now = System.currentTimeMillis();
         ResourceAudit.deleteResource(r, subject, now, now);
         r.getGroupBag().clear();
-        getResourceDAO().remove(r);
+        resourceDAO.remove(r);
     }
 
     /**
@@ -449,7 +447,7 @@ public class ResourceManagerImpl
         throws PermissionException {
         PermissionManager pm = PermissionManagerFactory.getInstance();
 
-        if (pm.hasAdminPermission(whoami.getId()) || getResourceDAO().isOwner(resource, whoami.getId())) {
+        if (pm.hasAdminPermission(whoami.getId()) || resourceDAO.isOwner(resource, whoami.getId())) {
             resource.setOwner(newOwner);
         } else {
             throw new PermissionException("Only an owner or admin may " + "reassign ownership.");
@@ -464,7 +462,7 @@ public class ResourceManagerImpl
      */
     // TODO: G
     public List getAllResourceTypes(AuthzSubject subject, PageControl pc) {
-        Collection<ResourceType> resTypes = getResourceTypeDAO().findAll();
+        Collection<ResourceType> resTypes = resourceTypeDAO.findAll();
         pc = PageControl.initDefaults(pc, SortAttribute.RESTYPE_NAME);
         return resourceTypePager.seek(resTypes, pc.getPagenum(), pc.getPagesize());
     }
@@ -496,7 +494,6 @@ public class ResourceManagerImpl
      * 
      */
     public PageList<Resource> findViewables(AuthzSubject subject, String searchFor, PageControl pc) {
-        ResourceDAO dao = getResourceDAO();
         PermissionManager pm = PermissionManagerFactory.getInstance();
         List<Integer> resIds = pm.findViewableResources(subject, searchFor, pc);
         Pager pager = Pager.getDefaultPager();
@@ -504,7 +501,7 @@ public class ResourceManagerImpl
 
         PageList<Resource> resources = new PageList<Resource>();
         for (Integer id : paged) {
-            resources.add(dao.findById(id));
+            resources.add(resourceDAO.findById(id));
         }
 
         resources.setTotalSize(resIds.size());
@@ -523,7 +520,7 @@ public class ResourceManagerImpl
         // First get all resource types
         Map<String, List<Integer>> resourceMap = new HashMap<String, List<Integer>>();
 
-        Collection<ResourceType> resTypes = getResourceTypeDAO().findAll();
+        Collection<ResourceType> resTypes = resourceTypeDAO.findAll();
         for (ResourceType type : resTypes) {
             String typeName = type.getName();
 
@@ -541,7 +538,7 @@ public class ResourceManagerImpl
      * 
      */
     public List<Resource> findResourcesByParent(AuthzSubject subject, Resource res) {
-        return getResourceDAO().findByResource(subject, res);
+        return resourceDAO.findByResource(subject, res);
     }
 
     /**
@@ -553,7 +550,7 @@ public class ResourceManagerImpl
      * 
      */
     public List<Resource> findResourcesOfType(int resourceType, PageInfo pInfo) {
-        return getResourceDAO().findResourcesOfType(resourceType, pInfo);
+        return resourceDAO.findResourcesOfType(resourceType, pInfo);
     }
 
     /**
@@ -562,7 +559,7 @@ public class ResourceManagerImpl
      * 
      */
     public List<Resource> findResourcesOfPrototype(Resource proto, PageInfo pInfo) {
-        return getResourceDAO().findResourcesOfPrototype(proto, pInfo);
+        return resourceDAO.findResourcesOfPrototype(proto, pInfo);
     }
 
     /**
@@ -572,7 +569,7 @@ public class ResourceManagerImpl
      * 
      */
     public List<Resource> findAppdefPrototypes() {
-        return getResourceDAO().findAppdefPrototypes();
+        return resourceDAO.findAppdefPrototypes();
     }
 
     /**
@@ -582,7 +579,7 @@ public class ResourceManagerImpl
      * 
      */
     public List<Resource> findAllAppdefPrototypes() {
-        return getResourceDAO().findAllAppdefPrototypes();
+        return resourceDAO.findAllAppdefPrototypes();
     }
 
     /**
@@ -597,7 +594,7 @@ public class ResourceManagerImpl
     public PageList<Resource> findViewableSvcResources(AuthzSubject subject, String resourceName, PageControl pc) {
         Collection<Resource> resources;
 
-        AuthzSubject subj = getSubjectDAO().findById(subject.getId());
+        AuthzSubject subj = authzSubjectDAO.findById(subject.getId());
 
         pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
 
@@ -635,7 +632,7 @@ public class ResourceManagerImpl
      * 
      */
     public Collection<Resource> findResourceByOwner(AuthzSubject owner) {
-        return getResourceDAO().findByOwner(owner);
+        return resourceDAO.findByOwner(owner);
     }
 
     /**
@@ -855,10 +852,5 @@ public class ResourceManagerImpl
 
     public static ResourceManager getOne() {
         return Bootstrap.getBean(ResourceManager.class);
-    }
-
-    @PostConstruct
-    public void initializePager() throws Exception {
-        resourceTypePager = Pager.getDefaultPager();
     }
 }
