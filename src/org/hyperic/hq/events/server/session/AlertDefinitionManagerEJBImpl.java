@@ -728,7 +728,7 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean {
             }
 
             if (ad != null) {
-                alertPermissionManager.canManageAlerts(subj, ad.getAppdefEntityId());
+                alertPermissionManager.canManageAlerts(subj, alertPermissionManager.getAppdefEntityID(ad));
             }
         }
         return ad;
@@ -813,7 +813,7 @@ public class AlertDefinitionManagerEJBImpl implements SessionBean {
             AlertDefinition a = (AlertDefinition) i.next();
             try {
                 // Only return the alert definitions that user can see
-                alertPermissionManager.canManageAlerts(subj, a.getAppdefEntityId());
+                alertPermissionManager.canManageAlerts(subj, alertPermissionManager.getAppdefEntityID(a));
             } catch (PermissionException e) {
                 continue;
             }

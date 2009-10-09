@@ -1,9 +1,8 @@
 package org.hyperic.hq.context;
 import java.util.Collection;
-
-import org.hyperic.hibernate.Util;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 
@@ -15,11 +14,16 @@ public class Bootstrap {
     private static final String[] EJB_APP_CONTEXT_FILES = new String[] { "classpath*:/META-INF/spring/ejb-*context.xml" };
 
     private static ApplicationContext APP_CONTEXT;
-   
+     
 
     public synchronized static ApplicationContext getContext() throws Exception {
+        boolean initialize = false;
         if (APP_CONTEXT == null) {
-            APP_CONTEXT = new ClassPathXmlApplicationContext(APP_CONTEXT_FILES);
+            initialize = true;
+            APP_CONTEXT = new ClassPathXmlApplicationContext(APP_CONTEXT_FILES,false);
+        }
+        if(initialize) {
+            ((ConfigurableApplicationContext)APP_CONTEXT).refresh();
         }
         return APP_CONTEXT;
     }
