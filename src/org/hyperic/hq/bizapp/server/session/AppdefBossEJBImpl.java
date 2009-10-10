@@ -1309,7 +1309,6 @@ public class AppdefBossEJBImpl
      * @return AppdefEntityID[] - an array of the resources (including children)
      * deleted
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
      */
     public AppdefEntityID[] removeAppdefEntity(int sessionId, AppdefEntityID aeid)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -1382,9 +1381,10 @@ public class AppdefBossEJBImpl
         return removed;
     }
     
+    //TODO modify javadoc comment below regarding NotSupported
     /**
      * Remove all delete resources
-     * Method is "NotSupported" since all the resource deletes may take longer
+     * Method was "NotSupported" since all the resource deletes may take longer
      * than the jboss transaction timeout.  No need for a transaction in this
      * context.
      * @ejb:interface-method
@@ -1538,7 +1538,7 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * @ejb:transaction type="RequiresNew"
+     * 
      * @ejb:interface-method
      */
     public void _removePlatformInNewTran(AuthzSubject subject, Platform platform)
@@ -1618,7 +1618,7 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * @ejb:transaction type="RequiresNew"
+     * 
      * @ejb:interface-method
      */
     public void _removeServerInNewTran(AuthzSubject subject, Server server)
@@ -1628,7 +1628,7 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * @ejb:transaction type="RequiresNew"
+     * 
      * @ejb:interface-method
      */
     public void _removeServiceInNewTran(AuthzSubject subject, Service service)
@@ -1649,7 +1649,7 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * @ejb:transaction type="RequiresNew"
+     * 
      * @ejb:interface-method
      */
     public void _removeGroupInNewTran(AuthzSubject subject, ResourceGroup group)
@@ -1659,7 +1659,7 @@ public class AppdefBossEJBImpl
     }
 
     /**
-     * @ejb:transaction type="RequiresNew"
+     * 
      * @ejb:interface-method
      */
     public void _removeApplicationInNewTran(AuthzSubject subject, Application app)
