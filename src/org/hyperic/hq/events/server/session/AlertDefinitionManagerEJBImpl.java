@@ -152,6 +152,7 @@ public class AlertDefinitionManagerEJBImpl
                                           AlertDefinition alertdef,
                                           boolean force)
         throws RemoveException, PermissionException {
+        final boolean debug = log.isDebugEnabled();
         StopWatch watch = new StopWatch();
 
         EscalationManagerLocal escMan = EscalationManagerEJBImpl.getOne();
@@ -161,28 +162,32 @@ public class AlertDefinitionManagerEJBImpl
             alertdef.setResource(null);
         } else {
             // If there are any children, delete them, too
-            watch.markTimeBegin("delete children");
+            if (debug) watch.markTimeBegin("delete children");
             List childBag = new ArrayList(alertdef.getChildrenBag());
             for (int i = 0; i < childBag.size(); i++) {
                 AlertDefinition child = (AlertDefinition) childBag.get(i);
                 deleteAlertDefinitionStuff(subj, child, escMan);
                 registeredTriggerManager.deleteTriggers(child);
             }
+            if (debug) watch.markTimeBegin("deleteByAlertDefinition");
             getAlertDefDAO().deleteByAlertDefinition(alertdef);
-            watch.markTimeEnd("delete children");
+            if (debug) {
+                watch.markTimeEnd("deleteByAlertDefinition");
+                watch.markTimeEnd("delete children");
+            }
         }
 
         deleteAlertDefinitionStuff(subj, alertdef, escMan);
 
-        watch.markTimeBegin("deleteTriggers");
+        if (debug)  watch.markTimeBegin("deleteTriggers");
         registeredTriggerManager.deleteTriggers(alertdef);
-        watch.markTimeBegin("deleteTriggers");
+        if (debug) watch.markTimeBegin("deleteTriggers");
 
-        watch.markTimeBegin("markActionsDeleted");
+        if (debug) watch.markTimeBegin("markActionsDeleted");
         getActionDAO().deleteAlertDefinition(alertdef);
-        watch.markTimeBegin("markActionsDeleted");
+        if (debug) watch.markTimeBegin("markActionsDeleted");
 
-        watch.markTimeBegin("mark deleted");
+        if (debug) watch.markTimeBegin("mark deleted");
         // Disassociated from escalations
         alertdef.setEscalation(null);
         alertdef.setDeleted(true);
@@ -191,9 +196,9 @@ public class AlertDefinitionManagerEJBImpl
         // This must be at the very end since we use the parent to determine
         // whether or not this is a resource type alert definition.
         alertdef.setParent(null);
-        watch.markTimeEnd("mark deleted");
 
-        if (log.isDebugEnabled()) {
+        if (debug) {
+            watch.markTimeEnd("mark deleted");
             log.debug("deleteAlertDefinition: " + watch);
         }
 

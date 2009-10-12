@@ -383,9 +383,6 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     public void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef, boolean addTxListener) 
         throws TriggerCreateException, InvalidOptionException, InvalidOptionValueException
     {
-        final boolean debug = log.isDebugEnabled();
-        StopWatch watch = new StopWatch();
-
         final List triggers = new ArrayList();
 
         // Create AppdefEntityID from the alert definition
@@ -396,8 +393,6 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
 
         AlertConditionValue[] conds = alertdef.getConditions();
         
-        if (debug) watch.markTimeBegin("createTrigger");
-
         if (conds.length == 1) {
             // Transform into registered trigger
             RegisteredTriggerValue triggerVal = convertToTriggerValue(id, conds[0]);
@@ -420,8 +415,6 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
             }
         }
         
-        if (debug) watch.markTimeEnd("createTrigger");
-
         for (Iterator it = triggers.iterator(); it.hasNext();) {
             RegisteredTrigger tval = (RegisteredTrigger) it.next();
             alertdef.addTrigger(tval.getRegisteredTriggerValue());
@@ -429,14 +422,8 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         
         // HHQ-3423: Add the TransactionListener after all the triggers are created
         if (addTxListener) {
-            if (debug) watch.markTimeBegin("addTriggersCreatedTxListener");
             addTriggersCreatedTxListener(triggers);
-            if (debug) watch.markTimeEnd("addTriggersCreatedTxListener");
         }
-        
-        if (debug) {
-            log.debug("createTriggers: time=" + watch);
-        }        
     }
 
     /**
@@ -533,39 +520,25 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     /**
      * Delete all triggers for an alert definition.
      *
+     * @param adId The alert definition id
+     * 
      * @ejb:interface-method
      */
-    public void deleteAlertDefinitionTriggers(Integer adId) {
-        final boolean debug = log.isDebugEnabled();
-        StopWatch watch = new StopWatch();
-
-        AlertDefinition def = getAlertDefDAO().findById(adId);
-        
-        if (debug) watch.markTimeBegin("unregisterTriggers");
-        
-        unregisterTriggers(adId, def.getTriggers());
-        
-        if (debug) {
-            watch.markTimeEnd("unregisterTriggers");
-            watch.markTimeBegin("removeTriggers");
-        }
-        
-        getTriggerDAO().removeTriggers(def);
-        
-        if (debug) {
-            watch.markTimeEnd("removeTriggers");
-            log.debug("deleteAlertDefinitionTriggers: time=" + watch);
-        }        
+    public void deleteTriggers(Integer adId) {
+        AlertDefinition def = getAlertDefDAO().findById(adId);        
+        deleteTriggers(def);
     }
 
     /**
      * Completely deletes all triggers when an alert definition is deleted
      *
+     * @param alertDef The alert definition
+     * 
      * @ejb:interface-method
      */
     public void deleteTriggers(AlertDefinition alertDef) {
         unregisterTriggers(alertDef.getId(), alertDef.getTriggers());
-        getTriggerDAO().deleteAlertDefinition(alertDef);
+        alertDef.clearTriggers();
     }
 
     void setAlertConditionEvaluatorFactory(AlertConditionEvaluatorFactory alertConditionEvaluatorFactory) {

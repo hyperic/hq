@@ -835,8 +835,6 @@ public class EventsBossEJBImpl
             List zevents = new ArrayList(children.size());
 
             for (Iterator it = children.iterator(); it.hasNext();) {
-                StopWatch childWatch = new StopWatch();
-
                 AlertDefinitionValue child = (AlertDefinitionValue) it.next();
 
                 AppdefEntityID id = new AppdefEntityID(child.getAppdefType(),
@@ -864,25 +862,18 @@ public class EventsBossEJBImpl
                 child.setControlFiltered(adval.getControlFiltered());
 
                 // Triggers are deleted by the manager
-                if (debug) childWatch.markTimeBegin("deleteAlertDefinitionTriggers");
-                rtm.deleteAlertDefinitionTriggers(child.getId());
-                if (debug) childWatch.markTimeEnd("deleteAlertDefinitionTriggers");
+                rtm.deleteTriggers(child.getId());
                 
                 child.removeAllTriggers();
 
-                if (debug) childWatch.markTimeBegin("createTriggers");
                 // HHQ-3423: Do not add the TransactionListener here.
                 // Add it at the end after all the triggers are created.
                 rtm.createTriggers(subject, child, false);
-                if (debug) childWatch.markTimeEnd("createTriggers");
 
                 // Now update the alert definition
-                if (debug) childWatch.markTimeBegin("updateAlertDefinition");
-                AlertDefinitionValue updatedChild = adm.updateAlertDefinition(child);                
-                if (debug) {
-                    childWatch.markTimeEnd("updateAlertDefinition");
-                    _log.debug("updateChildAlertDefinition[" + id + "]: time=" + childWatch);
-                }
+                AlertDefinitionValue updatedChild = adm.updateAlertDefinition(child);
+                
+                // Create TriggersCreatedZevent
                 zevents.add(new TriggersCreatedZevent(updatedChild.getId()));
             }
             
@@ -897,7 +888,7 @@ public class EventsBossEJBImpl
         }
         else {
             // First, get rid of the current triggers
-            rtm.deleteAlertDefinitionTriggers(adval.getId());
+            rtm.deleteTriggers(adval.getId());
             adval.removeAllTriggers();
 
             // Now create the new triggers
