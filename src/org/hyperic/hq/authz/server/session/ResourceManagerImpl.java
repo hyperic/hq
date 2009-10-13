@@ -361,7 +361,6 @@ public class ResourceManagerImpl extends AuthzSession implements ResourceManager
      * @return AppdefEntityID[] - an array of the resources (including children) deleted
      * 
      */
-    @Transactional(propagation=Propagation.NOT_SUPPORTED)
     public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r,
                                                 boolean nullResourceType)
         throws VetoException, PermissionException
