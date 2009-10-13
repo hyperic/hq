@@ -1,3 +1,6 @@
+<%
+import org.apache.commons.lang.StringEscapeUtils
+%>
 <%= dojoInclude(["dojo.event.*",
                  "dojo.collections.Store",
                  "dojo.widget.ContentPane",
@@ -32,7 +35,7 @@
 			            style="height:200px; width:185px; border:5px solid #ededed;"
 			            onchange="EventLogs_refreshTable();">
      	        <% for (g in allGroups) { %>
-			      <option value="${g.id}">${g.name}</option>
+			      <option value="${g.id}">${StringEscapeUtils.escapeHtml(g.name)}</option>
                 <% } %>
                 </select>
             <%
