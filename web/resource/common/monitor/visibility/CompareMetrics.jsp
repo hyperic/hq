@@ -101,9 +101,13 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 </tiles:insert>
 <html:form action="/resource/common/monitor/visibility/CompareMetrics">
 
-<html:link href="javascript:document.CompareMetricsForm.submit()" onclick="clickLink('CompareMetricsForm', 'back')"><fmt:message 
-key="resource.common.monitor.visibility.CompareMetricsReturnLink">
-<fmt:param value="${CompareMetricsForm.name}"/></fmt:message></html:link>
+<html:link href="javascript:document.CompareMetricsForm.submit()" onclick="clickLink('CompareMetricsForm', 'back')">
+	<fmt:message key="resource.common.monitor.visibility.CompareMetricsReturnLink">
+		<fmt:param>
+			<c:out value="${CompareMetricsForm.name}"/>
+		</fmt:param>
+	</fmt:message>
+</html:link>
 <div id="listDiv" style="padding-top: 24px; padding-bottom: 24px;">
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="resource.common.monitor.visibility.CompareMetricsTab"/>
@@ -226,9 +230,13 @@ key="resource.common.monitor.visibility.CompareMetricsReturnLink">
 </tiles:insert> 
 </div>
 
-<html:link href="javascript:document.CompareMetricsForm.submit()" onclick="clickLink('CompareMetricsForm', 'back')"><fmt:message 
-key="resource.common.monitor.visibility.CompareMetricsReturnLink">
-<fmt:param value="${CompareMetricsForm.name}"/></fmt:message></html:link>
+<html:link href="javascript:document.CompareMetricsForm.submit()" onclick="clickLink('CompareMetricsForm', 'back')">
+	<fmt:message key="resource.common.monitor.visibility.CompareMetricsReturnLink">
+		<fmt:param>
+			<c:out value="${CompareMetricsForm.name}"/>
+		</fmt:param>
+	</fmt:message>
+</html:link>
 
 <html:hidden property="rid"/>
 <html:hidden property="type"/>
