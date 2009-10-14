@@ -320,7 +320,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * that have been modified are analyzed.
      *
      * @return The time taken in milliseconds to run the command.
-     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public long analyzeNonMetricTables() {
@@ -362,7 +361,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      * @param analyzePrevMetricDataTable tells method to analyze previous metric
      * data table as well as the current.
      * @return The time taken in milliseconds to run the command.
-     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public long analyzeHqMetricTables(boolean analyzePrevMetricDataTable)
@@ -405,7 +403,6 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
      *
      * @return The time it took to vaccum, in milliseconds, or -1 if the
      * database is not PostgreSQL.
-     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public long vacuum() {

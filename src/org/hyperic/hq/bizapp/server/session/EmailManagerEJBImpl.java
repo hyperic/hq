@@ -48,7 +48,7 @@ import org.hyperic.hq.measurement.server.session.SessionEJB;
  *      view-type="local"
  *      type="Stateless"
  *      
- * @ejb:transaction type="NotSupported"
+ * @ejb:transaction type="Required"
  */
 public class EmailManagerEJBImpl extends SessionEJB implements SessionBean {
     

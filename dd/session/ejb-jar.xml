@@ -1436,7 +1436,7 @@
             <method-param>org.hyperic.hq.appdef.shared.AppdefEntityID</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -2251,7 +2251,7 @@
             <method-param>org.hyperic.hq.autoinventory.ScanStateCore</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -2263,7 +2263,7 @@
             <method-param>org.hyperic.hq.autoinventory.ScanStateCore</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -2299,7 +2299,7 @@
             <method-param>org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -2311,7 +2311,7 @@
             <method-param>org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -2346,7 +2346,7 @@
             <method-param>java.util.List</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -2357,7 +2357,7 @@
             <method-param>java.util.List</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -3779,7 +3779,7 @@
             <method-param>boolean</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -4076,7 +4076,7 @@
          <ejb-name>DataCompress</ejb-name>
           <method-name>*</method-name>
        </method>
-       <trans-attribute>NotSupported</trans-attribute>
+       <trans-attribute>Required</trans-attribute>
     </container-transaction>
    <container-transaction >
       <method >
@@ -4587,14 +4587,14 @@
             <method-param>java.lang.String</method-param>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
          <ejb-name>EmailManager</ejb-name>
           <method-name>*</method-name>
        </method>
-       <trans-attribute>NotSupported</trans-attribute>
+       <trans-attribute>Required</trans-attribute>
     </container-transaction>
    <container-transaction >
       <method >
@@ -4611,7 +4611,7 @@
          <method-params>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -4622,7 +4622,7 @@
             <method-param>boolean</method-param>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -4632,7 +4632,7 @@
          <method-params>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -5981,7 +5981,7 @@
             <method-param>java.lang.String</method-param>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -5995,7 +5995,7 @@
             <method-param>java.lang.String</method-param>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -6010,7 +6010,7 @@
             <method-param>boolean</method-param>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -6025,14 +6025,14 @@
             <method-param>boolean</method-param>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
          <ejb-name>HeartBeatService</ejb-name>
           <method-name>*</method-name>
        </method>
-       <trans-attribute>NotSupported</trans-attribute>
+       <trans-attribute>Required</trans-attribute>
     </container-transaction>
    <container-transaction >
       <method >
@@ -6059,7 +6059,7 @@
             <method-param>org.hyperic.hq.appdef.server.session.Platform</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -6072,7 +6072,7 @@
             <method-param>org.hyperic.hq.appdef.server.session.Platform</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >

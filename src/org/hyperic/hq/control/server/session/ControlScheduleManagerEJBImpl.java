@@ -691,7 +691,6 @@ public class ControlScheduleManagerEJBImpl
      * Removes all jobs associated with an appdef entity
      *
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
      */
     public void removeScheduledJobs(AuthzSubject subject, AppdefEntityID id)
         throws ScheduledJobRemoveException

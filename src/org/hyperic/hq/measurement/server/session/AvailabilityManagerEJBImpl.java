@@ -718,7 +718,6 @@ public class AvailabilityManagerEJBImpl
      *          The default behavior is true. If false, the calling method
      *          should call sendDataToEventHandlers directly afterwards.
      *
-     * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
     public void addData(List availPoints, boolean sendData)

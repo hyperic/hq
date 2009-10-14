@@ -1348,7 +1348,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * @ejb:interface-method
-     * @ejb:transaction type="NotSupported"
      */
     public void syncPluginMetrics(String plugin) {
         ConfigManagerLocal cm = ConfigManagerEJBImpl.getOne();

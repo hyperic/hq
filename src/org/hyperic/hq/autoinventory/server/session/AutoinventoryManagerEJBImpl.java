@@ -682,7 +682,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * scan.
      *
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
      */
     public void reportAIData(String agentToken, ScanStateCore stateCore)
         throws AutoinventoryException {
@@ -825,7 +824,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * Should only be called from RuntimePlatformAndServerMerger
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
      */
     public void _reportAIRuntimeReport(String agentToken,
                                       CompositeRuntimeResourceReport crrr)
@@ -909,7 +907,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * Merge a list of {@link ServiceMergeInfo}s in HQ's appdef model
      * 
      * @ejb:interface-method
-     * @ejb:transaction type="RequiresNew"
      */
     public void mergeServices(List mergeInfos)
         throws PermissionException, ApplicationException {
