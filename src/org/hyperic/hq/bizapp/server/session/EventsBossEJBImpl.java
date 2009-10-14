@@ -1491,10 +1491,10 @@ public class EventsBossEJBImpl
 
     /**
      * Fix a single alert.
-     * Method is "NotSupported" since all the alert fixes may take longer
+     * TODO: remove comment below
+     * Method WAS "NotSupported" since all the alert fixes may take longer
      * than the jboss transaction timeout.  No need for a transaction in this
      * context.
-     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public void fixAlert(int sessionID, EscalationAlertType alertType,
@@ -1507,10 +1507,10 @@ public class EventsBossEJBImpl
 
     /**
      * Fix a batch of alerts.
+     * TODO: remove comment below
      * Method is "NotSupported" since all the alert fixes may take longer
      * than the jboss transaction timeout.  No need for a transaction in this
      * context.
-     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public void fixAlert(int sessionID, EscalationAlertType alertType,

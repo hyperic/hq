@@ -49,6 +49,8 @@ import org.hyperic.util.stats.ConcurrentStatsCollector;
  *
  * @ejb:transaction type="NotSupported"
  * @jboss:destination-jndi-name name="topic/eventsTopic"
+ * This is intentionally NOT TRANSACTIONAL.  Had to mark it specifically as NotSupported b/c MDBs are required to have some type of transactional boundary.
+ * We are specifically NOT interacting with database or Hibernate sessions during message processing for performance reasons
  */
 
 public class RegisteredDispatcherEJBImpl implements MessageDrivenBean, MessageListener {

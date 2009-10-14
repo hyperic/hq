@@ -75,7 +75,7 @@ public class LatherBossEJBImpl
     }
 
     /**
-     * @ejb:transaction type="NotSupported"
+     * 
      * @ejb:interface-method
      */
     public LatherValue dispatchWithoutTx(LatherContext ctx, String method, 
@@ -103,7 +103,7 @@ public class LatherBossEJBImpl
      * @return an instantiated subclass of the LatherValue class, 
      *         representing the result of the invoked method
      *
-     * @ejb:transaction type="NotSupported"
+     * 
      * @ejb:interface-method
      */
     public LatherValue dispatch(LatherContext ctx, String method, 

@@ -102,7 +102,6 @@ public class CloningBossEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
     public void clonePlatform(AuthzSubject subj, Platform master,

@@ -29,22 +29,49 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.ejb.FinderException;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.CloningBossInterface;
 import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManagerInterface;
 import org.hyperic.util.pager.PageControl;
 
-public abstract class PermissionManager  extends AuthzSession {
+public abstract class PermissionManager   {
 
     public static final String OPERATION_PAGER =
         PagerProcessor_operation.class.getName();
+    
+    private InitialContext _ic = null;
+    
+    protected InitialContext getInitialContext() throws NamingException {
+        if (_ic == null)
+            _ic = new InitialContext();
+        return _ic;
+    }
+    
+    protected ResourceTypeDAO getResourceTypeDAO() {
+        return Bootstrap.getBean(ResourceTypeDAO.class);
+    }
+    
+    protected OperationDAO getOperationDAO() {
+        return Bootstrap.getBean(OperationDAO.class);
+    }
+    
+    protected ResourceDAO getResourceDAO() {
+        return Bootstrap.getBean(ResourceDAO.class);
+    }
+
 
     /**
      * Check permission.

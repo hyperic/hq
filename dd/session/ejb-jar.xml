@@ -1436,7 +1436,7 @@
             <method-param>org.hyperic.hq.appdef.shared.AppdefEntityID</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -2251,7 +2251,7 @@
             <method-param>org.hyperic.hq.autoinventory.ScanStateCore</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -2263,7 +2263,7 @@
             <method-param>org.hyperic.hq.autoinventory.ScanStateCore</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -2299,7 +2299,7 @@
             <method-param>org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -2311,7 +2311,7 @@
             <method-param>org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -2346,7 +2346,7 @@
             <method-param>java.util.List</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -2357,7 +2357,7 @@
             <method-param>java.util.List</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -3453,58 +3453,6 @@
     </container-transaction>
    <container-transaction >
       <method >
-         <ejb-name>LatherBoss</ejb-name>
-         <method-intf>Local</method-intf>
-         <method-name>dispatchWithoutTx</method-name>
-         <method-params>
-            <method-param>org.hyperic.lather.LatherContext</method-param>
-            <method-param>java.lang.String</method-param>
-            <method-param>org.hyperic.lather.LatherValue</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>NotSupported</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>LatherBoss</ejb-name>
-         <method-intf>Remote</method-intf>
-         <method-name>dispatchWithoutTx</method-name>
-         <method-params>
-            <method-param>org.hyperic.lather.LatherContext</method-param>
-            <method-param>java.lang.String</method-param>
-            <method-param>org.hyperic.lather.LatherValue</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>NotSupported</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>LatherBoss</ejb-name>
-         <method-intf>Local</method-intf>
-         <method-name>dispatch</method-name>
-         <method-params>
-            <method-param>org.hyperic.lather.LatherContext</method-param>
-            <method-param>java.lang.String</method-param>
-            <method-param>org.hyperic.lather.LatherValue</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>NotSupported</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>LatherBoss</ejb-name>
-         <method-intf>Remote</method-intf>
-         <method-name>dispatch</method-name>
-         <method-params>
-            <method-param>org.hyperic.lather.LatherContext</method-param>
-            <method-param>java.lang.String</method-param>
-            <method-param>org.hyperic.lather.LatherValue</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>NotSupported</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
          <ejb-name>ApplicationManager</ejb-name>
           <method-name>*</method-name>
        </method>
@@ -3831,7 +3779,7 @@
             <method-param>boolean</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -4128,7 +4076,7 @@
          <ejb-name>DataCompress</ejb-name>
           <method-name>*</method-name>
        </method>
-       <trans-attribute>NotSupported</trans-attribute>
+       <trans-attribute>Required</trans-attribute>
     </container-transaction>
    <container-transaction >
       <method >
@@ -4639,14 +4587,14 @@
             <method-param>java.lang.String</method-param>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
          <ejb-name>EmailManager</ejb-name>
           <method-name>*</method-name>
        </method>
-       <trans-attribute>NotSupported</trans-attribute>
+       <trans-attribute>Required</trans-attribute>
     </container-transaction>
    <container-transaction >
       <method >
@@ -4663,7 +4611,7 @@
          <method-params>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -4674,7 +4622,7 @@
             <method-param>boolean</method-param>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -4684,7 +4632,7 @@
          <method-params>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -4714,150 +4662,6 @@
        </method>
        <trans-attribute>Required</trans-attribute>
     </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Local</method-intf>
-         <method-name>removeAppdefEntity</method-name>
-         <method-params>
-            <method-param>int</method-param>
-            <method-param>org.hyperic.hq.appdef.shared.AppdefEntityID</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>RequiresNew</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Remote</method-intf>
-         <method-name>removeAppdefEntity</method-name>
-         <method-params>
-            <method-param>int</method-param>
-            <method-param>org.hyperic.hq.appdef.shared.AppdefEntityID</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>RequiresNew</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Local</method-intf>
-         <method-name>_removePlatformInNewTran</method-name>
-         <method-params>
-            <method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
-            <method-param>org.hyperic.hq.appdef.server.session.Platform</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>RequiresNew</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Remote</method-intf>
-         <method-name>_removePlatformInNewTran</method-name>
-         <method-params>
-            <method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
-            <method-param>org.hyperic.hq.appdef.server.session.Platform</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>RequiresNew</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Local</method-intf>
-         <method-name>_removeServerInNewTran</method-name>
-         <method-params>
-            <method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
-            <method-param>org.hyperic.hq.appdef.server.session.Server</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>RequiresNew</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Remote</method-intf>
-         <method-name>_removeServerInNewTran</method-name>
-         <method-params>
-            <method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
-            <method-param>org.hyperic.hq.appdef.server.session.Server</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>RequiresNew</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Local</method-intf>
-         <method-name>_removeServiceInNewTran</method-name>
-         <method-params>
-            <method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
-            <method-param>org.hyperic.hq.appdef.server.session.Service</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>RequiresNew</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Remote</method-intf>
-         <method-name>_removeServiceInNewTran</method-name>
-         <method-params>
-            <method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
-            <method-param>org.hyperic.hq.appdef.server.session.Service</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>RequiresNew</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Local</method-intf>
-         <method-name>_removeGroupInNewTran</method-name>
-         <method-params>
-            <method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
-            <method-param>org.hyperic.hq.authz.server.session.ResourceGroup</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>RequiresNew</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Remote</method-intf>
-         <method-name>_removeGroupInNewTran</method-name>
-         <method-params>
-            <method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
-            <method-param>org.hyperic.hq.authz.server.session.ResourceGroup</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>RequiresNew</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Local</method-intf>
-         <method-name>_removeApplicationInNewTran</method-name>
-         <method-params>
-            <method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
-            <method-param>org.hyperic.hq.appdef.server.session.Application</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>RequiresNew</trans-attribute>
-   </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AppdefBoss</ejb-name>
-         <method-intf>Remote</method-intf>
-         <method-name>_removeApplicationInNewTran</method-name>
-         <method-params>
-            <method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
-            <method-param>org.hyperic.hq.appdef.server.session.Application</method-param>
-         </method-params>
-      </method>
-      <trans-attribute>RequiresNew</trans-attribute>
-   </container-transaction>
    <container-transaction >
       <method >
          <ejb-name>TemplateManager</ejb-name>
@@ -6177,7 +5981,7 @@
             <method-param>java.lang.String</method-param>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -6191,7 +5995,7 @@
             <method-param>java.lang.String</method-param>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -6206,7 +6010,7 @@
             <method-param>boolean</method-param>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -6221,14 +6025,14 @@
             <method-param>boolean</method-param>
          </method-params>
       </method>
-      <trans-attribute>NotSupported</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
          <ejb-name>HeartBeatService</ejb-name>
           <method-name>*</method-name>
        </method>
-       <trans-attribute>NotSupported</trans-attribute>
+       <trans-attribute>Required</trans-attribute>
     </container-transaction>
    <container-transaction >
       <method >
@@ -6255,7 +6059,7 @@
             <method-param>org.hyperic.hq.appdef.server.session.Platform</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >
@@ -6268,7 +6072,7 @@
             <method-param>org.hyperic.hq.appdef.server.session.Platform</method-param>
          </method-params>
       </method>
-      <trans-attribute>RequiresNew</trans-attribute>
+      <trans-attribute>Required</trans-attribute>
    </container-transaction>
    <container-transaction >
       <method >

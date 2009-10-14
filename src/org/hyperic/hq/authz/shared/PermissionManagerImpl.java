@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.ejb.FinderException;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -44,13 +45,20 @@ import org.hibernate.Query;
 import org.hyperic.hq.appdef.server.session.CloningBossEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.CloningBossInterface;
+import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceDAO;
+import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
+import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.server.session.RoleDAO;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.server.session.HierarchicalAlertingManagerEJBImpl;
 import org.hyperic.hq.events.server.session.MaintenanceEventManagerEJBImpl;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManagerInterface;
@@ -69,8 +77,7 @@ public class PermissionManagerImpl
         LogFactory.getLog(PermissionManagerImpl.class.getName());
 
     private final String _falseToken;
-
-   
+    
     private DBUtil dbUtil;
 
     private static final String VIEWABLE_SELECT =
@@ -99,6 +106,8 @@ public class PermissionManagerImpl
               "(SORT_NAME LIKE UPPER(?) OR " +
                "PROTO_ID IN (SELECT ID FROM EAM_RESOURCE " +
                             "WHERE PROTO_ID = 0 AND SORT_NAME LIKE UPPER(?))) ";
+    
+   
 
     private Connection getConnection() throws SQLException {
         try {
@@ -120,7 +129,7 @@ public class PermissionManagerImpl
             throw new SystemException("Unable to initialize " +
                                       "PermissionManager:" + e, e);
         } finally {
-            dbUtil.closeConnection(ctx, conn);
+            dbUtil.closeConnection(PermissionManagerImpl.class, conn);
         }
     }
 
@@ -139,6 +148,8 @@ public class PermissionManagerImpl
     public boolean hasAdminPermission(Integer who) {
         return true;
     }
+    
+   
 
     public List findOperationScopeBySubject(AuthzSubject subj, String opName,
                                             String resType)
@@ -188,6 +199,63 @@ public class PermissionManagerImpl
         Set resLocArr = toPojos(resArr);
 
         return (Resource[]) resLocArr.toArray(new Resource[resLocArr.size()]);
+    }
+    
+    protected RoleDAO getRoleDAO() {
+        return Bootstrap.getBean(RoleDAO.class);
+    }
+    
+    protected ResourceGroupDAO getResourceGroupDAO() {
+        return Bootstrap.getBean(ResourceGroupDAO.class);
+    }
+    
+    private Resource lookupResource(ResourceValue resource) {
+        if (resource.getId() == null) {
+            ResourceType type = resource.getResourceType();
+            return getResourceDAO().findByInstanceId(type,
+                                                     resource.getInstanceId());
+        }
+        return getResourceDAO().findById(resource.getId());
+    }
+    
+   
+    
+    private Set toPojos(Object[] vals) {
+        Set ret = new HashSet();
+        if (vals == null || vals.length == 0) {
+            return ret;
+        }
+
+
+        RoleDAO roleDao = null;
+        ResourceGroupDAO resGrpDao = null;
+        for (int i = 0; i < vals.length; i++) {
+            if (vals[i] instanceof Operation) {
+                ret.add(vals[i]);
+            }
+            else if (vals[i] instanceof ResourceValue) {
+                ret.add(lookupResource((ResourceValue) vals[i]));
+            }
+            else if (vals[i] instanceof RoleValue) {
+                if (roleDao == null) {
+                    roleDao = getRoleDAO();
+                }
+                ret.add(roleDao.findById(((RoleValue) vals[i]).getId()));
+            }
+            else if (vals[i] instanceof ResourceGroupValue) {
+                if (resGrpDao == null) {
+                    resGrpDao = getResourceGroupDAO();
+                }
+                ret.add(resGrpDao.findById(
+                    ((ResourceGroupValue) vals[i]).getId()));
+            }
+            else {
+                _log.error("Invalid type.");
+            }
+
+        }
+
+        return ret;
     }
 
     public List<Integer> findViewableResources(AuthzSubject subj, String resType,
@@ -252,7 +320,7 @@ public class PermissionManagerImpl
             _log.error("Error getting scope by SQL", e);
             throw new SystemException("SQL Error getting scope: " + e.getMessage());
         } finally {
-            DBUtil.closeJDBCObjects(ctx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(PermissionManagerImpl.class, conn, stmt, rs);
         }
     }
 
@@ -304,7 +372,7 @@ public class PermissionManagerImpl
             _log.error("Error search by SQL", e);
             throw new SystemException("SQL Error search: " + e.getMessage());
         } finally {
-            DBUtil.closeJDBCObjects(ctx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(PermissionManagerImpl.class, conn, stmt, rs);
         }
     }
 
@@ -332,7 +400,7 @@ public class PermissionManagerImpl
             _log.error("Error getting scope by SQL", e);
             throw new FinderException("Error getting scope: " + e.getMessage());
         } finally {
-            dbUtil.closeJDBCObjects(ctx, conn, stmt, rs);
+            dbUtil.closeJDBCObjects(PermissionManagerImpl.class, conn, stmt, rs);
         }
     }
 

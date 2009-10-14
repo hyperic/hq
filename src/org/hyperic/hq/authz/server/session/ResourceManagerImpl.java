@@ -67,7 +67,6 @@ import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -339,7 +338,6 @@ public class ResourceManagerImpl
      *         deleted
      * 
      */
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public AppdefEntityID[] removeResourcePerms(AuthzSubject subj, Resource r, boolean nullResourceType)
         throws VetoException, PermissionException {
         final ResourceType resourceType = r.getResourceType();

@@ -68,7 +68,7 @@ import org.apache.commons.logging.LogFactory;
  *      view-type="local"
  *      type="Stateless"
  *
- * @ejb:transaction type="NotSupported"
+ * @ejb:transaction type="Required"
  */
 public class DataCompressEJBImpl
     extends SessionEJB
