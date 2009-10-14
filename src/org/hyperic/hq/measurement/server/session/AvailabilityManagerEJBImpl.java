@@ -74,6 +74,7 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
+import org.hyperic.util.timer.StopWatch;
 
 /** The AvailabityManagerEJBImpl class is a stateless session bean that can be
  *  used to retrieve Availability Data RLE points
@@ -1299,9 +1300,11 @@ public class AvailabilityManagerEJBImpl
         List zevents = new ArrayList(maxCapacity);
         MeasurementManagerLocal measMan = MeasurementManagerEJBImpl.getOne();
 
-        boolean allEventsInteresting =
+        final boolean allEventsInteresting =
             Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
 
+        final StopWatch watch = new StopWatch();
+        final boolean debug = _log.isDebugEnabled();
         for (Iterator i = data.iterator(); i.hasNext();) {
             DataPoint dp = (DataPoint) i.next();
             Integer metricId = dp.getMetricId();
@@ -1309,8 +1312,11 @@ public class AvailabilityManagerEJBImpl
 
             MeasurementEvent event = new MeasurementEvent(metricId, val);
 
-            if (RegisteredTriggers.isTriggerInterested(event)
-                    || allEventsInteresting) {
+            if (debug) watch.markTimeBegin("isTriggerInterested");
+            boolean isEventInteresting =
+                allEventsInteresting || RegisteredTriggers.isTriggerInterested(event);
+            if (debug) watch.markTimeEnd("isTriggerInterested");
+            if (isEventInteresting) {
                 measMan.buildMeasurementEvent(event);
                 if (event.getValue().getValue() == AVAIL_DOWN) {
                     Resource r = getResource(event.getResource());
