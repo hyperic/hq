@@ -92,7 +92,7 @@ public class ResourceTypeDAO
         super.save(entity);
     }
 
-    ResourceType findTypeResourceType() {
+    public ResourceType findTypeResourceType() {
         return findByName(AuthzConstants.typeResourceTypeName);
     }
 

@@ -52,7 +52,7 @@ public abstract class AuthzSession {
     public static final Log log
         = LogFactory.getLog(AuthzSession.class.getName());
 
-    private static InitialContext _ic = null;
+   
 
     protected SessionContext ctx;
 
@@ -162,11 +162,7 @@ public abstract class AuthzSession {
         return getResourceDAO().findById(resource.getId());
     }
 
-    protected InitialContext getInitialContext() throws NamingException {
-        if (_ic == null)
-            _ic = new InitialContext();
-        return _ic;
-    }
+   
 
     public void setSessionContext(SessionContext ctx) {
         this.ctx = ctx;
