@@ -29,14 +29,13 @@ import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
 import org.hyperic.hq.galerts.server.session.GalertDefSortField;
 import org.hyperic.hq.galerts.server.session.GalertLog;
-import org.hyperic.hq.galerts.server.session.GtriggerInfo;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
 /**
- * Local interface for
+ * Local interface for GalertManager
  */
 public interface GalertManager
 

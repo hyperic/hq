@@ -99,8 +99,7 @@ public class GalertManagerImpl implements GalertManager
                                 GalertActionLogDAO actionLogDAO,
                                 CrispoManagerLocal crispoManager,
                                 EscalationManagerLocal escalationManager,
-                                ResourceGroupManager resourceGroupManager,
-                                GalertManager galertManager)
+                                ResourceGroupManager resourceGroupManager)
     {
         _stratTypeDAO = stratTypeDAO;
         _defDAO = defDAO;
