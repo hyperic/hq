@@ -210,7 +210,7 @@
 <tr>
 <td>
 <display:table items="${MetricSummaries}" var="summary" width="100%" cellspacing="0" cellpadding="0">
-<display:column width="15%" value="${summary.resource.name}" 
+<display:column width="15%" property="resource.name" 
   title="${resourceTypeTitle}" isLocalizedTitle="false" styleClass="ListCell"/>
 <display:column width="6%" property="minExpectedValue" title="resource.common.monitor.visibility.metricmetadata.expectedrange.low" styleClass="ListCell">
   <display:metricdecorator unit="${summary.measurementTemplate.units}" defaultKey="common.value.notavail"/>
