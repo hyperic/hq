@@ -30,7 +30,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +38,6 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
@@ -49,12 +47,13 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.util.pager.PageList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class ResourceGroupDAO extends HibernateDAO
+public class ResourceGroupDAO extends HibernateDAO<ResourceGroup>
 {
     private static final Log _log
         = LogFactory.getLog(ResourceGroupDAO.class.getName());
@@ -98,7 +97,7 @@ public class ResourceGroupDAO extends HibernateDAO
     }
 
     ResourceGroup create(AuthzSubject creator, ResourceGroupCreateInfo cInfo,
-                         Collection resources, Collection roles)
+                         Collection<Resource> resources, Collection<Role> roles)
         throws GroupCreationException
     {
         assertNameConstraints(cInfo.getName());
@@ -150,8 +149,8 @@ public class ResourceGroupDAO extends HibernateDAO
         save(r);
         flushSession();
 
-        setMembers(resGrp, new HashSet(resources));
-        resGrp.setRoles(new HashSet(roles));
+        setMembers(resGrp, new HashSet<Resource>(resources));
+        resGrp.setRoles(new HashSet<Role>(roles));
 
         return resGrp;
     }
@@ -189,7 +188,7 @@ public class ResourceGroupDAO extends HibernateDAO
         return gm != null;
     }
 
-    void removeMembers(ResourceGroup group, Collection members) {
+    void removeMembers(ResourceGroup group, Collection<Resource> members) {
         // Don't want to mark the Root Resource Group dirty to avoid optimistic
         // locking issues.  Since the root group is associated with all
         // resources, transactions which involve creating/deleting resources
@@ -199,10 +198,9 @@ public class ResourceGroupDAO extends HibernateDAO
             group.markDirty();
         }
 
-        List memberIds = new ArrayList(members.size());
+        List<Integer> memberIds = new ArrayList<Integer>(members.size());
 
-        for (Iterator i=members.iterator(); i.hasNext(); ) {
-            Resource r = (Resource)i.next();
+        for (Resource r : members) {
             memberIds.add(r.getId());
         }
         int numDeleted =
@@ -223,7 +221,7 @@ public class ResourceGroupDAO extends HibernateDAO
         addMembers(group, Collections.singleton(resource));
     }
 
-    void addMembers(ResourceGroup group, Collection resources) {
+    void addMembers(ResourceGroup group, Collection<Resource> resources) {
         Session sess = getSession();
 
         // Don't want to mark the Root Resource Group dirty to avoid optimistic
@@ -234,15 +232,14 @@ public class ResourceGroupDAO extends HibernateDAO
         if (!group.getId().equals(rootResourceGroupId)) {
             group.markDirty();
         }
-        for (Iterator i=resources.iterator(); i.hasNext(); ) {
-            Resource r = (Resource)i.next();
+        for (Resource r : resources) {
             GroupMember m = new GroupMember(group, r);
 
             sess.save(m);
         }
     }
 
-    void setMembers(ResourceGroup group, Collection resources) {
+    void setMembers(ResourceGroup group, Collection<Resource> resources) {
         removeAllMembers(group);
         addMembers(group, resources);
     }
@@ -253,8 +250,9 @@ public class ResourceGroupDAO extends HibernateDAO
      *
      * @return {@link ResourceGroup}s
      */
-    Collection getGroups(Resource r) {
-        return createQuery("select g.group from GroupMember g " +
+    @SuppressWarnings("unchecked")
+    Collection<ResourceGroup> getGroups(Resource r) {
+        return (Collection<ResourceGroup>)createQuery("select g.group from GroupMember g " +
                            "where g.resource = :resource")
             .setParameter("resource", r)
             .list();
@@ -265,8 +263,9 @@ public class ResourceGroupDAO extends HibernateDAO
      *
      * @return {@link Resource}s
      */
-    Collection getMembers(ResourceGroup g) {
-        return createQuery("select g.resource from GroupMember g " +
+    @SuppressWarnings("unchecked")
+    Collection<Resource> getMembers(ResourceGroup g) {
+        return (Collection<Resource>)createQuery("select g.resource from GroupMember g " +
                            "where g.group = :group " +
                            "and g.resource.resourceType is not null " +
                            "order by g.resource.name")
@@ -279,18 +278,18 @@ public class ResourceGroupDAO extends HibernateDAO
      *
      * @return {@link Resource}s
      */
-    Map getMemberTypes(ResourceGroup g) {
-        List counts =
-            createQuery("select p.name, count(r) from GroupMember g " +
+    @SuppressWarnings("unchecked")
+    Map<String, Integer> getMemberTypes(ResourceGroup g) {
+        List<Object[]> counts =
+            (List<Object[]>)createQuery("select p.name, count(r) from GroupMember g " +
                         "join g.resource r " +
                         "join r.prototype p " +
                          "where g.group = :group group by p.name")
             .setParameter("group", g)
             .list();
-        Map types = new HashMap();
-        for (Iterator it = counts.iterator(); it.hasNext(); ) {
-            Object[] objs = (Object[]) it.next();
-            types.put(objs[0], objs[1]);
+        Map<String, Integer> types = new HashMap<String, Integer>();
+        for (Object[] objs : counts ) {
+            types.put((String)objs[0], (Integer)objs[1]);
         }
         return types;
     }
@@ -341,28 +340,31 @@ public class ResourceGroupDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public Collection findByRoleIdAndSystem_orderName(Integer roleId,
+    @SuppressWarnings("unchecked")
+    public Collection<ResourceGroup> findByRoleIdAndSystem_orderName(Integer roleId,
                                                       boolean system,
                                                       boolean asc) {
         String sql = "select g from ResourceGroup g join fetch g.roles r " +
                      "where r.id = ? and g.system = ? " +
                      "order by g.resource.sortName " + (asc ? "asc" : "desc");
-        return getSession().createQuery(sql)
+        return (Collection<ResourceGroup>)getSession().createQuery(sql)
             .setInteger(0, roleId.intValue())
             .setBoolean(1, system)
             .list();
     }
 
-    public Collection findWithNoRoles_orderName(boolean asc) {
+    @SuppressWarnings("unchecked")
+    public Collection<ResourceGroup> findWithNoRoles_orderName(boolean asc) {
         String sql = "from ResourceGroup g " +
                      "where g.roles.size = 0 and g.system = false " +
                      "order by g.resource.sortName " + (asc ? "asc" : "desc");
-        return getSession().createQuery(sql).list();
+        return (Collection<ResourceGroup>)getSession().createQuery(sql).list();
     }
 
-    public Collection findByNotRoleId_orderName(Integer roleId, boolean asc)
+    @SuppressWarnings("unchecked")
+    public Collection<ResourceGroup> findByNotRoleId_orderName(Integer roleId, boolean asc)
     {
-        return getSession()
+        return (Collection<ResourceGroup>)getSession()
             .createQuery("from ResourceGroup g " +
                          "where ? not in (select id from g.roles) and " +
                          "g.system = false order by g.resource.sortName " +
@@ -371,13 +373,14 @@ public class ResourceGroupDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findCompatible(Resource proto) {
+    @SuppressWarnings("unchecked")
+    public Collection<ResourceGroup> findCompatible(Resource proto) {
         String sql =
             "from ResourceGroup g " +
             "where g.resourcePrototype = ? and " +
             "(g.groupType = ? or g.groupType = ?)";
 
-        return getSession().createQuery(sql)
+        return (Collection<ResourceGroup>)getSession().createQuery(sql)
             .setParameter(0, proto)
             .setInteger(1, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS)
             .setInteger(2, AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC)
@@ -417,7 +420,8 @@ public class ResourceGroupDAO extends HibernateDAO
      * @return templateId A list of Measurement objects with the given template
      * id in the group that are set to be collected.
      */
-    public List getMetricsCollecting(ResourceGroup g, Integer templateId) {
+    @SuppressWarnings("unchecked")
+    public List<Measurement> getMetricsCollecting(ResourceGroup g, Integer templateId) {
         String sql =
             "select m from Measurement m, GroupMember g " +
             "join g.group rg " +
@@ -425,7 +429,7 @@ public class ResourceGroupDAO extends HibernateDAO
             "where m.instanceId = r.instanceId and "+
             "rg = ? and m.template.id = ? and m.enabled = true";
 
-        return getSession().createQuery(sql)
+        return (List<Measurement>)getSession().createQuery(sql)
             .setParameter(0, g)
             .setInteger(1, templateId.intValue())
             .setCacheable(true)
@@ -433,8 +437,9 @@ public class ResourceGroupDAO extends HibernateDAO
             .list();
     }
 
-    PageList findGroupsClusionary(AuthzSubject subject, Resource member,
-                                  Resource prototype, Collection excludeGroups,
+    @SuppressWarnings("unchecked")
+    PageList<ResourceGroup> findGroupsClusionary(AuthzSubject subject, Resource member,
+                                  Resource prototype, Collection<ResourceGroup> excludeGroups,
                                   PageInfo pInfo, boolean inclusive)
     {
         ResourceGroupSortField sort = (ResourceGroupSortField)pInfo.getSort();
@@ -459,10 +464,8 @@ public class ResourceGroupDAO extends HibernateDAO
             hql += ") and ";
         }
 
-        List excludes = new ArrayList(excludeGroups.size());
-        for (Iterator i=excludeGroups.iterator(); i.hasNext(); ) {
-            ResourceGroup g = (ResourceGroup)i.next();
-
+        List<Integer> excludes = new ArrayList<Integer>(excludeGroups.size());
+        for (ResourceGroup g : excludeGroups) {
             excludes.add(g.getId());
         }
         if (!excludes.isEmpty())
@@ -514,23 +517,25 @@ public class ResourceGroupDAO extends HibernateDAO
         if (pmql.length() > 0)
             q.setInteger("subjId", subject.getId().intValue());
 
-        List vals = pInfo.pageResults(q).list();
-        return new PageList(vals, total);
+        List<ResourceGroup> vals = (List<ResourceGroup>)pInfo.pageResults(q).list();
+        return new PageList<ResourceGroup>(vals, total);
     }
 
-    public Collection findByGroupType_orderName(boolean isAscending,
+    @SuppressWarnings("unchecked")
+    public Collection<ResourceGroup> findByGroupType_orderName(boolean isAscending,
                                                 int groupType) {
         String sql = "from ResourceGroup g where g.groupType = :type" +
                      " ORDER BY g.resource.name " +
                      ((isAscending) ? "asc" : "desc");
-        return getSession()
+        return (Collection<ResourceGroup>)getSession()
             .createQuery(sql)
             .setInteger("type", groupType)
             .list();
     }
 
-    public Collection findDeletedGroups() {
+    @SuppressWarnings("unchecked")
+    public Collection<ResourceGroup> findDeletedGroups() {
         String hql = "from ResourceGroup where resource.resourceType = null";
-        return createQuery(hql).list();
+        return (Collection<ResourceGroup>)createQuery(hql).list();
     }
 }

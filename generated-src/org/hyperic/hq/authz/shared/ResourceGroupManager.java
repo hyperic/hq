@@ -3,6 +3,31 @@
  */
 package org.hyperic.hq.authz.shared;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.FinderException;
+
+import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.auth.shared.SubjectNotFoundException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
+import org.hyperic.hq.authz.server.session.ResourceRelation;
+import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.common.DuplicateObjectException;
+import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.grouping.CritterList;
+import org.hyperic.hq.grouping.GroupException;
+import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
+import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
+
 /**
  * Local interface for ResourceGroupManager.
  */
@@ -14,19 +39,19 @@ public interface ResourceGroupManager
     * @param roles List of {@link Role}s
     * @param resources List of {@link Resource}s
     */
-   public org.hyperic.hq.authz.server.session.ResourceGroup createResourceGroup( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo cInfo,java.util.Collection roles,java.util.Collection resources ) throws org.hyperic.hq.authz.shared.GroupCreationException, org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
+   public ResourceGroup createResourceGroup( AuthzSubject whoami,ResourceGroup.ResourceGroupCreateInfo cInfo, Collection<Role> roles,Collection<Resource> resources ) throws GroupCreationException, GroupDuplicateNameException;
 
    /**
     * Find the group that has the given ID. Performs authz checking
     * @param whoami user requesting to find the group
     * @return {@link ResourceGroup} or null if it does not exist XXX scottmf, why is this method called find() but calls dao.get()???
     */
-   public org.hyperic.hq.authz.server.session.ResourceGroup findResourceGroupById( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer id ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public ResourceGroup findResourceGroupById( AuthzSubject whoami,Integer id ) throws PermissionException;
 
    /**
     * Find the group that has the given ID. Does not do any authz checking
     */
-   public org.hyperic.hq.authz.server.session.ResourceGroup findResourceGroupById( java.lang.Integer id ) ;
+   public ResourceGroup findResourceGroupById( Integer id ) ;
 
    /**
     * Find the role that has the given name.
@@ -35,42 +60,42 @@ public interface ResourceGroupManager
     * @return The value-object of the role of the given name.
     * @throws PermissionException whoami does not have viewResourceGroup on the requested group
     */
-   public org.hyperic.hq.authz.server.session.ResourceGroup findResourceGroupByName( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.String name ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public ResourceGroup findResourceGroupByName( AuthzSubject whoami,String name ) throws PermissionException;
 
-   public java.util.Collection findDeletedGroups(  ) ;
+   public Collection<ResourceGroup> findDeletedGroups(  ) ;
 
    /**
     * Update some of the fundamentals of groups (name, description, location). If name, description or location are null, the associated properties of the passed group will not change.
     * @throws DuplicateObjectException if an attempt to rename the group would result in a group with the same name.
     */
-   public void updateGroup( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.ResourceGroup group,java.lang.String name,java.lang.String description,java.lang.String location ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
+   public void updateGroup( AuthzSubject whoami,ResourceGroup group,String name,String description,String location ) throws PermissionException, GroupDuplicateNameException;
 
    /**
-    * Remove all groups compatable with the specified resource prototype.
+    * Remove all groups compatible with the specified resource prototype.
     * @throws VetoException if another subsystem cannot allow it (for constraint reasons)
     */
-   public void removeGroupsCompatibleWith( org.hyperic.hq.authz.server.session.Resource proto ) throws org.hyperic.hq.common.VetoException;
+   public void removeGroupsCompatibleWith( Resource proto ) throws VetoException;
 
    /**
     * Delete the specified ResourceGroup.
     * @param whoami The current running user.
     * @param group The group to delete.
     */
-   public void removeResourceGroup( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.ResourceGroup group ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.common.VetoException;
+   public void removeResourceGroup( AuthzSubject whoami,ResourceGroup group ) throws PermissionException, VetoException;
 
-   public void addResources( org.hyperic.hq.authz.server.session.AuthzSubject subj,org.hyperic.hq.authz.server.session.ResourceGroup group,java.util.List resources ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void addResources( AuthzSubject subj,ResourceGroup group,List<Resource> resources ) throws PermissionException;
 
    /**
     * Add a resource to a group by resource id and resource type
     */
-   public org.hyperic.hq.authz.server.session.ResourceGroup addResource( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.ResourceGroup group,org.hyperic.hq.authz.server.session.Resource resource ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public ResourceGroup addResource( AuthzSubject whoami,ResourceGroup group,Resource resource ) throws PermissionException;
 
    /**
     * RemoveResources from a group.
     * @param whoami The current running user.
     * @param group The group .
     */
-   public void removeResources( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.ResourceGroup group,java.util.Collection resources ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void removeResources( AuthzSubject whoami,ResourceGroup group,Collection<Resource> resources ) throws PermissionException;
 
    /**
     * Sets the criteria list for this group.
@@ -80,13 +105,13 @@ public interface ResourceGroupManager
     * @throws PermissionException whoami does not own the resource.
     * @throws GroupException critters is not a valid list of criteria.
     */
-   public void setCriteria( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.ResourceGroup group,org.hyperic.hq.grouping.CritterList critters ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.grouping.GroupException;
+   public void setCriteria( AuthzSubject whoami,ResourceGroup group,CritterList critters ) throws PermissionException, GroupException;
 
    /**
     * Change the resource contents of a group to the specified list of resources.
     * @param resources A list of {@link Resource}s to be in the group
     */
-   public void setResources( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.ResourceGroup group,java.util.Collection resources ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void setResources( AuthzSubject whoami,ResourceGroup group,Collection<Resource> resources ) throws PermissionException;
 
    /**
     * List the resources in this group that the caller is authorized to see.
@@ -95,116 +120,116 @@ public interface ResourceGroupManager
     * @param pc Paging information for the request
     * @return list of authorized resources in this group.
     */
-   public java.util.Collection getResources( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer id ) ;
+   public Collection<Resource> getResources( AuthzSubject whoami,Integer id ) ;
 
    /**
     * Get all the resource groups including the root resource group.
     */
-   public java.util.List getAllResourceGroups( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public List<ResourceGroup> getAllResourceGroups( AuthzSubject subject,PageControl pc ) throws PermissionException, javax.ejb.FinderException;
 
    /**
     * Get all the members of a group.
     * @return {@link Resource}s
     */
-   public java.util.Collection getMembers( org.hyperic.hq.authz.server.session.ResourceGroup g ) ;
+   public Collection<Resource> getMembers( ResourceGroup g ) ;
 
    /**
     * Get the member type counts of a group
     */
-   public java.util.Map getMemberTypes( org.hyperic.hq.authz.server.session.ResourceGroup g ) ;
+   public Map<String, Integer> getMemberTypes( ResourceGroup g ) ;
 
    /**
     * Get all the groups a resource belongs to
     * @return {@link ResourceGroup}s
     */
-   public java.util.Collection getGroups( org.hyperic.hq.authz.server.session.Resource r ) ;
+   public Collection<ResourceGroup> getGroups( Resource r ) ;
 
    /**
     * Get the # of groups within HQ inventory
     */
-   public java.lang.Number getGroupCount(  ) ;
+   public Number getGroupCount(  ) ;
 
    /**
     * Returns true if the passed resource is a member of the given group.
     */
-   public boolean isMember( org.hyperic.hq.authz.server.session.ResourceGroup group,org.hyperic.hq.authz.server.session.Resource resource ) ;
+   public boolean isMember( ResourceGroup group,Resource resource ) ;
 
    /**
     * Get the # of members in a group
     */
-   public int getNumMembers( org.hyperic.hq.authz.server.session.ResourceGroup g ) ;
+   public int getNumMembers( ResourceGroup g ) ;
 
    /**
     * Temporary method to convert a ResourceGroup into an AppdefGroupValue
     */
-   public org.hyperic.hq.appdef.shared.AppdefGroupValue getGroupConvert( org.hyperic.hq.authz.server.session.AuthzSubject subj,org.hyperic.hq.authz.server.session.ResourceGroup g ) ;
+   public AppdefGroupValue getGroupConvert( AuthzSubject subj,ResourceGroup g ) ;
 
-   public org.hyperic.hq.appdef.server.session.AppdefResourceType getAppdefResourceType( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.authz.server.session.ResourceGroup group ) ;
-
-   /**
-    * Get a list of {@link ResourceGroup}s which are compatable with the specified prototype. Do not return any groups contained within 'excludeGroups' (a list of {@link ResourceGroup}s
-    * @param prototype If specified, the resulting groups must be compatable with the prototype.
-    * @param pInfo Pageinfo with a sort field of type {@link ResourceGroupSortField}
-    */
-   public org.hyperic.util.pager.PageList findGroupsNotContaining( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.authz.server.session.Resource member,org.hyperic.hq.authz.server.session.Resource prototype,java.util.Collection excGrps,org.hyperic.hibernate.PageInfo pInfo ) ;
+   public AppdefResourceType getAppdefResourceType( AuthzSubject subject,ResourceGroup group ) ;
 
    /**
     * Get a list of {@link ResourceGroup}s which are compatible with the specified prototype. Do not return any groups contained within 'excludeGroups' (a list of {@link ResourceGroup}s
     * @param prototype If specified, the resulting groups must be compatible with the prototype.
     * @param pInfo Pageinfo with a sort field of type {@link ResourceGroupSortField}
     */
-   public org.hyperic.util.pager.PageList findGroupsContaining( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.authz.server.session.Resource member,java.util.Collection excludeGroups,org.hyperic.hibernate.PageInfo pInfo ) ;
+   public PageList<ResourceGroup> findGroupsNotContaining( AuthzSubject subject,Resource member,Resource prototype,Collection<ResourceGroup> excGrps,org.hyperic.hibernate.PageInfo pInfo ) ;
+
+   /**
+    * Get a list of {@link ResourceGroup}s which are compatible with the specified prototype. Do not return any groups contained within 'excludeGroups' (a list of {@link ResourceGroup}s
+    * @param prototype If specified, the resulting groups must be compatible with the prototype.
+    * @param pInfo Pageinfo with a sort field of type {@link ResourceGroupSortField}
+    */
+   public PageList<ResourceGroup> findGroupsContaining( AuthzSubject subject,Resource member,Collection<ResourceGroup> excludeGroups,PageInfo pInfo ) ;
 
    /**
     * Get all the resource groups excluding the root resource group.
     */
-   public java.util.Collection getAllResourceGroups( org.hyperic.hq.authz.server.session.AuthzSubject subject,boolean excludeRoot ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public Collection<ResourceGroup> getAllResourceGroups( AuthzSubject subject,boolean excludeRoot ) throws PermissionException;
 
    /**
     * Get all {@link ResourceGroup}s
     */
-   public java.util.Collection getAllResourceGroups(  ) ;
+   public Collection<ResourceGroup> getAllResourceGroups(  ) ;
 
    /**
     * Get all compatible resource groups of the given entity type and resource type.
     */
-   public java.util.Collection getCompatibleResourceGroups( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.authz.server.session.Resource resProto ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
+   public Collection<ResourceGroup> getCompatibleResourceGroups( AuthzSubject subject,Resource resProto ) throws FinderException, PermissionException;
 
    /**
     * Get the resource groups with the specified ids
     * @param ids the resource group ids
     * @param pc Paging information for the request
     */
-   public org.hyperic.util.pager.PageList getResourceGroupsById( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer[] ids,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public PageList<ResourceGroup> getResourceGroupsById( AuthzSubject whoami,Integer[] ids,PageControl pc ) throws PermissionException, FinderException;
 
    /**
     * Change owner of a group.
     */
-   public void changeGroupOwner( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.authz.server.session.ResourceGroup group,org.hyperic.hq.authz.server.session.AuthzSubject newOwner ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void changeGroupOwner( AuthzSubject subject,ResourceGroup group,AuthzSubject newOwner ) throws PermissionException;
 
    /**
     * Get a ResourceGroup owner's AuthzSubjectValue
     * @param gid The group id
     * @exception FinderException Unable to find a group by id
     */
-   public org.hyperic.hq.authz.server.session.AuthzSubject getResourceGroupOwner( java.lang.Integer gid ) throws javax.ejb.FinderException;
+   public AuthzSubject getResourceGroupOwner( Integer gid ) throws FinderException;
 
-   public org.hyperic.hq.authz.server.session.ResourceGroup getResourceGroupByResource( org.hyperic.hq.authz.server.session.Resource resource ) ;
+   public ResourceGroup getResourceGroupByResource( Resource resource ) ;
 
    /**
     * Set a ResourceGroup modifiedBy attribute
     * @param whoami user requesting to find the group
     * @param id The ID of the role you're looking for.
     */
-   public void setGroupModifiedBy( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer id ) ;
+   public void setGroupModifiedBy( AuthzSubject whoami,Integer id ) ;
 
-   public void updateGroupType( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.authz.server.session.ResourceGroup g,int groupType,int groupEntType,int groupEntResType ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void updateGroupType( AuthzSubject subject,ResourceGroup g,int groupType,int groupEntType,int groupEntResType ) throws PermissionException;
 
    /**
     * Get the maximum collection interval for a scheduled metric within a compatible group of resources.
     * @return The maximum collection time in milliseconds. TODO: This does not belong here. Evict, evict! -- JMT 04/01/08
     */
-   public long getMaxCollectionInterval( org.hyperic.hq.authz.server.session.ResourceGroup g,java.lang.Integer templateId ) ;
+   public long getMaxCollectionInterval( ResourceGroup g,Integer templateId ) ;
 
    /**
     * Return a List of Measurements that are collecting for the given template ID and group.
@@ -212,7 +237,7 @@ public interface ResourceGroupManager
     * @param templateId The measurement template to query.
     * @return templateId A list of Measurement objects with the given template id in the group that are set to be collected. TODO: This does not belong here. Evict, evict! -- JMT 04/01/08
     */
-   public java.util.List getMetricsCollecting( org.hyperic.hq.authz.server.session.ResourceGroup g,java.lang.Integer templateId ) ;
+   public List<Measurement> getMetricsCollecting( ResourceGroup g,Integer templateId ) ;
 
    /**
     * Find the subject that has the given name and authentication source.
@@ -220,10 +245,10 @@ public interface ResourceGroupManager
     * @param authDsn DSN of the authentication source. Authentication sources are defined externally.
     * @return The value-object of the subject of the given name and authenticating source.
     */
-   public org.hyperic.hq.authz.server.session.AuthzSubject findSubjectByAuth( java.lang.String name,java.lang.String authDsn ) throws org.hyperic.hq.auth.shared.SubjectNotFoundException;
+   public AuthzSubject findSubjectByAuth( String name,String authDsn ) throws SubjectNotFoundException;
 
-   public org.hyperic.hq.authz.server.session.ResourceRelation getContainmentRelation(  ) ;
+   public ResourceRelation getContainmentRelation(  ) ;
 
-   public org.hyperic.hq.authz.server.session.ResourceRelation getNetworkRelation(  ) ;
+   public ResourceRelation getNetworkRelation(  ) ;
 
 }
