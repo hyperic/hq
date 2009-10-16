@@ -42,8 +42,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class GalertDefDAO extends HibernateDAO<GalertDef>
-{
+public class GalertDefDAO
+    extends HibernateDAO<GalertDef> {
 
     @Autowired
     public GalertDefDAO(SessionFactory sessionFactory) {
@@ -51,7 +51,7 @@ public class GalertDefDAO extends HibernateDAO<GalertDef>
     }
 
     GalertDef findById(Integer id) {
-        return (GalertDef)super.findById(id);
+        return (GalertDef) super.findById(id);
     }
 
     void save(GalertDef def) {
@@ -78,9 +78,9 @@ public class GalertDefDAO extends HibernateDAO<GalertDef>
     Collection<GalertDef> findAbsolutelyAllGalertDefs(ResourceGroup g) {
         String sql = "from GalertDef d where d.group = :group";
 
-        return (Collection<GalertDef>)getSession().createQuery(sql)
-            .setParameter("group", g)
-            .list();
+        return (Collection<GalertDef>) getSession().createQuery(sql)
+                                                   .setParameter("group", g)
+                                                   .list();
     }
 
     /**
@@ -89,9 +89,9 @@ public class GalertDefDAO extends HibernateDAO<GalertDef>
      */
     @SuppressWarnings("unchecked")
     public List<GalertDef> findAll() {
-        return (List<GalertDef>)getSession().createQuery("from GalertDef d " +
-                                        "where d.deleted = false " +
-                                        "order by name").list();
+        return (List<GalertDef>) getSession().createQuery("from GalertDef d " +
+                                                          "where d.deleted = false " +
+                                                          "order by name").list();
     }
 
     @SuppressWarnings("unchecked")
@@ -99,17 +99,16 @@ public class GalertDefDAO extends HibernateDAO<GalertDef>
         String sql = "from GalertDef d where d.group = :group " +
                      "and d.deleted = false order by name";
 
-        return (Collection<GalertDef>)getSession().createQuery(sql)
-            .setParameter("group", g)
-            .list();
+        return (Collection<GalertDef>) getSession().createQuery(sql)
+                                                   .setParameter("group", g)
+                                                   .list();
     }
 
     @SuppressWarnings("unchecked")
     List<GalertDef> findAll(AuthzSubject subj, AlertSeverity minSeverity,
-                 Boolean enabled, PageInfo pInfo)
-    {
+                            Boolean enabled, PageInfo pInfo) {
         String sql = PermissionManagerFactory.getInstance()
-            .getGroupAlertDefsHQL();
+                                             .getGroupAlertDefsHQL();
 
         sql += " and d.deleted = false";
         if (enabled != null) {
@@ -120,23 +119,23 @@ public class GalertDefDAO extends HibernateDAO<GalertDef>
         sql += getOrderByClause(pInfo);
 
         Query q = getSession().createQuery(sql)
-            .setInteger("priority", minSeverity.getCode());
+                              .setInteger("priority", minSeverity.getCode());
 
         if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subj.getId().intValue())
              .setParameter("op", AuthzConstants.groupOpManageAlerts);
         }
 
-        return (List<GalertDef>)pInfo.pageResults(q).list();
+        return (List<GalertDef>) pInfo.pageResults(q).list();
     }
 
     private String getOrderByClause(PageInfo pInfo) {
-        GalertDefSortField sort = (GalertDefSortField)pInfo.getSort();
+        GalertDefSortField sort = (GalertDefSortField) pInfo.getSort();
         String res = " order by " + sort.getSortString("d", "g", "e") +
-            (pInfo.isAscending() ? "" : " DESC");
+                     (pInfo.isAscending() ? "" : " DESC");
 
         if (!sort.equals(GalertDefSortField.CTIME)) {
-            res += ", " + GalertDefSortField.CTIME.getSortString("d", "g", "e")+
+            res += ", " + GalertDefSortField.CTIME.getSortString("d", "g", "e") +
                    " DESC";
         }
         return res;
@@ -144,18 +143,18 @@ public class GalertDefDAO extends HibernateDAO<GalertDef>
 
     int countByStrategy(ExecutionStrategyTypeInfo strat) {
         String sql = "select count(*) from GalertDef d " +
-            "where d.strategyInfo.type = :type";
+                     "where d.strategyInfo.type = :type";
 
-        return ((Integer)getSession().createQuery(sql)
-            .setParameter("type", strat)
-            .uniqueResult()).intValue();
+        return ((Integer) getSession().createQuery(sql)
+                                      .setParameter("type", strat)
+                                      .uniqueResult()).intValue();
     }
 
     @SuppressWarnings("unchecked")
     Collection<GalertDef> getUsing(Escalation e) {
-        return (Collection<GalertDef>)getSession()
-            .createQuery("from GalertDef where escalation = :esc")
-            .setParameter("esc", e).list();
+        return (Collection<GalertDef>) getSession()
+                                                   .createQuery("from GalertDef where escalation = :esc")
+                                                   .setParameter("esc", e).list();
     }
 
 }

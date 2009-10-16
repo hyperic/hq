@@ -45,14 +45,14 @@ import org.hyperic.util.pager.PageList;
  * but we have to support JDK 1.4, :(
  */
 public abstract class HibernateDAO<T> {
-    private Class<T>      _persistentClass;
+    private Class<T> _persistentClass;
     protected static final int BATCH_SIZE = 500;
 
     protected SessionFactory sessionFactory;
 
     protected HibernateDAO(Class<T> persistentClass, SessionFactory f) {
         _persistentClass = persistentClass;
-        sessionFactory      = f;
+        sessionFactory = f;
     }
 
     public Class<T> getPersistentClass() {
@@ -81,8 +81,8 @@ public abstract class HibernateDAO<T> {
 
     protected Object findById(Serializable id, boolean lock) {
         return lock
-               ? getSession().load(getPersistentClass(), id, LockMode.UPGRADE)
-               : getSession().load(getPersistentClass(), id);
+                   ? getSession().load(getPersistentClass(), id, LockMode.UPGRADE)
+                   : getSession().load(getPersistentClass(), id);
     }
 
     protected Criteria createCriteria() {
@@ -96,12 +96,12 @@ public abstract class HibernateDAO<T> {
     /**
      * This method is intended for sub-classes to specify whether or not
      * their 'find-all' finder should be automatically added to the query-cache.
-     *
+     * 
      * The findAll query will use the persistent class specified in the
      * constructor, and use the following cache region:
-     *
-     *     com.my.Persistent.findAll
-     *
+     * 
+     * com.my.Persistent.findAll
+     * 
      * @return true to indicate that the finder should be cached
      */
     protected boolean cacheFindAll() {
@@ -122,24 +122,21 @@ public abstract class HibernateDAO<T> {
 
     @SuppressWarnings("unchecked")
     public Collection<T> findAllOrderByName() {
-        return getSession()
-            .createCriteria(getPersistentClass())
-            .addOrder(Order.asc("name"))
-            .list();
+        return getSession().createCriteria(getPersistentClass())
+                           .addOrder(Order.asc("name"))
+                           .list();
     }
 
     public int size() {
-        return ((Number)getSession()
-            .createQuery("select count(*) from "+getPersistentClass().getName())
-            .uniqueResult())
-            .intValue();
+        return ((Number) getSession().createQuery("select count(*) from " + getPersistentClass().getName())
+                                     .uniqueResult())
+                                     .intValue();
     }
 
     public int size(Collection<T> coll) {
-        return ((Number)getSession()
-            .createFilter(coll, "select count(*)")
-            .uniqueResult())
-            .intValue();
+        return ((Number) getSession()
+                                     .createFilter(coll, "select count(*)")
+                                     .uniqueResult()).intValue();
     }
 
     protected void save(Object entity) {
@@ -165,7 +162,7 @@ public abstract class HibernateDAO<T> {
 
     @SuppressWarnings("unchecked")
     protected PageList<T> getPagedResult(Criteria crit, Integer total,
-                                      PageControl pc) {
+                                         PageControl pc) {
         if (pc.getPagesize() != PageControl.SIZE_UNLIMITED) {
             crit.setMaxResults(pc.getPagesize());
         }

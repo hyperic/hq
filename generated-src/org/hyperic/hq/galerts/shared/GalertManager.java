@@ -37,9 +37,7 @@ import org.hyperic.util.pager.PageList;
 /**
  * Local interface for GalertManager
  */
-public interface GalertManager
-
-{
+public interface GalertManager {
     /**
      * Update basic properties of an alert definition If any of the passed
      * params are non-null, they will be updated with the new value
@@ -118,7 +116,8 @@ public interface GalertManager
 
     public List<GalertLog> findUnfixedAlertLogsByTimeWindow(ResourceGroup group, long begin, long end);
 
-    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority, long timeRange, long endTime, List<AppdefEntityID> includes)
+    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
+                                              List<AppdefEntityID> includes)
         throws PermissionException;
 
     /**
@@ -133,14 +132,17 @@ public interface GalertManager
      *        ignore and return
      * @return a list of {@link GalertLog}s
      */
-    public List<GalertLog> findAlerts(AuthzSubject subj, int count, int priority, long timeRange, long endTime, List<AppdefEntityID> includes)
+    public List<GalertLog> findAlerts(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
+                                      List<AppdefEntityID> includes)
         throws PermissionException;
 
-    public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange, long endTime, boolean inEsc,
-                           boolean notFixed, Integer groupId, PageInfo pInfo);
+    public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange, long endTime,
+                                      boolean inEsc,
+                                      boolean notFixed, Integer groupId, PageInfo pInfo);
 
-    public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange, long endTime, boolean inEsc,
-                           boolean notFixed, Integer groupId, Integer galertDefId, PageInfo pInfo);
+    public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange, long endTime,
+                                      boolean inEsc,
+                                      boolean notFixed, Integer groupId, Integer galertDefId, PageInfo pInfo);
 
     /**
      * Get the number of alerts for the given array of AppdefEntityID's
@@ -169,7 +171,8 @@ public interface GalertManager
      * @param configs A list of {@link ConfigResponse}s, one for each trigger
      *        info
      */
-    public void configureTriggers(GalertDef def, GalertDefPartition partition, List<GtriggerTypeInfo> triggerInfos, List<ConfigResponse> configs);
+    public void configureTriggers(GalertDef def, GalertDefPartition partition, List<GtriggerTypeInfo> triggerInfos,
+                                  List<ConfigResponse> configs);
 
     public ExecutionStrategyInfo addPartition(GalertDef def, GalertDefPartition partition,
                                               ExecutionStrategyTypeInfo stratType, ConfigResponse stratConfig);

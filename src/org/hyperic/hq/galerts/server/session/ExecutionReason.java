@@ -31,43 +31,42 @@ import java.util.List;
 import org.hyperic.hq.events.AlertAuxLog;
 
 public class ExecutionReason {
-    private final String             _shortReason;
-    private final String             _longReason;
-    private final List<AlertAuxLog>  _auxLogs;
+    private final String _shortReason;
+    private final String _longReason;
+    private final List<AlertAuxLog> _auxLogs;
     private final GalertDefPartition _partition;
-    
+
     public ExecutionReason(String shortReason, String longReason, List<AlertAuxLog> auxLogs,
-                           GalertDefPartition partition) 
-    {
+                           GalertDefPartition partition) {
         _shortReason = shortReason;
-        _longReason  = longReason;
-        _auxLogs     = auxLogs;
-        _partition   = partition;
+        _longReason = longReason;
+        _auxLogs = auxLogs;
+        _partition = partition;
     }
-    
+
     public String getShortReason() {
         return _shortReason;
     }
-    
+
     public String getLongReason() {
         return _longReason;
     }
-    
+
     /**
      * Returns a list of {@link AlertAuxLog}s
      */
     public List<AlertAuxLog> getAuxLogs() {
         return Collections.unmodifiableList(_auxLogs);
     }
-    
+
     public GalertDefPartition getPartition() {
         return _partition;
     }
-    
+
     public String toString() {
-        return "Execution Reason (" + _partition + "):\n" + 
-            "Short = [" + _shortReason + "]\n" + 
-            "Long = \n" + 
-            "[" + _longReason + "]" + "\n";
+        return "Execution Reason (" + _partition + "):\n" +
+               "Short = [" + _shortReason + "]\n" +
+               "Long = \n" +
+               "[" + _longReason + "]" + "\n";
     }
 }
