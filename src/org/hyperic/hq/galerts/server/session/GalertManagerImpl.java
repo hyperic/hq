@@ -70,22 +70,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-
 /**
  *
  */
 @Service
 @Transactional
-public class GalertManagerImpl implements GalertManager
-{
+public class GalertManagerImpl implements GalertManager {
     private final Log _log = LogFactory.getLog(GalertManagerImpl.class);
 
     private ExecutionStrategyTypeInfoDAO _stratTypeDAO;
-    private GalertDefDAO                 _defDAO;
-    private GalertAuxLogDAO              _auxLogDAO;
-    private GalertLogDAO                 _logDAO;
-    private GalertActionLogDAO           _actionLogDAO;
+    private GalertDefDAO _defDAO;
+    private GalertAuxLogDAO _auxLogDAO;
+    private GalertLogDAO _logDAO;
+    private GalertActionLogDAO _actionLogDAO;
     private CrispoManagerLocal crispoManager;
     private EscalationManagerLocal escalationManager;
 
@@ -93,14 +90,13 @@ public class GalertManagerImpl implements GalertManager
 
     @Autowired
     public GalertManagerImpl(ExecutionStrategyTypeInfoDAO stratTypeDAO,
-                                GalertDefDAO defDAO,
-                                GalertAuxLogDAO auxLogDAO,
-                                GalertLogDAO logDAO,
-                                GalertActionLogDAO actionLogDAO,
-                                CrispoManagerLocal crispoManager,
-                                EscalationManagerLocal escalationManager,
-                                ResourceGroupManager resourceGroupManager)
-    {
+                             GalertDefDAO defDAO,
+                             GalertAuxLogDAO auxLogDAO,
+                             GalertLogDAO logDAO,
+                             GalertActionLogDAO actionLogDAO,
+                             CrispoManagerLocal crispoManager,
+                             EscalationManagerLocal escalationManager,
+                             ResourceGroupManager resourceGroupManager) {
         _stratTypeDAO = stratTypeDAO;
         _defDAO = defDAO;
         _auxLogDAO = auxLogDAO;
@@ -113,15 +109,14 @@ public class GalertManagerImpl implements GalertManager
 
     /**
      * Update basic properties of an alert definition
-     *
+     * 
      * If any of the passed params are non-null, they will be updated with
      * the new value
-     *
+     * 
      * 
      */
     public void update(GalertDef def, String name, String desc,
-                       AlertSeverity severity, Boolean enabled)
-    {
+                       AlertSeverity severity, Boolean enabled) {
         boolean seriousUpdate = false;
         boolean updateName = false;
 
@@ -195,17 +190,16 @@ public class GalertManagerImpl implements GalertManager
 
     /**
      * Find all group alert definitions.
-     *
+     * 
      * @param minSeverity Minimum severity for returned defs
-     * @param enabled     If non-null specifies the nature of the 'enabled'
-     *                    flag for the results.
-     * @param pInfo       Paging information.  Must contain a sort field from
-     *                    {@link GalertDefSortField}
+     * @param enabled If non-null specifies the nature of the 'enabled'
+     *        flag for the results.
+     * @param pInfo Paging information. Must contain a sort field from
+     *        {@link GalertDefSortField}
      * 
      */
     public List<GalertDef> findAlertDefs(AuthzSubject subj, AlertSeverity minSeverity,
-                              Boolean enabled, PageInfo pInfo)
-    {
+                                         Boolean enabled, PageInfo pInfo) {
         return _defDAO.findAll(subj, minSeverity, enabled, pInfo);
     }
 
@@ -246,7 +240,7 @@ public class GalertManagerImpl implements GalertManager
 
     /**
      * Retrieve the Gtriggers for a partition in the given galert def.
-     *
+     * 
      * @param id The galert def id.
      * @param partition The partition.
      * @return The list of Gtriggers.
@@ -275,30 +269,34 @@ public class GalertManagerImpl implements GalertManager
     /**
      * Save the alert log and associated auxillary log information to the
      * DB.
-     *
-     * DevNote:  Since the GalertAuxLog table needs to be written first
+     * 
+     * DevNote: Since the GalertAuxLog table needs to be written first
      * (for foreign-key from the auxType tables), we first traverse all the
-     * logs and save them.  Then, we perform the same traversal and save the
+     * logs and save them. Then, we perform the same traversal and save the
      * specific logs.
-     *
+     * 
      * 
      */
     public GalertLog createAlertLog(GalertDef def, ExecutionReason reason)
-        throws ResourceDeletedException
-    {
+        throws ResourceDeletedException {
         Resource r = def.getResource();
         if (r == null || r.isInAsyncDeleteState()) {
             throw ResourceDeletedException.newInstance(r);
         }
-        Map<GalertAuxLog, AlertAuxLog> gAuxLogToAuxLog = new HashMap<GalertAuxLog, AlertAuxLog>(); // Stores real logs to auxType logs
+        Map<GalertAuxLog, AlertAuxLog> gAuxLogToAuxLog = new HashMap<GalertAuxLog, AlertAuxLog>(); // Stores
+                                                                                                   // real
+                                                                                                   // logs
+                                                                                                   // to
+                                                                                                   // auxType
+                                                                                                   // logs
         GalertLog newLog = new GalertLog(def, reason,
                                          System.currentTimeMillis());
         addAuxLogChildren(newLog, null, reason.getAuxLogs(), gAuxLogToAuxLog);
         _logDAO.save(newLog);
 
         for (Map.Entry<GalertAuxLog, AlertAuxLog> ent : gAuxLogToAuxLog.entrySet()) {
-            GalertAuxLog gAuxLog = (GalertAuxLog)ent.getKey();
-            AlertAuxLog auxLog = (AlertAuxLog)ent.getValue();
+            GalertAuxLog gAuxLog = (GalertAuxLog) ent.getKey();
+            AlertAuxLog auxLog = (AlertAuxLog) ent.getValue();
             AlertAuxLogProvider provider = auxLog.getProvider();
 
             if (provider != null)
@@ -309,9 +307,8 @@ public class GalertManagerImpl implements GalertManager
     }
 
     private void addAuxLogChildren(GalertLog alert, GalertAuxLog parent,
-                                   List<AlertAuxLog> auxLogs, Map<GalertAuxLog, AlertAuxLog> gAuxLogToAuxLog)
-    {
-        for (AlertAuxLog auxLog : auxLogs ) {
+                                   List<AlertAuxLog> auxLogs, Map<GalertAuxLog, AlertAuxLog> gAuxLogToAuxLog) {
+        for (AlertAuxLog auxLog : auxLogs) {
             GalertAuxLog newLog;
 
             newLog = alert.addAuxLog(auxLog, parent);
@@ -325,8 +322,7 @@ public class GalertManagerImpl implements GalertManager
      * 
      */
     public void createActionLog(GalertLog alert, String detail, Action action,
-                                AuthzSubject subject)
-    {
+                                AuthzSubject subject) {
         GalertActionLog log = alert.createActionLog(detail, action, subject);
 
         _actionLogDAO.save(log);
@@ -385,8 +381,7 @@ public class GalertManagerImpl implements GalertManager
      * 
      */
     public PageList<GalertLog> findAlertLogsByTimeWindow(ResourceGroup group, long begin,
-                                              long end, PageControl pc)
-    {
+                                                         long end, PageControl pc) {
         return _logDAO.findByTimeWindow(group, begin, end, pc);
     }
 
@@ -394,8 +389,7 @@ public class GalertManagerImpl implements GalertManager
      * 
      */
     public List<GalertLog> findUnfixedAlertLogsByTimeWindow(ResourceGroup group,
-                                                     long begin, long end)
-    {
+                                                            long begin, long end) {
         return _logDAO.findUnfixedByTimeWindow(group, begin, end);
     }
 
@@ -405,11 +399,10 @@ public class GalertManagerImpl implements GalertManager
      * 
      */
     public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority,
-                                 long timeRange, long endTime, List<AppdefEntityID> includes)
-        throws PermissionException
-    {
+                                              long timeRange, long endTime, List<AppdefEntityID> includes)
+        throws PermissionException {
         List<GalertLog> alerts = findAlerts(subj, count, priority, timeRange, endTime,
-                                 includes);
+                                            includes);
         List<Escalatable> res = new ArrayList<Escalatable>(alerts.size());
 
         for (GalertLog alert : alerts) {
@@ -420,27 +413,26 @@ public class GalertManagerImpl implements GalertManager
 
     /**
      * Find group alerts based on a set of criteria
-     *
-     * @param subj      Subject doing the finding
-     * @param count     Max # of alerts to return
-     * @param priority  A value from {@link EventConstants}
+     * 
+     * @param subj Subject doing the finding
+     * @param count Max # of alerts to return
+     * @param priority A value from {@link EventConstants}
      * @param timeRange the amount of milliseconds prior to current that the
-     *                  alerts will be contained in.  e.g. the beginning of the
-     *                  time range will be (current - timeRante)
-     * @param includes  A list of entity IDs to include in the result.  If null
-     * then ignore and return all.
-     *
+     *        alerts will be contained in. e.g. the beginning of the
+     *        time range will be (current - timeRante)
+     * @param includes A list of entity IDs to include in the result. If null
+     *        then ignore and return all.
+     * 
      * @return a list of {@link GalertLog}s
      * 
      */
     public List<GalertLog> findAlerts(AuthzSubject subj, int count, int priority,
-                           long timeRange, long endTime, List<AppdefEntityID> includes)
-        throws PermissionException
-    {
+                                      long timeRange, long endTime, List<AppdefEntityID> includes)
+        throws PermissionException {
         List<GalertLog> alerts;
 
         if (priority == EventConstants.PRIORITY_ALL) {
-            alerts = _logDAO.findByCreateTime(endTime- timeRange, endTime,
+            alerts = _logDAO.findByCreateTime(endTime - timeRange, endTime,
                                               count);
         } else {
             PageInfo pInfo = PageInfo.create(0, count, GalertLogSortField.DATE,
@@ -475,9 +467,8 @@ public class GalertManagerImpl implements GalertManager
      * 
      */
     public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity,
-                           long timeRange, long endTime, boolean inEsc,
-                           boolean notFixed, Integer groupId, PageInfo pInfo)
-    {
+                                      long timeRange, long endTime, boolean inEsc,
+                                      boolean notFixed, Integer groupId, PageInfo pInfo) {
         return findAlerts(subj, severity, timeRange, endTime,
                           inEsc, notFixed, groupId, null, pInfo);
     }
@@ -486,10 +477,9 @@ public class GalertManagerImpl implements GalertManager
      * 
      */
     public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity,
-                           long timeRange, long endTime, boolean inEsc,
-                           boolean notFixed, Integer groupId, Integer galertDefId,
-                           PageInfo pInfo)
-    {
+                                      long timeRange, long endTime, boolean inEsc,
+                                      boolean notFixed, Integer groupId, Integer galertDefId,
+                                      PageInfo pInfo) {
         return _logDAO.findByCreateTimeAndPriority(subj.getId(),
                                                    endTime - timeRange, endTime,
                                                    severity, inEsc, notFixed,
@@ -507,7 +497,7 @@ public class GalertManagerImpl implements GalertManager
         for (int i = 0; i < ids.length; i++) {
             if (ids[i].isGroup()) {
                 ResourceGroup group =
-                    resourceGroupManager.findResourceGroupById(subj, ids[i].getId());
+                                      resourceGroupManager.findResourceGroupById(subj, ids[i].getId());
 
                 counts[i] = _logDAO.countAlerts(group).intValue();
             }
@@ -533,9 +523,7 @@ public class GalertManagerImpl implements GalertManager
      * Register an execution strategy.
      * 
      */
-    public ExecutionStrategyTypeInfo
-        registerExecutionStrategy(ExecutionStrategyType stratType)
-    {
+    public ExecutionStrategyTypeInfo registerExecutionStrategy(ExecutionStrategyType stratType) {
         ExecutionStrategyTypeInfo info = _stratTypeDAO.find(stratType);
 
         if (info != null) {
@@ -550,7 +538,7 @@ public class GalertManagerImpl implements GalertManager
     }
 
     /**
-     * Unregister an execution strategy.  This will fail if any alert
+     * Unregister an execution strategy. This will fail if any alert
      * definitions are currently using the strategy
      * 
      */
@@ -574,16 +562,15 @@ public class GalertManagerImpl implements GalertManager
 
     /**
      * Configure triggers for a given partition.
-     *
+     * 
      * @param triggerInfos A list of {@link GtriggerTypeInfo}s
-     * @param configs      A list of {@link ConfigResponse}s, one for each
-     *                     trigger info
-     *
+     * @param configs A list of {@link ConfigResponse}s, one for each
+     *        trigger info
+     * 
      * 
      */
     public void configureTriggers(GalertDef def, GalertDefPartition partition,
-                                  List<GtriggerTypeInfo> triggerInfos, List<ConfigResponse> configs)
-    {
+                                  List<GtriggerTypeInfo> triggerInfos, List<ConfigResponse> configs) {
         ExecutionStrategyInfo strat;
 
         if (triggerInfos.size() != configs.size()) {
@@ -595,19 +582,19 @@ public class GalertManagerImpl implements GalertManager
 
         // Delete the old triggers if there were any
         List<Crispo> crispos = new ArrayList<Crispo>();
-        for (GtriggerInfo t : strat.getTriggers() ) {
+        for (GtriggerInfo t : strat.getTriggers()) {
             crispos.add(t.getConfigCrispo());
             _defDAO.remove(t);
         }
 
-        for (Iterator<Crispo> i=crispos.iterator(); i.hasNext(); ) {
+        for (Iterator<Crispo> i = crispos.iterator(); i.hasNext();) {
             crispoManager.deleteCrispo(i.next());
         }
         strat.clearTriggers();
 
         // Now add the new triggers
         Iterator<ConfigResponse> j = configs.iterator();
-        for (GtriggerTypeInfo typeInfo : triggerInfos ) {
+        for (GtriggerTypeInfo typeInfo : triggerInfos) {
             ConfigResponse config = j.next();
             Crispo crispo = crispoManager.create(config);
             GtriggerInfo t = strat.addTrigger(typeInfo, crispo, def.getGroup(),
@@ -621,11 +608,9 @@ public class GalertManagerImpl implements GalertManager
     /**
      * 
      */
-    public ExecutionStrategyInfo
-        addPartition(GalertDef def, GalertDefPartition partition,
-                     ExecutionStrategyTypeInfo stratType,
-                     ConfigResponse stratConfig)
-    {
+    public ExecutionStrategyInfo addPartition(GalertDef def, GalertDefPartition partition,
+                                              ExecutionStrategyTypeInfo stratType,
+                                              ConfigResponse stratConfig) {
         Crispo stratCrispo = crispoManager.create(stratConfig);
         ExecutionStrategyInfo res = def.addPartition(partition, stratType,
                                                      stratCrispo);
@@ -635,14 +620,12 @@ public class GalertManagerImpl implements GalertManager
         return res;
     }
 
-
     /**
      * 
      */
     public GalertDef createAlertDef(AuthzSubject subject, String name,
                                     String description, AlertSeverity severity,
-                                    boolean enabled, ResourceGroup group)
-    {
+                                    boolean enabled, ResourceGroup group) {
         GalertDef def;
 
         def = new GalertDef(name, description, severity, enabled, group);
@@ -653,9 +636,9 @@ public class GalertManagerImpl implements GalertManager
     }
 
     /**
-     * Reload an alert definition.  Probably should only be called internally
+     * Reload an alert definition. Probably should only be called internally
      * here.
-     *
+     * 
      * 
      */
     public void reloadAlertDef(GalertDef def) {
@@ -663,9 +646,9 @@ public class GalertManagerImpl implements GalertManager
     }
 
     /**
-     * Mark an alert definition as deleted.  This will remove it from all
+     * Mark an alert definition as deleted. This will remove it from all
      * dialogues, but will leave all the data (specific alerts) in place.
-     *
+     * 
      * 
      */
     public void markDefDeleted(GalertDef def) {
@@ -676,7 +659,7 @@ public class GalertManagerImpl implements GalertManager
 
     /**
      * Delete an alert definition along with all logs which are tied to it.
-     *
+     * 
      * 
      */
     public void nukeAlertDef(GalertDef def) {
@@ -692,8 +675,9 @@ public class GalertManagerImpl implements GalertManager
         _logDAO.removeAll(def);
 
         for (ExecutionStrategyInfo strat : def.getStrategies()) {
-             // Reconfigure the def to have 0 triggers (i.e. nuke the instances)
-            // TODO: G (Collections.emptyList() should have worked, but at least Eclipse issues an error)
+            // Reconfigure the def to have 0 triggers (i.e. nuke the instances)
+            // TODO: G (Collections.emptyList() should have worked, but at least
+            // Eclipse issues an error)
             configureTriggers(def, strat.getPartition(), Collections.EMPTY_LIST,
                               Collections.EMPTY_LIST);
             nukeCrispos.add(strat.getConfigCrispo());
@@ -717,7 +701,7 @@ public class GalertManagerImpl implements GalertManager
 
     /**
      * Start an escalation for a group alert definition.
-     *
+     * 
      * 
      */
     public void startEscalation(GalertDef def, ExecutionReason reason) {
@@ -726,7 +710,7 @@ public class GalertManagerImpl implements GalertManager
 
     /**
      * Remove all the galert defs associated with this resource group.
-     *
+     * 
      * 
      */
     public void processGroupDeletion(ResourceGroup g) {
@@ -746,7 +730,7 @@ public class GalertManagerImpl implements GalertManager
 
         HQApp.getInstance().registerCallbackListener(GroupChangeCallback.class,
                                                      new GroupChangeCallback()
-        {
+                                                     {
             public void postGroupCreate(ResourceGroup g) {
             }
 
@@ -760,7 +744,7 @@ public class GalertManagerImpl implements GalertManager
             /**
              * When the group system changes the members, we reload the
              * in-memory alert definition.
-             *
+             * 
              * This may be undesirable if the frequency of the changes to
              * the alert definition is high, since the in-memory state is
              * reset every time this operation is performed.
@@ -776,21 +760,20 @@ public class GalertManagerImpl implements GalertManager
         });
 
         HQApp.getInstance()
-            .registerCallbackListener(SubjectRemoveCallback.class,
-                 new SubjectRemoveCallback() {
-                    public void subjectRemoved(AuthzSubject toDelete) {
-                        _actionLogDAO
-                            .handleSubjectRemoval(toDelete);
-                    }
-                }
-            );
+             .registerCallbackListener(SubjectRemoveCallback.class,
+                                       new SubjectRemoveCallback() {
+            public void subjectRemoved(AuthzSubject toDelete) {
+                _actionLogDAO
+                             .handleSubjectRemoval(toDelete);
+            }
+        }
+             );
 
         GalertProcessor.getInstance().startupInitialize(_defDAO.findAll());
     }
 
     public static GalertManager getOne() {
-       return Bootstrap.getBean(GalertManager.class);
+        return Bootstrap.getBean(GalertManager.class);
     }
 
-  
 }

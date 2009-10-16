@@ -47,15 +47,14 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class GalertLogDAO
-    extends HibernateDAO<GalertLog>
-{
+    extends HibernateDAO<GalertLog> {
     @Autowired
     GalertLogDAO(SessionFactory f) {
         super(GalertLog.class, f);
     }
 
     GalertLog findById(Integer id) {
-        return (GalertLog)super.findById(id);
+        return (GalertLog) super.findById(id);
     }
 
     void save(GalertLog log) {
@@ -75,43 +74,42 @@ public class GalertLogDAO
         String sql = "from GalertLog l where l.alertDef.group = :group " +
                      "order by l.timestamp";
 
-        return (List<GalertLog>)getSession().createQuery(sql)
-            .setParameter("group", g)
-            .list();
+        return (List<GalertLog>) getSession().createQuery(sql)
+                                             .setParameter("group", g)
+                                             .list();
     }
 
     public GalertLog findLastByDefinition(GalertDef def, boolean fixed) {
         return (GalertLog) createCriteria()
-            .add(Expression.eq("alertDef", def))
-            .add(Expression.eq("fixed", new Boolean(fixed)))
-            .addOrder(Order.desc("timestamp"))
-            .setMaxResults(1)
-            .uniqueResult();
+                                           .add(Expression.eq("alertDef", def))
+                                           .add(Expression.eq("fixed", new Boolean(fixed)))
+                                           .addOrder(Order.desc("timestamp"))
+                                           .setMaxResults(1)
+                                           .uniqueResult();
     }
 
     PageList<GalertLog> findByTimeWindow(ResourceGroup g, long begin, long end,
-                              PageControl pc) {
+                                         PageControl pc) {
         final String tsProp = "timestamp";
         Integer count = (Integer) createCriteria()
-            .createAlias("alertDef", "d")
-            .add(Restrictions.eq("d.group", g))
-            .add(Restrictions.ge(tsProp, new Long(begin)))
-            .add(Restrictions.le(tsProp, new Long(end)))
-            .setProjection(Projections.rowCount())
-            .uniqueResult();
+                                                  .createAlias("alertDef", "d")
+                                                  .add(Restrictions.eq("d.group", g))
+                                                  .add(Restrictions.ge(tsProp, new Long(begin)))
+                                                  .add(Restrictions.le(tsProp, new Long(end)))
+                                                  .setProjection(Projections.rowCount())
+                                                  .uniqueResult();
 
         if (count.intValue() > 0) {
             Criteria crit = createCriteria()
-                .createAlias("alertDef", "d")
-                .add(Restrictions.eq("d.group", g))
-                .add(Restrictions.ge(tsProp, new Long(begin)))
-                .add(Restrictions.le(tsProp, new Long(end)))
-                .addOrder(pc.isDescending() ? Order.desc(tsProp) :
-                                              Order.asc(tsProp));
+                                            .createAlias("alertDef", "d")
+                                            .add(Restrictions.eq("d.group", g))
+                                            .add(Restrictions.ge(tsProp, new Long(begin)))
+                                            .add(Restrictions.le(tsProp, new Long(end)))
+                                            .addOrder(pc.isDescending() ? Order.desc(tsProp) :
+                                                                       Order.asc(tsProp));
 
             return getPagedResult(crit, count, pc);
         }
-
 
         return new PageList<GalertLog>();
     }
@@ -119,40 +117,38 @@ public class GalertLogDAO
     @SuppressWarnings("unchecked")
     List<GalertLog> findUnfixedByTimeWindow(ResourceGroup g, long begin, long end) {
         final String tsProp = "timestamp";
-        return (List<GalertLog>)createCriteria()
-                .createAlias("alertDef", "d")
-                .add(Restrictions.eq("fixed", Boolean.FALSE))
-                .add(Restrictions.eq("d.group", g))
-                .add(Restrictions.ge(tsProp, new Long(begin)))
-                .add(Restrictions.le(tsProp, new Long(end)))
-                .list();
+        return (List<GalertLog>) createCriteria()
+                                                 .createAlias("alertDef", "d")
+                                                 .add(Restrictions.eq("fixed", Boolean.FALSE))
+                                                 .add(Restrictions.eq("d.group", g))
+                                                 .add(Restrictions.ge(tsProp, new Long(begin)))
+                                                 .add(Restrictions.le(tsProp, new Long(end)))
+                                                 .list();
     }
 
     @SuppressWarnings("unchecked")
     List<GalertLog> findByCreateTime(long startTime, long endTime, int count) {
         Criteria criteria = createCriteria()
-            .add(Expression.between("timestamp", new Long(startTime),
-                                    new Long(endTime)))
-            .addOrder(Order.desc("timestamp"));
+                                            .add(Expression.between("timestamp", new Long(startTime),
+                                                                    new Long(endTime)))
+                                            .addOrder(Order.desc("timestamp"));
         if (count >= 0) {
             criteria.setMaxResults(count);
         }
-        return (List<GalertLog>)criteria.list();
+        return (List<GalertLog>) criteria.list();
     }
 
     @SuppressWarnings("unchecked")
     List<GalertLog> findByCreateTimeAndPriority(Integer subjectId, long begin, long end,
-                                     AlertSeverity severity, boolean inEsc,
-                                     boolean notFixed, Integer groupId,
-                                     Integer galertDefId, PageInfo pageInfo)
-    {
-        GalertLogSortField sort = (GalertLogSortField)pageInfo.getSort();
+                                                AlertSeverity severity, boolean inEsc,
+                                                boolean notFixed, Integer groupId,
+                                                Integer galertDefId, PageInfo pageInfo) {
+        GalertLogSortField sort = (GalertLogSortField) pageInfo.getSort();
         String op = AuthzConstants.groupOpManageAlerts;
-        String sql =  PermissionManagerFactory.getInstance()
-                .getGroupAlertsHQL(inEsc, notFixed, groupId, galertDefId) +
-            " order by " + sort.getSortString("a", "d", "g") +
-            (pageInfo.isAscending() ? "" : " DESC");
-
+        String sql = PermissionManagerFactory.getInstance()
+                                             .getGroupAlertsHQL(inEsc, notFixed, groupId, galertDefId) +
+                     " order by " + sort.getSortString("a", "d", "g") +
+                     (pageInfo.isAscending() ? "" : " DESC");
 
         if (!sort.equals(GalertLogSortField.DATE)) {
             sql += ", " + GalertLogSortField.DATE.getSortString("a", "d", "g") +
@@ -169,15 +165,15 @@ public class GalertLogDAO
              .setParameter("op", op);
         }
 
-        return (List<GalertLog>)pageInfo.pageResults(q).list();
+        return (List<GalertLog>) pageInfo.pageResults(q).list();
     }
 
     void removeAll(ResourceGroup g) {
         String sql = "delete from GalertLog l where l.alertDef.group = :group";
 
         getSession().createQuery(sql)
-            .setParameter("group", g)
-            .executeUpdate();
+                    .setParameter("group", g)
+                    .executeUpdate();
     }
 
     void removeAll(GalertDef d) {
@@ -190,9 +186,9 @@ public class GalertLogDAO
 
     public Integer countAlerts(ResourceGroup g) {
         return (Integer) createCriteria()
-            .createAlias("alertDef", "d")
-            .add(Restrictions.eq("d.group", g))
-            .setProjection(Projections.rowCount())
-            .uniqueResult();
+                                         .createAlias("alertDef", "d")
+                                         .add(Restrictions.eq("d.group", g))
+                                         .setProjection(Projections.rowCount())
+                                         .uniqueResult();
     }
 }

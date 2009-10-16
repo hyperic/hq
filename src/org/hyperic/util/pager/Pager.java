@@ -34,43 +34,40 @@ import java.util.Map;
 import org.hyperic.hq.common.SystemException;
 
 /**
- * Implements a generic pager.  What is a pager?  Let's say you
- * have a large collection of objects, perhaps a long list of 
- * EJB Local Interfaces.  You're interested in breaking the
+ * Implements a generic pager. What is a pager? Let's say you
+ * have a large collection of objects, perhaps a long list of
+ * EJB Local Interfaces. You're interested in breaking the
  * mammoth list out into a number pages, each with 25 items on it.
  * You're interested in returning page #17 of such a collection.
  * Why bother implementing the "skip past a bunch of things, then
- * return pagesize items in the resultant colleciton" over and over 
+ * return pagesize items in the resultant colleciton" over and over
  * again.
- *
+ * 
  * You can also have the elements go through a _processor that you
- * supply as they move from the source collection to the 
+ * supply as they move from the source collection to the
  * destination collection.
  */
 // TODO: G
 public class Pager {
-    public static final String DEFAULT_PROCESSOR_CLASSNAME =
-        DefaultPagerProcessor.class.getName();
+    public static final String DEFAULT_PROCESSOR_CLASSNAME = DefaultPagerProcessor.class.getName();
+    private static final Map PAGER_PROCESSOR_MAP = Collections.synchronizedMap(new HashMap());
 
-    private static final Map PAGER_PROCESSOR_MAP = 
-        Collections.synchronizedMap(new HashMap());
-
-    private PagerProcessor    _processor;
-    private boolean           _skipNulls = false;
+    private PagerProcessor _processor;
+    private boolean _skipNulls = false;
     private PagerEventHandler _eventHandler;
 
     private Pager(PagerProcessor processor) {
-        _processor    = processor;
-        _skipNulls    = false;
+        _processor = processor;
+        _skipNulls = false;
         _eventHandler = null;
 
-        if (_processor instanceof PagerProcessorExt ) {
-            _skipNulls    = ((PagerProcessorExt)_processor).skipNulls();
+        if (_processor instanceof PagerProcessorExt) {
+            _skipNulls = ((PagerProcessorExt) _processor).skipNulls();
             _eventHandler = ((PagerProcessorExt) _processor).getEventHandler();
         }
     }
 
-    public static Pager getDefaultPager () {
+    public static Pager getDefaultPager() {
         try {
             return getPager(DEFAULT_PROCESSOR_CLASSNAME);
         } catch (Exception e) {
@@ -82,14 +79,13 @@ public class Pager {
      * Get a pager based on the PagerProcessor supplied.
      */
     public static Pager getPager(String className)
-        throws InstantiationException, IllegalAccessException, 
-               ClassNotFoundException 
-    {
+        throws InstantiationException, IllegalAccessException,
+        ClassNotFoundException {
         Pager p = (Pager) PAGER_PROCESSOR_MAP.get(className);
-        
+
         if (p == null) {
-            PagerProcessor processor = (PagerProcessor) 
-                Class.forName(className).newInstance();
+            PagerProcessor processor = (PagerProcessor)
+                                       Class.forName(className).newInstance();
             p = new Pager(processor);
             PAGER_PROCESSOR_MAP.put(className, p);
         }
@@ -103,8 +99,9 @@ public class Pager {
      * source collection will be returned.
      * 
      * @param source The source collection to seek through.
-     * @param pagenum The page number to seek to.  If there not
-     * enough pages in the collection, then an empty list will be returned.
+     * @param pagenum The page number to seek to. If there not
+     *        enough pages in the collection, then an empty list will be
+     *        returned.
      * @param pagesize The size of each page.
      * @return PageList containing results of seek.
      */
@@ -122,14 +119,14 @@ public class Pager {
      * @param pc The PageControl object to use to control paging.
      * @return PageList containing results of seek.
      */
-    public PageList seek (Collection source, PageControl pc) {
+    public PageList seek(Collection source, PageControl pc) {
         if (pc == null)
             pc = PageControl.PAGE_ALL;
-        
+
         return seek(source, pc.getPagenum(), pc.getPagesize(), null);
     }
 
-    public PageList seek (Collection source, PageControl pc, Object procData) {
+    public PageList seek(Collection source, PageControl pc, Object procData) {
         if (pc == null)
             pc = PageControl.PAGE_ALL;
         return seek(source, pc.getPagenum(), pc.getPagesize(), procData);
@@ -142,15 +139,15 @@ public class Pager {
      * source collection will be returned.
      * 
      * @param source The source collection to seek through.
-     * @param pagenum The page number to seek to.  If there not
-     * enough pages in the collection, then an empty list will be returned.
+     * @param pagenum The page number to seek to. If there not
+     *        enough pages in the collection, then an empty list will be
+     *        returned.
      * @param pagesize The size of each page.
      * @param procData - any data object required by the _processor.
      * @return PageList containing results of seek.
      */
     public PageList seek(Collection source, int pagenum, int pagesize,
-                         Object procData ) 
-    {
+                         Object procData) {
         PageList dest = new PageList();
         dest.setTotalSize(seek(source, dest, pagenum, pagesize, procData));
         return dest;
@@ -164,13 +161,13 @@ public class Pager {
      * 
      * @param source The source collection to seek through.
      * @param dest The collection to place results into.
-     * @param pagenum The page number to seek to.  If there not
-     * enough pages in the collection, then an empty list will be returned.
+     * @param pagenum The page number to seek to. If there not
+     *        enough pages in the collection, then an empty list will be
+     *        returned.
      * @param pagesize The size of each page.
      */
     public void seek(Collection source, Collection dest, int pagenum,
-                     int pagesize ) 
-    {
+                     int pagesize) {
         seek(source, dest, pagenum, pagesize, null);
     }
 
@@ -182,45 +179,43 @@ public class Pager {
      * 
      * @param source The source collection to seek through.
      * @param dest The collection to place results into.
-     * @param pagenum The page number to seek to.  If there not
-     * enough pages in the collection, then an empty list will be returned.
+     * @param pagenum The page number to seek to. If there not
+     *        enough pages in the collection, then an empty list will be
+     *        returned.
      * @param pagesize The size of each page.
      * @param procData any object required to process the item.
      */
     public int seek(Collection source, Collection dest, int pagenum,
-                    int pagesize, Object procData) 
-    {
+                    int pagesize, Object procData) {
         Iterator iter = source.iterator();
         int i, currentPage, size = source.size();
 
         if (pagesize == -1 || pagenum == -1) {
-            pagenum  = 0;
+            pagenum = 0;
             pagesize = Integer.MAX_VALUE;
         }
 
-        for (i=0, currentPage=0;
-            iter.hasNext() && currentPage < pagenum;
-            i++, currentPage += (i % pagesize == 0) ? 1:0 ) 
-        {
+        for (i = 0, currentPage = 0; iter.hasNext() && currentPage < pagenum; i++, currentPage += (i % pagesize == 0) ? 1
+                                                                                                                     : 0) {
             iter.next();
         }
 
-        if (_eventHandler != null ) 
+        if (_eventHandler != null)
             _eventHandler.init();
 
         if (_skipNulls) {
             Object elt;
-            while ( iter.hasNext() ) {
+            while (iter.hasNext()) {
                 if (_processor instanceof PagerProcessorExt)
-                    elt = ((PagerProcessorExt)_processor)
-                      .processElement(iter.next(), procData);
+                    elt = ((PagerProcessorExt) _processor)
+                                                          .processElement(iter.next(), procData);
                 else
                     elt = _processor.processElement(iter.next());
                 if (elt == null) {
                     size--;
                     continue;
                 }
-                
+
                 // Need to keep accurate count, so gotta keep checking
                 if (dest.size() < pagesize) {
                     dest.add(elt);
@@ -234,9 +229,9 @@ public class Pager {
             }
         }
 
-        if (_eventHandler != null ) 
+        if (_eventHandler != null)
             _eventHandler.cleanup();
-        
+
         return size;
     }
 
@@ -247,16 +242,16 @@ public class Pager {
      * regardless whether they are placed in dest collection. If pagenum
      * or pagesize is -1, then everything in the source collection will
      * be placed in the dest collection.
-     *
+     * 
      * @param source The source collection to seek through.
-     * @param pagenum The page number to seek to.  If there not
-     * enough pages in the collection, then an empty list will be returned.
+     * @param pagenum The page number to seek to. If there not
+     *        enough pages in the collection, then an empty list will be
+     *        returned.
      * @param pagesize The size of each page.
      * @param procData any object required to process the item.
      */
     public PageList seekAll(Collection source, int pagenum, int pagesize,
-                            Object procData) 
-    {
+                            Object procData) {
         PageList dest = new PageList();
         dest.setTotalSize(seekAll(source, dest, pagenum, pagesize, procData));
         return dest;
@@ -265,21 +260,21 @@ public class Pager {
     /**
      * Seek to the specified pagenum in the source collection and place
      * pagesize number of elements into the dest collection. Unlike,
-     * seek(), all items are passed to the Processor or ProcessorExt 
-     * regardless whether they are placed in dest collection. If pagenum 
-     * or pagesize is -1, then everything in the source collection will 
+     * seek(), all items are passed to the Processor or ProcessorExt
+     * regardless whether they are placed in dest collection. If pagenum
+     * or pagesize is -1, then everything in the source collection will
      * be placed in the dest collection.
      * 
      * @param source The source collection to seek through.
      * @param dest The collection to place results into.
-     * @param pagenum The page number to seek to.  If there not
-     * enough pages in the collection, then an empty list will be returned.
+     * @param pagenum The page number to seek to. If there not
+     *        enough pages in the collection, then an empty list will be
+     *        returned.
      * @param pagesize The size of each page.
      * @param procData any object required to process the item.
      */
     public int seekAll(Collection source, Collection dest, int pagenum,
-                       int pagesize, Object procData) 
-    {
+                       int pagesize, Object procData) {
         Iterator iter = source.iterator();
         int i, currentPage, size = source.size();
 
@@ -290,39 +285,37 @@ public class Pager {
 
         // PR:8434 : Multi-part paging fixes.
         // 1.) Invoke the pager _processor external which in many cases may
-        //     be keeping track of element [in|ex]clusion.
+        // be keeping track of element [in|ex]clusion.
         // 2.) The counter 'i' is used with modulus arithmetic to determine
-        //     which page we should be on. Don't increment it if the proc-ext
-        //     indicated that the element should not be paged.
+        // which page we should be on. Don't increment it if the proc-ext
+        // indicated that the element should not be paged.
         // 3.) 'i' begins it's existance at 0. Zero modulus anything yields
-        //      zero. So the ternary expression needs to check for this initial
-        //      condition and not increment the page number.
-        for (i=0, currentPage=0;
-             iter.hasNext() && currentPage < pagenum;
-             currentPage += (i != 0 && i % pagesize == 0) ? 1:0 ) 
-        {
-        	Object ret = null;
-        	
+        // zero. So the ternary expression needs to check for this initial
+        // condition and not increment the page number.
+        for (i = 0, currentPage = 0; iter.hasNext() && currentPage < pagenum; currentPage += (i != 0 && i % pagesize == 0) ? 1
+                                                                                                                          : 0) {
+            Object ret = null;
+
             if (_processor instanceof PagerProcessorExt) {
-                ret = ((PagerProcessorExt)_processor).processElement(iter.next(), procData);
+                ret = ((PagerProcessorExt) _processor).processElement(iter.next(), procData);
             } else {
                 ret = _processor.processElement(iter.next());
             }
-            
+
             if (ret != null) {
                 i++;
             }
         }
 
-        if (_eventHandler != null ) 
+        if (_eventHandler != null)
             _eventHandler.init();
 
         if (_skipNulls) {
             Object elt;
             while (iter.hasNext()) {
                 if (_processor instanceof PagerProcessorExt)
-                    elt = ((PagerProcessorExt)_processor)
-                      .processElement(iter.next(), procData);
+                    elt = ((PagerProcessorExt) _processor)
+                                                          .processElement(iter.next(), procData);
                 else
                     elt = _processor.processElement(iter.next());
 
@@ -344,29 +337,30 @@ public class Pager {
 
         if (_eventHandler != null)
             _eventHandler.cleanup();
-        
+
         return size;
     }
-    
-    /** Process all objects in the source page list and return the destination
+
+    /**
+     * Process all objects in the source page list and return the destination
      * page list with the same total size
      */
     public PageList processAll(PageList source) {
         PageList dest = new PageList();
         int size = source.getTotalSize();
-        for (Iterator it = source.iterator(); it.hasNext(); ) {
+        for (Iterator it = source.iterator(); it.hasNext();) {
             Object elt = this._processor.processElement(it.next());
-            if ( elt == null ) {
+            if (elt == null) {
                 size--;
                 continue;
             }
             dest.add(elt);
         }
-        
+
         dest.setTotalSize(size);
         return dest;
     }
-    
+
     public Object processOne(Object one) {
         return _processor.processElement(one);
     }
