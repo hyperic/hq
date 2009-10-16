@@ -29,13 +29,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -46,6 +51,7 @@ import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.events.server.session.EventLog;
@@ -53,6 +59,7 @@ import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.EventLogManagerUtil;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.TrackEvent;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * <p> Stores Events to and deletes Events from storage</p>
@@ -67,6 +74,9 @@ import org.hyperic.hq.product.TrackEvent;
  */
 public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     
+    private final Log log = LogFactory.getLog(EventLogManagerEJBImpl.class);
+    private final Log traceLog = LogFactory.getLog(EventLogManagerEJBImpl.class.getName() + "Trace");
+
     private final int MSGMAX = TrackEvent.MESSAGE_MAXLEN;
     private final int SRCMAX = TrackEvent.SOURCE_MAXLEN;
     
@@ -151,6 +161,112 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public List findLastLogs(Resource proto) {
         return getEventLogDAO().findLastByType(proto);
+    }
+    
+    /**
+     * Find the last unfixed AlertFiredEvents for each alert definition in the list
+     * 
+     * @param alertDefinitionIds The list of alert definition ids
+     * @return {@link Map} of alert definition id {@link Integer} to {@link AlertFiredEvent}
+     * 
+     * @ejb:interface-method
+     */
+    public Map findLastUnfixedAlertFiredEvents(List alertDefinitionIds) {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
+        if (debug) {
+            watch.markTimeBegin("findUnfixedAlertFiredEventLogs[" + alertDefinitionIds.size() + "]");
+        }
+        
+        List logs = getEventLogDAO().findUnfixedAlertFiredEventLogs(alertDefinitionIds);
+        
+        if (debug) {
+            watch.markTimeEnd("findUnfixedAlertFiredEventLogs[" + alertDefinitionIds.size() + "]");
+            watch.markTimeBegin("convertToAlertFiredEventMap");
+        }
+
+        Map alertFiredMap = convertToAlertFiredEventMap(logs, alertDefinitionIds.size());
+        
+        if (debug) {
+            watch.markTimeEnd("convertToAlertFiredEventMap");
+            
+            if (traceLog.isDebugEnabled()) {
+                watch.markTimeBegin("get mapping");
+                for (Iterator iterator = alertFiredMap.keySet().iterator(); iterator.hasNext();) {
+                    Integer key = (Integer) iterator.next();
+                    AlertFiredEvent val = (AlertFiredEvent) alertFiredMap.get(key);
+                
+                    traceLog.debug(
+                            "alertFiredMap alertDefId=" + key
+                                + ", alertFiredEvent=" + val
+                                + ", alert id=" + val.getAlertId()
+                                + ", timestamp=" + val.getTimestamp());
+                }
+                watch.markTimeEnd("get mapping");
+            }
+            
+            log.debug("findLastUnfixedAlertFiredEvents[" + alertFiredMap.size() + "]: " + watch);
+        }
+        
+        return alertFiredMap;
+    }
+    
+    /**
+     * This will get the last AlertFiredEvent for each alert definition in the list.
+     * 
+     * @param logs The list of unordered event logs
+     * @param intialMapSize The initial map size of the returned map
+     * 
+     * @return {@link Map} of alert definition id {@link Integer} to {@link AlertFiredEvent}
+     */
+    private Map convertToAlertFiredEventMap(List logs, int initialMapSize) {
+        final boolean debug = log.isDebugEnabled();
+
+        boolean updateMap = false;
+        Map rtn = new HashMap(initialMapSize);
+        
+        // Object[]
+        // 0 = {Integer} Alert id
+        // 1 = {EventLog} The AlertFiredEvent event log
+        for (final Iterator it=logs.iterator(); it.hasNext(); ) {
+            updateMap = false;
+            Object[] o = (Object[]) it.next();           
+            Integer alertId = (Integer) o[0];
+            EventLog eventLog = (EventLog) o[1];
+            Integer alertDefId = eventLog.getInstanceId();
+            
+            if (rtn.containsKey(alertDefId)) {
+                AlertFiredEvent latestEvent = (AlertFiredEvent) rtn.get(alertDefId);
+                
+                if (eventLog.getTimestamp() > latestEvent.getTimestamp()) {
+                    updateMap = true;
+                }
+            } else {
+                updateMap = true;
+            }
+            
+            if (updateMap) {
+                AlertFiredEvent alertFired = 
+                    createAlertFiredEvent(alertDefId, alertId, eventLog);
+                
+                rtn.put(alertDefId, alertFired);
+            }
+        }
+        
+        return rtn;
+    }
+    
+    private AlertFiredEvent createAlertFiredEvent(Integer alertDefId,
+                                                  Integer alertId,
+                                                  EventLog eventLog) {
+
+        return new AlertFiredEvent(alertId,
+                                   alertDefId, 
+                                   new AppdefEntityID(eventLog.getResource()),
+                                   eventLog.getSubject(),
+                                   eventLog.getTimestamp(),
+                                   eventLog.getDetail());
     }
     
     /** 

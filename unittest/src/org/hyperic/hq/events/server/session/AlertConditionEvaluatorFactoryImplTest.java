@@ -7,7 +7,6 @@ import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 
 /**
@@ -20,13 +19,10 @@ public class AlertConditionEvaluatorFactoryImplTest
 {
     private AlertConditionEvaluatorFactory factory;
     private ZeventEnqueuer zeventEnqueuer;
-    private AlertManagerLocal alertManager;
 
     public void setUp() throws Exception {
         this.zeventEnqueuer = EasyMock.createMock(ZeventEnqueuer.class);
-        this.alertManager = EasyMock.createMock(AlertManagerLocal.class);
-        this.factory = new AlertConditionEvaluatorFactoryImpl(zeventEnqueuer,
-                                                              alertManager);
+        this.factory = new AlertConditionEvaluatorFactoryImpl(zeventEnqueuer);
     }
 
    

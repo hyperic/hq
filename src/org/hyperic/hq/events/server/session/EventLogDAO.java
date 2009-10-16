@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,6 +27,7 @@ package org.hyperic.hq.events.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -36,6 +37,7 @@ import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.Util;
@@ -48,6 +50,7 @@ import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.PermissionManager.RolePermNativeSQL;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.measurement.server.session.Number;
 
@@ -209,6 +212,51 @@ public class EventLogDAO extends HibernateDAO {
             res.add(new ResourceEventLog(e.getResource(), e));
         }
         return res;
+    }
+    
+    /**
+     * Find unfixed AlertFiredEvent event logs for each alert definition in the list
+     * 
+     * @param alertDefinitionIds The list of alert definition ids
+     * 
+     * @return {@link Object[]}
+     * 0 = {@link Integer} Alert id
+     * 1 = {@link EventLog} The AlertFiredEvent event log
+     */
+    List findUnfixedAlertFiredEventLogs(List alertDefinitionIds) {        
+        if (alertDefinitionIds.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
+                
+        // NOTE: This query could potentially return lots of rows if there are
+        // a lot of unfixed alerts and the event logs are not purged frequently.
+        final String sql = 
+            new StringBuilder()
+                    .append("SELECT A.ID AS ALERT_ID, {E.*} ")
+                    .append("FROM EAM_ALERT A, EAM_EVENT_LOG E ")
+                    .append("WHERE A.ALERT_DEFINITION_ID = E.INSTANCE_ID ")
+                    .append("AND A.CTIME = E.TIMESTAMP ")
+                    .append("AND E.TYPE = :eventLogType ")
+                    .append("AND A.FIXED = '0' ")
+                    .append("AND A.ALERT_DEFINITION_ID IN (:alertDefIds) ")
+                    .toString();
+         
+        final int max = BATCH_SIZE;
+        final List logs = new ArrayList(alertDefinitionIds.size());
+        
+        for (int i=0; i<alertDefinitionIds.size(); i+=max) {
+            final int end = Math.min(i+max, alertDefinitionIds.size());
+            final List list = alertDefinitionIds.subList(i, end);
+            logs.addAll(getSession()
+                            .createSQLQuery(sql)
+                            .addScalar("ALERT_ID", new IntegerType())
+                            .addEntity("E", EventLog.class)
+                            .setParameterList("alertDefIds", list, new IntegerType())
+                            .setString("eventLogType", AlertFiredEvent.class.getName())
+                            .list());
+        }
+        
+        return logs;
     }
     
     List findByEntityAndStatus(Resource r, AuthzSubject user, 

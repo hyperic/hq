@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 
 /**
@@ -19,8 +18,6 @@ public class AlertConditionEvaluatorFactoryImpl implements AlertConditionEvaluat
 
     private final ZeventEnqueuer zeventEnqueuer;
     
-    private final AlertManagerLocal alertManager;
-
     private final Log log = LogFactory.getLog(AlertConditionEvaluatorFactoryImpl.class);
 
     /**
@@ -28,10 +25,9 @@ public class AlertConditionEvaluatorFactoryImpl implements AlertConditionEvaluat
      * @param zeventEnqueuer The {@link ZeventEnqueuer} to pass to created
      *        {@link AlertConditionEvaluator}s
      */
-    public AlertConditionEvaluatorFactoryImpl(ZeventEnqueuer zeventEnqueuer, AlertManagerLocal alertManager)
+    public AlertConditionEvaluatorFactoryImpl(ZeventEnqueuer zeventEnqueuer)
     {
         this.zeventEnqueuer = zeventEnqueuer;
-        this.alertManager = alertManager;
     }
 
     public AlertConditionEvaluator create(AlertDefinition alertDefinition) {
@@ -58,7 +54,7 @@ public class AlertConditionEvaluatorFactoryImpl implements AlertConditionEvaluat
             evaluator = new RecoveryConditionEvaluator(alertDefinition.getId(),
                                                        alertTriggerId, recoveringFromAlertDefId,
                                                        conditions,
-                                                       createExecutionStrategy(alertDefinition), alertManager);
+                                                       createExecutionStrategy(alertDefinition));
         } else if (alertDefinition.getConditions().size() > 1) {
             evaluator = new MultiConditionEvaluator(alertDefinition.getId(),
                                                     alertDefinition.getConditions(),

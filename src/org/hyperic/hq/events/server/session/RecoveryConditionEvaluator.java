@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.TriggerNotFiredEvent;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
 
 /**
  *Implementation of {@link AlertConditionEvaluator} that knows when an
@@ -30,8 +30,6 @@ public class RecoveryConditionEvaluator
     
     private final Integer recoveringFromAlertId;
     
-    private final AlertManagerLocal alertManager;
-
     /**
      * 
      * @param alertDefinitionId The ID of the recovery alert definition
@@ -47,12 +45,11 @@ public class RecoveryConditionEvaluator
                                       Integer alertTriggerId,
                                       Integer recoveringFromAlertDefId,
                                       Collection alertConditions,
-                                      ExecutionStrategy executionStrategy,AlertManagerLocal alertManager)
+                                      ExecutionStrategy executionStrategy)
     {
         super(alertDefinitionId, alertConditions, 0, executionStrategy);
         this.alertTriggerId = alertTriggerId;
         this.recoveringFromAlertId = recoveringFromAlertDefId;
-        this.alertManager = alertManager;
     }
 
     /**
@@ -71,13 +68,12 @@ public class RecoveryConditionEvaluator
                                       Integer alertTriggerId,
                                       Integer recoveringFromAlertDefId,
                                       Collection alertConditions,
-                                      ExecutionStrategy executionStrategy, AlertManagerLocal alertManager,
+                                      ExecutionStrategy executionStrategy,
                                       Map events)
     {
         super(alertDefinitionId, alertConditions, 0, executionStrategy, events);
         this.alertTriggerId = alertTriggerId;
         this.recoveringFromAlertId = recoveringFromAlertDefId;
-        this.alertManager = alertManager;
     }
 
     private void evaluateRecoveryConditions(Collection fulfilled) {
@@ -99,17 +95,28 @@ public class RecoveryConditionEvaluator
     Integer getAlertTriggerId() {
         return alertTriggerId;
     }
+    
+    Integer getRecoveringFromAlertDefinitionId() {
+        return recoveringFromAlertId;
+    }
 
+    /**
+     * Anything returned from getState() gets persisted to file on server shutdown,
+     * which we don't want to do anymore for the recovery alerts.
+     */
     public Serializable getState() {
         return null;
     }
     
-    TriggerFiredEvent getLastAlertFired() {
+    public TriggerFiredEvent getLastAlertFired() {
         return this.lastAlertFired;
     }
 
-    public void initialize(Serializable initialState) {
-        this.lastAlertFired = alertManager.getUnfixedAlertTriggerFiredEvent(recoveringFromAlertId, alertTriggerId);
+    public void initialize(Serializable initialState) {        
+        if (initialState != null && initialState instanceof AbstractEvent) {
+            this.lastAlertFired = new TriggerFiredEvent(alertTriggerId, 
+                                                        (AbstractEvent) initialState);
+        }        
     }
 
     public void triggerFired(TriggerFiredEvent event) {

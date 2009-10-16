@@ -20,8 +20,11 @@ package org.hyperic.hq.events.server.session;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
@@ -36,14 +39,17 @@ import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.InvalidTriggerDataException;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisterableTriggerRepository;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
+import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -84,6 +90,8 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     private RegisterableTriggerRepository registeredTriggerRepository;
 
     private TriggerDAOInterface triggerDAO;
+    
+    private EventLogManagerLocal eventLogManager;
 
     private ZeventEnqueuer zeventEnqueuer;
 
@@ -109,19 +117,23 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public void initializeTriggers() {
-        log.debug("Initializing triggers");
-        long startTime = System.currentTimeMillis();
+        StopWatch watch = new StopWatch();
+        
         // Only initialize the enabled triggers. If disabled ones become enabled
         // we will lazy init
-        log.debug("Fetching enabled triggers");
+        log.info("Initializing triggers");
+        
+        watch.markTimeBegin("findAllEnabledTriggers");
         Collection registeredTriggers = getTriggerDAO().findAllEnabledTriggers();
-        if (log.isDebugEnabled()) {
-            log.debug("Found " + registeredTriggers.size() + " triggers");
-        }
+        watch.markTimeEnd("findAllEnabledTriggers");
+        
+        log.info("Found " + registeredTriggers.size() + " enabled triggers");
+        
+        watch.markTimeBegin("initializeTriggers");
         initializeTriggers(registeredTriggers);
-        if(log.isInfoEnabled()) {
-            log.info("Finished initializing triggers in " + (System.currentTimeMillis() - startTime) + " ms.");
-        }
+        watch.markTimeEnd("initializeTriggers");
+        
+        log.info("Finished initializing triggers: " + watch);
     }
 
     private void registerTriggers(Integer alertDefId) {
@@ -155,7 +167,27 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     }
 
     private void initializeTriggers(Collection registeredTriggers) {
-        initializeAlertConditionEvaluators(registeredTriggers);
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
+        if (debug) {
+            watch.markTimeBegin("findLastUnfixedAlertFiredEvents");
+        }
+            
+        Map alertFiredEvents = findLastUnfixedAlertFiredEvents(registeredTriggers);
+        
+        if (debug) {
+            watch.markTimeEnd("findLastUnfixedAlertFiredEvents");
+            watch.markTimeBegin("initializeAlertConditionEvaluators");
+        }
+                
+        initializeAlertConditionEvaluators(registeredTriggers, alertFiredEvents);
+        
+        if (debug) {
+            watch.markTimeEnd("initializeAlertConditionEvaluators");
+            watch.markTimeBegin("registerTriggers[" + registeredTriggers.size() + "]");
+        }
+                
         for (Iterator i = registeredTriggers.iterator(); i.hasNext();) {
             // Try to register each trigger, if exception, then move on
             RegisteredTrigger tv = (RegisteredTrigger) i.next();
@@ -176,11 +208,23 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
                 log.error("Error registering trigger", e);
             }
         }
+        
+        if (debug) {
+            watch.markTimeEnd("registerTriggers[" + registeredTriggers.size() + "]");            
+            log.debug("initializeTriggers: " + watch);
+        }
     }
+    
+    /**
+     * Create AlertConditionEvaluator for each AlertDefinition, so they can
+     * be shared by all triggers associated with the alertDef
+     * 
+     * @param registeredTriggers Collection of all enabled triggers
+     * @param alertFiredEvents Map of alert definition id {@link Integer} to {@link AlertFiredEvent}
+     */
+    private void initializeAlertConditionEvaluators(Collection registeredTriggers, Map alertFiredEvents) {
+        final boolean debug = log.isDebugEnabled();
 
-    private void initializeAlertConditionEvaluators(Collection registeredTriggers) {
-        // Create AlertConditionEvaluator for each AlertDefinition, so they can
-        // be shared by all triggers associated with the alertDef
         for (Iterator i = registeredTriggers.iterator(); i.hasNext();) {
             try {
                 RegisteredTrigger tv = (RegisteredTrigger) i.next();
@@ -190,16 +234,73 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
                              ".  These alerts will not fire.");
                 } else if (alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(def.getId()) == null) {
                     AlertConditionEvaluator alertConditionEvaluator = alertConditionEvaluatorFactory.create(def);
-                    Serializable initialState = (Serializable) alertConditionEvaluatorRepository.getStateRepository().getAlertConditionEvaluatorStates().get(def.getId());
+                    Serializable initialState = null;
+                    
+                    if (alertConditionEvaluator instanceof RecoveryConditionEvaluator) {
+                        RecoveryConditionEvaluator rce = (RecoveryConditionEvaluator) alertConditionEvaluator;
+                        initialState = (AlertFiredEvent) alertFiredEvents.get(rce.getRecoveringFromAlertDefinitionId());
+                    } else {
+                        initialState = (Serializable) alertConditionEvaluatorRepository
+                                                            .getStateRepository()
+                                                            .getAlertConditionEvaluatorStates()
+                                                            .get(def.getId());
+                    }
+                    
                     alertConditionEvaluator.initialize(initialState);
+                    
                     Serializable initialExStrategyState = (Serializable) alertConditionEvaluatorRepository.getStateRepository().getExecutionStrategyStates().get(def.getId());
+                    
                     alertConditionEvaluator.getExecutionStrategy().initialize(initialExStrategyState);
+                    
                     alertConditionEvaluatorRepository.addAlertConditionEvaluator(alertConditionEvaluator);
                 }
             } catch (Exception e) {
                 log.error("Error retrieving alert definition for trigger", e);
             }
         }
+    }
+    
+    /**
+     * 
+     * @return {@link Map} of alert definition id {@link Integer} to {@link AlertFiredEvent}
+     */
+    private Map findLastUnfixedAlertFiredEvents(Collection registeredTriggers) {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
+        Set alertDefinitionIds = new HashSet(registeredTriggers.size());
+
+        if (debug) watch.markTimeBegin("getRecoveringFromAlertDefId");
+
+        for (Iterator i = registeredTriggers.iterator(); i.hasNext();) {
+            RegisteredTrigger tv = (RegisteredTrigger) i.next();
+            AlertDefinition def = getDefinitionFromTrigger(tv);
+            if (def != null) {
+                for (Iterator iter = def.getConditions().iterator(); iter.hasNext();) {
+                    AlertCondition condition = (AlertCondition) iter.next();
+                    if (condition.getType() == EventConstants.TYPE_ALERT) {
+                        Integer recoveringFromAlertDefId = Integer.valueOf(condition.getMeasurementId());
+                        alertDefinitionIds.add(recoveringFromAlertDefId);                        
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (debug) {
+            watch.markTimeEnd("getRecoveringFromAlertDefId");
+            watch.markTimeBegin("find");
+        }
+
+        Map results =  getEventLogManagerLocal()
+                            .findLastUnfixedAlertFiredEvents(new ArrayList(alertDefinitionIds));
+        
+        if (debug) {
+            watch.markTimeEnd("find");
+            log.debug("findLastUnfixedAlertFiredEvents: " + watch);
+        }
+        
+        return results;
     }
 
     /**
@@ -548,6 +649,16 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
     void setTriggerDAO(TriggerDAOInterface triggerDAO) {
         this.triggerDAO = triggerDAO;
     }
+    
+    EventLogManagerLocal getEventLogManagerLocal() {
+        return (this.eventLogManager == null)
+                    ? EventLogManagerEJBImpl.getOne()
+                    : this.eventLogManager;
+    }
+    
+    void setEventLogManagerLocal(EventLogManagerLocal eventLogManagerLocal) {
+        this.eventLogManager = eventLogManagerLocal;
+    }
 
     void setRegisteredTriggerRepository(RegisterableTriggerRepository registeredTriggerRepository) {
         this.registeredTriggerRepository = registeredTriggerRepository;
@@ -576,8 +687,8 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         this.registeredTriggerRepository = RegisteredTriggers.getInstance();
         this.zeventEnqueuer = ZeventManager.getInstance();
         this.alertConditionEvaluatorRepository = AlertConditionEvaluatorRepositoryImpl.getInstance();
-        this.alertConditionEvaluatorFactory = new AlertConditionEvaluatorFactoryImpl(zeventEnqueuer, AlertManagerEJBImpl.getOne());
-        this.triggerDAO = DAOFactory.getDAOFactory().getTriggerDAO();        
+        this.alertConditionEvaluatorFactory = new AlertConditionEvaluatorFactoryImpl(zeventEnqueuer);
+        this.triggerDAO = DAOFactory.getDAOFactory().getTriggerDAO();
     }
 
     public void ejbRemove() {
