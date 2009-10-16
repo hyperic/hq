@@ -3,161 +3,212 @@
  */
 package org.hyperic.hq.galerts.shared;
 
+import java.util.Collection;
+import java.util.List;
+
+import javax.ejb.FinderException;
+
+import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.events.AlertSeverity;
+import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.events.server.session.Action;
+import org.hyperic.hq.galerts.processor.Gtrigger;
+import org.hyperic.hq.galerts.server.session.ExecutionReason;
+import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
+import org.hyperic.hq.galerts.server.session.ExecutionStrategyType;
+import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo;
+import org.hyperic.hq.galerts.server.session.GalertAuxLog;
+import org.hyperic.hq.galerts.server.session.GalertDef;
+import org.hyperic.hq.galerts.server.session.GalertDefPartition;
+import org.hyperic.hq.galerts.server.session.GalertDefSortField;
+import org.hyperic.hq.galerts.server.session.GalertLog;
+import org.hyperic.hq.galerts.server.session.GtriggerInfo;
+import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
+
 /**
- * Local interface for GalertManager.
+ * Local interface for
  */
 public interface GalertManager
-   
+
 {
-   /**
-    * Update basic properties of an alert definition If any of the passed params are non-null, they will be updated with the new value
-    */
-   public void update( org.hyperic.hq.galerts.server.session.GalertDef def,java.lang.String name,java.lang.String desc,org.hyperic.hq.events.AlertSeverity severity,java.lang.Boolean enabled ) ;
+    /**
+     * Update basic properties of an alert definition If any of the passed
+     * params are non-null, they will be updated with the new value
+     */
+    public void update(GalertDef def, String name, String desc, AlertSeverity severity, Boolean enabled);
 
-   /**
-    * Update the escalation of an alert def
-    */
-   public void update( org.hyperic.hq.galerts.server.session.GalertDef def,org.hyperic.hq.escalation.server.session.Escalation escalation ) ;
+    /**
+     * Update the escalation of an alert def
+     */
+    public void update(GalertDef def, Escalation escalation);
 
-   /**
-    * Enable/disable an alert def
-    */
-   public void enable( org.hyperic.hq.galerts.server.session.GalertDef def,boolean enable ) ;
+    /**
+     * Enable/disable an alert def
+     */
+    public void enable(GalertDef def, boolean enable);
 
-   /**
-    * Find all alert definitions for the specified group
-    */
-   public org.hyperic.util.pager.PageList findAlertDefs( org.hyperic.hq.authz.server.session.ResourceGroup g,org.hyperic.util.pager.PageControl pc ) ;
+    /**
+     * Find all alert definitions for the specified group
+     */
+    public PageList<GalertDef> findAlertDefs(ResourceGroup g, PageControl pc);
 
-   /**
-    * Find all group alert definitions.
-    * @param minSeverity Minimum severity for returned defs
-    * @param enabled If non-null specifies the nature of the 'enabled' flag for the results.
-    * @param pInfo Paging information. Must contain a sort field from {@link GalertDefSortField}
-    */
-   public java.util.List findAlertDefs( org.hyperic.hq.authz.server.session.AuthzSubject subj,org.hyperic.hq.events.AlertSeverity minSeverity,java.lang.Boolean enabled,org.hyperic.hibernate.PageInfo pInfo ) ;
+    /**
+     * Find all group alert
+     * @param minSeverity Minimum severity for returned defs
+     * @param enabled If non-null specifies the nature of the 'enabled' flag for
+     *        the
+     * @param pInfo Paging Must contain a sort field from
+     *        {@link GalertDefSortField}
+     */
+    public List<GalertDef> findAlertDefs(AuthzSubject subj, AlertSeverity minSeverity, Boolean enabled, PageInfo pInfo);
 
-   public java.util.Collection findAllStrategyTypes(  ) ;
+    public Collection<ExecutionStrategyTypeInfo> findAllStrategyTypes();
 
-   public org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo findStrategyType( java.lang.Integer id ) ;
+    public ExecutionStrategyTypeInfo findStrategyType(Integer id);
 
-   public org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo findStrategyType( org.hyperic.hq.galerts.server.session.ExecutionStrategyType t ) ;
+    public ExecutionStrategyTypeInfo findStrategyType(ExecutionStrategyType t);
 
-   public org.hyperic.hq.galerts.server.session.GalertDef findById( java.lang.Integer id ) ;
+    public GalertDef findById(Integer id);
 
-   public org.hyperic.hq.galerts.server.session.GalertAuxLog findAuxLogById( java.lang.Integer id ) ;
+    public GalertAuxLog findAuxLogById(Integer id);
 
-   /**
-    * Retrieve the Gtriggers for a partition in the given galert def.
-    * @param id The galert def id.
-    * @param partition The partition.
-    * @return The list of Gtriggers.
-    */
-   public java.util.List getTriggersById( java.lang.Integer id,org.hyperic.hq.galerts.server.session.GalertDefPartition partition ) ;
+    /**
+     * Retrieve the Gtriggers for a partition in the given galert
+     * @param id The galert def
+     * @param partition The
+     * @return The list of
+     */
+    public List<Gtrigger> getTriggersById(Integer id, GalertDefPartition partition);
 
-   /**
-    * Save the alert log and associated auxillary log information to the DB. DevNote: Since the GalertAuxLog table needs to be written first (for foreign-key from the auxType tables), we first traverse all the logs and save them. Then, we perform the same traversal and save the specific logs.
-    */
-   public org.hyperic.hq.galerts.server.session.GalertLog createAlertLog( org.hyperic.hq.galerts.server.session.GalertDef def,org.hyperic.hq.galerts.server.session.ExecutionReason reason ) throws org.hyperic.hq.authz.server.shared.ResourceDeletedException;
+    /**
+     * Save the alert log and associated auxillary log information to the
+     * DevNote: Since the GalertAuxLog table needs to be written first (for
+     * foreign-key from the auxType tables), we first traverse all the logs and
+     * save Then, we perform the same traversal and save the specific
+     */
+    public GalertLog createAlertLog(GalertDef def, ExecutionReason reason) throws ResourceDeletedException;
 
-   public void createActionLog( org.hyperic.hq.galerts.server.session.GalertLog alert,java.lang.String detail,org.hyperic.hq.events.server.session.Action action,org.hyperic.hq.authz.server.session.AuthzSubject subject ) ;
+    public void createActionLog(GalertLog alert, String detail, Action action, AuthzSubject subject);
 
-   public java.util.List findAlertLogs( org.hyperic.hq.galerts.server.session.GalertDef def ) ;
+    public List<GalertLog> findAlertLogs(GalertDef def);
 
-   public org.hyperic.hq.galerts.server.session.GalertLog findLastFixedByDef( org.hyperic.hq.galerts.server.session.GalertDef def ) ;
+    public GalertLog findLastFixedByDef(GalertDef def);
 
-   /**
-    * Simply sets the 'fixed' flag on an alert
-    */
-   public void fixAlert( org.hyperic.hq.galerts.server.session.GalertLog alert ) ;
+    /**
+     * Simply sets the 'fixed' flag on an alert
+     */
+    public void fixAlert(GalertLog alert);
 
-   public org.hyperic.hq.escalation.server.session.Escalatable findEscalatableAlert( java.lang.Integer id ) ;
+    public Escalatable findEscalatableAlert(Integer id);
 
-   public org.hyperic.hq.galerts.server.session.GalertLog findAlertLog( java.lang.Integer id ) ;
+    public GalertLog findAlertLog(Integer id);
 
-   public java.util.List findAlertLogs( org.hyperic.hq.authz.server.session.ResourceGroup group ) ;
+    public List<GalertLog> findAlertLogs(ResourceGroup group);
 
-   public org.hyperic.util.pager.PageList findAlertLogsByTimeWindow( org.hyperic.hq.authz.server.session.ResourceGroup group,long begin,long end,org.hyperic.util.pager.PageControl pc ) ;
+    public PageList<GalertLog> findAlertLogsByTimeWindow(ResourceGroup group, long begin, long end, PageControl pc);
 
-   public java.util.List findUnfixedAlertLogsByTimeWindow( org.hyperic.hq.authz.server.session.ResourceGroup group,long begin,long end ) ;
+    public List<GalertLog> findUnfixedAlertLogsByTimeWindow(ResourceGroup group, long begin, long end);
 
-   public java.util.List findEscalatables( org.hyperic.hq.authz.server.session.AuthzSubject subj,int count,int priority,long timeRange,long endTime,java.util.List includes ) throws org.hyperic.hq.authz.shared.PermissionException;
+    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority, long timeRange, long endTime, List<AppdefEntityID> includes)
+        throws PermissionException;
 
-   /**
-    * Find group alerts based on a set of criteria
-    * @param subj Subject doing the finding
-    * @param count Max # of alerts to return
-    * @param priority A value from {@link EventConstants}
-    * @param timeRange the amount of milliseconds prior to current that the alerts will be contained in. e.g. the beginning of the time range will be (current - timeRante)
-    * @param includes A list of entity IDs to include in the result. If null then ignore and return all.
-    * @return a list of {@link GalertLog}s
-    */
-   public java.util.List findAlerts( org.hyperic.hq.authz.server.session.AuthzSubject subj,int count,int priority,long timeRange,long endTime,java.util.List includes ) throws org.hyperic.hq.authz.shared.PermissionException;
+    /**
+     * Find group alerts based on a set of criteria
+     * @param subj Subject doing the finding
+     * @param count Max # of alerts to return
+     * @param priority A value from {@link EventConstants}
+     * @param timeRange the amount of milliseconds prior to current that the
+     *        alerts will be contained the beginning of the time range will be
+     *        (current - timeRante)
+     * @param includes A list of entity IDs to include in the If null then
+     *        ignore and return
+     * @return a list of {@link GalertLog}s
+     */
+    public List<GalertLog> findAlerts(AuthzSubject subj, int count, int priority, long timeRange, long endTime, List<AppdefEntityID> includes)
+        throws PermissionException;
 
-   public java.util.List findAlerts( org.hyperic.hq.authz.server.session.AuthzSubject subj,org.hyperic.hq.events.AlertSeverity severity,long timeRange,long endTime,boolean inEsc,boolean notFixed,java.lang.Integer groupId,org.hyperic.hibernate.PageInfo pInfo ) ;
+    public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange, long endTime, boolean inEsc,
+                           boolean notFixed, Integer groupId, PageInfo pInfo);
 
-   public java.util.List findAlerts( org.hyperic.hq.authz.server.session.AuthzSubject subj,org.hyperic.hq.events.AlertSeverity severity,long timeRange,long endTime,boolean inEsc,boolean notFixed,java.lang.Integer groupId,java.lang.Integer galertDefId,org.hyperic.hibernate.PageInfo pInfo ) ;
+    public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity, long timeRange, long endTime, boolean inEsc,
+                           boolean notFixed, Integer groupId, Integer galertDefId, PageInfo pInfo);
 
-   /**
-    * Get the number of alerts for the given array of AppdefEntityID's
-    */
-   public int[] fillAlertCount( org.hyperic.hq.authz.server.session.AuthzSubject subj,org.hyperic.hq.appdef.shared.AppdefEntityID[] ids,int[] counts ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+    /**
+     * Get the number of alerts for the given array of AppdefEntityID's
+     */
+    public int[] fillAlertCount(AuthzSubject subj, AppdefEntityID[] ids, int[] counts) throws PermissionException,
+        FinderException;
 
-   public void deleteAlertLog( org.hyperic.hq.galerts.server.session.GalertLog log ) ;
+    public void deleteAlertLog(GalertLog log);
 
-   public void deleteAlertLogs( org.hyperic.hq.authz.server.session.ResourceGroup group ) ;
+    public void deleteAlertLogs(ResourceGroup group);
 
-   /**
-    * Register an execution strategy.
-    */
-   public org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo registerExecutionStrategy( org.hyperic.hq.galerts.server.session.ExecutionStrategyType stratType ) ;
+    /**
+     * Register an execution
+     */
+    public ExecutionStrategyTypeInfo registerExecutionStrategy(ExecutionStrategyType stratType);
 
-   /**
-    * Unregister an execution strategy. This will fail if any alert definitions are currently using the strategy
-    */
-   public void unregisterExecutionStrategy( org.hyperic.hq.galerts.server.session.ExecutionStrategyType sType ) ;
+    /**
+     * Unregister an execution This will fail if any alert definitions are
+     * currently using the strategy
+     */
+    public void unregisterExecutionStrategy(ExecutionStrategyType sType);
 
-   /**
-    * Configure triggers for a given partition.
-    * @param triggerInfos A list of {@link GtriggerTypeInfo}s
-    * @param configs A list of {@link ConfigResponse}s, one for each trigger info
-    */
-   public void configureTriggers( org.hyperic.hq.galerts.server.session.GalertDef def,org.hyperic.hq.galerts.server.session.GalertDefPartition partition,java.util.List triggerInfos,java.util.List configs ) ;
+    /**
+     * Configure triggers for a given
+     * @param triggerInfos A list of {@link GtriggerTypeInfo}s
+     * @param configs A list of {@link ConfigResponse}s, one for each trigger
+     *        info
+     */
+    public void configureTriggers(GalertDef def, GalertDefPartition partition, List<GtriggerTypeInfo> triggerInfos, List<ConfigResponse> configs);
 
-   public org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo addPartition( org.hyperic.hq.galerts.server.session.GalertDef def,org.hyperic.hq.galerts.server.session.GalertDefPartition partition,org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo stratType,org.hyperic.util.config.ConfigResponse stratConfig ) ;
+    public ExecutionStrategyInfo addPartition(GalertDef def, GalertDefPartition partition,
+                                              ExecutionStrategyTypeInfo stratType, ConfigResponse stratConfig);
 
-   public org.hyperic.hq.galerts.server.session.GalertDef createAlertDef( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String name,java.lang.String description,org.hyperic.hq.events.AlertSeverity severity,boolean enabled,org.hyperic.hq.authz.server.session.ResourceGroup group ) ;
+    public GalertDef createAlertDef(AuthzSubject subject, String name, String description, AlertSeverity severity,
+                                    boolean enabled, ResourceGroup group);
 
-   /**
-    * Reload an alert definition. Probably should only be called internally here.
-    */
-   public void reloadAlertDef( org.hyperic.hq.galerts.server.session.GalertDef def ) ;
+    /**
+     * Reload an alert Probably should only be called internally
+     */
+    public void reloadAlertDef(GalertDef def);
 
-   /**
-    * Mark an alert definition as deleted. This will remove it from all dialogues, but will leave all the data (specific alerts) in place.
-    */
-   public void markDefDeleted( org.hyperic.hq.galerts.server.session.GalertDef def ) ;
+    /**
+     * Mark an alert definition as This will remove it from all dialogues, but
+     * will leave all the data (specific alerts) in
+     */
+    public void markDefDeleted(GalertDef def);
 
-   /**
-    * Delete an alert definition along with all logs which are tied to it.
-    */
-   public void nukeAlertDef( org.hyperic.hq.galerts.server.session.GalertDef def ) ;
+    /**
+     * Delete an alert definition along with all logs which are tied to
+     */
+    public void nukeAlertDef(GalertDef def);
 
-   /**
-    * Returns a list of {@link GalertDef}s using the passed escalation.
-    */
-   public java.util.Collection getUsing( org.hyperic.hq.escalation.server.session.Escalation e ) ;
+    /**
+     * Returns a list of {@link GalertDef}s using the passed
+     */
+    public Collection<GalertDef> getUsing(Escalation e);
 
-   /**
-    * Start an escalation for a group alert definition.
-    */
-   public void startEscalation( org.hyperic.hq.galerts.server.session.GalertDef def,org.hyperic.hq.galerts.server.session.ExecutionReason reason ) ;
+    /**
+     * Start an escalation for a group alert
+     */
+    public void startEscalation(GalertDef def, ExecutionReason reason);
 
-   /**
-    * Remove all the galert defs associated with this resource group.
-    */
-   public void processGroupDeletion( org.hyperic.hq.authz.server.session.ResourceGroup g ) ;
+    /**
+     * Remove all the galert defs associated with this resource
+     */
+    public void processGroupDeletion(ResourceGroup g);
 
-   public void startup(  ) ;
+    public void startup();
 
 }

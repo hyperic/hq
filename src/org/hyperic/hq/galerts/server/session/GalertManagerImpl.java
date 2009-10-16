@@ -44,18 +44,16 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.GroupChangeCallback;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
 import org.hyperic.hq.common.shared.CrispoManagerLocal;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.AlertSeverity;
@@ -73,6 +71,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+
 /**
  *
  */
@@ -87,21 +86,30 @@ public class GalertManagerImpl implements GalertManager
     private GalertAuxLogDAO              _auxLogDAO;
     private GalertLogDAO                 _logDAO;
     private GalertActionLogDAO           _actionLogDAO;
+    private CrispoManagerLocal crispoManager;
+    private EscalationManagerLocal escalationManager;
 
-   
+    private ResourceGroupManager resourceGroupManager;
 
     @Autowired
     public GalertManagerImpl(ExecutionStrategyTypeInfoDAO stratTypeDAO,
                                 GalertDefDAO defDAO,
                                 GalertAuxLogDAO auxLogDAO,
                                 GalertLogDAO logDAO,
-                                GalertActionLogDAO actionLogDAO)
+                                GalertActionLogDAO actionLogDAO,
+                                CrispoManagerLocal crispoManager,
+                                EscalationManagerLocal escalationManager,
+                                ResourceGroupManager resourceGroupManager,
+                                GalertManager galertManager)
     {
         _stratTypeDAO = stratTypeDAO;
         _defDAO = defDAO;
         _auxLogDAO = auxLogDAO;
         _logDAO = logDAO;
         _actionLogDAO = actionLogDAO;
+        this.crispoManager = crispoManager;
+        this.escalationManager = escalationManager;
+        this.resourceGroupManager = resourceGroupManager;
     }
 
     /**
@@ -160,7 +168,7 @@ public class GalertManagerImpl implements GalertManager
         def.setMtime(System.currentTimeMillis());
 
         // End any escalation we were previously doing.
-        EscalationManagerEJBImpl.getOne().endEscalation(def);
+        escalationManager.endEscalation(def);
         // If the alert def was in the middle of an escalation, ending the
         // escalation will prevent users from being aware that the alert def
         // has fired. Thus, they might not fix the alert and reset the triggers.
@@ -180,8 +188,9 @@ public class GalertManagerImpl implements GalertManager
      * Find all alert definitions for the specified group
      * 
      */
-    public PageList findAlertDefs(ResourceGroup g, PageControl pc) {
+    public PageList<GalertDef> findAlertDefs(ResourceGroup g, PageControl pc) {
         Pager pager = Pager.getDefaultPager();
+        // TODO: G
         return pager.seek(_defDAO.findAll(g), pc);
     }
 
@@ -195,7 +204,7 @@ public class GalertManagerImpl implements GalertManager
      *                    {@link GalertDefSortField}
      * 
      */
-    public List findAlertDefs(AuthzSubject subj, AlertSeverity minSeverity,
+    public List<GalertDef> findAlertDefs(AuthzSubject subj, AlertSeverity minSeverity,
                               Boolean enabled, PageInfo pInfo)
     {
         return _defDAO.findAll(subj, minSeverity, enabled, pInfo);
@@ -204,7 +213,7 @@ public class GalertManagerImpl implements GalertManager
     /**
      * 
      */
-    public Collection findAllStrategyTypes() {
+    public Collection<ExecutionStrategyTypeInfo> findAllStrategyTypes() {
         return _stratTypeDAO.findAll();
     }
 
@@ -244,18 +253,17 @@ public class GalertManagerImpl implements GalertManager
      * @return The list of Gtriggers.
      * 
      */
-    public List getTriggersById(Integer id, GalertDefPartition partition) {
-        List triggers = new ArrayList();
+    public List<Gtrigger> getTriggersById(Integer id, GalertDefPartition partition) {
+        List<Gtrigger> triggers = new ArrayList<Gtrigger>();
 
         GalertDef def = findById(id);
 
         ExecutionStrategyInfo strategy = def.getStrategy(partition);
 
         if (strategy != null) {
-            List triggerInfos = strategy.getTriggers();
+            List<GtriggerInfo> triggerInfos = strategy.getTriggers();
 
-            for (Iterator it = triggerInfos.iterator(); it.hasNext();) {
-                GtriggerInfo triggerInfo = (GtriggerInfo) it.next();
+            for (GtriggerInfo triggerInfo : triggerInfos) {
                 Gtrigger trigger = triggerInfo.getTrigger();
                 trigger.setGroup(def.getGroup());
                 triggers.add(trigger);
@@ -283,14 +291,13 @@ public class GalertManagerImpl implements GalertManager
         if (r == null || r.isInAsyncDeleteState()) {
             throw ResourceDeletedException.newInstance(r);
         }
-        Map gAuxLogToAuxLog = new HashMap(); // Stores real logs to auxType logs
+        Map<GalertAuxLog, AlertAuxLog> gAuxLogToAuxLog = new HashMap<GalertAuxLog, AlertAuxLog>(); // Stores real logs to auxType logs
         GalertLog newLog = new GalertLog(def, reason,
                                          System.currentTimeMillis());
         addAuxLogChildren(newLog, null, reason.getAuxLogs(), gAuxLogToAuxLog);
         _logDAO.save(newLog);
 
-        for (Iterator i=gAuxLogToAuxLog.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry ent = (Map.Entry)i.next();
+        for (Map.Entry<GalertAuxLog, AlertAuxLog> ent : gAuxLogToAuxLog.entrySet()) {
             GalertAuxLog gAuxLog = (GalertAuxLog)ent.getKey();
             AlertAuxLog auxLog = (AlertAuxLog)ent.getValue();
             AlertAuxLogProvider provider = auxLog.getProvider();
@@ -303,10 +310,9 @@ public class GalertManagerImpl implements GalertManager
     }
 
     private void addAuxLogChildren(GalertLog alert, GalertAuxLog parent,
-                                   List auxLogs, Map gAuxLogToAuxLog)
+                                   List<AlertAuxLog> auxLogs, Map<GalertAuxLog, AlertAuxLog> gAuxLogToAuxLog)
     {
-        for (Iterator i=auxLogs.iterator(); i.hasNext(); ) {
-            AlertAuxLog auxLog = (AlertAuxLog)i.next();
+        for (AlertAuxLog auxLog : auxLogs ) {
             GalertAuxLog newLog;
 
             newLog = alert.addAuxLog(auxLog, parent);
@@ -330,7 +336,7 @@ public class GalertManagerImpl implements GalertManager
     /**
      * 
      */
-    public List findAlertLogs(GalertDef def) {
+    public List<GalertLog> findAlertLogs(GalertDef def) {
         return _logDAO.findAll(def.getGroup());
     }
 
@@ -372,14 +378,14 @@ public class GalertManagerImpl implements GalertManager
     /**
      * 
      */
-    public List findAlertLogs(ResourceGroup group) {
+    public List<GalertLog> findAlertLogs(ResourceGroup group) {
         return _logDAO.findAll(group);
     }
 
     /**
      * 
      */
-    public PageList findAlertLogsByTimeWindow(ResourceGroup group, long begin,
+    public PageList<GalertLog> findAlertLogsByTimeWindow(ResourceGroup group, long begin,
                                               long end, PageControl pc)
     {
         return _logDAO.findByTimeWindow(group, begin, end, pc);
@@ -388,7 +394,7 @@ public class GalertManagerImpl implements GalertManager
     /**
      * 
      */
-    public List findUnfixedAlertLogsByTimeWindow(ResourceGroup group,
+    public List<GalertLog> findUnfixedAlertLogsByTimeWindow(ResourceGroup group,
                                                      long begin, long end)
     {
         return _logDAO.findUnfixedByTimeWindow(group, begin, end);
@@ -399,17 +405,15 @@ public class GalertManagerImpl implements GalertManager
      * @return a list of {@link Escalatable}s
      * 
      */
-    public List findEscalatables(AuthzSubject subj, int count, int priority,
-                                 long timeRange, long endTime, List includes)
+    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority,
+                                 long timeRange, long endTime, List<AppdefEntityID> includes)
         throws PermissionException
     {
-        List alerts = findAlerts(subj, count, priority, timeRange, endTime,
+        List<GalertLog> alerts = findAlerts(subj, count, priority, timeRange, endTime,
                                  includes);
-        List res = new ArrayList(alerts.size());
+        List<Escalatable> res = new ArrayList<Escalatable>(alerts.size());
 
-        for (Iterator i=alerts.iterator(); i.hasNext(); ) {
-            GalertLog alert = (GalertLog)i.next();
-
+        for (GalertLog alert : alerts) {
             res.add(GalertEscalatableCreator.createEscalatable(alert));
         }
         return res;
@@ -430,11 +434,11 @@ public class GalertManagerImpl implements GalertManager
      * @return a list of {@link GalertLog}s
      * 
      */
-    public List findAlerts(AuthzSubject subj, int count, int priority,
-                           long timeRange, long endTime, List includes)
+    public List<GalertLog> findAlerts(AuthzSubject subj, int count, int priority,
+                           long timeRange, long endTime, List<AppdefEntityID> includes)
         throws PermissionException
     {
-        List alerts;
+        List<GalertLog> alerts;
 
         if (priority == EventConstants.PRIORITY_ALL) {
             alerts = _logDAO.findByCreateTime(endTime- timeRange, endTime,
@@ -450,9 +454,8 @@ public class GalertManagerImpl implements GalertManager
                                                          pInfo);
         }
 
-        List result = new ArrayList();
-        for (Iterator i=alerts.iterator(); i.hasNext(); ) {
-            GalertLog l = (GalertLog)i.next();
+        List<GalertLog> result = new ArrayList<GalertLog>();
+        for (GalertLog l : alerts) {
             GalertDef def = l.getAlertDef();
             if (def.getResource().isInAsyncDeleteState()) {
                 continue;
@@ -472,7 +475,7 @@ public class GalertManagerImpl implements GalertManager
     /**
      * 
      */
-    public List findAlerts(AuthzSubject subj, AlertSeverity severity,
+    public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity,
                            long timeRange, long endTime, boolean inEsc,
                            boolean notFixed, Integer groupId, PageInfo pInfo)
     {
@@ -483,7 +486,7 @@ public class GalertManagerImpl implements GalertManager
     /**
      * 
      */
-    public List findAlerts(AuthzSubject subj, AlertSeverity severity,
+    public List<GalertLog> findAlerts(AuthzSubject subj, AlertSeverity severity,
                            long timeRange, long endTime, boolean inEsc,
                            boolean notFixed, Integer groupId, Integer galertDefId,
                            PageInfo pInfo)
@@ -502,12 +505,10 @@ public class GalertManagerImpl implements GalertManager
     public int[] fillAlertCount(AuthzSubject subj, AppdefEntityID[] ids,
                                 int[] counts)
         throws PermissionException, FinderException {
-        ResourceGroupManager resMan = ResourceGroupManagerImpl.getOne();
-
         for (int i = 0; i < ids.length; i++) {
             if (ids[i].isGroup()) {
                 ResourceGroup group =
-                    resMan.findResourceGroupById(subj, ids[i].getId());
+                    resourceGroupManager.findResourceGroupById(subj, ids[i].getId());
 
                 counts[i] = _logDAO.countAlerts(group).intValue();
             }
@@ -582,7 +583,7 @@ public class GalertManagerImpl implements GalertManager
      * 
      */
     public void configureTriggers(GalertDef def, GalertDefPartition partition,
-                                  List triggerInfos, List configs)
+                                  List<GtriggerTypeInfo> triggerInfos, List<ConfigResponse> configs)
     {
         ExecutionStrategyInfo strat;
 
@@ -594,27 +595,22 @@ public class GalertManagerImpl implements GalertManager
         strat = def.getStrategy(partition);
 
         // Delete the old triggers if there were any
-        List crispos = new ArrayList();
-        for (Iterator i=strat.getTriggers().iterator(); i.hasNext(); ) {
-            GtriggerInfo t = (GtriggerInfo)i.next();
-
+        List<Crispo> crispos = new ArrayList<Crispo>();
+        for (GtriggerInfo t : strat.getTriggers() ) {
             crispos.add(t.getConfigCrispo());
             _defDAO.remove(t);
         }
 
-        CrispoManagerLocal crispoMan = CrispoManagerEJBImpl.getOne();
-
-        for (Iterator i=crispos.iterator(); i.hasNext(); ) {
-            crispoMan.deleteCrispo((Crispo)i.next());
+        for (Iterator<Crispo> i=crispos.iterator(); i.hasNext(); ) {
+            crispoManager.deleteCrispo(i.next());
         }
         strat.clearTriggers();
 
         // Now add the new triggers
-        Iterator j = configs.iterator();
-        for (Iterator i=triggerInfos.iterator(); i.hasNext(); ) {
-            GtriggerTypeInfo typeInfo = (GtriggerTypeInfo)i.next();
-            ConfigResponse config = (ConfigResponse)j.next();
-            Crispo crispo = crispoMan.create(config);
+        Iterator<ConfigResponse> j = configs.iterator();
+        for (GtriggerTypeInfo typeInfo : triggerInfos ) {
+            ConfigResponse config = j.next();
+            Crispo crispo = crispoManager.create(config);
             GtriggerInfo t = strat.addTrigger(typeInfo, crispo, def.getGroup(),
                                               partition);
 
@@ -631,7 +627,7 @@ public class GalertManagerImpl implements GalertManager
                      ExecutionStrategyTypeInfo stratType,
                      ConfigResponse stratConfig)
     {
-        Crispo stratCrispo = CrispoManagerEJBImpl.getOne().create(stratConfig);
+        Crispo stratCrispo = crispoManager.create(stratConfig);
         ExecutionStrategyInfo res = def.addPartition(partition, stratType,
                                                      stratCrispo);
 
@@ -685,12 +681,10 @@ public class GalertManagerImpl implements GalertManager
      * 
      */
     public void nukeAlertDef(GalertDef def) {
-        List nukeCrispos = new ArrayList();
+        List<Crispo> nukeCrispos = new ArrayList<Crispo>();
         Integer defId = def.getId();
 
-        for (Iterator i=AlertAuxLogProvider.findAll().iterator(); i.hasNext();){
-            AlertAuxLogProvider p = (AlertAuxLogProvider)i.next();
-
+        for (AlertAuxLogProvider p : AlertAuxLogProvider.findAll()) {
             p.deleteAll(def);
         }
         _auxLogDAO.removeAll(def);
@@ -698,10 +692,9 @@ public class GalertManagerImpl implements GalertManager
         // Kill the logs
         _logDAO.removeAll(def);
 
-        for (Iterator i=def.getStrategies().iterator(); i.hasNext(); ) {
-            ExecutionStrategyInfo strat = (ExecutionStrategyInfo)i.next();
-
-            // Reconfigure the def to have 0 triggers (i.e. nuke the instances)
+        for (ExecutionStrategyInfo strat : def.getStrategies()) {
+             // Reconfigure the def to have 0 triggers (i.e. nuke the instances)
+            // TODO: G (Collections.emptyList() should have worked, but at least Eclipse issues an error)
             configureTriggers(def, strat.getPartition(), Collections.EMPTY_LIST,
                               Collections.EMPTY_LIST);
             nukeCrispos.add(strat.getConfigCrispo());
@@ -709,12 +702,8 @@ public class GalertManagerImpl implements GalertManager
 
         _defDAO.remove(def);
 
-        CrispoManagerLocal crispoMan = CrispoManagerEJBImpl.getOne();
-
-        for (Iterator i=nukeCrispos.iterator(); i.hasNext(); ) {
-            Crispo c = (Crispo)i.next();
-
-            crispoMan.deleteCrispo(c);
+        for (Crispo c : nukeCrispos) {
+            crispoManager.deleteCrispo(c);
         }
         GalertProcessor.getInstance().alertDefDeleted(defId);
     }
@@ -723,7 +712,7 @@ public class GalertManagerImpl implements GalertManager
      * Returns a list of {@link GalertDef}s using the passed escalation.
      * 
      */
-    public Collection getUsing(Escalation e) {
+    public Collection<GalertDef> getUsing(Escalation e) {
         return _defDAO.getUsing(e);
     }
 
@@ -733,8 +722,7 @@ public class GalertManagerImpl implements GalertManager
      * 
      */
     public void startEscalation(GalertDef def, ExecutionReason reason) {
-        EscalationManagerEJBImpl.getOne()
-            .startEscalation(def, new GalertEscalatableCreator(def, reason));
+        escalationManager.startEscalation(def, new GalertEscalatableCreator(def, reason));
     }
 
     /**
@@ -743,11 +731,9 @@ public class GalertManagerImpl implements GalertManager
      * 
      */
     public void processGroupDeletion(ResourceGroup g) {
-        Collection defs = _defDAO.findAbsolutelyAllGalertDefs(g);
+        Collection<GalertDef> defs = _defDAO.findAbsolutelyAllGalertDefs(g);
 
-        for (Iterator i=defs.iterator(); i.hasNext(); ) {
-            GalertDef def = (GalertDef)i.next();
-
+        for (GalertDef def : defs) {
             _log.debug("Cascade deleting GalertDef[" + def.getName() + "]");
             nukeAlertDef(def);
         }
@@ -769,7 +755,7 @@ public class GalertManagerImpl implements GalertManager
              * Delete the GalertDefs that depend on the deleted group
              */
             public void preGroupDelete(ResourceGroup g) {
-                GalertManagerImpl.getOne().processGroupDeletion(g);
+                processGroupDeletion(g);
             }
 
             /**
@@ -781,11 +767,9 @@ public class GalertManagerImpl implements GalertManager
              * reset every time this operation is performed.
              */
             public void groupMembersChanged(ResourceGroup g) {
-                Collection defs = findAlertDefs(g, PageControl.PAGE_ALL);
+                Collection<GalertDef> defs = findAlertDefs(g, PageControl.PAGE_ALL);
 
-                for (Iterator i=defs.iterator(); i.hasNext(); ) {
-                    GalertDef def = (GalertDef)i.next();
-
+                for (GalertDef def : defs) {
                     reloadAlertDef(def);
                 }
                 _log.debug("Group members changed for group [" + g + "]");

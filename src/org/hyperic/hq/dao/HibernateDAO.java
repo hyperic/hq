@@ -150,7 +150,8 @@ public abstract class HibernateDAO<T> {
         getSession().delete(entity);
     }
 
-    protected PageList getPagedResult(Query q, Integer total, PageControl pc) {
+    @SuppressWarnings("unchecked")
+    protected PageList<T> getPagedResult(Query q, Integer total, PageControl pc) {
         if (pc.getPagesize() != PageControl.SIZE_UNLIMITED) {
             q.setMaxResults(pc.getPagesize());
         }
@@ -159,10 +160,11 @@ public abstract class HibernateDAO<T> {
             q.setFirstResult(pc.getPageEntityIndex());
         }
 
-        return new PageList(q.list(), total.intValue());
+        return new PageList<T>(q.list(), total.intValue());
     }
 
-    protected PageList getPagedResult(Criteria crit, Integer total,
+    @SuppressWarnings("unchecked")
+    protected PageList<T> getPagedResult(Criteria crit, Integer total,
                                       PageControl pc) {
         if (pc.getPagesize() != PageControl.SIZE_UNLIMITED) {
             crit.setMaxResults(pc.getPagesize());
@@ -172,7 +174,7 @@ public abstract class HibernateDAO<T> {
             crit.setFirstResult(pc.getPageEntityIndex());
         }
 
-        return new PageList(crit.list(), total.intValue());
+        return new PageList<T>(crit.list(), total.intValue());
     }
 
 }

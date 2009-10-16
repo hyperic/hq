@@ -47,7 +47,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class GalertLogDAO
-    extends HibernateDAO
+    extends HibernateDAO<GalertLog>
 {
     @Autowired
     GalertLogDAO(SessionFactory f) {
@@ -70,11 +70,12 @@ public class GalertLogDAO
         super.remove(log);
     }
 
-    List findAll(ResourceGroup g) {
+    @SuppressWarnings("unchecked")
+    List<GalertLog> findAll(ResourceGroup g) {
         String sql = "from GalertLog l where l.alertDef.group = :group " +
                      "order by l.timestamp";
 
-        return getSession().createQuery(sql)
+        return (List<GalertLog>)getSession().createQuery(sql)
             .setParameter("group", g)
             .list();
     }
@@ -88,7 +89,7 @@ public class GalertLogDAO
             .uniqueResult();
     }
 
-    PageList findByTimeWindow(ResourceGroup g, long begin, long end,
+    PageList<GalertLog> findByTimeWindow(ResourceGroup g, long begin, long end,
                               PageControl pc) {
         final String tsProp = "timestamp";
         Integer count = (Integer) createCriteria()
@@ -112,12 +113,13 @@ public class GalertLogDAO
         }
 
 
-        return new PageList();
+        return new PageList<GalertLog>();
     }
 
-    List findUnfixedByTimeWindow(ResourceGroup g, long begin, long end) {
+    @SuppressWarnings("unchecked")
+    List<GalertLog> findUnfixedByTimeWindow(ResourceGroup g, long begin, long end) {
         final String tsProp = "timestamp";
-        return createCriteria()
+        return (List<GalertLog>)createCriteria()
                 .createAlias("alertDef", "d")
                 .add(Restrictions.eq("fixed", Boolean.FALSE))
                 .add(Restrictions.eq("d.group", g))
@@ -126,7 +128,8 @@ public class GalertLogDAO
                 .list();
     }
 
-    List findByCreateTime(long startTime, long endTime, int count) {
+    @SuppressWarnings("unchecked")
+    List<GalertLog> findByCreateTime(long startTime, long endTime, int count) {
         Criteria criteria = createCriteria()
             .add(Expression.between("timestamp", new Long(startTime),
                                     new Long(endTime)))
@@ -134,10 +137,11 @@ public class GalertLogDAO
         if (count >= 0) {
             criteria.setMaxResults(count);
         }
-        return criteria.list();
+        return (List<GalertLog>)criteria.list();
     }
 
-    List findByCreateTimeAndPriority(Integer subjectId, long begin, long end,
+    @SuppressWarnings("unchecked")
+    List<GalertLog> findByCreateTimeAndPriority(Integer subjectId, long begin, long end,
                                      AlertSeverity severity, boolean inEsc,
                                      boolean notFixed, Integer groupId,
                                      Integer galertDefId, PageInfo pageInfo)
@@ -165,7 +169,7 @@ public class GalertLogDAO
              .setParameter("op", op);
         }
 
-        return pageInfo.pageResults(q).list();
+        return (List<GalertLog>)pageInfo.pageResults(q).list();
     }
 
     void removeAll(ResourceGroup g) {

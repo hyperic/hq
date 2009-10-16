@@ -50,7 +50,7 @@ public interface AlertAuxLog {
      * Returns a list of {@link AlertAuxLog}s which are children of this
      * log.
      */
-    List getChildren();
+    List<AlertAuxLog> getChildren();
     
     void addChild(AlertAuxLog child);
     

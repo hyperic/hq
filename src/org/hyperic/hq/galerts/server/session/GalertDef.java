@@ -165,7 +165,7 @@ public class GalertDef
         _strategies = strategies;
     }
     
-    public Set getStrategies() {
+    public Set<ExecutionStrategyInfo> getStrategies() {
         return Collections.unmodifiableSet(_strategies);
     }
     

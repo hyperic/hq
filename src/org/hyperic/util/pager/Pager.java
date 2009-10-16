@@ -47,6 +47,7 @@ import org.hyperic.hq.common.SystemException;
  * supply as they move from the source collection to the 
  * destination collection.
  */
+// TODO: G
 public class Pager {
     public static final String DEFAULT_PROCESSOR_CLASSNAME =
         DefaultPagerProcessor.class.getName();

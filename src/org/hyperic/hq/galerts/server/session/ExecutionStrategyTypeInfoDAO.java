@@ -33,7 +33,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class ExecutionStrategyTypeInfoDAO
-    extends HibernateDAO
+    extends HibernateDAO<ExecutionStrategyTypeInfo>
 {
     @Autowired
     public ExecutionStrategyTypeInfoDAO(SessionFactory f) {
@@ -61,7 +61,7 @@ public class ExecutionStrategyTypeInfoDAO
     }
 
     public ExecutionStrategyTypeInfo find(ExecutionStrategyType sType) {
-        Class strategyClass = sType.getClass();
+        Class<? extends ExecutionStrategyType> strategyClass = sType.getClass();
 
         return (ExecutionStrategyTypeInfo) createCriteria()
             .add(Expression.eq("typeClass", strategyClass))

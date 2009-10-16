@@ -33,10 +33,10 @@ import org.hyperic.hq.events.AlertAuxLog;
 public class ExecutionReason {
     private final String             _shortReason;
     private final String             _longReason;
-    private final List               _auxLogs;
+    private final List<AlertAuxLog>  _auxLogs;
     private final GalertDefPartition _partition;
     
-    public ExecutionReason(String shortReason, String longReason, List auxLogs,
+    public ExecutionReason(String shortReason, String longReason, List<AlertAuxLog> auxLogs,
                            GalertDefPartition partition) 
     {
         _shortReason = shortReason;
@@ -56,7 +56,7 @@ public class ExecutionReason {
     /**
      * Returns a list of {@link AlertAuxLog}s
      */
-    public List getAuxLogs() {
+    public List<AlertAuxLog> getAuxLogs() {
         return Collections.unmodifiableList(_auxLogs);
     }
     

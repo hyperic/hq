@@ -30,7 +30,6 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -43,8 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class GalertDefDAO
-    extends HibernateDAO
+public class GalertDefDAO extends HibernateDAO<GalertDef>
 {
 
     @Autowired
@@ -72,14 +70,15 @@ public class GalertDefDAO
         super.save(t);
     }
 
-    Collection findAbsolutelyAllGalertDefs() {
+    Collection<GalertDef> findAbsolutelyAllGalertDefs() {
         return super.findAll();
     }
 
-    Collection findAbsolutelyAllGalertDefs(ResourceGroup g) {
+    @SuppressWarnings("unchecked")
+    Collection<GalertDef> findAbsolutelyAllGalertDefs(ResourceGroup g) {
         String sql = "from GalertDef d where d.group = :group";
 
-        return getSession().createQuery(sql)
+        return (Collection<GalertDef>)getSession().createQuery(sql)
             .setParameter("group", g)
             .list();
     }
@@ -88,22 +87,25 @@ public class GalertDefDAO
      * Finds all the galert defs which have not been marked for deletion.
      * Typically this is what people want to use.
      */
-    public List findAll() {
-        return getSession().createQuery("from GalertDef d " +
+    @SuppressWarnings("unchecked")
+    public List<GalertDef> findAll() {
+        return (List<GalertDef>)getSession().createQuery("from GalertDef d " +
                                         "where d.deleted = false " +
                                         "order by name").list();
     }
 
-    Collection findAll(ResourceGroup g) {
+    @SuppressWarnings("unchecked")
+    Collection<GalertDef> findAll(ResourceGroup g) {
         String sql = "from GalertDef d where d.group = :group " +
                      "and d.deleted = false order by name";
 
-        return getSession().createQuery(sql)
+        return (Collection<GalertDef>)getSession().createQuery(sql)
             .setParameter("group", g)
             .list();
     }
 
-    List findAll(AuthzSubject subj, AlertSeverity minSeverity,
+    @SuppressWarnings("unchecked")
+    List<GalertDef> findAll(AuthzSubject subj, AlertSeverity minSeverity,
                  Boolean enabled, PageInfo pInfo)
     {
         String sql = PermissionManagerFactory.getInstance()
@@ -125,7 +127,7 @@ public class GalertDefDAO
              .setParameter("op", AuthzConstants.groupOpManageAlerts);
         }
 
-        return pInfo.pageResults(q).list();
+        return (List<GalertDef>)pInfo.pageResults(q).list();
     }
 
     private String getOrderByClause(PageInfo pInfo) {
@@ -149,8 +151,9 @@ public class GalertDefDAO
             .uniqueResult()).intValue();
     }
 
-    Collection getUsing(Escalation e) {
-        return getSession()
+    @SuppressWarnings("unchecked")
+    Collection<GalertDef> getUsing(Escalation e) {
+        return (Collection<GalertDef>)getSession()
             .createQuery("from GalertDef where escalation = :esc")
             .setParameter("esc", e).list();
     }

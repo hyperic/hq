@@ -68,7 +68,7 @@ public abstract class AlertAuxLogProvider
      */
     public abstract void deleteAll(GalertDef def);
     
-    public static Collection findAll() {
+    public static Collection<AlertAuxLogProvider> findAll() {
         return HypericEnum.getAll(AlertAuxLogProvider.class);
     }
 }

@@ -42,7 +42,7 @@ public class ExecutionStrategyInfo
     private ExecutionStrategyTypeInfo _type;
     private Crispo                    _config;
     private GalertDefPartition        _partition;
-    private List                      _triggers = new ArrayList();
+    private List<GtriggerInfo>        _triggers = new ArrayList<GtriggerInfo>();
     
     protected ExecutionStrategyInfo() {}
 
@@ -100,11 +100,11 @@ public class ExecutionStrategyInfo
     }
     
     
-    public List getTriggers() {
+    public List<GtriggerInfo> getTriggers() {
         return Collections.unmodifiableList(_triggers);
     }
     
-    protected List getTriggerList() {
+    protected List<GtriggerInfo> getTriggerList() {
         return _triggers;
     }
     
@@ -139,7 +139,7 @@ public class ExecutionStrategyInfo
         getTriggerList().clear();
     }
     
-    protected void setTriggerList(List triggers) {
+    protected void setTriggerList(List<GtriggerInfo> triggers) {
         _triggers = triggers;
     }
     
