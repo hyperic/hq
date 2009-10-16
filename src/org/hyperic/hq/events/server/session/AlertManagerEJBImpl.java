@@ -158,28 +158,6 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     {
         alert.createActionLog(detail, action, subject);
     }
-    
-    /**
-     * @param alertDefinitionId The ID of the alert definition
-     * @param alertTriggerID The ID of the alert trigger that creates the {@link TriggerFiredEvent}s
-     * @return If the most recently created alert with specified definition ID is unfixed, returns the TriggerFiredEvent from the alert trigger (wrapping an AlertFiredEvent).  Else returns null.
-     * May return null if alerts or event log entries have been purged.  
-     * @ejb:interface-method
-     */
-    public TriggerFiredEvent getUnfixedAlertTriggerFiredEvent(Integer alertDefinitionId, Integer alertTriggerId) {
-        Alert mostRecentAlert = findLastByDefinition(alertDefinitionId);
-        if(mostRecentAlert != null && !(mostRecentAlert.isFixed())) {
-            EventLog eventLog = eventLogManager.findLog(AlertFiredEvent.class.getName(), alertDefinitionId.intValue(), mostRecentAlert.getCtime());
-            if(eventLog == null) {
-                log.warn("Could not find log event corresponding to an unfixed alert with definition ID " + alertDefinitionId + 
-                         ".  This could be due to event log purging.  An initial recovery alert may not fire.");
-                return null;
-            }
-            AlertFiredEvent alertFired = new AlertFiredEvent(mostRecentAlert.getId(),alertDefinitionId, new AppdefEntityID(eventLog.getResource()),eventLog.getSubject(),eventLog.getTimestamp(),eventLog.getDetail());
-            return new TriggerFiredEvent(alertTriggerId,alertFired);
-        }
-        return null;
-    }
 
     public void addConditionLogs(Alert alert, AlertConditionLogValue[] logs) {
         AlertConditionDAO dao = getAlertConDAO();
