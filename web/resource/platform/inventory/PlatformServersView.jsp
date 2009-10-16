@@ -103,7 +103,7 @@ serversWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceNam
       <display:checkboxdecorator name="r" onclick="ToggleSelection(this, serversWidgetProperties)" styleClass="listMember"/>
     </display:column>
     <display:column property="name" title="resource.platform.inventory.servers.ServerTH" href="/resource/server/Inventory.do?mode=view&rid=${server.id}&type=${server.entityId.type}" sort="true" sortAttr="5" defaultSort="true" width="20%"/>
-    <display:column value="${server.serverType.name}" title="resource.platform.inventory.servers.TypeTH" width="20%"/>
+    <display:column property="serverType.name" title="resource.platform.inventory.servers.TypeTH" width="20%"/>
     <display:column property="installPath" title="resource.platform.inventory.servers.InstallPathTH" width="20%"/>
     <display:column property="description" title="common.header.Description" width="20%"/>
     <display:column property="id" title="resource.common.monitor.visibility.AvailabilityTH" width="20%" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" valign="middle">

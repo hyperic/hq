@@ -102,7 +102,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
                    nowrap="true" sort="true" sortAttr="15" defaultSort="true">
       <display:datedecorator/>
    </display:column>
-    <display:column width="30%" value="${aiSchedule.scheduleValue.scheduleString}"   
+    <display:column width="30%" property="scheduleValue.scheduleString"   
                     title="resource.autodiscovery.autoDiscoverySchedule.DateScheduledTH"/>
     <display:column width="33%" property="scanDesc" 
                     title="common.header.Description"/>
