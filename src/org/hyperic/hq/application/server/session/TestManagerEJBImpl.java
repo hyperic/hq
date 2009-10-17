@@ -31,8 +31,8 @@ import javax.ejb.SessionContext;
 import org.hyperic.hq.application.shared.TestManagerLocal;
 import org.hyperic.hq.application.shared.TestManagerUtil;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
+
 
 /**
  * @ejb:bean name="TestManager"

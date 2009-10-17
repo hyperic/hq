@@ -165,7 +165,7 @@ public class AlertDefinition
         _parent = parent;
     }
 
-    public Collection getChildren() {
+    public Collection<AlertDefinition> getChildren() {
         List children = new ArrayList();
         for (Iterator it = _children.iterator(); it.hasNext();) {
             AlertDefinition child = (AlertDefinition) it.next();
@@ -176,7 +176,7 @@ public class AlertDefinition
         return Collections.unmodifiableCollection(children);
     }
 
-    Collection getChildrenBag() {
+    Collection<AlertDefinition> getChildrenBag() {
         return _children;
     }
 
@@ -416,7 +416,7 @@ public class AlertDefinition
         _actions.clear();
     }
 
-    public Collection getConditions() {
+    public Collection<AlertCondition> getConditions() {
         return Collections.unmodifiableCollection(_conditions);
     }
 

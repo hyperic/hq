@@ -59,10 +59,10 @@ import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertSortField;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GalertManagerImpl;
@@ -332,8 +332,8 @@ public class DashboardPortletBossEJBImpl
                 // definitions?
                 ResourceGroupManager rgMan =
                     ResourceGroupManagerImpl.getOne();
-                AlertDefinitionManagerLocal adMan =
-                    AlertDefinitionManagerEJBImpl.getOne();
+                AlertDefinitionManager adMan =
+                    AlertDefinitionManagerImpl.getOne();
                 Collection resources = rgMan.getMembers(group);
                 PageControl pc = new PageControl(0, 1);
                 Resource r = null;

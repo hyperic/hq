@@ -68,7 +68,7 @@ public class EventsStartupListener
                 app.registerCallbackCaller(AlertDefinitionChangeCallback.class);
         }
 
-        AlertDefinitionManagerEJBImpl.getOne().startup();
+        AlertDefinitionManagerImpl.getOne().startup();
 
         loadConfigProps("triggers");
         loadConfigProps("actions");

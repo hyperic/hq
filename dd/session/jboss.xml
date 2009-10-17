@@ -235,11 +235,6 @@
 
       </session>
       <session>
-         <ejb-name>AlertDefinitionManager</ejb-name>
-         <local-jndi-name>LocalAlertDefinitionManager</local-jndi-name>
-
-      </session>
-      <session>
          <ejb-name>CrispoManager</ejb-name>
          <local-jndi-name>LocalCrispoManager</local-jndi-name>
 

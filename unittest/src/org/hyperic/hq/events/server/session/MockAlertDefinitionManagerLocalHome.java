@@ -22,12 +22,12 @@ import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
-public class MockAlertDefinitionManagerLocalHome implements AlertDefinitionManagerLocal {
+public class MockAlertDefinitionManagerLocalHome implements AlertDefinitionManager {
 
     private MockAlertDefinitionManagerEJBImpl adMan;
 
