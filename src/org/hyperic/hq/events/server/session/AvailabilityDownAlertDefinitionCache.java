@@ -41,8 +41,8 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
 
 /**
  * This class is an in-memory map of whether "availability down"
@@ -98,7 +98,7 @@ public class AvailabilityDownAlertDefinitionCache {
         Boolean value = null;
              
         try {
-            AlertDefinitionManagerLocal adm = AlertDefinitionManagerEJBImpl.getOne();
+            AlertDefinitionManager adm = AlertDefinitionManagerImpl.getOne();
             AuthzSubject hqadmin = AuthzSubjectManagerEJBImpl.getOne()
                                         .getSubjectById(AuthzConstants.rootSubjectId);
             Collection alertDefs = adm.findAlertDefinitions(hqadmin, key);

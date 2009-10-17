@@ -57,7 +57,7 @@ import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class AlertDefinitionDAO extends HibernateDAO {
+public class AlertDefinitionDAO extends HibernateDAO<AlertDefinition> {
     
       private PermissionManager permissionManager;
       private  ActionDAO actDAO;
@@ -100,11 +100,11 @@ public class AlertDefinitionDAO extends HibernateDAO {
     }
 
     
-    public List findAllByResource(Resource r) {
+    public List<AlertDefinition> findAllByResource(Resource r) {
         return createCriteria().add(Restrictions.eq("resource", r)).list();
     }
 
-    public List findAllDeletedResources() {
+    public List<AlertDefinition> findAllDeletedResources() {
         return createCriteria()
             .add(Restrictions.isNull("resource"))
             .add(Restrictions.eq("deleted", Boolean.TRUE))
@@ -190,7 +190,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
         return (AlertDefinition)super.get(id);
     }
 
-    private List findByResource(Resource res, String sort, boolean asc) {
+    private List<AlertDefinition> findByResource(Resource res, String sort, boolean asc) {
         String sql = "from AlertDefinition a where a.resource = :res and " +
             "a.deleted = false order by a." + sort + (asc ? " ASC" : " DESC");
 
@@ -199,15 +199,15 @@ public class AlertDefinitionDAO extends HibernateDAO {
             .list();
     }
 
-    public List findByResource(Resource res) {
+    public List<AlertDefinition> findByResource(Resource res) {
         return findByResource(res, true);
     }
 
-    public List findByResource(Resource res, boolean asc) {
+    public List<AlertDefinition> findByResource(Resource res, boolean asc) {
         return findByResource(res, "name", asc);
     }
 
-    public List findByResourceSortByCtime(Resource res, boolean asc) {
+    public List<AlertDefinition> findByResourceSortByCtime(Resource res, boolean asc) {
         return findByResource(res, "ctime", asc);
     }
 
@@ -216,7 +216,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
      * @param res the root resource
      * @return
      */
-    public List findByRootResource(AuthzSubject subject, Resource r) {
+    public List<AlertDefinition> findByRootResource(AuthzSubject subject, Resource r) {
         EdgePermCheck wherePermCheck =
            permissionManager.makePermCheckHql("rez", true);
         String hql = "select ad from AlertDefinition ad join ad.resource rez "
@@ -355,7 +355,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
         clone.setDeleted(master.getDeleted());
     }
 
-    List findDefinitions(AuthzSubject subj, AlertSeverity minSeverity,
+    List<AlertDefinition> findDefinitions(AuthzSubject subj, AlertSeverity minSeverity,
                          Boolean enabled, boolean excludeTypeBased,
                          PageInfo pInfo)
     {
@@ -399,7 +399,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
         return res;
     }
 
-    List findTypeBased(Boolean enabled, PageInfo pInfo) {
+    List<AlertDefinition> findTypeBased(Boolean enabled, PageInfo pInfo) {
         String sql = "from AlertDefinition d " +
             "where d.deleted = false and d.parent.id = 0 ";
 
@@ -414,7 +414,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
         return pInfo.pageResults(q).list();
     }
 
-    List getUsing(Escalation e) {
+    List<AlertDefinition> getUsing(Escalation e) {
         return createCriteria().add(Restrictions.eq("escalation", e)).list();
     }
 

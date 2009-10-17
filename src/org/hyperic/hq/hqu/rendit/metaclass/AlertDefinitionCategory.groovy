@@ -1,6 +1,6 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl as AdefMan
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as AdefMan
 import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.escalation.server.session.Escalation
@@ -35,7 +35,7 @@ class AlertDefinitionCategory {
     static void updateAlertDefinitionActiveStatus(AlertDefinition d,
                                                   AuthzSubject s,
                                                   boolean enable) {
-        AdefMan.one.updateAlertDefinitionActiveStatus(s, d, enable)
+        AdefMan.one.AlertDefinitionManagerImpltionActiveStatus(s, d, enable)
     }
 
     static String urlFor(AlertDefinition d, String context) {
@@ -82,6 +82,6 @@ class AlertDefinitionCategory {
     }
 
     static void delete(AlertDefinition d, AuthzSubject user) {
-        AdefMan.one.deleteAlertDefinitions(user, [ d.id ] as Integer[])
+        AdefMan.one.AlertDefinitionManagerImpltions(user, [ d.id ] as Integer[])
     }
 }

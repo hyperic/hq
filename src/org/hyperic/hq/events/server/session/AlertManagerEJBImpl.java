@@ -63,7 +63,7 @@ import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.events.shared.AlertValue;
@@ -145,7 +145,7 @@ public class AlertManagerEJBImpl implements SessionBean {
 
         if (def.isWillRecover()) {
             try {
-                AlertDefinitionManagerEJBImpl.getOne().updateAlertDefinitionInternalEnable( AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(), def, true);
+                AlertDefinitionManagerImpl.getOne().updateAlertDefinitionInternalEnable( AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(), def, true);
             } catch (PermissionException e) {
                 log.error("Error re-enabling alert with ID: " + def.getId() + " after it was fixed.",e);
             }
@@ -300,8 +300,8 @@ public class AlertManagerEJBImpl implements SessionBean {
         }
         long startTime = System.currentTimeMillis();
         try {
-            AlertDefinitionManagerLocal aman =
-                AlertDefinitionManagerEJBImpl.getOne();
+            AlertDefinitionManager aman =
+                AlertDefinitionManagerImpl.getOne();
 
             Integer adId = Integer.valueOf(((AlertConditionsSatisfiedZEventSource)event.getSourceId()).getId());
 

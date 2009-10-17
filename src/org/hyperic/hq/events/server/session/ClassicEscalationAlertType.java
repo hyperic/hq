@@ -37,7 +37,7 @@ import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 
 public final class ClassicEscalationAlertType 
@@ -51,13 +51,13 @@ public final class ClassicEscalationAlertType
 
     private static Object INIT_LOCK = new Object();
     private static AlertManagerLocal           _alertMan;
-    private static AlertDefinitionManagerLocal _defMan;
+    private static AlertDefinitionManager _defMan;
     
     private void setup() {
         synchronized (INIT_LOCK) {
             if (_alertMan == null) {
                 _alertMan = AlertManagerEJBImpl.getOne();
-                _defMan = AlertDefinitionManagerEJBImpl.getOne();
+                _defMan = AlertDefinitionManagerImpl.getOne();
             }
         }
     }
@@ -67,7 +67,7 @@ public final class ClassicEscalationAlertType
         return _alertMan;
     }
     
-    private AlertDefinitionManagerLocal getDefMan() {
+    private AlertDefinitionManager getDefMan() {
         setup();
         return _defMan;
     }
@@ -152,6 +152,6 @@ public final class ClassicEscalationAlertType
     }
 
     protected Collection getPerformersOfEscalation(Escalation escalation) {
-        return AlertDefinitionManagerEJBImpl.getOne().getUsing(escalation);
+        return AlertDefinitionManagerImpl.getOne().getUsing(escalation);
     }
 }

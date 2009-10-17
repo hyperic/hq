@@ -45,8 +45,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.bizapp.shared.LiveDataBossLocal;
 import org.hyperic.hq.bizapp.shared.LiveDataBossUtil;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 

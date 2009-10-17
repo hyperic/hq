@@ -56,8 +56,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
+
 
 /**
  * This class is responsible for managing Server objects in appdef

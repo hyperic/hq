@@ -105,7 +105,7 @@ import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
 import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
@@ -114,7 +114,7 @@ import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
 import org.hyperic.hq.events.shared.ActionManagerLocal;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
@@ -183,8 +183,8 @@ public class EventsBossEJBImpl
         return AlertManagerEJBImpl.getOne();
     }
 
-    private AlertDefinitionManagerLocal getADM() {
-        return AlertDefinitionManagerEJBImpl.getOne();
+    private AlertDefinitionManager getADM() {
+        return AlertDefinitionManagerImpl.getOne();
     }
 
     private ActionManagerLocal getActMan() {
@@ -382,7 +382,7 @@ public class EventsBossEJBImpl
         ArrayList triggers = new ArrayList();
 
         AlertDefinitionValue parent = null;
-        AlertDefinitionManagerLocal adm = getADM();
+        AlertDefinitionManager adm = getADM();
         // Iterate through to create the appropriate triggers and alertdef
         for (Iterator it = appdefIds.iterator(); it.hasNext(); ) {
             AppdefEntityID id = (AppdefEntityID) it.next();
@@ -482,7 +482,7 @@ public class EventsBossEJBImpl
         ArrayList triggers = new ArrayList();
 
         // Iterate through to create the appropriate triggers and alertdef
-        AlertDefinitionManagerLocal adm = getADM();
+        AlertDefinitionManager adm = getADM();
         for (int ei = 0; ei < entIds.length; ei++) {
             AppdefEntityID id = new AppdefEntityID(aetid.getType(), entIds[ei]);
 
@@ -573,7 +573,7 @@ public class EventsBossEJBImpl
 
         List defs = getADM().findAlertDefinitions(subject, aetid, pc);
 
-        AlertDefinitionManagerLocal adm = getADM();
+        AlertDefinitionManager adm = getADM();
         ArrayList triggers = new ArrayList();
         for (Iterator it = defs.iterator(); it.hasNext(); ) {
             AlertDefinitionValue adval = (AlertDefinitionValue) it.next();
@@ -724,7 +724,7 @@ public class EventsBossEJBImpl
         boolean debugEnabled = _log.isDebugEnabled();
         String status = (activate ? "enabled" : "disabled");
 
-        AlertDefinitionManagerLocal adm = getADM();
+        AlertDefinitionManager adm = getADM();
         Collection allAlerts = adm.findRelatedAlertDefinitions(subject, res);
 
         for (Iterator it = allAlerts.iterator(); it.hasNext();) {
@@ -767,7 +767,7 @@ public class EventsBossEJBImpl
                 "Conditions cannot be null or empty");
         }
 
-        AlertDefinitionManagerLocal adm = getADM();
+        AlertDefinitionManager adm = getADM();
         ArrayList triggers = new ArrayList();
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(adval.getParentId()) ||
             adval.getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
@@ -920,7 +920,7 @@ public class EventsBossEJBImpl
 
         // Delete alerts for definition and its children
         int count = 0;
-        AlertDefinitionManagerLocal adm = getADM();
+        AlertDefinitionManager adm = getADM();
         for (int i = 0; i < adids.length; i++) {
             AlertDefinition def = adm.getByIdAndCheck(subject, adids[i]);
             count += getAM().deleteAlerts(subject, def);
@@ -1703,7 +1703,7 @@ public class EventsBossEJBImpl
         app.registerCallbackListener(ResourceDeleteCallback.class,
             new ResourceDeleteCallback() {
                 public void preResourceDelete(Resource r) throws VetoException {
-                    AlertDefinitionManagerLocal adm = getADM();
+                    AlertDefinitionManager adm = getADM();
                     adm.disassociateResource(r);
                 }
             }
@@ -1726,7 +1726,7 @@ public class EventsBossEJBImpl
         ZeventManager.getInstance().addBufferedListener(events,
             new ZeventListener() {
                 public void processEvents(List events) {
-                    AlertDefinitionManagerLocal adm = getADM();
+                    AlertDefinitionManager adm = getADM();
                     for (Iterator i = events.iterator(); i.hasNext();) {
                         ResourceZevent z = (ResourceZevent) i.next();
                         if (z instanceof ResourceDeletedZevent) {
