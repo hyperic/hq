@@ -420,8 +420,8 @@ public class AlertDefinitionValue
    protected java.util.Collection removedTriggers = new java.util.ArrayList();
    protected java.util.Collection updatedTriggers = new java.util.ArrayList();
 
-   public java.util.Collection getAddedTriggers() { return addedTriggers; }
-   public java.util.Collection getRemovedTriggers() { return removedTriggers; }
+   public java.util.Collection<RegisteredTriggerValue> getAddedTriggers() { return addedTriggers; }
+   public java.util.Collection<RegisteredTriggerValue> getRemovedTriggers() { return removedTriggers; }
    public java.util.Collection getUpdatedTriggers() { return updatedTriggers; }
 
    public org.hyperic.hq.events.shared.RegisteredTriggerValue[] getTriggers()
@@ -473,8 +473,8 @@ public class AlertDefinitionValue
    protected java.util.Collection removedConditions = new java.util.ArrayList();
    protected java.util.Collection updatedConditions = new java.util.ArrayList();
 
-   public java.util.Collection getAddedConditions() { return addedConditions; }
-   public java.util.Collection getRemovedConditions() { return removedConditions; }
+   public java.util.Collection<AlertConditionValue> getAddedConditions() { return addedConditions; }
+   public java.util.Collection<AlertConditionValue> getRemovedConditions() { return removedConditions; }
    public java.util.Collection getUpdatedConditions() { return updatedConditions; }
 
    public org.hyperic.hq.events.shared.AlertConditionValue[] getConditions()
@@ -526,8 +526,8 @@ public class AlertDefinitionValue
    protected java.util.Collection removedActions = new java.util.ArrayList();
    protected java.util.Collection updatedActions = new java.util.ArrayList();
 
-   public java.util.Collection getAddedActions() { return addedActions; }
-   public java.util.Collection getRemovedActions() { return removedActions; }
+   public java.util.Collection<ActionValue> getAddedActions() { return addedActions; }
+   public java.util.Collection<ActionValue> getRemovedActions() { return removedActions; }
    public java.util.Collection getUpdatedActions() { return updatedActions; }
 
    public org.hyperic.hq.events.shared.ActionValue[] getActions()
