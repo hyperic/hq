@@ -21,17 +21,21 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.dialect.Dialect;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
-
+import org.hyperic.util.timer.StopWatch;
 
 
 public class TriggerDAO
     extends HibernateDAO implements TriggerDAOInterface
 {
+    private final Log log = LogFactory.getLog(TriggerDAO.class);
+
     public TriggerDAO(DAOFactory f) {
         super(RegisteredTrigger.class, f);
     }
@@ -68,14 +72,31 @@ public class TriggerDAO
 
 
     public Set findAllEnabledTriggers() {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
         Dialect dialect = Util.getDialect();
-        //For performance optimization, we want to fetch each trigger's alert def as well as the alert def's conditions in a single query (as they will be used to create AlertConditionEvaluators when creating trigger impls).
-        //This query guarantees that when we do trigger.getAlertDefinition().getConditions(), the database is not hit again
-        String hql = new StringBuilder().append("from AlertDefinition ad left join fetch ad.conditionsBag c inner join fetch c.trigger where ad.enabled = ")
+        // For performance optimization, we want to fetch each trigger's alert def as well 
+        // as the alert def's alert definition state and conditions in a single query 
+        // (as they will be used to create AlertConditionEvaluators when creating trigger impls).
+        // This query guarantees that when we do trigger.getAlertDefinition().getConditions(), 
+        // the database is not hit again
+        String hql = new StringBuilder().append("from AlertDefinition ad ")
+                                        .append("inner join fetch ad.alertDefinitionState ")
+                                        .append("left join fetch ad.conditionsBag c ")
+                                        .append("inner join fetch c.trigger ")
+                                        .append("where ad.enabled = ")
                                         .append(dialect.toBooleanValueString(true))
                                         .toString();
+        
+        if (debug) watch.markTimeBegin("createQuery.list");
         List alertDefs = getSession().createQuery(hql).list();
+        if (debug) watch.markTimeEnd("createQuery.list");        
+        
         Set triggers = new LinkedHashSet();
+
+        if (debug) watch.markTimeBegin("addTriggers");
+
         for(Iterator iterator = alertDefs.iterator();iterator.hasNext();) {
             AlertDefinition definition = (AlertDefinition)iterator.next();
             for(Iterator conditions = definition.getConditionsBag().iterator(); conditions.hasNext();) {
@@ -83,6 +104,12 @@ public class TriggerDAO
                 triggers.add(condition.getTrigger());
             }
         }
+
+        if (debug) {
+            watch.markTimeEnd("addTriggers");
+            log.debug("findAllEnabledTriggers: " + watch);
+        }
+
         return triggers;
     }
 
