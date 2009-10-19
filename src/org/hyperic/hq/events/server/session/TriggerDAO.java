@@ -75,19 +75,19 @@ public class TriggerDAO
         final boolean debug = log.isDebugEnabled();
         StopWatch watch = new StopWatch();
 
-        Dialect dialect = Util.getDialect();
-        // For performance optimization, we want to fetch each trigger's alert def as well 
-        // as the alert def's alert definition state and conditions in a single query 
-        // (as they will be used to create AlertConditionEvaluators when creating trigger impls).
-        // This query guarantees that when we do trigger.getAlertDefinition().getConditions(), 
+        // For performance optimization, we want to fetch each trigger's alert
+        // def as well as the alert def's alert definition state and conditions
+        // in a single query (as they will be used to create 
+        // AlertConditionEvaluators when creating trigger impls). This query 
+        // guarantees that when we do trigger.getAlertDefinition().getConditions(), 
         // the database is not hit again
-        String hql = new StringBuilder().append("from AlertDefinition ad ")
-                                        .append("inner join fetch ad.alertDefinitionState ")
-                                        .append("left join fetch ad.conditionsBag c ")
-                                        .append("inner join fetch c.trigger ")
-                                        .append("where ad.enabled = ")
-                                        .append(dialect.toBooleanValueString(true))
-                                        .toString();
+        String hql = new StringBuilder(256)
+            .append("from AlertDefinition ad ")
+            .append("join fetch ad.alertDefinitionState ")
+            .append("join fetch ad.conditionsBag c ")
+            .append("join fetch c.trigger ")
+            .append("where ad.enabled = '1'")
+            .toString();
         
         if (debug) watch.markTimeBegin("createQuery.list");
         List alertDefs = getSession().createQuery(hql).list();
@@ -98,9 +98,9 @@ public class TriggerDAO
         if (debug) watch.markTimeBegin("addTriggers");
 
         for(Iterator iterator = alertDefs.iterator();iterator.hasNext();) {
-            AlertDefinition definition = (AlertDefinition)iterator.next();
-            for(Iterator conditions = definition.getConditionsBag().iterator(); conditions.hasNext();) {
-                AlertCondition condition = (AlertCondition)conditions.next();
+            AlertDefinition defs = (AlertDefinition)iterator.next();
+            for(Iterator it = defs.getConditionsBag().iterator(); it.hasNext();) {
+                AlertCondition condition = (AlertCondition)it.next();
                 triggers.add(condition.getTrigger());
             }
         }
