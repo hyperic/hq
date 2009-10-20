@@ -421,7 +421,8 @@ public class ZeventManager implements ZeventEnqueuer {
             e.enterQueue();
             _eventQueue.offer(e, 1, TimeUnit.SECONDS);
         }
-        ConcurrentStatsCollector.getInstance().addStat(_eventQueue.size(), ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
+        ConcurrentStatsCollector.getInstance().addStat(
+            _eventQueue.size(), ConcurrentStatsCollector.ZEVENT_QUEUE_SIZE);
     }
 
     public void enqueueEventAfterCommit(Zevent event) {
@@ -438,7 +439,7 @@ public class ZeventManager implements ZeventEnqueuer {
             public void afterCommit(boolean success) {
                 try {
                     if (_log.isDebugEnabled()) {
-                        _log.debug("Listener[" + this + "] after tx " +
+                        _log.debug("Listener[" + this.toString() + "] after tx " +
                                    "enqueueing=" + success);
                     }
 
