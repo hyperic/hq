@@ -18,7 +18,6 @@ import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
 import org.hyperic.hq.ui.shared.DashboardManagerLocal;
 import org.hyperic.hq.ui.util.ContextUtils;
-import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 
 public class DisplayPortletAction extends TilesAction {
@@ -32,8 +31,8 @@ public class DisplayPortletAction extends TilesAction {
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
 		WebUser user = SessionUtils.getWebUser(session);
 		DashboardManagerLocal dashManager = DashboardManagerEJBImpl.getOne();
-		AuthzSubject guestUser = boss.findSubjectByName(user.getSessionId(), "guest");
-		DashboardConfig dashboardConfig = dashManager.getUserDashboard(guestUser, guestUser);
+		AuthzSubject me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
+		DashboardConfig dashboardConfig = dashManager.getUserDashboard(me, me);
 			
 		String portletId = request.getParameter("pid");
 		Portlet portlet = new Portlet(portletId);
