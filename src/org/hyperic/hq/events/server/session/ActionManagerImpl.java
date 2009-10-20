@@ -43,14 +43,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The action manager.
- *
+ * 
  */
 
 @Service
 @Transactional
 public class ActionManagerImpl implements ActionManager {
-    private ActionDAO          actionDAO;
-    private AlertDAO           alertDAO;
+    private ActionDAO actionDAO;
+    private AlertDAO alertDAO;
 
     @Autowired
     public ActionManagerImpl(ActionDAO actionDAO, AlertDAO alertDAO) {
@@ -60,7 +60,7 @@ public class ActionManagerImpl implements ActionManager {
 
     /**
      * Get all the actions for a given alert
-     *
+     * 
      * @return a collection of {@link ActionValue}s
      */
     public List<ActionValue> getActionsForAlert(int alertId) {
@@ -102,8 +102,7 @@ public class ActionManagerImpl implements ActionManager {
         if (val.getConfig() == null) {
             if (action.getLogEntriesBag().size() == 0) {
                 actionDAO.removeAction(action);
-            }
-            else {  // Disassociate from everything
+            } else { // Disassociate from everything
                 if (action.getAlertDefinition() != null) {
                     action.getAlertDefinition().getActionsBag().remove(action);
                     action.setAlertDefinition(null);
@@ -134,12 +133,14 @@ public class ActionManagerImpl implements ActionManager {
 
         // Then find and update the child actions.
 
-        /* It would be nice to have a more explicit method that
-           does this kind of update.  XXX -- JMT */
+        /*
+         * It would be nice to have a more explicit method that
+         * does this kind of update. XXX -- JMT
+         */
         Collection<Action> children = action.getChildren();
 
         val.setParentId(val.getId());
-        for (Action act : children ) {
+        for (Action act : children) {
             act.setClassName(val.getClassname());
             act.setConfig(val.getConfig());
             setParentAction(act, val.getParentId());
@@ -156,14 +157,13 @@ public class ActionManagerImpl implements ActionManager {
     }
 
     /**
-     * Create a free-standing action.  These are linked to from things like
+     * Create a free-standing action. These are linked to from things like
      * escalations actions.
-     *
-     * XXX:  This should really be removed -- the JSON object sucks.
+     * 
+     * XXX: This should really be removed -- the JSON object sucks.
      */
     public Action createAction(JSONObject json)
-        throws JSONException
-    {
+        throws JSONException {
         Action action = Action.newInstance(json);
 
         actionDAO.save(action);
@@ -171,7 +171,7 @@ public class ActionManagerImpl implements ActionManager {
     }
 
     /**
-     * Create a free-standing action.  These are linked to from things like
+     * Create a free-standing action. These are linked to from things like
      * escalations actions.
      */
     public Action createAction(ActionConfigInterface cfg) {
@@ -182,7 +182,7 @@ public class ActionManagerImpl implements ActionManager {
     }
 
     /**
-     * Mark a free-standing action as deleted.  These actions will later be
+     * Mark a free-standing action as deleted. These actions will later be
      * deleted by a cleanup thread.
      */
     public void markActionDeleted(Action action) {

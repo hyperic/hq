@@ -49,27 +49,25 @@ import org.hyperic.util.json.JSON;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Action  
+public class Action
     extends PersistedObject
-    implements JSON
-{
+    implements JSON {
     private static final Log _log = LogFactory.getLog(Action.class);
 
     public static final String JSON_NAME = "action";
-    
-    private String          _className;
-    private byte[]          _config;
-    private Action          _parent;
-    private AlertDefinition _alertDef;
-    private Collection      _logEntries = new ArrayList();
-    private Collection<Action>      _children = new ArrayList<Action>();
-    private boolean         _deleted = false;
-    
-    private ActionValue     _valueObj;
 
-    static Action newInstance(JSONObject json) 
-        throws JSONException
-    {
+    private String _className;
+    private byte[] _config;
+    private Action _parent;
+    private AlertDefinition _alertDef;
+    private Collection _logEntries = new ArrayList();
+    private Collection<Action> _children = new ArrayList<Action>();
+    private boolean _deleted = false;
+
+    private ActionValue _valueObj;
+
+    static Action newInstance(JSONObject json)
+        throws JSONException {
         String className = json.getString("className");
         Action action;
         if (className.endsWith("EmailAction")) {
@@ -84,8 +82,7 @@ public class Action
         return action;
     }
 
-    static Action newEmailAction(JSONObject json) throws JSONException
-    {
+    static Action newEmailAction(JSONObject json) throws JSONException {
         EmailActionConfig config = new EmailActionConfig();
         config.setType(json.getInt(EmailActionConfig.CFG_TYPE));
         config.setNames(json.getString(EmailActionConfig.CFG_NAMES));
@@ -95,35 +92,31 @@ public class Action
     }
 
     static Action newSyslogAction(String metaProject, String project,
-                                         String version)
-    {
+                                  String version) {
         SyslogActionConfig sa = new SyslogActionConfig();
         sa.setMeta(metaProject);
         sa.setProduct(project);
         sa.setVersion(version);
-        
+
         return createAction(sa);
     }
 
-    static Action newSyslogAction(JSONObject json) throws JSONException
-    {
+    static Action newSyslogAction(JSONObject json) throws JSONException {
         return newSyslogAction(
-            json.getString(SyslogActionConfig.CFG_META),
-            json.getString(SyslogActionConfig.CFG_PROD),
-            json.getString(SyslogActionConfig.CFG_VER)
-        );
+                               json.getString(SyslogActionConfig.CFG_META),
+                               json.getString(SyslogActionConfig.CFG_PROD),
+                               json.getString(SyslogActionConfig.CFG_VER));
     }
 
     static Action newNoOpAction() {
-        NoOpAction na = new NoOpAction();        
+        NoOpAction na = new NoOpAction();
         return createAction(na);
     }
 
-    static Action newNoOpAction(JSONObject json) throws JSONException
-    {
+    static Action newNoOpAction(JSONObject json) throws JSONException {
         return newNoOpAction();
     }
-    
+
     static Action createAction(ActionConfigInterface config) {
         Action act = new Action();
         act.setClassName(config.getImplementor());
@@ -139,36 +132,35 @@ public class Action
     protected Action() {
     }
 
-    Action(AlertDefinition def, String className, byte[] config, Action parent)
-    {
-        _className  = className;
-        _config     = config;
-        _parent     = parent;
-        _alertDef   = def;
+    Action(AlertDefinition def, String className, byte[] config, Action parent) {
+        _className = className;
+        _config = config;
+        _parent = parent;
+        _alertDef = def;
         _logEntries = Collections.EMPTY_LIST;
-        _children   = Collections.EMPTY_LIST;
+        _children = Collections.EMPTY_LIST;
     }
-    
+
     public String getClassName() {
         return _className;
     }
-    
+
     protected void setClassName(String className) {
         _className = className;
     }
-    
+
     public byte[] getConfig() {
         return ArrayUtil.clone(_config);
     }
-    
+
     protected void setConfig(byte[] config) {
         _config = config;
     }
-    
+
     public Action getParent() {
         return _parent;
     }
-    
+
     protected void setParent(Action parent) {
         _parent = parent;
     }
@@ -188,11 +180,11 @@ public class Action
     protected Collection<Action> getChildrenBag() {
         return _children;
     }
-    
+
     protected void setChildrenBag(Collection<Action> children) {
         _children = children;
     }
-    
+
     public Collection getLogEntries() {
         return Collections.unmodifiableCollection(_logEntries);
     }
@@ -204,7 +196,7 @@ public class Action
     protected void setLogEntriesBag(Collection logEntries) {
         _logEntries = logEntries;
     }
-    
+
     public boolean isDeleted() {
         return _deleted;
     }
@@ -212,11 +204,11 @@ public class Action
     protected void setDeleted(boolean deleted) {
         _deleted = deleted;
     }
-    
+
     public ActionValue getActionValue() {
         if (_valueObj == null)
             _valueObj = new ActionValue();
-            
+
         _valueObj.setId(getId());
         _valueObj.setClassname(getClassName());
         _valueObj.setConfig(getConfig());
@@ -233,8 +225,8 @@ public class Action
         try {
             ConfigResponse conf = ConfigResponse.decode(getConfig());
             JSONObject json = new JSONObject()
-                    .put("className", getClassName())
-                    .put("config", conf.toProperties());
+                                              .put("className", getClassName())
+                                              .put("config", conf.toProperties());
             if (getId() != null) {
                 json.put("id", getId());
                 json.put("_version_", get_version_());
@@ -253,28 +245,27 @@ public class Action
     }
 
     public ActionInterface getInitializedAction() {
-    	String actionClassName = null;
+        String actionClassName = null;
         try {
-        	actionClassName = getClassName();
+            actionClassName = getClassName();
             Class ac = Class.forName(actionClassName);
             ActionInterface action = (ActionInterface) ac.newInstance();
 
             action.init(ConfigResponse.decode(action.getConfigSchema(),
                                               getConfig()));
-        
+
             return action;
         } catch (Exception e) {
-        	_log.error("Error getting initialized action for " + actionClassName);
-            throw new SystemException("Unable to get action", e); 
+            _log.error("Error getting initialized action for " + actionClassName);
+            throw new SystemException("Unable to get action", e);
         }
     }
-    
+
     /**
      * Execute the action specified by the classname and config data.
      */
-    public String executeAction(AlertInterface alert, ActionExecutionInfo info)  
-        throws ActionExecuteException
-    {
+    public String executeAction(AlertInterface alert, ActionExecutionInfo info)
+        throws ActionExecuteException {
         try {
             return getInitializedAction().execute(alert, info);
         } catch (Exception e) {
@@ -282,7 +273,7 @@ public class Action
                 _log.debug("Unable to execute action", e);
             }
             throw new ActionExecuteException("Unable to execute action: " +
-                                             e.getMessage(), e); 
+                                             e.getMessage(), e);
         }
     }
 
