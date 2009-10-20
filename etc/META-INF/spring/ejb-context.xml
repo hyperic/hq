@@ -52,7 +52,6 @@
 <bean class="org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.events.server.session.ActionManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.events.server.session.AlertManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.events.server.session.EventLogManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.events.server.session.HeartBeatServiceEJBImpl" factory-method="getOne"/>

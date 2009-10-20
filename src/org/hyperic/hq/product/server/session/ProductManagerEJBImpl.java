@@ -67,8 +67,8 @@ import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
@@ -118,7 +118,7 @@ public class ProductManagerEJBImpl
     private TemplateManagerLocal   templateManagerLocal;
     private PluginUpdater pluginUpdater = new PluginUpdater();
     private static final String ALERT_DEFINITIONS_XML_FILE = "etc/alert-definitions.xml";
-    private AlertDefinitionManagerLocal alertDefinitionManagerLocal;
+    private AlertDefinitionManager alertDefinitionManagerLocal;
     private PluginDAO pluginDao = Bootstrap.getBean(PluginDAO.class);
     
 
@@ -479,9 +479,9 @@ public class ProductManagerEJBImpl
            }
      }
     
-    private AlertDefinitionManagerLocal getAlertDefinitionManagerLocal() {
+    private AlertDefinitionManager getAlertDefinitionManagerLocal() {
         if(alertDefinitionManagerLocal == null)
-            alertDefinitionManagerLocal = AlertDefinitionManagerEJBImpl.getOne();
+            alertDefinitionManagerLocal = AlertDefinitionManagerImpl.getOne();
         return alertDefinitionManagerLocal;
     }
 

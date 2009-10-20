@@ -48,8 +48,8 @@ import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.hq.events.server.session.AlertCondition;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.junit.Assert;
@@ -70,7 +70,7 @@ public class EventsBoss_testEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public void testUpdateAlertDefinition() throws Exception {
-        final AlertDefinitionManagerLocal adMan = getADMan();
+        final AlertDefinitionManager adMan = getADMan();
         final AlertDefinition def =
             adMan.findAlertDefinitionById(new Integer(10100));
         final EventsBossLocal eBoss = getEventsBoss();
@@ -167,8 +167,8 @@ public class EventsBoss_testEJBImpl implements SessionBean {
         return EventsBossEJBImpl.getOne();
     }
 
-    private final AlertDefinitionManagerLocal getADMan() {
-        return AlertDefinitionManagerEJBImpl.getOne();
+    private final AlertDefinitionManager getADMan() {
+        return AlertDefinitionManagerImpl.getOne();
     }
 
     public static EventsBoss_testLocal getOne() {

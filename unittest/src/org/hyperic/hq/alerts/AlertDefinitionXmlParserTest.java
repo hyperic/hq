@@ -17,7 +17,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
@@ -41,7 +41,7 @@ public class AlertDefinitionXmlParserTest
 
     private TemplateManagerLocal templateManager;
 
-    private AlertDefinitionManagerLocal alertDefinitionManager;
+    private AlertDefinitionManager alertDefinitionManager;
 
     private static final AuthzSubject SUBJECT = new AuthzSubject(true,
                                                                  "auth",
@@ -64,7 +64,7 @@ public class AlertDefinitionXmlParserTest
         this.resourceManager = (ResourceManager) EasyMock.createMock(ResourceManager.class);
         this.authSubjectManager = (AuthzSubjectManagerLocal) EasyMock.createMock(AuthzSubjectManagerLocal.class);
         this.templateManager = (TemplateManagerLocal) EasyMock.createMock(TemplateManagerLocal.class);
-        this.alertDefinitionManager = (AlertDefinitionManagerLocal) EasyMock.createMock(AlertDefinitionManagerLocal.class);
+        this.alertDefinitionManager = (AlertDefinitionManager) EasyMock.createMock(AlertDefinitionManager.class);
         this.parser = new AlertDefinitionXmlParser(resourceManager,
                                                    templateManager,
                                                    authSubjectManager,

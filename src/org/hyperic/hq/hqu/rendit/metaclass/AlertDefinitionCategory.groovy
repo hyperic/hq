@@ -1,6 +1,6 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl as AdefMan
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as AdefMan
 import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.escalation.server.session.Escalation

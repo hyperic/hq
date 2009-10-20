@@ -582,18 +582,6 @@
 
       </session>
 
-      <session >
-         <description><![CDATA[<p> Stores Events to and deletes Events from storage </p>]]></description>
-
-         <ejb-name>AlertDefinitionManager</ejb-name>
-
-         <local-home>org.hyperic.hq.events.shared.AlertDefinitionManagerLocalHome</local-home>
-         <local>org.hyperic.hq.events.shared.AlertDefinitionManagerLocal</local>
-         <ejb-class>org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
 
       <session >
          <description><![CDATA[The CRISPO (Config Response Is Sweetly Persisted ...]]></description>
@@ -3781,13 +3769,6 @@
       </method>
       <trans-attribute>Required</trans-attribute>
    </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AlertDefinitionManager</ejb-name>
-          <method-name>*</method-name>
-       </method>
-       <trans-attribute>Required</trans-attribute>
-    </container-transaction>
    <container-transaction >
       <method >
          <ejb-name>CrispoManager</ejb-name>

@@ -22,9 +22,9 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
 import org.hyperic.hq.events.shared.AlertConditionValue;
-import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateSortField;
@@ -57,19 +57,19 @@ public class AlertDefinitionXmlParser {
     private final ResourceManager resourceManager;
     private final TemplateManagerLocal templateManager;
     private final AuthzSubjectManagerLocal authzSubjectManager;
-    private final AlertDefinitionManagerLocal alertDefinitionManager;
+    private final AlertDefinitionManager alertDefinitionManager;
 
     public AlertDefinitionXmlParser() {
         this.authzSubjectManager = AuthzSubjectManagerEJBImpl.getOne();
         this.resourceManager = ResourceManagerImpl.getOne();
         this.templateManager = TemplateManagerEJBImpl.getOne();
-        this.alertDefinitionManager = AlertDefinitionManagerEJBImpl.getOne();
+        this.alertDefinitionManager = AlertDefinitionManagerImpl.getOne();
     }
 
     public AlertDefinitionXmlParser(ResourceManager resourceManager,
                                     TemplateManagerLocal templateManager,
                                     AuthzSubjectManagerLocal authzSubjectManager,
-                                    AlertDefinitionManagerLocal alertDefinitionManager)
+                                    AlertDefinitionManager alertDefinitionManager)
     {
         this.resourceManager = resourceManager;
         this.templateManager = templateManager;
