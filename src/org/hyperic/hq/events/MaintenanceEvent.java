@@ -31,12 +31,12 @@ import java.util.ResourceBundle;
 import java.util.Set;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.measurement.shared.ResourceLogEvent;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.TrackEvent;
 import org.hyperic.util.json.JSON;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.quartz.JobDataMap;
@@ -71,7 +71,7 @@ public class MaintenanceEvent extends ResourceLogEvent
     private String _authzName;
 
     // Stats
-    private Set _resourcesProcessed = new HashSet();
+    private Set<AppdefEntityID> _resourcesProcessed = new HashSet<AppdefEntityID>();
     public long alertCount;
     public long errorCount;
     
@@ -134,7 +134,7 @@ public class MaintenanceEvent extends ResourceLogEvent
         return STATE_RUNNING.equals(getState());
     }
     
-    public Set getResourcesProcessed() {
+    public Set<AppdefEntityID> getResourcesProcessed() {
         return _resourcesProcessed;
     }
     
