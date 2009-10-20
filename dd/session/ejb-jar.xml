@@ -490,19 +490,6 @@
       </session>
 
       <session >
-         <description><![CDATA[The action manager.]]></description>
-
-         <ejb-name>ActionManager</ejb-name>
-
-         <local-home>org.hyperic.hq.events.shared.ActionManagerLocalHome</local-home>
-         <local>org.hyperic.hq.events.shared.ActionManagerLocal</local>
-         <ejb-class>org.hyperic.hq.events.server.session.ActionManagerEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
-      <session >
          <description><![CDATA[]]></description>
 
          <ejb-name>TestManager</ejb-name>

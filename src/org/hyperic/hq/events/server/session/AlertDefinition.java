@@ -44,8 +44,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 
 public class AlertDefinition
     extends PersistedObject implements AlertDefinitionInterface, PerformsEscalations,
-    ContainerManagedTimestampTrackable
-{
+    ContainerManagedTimestampTrackable {
     private String _name;
     private long _ctime;
     private long _mtime;
@@ -64,14 +63,12 @@ public class AlertDefinition
     private boolean _deleted; // XXX -- default to false
     private Collection _conditions = new ArrayList();
     private Collection _triggers = new ArrayList();
-    private Collection _actions = new ArrayList();
+    private Collection<Action> _actions = new ArrayList<Action>();
     private Escalation _escalation;
     private Resource _resource;
     private AlertDefinitionState _state;
 
     private AlertDefinitionValue _value;
-
-
 
     public AlertDefinition() {
     }
@@ -244,7 +241,7 @@ public class AlertDefinition
 
     /**
      * Check if an alert definition is enabled.
-     *
+     * 
      * @return <code>true</code> if the alert definition is enabled;
      *         <code>false</code> if disabled.
      */
@@ -254,7 +251,7 @@ public class AlertDefinition
 
     /**
      * Check if an alert definition is active.
-     *
+     * 
      * @return <code>true</code> if the alert definition is active;
      *         <code>false</code> if inactive.
      */
@@ -277,7 +274,7 @@ public class AlertDefinition
 
     /**
      * Activate or deactivate an alert definition.
-     *
+     * 
      * @param activate <code>true</code> to activate the alert definition;
      *        <code>false</code> to deactivate the alert definition.
      */
@@ -289,7 +286,7 @@ public class AlertDefinition
     /**
      * Enable or disable the alert definition. This operation will not succeed
      * if the alert definition is not active.
-     *
+     * 
      * @param enabled <code>true</code> to enable the alert definition;
      *        <code>false</code> to disable the alert definition.
      * @return <code>true</code> if the operation succeeded, meaning the enabled
@@ -396,21 +393,20 @@ public class AlertDefinition
         _resource = resource;
     }
 
-    public Collection getActions() {
+    public Collection<Action> getActions() {
         return Collections.unmodifiableCollection(_actions);
     }
 
-    Collection getActionsBag() {
+    Collection<Action> getActionsBag() {
         return _actions;
     }
 
-    void setActionsBag(Collection actions) {
+    void setActionsBag(Collection<Action> actions) {
         _actions = actions;
     }
 
     void clearActions() {
-        for (Iterator it = _actions.iterator(); it.hasNext();) {
-            Action act = (Action) it.next();
+        for (Action act : _actions) {
             act.setAlertDefinition(null);
         }
         _actions.clear();
@@ -456,23 +452,25 @@ public class AlertDefinition
     public boolean isResourceTypeDefinition() {
         return getParent() != null && getParent().getId().equals(new Integer(0));
     }
-    
+
     /**
      * Check if an alert definition is configured for only availability.
-     *
-     * @param up Indicates where the availability condition is up (true) or down (false)
-     * @return <code>true</code> if the alert definition has an availability condition.
+     * 
+     * @param up Indicates where the availability condition is up (true) or down
+     *        (false)
+     * @return <code>true</code> if the alert definition has an availability
+     *         condition.
      */
     public boolean isAvailability(boolean up) {
         boolean isAvail = false;
 
         // ignore multi-conditional alert definitions
         if (_conditions.size() == 1) {
-            for (Iterator cit=_conditions.iterator(); cit.hasNext(); ) {
+            for (Iterator cit = _conditions.iterator(); cit.hasNext();) {
                 AlertCondition cond = (AlertCondition) cit.next();
 
                 if (cond != null
-                        && MeasurementConstants.CAT_AVAILABILITY.equalsIgnoreCase(cond.getName())) {
+                    && MeasurementConstants.CAT_AVAILABILITY.equalsIgnoreCase(cond.getName())) {
 
                     if ("=".equals(cond.getComparator())) {
                         if (up) {
@@ -501,7 +499,7 @@ public class AlertDefinition
                     } else if ("<".equals(cond.getComparator())) {
                         if (!up) {
                             if (cond.getThreshold() <= MeasurementConstants.AVAIL_UP
-                                    && cond.getThreshold() > MeasurementConstants.AVAIL_DOWN) {
+                                && cond.getThreshold() > MeasurementConstants.AVAIL_DOWN) {
                                 isAvail = true;
                                 break;
                             }
@@ -509,7 +507,7 @@ public class AlertDefinition
                     } else if (">".equals(cond.getComparator())) {
                         if (up) {
                             if (cond.getThreshold() >= MeasurementConstants.AVAIL_DOWN
-                                    && cond.getThreshold() < MeasurementConstants.AVAIL_UP) {
+                                && cond.getThreshold() < MeasurementConstants.AVAIL_UP) {
                                 isAvail = true;
                                 break;
                             }
@@ -566,7 +564,6 @@ public class AlertDefinition
         _value.setCount(getCount());
         _value.setRange(getRange());
         _value.setDeleted(isDeleted());
-
 
         if (getEscalation() != null) {
             _value.setEscalationId(getEscalation().getId());

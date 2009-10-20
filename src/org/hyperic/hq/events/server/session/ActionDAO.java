@@ -24,31 +24,30 @@
  */
 package org.hyperic.hq.events.server.session;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class ActionDAO extends HibernateDAO {
-    
+public class ActionDAO
+    extends HibernateDAO<Action> {
+
     @Autowired
     public ActionDAO(SessionFactory f) {
         super(Action.class, f);
     }
 
     public Action findById(Integer id) {
-        return (Action)super.findById(id);
+        return (Action) super.findById(id);
     }
 
     public Action get(Integer id) {
-        return (Action)super.get(id);
+        return (Action) super.get(id);
     }
 
     public void save(Action entity) {
@@ -67,8 +66,7 @@ public class ActionDAO extends HibernateDAO {
     }
 
     void removeActions(AlertDefinition def) {
-        for (Iterator it = def.getActions().iterator(); it.hasNext(); ) {
-            Action action = (Action) it.next();
+        for (Action action : def.getActions()) {
             removeActionCascade(action);
         }
         def.clearActions();
@@ -81,16 +79,17 @@ public class ActionDAO extends HibernateDAO {
         removeActionCascade(action);
     }
 
+    @SuppressWarnings("unchecked")
     void deleteAlertDefinition(AlertDefinition def) {
         // Find all actions
-        List actions =
-            createCriteria().add(Restrictions.eq("alertDefinition", def))
-                            .list();
+        List<Action> actions =
+                               (List<Action>) createCriteria().add(Restrictions.eq("alertDefinition", def))
+                                                              .list();
 
         // Bulk update all actions
         String sql = "update Action set parent = null, deleted = true where " +
-        		     (actions.size() > 0 ? "parent in (:acts) or" : "") +
-        		             " alertDefinition = :def";
+                     (actions.size() > 0 ? "parent in (:acts) or" : "") +
+                     " alertDefinition = :def";
         Query q = createQuery(sql).setParameter("def", def);
 
         if (actions.size() > 0)
@@ -103,12 +102,13 @@ public class ActionDAO extends HibernateDAO {
      * Find all the actions which triggered the alert in the alert log
      * @return a collection of {@link Action}s
      */
-    public List findByAlert(Alert a) {
+    @SuppressWarnings("unchecked")
+    public List<Action> findByAlert(Alert a) {
         String sql = "select a from Action a, AlertActionLog al " +
-            "where a.id = al.action AND al.alert = :alert";
+                     "where a.id = al.action AND al.alert = :alert";
 
-        return getSession().createQuery(sql)
-              .setParameter("alert", a)
-              .list();
+        return (List<Action>) getSession().createQuery(sql)
+                                          .setParameter("alert", a)
+                                          .list();
     }
 }
