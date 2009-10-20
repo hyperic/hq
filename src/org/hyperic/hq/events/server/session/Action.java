@@ -62,7 +62,7 @@ public class Action
     private Action          _parent;
     private AlertDefinition _alertDef;
     private Collection      _logEntries = new ArrayList();
-    private Collection      _children = new ArrayList();
+    private Collection<Action>      _children = new ArrayList<Action>();
     private boolean         _deleted = false;
     
     private ActionValue     _valueObj;
@@ -181,15 +181,15 @@ public class Action
         _alertDef = alertDefinition;
     }
 
-    public Collection getChildren() {
+    public Collection<Action> getChildren() {
         return Collections.unmodifiableCollection(_children);
     }
 
-    protected Collection getChildrenBag() {
+    protected Collection<Action> getChildrenBag() {
         return _children;
     }
     
-    protected void setChildrenBag(Collection children) {
+    protected void setChildrenBag(Collection<Action> children) {
         _children = children;
     }
     

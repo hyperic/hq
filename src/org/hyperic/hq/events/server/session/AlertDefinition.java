@@ -64,7 +64,7 @@ public class AlertDefinition
     private boolean _deleted; // XXX -- default to false
     private Collection _conditions = new ArrayList();
     private Collection _triggers = new ArrayList();
-    private Collection _actions = new ArrayList();
+    private Collection<Action> _actions = new ArrayList<Action>();
     private Escalation _escalation;
     private Resource _resource;
     private AlertDefinitionState _state;
@@ -396,21 +396,20 @@ public class AlertDefinition
         _resource = resource;
     }
 
-    public Collection getActions() {
+    public Collection<Action> getActions() {
         return Collections.unmodifiableCollection(_actions);
     }
 
-    Collection getActionsBag() {
+    Collection<Action> getActionsBag() {
         return _actions;
     }
 
-    void setActionsBag(Collection actions) {
+    void setActionsBag(Collection<Action> actions) {
         _actions = actions;
     }
 
     void clearActions() {
-        for (Iterator it = _actions.iterator(); it.hasNext();) {
-            Action act = (Action) it.next();
+        for (Action act : _actions) {
             act.setAlertDefinition(null);
         }
         _actions.clear();

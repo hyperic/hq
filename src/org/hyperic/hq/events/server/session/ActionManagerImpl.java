@@ -27,63 +27,53 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.ActionConfigInterface;
-import org.hyperic.hq.events.shared.ActionManagerLocal;
-import org.hyperic.hq.events.shared.ActionManagerUtil;
+import org.hyperic.hq.events.shared.ActionManager;
 import org.hyperic.hq.events.shared.ActionValue;
-import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.Action;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The action manager.
  *
- * @ejb:bean name="ActionManager"
- *      jndi-name="ejb/events/ActionManager"
- *      local-jndi-name="LocalActionManager"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:transaction type="Required"
  */
 
-public class ActionManagerEJBImpl implements SessionBean {
-    private ActionDAO          _actDAO = Bootstrap.getBean(ActionDAO.class);
-    private AlertDAO           _alertDAO = Bootstrap.getBean(AlertDAO.class);
+@Service
+@Transactional
+public class ActionManagerImpl implements ActionManager {
+    private ActionDAO          actionDAO;
+    private AlertDAO           alertDAO;
 
-    public ActionManagerEJBImpl() {
-
+    @Autowired
+    public ActionManagerImpl(ActionDAO actionDAO, AlertDAO alertDAO) {
+        this.actionDAO = actionDAO;
+        this.alertDAO = alertDAO;
     }
 
     /**
      * Get all the actions for a given alert
      *
      * @return a collection of {@link ActionValue}s
-     * @ejb:interface-method
      */
-    public List getActionsForAlert(int alertId) {
-        Alert a = _alertDAO.findById(new Integer(alertId));
-        Collection actions = _actDAO.findByAlert(a);
+    public List<ActionValue> getActionsForAlert(int alertId) {
+        Alert alert = alertDAO.findById(new Integer(alertId));
+        Collection<Action> actions = actionDAO.findByAlert(alert);
 
         return actionsToActionValues(actions);
     }
 
-    private List actionsToActionValues(Collection actions) {
-        List res = new ArrayList(actions.size());
+    private List<ActionValue> actionsToActionValues(Collection<Action> actions) {
+        List<ActionValue> res = new ArrayList<ActionValue>(actions.size());
 
-        for (Iterator i=actions.iterator(); i.hasNext();) {
-            Action action = (Action)i.next();
+        for (Action action : actions) {
             res.add(action.getActionValue());
         }
 
@@ -92,8 +82,6 @@ public class ActionManagerEJBImpl implements SessionBean {
 
     /**
      * Create a new action
-     *
-     * @ejb:interface-method
      */
     public Action createAction(AlertDefinition def, String className,
                                ConfigResponse config, Action parent)
@@ -105,17 +93,15 @@ public class ActionManagerEJBImpl implements SessionBean {
 
     /**
      * Update an action
-     *
-     * @ejb:interface-method
      */
     public Action updateAction(ActionValue val) {
         // First update the primary action
-        Action action = _actDAO.findById(val.getId());
+        Action action = actionDAO.findById(val.getId());
 
         // Delete it if no configuration or logs
         if (val.getConfig() == null) {
             if (action.getLogEntriesBag().size() == 0) {
-                _actDAO.removeAction(action);
+                actionDAO.removeAction(action);
             }
             else {  // Disassociate from everything
                 if (action.getAlertDefinition() != null) {
@@ -150,11 +136,10 @@ public class ActionManagerEJBImpl implements SessionBean {
 
         /* It would be nice to have a more explicit method that
            does this kind of update.  XXX -- JMT */
-        Collection children = action.getChildren();
+        Collection<Action> children = action.getChildren();
 
         val.setParentId(val.getId());
-        for (Iterator i = children.iterator(); i.hasNext(); ) {
-            Action act = (Action) i.next();
+        for (Action act : children ) {
             act.setClassName(val.getClassname());
             act.setConfig(val.getConfig());
             setParentAction(act, val.getParentId());
@@ -175,60 +160,45 @@ public class ActionManagerEJBImpl implements SessionBean {
      * escalations actions.
      *
      * XXX:  This should really be removed -- the JSON object sucks.
-     *
-     * @ejb:interface-method
      */
     public Action createAction(JSONObject json)
         throws JSONException
     {
-        Action a = Action.newInstance(json);
+        Action action = Action.newInstance(json);
 
-        _actDAO.save(a);
-        return a;
+        actionDAO.save(action);
+        return action;
     }
 
     /**
      * Create a free-standing action.  These are linked to from things like
      * escalations actions.
-     *
-     * @ejb:interface-method
      */
     public Action createAction(ActionConfigInterface cfg) {
-        Action a = Action.createAction(cfg);
+        Action action = Action.createAction(cfg);
 
-        _actDAO.save(a);
-        return a;
+        actionDAO.save(action);
+        return action;
     }
 
     /**
      * Mark a free-standing action as deleted.  These actions will later be
      * deleted by a cleanup thread.
-     *
-     * @ejb:interface-method
      */
-    public void markActionDeleted(Action a) {
-        a.setDeleted(true);
+    public void markActionDeleted(Action action) {
+        action.setDeleted(true);
     }
 
     private void setParentAction(Action action, Integer parent) {
         if (parent == null) {
             action.setParent(null);
         } else {
-            action.setParent(_actDAO.findById(parent));
+            action.setParent(actionDAO.findById(parent));
         }
     }
 
-    public static ActionManagerLocal getOne() {
-        try {
-            return ActionManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static ActionManager getOne() {
+        return Bootstrap.getBean(ActionManager.class);
     }
 
-    public void ejbCreate() {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
 }

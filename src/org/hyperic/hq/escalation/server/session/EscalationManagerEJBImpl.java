@@ -59,7 +59,7 @@ import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.ActionManagerImpl;
 import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
@@ -181,7 +181,7 @@ public class EscalationManagerEJBImpl implements SessionBean
     public void addAction(Escalation e, ActionConfigInterface cfg,
                           long waitTime)
     {
-        Action a = ActionManagerEJBImpl.getOne().createAction(cfg);
+        Action a = ActionManagerImpl.getOne().createAction(cfg);
         e.addAction(waitTime, a);
         unscheduleEscalation(e);
     }
@@ -210,7 +210,7 @@ public class EscalationManagerEJBImpl implements SessionBean
 
         unscheduleEscalation(e);
 
-        ActionManagerEJBImpl.getOne().markActionDeleted(action);
+        ActionManagerImpl.getOne().markActionDeleted(action);
     }
 
     /**

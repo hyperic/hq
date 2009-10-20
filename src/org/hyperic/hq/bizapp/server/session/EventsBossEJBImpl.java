@@ -102,7 +102,7 @@ import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.server.session.ActionManagerEJBImpl;
+import org.hyperic.hq.events.server.session.ActionManagerImpl;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
@@ -111,7 +111,7 @@ import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.server.session.EventsStartupListener;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
-import org.hyperic.hq.events.shared.ActionManagerLocal;
+import org.hyperic.hq.events.shared.ActionManager;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
@@ -187,8 +187,8 @@ public class EventsBossEJBImpl
         return AlertDefinitionManagerImpl.getOne();
     }
 
-    private ActionManagerLocal getActMan() {
-        return ActionManagerEJBImpl.getOne();
+    private ActionManager getActMan() {
+        return ActionManagerImpl.getOne();
     }
 
     private MaintenanceEventManagerInterface getMaintEvtMgr() {
@@ -636,7 +636,7 @@ public class EventsBossEJBImpl
         alertdefs.addAll(ad.getChildren());
 
         Action root = null;
-        ActionManagerLocal actMan = getActMan();
+        ActionManager actMan = getActMan();
         for (Iterator it = alertdefs.iterator(); it.hasNext(); ) {
             ad = (AlertDefinition) it.next();
 
