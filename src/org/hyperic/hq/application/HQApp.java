@@ -576,6 +576,7 @@ public class HQApp {
                    // masthead
                    methName.equals("resourcesExistOfType") ||
                    methName.equals("search") || 
+                   methName.equals("initializeTriggers") || 
                    methName.startsWith("are") ||
                    methName.startsWith("check") ||
                    methName.startsWith("dispatch") ||
