@@ -932,6 +932,7 @@ public class EventsBossEJBImpl
     /**
      * Delete a collection of alert definitions
      *
+     * @ejb:transaction type="NotSupported"
      * @ejb:interface-method
      */
     public void deleteAlertDefinitions(int sessionID, Integer[] ids)
@@ -939,7 +940,13 @@ public class EventsBossEJBImpl
                RemoveException, PermissionException
     {
         AuthzSubject subject = manager.getSubject(sessionID);
-        getADM().deleteAlertDefinitions(subject, ids);
+        
+        // HQ-1887: Process each alert definition in a separate transaction
+        // to avoid transaction timeout issues, especially with
+        // resource type alert definitions
+        for (int i=0; i< ids.length; i++) {
+            getADM().deleteAlertDefinitions(subject, new Integer[] {ids[i]});
+        }
     }
 
     /**
