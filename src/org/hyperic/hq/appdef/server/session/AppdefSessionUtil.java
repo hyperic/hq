@@ -43,12 +43,11 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.TypeInfo;
 
-
 public abstract class AppdefSessionUtil {
-    private AIQueueManagerLocal  aiqManagerLocal;
-    private ConfigManagerLocal   configMgrL;
+    private AIQueueManagerLocal aiqManagerLocal;
+    private ConfigManagerLocal configMgrL;
     private ResourceManager rmLocal;
-    private CPropManagerLocal    cpropLocal;
+    private CPropManagerLocal cpropLocal;
     // TODO: Remove protected accessor when all subclasses are converted
     protected AgentDAO agentDao = Bootstrap.getBean(AgentDAO.class);
     protected ApplicationDAO applicationDAO = Bootstrap.getBean(ApplicationDAO.class);
@@ -142,32 +141,31 @@ public abstract class AppdefSessionUtil {
 
     protected AppdefResourceType findResourceType(int appdefType,
                                                   int appdefTypeId)
-        throws AppdefEntityNotFoundException
-    {
+        throws AppdefEntityNotFoundException {
         Integer id = new Integer(appdefTypeId);
 
-        if(appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM){
+        if (appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
             return getPlatformManager().findPlatformType(id);
-        } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER){
+        } else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
             try {
                 return getServerManager().findServerType(id);
-            } catch(ObjectNotFoundException exc){
+            } catch (ObjectNotFoundException exc) {
                 throw new ServerNotFoundException("Server type id=" +
                                                   appdefTypeId +
                                                   " not found");
             }
-        } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE){
+        } else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
             try {
                 return getServiceManager().findServiceType(id);
-            } catch(ObjectNotFoundException exc){
+            } catch (ObjectNotFoundException exc) {
                 throw new ServiceNotFoundException("Service type id=" +
                                                    appdefTypeId +
                                                    " not found");
             }
-        } else if(appdefType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
+        } else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
             return getApplicationManager().findApplicationType(id);
         } else {
-            throw new IllegalArgumentException("Unrecognized appdef type:"+
+            throw new IllegalArgumentException("Unrecognized appdef type:" +
                                                " " + appdefType);
         }
     }
@@ -175,11 +173,11 @@ public abstract class AppdefSessionUtil {
     protected AppdefResourceType findResourceType(TypeInfo info) {
         int type = info.getType();
 
-        if(type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM){
+        if (type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
             return getPlatformTypeDAO().findByName(info.getName());
-        } else if(type == AppdefEntityConstants.APPDEF_TYPE_SERVER){
+        } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
             return getServerTypeDAO().findByName(info.getName());
-        } else if(type == AppdefEntityConstants.APPDEF_TYPE_SERVICE){
+        } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
             return getServiceTypeDAO().findByName(info.getName());
         } else {
             throw new IllegalArgumentException("Unrecognized appdef type:" +
