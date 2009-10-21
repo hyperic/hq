@@ -30,7 +30,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.shared.AgentManagerLocal;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.zevents.ZeventListener;
@@ -46,7 +46,7 @@ public class TransferAgentBundleZeventListener implements ZeventListener {
      * @see org.hyperic.hq.zevents.ZeventListener#processEvents(java.util.List)
      */
     public void processEvents(List events) {
-        AgentManagerLocal agentMan = AgentManagerEJBImpl.getOne();
+        AgentManager agentMan = AgentManagerImpl.getOne();
         AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
         
         for (Iterator iter = events.iterator(); iter.hasNext();) {

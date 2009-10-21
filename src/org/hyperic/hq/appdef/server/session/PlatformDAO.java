@@ -50,7 +50,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class PlatformDAO extends HibernateDAO {
+public class PlatformDAO extends HibernateDAO<Platform> {
 
     @Autowired
     public PlatformDAO(SessionFactory f) {
@@ -245,6 +245,7 @@ public class PlatformDAO extends HibernateDAO {
             .list();
     }
 
+    // TODO: G (this and other methods in this class)
     public List findParentByNetworkRelation(List platformTypeIds,
                                             String platformName,
                                             Boolean hasChildren) {
@@ -297,7 +298,8 @@ public class PlatformDAO extends HibernateDAO {
         return query.list();
     }
 
-    public List findByNoNetworkRelation(List platformTypeIds,
+    @SuppressWarnings("unchecked")
+    public List<Platform> findByNoNetworkRelation(List<Integer> platformTypeIds,
                                         String platformName) {
         String nameEx = null;
         String sql = "select {p.*} from EAM_PLATFORM p " +
@@ -325,22 +327,24 @@ public class PlatformDAO extends HibernateDAO {
             query.setString("regex", platformName);
         }
 
-        return query.list();
+        return (List<Platform>)query.list();
     }
 
-    public List findByType(Integer pid)
+    @SuppressWarnings("unchecked")
+    public List<Platform> findByType(Integer pid)
     {
         String sql = "select distinct p from Platform p "+
                      "where p.platformType.id=?";
-        return getSession()
+        return (List<Platform>)getSession()
             .createQuery(sql)
             .setInteger(0, pid.intValue())
             .list();
     }
 
-    public List findByServers(Integer[] ids)
+    @SuppressWarnings("unchecked")
+    public List<Platform> findByServers(Integer[] ids)
     {
-        return createCriteria()
+        return (List<Platform>)createCriteria()
             .createAlias("resource", "r")
             .createAlias("serversBag", "s")
             .add(Restrictions.in("s.id", ids))
@@ -386,26 +390,29 @@ public class PlatformDAO extends HibernateDAO {
             .list();
     }
 
-    public Collection findByAgent(Agent agt)
+    @SuppressWarnings("unchecked")
+    public Collection<Platform> findByAgent(Agent agt)
     {
         String sql = "from Platform where agent.id=?";
-        return getSession()
+        return (Collection<Platform>)getSession()
             .createQuery(sql)
             .setInteger(0, agt.getId().intValue())
             .list();
     }
 
-    public Collection findByAgentToken(String token)
+    @SuppressWarnings("unchecked")
+    public Collection<Platform> findByAgentToken(String token)
     {
         String sql = "select p from Platform p join fetch p.agent a " +
                      "where a.agentToken=?";
-        return getSession()
+        return (Collection<Platform>)getSession()
             .createQuery(sql)
             .setString(0, token)
             .list();
     }
 
-    public Collection findByIpAddr(String addr)
+    @SuppressWarnings("unchecked")
+    public Collection<Platform> findByIpAddr(String addr)
     {
         // here we do not to use 'fetch' join as fetch joins have a
         // side effect of also initializing the collection with the
@@ -415,7 +422,7 @@ public class PlatformDAO extends HibernateDAO {
         // to the 'addr' passed to this method.
         String sql = "select distinct p from Platform p " +
                      "join p.ips ip where ip.address=?";
-        return getSession()
+        return (Collection<Platform>)getSession()
             .createQuery(sql)
             .setString(0, addr)
             .list();

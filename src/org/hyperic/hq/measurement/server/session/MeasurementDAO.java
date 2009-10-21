@@ -46,8 +46,8 @@ import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
-import org.hyperic.hq.appdef.shared.AgentManagerLocal;
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -777,7 +777,7 @@ public class MeasurementDAO extends HibernateDAO {
         }
 
         Map res = new HashMap(idToCount.size());
-        AgentManagerLocal agentMan = AgentManagerEJBImpl.getOne();
+        AgentManager agentMan = AgentManagerImpl.getOne();
         for (Iterator i=idToCount.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry ent = (Map.Entry)i.next();
             Integer id = (Integer)ent.getKey();

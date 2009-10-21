@@ -30,46 +30,41 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import javax.ejb.CreateException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
-import org.hyperic.dao.DAOFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentUpgradeManager;
 import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.agent.commands.AgentUpgrade_result;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.AgentManagerLocal;
-import org.hyperic.hq.appdef.shared.AgentManagerUtil;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
-import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.AgentType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.server.session.AgentReportStatus;
 import org.hyperic.hq.autoinventory.server.session.AgentReportStatusDAO;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.context.Bootstrap;
@@ -77,23 +72,15 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.security.MD5;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @ejb:bean name="AgentManager"
- *      jndi-name="ejb/appdef/AgentManager"
- *      local-jndi-name="LocalAgentManager"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:util generate="physical"
  */
-public class AgentManagerEJBImpl
-    extends    AppdefSessionEJB
-    implements SessionBean
-{
+// TODO: Replace FQN after fixing HE-99
+@org.springframework.stereotype.Service
+@Transactional
+public class AgentManagerImpl extends AppdefSessionEJB implements AgentManager {
     // XXX: These should go elsewhere.
     private final String CAM_AGENT_TYPE = "covalent-eam";
     private final String HQ_AGENT_REMOTING_TYPE = "hyperic-hq-remoting";
@@ -101,20 +88,26 @@ public class AgentManagerEJBImpl
     private final String HQ_PLUGINS_DIR ="/deploy/hq.ear/hq-plugins";
     private final String PLUGINS_EXTENSION = "-plugin";
 
-    private Log log = LogFactory.getLog(AgentManagerEJBImpl.class.getName());
-    private AgentReportStatusDAO agentReportStatusDao = Bootstrap.getBean(AgentReportStatusDAO.class);
-    private AgentTypeDAO agentTypeDAO = Bootstrap.getBean(AgentTypeDAO.class);
+    private Log log = LogFactory.getLog(AgentManagerImpl.class.getName());
+    private AgentReportStatusDAO agentReportStatusDao;
+    private AgentTypeDAO agentTypeDao;
+    private ServerConfigManagerLocal serverConfigManager;
 
-    private AgentTypeDAO getAgentTypeDAO() {
-        return agentTypeDAO;
+    
+    @Autowired
+    public AgentManagerImpl(AgentReportStatusDAO agentReportStatusDao, AgentTypeDAO agentTypeDao, ServerConfigManagerLocal serverConfigManager) {
+        this.agentReportStatusDao = agentReportStatusDao;
+        this.agentTypeDao = agentTypeDao;
+        this.serverConfigManager = serverConfigManager;
     }
+    
     /**
      * Grab an agent object by ip:port
      */
     private Agent getAgentInternal(String ip, int port)
         throws AgentNotFoundException
     {
-        Agent agent = getAgentDAO().findByIpAndPort(ip, port);
+        Agent agent = agentDao.findByIpAndPort(ip, port);
         if (agent == null) {
             throw new AgentNotFoundException("Agent at " + ip + ":" + port +
                                              " not found");
@@ -128,7 +121,7 @@ public class AgentManagerEJBImpl
     private Agent getAgentInternal(String agentToken)
         throws AgentNotFoundException
     {
-        Agent agent = getAgentDAO().findByAgentToken(agentToken);
+        Agent agent = agentDao.findByAgentToken(agentToken);
         if (agent == null) {
             throw new AgentNotFoundException("Agent with token " + agentToken +
                                              " not found");
@@ -137,8 +130,6 @@ public class AgentManagerEJBImpl
     }
     
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void removeAgentStatus(Agent agent) {
         AgentReportStatus status = agentReportStatusDao.getReportStatus(agent);
@@ -148,8 +139,6 @@ public class AgentManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void removeAgent(Agent agent) {
 
@@ -157,14 +146,11 @@ public class AgentManagerEJBImpl
         if (status != null) {
             agentReportStatusDao.remove(status);
         }
-        getAgentDAO().remove(agent);
+        agentDao.remove(agent);
     }
 
     /**
      * Get a list of all the entities which can be serviced by an Agent.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public ResourceTree getEntitiesForAgent(AuthzSubject subject,
                                             String agentToken)
@@ -173,16 +159,13 @@ public class AgentManagerEJBImpl
         ResourceTreeGenerator generator;
 
         Agent agt = getAgentInternal(agentToken);
-        PlatformDAO platHome = getPlatformDAO();
-
-        Collection plats = platHome.findByAgent(agt);
+        Collection<Platform> plats = platformDao.findByAgent(agt);
         if (plats.size() == 0) {
             return new ResourceTree();
         }
         AppdefEntityID[] platIds = new AppdefEntityID[plats.size()];
         int i = 0;
-        for (Iterator it = plats.iterator(); it.hasNext(); i++) {
-            Platform plat = (Platform) it.next();
+        for (Platform plat : plats) {
             platIds[i] = AppdefEntityID.newPlatformID(plat.getId());
         }
 
@@ -202,59 +185,48 @@ public class AgentManagerEJBImpl
      * @param pInfo a pager object, with an {@link AgentSortField} sort field
      *
      * @return a list of {@link Agent}s
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
-    public List findAgents(PageInfo pInfo) {
-        return getAgentDAO().findAgents(pInfo);
+    public List<Agent> findAgents(PageInfo pInfo) {
+        return agentDao.findAgents(pInfo);
     }
 
     /**
      * Get a list of all the agents in the system
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
-    public List getAgents(){
-        return new ArrayList(getAgentDAO().findAll());
+    public List<Agent> getAgents(){
+        return new ArrayList<Agent>(agentDao.findAll());
     }
 
     /**
      * Get a count of all the agents in the system
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public int getAgentCount() {
-        return getAgentDAO().size();
+        return agentDao.size();
     }
 
     /**
      * Get a count of the agents which are actually used (i.e. have platforms)
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public int getAgentCountUsed() {
-        return getAgentDAO().countUsed();
+        return agentDao.countUsed();
     }
 
     /**
      * Create a new Agent object.  The type of the agent that is created is the
      * 'hyperic-hq-remoting' agent. This type of agent may be configured to use
      * either a bidirectional or unidirectional transport.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Agent createNewTransportAgent(String address, Integer port,
                                          String authToken, String agentToken,
                                          String version, boolean unidirectional)
         throws AgentCreateException
     {
-        AgentType type = getAgentTypeDAO().findByName(HQ_AGENT_REMOTING_TYPE);
+        AgentType type = agentTypeDao.findByName(HQ_AGENT_REMOTING_TYPE);
         if (type == null){
             throw new SystemException("Unable to find agent type '" +
                                         HQ_AGENT_REMOTING_TYPE + "'");
         }
-        Agent agent = getAgentDAO().create(type, address, port, unidirectional,
+        Agent agent = agentDao.create(type, address, port, unidirectional,
                                            authToken, agentToken, version);
         logAgentWarning(address, port.intValue(), unidirectional);
         try {
@@ -268,21 +240,18 @@ public class AgentManagerEJBImpl
     /**
      * Create a new Agent object.  The type of the agent that is created is
      * the legacy 'covalent-eam' type.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Agent createLegacyAgent(String address, Integer port,
                                    String authToken, String agentToken,
                                    String version)
         throws AgentCreateException
     {
-        AgentType type = getAgentTypeDAO().findByName(CAM_AGENT_TYPE);
+        AgentType type = agentTypeDao.findByName(CAM_AGENT_TYPE);
         if (type == null){
             throw new SystemException("Unable to find agent type '" +
                                       CAM_AGENT_TYPE + "'");
         }
-        Agent agent = getAgentDAO().create(type, address, port, false, authToken,
+        Agent agent = agentDao.create(type, address, port, false, authToken,
                                            agentToken, version);
         logAgentWarning(address, port.intValue(), false);
         try {
@@ -298,9 +267,6 @@ public class AgentManagerEJBImpl
      * be reset. The type of the agent that is updated is the 'hyperic-hq-remoting' agent.
      * This type of agent may be configured to use either a bidirectional or
      * unidirectional transport.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @return An Agent object representing the updated agent
      */
     public Agent updateNewTransportAgent(String agentToken,
@@ -310,7 +276,7 @@ public class AgentManagerEJBImpl
                                          boolean unidirectional)
         throws AgentNotFoundException
     {
-        AgentType type = getAgentTypeDAO().findByName(HQ_AGENT_REMOTING_TYPE);
+        AgentType type = agentTypeDao.findByName(HQ_AGENT_REMOTING_TYPE);
 
         if (type == null){
             throw new SystemException("Unable to find agent type '" +
@@ -334,9 +300,6 @@ public class AgentManagerEJBImpl
     /**
      * Update an existing Agent given the old agent token. The auth token will
      * be reset. The type of the agent that is updated is the legacy 'covalent-eam' type.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @return An Agent object representing the updated agent
      */
     public Agent updateLegacyAgent(String agentToken,
@@ -345,7 +308,7 @@ public class AgentManagerEJBImpl
                                    String version)
         throws AgentNotFoundException
     {
-        AgentType type = getAgentTypeDAO().findByName(CAM_AGENT_TYPE);
+        AgentType type = agentTypeDao.findByName(CAM_AGENT_TYPE);
 
         if (type == null){
             throw new SystemException("Unable to find agent type '" +
@@ -370,9 +333,6 @@ public class AgentManagerEJBImpl
      * Update an existing Agent given an IP and port. The type of the agent that
      * is updated is the 'hyperic-hq-remoting' agent. This type of agent may be
      * configured to use either a bidirectional or unidirectional transport.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @return An Agent object representing the updated agent
      */
     public Agent updateNewTransportAgent(String ip, int port, String authToken,
@@ -380,7 +340,7 @@ public class AgentManagerEJBImpl
                                          boolean unidirectional)
         throws AgentNotFoundException
     {
-        AgentType type = getAgentTypeDAO().findByName(HQ_AGENT_REMOTING_TYPE);
+        AgentType type = agentTypeDao.findByName(HQ_AGENT_REMOTING_TYPE);
 
         if (type == null){
             throw new SystemException("Unable to find agent type '" +
@@ -403,16 +363,13 @@ public class AgentManagerEJBImpl
     /**
      * Update an existing Agent given an IP and port. The type of the agent
      * that is updated is the legacy 'covalent-eam' type.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @return An Agent object representing the updated agent
      */
     public Agent updateLegacyAgent(String ip, int port, String authToken,
                                    String agentToken, String version)
         throws AgentNotFoundException
     {
-        AgentType type = getAgentTypeDAO().findByName(CAM_AGENT_TYPE);
+        AgentType type = agentTypeDao.findByName(CAM_AGENT_TYPE);
 
         if (type == null){
             throw new SystemException("Unable to find agent type '" +
@@ -433,11 +390,9 @@ public class AgentManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
-    public List findAgentsByIP(String ip) {
-        return getAgentDAO().findByIP(ip);
+    public List<Agent> findAgentsByIP(String ip) {
+        return agentDao.findByIP(ip);
     }
 
     /**
@@ -449,16 +404,13 @@ public class AgentManagerEJBImpl
      * @param agentToken Token that the agent uses to connect to HQ
      * @param ip         The new IP address
      * @param port       The new port
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @return An Agent object representing the updated agent
      */
     public Agent updateNewTransportAgent(String agentToken, String ip,
                                          int port, boolean unidirectional)
         throws AgentNotFoundException
     {
-        AgentType type = getAgentTypeDAO().findByName(HQ_AGENT_REMOTING_TYPE);
+        AgentType type = agentTypeDao.findByName(HQ_AGENT_REMOTING_TYPE);
 
         if (type == null){
             throw new SystemException("Unable to find agent type '" +
@@ -484,15 +436,12 @@ public class AgentManagerEJBImpl
      * @param agentToken Token that the agent uses to connect to HQ
      * @param ip         The new IP address
      * @param port       The new port
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      * @return An Agent object representing the updated agent
      */
     public Agent updateLegacyAgent(String agentToken, String ip, int port)
         throws AgentNotFoundException
     {
-        AgentType type = getAgentTypeDAO().findByName(CAM_AGENT_TYPE);
+        AgentType type = agentTypeDao.findByName(CAM_AGENT_TYPE);
 
         if (type == null){
             throw new SystemException("Unable to find agent type '" +
@@ -514,22 +463,17 @@ public class AgentManagerEJBImpl
     /**
      * Find an agent by the token which is Required for the agent
      * to send when it connects.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void checkAgentAuth(String agentToken)
         throws AgentUnauthorizedException
     {
-        Agent agent = getAgentDAO().findByAgentToken(agentToken);
+        Agent agent = agentDao.findByAgentToken(agentToken);
         if (agent == null) {
             throw new AgentUnauthorizedException("Agent unauthorized");
         }
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public AgentConnection getAgentConnection(String method, String connIp,
                                               Integer agentId)
@@ -539,32 +483,25 @@ public class AgentManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void disconnectAgent(AgentConnection a) {
         AgentConnections.getInstance().disconnectAgent(a);
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    // TODO: G (does this return Agents or AgentConnection?)
     public Collection getConnectedAgents() {
         return AgentConnections.getInstance().getConnected();
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public int getNumConnectedAgents() {
         return AgentConnections.getInstance().getNumConnected();
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public long getTotalConnectedAgents() {
         return AgentConnections.getInstance().getTotalConnections();
@@ -572,9 +509,6 @@ public class AgentManagerEJBImpl
 
     /**
      * Find an agent listening on a specific IP & port
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Agent getAgent(String ip, int port)
         throws AgentNotFoundException
@@ -586,8 +520,6 @@ public class AgentManagerEJBImpl
      * Find an agent by agent token.
      * @param agentToken the agent token to look for
      * @return An Agent representing the agent that has the given token.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Agent getAgent(String agentToken)
         throws AgentNotFoundException
@@ -601,35 +533,27 @@ public class AgentManagerEJBImpl
      * @param agentToken The agent token.
      * @return <code>true</code> if the agent token is unique;
      *         <code>false</code> if it is already assigned to an agent.
-     * @ejb:interface-method
      */
     public boolean isAgentTokenUnique(String agentToken) {
-        return getAgentDAO().findByAgentToken(agentToken) == null;
+        return agentDao.findByAgentToken(agentToken) == null;
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Agent findAgent(Integer id) {
-        return getAgentDAO().findById(id);
+        return agentDao.findById(id);
     }
 
     /**
      * Get an Agent by id.
-     *
-     * @ejb:interface-method
      */
     public Agent getAgent(Integer id) {
-        return getAgentDAO().get(id);
+        return agentDao.get(id);
     }
 
     /**
      * Find an agent which can service the given entity ID
      * @return An agent which is set to manage the specified ID
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public Agent getAgent(AppdefEntityID aID)
         throws AgentNotFoundException
@@ -638,7 +562,7 @@ public class AgentManagerEJBImpl
             Platform platform = null;
             switch (aID.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    Service service = getServiceDAO().findById(aID.getId());
+                    Service service = serviceDao.findById(aID.getId());
                     Server server = service.getServer();
                     // server may be null due to async delete
                     if (server == null) {
@@ -647,11 +571,11 @@ public class AgentManagerEJBImpl
                     platform = server.getPlatform();
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    server = getServerDAO().findById(aID.getId());
+                    server = serverDao.findById(aID.getId());
                     platform = server.getPlatform();
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    platform = getPlatformDAO().findById(aID.getId());
+                    platform = platformDao.findById(aID.getId());
                     break;
                 default:
                     throw new AgentNotFoundException(
@@ -681,8 +605,6 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws AgentRemoteException if an exception occurs on the remote agent side.
      * @throws AgentConnectionException  if the connection to the agent fails.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public String getCurrentAgentBundle(AuthzSubject subject, AppdefEntityID aid)
         throws PermissionException,
@@ -714,8 +636,6 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @throws InterruptedException if enqueuing the Zevent is interrupted.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void upgradeAgentAsync(AuthzSubject subject,
                                          AppdefEntityID aid,
@@ -763,8 +683,6 @@ public class AgentManagerEJBImpl
      * @throws AgentConnectionException  if the connection to the agent fails.
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void upgradeAgent(AuthzSubject subject,
                                          AppdefEntityID aid,
@@ -802,8 +720,6 @@ public class AgentManagerEJBImpl
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
      * @throws InterruptedException if enqueuing the Zevent is interrupted.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void transferAgentBundleAsync(AuthzSubject subject,
                                          AppdefEntityID aid,
@@ -850,8 +766,6 @@ public class AgentManagerEJBImpl
      * @throws AgentConnectionException  if the connection to the agent fails.
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void transferAgentBundle(AuthzSubject subject,
                                     AppdefEntityID aid,
@@ -901,8 +815,6 @@ public class AgentManagerEJBImpl
      * @throws AgentRemoteException if an exception occurs on the remote agent side.
      * @throws AgentConnectionException  if the connection to the agent fails.
      * @throws AgentNotFoundException if no agent exists with the given agent id.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void transferAgentPlugin(AuthzSubject subject,
                                     AppdefEntityID aid,
@@ -965,8 +877,6 @@ public class AgentManagerEJBImpl
      * @throws FileNotFoundException if the plugin is not found on the HQ server.
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws InterruptedException if enqueuing the Zevent is interrupted.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void transferAgentPluginAsync(AuthzSubject subject,
                                     AppdefEntityID aid,
@@ -1017,8 +927,6 @@ public class AgentManagerEJBImpl
      * @throws AgentConnectionException  if the connection to the agent fails.
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void upgradeAgentBundle(AuthzSubject subject, AppdefEntityID aid, String bundleFileName) 
         throws PermissionException, 
@@ -1036,6 +944,7 @@ public class AgentManagerEJBImpl
 
         AgentCommandsClient client = AgentCommandsClientFactory.getInstance().getClient(aid);
         String bundleFilePath = HQConstants.AgentBundleDropDir + "/" + bundleFileName;
+        // TODO: G
         Map updatedAgentInfo = client.upgrade(bundleFilePath, HQConstants.AgentBundleDropDir);
         
         if (!updatedAgentInfo.isEmpty()) {
@@ -1065,8 +974,6 @@ public class AgentManagerEJBImpl
      * @throws AgentConnectionException  if the connection to the agent fails.
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public void restartAgent(AuthzSubject subject,
                                     AppdefEntityID aid)
@@ -1089,8 +996,7 @@ public class AgentManagerEJBImpl
 
     /**
      * Pings the specified agent.
-     * @ejb:interface-method
-     * @see org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl#pingAgent(org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.appdef.Agent)
+     * @see org.hyperic.hq.appdef.server.session.AgentManagerImpl#pingAgent(org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.appdef.Agent)
      */
     public long pingAgent(AuthzSubject subject, AppdefEntityID id)
         throws AgentNotFoundException, PermissionException,
@@ -1117,8 +1023,6 @@ public class AgentManagerEJBImpl
      * @throws AgentConnectionException  if the connection to the agent fails.
      * @throws AgentNotFoundException if no agent exists with the given agent id.
      * @throws ConfigPropertyException if the server configuration cannot be retrieved.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
     public long pingAgent(AuthzSubject subject, Agent agent)
         throws PermissionException, AgentNotFoundException,
@@ -1138,8 +1042,7 @@ public class AgentManagerEJBImpl
      * Simply logs if the new agent may conflict with an existing agent
      */
     private void logAgentWarning(String ip, int port, boolean unidirectional) {
-        AgentDAO dao = getAgentDAO();
-        Collection agents = dao.findByIP(ip);
+        Collection<Agent> agents = agentDao.findByIP(ip);
         if (agents.size() == 0) {
             return;
         }
@@ -1162,9 +1065,8 @@ public class AgentManagerEJBImpl
         }
     }
 
-    private boolean containsAgentsOfType(Collection agents, String type) {
-        for (Iterator it=agents.iterator(); it.hasNext(); ) {
-            Agent agent = (Agent)it.next();
+    private boolean containsAgentsOfType(Collection<Agent> agents, String type) {
+        for (Agent agent : agents) {
             if (agent.getAgentType().getName().equals(type)) {
                 return true;
             }
@@ -1179,9 +1081,7 @@ public class AgentManagerEJBImpl
     private File resolveAgentBundleFile(String bundleFileName)
         throws ConfigPropertyException {
 
-        ServerConfigManagerLocal configMan = ServerConfigManagerEJBImpl.getOne();
-
-        Properties config = configMan.getConfig();
+        Properties config = serverConfigManager.getConfig();
 
         String repositoryDir = config.getProperty(HQConstants.AgentBundleRepositoryDir);
 
@@ -1256,21 +1156,7 @@ public class AgentManagerEJBImpl
         }
     }
 
-    public static AgentManagerLocal getOne() {
-        try {
-            return AgentManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    public static AgentManager getOne() {
+        return Bootstrap.getBean(AgentManager.class);
     }
-
-    public void ejbCreate() throws CreateException {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
-
-
-
-
 }

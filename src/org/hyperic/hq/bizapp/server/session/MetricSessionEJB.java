@@ -40,10 +40,10 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.shared.AgentManagerLocal;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -407,7 +407,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         throws ApplicationNotFoundException,
                AppdefEntityNotFoundException,
                PermissionException {
-        final AgentManagerLocal agentMan = AgentManagerEJBImpl.getOne();
+        final AgentManager agentMan = AgentManagerImpl.getOne();
         final double[] result = new double[ids.length];
         Arrays.fill(result, MeasurementConstants.AVAIL_UNKNOWN);
         final Map data = new HashMap();

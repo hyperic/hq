@@ -822,19 +822,6 @@
       </session>
 
       <session >
-         <description><![CDATA[]]></description>
-
-         <ejb-name>AgentManager</ejb-name>
-
-         <local-home>org.hyperic.hq.appdef.shared.AgentManagerLocalHome</local-home>
-         <local>org.hyperic.hq.appdef.shared.AgentManagerLocal</local>
-         <ejb-class>org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
-      <session >
          <description><![CDATA[The BizApp's interface to the Events Subsystem]]></description>
 
          <ejb-name>EventsBoss</ejb-name>

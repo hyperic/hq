@@ -40,8 +40,8 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
-import org.hyperic.hq.appdef.shared.AgentManagerLocal;
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -91,7 +91,7 @@ public class MeasurementProcessorEJBImpl
      * @ejb:interface-method
      */
     public void scheduleSynchronous(List aeids) {
-        AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
+        AgentManager aMan = AgentManagerImpl.getOne();
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         try {
@@ -116,7 +116,7 @@ public class MeasurementProcessorEJBImpl
      * @return Map of {@link Agent} to {@link List<AppdefEntityID>}
      */
     private Map getAgentMap(List aeids) {
-        AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
+        AgentManager aMan = AgentManagerImpl.getOne();
         Map rtn = new HashMap(aeids.size());
         List tmp;
         for (Iterator it=aeids.iterator(); it.hasNext(); ) {
@@ -258,7 +258,7 @@ public class MeasurementProcessorEJBImpl
         throws MeasurementUnscheduleException {
         Map agents;
         agents = getAgentMap(aeids);
-        AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
+        AgentManager aMan = AgentManagerImpl.getOne();
         for (Iterator it=agents.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry)it.next();
             Agent agent = aMan.findAgent((Integer)entry.getKey());

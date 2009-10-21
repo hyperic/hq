@@ -327,11 +327,6 @@
 
       </session>
       <session>
-         <ejb-name>AgentManager</ejb-name>
-         <local-jndi-name>LocalAgentManager</local-jndi-name>
-
-      </session>
-      <session>
          <ejb-name>EventsBoss</ejb-name>
          <jndi-name>ejb/bizapp/EventsBoss</jndi-name>
          <local-jndi-name>LocalEventsBoss</local-jndi-name>

@@ -51,7 +51,7 @@ import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
-import org.hyperic.hq.appdef.shared.AgentManagerLocal;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
@@ -376,7 +376,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             return;
         }
         if (phys.getId().equals(platform.getId())) {
-            AgentManagerEJBImpl.getOne().removeAgentStatus(agent);
+            AgentManagerImpl.getOne().removeAgentStatus(agent);
         }
     }
 
@@ -755,7 +755,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
      */
     public Platform getPhysPlatformByAgentToken(String agentToken) {
         try {
-            AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
+            AgentManager aMan = AgentManagerImpl.getOne();
             Agent agent = aMan.getAgent(agentToken);
             Collection platforms = agent.getPlatforms();
             for (Iterator it = platforms.iterator(); it.hasNext();) {
@@ -778,7 +778,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         // with no associated platform, we need to check the ips in the
         // agent table. If there are more than one IPs match,
         // then assume this is the Agent Porker
-        AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
+        AgentManager aMan = AgentManagerImpl.getOne();
         for (Iterator it = ips.iterator(); it.hasNext();) {
             AIIpValue ip = (AIIpValue) it.next();
             if (ip.getAddress().equals(NetFlags.LOOPBACK_ADDRESS)) {
@@ -1620,7 +1620,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
         // need to check if IPs have changed, if so update Agent
         List ips = Arrays.asList(aiplatform.getAIIpValues());
-        AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
+        AgentManager aMan = AgentManagerImpl.getOne();
         Agent currAgent = platform.getAgent();
         boolean removeCurrAgent = false;
         for (Iterator it = ips.iterator(); it.hasNext();) {

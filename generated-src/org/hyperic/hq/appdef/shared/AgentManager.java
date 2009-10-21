@@ -3,33 +3,51 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+
+import javax.ejb.FinderException;
+
+import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
+import org.hyperic.hq.appdef.server.session.AgentSortField;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
+import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.util.ConfigPropertyException;
+
 /**
  * Local interface for AgentManager.
  */
-public interface AgentManagerLocal
-   extends javax.ejb.EJBLocalObject
-{
+public interface AgentManager {
 
-   public void removeAgentStatus( org.hyperic.hq.appdef.Agent agent ) ;
+   public void removeAgentStatus( Agent agent ) ;
 
-   public void removeAgent( org.hyperic.hq.appdef.Agent agent ) ;
+   public void removeAgent( Agent agent ) ;
 
    /**
     * Get a list of all the entities which can be serviced by an Agent.
     */
-   public org.hyperic.hq.appdef.shared.resourceTree.ResourceTree getEntitiesForAgent( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String agentToken ) throws org.hyperic.hq.appdef.shared.AgentNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
+   public ResourceTree getEntitiesForAgent( AuthzSubject subject,String agentToken ) throws AgentNotFoundException, PermissionException;
 
    /**
     * Get a paged list of agents in the system.
     * @param pInfo a pager object, with an {@link AgentSortField} sort field
     * @return a list of {@link Agent}s
     */
-   public java.util.List findAgents( org.hyperic.hibernate.PageInfo pInfo ) ;
+   public List<Agent> findAgents( PageInfo pInfo ) ;
 
    /**
     * Get a list of all the agents in the system
     */
-   public java.util.List getAgents(  ) ;
+   public List<Agent> getAgents(  ) ;
 
    /**
     * Get a count of all the agents in the system
@@ -37,41 +55,41 @@ public interface AgentManagerLocal
    public int getAgentCount(  ) ;
 
    /**
-    * Get a count of the agents which are actually used (i.e. have platforms)
+    * Get a count of the agents which are actually used (e. have platforms)
     */
    public int getAgentCountUsed(  ) ;
 
    /**
     * Create a new Agent object. The type of the agent that is created is the 'hyperic-hq-remoting' agent. This type of agent may be configured to use either a bidirectional or unidirectional transport.
     */
-   public org.hyperic.hq.appdef.Agent createNewTransportAgent( java.lang.String address,java.lang.Integer port,java.lang.String authToken,java.lang.String agentToken,java.lang.String version,boolean unidirectional ) throws org.hyperic.hq.appdef.shared.AgentCreateException;
+   public Agent createNewTransportAgent( String address,Integer port,String authToken,String agentToken,String version,boolean unidirectional ) throws AgentCreateException;
 
    /**
     * Create a new Agent object. The type of the agent that is created is the legacy 'covalent-eam' type.
     */
-   public org.hyperic.hq.appdef.Agent createLegacyAgent( java.lang.String address,java.lang.Integer port,java.lang.String authToken,java.lang.String agentToken,java.lang.String version ) throws org.hyperic.hq.appdef.shared.AgentCreateException;
+   public Agent createLegacyAgent( String address,Integer port,String authToken,String agentToken,String version ) throws AgentCreateException;
 
    /**
     * Update an existing Agent given the old agent token. The auth token will be reset. The type of the agent that is updated is the 'hyperic-hq-remoting' agent. This type of agent may be configured to use either a bidirectional or unidirectional transport.
     * @return An Agent object representing the updated agent    */
-   public org.hyperic.hq.appdef.Agent updateNewTransportAgent( java.lang.String agentToken,java.lang.String ip,int port,java.lang.String authToken,java.lang.String version,boolean unidirectional ) throws org.hyperic.hq.appdef.shared.AgentNotFoundException;
+   public Agent updateNewTransportAgent( String agentToken,String ip,int port,String authToken,String version,boolean unidirectional ) throws AgentNotFoundException;
 
    /**
     * Update an existing Agent given the old agent token. The auth token will be reset. The type of the agent that is updated is the legacy 'covalent-eam' type.
     * @return An Agent object representing the updated agent    */
-   public org.hyperic.hq.appdef.Agent updateLegacyAgent( java.lang.String agentToken,java.lang.String ip,int port,java.lang.String authToken,java.lang.String version ) throws org.hyperic.hq.appdef.shared.AgentNotFoundException;
+   public Agent updateLegacyAgent( String agentToken,String ip,int port,String authToken,String version ) throws AgentNotFoundException;
 
    /**
     * Update an existing Agent given an IP and port. The type of the agent that is updated is the 'hyperic-hq-remoting' agent. This type of agent may be configured to use either a bidirectional or unidirectional transport.
     * @return An Agent object representing the updated agent    */
-   public org.hyperic.hq.appdef.Agent updateNewTransportAgent( java.lang.String ip,int port,java.lang.String authToken,java.lang.String agentToken,java.lang.String version,boolean unidirectional ) throws org.hyperic.hq.appdef.shared.AgentNotFoundException;
+   public Agent updateNewTransportAgent( String ip,int port,String authToken,String agentToken,String version,boolean unidirectional ) throws AgentNotFoundException;
 
    /**
     * Update an existing Agent given an IP and port. The type of the agent that is updated is the legacy 'covalent-eam' type.
     * @return An Agent object representing the updated agent    */
-   public org.hyperic.hq.appdef.Agent updateLegacyAgent( java.lang.String ip,int port,java.lang.String authToken,java.lang.String agentToken,java.lang.String version ) throws org.hyperic.hq.appdef.shared.AgentNotFoundException;
+   public Agent updateLegacyAgent( String ip,int port,String authToken,String agentToken,String version ) throws AgentNotFoundException;
 
-   public java.util.List findAgentsByIP( java.lang.String ip ) ;
+   public List<Agent> findAgentsByIP( String ip ) ;
 
    /**
     * Update an existing agent's IP and port based on an agent token. The type of the agent that is updated is the 'hyperic-hq-remoting' agent. This type of agent may be configured to use either a bidirectional or unidirectional transport.
@@ -79,7 +97,7 @@ public interface AgentManagerLocal
     * @param ip The new IP address
     * @param port The new port
     * @return An Agent object representing the updated agent    */
-   public org.hyperic.hq.appdef.Agent updateNewTransportAgent( java.lang.String agentToken,java.lang.String ip,int port,boolean unidirectional ) throws org.hyperic.hq.appdef.shared.AgentNotFoundException;
+   public Agent updateNewTransportAgent( String agentToken,String ip,int port,boolean unidirectional ) throws AgentNotFoundException;
 
    /**
     * Update an existing agent's IP and port based on an agent token. The type of the agent that is updated is the legacy 'covalent-eam' type.
@@ -87,18 +105,18 @@ public interface AgentManagerLocal
     * @param ip The new IP address
     * @param port The new port
     * @return An Agent object representing the updated agent    */
-   public org.hyperic.hq.appdef.Agent updateLegacyAgent( java.lang.String agentToken,java.lang.String ip,int port ) throws org.hyperic.hq.appdef.shared.AgentNotFoundException;
+   public Agent updateLegacyAgent( String agentToken,String ip,int port ) throws AgentNotFoundException;
 
    /**
     * Find an agent by the token which is Required for the agent to send when it connects.
     */
-   public void checkAgentAuth( java.lang.String agentToken ) throws org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
+   public void checkAgentAuth( String agentToken ) throws AgentUnauthorizedException;
 
-   public org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection getAgentConnection( java.lang.String method,java.lang.String connIp,java.lang.Integer agentId ) ;
+   public AgentConnection getAgentConnection( String method,String connIp,Integer agentId ) ;
 
-   public void disconnectAgent( org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection a ) ;
+   public void disconnectAgent( AgentConnection a ) ;
 
-   public java.util.Collection getConnectedAgents(  ) ;
+   public Collection<Agent> getConnectedAgents(  ) ;
 
    public int getNumConnectedAgents(  ) ;
 
@@ -107,34 +125,34 @@ public interface AgentManagerLocal
    /**
     * Find an agent listening on a specific IP & port
     */
-   public org.hyperic.hq.appdef.Agent getAgent( java.lang.String ip,int port ) throws org.hyperic.hq.appdef.shared.AgentNotFoundException;
+   public Agent getAgent( String ip,int port ) throws AgentNotFoundException;
 
    /**
     * Find an agent by agent token.
     * @param agentToken the agent token to look for
     * @return An Agent representing the agent that has the given token.
     */
-   public org.hyperic.hq.appdef.Agent getAgent( java.lang.String agentToken ) throws org.hyperic.hq.appdef.shared.AgentNotFoundException;
+   public Agent getAgent( String agentToken ) throws AgentNotFoundException;
 
    /**
     * Determine if the agent token is already assigned to another agent.
     * @param agentToken The agent token.
     * @return <code>true</code> if the agent token is unique; <code>false</code> if it is already assigned to an agent.
     */
-   public boolean isAgentTokenUnique( java.lang.String agentToken ) ;
+   public boolean isAgentTokenUnique( String agentToken ) ;
 
-   public org.hyperic.hq.appdef.Agent findAgent( java.lang.Integer id ) ;
+   public Agent findAgent( Integer id ) ;
 
    /**
     * Get an Agent by id.
     */
-   public org.hyperic.hq.appdef.Agent getAgent( java.lang.Integer id ) ;
+   public Agent getAgent( Integer id ) ;
 
    /**
     * Find an agent which can service the given entity ID
     * @return An agent which is set to manage the specified ID
     */
-   public org.hyperic.hq.appdef.Agent getAgent( org.hyperic.hq.appdef.shared.AppdefEntityID aID ) throws org.hyperic.hq.appdef.shared.AgentNotFoundException;
+   public Agent getAgent( AppdefEntityID aID ) throws AgentNotFoundException;
 
    /**
     * Return the bundle that is currently running on a give agent. The returned bundle name may be parsed to retrieve the current agent version.
@@ -146,7 +164,7 @@ public interface AgentManagerLocal
     * @throws AgentRemoteException if an exception occurs on the remote agent side.
     * @throws AgentConnectionException if the connection to the agent fails.
     */
-   public java.lang.String getCurrentAgentBundle( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID aid ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.AgentNotFoundException, org.hyperic.hq.agent.AgentRemoteException, org.hyperic.hq.agent.AgentConnectionException;
+   public String getCurrentAgentBundle( AuthzSubject subject,AppdefEntityID aid ) throws PermissionException, AgentNotFoundException, AgentRemoteException, AgentConnectionException;
 
    /**
     * Upgrade an agent asynchronously including agent restart. This operation blocks long enough only to do some basic failure condition checking (permissions, agent existence, file existence, config property existence) then delegates the actual commands to the Zevent subsystem.
@@ -159,7 +177,7 @@ public interface AgentManagerLocal
     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
     * @throws InterruptedException if enqueuing the Zevent is interrupted.
     */
-   public void upgradeAgentAsync( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID aid,java.lang.String bundleFileName ) throws org.hyperic.hq.authz.shared.PermissionException, java.io.FileNotFoundException, org.hyperic.hq.appdef.shared.AgentNotFoundException, org.hyperic.util.ConfigPropertyException, java.lang.InterruptedException;
+   public void upgradeAgentAsync( AuthzSubject subject,AppdefEntityID aid,String bundleFileName ) throws PermissionException, FileNotFoundException, AgentNotFoundException, ConfigPropertyException, InterruptedException;
 
    /**
     * Upgrade an agent synchronously including agent restart. This operation is composed of transferring the agent bundle, upgrading the agent, and restarting the agent, in that order.
@@ -174,7 +192,7 @@ public interface AgentManagerLocal
     * @throws AgentNotFoundException if no agent exists with the given agent id.
     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
     */
-   public void upgradeAgent( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID aid,java.lang.String bundleFileName ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.AgentNotFoundException, org.hyperic.hq.agent.AgentConnectionException, org.hyperic.hq.agent.AgentRemoteException, java.io.FileNotFoundException, org.hyperic.util.ConfigPropertyException, java.io.IOException;
+   public void upgradeAgent( AuthzSubject subject,AppdefEntityID aid,String bundleFileName ) throws PermissionException, AgentNotFoundException, AgentConnectionException, AgentRemoteException, FileNotFoundException, ConfigPropertyException, IOException;
 
    /**
     * Transfer asynchronously an agent bundle residing on the HQ server to an agent. This operation blocks long enough only to do some basic failure condition checking (permissions, agent existence, file existence, config property existence) then delegates the actual file transfer to the Zevent subsystem.
@@ -187,7 +205,7 @@ public interface AgentManagerLocal
     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
     * @throws InterruptedException if enqueuing the Zevent is interrupted.
     */
-   public void transferAgentBundleAsync( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID aid,java.lang.String bundleFileName ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.AgentNotFoundException, java.io.FileNotFoundException, org.hyperic.util.ConfigPropertyException, java.lang.InterruptedException;
+   public void transferAgentBundleAsync( AuthzSubject subject,AppdefEntityID aid,String bundleFileName ) throws PermissionException, AgentNotFoundException, FileNotFoundException, ConfigPropertyException, InterruptedException;
 
    /**
     * Transfer an agent bundle residing on the HQ server to an agent.
@@ -202,7 +220,7 @@ public interface AgentManagerLocal
     * @throws AgentNotFoundException if no agent exists with the given agent id.
     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
     */
-   public void transferAgentBundle( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID aid,java.lang.String bundleFileName ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.AgentNotFoundException, org.hyperic.hq.agent.AgentConnectionException, org.hyperic.hq.agent.AgentRemoteException, java.io.FileNotFoundException, java.io.IOException, org.hyperic.util.ConfigPropertyException;
+   public void transferAgentBundle( AuthzSubject subject,AppdefEntityID aid,String bundleFileName ) throws PermissionException, AgentNotFoundException, AgentConnectionException, AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException;
 
    /**
     * Transfer an agent plugin residing on the HQ server to an agent.
@@ -216,7 +234,7 @@ public interface AgentManagerLocal
     * @throws AgentConnectionException if the connection to the agent fails.
     * @throws AgentNotFoundException if no agent exists with the given agent id.
     */
-   public void transferAgentPlugin( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID aid,java.lang.String plugin ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.agent.AgentConnectionException, org.hyperic.hq.appdef.shared.AgentNotFoundException, org.hyperic.hq.agent.AgentRemoteException, java.io.FileNotFoundException, java.io.IOException, org.hyperic.util.ConfigPropertyException;
+   public void transferAgentPlugin( AuthzSubject subject,AppdefEntityID aid,String plugin ) throws PermissionException, AgentConnectionException, AgentNotFoundException, AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException;
 
    /**
     * Transfer an agent plugin residing on the HQ server to an agent. The transfer is performed asynchronously by placing on the Zevent queue and results in an agent restart.
@@ -228,7 +246,7 @@ public interface AgentManagerLocal
     * @throws AgentNotFoundException if no agent exists with the given agent id.
     * @throws InterruptedException if enqueuing the Zevent is interrupted.
     */
-   public void transferAgentPluginAsync( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID aid,java.lang.String plugin ) throws org.hyperic.hq.authz.shared.PermissionException, java.io.FileNotFoundException, org.hyperic.hq.appdef.shared.AgentNotFoundException, java.lang.InterruptedException;
+   public void transferAgentPluginAsync( AuthzSubject subject,AppdefEntityID aid,String plugin ) throws PermissionException, FileNotFoundException, AgentNotFoundException, InterruptedException;
 
    /**
     * Upgrade to the specified agent bundle residing on the HQ agent.
@@ -243,7 +261,7 @@ public interface AgentManagerLocal
     * @throws AgentNotFoundException if no agent exists with the given agent id.
     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
     */
-   public void upgradeAgentBundle( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID aid,java.lang.String bundleFileName ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.AgentNotFoundException, org.hyperic.hq.agent.AgentConnectionException, org.hyperic.hq.agent.AgentRemoteException, java.io.FileNotFoundException, java.io.IOException, org.hyperic.util.ConfigPropertyException;
+   public void upgradeAgentBundle( AuthzSubject subject,AppdefEntityID aid,String bundleFileName ) throws PermissionException, AgentNotFoundException, AgentConnectionException, AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException;
 
    /**
     * Restarts the specified agent using the Java Service Wrapper.
@@ -257,12 +275,12 @@ public interface AgentManagerLocal
     * @throws AgentNotFoundException if no agent exists with the given agent id.
     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
     */
-   public void restartAgent( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID aid ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.AgentNotFoundException, org.hyperic.hq.agent.AgentConnectionException, org.hyperic.hq.agent.AgentRemoteException, java.io.FileNotFoundException, java.io.IOException, org.hyperic.util.ConfigPropertyException;
+   public void restartAgent( AuthzSubject subject,AppdefEntityID aid ) throws PermissionException, AgentNotFoundException, AgentConnectionException, AgentRemoteException, FileNotFoundException, IOException, ConfigPropertyException;
 
    /**
     * Pings the specified agent.
-    * @see org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl#pingAgent(org.hyperic.hq.authz.server.session.AuthzSubject, org.hyperic.hq.appdef.Agent)    */
-   public long pingAgent( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID id ) throws org.hyperic.hq.appdef.shared.AgentNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.agent.AgentConnectionException, java.io.IOException, org.hyperic.util.ConfigPropertyException, org.hyperic.hq.agent.AgentRemoteException;
+    * @see AgentManagerImpl#pingAgent(AuthzSubject, Agent)    */
+   public long pingAgent( AuthzSubject subject,AppdefEntityID id ) throws AgentNotFoundException, PermissionException, AgentConnectionException, IOException, ConfigPropertyException, AgentRemoteException;
 
    /**
     * Pings the specified agent.
@@ -277,50 +295,50 @@ public interface AgentManagerLocal
     * @throws AgentNotFoundException if no agent exists with the given agent id.
     * @throws ConfigPropertyException if the server configuration cannot be retrieved.
     */
-   public long pingAgent( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.Agent agent ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.AgentNotFoundException, org.hyperic.hq.agent.AgentConnectionException, org.hyperic.hq.agent.AgentRemoteException, java.io.IOException, org.hyperic.util.ConfigPropertyException;
+   public long pingAgent( AuthzSubject subject,Agent agent ) throws PermissionException, AgentNotFoundException, AgentConnectionException, AgentRemoteException, IOException, ConfigPropertyException;
 
    /**
     * Check for createPlatform permission for a resource
     * @param subject
     * @throws PermissionException
     */
-   public void checkCreatePlatformPermission( org.hyperic.hq.authz.server.session.AuthzSubject subject ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void checkCreatePlatformPermission( AuthzSubject subject ) throws PermissionException;
 
    /**
     * Check for modify permission for a given resource
     */
-   public void checkModifyPermission( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID id ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void checkModifyPermission( AuthzSubject subject,AppdefEntityID id ) throws PermissionException;
 
    /**
     * Check for view permission for a given resource
     */
-   public void checkViewPermission( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID id ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void checkViewPermission( AuthzSubject subject,AppdefEntityID id ) throws PermissionException;
 
    /**
     * Check for control permission for a given resource
     */
-   public void checkControlPermission( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID id ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void checkControlPermission( AuthzSubject subject,AppdefEntityID id ) throws PermissionException;
 
    /**
     * Check for control permission for a given resource
     */
-   public void checkRemovePermission( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID id ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void checkRemovePermission( AuthzSubject subject,AppdefEntityID id ) throws PermissionException;
 
    /**
     * Check for monitor permission for a given resource
     */
-   public void checkMonitorPermission( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID id ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void checkMonitorPermission( AuthzSubject subject,AppdefEntityID id ) throws PermissionException;
 
    /**
     * Check for manage alerts permission for a given resource
     */
-   public void checkAlertingPermission( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID id ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void checkAlertingPermission( AuthzSubject subject,AppdefEntityID id ) throws PermissionException;
 
    /**
     * Check the scope of alertable resources for a give subject
     * @return a list of AppdefEntityIds
     */
-   public java.util.List checkAlertingScope( org.hyperic.hq.authz.server.session.AuthzSubject subj ) ;
+   public List checkAlertingScope( AuthzSubject subj ) ;
 
    /**
     * Check for create child object permission for a given resource Child Resources: Platforms -> servers Servers -> services Any other resource will throw an InvalidAppdefTypeException since no other resources have this parent->child relationship with respect to their permissions
@@ -328,16 +346,16 @@ public interface AgentManagerLocal
     * @param id - what
     * @param subject - who
     */
-   public void checkCreateChildPermission( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID id ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void checkCreateChildPermission( AuthzSubject subject,AppdefEntityID id ) throws PermissionException;
 
    /**
     * Get the AppdefResourcePermissions for a given resource
     * @deprecated Use the individual check*Permission methods instead.    */
-   public org.hyperic.hq.appdef.shared.AppdefResourcePermissions getResourcePermissions( org.hyperic.hq.authz.server.session.AuthzSubject who,org.hyperic.hq.appdef.shared.AppdefEntityID eid ) throws javax.ejb.FinderException;
+   public AppdefResourcePermissions getResourcePermissions( AuthzSubject who,AppdefEntityID eid ) throws FinderException;
 
    /**
     * Change appdef entity owner
     */
-   public void changeOwner( org.hyperic.hq.authz.server.session.AuthzSubject who,org.hyperic.hq.appdef.server.session.AppdefResource res,org.hyperic.hq.authz.server.session.AuthzSubject newOwner ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.ServerNotFoundException;
+   public void changeOwner( AuthzSubject who,AppdefResource res,AuthzSubject newOwner ) throws PermissionException, ServerNotFoundException;
 
 }

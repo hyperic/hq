@@ -49,15 +49,16 @@ public abstract class AppdefSessionUtil {
     private ConfigManagerLocal   configMgrL;
     private ResourceManager rmLocal;
     private CPropManagerLocal    cpropLocal;
-    private AgentDAO agentDao = Bootstrap.getBean(AgentDAO.class);
-    private ApplicationDAO applicationDAO = Bootstrap.getBean(ApplicationDAO.class);
-    private ConfigResponseDAO configResponseDAO = Bootstrap.getBean(ConfigResponseDAO.class);
-    private PlatformDAO platformDAO = Bootstrap.getBean(PlatformDAO.class);
-    private PlatformTypeDAO platformTypeDAO = Bootstrap.getBean(PlatformTypeDAO.class);
-    private ServerDAO serverDAO = Bootstrap.getBean(ServerDAO.class);
-    private ServerTypeDAO serverTypeDAO = Bootstrap.getBean(ServerTypeDAO.class);
-    private ServiceTypeDAO serviceTypeDAO = Bootstrap.getBean(ServiceTypeDAO.class);
-    private ServiceDAO serviceDAO = Bootstrap.getBean(ServiceDAO.class);
+    // TODO: Remove protected accessor when all subclasses are converted
+    protected AgentDAO agentDao = Bootstrap.getBean(AgentDAO.class);
+    protected ApplicationDAO applicationDAO = Bootstrap.getBean(ApplicationDAO.class);
+    protected ConfigResponseDAO configResponseDAO = Bootstrap.getBean(ConfigResponseDAO.class);
+    protected PlatformDAO platformDao = Bootstrap.getBean(PlatformDAO.class);
+    protected PlatformTypeDAO platformTypeDAO = Bootstrap.getBean(PlatformTypeDAO.class);
+    protected ServerDAO serverDao = Bootstrap.getBean(ServerDAO.class);
+    protected ServerTypeDAO serverTypeDAO = Bootstrap.getBean(ServerTypeDAO.class);
+    protected ServiceTypeDAO serviceTypeDAO = Bootstrap.getBean(ServiceTypeDAO.class);
+    protected ServiceDAO serviceDao = Bootstrap.getBean(ServiceDAO.class);
 
     protected CPropManagerLocal getCPropManager() {
         if (cpropLocal == null) {
@@ -112,7 +113,7 @@ public abstract class AppdefSessionUtil {
     }
 
     protected PlatformDAO getPlatformDAO() {
-        return platformDAO;
+        return platformDao;
     }
 
     protected PlatformTypeDAO getPlatformTypeDAO() {
@@ -120,7 +121,7 @@ public abstract class AppdefSessionUtil {
     }
 
     protected ServerDAO getServerDAO() {
-        return serverDAO;
+        return serverDao;
     }
 
     protected ServerTypeDAO getServerTypeDAO() {
@@ -132,7 +133,7 @@ public abstract class AppdefSessionUtil {
     }
 
     protected ServiceDAO getServiceDAO() {
-        return serviceDAO;
+        return serviceDao;
     }
 
     protected ApplicationDAO getApplicationDAO() {

@@ -26,7 +26,7 @@
 package org.hyperic.hq.autoinventory.agent.client;
 
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
@@ -51,7 +51,7 @@ public class AICommandsClientFactory {
     public AICommandsClient getClient(AppdefEntityID aid) 
         throws AgentNotFoundException {
         
-        Agent agent = AgentManagerEJBImpl.getOne().getAgent(aid);
+        Agent agent = AgentManagerImpl.getOne().getAgent(aid);
 
         return getClient(agent);
     }
@@ -59,7 +59,7 @@ public class AICommandsClientFactory {
     public AICommandsClient getClient(String agentToken) 
         throws AgentNotFoundException {
         
-        Agent agent = AgentManagerEJBImpl.getOne().getAgent(agentToken);
+        Agent agent = AgentManagerImpl.getOne().getAgent(agentToken);
 
         return getClient(agent);
     }

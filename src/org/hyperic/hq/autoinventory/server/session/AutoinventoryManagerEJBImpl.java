@@ -68,7 +68,7 @@ import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AgentCreateCallback;
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
@@ -832,7 +832,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     {
         List serviceMerges = mergePlatformsAndServers(agentToken, crrr);
 
-        Agent a = AgentManagerEJBImpl.getOne().getAgent(agentToken);
+        Agent a = AgentManagerImpl.getOne().getAgent(agentToken);
 
         AgentReportStatus status = statDAO.getOrCreate(a);
 
@@ -1061,7 +1061,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         Agent a;
 
         try {
-            a = AgentManagerEJBImpl.getOne().getAgent(agentToken);
+            a = AgentManagerImpl.getOne().getAgent(agentToken);
         } catch(AgentNotFoundException e) {
             _log.error("Agent [" + agentToken + "] not found");
             return;

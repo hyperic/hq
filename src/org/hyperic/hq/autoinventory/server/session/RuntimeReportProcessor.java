@@ -39,7 +39,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AIAudit;
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -118,7 +118,7 @@ public class RuntimeReportProcessor {
         _overlord   = _subjectMgr.getOverlordPojo();
         _agentToken = agentToken;
         
-        Agent agent = AgentManagerEJBImpl.getOne().getAgent(_agentToken);
+        Agent agent = AgentManagerImpl.getOne().getAgent(_agentToken);
         Audit audit = AIAudit.newRuntimeImportAudit(agent); 
         boolean pushed = false;
         

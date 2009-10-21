@@ -39,13 +39,13 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.shared.AgentManagerLocal;
-import org.hyperic.hq.appdef.shared.AgentManagerUtil;
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SessionMBeanBase;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
@@ -100,23 +100,10 @@ public class ScheduleVerificationService
             return;
         }
 
-        AgentManagerLocal agentMan;
+        AgentManager agentMan;
 
-        try {
-            agentMan = AgentManagerUtil.getLocalHome().create();
-        } catch (CreateException e) {
-            // this is a schedulable MBean -- we will try again later,
-            // so just log a "not ready" message
-            _log.info("Measurement Schedule Verification: " +
-                      "Agent or Data Manager not ready.");
-            return;
-        } catch (NamingException e) {
-            // this is a schedulable MBean -- we will try again later,
-            // so just log a "not ready" message
-            _log.info("Measurement Schedule Verification: " +
-                      "Agent or Data Manager not ready.");
-            return;
-        }
+        agentMan = Bootstrap.getBean(AgentManager.class);
+
 
         // Ask the SRNCache what requires rescheduling
         SRNManagerLocal srnManager = SRNManagerEJBImpl.getOne();

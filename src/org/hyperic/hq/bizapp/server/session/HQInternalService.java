@@ -28,7 +28,7 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.Iterator;
 import java.util.List;
 
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
@@ -45,7 +45,7 @@ public class HQInternalService implements HQInternalServiceMBean {
     }
 
     public int getAgentCount() {
-        return AgentManagerEJBImpl.getOne().getAgentCountUsed();
+        return AgentManagerImpl.getOne().getAgentCountUsed();
     }
 
     public double getMetricsCollectedPerMinute() { 
@@ -75,11 +75,11 @@ public class HQInternalService implements HQInternalServiceMBean {
     }
 
     public long getAgentRequests() {
-        return AgentManagerEJBImpl.getOne().getTotalConnectedAgents();
+        return AgentManagerImpl.getOne().getTotalConnectedAgents();
     }
     
     public int getAgentConnections() {
-        return AgentManagerEJBImpl.getOne().getNumConnectedAgents();
+        return AgentManagerImpl.getOne().getNumConnectedAgents();
     }
 
     public long getZeventMaxWait() {

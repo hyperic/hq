@@ -56,7 +56,7 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
-import org.hyperic.hq.appdef.shared.AgentManagerLocal;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -324,7 +324,7 @@ public class LatherDispatcher
 
         boolean isOldAgentToken = true;
         String agentToken = args.getAgentToken();
-        AgentManagerLocal agentMan = getAgentManager();
+        AgentManager agentMan = getAgentManager();
         
         if (agentToken == null) {
             // Generate a unique agent token
@@ -790,7 +790,7 @@ public class LatherDispatcher
                                 LatherValue arg)
         throws LatherRemoteException
     {
-        AgentManagerLocal agentMan = getAgentManager();
+        AgentManager agentMan = getAgentManager();
         Integer agentId = null;
         
         if (log.isDebugEnabled()) {

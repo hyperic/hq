@@ -37,7 +37,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class AgentDAO extends HibernateDAO
+public class AgentDAO extends HibernateDAO<Agent>
 {
     @Autowired
     public AgentDAO(SessionFactory f) {
@@ -70,9 +70,10 @@ public class AgentDAO extends HibernateDAO
         return ag;
     }
 
-    public List findByIP(String ip) {
+    @SuppressWarnings("unchecked")
+    public List<Agent> findByIP(String ip) {
         String hql = "from Agent where address=:address";
-        return getSession()
+        return (List<Agent>)getSession()
             .createQuery(hql)
             .setString("address", ip)
             .list();
@@ -102,7 +103,8 @@ public class AgentDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public List findAgents(PageInfo pInfo) {
+    @SuppressWarnings("unchecked")
+    public List<Agent> findAgents(PageInfo pInfo) {
         final AgentSortField sort = (AgentSortField)pInfo.getSort();
         final StringBuilder sql = new StringBuilder()
             .append("select distinct a from Platform p ")
@@ -121,6 +123,6 @@ public class AgentDAO extends HibernateDAO
 
         final Query q = getSession().createQuery(sql.toString());
 
-        return pInfo.pageResults(q).list();
+        return (List<Agent>)pInfo.pageResults(q).list();
     }
 }

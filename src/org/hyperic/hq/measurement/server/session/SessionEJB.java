@@ -31,8 +31,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
-import org.hyperic.hq.appdef.shared.AgentManagerLocal;
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -72,7 +72,7 @@ public abstract class SessionEJB {
     protected static MeasurementPluginManager _mpm = null;
 
     private DataManagerLocal _dataMan;
-    private AgentManagerLocal _agentMan;
+    private AgentManager _agentMan;
     private ProductManagerLocal _prodMan;
     private AuthzSubjectManagerLocal _ssmLocal;
     private TemplateManagerLocal _templateMan;
@@ -143,9 +143,9 @@ public abstract class SessionEJB {
         return _dataMan;
     }
 
-    protected AgentManagerLocal getAgentMan() {
+    protected AgentManager getAgentMan() {
         if (_agentMan == null) {
-            _agentMan = AgentManagerEJBImpl.getOne();
+            _agentMan = AgentManagerImpl.getOne();
         }
         return _agentMan;
     }
