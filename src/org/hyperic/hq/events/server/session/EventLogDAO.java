@@ -27,9 +27,10 @@ package org.hyperic.hq.events.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,11 +38,11 @@ import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
-import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -101,7 +102,8 @@ public class EventLogDAO extends HibernateDAO {
     }
     
     EventLog findLog(String typeClass, int instanceId, long timestamp) {
-        String hql = "select l from EventLog l where l.timestamp = :ts and l.instanceId = :instId and l.type = :type";
+        String hql = "select l from EventLog l where l.timestamp = :ts " +
+                     "and l.instanceId = :instId and l.type = :type";
         Query q = createQuery(hql)
         .setLong("ts", timestamp)
         .setInteger("instId", instanceId)
@@ -112,7 +114,8 @@ public class EventLogDAO extends HibernateDAO {
             return null;
         }
         if(events.size() > 1) {
-            log.warn("Found multiple log entries matching the specified criteria (typeClass=" + typeClass +", instanceId=" + instanceId + 
+            log.warn("Found multiple log entries matching the specified " +
+                     "criteria (typeClass=" + typeClass +", instanceId=" + instanceId + 
                      ", timestamp=" + timestamp + "). Returning the first one.");
         }
         return (EventLog) events.iterator().next();
@@ -214,49 +217,91 @@ public class EventLogDAO extends HibernateDAO {
         return res;
     }
     
+    private final long getOldestUnfixedAlertTime() {
+        return ((Long)getSession()
+            .createQuery("select min(ctime) from Alert where fixed = '0'")
+            .uniqueResult()).longValue();
+    }
+    
+    /**
+     * @return {@link Map} of {@link Integer} = AlertDefitionId to
+     *  {@link Object[]} <br>
+     *   [0] {@link Integer} AlertDefId, <br>
+     *   [1] {@link Integer} AlertId
+     */
+    private final Map getUnfixedAlertInfoAfter(long ctime) {
+        final String hql = new StringBuilder(128)
+            .append("SELECT alertDefinition.id, id ")
+            .append("FROM Alert WHERE ctime >= :ctime and fixed = '0'")
+            .toString();
+        final List list = getSession()
+            .createQuery(hql)
+            .setLong("ctime", ctime)
+            .list();
+        final Map alerts = new HashMap(list.size());
+        for (final Iterator it=list.iterator(); it.hasNext(); ) {
+            final Object[] obj = (Object[]) it.next();
+            alerts.put(obj[0], obj);
+        }
+        return alerts;
+    }
+    
     /**
      * Find unfixed AlertFiredEvent event logs for each alert definition in the list
      * 
      * @param alertDefinitionIds The list of alert definition ids
      * 
-     * @return {@link Object[]}
-     * 0 = {@link Integer} Alert id
-     * 1 = {@link EventLog} The AlertFiredEvent event log
+     * @return {@link Map} of {@link Integer} = AlertDefinitionId to
+     *  {@link AlertFiredEvent}
      */
-    List findUnfixedAlertFiredEventLogs(List alertDefinitionIds) {        
-        if (alertDefinitionIds.isEmpty()) {
-            return Collections.EMPTY_LIST;
+    Map findUnfixedAlertFiredEventLogs() {        
+        final Map rtn = new HashMap();
+        final long ctime = getOldestUnfixedAlertTime();
+        final Map alerts = getUnfixedAlertInfoAfter(ctime);
+        final String hql = new StringBuilder(256)
+            .append("FROM EventLog ")
+            .append("WHERE timestamp >= :ctime AND type = :type ")
+            .append("AND instanceId is not null")
+            .toString();
+        final List list = getSession()
+            .createQuery(hql)
+            .setString("type", AlertFiredEvent.class.getName())
+            .setLong("ctime", ctime)
+            .list();
+        for (final Iterator it=list.iterator(); it.hasNext(); ) {
+            final EventLog log = (EventLog)it.next();
+            if (log == null || log.getInstanceId() == null) {
+                continue;
+            }
+            final Object[] obj = (Object[])alerts.get(log.getInstanceId());
+            if (obj == null) {
+                continue;
+            }
+            final Integer alertDefId = (Integer)obj[0];
+            final Integer alertId    = (Integer)obj[1];
+            AlertFiredEvent latestEvent;
+            boolean updateMap = false;
+            if (null != (latestEvent = (AlertFiredEvent)rtn.get(alertDefId)) &&
+                    log.getTimestamp() > latestEvent.getTimestamp()) {
+                updateMap = true;
+            } else {
+                updateMap = true;
+            }
+            if (updateMap) {
+                AlertFiredEvent alertFired = 
+                    createAlertFiredEvent(alertDefId, alertId, log);
+                rtn.put(alertDefId, alertFired);
+            }
         }
-                
-        // NOTE: This query could potentially return lots of rows if there are
-        // a lot of unfixed alerts and the event logs are not purged frequently.
-        final String sql = 
-            new StringBuilder()
-                    .append("SELECT A.ID AS ALERT_ID, {E.*} ")
-                    .append("FROM EAM_ALERT A, EAM_EVENT_LOG E ")
-                    .append("WHERE A.ALERT_DEFINITION_ID = E.INSTANCE_ID ")
-                    .append("AND A.CTIME = E.TIMESTAMP ")
-                    .append("AND E.TYPE = :eventLogType ")
-                    .append("AND A.FIXED = '0' ")
-                    .append("AND A.ALERT_DEFINITION_ID IN (:alertDefIds) ")
-                    .toString();
-         
-        final int max = BATCH_SIZE;
-        final List logs = new ArrayList(alertDefinitionIds.size());
-        
-        for (int i=0; i<alertDefinitionIds.size(); i+=max) {
-            final int end = Math.min(i+max, alertDefinitionIds.size());
-            final List list = alertDefinitionIds.subList(i, end);
-            logs.addAll(getSession()
-                            .createSQLQuery(sql)
-                            .addScalar("ALERT_ID", new IntegerType())
-                            .addEntity("E", EventLog.class)
-                            .setParameterList("alertDefIds", list, new IntegerType())
-                            .setString("eventLogType", AlertFiredEvent.class.getName())
-                            .list());
-        }
-        
-        return logs;
+        return rtn;
+    }
+    
+    private final AlertFiredEvent createAlertFiredEvent(Integer alertDefId,
+                                                        Integer alertId,
+                                                        EventLog eventLog) {
+        return new AlertFiredEvent(alertId, alertDefId, 
+            new AppdefEntityID(eventLog.getResource()), eventLog.getSubject(),
+            eventLog.getTimestamp(), eventLog.getDetail());
     }
     
     List findByEntityAndStatus(Resource r, AuthzSubject user, 
@@ -479,8 +524,7 @@ public class EventLogDAO extends HibernateDAO {
                     sql.append(" UNION ALL ");
                 }
             }
-        }
-        else {
+        } else {
             sql.append("SELECT i AS I FROM ").append(TABLE_EAM_NUMBERS)
                .append(" WHERE i < ").append(intervals)
                .append(" AND EXISTS (")
