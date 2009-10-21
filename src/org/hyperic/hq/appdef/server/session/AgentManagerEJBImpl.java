@@ -1033,7 +1033,7 @@ public class AgentManagerEJBImpl
         String bundleFilePath = HQConstants.AgentBundleDropDir + "/" + bundleFileName;
         Map updatedAgentInfo = client.upgrade(bundleFilePath, HQConstants.AgentBundleDropDir);
         
-        if (!updatedAgentInfo.isEmpty()) {
+        if (updatedAgentInfo != null && !updatedAgentInfo.isEmpty()) {
             // If Map is not empty, we'll handle the data otherwise we do nothing
             
             Agent agent = getAgent(aid);
