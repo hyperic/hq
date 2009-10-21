@@ -218,9 +218,13 @@ public class EventLogDAO extends HibernateDAO {
     }
     
     private final long getOldestUnfixedAlertTime() {
-        return ((Long)getSession()
+        Object o = getSession()
             .createQuery("select min(ctime) from Alert where fixed = '0'")
-            .uniqueResult()).longValue();
+            .uniqueResult();
+        if (o == null) {
+            return 0;
+        }
+        return ((Long)o).longValue();
     }
     
     /**
