@@ -49,7 +49,7 @@ import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.common.shared.CrispoManagerLocal;
+import org.hyperic.hq.common.shared.CrispoManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
@@ -83,7 +83,7 @@ public class GalertManagerImpl implements GalertManager {
     private GalertAuxLogDAO _auxLogDAO;
     private GalertLogDAO _logDAO;
     private GalertActionLogDAO _actionLogDAO;
-    private CrispoManagerLocal crispoManager;
+    private CrispoManager crispoManager;
     private EscalationManagerLocal escalationManager;
 
     private ResourceGroupManager resourceGroupManager;
@@ -94,7 +94,7 @@ public class GalertManagerImpl implements GalertManager {
                              GalertAuxLogDAO auxLogDAO,
                              GalertLogDAO logDAO,
                              GalertActionLogDAO actionLogDAO,
-                             CrispoManagerLocal crispoManager,
+                             CrispoManager crispoManager,
                              EscalationManagerLocal escalationManager,
                              ResourceGroupManager resourceGroupManager) {
         _stratTypeDAO = stratTypeDAO;

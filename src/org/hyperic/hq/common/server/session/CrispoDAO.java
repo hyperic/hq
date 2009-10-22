@@ -29,15 +29,17 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class CrispoDAO extends HibernateDAO {
+public class CrispoDAO
+    extends HibernateDAO<Crispo> {
     @Autowired
     public CrispoDAO(SessionFactory f) {
         super(Crispo.class, f);
     }
 
     Crispo findById(Integer id) {
-        return (Crispo)super.findById(id);
+        return (Crispo) super.findById(id);
     }
 
     void remove(Crispo c) {

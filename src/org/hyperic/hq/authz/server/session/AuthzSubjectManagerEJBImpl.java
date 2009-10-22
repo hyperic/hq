@@ -47,7 +47,7 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
+import org.hyperic.hq.common.server.session.CrispoManagerImpl;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -481,9 +481,9 @@ public class AuthzSubjectManagerEJBImpl
         AuthzSubject targ = getSubjectDAO().findById(subjId);
         
         if (targ.getPrefs() != null)
-            CrispoManagerEJBImpl.getOne().update(targ.getPrefs(), prefs);
+            CrispoManagerImpl.getOne().update(targ.getPrefs(), prefs);
         else {
-            Crispo newPrefs = CrispoManagerEJBImpl.getOne().create(prefs);
+            Crispo newPrefs = CrispoManagerImpl.getOne().create(prefs);
             targ.setPrefs(newPrefs);
         }
     }

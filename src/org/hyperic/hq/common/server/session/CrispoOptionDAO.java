@@ -1,15 +1,16 @@
 package org.hyperic.hq.common.server.session;
 
-import org.hyperic.hq.dao.HibernateDAO;
-import org.hyperic.dao.DAOFactory;
+import java.util.List;
+
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 @Repository
-public class CrispoOptionDAO extends HibernateDAO {
+public class CrispoOptionDAO
+    extends HibernateDAO<CrispoOption> {
 
     @Autowired
     public CrispoOptionDAO(SessionFactory f) {
@@ -29,18 +30,20 @@ public class CrispoOptionDAO extends HibernateDAO {
      * given String key
      * @param key The key to search for
      * @return A List of CrispoOptions that have a key that contains the
-     * given search key.
+     *         given search key.
      */
-    List findOptionsByKey(String key) {
+    @SuppressWarnings("unchecked")
+    List<CrispoOption> findOptionsByKey(String key) {
         return createCriteria().add(Restrictions.like("key",
                                                       "%" + key + "%")).list();
     }
 
-    List findOptionsByValue(String val) {
+    @SuppressWarnings("unchecked")
+    List<CrispoOption> findOptionsByValue(String val) {
         String hql = "from CrispoOption o join o.array a where " +
-        		     "o.optionValue = :val or a = :val";
+                     "o.optionValue = :val or a = :val";
         return createQuery(hql)
-            .setString("val", val)
-            .list();
+                               .setString("val", val)
+                               .list();
     }
 }
