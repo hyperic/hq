@@ -127,6 +127,7 @@
 	<classpathentry kind="lib" path="thirdparty/lib/mx4j/mx4j-rjmx.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/mx4j/mx4j-tools.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/mx4j/mx4j.jar"/>
+	<classpathentry kind="lib" path="thirdparty/lib/mysql_jdbc/mysql-connector-java-5.1.10-bin.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/oracle_jdbc/ojdbc14.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/oracle_jdbc/oracle12.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/postgresql/postgresql-7.4.3.jar"/>

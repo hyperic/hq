@@ -79,7 +79,7 @@ LIB="$basedir/../thirdparty/lib"
 DBUNIT_PKGS="${LIB}/dbunit-2.2.jar"
 PG_PKGS=${LIB}/oracle_jdbc/oracle12.jar 
 ORA_PKGS=${LIB}/postgresql/postgresql-8.2-505.jdbc3.jar 
-MYSQL_PKGS=${LIB}/mysql_jdbc/mysql-connector-java-5.0.5-bin.jar 
+MYSQL_PKGS=${LIB}/mysql_jdbc/mysql-connector-java-5.1.10-bin.jar 
 DB_PKGS="${PG_PKGS}:${ORA_PKGS}:${MYSQL_PKGS}"
 PKGS="${DB_PKGS}:${DBUNIT_PKGS}:$basedir/../build/hq.ear/hq.jar"
 ARGS="-Djdbc.drivers=${DRIVER} -cp ${PKGS}"
