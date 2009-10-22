@@ -1,6 +1,6 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl as AgentMan
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl as AgentMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.appdef.shared.AgentNotFoundException
 
