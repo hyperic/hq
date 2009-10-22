@@ -744,19 +744,6 @@
       <session >
          <description><![CDATA[]]></description>
 
-         <ejb-name>DashboardManager</ejb-name>
-
-         <local-home>org.hyperic.hq.ui.shared.DashboardManagerLocalHome</local-home>
-         <local>org.hyperic.hq.ui.shared.DashboardManagerLocal</local>
-         <ejb-class>org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
-      <session >
-         <description><![CDATA[]]></description>
-
          <ejb-name>AppdefBoss</ejb-name>
 
          <home>org.hyperic.hq.bizapp.shared.AppdefBossHome</home>

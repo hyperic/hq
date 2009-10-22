@@ -3,6 +3,8 @@
  */
 package org.hyperic.hq.common.shared;
 
+import org.hyperic.hq.common.server.session.CrispoOption;
+
 /**
  * Local interface for CrispoManager.
  */
@@ -38,14 +40,14 @@ public interface CrispoManagerLocal
     * @param key The key to search for
     * @return A list of CrispoOptions that have a key that matches in whole or part the given key parameter.
     */
-   public java.util.List findOptionByKey( java.lang.String key ) ;
+   public java.util.List<CrispoOption> findOptionByKey( java.lang.String key ) ;
 
    /**
     * Find a List of CrispoOptions given the search value.
     * @param val The value to search for
     * @return A list of CrispoOptions that have a value (in the array) that matches
     */
-   public java.util.List findOptionByValue( java.lang.String val ) ;
+   public java.util.List<CrispoOption> findOptionByValue( java.lang.String val ) ;
 
    /**
     * Update the given CrispoOption with the given value.

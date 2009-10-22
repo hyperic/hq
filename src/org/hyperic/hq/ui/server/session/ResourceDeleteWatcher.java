@@ -49,7 +49,7 @@ public class ResourceDeleteWatcher implements ZeventListener {
             ids[i] = e.getAppdefEntityID();
         }
 
-        DashboardManagerEJBImpl.getOne().handleResourceDelete(ids);
+        DashboardManagerImpl.getOne().handleResourceDelete(ids);
     }
     
     public String toString() {

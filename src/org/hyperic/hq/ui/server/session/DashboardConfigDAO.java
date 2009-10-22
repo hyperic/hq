@@ -28,7 +28,6 @@ package org.hyperic.hq.ui.server.session;
 import java.util.Collection;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -37,9 +36,10 @@ import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
 public class DashboardConfigDAO
-    extends HibernateDAO
+    extends HibernateDAO<DashboardConfig>
 {
     @Autowired
     DashboardConfigDAO(SessionFactory f) {
@@ -72,14 +72,16 @@ public class DashboardConfigDAO
             .uniqueResult();
     }
 
-    Collection findAllRoleDashboards() {
+    @SuppressWarnings("unchecked")
+    Collection<RoleDashboardConfig> findAllRoleDashboards() {
         return getSession().createQuery("from RoleDashboardConfig order by name")
             .setCacheable(true)
             .setCacheRegion("RoleDashboardConfig.findAllRoleDashboards")
             .list();
     }
 
-    Collection findRolesFor(AuthzSubject me) {
+    @SuppressWarnings("unchecked")
+    Collection<RoleDashboardConfig> findRolesFor(AuthzSubject me) {
         String sql = "select rc from RoleDashboardConfig rc " +
             "join rc.role r " +
             "join r.subjects s " +

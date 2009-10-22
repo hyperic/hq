@@ -15,8 +15,8 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Portlet;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
-import org.hyperic.hq.ui.shared.DashboardManagerLocal;
+import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
@@ -31,7 +31,7 @@ public class DisplayPortletAction extends TilesAction {
         HttpSession session = request.getSession();
         AuthzBoss boss = ContextUtils.getAuthzBoss(ctx);
 		WebUser user = SessionUtils.getWebUser(session);
-		DashboardManagerLocal dashManager = DashboardManagerEJBImpl.getOne();
+		DashboardManager dashManager = DashboardManagerImpl.getOne();
 		AuthzSubject guestUser = boss.findSubjectByName(user.getSessionId(), "guest");
 		DashboardConfig dashboardConfig = dashManager.getUserDashboard(guestUser, guestUser);
 			

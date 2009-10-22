@@ -39,10 +39,10 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.BaseAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
-import org.hyperic.hq.ui.shared.DashboardManagerLocal;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
@@ -69,7 +69,7 @@ public class QuickFavoritesAction extends BaseAction {
         if (mode == null) return returnFailure(request, mapping, forwardParams);
 
         //Boolean isFavorite = QuickFavoritesUtil.isFavorite(dashPrefs, aeid);
-        DashboardManagerLocal dashManager = DashboardManagerEJBImpl.getOne();
+        DashboardManager dashManager = DashboardManagerImpl.getOne();
         
         if (mode.equals(Constants.MODE_ADD)) {
         	if (dashboardIds != null) {

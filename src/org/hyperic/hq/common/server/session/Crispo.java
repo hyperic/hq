@@ -50,7 +50,7 @@ public class Crispo
     /**
      * Return a collection of {@link CrispoOption}s
      */
-    public Collection getOptions() {
+    public Collection<CrispoOption> getOptions() {
         return Collections.unmodifiableCollection(_opts);
     }
     
