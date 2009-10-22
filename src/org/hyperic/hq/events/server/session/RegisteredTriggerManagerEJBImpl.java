@@ -28,6 +28,8 @@ package org.hyperic.hq.events.server.session;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -84,6 +86,7 @@ import org.hyperic.util.timer.StopWatch;
 public class RegisteredTriggerManagerEJBImpl implements SessionBean {
 
     private final Log log = LogFactory.getLog(RegisteredTriggerManagerEJBImpl.class);
+    private final Log traceLog = LogFactory.getLog(RegisteredTriggerManagerEJBImpl.class.getName() + "Trace");
 
     private TriggerDAOInterface getTriggerDAO() {
         return triggerDAO;
@@ -131,17 +134,19 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         // we will lazy init
         log.info("Initializing triggers");
         
-        watch.markTimeBegin("findAllEnabledTriggers");
-        Collection registeredTriggers = getTriggerDAO().findAllEnabledTriggers();
-        watch.markTimeEnd("findAllEnabledTriggers");
+        try {
+            watch.markTimeBegin("findAllEnabledTriggers");
+            Collection registeredTriggers = getTriggerDAO().findAllEnabledTriggers();
+            watch.markTimeEnd("findAllEnabledTriggers");
         
-        log.info("Found " + registeredTriggers.size() + " enabled triggers");
+            log.info("Found " + registeredTriggers.size() + " enabled triggers");
         
-        watch.markTimeBegin("initializeTriggers");
-        initializeTriggers(registeredTriggers);
-        watch.markTimeEnd("initializeTriggers");
-        
-        log.info("Finished initializing triggers: " + watch);
+            watch.markTimeBegin("initializeTriggers");
+            initializeTriggers(registeredTriggers);
+            watch.markTimeEnd("initializeTriggers");
+        } finally {        
+            log.info("Finished initializing triggers: " + watch);
+        }
     }
 
     private void registerTriggers(Integer alertDefId) {
@@ -365,12 +370,40 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public void setAlertDefinitionTriggersEnabled(Integer alertDefId, boolean enabled) {
-        Collection triggerIds = getTriggerIdsByAlertDefId(alertDefId);
-        addPostCommitSetEnabledListener(alertDefId, triggerIds, enabled);
+        setAlertDefinitionTriggersEnabled(Collections.singletonList(alertDefId), enabled);
     }
+    /**
+     * Enable or disable triggers associated with an alert definition
+     *
+     * @ejb:interface-method
+     */
+    public void setAlertDefinitionTriggersEnabled(List alertDefIds, boolean enabled) {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
 
-    private void addPostCommitSetEnabledListener(final Integer alertDefId,
-                                                 final Collection triggerIds,
+        if (debug) watch.markTimeBegin("getTriggerIdsByAlertDefIds");
+
+        Map alertDefTriggerMap = getTriggerIdsByAlertDefIds(alertDefIds);
+
+        if (debug) {
+            watch.markTimeEnd("getTriggerIdsByAlertDefIds");
+            watch.markTimeBegin("addPostCommitSetEnabledListener");
+        }
+
+        addPostCommitSetEnabledListener(alertDefTriggerMap, enabled);
+
+        if (debug) {
+            watch.markTimeEnd("addPostCommitSetEnabledListener");
+            
+            if (traceLog.isDebugEnabled()) {
+                traceLog.debug("alertDefTriggerMap: " + alertDefTriggerMap);
+            }
+
+            log.debug("setAlertDefinitionTriggersEnabled: " + watch);
+        }
+    }
+    
+    private void addPostCommitSetEnabledListener(final Map alertDefTriggerMap,
                                                  final boolean enabled)
     {
         try {
@@ -378,7 +411,7 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
                 public void afterCommit(boolean success) {
                     if (success) {
                         try {
-                            setTriggersEnabled(alertDefId, triggerIds, enabled);
+                            setTriggersEnabled(alertDefTriggerMap, enabled);
                         } catch (Exception e) {
                             log.error("Error setting triggers enabled to " + enabled, e);
                         }
@@ -393,33 +426,56 @@ public class RegisteredTriggerManagerEJBImpl implements SessionBean {
         }
     }
 
-    void setTriggersEnabled(final Integer alertDefinitionId,
-                            final Collection triggerIds,
-                            final boolean enabled) {
+    void setTriggersEnabled(final Map alertDefTriggerMap, final boolean enabled) {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+                
         if (this.registeredTriggerRepository.isInitialized()) {
-            if (enabled == true && !(triggerIds.isEmpty())) {
-                Integer triggerId = (Integer) triggerIds.iterator().next();
-                if (registeredTriggerRepository.getTriggerById(triggerId) == null) {
-                    try {
-                        zeventEnqueuer.enqueueEvent(new TriggersCreatedZevent(alertDefinitionId));
-                    } catch (InterruptedException e) {
-                        log.error("Error sending event to create newly enabled triggers for alert definition " +
-                                  alertDefinitionId + ". These alerts will not fire", e);
-                    }
-                    return;
-                }
-            }
-            registeredTriggerRepository.setTriggersEnabled(triggerIds, enabled);
-        }
-    }
+            List zevents = new ArrayList();
+            List enabledTriggersToProcess = new ArrayList();
+            
+            if (debug) watch.markTimeBegin("processTriggers");
 
-    Collection getTriggerIdsByAlertDefId(Integer id) {
-        Collection triggers = getAllTriggersByAlertDefId(id);
-        List triggerIds = new ArrayList();
-        for (Iterator iterator = triggers.iterator(); iterator.hasNext();) {
-            triggerIds.add(((RegisteredTrigger) iterator.next()).getId());
+            for (Iterator iterator = alertDefTriggerMap.keySet().iterator(); iterator.hasNext();) {
+                Integer alertDefId = (Integer) iterator.next();
+                Collection triggerIds = (Collection) alertDefTriggerMap.get(alertDefId);
+                
+                if (enabled && !triggerIds.isEmpty()) {
+                    Integer triggerId = (Integer) triggerIds.iterator().next();
+                    if (registeredTriggerRepository.getTriggerById(triggerId) == null) {
+                        zevents.add(new TriggersCreatedZevent(alertDefId));
+                        continue;
+                    }
+                }
+                enabledTriggersToProcess.addAll(triggerIds);
+            }
+            
+            if (debug) watch.markTimeEnd("processTriggers");
+
+            if (!zevents.isEmpty()) {
+                if (debug) watch.markTimeBegin("enqueueEvents");
+                try {
+                    zeventEnqueuer.enqueueEvents(zevents);
+                } catch (InterruptedException e) {
+                    log.error("Error sending event to create newly enabled triggers for alert definition "
+                                  + alertDefTriggerMap.keySet() + ". These alerts will not fire", e);
+                }
+                if (debug) watch.markTimeEnd("enqueueEvents");
+            }
+            
+            if (!enabledTriggersToProcess.isEmpty()) {
+                if (debug) watch.markTimeBegin("setTriggersEnabled");
+                registeredTriggerRepository.setTriggersEnabled(enabledTriggersToProcess, enabled);
+                if (debug) watch.markTimeEnd("setTriggersEnabled");
+            }
         }
-        return triggerIds;
+        
+        log.debug("setTriggersEnabled: " + watch);
+    }
+    
+    Map getTriggerIdsByAlertDefIds(List alertDefIds) {
+        return getTriggerDAO()
+                    .findTriggerIdsByAlertDefinitionIds(alertDefIds);
     }
 
     /**

@@ -1,6 +1,7 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -16,6 +17,8 @@ public interface TriggerDAOInterface {
     List findAll();
 
     List findByAlertDefinitionId(Integer id);
+    
+    Map findTriggerIdsByAlertDefinitionIds(List alertDefIds);
 
     RegisteredTrigger findById(Integer id);
 

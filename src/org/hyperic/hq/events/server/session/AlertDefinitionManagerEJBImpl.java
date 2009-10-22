@@ -353,13 +353,25 @@ public class AlertDefinitionManagerEJBImpl
                                            int priority, boolean activate)
         throws PermissionException
     {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
         AlertDefinition def = getAlertDefDAO().findById(id);
         canManageAlerts(subj, def);
-        List alertdefs = new ArrayList(def.getChildren().size() + 1);
+        int initCapacity = def.getChildren().size() + 1;
+        List alertdefs = new ArrayList(initCapacity);
+        List defIds = new ArrayList(initCapacity);
         alertdefs.add(def);
 
+        if (debug) watch.markTimeBegin("getChildren");
+        
         // If there are any children, add them, too
         alertdefs.addAll(def.getChildren());
+
+        if (debug) {
+            watch.markTimeEnd("getChildren");
+            watch.markTimeBegin("updateBasic");
+        }
 
         for (Iterator it = alertdefs.iterator(); it.hasNext(); ) {
             def = (AlertDefinition) it.next();
@@ -371,12 +383,24 @@ public class AlertDefinitionManagerEJBImpl
             if (def.isActive() != activate || def.isEnabled() != activate) {
                 def.setActiveStatus(activate);
                 AlertAudit.enableAlert(def, subj);
-                registeredTriggerManager.setAlertDefinitionTriggersEnabled(def.getId(), activate);
+                defIds.add(def.getId());
             }
             def.setMtime(System.currentTimeMillis());
 
             EventsStartupListener.getAlertDefinitionChangeCallback()
                 .postUpdate(def);
+        }
+        
+        if (debug) {
+            watch.markTimeEnd("updateBasic");
+            watch.markTimeBegin("setAlertDefinitionTriggersEnabled");
+        }
+        
+        registeredTriggerManager.setAlertDefinitionTriggersEnabled(defIds, activate);
+        
+        if (debug) {
+            watch.markTimeEnd("setAlertDefinitionTriggersEnabled");
+            log.debug("updateAlertDefinitionBasic[" + initCapacity + "]: " + watch);
         }
     }
 
@@ -559,19 +583,44 @@ public class AlertDefinitionManagerEJBImpl
                                                   boolean activate)
         throws PermissionException {
 
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+        
         canManageAlerts(subj, def);
 
         if (def.isActive() != activate || def.isEnabled() != activate) {
             def.setActiveStatus(activate);
             def.setMtime(System.currentTimeMillis());
             AlertAudit.enableAlert(def, subj);
-            registeredTriggerManager.setAlertDefinitionTriggersEnabled(def.getId(), activate);
+            
+            // process the children
+            if (debug) watch.markTimeBegin("getChildren");
+            Collection children = def.getChildren();
+            if (debug) watch.markTimeEnd("getChildren");
+            
+            List defIds = new ArrayList(children.size()+1);
+            defIds.add(def.getId());
+
+            for (Iterator it=children.iterator(); it.hasNext(); ) {
+                AlertDefinition childDef = (AlertDefinition) it.next();
+                defIds.add(childDef.getId());
+            }
+
+            if (debug) watch.markTimeBegin("setAlertDefinitionTriggersEnabled");
+            registeredTriggerManager.setAlertDefinitionTriggersEnabled(defIds, activate);
+            if (debug) watch.markTimeEnd("setAlertDefinitionTriggersEnabled");
         }
 
+        if (debug) watch.markTimeBegin("setChildrenActive");
         getAlertDefDAO().setChildrenActive(def, activate);
+        if (debug) watch.markTimeEnd("setChildrenActive");
 
         EventsStartupListener.getAlertDefinitionChangeCallback()
             .postUpdate(def);
+        
+        if (debug) {
+            log.debug("updateAlertDefinitionActiveStatus: " + watch);
+        }
     }
 
     /**

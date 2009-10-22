@@ -77,11 +77,13 @@ public class RegisteredTriggerManagerEJBImplTest
         Integer alertDefinitionId = Integer.valueOf(5432);
         List triggerIds = new ArrayList();
         triggerIds.add(triggerId);
+        Map alertDefTriggerMap = new HashMap();
+        alertDefTriggerMap.put(alertDefinitionId, triggerIds);
         registeredTriggerRepository.setTriggersEnabled(triggerIds, false);
         EasyMock.expect(registeredTriggerRepository.isInitialized()).andReturn(true);
         replay();
         registeredTriggerManager.setRegisteredTriggerRepository(registeredTriggerRepository);
-        registeredTriggerManager.setTriggersEnabled(alertDefinitionId,triggerIds, false);
+        registeredTriggerManager.setTriggersEnabled(alertDefTriggerMap, false);
         verify();
     }
 
@@ -93,10 +95,12 @@ public class RegisteredTriggerManagerEJBImplTest
         Integer alertDefinitionId = Integer.valueOf(5432);
         List triggerIds = new ArrayList();
         triggerIds.add(triggerId);
+        Map alertDefTriggerMap = new HashMap();
+        alertDefTriggerMap.put(alertDefinitionId, triggerIds);
         EasyMock.expect(registeredTriggerRepository.isInitialized()).andReturn(false);
         replay();
         registeredTriggerManager.setRegisteredTriggerRepository(registeredTriggerRepository);
-        registeredTriggerManager.setTriggersEnabled(alertDefinitionId,triggerIds, false);
+        registeredTriggerManager.setTriggersEnabled(alertDefTriggerMap, false);
         verify();
     }
 
@@ -108,13 +112,15 @@ public class RegisteredTriggerManagerEJBImplTest
         Integer alertDefinitionId = Integer.valueOf(5432);
         List triggerIds = new ArrayList();
         triggerIds.add(triggerId);
+        Map alertDefTriggerMap = new HashMap();
+        alertDefTriggerMap.put(alertDefinitionId, triggerIds);
         RegisterableTriggerInterface trigger1 = EasyMock.createMock(RegisterableTriggerInterface.class);
         EasyMock.expect(registeredTriggerRepository.getTriggerById(triggerId)).andReturn(trigger1);
         EasyMock.expect(registeredTriggerRepository.isInitialized()).andReturn(true);
         registeredTriggerRepository.setTriggersEnabled(triggerIds, true);
         replay();
         registeredTriggerManager.setRegisteredTriggerRepository(registeredTriggerRepository);
-        registeredTriggerManager.setTriggersEnabled(alertDefinitionId, triggerIds, true);
+        registeredTriggerManager.setTriggersEnabled(alertDefTriggerMap, true);
         verify();
     }
 
@@ -140,12 +146,20 @@ public class RegisteredTriggerManagerEJBImplTest
 
         List expectedIds = new ArrayList();
         expectedIds.add(triggerId);
+        
+        Map expectedMap = new HashMap();
+        expectedMap.put(alertDefinitionId, expectedIds);
 
-        EasyMock.expect(triggerDAO.findByAlertDefinitionId(alertDefinitionId)).andReturn(triggers);
+        EasyMock.expect(triggerDAO
+                            .findTriggerIdsByAlertDefinitionIds(
+                                    Collections.singletonList(alertDefinitionId))
+                       ).andReturn(expectedMap);
         replay();
-        Collection triggerIds = registeredTriggerManager.getTriggerIdsByAlertDefId(alertDefinitionId);
+        Map triggerMap = registeredTriggerManager
+                            .getTriggerIdsByAlertDefIds(
+                                    Collections.singletonList(alertDefinitionId));
         verify();
-        assertEquals(expectedIds,triggerIds);
+        assertEquals(expectedMap,triggerMap);
     }
 
     /**
@@ -566,12 +580,14 @@ public class RegisteredTriggerManagerEJBImplTest
         Integer alertDefinitionId = Integer.valueOf(5432);
         List triggerIds = new ArrayList();
         triggerIds.add(triggerId);
+        Map alertDefTriggerMap = new HashMap();
+        alertDefTriggerMap.put(alertDefinitionId, triggerIds);
         EasyMock.expect(registeredTriggerRepository.isInitialized()).andReturn(true);
         EasyMock.expect(registeredTriggerRepository.getTriggerById(triggerId)).andReturn(null);
-        zEventEnqueuer.enqueueEvent(EasyMock.isA(TriggersCreatedZevent.class));
+        zEventEnqueuer.enqueueEvents(EasyMock.isA(List.class));
         replay();
         registeredTriggerManager.setRegisteredTriggerRepository(registeredTriggerRepository);
-        registeredTriggerManager.setTriggersEnabled(alertDefinitionId, triggerIds, true);
+        registeredTriggerManager.setTriggersEnabled(alertDefTriggerMap, true);
         verify();
     }
 
@@ -584,13 +600,15 @@ public class RegisteredTriggerManagerEJBImplTest
         Integer alertDefinitionId = Integer.valueOf(5432);
         List triggerIds = new ArrayList();
         triggerIds.add(triggerId);
+        Map alertDefTriggerMap = new HashMap();
+        alertDefTriggerMap.put(alertDefinitionId, triggerIds);
         EasyMock.expect(registeredTriggerRepository.getTriggerById(triggerId)).andReturn(null);
         EasyMock.expect(registeredTriggerRepository.isInitialized()).andReturn(true);
-        zEventEnqueuer.enqueueEvent(EasyMock.isA(TriggersCreatedZevent.class));
+        zEventEnqueuer.enqueueEvents(EasyMock.isA(List.class));
         EasyMock.expectLastCall().andThrow(new InterruptedException());
         replay();
         registeredTriggerManager.setRegisteredTriggerRepository(registeredTriggerRepository);
-        registeredTriggerManager.setTriggersEnabled(alertDefinitionId, triggerIds, true);
+        registeredTriggerManager.setTriggersEnabled(alertDefTriggerMap, true);
         verify();
     }
 

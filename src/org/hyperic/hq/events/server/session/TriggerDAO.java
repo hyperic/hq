@@ -16,14 +16,20 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.Query;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -68,6 +74,76 @@ public class TriggerDAO
         String sql = "from RegisteredTrigger rt where rt.alertDefinition.id = :defId";
 
         return getSession().createQuery(sql).setParameter("defId", id).list();
+    }
+
+    /**
+     * Find all the registered trigger ids associated with the alert definition ids.
+     *
+     * @param alertDefIds The alert definition ids.
+     * @return {@link Map} of alert definition id {@link Integer} 
+     *          to {@link List} of trigger id {@link Integer}
+     */
+    public Map findTriggerIdsByAlertDefinitionIds(List alertDefIds) {
+        if (alertDefIds.isEmpty()) {
+            return Collections.EMPTY_MAP;
+        }
+ 
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
+        final String sql = 
+            new StringBuilder()
+                    .append("SELECT T.ALERT_DEFINITION_ID AS ALERT_DEF_ID, ")
+                    .append("T.ID AS TRIGGER_ID ")
+                    .append("FROM EAM_REGISTERED_TRIGGER T ")
+                    .append("WHERE T.ALERT_DEFINITION_ID IN (:alertDefIds) ")
+                    .toString();
+        
+        Query query = getSession().createSQLQuery(sql)
+                            .addScalar("ALERT_DEF_ID", new IntegerType())
+                            .addScalar("TRIGGER_ID", new IntegerType());
+        
+        List triggers = new ArrayList(alertDefIds.size());
+        int batchSize = 1000;
+        
+        if (debug) watch.markTimeBegin("createQuery.list");
+
+        for (int i=0; i<alertDefIds.size(); i+=batchSize) {
+            int end = Math.min(i+batchSize, alertDefIds.size());
+            List list = alertDefIds.subList(i, end);
+            query.setParameterList("alertDefIds", list, new IntegerType());
+            triggers.addAll(query.list());
+        }
+
+        if (debug) watch.markTimeEnd("createQuery.list");
+
+        Map alertDefTriggerMap = new HashMap(alertDefIds.size());
+        
+        if (debug) watch.markTimeBegin("buildMap");
+
+        for (Iterator it=triggers.iterator(); it.hasNext(); ) {
+            Object[] o = (Object[]) it.next();           
+            Integer alertDefId = (Integer) o[0];
+            Integer triggerId = (Integer) o[1];
+
+            List trigList = (List) alertDefTriggerMap.get(alertDefId);
+            
+            if (trigList == null) {
+                trigList = new ArrayList();
+                alertDefTriggerMap.put(alertDefId, trigList);
+            }
+            trigList.add(triggerId);
+        }
+        
+        if (debug) {
+            watch.markTimeEnd("buildMap");
+            log.debug("findTriggerIdsByAlertDefinitionIds: " + watch
+                            + ", alert definition ids size=" + alertDefIds.size()
+                            + ", trigger ids size=" + triggers.size()
+                            + ", map size=" + alertDefTriggerMap.size());
+        }
+        
+        return alertDefTriggerMap;
     }
 
 
