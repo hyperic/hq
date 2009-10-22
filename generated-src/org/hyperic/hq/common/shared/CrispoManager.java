@@ -3,57 +3,61 @@
  */
 package org.hyperic.hq.common.shared;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import org.hyperic.hq.common.server.session.Crispo;
 import org.hyperic.hq.common.server.session.CrispoOption;
+import org.hyperic.util.config.ConfigResponse;
 
 /**
  * Local interface for CrispoManager.
  */
-public interface CrispoManagerLocal
-   extends javax.ejb.EJBLocalObject
-{
+public interface CrispoManager {
    /**
     * Create a new {@link Crispo} from a {@link Map} of {@link String} key/value pairs
     */
-   public org.hyperic.hq.common.server.session.Crispo createCrispo( java.util.Map keyVals ) ;
+   public Crispo createCrispo( Map<String,String> keyVals ) ;
 
-   public java.util.Collection findAll(  ) ;
+   public Collection<Crispo> findAll(  ) ;
 
-   public org.hyperic.hq.common.server.session.Crispo findById( java.lang.Integer id ) ;
+   public Crispo findById( Integer id ) ;
 
    /**
     * Delete a {@link Crispo} and all the options contained within.
     */
-   public void deleteCrispo( org.hyperic.hq.common.server.session.Crispo c ) ;
+   public void deleteCrispo( Crispo c ) ;
 
    /**
     * Create a new Crispo, filled out with the values from a {@link ConfigResponse}
     */
-   public org.hyperic.hq.common.server.session.Crispo create( org.hyperic.util.config.ConfigResponse cfg ) ;
+   public Crispo create( ConfigResponse cfg ) ;
 
    /**
     * Update a crispo, matching the saved crispo to the values in the config repsonse.
     */
-   public void update( org.hyperic.hq.common.server.session.Crispo c,org.hyperic.util.config.ConfigResponse cfg ) ;
+   public void update( Crispo c,ConfigResponse cfg ) ;
 
    /**
     * Find a List of CrispoOptions given the search key.
     * @param key The key to search for
     * @return A list of CrispoOptions that have a key that matches in whole or part the given key parameter.
     */
-   public java.util.List<CrispoOption> findOptionByKey( java.lang.String key ) ;
+   public List<CrispoOption> findOptionByKey( String key ) ;
 
    /**
     * Find a List of CrispoOptions given the search value.
     * @param val The value to search for
     * @return A list of CrispoOptions that have a value (in the array) that matches
     */
-   public java.util.List<CrispoOption> findOptionByValue( java.lang.String val ) ;
+   public List<CrispoOption> findOptionByValue( String val ) ;
 
    /**
     * Update the given CrispoOption with the given value.
     * @param o The CrispoOption to update
     * @param val The new value for this option
     */
-   public void updateOption( org.hyperic.hq.common.server.session.CrispoOption o,java.lang.String val ) ;
+   public void updateOption( CrispoOption o,String val ) ;
 
 }

@@ -179,7 +179,7 @@ public class ConfigResponse implements GenericValueMap, Serializable  {
         return (val != null) ? val : defaultValue;
     }
 
-    public Set getKeys() {
+    public Set<String> getKeys() {
         return this.attributes.keySet();
     }
 

@@ -230,11 +230,6 @@
 
       </session>
       <session>
-         <ejb-name>CrispoManager</ejb-name>
-         <local-jndi-name>LocalCrispoManager</local-jndi-name>
-
-      </session>
-      <session>
          <ejb-name>DataManager</ejb-name>
          <local-jndi-name>LocalDataManager</local-jndi-name>
 

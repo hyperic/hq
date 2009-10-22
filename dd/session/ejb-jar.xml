@@ -569,20 +569,6 @@
 
       </session>
 
-
-      <session >
-         <description><![CDATA[The CRISPO (Config Response Is Sweetly Persisted ...]]></description>
-
-         <ejb-name>CrispoManager</ejb-name>
-
-         <local-home>org.hyperic.hq.common.shared.CrispoManagerLocalHome</local-home>
-         <local>org.hyperic.hq.common.shared.CrispoManagerLocal</local>
-         <ejb-class>org.hyperic.hq.common.server.session.CrispoManagerEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
       <session >
          <description><![CDATA[The DataManagerEJB class is a stateless session bean that can be used to retrieve measurement data points]]></description>
 

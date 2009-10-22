@@ -49,9 +49,9 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
+import org.hyperic.hq.common.server.session.CrispoManagerImpl;
 import org.hyperic.hq.common.server.session.CrispoOption;
-import org.hyperic.hq.common.shared.CrispoManagerLocal;
+import org.hyperic.hq.common.shared.CrispoManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.shared.DashboardManager;
@@ -72,11 +72,11 @@ public class DashboardManagerImpl implements DashboardManager {
     protected SessionManager sessionManager = SessionManager.getInstance();
 
     private DashboardConfigDAO dashDao;
-    private CrispoManagerLocal crispoManager;
+    private CrispoManager crispoManager;
     private AuthzSubjectManagerLocal authzSubjectManager;
 
     @Autowired
-    public DashboardManagerImpl(DashboardConfigDAO dashDao, CrispoManagerLocal crispoManager,
+    public DashboardManagerImpl(DashboardConfigDAO dashDao, CrispoManager crispoManager,
                                 AuthzSubjectManagerLocal authzSubjectManager) {
         this.dashDao = dashDao;
         this.crispoManager = crispoManager;

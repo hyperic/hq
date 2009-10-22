@@ -43,7 +43,7 @@ import org.hyperic.util.config.ConfigResponse;
 public class Crispo
     extends PersistedObject
 {
-    private Collection _opts = new HashSet();
+    private Collection<CrispoOption> _opts = new HashSet<CrispoOption>();
     
     protected Crispo() {}
     
@@ -54,11 +54,11 @@ public class Crispo
         return Collections.unmodifiableCollection(_opts);
     }
     
-    protected Collection getOptsSet() {
+    protected Collection<CrispoOption> getOptsSet() {
         return _opts;
     }
     
-    protected void setOptsSet(Collection opts) {
+    protected void setOptsSet(Collection<CrispoOption> opts) {
         _opts = opts;
     }
     
@@ -91,10 +91,8 @@ public class Crispo
     public ConfigResponse toResponse() {
         ConfigResponse res = new ConfigResponse();
         
-        for (Iterator i=getOptions().iterator(); i.hasNext(); ) {
-            CrispoOption opt = (CrispoOption)i.next();
-            
-            res.setValue(opt.getKey(), opt.getValue());
+        for (CrispoOption opt : getOptions()) {
+           res.setValue(opt.getKey(), opt.getValue());
         }
         return res;
     }
@@ -102,14 +100,11 @@ public class Crispo
     void updateWith(ConfigResponse cfg) {
         // First, make any modifications to existing values, and add any
         // values not contained within the crispo
-        for (Iterator i=cfg.getKeys().iterator(); i.hasNext(); ) {
-            String key = (String)i.next();
-            String val = cfg.getValue(key);
+        for (String key : cfg.getKeys()) {
+           String val = cfg.getValue(key);
             
             boolean needToAdd = true;
-            for (Iterator j=_opts.iterator(); j.hasNext(); ) {
-                CrispoOption opt = (CrispoOption)j.next();
-                
+            for (CrispoOption opt : _opts) {
                 if (opt.getKey().equals(key)) {
                     if (!opt.getValue().equals(val)) {
                         opt.setValue(val);
@@ -125,7 +120,7 @@ public class Crispo
         }
         
         // Now remove any keys not contained within the cfg
-        for (Iterator i = _opts.iterator(); i.hasNext(); ) {
+        for (Iterator<CrispoOption> i = _opts.iterator(); i.hasNext(); ) {
             CrispoOption opt = (CrispoOption)i.next();
             
             if (cfg.getValue(opt.getKey()) == null || 
@@ -137,17 +132,16 @@ public class Crispo
         }
     }
     
-    static Crispo create(Map keyVals) {
+    static Crispo create(Map<String, String> keyVals) {
         Crispo res = new Crispo();
         
-        for (Iterator i=keyVals.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry ent = (Map.Entry)i.next();
-            String val = (String)ent.getValue();
+        for (Map.Entry<String, String> ent : keyVals.entrySet()) {
+            String val = ent.getValue();
             
             if (val == null || val.length() == 0)
                 continue;
             
-            res.addOption((String)ent.getKey(), val);
+            res.addOption(ent.getKey(), val);
         }
         return res;
     }
@@ -155,8 +149,7 @@ public class Crispo
     static Crispo create(ConfigResponse cfg) {
         Crispo res = new Crispo();
         
-        for (Iterator i=cfg.getKeys().iterator(); i.hasNext(); ) {
-            String key = (String)i.next();
+        for (String key : cfg.getKeys()) {
             String val = cfg.getValue(key);
             
             if (val == null || val.length() == 0)

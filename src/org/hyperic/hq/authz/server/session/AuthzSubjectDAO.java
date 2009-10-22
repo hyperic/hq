@@ -36,7 +36,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.common.server.session.CrispoManagerEJBImpl;
+import org.hyperic.hq.common.server.session.CrispoManagerImpl;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -88,7 +88,7 @@ public class AuthzSubjectDAO
         subject.addRole(role);
 
         // Insert an empty config response
-        Crispo c = CrispoManagerEJBImpl.getOne().create(new ConfigResponse());
+        Crispo c = CrispoManagerImpl.getOne().create(new ConfigResponse());
         subject.setPrefs(c);
         save(subject);
         return subject;
@@ -105,7 +105,7 @@ public class AuthzSubjectDAO
     void remove(AuthzSubject entity) {
         Crispo c = entity.getPrefs();
         entity.setPrefs(null);
-        CrispoManagerEJBImpl.getOne().deleteCrispo(c);
+        CrispoManagerImpl.getOne().deleteCrispo(c);
         super.remove(entity);
     }
 
