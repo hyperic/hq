@@ -130,6 +130,7 @@ public class HQApp {
                 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
+                _isShutdown.set(true);
                 _log.info("Running shutdown hooks");
                 _shutdown.shutdown();
                 _log.info("Done running shutdown hooks");
@@ -624,6 +625,7 @@ public class HQApp {
      * Execute the registered startup classes.
      */
     public void runStartupClasses() {
+        // HHQ-3496 check if HQ is shutdown before running initialization
         if (_isShutdown.get()) {
             throw new SystemException("HQ is shutdown");
         }
@@ -637,6 +639,13 @@ public class HQApp {
         checkDBSchemaState();
 
         for (Iterator i=classNames.iterator(); i.hasNext(); ) {
+            // HHQ-3496
+            // there could be a timing issue from when the shutdown hook will
+            // kick in and when jboss notifies the app of an event.
+            // Don't take any chances, just check the flag each iteration.
+            if (_isShutdown.get()) {
+                throw new SystemException("HQ is shutdown");
+            }
             String name = (String)i.next();
             
             try {
