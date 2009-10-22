@@ -49,8 +49,8 @@ import org.hyperic.hq.ui.Dashboard;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.portlet.addresource.AddResourcesPrepareAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
-import org.hyperic.hq.ui.shared.DashboardManagerLocal;
+import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.InvalidOptionException;
@@ -410,7 +410,7 @@ public class DashboardUtils {
 		
 		try {
 			me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
-			DashboardManagerLocal dashManager = DashboardManagerEJBImpl.getOne();
+			DashboardManager dashManager = DashboardManagerImpl.getOne();
 			dashboardCollection = (ArrayList) dashManager.getDashboards(me);
 		} catch (Exception e) {
 			return null;
@@ -463,7 +463,7 @@ public class DashboardUtils {
 		
 		me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
 			
-		DashboardManagerLocal dashManager = DashboardManagerEJBImpl.getOne();
+		DashboardManager dashManager = DashboardManagerImpl.getOne();
 			
 		dashboardCollection = (ArrayList) dashManager.getDashboards(me);
 			

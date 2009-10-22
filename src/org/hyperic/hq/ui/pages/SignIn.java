@@ -63,10 +63,10 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.hq.ui.service.SearchService;
-import org.hyperic.hq.ui.shared.DashboardManagerLocal;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.image.widget.ResourceTree;
 import org.hyperic.ui.tapestry.page.PageListing;
@@ -175,8 +175,8 @@ public abstract class SignIn extends BasePage {
     private void loadDashboard(ServletContext ctx, WebUser webUser,
                                AuthzBoss authzBoss) {
         try {
-            DashboardManagerLocal dashManager =
-                DashboardManagerEJBImpl.getOne();
+            DashboardManager dashManager =
+                DashboardManagerImpl.getOne();
             ConfigResponse defaultUserDashPrefs =
                 (ConfigResponse) ctx.getAttribute(Constants.DEF_USER_DASH_PREFS);
             AuthzSubject me =
@@ -296,8 +296,8 @@ public abstract class SignIn extends BasePage {
             session.setAttribute(Constants.USER_OPERATIONS_ATTR, userOpsMap);
     
             try {
-                DashboardManagerLocal dashManager =
-                    DashboardManagerEJBImpl.getOne();
+                DashboardManager dashManager =
+                    DashboardManagerImpl.getOne();
                 ConfigResponse defaultUserDashPrefs = (ConfigResponse) ctx
                         .getAttribute(Constants.DEF_USER_DASH_PREFS);
                 AuthzSubject me =

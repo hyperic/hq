@@ -19,7 +19,7 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartForm;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.ui.server.session.RoleDashboardConfig;
 import org.hyperic.hq.ui.server.session.UserDashboardConfig;
 import org.hyperic.util.config.ConfigResponse;
@@ -62,7 +62,7 @@ public class SaveChartToDashboardUtil {
     		}
     	} else {
             AuthzSubject me = boss.findSubjectById(user.getSessionId(), user.getSubject().getId());
-            DashboardConfig dashboardConfig = DashboardManagerEJBImpl.getOne().getUserDashboard(me, me);
+            DashboardConfig dashboardConfig = DashboardManagerImpl.getOne().getUserDashboard(me, me);
     		
     		result = addChartToDashboard(forHTMLTag(chartName), url, dashboardConfig, boss, user, request);
     	}

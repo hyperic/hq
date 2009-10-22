@@ -296,11 +296,6 @@
 
       </session>
       <session>
-         <ejb-name>DashboardManager</ejb-name>
-         <local-jndi-name>LocalDashboardManager</local-jndi-name>
-
-      </session>
-      <session>
          <ejb-name>AppdefBoss</ejb-name>
          <jndi-name>ejb/bizapp/AppdefBoss</jndi-name>
          <local-jndi-name>LocalAppdefBoss</local-jndi-name>

@@ -58,7 +58,7 @@ import org.hyperic.hq.bizapp.shared.AuthzBossLocal;
 import org.hyperic.hq.bizapp.shared.AuthzBossUtil;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -489,7 +489,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
         AuthzSubject subj = manager.getSubject(sessionId);
-        return DashboardManagerEJBImpl.getOne()
+        return DashboardManagerImpl.getOne()
             .getUserDashboard(subj, subj).getConfig();
     }
 

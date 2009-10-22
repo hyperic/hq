@@ -34,8 +34,8 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseAction;
-import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
-import org.hyperic.hq.ui.shared.DashboardManagerLocal;
+import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.ConfigPropertyException;
@@ -70,7 +70,7 @@ public abstract class BaseRSSAction extends BaseAction {
         String rssToken = RequestUtils.getStringParameter(request, "token");
 
         // Get user preferences
-        ConfigResponse preferences = DashboardManagerEJBImpl.getOne()
+        ConfigResponse preferences = DashboardManagerImpl.getOne()
             .getRssUserPreferences(user, rssToken);
 
         ConfigResponse defaultPreferences =

@@ -35,9 +35,9 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
-import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
+import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.ui.shared.DashboardManagerLocal;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -56,7 +56,7 @@ public class ConfigurationProxy {
 			throws ApplicationException, RemoteException {
 		if (key.substring(0, 5).equalsIgnoreCase(".dash")) {
 			// Dashboard preference
-			DashboardManagerLocal dashManager = DashboardManagerEJBImpl
+			DashboardManager dashManager = DashboardManagerImpl
 					.getOne();
 			AuthzSubject me = boss.findSubjectById(user.getSessionId(), user
 					.getSubject().getId());
@@ -79,7 +79,7 @@ public class ConfigurationProxy {
 			AuthzBoss boss, ConfigResponse dashConfigResp)
 			throws SessionNotFoundException, SessionTimeoutException,
 			PermissionException, RemoteException {
-		DashboardManagerLocal dashManager = DashboardManagerEJBImpl.getOne();
+		DashboardManager dashManager = DashboardManagerImpl.getOne();
 		AuthzSubject me = boss.findSubjectById(user.getSessionId(), user
 				.getSubject().getId());
 		DashboardConfig dashConfig = DashboardUtils.findDashboard(
@@ -100,7 +100,7 @@ public class ConfigurationProxy {
 			AuthzBoss boss, WebUser user) throws ApplicationException,
 			RemoteException {
 
-		DashboardManagerLocal dashManager = DashboardManagerEJBImpl.getOne();
+		DashboardManager dashManager = DashboardManagerImpl.getOne();
 		AuthzSubject me = boss.findSubjectById(user.getSessionId(), user
 				.getSubject().getId());
 		dashManager.configureDashboard(me,
@@ -111,7 +111,7 @@ public class ConfigurationProxy {
 			AuthzBoss boss, WebUser user, Role role)
 			throws ApplicationException, RemoteException {
 
-		DashboardManagerLocal dashManager = DashboardManagerEJBImpl.getOne();
+		DashboardManager dashManager = DashboardManagerImpl.getOne();
 		AuthzSubject me = boss.findSubjectById(user.getSessionId(), user
 				.getSubject().getId());
 		dashManager.configureDashboard(me, dashManager.getRoleDashboard(me,
