@@ -21,36 +21,38 @@ import org.hyperic.util.config.ConfigResponse;
  */
 public interface DashboardManager {
 
-   public UserDashboardConfig getUserDashboard( AuthzSubject me,AuthzSubject user ) throws PermissionException;
+    public UserDashboardConfig getUserDashboard(AuthzSubject me, AuthzSubject user) throws PermissionException;
 
-   public RoleDashboardConfig getRoleDashboard( AuthzSubject me,Role r ) throws PermissionException;
+    public RoleDashboardConfig getRoleDashboard(AuthzSubject me, Role r) throws PermissionException;
 
-   public UserDashboardConfig createUserDashboard( AuthzSubject me,AuthzSubject user,String name ) throws PermissionException;
+    public UserDashboardConfig createUserDashboard(AuthzSubject me, AuthzSubject user, String name)
+        throws PermissionException;
 
-   public RoleDashboardConfig createRoleDashboard( AuthzSubject me,Role r,String name ) throws PermissionException;
+    public RoleDashboardConfig createRoleDashboard(AuthzSubject me, Role r, String name) throws PermissionException;
 
-   /**
-    * Reconfigure a user's dashboard
-    */
-   public void configureDashboard( AuthzSubject me,DashboardConfig cfg,ConfigResponse newCfg ) throws PermissionException;
+    /**
+     * Reconfigure a user's dashboard
+     */
+    public void configureDashboard(AuthzSubject me, DashboardConfig cfg, ConfigResponse newCfg)
+        throws PermissionException;
 
-   public void renameDashboard( AuthzSubject me,DashboardConfig cfg,String name ) throws PermissionException;
+    public void renameDashboard(AuthzSubject me, DashboardConfig cfg, String name) throws PermissionException;
 
-   /**
-    * Determine if a dashboard is editable by the passed user
-    */
-   public boolean isEditable( AuthzSubject me,DashboardConfig dash ) ;
+    /**
+     * Determine if a dashboard is editable by the passed user
+     */
+    public boolean isEditable(AuthzSubject me, DashboardConfig dash);
 
-   public Collection getDashboards( AuthzSubject me ) throws PermissionException;
+    public Collection<DashboardConfig> getDashboards(AuthzSubject me) throws PermissionException;
 
-   /**
-    * Update dashboard and user configs to account for resource deletion
-    * @param ids An array of ID's of removed resources
-    */
-   public void handleResourceDelete( AppdefEntityID[] ids ) ;
+    /**
+     * Update dashboard and user configs to account for resource deletion
+     * @param ids An array of ID's of removed resources
+     */
+    public void handleResourceDelete(AppdefEntityID[] ids);
 
-   public ConfigResponse getRssUserPreferences( String user,String token ) throws LoginException;
+    public ConfigResponse getRssUserPreferences(String user, String token) throws LoginException;
 
-   public void startup(  ) ;
+    public void startup();
 
 }

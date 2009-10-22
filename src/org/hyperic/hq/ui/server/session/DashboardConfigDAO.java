@@ -38,9 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class DashboardConfigDAO
-    extends HibernateDAO<DashboardConfig>
-{
+public class DashboardConfigDAO extends HibernateDAO<DashboardConfig> {
+    
     @Autowired
     DashboardConfigDAO(SessionFactory f) {
         super(DashboardConfig.class, f);
@@ -53,55 +52,55 @@ public class DashboardConfigDAO
     UserDashboardConfig findDashboard(AuthzSubject user) {
         String sql = "from UserDashboardConfig where user = :user";
 
-        return (UserDashboardConfig)getSession()
-            .createQuery(sql)
-            .setParameter("user", user)
-            .setCacheable(true)
-            .setCacheRegion("UserDashboardConfig.findDashboard")
-            .uniqueResult();
+        return (UserDashboardConfig) getSession()
+                                                 .createQuery(sql)
+                                                 .setParameter("user", user)
+                                                 .setCacheable(true)
+                                                 .setCacheRegion("UserDashboardConfig.findDashboard")
+                                                 .uniqueResult();
     }
 
     RoleDashboardConfig findDashboard(Role role) {
         String sql = "from RoleDashboardConfig where role = :role";
 
-        return (RoleDashboardConfig)getSession()
-            .createQuery(sql)
-            .setParameter("role", role)
-            .setCacheable(true)
-            .setCacheRegion("RoleDashboardConfig.findDashboard")
-            .uniqueResult();
+        return (RoleDashboardConfig) getSession()
+                                                 .createQuery(sql)
+                                                 .setParameter("role", role)
+                                                 .setCacheable(true)
+                                                 .setCacheRegion("RoleDashboardConfig.findDashboard")
+                                                 .uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
     Collection<RoleDashboardConfig> findAllRoleDashboards() {
         return getSession().createQuery("from RoleDashboardConfig order by name")
-            .setCacheable(true)
-            .setCacheRegion("RoleDashboardConfig.findAllRoleDashboards")
-            .list();
+                           .setCacheable(true)
+                           .setCacheRegion("RoleDashboardConfig.findAllRoleDashboards")
+                           .list();
     }
 
     @SuppressWarnings("unchecked")
     Collection<RoleDashboardConfig> findRolesFor(AuthzSubject me) {
         String sql = "select rc from RoleDashboardConfig rc " +
-            "join rc.role r " +
-            "join r.subjects s " +
-            "where s = :subject";
+                     "join rc.role r " +
+                     "join r.subjects s " +
+                     "where s = :subject";
 
         return getSession()
-            .createQuery(sql)
-            .setParameter("subject", me)
-            .list();
+                           .createQuery(sql)
+                           .setParameter("subject", me)
+                           .list();
     }
 
     void handleSubjectRemoval(AuthzSubject s) {
         getSession().createQuery("delete UserDashboardConfig where user = :user")
-            .setParameter("user", s)
-            .executeUpdate();
+                    .setParameter("user", s)
+                    .executeUpdate();
     }
 
     void handleRoleRemoval(Role r) {
         getSession().createQuery("delete RoleDashboardConfig where role= :role")
-            .setParameter("role", r)
-            .executeUpdate();
+                    .setParameter("role", r)
+                    .executeUpdate();
     }
 }
