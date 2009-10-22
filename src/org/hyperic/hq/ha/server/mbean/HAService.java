@@ -42,6 +42,7 @@ public class HAService
     implements HAServiceMBean
 {
     private static Log _log = LogFactory.getLog(HAService.class);
+    private static boolean isFirstPass = true;
 
     /**
      * @jmx:managed-operation
@@ -50,7 +51,13 @@ public class HAService
         MBeanServer server = MBeanUtil.getMBeanServer();
 
         //Reset in-memory triggers
-        RegisteredTriggers.reset();
+        if (!isFirstPass) {
+            // RegisteredTriggers already does a startup initialization
+            // don't want to reset that.
+            RegisteredTriggers.reset();
+        } else {
+            isFirstPass = false;
+        }
         
         _log.info("Starting HA Services");
 

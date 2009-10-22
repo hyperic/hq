@@ -1,18 +1,26 @@
 /*
- * NOTE: This copyright doesnot cover user programs that use HQ program services
- * by normal system calls through the application program interfaces provided as
- * part of the Hyperic Plug-in Development Kit or the Hyperic Client Development
- * Kit - this is merely considered normal use of the program, and doesnot fall
- * under the heading of "derived work". Copyright (C) [2004, 2005, 2006],
- * Hyperic, Inc. This file is part of HQ. HQ is free software; you can
- * redistribute it and/or modify it under the terms version 2 of the GNU General
- * Public License as published by the Free Software Foundation. This program is
- * distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details. You
- * should have received a copy of the GNU General Public License along with this
- * program; if not, write to the Free Software Foundation, Inc., 59 Temple
- * Place, Suite 330, Boston, MA 02111-1307 USA.
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ *
+ * Copyright (C) [2004-2009], Hyperic, Inc.
+ * This file is part of HQ.
+ *
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
  */
 
 /*
@@ -27,13 +35,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
-import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
-
-
 
 /**
  * Repository of in memory triggers for event processing
@@ -46,13 +54,16 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
 
     private static final Object INIT_LOCK = new Object();
 
-    private static RegisteredTriggers INSTANCE;
+    private static RegisteredTriggers INSTANCE = new RegisteredTriggers();
     
-    private boolean initialized = false;
+    // use AtomicBoolean so that simple ops like reset() don't hang
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     private Object triggerUpdateLock = new Object();
 
     private Map triggers = new ConcurrentHashMap();
+    
+    private static final Log log = LogFactory.getLog(RegisteredTriggers.class);
 
     RegisteredTriggers() {
         
@@ -62,18 +73,22 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
         return this.triggers;
     }
 
-    void init() {
+    private void init() {
         synchronized (INIT_LOCK) {
             this.triggers = new ConcurrentHashMap();
             RegisteredTriggerManagerEJBImpl.getOne().initializeTriggers();
-            initialized = true;
+            initialized.set(true);
         }
     }
     
     void setInitialized(boolean initialized) {
-        synchronized (INIT_LOCK) {
-            this.initialized = initialized;
+        if (!initialized) {
+            log.info("Resetting Triggers");
+            if (log.isDebugEnabled()) {
+                log.debug("Stack Trace For Trigger Reset", new Throwable());
+            }
         }
+        this.initialized.set(initialized);
     }
 
     public Collection getInterestedTriggers(Class eventClass, Integer instanceId) {
@@ -172,34 +187,31 @@ public class RegisteredTriggers implements RegisterableTriggerRepository {
     }
     
     public boolean isInitialized() {
-        synchronized (INIT_LOCK) {
-            return initialized;
-        }
+        return initialized.get();
     }
     
-   private static RegisteredTriggers getAndInitialize() {
-       synchronized (INIT_LOCK) {
-           RegisteredTriggers instance = getInstance();
-           if(!instance.isInitialized()) {
-               instance.init();
-           }
-           return instance;
-       }
-   }
-
-    public static RegisteredTriggers getInstance() {
+    /**
+     * Will block if the Triggers are not initialized.
+     */
+    public static RegisteredTriggers getAndInitialize() {
+        RegisteredTriggers instance = getInstance();
+        if (instance.isInitialized()) {
+            return instance;
+        }
         synchronized (INIT_LOCK) {
-            if (INSTANCE == null) {
-                INSTANCE = new RegisteredTriggers();
+            if (!instance.isInitialized()) {
+                instance.init();
             }
         }
+        return instance;
+    }
+
+    public static RegisteredTriggers getInstance() {
         return INSTANCE;
     }
     
     public static void reset() {
-        synchronized (INIT_LOCK) {
-            getInstance().setInitialized(false);
-        }
+        getInstance().setInitialized(false);
     }
 
     public static Collection getInterestedTriggers(AbstractEvent event) {

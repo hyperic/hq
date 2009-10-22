@@ -27,6 +27,7 @@ package org.hyperic.hq.events.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -217,6 +218,9 @@ public class EventLogDAO extends HibernateDAO {
         return res;
     }
     
+    /**
+     * @return 0 if there are no unfixed alerts
+     */
     private final long getOldestUnfixedAlertTime() {
         Object o = getSession()
             .createQuery("select min(ctime) from Alert where fixed = '0'")
@@ -229,14 +233,15 @@ public class EventLogDAO extends HibernateDAO {
     
     /**
      * @return {@link Map} of {@link Integer} = AlertDefitionId to
-     *  {@link Object[]} <br>
-     *   [0] {@link Integer} AlertDefId, <br>
-     *   [1] {@link Integer} AlertId
+     *  {@link Map} of <br>
+     *   key {@link AlertInfo} <br>
+     *   value {@link Integer} AlertId
      */
     private final Map getUnfixedAlertInfoAfter(long ctime) {
         final String hql = new StringBuilder(128)
-            .append("SELECT alertDefinition.id, id ")
-            .append("FROM Alert WHERE ctime >= :ctime and fixed = '0'")
+            .append("SELECT alertDefinition.id, id, ctime ")
+            .append("FROM Alert WHERE ctime >= :ctime and fixed = '0' ")
+            .append("ORDER BY ctime")
             .toString();
         final List list = getSession()
             .createQuery(hql)
@@ -245,9 +250,48 @@ public class EventLogDAO extends HibernateDAO {
         final Map alerts = new HashMap(list.size());
         for (final Iterator it=list.iterator(); it.hasNext(); ) {
             final Object[] obj = (Object[]) it.next();
-            alerts.put(obj[0], obj);
+            Map tmp;
+            if (null == (tmp = (Map)alerts.get(obj[0]))) {
+                tmp = new HashMap();
+                alerts.put(obj[0], tmp);
+            }
+            final AlertInfo ai = new AlertInfo((Integer)obj[0], (Long)obj[2]);
+            tmp.put(ai, (Integer)obj[1]);
         }
         return alerts;
+    }
+    
+    private class AlertInfo {
+        private final Integer _alertDefId;
+        private final Long _ctime;
+        AlertInfo(Integer alertDefId, Long ctime) {
+            _alertDefId = alertDefId;
+            _ctime = ctime;
+        }
+        AlertInfo(Integer alertDefId, long ctime) {
+            _alertDefId = alertDefId;
+            _ctime = new Long(ctime);
+        }
+        Integer getAlertDefId() {
+            return _alertDefId;
+        }
+        Long getCtime() {
+            return _ctime;
+        }
+        public boolean equals(Object rhs) {
+            if (rhs == this) {
+                return true;
+            }
+            if (rhs instanceof AlertInfo) {
+                AlertInfo obj = (AlertInfo)rhs;
+                return obj.getCtime().equals(_ctime) &&
+                       obj.getAlertDefId().equals(_alertDefId);
+            }
+            return false;
+        }
+        public int hashCode() {
+            return 17*_alertDefId.hashCode() + _ctime.hashCode();
+        }
     }
     
     /**
@@ -261,6 +305,9 @@ public class EventLogDAO extends HibernateDAO {
     Map findUnfixedAlertFiredEventLogs() {        
         final Map rtn = new HashMap();
         final long ctime = getOldestUnfixedAlertTime();
+        if (ctime == 0) {
+            return Collections.EMPTY_MAP;
+        }
         final Map alerts = getUnfixedAlertInfoAfter(ctime);
         final String hql = new StringBuilder(256)
             .append("FROM EventLog ")
@@ -277,25 +324,20 @@ public class EventLogDAO extends HibernateDAO {
             if (log == null || log.getInstanceId() == null) {
                 continue;
             }
-            final Object[] obj = (Object[])alerts.get(log.getInstanceId());
-            if (obj == null) {
+            final Map objs = (Map)alerts.get(log.getInstanceId());
+            if (objs == null) {
                 continue;
             }
-            final Integer alertDefId = (Integer)obj[0];
-            final Integer alertId    = (Integer)obj[1];
-            AlertFiredEvent latestEvent;
-            boolean updateMap = false;
-            if (null != (latestEvent = (AlertFiredEvent)rtn.get(alertDefId)) &&
-                    log.getTimestamp() > latestEvent.getTimestamp()) {
-                updateMap = true;
-            } else {
-                updateMap = true;
+            final Integer alertDefId = log.getInstanceId();
+            final long timestamp     = log.getTimestamp();
+            final Integer alertId =
+                (Integer)objs.get(new AlertInfo(alertDefId, timestamp));
+            if (alertId == null) {
+                continue;
             }
-            if (updateMap) {
-                AlertFiredEvent alertFired = 
-                    createAlertFiredEvent(alertDefId, alertId, log);
-                rtn.put(alertDefId, alertFired);
-            }
+            AlertFiredEvent alertFired = 
+                createAlertFiredEvent(alertDefId, alertId, log);
+            rtn.put(alertDefId, alertFired);
         }
         return rtn;
     }

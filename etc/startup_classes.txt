@@ -1,4 +1,5 @@
 org.hyperic.hq.product.server.session.ProductStartupListener
+org.hyperic.hq.events.server.session.RegisteredTriggerStartupListener
 org.hyperic.hq.authz.server.session.GroupingStartupListener
 org.hyperic.hq.authz.server.session.AuthzStartupListener
 org.hyperic.hq.common.server.session.CommonStartupListener

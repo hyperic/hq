@@ -62,6 +62,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.bizapp.server.session.SystemAudit;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.events.server.session.RegisteredTriggerStartupListener;
 import org.hyperic.hq.hqu.rendit.RenditServer;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
@@ -226,6 +227,7 @@ public class ProductPluginDeployer
             .getPluginsDeployedCaller().pluginsDeployed(_plugins);
 
         _plugins.clear();
+        waitForTriggerInit();
         startConcurrentStatsCollector();
 
         //generally means we are done deploying plugins at startup.
@@ -241,6 +243,17 @@ public class ProductPluginDeployer
 
         if (n != null && n.getType().equals("org.jboss.system.server.started")) {
             SystemAudit.createUpAudit(((Number)n.getUserData()).longValue());
+        }
+    }
+
+    private void waitForTriggerInit() {
+        Thread thread = RegisteredTriggerStartupListener.getRunnerThread();
+        while (thread.isAlive()) {
+            _log.info("waiting for Trigger Initialization to complete");
+            try {
+                thread.join(10000);
+            } catch (InterruptedException e) {
+            }
         }
     }
 
