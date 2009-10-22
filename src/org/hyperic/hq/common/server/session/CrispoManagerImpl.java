@@ -38,8 +38,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The CRISPO (Config Response Is Sweetly Persisted ... Oy!) Manager deals
- * with storing configuration data typically associated with 
- * {@link ConfigResponse} objects; 
+ * with storing configuration data typically associated with
+ * {@link ConfigResponse} objects;
  * 
  */
 @Service
@@ -47,8 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CrispoManagerImpl implements CrispoManager {
     private CrispoDAO crispoDao;
     private CrispoOptionDAO crispoOptionDao;
-  
-    
+
     @Autowired
     public CrispoManagerImpl(CrispoDAO crispoDao, CrispoOptionDAO crispoOptionDao) {
         this.crispoDao = crispoDao;
@@ -61,12 +60,12 @@ public class CrispoManagerImpl implements CrispoManager {
      */
     public Crispo createCrispo(Map<String, String> keyVals) {
         Crispo c = Crispo.create(keyVals);
-        
+
         crispoDao.save(c);
         return c;
     }
-    
-    /** 
+
+    /**
      * @return all the {@link Crispo}s in the system
      */
     public Collection<Crispo> findAll() {
@@ -78,7 +77,7 @@ public class CrispoManagerImpl implements CrispoManager {
     public Crispo findById(Integer id) {
         return crispoDao.findById(id);
     }
-    
+
     /**
      * Delete a {@link Crispo} and all the options contained within.
      */
@@ -87,7 +86,7 @@ public class CrispoManagerImpl implements CrispoManager {
     }
 
     /**
-     * Create a new Crispo, filled out with the values from a 
+     * Create a new Crispo, filled out with the values from a
      * {@link ConfigResponse}
      */
     public Crispo create(ConfigResponse cfg) {
@@ -95,10 +94,10 @@ public class CrispoManagerImpl implements CrispoManager {
         crispoDao.save(res);
         return res;
     }
-    
+
     /**
      * Update a crispo, matching the saved crispo to the values in the
-     * config repsonse. 
+     * config repsonse.
      */
     public void update(Crispo c, ConfigResponse cfg) {
         c.updateWith(cfg);
@@ -107,28 +106,29 @@ public class CrispoManagerImpl implements CrispoManager {
 
     /**
      * Find a List of CrispoOptions given the search key.
-     *
+     * 
      * @param key The key to search for
      * @return A list of CrispoOptions that have a key that matches in whole
-     * or part the given key parameter.
+     *         or part the given key parameter.
      */
     public List<CrispoOption> findOptionByKey(String key) {
-        return crispoOptionDao.findOptionsByKey(key);    
+        return crispoOptionDao.findOptionsByKey(key);
     }
 
     /**
      * Find a List of CrispoOptions given the search value.
-     *
+     * 
      * @param val The value to search for
-     * @return A list of CrispoOptions that have a value (in the array) that matches
+     * @return A list of CrispoOptions that have a value (in the array) that
+     *         matches
      */
     public List<CrispoOption> findOptionByValue(String val) {
-        return crispoOptionDao.findOptionsByValue(val);    
+        return crispoOptionDao.findOptionsByValue(val);
     }
 
     /**
      * Update the given CrispoOption with the given value.
-     *
+     * 
      * @param o The CrispoOption to update
      * @param val The new value for this option
      */

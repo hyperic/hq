@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class CrispoOptionDAO extends HibernateDAO<CrispoOption> {
+public class CrispoOptionDAO
+    extends HibernateDAO<CrispoOption> {
 
     @Autowired
     public CrispoOptionDAO(SessionFactory f) {
@@ -29,7 +30,7 @@ public class CrispoOptionDAO extends HibernateDAO<CrispoOption> {
      * given String key
      * @param key The key to search for
      * @return A List of CrispoOptions that have a key that contains the
-     * given search key.
+     *         given search key.
      */
     @SuppressWarnings("unchecked")
     List<CrispoOption> findOptionsByKey(String key) {
@@ -40,9 +41,9 @@ public class CrispoOptionDAO extends HibernateDAO<CrispoOption> {
     @SuppressWarnings("unchecked")
     List<CrispoOption> findOptionsByValue(String val) {
         String hql = "from CrispoOption o join o.array a where " +
-        		     "o.optionValue = :val or a = :val";
+                     "o.optionValue = :val or a = :val";
         return createQuery(hql)
-            .setString("val", val)
-            .list();
+                               .setString("val", val)
+                               .list();
     }
 }

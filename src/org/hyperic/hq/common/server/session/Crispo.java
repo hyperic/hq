@@ -41,27 +41,27 @@ import org.hyperic.util.config.ConfigResponse;
  * mechanism for {@link ConfigResponse} objects.
  */
 public class Crispo
-    extends PersistedObject
-{
+    extends PersistedObject {
     private Collection<CrispoOption> _opts = new HashSet<CrispoOption>();
-    
-    protected Crispo() {}
-    
+
+    protected Crispo() {
+    }
+
     /**
      * Return a collection of {@link CrispoOption}s
      */
     public Collection<CrispoOption> getOptions() {
         return Collections.unmodifiableCollection(_opts);
     }
-    
+
     protected Collection<CrispoOption> getOptsSet() {
         return _opts;
     }
-    
+
     protected void setOptsSet(Collection<CrispoOption> opts) {
         _opts = opts;
     }
-    
+
     void addOption(String key, String val) {
         getOptsSet().add(new CrispoOption(this, key, val));
     }
@@ -69,7 +69,7 @@ public class Crispo
     public int hashCode() {
         return getId() == null ? 0 : getId().intValue();
     }
-    
+
     public boolean equals(Object obj) {
         if (this == obj)
             return true;
@@ -77,7 +77,7 @@ public class Crispo
         if (obj == null || obj instanceof Crispo == false)
             return false;
 
-        Crispo o = (Crispo)obj;
+        Crispo o = (Crispo) obj;
         if (getId() == null || o.getId() == null)
             return false;
 
@@ -90,9 +90,9 @@ public class Crispo
      */
     public ConfigResponse toResponse() {
         ConfigResponse res = new ConfigResponse();
-        
+
         for (CrispoOption opt : getOptions()) {
-           res.setValue(opt.getKey(), opt.getValue());
+            res.setValue(opt.getKey(), opt.getValue());
         }
         return res;
     }
@@ -101,8 +101,8 @@ public class Crispo
         // First, make any modifications to existing values, and add any
         // values not contained within the crispo
         for (String key : cfg.getKeys()) {
-           String val = cfg.getValue(key);
-            
+            String val = cfg.getValue(key);
+
             boolean needToAdd = true;
             for (CrispoOption opt : _opts) {
                 if (opt.getKey().equals(key)) {
@@ -113,48 +113,47 @@ public class Crispo
                     break;
                 }
             }
-            
+
             if (needToAdd) {
                 addOption(key, val);
             }
         }
-        
+
         // Now remove any keys not contained within the cfg
-        for (Iterator<CrispoOption> i = _opts.iterator(); i.hasNext(); ) {
-            CrispoOption opt = (CrispoOption)i.next();
-            
-            if (cfg.getValue(opt.getKey()) == null || 
+        for (Iterator<CrispoOption> i = _opts.iterator(); i.hasNext();) {
+            CrispoOption opt = (CrispoOption) i.next();
+
+            if (cfg.getValue(opt.getKey()) == null ||
                 opt.getValue() == null ||
-                opt.getValue().length() == 0)
-            {
+                opt.getValue().length() == 0) {
                 i.remove();
             }
         }
     }
-    
+
     static Crispo create(Map<String, String> keyVals) {
         Crispo res = new Crispo();
-        
+
         for (Map.Entry<String, String> ent : keyVals.entrySet()) {
             String val = ent.getValue();
-            
+
             if (val == null || val.length() == 0)
                 continue;
-            
+
             res.addOption(ent.getKey(), val);
         }
         return res;
     }
-    
+
     static Crispo create(ConfigResponse cfg) {
         Crispo res = new Crispo();
-        
+
         for (String key : cfg.getKeys()) {
             String val = cfg.getValue(key);
-            
+
             if (val == null || val.length() == 0)
                 continue;
-            
+
             res.addOption(key, cfg.getValue(key));
         }
         return res;
