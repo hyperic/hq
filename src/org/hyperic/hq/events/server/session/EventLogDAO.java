@@ -67,7 +67,15 @@ public class EventLogDAO extends HibernateDAO {
             AuthzConstants.platformOpViewPlatform,
             AuthzConstants.serverOpViewServer,
             AuthzConstants.serviceOpViewService,
-            AuthzConstants.groupOpViewResourceGroup,
+            AuthzConstants.groupOpViewResourceGroup
+        });
+
+    private static final List MANAGE_ALERT_PERMISSIONS = 
+        Arrays.asList(new String[] { 
+            AuthzConstants.platformOpManageAlerts,
+            AuthzConstants.serverOpManageAlerts,
+            AuthzConstants.serviceOpManageAlerts,
+            AuthzConstants.groupOpManageAlerts
         });
 
     public EventLogDAO(DAOFactory f) {
@@ -143,7 +151,7 @@ public class EventLogDAO extends HibernateDAO {
                   
         RolePermNativeSQL roleSql  = PermissionManagerFactory
             .getInstance() 
-            .getRolePermissionNativeSQL("r", "subject", "opList");
+            .getRolePermissionNativeSQL("r", "e", "subject", "opListVR", "opListMA");
         
         
         if (inGroups == null || inGroups.isEmpty())
@@ -194,7 +202,7 @@ public class EventLogDAO extends HibernateDAO {
             .setLong("begin", begin)
             .setLong("end", end)
             .setInteger("maxStatus", maxStatus.getCode());
-        roleSql.bindParams(q, subject, VIEW_PERMISSIONS);
+        roleSql.bindParams(q, subject, VIEW_PERMISSIONS, MANAGE_ALERT_PERMISSIONS);
         
         if (typeClass != null) {
             q.setString("type", typeClass);
