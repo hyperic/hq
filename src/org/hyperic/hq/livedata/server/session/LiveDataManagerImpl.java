@@ -80,7 +80,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
 
     private final String CACHENAME = "LiveData";
     private final long NO_CACHE = -1;
-    
+
     private ProductManagerLocal productManager;
 
     private ConfigManagerLocal configManager;
@@ -90,7 +90,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
         this.productManager = productManager;
         this.configManager = configManager;
     }
-    
+
     @PostConstruct
     public void initCache() {
         // Initialize local objects
@@ -111,21 +111,20 @@ public class LiveDataManagerImpl implements LiveDataManager {
      */
     private ConfigResponse getConfig(AuthzSubject subject,
                                      LiveDataCommand command)
-        throws LiveDataException
-    {
+        throws LiveDataException {
         try {
             AppdefEntityID id = command.getAppdefEntityID();
             ConfigResponse config = command.getConfig();
 
             try {
                 ConfigResponse mConfig = configManager.
-                    getMergedConfigResponse(subject,
-                                            ProductPlugin.TYPE_MEASUREMENT,
-                                            id, true);
+                                                      getMergedConfigResponse(subject,
+                                                                              ProductPlugin.TYPE_MEASUREMENT,
+                                                                              id, true);
                 mConfig.merge(config, false);
                 return mConfig;
             } catch (ConfigFetchException e) {
-                // No measurement config?  No problem
+                // No measurement config? No problem
                 return config;
             }
         } catch (Exception e) {
@@ -137,11 +136,10 @@ public class LiveDataManagerImpl implements LiveDataManager {
      * Get the appdef type for a given entity id.
      */
     private String getType(AuthzSubject subject, LiveDataCommand cmd)
-        throws AppdefEntityNotFoundException, PermissionException
-    {
+        throws AppdefEntityNotFoundException, PermissionException {
         AppdefEntityID id = cmd.getAppdefEntityID();
-        AppdefEntityValue val = new AppdefEntityValue(id, subject); 
-                                  
+        AppdefEntityValue val = new AppdefEntityValue(id, subject);
+
         AppdefResourceType typeVal = val.getAppdefResourceType();
         return typeVal.getName();
     }
@@ -171,7 +169,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
             return null;
         }
 
-        LiveDataCacheObject obj = (LiveDataCacheObject)e.getObjectValue();
+        LiveDataCacheObject obj = (LiveDataCacheObject) e.getObjectValue();
 
         if (System.currentTimeMillis() > obj.getCtime() + timeout) {
             // Object is expired
@@ -180,35 +178,33 @@ public class LiveDataManagerImpl implements LiveDataManager {
         }
 
         log.info("Returning cached result " +
-                  StringUtil.arrayToString(obj.getResult()));
+                 StringUtil.arrayToString(obj.getResult()));
         return obj.getResult();
     }
 
     /**
      * Run the given live data command.
-     *
+     * 
      * @ejb:interface-method
      */
     public LiveDataResult getData(AuthzSubject subject,
                                   LiveDataCommand cmd)
         throws AppdefEntityNotFoundException, PermissionException,
-               AgentNotFoundException, LiveDataException
-    {
+        AgentNotFoundException, LiveDataException {
         return getData(subject, cmd, NO_CACHE);
     }
 
     /**
-     * Run the given live data command.  If cached data is found that is not
+     * Run the given live data command. If cached data is found that is not
      * older than the cachedTimeout the cached data will be returned.
-     *
+     * 
      * @param cacheTimeout
      * @ejb:interface-method
      */
     public LiveDataResult getData(AuthzSubject subject,
                                   LiveDataCommand cmd, long cacheTimeout)
         throws PermissionException, AgentNotFoundException,
-               AppdefEntityNotFoundException, LiveDataException
-    {
+        AppdefEntityNotFoundException, LiveDataException {
         // Attempt load from cache
         LiveDataResult res;
 
@@ -220,9 +216,9 @@ public class LiveDataManagerImpl implements LiveDataManager {
         }
 
         AppdefEntityID id = cmd.getAppdefEntityID();
-       
-        LiveDataCommandsClient client = 
-            LiveDataCommandsClientFactory.getInstance().getClient(id);
+
+        LiveDataCommandsClient client =
+                                        LiveDataCommandsClientFactory.getInstance().getClient(id);
 
         ConfigResponse config = getConfig(subject, cmd);
         String type = getType(subject, cmd);
@@ -242,21 +238,20 @@ public class LiveDataManagerImpl implements LiveDataManager {
 
     /**
      * Run a list of live data commands in batch.
-     *
+     * 
      * @ejb:interface-method
      */
     public LiveDataResult[] getData(AuthzSubject subject,
                                     LiveDataCommand[] commands)
-        throws AppdefEntityNotFoundException, PermissionException, 
-               AgentNotFoundException, LiveDataException
-    {
-       return getData(subject, commands, NO_CACHE);
+        throws AppdefEntityNotFoundException, PermissionException,
+        AgentNotFoundException, LiveDataException {
+        return getData(subject, commands, NO_CACHE);
     }
 
     /**
-     * Run a list of live data commands in batch.  If cached data is found
+     * Run a list of live data commands in batch. If cached data is found
      * that is not older than the cacheTimeout the cached data will be returned.
-     *
+     * 
      * @param cacheTimeout The cache timeout given in milliseconds.
      * @ejb:interface-method
      */
@@ -264,8 +259,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
                                     LiveDataCommand[] commands,
                                     long cacheTimeout)
         throws PermissionException, AppdefEntityNotFoundException,
-               AgentNotFoundException, LiveDataException
-    {
+        AgentNotFoundException, LiveDataException {
         // Attempt load from cache
         LiveDataResult[] res;
         if (cacheTimeout != NO_CACHE) {
@@ -284,7 +278,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
             String type = getType(subject, cmd);
 
             LiveDataExecutorCommand exec =
-                new LiveDataExecutorCommand(id, type, cmd.getCommand(), config);
+                                           new LiveDataExecutorCommand(id, type, cmd.getCommand(), config);
 
             List<LiveDataExecutorCommand> queue = buckets.get(id);
             if (queue == null) {
@@ -299,10 +293,10 @@ public class LiveDataManagerImpl implements LiveDataManager {
         LiveDataExecutor executor = new LiveDataExecutor();
         for (AppdefEntityID id : buckets.keySet()) {
             List<LiveDataExecutorCommand> cmds = buckets.get(id);
-            
-            LiveDataCommandsClient client = 
-                LiveDataCommandsClientFactory.getInstance().getClient(id);
-            
+
+            LiveDataCommandsClient client =
+                                            LiveDataCommandsClientFactory.getInstance().getClient(id);
+
             executor.getData(client, cmds);
         }
 
@@ -319,12 +313,11 @@ public class LiveDataManagerImpl implements LiveDataManager {
 
     /**
      * Get the available commands for a given resources.
-     *
-     * @ejb:interface-method 
+     * 
+     * @ejb:interface-method
      */
     public String[] getCommands(AuthzSubject subject, AppdefEntityID id)
-        throws PluginException, PermissionException
-    {
+        throws PluginException, PermissionException {
         try {
             AppdefEntityValue val = new AppdefEntityValue(id, subject);
             AppdefResourceType tVal = val.getAppdefResourceType();
@@ -339,11 +332,11 @@ public class LiveDataManagerImpl implements LiveDataManager {
      * @ejb:interface-method
      */
     public void registerFormatter(LiveDataFormatter f) {
-        log.info("Registering formatter [" + f.getName() + "]: " + 
-                  f.getDescription());
+        log.info("Registering formatter [" + f.getName() + "]: " +
+                 f.getDescription());
         FormatterRegistry.getInstance().registerFormatter(f);
     }
-    
+
     /**
      * @ejb:interface-method
      */
@@ -361,7 +354,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
     public Set<LiveDataFormatter> findFormatters(LiveDataCommand cmd, FormatType type) {
         return FormatterRegistry.getInstance().findFormatters(cmd, type);
     }
-    
+
     /**
      * Find a formatter based on its 'id' property.
      * @ejb:interface-method
@@ -377,8 +370,7 @@ public class LiveDataManagerImpl implements LiveDataManager {
      */
     public ConfigSchema getConfigSchema(AuthzSubject subject,
                                         AppdefEntityID id, String command)
-        throws PluginException, PermissionException
-    {
+        throws PluginException, PermissionException {
         try {
             AppdefEntityValue val = new AppdefEntityValue(id, subject);
             AppdefResourceType tVal = val.getAppdefResourceType();

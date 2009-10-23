@@ -19,50 +19,58 @@ import org.hyperic.util.config.ConfigSchema;
  * Local interface for LiveDataManager.
  */
 public interface LiveDataManager {
-   /**
-    * Run the given live data command.
-    */
-   public LiveDataResult getData( AuthzSubject subject,LiveDataCommand cmd ) throws AppdefEntityNotFoundException, PermissionException, AgentNotFoundException, LiveDataException;
+    /**
+     * Run the given live data command.
+     */
+    public LiveDataResult getData(AuthzSubject subject, LiveDataCommand cmd) throws AppdefEntityNotFoundException,
+        PermissionException, AgentNotFoundException, LiveDataException;
 
-   /**
-    * Run the given live data command. If cached data is found that is not older than the cachedTimeout the cached data will be returned.
-    * @param cacheTimeout
-    */
-   public LiveDataResult getData( AuthzSubject subject,LiveDataCommand cmd,long cacheTimeout ) throws PermissionException, AgentNotFoundException, AppdefEntityNotFoundException, LiveDataException;
+    /**
+     * Run the given live data command. If cached data is found that is not
+     * older than the cachedTimeout the cached data will be returned.
+     * @param cacheTimeout
+     */
+    public LiveDataResult getData(AuthzSubject subject, LiveDataCommand cmd, long cacheTimeout)
+        throws PermissionException, AgentNotFoundException, AppdefEntityNotFoundException, LiveDataException;
 
-   /**
-    * Run a list of live data commands in batch.
-    */
-   public LiveDataResult[] getData( AuthzSubject subject,LiveDataCommand[] commands ) throws AppdefEntityNotFoundException, PermissionException, AgentNotFoundException, LiveDataException;
+    /**
+     * Run a list of live data commands in batch.
+     */
+    public LiveDataResult[] getData(AuthzSubject subject, LiveDataCommand[] commands)
+        throws AppdefEntityNotFoundException, PermissionException, AgentNotFoundException, LiveDataException;
 
-   /**
-    * Run a list of live data commands in batch. If cached data is found that is not older than the cacheTimeout the cached data will be returned.
-    * @param cacheTimeout The cache timeout given in milliseconds.
-    */
-   public LiveDataResult[] getData( AuthzSubject subject,LiveDataCommand[] commands,long cacheTimeout ) throws PermissionException, AppdefEntityNotFoundException, AgentNotFoundException, LiveDataException;
+    /**
+     * Run a list of live data commands in batch. If cached data is found that
+     * is not older than the cacheTimeout the cached data will be returned.
+     * @param cacheTimeout The cache timeout given in milliseconds.
+     */
+    public LiveDataResult[] getData(AuthzSubject subject, LiveDataCommand[] commands, long cacheTimeout)
+        throws PermissionException, AppdefEntityNotFoundException, AgentNotFoundException, LiveDataException;
 
-   /**
-    * Get the available commands for a given resources.
-    */
-   public String[] getCommands( AuthzSubject subject,AppdefEntityID id ) throws PluginException, PermissionException;
+    /**
+     * Get the available commands for a given resources.
+     */
+    public String[] getCommands(AuthzSubject subject, AppdefEntityID id) throws PluginException, PermissionException;
 
-   public void registerFormatter( LiveDataFormatter f ) ;
+    public void registerFormatter(LiveDataFormatter f);
 
-   public void unregisterFormatter( LiveDataFormatter f ) ;
+    public void unregisterFormatter(LiveDataFormatter f);
 
-   /**
-    * Gets a set of {@link LiveDataFormatter}s which are able to format the passed command.
-    */
-   public Set<LiveDataFormatter> findFormatters( LiveDataCommand cmd,FormatType type ) ;
+    /**
+     * Gets a set of {@link LiveDataFormatter}s which are able to format the
+     * passed command.
+     */
+    public Set<LiveDataFormatter> findFormatters(LiveDataCommand cmd, FormatType type);
 
-   /**
-    * Find a formatter based on its 'id' property.
-    */
-   public LiveDataFormatter findFormatter( String id ) ;
+    /**
+     * Find a formatter based on its 'id' property.
+     */
+    public LiveDataFormatter findFormatter(String id);
 
-   /**
-    * Get the ConfigSchema for a given resource.
-    */
-   public ConfigSchema getConfigSchema( AuthzSubject subject,AppdefEntityID id,String command ) throws PluginException, PermissionException;
+    /**
+     * Get the ConfigSchema for a given resource.
+     */
+    public ConfigSchema getConfigSchema(AuthzSubject subject, AppdefEntityID id, String command)
+        throws PluginException, PermissionException;
 
 }

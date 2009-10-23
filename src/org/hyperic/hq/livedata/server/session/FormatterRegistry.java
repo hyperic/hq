@@ -36,17 +36,18 @@ import org.hyperic.hq.livedata.shared.LiveDataCommand;
 
 class FormatterRegistry {
     private static final FormatterRegistry INSTANCE = new FormatterRegistry();
-    
+
     private List<LiveDataFormatter> _formatters = new ArrayList<LiveDataFormatter>();
-    
-    private FormatterRegistry() {}
+
+    private FormatterRegistry() {
+    }
 
     void registerFormatter(LiveDataFormatter f) {
         synchronized (_formatters) {
             _formatters.add(f);
         }
     }
-    
+
     void unregisterFormatter(LiveDataFormatter f) {
         synchronized (_formatters) {
             _formatters.remove(f);
@@ -54,14 +55,14 @@ class FormatterRegistry {
     }
 
     /**
-     * Find the formatters which can process the specified command 
+     * Find the formatters which can process the specified command
      */
     Set<LiveDataFormatter> findFormatters(LiveDataCommand cmd, FormatType type) {
         Set<LiveDataFormatter> res = new HashSet<LiveDataFormatter>();
-        
+
         synchronized (_formatters) {
             for (LiveDataFormatter f : _formatters) {
-                if (f.canFormat(cmd, type)) 
+                if (f.canFormat(cmd, type))
                     res.add(f);
             }
         }
@@ -71,13 +72,13 @@ class FormatterRegistry {
     LiveDataFormatter findFormatter(String id) {
         synchronized (_formatters) {
             for (LiveDataFormatter f : _formatters) {
-               if (f.getId().equals(id))
+                if (f.getId().equals(id))
                     return f;
             }
         }
         return null;
     }
-    
+
     static FormatterRegistry getInstance() {
         return INSTANCE;
     }
