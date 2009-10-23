@@ -34,10 +34,10 @@ import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.livedata.shared.LiveDataException;
-import org.hyperic.hq.livedata.shared.LiveDataManagerLocal;
+import org.hyperic.hq.livedata.shared.LiveDataManager;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
 import org.hyperic.hq.livedata.shared.LiveDataCommand;
-import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl;
+import org.hyperic.hq.livedata.server.session.LiveDataManagerImpl;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -88,7 +88,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
                SessionTimeoutException, SessionNotFoundException
     {
         AuthzSubject subject = _manager.getSubject(sessionId);
-        LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
+        LiveDataManager manager = LiveDataManagerImpl.getOne();
         return manager.getData(subject, command);
     }
 
@@ -104,7 +104,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
                SessionTimeoutException, SessionNotFoundException
     {
         AuthzSubject subject = _manager.getSubject(sessionId);
-        LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
+        LiveDataManager manager = LiveDataManagerImpl.getOne();
         return manager.getData(subject, commands);
     }
 
@@ -118,7 +118,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
                SessionTimeoutException, SessionNotFoundException
     {
         AuthzSubject subject = _manager.getSubject(sessionId);
-        LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
+        LiveDataManager manager = LiveDataManagerImpl.getOne();
         return manager.getCommands(subject, id);
     }
 
@@ -133,7 +133,7 @@ public class LiveDataBossEJBImpl implements SessionBean {
                SessionTimeoutException, SessionNotFoundException    
     {
         AuthzSubject subject = _manager.getSubject(sessionId);
-        LiveDataManagerLocal manager = LiveDataManagerEJBImpl.getOne();
+        LiveDataManager manager = LiveDataManagerImpl.getOne();
         return manager.getConfigSchema(subject, id, command);
     }
     

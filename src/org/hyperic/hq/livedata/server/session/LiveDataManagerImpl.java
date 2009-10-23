@@ -25,93 +25,86 @@
 
 package org.hyperic.hq.livedata.server.session;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.LiveDataPluginManager;
-import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.PluginNotFoundException;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
-import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
-import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClientFactory;
-import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AgentNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
-import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.livedata.FormatType;
-import org.hyperic.hq.livedata.LiveDataFormatter;
-import org.hyperic.hq.livedata.shared.LiveDataManagerLocal;
-import org.hyperic.hq.livedata.shared.LiveDataManagerUtil;
-import org.hyperic.hq.livedata.shared.LiveDataException;
-import org.hyperic.hq.livedata.shared.LiveDataResult;
-import org.hyperic.hq.livedata.shared.LiveDataCommand;
-import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.StringUtil;
-
-import javax.ejb.SessionContext;
-import javax.ejb.SessionBean;
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Iterator;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.livedata.FormatType;
+import org.hyperic.hq.livedata.LiveDataFormatter;
+import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
+import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClientFactory;
+import org.hyperic.hq.livedata.shared.LiveDataCommand;
+import org.hyperic.hq.livedata.shared.LiveDataException;
+import org.hyperic.hq.livedata.shared.LiveDataManager;
+import org.hyperic.hq.livedata.shared.LiveDataResult;
+import org.hyperic.hq.product.LiveDataPluginManager;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginNotFoundException;
+import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.shared.ProductManagerLocal;
+import org.hyperic.util.StringUtil;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 /**
- * @ejb:bean name="LiveDataManager"
- *      jndi-name="ejb/livedata/LiveDataManager"
- *      local-jndi-name="LocalLiveDataManager"
- *      view-type="local"
- *      type="Stateless"
  */
-public class LiveDataManagerEJBImpl implements SessionBean {
+@Service
+public class LiveDataManagerImpl implements LiveDataManager {
 
-    private Log _log = LogFactory.getLog(LiveDataManagerEJBImpl.class);
+    private Log log = LogFactory.getLog(LiveDataManagerImpl.class);
 
-    private LiveDataPluginManager _manager;
-    private Cache _cache;
+    private LiveDataPluginManager manager;
+    private Cache cache;
 
     private final String CACHENAME = "LiveData";
     private final long NO_CACHE = -1;
+    
+    private ProductManagerLocal productManager;
 
-    /** @ejb:create-method */
-    public void ejbCreate() {
+    private ConfigManagerLocal configManager;
 
+    @Autowired
+    public LiveDataManagerImpl(ProductManagerLocal productManager, ConfigManagerLocal configManager) {
+        this.productManager = productManager;
+        this.configManager = configManager;
+    }
+    
+    @PostConstruct
+    public void initCache() {
         // Initialize local objects
         try {
-            _manager = (LiveDataPluginManager) ProductManagerEJBImpl.
-                getOne().getPluginManager(ProductPlugin.TYPE_LIVE_DATA);
-            _cache = CacheManager.getInstance().getCache(CACHENAME);
+            manager = (LiveDataPluginManager) productManager.getPluginManager(ProductPlugin.TYPE_LIVE_DATA);
+            cache = CacheManager.getInstance().getCache(CACHENAME);
         } catch (Exception e) {
-            _log.error("Unable to initialize LiveData manager", e);
+            log.error("Unable to initialize LiveData manager", e);
         }
     }
 
-    public static LiveDataManagerLocal getOne() {
-        try {
-            return LiveDataManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    public static LiveDataManager getOne() {
+        return Bootstrap.getBean(LiveDataManager.class);
     }
-
-    public void ejbPostCreate() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {}
 
     /**
      * Live data subsystem uses measurement configs.
@@ -120,14 +113,12 @@ public class LiveDataManagerEJBImpl implements SessionBean {
                                      LiveDataCommand command)
         throws LiveDataException
     {
-        ConfigManagerLocal cManager = ConfigManagerEJBImpl.getOne();
-
         try {
             AppdefEntityID id = command.getAppdefEntityID();
             ConfigResponse config = command.getConfig();
 
             try {
-                ConfigResponse mConfig = cManager.
+                ConfigResponse mConfig = configManager.
                     getMergedConfigResponse(subject,
                                             ProductPlugin.TYPE_MEASUREMENT,
                                             id, true);
@@ -164,7 +155,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
         LiveDataCacheKey key = new LiveDataCacheKey(cmds);
         LiveDataCacheObject obj = new LiveDataCacheObject(res);
         Element e = new Element(key, obj);
-        _cache.put(e);
+        cache.put(e);
     }
 
     private LiveDataResult getElement(LiveDataCommand cmd, long timeout) {
@@ -175,7 +166,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
 
     private LiveDataResult[] getElement(LiveDataCommand[] cmds, long timeout) {
         LiveDataCacheKey key = new LiveDataCacheKey(cmds);
-        Element e = _cache.get(key);
+        Element e = cache.get(key);
         if (e == null) {
             return null;
         }
@@ -184,11 +175,11 @@ public class LiveDataManagerEJBImpl implements SessionBean {
 
         if (System.currentTimeMillis() > obj.getCtime() + timeout) {
             // Object is expired
-            _cache.remove(key);
+            cache.remove(key);
             return null;
         }
 
-        _log.info("Returning cached result " +
+        log.info("Returning cached result " +
                   StringUtil.arrayToString(obj.getResult()));
         return obj.getResult();
     }
@@ -284,7 +275,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
             }
         }
 
-        HashMap buckets = new HashMap();
+        HashMap<AppdefEntityID, List<LiveDataExecutorCommand>> buckets = new HashMap<AppdefEntityID, List<LiveDataExecutorCommand>>();
         for (int i = 0; i < commands.length; i++) {
             LiveDataCommand cmd = commands[i];
             AppdefEntityID id = cmd.getAppdefEntityID();
@@ -295,9 +286,9 @@ public class LiveDataManagerEJBImpl implements SessionBean {
             LiveDataExecutorCommand exec =
                 new LiveDataExecutorCommand(id, type, cmd.getCommand(), config);
 
-            List queue = (List)buckets.get(id);
+            List<LiveDataExecutorCommand> queue = buckets.get(id);
             if (queue == null) {
-                queue = new ArrayList();
+                queue = new ArrayList<LiveDataExecutorCommand>();
                 queue.add(exec);
                 buckets.put(id, queue);
             } else {
@@ -306,9 +297,8 @@ public class LiveDataManagerEJBImpl implements SessionBean {
         }
 
         LiveDataExecutor executor = new LiveDataExecutor();
-        for (Iterator i = buckets.keySet().iterator(); i.hasNext(); ) {
-            AppdefEntityID id = (AppdefEntityID)i.next();
-            List cmds = (List)buckets.get(id);
+        for (AppdefEntityID id : buckets.keySet()) {
+            List<LiveDataExecutorCommand> cmds = buckets.get(id);
             
             LiveDataCommandsClient client = 
                 LiveDataCommandsClientFactory.getInstance().getClient(id);
@@ -339,7 +329,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
             AppdefEntityValue val = new AppdefEntityValue(id, subject);
             AppdefResourceType tVal = val.getAppdefResourceType();
 
-            return _manager.getCommands(tVal.getName());
+            return manager.getCommands(tVal.getName());
         } catch (AppdefEntityNotFoundException e) {
             throw new PluginNotFoundException("No plugin found for " + id, e);
         }
@@ -349,7 +339,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public void registerFormatter(LiveDataFormatter f) {
-        _log.info("Registering formatter [" + f.getName() + "]: " + 
+        log.info("Registering formatter [" + f.getName() + "]: " + 
                   f.getDescription());
         FormatterRegistry.getInstance().registerFormatter(f);
     }
@@ -358,7 +348,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      * @ejb:interface-method
      */
     public void unregisterFormatter(LiveDataFormatter f) {
-        _log.info("Unregistering formatter [" + f.getName() + "]");
+        log.info("Unregistering formatter [" + f.getName() + "]");
         FormatterRegistry.getInstance().unregisterFormatter(f);
     }
 
@@ -368,7 +358,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
      * 
      * @ejb:interface-method
      */
-    public Set findFormatters(LiveDataCommand cmd, FormatType type) {
+    public Set<LiveDataFormatter> findFormatters(LiveDataCommand cmd, FormatType type) {
         return FormatterRegistry.getInstance().findFormatters(cmd, type);
     }
     
@@ -393,7 +383,7 @@ public class LiveDataManagerEJBImpl implements SessionBean {
             AppdefEntityValue val = new AppdefEntityValue(id, subject);
             AppdefResourceType tVal = val.getAppdefResourceType();
 
-            return _manager.getConfigSchema(tVal.getName(), command);
+            return manager.getConfigSchema(tVal.getName(), command);
         } catch (AppdefEntityNotFoundException e) {
             throw new PluginNotFoundException("No plugin found for " + id, e);
         }

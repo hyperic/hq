@@ -215,11 +215,6 @@
 
       </session>
       <session>
-         <ejb-name>LiveDataManager</ejb-name>
-         <local-jndi-name>LocalLiveDataManager</local-jndi-name>
-
-      </session>
-      <session>
          <ejb-name>AvailabilityManager</ejb-name>
          <local-jndi-name>LocalAvailabilityManager</local-jndi-name>
 

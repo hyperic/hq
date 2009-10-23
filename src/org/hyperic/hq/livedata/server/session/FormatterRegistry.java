@@ -27,7 +27,6 @@ package org.hyperic.hq.livedata.server.session;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -38,7 +37,7 @@ import org.hyperic.hq.livedata.shared.LiveDataCommand;
 class FormatterRegistry {
     private static final FormatterRegistry INSTANCE = new FormatterRegistry();
     
-    private List _formatters = new ArrayList();
+    private List<LiveDataFormatter> _formatters = new ArrayList<LiveDataFormatter>();
     
     private FormatterRegistry() {}
 
@@ -57,13 +56,11 @@ class FormatterRegistry {
     /**
      * Find the formatters which can process the specified command 
      */
-    Set findFormatters(LiveDataCommand cmd, FormatType type) {
-        Set res = new HashSet();
+    Set<LiveDataFormatter> findFormatters(LiveDataCommand cmd, FormatType type) {
+        Set<LiveDataFormatter> res = new HashSet<LiveDataFormatter>();
         
         synchronized (_formatters) {
-            for (Iterator i=_formatters.iterator(); i.hasNext(); ) {
-                LiveDataFormatter f = (LiveDataFormatter)i.next();
-                
+            for (LiveDataFormatter f : _formatters) {
                 if (f.canFormat(cmd, type)) 
                     res.add(f);
             }
@@ -73,10 +70,8 @@ class FormatterRegistry {
 
     LiveDataFormatter findFormatter(String id) {
         synchronized (_formatters) {
-            for (Iterator i=_formatters.iterator(); i.hasNext(); ) {
-                LiveDataFormatter f = (LiveDataFormatter)i.next();
-                
-                if (f.getId().equals(id))
+            for (LiveDataFormatter f : _formatters) {
+               if (f.getId().equals(id))
                     return f;
             }
         }

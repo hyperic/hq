@@ -531,19 +531,6 @@
       </session>
 
       <session >
-         <description><![CDATA[]]></description>
-
-         <ejb-name>LiveDataManager</ejb-name>
-
-         <local-home>org.hyperic.hq.livedata.shared.LiveDataManagerLocalHome</local-home>
-         <local>org.hyperic.hq.livedata.shared.LiveDataManagerLocal</local>
-         <ejb-class>org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
-      <session >
          <description><![CDATA[The AvailabityManagerEJBImpl class is a stateless session bean that can be used to retrieve Availability Data RLE points]]></description>
 
          <ejb-name>AvailabilityManager</ejb-name>

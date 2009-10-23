@@ -34,13 +34,13 @@ import org.hyperic.hq.livedata.formatters.NetstatFormatter;
 import org.hyperic.hq.livedata.formatters.ToStringFormatter;
 import org.hyperic.hq.livedata.formatters.TopFormatter;
 import org.hyperic.hq.livedata.formatters.WhoFormatter;
-import org.hyperic.hq.livedata.shared.LiveDataManagerLocal;
+import org.hyperic.hq.livedata.shared.LiveDataManager;
 
 public class LiveDataStartupListener
     implements StartupListener
 {
     public void hqStarted() {
-        LiveDataManagerLocal lman = LiveDataManagerEJBImpl.getOne();
+        LiveDataManager lman = LiveDataManagerImpl.getOne();
         
         lman.registerFormatter(new ToStringFormatter());
         lman.registerFormatter(new CpuPercFormatter());
