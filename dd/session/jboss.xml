@@ -199,11 +199,6 @@
 
       </session>
       <session>
-         <ejb-name>TestManager</ejb-name>
-         <local-jndi-name>LocalTestManager</local-jndi-name>
-
-      </session>
-      <session>
          <ejb-name>TransactionManager</ejb-name>
          <local-jndi-name>LocalTransactionManager</local-jndi-name>
 
@@ -217,11 +212,6 @@
          <ejb-name>ControlBoss</ejb-name>
          <jndi-name>ejb/bizapp/ControlBoss</jndi-name>
          <local-jndi-name>LocalControlBoss</local-jndi-name>
-
-      </session>
-      <session>
-         <ejb-name>LiveDataManager</ejb-name>
-         <local-jndi-name>LocalLiveDataManager</local-jndi-name>
 
       </session>
       <session>

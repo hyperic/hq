@@ -19,7 +19,6 @@
 <bean class="org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.VirtualManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.application.server.session.TestManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.auth.server.session.AuthManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.authz.server.session.RoleManagerEJBImpl" factory-method="getOne"/>
@@ -57,7 +56,6 @@
 <bean class="org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.galerts.server.session.GtriggerManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.DataCompressEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.DataManagerEJBImpl" factory-method="getOne"/>

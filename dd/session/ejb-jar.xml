@@ -492,19 +492,6 @@
       <session >
          <description><![CDATA[]]></description>
 
-         <ejb-name>TestManager</ejb-name>
-
-         <local-home>org.hyperic.hq.application.shared.TestManagerLocalHome</local-home>
-         <local>org.hyperic.hq.application.shared.TestManagerLocal</local>
-         <ejb-class>org.hyperic.hq.application.server.session.TestManagerEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
-      <session >
-         <description><![CDATA[]]></description>
-
          <ejb-name>TransactionManager</ejb-name>
 
          <local-home>org.hyperic.hq.common.shared.TransactionManagerLocalHome</local-home>
@@ -538,19 +525,6 @@
          <local-home>org.hyperic.hq.bizapp.shared.ControlBossLocalHome</local-home>
          <local>org.hyperic.hq.bizapp.shared.ControlBossLocal</local>
          <ejb-class>org.hyperic.hq.bizapp.server.session.ControlBossEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
-      <session >
-         <description><![CDATA[]]></description>
-
-         <ejb-name>LiveDataManager</ejb-name>
-
-         <local-home>org.hyperic.hq.livedata.shared.LiveDataManagerLocalHome</local-home>
-         <local>org.hyperic.hq.livedata.shared.LiveDataManagerLocal</local>
-         <ejb-class>org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl</ejb-class>
          <session-type>Stateless</session-type>
          <transaction-type>Container</transaction-type>
 
@@ -3658,13 +3632,6 @@
    <container-transaction >
       <method >
          <ejb-name>MaintenanceEventManager</ejb-name>
-          <method-name>*</method-name>
-       </method>
-       <trans-attribute>Required</trans-attribute>
-    </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>TestManager</ejb-name>
           <method-name>*</method-name>
        </method>
        <trans-attribute>Required</trans-attribute>
