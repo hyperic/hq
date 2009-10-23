@@ -199,11 +199,6 @@
 
       </session>
       <session>
-         <ejb-name>TestManager</ejb-name>
-         <local-jndi-name>LocalTestManager</local-jndi-name>
-
-      </session>
-      <session>
          <ejb-name>TransactionManager</ejb-name>
          <local-jndi-name>LocalTransactionManager</local-jndi-name>
 
