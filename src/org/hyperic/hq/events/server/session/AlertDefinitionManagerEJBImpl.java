@@ -273,25 +273,7 @@ public class AlertDefinitionManagerEJBImpl
             }
 
             if (cond.getType() == EventConstants.TYPE_ALERT) {
-                ActionValue recoverAction = new ActionValue();
-
-                EnableAlertDefActionConfig action =
-                    new EnableAlertDefActionConfig();
-                action.setAlertDefId(cond.getMeasurementId());
-
-                recoverAction.setClassname(action.getImplementor());
-                try {
-                    recoverAction
-                        .setConfig(action.getConfigResponse().encode());
-                } catch (EncodingException e) {
-                    log.debug("Error encoding EnableAlertDefAction", e);
-                } catch (InvalidOptionException e) {
-                    log.debug("Error encoding EnableAlertDefAction", e);
-                } catch (InvalidOptionValueException e) {
-                    log.debug("Error encoding EnableAlertDefAction", e);
-                }
-
-                a.addAction(recoverAction);
+                setEnableAlertDefAction(a, cond.getMeasurementId());
             }
 
             acDAO.save(cond);
@@ -408,7 +390,7 @@ public class AlertDefinitionManagerEJBImpl
      * Get the EnableAlertDefAction ActionValue from an
      * AlertDefinitionValue.  If none exists, return null.
      */
-    private ActionValue getEnableAction(AlertDefinitionValue adv) {
+    private ActionValue getEnableAlertDefAction(AlertDefinitionValue adv) {
         ActionValue[] actions = adv.getActions();
         EnableAlertDefActionConfig cfg = new EnableAlertDefActionConfig();
         for (int i = 0; i < actions.length; ++i) {
@@ -419,6 +401,53 @@ public class AlertDefinitionManagerEJBImpl
         return null;
     }
 
+    private void setEnableAlertDefAction(AlertDefinitionValue adval, int recoverId) {
+        EnableAlertDefActionConfig action =
+            new EnableAlertDefActionConfig();
+
+        // Find recovery actions first
+        ActionValue recoverAction = getEnableAlertDefAction(adval);
+        
+        if (recoverAction != null) {
+            try {
+                ConfigResponse configResponse =
+                    ConfigResponse.decode(recoverAction.getConfig());
+                action.init(configResponse);
+
+                if (action.getAlertDefId() != recoverId) {
+                    action.setAlertDefId(recoverId);
+                    recoverAction.setConfig(action
+                                                .getConfigResponse()
+                                                .encode());
+                    adval.updateAction(recoverAction);
+                }
+            } catch (Exception e) {
+                adval.removeAction(recoverAction);
+                recoverAction = null;
+            }
+        }
+
+        // Add action if doesn't exist
+        if (recoverAction == null) {
+            recoverAction = new ActionValue();
+            action.setAlertDefId(recoverId);
+            recoverAction.setClassname(action.getImplementor());
+
+            try {
+                recoverAction
+                .setConfig(action.getConfigResponse().encode());
+            } catch (EncodingException e) {
+                log.debug("Error encoding EnableAlertDefAction", e);
+            } catch (InvalidOptionException e) {
+                log.debug("Error encoding EnableAlertDefAction", e);
+            } catch (InvalidOptionValueException e) {
+                log.debug("Error encoding EnableAlertDefAction", e);
+            }
+
+            adval.addAction(recoverAction);
+        }
+    }
+    
     /**
      * Update an alert definition
      * @ejb:interface-method
@@ -430,11 +459,8 @@ public class AlertDefinitionManagerEJBImpl
         AlertDefinitionDAO dao = getAlertDefDAO();
         ActionDAO actDao = getActionDAO();
         AlertDefinition aldef = dao.findById(adval.getId());
-
-        // Find recovery actions first
-        ActionValue recoverAction = getEnableAction(adval);
-        adval.removeAction(recoverAction);
-
+        int recoverId = -1;
+                
         // See if the conditions changed
         if (adval.getAddedConditions().size()   > 0 ||
             adval.getUpdatedConditions().size() > 0 ||
@@ -452,61 +478,34 @@ public class AlertDefinitionManagerEJBImpl
                 if (conds[i].getTriggerId() != null)
                     trigger = registeredTriggerManager.findById(conds[i].getTriggerId());
 
-                if (conds[i].getType() == EventConstants.TYPE_ALERT) {
-                    EnableAlertDefActionConfig action =
-                        new EnableAlertDefActionConfig();
-                    if (recoverAction != null) {
-                        try {
-                            ConfigResponse configResponse =
-                                ConfigResponse.decode(recoverAction.getConfig());
-                            action.init(configResponse);
-
-                            if (action.getAlertDefId() !=
-                                conds[i].getMeasurementId()) {
-                                action.setAlertDefId(conds[i].getMeasurementId());
-                                recoverAction.setConfig(action
-                                                            .getConfigResponse()
-                                                            .encode());
-                                adval.updateAction(recoverAction);
-                            }
-                        } catch (Exception e) {
-                            recoverAction = null;
-                        }
-                    }
-
-                    // Add action if doesn't exist
-                    if (recoverAction == null) {
-                        recoverAction = new ActionValue();
-                        action.setAlertDefId(conds[i].getMeasurementId());
-                        recoverAction.setClassname(action.getImplementor());
-
-                        try {
-                            recoverAction
-                            .setConfig(action.getConfigResponse().encode());
-                        } catch (EncodingException e) {
-                            log.debug("Error encoding EnableAlertDefAction", e);
-                        } catch (InvalidOptionException e) {
-                            log.debug("Error encoding EnableAlertDefAction", e);
-                        } catch (InvalidOptionValueException e) {
-                            log.debug("Error encoding EnableAlertDefAction", e);
-                        }
-
-                        adval.addAction(recoverAction);
-                    }
+                if (conds[i].getType() == EventConstants.TYPE_ALERT) {                    
+                    recoverId = conds[i].getMeasurementId();
                 }
 
                 aldef.createCondition(conds[i], trigger);
+            }
+        }
+        
+        if (recoverId > 0) {
+            setEnableAlertDefAction(adval, recoverId);
+        } else {
+            // Remove recover action if exists
+            ActionValue recoverAction = getEnableAlertDefAction(adval);
+
+            if (recoverAction != null) {
+                adval.removeAction(recoverAction);
             }
         }
 
         // See if the actions changed
         if (adval.getAddedActions().size()   > 0 ||
             adval.getUpdatedActions().size() > 0 ||
-            adval.getRemovedActions().size() > 0)
+            adval.getRemovedActions().size() > 0 ||
+            adval.getActions().length != aldef.getActions().size())
         {
             // We need to keep old actions around for the logs.  So
             // we'll create new actions and update the alert
-            // definition, but we won't remove the old conditions.
+            // definition, but we won't remove the old actions.
             ActionValue[] actions = adval.getActions();
             aldef.clearActions();
             for (int i = 0; i <  actions.length; i++) {
