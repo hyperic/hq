@@ -80,17 +80,18 @@ public class MeasurementDAO extends HibernateDAO {
     }
     
     /**
+     * Used primarily for preloaded 2nd level cache measurement objects
      * retrieves List<Object[]>
      * [0] = Measurement
      * [1] = MeasurementTemplate
+     * [2] = Baseline
      */
     List findAllEnabledMeasurementsAndTemplates() {
-        Dialect dialect = Util.getDialect();
         String hql = new StringBuilder()
             .append("from Measurement m")
             .append(" join m.template t")
-            .append(" where enabled = ")
-            .append(dialect.toBooleanValueString(true))
+            .append(" join m.baselinesBag b")
+            .append(" where enabled = '1'")
             .toString();
         return getSession().createQuery(hql).list();
     }

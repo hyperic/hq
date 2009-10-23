@@ -1,5 +1,4 @@
 org.hyperic.hq.product.server.session.ProductStartupListener
-org.hyperic.hq.events.server.session.RegisteredTriggerStartupListener
 org.hyperic.hq.authz.server.session.GroupingStartupListener
 org.hyperic.hq.authz.server.session.AuthzStartupListener
 org.hyperic.hq.common.server.session.CommonStartupListener
@@ -7,12 +6,13 @@ org.hyperic.hq.appdef.server.session.AppdefStartupListener
 org.hyperic.hq.autoinventory.server.session.AIStartupListener
 org.hyperic.hq.livedata.server.session.LiveDataStartupListener
 org.hyperic.hq.measurement.server.session.MeasurementStartupListener
+org.hyperic.hq.bizapp.server.session.BossStartupListener
+org.hyperic.hq.events.server.session.RegisteredTriggerStartupListener
 org.hyperic.hq.galerts.server.session.GalertStartupListener
 org.hyperic.hq.events.server.session.EventsStartupListener
 org.hyperic.hq.ui.server.session.UIStartupListener
 org.hyperic.hq.escalation.server.session.EscalationStartupListener
 org.hyperic.hq.control.server.session.ControlStartupListener
-org.hyperic.hq.bizapp.server.session.BossStartupListener
 org.hyperic.hq.ha.server.session.HAStartupListener
 org.hyperic.hq.events.server.session.HeartBeatServiceStartupListener
 org.hyperic.hq.events.server.session.HQDBHealthStartupListener
