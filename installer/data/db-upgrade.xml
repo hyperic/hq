@@ -10857,6 +10857,16 @@ has already been defined.
                         columnType="VARCHAR2"
                         nullable="NOT NULL" />
   </schemaSpec>
+	
+   <schemaSpec version="3.192">         
+	    <schema-directSQL>  
+	      <statement desc="Updating HQ Health Plugin">
+	        UPDATE EAM_UI_VIEW
+	        SET DESCRIPTION='HQ Health'
+	        WHERE DESCRIPTION='AMS Health'
+	      </statement>   
+	    </schema-directSQL>  
+   </schemaSpec>
 
 </dbupgrade>
 </target>
