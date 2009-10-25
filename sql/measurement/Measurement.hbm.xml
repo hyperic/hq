@@ -43,7 +43,7 @@
       <column name="RESOURCE_ID"/>
     </many-to-one>
 
-    <bag inverse="true" cascade="all-delete-orphan" name="baselinesBag" table="EAM_MEASUREMENT_BL" fetch="join">
+    <bag inverse="true" cascade="all-delete-orphan" name="baselinesBag" table="EAM_MEASUREMENT_BL">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="MEASUREMENT_ID"/>
       <one-to-many class="Baseline"/>
