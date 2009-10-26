@@ -25,7 +25,7 @@ import org.hyperic.hq.common.VetoException
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as DefMan
 import org.hyperic.hq.events.server.session.AlertManagerEJBImpl as AlertMan
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl as EventMan
-import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl
+import org.hyperic.hq.livedata.server.session.LiveDataManagerImpl as liveDataMan
 import org.hyperic.hq.control.server.session.ControlManagerEJBImpl as CMan
 import org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl as CSMan
 import org.hyperic.hq.product.PluginNotFoundException
@@ -234,7 +234,7 @@ class ResourceCategory {
      */
     static Collection getLiveDataCommands(Resource r, AuthzSubject user) {
         try {
-            return LiveDataManagerEJBImpl.one.getCommands(user, r.entityId) as List
+            return liveDataMan.one.getCommands(user, r.entityId) as List
         } catch (PluginNotFoundException e) {
             return []
         }
@@ -244,7 +244,7 @@ class ResourceCategory {
                                       String cmd, ConfigResponse cfg)  
     {
         def lcmd = new LiveDataCommand(r.entityId, cmd, cfg)
-        LiveDataManagerEJBImpl.one.getData(user, lcmd)
+        liveDataMan.one.getData(user, lcmd)
     }
     
     static List getLiveData(Collection resources, AuthzSubject user,
@@ -254,7 +254,7 @@ class ResourceCategory {
         for (r in resources) {
             cmds << new LiveDataCommand(r.entityId, cmd, cfg)
         }
-        LiveDataManagerEJBImpl.one.getData(user, cmds as LiveDataCommand[]) as List
+        liveDataMan.one.getData(user, cmds as LiveDataCommand[]) as List
     }
     
     static boolean isPlatform(Resource r) {
