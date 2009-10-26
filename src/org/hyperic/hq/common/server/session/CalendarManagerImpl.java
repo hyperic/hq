@@ -36,91 +36,97 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CalendarManagerImpl implements CalendarManager  {
-    private CalendarDAO calendarDAO  = Bootstrap.getBean(CalendarDAO.class);
-    private CalendarEntryDAO calendarEntryDAO = Bootstrap.getBean(CalendarEntryDAO.class);
+public class CalendarManagerImpl implements CalendarManager {
+	private CalendarDAO calendarDAO = Bootstrap.getBean(CalendarDAO.class);
+	private CalendarEntryDAO calendarEntryDAO = Bootstrap
+			.getBean(CalendarEntryDAO.class);
 
-    @Autowired
-    public CalendarManagerImpl(CalendarDAO calendarDAO, CalendarEntryDAO calendarEntryDAO) {
-    	this.calendarDAO = calendarDAO;
-    	this.calendarEntryDAO = calendarEntryDAO;
-    }
-    
-    /**
-     * Create a calendar with the specified name.  This name is only used
-     * to distinguish between calendars and must be unique, however it
-     * will be changed in the future to be used in the UI.
-     *
-     */
-    public Calendar createCalendar(String name) {
-        Calendar c = new Calendar(name);
+	@Autowired
+	public CalendarManagerImpl(CalendarDAO calendarDAO,
+			CalendarEntryDAO calendarEntryDAO) {
+		this.calendarDAO = calendarDAO;
+		this.calendarEntryDAO = calendarEntryDAO;
+	}
 
-        calendarDAO.save(c);
+	/**
+	 * Create a calendar with the specified name. This name is only used to
+	 * distinguish between calendars and must be unique, however it will be
+	 * changed in the future to be used in the UI.
+	 * 
+	 */
+	public Calendar createCalendar(String name) {
+		Calendar c = new Calendar(name);
 
-        return c;
-    }
+		calendarDAO.save(c);
 
-    /**
-     * Find all calendars in the system
-     *
-     * @return {@link Calendar}s
-     */
-    public Collection<Calendar> findAll() {
-        return calendarDAO.findAll();
-    }
+		return c;
+	}
 
-    /**
-     * Delete a calendar and all of its entries
-     *
-     */
-    public void remove(Calendar c) {
-        calendarDAO.remove(c);
-    }
+	/**
+	 * Find all calendars in the system
+	 * 
+	 * @return {@link Calendar}s
+	 */
+	public Collection<Calendar> findAll() {
+		return calendarDAO.findAll();
+	}
 
-    /**
-     * Add a weekly entry to a calendar.
-     *
-     * @param weekDay    Day of the week (0 to 6)
-     * @param startTime  # of minutes since midnight
-     * @param endTime    # of minutes since midnight
-     *
-     */
-    public WeekEntry addWeekEntry(Calendar c, int weekDay, int startTime, int endTime)
-    {
-        WeekEntry res = c.addWeekEntry(weekDay, startTime, endTime);
+	/**
+	 * Delete a calendar and all of its entries
+	 * 
+	 */
+	public void remove(Calendar c) {
+		calendarDAO.remove(c);
+	}
 
-        calendarEntryDAO.save(res); // In order to pick up an ID
-        
-        return res;
-    }
+	/**
+	 * Add a weekly entry to a calendar.
+	 * 
+	 * @param weekDay
+	 *            Day of the week (0 to 6)
+	 * @param startTime
+	 *            # of minutes since midnight
+	 * @param endTime
+	 *            # of minutes since midnight
+	 * 
+	 */
+	public WeekEntry addWeekEntry(Calendar c, int weekDay, int startTime,
+			int endTime) {
+		WeekEntry res = c.addWeekEntry(weekDay, startTime, endTime);
 
-    /**
-     * Remove a calendar entry from a calendar
-     *
-     */
-    public void removeEntry(Calendar c, CalendarEntry ent) {
-        if (!c.removeEntry(ent)) {
-            throw new IllegalArgumentException("Entry was not a part of the calendar");
-        }
-    }
+		calendarEntryDAO.save(res); // In order to pick up an ID
 
-    /**
-     * Remove calendar entries from a calendar
-     *
-     */
-    public void removeEntries(Calendar c) {
-        calendarDAO.removeEntries(c);
-    }
+		return res;
+	}
 
-    public Calendar findCalendarById(int id) {
-        return calendarDAO.findById(new Integer(id));
-    }
+	/**
+	 * Remove a calendar entry from a calendar
+	 * 
+	 */
+	public void removeEntry(Calendar c, CalendarEntry ent) {
+		if (!c.removeEntry(ent)) {
+			throw new IllegalArgumentException(
+					"Entry was not a part of the calendar");
+		}
+	}
 
-    public CalendarEntry findEntryById(int id) {
-        return calendarEntryDAO.findById(new Integer(id));
-    }
+	/**
+	 * Remove calendar entries from a calendar
+	 * 
+	 */
+	public void removeEntries(Calendar c) {
+		calendarDAO.removeEntries(c);
+	}
 
-    public static CalendarManager getOne() {
-        return Bootstrap.getBean(CalendarManager.class);
-    }
+	public Calendar findCalendarById(int id) {
+		return calendarDAO.findById(new Integer(id));
+	}
+
+	public CalendarEntry findEntryById(int id) {
+		return calendarEntryDAO.findById(new Integer(id));
+	}
+
+	public static CalendarManager getOne() {
+		return Bootstrap.getBean(CalendarManager.class);
+	}
 }
