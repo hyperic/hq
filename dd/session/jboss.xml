@@ -129,11 +129,6 @@
 
       </session>
       <session>
-         <ejb-name>CalendarManager</ejb-name>
-         <local-jndi-name>LocalCalendarManager</local-jndi-name>
-
-      </session>
-      <session>
          <ejb-name>TrackerManager</ejb-name>
          <local-jndi-name>LocalTrackerManager</local-jndi-name>
 

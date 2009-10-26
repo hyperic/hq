@@ -62,7 +62,7 @@ import org.hyperic.hq.authz.shared.RoleValue;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Calendar;
-import org.hyperic.hq.common.server.session.CalendarManagerEJBImpl;
+import org.hyperic.hq.common.server.session.CalendarManagerImpl;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -553,7 +553,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
                  r.getId(), AuthzConstants.roleOpModifyRole);
 
         Calendar cal =
-            CalendarManagerEJBImpl.getOne().createCalendar(calendarName);
+            CalendarManagerImpl.getOne().createCalendar(calendarName);
         RoleCalendar res = new RoleCalendar(r, cal, type);
         r.addCalendar(res);
         return res;
@@ -565,7 +565,7 @@ public class RoleManagerEJBImpl extends AuthzSession implements SessionBean {
     public boolean removeCalendar(RoleCalendar c) {
         boolean res = c.getRole().removeCalendar(c);
         roleCalendarDAO.remove(c);
-        CalendarManagerEJBImpl.getOne().remove(c.getCalendar());
+        CalendarManagerImpl.getOne().remove(c.getCalendar());
         return res;
     }
 
