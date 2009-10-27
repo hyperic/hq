@@ -34,12 +34,13 @@ import org.hyperic.hq.common.shared.CalendarManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 public class CalendarManagerImpl implements CalendarManager {
-	private CalendarDAO calendarDAO = Bootstrap.getBean(CalendarDAO.class);
-	private CalendarEntryDAO calendarEntryDAO = Bootstrap
-			.getBean(CalendarEntryDAO.class);
+	private CalendarDAO calendarDAO;
+	private CalendarEntryDAO calendarEntryDAO;
 
 	@Autowired
 	public CalendarManagerImpl(CalendarDAO calendarDAO,
