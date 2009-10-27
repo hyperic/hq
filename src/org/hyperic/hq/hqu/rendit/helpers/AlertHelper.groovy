@@ -5,12 +5,12 @@ import org.hyperic.hq.events.server.session.AlertDefSortField
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl
-import org.hyperic.hq.events.server.session.AlertManagerEJBImpl
+import org.hyperic.hq.events.server.session.AlertManagerImpl
 import org.hyperic.hq.galerts.server.session.GalertManagerImpl
 import org.hyperic.hq.events.AlertSeverity
 
 class AlertHelper extends BaseHelper {
-    private alertMan  = AlertManagerEJBImpl.one
+    private alertMan  = AlertManagerImpl.one
     private galertMan = GalertManagerImpl.one
     private defMan    = AlertDefinitionManagerImpl.one
     

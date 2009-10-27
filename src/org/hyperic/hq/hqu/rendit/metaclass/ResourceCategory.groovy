@@ -23,7 +23,7 @@ import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
 import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
 import org.hyperic.hq.common.VetoException
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as DefMan
-import org.hyperic.hq.events.server.session.AlertManagerEJBImpl as AlertMan
+import org.hyperic.hq.events.server.session.AlertManagerImpl as AlertMan
 import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl as EventMan
 import org.hyperic.hq.livedata.server.session.LiveDataManagerImpl as liveDataMan
 import org.hyperic.hq.control.server.session.ControlManagerEJBImpl as CMan

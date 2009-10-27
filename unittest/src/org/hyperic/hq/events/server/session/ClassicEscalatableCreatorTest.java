@@ -14,7 +14,7 @@ import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.MockEvent;
 import org.hyperic.hq.events.TriggerFiredEvent;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
+import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 /**
  * Unit test of {@link ClassicEscalatableCreator}
@@ -26,14 +26,14 @@ public class ClassicEscalatableCreatorTest
 {
 
     private MessagePublisher messagePublisher;
-    private AlertManagerLocal alertManager;
+    private AlertManager alertManager;
 
     private static final Integer TEST_ALERT_DEF_ID = Integer.valueOf(1234);
 
     public void setUp() throws Exception {
         super.setUp();
         this.messagePublisher = EasyMock.createMock(MessagePublisher.class);
-        this.alertManager = EasyMock.createMock(AlertManagerLocal.class);
+        this.alertManager = EasyMock.createMock(AlertManager.class);
     }
 
     /**

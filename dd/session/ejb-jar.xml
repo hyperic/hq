@@ -382,19 +382,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[]]></description>
-
-			<ejb-name>AlertManager</ejb-name>
-
-			<local-home>org.hyperic.hq.events.shared.AlertManagerLocalHome</local-home>
-			<local>org.hyperic.hq.events.shared.AlertManagerLocal</local>
-			<ejb-class>org.hyperic.hq.events.server.session.AlertManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[This class is responsible for managing Server objects in appdef and their relationships]]></description>
 
 			<ejb-name>ServiceManager</ejb-name>
@@ -3084,13 +3071,6 @@
 				</method-params>
 			</method>
 			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>AlertManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>REQUIRED</trans-attribute>
 		</container-transaction>
 		<container-transaction>
 			<method>

@@ -46,7 +46,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 
-import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertManagerImpl;
 import org.hyperic.hq.measurement.shared.DataCompressLocal;
 import org.hyperic.hq.measurement.shared.DataCompressUtil;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
@@ -228,7 +228,7 @@ public class DataCompressEJBImpl
         log.info("Purging alerts older than " +
                  TimeUtil.toString(now - this.purgeAlert));
         int alertsDeleted =
-            AlertManagerEJBImpl.getOne().deleteAlerts(0, now - this.purgeAlert);
+            AlertManagerImpl.getOne().deleteAlerts(0, now - this.purgeAlert);
         log.info("Done (Deleted " + alertsDeleted + " alerts)");
     }
 

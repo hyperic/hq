@@ -157,11 +157,6 @@
 
 		</session>
 		<session>
-			<ejb-name>AlertManager</ejb-name>
-			<local-jndi-name>LocalAlertManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>ServiceManager</ejb-name>
 			<local-jndi-name>LocalServiceManager</local-jndi-name>
 

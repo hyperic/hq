@@ -24,7 +24,6 @@
  */
 package org.hyperic.hq.events.server.session;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -32,7 +31,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -41,7 +39,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class AlertDAO extends HibernateDAO {
+public class AlertDAO extends HibernateDAO<Alert> {
     
     private AlertActionLogDAO alertActionLogDAO;
     
@@ -68,6 +66,7 @@ public class AlertDAO extends HibernateDAO {
         return (Alert)super.get(id);
     }
 
+    @SuppressWarnings("unchecked")
     int deleteByCreateTime(long begin, long end) {
         // don't want to thrash the Alert cache, so select and do an explicit
         // remove() on each Object
@@ -78,20 +77,19 @@ public class AlertDAO extends HibernateDAO {
             .append("where alertTypeEnum = :type)")
             .toString();
        
-        List list = null;
+        List<Alert> list = null;
         int rtn = 0;
         // due to http://opensource.atlassian.com/projects/hibernate/browse/HHH-1985
         // need to batch this
         while (list == null || list.size() > 0) {
-            list = getSession().createQuery(sql)
+            list = (List<Alert>) getSession().createQuery(sql)
                 .setLong("timeStart", begin)
                 .setLong("timeEnd", end)
                 .setInteger("type", ClassicEscalationAlertType.CLASSIC.getCode())
                 .setMaxResults(1000)
                 .list();
             alertActionLogDAO.deleteAlertActions(list);
-            for (final Iterator it=list.iterator(); it.hasNext(); ) {
-                final Alert alert = (Alert)it.next();
+            for (Alert alert: list ) {
                 rtn++;
                 remove(alert);
             }
@@ -99,11 +97,12 @@ public class AlertDAO extends HibernateDAO {
         return rtn;
     }
 
-    public List findByResource(Resource res) {
+    public List<Alert> findByResource(Resource res) {
         return findByResource(res, "a.ctime DESC");
     }
 
-    List findEscalatables() {
+    @SuppressWarnings("unchecked")
+    List<Alert> findEscalatables() {
         String sql = "from Alert a";
 
         return getSession().createQuery(sql)
@@ -117,7 +116,8 @@ public class AlertDAO extends HibernateDAO {
      * the lines of only querying alertIds and then the caller would have to do
      * a findById(alertId), process it, then immediately evict from the session
      */
-    List findByCreateTimeAndPriority(Integer subj, long begin, long end,
+    @SuppressWarnings("unchecked")
+    List<Alert> findByCreateTimeAndPriority(Integer subj, long begin, long end,
                                      int priority, boolean inEsc,
                                      boolean notFixed, Integer groupId,
                                      Integer alertDefId, PageInfo pageInfo) {
@@ -183,7 +183,8 @@ public class AlertDAO extends HibernateDAO {
         return (Integer) q.uniqueResult();
     }
 
-    public List findByAppdefEntityInRange(Resource res, long begin,
+    @SuppressWarnings("unchecked")
+    public List<Alert> findByAppdefEntityInRange(Resource res, long begin,
                                           long end, boolean nameSort,
                                           boolean asc)
     {
@@ -199,7 +200,8 @@ public class AlertDAO extends HibernateDAO {
             .list();
     }
 
-    private List findByResource(Resource res, String orderBy) {
+    @SuppressWarnings("unchecked")
+    private List<Alert> findByResource(Resource res, String orderBy) {
         String sql = "from Alert a WHERE a.alertDefinition.resource = :res " +
             "ORDER BY " + orderBy;
 
@@ -218,7 +220,7 @@ public class AlertDAO extends HibernateDAO {
             .executeUpdate();
     }
 
-    public List findByResourceSortByAlertDef(Resource res) {
+    public List<Alert> findByResourceSortByAlertDef(Resource res) {
         return findByResource(res, "a.alertDefinition.name DESC");
     }
 
@@ -232,7 +234,8 @@ public class AlertDAO extends HibernateDAO {
             .uniqueResult();
     }
 
-    public List findByAlertDefinition(AlertDefinition def) {
+    @SuppressWarnings("unchecked")
+    public List<Alert> findByAlertDefinition(AlertDefinition def) {
         String sql = "from Alert a WHERE a.alertDefinition = :alertDef";
 
         return getSession().createQuery(sql)
