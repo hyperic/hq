@@ -10868,6 +10868,17 @@ has already been defined.
 	    </schema-directSQL>  
    </schemaSpec>
 
+  <schemaSpec version="3.193">
+    <schema-directSQL>  
+      <statement desc="Cleanup deleted alert definitions">
+		UPDATE EAM_ALERT_DEFINITION
+		SET ACTIVE = '0', ENABLED = '0'
+		WHERE DELETED = '1'
+		AND (ACTIVE = '1' OR ENABLED = '1')
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+   
 </dbupgrade>
 </target>
 </project>

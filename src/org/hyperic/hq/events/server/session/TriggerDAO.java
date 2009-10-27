@@ -162,7 +162,8 @@ public class TriggerDAO
             .append("join fetch ad.alertDefinitionState ")
             .append("join fetch ad.conditionsBag c ")
             .append("join fetch c.trigger ")
-            .append("where ad.enabled = '1'")
+            .append("where ad.enabled = '1' ")
+            .append("and ad.deleted = '0' ")
             .toString();
         
         if (debug) watch.markTimeBegin("createQuery.list");
