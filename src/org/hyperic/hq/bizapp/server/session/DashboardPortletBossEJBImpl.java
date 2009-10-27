@@ -60,10 +60,10 @@ import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
-import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertManagerImpl;
 import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
+import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GalertManagerImpl;
 import org.hyperic.hq.galerts.shared.GalertManager;
@@ -298,7 +298,7 @@ public class DashboardPortletBossEJBImpl
             long begin = now - range;
             
             watch.markTimeBegin("getResourceStatus: getUnfixedCount");
-            AlertManagerLocal alMan = AlertManagerEJBImpl.getOne();
+            AlertManager alMan = AlertManagerImpl.getOne();
             int unfixed = alMan.getUnfixedCount(subj.getId(), begin, now,
                                                  group.getId());
             watch.markTimeEnd("getResourceStatus: getUnfixedCount");

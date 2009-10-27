@@ -106,7 +106,7 @@ import org.hyperic.hq.events.server.session.ActionManagerImpl;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
-import org.hyperic.hq.events.server.session.AlertManagerEJBImpl;
+import org.hyperic.hq.events.server.session.AlertManagerImpl;
 import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.server.session.EventsStartupListener;
@@ -116,7 +116,7 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
+import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
@@ -179,8 +179,8 @@ public class EventsBossEJBImpl
         return RegisteredTriggerManagerEJBImpl.getOne();
     }
 
-    private AlertManagerLocal getAM() {
-        return AlertManagerEJBImpl.getOne();
+    private AlertManager getAM() {
+        return AlertManagerImpl.getOne();
     }
 
     private AlertDefinitionManager getADM() {
@@ -1021,18 +1021,7 @@ public class EventsBossEJBImpl
         return getADM().findAlertDefinitionNames(subject, id, parentId);
     }
 
-    /**
-     * Get a list of all alerts
-     *
-     * @ejb:interface-method
-     */
-    public PageList findAllAlerts(int sessionID)
-        throws SessionNotFoundException, SessionTimeoutException
-    {
-        manager.authenticate(sessionID);
-        // XXX no security... FIXME
-        return getAM().findAllAlerts();
-    }
+   
 
     /**
      * Find all alerts for an appdef resource

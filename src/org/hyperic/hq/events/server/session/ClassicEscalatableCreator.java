@@ -47,7 +47,7 @@ import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
+import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEventPayload;
 
@@ -67,7 +67,7 @@ public class ClassicEscalatableCreator
     private final AlertConditionsSatisfiedZEvent _event;
 
     private final MessagePublisher messenger;
-    private final AlertManagerLocal alertMan;
+    private final AlertManager alertMan;
 
     /**
      * Creates an instance.
@@ -77,7 +77,7 @@ public class ClassicEscalatableCreator
      * @param messenger The messenger to use for publishing AlertFiredEvents
      * @param alertMan The alert manager to use
      */
-    public ClassicEscalatableCreator(AlertDefinition def, AlertConditionsSatisfiedZEvent event, MessagePublisher messenger, AlertManagerLocal alertMan) {
+    public ClassicEscalatableCreator(AlertDefinition def, AlertConditionsSatisfiedZEvent event, MessagePublisher messenger, AlertManager alertMan) {
         _def   = def;
         _event = event;
         this.messenger = messenger;

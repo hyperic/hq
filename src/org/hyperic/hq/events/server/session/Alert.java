@@ -141,7 +141,8 @@ public class Alert
         _actionLog.remove(aal);
     }
 
-    public Collection getConditionLog() {
+    @SuppressWarnings("unchecked")
+    public Collection<AlertConditionLog> getConditionLog() {
         return Collections.unmodifiableCollection(_conditionLog);
     }
 

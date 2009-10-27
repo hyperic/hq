@@ -38,7 +38,7 @@ import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
-import org.hyperic.hq.events.shared.AlertManagerLocal;
+import org.hyperic.hq.events.shared.AlertManager;
 
 public final class ClassicEscalationAlertType 
     extends EscalationAlertType
@@ -50,19 +50,19 @@ public final class ClassicEscalationAlertType
                                        "escalation.type.classic");
 
     private static Object INIT_LOCK = new Object();
-    private static AlertManagerLocal           _alertMan;
+    private static AlertManager           _alertMan;
     private static AlertDefinitionManager _defMan;
     
     private void setup() {
         synchronized (INIT_LOCK) {
             if (_alertMan == null) {
-                _alertMan = AlertManagerEJBImpl.getOne();
+                _alertMan = AlertManagerImpl.getOne();
                 _defMan = AlertDefinitionManagerImpl.getOne();
             }
         }
     }
     
-    private AlertManagerLocal getAlertMan() {
+    private AlertManager getAlertMan() {
         setup();
         return _alertMan;
     }
@@ -73,7 +73,7 @@ public final class ClassicEscalationAlertType
     }
 
     public Escalatable findEscalatable(Integer alertId) {
-        AlertManagerLocal aMan = getAlertMan();
+        AlertManager aMan = getAlertMan();
         Alert a = aMan.findAlertById(alertId);
         String shortReason, longReason;
         

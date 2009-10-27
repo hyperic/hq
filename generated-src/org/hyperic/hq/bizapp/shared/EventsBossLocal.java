@@ -114,11 +114,6 @@ public interface EventsBossLocal
    public java.util.Map findAlertDefinitionNames( int sessionID,org.hyperic.hq.appdef.shared.AppdefEntityID id,java.lang.Integer parentId ) throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
-    * Get a list of all alerts
-    */
-   public org.hyperic.util.pager.PageList findAllAlerts( int sessionID ) throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException;
-
-   /**
     * Find all alerts for an appdef resource
     */
    public org.hyperic.util.pager.PageList findAlerts( int sessionID,org.hyperic.hq.appdef.shared.AppdefEntityID id,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.authz.shared.PermissionException;
