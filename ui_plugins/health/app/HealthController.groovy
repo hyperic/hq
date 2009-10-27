@@ -4,7 +4,7 @@ import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl as SCM
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as subMan
 import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl as cpropMan
 import org.hyperic.hq.appdef.server.session.Server
-import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl
+import org.hyperic.hq.appdef.server.session.AgentManagerImpl
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityValue
 import org.hyperic.hq.appdef.server.session.AgentSortField

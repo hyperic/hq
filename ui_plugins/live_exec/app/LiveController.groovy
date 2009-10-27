@@ -1,6 +1,6 @@
 import org.hyperic.hq.hqu.rendit.BaseController
 
-import org.hyperic.hq.livedata.server.session.LiveDataManagerEJBImpl as ldmi
+import org.hyperic.hq.livedata.server.session.LiveDataManagerImpl as ldmi
 import org.hyperic.util.config.ConfigResponse
 import org.hyperic.hq.livedata.FormatType
 import org.hyperic.hq.livedata.shared.LiveDataCommand
