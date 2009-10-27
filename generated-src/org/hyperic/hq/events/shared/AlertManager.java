@@ -20,136 +20,152 @@ import org.hyperic.util.pager.PageList;
 /**
  * Local interface for AlertManager.
  */
-public interface AlertManager
-{
-   /**
-    * Create a new alert.
-    * @param def The alert definition.
-    * @param ctime The alert creation time.
-    */
-   public Alert createAlert( AlertDefinition def,long ctime ) ;
+public interface AlertManager {
+    /**
+     * Create a new alert.
+     * @param def The alert definition.
+     * @param ctime The alert creation time.
+     */
+    public Alert createAlert(AlertDefinition def, long ctime);
 
-   /**
-    * Simply mark an alert object as fixed
-    */
-   public void setAlertFixed( Alert alert ) ;
+    /**
+     * Simply mark an alert object as fixed
+     */
+    public void setAlertFixed(Alert alert);
 
-   /**
-    * Log the details of an action's execution
-    */
-   public void logActionDetail( Alert alert,Action action,String detail,AuthzSubject subject ) ;
+    /**
+     * Log the details of an action's execution
+     */
+    public void logActionDetail(Alert alert, Action action, String detail, AuthzSubject subject);
 
-   /**
-    * Remove alerts
-    */
-   public void deleteAlerts( java.lang.Integer[] ids ) ;
+    /**
+     * Remove alerts
+     */
+    public void deleteAlerts(java.lang.Integer[] ids);
 
-   /**
-    * Remove alerts for an appdef entity
-    * @throws PermissionException
-    */
-   public int deleteAlerts( AuthzSubject subj,AppdefEntityID id ) throws org.hyperic.hq.authz.shared.PermissionException;
+    /**
+     * Remove alerts for an appdef entity
+     * @throws PermissionException
+     */
+    public int deleteAlerts(AuthzSubject subj, AppdefEntityID id)
+        throws org.hyperic.hq.authz.shared.PermissionException;
 
-   /**
-    * Remove alerts for an alert definition
-    * @throws PermissionException
-    */
-   public int deleteAlerts( AuthzSubject subj,AlertDefinition ad ) throws javax.ejb.RemoveException, org.hyperic.hq.authz.shared.PermissionException;
+    /**
+     * Remove alerts for an alert definition
+     * @throws PermissionException
+     */
+    public int deleteAlerts(AuthzSubject subj, AlertDefinition ad) throws javax.ejb.RemoveException,
+        org.hyperic.hq.authz.shared.PermissionException;
 
-   /**
-    * Remove alerts for a range of time
-    */
-   public int deleteAlerts( long begin,long end ) ;
+    /**
+     * Remove alerts for a range of time
+     */
+    public int deleteAlerts(long begin, long end);
 
-   /**
-    * Find an alert by ID
-    */
-   public AlertValue getById( Integer id ) ;
+    /**
+     * Find an alert by ID
+     */
+    public AlertValue getById(Integer id);
 
-   /**
-    * Find an alert pojo by ID
-    */
-   public Alert findAlertById( Integer id ) ;
+    /**
+     * Find an alert pojo by ID
+     */
+    public Alert findAlertById(Integer id);
 
-   /**
-    * Find the last alert by definition ID
-    * @throws PermissionException
-    */
-   public Alert findLastUnfixedByDefinition( AuthzSubject subj,Integer id ) ;
+    /**
+     * Find the last alert by definition ID
+     * @throws PermissionException
+     */
+    public Alert findLastUnfixedByDefinition(AuthzSubject subj, Integer id);
 
-   /**
-    * Find the last alert by definition ID
-    * @throws PermissionException
-    */
-   public Alert findLastFixedByDefinition( AlertDefinition def ) ;
+    /**
+     * Find the last alert by definition ID
+     * @throws PermissionException
+     */
+    public Alert findLastFixedByDefinition(AlertDefinition def);
 
-   /**
-    * Get the # of alerts within HQ inventory
-    */
-   public Number getAlertCount(  ) ;
+    /**
+     * Get the # of alerts within HQ inventory
+     */
+    public Number getAlertCount();
 
-   /**
-    * Get the number of alerts for the given array of AppdefEntityID's
-    */
-   public int[] getAlertCount( org.hyperic.hq.appdef.shared.AppdefEntityID[] ids ) ;
+    /**
+     * Get the number of alerts for the given array of AppdefEntityID's
+     */
+    public int[] getAlertCount(org.hyperic.hq.appdef.shared.AppdefEntityID[] ids);
 
-   /**
-    * Processes {@link AlertConditionSatisfiedZEvent} that indicate that an alert should be created To minimize StaleStateExceptions, this method should only be called once in one transaction.
-    */
-   public void fireAlert( AlertConditionsSatisfiedZEvent event ) ;
+    /**
+     * Processes {@link AlertConditionSatisfiedZEvent} that indicate that an
+     * alert should be created To minimize StaleStateExceptions, this method
+     * should only be called once in one transaction.
+     */
+    public void fireAlert(AlertConditionsSatisfiedZEvent event);
 
-   /**
-    * Get a collection of alerts for an AppdefEntityID
-    * @throws PermissionException
-    */
-   public PageList<Alert> findAlerts( AuthzSubject subj,AppdefEntityID id,PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException;
+    /**
+     * Get a collection of alerts for an AppdefEntityID
+     * @throws PermissionException
+     */
+    public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id, PageControl pc)
+        throws org.hyperic.hq.authz.shared.PermissionException;
 
-   /**
-    * Get a collection of alerts for an AppdefEntityID and time range
-    * @throws PermissionException
-    */
-   public PageList<Alert> findAlerts( AuthzSubject subj,AppdefEntityID id,long begin,long end,PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException;
+    /**
+     * Get a collection of alerts for an AppdefEntityID and time range
+     * @throws PermissionException
+     */
+    public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id, long begin, long end, PageControl pc)
+        throws org.hyperic.hq.authz.shared.PermissionException;
 
-   /**
-    * A more optimized look up which includes the permission checking
-    */
-   public List<Alert> findAlerts( Integer subj,int priority,long timeRange,long endTime,boolean inEsc,boolean notFixed,Integer groupId,PageInfo pageInfo ) throws org.hyperic.hq.authz.shared.PermissionException;
+    /**
+     * A more optimized look up which includes the permission checking
+     */
+    public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime, boolean inEsc,
+                                  boolean notFixed, Integer groupId, PageInfo pageInfo)
+        throws org.hyperic.hq.authz.shared.PermissionException;
 
-   /**
-    * A more optimized look up which includes the permission checking
-    * @return {@link List} of {@link Alert}s
-    */
-   public List<Alert> findAlerts( Integer subj,int priority,long timeRange,long endTime,boolean inEsc,boolean notFixed,Integer groupId,Integer alertDefId,PageInfo pageInfo ) throws org.hyperic.hq.authz.shared.PermissionException;
+    /**
+     * A more optimized look up which includes the permission checking
+     * @return {@link List} of {@link Alert}s
+     */
+    public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime, boolean inEsc,
+                                  boolean notFixed, Integer groupId, Integer alertDefId, PageInfo pageInfo)
+        throws org.hyperic.hq.authz.shared.PermissionException;
 
-   /**
-    * Search alerts given a set of criteria
-    * @param timeRange the amount of milliseconds prior to current that the alerts will be contained in. e.g. the beginning of the time range will be (current - timeRante)
-    * @param page TODO
-    * @param includes {@link List} of {@link AppdefEntityID}s to filter, may be null for all.
-    */
-   public List<Alert> findAlerts( AuthzSubject subj,int count,int priority,long timeRange,long endTime,List<AppdefEntityID> includes ) throws org.hyperic.hq.authz.shared.PermissionException;
+    /**
+     * Search alerts given a set of criteria
+     * @param timeRange the amount of milliseconds prior to current that the
+     *        alerts will be contained in. e.g. the beginning of the time range
+     *        will be (current - timeRante)
+     * @param page TODO
+     * @param includes {@link List} of {@link AppdefEntityID}s to filter, may be
+     *        null for all.
+     */
+    public List<Alert> findAlerts(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
+                                  List<AppdefEntityID> includes) throws org.hyperic.hq.authz.shared.PermissionException;
 
-   /**
-    * Find escalatables for a resource in a given time range.
-    * @see findAlerts(AuthzSubject, int, int, long, long, List)
-    */
-   public List<Escalatable> findEscalatables( AuthzSubject subj,int count,int priority,long timeRange,long endTime,List<AppdefEntityID> includes ) throws org.hyperic.hq.authz.shared.PermissionException;
+    /**
+     * Find escalatables for a resource in a given time range.
+     * @see findAlerts(AuthzSubject, int, int, long, long, List)
+     */
+    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
+                                              List<AppdefEntityID> includes)
+        throws org.hyperic.hq.authz.shared.PermissionException;
 
-   /**
-    * A more optimized look up which includes the permission checking
-    */
-   public int getUnfixedCount( Integer subj,long timeRange,long endTime,Integer groupId ) throws org.hyperic.hq.authz.shared.PermissionException;
+    /**
+     * A more optimized look up which includes the permission checking
+     */
+    public int getUnfixedCount(Integer subj, long timeRange, long endTime, Integer groupId)
+        throws org.hyperic.hq.authz.shared.PermissionException;
 
-   /**
-    * Get the long reason for an alert
-    */
-   public String getShortReason( Alert alert ) ;
+    /**
+     * Get the long reason for an alert
+     */
+    public String getShortReason(Alert alert);
 
-   /**
-    * Get the long reason for an alert
-    */
-   public String getLongReason( Alert alert ) ;
+    /**
+     * Get the long reason for an alert
+     */
+    public String getLongReason(Alert alert);
 
-   public void handleSubjectRemoval( AuthzSubject subject ) ;
+    public void handleSubjectRemoval(AuthzSubject subject);
 
 }

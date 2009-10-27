@@ -79,69 +79,63 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class AlertManagerImpl implements AlertManager {
-   
-    
-         private AlertPermissionManager alertPermissionManager;
-  
-   
-      private final Log log =
-              LogFactory.getLog(AlertManagerImpl.class.getName());
-          private static final String VALUE_PROCESSOR =
-              PagerProcessor_events.class.getName();
-      
-          private Pager valuePager;
-          private Pager pojoPager;
-    
-         private AlertDefinitionDAO alertDefDao;
-   
-         private AlertActionLogDAO alertActionLogDAO;
-    
-        private AlertDAO alertDAO;
-    
-         private AlertConditionDAO alertConditionDAO;
-     
-        private MeasurementDAO measurementDAO;
-        
-        private ResourceManager resourceManager;
-        
-        private AlertDefinitionManager alertDefinitionManager;
-        
-        private AuthzSubjectManagerLocal authzSubjectManager;
-        
-        private EscalationManagerLocal escalationManager;
-        
-        
-   
+
+    private AlertPermissionManager alertPermissionManager;
+
+    private final Log log = LogFactory.getLog(AlertManagerImpl.class.getName());
+    private static final String VALUE_PROCESSOR = PagerProcessor_events.class.getName();
+
+    private Pager valuePager;
+    private Pager pojoPager;
+
+    private AlertDefinitionDAO alertDefDao;
+
+    private AlertActionLogDAO alertActionLogDAO;
+
+    private AlertDAO alertDAO;
+
+    private AlertConditionDAO alertConditionDAO;
+
+    private MeasurementDAO measurementDAO;
+
+    private ResourceManager resourceManager;
+
+    private AlertDefinitionManager alertDefinitionManager;
+
+    private AuthzSubjectManagerLocal authzSubjectManager;
+
+    private EscalationManagerLocal escalationManager;
+
     @Autowired
     public AlertManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
-                                AlertActionLogDAO alertActionLogDAO, AlertDAO alertDAO,
-                                AlertConditionDAO alertConditionDAO, MeasurementDAO measurementDAO,
-                                ResourceManager resourceManager, AlertDefinitionManager alertDefinitionManager,
-                                AuthzSubjectManagerLocal authzSubjectManager, EscalationManagerLocal escalationManager) {
-            this.alertPermissionManager = alertPermissionManager;
-            this.alertDefDao = alertDefDao;
-            this.alertActionLogDAO = alertActionLogDAO;
-            this.alertDAO = alertDAO;
-            this.alertConditionDAO = alertConditionDAO;
-            this.measurementDAO = measurementDAO;
-            this.resourceManager = resourceManager;
-            this.alertDefinitionManager = alertDefinitionManager;
-            this.authzSubjectManager = authzSubjectManager;
-            this.escalationManager = escalationManager;
+                            AlertActionLogDAO alertActionLogDAO, AlertDAO alertDAO,
+                            AlertConditionDAO alertConditionDAO, MeasurementDAO measurementDAO,
+                            ResourceManager resourceManager, AlertDefinitionManager alertDefinitionManager,
+                            AuthzSubjectManagerLocal authzSubjectManager, EscalationManagerLocal escalationManager) {
+        this.alertPermissionManager = alertPermissionManager;
+        this.alertDefDao = alertDefDao;
+        this.alertActionLogDAO = alertActionLogDAO;
+        this.alertDAO = alertDAO;
+        this.alertConditionDAO = alertConditionDAO;
+        this.measurementDAO = measurementDAO;
+        this.resourceManager = resourceManager;
+        this.alertDefinitionManager = alertDefinitionManager;
+        this.authzSubjectManager = authzSubjectManager;
+        this.escalationManager = escalationManager;
     }
 
     @PostConstruct
-     public void afterPropertiesSet() throws Exception {
-      // We need to phase out the Value objects...
-         valuePager = Pager.getPager(VALUE_PROCESSOR);
+    public void afterPropertiesSet() throws Exception {
+        // We need to phase out the Value objects...
+        valuePager = Pager.getPager(VALUE_PROCESSOR);
 
-         // ...and start using the POJOs instead
-         pojoPager = Pager.getDefaultPager();
-     }
+        // ...and start using the POJOs instead
+        pojoPager = Pager.getDefaultPager();
+    }
 
     /**
      * Create a new alert.
-     *
+     * 
      * @param def The alert definition.
      * @param ctime The alert creation time.
      * 
@@ -150,38 +144,38 @@ public class AlertManagerImpl implements AlertManager {
         Alert alert = new Alert();
         alert.setAlertDefinition(def);
         alert.setCtime(ctime);
-       alertDAO.save(alert);
+        alertDAO.save(alert);
         return alert;
     }
 
     /**
      * Simply mark an alert object as fixed
-     *
+     * 
      * 
      */
     public void setAlertFixed(Alert alert) {
         alert.setFixed(true);
 
-        // If the alert definition is set to "recover", then we should enable it.
+        // If the alert definition is set to "recover", then we should enable
+        // it.
         AlertDefinition def = alert.getAlertDefinition();
 
         if (def.isWillRecover()) {
             try {
-                alertDefinitionManager.updateAlertDefinitionInternalEnable( authzSubjectManager.getOverlordPojo(), def, true);
+                alertDefinitionManager.updateAlertDefinitionInternalEnable(authzSubjectManager.getOverlordPojo(), def,
+                    true);
             } catch (PermissionException e) {
-                log.error("Error re-enabling alert with ID: " + def.getId() + " after it was fixed.",e);
+                log.error("Error re-enabling alert with ID: " + def.getId() + " after it was fixed.", e);
             }
         }
     }
 
     /**
      * Log the details of an action's execution
-     *
+     * 
      * 
      */
-    public void logActionDetail(Alert alert, Action action, String detail,
-                                AuthzSubject subject)
-    {
+    public void logActionDetail(Alert alert, Action action, String detail, AuthzSubject subject) {
         alert.createActionLog(detail, action, subject);
     }
 
@@ -193,11 +187,12 @@ public class AlertManagerImpl implements AlertManager {
         }
     }
 
-    /** Remove alerts
+    /**
+     * Remove alerts
      * 
      */
     public void deleteAlerts(Integer[] ids) {
-       alertDAO.deleteByIds(ids);
+        alertDAO.deleteByIds(ids);
     }
 
     /**
@@ -205,8 +200,7 @@ public class AlertManagerImpl implements AlertManager {
      * @throws PermissionException
      * 
      */
-    public int deleteAlerts(AuthzSubject subj, AppdefEntityID id)
-        throws PermissionException {
+    public int deleteAlerts(AuthzSubject subj, AppdefEntityID id) throws PermissionException {
         alertPermissionManager.canManageAlerts(subj, id);
         return alertDAO.deleteByResource(resourceManager.findResource(id));
     }
@@ -216,8 +210,7 @@ public class AlertManagerImpl implements AlertManager {
      * @throws PermissionException
      * 
      */
-    public int deleteAlerts(AuthzSubject subj, AlertDefinition ad)
-        throws RemoveException, PermissionException {
+    public int deleteAlerts(AuthzSubject subj, AlertDefinition ad) throws RemoveException, PermissionException {
         alertPermissionManager.canManageAlerts(subj, ad);
         return alertDAO.deleteByAlertDefinition(ad);
     }
@@ -232,7 +225,7 @@ public class AlertManagerImpl implements AlertManager {
 
     /**
      * Find an alert by ID
-     *
+     * 
      * 
      */
     public AlertValue getById(Integer id) {
@@ -241,16 +234,14 @@ public class AlertManagerImpl implements AlertManager {
 
     /**
      * Find an alert pojo by ID
-     *
+     * 
      * 
      */
     public Alert findAlertById(Integer id) {
-        Alert alert =alertDAO.findById(id);
+        Alert alert = alertDAO.findById(id);
         Hibernate.initialize(alert);
 
-        alert.setAckable(escalationManager
-                         .isAlertAcknowledgeable(alert.getId(),
-                                                 alert.getDefinition()));
+        alert.setAckable(escalationManager.isAlertAcknowledgeable(alert.getId(), alert.getDefinition()));
 
         return alert;
     }
@@ -258,11 +249,10 @@ public class AlertManagerImpl implements AlertManager {
     /**
      * Find the last alert by definition ID
      * @throws PermissionException
-     *
+     * 
      * 
      */
-    public Alert findLastUnfixedByDefinition(AuthzSubject subj, Integer id)
-    {
+    public Alert findLastUnfixedByDefinition(AuthzSubject subj, Integer id) {
         try {
             AlertDefinition def = alertDefDao.findById(id);
             return alertDAO.findLastByDefinition(def, false);
@@ -274,7 +264,7 @@ public class AlertManagerImpl implements AlertManager {
     /**
      * Find the last alert by definition ID
      * @throws PermissionException
-     *
+     * 
      * 
      */
     public Alert findLastFixedByDefinition(AlertDefinition def) {
@@ -298,10 +288,10 @@ public class AlertManagerImpl implements AlertManager {
      * 
      */
     public int[] getAlertCount(AppdefEntityID[] ids) {
-        AlertDAO dao =alertDAO;
+        AlertDAO dao = alertDAO;
         int[] counts = new int[ids.length];
         for (int i = 0; i < ids.length; i++) {
-            if (ids[i].isPlatform() || ids[i].isServer() || ids[i].isService()){
+            if (ids[i].isPlatform() || ids[i].isServer() || ids[i].isService()) {
                 counts[i] = dao.countAlerts(resourceManager.findResource(ids[i])).intValue();
             }
         }
@@ -309,10 +299,12 @@ public class AlertManagerImpl implements AlertManager {
     }
 
     /**
-     * Processes {@link AlertConditionSatisfiedZEvent} that indicate that an alert should be created
+     * Processes {@link AlertConditionSatisfiedZEvent} that indicate that an
+     * alert should be created
      * 
-     * To minimize StaleStateExceptions, this method should only be called once in one transaction.
-     *      
+     * To minimize StaleStateExceptions, this method should only be called once
+     * in one transaction.
+     * 
      * 
      */
     public void fireAlert(AlertConditionsSatisfiedZEvent event) {
@@ -322,31 +314,25 @@ public class AlertManagerImpl implements AlertManager {
         }
         long startTime = System.currentTimeMillis();
         try {
-           
 
-            Integer adId = Integer.valueOf(((AlertConditionsSatisfiedZEventSource)event.getSourceId()).getId());
+            Integer adId = Integer.valueOf(((AlertConditionsSatisfiedZEventSource) event.getSourceId()).getId());
 
             AlertDefinition alertDef = null;
 
-            //Check persisted alert def status
+            // Check persisted alert def status
             if (!alertDefinitionManager.isEnabled(adId)) {
-                  return;
+                return;
             }
 
-           alertDef = alertDefinitionManager.getByIdNoCheck(adId);
+            alertDef = alertDefinitionManager.getByIdNoCheck(adId);
 
-
-           if (alertDef.getFrequencyType() == EventConstants.FREQ_ONCE ||
-                    alertDef.isWillRecover()) {
+            if (alertDef.getFrequencyType() == EventConstants.FREQ_ONCE || alertDef.isWillRecover()) {
                 // Disable the alert definition now that we've fired
-                alertDefinitionManager.updateAlertDefinitionInternalEnable(
-                            authzSubjectManager.getOverlordPojo(),
-                            alertDef,
-                            false);
+                alertDefinitionManager.updateAlertDefinitionInternalEnable(authzSubjectManager.getOverlordPojo(),
+                    alertDef, false);
             }
 
-            EscalatableCreator creator =
-                new ClassicEscalatableCreator(alertDef, event, new Messenger(), this);
+            EscalatableCreator creator = new ClassicEscalatableCreator(alertDef, event, new Messenger(), this);
             Resource res = creator.getAlertDefinition().getResource();
             if (res == null || res.isInAsyncDeleteState()) {
                 return;
@@ -354,43 +340,40 @@ public class AlertManagerImpl implements AlertManager {
 
             // Now start escalation
             if (alertDef.getEscalation() != null) {
-               escalationManager
-                                    .startEscalation(alertDef, creator);
+                escalationManager.startEscalation(alertDef, creator);
             } else {
                 creator.createEscalatable();
             }
-            
+
             if (log.isDebugEnabled()) {
-                log.debug("Alert definition " + alertDef.getName() +
-                           " (id=" + alertDef.getId() + ") fired.");
+                log.debug("Alert definition " + alertDef.getName() + " (id=" + alertDef.getId() + ") fired.");
             }
-            
-            ConcurrentStatsCollector.getInstance().addStat(System.currentTimeMillis() - startTime,ConcurrentStatsCollector.FIRE_ALERT_TIME);
+
+            ConcurrentStatsCollector.getInstance().addStat(System.currentTimeMillis() - startTime,
+                ConcurrentStatsCollector.FIRE_ALERT_TIME);
         } catch (PermissionException e) {
-            log.error("Alert not firing due to a permissions issue",e);
+            log.error("Alert not firing due to a permissions issue", e);
         } catch (ResourceDeletedException e) {
-            log.debug(e,e);
+            log.debug(e, e);
         }
     }
 
     /**
      * Get a collection of alerts for an AppdefEntityID
      * @throws PermissionException
-     *
+     * 
      * 
      */
     @SuppressWarnings("unchecked")
-    public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id,
-                               PageControl pc)
-        throws PermissionException {
+    public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id, PageControl pc) throws PermissionException {
         alertPermissionManager.canManageAlerts(subj, id);
         List<Alert> alerts;
 
         final Resource resource = resourceManager.findResource(id);
         if (pc.getSortattribute() == SortAttribute.NAME) {
-            alerts =alertDAO.findByResourceSortByAlertDef(resource);
+            alerts = alertDAO.findByResourceSortByAlertDef(resource);
         } else {
-            alerts =alertDAO.findByResource(resource);
+            alerts = alertDAO.findByResource(resource);
         }
 
         if (pc.getSortorder() == PageControl.SORT_DESC)
@@ -402,21 +385,15 @@ public class AlertManagerImpl implements AlertManager {
     /**
      * Get a collection of alerts for an AppdefEntityID and time range
      * @throws PermissionException
-     *
+     * 
      * 
      */
     @SuppressWarnings("unchecked")
-    public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id,
-                               long begin, long end, PageControl pc)
-        throws PermissionException
-    {
+    public PageList<Alert> findAlerts(AuthzSubject subj, AppdefEntityID id, long begin, long end, PageControl pc)
+        throws PermissionException {
         alertPermissionManager.canManageAlerts(subj, id);
-        List<Alert> alerts =
-           alertDAO.findByAppdefEntityInRange(resourceManager.findResource(id),
-                                                    begin, end,
-                                                    pc.getSortattribute() ==
-                                                        SortAttribute.NAME,
-                                                    pc.isAscending());
+        List<Alert> alerts = alertDAO.findByAppdefEntityInRange(resourceManager.findResource(id), begin, end, pc
+            .getSortattribute() == SortAttribute.NAME, pc.isAscending());
 
         return pojoPager.seek(alerts, pc);
     }
@@ -425,13 +402,9 @@ public class AlertManagerImpl implements AlertManager {
      * A more optimized look up which includes the permission checking
      * 
      */
-    public List<Alert> findAlerts(Integer subj, int priority, long timeRange,
-                           long endTime, boolean inEsc, boolean notFixed,
-                           Integer groupId, PageInfo pageInfo)
-        throws PermissionException
-    {
-        return findAlerts(subj, priority, timeRange, endTime,
-                          inEsc, notFixed, groupId, null, pageInfo);
+    public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime, boolean inEsc,
+                                  boolean notFixed, Integer groupId, PageInfo pageInfo) throws PermissionException {
+        return findAlerts(subj, priority, timeRange, endTime, inEsc, notFixed, groupId, null, pageInfo);
     }
 
     /**
@@ -439,12 +412,9 @@ public class AlertManagerImpl implements AlertManager {
      * @return {@link List} of {@link Alert}s
      * 
      */
-    public List<Alert> findAlerts(Integer subj, int priority, long timeRange,
-                           long endTime, boolean inEsc, boolean notFixed,
-                           Integer groupId, Integer alertDefId,
-                           PageInfo pageInfo)
-        throws PermissionException
-    {
+    public List<Alert> findAlerts(Integer subj, int priority, long timeRange, long endTime, boolean inEsc,
+                                  boolean notFixed, Integer groupId, Integer alertDefId, PageInfo pageInfo)
+        throws PermissionException {
         // [HHQ-2946] Only round up if end time is not a multiple of a minute
         long mod = endTime % 60000;
         if (mod > 0) {
@@ -452,48 +422,38 @@ public class AlertManagerImpl implements AlertManager {
             // be able to use cached results.
             endTime = TimingVoodoo.roundUpTime(endTime, 60000);
         }
-        return alertDAO.findByCreateTimeAndPriority(subj,
-                                                         endTime - timeRange,
-                                                         endTime, priority,
-                                                         inEsc, notFixed,
-                                                         groupId, alertDefId,
-                                                         pageInfo);
+        return alertDAO.findByCreateTimeAndPriority(subj, endTime - timeRange, endTime, priority, inEsc, notFixed,
+            groupId, alertDefId, pageInfo);
     }
 
     /**
      * Search alerts given a set of criteria
-     *
-     * @param timeRange
-     *            the amount of milliseconds prior to current that the alerts
-     *            will be contained in. e.g. the beginning of the time range
-     *            will be (current - timeRante)
-     * @param page
-     *            TODO
-     *
-     * @param includes {@link List} of {@link AppdefEntityID}s to filter,
-     *  may be null for all.
+     * 
+     * @param timeRange the amount of milliseconds prior to current that the
+     *        alerts will be contained in. e.g. the beginning of the time range
+     *        will be (current - timeRante)
+     * @param page TODO
+     * 
+     * @param includes {@link List} of {@link AppdefEntityID}s to filter, may be
+     *        null for all.
      * 
      */
-    public List<Alert> findAlerts(AuthzSubject subj, int count, int priority,
-                           long timeRange, long endTime, List<AppdefEntityID> includes)
-        throws PermissionException
-    {
+    public List<Alert> findAlerts(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
+                                  List<AppdefEntityID> includes) throws PermissionException {
         List<Alert> result = new ArrayList<Alert>();
         final Set<AppdefEntityID> inclSet = (includes == null) ? null : new HashSet<AppdefEntityID>(includes);
 
         for (int index = 0; result.size() < count; index++) {
             // Permission checking included
-            PageInfo pInfo = PageInfo.create(index, count, AlertSortField.DATE,
-                                             false);
+            PageInfo pInfo = PageInfo.create(index, count, AlertSortField.DATE, false);
             // XXX need to change this to pass in specific includes so that
             // the session does not blow up with too many objects
-            List<Alert> alerts = findAlerts(subj.getId(), priority, timeRange,
-                                     endTime, false, false, null, pInfo);
+            List<Alert> alerts = findAlerts(subj.getId(), priority, timeRange, endTime, false, false, null, pInfo);
             if (alerts.size() == 0) {
                 break;
             }
             if (inclSet != null) {
-                for (Alert alert: alerts) {
+                for (Alert alert : alerts) {
                     AlertDefinition alertdef = alert.getAlertDefinition();
 
                     // Filter by appdef entity
@@ -510,8 +470,7 @@ public class AlertManagerImpl implements AlertManager {
                         break;
                     }
                 }
-            }
-            else {
+            } else {
                 return alerts;
             }
         }
@@ -521,18 +480,14 @@ public class AlertManagerImpl implements AlertManager {
 
     /**
      * Find escalatables for a resource in a given time range.
-     *
+     * 
      * @see findAlerts(AuthzSubject, int, int, long, long, List)
-     *
+     * 
      * 
      */
-    public List<Escalatable> findEscalatables(AuthzSubject subj, int count,
-                                 int priority, long timeRange, long endTime,
-                                 List<AppdefEntityID> includes)
-        throws PermissionException
-    {
-        List<Alert> alerts = findAlerts(subj, count, priority, timeRange, endTime,
-                                 includes);
+    public List<Escalatable> findEscalatables(AuthzSubject subj, int count, int priority, long timeRange, long endTime,
+                                              List<AppdefEntityID> includes) throws PermissionException {
+        List<Alert> alerts = findAlerts(subj, count, priority, timeRange, endTime, includes);
         return convertAlertsToEscalatables(alerts);
     }
 
@@ -540,18 +495,12 @@ public class AlertManagerImpl implements AlertManager {
      * A more optimized look up which includes the permission checking
      * 
      */
-    public int getUnfixedCount(Integer subj, long timeRange, long endTime,
-                               Integer groupId)
-        throws PermissionException
-    {
+    public int getUnfixedCount(Integer subj, long timeRange, long endTime, Integer groupId) throws PermissionException {
         // Time voodoo the end time to the nearest minute so that we might
         // be able to use cached results
         endTime = TimingVoodoo.roundUpTime(endTime, 60000);
-        Integer count =alertDAO.countByCreateTimeAndPriority(subj,
-                                                         endTime - timeRange,
-                                                         endTime, 0,
-                                                         false, true,
-                                                         groupId, null);
+        Integer count = alertDAO.countByCreateTimeAndPriority(subj, endTime - timeRange, endTime, 0, false, true,
+            groupId, null);
         if (count != null)
             return count.intValue();
 
@@ -561,15 +510,12 @@ public class AlertManagerImpl implements AlertManager {
     private List<Escalatable> convertAlertsToEscalatables(Collection<Alert> alerts) {
         List<Escalatable> res = new ArrayList<Escalatable>(alerts.size());
 
-        for (Alert a: alerts ) {
-            // due to async deletes this could be null.  just ignore and continue
+        for (Alert a : alerts) {
+            // due to async deletes this could be null. just ignore and continue
             if (a.getAlertDefinition().getResource().isInAsyncDeleteState()) {
                 continue;
             }
-            Escalatable e =
-                ClassicEscalatableCreator.createEscalatable(a,
-                                                            getShortReason(a),
-                                                            getLongReason(a));
+            Escalatable e = ClassicEscalatableCreator.createEscalatable(a, getShortReason(a), getLongReason(a));
             res.add(e);
         }
         return res;
@@ -581,18 +527,15 @@ public class AlertManagerImpl implements AlertManager {
      */
     public String getShortReason(Alert alert) {
         AlertDefinition def = alert.getAlertDefinition();
-        AppdefEntityID aeid =
-            new AppdefEntityID(def.getResource());
-        AppdefEntityValue aev = new AppdefEntityValue(
-            aeid, authzSubjectManager.getOverlordPojo());
+        AppdefEntityID aeid = new AppdefEntityID(def.getResource());
+        AppdefEntityValue aev = new AppdefEntityValue(aeid, authzSubjectManager.getOverlordPojo());
 
         String name = "";
 
         try {
             name = aev.getName();
         } catch (AppdefEntityNotFoundException e) {
-            log.warn("Alert short reason requested for invalid resource " +
-                     aeid);
+            log.warn("Alert short reason requested for invalid resource " + aeid);
         } catch (PermissionException e) {
             // Should never happen
             log.error("Overlord does not have permission for resource " + aeid);
@@ -601,50 +544,36 @@ public class AlertManagerImpl implements AlertManager {
         // Get the alert definition's conditions
         Collection<AlertConditionLog> clogs = alert.getConditionLog();
 
-        StringBuffer text =
-            new StringBuffer(def.getName())
-                .append(" ")
-                .append(name)
-                .append(" ");
+        StringBuffer text = new StringBuffer(def.getName()).append(" ").append(name).append(" ");
 
-      
-        for (AlertConditionLog log: clogs ) {
+        for (AlertConditionLog log : clogs) {
             AlertCondition cond = log.getCondition();
 
             switch (cond.getType()) {
-            case EventConstants.TYPE_THRESHOLD:
-            case EventConstants.TYPE_BASELINE:
-                // Value is already formatted by HHQ-2573
-                String actualValue = log.getValue();
+                case EventConstants.TYPE_THRESHOLD:
+                case EventConstants.TYPE_BASELINE:
+                    // Value is already formatted by HHQ-2573
+                    String actualValue = log.getValue();
 
-                text.append(cond.getName())
-                    .append(" (").append(actualValue).append(") ");
-                break;
-            case EventConstants.TYPE_CONTROL:
-                text.append(cond.getName());
-                break;
-            case EventConstants.TYPE_CHANGE:
-                text.append(cond.getName())
-                    .append(" (")
-                    .append(log.getValue())
-                    .append(") ");
-                break;
-            case EventConstants.TYPE_CUST_PROP:
-                text.append(cond.getName()).append(" (")
-                    .append(log.getValue()).append(") ");
-                break;
-            case EventConstants.TYPE_LOG:
-                text.append("Log (")
-                    .append(log.getValue())
-                    .append(") ");
-                break;
-            case EventConstants.TYPE_CFG_CHG:
-                text.append("Config changed (")
-                    .append(log.getValue())
-                    .append(") ");
-                break;
-            default:
-                break;
+                    text.append(cond.getName()).append(" (").append(actualValue).append(") ");
+                    break;
+                case EventConstants.TYPE_CONTROL:
+                    text.append(cond.getName());
+                    break;
+                case EventConstants.TYPE_CHANGE:
+                    text.append(cond.getName()).append(" (").append(log.getValue()).append(") ");
+                    break;
+                case EventConstants.TYPE_CUST_PROP:
+                    text.append(cond.getName()).append(" (").append(log.getValue()).append(") ");
+                    break;
+                case EventConstants.TYPE_LOG:
+                    text.append("Log (").append(log.getValue()).append(") ");
+                    break;
+                case EventConstants.TYPE_CFG_CHG:
+                    text.append("Config changed (").append(log.getValue()).append(") ");
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -662,59 +591,50 @@ public class AlertManagerImpl implements AlertManager {
         // Get the alert definition's conditions
         Collection<AlertConditionLog> clogs = alert.getConditionLog();
 
-        AlertConditionLog[] logs = (AlertConditionLog[])
-            clogs.toArray(new AlertConditionLog[clogs.size()]);
+        AlertConditionLog[] logs = (AlertConditionLog[]) clogs.toArray(new AlertConditionLog[clogs.size()]);
 
         StringBuffer text = new StringBuffer();
-      
+
         for (int i = 0; i < logs.length; i++) {
             AlertCondition cond = logs[i].getCondition();
 
             if (i == 0) {
                 text.append("\n").append(indent).append("If ");
-            }
-            else {
-                text.append("\n").append(indent)
-                    .append(cond.isRequired() ? "AND " : "OR ");
+            } else {
+                text.append("\n").append(indent).append(cond.isRequired() ? "AND " : "OR ");
             }
 
             Measurement dm = null;
 
             switch (cond.getType()) {
-            case EventConstants.TYPE_THRESHOLD:
-            case EventConstants.TYPE_BASELINE:
-                dm = measurementDAO.findById(new Integer(cond.getMeasurementId()));
-                text.append(cond.describe(dm));
+                case EventConstants.TYPE_THRESHOLD:
+                case EventConstants.TYPE_BASELINE:
+                    dm = measurementDAO.findById(new Integer(cond.getMeasurementId()));
+                    text.append(cond.describe(dm));
 
-                // Value is already formatted by HHQ-2573
-                String actualValue = logs[i].getValue();
-                text.append(" (actual value = ").append(actualValue).append(")");
-                break;
-            case EventConstants.TYPE_CONTROL:
-                text.append(cond.describe(dm));
-                break;
-            case EventConstants.TYPE_CHANGE:
-                text.append(cond.describe(dm))
-                    .append(" (New value: ")
-                    .append(logs[i].getValue())
-                    .append(")");
-                break;
-            case EventConstants.TYPE_CUST_PROP:
-                text.append(cond.describe(dm))
-                    .append("\n").append(indent).append(logs[i].getValue());
-                break;
-            case EventConstants.TYPE_LOG:
-                text.append(cond.describe(dm))
-                    .append("\n").append(indent).append("Log: ")
-                    .append(logs[i].getValue());
-                break;
-            case EventConstants.TYPE_CFG_CHG:
-                text.append(cond.describe(dm))
-                    .append("\n").append(indent).append("Details: ")
-                    .append(logs[i].getValue());
-                break;
-            default:
-                break;
+                    // Value is already formatted by HHQ-2573
+                    String actualValue = logs[i].getValue();
+                    text.append(" (actual value = ").append(actualValue).append(")");
+                    break;
+                case EventConstants.TYPE_CONTROL:
+                    text.append(cond.describe(dm));
+                    break;
+                case EventConstants.TYPE_CHANGE:
+                    text.append(cond.describe(dm)).append(" (New value: ").append(logs[i].getValue()).append(")");
+                    break;
+                case EventConstants.TYPE_CUST_PROP:
+                    text.append(cond.describe(dm)).append("\n").append(indent).append(logs[i].getValue());
+                    break;
+                case EventConstants.TYPE_LOG:
+                    text.append(cond.describe(dm)).append("\n").append(indent).append("Log: ").append(
+                        logs[i].getValue());
+                    break;
+                case EventConstants.TYPE_CFG_CHG:
+                    text.append(cond.describe(dm)).append("\n").append(indent).append("Details: ").append(
+                        logs[i].getValue());
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -730,7 +650,7 @@ public class AlertManagerImpl implements AlertManager {
     }
 
     public static AlertManager getOne() {
-       return Bootstrap.getBean(AlertManager.class);
+        return Bootstrap.getBean(AlertManager.class);
     }
 
 }
