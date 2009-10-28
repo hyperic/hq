@@ -93,8 +93,8 @@ import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
-import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
-import org.hyperic.hq.product.shared.ProductManagerLocal;
+import org.hyperic.hq.product.server.session.ProductManagerImpl;
+import org.hyperic.hq.product.shared.ProductManager;
 
 public abstract class BizappSessionEJB {
 
@@ -205,8 +205,8 @@ public abstract class BizappSessionEJB {
         return PlatformManagerEJBImpl.getOne();
     }
 
-    public ProductManagerLocal getProductManager() {
-        return ProductManagerEJBImpl.getOne();
+    public ProductManager getProductManager() {
+        return ProductManagerImpl.getOne();
     }
 
     public TemplateManagerLocal getTemplateManager() {

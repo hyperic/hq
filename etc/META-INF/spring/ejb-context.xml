@@ -64,7 +64,7 @@
 <bean class="org.hyperic.hq.measurement.server.session.SRNManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.TrackerManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.product.server.session.ProductManagerEJBImpl" factory-method="getOne"/>
+<bean class="org.hyperic.hq.product.server.session.ProductManagerImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl" factory-method="getOne"/>
 
 <tx:jta-transaction-manager />

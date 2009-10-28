@@ -84,7 +84,7 @@ import org.hyperic.hq.product.ControlPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
+import org.hyperic.hq.product.server.session.ProductManagerImpl;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -118,7 +118,7 @@ public class ControlManagerEJBImpl implements SessionBean {
 
         // Get reference to the control plugin manager
         try {
-            _controlManager = (ControlPluginManager)ProductManagerEJBImpl.
+            _controlManager = (ControlPluginManager)ProductManagerImpl.
                 getOne().getPluginManager(ProductPlugin.TYPE_CONTROL);
         } catch (Exception e) {
             this._log.error("Unable to get plugin manager", e);

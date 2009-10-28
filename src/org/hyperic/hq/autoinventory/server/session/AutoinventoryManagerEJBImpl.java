@@ -116,8 +116,8 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerDetector;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
-import org.hyperic.hq.product.shared.ProductManagerLocal;
+import org.hyperic.hq.product.server.session.ProductManagerImpl;
+import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.hq.dao.AIHistoryDAO;
@@ -209,7 +209,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                                AppdefEntityID id) {
         boolean retVal;
         AutoinventoryPluginManager aiPluginManager ;
-        ProductManagerLocal productManager = ProductManagerEJBImpl.getOne();
+        ProductManager productManager = ProductManagerImpl.getOne();
         ServerManagerLocal serverManager = ServerManagerEJBImpl.getOne();
 
         try {
@@ -876,7 +876,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     
     private void mergeServiceTypes(final Set serviceTypeMerges) {
     	if(! serviceTypeMerges.isEmpty()) {
-    		final ProductManagerLocal productManager = ProductManagerEJBImpl.getOne();
+    		final ProductManager productManager = ProductManagerImpl.getOne();
     		Map productTypes = new HashMap();
     		for(Iterator iterator = serviceTypeMerges.iterator();iterator.hasNext();) {
     			final org.hyperic.hq.product.ServiceType serviceType = (org.hyperic.hq.product.ServiceType) iterator
@@ -1165,7 +1165,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     public void ejbCreate() throws CreateException {
         // Get reference to the AI plugin manager
         try {
-            ProductManagerLocal productManager = ProductManagerEJBImpl.getOne();
+            ProductManager productManager = ProductManagerImpl.getOne();
             aiPluginManager =
                 (AutoinventoryPluginManager) productManager.
                 getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);

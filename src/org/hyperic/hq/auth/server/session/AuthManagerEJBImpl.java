@@ -47,7 +47,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.PrincipalDAO;
-import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
+import org.hyperic.hq.product.server.session.ProductManagerImpl;
 import org.hyperic.util.ConfigPropertyException;
 import org.jboss.security.Util;
 import org.jboss.security.auth.callback.UsernamePasswordHandler;
@@ -76,7 +76,7 @@ public class AuthManagerEJBImpl implements SessionBean {
 
 
     private boolean isReady() {
-        return ProductManagerEJBImpl.getOne().isReady();
+        return ProductManagerImpl.getOne().isReady();
     }
 
     /**
