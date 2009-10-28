@@ -2,14 +2,14 @@ package org.hyperic.hq.events.server.session;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
+import org.springframework.beans.factory.annotation.Autowired;
+
 
 /**
  * Default implementation of {@link AlertConditionEvaluatorFactory}
@@ -22,28 +22,20 @@ public class AlertConditionEvaluatorFactoryImpl implements AlertConditionEvaluat
 
     private final Log log = LogFactory.getLog(AlertConditionEvaluatorFactoryImpl.class);
 
-    private final Map alertConditionEvaluatorStates;
+    private final AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository;
 
-    private final Map executionStrategyStates;
 
     /**
      * 
      * @param zeventEnqueuer The {@link ZeventEnqueuer} to pass to created
      *        {@link AlertConditionEvaluator}s
-     * @param evaluatorStates The saved state (if any) of
-     *        {@link AlertConditionEvaluator}s created the last time the server
-     *        was running. Keyed by alert definition ID.
-     * @param executionStrategyStates The saved state (if any) of
-     *        {@link ExecutionStrategy}s created the last time the server was
-     *        running. Keyed by alert definition ID.
      */
+    @Autowired
     public AlertConditionEvaluatorFactoryImpl(ZeventEnqueuer zeventEnqueuer,
-                                              Map evaluatorStates,
-                                              Map executionStrategyStates)
+                                             AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository)
     {
         this.zeventEnqueuer = zeventEnqueuer;
-        this.alertConditionEvaluatorStates = evaluatorStates;
-        this.executionStrategyStates = executionStrategyStates;
+        this.alertConditionEvaluatorStateRepository = alertConditionEvaluatorStateRepository;
     }
 
     public AlertConditionEvaluator create(AlertDefinition alertDefinition) {
@@ -56,9 +48,8 @@ public class AlertConditionEvaluatorFactoryImpl implements AlertConditionEvaluat
         AlertConditionEvaluator evaluator;
         if (alertDefinition.isRecoveryDefinition()) {
             Integer alertTriggerId = Integer.valueOf(0);
-            List conditions = new ArrayList();
-            for (Iterator iter = alertDefinition.getConditions().iterator(); iter.hasNext();) {
-                AlertCondition condition = (AlertCondition) iter.next();
+            List<AlertCondition> conditions = new ArrayList<AlertCondition>();
+            for (AlertCondition condition: alertDefinition.getConditions()) {
                 if (condition.getType() == EventConstants.TYPE_ALERT) {
                     alertTriggerId = condition.getTrigger().getId();
                 } else {
@@ -79,7 +70,7 @@ public class AlertConditionEvaluatorFactoryImpl implements AlertConditionEvaluat
         }
         // take state out of the map so if the ACE is re-created on modification
         // of alert def, we don't use the initial state
-        Serializable initialState = (Serializable) alertConditionEvaluatorStates.remove(alertDefinition.getId());
+        Serializable initialState = (Serializable) alertConditionEvaluatorStateRepository.getAlertConditionEvaluatorStates().remove(alertDefinition.getId());
         if (initialState != null) {
             evaluator.initialize(initialState);
         }
@@ -103,7 +94,7 @@ public class AlertConditionEvaluatorFactoryImpl implements AlertConditionEvaluat
         }
         // take state out of the map so if the ACE is re-created on modification
         // of alert def, we don't use the initial state
-        Serializable initialState = (Serializable) executionStrategyStates.remove(alertDefinition.getId());
+        Serializable initialState = (Serializable) alertConditionEvaluatorStateRepository.getExecutionStrategyStates().remove(alertDefinition.getId());
         if (initialState != null) {
             executionStrategy.initialize(initialState);
         }

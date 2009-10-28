@@ -16,7 +16,6 @@
  */
 package org.hyperic.hq.events.server.session;
 
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,7 +31,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class TriggerDAO
-    extends HibernateDAO implements TriggerDAOInterface
+    extends HibernateDAO<RegisteredTrigger> implements TriggerDAOInterface
 {
     @Autowired
     public TriggerDAO(SessionFactory sessionFactory) {
@@ -85,26 +84,26 @@ public class TriggerDAO
      * @param id The alert definition id.
      * @return The list of associated registered triggers.
      */
-    public List findByAlertDefinitionId(Integer id) {
+    @SuppressWarnings("unchecked")
+    public List<RegisteredTrigger> findByAlertDefinitionId(Integer id) {
         String sql = "from RegisteredTrigger rt where rt.alertDefinition.id = :defId";
 
         return getSession().createQuery(sql).setParameter("defId", id).list();
     }
 
 
-    public Set findAllEnabledTriggers() {
+    @SuppressWarnings("unchecked")
+    public Set<RegisteredTrigger> findAllEnabledTriggers() {
         Dialect dialect = Util.getDialect();
         //For performance optimization, we want to fetch each trigger's alert def as well as the alert def's conditions in a single query (as they will be used to create AlertConditionEvaluators when creating trigger impls).
         //This query guarantees that when we do trigger.getAlertDefinition().getConditions(), the database is not hit again
         String hql = new StringBuilder().append("from AlertDefinition ad left join fetch ad.conditionsBag c inner join fetch c.trigger where ad.enabled = ")
                                         .append(dialect.toBooleanValueString(true))
                                         .toString();
-        List alertDefs = getSession().createQuery(hql).list();
-        Set triggers = new LinkedHashSet();
-        for(Iterator iterator = alertDefs.iterator();iterator.hasNext();) {
-            AlertDefinition definition = (AlertDefinition)iterator.next();
-            for(Iterator conditions = definition.getConditionsBag().iterator(); conditions.hasNext();) {
-                AlertCondition condition = (AlertCondition)conditions.next();
+        List<AlertDefinition> alertDefs = getSession().createQuery(hql).list();
+        Set<RegisteredTrigger> triggers = new LinkedHashSet<RegisteredTrigger>();
+        for(AlertDefinition definition : alertDefs) {
+            for(AlertCondition condition: definition.getConditionsBag()) {
                 triggers.add(condition.getTrigger());
             }
         }

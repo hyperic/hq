@@ -23,11 +23,11 @@ public class MockTrigger implements RegisterableTriggerInterface {
         return null;
     }
 
-    public Class[] getInterestedEventTypes() {
+    public Class<?>[] getInterestedEventTypes() {
         return new Class[] { MockEvent.class };
     }
 
-    public Integer[] getInterestedInstanceIDs(Class c) {
+    public Integer[] getInterestedInstanceIDs(Class<?> c) {
         return new Integer[] { 123, 456 };
     }
 

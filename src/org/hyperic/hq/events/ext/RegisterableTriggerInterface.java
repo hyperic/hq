@@ -54,7 +54,7 @@ public interface RegisterableTriggerInterface {
      * @return an array of Class objects which implement
      *          the 'Event' interface
      */
-    public Class[] getInterestedEventTypes();
+    public Class<?>[] getInterestedEventTypes();
 
     /**
      * Get a list of instance IDs specific to a class (as returned
@@ -67,7 +67,7 @@ public interface RegisterableTriggerInterface {
      * @return An array of integers representing the instance IDs
      *          for the specific event class
      */
-    public Integer[] getInterestedInstanceIDs(Class c);
+    public Integer[] getInterestedInstanceIDs(Class<?> c);
 
     /**
      * Initialize the trigger with a value object.

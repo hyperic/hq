@@ -20,7 +20,7 @@ public interface RegisterableTriggerRepository {
      * @param instanceId The id of the source instance of the event
      * @return The {@link RegisterableTriggerInterface}s interested in the event
      */
-    Collection getInterestedTriggers(Class eventClass, Integer instanceId);
+    Collection<RegisterableTriggerInterface> getInterestedTriggers(Class<?> eventClass, Integer instanceId);
 
     /**
      *
@@ -41,7 +41,7 @@ public interface RegisterableTriggerRepository {
      * @param triggerIds  The triggers that should be enabled or disabled
      * @param enabled true if triggers should be enabled
      */
-    void setTriggersEnabled(Collection triggerIds, boolean enabled);
+    void setTriggersEnabled(Collection<Integer> triggerIds, boolean enabled);
 
 
 }

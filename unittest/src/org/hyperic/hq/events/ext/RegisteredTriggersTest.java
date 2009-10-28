@@ -11,7 +11,7 @@ import junit.framework.TestCase;
 import org.easymock.EasyMock;
 import org.hyperic.hq.events.MockEvent;
 import org.hyperic.hq.events.server.session.AlertRegulator;
-import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
+import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 
 /**
  * Unit test of {@link RegisteredTriggers}
@@ -40,7 +40,7 @@ public class RegisteredTriggersTest
 
     }
 
-    private RegisteredTriggerManagerLocal registeredTriggerManager;
+    private RegisteredTriggerManager registeredTriggerManager;
 
     private RegisteredTriggers registeredTriggers;
 
@@ -53,7 +53,7 @@ public class RegisteredTriggersTest
      */
     public void setUp() throws Exception {
         super.setUp();
-        this.registeredTriggerManager = EasyMock.createMock(RegisteredTriggerManagerLocal.class);
+        this.registeredTriggerManager = EasyMock.createMock(RegisteredTriggerManager.class);
         this.registeredTriggers = new RegisteredTriggers(registeredTriggerManager);
         AlertRegulator.setInstance(new MockAlertRegulator(true));
     }
@@ -77,7 +77,7 @@ public class RegisteredTriggersTest
 
         trigger1.setEnabled(false);
 
-        List expectedDisabledTriggers = new ArrayList();
+        List<Integer> expectedDisabledTriggers = new ArrayList<Integer>();
         expectedDisabledTriggers.add(triggerId);
 
         EasyMock.replay(trigger1);
@@ -158,25 +158,25 @@ public class RegisteredTriggersTest
         registeredTriggers.addTrigger(trigger1);
         registeredTriggers.addTrigger(trigger2);
 
-        Map registeredTriggersMap = registeredTriggers.getTriggers();
+        Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> registeredTriggersMap = registeredTriggers.getTriggers();
         assertEquals(2, registeredTriggersMap.size());
-        Map instance1 = (Map) registeredTriggersMap.get(new TriggerEventKey(MockEvent.class, 123));
+        Map<Integer, RegisterableTriggerInterface> instance1 = registeredTriggersMap.get(new TriggerEventKey(MockEvent.class, 123));
         assertNotNull(instance1);
         assertEquals(2, instance1.size());
         assertNotNull(instance1.get(987));
         assertNotNull(instance1.get(trigger2Id));
 
-        Map instance2 = (Map) registeredTriggersMap.get(new TriggerEventKey(MockEvent.class, 456));
+        Map<Integer, RegisterableTriggerInterface> instance2 = registeredTriggersMap.get(new TriggerEventKey(MockEvent.class, 456));
         assertNotNull(instance2);
         assertEquals(2, instance2.size());
         assertNotNull(instance2.get(987));
         assertNotNull(instance2.get(trigger2Id));
 
         RegisteredTriggers.setInstance(registeredTriggers);
-        Collection interestedTriggers = RegisteredTriggers.getInterestedTriggers(new MockEvent(7l, 123));
+        Collection<RegisterableTriggerInterface> interestedTriggers = RegisteredTriggers.getInterestedTriggers(new MockEvent(7l, 123));
         assertEquals(2, interestedTriggers.size());
 
-        Collection interestedTriggers2 = RegisteredTriggers.getInterestedTriggers(new MockEvent(7l, 999));
+        Collection<RegisterableTriggerInterface> interestedTriggers2 = RegisteredTriggers.getInterestedTriggers(new MockEvent(7l, 999));
         assertTrue(interestedTriggers2.isEmpty());
 
         assertTrue(RegisteredTriggers.isTriggerInterested(new MockEvent(7l, 123)));
@@ -214,25 +214,25 @@ public class RegisteredTriggersTest
         registeredTriggers.addTrigger(trigger1);
         registeredTriggers.addTrigger(trigger2);
 
-        Map registeredTriggersMap = registeredTriggers.getTriggers();
+        Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> registeredTriggersMap = registeredTriggers.getTriggers();
         assertEquals(2, registeredTriggersMap.size());
-        Map instance1 = (Map) registeredTriggersMap.get(new TriggerEventKey(MockEvent.class, 123));
+        Map<Integer, RegisterableTriggerInterface> instance1 = registeredTriggersMap.get(new TriggerEventKey(MockEvent.class, 123));
         assertNotNull(instance1);
         assertEquals(2, instance1.size());
         assertNotNull(instance1.get(987));
         assertNotNull(instance1.get(trigger2Id));
 
-        Map instance2 = (Map) registeredTriggersMap.get(new TriggerEventKey(MockEvent.class, 456));
+        Map<Integer, RegisterableTriggerInterface> instance2 = registeredTriggersMap.get(new TriggerEventKey(MockEvent.class, 456));
         assertNotNull(instance2);
         assertEquals(2, instance2.size());
         assertNotNull(instance2.get(987));
         assertNotNull(instance2.get(trigger2Id));
 
         RegisteredTriggers.setInstance(registeredTriggers);
-        Collection interestedTriggers = RegisteredTriggers.getInterestedTriggers(new MockEvent(7l, 123));
+        Collection<RegisterableTriggerInterface> interestedTriggers = RegisteredTriggers.getInterestedTriggers(new MockEvent(7l, 123));
         assertEquals(1, interestedTriggers.size());
 
-        Collection interestedTriggers2 = RegisteredTriggers.getInterestedTriggers(new MockEvent(7l, 999));
+        Collection<RegisterableTriggerInterface> interestedTriggers2 = RegisteredTriggers.getInterestedTriggers(new MockEvent(7l, 999));
         assertTrue(interestedTriggers2.isEmpty());
 
         assertTrue(RegisteredTriggers.isTriggerInterested(new MockEvent(7l, 123)));
@@ -248,8 +248,8 @@ public class RegisteredTriggersTest
      */
     public void testUnregisterTriggerNoneRemainingForEventKey() {
         Integer triggerId = 567;
-        Map testTriggers = new HashMap();
-        Map triggersById = new HashMap();
+        Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> testTriggers = new HashMap<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>>();
+        Map<Integer, RegisterableTriggerInterface> triggersById = new HashMap<Integer, RegisterableTriggerInterface>();
         RegisterableTriggerInterface trigger1 = EasyMock.createMock(RegisterableTriggerInterface.class);
         triggersById.put(triggerId, trigger1);
         testTriggers.put(new TriggerEventKey(MockEvent.class, 123), triggersById);
@@ -257,7 +257,7 @@ public class RegisteredTriggersTest
         EasyMock.replay(trigger1);
         registeredTriggers.removeTrigger(triggerId);
         EasyMock.verify(trigger1);
-        Map trigMap = registeredTriggers.getTriggers();
+        Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> trigMap = registeredTriggers.getTriggers();
         assertTrue(trigMap.isEmpty());
     }
 
@@ -269,9 +269,9 @@ public class RegisteredTriggersTest
         Integer triggerId = 567;
         Integer trigger2Id = 9908;
 
-        Map testTriggers = new HashMap();
+        Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> testTriggers = new HashMap<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>>();
 
-        Map triggersById = new HashMap();
+        Map<Integer, RegisterableTriggerInterface> triggersById = new HashMap<Integer, RegisterableTriggerInterface>();
         RegisterableTriggerInterface trigger1 = EasyMock.createMock(RegisterableTriggerInterface.class);
         triggersById.put(triggerId, trigger1);
 
@@ -284,8 +284,8 @@ public class RegisteredTriggersTest
         EasyMock.replay(trigger1);
         registeredTriggers.removeTrigger(triggerId);
         EasyMock.verify(trigger1);
-        Map trigMap = registeredTriggers.getTriggers();
-        Map actualTriggers = (Map) trigMap.get(new TriggerEventKey(MockEvent.class, 123));
+        Map<TriggerEventKey, Map<Integer, RegisterableTriggerInterface>> trigMap = registeredTriggers.getTriggers();
+        Map<Integer, RegisterableTriggerInterface> actualTriggers = trigMap.get(new TriggerEventKey(MockEvent.class, 123));
         assertNotNull(actualTriggers);
         assertEquals(1, actualTriggers.size());
         assertEquals(trigger2, (RegisterableTriggerInterface) actualTriggers.get(trigger2Id));

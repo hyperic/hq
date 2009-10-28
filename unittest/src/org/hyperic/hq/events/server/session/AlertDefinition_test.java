@@ -26,7 +26,6 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import junit.framework.TestCase;
@@ -225,7 +224,7 @@ public class AlertDefinition_test extends TestCase {
     }
     
     public void testIsAvailabilityUpGreaterThanComparator() {
-        List list = new ArrayList();
+        List<AlertDefinition> list = new ArrayList<AlertDefinition>();
         
         // add valid alert definitions to test here
         
@@ -253,9 +252,7 @@ public class AlertDefinition_test extends TestCase {
         cond3.setThreshold(0.5);
         list.add(def3);
         
-        for (Iterator it=list.iterator(); it.hasNext(); ) {
-            AlertDefinition def = (AlertDefinition) it.next();
-            
+        for (AlertDefinition def :list) { 
             assertTrue("The alert definition is not properly configured for up availability",
                         def.isAvailability(true));
         }
@@ -266,7 +263,7 @@ public class AlertDefinition_test extends TestCase {
     }
     
     public void testIsAvailabilityDownLessThanComparator() {
-        List list = new ArrayList();
+        List<AlertDefinition> list = new ArrayList<AlertDefinition>();
         
         // add valid alert definitions to test here
         
@@ -294,9 +291,7 @@ public class AlertDefinition_test extends TestCase {
         cond3.setThreshold(0.5);
         list.add(def3);
         
-        for (Iterator it=list.iterator(); it.hasNext(); ) {
-            AlertDefinition def = (AlertDefinition) it.next();
-            
+        for (AlertDefinition def: list) {
             assertTrue("The alert definition is not properly configured for down availability",
                         def.isAvailability(false));
         }
@@ -307,7 +302,7 @@ public class AlertDefinition_test extends TestCase {
     }
 
     private void testIsAvailabilityInvalidThreshold(boolean up, String comparator) {
-        List list = new ArrayList();
+        List<AlertDefinition> list = new ArrayList<AlertDefinition>();
         
         // add invalid alert definitions to test here
 
@@ -327,9 +322,7 @@ public class AlertDefinition_test extends TestCase {
         cond2.setThreshold(MeasurementConstants.AVAIL_PAUSED);
         list.add(def2);
         
-        for (Iterator it=list.iterator(); it.hasNext(); ) {
-            AlertDefinition def = (AlertDefinition) it.next();
-            
+        for (AlertDefinition def : list ) {
             assertFalse("The alert definition is properly configured for availability",
                         def.isAvailability(up));
         }        

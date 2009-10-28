@@ -52,7 +52,7 @@ import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
-import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
+import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementDAO;
@@ -97,7 +97,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
 
     private MeasurementDAO measurementDAO;
 
-    private RegisteredTriggerManagerLocal registeredTriggerManager;
+    private RegisteredTriggerManager registeredTriggerManager;
 
     private ResourceManager resourceManager;
 
@@ -107,7 +107,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     public AlertDefinitionManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
                                       ActionDAO actionDao, AlertConditionDAO alertConditionDAO, TriggerDAO triggerDAO,
                                       MeasurementDAO measurementDAO,
-                                      RegisteredTriggerManagerLocal registeredTriggerManager,
+                                      RegisteredTriggerManager registeredTriggerManager,
                                       ResourceManager resourceManager, EscalationManagerLocal escalationManager) {
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;

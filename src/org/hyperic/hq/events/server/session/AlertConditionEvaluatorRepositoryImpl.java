@@ -3,14 +3,15 @@ package org.hyperic.hq.events.server.session;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
+
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.ShutdownCallback;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Default implementation of{@link AlertConditionEvaluatorRepository} This
@@ -23,14 +24,11 @@ import org.hyperic.hq.application.ShutdownCallback;
  * @author jhickey
  *
  */
+
 public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEvaluatorRepository, ShutdownCallback {
     private static final Log log = LogFactory.getLog(AlertConditionEvaluatorRepositoryImpl.class);
-
-    private static final Object INIT_LOCK = new Object();
-    private static AlertConditionEvaluatorRepositoryImpl INSTANCE;
-
     private AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository;
-    private Map alertConditionEvaluators = new HashMap();
+    private Map<Integer, AlertConditionEvaluator> alertConditionEvaluators = new HashMap<Integer, AlertConditionEvaluator>();
 
     /**
      *
@@ -38,9 +36,15 @@ public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEval
      *        {@link AlertConditionEvaluatorStateRepository} to use for
      *        persisting state on server shutdown
      */
-    protected AlertConditionEvaluatorRepositoryImpl(AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository)
+    @Autowired
+    public AlertConditionEvaluatorRepositoryImpl(AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository)
     {
         this.alertConditionEvaluatorStateRepository = alertConditionEvaluatorStateRepository;
+    }
+    
+    @PostConstruct
+    public void afterPropertiesSet() {
+        HQApp.getInstance().registerCallbackListener(ShutdownCallback.class, this);
     }
 
     public void addAlertConditionEvaluator(AlertConditionEvaluator alertConditionEvaluator) {
@@ -53,7 +57,7 @@ public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEval
         return (AlertConditionEvaluator) alertConditionEvaluators.get(alertDefinitionId);
     }
 
-    public Map getAlertConditionEvaluators() {
+    public Map<Integer, AlertConditionEvaluator> getAlertConditionEvaluators() {
         return Collections.unmodifiableMap(alertConditionEvaluators);
     }
     
@@ -72,10 +76,9 @@ public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEval
             log.debug("shutdown starting on " + this);
         }
         
-        Map alertConditionEvaluatorStates = new HashMap();
-        Map executionStrategyStates = new HashMap();
-        for (Iterator iterator = alertConditionEvaluators.values().iterator(); iterator.hasNext();) {
-            AlertConditionEvaluator alertConditionEvaluator = (AlertConditionEvaluator) iterator.next();
+        Map<Integer, Serializable> alertConditionEvaluatorStates = new HashMap<Integer, Serializable>();
+        Map<Integer, Serializable> executionStrategyStates = new HashMap<Integer, Serializable>();
+        for (AlertConditionEvaluator alertConditionEvaluator: alertConditionEvaluators.values()) {
             Serializable alertConditionEvaluatorState = alertConditionEvaluator.getState();
             if (alertConditionEvaluatorState != null) {
                 alertConditionEvaluatorStates.put(alertConditionEvaluator.getAlertDefinitionId(),
@@ -94,24 +97,4 @@ public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEval
         }
     }
     
-    private void initialize() {
-        if (log.isDebugEnabled()) {
-            log.debug("initialize starting on " + this);
-        }
-
-        HQApp.getInstance().registerCallbackListener(ShutdownCallback.class, INSTANCE);
-    }
-    
-    public static AlertConditionEvaluatorRepository getInstance() {
-        synchronized (INIT_LOCK) {
-            if (INSTANCE == null) {
-                AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository = 
-                    new FileAlertConditionEvaluatorStateRepository(HQApp.getInstance().getRestartStorageDir());
-
-                INSTANCE = new AlertConditionEvaluatorRepositoryImpl(alertConditionEvaluatorStateRepository);
-                INSTANCE.initialize();
-            }
-        }
-        return INSTANCE;
-    }
 }

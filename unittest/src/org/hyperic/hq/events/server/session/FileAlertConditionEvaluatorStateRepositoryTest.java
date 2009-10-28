@@ -2,6 +2,7 @@ package org.hyperic.hq.events.server.session;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,7 +53,7 @@ public class FileAlertConditionEvaluatorStateRepositoryTest
         new File(tempDir, FileAlertConditionEvaluatorStateRepository.EVALUATOR_STATE_FILE_NAME).createNewFile();
         Integer alertDefinitionId = Integer.valueOf(1234);
         Integer alertDefinition2Id = Integer.valueOf(5678);
-        Map alertConditionEvaluatorStates = new HashMap();
+        Map<Integer, Serializable> alertConditionEvaluatorStates = new HashMap<Integer, Serializable>();
         alertConditionEvaluatorStates.put(alertDefinitionId, "Some State");
         alertConditionEvaluatorStates.put(alertDefinition2Id, Integer.valueOf(778));
         alertConditionEvaluatorStateRepository.saveAlertConditionEvaluatorStates(alertConditionEvaluatorStates);
@@ -68,7 +69,7 @@ public class FileAlertConditionEvaluatorStateRepositoryTest
     public void testSaveAndRetrieveAlertConditionEvaluatorStates() {
         Integer alertDefinitionId = Integer.valueOf(1234);
         Integer alertDefinition2Id = Integer.valueOf(5678);
-        Map alertConditionEvaluatorStates = new HashMap();
+        Map<Integer, Serializable> alertConditionEvaluatorStates = new HashMap<Integer, Serializable>();
         alertConditionEvaluatorStates.put(alertDefinitionId, "Some State");
         alertConditionEvaluatorStates.put(alertDefinition2Id, Integer.valueOf(778));
         alertConditionEvaluatorStateRepository.saveAlertConditionEvaluatorStates(alertConditionEvaluatorStates);
@@ -84,7 +85,7 @@ public class FileAlertConditionEvaluatorStateRepositoryTest
     public void testSaveAndRetrieveExecutionStrategyStates() {
         Integer alertDefinitionId = Integer.valueOf(1234);
         Integer alertDefinition2Id = Integer.valueOf(5678);
-        Map executionStrategyStates = new HashMap();
+        Map<Integer, Serializable> executionStrategyStates = new HashMap<Integer, Serializable>();
         executionStrategyStates.put(alertDefinitionId, "Some State");
         executionStrategyStates.put(alertDefinition2Id, Integer.valueOf(778));
         alertConditionEvaluatorStateRepository.saveExecutionStrategyStates(executionStrategyStates);
@@ -101,7 +102,7 @@ public class FileAlertConditionEvaluatorStateRepositoryTest
         new File(tempDir, FileAlertConditionEvaluatorStateRepository.EXECUTION_STRATEGY_FILE_NAME).createNewFile();
         Integer alertDefinitionId = Integer.valueOf(1234);
         Integer alertDefinition2Id = Integer.valueOf(5678);
-        Map executionStrategyStates = new HashMap();
+        Map<Integer, Serializable> executionStrategyStates = new HashMap<Integer, Serializable>();
         executionStrategyStates.put(alertDefinitionId, "Some State");
         executionStrategyStates.put(alertDefinition2Id, Integer.valueOf(778));
         alertConditionEvaluatorStateRepository.saveExecutionStrategyStates(executionStrategyStates);

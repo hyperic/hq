@@ -33,11 +33,6 @@
 
 		</session>
 		<session>
-			<ejb-name>RegisteredTriggerManager</ejb-name>
-			<local-jndi-name>LocalRegisteredTriggerManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>CPropManager</ejb-name>
 			<local-jndi-name>LocalCPropManager</local-jndi-name>
 

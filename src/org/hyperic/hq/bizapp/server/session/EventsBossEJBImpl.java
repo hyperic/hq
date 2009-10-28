@@ -110,7 +110,7 @@ import org.hyperic.hq.events.server.session.AlertManagerImpl;
 import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
 import org.hyperic.hq.events.server.session.EventsStartupListener;
-import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl;
+import org.hyperic.hq.events.server.session.RegisteredTriggerManagerImpl;
 import org.hyperic.hq.events.shared.ActionManager;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -118,7 +118,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
-import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
+import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
@@ -175,8 +175,8 @@ public class EventsBossEJBImpl
         return EscalationManagerEJBImpl.getOne();
     }
 
-    private RegisteredTriggerManagerLocal getRTM() {
-        return RegisteredTriggerManagerEJBImpl.getOne();
+    private RegisteredTriggerManager getRTM() {
+        return RegisteredTriggerManagerImpl.getOne();
     }
 
     private AlertManager getAM() {

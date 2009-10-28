@@ -51,7 +51,6 @@
 <bean class="org.hyperic.hq.events.server.session.HeartBeatServiceEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.events.server.session.HierarchicalAlertingManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.events.server.session.MaintenanceEventManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.galerts.server.session.GtriggerManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl" factory-method="getOne"/>
@@ -67,11 +66,23 @@
 <bean class="org.hyperic.hq.product.server.session.ProductManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl" factory-method="getOne"/>
 
+<!--  These components have to be initialized here instead of through @Component because HQApp restart storage dir is set through ProductPluginDeployer loadConfig() after server is started.-->
+<!--  TODO configure storage dir separately once we're off JBoss and then these can be instantiated through component scanning-->
+<bean id="hqApp" class="org.hyperic.hq.application.HQApp" factory-method="getInstance"/>
+
+<bean class="org.hyperic.hq.events.server.session.FileAlertConditionEvaluatorStateRepository">
+	<constructor-arg value="#{ hqApp.restartStorageDir}"/>
+</bean>
+
+<bean class="org.hyperic.hq.events.server.session.AlertConditionEvaluatorFactoryImpl"/>
+
+<bean class="org.hyperic.hq.events.server.session.AlertConditionEvaluatorRepositoryImpl"/>
+
+<bean class="org.hyperic.hq.events.server.session.TriggersCreatedListener"/>
+
 <tx:jta-transaction-manager />
 
 <tx:annotation-driven />
-
-
 
 <context:annotation-config />
 

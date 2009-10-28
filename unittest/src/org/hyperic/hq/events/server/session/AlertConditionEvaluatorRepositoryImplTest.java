@@ -1,5 +1,6 @@
 package org.hyperic.hq.events.server.session;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -62,11 +63,11 @@ public class AlertConditionEvaluatorRepositoryImplTest extends TestCase {
         Integer alertDefinitionId = Integer.valueOf(1234);
         EasyMock.expect(alertConditionEvaluator.getAlertDefinitionId()).andReturn(alertDefinitionId).times(3);
         EasyMock.expect(alertConditionEvaluator.getState()).andReturn("Some State");
-        Map expectedState = new HashMap();
+        Map<Integer, Serializable> expectedState = new HashMap<Integer, Serializable>();
         expectedState.put(alertDefinitionId, "Some State");
         EasyMock.expect(alertConditionEvaluator.getExecutionStrategy()).andReturn(executionStrategy);
         EasyMock.expect(executionStrategy.getState()).andReturn("More State");
-        Map expectedExStratState= new HashMap();
+        Map<Integer, Serializable> expectedExStratState= new HashMap<Integer, Serializable>();
         expectedExStratState.put(alertDefinitionId, "More State");
         alertEvaluatorStateRepository.saveAlertConditionEvaluatorStates(expectedState);
         alertEvaluatorStateRepository.saveExecutionStrategyStates(expectedExStratState);

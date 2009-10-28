@@ -63,19 +63,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[The trigger manager.]]></description>
-
-			<ejb-name>RegisteredTriggerManager</ejb-name>
-
-			<local-home>org.hyperic.hq.events.shared.RegisteredTriggerManagerLocalHome</local-home>
-			<local>org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal</local>
-			<ejb-class>org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[]]></description>
 
 			<ejb-name>CPropManager</ejb-name>
@@ -952,13 +939,6 @@
 					<method-param>java.lang.String</method-param>
 					<method-param>java.lang.String</method-param>
 				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>RegisteredTriggerManager</ejb-name>
-				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>

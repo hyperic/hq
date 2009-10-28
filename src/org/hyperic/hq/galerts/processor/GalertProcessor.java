@@ -41,6 +41,7 @@ import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.hibernate.SessionManager.SessionRunner;
 import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventSourceId;
 
@@ -68,7 +69,7 @@ public class GalertProcessor {
 
     private static boolean _initialized = false;
     
-    private final ZeventManager      _zMan;
+    private final ZeventEnqueuer      _zMan;
     
     // Integer ids -> MemGalertDefs
     private Map _alertDefs = new HashMap();

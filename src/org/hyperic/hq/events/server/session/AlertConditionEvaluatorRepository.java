@@ -30,7 +30,7 @@ public interface AlertConditionEvaluatorRepository {
     /**
      * Get all the alert condition evaluators
      */
-    Map getAlertConditionEvaluators();
+    Map<Integer, AlertConditionEvaluator> getAlertConditionEvaluators();
 
     /**
      * Remove from the repository
