@@ -91,7 +91,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  */
 @Service
-public class ProductManagerImpl {
+public class ProductManagerImpl implements ProductManager {
 
     // XXX constant should be elsewhere
     private final String PLUGIN_DEPLOYER = "hyperic.jmx:type=Service,name=ProductPluginDeployer";
