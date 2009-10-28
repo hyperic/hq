@@ -41,18 +41,22 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticThread;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
 import org.hyperic.util.thread.LoggingThreadGroup;
 import org.hyperic.util.thread.ThreadGroupFactory;
 import org.hyperic.util.thread.ThreadWatchdog;
 import org.hyperic.util.thread.ThreadWatchdog.InterruptToken;
+import org.springframework.stereotype.Component;
 
 /**
  * The Zevent subsystem is an event system for fast, non-reliable transmission
@@ -62,6 +66,7 @@ import org.hyperic.util.thread.ThreadWatchdog.InterruptToken;
  * This manager provides no transactional guarantees, so the caller must
  * rollback additions of listeners if the transaction fails.
  */
+@Component
 public class ZeventManager implements ZeventEnqueuer {
     private static final Log _log = LogFactory.getLog(ZeventManager.class);
 
@@ -125,6 +130,7 @@ public class ZeventManager implements ZeventEnqueuer {
         return res;
     }
 
+    @PostConstruct
     private void initialize() {
         Properties props = new Properties();
         try {
@@ -163,7 +169,7 @@ public class ZeventManager implements ZeventEnqueuer {
 
         DiagnosticObject myDiag = new DiagnosticObject() {
             public String getStatus() {
-                return ZeventManager.getInstance().getDiagnostics();
+                return getDiagnostics();
             }
 
             public String toString() {
@@ -237,7 +243,7 @@ public class ZeventManager implements ZeventEnqueuer {
      * Registers a buffer with the internal list, so data about its contents
      * can be printed by the diagnostic thread.
      */
-    void registerBuffer(Queue q, ZeventListener e) {
+    public void registerBuffer(Queue q, ZeventListener e) {
         synchronized (_registeredBuffers) {
             _registeredBuffers.put(q, e);
         }
@@ -643,13 +649,7 @@ public class ZeventManager implements ZeventEnqueuer {
         }
     }
 
-    public static ZeventManager getInstance() {
-        synchronized (INIT_LOCK) {
-            if (INSTANCE == null) {
-                INSTANCE = new ZeventManager();
-                INSTANCE.initialize();
-            }
-        }
-        return INSTANCE;
+    public static ZeventEnqueuer getInstance() {
+       return Bootstrap.getBean(ZeventEnqueuer.class);
     }
 }

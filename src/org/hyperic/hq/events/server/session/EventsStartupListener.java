@@ -85,7 +85,7 @@ public class EventsStartupListener
         triggerEvents.add(TriggersCreatedZevent.class);
 
         ZeventManager.getInstance().addBufferedListener(
-                                                        triggerEvents, new TriggersCreatedListener());
+                                                        triggerEvents, Bootstrap.getBean(TriggersCreatedListener.class));
 
         cleanupRegisteredTriggers();
     }

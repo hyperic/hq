@@ -33,6 +33,7 @@ import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 
@@ -45,7 +46,7 @@ public class AIStartupListener
          * Add the runtime-AI listener to enable resources for runtime
          * autodiscovery as they are created.
          */
-        ZeventManager zMan = ZeventManager.getInstance();
+        ZeventEnqueuer zMan = ZeventManager.getInstance();
         Set events = new HashSet();
         events.add(ResourceCreatedZevent.class);
         events.add(ResourceUpdatedZevent.class);

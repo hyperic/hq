@@ -39,7 +39,6 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.HeartBeatEvent;
 import org.hyperic.hq.events.shared.HeartBeatServiceLocal;
 import org.hyperic.hq.events.shared.HeartBeatServiceUtil;
-import org.hyperic.hq.events.shared.RegisteredTriggerManagerUtil;
 import org.hyperic.hq.zevents.ZeventManager;
 
 /**
@@ -81,7 +80,7 @@ public class HeartBeatServiceEJBImpl implements SessionBean {
 
         try {
             // Try to see if RegisteredTriggerManager is available
-            RegisteredTriggerManagerUtil.getLocalHome();
+            RegisteredTriggerManagerImpl.getOne();
 
             // Send the heart beat event
             Messenger sender = new Messenger();

@@ -1,5 +1,6 @@
 package org.hyperic.hq.events.server.session;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -15,7 +16,7 @@ public interface AlertConditionEvaluatorStateRepository {
      *         Serializable stored state of the {@link AlertConditionEvaluator}
      *         with that ID.
      */
-    Map getAlertConditionEvaluatorStates();
+    Map<Integer, Serializable> getAlertConditionEvaluatorStates();
 
     /**
      * 
@@ -23,7 +24,7 @@ public interface AlertConditionEvaluatorStateRepository {
      *         Serializable stored state of the {@link ExecutionStrategy} with
      *         that ID.
      */
-    Map getExecutionStrategyStates();
+    Map<Integer, Serializable> getExecutionStrategyStates();
 
     /**
      * Persists states of {@link AlertConditionEvaluator}s
@@ -31,7 +32,7 @@ public interface AlertConditionEvaluatorStateRepository {
      *        ID and value is the Serializable state of the
      *        {@link AlertConditionEvaluator} with that ID.
      */
-    void saveAlertConditionEvaluatorStates(Map alertConditionEvaluatorStates);
+    void saveAlertConditionEvaluatorStates(Map<Integer, Serializable> alertConditionEvaluatorStates);
 
     /**
      * Persists states of {@link ExecutionStrategy}s
@@ -39,6 +40,6 @@ public interface AlertConditionEvaluatorStateRepository {
      *        value is the Serializable state of the {@link ExecutionStrategy}
      *        with that ID.
      */
-    void saveExecutionStrategyStates(Map executionStrategyStates);
+    void saveExecutionStrategyStates(Map<Integer, Serializable> executionStrategyStates);
 
 }

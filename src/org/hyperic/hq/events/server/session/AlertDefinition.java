@@ -416,7 +416,7 @@ public class AlertDefinition
         return Collections.unmodifiableCollection(_conditions);
     }
 
-    Collection getConditionsBag() {
+    Collection<AlertCondition> getConditionsBag() {
         return _conditions;
     }
 
@@ -433,7 +433,7 @@ public class AlertDefinition
         _conditions.clear();
     }
 
-    public Collection getTriggers() {
+    public Collection<RegisteredTrigger> getTriggers() {
         return Collections.unmodifiableCollection(_triggers);
     }
 

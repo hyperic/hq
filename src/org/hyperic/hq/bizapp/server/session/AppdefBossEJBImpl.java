@@ -3503,8 +3503,7 @@ public class AppdefBossEJBImpl
             if (allConfigs.shouldConfigRt())
                 ids.add(entityId);
 
-            if (ids.size() > 0) {   // Actually updated
-                ZeventManager zmgr = ZeventManager.getInstance();
+            if (ids.size() > 0) {   // Actually updated 
                 List events = new ArrayList(ids.size());
                 
                 AppdefEntityID ade;
@@ -3531,7 +3530,7 @@ public class AppdefBossEJBImpl
                                                   ade,
                                                   allConfigs));
                 }
-                zmgr.enqueueEventsAfterCommit(events);
+                ZeventManager.getInstance().enqueueEventsAfterCommit(events);
             }
 
             if (entityId.isServer() || entityId.isService()) {
