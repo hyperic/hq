@@ -28,7 +28,6 @@ package org.hyperic.hq.product.server.session;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,8 +36,6 @@ import java.util.SortedMap;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
@@ -49,11 +46,8 @@ import javax.management.ReflectionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.alerts.AlertDefinitionXmlParser;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -64,14 +58,12 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
-import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.common.shared.AuditManagerLocal;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
-import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.Plugin;
@@ -88,40 +80,46 @@ import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.hq.product.shared.PluginValue;
-import org.hyperic.hq.product.shared.ProductManagerLocal;
-import org.hyperic.hq.product.shared.ProductManagerUtil;
+import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
-import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @ejb:bean name="ProductManager"
- *           jndi-name="ejb/product/ProductManager"
- *           local-jndi-name="LocalProductManager"
- *           view-type="local"
- *           type="Stateless"
  */
-public class ProductManagerEJBImpl 
-    implements SessionBean 
-{
+@Service
+public class ProductManagerImpl {
 	
 	//XXX constant should be elsewhere
     private final String PLUGIN_DEPLOYER = 
         "hyperic.jmx:type=Service,name=ProductPluginDeployer";
 
-    private Log log = LogFactory.getLog(ProductManagerEJBImpl.class);
+    private Log log = LogFactory.getLog(ProductManagerImpl.class);
 
     private ProductPluginManager   ppm;
-    private ConfigManagerLocal     configManagerLocal;
-    private CPropManagerLocal      cPropManagerLocal;
-    private TemplateManagerLocal   templateManagerLocal;
+    private ConfigManagerLocal     configManager;
+    private CPropManagerLocal      cPropManager;
+    private TemplateManagerLocal   templateManager;
+    private AuditManagerLocal auditManager;
     private PluginUpdater pluginUpdater = new PluginUpdater();
     private static final String ALERT_DEFINITIONS_XML_FILE = "etc/alert-definitions.xml";
-    private AlertDefinitionManager alertDefinitionManagerLocal;
-    private PluginDAO pluginDao = Bootstrap.getBean(PluginDAO.class);
+    private AlertDefinitionManager alertDefinitionManager;
+    private PluginDAO pluginDao;
     
-
+    @Autowired
+    public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager, ConfigManagerLocal configManager,
+                              CPropManagerLocal cPropManager, TemplateManagerLocal templateManager, AuditManagerLocal auditManager) {
+        this.pluginDao = pluginDao;
+        this.alertDefinitionManager = alertDefinitionManager;
+        this.configManager = configManager;
+        this.cPropManager = cPropManager;
+        this.templateManager = templateManager;
+        this.auditManager = auditManager;
+    }
+    
     /*
      * There is once instance of the ProductPluginDeployer service
      * MBean, it will be deployed before we are created.
@@ -153,7 +151,7 @@ public class ProductManagerEJBImpl
         }
     }
 
-    public ProductManagerEJBImpl(){
+    public ProductManagerImpl(){
         try {
             ppm = getProductPluginManager();
         } catch (PluginException e) {
@@ -162,22 +160,11 @@ public class ProductManagerEJBImpl
         }
     }
 
-    public static ProductManagerLocal getOne() {
-        try {
-            return ProductManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static ProductManager getOne() {
+        return Bootstrap.getBean(ProductManager.class);
     }
 
-    public void ejbCreate() {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
-
     /**
-     * @ejb:interface-method
      */
     public boolean isReady() {
         MBeanServer server = MBeanUtil.getMBeanServer();
@@ -199,7 +186,6 @@ public class ProductManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method
      */
     public TypeInfo getTypeInfo(AppdefEntityValue value)
         throws PermissionException, AppdefEntityNotFoundException
@@ -209,7 +195,6 @@ public class ProductManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method
      */
     public PluginManager getPluginManager(String type)
         throws PluginException
@@ -218,8 +203,8 @@ public class ProductManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method
      */
+    // TOD: G
     public String getMonitoringHelp(AppdefEntityValue entityVal, Map props)
         throws PluginNotFoundException, PermissionException,
                AppdefEntityNotFoundException
@@ -234,7 +219,6 @@ public class ProductManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method
      */
     public ConfigSchema getConfigSchema(String type,
                                         String name,
@@ -287,15 +271,13 @@ public class ProductManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public void deploymentNotify(String pluginName)
         throws PluginNotFoundException, FinderException,
                CreateException, RemoveException, VetoException
     {
         ProductPlugin pplugin = (ProductPlugin) ppm.getPlugin(pluginName);
-        //PluginDAO pluginDao = pluginDao;
         PluginValue ejbPlugin;
         PluginInfo pInfo;
         boolean created = false;
@@ -345,12 +327,12 @@ public class ProductManagerEJBImpl
             audit = PluginAudit.updateAudit(pluginName, start, start);
         
         try {
-            AuditManagerEJBImpl.getOne().pushContainer(audit);
+            auditManager.pushContainer(audit);
             pushed = true;
             updatePlugin(pluginName);   
         } finally {
             if (pushed) {
-                AuditManagerEJBImpl.getOne().popContainer(true);
+                auditManager.popContainer(true);
             }
         }
     }
@@ -363,10 +345,9 @@ public class ProductManagerEJBImpl
      * @throws CreateException 
      * @throws RemoveException 
      * @throws FinderException 
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
-    public void updateDynamicServiceTypePlugin(String pluginName, Set serviceTypes) throws PluginNotFoundException, FinderException, RemoveException, CreateException, VetoException {
+    @Transactional
+    public void updateDynamicServiceTypePlugin(String pluginName, Set<ServiceType> serviceTypes) throws PluginNotFoundException, FinderException, RemoveException, CreateException, VetoException {
     	ProductPlugin productPlugin = (ProductPlugin) ppm.getPlugin(pluginName);
     	try {
 			pluginUpdater.updateServiceTypes(productPlugin, serviceTypes);
@@ -385,14 +366,11 @@ public class ProductManagerEJBImpl
     	
     	
     	TypeInfo[] entities = pplugin.getTypes();
-    	getConfigManagerLocal().updateAppdefEntities(pluginName, entities);
+    	configManager.updateAppdefEntities(pluginName, entities);
 
-        StopWatch timer = new StopWatch();
-
-         // Get the measurement templates
-         TemplateManagerLocal tMan = getTemplateManagerLocal();
          // Keep a list of templates to add
-         HashMap toAdd = new HashMap();
+         // TODO: G (what are the parameters for the map returned by TemplateManagerLocal.updateTemplates
+         HashMap<MonitorableType, Map<?, ?>> toAdd = new HashMap<MonitorableType, Map<?, ?>>();
 
          for (int i = 0; i < entities.length; i++) {
              TypeInfo info = entities[i];
@@ -412,8 +390,8 @@ public class ProductManagerEJBImpl
 
              if (measurements != null && measurements.length > 0) {
                  MonitorableType monitorableType =
-                     tMan.getMonitorableType(pluginName, info);
-                 Map newMeasurements = tMan.updateTemplates(pluginName, info,
+                     templateManager.getMonitorableType(pluginName, info);
+                 Map<?,?> newMeasurements = templateManager.updateTemplates(pluginName, info,
                                                             monitorableType,
                                                             measurements);
                  toAdd.put(monitorableType, newMeasurements);
@@ -421,17 +399,15 @@ public class ProductManagerEJBImpl
          }
 
          // For performance reasons, we add all the new measurements at once.
-         tMan.createTemplates(pluginName, toAdd);
+         templateManager.createTemplates(pluginName, toAdd);
 
          // Add any custom properties.
-         CPropManagerLocal cPropManager = getCPropManagerLocal();
          for (int i = 0; i < entities.length; i++) {
              TypeInfo info = entities[i];
              ConfigSchema schema = pplugin.getCustomPropertiesSchema(info);
-             List options = schema.getOptions();
+             List<ConfigOption> options = schema.getOptions();
              AppdefResourceType appdefType = cPropManager.findResourceType(info);
-             for (Iterator j=options.iterator(); j.hasNext();) {
-                 ConfigOption opt = (ConfigOption)j.next();
+             for (ConfigOption opt : options) {
                  CpropKey c = cPropManager.findByKey(appdefType, opt.getName());
                  if (c == null) {
                      cPropManager.addKey(appdefType, opt.getName(),
@@ -452,16 +428,15 @@ public class ProductManagerEJBImpl
         //TODO DI
         AlertDefinitionXmlParser alertDefXmlParser   = new AlertDefinitionXmlParser();
        try {
-           final Set alertDefs = alertDefXmlParser.parse(alertDefns);
-           for(Iterator iterator=alertDefs.iterator();iterator.hasNext();) {
+           final Set<AlertDefinitionValue> alertDefs = alertDefXmlParser.parse(alertDefns);
+           for(AlertDefinitionValue alertDefinition : alertDefs) {
                try {
-                   final AlertDefinitionValue alertDefinition =  (AlertDefinitionValue)iterator.next();
                    final AppdefEntityID id = new AppdefEntityID(alertDefinition.getAppdefType(),alertDefinition.getAppdefId());
-                   final SortedMap existingAlertDefinitions = getAlertDefinitionManagerLocal().findAlertDefinitionNames(id, EventConstants.TYPE_ALERT_DEF_ID);
+                   final SortedMap<String, Integer> existingAlertDefinitions = alertDefinitionManager.findAlertDefinitionNames(id, EventConstants.TYPE_ALERT_DEF_ID);
                    //TODO update existing alert defs - for now, just create if one does not exist.  Be aware that this method is also called
                    //when new service type metadata is discovered (from updateServiceTypes method), as well as when a new or modified plugin jar is detected
                    if(!(existingAlertDefinitions.keySet().contains(alertDefinition.getName()))) {
-                       getAlertDefinitionManagerLocal().createAlertDefinition(alertDefinition);
+                       alertDefinitionManager.createAlertDefinition(alertDefinition);
                    }
                } catch (Exception e) {
                    log.error("Unable to load some or all of alert definitions for plugin " + pInfo.name + ".  Cause: " + e.getMessage());
@@ -477,32 +452,5 @@ public class ProductManagerEJBImpl
                             ".  Cause: " + e.getMessage());
                }
            }
-     }
-    
-    private AlertDefinitionManager getAlertDefinitionManagerLocal() {
-        if(alertDefinitionManagerLocal == null)
-            alertDefinitionManagerLocal = AlertDefinitionManagerImpl.getOne();
-        return alertDefinitionManagerLocal;
     }
-
-    private ConfigManagerLocal getConfigManagerLocal() {
-        if(configManagerLocal == null)
-            configManagerLocal = ConfigManagerEJBImpl.getOne();
-        return configManagerLocal;
-    }
-    
-
-    private CPropManagerLocal getCPropManagerLocal() {
-        if(cPropManagerLocal == null)
-            cPropManagerLocal = CPropManagerEJBImpl.getOne();
-        return cPropManagerLocal;
-    }
-
-    private TemplateManagerLocal getTemplateManagerLocal() {
-        if(templateManagerLocal == null)
-            templateManagerLocal = TemplateManagerEJBImpl.getOne();
-        return templateManagerLocal;
-    }
-
-   
 }

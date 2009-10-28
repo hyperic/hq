@@ -219,8 +219,8 @@ public class AlertDefinitionXmlParser {
      *        an {@link AlertDefinitionsResponse}
      * @return A Set of {@link AlertDefinitionValue}s parsed from the XML
      */
-    public Set parse(InputStream alertDefinitionsXml) {
-        List alertDefinitions;
+    public Set<AlertDefinitionValue> parse(InputStream alertDefinitionsXml) {
+        List<AlertDefinition> alertDefinitions;
         try {
             AlertDefinitionsResponse response = (AlertDefinitionsResponse) XmlUtil.deserialize(AlertDefinitionsResponse.class,
                                                                                                alertDefinitionsXml);
@@ -231,10 +231,9 @@ public class AlertDefinitionXmlParser {
         return parse(alertDefinitions);
     }
 
-    Set parse(List alertDefinitions) {
-        final Set alertDefinitionValues = new HashSet();
-        for (Iterator iterator = alertDefinitions.iterator(); iterator.hasNext();) {
-            AlertDefinition definition = (AlertDefinition) iterator.next();
+    Set<AlertDefinitionValue> parse(List<AlertDefinition> alertDefinitions) {
+        final Set<AlertDefinitionValue> alertDefinitionValues = new HashSet<AlertDefinitionValue>();
+        for (AlertDefinition definition : alertDefinitions) {
             alertDefinitionValues.add(parse(definition));
         }
         return alertDefinitionValues;

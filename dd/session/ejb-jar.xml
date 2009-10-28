@@ -11,19 +11,6 @@
 
 		<!-- Session Beans -->
 		<session>
-			<description><![CDATA[]]></description>
-
-			<ejb-name>ProductManager</ejb-name>
-
-			<local-home>org.hyperic.hq.product.shared.ProductManagerLocalHome</local-home>
-			<local>org.hyperic.hq.product.shared.ProductManagerLocal</local>
-			<ejb-class>org.hyperic.hq.product.server.session.ProductManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[The tracker manager handles sending agents add and remove operations for the log and config track plugsin.]]></description>
 
 			<ejb-name>SRNManager</ejb-name>
@@ -876,29 +863,6 @@
 			the merge directory called ejb-container-transactions.ent that
 			contains them.
 		-->
-		<container-transaction>
-			<method>
-				<ejb-name>ProductManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>deploymentNotify</method-name>
-				<method-params>
-					<method-param>java.lang.String</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>ProductManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>updateDynamicServiceTypePlugin</method-name>
-				<method-params>
-					<method-param>java.lang.String</method-param>
-					<method-param>java.util.Set</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
 		<container-transaction>
 			<method>
 				<ejb-name>SRNManager</ejb-name>

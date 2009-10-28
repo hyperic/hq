@@ -56,8 +56,8 @@ import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.server.session.ProductManagerEJBImpl;
-import org.hyperic.hq.product.shared.ProductManagerLocal;
+import org.hyperic.hq.product.server.session.ProductManagerImpl;
+import org.hyperic.hq.product.shared.ProductManager;
 
 /**
  *This is the base class to Measurement Session EJB's
@@ -73,7 +73,7 @@ public abstract class SessionEJB {
 
     private DataManagerLocal _dataMan;
     private AgentManager _agentMan;
-    private ProductManagerLocal _prodMan;
+    private ProductManager _prodMan;
     private AuthzSubjectManagerLocal _ssmLocal;
     private TemplateManagerLocal _templateMan;
     private SRNManagerLocal s_rnManager;
@@ -150,16 +150,16 @@ public abstract class SessionEJB {
         return _agentMan;
     }
 
-    protected ProductManagerLocal getProductMan() {
+    protected ProductManager getProductMan() {
         if (_prodMan == null) {
-            _prodMan = ProductManagerEJBImpl.getOne();
+            _prodMan = ProductManagerImpl.getOne();
         }
         return _prodMan;
     }
 
     protected MeasurementPluginManager getMPM() {
         if (_mpm == null) {
-            ProductManagerLocal ppm = this.getProductMan();
+            ProductManager ppm = this.getProductMan();
 
             try {
                 _mpm = (MeasurementPluginManager)

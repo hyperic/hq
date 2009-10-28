@@ -101,7 +101,7 @@ public class PluginUpdater {
 	 *            The service types to update
 	 * @throws PluginException
 	 */
-	public void updateServiceTypes(ProductPlugin productPlugin, Set serviceTypes)
+	public void updateServiceTypes(ProductPlugin productPlugin, Set<ServiceType> serviceTypes)
 			throws PluginException {
 		
 		final List typeInfos = new ArrayList(serviceTypes.size());

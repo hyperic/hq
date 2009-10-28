@@ -61,7 +61,7 @@ import org.hyperic.hq.product.LiveDataPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.shared.ProductManagerLocal;
+import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -81,12 +81,12 @@ public class LiveDataManagerImpl implements LiveDataManager {
     private final String CACHENAME = "LiveData";
     private final long NO_CACHE = -1;
 
-    private ProductManagerLocal productManager;
+    private ProductManager productManager;
 
     private ConfigManagerLocal configManager;
 
     @Autowired
-    public LiveDataManagerImpl(ProductManagerLocal productManager, ConfigManagerLocal configManager) {
+    public LiveDataManagerImpl(ProductManager productManager, ConfigManagerLocal configManager) {
         this.productManager = productManager;
         this.configManager = configManager;
     }

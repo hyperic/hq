@@ -69,8 +69,7 @@ import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.server.session.ProductStartupListener;
-import org.hyperic.hq.product.shared.ProductManagerLocal;
-import org.hyperic.hq.product.shared.ProductManagerUtil;
+import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.file.FileUtil;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
 import org.jboss.deployment.DeploymentException;
@@ -214,7 +213,7 @@ public class ProductPluginDeployer
 
         Collections.sort(_plugins, this);
 
-        ProductManagerLocal pm = getProductManager();
+        ProductManager pm = getProductManager();
 
         for (Iterator i = _plugins.iterator(); i.hasNext();) {
             String pluginName = (String)i.next();
@@ -659,12 +658,8 @@ public class ProductPluginDeployer
         _broadcaster.sendNotification(notif);
     }
 
-    private ProductManagerLocal getProductManager() {
-        try {
-            return ProductManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    private ProductManager getProductManager() {
+        return Bootstrap.getBean(ProductManager.class);
     }
 
     private String registerPluginJar(DeploymentInfo di) {
@@ -686,7 +681,7 @@ public class ProductPluginDeployer
         }
     }
 
-    private void deployPlugin(String plugin, ProductManagerLocal pm)
+    private void deployPlugin(String plugin, ProductManager pm)
         throws DeploymentException {
 
         try {
@@ -867,7 +862,7 @@ public class ProductPluginDeployer
 
         //plugin metadata cannot be deployed until HQ is up
         if (isReady()) {
-            ProductManagerLocal pm = getProductManager();
+            ProductManager pm = getProductManager();
             deployPlugin(plugin, pm);
         }
         else {

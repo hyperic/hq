@@ -59,7 +59,7 @@ public class ConfigSchema implements Serializable {
         this.configOptions.addAll( Arrays.asList(options) );
     }
 
-    public List getOptions(){
+    public List<ConfigOption> getOptions(){
         return this.configOptions;
     }
 
