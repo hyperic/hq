@@ -27,18 +27,23 @@ import org.hyperic.util.config.ConfigSchema;
  */
 public interface ProductManager {
 
-   public boolean isReady(  ) ;
+    public boolean isReady();
 
-   public TypeInfo getTypeInfo( AppdefEntityValue value ) throws PermissionException, AppdefEntityNotFoundException;
+    public TypeInfo getTypeInfo(AppdefEntityValue value) throws PermissionException, AppdefEntityNotFoundException;
 
-   public PluginManager getPluginManager( String type ) throws PluginException;
+    public PluginManager getPluginManager(String type) throws PluginException;
 
-   public String getMonitoringHelp( AppdefEntityValue entityVal,Map props ) throws PluginNotFoundException, PermissionException, AppdefEntityNotFoundException;
+    public String getMonitoringHelp(AppdefEntityValue entityVal, Map props) throws PluginNotFoundException,
+        PermissionException, AppdefEntityNotFoundException;
 
-   public ConfigSchema getConfigSchema( String type,String name,AppdefEntityValue entityVal,ConfigResponse baseResponse ) throws PluginException, AppdefEntityNotFoundException, PermissionException;
+    public ConfigSchema getConfigSchema(String type, String name, AppdefEntityValue entityVal,
+                                        ConfigResponse baseResponse) throws PluginException,
+        AppdefEntityNotFoundException, PermissionException;
 
-   public void deploymentNotify( String pluginName ) throws PluginNotFoundException, FinderException, CreateException, RemoveException, VetoException;
+    public void deploymentNotify(String pluginName) throws PluginNotFoundException, FinderException, CreateException,
+        RemoveException, VetoException;
 
-   public void updateDynamicServiceTypePlugin( String pluginName,Set<ServiceType> serviceTypes ) throws PluginNotFoundException, FinderException, RemoveException, CreateException, VetoException;
+    public void updateDynamicServiceTypePlugin(String pluginName, Set<ServiceType> serviceTypes)
+        throws PluginNotFoundException, FinderException, RemoveException, CreateException, VetoException;
 
 }
