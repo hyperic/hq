@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * state of {@link AlertConditionEvaluator}s and their {@link ExecutionStrategy}
  * s on server shutdown.
  * @author jhickey
- *
+ * 
  */
 
 public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEvaluatorRepository, ShutdownCallback {
@@ -31,28 +31,28 @@ public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEval
     private Map<Integer, AlertConditionEvaluator> alertConditionEvaluators = new HashMap<Integer, AlertConditionEvaluator>();
 
     /**
-     *
+     * 
      * @param alertConditionEvaluatorStateRepository The
      *        {@link AlertConditionEvaluatorStateRepository} to use for
      *        persisting state on server shutdown
      */
     @Autowired
-    public AlertConditionEvaluatorRepositoryImpl(AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository)
-    {
+    public AlertConditionEvaluatorRepositoryImpl(
+                                                 AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository) {
         this.alertConditionEvaluatorStateRepository = alertConditionEvaluatorStateRepository;
     }
-    
+
     @PostConstruct
     public void afterPropertiesSet() {
         HQApp.getInstance().registerCallbackListener(ShutdownCallback.class, this);
     }
 
     public void addAlertConditionEvaluator(AlertConditionEvaluator alertConditionEvaluator) {
-        synchronized(alertConditionEvaluators) {
+        synchronized (alertConditionEvaluators) {
             alertConditionEvaluators.put(alertConditionEvaluator.getAlertDefinitionId(), alertConditionEvaluator);
         }
     }
-    
+
     public AlertConditionEvaluator getAlertConditionEvaluatorById(Integer alertDefinitionId) {
         return (AlertConditionEvaluator) alertConditionEvaluators.get(alertDefinitionId);
     }
@@ -60,13 +60,13 @@ public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEval
     public Map<Integer, AlertConditionEvaluator> getAlertConditionEvaluators() {
         return Collections.unmodifiableMap(alertConditionEvaluators);
     }
-    
+
     public void removeAlertConditionEvaluator(Integer alertDefinitionId) {
-        synchronized(alertConditionEvaluators) {
+        synchronized (alertConditionEvaluators) {
             alertConditionEvaluators.remove(alertDefinitionId);
         }
     }
-    
+
     public AlertConditionEvaluatorStateRepository getStateRepository() {
         return this.alertConditionEvaluatorStateRepository;
     }
@@ -75,14 +75,14 @@ public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEval
         if (log.isDebugEnabled()) {
             log.debug("shutdown starting on " + this);
         }
-        
+
         Map<Integer, Serializable> alertConditionEvaluatorStates = new HashMap<Integer, Serializable>();
         Map<Integer, Serializable> executionStrategyStates = new HashMap<Integer, Serializable>();
-        for (AlertConditionEvaluator alertConditionEvaluator: alertConditionEvaluators.values()) {
+        for (AlertConditionEvaluator alertConditionEvaluator : alertConditionEvaluators.values()) {
             Serializable alertConditionEvaluatorState = alertConditionEvaluator.getState();
             if (alertConditionEvaluatorState != null) {
                 alertConditionEvaluatorStates.put(alertConditionEvaluator.getAlertDefinitionId(),
-                                                  alertConditionEvaluatorState);
+                    alertConditionEvaluatorState);
             }
             Serializable executionStrategyState = alertConditionEvaluator.getExecutionStrategy().getState();
             if (executionStrategyState != null) {
@@ -96,5 +96,5 @@ public class AlertConditionEvaluatorRepositoryImpl implements AlertConditionEval
             alertConditionEvaluatorStateRepository.saveExecutionStrategyStates(executionStrategyStates);
         }
     }
-    
+
 }

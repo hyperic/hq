@@ -5,20 +5,22 @@ import java.util.Map;
 /**
  * Repository of {@link AlertConditionEvaluator}s
  * @author jhickey
- *
+ * 
  */
 public interface AlertConditionEvaluatorRepository {
 
     /**
      * Add to the repository
-     * @param alertConditionEvaluator The {@link AlertConditionEvaluator} to add the repository
+     * @param alertConditionEvaluator The {@link AlertConditionEvaluator} to add
+     *        the repository
      */
     void addAlertConditionEvaluator(AlertConditionEvaluator alertConditionEvaluator);
 
     /**
-     *
+     * 
      * @param alertDefinitionId The ID of the alert definition
-     * @return The corresponding {@link AlertConditionEvaluator} or null if none exists
+     * @return The corresponding {@link AlertConditionEvaluator} or null if none
+     *         exists
      */
     AlertConditionEvaluator getAlertConditionEvaluatorById(Integer alertDefinitionId);
 
@@ -26,7 +28,7 @@ public interface AlertConditionEvaluatorRepository {
      * Get the {@link AlertConditionEvaluatorStateRepository}
      */
     AlertConditionEvaluatorStateRepository getStateRepository();
-    
+
     /**
      * Get all the alert condition evaluators
      */
@@ -34,9 +36,10 @@ public interface AlertConditionEvaluatorRepository {
 
     /**
      * Remove from the repository
-     * @param alertDefinitionId The ID of the alert definition whose {@link AlertConditionEvaluator} should be removed from the repository
+     * @param alertDefinitionId The ID of the alert definition whose
+     *        {@link AlertConditionEvaluator} should be removed from the
+     *        repository
      */
     void removeAlertConditionEvaluator(Integer alertDefinitionId);
-
 
 }

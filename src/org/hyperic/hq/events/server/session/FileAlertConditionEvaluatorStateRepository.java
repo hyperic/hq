@@ -20,7 +20,7 @@ import org.apache.commons.logging.LogFactory;
  * Implementation of {@link AlertConditionEvaluatorRepository} that stores and
  * retrieves by serialzing state to/from a file
  * @author jhickey
- *
+ * 
  */
 public class FileAlertConditionEvaluatorStateRepository implements AlertConditionEvaluatorStateRepository {
     private final File storageDirectory;
@@ -29,7 +29,7 @@ public class FileAlertConditionEvaluatorStateRepository implements AlertConditio
     private final Log log = LogFactory.getLog(FileAlertConditionEvaluatorStateRepository.class);
 
     /**
-     *
+     * 
      * @param storageDirectory The directory in which to write and read
      *        serialized object files
      */

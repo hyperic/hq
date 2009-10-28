@@ -32,7 +32,7 @@ public interface AlertConditionEvaluatorStateRepository {
      *        ID and value is the Serializable state of the
      *        {@link AlertConditionEvaluator} with that ID.
      */
-    void saveAlertConditionEvaluatorStates( Map<Integer, Serializable> alertConditionEvaluatorStates);
+    void saveAlertConditionEvaluatorStates(Map<Integer, Serializable> alertConditionEvaluatorStates);
 
     /**
      * Persists states of {@link ExecutionStrategy}s

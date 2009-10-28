@@ -17,50 +17,53 @@ import org.hyperic.util.config.InvalidOptionValueException;
 /**
  * Local interface for RegisteredTriggerManager.
  */
-public interface RegisteredTriggerManager
-{
-   /**
-    * Processes {@link TriggerCreatedEvent}s that indicate that triggers should be created
-    */
-   public void handleTriggerCreatedEvents( Collection<TriggersCreatedZevent> events ) ;
+public interface RegisteredTriggerManager {
+    /**
+     * Processes {@link TriggerCreatedEvent}s that indicate that triggers should
+     * be created
+     */
+    public void handleTriggerCreatedEvents(Collection<TriggersCreatedZevent> events);
 
-   /**
-    * Initialize the in-memory triggers and update the RegisteredTriggers repository
-    */
-   public void initializeTriggers( RegisterableTriggerRepository registeredTriggerRepository ) ;
+    /**
+     * Initialize the in-memory triggers and update the RegisteredTriggers
+     * repository
+     */
+    public void initializeTriggers(RegisterableTriggerRepository registeredTriggerRepository);
 
-   /**
-    * Enable or disable triggers associated with an alert definition
-    */
-   public void setAlertDefinitionTriggersEnabled( Integer alertDefId,boolean enabled ) ;
+    /**
+     * Enable or disable triggers associated with an alert definition
+     */
+    public void setAlertDefinitionTriggersEnabled(Integer alertDefId, boolean enabled);
 
-   /**
-    * Finds a trigger by its ID, assuming existence
-    * @param id The trigger ID
-    * @return The trigger with the specified ID (exception will occur if trigger does not exist)
-    */
-   public RegisteredTrigger findById( Integer id ) ;
+    /**
+     * Finds a trigger by its ID, assuming existence
+     * @param id The trigger ID
+     * @return The trigger with the specified ID (exception will occur if
+     *         trigger does not exist)
+     */
+    public RegisteredTrigger findById(Integer id);
 
-   /**
-    * Create a new trigger
-    * @return a RegisteredTriggerValue
-    */
-   public RegisteredTrigger createTrigger( RegisteredTriggerValue val ) ;
+    /**
+     * Create a new trigger
+     * @return a RegisteredTriggerValue
+     */
+    public RegisteredTrigger createTrigger(RegisteredTriggerValue val);
 
-   /**
-    * Create new triggers
-    * @return a RegisteredTriggerValue
-    */
-   public void createTriggers( AuthzSubject subject,AlertDefinitionValue alertdef ) throws TriggerCreateException, InvalidOptionException, InvalidOptionValueException;
+    /**
+     * Create new triggers
+     * @return a RegisteredTriggerValue
+     */
+    public void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef) throws TriggerCreateException,
+        InvalidOptionException, InvalidOptionValueException;
 
-   /**
-    * Delete all triggers for an alert definition.
-    */
-   public void deleteAlertDefinitionTriggers( Integer adId ) ;
+    /**
+     * Delete all triggers for an alert definition.
+     */
+    public void deleteAlertDefinitionTriggers(Integer adId);
 
-   /**
-    * Completely deletes all triggers when an alert definition is deleted
-    */
-   public void deleteTriggers( AlertDefinition alertDef ) ;
+    /**
+     * Completely deletes all triggers when an alert definition is deleted
+     */
+    public void deleteTriggers(AlertDefinition alertDef);
 
 }

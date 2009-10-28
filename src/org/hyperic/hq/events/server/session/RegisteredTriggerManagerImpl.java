@@ -48,7 +48,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The trigger manager.
- *
+ * 
  */
 @Service
 @Transactional
@@ -65,12 +65,11 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     private ZeventEnqueuer zeventEnqueuer;
 
     private AlertConditionEvaluatorRepository alertConditionEvaluatorRepository;
-    
+
     private AlertDefinitionDAOInterface alertDefinitionDAO;
-    
-       
+
     @Autowired
-    public RegisteredTriggerManagerImpl(AlertConditionEvaluatorFactory alertConditionEvaluatorFactory,                                   
+    public RegisteredTriggerManagerImpl(AlertConditionEvaluatorFactory alertConditionEvaluatorFactory,
                                         TriggerDAOInterface triggerDAO, ZeventEnqueuer zeventEnqueuer,
                                         AlertConditionEvaluatorRepository alertConditionEvaluatorRepository,
                                         AlertDefinitionDAOInterface alertDefinitionDAO) {
@@ -87,7 +86,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
      * 
      */
     public void handleTriggerCreatedEvents(Collection<TriggersCreatedZevent> events) {
-        for (TriggersCreatedZevent z: events) {
+        for (TriggersCreatedZevent z : events) {
             Integer alertDefId = ((TriggersCreatedZeventSource) z.getSourceId()).getId();
             registerTriggers(alertDefId);
         }
@@ -96,7 +95,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     /**
      * Initialize the in-memory triggers and update the RegisteredTriggers
      * repository
-     *
+     * 
      * 
      */
     public void initializeTriggers(RegisterableTriggerRepository registeredTriggerRepository) {
@@ -111,7 +110,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
             log.debug("Found " + registeredTriggers.size() + " triggers");
         }
         initializeTriggers(registeredTriggers);
-        if(log.isInfoEnabled()) {
+        if (log.isInfoEnabled()) {
             log.info("Finished initializing triggers in " + (System.currentTimeMillis() - startTime) + " ms.");
         }
     }
@@ -124,20 +123,19 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
         }
         Collection<RegisteredTrigger> registeredTriggers = getAllTriggersByAlertDefId(alertDefId);
         if (!(registeredTriggers.isEmpty())) {
-            AlertDefinition alertDefinition = getDefinitionFromTrigger((RegisteredTrigger) registeredTriggers.iterator()
-                                                                                                             .next());
+            AlertDefinition alertDefinition = getDefinitionFromTrigger((RegisteredTrigger) registeredTriggers
+                .iterator().next());
             if (alertDefinition == null) {
                 log.warn("Unable to find AlertDefinition with id: " + alertDefId + ".  These alerts will not fire.");
                 return;
             }
             AlertConditionEvaluator alertConditionEvaluator = alertConditionEvaluatorFactory.create(alertDefinition);
             alertConditionEvaluatorRepository.addAlertConditionEvaluator(alertConditionEvaluator);
-            for (RegisteredTrigger tv: registeredTriggers) {
+            for (RegisteredTrigger tv : registeredTriggers) {
                 // Try to register each trigger, if exception, then move on
                 try {
-                    registerTrigger(tv.getRegisteredTriggerValue(),
-                                    alertConditionEvaluator,
-                                    alertDefinition.isEnabled());
+                    registerTrigger(tv.getRegisteredTriggerValue(), alertConditionEvaluator, alertDefinition
+                        .isEnabled());
                 } catch (Exception e) {
                     log.error("Error registering trigger", e);
                 }
@@ -147,19 +145,17 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
 
     private void initializeTriggers(Collection<RegisteredTrigger> registeredTriggers) {
         initializeAlertConditionEvaluators(registeredTriggers);
-        for (RegisteredTrigger tv: registeredTriggers) {
+        for (RegisteredTrigger tv : registeredTriggers) {
             // Try to register each trigger, if exception, then move on
             try {
                 AlertDefinition def = getDefinitionFromTrigger(tv);
-            
+
                 if (def != null) {
-                    AlertConditionEvaluator evaluator = 
-                        (AlertConditionEvaluator) alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(def.getId());
-                
+                    AlertConditionEvaluator evaluator = (AlertConditionEvaluator) alertConditionEvaluatorRepository
+                        .getAlertConditionEvaluatorById(def.getId());
+
                     if (evaluator != null) {
-                        registerTrigger(tv.getRegisteredTriggerValue(),
-                                        evaluator,
-                                        def.isEnabled());
+                        registerTrigger(tv.getRegisteredTriggerValue(), evaluator, def.isEnabled());
                     }
                 }
             } catch (Exception e) {
@@ -171,14 +167,15 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     private void initializeAlertConditionEvaluators(Collection<RegisteredTrigger> registeredTriggers) {
         // Create AlertConditionEvaluator for each AlertDefinition, so they can
         // be shared by all triggers associated with the alertDef
-        for (RegisteredTrigger tv: registeredTriggers) {
+        for (RegisteredTrigger tv : registeredTriggers) {
             try {
                 AlertDefinition def = getDefinitionFromTrigger(tv);
                 if (def == null) {
                     log.warn("Unable to find AlertDefinition for trigger with id " + tv.getId() +
                              ".  These alerts will not fire.");
                 } else if (alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(def.getId()) == null) {
-                    alertConditionEvaluatorRepository.addAlertConditionEvaluator(alertConditionEvaluatorFactory.create(def));
+                    alertConditionEvaluatorRepository.addAlertConditionEvaluator(alertConditionEvaluatorFactory
+                        .create(def));
                 }
             } catch (Exception e) {
                 log.error("Error retrieving alert definition for trigger", e);
@@ -197,12 +194,9 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
      * @throws IllegalAccessException
      * @throws InvalidTriggerDataException
      */
-    void registerTrigger(RegisteredTriggerValue tv,
-                         AlertConditionEvaluator alertConditionEvaluator,
-                         boolean enableTrigger) throws InstantiationException,
-                                               IllegalAccessException,
-                                               InvalidTriggerDataException
-    {
+    void registerTrigger(RegisteredTriggerValue tv, AlertConditionEvaluator alertConditionEvaluator,
+                         boolean enableTrigger) throws InstantiationException, IllegalAccessException,
+        InvalidTriggerDataException {
         Class<?> tc;
         try {
             tc = Class.forName(tv.getClassname());
@@ -219,7 +213,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
 
     /**
      * Enable or disable triggers associated with an alert definition
-     *
+     * 
      * 
      */
     public void setAlertDefinitionTriggersEnabled(Integer alertDefId, boolean enabled) {
@@ -227,10 +221,8 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
         addPostCommitSetEnabledListener(alertDefId, triggerIds, enabled);
     }
 
-    private void addPostCommitSetEnabledListener(final Integer alertDefId,
-                                                 final Collection<Integer> triggerIds,
-                                                 final boolean enabled)
-    {
+    private void addPostCommitSetEnabledListener(final Integer alertDefId, final Collection<Integer> triggerIds,
+                                                 final boolean enabled) {
         try {
             HQApp.getInstance().addTransactionListener(new TransactionListener() {
                 public void afterCommit(boolean success) {
@@ -272,7 +264,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     Collection<Integer> getTriggerIdsByAlertDefId(Integer id) {
         Collection<RegisteredTrigger> triggers = getAllTriggersByAlertDefId(id);
         List<Integer> triggerIds = new ArrayList<Integer>();
-        for (RegisteredTrigger trigger: triggers) {
+        for (RegisteredTrigger trigger : triggers) {
             triggerIds.add(trigger.getId());
         }
         return triggerIds;
@@ -283,7 +275,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
      * @param id The trigger ID
      * @return The trigger with the specified ID (exception will occur if
      *         trigger does not exist)
-     *
+     * 
      * 
      */
     public RegisteredTrigger findById(Integer id) {
@@ -293,7 +285,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     void unregisterTriggers(Integer alertDefinitionId, Collection<RegisteredTrigger> triggers) {
         // No point unregistering if repository has not been intialized
         if (this.registeredTriggerRepository != null) {
-            for (RegisteredTrigger trigger: triggers) {
+            for (RegisteredTrigger trigger : triggers) {
                 this.registeredTriggerRepository.removeTrigger(trigger.getId());
             }
             alertConditionEvaluatorRepository.removeAlertConditionEvaluator(alertDefinitionId);
@@ -312,7 +304,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     /**
      * Get the registered trigger objects associated with a given alert
      * definition.
-     *
+     * 
      * @param id The alert def id.
      * @return The registered trigger objects.
      */
@@ -322,9 +314,9 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
 
     /**
      * Create a new trigger
-     *
+     * 
      * @return a RegisteredTriggerValue
-     *
+     * 
      * 
      */
     public RegisteredTrigger createTrigger(RegisteredTriggerValue val) {
@@ -337,15 +329,13 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
 
     /**
      * Create new triggers
-     *
+     * 
      * @return a RegisteredTriggerValue
-     *
+     * 
      * 
      */
     public void createTriggers(AuthzSubject subject, AlertDefinitionValue alertdef) throws TriggerCreateException,
-                                                                                   InvalidOptionException,
-                                                                                   InvalidOptionValueException
-    {
+        InvalidOptionException, InvalidOptionValueException {
         final List<RegisteredTrigger> triggers = new ArrayList<RegisteredTrigger>();
 
         // Create AppdefEntityID from the alert definition
@@ -374,7 +364,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
             }
         }
 
-        for (RegisteredTrigger tval: triggers) {
+        for (RegisteredTrigger tval : triggers) {
             alertdef.addTrigger(tval.getRegisteredTriggerValue());
         }
         addCommitListener(triggers);
@@ -390,8 +380,8 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
                             // AlertDef ID should be set now that original tx is
                             // committed
                             if (!(triggers.isEmpty())) {
-                                AlertDefinition alertDefinition = getDefinitionFromTrigger((RegisteredTrigger) triggers.iterator()
-                                                                                                                       .next());
+                                AlertDefinition alertDefinition = getDefinitionFromTrigger((RegisteredTrigger) triggers
+                                    .iterator().next());
                                 if (alertDefinition != null) {
                                     zeventEnqueuer.enqueueEvent(new TriggersCreatedZevent(alertDefinition.getId()));
                                 }
@@ -410,14 +400,14 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
         }
     }
 
-    private RegisteredTriggerValue convertToTriggerValue(AppdefEntityID id, AlertConditionValue cond) throws InvalidOptionException,
-                                                                                                     InvalidOptionValueException
-    {
+    private RegisteredTriggerValue convertToTriggerValue(AppdefEntityID id, AlertConditionValue cond)
+        throws InvalidOptionException, InvalidOptionValueException {
 
         // Create trigger based on the type of the condition
         RegisteredTriggerValue trigger;
         try {
-            Class<?> trigClass = (Class<?>) ConditionalTriggerInterface.MAP_COND_TRIGGER.get(new Integer(cond.getType()));
+            Class<?> trigClass = (Class<?>) ConditionalTriggerInterface.MAP_COND_TRIGGER
+                .get(new Integer(cond.getType()));
 
             if (trigClass == null)
                 throw new InvalidOptionValueException("Condition type not yet supported");
@@ -451,7 +441,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
 
     /**
      * Delete all triggers for an alert definition.
-     *
+     * 
      * 
      */
     public void deleteAlertDefinitionTriggers(Integer adId) {
@@ -462,7 +452,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
 
     /**
      * Completely deletes all triggers when an alert definition is deleted
-     *
+     * 
      * 
      */
     public void deleteTriggers(AlertDefinition alertDef) {
@@ -479,7 +469,7 @@ public class RegisteredTriggerManagerImpl implements RegisteredTriggerManager {
     }
 
     public static RegisteredTriggerManager getOne() {
-       return Bootstrap.getBean(RegisteredTriggerManager.class);
+        return Bootstrap.getBean(RegisteredTriggerManager.class);
     }
-    
+
 }
