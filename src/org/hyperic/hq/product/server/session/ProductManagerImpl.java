@@ -119,6 +119,12 @@ public class ProductManagerImpl implements ProductManager {
         this.cPropManager = cPropManager;
         this.templateManager = templateManager;
         this.auditManager = auditManager;
+        try {
+            ppm = getProductPluginManager();
+        } catch (PluginException e) {
+            log.error("Unable to initialize plugin manager: " +
+                      e.getMessage());
+        }
     }
 
     /*
@@ -148,15 +154,6 @@ public class ProductManagerImpl implements ProductManager {
             throw new PluginException(e.getMessage(), e);
         } catch (ReflectionException e) {
             throw new PluginException(e.getMessage(), e);
-        }
-    }
-
-    public ProductManagerImpl() {
-        try {
-            ppm = getProductPluginManager();
-        } catch (PluginException e) {
-            log.error("Unable to initialize plugin manager: " +
-                      e.getMessage());
         }
     }
 
