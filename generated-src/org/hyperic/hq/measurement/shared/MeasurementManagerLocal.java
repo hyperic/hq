@@ -3,6 +3,10 @@
  */
 package org.hyperic.hq.measurement.shared;
 
+import java.util.List;
+
+import org.hyperic.hq.measurement.server.session.Measurement;
+
 /**
  * Local interface for MeasurementManager.
  */
@@ -151,7 +155,7 @@ public interface MeasurementManagerLocal
     * TODO: scottmf, need to do some more work to handle other authz resource types other than platform, server, service, and group
     * @return {@link Map} of {@link Integer} to {@link List} of {@link Measurement}s, Integer => Resource.getId(),
     */
-   public java.util.Map getAvailMeasurements( java.util.Collection resources ) ;
+   public java.util.Map<Integer,List<Measurement>> getAvailMeasurements( java.util.Collection resources ) ;
 
    /**
     * Look up a list of Measurement intervals for template IDs.

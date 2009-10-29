@@ -41,9 +41,6 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -51,11 +48,12 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -63,9 +61,7 @@ import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
-import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
-import org.hyperic.hq.measurement.shared.AvailabilityManagerUtil;
+import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.AvailabilityMetricValue;
@@ -74,51 +70,49 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** The AvailabityManagerEJBImpl class is a stateless session bean that can be
  *  used to retrieve Availability Data RLE points
  *
- * @ejb:bean name="AvailabilityManager"
- *      jndi-name="ejb/measurement/AvailabilityManager"
- *      local-jndi-name="LocalAvailabilityManager"
- *      view-type="local"
- *      type="Stateless"
- *
- * @ejb:transaction type="Required"
  */
-public class AvailabilityManagerEJBImpl
-    extends SessionEJB implements SessionBean {
+@Service
+@Transactional
+public class AvailabilityManagerImpl
+    extends SessionEJB implements AvailabilityManager {
 
-    private final Log _log = LogFactory.getLog(AvailabilityManagerEJBImpl.class);
+    private final Log _log = LogFactory.getLog(AvailabilityManagerImpl.class);
     private final Log _traceLog = LogFactory.getLog(
-        AvailabilityManagerEJBImpl.class.getName() + "Trace");
-    private final double AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
-    private final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
-    private final double AVAIL_UNKNOWN =
+        AvailabilityManagerImpl.class.getName() + "Trace");
+    private static final double AVAIL_NULL = MeasurementConstants.AVAIL_NULL;
+    private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
+    private static final double AVAIL_UNKNOWN =
         MeasurementConstants.AVAIL_UNKNOWN;
-    private final int IND_MIN       = MeasurementConstants.IND_MIN;
-    private final int IND_AVG       = MeasurementConstants.IND_AVG;
-    private final int IND_MAX       = MeasurementConstants.IND_MAX;
-    private final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
-    private final int IND_LAST_TIME = MeasurementConstants.IND_LAST_TIME;
-    private final int IND_UP_TIME   = IND_LAST_TIME + 1;
-    private final int IND_TOTAL_TIME = IND_UP_TIME + 1;
-    private final long MAX_AVAIL_TIMESTAMP =
+    private static final int IND_MIN       = MeasurementConstants.IND_MIN;
+    private static final int IND_AVG       = MeasurementConstants.IND_AVG;
+    private static final int IND_MAX       = MeasurementConstants.IND_MAX;
+    private static final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
+    private static final int IND_LAST_TIME = MeasurementConstants.IND_LAST_TIME;
+    private static final int IND_UP_TIME   = IND_LAST_TIME + 1;
+    private static final int IND_TOTAL_TIME = IND_UP_TIME + 1;
+    private static final long MAX_AVAIL_TIMESTAMP =
         AvailabilityDataRLE.getLastTimestamp();
-    private final String ALL_EVENTS_INTERESTING_PROP =
+    private static final String ALL_EVENTS_INTERESTING_PROP =
         "org.hq.triggers.all.events.interesting";
-    private final int DEFAULT_INTERVAL = 60;
-    private final AvailabilityDataDAO _dao = getAvailabilityDataDAO();
+    private static final int DEFAULT_INTERVAL = 60;
+   
     private static final String AVAIL_MANAGER_METRICS_INSERTED =
         ConcurrentStatsCollector.AVAIL_MANAGER_METRICS_INSERTED;
     /**
      * {@link Map} of {@link DataPoint} to {@link AvailabilityDataRLE}
      */
-    private Map _createMap = null;
+    private Map<DataPoint, AvailabilityDataRLE> createMap = null;
     /**
      * {@link Map} of {@link DataPoint} to {@link AvailabilityDataRLE}
      */
-    private Map _removeMap = null;
+    private Map<DataPoint, AvailabilityDataRLE> removeMap = null;
     /**
      * {@link Map} of {@link Integer} to ({@link TreeSet} of
      *  {@link AvailabilityDataRLE}).
@@ -126,43 +120,55 @@ public class AvailabilityManagerEJBImpl
      * <p>The {@link TreeSet}'s comparator sorts by
      *  {@link AvailabilityDataRLE}.getStartime().
      */
-    private Map _currAvails = null;
+    private Map<Integer, TreeSet<AvailabilityDataRLE>> currAvails = null;
 
-    private final long MAX_DATA_BACKLOG_TIME = 7 * MeasurementConstants.DAY;
-
-    /**
-     * @ejb:interface-method
-     */
-    public Measurement getAvailMeasurement(Resource resource) {
-        return getMeasurementDAO().findAvailMeasurement(resource);
+    private static final long MAX_DATA_BACKLOG_TIME = 7 * MeasurementConstants.DAY;
+    
+    private MeasurementManagerLocal measurementManager;
+    
+    private ResourceManager resourceManager;
+    
+    private MessagePublisher messenger;
+    
+    @Autowired
+    public AvailabilityManagerImpl(MeasurementManagerLocal measurementManager, ResourceManager resourceManager, MessagePublisher messenger) {
+        this.measurementManager = measurementManager;
+        this.resourceManager = resourceManager;
+        this.messenger = messenger;
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
-    public List getPlatformResources() {
-        return getMeasurementDAO().findAvailMeasurementsByInstances(
+    public Measurement getAvailMeasurement(Resource resource) {
+        return measurementDAO.findAvailMeasurement(resource);
+    }
+
+    /**
+     * 
+     */
+    public List<Measurement> getPlatformResources() {
+        return measurementDAO.findAvailMeasurementsByInstances(
             AppdefEntityConstants.APPDEF_TYPE_PLATFORM, null);
     }
 
     /**
      * @return Down time in ms for the Resource availability
      *
-     * @ejb:interface-method
+     * 
      */
     public long getDowntime(Resource resource, long begin, long end)
         throws MeasurementNotFoundException
     {
-        Measurement meas = getMeasurementDAO().findAvailMeasurement(resource);
+        Measurement meas = measurementDAO.findAvailMeasurement(resource);
         if (meas == null) {
             throw new MeasurementNotFoundException("Availability measurement " +
                                                    "not found for resource " +
                                                    resource.getId());
         }
-        List availInfo = _dao.getHistoricalAvails(meas, begin, end, false);
+        List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(meas, begin, end, false);
         long rtn = 0l;
-        for (Iterator i=availInfo.iterator(); i.hasNext(); ) {
-            AvailabilityDataRLE avail = (AvailabilityDataRLE)i.next();
+        for (AvailabilityDataRLE avail: availInfo ) {
             if (avail.getAvailVal() != AVAIL_DOWN) {
                 continue;
             }
@@ -178,22 +184,22 @@ public class AvailabilityManagerEJBImpl
     /**
      * @return List of all measurement ids for availability, ordered
      *
-     * @ejb:interface-method
+     * 
      */
-    public List getAllAvailIds() {
-        return getMeasurementDAO().findAllAvailIds();
+    public List<Integer> getAllAvailIds() {
+        return measurementDAO.findAllAvailIds();
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
-    public List getAvailMeasurementChildren(Resource resource,
+    public List<Measurement> getAvailMeasurementChildren(Resource resource,
                                             String resourceRelationType) {
-        final List sList = Collections.singletonList(resource.getId());
-        List rtn = (List) getAvailMeasurementChildren(sList, resourceRelationType)
+        final List<Integer> sList = Collections.singletonList(resource.getId());
+        List<Measurement> rtn =  getAvailMeasurementChildren(sList, resourceRelationType)
                                     .get(resource.getId());
         if (rtn == null) {
-            rtn = new ArrayList(0);
+            rtn = new ArrayList<Measurement>(0);
         }
         return rtn;
     }
@@ -202,51 +208,50 @@ public class AvailabilityManagerEJBImpl
      * @param {@link List} of {@link Integer} resource ids
      * @return {@link Map} of {@link Integer} to {@link List} of
      * {@link Measurement}
-     * @ejb:interface-method
+     * 
      */
-    public Map getAvailMeasurementChildren(List resourceIds,
+    public Map<Integer, List<Measurement>> getAvailMeasurementChildren(List<Integer> resourceIds,
                                            String resourceRelationType) {
-        final List objects = getMeasurementDAO().findRelatedAvailMeasurements(
+        final List<Object[]> objects = measurementDAO.findRelatedAvailMeasurements(
             resourceIds, resourceRelationType);
 
         return convertAvailMeasurementListToMap(objects);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
-    public List getAvailMeasurementParent(Resource resource,
+    public List<Measurement> getAvailMeasurementParent(Resource resource,
                                           String resourceRelationType) {
-        final List sList = Collections.singletonList(resource.getId());
-        List rtn = (List) getAvailMeasurementParent(sList, resourceRelationType)
+        final List<Integer> sList = Collections.singletonList(resource.getId());
+        List<Measurement> rtn = getAvailMeasurementParent(sList, resourceRelationType)
                                     .get(resource.getId());
         if (rtn == null) {
-            rtn = new ArrayList(0);
+            rtn = new ArrayList<Measurement>(0);
         }
         return rtn;
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
-    public Map getAvailMeasurementParent(List resourceIds,
+    public Map<Integer, List<Measurement>> getAvailMeasurementParent(List<Integer> resourceIds,
                                          String resourceRelationType) {
-        final List objects = getMeasurementDAO().findParentAvailMeasurements(
+        final List<Object[]> objects = measurementDAO.findParentAvailMeasurements(
                                       resourceIds,
                                       resourceRelationType);
 
         return convertAvailMeasurementListToMap(objects);
     }
 
-    private Map convertAvailMeasurementListToMap(List objects) {
-        final Map rtn = new HashMap(objects.size());
-        for (final Iterator it=objects.iterator(); it.hasNext(); ) {
-            final Object[] o = (Object[])it.next();
+    private Map<Integer, List<Measurement>> convertAvailMeasurementListToMap(List<Object[]> objects) {
+        final Map<Integer, List<Measurement>> rtn = new HashMap<Integer, List<Measurement>>(objects.size());
+        for (Object[] o: objects) {
             final Integer rId = (Integer)o[0];
             final Measurement m = (Measurement)o[1];
-            List tmp;
-            if (null == (tmp = (List)rtn.get(rId))) {
-                tmp = new ArrayList();
+            List<Measurement> tmp;
+            if (null == (tmp = rtn.get(rId))) {
+                tmp = new ArrayList<Measurement>();
                 rtn.put(rId, tmp);
             }
             tmp.add(m);
@@ -257,12 +262,12 @@ public class AvailabilityManagerEJBImpl
     /**
      * TODO: Can this method be combined with the one that takes an array?
      *
-     * @ejb:interface-method
+     * 
      */
-    public PageList getHistoricalAvailData(Measurement m, long begin, long end,
+    public PageList<HighLowMetricValue> getHistoricalAvailData(Measurement m, long begin, long end,
                                            PageControl pc,
                                            boolean prependUnknowns) {
-        List availInfo = _dao.getHistoricalAvails(
+        List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(
             m, begin, end, pc.isDescending());
         return getPageList(
             availInfo, begin, end, m.getInterval(), prependUnknowns);
@@ -281,62 +286,46 @@ public class AvailabilityManagerEJBImpl
      * availability is contiguous this will not occur unless the time range
      * precedes the first availability point.
      * @see org.hyperic.hq.measurement.MeasurementConstants#AVAIL_UNKNOWN
-     * @ejb:interface-method
+     * 
      */
-    public PageList getHistoricalAvailData(Integer[] mids, long begin, long end,
+    public PageList<HighLowMetricValue> getHistoricalAvailData(Integer[] mids, long begin, long end,
                                            long interval, PageControl pc,
                                            boolean prependUnknowns) {
         if (mids.length == 0) {
-            return new PageList();
+            return new PageList<HighLowMetricValue>();
         }
-        List availInfo = _dao.getHistoricalAvails(mids, begin,
+        List<AvailabilityDataRLE> availInfo = availabilityDataDAO.getHistoricalAvails(mids, begin,
             end, pc.isDescending());
         return getPageList(availInfo, begin, end, interval, prependUnknowns);
-    }
-
-    // XXX scottmf, not used right now.  Will be used in some fashion to calc
-    // the correct availability uptime percent
-    private double getUpTime(List availInfo, long begin, long end) {
-        long totalUptime = 0;
-        long totalTime = 0;
-        for (Iterator it=availInfo.iterator(); it.hasNext(); ) {
-            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
-            long endtime = rle.getEndtime();
-            long startime = rle.getStartime();
-            long total = Math.min(endtime, end) - Math.max(startime, begin);
-            totalUptime += total*rle.getAvailVal();
-            totalTime += total;
-        }
-        return (double)totalUptime/(double)totalTime*100;
     }
 
     /**
      * Get the list of Raw RLE objects for a resource
      * @return List<AvailabilityDataRLE>
-     * @ejb:interface-method
+     * 
      */
-    public List getHistoricalAvailData(Resource res, long begin, long end) {
-        return _dao.getHistoricalAvails(res, begin, end);
+    public List<AvailabilityDataRLE> getHistoricalAvailData(Resource res, long begin, long end) {
+        return availabilityDataDAO.getHistoricalAvails(res, begin, end);
     }
 
-    private Collection getDefaultHistoricalAvail(long timestamp) {
+    private Collection<HighLowMetricValue> getDefaultHistoricalAvail(long timestamp) {
         HighLowMetricValue[] rtn = new HighLowMetricValue[DEFAULT_INTERVAL];
         Arrays.fill(rtn, new HighLowMetricValue(AVAIL_UNKNOWN, timestamp));
         return Arrays.asList(rtn);
     }
 
-    private PageList getPageList(List availInfo, long begin, long end,
+    private PageList<HighLowMetricValue> getPageList(List<AvailabilityDataRLE> availInfo, long begin, long end,
                                  long interval, boolean prependUnknowns) {
-        PageList rtn = new PageList();
+        PageList<HighLowMetricValue> rtn = new PageList<HighLowMetricValue>();
         begin += interval;
-        for (Iterator it=availInfo.iterator(); it.hasNext(); ) {
-            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
+        for (Iterator<AvailabilityDataRLE> it=availInfo.iterator(); it.hasNext(); ) {
+            AvailabilityDataRLE rle = it.next();
             long availStartime = rle.getStartime();
             long availEndtime = rle.getEndtime();
             if (availEndtime < begin) {
                 continue;
             }
-            LinkedList queue = new LinkedList();
+            LinkedList<AvailabilityDataRLE> queue = new LinkedList<AvailabilityDataRLE>();
             queue.add(rle);
             int i=0;
             for (long curr=begin; curr<=end; curr+=interval) {
@@ -433,14 +422,13 @@ public class AvailabilityManagerEJBImpl
         return oldVal;
     }
 
-    private HighLowMetricValue getMetricValue(List avails, long timestamp) {
+    private HighLowMetricValue getMetricValue(List<AvailabilityDataRLE> avails, long timestamp) {
         if (avails.size() == 1) {
-            AvailabilityDataRLE rle = (AvailabilityDataRLE)avails.get(0);
+            AvailabilityDataRLE rle = avails.get(0);
             return new HighLowMetricValue(rle.getAvailVal(), timestamp);
         }
         double value = 0;
-        for (Iterator i=avails.iterator(); i.hasNext(); ) {
-            AvailabilityDataRLE rle = (AvailabilityDataRLE)i.next();
+        for (AvailabilityDataRLE rle: avails ) {
             double availVal = rle.getAvailVal();
             value += availVal;
         }
@@ -458,10 +446,10 @@ public class AvailabilityManagerEJBImpl
      * [IND_MAX]
      * [IND_CFG_COUNT]
      * [IND_LAST_TIME]
-     * @ejb:interface-method
+     * 
      */
-    public Map getAggregateData(Integer[] mids, long begin, long end) {
-        List avails = _dao.findAggregateAvailability(mids, begin, end);
+    public Map<Integer, double[]> getAggregateData(Integer[] mids, long begin, long end) {
+        List<Object[]> avails = availabilityDataDAO.findAggregateAvailability(mids, begin, end);
         return getAggData(avails, false);
     }
 
@@ -474,10 +462,10 @@ public class AvailabilityManagerEJBImpl
      * [IND_MAX]
      * [IND_CFG_COUNT]
      * [IND_LAST_TIME]
-     * @ejb:interface-method
+     * 
      */
-    public Map getAggregateDataByTemplate(Integer[] mids, long begin, long end) {
-        List avails = _dao.findAggregateAvailability(mids, begin, end);
+    public Map<Integer, double[]> getAggregateDataByTemplate(Integer[] mids, long begin, long end) {
+        List<Object[]> avails = availabilityDataDAO.findAggregateAvailability(mids, begin, end);
         return getAggData(avails, true);
     }
 
@@ -490,24 +478,22 @@ public class AvailabilityManagerEJBImpl
      * [IND_MAX]
      * [IND_CFG_COUNT]
      * [IND_LAST_TIME]
-     * @ejb:interface-method
+     * 
      */
-    public Map getAggregateData(Integer[] tids, Integer[] iids,
+    public Map<Integer, double[]> getAggregateData(Integer[] tids, Integer[] iids,
                                 long begin, long end) {
-        List avails = _dao.findAggregateAvailability(tids, iids, begin, end);
+        List<Object[]> avails = availabilityDataDAO.findAggregateAvailability(tids, iids, begin, end);
         return getAggData(avails, true);
     }
 
-    private Map getAggData(List avails, boolean useTidKey)
+    private Map<Integer, double[]> getAggData(List<Object[]> avails, boolean useTidKey)
     {
-        Map rtn = new HashMap();
+        Map<Integer, double[]> rtn = new HashMap<Integer, double[]>();
         if (avails.size() == 0) {
             // Nothing to do, return an empty Map.
             return rtn;
         }
-        for (Iterator it=avails.iterator(); it.hasNext(); ) {
-            Object[] objs = (Object[]) it.next();
-
+        for (Object[] objs: avails) {
             double[] data;
             Integer key = null;
             if (useTidKey) {
@@ -541,8 +527,7 @@ public class AvailabilityManagerEJBImpl
         }
 
         // Now calculate the average value
-        for (Iterator it = rtn.values().iterator(); it.hasNext(); ) {
-            double[] data = (double[]) it.next();
+        for (double[] data: rtn.values()) {
             data[IND_AVG] += data[IND_UP_TIME] / data[IND_TOTAL_TIME];
         }
         return rtn;
@@ -555,63 +540,57 @@ public class AvailabilityManagerEJBImpl
      * @param measCache Map<Integer, List> optional arg (may be null) to supply
      * measurement id(s) of ResourceIds. Integer => Resource.getId()
      * @return Map<Integer, MetricValue> Integer => Measurement.getId()
-     * @ejb:interface-method
+     * 
      */
-    public Map getLastAvail(Collection resources, Map measCache) {
-        final MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
-        final Set midsToGet = new HashSet(resources.size());
-        final List resToGet = new ArrayList(resources.size());
-        final ResourceManager resMan = ResourceManagerImpl.getOne();
-        for (final Iterator it=resources.iterator(); it.hasNext(); ) {
-            final Object o = it.next();
+    public Map<Integer,MetricValue> getLastAvail(Collection<Object> resources, Map<Integer, List<Measurement>> measCache) {
+        final Set<Integer> midsToGet = new HashSet<Integer>(resources.size());
+        final List<Resource> resToGet = new ArrayList<Resource>(resources.size());
+        for (Object o : resources ) {
             Resource resource = null;
             if (o instanceof AppdefEntityValue) {
                 AppdefEntityValue rv = (AppdefEntityValue) o;
                 AppdefEntityID aeid = rv.getID();
-                resource = resMan.findResource(aeid);
+                resource = resourceManager.findResource(aeid);
             } else if (o instanceof AppdefEntityID) {
                 AppdefEntityID aeid = (AppdefEntityID) o;
-                resource = resMan.findResource(aeid);
+                resource = resourceManager.findResource(aeid);
             } else if (o instanceof Resource) {
                 resource = (Resource) o;
             } else if (o instanceof AppdefResourceValue){
                 AppdefResourceValue res = (AppdefResourceValue) o;
                 AppdefEntityID aeid = res.getEntityId();
-                resource = resMan.findResource(aeid);
+                resource = resourceManager.findResource(aeid);
             } else {
-                resource = resMan.findResourceById((Integer) o);
+                resource = resourceManager.findResourceById((Integer) o);
             }
-            List measIds = null;
+            List<Measurement> measurements = null;
             if (measCache != null) {
-                measIds = (List)measCache.get(resource.getId());
+                measurements = measCache.get(resource.getId());
             }
-            if (measIds == null || measIds.size() == 0) {
+            if (measurements == null || measurements.size() == 0) {
                 resToGet.add(resource);
                 continue;
             }
-            for (final Iterator iter=measIds.iterator(); iter.hasNext(); ) {
-                final Measurement m = (Measurement)iter.next();
+            for (Measurement m : measurements) {
                 midsToGet.add(m.getId());
             }
         }
         if (!resToGet.isEmpty()) {
-            final Collection measIds = mMan.getAvailMeasurements(resToGet).values();
-            for (final Iterator it=measIds.iterator(); it.hasNext(); ) {
-                final List mids = (List)it.next();
-                for (final Iterator iter=mids.iterator(); iter.hasNext(); ) {
-                    final Measurement m = (Measurement)iter.next();
+            final Collection<List<Measurement>> measIds = measurementManager.getAvailMeasurements(resToGet).values();
+            for (List<Measurement> measurementList : measIds) {
+                for(Measurement m: measurementList) {               
                     midsToGet.add(m.getId());
-                }
+                }   
             }
         }
         return getLastAvail((Integer[])midsToGet.toArray(new Integer[0]));
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public MetricValue getLastAvail(Measurement m) {
-        Map map = getLastAvail(new Integer[] { m.getId() });
+        Map<Integer,MetricValue> map = getLastAvail(new Integer[] { m.getId() });
         MetricValue mv = (MetricValue)map.get(m.getId());
         if (mv == null) {
             return new MetricValue(AVAIL_UNKNOWN, System.currentTimeMillis());
@@ -626,18 +605,18 @@ public class AvailabilityManagerEJBImpl
      *
      * @return {@link Map} of {@link Integer} to {@link MetricValue}
      * Integer is the measurementId
-     * @ejb:interface-method
+     * 
      */
-    public Map getLastAvail(Integer[] mids) {
+    @SuppressWarnings("unchecked")
+    public Map<Integer, MetricValue> getLastAvail(Integer[] mids) {
         if (mids.length == 0) {
             return Collections.EMPTY_MAP;
         }
         // Don't modify callers array
-        final List midList = Collections.unmodifiableList(Arrays.asList(mids));
-        final Map rtn = new HashMap(midList.size());
-        final List list = _dao.findLastAvail(midList);
-        for (final Iterator i=list.iterator(); i.hasNext(); ) {
-            final AvailabilityDataRLE avail = (AvailabilityDataRLE)i.next();
+        final List<Integer> midList = Collections.unmodifiableList(Arrays.asList(mids));
+        final Map<Integer, MetricValue> rtn = new HashMap<Integer, MetricValue>(midList.size());
+        final List<AvailabilityDataRLE> list = availabilityDataDAO.findLastAvail(midList);
+        for (AvailabilityDataRLE avail : list ) {
             final Integer mid = avail.getMeasurement().getId();
             final AvailabilityMetricValue mVal =
                 new AvailabilityMetricValue(avail.getAvailVal(),
@@ -648,33 +627,32 @@ public class AvailabilityManagerEJBImpl
         // fill in missing measurements
         final long now = TimingVoodoo.roundDownTime(
             System.currentTimeMillis(), MeasurementConstants.MINUTE);
-        if (midList.size() > 0) {
-            for (final Iterator i=midList.iterator(); i.hasNext(); ) {
-                final Integer mid = (Integer)i.next();
+       
+            for (Integer mid : midList ) {
+               
                 if (!rtn.containsKey(mid)) {
                     final MetricValue mVal = new MetricValue(AVAIL_UNKNOWN, now);
                     rtn.put(mid, mVal);
                 }
             }
-        }
+        
         return rtn;
     }
 
     /**
      * @param includes List<Integer> of mids.  If includes is null then all
      * unavail entities will be returned.
-     * @ejb:interface-method
+     * 
      */
-    public List getUnavailEntities(List includes) {
-        List rtn;
+    public List<DownMetricValue> getUnavailEntities(List<Integer> includes) {
+        List<DownMetricValue> rtn;
         if (includes != null) {
-            rtn = new ArrayList(includes.size());
+            rtn = new ArrayList<DownMetricValue>(includes.size());
         } else {
-            rtn = new ArrayList();
+            rtn = new ArrayList<DownMetricValue>();
         }
-        List unavails = _dao.getDownMeasurements(includes);
-        for (Iterator it=unavails.iterator(); it.hasNext(); ) {
-            AvailabilityDataRLE rle = (AvailabilityDataRLE) it.next();
+        List<AvailabilityDataRLE> unavails = availabilityDataDAO.getDownMeasurements(includes);
+        for (AvailabilityDataRLE rle : unavails) {
             Measurement meas = rle.getMeasurement();
             long timestamp = rle.getStartime();
             Integer mid = meas.getId();
@@ -688,10 +666,10 @@ public class AvailabilityManagerEJBImpl
      * Add a single Availablility Data point.
      * @mid The Measurement id
      * @mval The MetricValue to store.
-     * @ejb:interface-method
+     * 
      */
     public void addData(Integer mid, MetricValue mval) {
-        List l = new ArrayList(1);
+        List<DataPoint> l = new ArrayList<DataPoint>(1);
         l.add(new DataPoint(mid, mval));
         addData(l);
     }
@@ -703,9 +681,9 @@ public class AvailabilityManagerEJBImpl
      *
      * @param availPoints List of DataPoints
      *
-     * @ejb:interface-method
+     * 
      */
-    public void addData(List availPoints) {
+    public void addData(List<DataPoint> availPoints) {
         addData(availPoints, true);
     }
 
@@ -718,21 +696,21 @@ public class AvailabilityManagerEJBImpl
      *          The default behavior is true. If false, the calling method
      *          should call sendDataToEventHandlers directly afterwards.
      *
-     * @ejb:interface-method
+     * 
      */
-    public void addData(List availPoints, boolean sendData)
+    public void addData(List<DataPoint> availPoints, boolean sendData)
     {
         if (availPoints == null || availPoints.size() == 0) {
             return;
         }
-        List updateList = new ArrayList(availPoints.size());
-        List outOfOrderAvail = new ArrayList(availPoints.size());
+        List<DataPoint> updateList = new ArrayList<DataPoint>(availPoints.size());
+        List<DataPoint> outOfOrderAvail = new ArrayList<DataPoint>(availPoints.size());
         AvailabilityCache cache = AvailabilityCache.getInstance();
-        _createMap = new HashMap();
-        _removeMap = new HashMap();
+        createMap = new HashMap<DataPoint, AvailabilityDataRLE>();
+        removeMap = new HashMap<DataPoint, AvailabilityDataRLE>();
         final boolean debug = _log.isDebugEnabled();
         long begin = -1;
-        Map state = null;
+        Map<Integer, StringBuilder> state = null;
         synchronized (cache) {
             try {
                 cache.beginTran();
@@ -759,9 +737,9 @@ public class AvailabilityManagerEJBImpl
                 cache.rollbackTran();
                 throw new SystemException(e);
             } finally {
-                _createMap = null;
-                _removeMap = null;
-                _currAvails = null;
+                createMap = null;
+                removeMap = null;
+                currAvails = null;
             }
         }
         ConcurrentStatsCollector.getInstance().addStat(
@@ -774,21 +752,17 @@ public class AvailabilityManagerEJBImpl
     }
 
     private void flushCreateAndRemoves() {
-        for (Iterator it=_removeMap.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)it.next();
-            AvailabilityDataRLE rle = (AvailabilityDataRLE)entry.getValue();
-            _dao.remove(rle);
+        for (AvailabilityDataRLE rle : removeMap.values()) {
+            availabilityDataDAO.remove(rle);
         }
         // for some reason if flush is not run, then create() will throw
         // Hibernate NonUniqueObjectExceptions
-        _dao.getSession().flush();
-        for (Iterator it=_createMap.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)it.next();
-            AvailabilityDataRLE rle = (AvailabilityDataRLE)entry.getValue();
+        availabilityDataDAO.getSession().flush();
+        for (AvailabilityDataRLE rle: createMap.values() ) {
             AvailabilityDataId id = new AvailabilityDataId();
             id.setMeasurement(rle.getMeasurement());
             id.setStartime(rle.getStartime());
-            _dao.create(rle.getMeasurement(), rle.getStartime(),
+            availabilityDataDAO.create(rle.getMeasurement(), rle.getStartime(),
                         rle.getEndtime(), rle.getAvailVal());
         }
     }
@@ -809,12 +783,12 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
-    private void logErrorInfo(final Map oldState, final List availPoints) {
+    private void logErrorInfo(final Map<Integer, StringBuilder> oldState, final List<DataPoint> availPoints) {
         if (!_traceLog.isDebugEnabled()) {
             return;
         }
         Integer mid;
-        Map currState = captureCurrAvailState();
+        Map<Integer, StringBuilder> currState = captureCurrAvailState();
         if (null != (mid = isAvailDataRLEValid())) {
             logAvailState(oldState, mid);
             logStates(availPoints, mid);
@@ -824,30 +798,31 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
-    private void setCurrAvails(final List outOfOrderAvail,
-                               final List updateList) {
+    @SuppressWarnings("unchecked")
+    private void setCurrAvails(final List<DataPoint> outOfOrderAvail,
+                               final List<DataPoint> updateList) {
         if (outOfOrderAvail.size() == 0 && updateList.size() == 0) {
-            _currAvails = Collections.EMPTY_MAP;
+            currAvails = Collections.EMPTY_MAP;
             return;
         }
         long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), 60000);
-        HashSet mids = getMidsWithinAllowedDataWindow(updateList, now);
+        HashSet<Integer> mids = getMidsWithinAllowedDataWindow(updateList, now);
         mids.addAll(getMidsWithinAllowedDataWindow(outOfOrderAvail, now));
         if (mids.size() <= 0) {
-            _currAvails = Collections.EMPTY_MAP;
+            currAvails = Collections.EMPTY_MAP;
             return;
         }
         Integer[] mIds = (Integer[])mids.toArray(new Integer[0]);
-        _currAvails = _dao.getHistoricalAvailMap(
+        currAvails = availabilityDataDAO.getHistoricalAvailMap(
             mIds, now-MAX_DATA_BACKLOG_TIME, false);
     }
 
-    private HashSet getMidsWithinAllowedDataWindow(final List states,
+    private HashSet<Integer> getMidsWithinAllowedDataWindow(final List<DataPoint> states,
                                                    final long now) {
-        HashSet mids = new HashSet();
+        HashSet<Integer> mids = new HashSet<Integer>();
         int i=0;
-        for (Iterator it=states.iterator(); it.hasNext(); i++) {
-            DataPoint pt = (DataPoint)it.next();
+        for (Iterator<DataPoint> it=states.iterator(); it.hasNext(); i++) {
+            DataPoint pt = it.next();
             long timestamp = pt.getTimestamp();
             // only allow data for the last MAX_DATA_BACKLOG_TIME ms
             // this way we don't have to bring too much into memory which could
@@ -961,10 +936,9 @@ public class AvailabilityManagerEJBImpl
 
     private AvailabilityDataRLE findAvail(DataPoint state) {
         Integer mId = state.getMetricId();
-        Collection rles = (Collection)_currAvails.get(mId);
+        Collection<AvailabilityDataRLE> rles = currAvails.get(mId);
         long start = state.getTimestamp();
-        for (Iterator it=rles.iterator(); it.hasNext(); ) {
-            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
+        for (AvailabilityDataRLE rle : rles ) {
             if (rle.getStartime() == start) {
                 return rle;
             }
@@ -974,12 +948,12 @@ public class AvailabilityManagerEJBImpl
 
     private AvailabilityDataRLE findAvailAfter(DataPoint state) {
         final Integer mId = state.getMetricId();
-        final TreeSet rles = (TreeSet)_currAvails.get(mId);
+        final TreeSet<AvailabilityDataRLE> rles = currAvails.get(mId);
         final long start = state.getTimestamp();
         final AvailabilityDataRLE tmp = new AvailabilityDataRLE();
         // tailSet is inclusive so we need to add 1 to start
         tmp.setStartime(start+1);
-        final SortedSet set = rles.tailSet(tmp);
+        final SortedSet<AvailabilityDataRLE> set = rles.tailSet(tmp);
         if (set.size() == 0) {
             return null;
         }
@@ -988,16 +962,16 @@ public class AvailabilityManagerEJBImpl
 
     private AvailabilityDataRLE findAvailBefore(DataPoint state) {
         Integer mId = state.getMetricId();
-        TreeSet rles = (TreeSet)_currAvails.get(mId);
+        TreeSet<AvailabilityDataRLE> rles = currAvails.get(mId);
         long start = state.getTimestamp();
         AvailabilityDataRLE tmp = new AvailabilityDataRLE();
         // headSet is inclusive so we need to subtract 1 from start
         tmp.setStartime(start-1);
-        SortedSet set = rles.headSet(tmp);
+        SortedSet<AvailabilityDataRLE> set = rles.headSet(tmp);
         if (set.size() == 0) {
             return null;
         }
-        return (AvailabilityDataRLE)set.last();
+        return set.last();
     }
 
     private void merge(DataPoint state)
@@ -1111,30 +1085,30 @@ public class AvailabilityManagerEJBImpl
     private void removeAvail(AvailabilityDataRLE avail) {
         long start = avail.getStartime();
         Integer mId = avail.getMeasurement().getId();
-        TreeSet rles = (TreeSet)_currAvails.get(mId);
+        TreeSet<AvailabilityDataRLE> rles = currAvails.get(mId);
         if (rles.remove(avail)) {
             DataPoint key =
                 new DataPoint(mId.intValue(), avail.getAvailVal(), start);
-            _createMap.remove(key);
-            _removeMap.put(key, avail);
+            createMap.remove(key);
+            removeMap.put(key, avail);
         }
     }
 
     private AvailabilityDataRLE getLastAvail(DataPoint state) {
         Integer mId = state.getMetricId();
-        TreeSet rles = (TreeSet)_currAvails.get(mId);
+        TreeSet<AvailabilityDataRLE> rles = currAvails.get(mId);
         if (rles.size() == 0) {
             return null;
         }
-        return (AvailabilityDataRLE)rles.last();
+        return rles.last();
     }
 
     private AvailabilityDataRLE create(Measurement meas, long start,
                                        long end, double val) {
         AvailabilityDataRLE rtn = _createAvail(meas, start, end, val);
-        _createMap.put(new DataPoint(meas.getId().intValue(), val, start), rtn);
+        createMap.put(new DataPoint(meas.getId().intValue(), val, start), rtn);
         Integer mId = meas.getId();
-        Collection rles = (Collection)_currAvails.get(mId);
+        Collection<AvailabilityDataRLE> rles = currAvails.get(mId);
         rles.add(rtn);
         return rtn;
     }
@@ -1151,9 +1125,9 @@ public class AvailabilityManagerEJBImpl
 
     private AvailabilityDataRLE create(Measurement meas, long start, double val) {
         AvailabilityDataRLE rtn = _createAvail(meas, start, MAX_AVAIL_TIMESTAMP, val);
-        _createMap.put(new DataPoint(meas.getId().intValue(), val, start), rtn);
+        createMap.put(new DataPoint(meas.getId().intValue(), val, start), rtn);
         Integer mId = meas.getId();
-        Collection rles = (Collection)_currAvails.get(mId);
+        Collection<AvailabilityDataRLE> rles = currAvails.get(mId);
         // I am assuming that this will be cleaned up by the caller where it
         // will update the rle before rtn if one exists
         rles.add(rtn);
@@ -1206,7 +1180,7 @@ public class AvailabilityManagerEJBImpl
 	    return true;
     }
 
-    private void updateStates(List states) {
+    private void updateStates(List<DataPoint> states) {
         AvailabilityCache cache = AvailabilityCache.getInstance();
         if (states.size() == 0) {
             return;
@@ -1214,8 +1188,7 @@ public class AvailabilityManagerEJBImpl
         // as a performance optimization, fetch all the last avails
         // at once, rather than one at a time in updateState()
         final boolean debug = _log.isDebugEnabled();
-        for (Iterator i=states.iterator(); i.hasNext(); ) {
-            DataPoint state = (DataPoint)i.next();
+        for (DataPoint state : states) {
             try {
                 // need to check again since there could be multiple
                 // states with the same id in the list
@@ -1238,13 +1211,12 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
-    private void updateOutOfOrderState(List outOfOrderAvail) {
+    private void updateOutOfOrderState(List<DataPoint> outOfOrderAvail) {
         if (outOfOrderAvail.size() == 0) {
             return;
         }
-        for (Iterator i=outOfOrderAvail.iterator(); i.hasNext(); ) {
+        for (DataPoint state: outOfOrderAvail ) {
             try {
-            	DataPoint state = (DataPoint)i.next();
             	// do not update the cache here, the timestamp is out of order
                 merge(state);
             } catch (BadAvailStateException e) {
@@ -1253,16 +1225,15 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
-    private void updateCache(List availPoints, List updateList,
-                             List outOfOrderAvail)
+    private void updateCache(List<DataPoint> availPoints, List<DataPoint> updateList,
+                             List<DataPoint> outOfOrderAvail)
     {
         if (availPoints.size() == 0) {
             return;
         }
         AvailabilityCache cache = AvailabilityCache.getInstance();
         final boolean debug = _log.isDebugEnabled();
-        for (Iterator i=availPoints.iterator(); i.hasNext(); ) {
-            DataPoint pt = (DataPoint)i.next();
+        for (DataPoint pt: availPoints ) {
 			int id = pt.getMetricId().intValue();
             MetricValue mval = pt.getMetricValue();
             double val = mval.getValue();
@@ -1291,18 +1262,16 @@ public class AvailabilityManagerEJBImpl
         }
     }
 
-    private void sendDataToEventHandlers(List data) {
+    private void sendDataToEventHandlers(List<DataPoint> data) {
         int maxCapacity = data.size();
-        ArrayList events  = new ArrayList(maxCapacity);
-        Map downEvents  = new HashMap(maxCapacity);
-        List zevents = new ArrayList(maxCapacity);
-        MeasurementManagerLocal measMan = MeasurementManagerEJBImpl.getOne();
+        ArrayList<MeasurementEvent> events  = new ArrayList<MeasurementEvent>(maxCapacity);
+        Map<Integer, MeasurementEvent> downEvents  = new HashMap<Integer, MeasurementEvent>(maxCapacity);
+        List<MeasurementZevent> zevents = new ArrayList<MeasurementZevent>(maxCapacity);
 
         boolean allEventsInteresting =
             Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
 
-        for (Iterator i = data.iterator(); i.hasNext();) {
-            DataPoint dp = (DataPoint) i.next();
+        for (DataPoint dp: data) {
             Integer metricId = dp.getMetricId();
             MetricValue val = dp.getMetricValue();
 
@@ -1310,7 +1279,7 @@ public class AvailabilityManagerEJBImpl
 
             if (RegisteredTriggers.isTriggerInterested(event)
                     || allEventsInteresting) {
-                measMan.buildMeasurementEvent(event);
+                measurementManager.buildMeasurementEvent(event);
                 if (event.getValue().getValue() == AVAIL_DOWN) {
                     Resource r = getResource(event.getResource());
                     if (r != null && !r.isInAsyncDeleteState()) {
@@ -1337,8 +1306,7 @@ public class AvailabilityManagerEJBImpl
         }
 
         if (!events.isEmpty()) {
-            Messenger sender = new Messenger();
-            sender.publishMessage(EventConstants.EVENTS_TOPIC, events);
+            messenger.publishMessage(EventConstants.EVENTS_TOPIC, events);
         }
 
         if (!zevents.isEmpty()) {
@@ -1351,27 +1319,26 @@ public class AvailabilityManagerEJBImpl
      * and is used to filter availability data points based on
      * hierarchical alerting rules.
      *
-     * @ejb:interface-method
+     * 
      */
-    public void sendDataToEventHandlers(Map data) {
+    public void sendDataToEventHandlers(Map<Integer,DataPoint> data) {
         int maxCapacity = data.size();
-        Map events  = new HashMap(maxCapacity);
-        List zevents = new ArrayList(maxCapacity);
-        MeasurementManagerLocal measMan = MeasurementManagerEJBImpl.getOne();
+        Map<Integer, MeasurementEvent> events  = new HashMap<Integer, MeasurementEvent>(maxCapacity);
+        List<MeasurementZevent> zevents = new ArrayList<MeasurementZevent>(maxCapacity);
 
         boolean allEventsInteresting =
             Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
 
-        for (Iterator i = data.keySet().iterator(); i.hasNext();) {
-            Integer resourceIdKey = (Integer) i.next();
-            DataPoint dp = (DataPoint) data.get(resourceIdKey);
+        for (Integer resourceIdKey : data.keySet()) {
+           
+            DataPoint dp = data.get(resourceIdKey);
             Integer metricId = dp.getMetricId();
             MetricValue val = dp.getMetricValue();
             MeasurementEvent event = new MeasurementEvent(metricId, val);
 
             if (RegisteredTriggers.isTriggerInterested(event)
                     || allEventsInteresting) {
-                measMan.buildMeasurementEvent(event);
+                measurementManager.buildMeasurementEvent(event);
                 events.put(resourceIdKey, event);
             }
 
@@ -1387,7 +1354,7 @@ public class AvailabilityManagerEJBImpl
 
             Messenger sender = new Messenger();
             sender.publishMessage(EventConstants.EVENTS_TOPIC,
-                                  new ArrayList(events.values()));
+                                  new ArrayList<MeasurementEvent>(events.values()));
         }
 
         if (!zevents.isEmpty()) {
@@ -1396,29 +1363,23 @@ public class AvailabilityManagerEJBImpl
     }
 
     private Measurement getMeasurement(Integer mId) {
-        return MeasurementManagerEJBImpl.getOne().getMeasurement(mId);
+        return measurementManager.getMeasurement(mId);
     }
 
-    public static AvailabilityManagerLocal getOne() {
-        try {
-            return AvailabilityManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    public static AvailabilityManager getOne() {
+       return Bootstrap.getBean(AvailabilityManager.class);
     }
 
-    private Map captureCurrAvailState() {
+    private Map<Integer, StringBuilder> captureCurrAvailState() {
         if (!_traceLog.isDebugEnabled()) {
             return null;
         }
-        Map rtn = new HashMap();
-        for (Iterator it=_currAvails.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)it.next();
-            Integer mid = (Integer)entry.getKey();
-            Collection rles = (Collection)entry.getValue();
+        Map<Integer, StringBuilder> rtn = new HashMap<Integer, StringBuilder>();
+        for (Map.Entry<Integer,TreeSet<AvailabilityDataRLE>> entry:currAvails.entrySet()) {
+            Integer mid = entry.getKey();
+            Collection<AvailabilityDataRLE> rles = entry.getValue();
             StringBuilder buf = new StringBuilder("\n");
-            for (Iterator ii=rles.iterator(); ii.hasNext(); ) {
-                AvailabilityDataRLE rle = (AvailabilityDataRLE)ii.next();
+            for (AvailabilityDataRLE rle : rles ) {
                 buf.append(mid).append(" | ")
                    .append(rle.getStartime()).append(" | ")
                    .append(rle.getEndtime()).append(" | ")
@@ -1429,15 +1390,14 @@ public class AvailabilityManagerEJBImpl
         return rtn;
     }
 
-    private void logAvailState(Map availState, Integer mid) {
+    private void logAvailState(Map<Integer, StringBuilder> availState, Integer mid) {
         StringBuilder buf = (StringBuilder)availState.get(mid);
         _traceLog.debug(buf.toString());
     }
 
-    private void logStates(List states, Integer mid) {
+    private void logStates(List<DataPoint> states, Integer mid) {
         StringBuilder log = new StringBuilder("\n");
-        for (Iterator it=states.iterator(); it.hasNext(); ) {
-            DataPoint pt = (DataPoint)it.next();
+        for (DataPoint pt :states ) {
             if (!pt.getMetricId().equals(mid)) {
                 continue;
             }
@@ -1451,10 +1411,9 @@ public class AvailabilityManagerEJBImpl
     private Integer isAvailDataRLEValid() {
         AvailabilityCache cache = AvailabilityCache.getInstance();
         synchronized(cache) {
-            for (Iterator it=_currAvails.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry entry = (Map.Entry)it.next();
-                Integer mId = (Integer)entry.getKey();
-                Collection rles = (Collection)entry.getValue();
+            for (Map.Entry<Integer, TreeSet<AvailabilityDataRLE>> entry : currAvails.entrySet()) {
+                Integer mId = entry.getKey();
+                Collection<AvailabilityDataRLE> rles = entry.getValue();
                 if (!isAvailDataRLEValid(mId, cache.get(mId), rles)) {
                     return mId;
                 }
@@ -1464,11 +1423,10 @@ public class AvailabilityManagerEJBImpl
     }
 
     private boolean isAvailDataRLEValid(Integer measId, DataPoint lastPt,
-                                        Collection avails) {
+                                        Collection<AvailabilityDataRLE> avails) {
         AvailabilityDataRLE last = null;
-        Set endtimes = new HashSet();
-        for (Iterator it=avails.iterator(); it.hasNext(); ) {
-            AvailabilityDataRLE avail = (AvailabilityDataRLE)it.next();
+        Set<Long> endtimes = new HashSet<Long>();
+        for (AvailabilityDataRLE avail : avails ) {
             Long endtime = new Long(avail.getEndtime());
             if (endtimes.contains(endtime)) {
                 _log.error("list for MID=" + measId +
@@ -1502,11 +1460,4 @@ public class AvailabilityManagerEJBImpl
         }
         return true;
     }
-
-    public void ejbCreate() {}
-    public void ejbPostCreate() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {}
 }

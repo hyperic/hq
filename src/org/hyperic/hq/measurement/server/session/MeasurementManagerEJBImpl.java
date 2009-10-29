@@ -475,7 +475,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
             if (availMeasurement != null) {
                 MetricValue val = new MetricValue(MeasurementConstants.AVAIL_DOWN);
-                AvailabilityManagerEJBImpl.getOne().addData(availMeasurement,
+                AvailabilityManagerImpl.getOne().addData(availMeasurement,
                                                             val);
             }
         }

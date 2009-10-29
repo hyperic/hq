@@ -79,14 +79,14 @@ import org.hyperic.hq.control.server.session.ControlManagerEJBImpl;
 import org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl;
 import org.hyperic.hq.control.shared.ControlManagerLocal;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
-import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl;
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.ReportProcessorEJBImpl;
 import org.hyperic.hq.measurement.server.session.SRNManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.TrackerManagerEJBImpl;
-import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
+import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
@@ -229,8 +229,8 @@ public abstract class BizappSessionEJB {
         return AuthManagerEJBImpl.getOne();
     }
 
-    public AvailabilityManagerLocal getAvailManager() {
-        return AvailabilityManagerEJBImpl.getOne();
+    public AvailabilityManager getAvailManager() {
+        return AvailabilityManagerImpl.getOne();
     }
 
     public DataManagerLocal getDataMan() {

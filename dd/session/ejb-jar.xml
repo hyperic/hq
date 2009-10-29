@@ -492,19 +492,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[The AvailabityManagerEJBImpl class is a stateless session bean that can be used to retrieve Availability Data RLE points]]></description>
-
-			<ejb-name>AvailabilityManager</ejb-name>
-
-			<local-home>org.hyperic.hq.measurement.shared.AvailabilityManagerLocalHome</local-home>
-			<local>org.hyperic.hq.measurement.shared.AvailabilityManagerLocal</local>
-			<ejb-class>org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[The DataManagerEJB class is a stateless session bean that can be used to retrieve measurement data points]]></description>
 
 			<ejb-name>DataManager</ejb-name>
@@ -3596,25 +3583,6 @@
 			<method>
 				<ejb-name>ControlBoss</ejb-name>
 				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>AvailabilityManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>AvailabilityManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>addData</method-name>
-				<method-params>
-					<method-param>java.util.List</method-param>
-					<method-param>boolean</method-param>
-				</method-params>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>
