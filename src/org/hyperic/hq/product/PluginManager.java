@@ -51,7 +51,7 @@ public abstract class PluginManager {
     private final String OS;
     private final String OS_SUFFIX;
 
-    protected Map plugins = Collections.synchronizedMap(new HashMap());
+    protected Map<String, GenericPlugin> plugins = Collections.synchronizedMap(new HashMap<String, GenericPlugin>());
     private Map pluginInfo = Collections.synchronizedMap(new HashMap());
     private Properties props = null;
     protected Log log = null;
@@ -82,11 +82,8 @@ public abstract class PluginManager {
         throws PluginException {
 
         synchronized (plugins) {
-            Iterator it = this.plugins.entrySet().iterator();
-            
-            while (it.hasNext()) {
-                Map.Entry entry = (Map.Entry)it.next();
-                GenericPlugin plugin = (GenericPlugin)entry.getValue();
+            for (Map.Entry<String, GenericPlugin> entry : this.plugins.entrySet()) {
+                GenericPlugin plugin = entry.getValue();
 
                 try {
                     plugin.shutdown();
@@ -271,7 +268,7 @@ public abstract class PluginManager {
         }
 
         if (isPlatformPlugin) {
-            return (GenericPlugin)this.plugins.get(platformName);
+            return this.plugins.get(platformName);
         }
         return plugin;
     }
@@ -279,7 +276,7 @@ public abstract class PluginManager {
     public GenericPlugin getPlugin(String name)
         throws PluginNotFoundException {
 
-        GenericPlugin plugin = (GenericPlugin)this.plugins.get(name);
+        GenericPlugin plugin = this.plugins.get(name);
         if (plugin == null) {
             if ((plugin = getPluginExtension(name)) != null) {
                 return plugin;
@@ -311,7 +308,7 @@ public abstract class PluginManager {
             log.debug("removePlugin=" + name);
         }
 
-        GenericPlugin plugin = (GenericPlugin)getPlugin(name);
+        GenericPlugin plugin = getPlugin(name);
         this.plugins.remove(name);
 
         try {
@@ -423,7 +420,7 @@ public abstract class PluginManager {
         GenericPlugin plugin;
 
         try {
-            plugin = (GenericPlugin)pluginType.getClass().newInstance();
+            plugin = pluginType.getClass().newInstance();
         } catch (Exception e) {
             throw new PluginException(e.getMessage(), e);
         }
@@ -442,7 +439,7 @@ public abstract class PluginManager {
         return plugin;
     }
 
-    public Map getPlugins() {
+    public Map<String, GenericPlugin> getPlugins() {
         return this.plugins;
     }
 

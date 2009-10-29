@@ -28,13 +28,13 @@ package org.hyperic.hq.autoinventory.server.session;
 import java.util.Collection;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class AgentReportStatusDAO extends HibernateDAO {
+public class AgentReportStatusDAO extends HibernateDAO<AgentReportStatus> {
     @Autowired
     public AgentReportStatusDAO(SessionFactory f) {
         super(AgentReportStatus.class, f);
@@ -72,7 +72,8 @@ public class AgentReportStatusDAO extends HibernateDAO {
      * Find a collection of {@link AgentReportStatus} where the services
      * have not been totally processed.
      */
-    Collection findDirtyStatus() {
+    @SuppressWarnings("unchecked")
+    Collection<AgentReportStatus> findDirtyStatus() {
         String sql="from AgentReportStatus where serviceDirty = true";
 
         return getSession().createQuery(sql).list();

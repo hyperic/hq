@@ -9,7 +9,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
@@ -25,7 +25,7 @@ public class ServerRestartHandlerTest
 
     private ServerRestartHandler serverRestartHandler;
 
-    private AutoinventoryManagerLocal autoInvManager;
+    private AutoinventoryManager autoInvManager;
 
     private ServerManagerLocal serverManager;
 
@@ -41,7 +41,7 @@ public class ServerRestartHandlerTest
 
     public void setUp() throws Exception {
         super.setUp();
-        this.autoInvManager = EasyMock.createMock(AutoinventoryManagerLocal.class);
+        this.autoInvManager = EasyMock.createMock(AutoinventoryManager.class);
         this.serverManager = EasyMock.createMock(ServerManagerLocal.class);
         this.configManager = EasyMock.createMock(ConfigManagerLocal.class);
         this.trackerManager = EasyMock.createMock(TrackerManagerLocal.class);

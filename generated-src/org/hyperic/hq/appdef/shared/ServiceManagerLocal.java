@@ -62,7 +62,7 @@ public interface ServiceManagerLocal
     * @return The Service identified by this id.    */
    public org.hyperic.hq.appdef.server.session.Service getServiceById( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer id ) throws org.hyperic.hq.appdef.shared.ServiceNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
-   public java.util.List getServicesByAIID( org.hyperic.hq.appdef.server.session.Server server,java.lang.String aiid ) ;
+   public java.util.List<org.hyperic.hq.appdef.server.session.Service> getServicesByAIID( org.hyperic.hq.appdef.server.session.Server server,java.lang.String aiid ) ;
 
    public org.hyperic.hq.appdef.server.session.Service getServiceByName( org.hyperic.hq.appdef.server.session.Server server,java.lang.String name ) ;
 

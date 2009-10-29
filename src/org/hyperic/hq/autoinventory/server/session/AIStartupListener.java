@@ -60,7 +60,7 @@ public class AIStartupListener
         events = new HashSet();
         events.add(MergePlatformAndServersZevent.class);
         zMan.addBufferedListener(events, new RuntimePlatformAndServerMerger());
-        AutoinventoryManagerEJBImpl.getOne().startup();
+        AutoinventoryManagerImpl.getOne().startup();
     }
 
     /**
@@ -69,7 +69,7 @@ public class AIStartupListener
     private class RuntimeAIEnabler implements ZeventListener {
 
         public void processEvents(List events) {
-            AutoinventoryManagerEJBImpl.getOne().handleResourceEvents(events);
+            AutoinventoryManagerImpl.getOne().handleResourceEvents(events);
         }
         
         public String toString() {
