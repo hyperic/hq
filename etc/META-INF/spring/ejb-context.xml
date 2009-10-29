@@ -62,7 +62,6 @@
 <bean class="org.hyperic.hq.measurement.server.session.SRNManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.TrackerManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.product.server.session.ProductManagerImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl" factory-method="getOne"/>
 
 <!--  These components have to be initialized here instead of through @Component because HQApp restart storage dir is set through ProductPluginDeployer loadConfig() after server is started.-->
