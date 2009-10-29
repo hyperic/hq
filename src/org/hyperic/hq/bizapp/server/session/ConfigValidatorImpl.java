@@ -33,9 +33,8 @@ import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.control.shared.ControlManagerLocal;
-import org.hyperic.hq.control.shared.ControlManagerUtil;
-import org.hyperic.hq.measurement.MeasurementCreateException;
+import org.hyperic.hq.control.server.session.ControlManagerImpl;
+import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.product.PluginException;
@@ -118,10 +117,10 @@ public class ConfigValidatorImpl
         throws PermissionException, ConfigFetchException, EncodingException,
                InvalidConfigException
     {
-        ControlManagerLocal cLocal;
+        ControlManager cLocal;
 
         try {
-            cLocal = ControlManagerUtil.getLocalHome().create();
+            cLocal = ControlManagerImpl.getOne();
         } catch(Exception exc){
             throw new SystemException(exc);
         }

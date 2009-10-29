@@ -172,11 +172,6 @@
 
 		</session>
 		<session>
-			<ejb-name>ControlManager</ejb-name>
-			<local-jndi-name>LocalControlManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>ControlBoss</ejb-name>
 			<jndi-name>ejb/bizapp/ControlBoss</jndi-name>
 			<local-jndi-name>LocalControlBoss</local-jndi-name>

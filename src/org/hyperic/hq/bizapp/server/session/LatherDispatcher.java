@@ -96,7 +96,7 @@ import org.hyperic.hq.bizapp.shared.lather.UserIsValid_result;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
-import org.hyperic.hq.control.shared.ControlManagerLocal;
+import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.measurement.data.TrackEventReport;
@@ -878,7 +878,7 @@ public class LatherDispatcher
         cmdControlGetPluginConfig(ControlGetPluginConfig_args args)
         throws LatherRemoteException {
         ControlGetPluginConfig_result res;
-        ControlManagerLocal cLocal;
+        ControlManager cLocal;
         byte[] cfg;
     
         cLocal = getControlManager();
