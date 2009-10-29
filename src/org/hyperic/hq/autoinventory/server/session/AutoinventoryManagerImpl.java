@@ -771,6 +771,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     /**
      * Should only be called from RuntimePlatformAndServerMerger
      */
+    @Transactional
     public void _reportAIRuntimeReport(String agentToken,
                                        CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, PermissionException, ValidationException,
