@@ -45,7 +45,7 @@ public class BossStartupListener
     }
     
     public void startupFinished() {
-        UpdateBossEJBImpl.getOne().startup();
+        UpdateBossImpl.getOne().startup();
     }
 
     static UpdateReportAppender getUpdateReportAppender() {

@@ -115,21 +115,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[]]></description>
-
-			<ejb-name>UpdateBoss</ejb-name>
-
-			<home>org.hyperic.hq.bizapp.shared.UpdateBossHome</home>
-			<remote>org.hyperic.hq.bizapp.shared.UpdateBoss</remote>
-			<local-home>org.hyperic.hq.bizapp.shared.UpdateBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.UpdateBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.UpdateBossEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[The BizApp's interface to the Scheduler Subsystem.]]></description>
 
 			<ejb-name>SchedulerBoss</ejb-name>
@@ -1367,13 +1352,6 @@
 		<container-transaction>
 			<method>
 				<ejb-name>MeasurementProcessor</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>UpdateBoss</ejb-name>
 				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>
