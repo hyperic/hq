@@ -53,12 +53,6 @@
 
 		</session>
 		<session>
-			<ejb-name>UpdateBoss</ejb-name>
-			<jndi-name>ejb/bizapp/UpdateBoss</jndi-name>
-			<local-jndi-name>LocalUpdateBoss</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>SchedulerBoss</ejb-name>
 			<jndi-name>ejb/bizapp/SchedulerBoss</jndi-name>
 			<local-jndi-name>LocalSchedulerBoss</local-jndi-name>

@@ -40,7 +40,6 @@
 <bean class="org.hyperic.hq.bizapp.server.session.MeasurementBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.SchedulerBossEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.bizapp.server.session.UpdateBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.common.server.session.AuditManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.common.server.session.TransactionManagerEJBImpl" factory-method="getOne"/>
