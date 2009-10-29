@@ -79,12 +79,6 @@
 
 		</session>
 		<session>
-			<ejb-name>AutoinventoryManager</ejb-name>
-			<jndi-name>ejb/autoinventory/AutoinventoryManager</jndi-name>
-			<local-jndi-name>LocalAutoinventoryManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>HierarchicalAlertingManager</ejb-name>
 			<local-jndi-name>LocalHierarchicalAlertingManager</local-jndi-name>
 

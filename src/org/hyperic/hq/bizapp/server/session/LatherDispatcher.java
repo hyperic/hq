@@ -74,7 +74,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanStateCore;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.bizapp.shared.lather.AiSendReport_args;
 import org.hyperic.hq.bizapp.shared.lather.AiSendRuntimeReport_args;
 import org.hyperic.hq.bizapp.shared.lather.CommandInfo;
@@ -585,7 +585,7 @@ public class LatherDispatcher
     private NullLatherValue cmdAiSendReport(AiSendReport_args args)
         throws LatherRemoteException
     {
-        AutoinventoryManagerLocal aiManagerLocal;
+        AutoinventoryManager aiManagerLocal;
         ScanStateCore core;
 
         core = args.getCore();
@@ -608,7 +608,7 @@ public class LatherDispatcher
     private NullLatherValue cmdAiSendRuntimeReport(AiSendRuntimeReport_args arg)
         throws LatherRemoteException
     {
-        AutoinventoryManagerLocal aiManagerLocal;
+        AutoinventoryManager aiManagerLocal;
 
         aiManagerLocal = getAutoInventoryManager();
         try {

@@ -44,8 +44,7 @@ import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerUtil;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.scheduler.server.session.BaseJob;
 import org.quartz.JobDataMap;
@@ -152,7 +151,7 @@ public abstract class AIJob extends BaseJob {
     protected void removeHistory(AIHistory history)
         throws NamingException, CreateException
     {
-        AutoinventoryManagerLocal alocal = getAutoInventoryManager();
+        AutoinventoryManager alocal = getAutoInventoryManager();
         alocal.removeHistory(history);
     }
 
@@ -171,7 +170,7 @@ public abstract class AIJob extends BaseJob {
                                       String errorMessage)
         throws CreateException, NamingException, AutoinventoryException
     {
-        AutoinventoryManagerLocal alocal = getAutoInventoryManager();
+        AutoinventoryManager alocal = getAutoInventoryManager();
         return alocal.createAIHistory(id, groupId, batchId, subjectName,
                                       config, scanName, scanDesc,
                                       scheduled, startTime,
@@ -184,16 +183,16 @@ public abstract class AIJob extends BaseJob {
                                  String status, String message)
         throws FinderException, CreateException, NamingException
     {
-        AutoinventoryManagerLocal alocal = getAutoInventoryManager();
+        AutoinventoryManager alocal = getAutoInventoryManager();
         alocal.updateAIHistory(jobId, endTime, status, message);
     }
 
-    private AutoinventoryManagerLocal aimanager = null;
+    private AutoinventoryManager aimanager = null;
 
-    protected AutoinventoryManagerLocal getAutoInventoryManager()
+    protected AutoinventoryManager getAutoInventoryManager()
         throws NamingException, CreateException {
         if (aimanager == null) {
-            aimanager = AutoinventoryManagerUtil.getLocalHome().create();
+            aimanager = AutoinventoryManagerImpl.getOne();
         }
         return aimanager;
     }

@@ -14,7 +14,7 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.CollectionUtil;
@@ -41,7 +41,7 @@ class ServiceMerger implements ZeventListener {
     
     
     public void processEvents(List events) {
-        AutoinventoryManagerLocal aiMan = AutoinventoryManagerEJBImpl.getOne();
+        AutoinventoryManager aiMan = AutoinventoryManagerImpl.getOne();
         events = new ArrayList(events); // Copy, since it's immutable
         List batch = new ArrayList(BATCH_SIZE);
         List sInfos = new ArrayList(BATCH_SIZE);
@@ -86,7 +86,7 @@ class ServiceMerger implements ZeventListener {
                     _log.debug("Last event processed for agent [" + 
                                agentToken + " ] removing");
                     _workingCache.remove(agentToken);
-                    AutoinventoryManagerEJBImpl.getOne()
+                    AutoinventoryManagerImpl.getOne()
                         .markServiceClean(agentToken);
                 } else {
                     val--;

@@ -29,23 +29,27 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AgentCreateCallback;
+import org.hyperic.hq.appdef.server.session.AppdefResource;
+import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.Service;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
@@ -53,11 +57,13 @@ import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
+import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -65,88 +71,95 @@ import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.AgentCreateCallback;
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
-import org.hyperic.hq.appdef.server.session.AppdefResource;
-import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServiceType;
-import org.hyperic.hq.appdef.server.session.ResourceZevent;
-import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.autoinventory.AIHistory;
+import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.ScanState;
 import org.hyperic.hq.autoinventory.ScanStateCore;
-import org.hyperic.hq.autoinventory.AIPlatform;
-import org.hyperic.hq.autoinventory.AIHistory;
+import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
 import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
-import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerUtil;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.dao.AIHistoryDAO;
+import org.hyperic.hq.dao.AIPlatformDAO;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.GenericPlugin;
-import org.hyperic.hq.product.PluginManager;
-import org.hyperic.hq.product.PluginUpdater;
+import org.hyperic.hq.product.PluginException;
+import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerDetector;
-import org.hyperic.hq.product.PluginNotFoundException;
-import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.product.server.session.ProductManagerImpl;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
-import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This class is responsible for managing Autoinventory objects in autoinventory
  * and their relationships
- * @ejb:bean name="AutoinventoryManager"
- *      jndi-name="ejb/autoinventory/AutoinventoryManager"
- *      local-jndi-name="LocalAutoinventoryManager"
- *      view-type="both"
- *      type="Stateless"
- * @ejb:util generate="physical"
  */
-public class AutoinventoryManagerEJBImpl implements SessionBean {
+@org.springframework.stereotype.Service
+public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private Log _log =
-        LogFactory.getLog(AutoinventoryManagerEJBImpl.class.getName());
+        LogFactory.getLog(AutoinventoryManagerImpl.class.getName());
 
     protected final String DATASOURCE_NAME = HQConstants.DATASOURCE;
 
     private AutoinventoryPluginManager aiPluginManager;
     private AIScheduleManagerLocal     aiScheduleManager;
-    private AgentReportStatusDAO statDAO = Bootstrap.getBean(AgentReportStatusDAO.class);
-    private AIHistoryDAO aiHistoryDAO = Bootstrap.getBean(AIHistoryDAO.class);
+    
+    private AgentReportStatusDAO agentReportStatusDao;
+    private AIHistoryDAO aiHistoryDao;
+    private AIPlatformDAO aiPlatformDao;
+    
+    private ProductManager productManager;
+    private ServerManagerLocal serverManager;
+    private ResourceManager resourceManager;
+    private ConfigManagerLocal configManager;
+    private AgentManager agentManager;
+    private CPropManagerLocal cPropManager;
+    private ServiceManagerLocal serviceManager;
+    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AIQueueManagerLocal aiQueueManager;
 
-    private AIHistoryDAO getHistoryDAO() {
-        return aiHistoryDAO;
+    @Autowired
+    public AutoinventoryManagerImpl(AgentReportStatusDAO agentReportStatusDao, AIHistoryDAO aiHistoryDao, AIPlatformDAO aiPlatformDao,
+                                    ProductManager productManager, ServerManagerLocal serverManager, AIScheduleManagerLocal aiScheduleManager,
+                                    ResourceManager resourceManager, ConfigManagerLocal configManager, AgentManager agentManager,
+                                    CPropManagerLocal cPropManager, ServiceManagerLocal serviceManager, AuthzSubjectManagerLocal authzSubjectManager,
+                                    AIQueueManagerLocal aiQueueManager) {
+        this.agentReportStatusDao = agentReportStatusDao;
+        this.aiHistoryDao = aiHistoryDao;
+        this.aiPlatformDao = aiPlatformDao;
+        this.productManager = productManager;
+        this.serverManager = serverManager;
+        this.aiScheduleManager = aiScheduleManager;
+        this.resourceManager = resourceManager;
+        this.configManager = configManager;
+        this.agentManager = agentManager;
+        this.cPropManager = cPropManager;
+        this.serviceManager = serviceManager;
+        this.authzSubjectManager = authzSubjectManager;
+        this.aiQueueManager = aiQueueManager;
     }
 
     /**
@@ -156,17 +169,16 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * signatures are returned.
      * @return A Map, where the keys are the names of the ServerTypeValues,
      * and the values are the ServerSignature objects.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
-    public Map getServerSignatures(AuthzSubject subject,
-                                   List serverTypes)
+    @Transactional
+    public Map<String, ServerSignature> getServerSignatures(AuthzSubject subject,
+                                                            List<ServerTypeValue> serverTypes)
         throws FinderException, AutoinventoryException
     {
         // Plug server type names into a map for quick retrieval
-        HashMap stNames = null;
+        HashMap<String, ServerTypeValue> stNames = null;
         if ( serverTypes != null ) {
-            stNames = new HashMap();
+            stNames = new HashMap<String, ServerTypeValue>();
             ServerTypeValue stValue;
             for ( int i=0; i<serverTypes.size(); i++ ) {
                 stValue = (ServerTypeValue) serverTypes.get(i);
@@ -174,14 +186,11 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             }
         }
 
-        Map plugins = aiPluginManager.getPlugins();
-        Iterator iter = plugins.keySet().iterator();
-        Map results = new HashMap();
-        String pluginName;
-        GenericPlugin plugin;
-        while (iter.hasNext()) {
-            plugin = (GenericPlugin) plugins.get(iter.next());
-            pluginName = plugin.getName();
+        Map<String, GenericPlugin> plugins = aiPluginManager.getPlugins();
+        Map<String, ServerSignature> results = new HashMap<String, ServerSignature>();
+        for (String name : plugins.keySet()) {
+            GenericPlugin plugin = (GenericPlugin) plugins.get(name);
+            String pluginName = plugin.getName();
             if (!(plugin instanceof ServerDetector)) {
                 _log.debug("skipping non-server AI plugin: " + pluginName);
                 continue;
@@ -203,14 +212,10 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      *
      * @param id The entity id to check.
      * @return true if the given resource supports runtime auto-discovery.
-     * @ejb:interface-method
      */
     public boolean isRuntimeDiscoverySupported(AuthzSubject subject,
                                                AppdefEntityID id) {
         boolean retVal;
-        AutoinventoryPluginManager aiPluginManager ;
-        ProductManager productManager = ProductManagerImpl.getOne();
-        ServerManagerLocal serverManager = ServerManagerEJBImpl.getOne();
 
         try {
             Server server = serverManager.getServerById(id.getId());
@@ -219,7 +224,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             }
 
             String pluginName = server.getServerType().getName();
-            aiPluginManager = (AutoinventoryPluginManager)productManager.
+            AutoinventoryPluginManager aiPluginManager = (AutoinventoryPluginManager)productManager.
                 getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
             GenericPlugin plugin = aiPluginManager.getPlugin(pluginName);
 
@@ -246,9 +251,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * which agent we should create our AICommandsClient from.
      * @param id The AppdefEntityID of the resource to turn
      * off runtime config for.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public void turnOffRuntimeDiscovery(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException
     {
@@ -280,9 +284,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * off runtime config for.
      * @param agentToken Which agent controls the runtime AI scans for
      * this resource.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public void turnOffRuntimeDiscovery(AuthzSubject subject,
                                         AppdefEntityID id,
                                         String agentToken)
@@ -308,14 +311,12 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     /**
      * Toggle Runtime-AI config for the given server.
-     * @ejb:interface-method
      */
     public void toggleRuntimeScan(AuthzSubject subject,
                                   AppdefEntityID id, boolean enable)
         throws PermissionException, AutoinventoryException,
                ResourceDeletedException {
-        ResourceManager rMan = ResourceManagerImpl.getOne();
-        Resource res = rMan.findResource(id);
+        Resource res = resourceManager.findResource(id);
         // if resource is asynchronously deleted ignore
         if (res == null || res.isInAsyncDeleteState()) {
             final String m = id + " is asynchronously deleted";
@@ -330,14 +331,12 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             return;
         }
 
-        ConfigManagerLocal cman = ConfigManagerEJBImpl.getOne();
-        ServerManagerLocal serverManager = ServerManagerEJBImpl.getOne();
         try {
             Server server = serverManager.findServerById(id.getId());
             server.setRuntimeAutodiscovery(enable);
 
             ConfigResponse metricConfig =
-                cman.getMergedConfigResponse(subject,
+                configManager.getMergedConfigResponse(subject,
                                              ProductPlugin.TYPE_MEASUREMENT,
                                              id, true);
 
@@ -409,9 +408,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * @param schedule Described when and how often the scan should run.  If
      * this is null, then the scan will be run as an immediate, one-time only
      * scan.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public void startScan(AuthzSubject subject,
                           AppdefEntityID aid,
                           ScanConfigurationCore scanConfig,
@@ -424,11 +422,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         try {
             final AIQueueManagerEJBImpl authzChecker =
                 new AIQueueManagerEJBImpl();
-            final ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
-
             authzChecker.checkAIScanPermission(subject, aid);
 
-            ConfigResponse config = cfgMan.
+            ConfigResponse config = configManager.
                     getMergedConfigResponse(subject,
                                             ProductPlugin.TYPE_MEASUREMENT,
                                             aid, false);
@@ -463,9 +459,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     /**
      * Start an autoinventory scan by agentToken
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public void startScan(AuthzSubject subject,
                           String agentToken,
                           ScanConfigurationCore scanConfig)
@@ -477,8 +472,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         // Is there an already-approved platform with this agent token?  If so,
         // re-call using the other startScan method
         AIPlatform aipLocal =
-            DAOFactory.getDAOFactory()
-                .getAIPlatformDAO().findByAgentToken(agentToken);
+            aiPlatformDao.findByAgentToken(agentToken);
         if (aipLocal == null) {
             throw new AutoinventoryException("No platform in auto-discovery " +
                                              "queue with agentToken=" +
@@ -486,7 +480,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
         PlatformValue pValue;
         try {
-            pValue = getAIQueueManagerLocal().getPlatformByAI
+            pValue = aiQueueManager.getPlatformByAI
                 (subject, aipLocal.getId().intValue());
 
             // It does exist.  Call the other startScan method so that
@@ -518,9 +512,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * Stop an autoinventory scan.
      * @param aid The appdef entity whose agent we'll talk to.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public void stopScan(AuthzSubject subject, AppdefEntityID aid)
         throws AutoinventoryException {
 
@@ -538,9 +531,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * Get status for an autoinventory scan.
      * @param aid The appdef entity whose agent we'll talk to.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public ScanStateCore getScanStatus(AuthzSubject subject, AppdefEntityID aid)
         throws AgentNotFoundException, AgentConnectionException,
                AgentRemoteException, AutoinventoryException {
@@ -569,9 +561,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     /**
      * create AIHistory
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public AIHistory createAIHistory(AppdefEntityID id,
                                      Integer groupId,
                                      Integer batchId,
@@ -586,7 +577,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
                                      String status,
                                      String errorMessage)
         throws AutoinventoryException {
-        return getHistoryDAO().create(id, groupId, batchId, subjectName,
+        return aiHistoryDao.create(id, groupId, batchId, subjectName,
                                       config, scanName, scanDesc,
                                       scheduled, startTime,
                                       stopTime, scheduleTime,
@@ -596,21 +587,19 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     /**
      * remove AIHistory
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public void removeHistory(AIHistory history) {
-        getHistoryDAO().remove(history);
+        aiHistoryDao.remove(history);
     }
 
     /**
      * update AIHistory
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public void updateAIHistory(Integer jobId, long endTime,
                                 String status, String message) {
-        AIHistory local = getHistoryDAO().findById(jobId);
+        AIHistory local = aiHistoryDao.findById(jobId);
 
         local.setEndTime(endTime);
         local.setDuration(endTime - local.getStartTime());
@@ -622,9 +611,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     /**
      * Get status for an autoinventory scan, given the agentToken
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public ScanStateCore getScanStatusByAgentToken(AuthzSubject subject,
                                                    String agentToken)
         throws AgentNotFoundException,  AgentConnectionException,
@@ -651,9 +639,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         return core;
     }
 
-    private static List buildAIResourceIds(AIAppdefResourceValue[] aiResources)
+    private static List<Integer> buildAIResourceIds(AIAppdefResourceValue[] aiResources)
     {
-        List ids = new ArrayList();
+        List<Integer> ids = new ArrayList<Integer>();
         for (int i=0; i<aiResources.length; i++) {
             Integer id = aiResources[i].getId();
             if (id == null) {
@@ -664,10 +652,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         return ids;
     }
 
-    private String getIps(Collection aiipValues) {
+    private String getIps(Collection<AIIpValue> aiipValues) {
         StringBuilder rtn = new StringBuilder();
-        for (Iterator it=aiipValues.iterator(); it.hasNext(); ) {
-            AIIpValue aiip = (AIIpValue)it.next();
+        for (AIIpValue aiip : aiipValues) {
             rtn.append(aiip.getAddress()).append(',');
         }
         return rtn.substring(0, rtn.length()-1);
@@ -680,8 +667,6 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * the report.
      * @param stateCore The ScanState that was detected during the autoinventory
      * scan.
-     *
-     * @ejb:interface-method
      */
     public void reportAIData(String agentToken, ScanStateCore stateCore)
         throws AutoinventoryException {
@@ -697,6 +682,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             return;
         }
 
+        // TODO: G
         _log.info("Received auto-inventory report from " + aiPlatform.getFqdn() +
                  "; IPs -> " + getIps(aiPlatform.getAddedAIIpValues()) +
                  "; CertDN -> " + aiPlatform.getCertdn() +
@@ -724,16 +710,13 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
 
         if (stateCore.getAreServersIncluded()) {
-            Set serverSet = state.getAllServers(_log);
+            // TODO: G
+            Set<AIServerValue> serverSet = state.getAllServers(_log);
 
-            final ServerManagerLocal svrMan = ServerManagerEJBImpl.getOne();
-            for (Iterator aiservers = serverSet.iterator();aiservers.hasNext();)
-            {
-                AIServerValue aiServer = (AIServerValue)aiservers.next();
-
+            for (AIServerValue aiServer : serverSet) {
                 // Ensure the server reported has a valid appdef type
                 try {
-                    svrMan. findServerTypeByName(aiServer.getServerTypeName());
+                    serverManager. findServerTypeByName(aiServer.getServerTypeName());
                 } catch (FinderException e) {
                     _log.error("Ignoring non-existent server type: " +
                                aiServer.getServerTypeName(), e);
@@ -744,15 +727,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             }
         }
 
-        AIQueueManagerLocal aiqLocal;
         try {
-            aiqLocal = getAIQueueManagerLocal();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
-
-        try {
-            aiPlatform = aiqLocal.queue(subject, aiPlatform,
+            aiPlatform = aiQueueManager.queue(subject, aiPlatform,
                                         stateCore.getAreServersIncluded(),
                                         false, true);
         } catch ( SystemException cse ) {
@@ -763,15 +739,15 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
         if (aiPlatform.isPlatformDevice()) {
             _log.info("Auto-approving inventory for " + aiPlatform.getFqdn());
-            List platforms = new ArrayList();
+            List<Integer> platforms = new ArrayList<Integer>();
             platforms.add(aiPlatform.getId());
-            List ips =
+            List<Integer> ips =
                 buildAIResourceIds(aiPlatform.getAIIpValues());
-            List servers =
+            List<Integer> servers =
                 buildAIResourceIds(aiPlatform.getAIServerValues());
 
             try {
-                aiqLocal.processQueue(subject,
+                aiQueueManager.processQueue(subject,
                                       platforms, servers, ips,
                                       AIQueueConstants.Q_DECISION_APPROVE);
             } catch (SystemException cse) {
@@ -809,10 +785,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * the report.
      * @param crrr The CompositeRuntimeResourceReport that was generated
      * during the runtime autoinventory scan.
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public void reportAIRuntimeReport(String agentToken,
                                       CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, PermissionException, ValidationException,
@@ -823,18 +797,17 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
     /**
      * Should only be called from RuntimePlatformAndServerMerger
-     * @ejb:interface-method
      */
     public void _reportAIRuntimeReport(String agentToken,
                                       CompositeRuntimeResourceReport crrr)
         throws AutoinventoryException, PermissionException, ValidationException,
                ApplicationException
     {
-        List serviceMerges = mergePlatformsAndServers(agentToken, crrr);
+        List<ServiceMergeInfo> serviceMerges = mergePlatformsAndServers(agentToken, crrr);
 
-        Agent a = AgentManagerImpl.getOne().getAgent(agentToken);
+        Agent a = agentManager.getAgent(agentToken);
 
-        AgentReportStatus status = statDAO.getOrCreate(a);
+        AgentReportStatus status = agentReportStatusDao.getOrCreate(a);
 
         if (serviceMerges.isEmpty()) {
             _log.debug("Agent [" + agentToken + "] reported no services.  " +
@@ -854,11 +827,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      *
      * @return a List of {@link ServiceMergeInfo} -- information from the
      *         report about services still needing to be processed
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
-    public List mergePlatformsAndServers(String agentToken,
+    @Transactional
+    public List<ServiceMergeInfo> mergePlatformsAndServers(String agentToken,
                                          CompositeRuntimeResourceReport crrr)
         throws ApplicationException, AutoinventoryException
     {
@@ -874,27 +845,23 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
     }
     
-    private void mergeServiceTypes(final Set serviceTypeMerges) {
+    private void mergeServiceTypes(final Set<org.hyperic.hq.product.ServiceType> serviceTypeMerges) {
     	if(! serviceTypeMerges.isEmpty()) {
-    		final ProductManager productManager = ProductManagerImpl.getOne();
-    		Map productTypes = new HashMap();
-    		for(Iterator iterator = serviceTypeMerges.iterator();iterator.hasNext();) {
-    			final org.hyperic.hq.product.ServiceType serviceType = (org.hyperic.hq.product.ServiceType) iterator
-    	 			.next();
-    			Set serviceTypes = (Set)productTypes.get(serviceType.getProductName());
+    		Map<String, Set<org.hyperic.hq.product.ServiceType>> productTypes = new HashMap<String, Set<org.hyperic.hq.product.ServiceType>>();
+    		for(org.hyperic.hq.product.ServiceType serviceType : serviceTypeMerges) {
+    			Set<org.hyperic.hq.product.ServiceType> serviceTypes = productTypes.get(serviceType.getProductName());
     			if(serviceTypes == null) {
-    				serviceTypes = new HashSet();
+    				serviceTypes = new HashSet<org.hyperic.hq.product.ServiceType>();
     			}
     			serviceTypes.add(serviceType);
     			_log.info("Adding serviceType " + serviceType + " to product type: " + serviceType.getProductName());
     			productTypes.put(serviceType.getProductName(), serviceTypes);
     		}
     		_log.info("The size of productTypes: " + productTypes.size());
-    		for(Iterator iterator = productTypes.entrySet().iterator();iterator.hasNext();)  {
+    		for(Map.Entry<String, Set<org.hyperic.hq.product.ServiceType>> serviceTypeEntry : productTypes.entrySet())  {
     			try {
-    				Map.Entry serviceTypeEntry = (Map.Entry)iterator.next();
     				_log.info("Updating dynamic service type plugin");
-    				productManager.updateDynamicServiceTypePlugin((String)serviceTypeEntry.getKey(), (Set)serviceTypeEntry.getValue());
+    				productManager.updateDynamicServiceTypePlugin((String)serviceTypeEntry.getKey(), serviceTypeEntry.getValue());
     			} catch (Exception e) {
     				_log.error("Error merging dynamic service types for product.  Cause: " + e.getMessage());
     			} 
@@ -905,22 +872,15 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     
     /**
      * Merge a list of {@link ServiceMergeInfo}s in HQ's appdef model
-     * 
-     * @ejb:interface-method
      */
-    public void mergeServices(List mergeInfos)
+    public void mergeServices(List<ServiceMergeInfo> mergeInfos)
         throws PermissionException, ApplicationException {
-        final ServerManagerLocal svrMan = ServerManagerEJBImpl.getOne();
-        final CPropManagerLocal cpropMan = CPropManagerEJBImpl.getOne();
-
-        for (final Iterator i = mergeInfos.iterator(); i.hasNext();) {
-            ServiceMergeInfo sInfo = (ServiceMergeInfo) i.next();
+        for (ServiceMergeInfo sInfo : mergeInfos) {
             AIServiceValue aiservice = sInfo.aiservice;
-            Server server = svrMan.getServerById(sInfo.serverId);
+            Server server = serverManager.getServerById(sInfo.serverId);
 
             _log.info("Checking for existing service: " + aiservice.getName());
 
-            final ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
             // this is a propagation of a bug that nobody really runs into.
             // Occurs when a set of services under a server have the same name
             // and therefore the AIID is also the same.  In a perfect world the
@@ -929,8 +889,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             // The get(0), instead of operating on the whole list, enables
             // us to make the least amount of code changes in a messy code path
             // thus reducing the amount of potential problems.
-            final List tmp =
-                svcMan.getServicesByAIID(server, aiservice.getName());
+            final List<Service> tmp =
+                serviceManager.getServicesByAIID(server, aiservice.getName());
             Service service = (tmp.size() > 0) ? (Service)tmp.get(0) : null;
             boolean update = false;
 
@@ -940,8 +900,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
                 String typeName = aiservice.getServiceTypeName();
                 ServiceType serviceType =
-                    svcMan.findServiceTypeByName(typeName);
-                service = svcMan.createService(sInfo.subject, server,
+                    serviceManager.findServiceTypeByName(typeName);
+                service = serviceManager.createService(sInfo.subject, server,
                                                serviceType, aiservice.getName(),
                                                aiservice.getDescription(), "",
                                                null);
@@ -969,8 +929,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             }
 
             // CONFIGURE SERVICE
-            final ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
-            cfgMan.configureResponse(sInfo.subject,
+            configManager.configureResponse(sInfo.subject,
                                          service.getConfigResponse(),
                                          service.getEntityId(),
                                          aiservice.getProductConfig(),
@@ -984,7 +943,7 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
             // SET CUSTOM PROPERTIES FOR SERVICE
             if (aiservice.getCustomProperties() != null) {
                 int typeId = service.getServiceType().getId().intValue();
-                cpropMan.setConfigResponse(service.getEntityId(),
+                cPropManager.setConfigResponse(service.getEntityId(),
                                             typeId,
                                             aiservice.getCustomProperties());
             }
@@ -994,21 +953,17 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     /**
      * Returns a list of {@link Agent}s which still need to send in a
      * runtime scan (their last runtime scan was unsuccessfully processed)
-     *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
-    public List findAgentsRequiringRuntimeScan() {
+    @Transactional
+    public List<Agent> findAgentsRequiringRuntimeScan() {
 
-        Collection dirties = statDAO.findDirtyStatus();
-        List res = new ArrayList(dirties.size());
+        Collection<AgentReportStatus> dirties = agentReportStatusDao.findDirtyStatus();
+        List<Agent> res = new ArrayList<Agent>(dirties.size());
 
         _log.debug("Found " + dirties.size() + " agents with " +
                   "serviceDirty = true");
 
-        for (Iterator i=dirties.iterator(); i.hasNext(); ) {
-            AgentReportStatus s = (AgentReportStatus)i.next();
-
+        for (AgentReportStatus s : dirties) {
             if (!ServiceMerger.currentlyWorkingOn(s.getAgent())) {
                 _log.debug("Agent [" + s.getAgent().getAgentToken() +
                           "] is serviceDirty");
@@ -1022,14 +977,12 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public void notifyAgentsNeedingRuntimeScan() {
-        List agents = findAgentsRequiringRuntimeScan();
+        List<Agent> agents = findAgentsRequiringRuntimeScan();
 
-        for (Iterator i=agents.iterator(); i.hasNext(); ) {
-            Agent a = (Agent)i.next();
+        for (Agent a : agents) {
             AICommandsClient client;
 
             try {
@@ -1054,14 +1007,13 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public void markServiceClean(String agentToken) {
         Agent a;
 
         try {
-            a = AgentManagerImpl.getOne().getAgent(agentToken);
+            a = agentManager.getAgent(agentToken);
         } catch(AgentNotFoundException e) {
             _log.error("Agent [" + agentToken + "] not found");
             return;
@@ -1071,12 +1023,11 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public void markServiceClean(Agent agent, boolean serviceClean) {
 
-        AgentReportStatus status = statDAO.getOrCreate(agent);
+        AgentReportStatus status = agentReportStatusDao.getOrCreate(agent);
         if (serviceClean)
             status.markClean();
         else
@@ -1084,9 +1035,8 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
+    @Transactional
     public void startup() {
         AgentCreateCallback listener = new AgentCreateCallback() {
             public void agentCreated(Agent agent) {
@@ -1101,16 +1051,11 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
      * Handle ResourceZEvents for enabling runtime autodiscovery.
      *
      * @param events A list of ResourceZevents
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
      */
-    public void handleResourceEvents(List events)
+    @Transactional
+    public void handleResourceEvents(List<ResourceZevent> events)
     {
-        ServerManagerLocal serverMgr = ServerManagerEJBImpl.getOne();
-        AuthzSubjectManagerLocal azMan = AuthzSubjectManagerEJBImpl.getOne();
-
-        for (Iterator i = events.iterator(); i.hasNext(); ) {
-            ResourceZevent zevent = (ResourceZevent) i.next();
+        for (ResourceZevent zevent : events) {
             AppdefEntityID id = zevent.getAppdefEntityID();
             boolean isUpdate = zevent instanceof ResourceUpdatedZevent;
 
@@ -1121,9 +1066,9 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
 
             // Need to look up the AuthzSubject POJO
             AuthzSubject subj =
-                azMan.findSubjectById(zevent.getAuthzSubjectId());
+                authzSubjectManager.findSubjectById(zevent.getAuthzSubjectId());
             if (isUpdate) {
-                Server s = serverMgr.getServerById(id.getId());
+                Server s = serverManager.getServerById(id.getId());
                 _log.info("Toggling Runtime-AI for " + id);
                 try {
                     toggleRuntimeScan(subj, id, s.isRuntimeAutodiscovery());
@@ -1147,25 +1092,19 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         }
     }
 
-    public void setSessionContext(SessionContext ctx) {}
-
-    public static AutoinventoryManagerLocal getOne() {
-        try {
-            return AutoinventoryManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static AutoinventoryManager getOne() {
+        return Bootstrap.getBean(AutoinventoryManager.class);
     }
 
     /**
-     * Create an autoinventory manager session bean.
+     * Create an autoinventory manager.
      * @exception CreateException If an error occurs creating the pager
      * for the bean.
      */
-    public void ejbCreate() throws CreateException {
+    @PostConstruct
+    public void createDependentManagers() throws CreateException {
         // Get reference to the AI plugin manager
         try {
-            ProductManager productManager = ProductManagerImpl.getOne();
             aiPluginManager =
                 (AutoinventoryPluginManager) productManager.
                 getPluginManager(ProductPlugin.TYPE_AUTOINVENTORY);
@@ -1173,33 +1112,14 @@ public class AutoinventoryManagerEJBImpl implements SessionBean {
         } catch (Exception e) {
             _log.error("Unable to initialize session beans.", e);
         }
-        // Get a reference to the control scheduler ejb
-        try {
-            aiScheduleManager = AIScheduleManagerEJBImpl.getOne();
-        } catch (Exception e) {
-            _log.error("Unable to get autoinventory schedule manager: " +
-                           e.getMessage());
-        }
     }
-    public void ejbRemove() { }
-    public void ejbActivate() { }
-    public void ejbPassivate() { }
 
     private AuthzSubject getHQAdmin() throws AutoinventoryException {
         try {
-             return AuthzSubjectManagerEJBImpl.getOne()
+             return authzSubjectManager
                  .getSubjectById(AuthzConstants.rootSubjectId);
         } catch ( Exception e ) {
             throw new AutoinventoryException("Error looking up subject", e);
         }
-    }
-
-    /**
-     * If we ever have more than this single session EJB, this method
-     * ought to be placed in a superclass, kinda like appdef has the
-     * AppdefSessionEJB as a base class for all other appdef session EJBs.
-     */
-    protected AIQueueManagerLocal getAIQueueManagerLocal() {
-        return AIQueueManagerEJBImpl.getOne();
     }
 }

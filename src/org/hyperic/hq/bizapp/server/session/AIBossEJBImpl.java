@@ -61,7 +61,7 @@ import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.server.session.AIScheduleManagerEJBImpl;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.bizapp.shared.AIBossLocal;
 import org.hyperic.hq.bizapp.shared.AIBossUtil;
 import org.hyperic.hq.common.SystemException;
@@ -490,7 +490,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
             return;
         }
 
-        AutoinventoryManagerLocal aiManager = getAutoInventoryManager();
+        AutoinventoryManager aiManager = getAutoInventoryManager();
         try {
             aiManager.toggleRuntimeScan(subject, id, doEnable);
         } catch (ResourceDeletedException e) {

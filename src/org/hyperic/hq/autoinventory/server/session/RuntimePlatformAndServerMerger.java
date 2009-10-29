@@ -31,7 +31,7 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
@@ -46,7 +46,7 @@ public class RuntimePlatformAndServerMerger implements ZeventListener {
         ConcurrentStatsCollector.RUNTIME_PLATFORM_AND_SERVER_MERGER;
 
     public void processEvents(List events) {
-        AutoinventoryManagerLocal aMan = AutoinventoryManagerEJBImpl.getOne();
+        AutoinventoryManager aMan = AutoinventoryManagerImpl.getOne();
         for (Iterator it=events.iterator(); it.hasNext(); ) {
             MergePlatformAndServersZevent event =
                 (MergePlatformAndServersZevent)it.next();

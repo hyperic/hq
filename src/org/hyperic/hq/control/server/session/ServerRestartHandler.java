@@ -11,7 +11,7 @@ import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
@@ -35,7 +35,7 @@ public class ServerRestartHandler {
 
     private final ConfigManagerLocal configManager;
 
-    private final AutoinventoryManagerLocal autoInvManager;
+    private final AutoinventoryManager autoInvManager;
 
     private final TrackerManagerLocal trackerManager;
 
@@ -43,7 +43,7 @@ public class ServerRestartHandler {
 
     public ServerRestartHandler(ServerManagerLocal serverManager,
                                 ConfigManagerLocal configManager,
-                                AutoinventoryManagerLocal autoInvManager,
+                                AutoinventoryManager autoInvManager,
                                 TrackerManagerLocal trackerManager)
     {
         this.serverManager = serverManager;

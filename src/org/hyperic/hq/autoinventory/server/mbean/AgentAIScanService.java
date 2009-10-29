@@ -29,7 +29,7 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerEJBImpl;
+import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerImpl;
 import org.hyperic.hq.common.SessionMBeanBase;
 
 /**
@@ -53,7 +53,7 @@ public class AgentAIScanService
     protected void hitInSession(Date lDate) {
         _log.debug("Agent AI Scan Service started executing: "+lDate);  
         
-        AutoinventoryManagerEJBImpl.getOne().notifyAgentsNeedingRuntimeScan();
+        AutoinventoryManagerImpl.getOne().notifyAgentsNeedingRuntimeScan();
         
         _log.debug("Agent AI Scan Service finished executing: "+lDate); 
     }

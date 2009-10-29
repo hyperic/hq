@@ -70,7 +70,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
-import org.hyperic.hq.autoinventory.shared.AutoinventoryManagerLocal;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
@@ -81,8 +81,8 @@ import org.hyperic.util.pager.PageControl;
 
 public class RuntimeReportProcessor {
     private final Log _log = LogFactory.getLog(RuntimeReportProcessor.class);
-    private final AutoinventoryManagerLocal
-        _aiMgr = AutoinventoryManagerEJBImpl.getOne();
+    private final AutoinventoryManager
+        _aiMgr = AutoinventoryManagerImpl.getOne();
     
     private final PlatformManagerLocal
         _platformMgr = PlatformManagerEJBImpl.getOne();
@@ -103,8 +103,8 @@ public class RuntimeReportProcessor {
         _cpropMgr = CPropManagerEJBImpl.getOne();
     
     private AuthzSubject _overlord;
-    private List         _serviceMerges = new ArrayList();
-	private Set serviceTypeMerges = new HashSet();
+    private List<ServiceMergeInfo>         _serviceMerges = new ArrayList<ServiceMergeInfo>();
+	private Set<ServiceType> serviceTypeMerges = new HashSet<ServiceType>();
     private String       _agentToken;
     private ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
     
@@ -552,11 +552,11 @@ public class RuntimeReportProcessor {
         public String         agentToken;
     }
     
-    public List getServiceMerges() {
+    public List<ServiceMergeInfo> getServiceMerges() {
         return _serviceMerges;
     }
     
-    public Set getServiceTypeMerges() {
+    public Set<ServiceType> getServiceTypeMerges() {
     	return serviceTypeMerges;
     }
 
