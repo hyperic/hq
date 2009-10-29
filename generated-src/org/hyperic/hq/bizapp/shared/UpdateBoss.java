@@ -3,35 +3,31 @@
  */
 package org.hyperic.hq.bizapp.shared;
 
+import org.hyperic.hq.auth.shared.SessionException;
+import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
+
 /**
- * Remote interface for UpdateBoss.
+ * Local interface for UpdateBoss.
  */
-public interface UpdateBoss
-   extends javax.ejb.EJBObject
-{
+public interface UpdateBoss {
 
-   public void startup(  )
-      throws java.rmi.RemoteException;
+    public void startup();
 
-   /**
-    * Meant to be called internally by the fetching thread
-    */
-   public void fetchReport(  )
-      throws java.rmi.RemoteException;
+    /**
+     * Meant to be called internally by the fetching thread
+     */
+    public void fetchReport();
 
-   /**
-    * Returns null if there is no status report (or it's been ignored), else the string status report
-    */
-   public java.lang.String getUpdateReport(  )
-      throws java.rmi.RemoteException;
+    /**
+     * Returns null if there is no status report (or it's been ignored), else
+     * the string status report
+     */
+    public java.lang.String getUpdateReport();
 
-   public void setUpdateMode( int sess,org.hyperic.hq.bizapp.server.session.UpdateStatusMode mode )
-      throws org.hyperic.hq.auth.shared.SessionException, java.rmi.RemoteException;
+    public void setUpdateMode(int sess, UpdateStatusMode mode) throws SessionException;
 
-   public org.hyperic.hq.bizapp.server.session.UpdateStatusMode getUpdateMode(  )
-      throws java.rmi.RemoteException;
+    public UpdateStatusMode getUpdateMode();
 
-   public void ignoreUpdate(  )
-      throws java.rmi.RemoteException;
+    public void ignoreUpdate();
 
 }

@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +20,7 @@ import org.apache.commons.logging.LogFactory;
  * Implementation of {@link AlertConditionEvaluatorRepository} that stores and
  * retrieves by serialzing state to/from a file
  * @author jhickey
- *
+ * 
  */
 public class FileAlertConditionEvaluatorStateRepository implements AlertConditionEvaluatorStateRepository {
     private final File storageDirectory;
@@ -28,7 +29,7 @@ public class FileAlertConditionEvaluatorStateRepository implements AlertConditio
     private final Log log = LogFactory.getLog(FileAlertConditionEvaluatorStateRepository.class);
 
     /**
-     *
+     * 
      * @param storageDirectory The directory in which to write and read
      *        serialized object files
      */
@@ -56,15 +57,16 @@ public class FileAlertConditionEvaluatorStateRepository implements AlertConditio
         }
     }
 
-    public Map getAlertConditionEvaluatorStates() {
+    public Map<Integer, Serializable> getAlertConditionEvaluatorStates() {
         return getStates(new File(storageDirectory, EVALUATOR_STATE_FILE_NAME));
     }
 
-    public Map getExecutionStrategyStates() {
+    public Map<Integer, Serializable> getExecutionStrategyStates() {
         return getStates(new File(storageDirectory, EXECUTION_STRATEGY_FILE_NAME));
     }
 
-    private Map getStates(File in) {
+    @SuppressWarnings("unchecked")
+    private Map<Integer, Serializable> getStates(File in) {
         if (in.exists() && in.canRead()) {
             if (log.isInfoEnabled()) {
                 log.info("Loading alert condition evaluator states from [" + in.getAbsolutePath() + "]");
@@ -87,10 +89,10 @@ public class FileAlertConditionEvaluatorStateRepository implements AlertConditio
             log.warn("Alert condition evaluator states found in [" + in.getAbsolutePath() +
                      "] but I don't have read access!");
         }
-        return new HashMap();
+        return new HashMap<Integer, Serializable>();
     }
 
-    private void persistStates(Map states, File out) {
+    private void persistStates(Map<Integer, Serializable> states, File out) {
         ObjectOutputStream objectOutputStream = null;
         FileOutputStream fileOutputStream = null;
         try {
@@ -113,12 +115,12 @@ public class FileAlertConditionEvaluatorStateRepository implements AlertConditio
         }
     }
 
-    public void saveAlertConditionEvaluatorStates(Map alertConditionEvaluatorStates) {
+    public void saveAlertConditionEvaluatorStates(Map<Integer, Serializable> alertConditionEvaluatorStates) {
         persistStates(alertConditionEvaluatorStates, new File(storageDirectory, EVALUATOR_STATE_FILE_NAME));
 
     }
 
-    public void saveExecutionStrategyStates(Map executionStrategyStates) {
+    public void saveExecutionStrategyStates(Map<Integer, Serializable> executionStrategyStates) {
         persistStates(executionStrategyStates, new File(storageDirectory, EXECUTION_STRATEGY_FILE_NAME));
     }
 

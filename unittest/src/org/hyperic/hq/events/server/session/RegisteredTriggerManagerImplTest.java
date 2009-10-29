@@ -17,27 +17,28 @@ import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 
 /**
- * Unit test of the {@link RegisteredTriggerManagerEJBImpl}
+ * Unit test of the {@link RegisteredTriggerManagerImpl}
  * @author jhickey
  *
  */
-public class RegisteredTriggerManagerEJBImplTest
+public class RegisteredTriggerManagerImplTest
     extends TestCase
 {
 
     private AlertConditionEvaluatorFactory alertConditionEvaluatorFactory;
     private AlertConditionEvaluator alertConditionEvaluator;
     private TriggerDAOInterface triggerDAO;
-    private RegisteredTriggerManagerEJBImpl registeredTriggerManager;
+    private RegisteredTriggerManagerImpl registeredTriggerManager;
     private RegisterableTriggerRepository registeredTriggerRepository;
     private AlertConditionEvaluatorRepository alertConditionEvaluatorRepository;
     private ZeventEnqueuer zEventEnqueuer;
+    private AlertDefinitionDAOInterface alertDefinitionDAO;
 
     private void replay() {
         EasyMock.replay(alertConditionEvaluatorFactory,
                         alertConditionEvaluator,
                         triggerDAO,
-                        registeredTriggerRepository, zEventEnqueuer, alertConditionEvaluatorRepository);
+                        registeredTriggerRepository, zEventEnqueuer, alertConditionEvaluatorRepository, alertDefinitionDAO);
     }
 
     public void setUp() throws Exception {
@@ -48,11 +49,8 @@ public class RegisteredTriggerManagerEJBImplTest
         this.registeredTriggerRepository = EasyMock.createMock(RegisterableTriggerRepository.class);
         this.zEventEnqueuer = EasyMock.createMock(ZeventEnqueuer.class);
         this.alertConditionEvaluatorRepository = EasyMock.createMock(AlertConditionEvaluatorRepository.class);
-        this.registeredTriggerManager = new RegisteredTriggerManagerEJBImpl();
-        registeredTriggerManager.setAlertConditionEvaluatorFactory(alertConditionEvaluatorFactory);
-        registeredTriggerManager.setTriggerDAO(triggerDAO);
-        registeredTriggerManager.setZeventEnqueuer(zEventEnqueuer);
-        registeredTriggerManager.setAlertConditionEvaluatorRepository(alertConditionEvaluatorRepository);
+        this.alertDefinitionDAO = EasyMock.createMock(AlertDefinitionDAOInterface.class);
+        this.registeredTriggerManager = new RegisteredTriggerManagerImpl(alertConditionEvaluatorFactory,triggerDAO,zEventEnqueuer,alertConditionEvaluatorRepository,alertDefinitionDAO);
         MockTrigger.initialized = false;
         MockTrigger.enabled = false;
     }
@@ -63,7 +61,7 @@ public class RegisteredTriggerManagerEJBImplTest
     public void testDisableTriggers() {
         Integer triggerId = Integer.valueOf(987);
         Integer alertDefinitionId = Integer.valueOf(5432);
-        List triggerIds = new ArrayList();
+        List<Integer> triggerIds = new ArrayList<Integer>();
         triggerIds.add(triggerId);
         registeredTriggerRepository.setTriggersEnabled(triggerIds, false);
         replay();
@@ -78,7 +76,7 @@ public class RegisteredTriggerManagerEJBImplTest
     public void testDisableTriggersNotInitialized() {
         Integer triggerId = Integer.valueOf(987);
         Integer alertDefinitionId = Integer.valueOf(5432);
-        List triggerIds = new ArrayList();
+        List<Integer> triggerIds = new ArrayList<Integer>();
         triggerIds.add(triggerId);
         replay();
         registeredTriggerManager.setTriggersEnabled(alertDefinitionId,triggerIds, false);
@@ -91,7 +89,7 @@ public class RegisteredTriggerManagerEJBImplTest
     public void testEnableInitializedTriggers() {
         Integer triggerId = Integer.valueOf(987);
         Integer alertDefinitionId = Integer.valueOf(5432);
-        List triggerIds = new ArrayList();
+        List<Integer> triggerIds = new ArrayList<Integer>();
         triggerIds.add(triggerId);
         RegisterableTriggerInterface trigger1 = EasyMock.createMock(RegisterableTriggerInterface.class);
         EasyMock.expect(registeredTriggerRepository.getTriggerById(triggerId)).andReturn(trigger1);
@@ -119,15 +117,15 @@ public class RegisteredTriggerManagerEJBImplTest
         trigger.setId(mockTrigger.getId());
         trigger.setAlertDefinition(alertDef);
 
-        List triggers = new ArrayList();
+        List<RegisteredTrigger> triggers = new ArrayList<RegisteredTrigger>();
         triggers.add(trigger);
 
-        List expectedIds = new ArrayList();
+        List<Integer> expectedIds = new ArrayList<Integer>();
         expectedIds.add(triggerId);
 
         EasyMock.expect(triggerDAO.findByAlertDefinitionId(alertDefinitionId)).andReturn(triggers);
         replay();
-        Collection triggerIds = registeredTriggerManager.getTriggerIdsByAlertDefId(alertDefinitionId);
+        Collection<Integer> triggerIds = registeredTriggerManager.getTriggerIdsByAlertDefId(alertDefinitionId);
         verify();
         assertEquals(expectedIds,triggerIds);
     }
@@ -159,11 +157,11 @@ public class RegisteredTriggerManagerEJBImplTest
         trigger2.setId(mockTrigger2.getId());
         trigger2.setAlertDefinition(alertDef);
 
-        List triggers = new ArrayList();
+        List<RegisteredTrigger> triggers = new ArrayList<RegisteredTrigger>();
         triggers.add(trigger);
         triggers.add(trigger2);
 
-        List createdEvents = new ArrayList();
+        List<TriggersCreatedZevent> createdEvents = new ArrayList<TriggersCreatedZevent>();
         createdEvents.add(new TriggersCreatedZevent(alertDefinitionId));
 
         EasyMock.expect(triggerDAO.findByAlertDefinitionId(alertDefinitionId)).andReturn(triggers);
@@ -193,10 +191,10 @@ public class RegisteredTriggerManagerEJBImplTest
         RegisteredTrigger trigger = new RegisteredTrigger(mockTrigger);
         trigger.setId(mockTrigger.getId());
 
-        List triggers = new ArrayList();
+        List<RegisteredTrigger> triggers = new ArrayList<RegisteredTrigger>();
         triggers.add(trigger);
 
-        List createdEvents = new ArrayList();
+        List<TriggersCreatedZevent> createdEvents = new ArrayList<TriggersCreatedZevent>();
         createdEvents.add(new TriggersCreatedZevent(alertDefinitionId));
 
         EasyMock.expect(triggerDAO.findByAlertDefinitionId(alertDefinitionId)).andReturn(triggers);
@@ -234,11 +232,11 @@ public class RegisteredTriggerManagerEJBImplTest
         trigger2.setId(mockTrigger2.getId());
         trigger2.setAlertDefinition(alertDef);
 
-        List triggers = new ArrayList();
+        List<RegisteredTrigger> triggers = new ArrayList<RegisteredTrigger>();
         triggers.add(trigger);
         triggers.add(trigger2);
 
-        List createdEvents = new ArrayList();
+        List<TriggersCreatedZevent> createdEvents = new ArrayList<TriggersCreatedZevent>();
         createdEvents.add(new TriggersCreatedZevent(alertDefinitionId));
 
         EasyMock.expect(triggerDAO.findByAlertDefinitionId(alertDefinitionId)).andReturn(triggers);
@@ -261,7 +259,7 @@ public class RegisteredTriggerManagerEJBImplTest
     public void testHandleTriggerCreationNotInitialized() {
         Integer alertDefinitionId = Integer.valueOf(5432);
 
-        List createdEvents = new ArrayList();
+        List<TriggersCreatedZevent> createdEvents = new ArrayList<TriggersCreatedZevent>();
         createdEvents.add(new TriggersCreatedZevent(alertDefinitionId));
 
         replay();
@@ -298,7 +296,7 @@ public class RegisteredTriggerManagerEJBImplTest
         trigger2.setId(mockTrigger2.getId());
         trigger2.setAlertDefinition(alertDef);
 
-        Set triggers = new HashSet();
+        Set<RegisteredTrigger> triggers = new HashSet<RegisteredTrigger>();
         triggers.add(trigger);
         triggers.add(trigger2);
 
@@ -343,7 +341,7 @@ public class RegisteredTriggerManagerEJBImplTest
         trigger2.setId(mockTrigger2.getId());
         trigger2.setAlertDefinition(alertDef);
 
-        Set triggers = new HashSet();
+        Set<RegisteredTrigger> triggers = new HashSet<RegisteredTrigger>();
         triggers.add(trigger);
         triggers.add(trigger2);
 
@@ -387,7 +385,7 @@ public class RegisteredTriggerManagerEJBImplTest
         trigger2.setId(mockTrigger2.getId());
         trigger2.setAlertDefinition(alertDef);
 
-        Set triggers = new HashSet();
+        Set<RegisteredTrigger> triggers = new HashSet<RegisteredTrigger>();
         triggers.add(trigger);
         triggers.add(trigger2);
 
@@ -437,7 +435,7 @@ public class RegisteredTriggerManagerEJBImplTest
         trigger2.setId(mockTrigger2.getId());
         trigger2.setAlertDefinition(alertDef2);
 
-        Set triggers = new HashSet();
+        Set<RegisteredTrigger> triggers = new HashSet<RegisteredTrigger>();
         triggers.add(trigger);
         triggers.add(trigger2);
 
@@ -482,7 +480,7 @@ public class RegisteredTriggerManagerEJBImplTest
         trigger.setId(mockTrigger.getId());
         trigger.setAlertDefinition(alertDef);
 
-        Set triggers = new HashSet();
+        Set<RegisteredTrigger> triggers = new HashSet<RegisteredTrigger>();
         triggers.add(trigger);
 
         EasyMock.expect(triggerDAO.findAllEnabledTriggers()).andReturn(triggers);
@@ -503,7 +501,7 @@ public class RegisteredTriggerManagerEJBImplTest
     public void testSetTriggersEnabledLazyInit() throws InterruptedException {
         Integer triggerId = Integer.valueOf(987);
         Integer alertDefinitionId = Integer.valueOf(5432);
-        List triggerIds = new ArrayList();
+        List<Integer> triggerIds = new ArrayList<Integer>();
         triggerIds.add(triggerId);
         EasyMock.expect(registeredTriggerRepository.getTriggerById(triggerId)).andReturn(null);
         zEventEnqueuer.enqueueEvent(EasyMock.isA(TriggersCreatedZevent.class));
@@ -520,7 +518,7 @@ public class RegisteredTriggerManagerEJBImplTest
     public void testSetTriggersEnabledLazyInitException() throws InterruptedException {
         Integer triggerId = Integer.valueOf(987);
         Integer alertDefinitionId = Integer.valueOf(5432);
-        List triggerIds = new ArrayList();
+        List<Integer> triggerIds = new ArrayList<Integer>();
         triggerIds.add(triggerId);
         EasyMock.expect(registeredTriggerRepository.getTriggerById(triggerId)).andReturn(null);
         zEventEnqueuer.enqueueEvent(EasyMock.isA(TriggersCreatedZevent.class));
@@ -557,7 +555,7 @@ public class RegisteredTriggerManagerEJBImplTest
         trigger2.setId(mockTrigger2.getId());
         trigger2.setAlertDefinition(alertDef);
 
-        List triggers = new ArrayList();
+        List<RegisteredTrigger> triggers = new ArrayList<RegisteredTrigger>();
         triggers.add(trigger);
         triggers.add(trigger2);
 
@@ -596,7 +594,7 @@ public class RegisteredTriggerManagerEJBImplTest
         trigger2.setId(mockTrigger2.getId());
         trigger2.setAlertDefinition(alertDef);
 
-        List triggers = new ArrayList();
+        List<RegisteredTrigger> triggers = new ArrayList<RegisteredTrigger>();
         triggers.add(trigger);
         triggers.add(trigger2);
 
@@ -609,6 +607,6 @@ public class RegisteredTriggerManagerEJBImplTest
         EasyMock.verify(alertConditionEvaluatorFactory,
                         alertConditionEvaluator,
                         triggerDAO,
-                        registeredTriggerRepository, zEventEnqueuer, alertConditionEvaluatorRepository);
+                        registeredTriggerRepository, zEventEnqueuer, alertConditionEvaluatorRepository, alertDefinitionDAO);
     }
 }

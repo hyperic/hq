@@ -61,7 +61,7 @@ import org.hyperic.hq.bizapp.shared.MeasurementBossHome;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.bizapp.shared.ProductBossHome;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
-import org.hyperic.hq.bizapp.shared.UpdateBossHome;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.exception.ServiceLocatorException;
 import org.hyperic.hq.ui.util.UIUtils;
 /**
@@ -106,8 +106,8 @@ public class ServiceLocator {
     private static final String GALERT_NAME = GalertBossHome.JNDI_NAME;
     private static final Class GALERT_CLASS = GalertBossHome.class;
 
-    private static final String UPDATE_NAME = UpdateBossHome.JNDI_NAME;
-    private static final Class UPDATE_CLASS = UpdateBossHome.class;
+    //private static final String UPDATE_NAME = UpdateBossHome.JNDI_NAME;
+    //private static final Class UPDATE_CLASS = UpdateBossHome.class;
 
     private final static String CONTEXT_FACTORY_NAME =
         "ejb-remote-config.context-factory";
@@ -378,14 +378,8 @@ public class ServiceLocator {
         }
     }
 
-    public UpdateBoss getUpdateBoss() throws ServiceLocatorException {
-        UpdateBossHome home = (UpdateBossHome)lookup(UPDATE_NAME, UPDATE_CLASS);
-                                                      
-        try {
-            return (UpdateBoss) home.create();
-        } catch (Exception e) {
-            throw new ServiceLocatorException(e);
-        }
+    public UpdateBoss getUpdateBoss()  {
+       return Bootstrap.getBean(UpdateBoss.class);
     }
 
 }

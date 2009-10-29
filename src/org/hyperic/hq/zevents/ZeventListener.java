@@ -34,12 +34,12 @@ import java.util.List;
  * @see ZeventManager#addGlobalListener(ZeventListener)
  * @see ZeventManager#addListener(Class, ZeventListener)
  */
-public interface ZeventListener {
+public interface ZeventListener<T> {
     /**
      * Called by the {@link ZeventManager} to process events coming off the
      * event queue
      * 
      * @param events a List of {@link Zevent} events
      */
-    void processEvents(List events);
+    void processEvents(List<T> events);
 }

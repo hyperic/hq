@@ -28,11 +28,6 @@
 
 		</session>
 		<session>
-			<ejb-name>RegisteredTriggerManager</ejb-name>
-			<local-jndi-name>LocalRegisteredTriggerManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>CPropManager</ejb-name>
 			<local-jndi-name>LocalCPropManager</local-jndi-name>
 
@@ -50,12 +45,6 @@
 		<session>
 			<ejb-name>MeasurementProcessor</ejb-name>
 			<local-jndi-name>LocalMeasurementProcessor</local-jndi-name>
-
-		</session>
-		<session>
-			<ejb-name>UpdateBoss</ejb-name>
-			<jndi-name>ejb/bizapp/UpdateBoss</jndi-name>
-			<local-jndi-name>LocalUpdateBoss</local-jndi-name>
 
 		</session>
 		<session>
@@ -197,11 +186,6 @@
 			<ejb-name>ControlBoss</ejb-name>
 			<jndi-name>ejb/bizapp/ControlBoss</jndi-name>
 			<local-jndi-name>LocalControlBoss</local-jndi-name>
-
-		</session>
-		<session>
-			<ejb-name>AvailabilityManager</ejb-name>
-			<local-jndi-name>LocalAvailabilityManager</local-jndi-name>
 
 		</session>
 		<session>

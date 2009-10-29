@@ -56,7 +56,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class AlertDefinitionDAO
-    extends HibernateDAO<AlertDefinition> {
+    extends HibernateDAO<AlertDefinition> implements AlertDefinitionDAOInterface {
 
     private PermissionManager permissionManager;
     private ActionDAO actDAO;

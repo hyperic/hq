@@ -66,7 +66,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.MeasurementDataSourceException;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
-import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
+import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
@@ -1168,7 +1168,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param measurements The List of {@link Measurement}s to query
      * @param begin The start of the time range
      * @param end The end of the time range
-     * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl#getHistoricalData()
+     * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl#getHistoricalData()
      * @return the {@link Map} of {@link Integer} to {@link double[]} which
      * represents templateId to data points
      * @ejb:interface-method
@@ -1276,7 +1276,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param type Collection type for the metric
      * @param returnMetricNulls Specifies whether intervals with no data should
      * be return as nulls
-     * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl#getHistoricalData()
+     * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl#getHistoricalData()
      * @return the list of data points
      * @ejb:interface-method
      */
@@ -1979,8 +1979,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return rtn;
     }
 
-    private AvailabilityManagerLocal getAvailMan() {
-        return AvailabilityManagerEJBImpl.getOne();
+    private AvailabilityManager getAvailMan() {
+        return AvailabilityManagerImpl.getOne();
     }
 
     private Map getAggDataByMetric(Integer[] mids, long begin,

@@ -46,7 +46,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class AvailabilityDataDAO extends HibernateDAO {
+public class AvailabilityDataDAO extends HibernateDAO<AvailabilityDataRLE> {
 
     private static final String logCtx = AvailabilityDataDAO.class.getName();
     private final Log _log = LogFactory.getLog(logCtx);
@@ -68,7 +68,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
 
     @Autowired
     public AvailabilityDataDAO(SessionFactory f) {
-        super(AvailabilityDataDAO.class, f);
+        super(AvailabilityDataRLE.class, f);
     }
 
     List findLastAvail(List mids, long after) {
@@ -95,7 +95,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         return rtn;
     }
 
-    List findLastAvail(List mids) {
+    List<AvailabilityDataRLE> findLastAvail(List mids) {
         // sort so that the cache has the best opportunity use the query
         // multiple times
         mids = new ArrayList(mids);
@@ -194,7 +194,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
     /**
      * @return List of AvailabilityDataRLE objs
      */
-    List getHistoricalAvails(Measurement m, long start,
+    @SuppressWarnings("unchecked")
+    List<AvailabilityDataRLE> getHistoricalAvails(Measurement m, long start,
                              long end, boolean descending) {
         String sql = new StringBuilder()
             .append("FROM AvailabilityDataRLE rle ")
@@ -217,7 +218,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
     /**
      * @return List of AvailabilityDataRLE objs
      */
-    List getHistoricalAvails(Integer[] mids, long start,
+    @SuppressWarnings("unchecked")
+    List<AvailabilityDataRLE> getHistoricalAvails(Integer[] mids, long start,
                              long end, boolean descending) {
         String sql = new StringBuilder()
                     .append("FROM AvailabilityDataRLE rle")
@@ -242,15 +244,14 @@ public class AvailabilityDataDAO extends HibernateDAO {
      * <p>The {@link TreeSet}'s comparator sorts by
      *  {@link AvailabilityDataRLE}.getStartime().
      */
-    Map getHistoricalAvailMap(Integer[] mids, final long after,
+    @SuppressWarnings("unchecked")
+    Map<Integer,TreeSet<AvailabilityDataRLE>> getHistoricalAvailMap(Integer[] mids, final long after,
                               final boolean descending) {
         if (mids.length <= 0) {
             return Collections.EMPTY_MAP;
         }
-        final Comparator comparator = new Comparator() {
-            public int compare(Object arg0, Object arg1) {
-                AvailabilityDataRLE lhs = (AvailabilityDataRLE)arg0;
-                AvailabilityDataRLE rhs = (AvailabilityDataRLE)arg1;
+        final Comparator<AvailabilityDataRLE> comparator = new Comparator<AvailabilityDataRLE>() {
+            public int compare(AvailabilityDataRLE lhs, AvailabilityDataRLE rhs) {
                 Long lhsStart = new Long(lhs.getStartime());
                 Long rhsStart = new Long(rhs.getStartime());
                 if (descending) {
@@ -271,21 +272,20 @@ public class AvailabilityDataDAO extends HibernateDAO {
         if (after > 0) {
             query.setLong("endtime", after);
         }
-        List list = query.list();
-        Map rtn = new HashMap(list.size());
-        TreeSet tmp;
-        for (Iterator it=list.iterator(); it.hasNext(); ) {
-            AvailabilityDataRLE rle = (AvailabilityDataRLE)it.next();
+        List<AvailabilityDataRLE> list = query.list();
+        Map<Integer, TreeSet<AvailabilityDataRLE>> rtn = new HashMap<Integer, TreeSet<AvailabilityDataRLE>>(list.size());
+        TreeSet<AvailabilityDataRLE> tmp;
+        for (AvailabilityDataRLE rle : list ) {
             Integer mId = rle.getMeasurement().getId();
-            if (null == (tmp = (TreeSet)rtn.get(mId))) {
-                tmp = new TreeSet(comparator);
+            if (null == (tmp = rtn.get(mId))) {
+                tmp = new TreeSet<AvailabilityDataRLE>(comparator);
                 rtn.put(rle.getMeasurement().getId(), tmp);
             }
             tmp.add(rle);
         }
         for (int i=0; i<mids.length; i++) {
             if (!rtn.containsKey(mids[i])) {
-                rtn.put(mids[i], new TreeSet(comparator));
+                rtn.put(mids[i], new TreeSet<AvailabilityDataRLE>(comparator));
             }
         }
         return rtn;
@@ -294,7 +294,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
     /**
      * @return List of AvailabilityDataRLE objs
      */
-    List getHistoricalAvails(Resource res, long start, long end) {
+    @SuppressWarnings("unchecked")
+    List<AvailabilityDataRLE> getHistoricalAvails(Resource res, long start, long end) {
         String sql = new StringBuilder()
                     .append("SELECT rle")
                     .append(" FROM AvailabilityDataRLE rle")
@@ -316,10 +317,11 @@ public class AvailabilityDataDAO extends HibernateDAO {
      *  [1] = min(availVal), [2] = max(availVal), [3] = avg(availVal)
      *  [4] = mid count, [5] = total uptime, [6] = = total time
      */
-    List findAggregateAvailability(Integer[] mids, long start, long end) {
+    @SuppressWarnings("unchecked")
+    List<Object[]> findAggregateAvailability(Integer[] mids, long start, long end) {
         if (mids.length == 0) {
             // Nothing to do
-            return new ArrayList(0);
+            return new ArrayList<Object[]>(0);
         }
         String sql = new StringBuilder()
                     .append("SELECT m, min(rle.availVal),")
@@ -357,11 +359,12 @@ public class AvailabilityDataDAO extends HibernateDAO {
      *  [1] = min(availVal), [2] = max(availVal), [3] = avg(availVal)
      *  [4] = mid count, [5] = total uptime, [6] = = total time
      */
-    List findAggregateAvailability(Integer[] tids, Integer[] iids,
+    @SuppressWarnings("unchecked")
+    List<Object[]> findAggregateAvailability(Integer[] tids, Integer[] iids,
                                    long start, long end) {
         if (tids.length == 0) {
             // Nothing to do
-            return new ArrayList(0);
+            return new ArrayList<Object[]>(0);
         }
 
         String sql = new StringBuilder()
@@ -405,7 +408,8 @@ public class AvailabilityDataDAO extends HibernateDAO {
     /**
      * @return List of down Measurements
      */
-    List getDownMeasurements(List includes) {
+    @SuppressWarnings("unchecked")
+    List<AvailabilityDataRLE> getDownMeasurements(List<Integer> includes) {
         StringBuilder sql = new StringBuilder()
                      .append("SELECT rle FROM AvailabilityDataRLE rle")
                      .append(" JOIN rle.availabilityDataId.measurement m")
@@ -423,7 +427,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         if (!hasIncludes) {
             return query.list();
         }
-        List rtn = new ArrayList(includes.size());
+        List<AvailabilityDataRLE> rtn = new ArrayList<AvailabilityDataRLE>(includes.size());
         for (int i=0; i<includes.size(); i+=BATCH_SIZE) {
             int end = Math.min(i + BATCH_SIZE, includes.size());
             query.setParameterList(

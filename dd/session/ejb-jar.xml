@@ -50,19 +50,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[The trigger manager.]]></description>
-
-			<ejb-name>RegisteredTriggerManager</ejb-name>
-
-			<local-home>org.hyperic.hq.events.shared.RegisteredTriggerManagerLocalHome</local-home>
-			<local>org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal</local>
-			<ejb-class>org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[]]></description>
 
 			<ejb-name>CPropManager</ejb-name>
@@ -109,21 +96,6 @@
 			<local-home>org.hyperic.hq.measurement.shared.MeasurementProcessorLocalHome</local-home>
 			<local>org.hyperic.hq.measurement.shared.MeasurementProcessorLocal</local>
 			<ejb-class>org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
-			<description><![CDATA[]]></description>
-
-			<ejb-name>UpdateBoss</ejb-name>
-
-			<home>org.hyperic.hq.bizapp.shared.UpdateBossHome</home>
-			<remote>org.hyperic.hq.bizapp.shared.UpdateBoss</remote>
-			<local-home>org.hyperic.hq.bizapp.shared.UpdateBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.UpdateBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.UpdateBossEJBImpl</ejb-class>
 			<session-type>Stateless</session-type>
 			<transaction-type>Container</transaction-type>
 
@@ -486,19 +458,6 @@
 			<local-home>org.hyperic.hq.bizapp.shared.ControlBossLocalHome</local-home>
 			<local>org.hyperic.hq.bizapp.shared.ControlBossLocal</local>
 			<ejb-class>org.hyperic.hq.bizapp.server.session.ControlBossEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
-			<description><![CDATA[The AvailabityManagerEJBImpl class is a stateless session bean that can be used to retrieve Availability Data RLE points]]></description>
-
-			<ejb-name>AvailabilityManager</ejb-name>
-
-			<local-home>org.hyperic.hq.measurement.shared.AvailabilityManagerLocalHome</local-home>
-			<local>org.hyperic.hq.measurement.shared.AvailabilityManagerLocal</local>
-			<ejb-class>org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl</ejb-class>
 			<session-type>Stateless</session-type>
 			<transaction-type>Container</transaction-type>
 
@@ -916,13 +875,6 @@
 					<method-param>java.lang.String</method-param>
 					<method-param>java.lang.String</method-param>
 				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>RegisteredTriggerManager</ejb-name>
-				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>
@@ -1364,13 +1316,6 @@
 		<container-transaction>
 			<method>
 				<ejb-name>MeasurementProcessor</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>UpdateBoss</ejb-name>
 				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>
@@ -3580,25 +3525,6 @@
 			<method>
 				<ejb-name>ControlBoss</ejb-name>
 				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>AvailabilityManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>AvailabilityManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>addData</method-name>
-				<method-params>
-					<method-param>java.util.List</method-param>
-					<method-param>boolean</method-param>
-				</method-params>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>

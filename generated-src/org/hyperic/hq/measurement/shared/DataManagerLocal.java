@@ -64,7 +64,7 @@ public interface DataManagerLocal
     * @param measurements The List of {@link Measurement}s to query
     * @param begin The start of the time range
     * @param end The end of the time range
-    * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl#getHistoricalData()
+    * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl#getHistoricalData()
     * @return the {@link Map} of {@link Integer} to {@link double[]} which represents templateId to data points
     */
    public java.util.Map getAggregateDataByTemplate( java.util.List measurements,long begin,long end ) ;
@@ -77,7 +77,7 @@ public interface DataManagerLocal
     * @param interval Interval for the time range
     * @param type Collection type for the metric
     * @param returnMetricNulls Specifies whether intervals with no data should be return as nulls
-    * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl#getHistoricalData()
+    * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl#getHistoricalData()
     * @return the list of data points
     */
    public org.hyperic.util.pager.PageList getHistoricalData( java.util.List measurements,long begin,long end,long interval,int type,boolean returnMetricNulls,org.hyperic.util.pager.PageControl pc ) ;

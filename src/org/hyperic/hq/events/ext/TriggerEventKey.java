@@ -8,7 +8,7 @@ package org.hyperic.hq.events.ext;
  */
 public class TriggerEventKey {
 
-    private final Class eventClass;
+    private final Class<?> eventClass;
 
     private final int instanceId;
 
@@ -17,7 +17,7 @@ public class TriggerEventKey {
      * @param eventClass The event type
      * @param instanceId The instance the event occurred against, or RegisteredTriggers.KEY_ALL if interested in all instances
      */
-    public TriggerEventKey(Class eventClass, int instanceId) {
+    public TriggerEventKey(Class<?> eventClass, int instanceId) {
         this.eventClass = eventClass;
         this.instanceId = instanceId;
     }

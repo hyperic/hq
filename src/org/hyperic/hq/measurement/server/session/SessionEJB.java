@@ -30,19 +30,15 @@ import java.util.Collection;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -50,13 +46,10 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.SRNManagerLocal;
-import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.server.session.ProductManagerImpl;
 import org.hyperic.hq.product.shared.ProductManager;
 
 /**
@@ -69,23 +62,16 @@ public abstract class SessionEJB {
     private final String ERR_START = "Begin and end times must be positive";
     private final String ERR_END   = "Start time must be earlier than end time";
 
-    protected static MeasurementPluginManager _mpm = null;
+    protected static MeasurementPluginManager measurementPluginManager = null;
 
-    private DataManagerLocal _dataMan;
-    private AgentManager _agentMan;
-    private ProductManager _prodMan;
-    private AuthzSubjectManagerLocal _ssmLocal;
-    private TemplateManagerLocal _templateMan;
-    private SRNManagerLocal s_rnManager;
-
-    private AvailabilityDataDAO availabilityDataDAO = Bootstrap.getBean(AvailabilityDataDAO.class);
-    private BaselineDAO baselineDAO = Bootstrap.getBean(BaselineDAO.class);
-    private CategoryDAO categoryDAO = Bootstrap.getBean(CategoryDAO.class); 
-    private MeasurementDAO measurementDAO = Bootstrap.getBean(MeasurementDAO.class);
-    private MeasurementTemplateDAO measurementTemplateDAO = Bootstrap.getBean(MeasurementTemplateDAO.class);
-    private MetricProblemDAO metricProblemDAO = Bootstrap.getBean(MetricProblemDAO.class);
-    private MonitorableTypeDAO monitorableTypeDAO = Bootstrap.getBean(MonitorableTypeDAO.class);
-    private ScheduleRevNumDAO scheduleRevNumDAO = Bootstrap.getBean(ScheduleRevNumDAO.class);
+    protected AvailabilityDataDAO availabilityDataDAO = Bootstrap.getBean(AvailabilityDataDAO.class);
+    protected BaselineDAO baselineDAO = Bootstrap.getBean(BaselineDAO.class);
+    protected CategoryDAO categoryDAO = Bootstrap.getBean(CategoryDAO.class); 
+    protected MeasurementDAO measurementDAO = Bootstrap.getBean(MeasurementDAO.class);
+    protected MeasurementTemplateDAO measurementTemplateDAO = Bootstrap.getBean(MeasurementTemplateDAO.class);
+    protected MetricProblemDAO metricProblemDAO = Bootstrap.getBean(MetricProblemDAO.class);
+    protected MonitorableTypeDAO monitorableTypeDAO = Bootstrap.getBean(MonitorableTypeDAO.class);
+    protected ScheduleRevNumDAO scheduleRevNumDAO = Bootstrap.getBean(ScheduleRevNumDAO.class);
 
     private InitialContext _ic;
 
@@ -120,63 +106,29 @@ public abstract class SessionEJB {
     protected ScheduleRevNumDAO getScheduleRevNumDAO() {
         return scheduleRevNumDAO;
     }
-
-    // Exposed accessor methods
-    protected TemplateManagerLocal getTemplateMan(){
-        if (_templateMan == null) {
-            _templateMan = TemplateManagerEJBImpl.getOne();
-        }
-        return _templateMan;
+    
+    private AgentManager getAgentManager() {
+        return Bootstrap.getBean(AgentManager.class);
     }
 
-    protected AuthzSubjectManagerLocal getAuthzSubjectManager() {
-        if (_ssmLocal == null) {
-            _ssmLocal = AuthzSubjectManagerEJBImpl.getOne();
-        }
-        return _ssmLocal;
+    private ProductManager getProductManager() {
+        return Bootstrap.getBean(ProductManager.class);
     }
-
-    protected DataManagerLocal getDataMan() {
-        if (_dataMan == null) {
-            _dataMan = DataManagerEJBImpl.getOne();
-        }
-        return _dataMan;
-    }
-
-    protected AgentManager getAgentMan() {
-        if (_agentMan == null) {
-            _agentMan = AgentManagerImpl.getOne();
-        }
-        return _agentMan;
-    }
-
-    protected ProductManager getProductMan() {
-        if (_prodMan == null) {
-            _prodMan = ProductManagerImpl.getOne();
-        }
-        return _prodMan;
-    }
-
     protected MeasurementPluginManager getMPM() {
-        if (_mpm == null) {
-            ProductManager ppm = this.getProductMan();
-
+        if (measurementPluginManager == null) {
             try {
-                _mpm = (MeasurementPluginManager)
-                    ppm.getPluginManager(ProductPlugin.TYPE_MEASUREMENT);
+                measurementPluginManager = (MeasurementPluginManager)
+                    getProductManager().getPluginManager(ProductPlugin.TYPE_MEASUREMENT);
             } catch (PluginException e) {
                 throw new SystemException("PluginException: " + e.getMessage(),
                                           e);
             }
         }
-        return _mpm;
+        return measurementPluginManager;
     }
 
     protected SRNManagerLocal getSRNManager() {
-        if (s_rnManager == null) {
-            s_rnManager = SRNManagerEJBImpl.getOne();
-        }
-        return s_rnManager;
+        return Bootstrap.getBean(SRNManagerLocal.class);
     }
 
     protected InitialContext getInitialContext() {
@@ -194,7 +146,7 @@ public abstract class SessionEJB {
         throws MonitorAgentException {
         // Ask the AgentManager for the AgentConnection
         try {
-            return this.getAgentMan().getAgent(id);
+            return getAgentManager().getAgent(id);
         } catch (AgentNotFoundException e) {
             throw new MonitorAgentException(e);
         }
@@ -204,7 +156,7 @@ public abstract class SessionEJB {
         throws MonitorAgentException {
         // Ask the AgentManager for the AgentConnection
         try {
-            return this.getAgentMan().getAgent(agentToken);
+            return getAgentManager().getAgent(agentToken);
         } catch (AgentNotFoundException e) {
             throw new MonitorAgentException(e);
         }
@@ -247,36 +199,7 @@ public abstract class SessionEJB {
         checkPermission(subjectId, id, id.getAuthzTypeName(), opName);
     }
 
-    /**
-     * Check for modify permission for a given resource
-     */
-    protected void checkDeletePermission(Integer subjectId,
-                                         AppdefEntityID id)
-        throws PermissionException {
-        String resType = null;
-        String opName = null;
-
-        int type = id.getType();
-        switch (type) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                resType = AuthzConstants.platformResType;
-                opName = AuthzConstants.platformOpRemovePlatform;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                resType = AuthzConstants.serverResType;
-                opName = AuthzConstants.serverOpRemoveServer;
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                resType = AuthzConstants.serviceResType;
-                opName = AuthzConstants.serviceOpRemoveService;
-                break;
-            default:
-                throw new InvalidAppdefTypeException("Unknown type: " + type);
-        }
-
-        checkPermission(subjectId, id, resType, opName);
-    }
-
+  
     protected void checkTimeArguments(long begin, long end)
         throws IllegalArgumentException {
         if (begin > end)
@@ -286,7 +209,7 @@ public abstract class SessionEJB {
             throw new IllegalArgumentException(this.ERR_START);
     }
 
-    protected void deleteMetricProblems(Collection mids) {
+    protected void deleteMetricProblems(Collection<Integer> mids) {
         getMetricProblemDAO().deleteByMetricIds(mids);
     }
 

@@ -1386,7 +1386,6 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                 } else if (!plat.getAgent().equals(existing.getAgent())) {
                     // Need to enqueue the ResourceUpdatedZevent if the
                     // agent changed to get the metrics scheduled
-                    ZeventManager zmgr = ZeventManager.getInstance();
                     List events = new ArrayList();
                     events.add(new ResourceUpdatedZevent(subject, plat
                             .getEntityId()));
@@ -1404,7 +1403,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
                         }
                     }
 
-                    zmgr.enqueueEventsAfterCommit(events);
+                    ZeventManager.getInstance().enqueueEventsAfterCommit(events);
                 }
             }
             dao.updatePlatform(plat, existing);

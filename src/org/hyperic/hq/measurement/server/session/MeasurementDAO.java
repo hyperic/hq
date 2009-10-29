@@ -56,7 +56,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class MeasurementDAO extends HibernateDAO {
+public class MeasurementDAO extends HibernateDAO<Measurement> {
     private final Log _log = LogFactory.getLog(MeasurementDAO.class);
 
     private static final String ALIAS_CLAUSE = " upper(t.alias) = '" +
@@ -402,7 +402,8 @@ public class MeasurementDAO extends HibernateDAO {
     /**
      * @return List of all measurement ids for availability, ordered
      */
-    List findAllAvailIds() {
+    @SuppressWarnings("unchecked")
+    List<Integer> findAllAvailIds() {
         String sql = new StringBuilder()
             .append("select m.id from Measurement m ")
             .append("join m.template t ")
@@ -513,7 +514,8 @@ public class MeasurementDAO extends HibernateDAO {
      * 1 = {@link List} of Availability {@link Measurement}s
      * Measurements which are children of the resource
      */
-    final List findRelatedAvailMeasurements(final List resourceIds,
+    @SuppressWarnings("unchecked")
+    final List<Object[]> findRelatedAvailMeasurements(final List<Integer> resourceIds,
                                             final String resourceRelationType) {
        if (resourceIds.isEmpty()) {
            return Collections.EMPTY_LIST;
@@ -560,7 +562,8 @@ public class MeasurementDAO extends HibernateDAO {
      * 1 = {@link List} of Availability {@link Measurement}s
      * Availability measurements which are parents of the resourceId
      */
-    List findParentAvailMeasurements(List resourceIds,
+    @SuppressWarnings("unchecked")
+    List<Object[]> findParentAvailMeasurements(List resourceIds,
                                      String resourceRelationType) {
         if (resourceIds.isEmpty()) {
             return Collections.EMPTY_LIST;
@@ -604,7 +607,8 @@ public class MeasurementDAO extends HibernateDAO {
        return rtn;
     }
 
-    List findAvailMeasurementsByInstances(int type, Integer[] ids) {
+    @SuppressWarnings("unchecked")
+    List<Measurement> findAvailMeasurementsByInstances(int type, Integer[] ids) {
         boolean checkIds = (ids != null && ids.length > 0);
         String sql = new StringBuilder()
             .append("select m from Measurement m ")

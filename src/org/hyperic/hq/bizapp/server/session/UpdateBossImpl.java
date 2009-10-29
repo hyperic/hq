@@ -29,54 +29,65 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.zip.GZIPOutputStream;
-
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.bizapp.shared.UpdateBossLocal;
-import org.hyperic.hq.bizapp.shared.UpdateBossUtil;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.common.server.session.ServerConfigAudit;
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
-import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
+import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
 import org.hyperic.util.thread.LoggingThreadGroup;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @ejb:bean name="UpdateBoss"
- *      jndi-name="ejb/bizapp/UpdateBoss"
- *      local-jndi-name="LocalUpdateBoss"
- *      view-type="both"
- *      type="Stateless"
- * @ejb:transaction type="Required"
  */
-public class UpdateBossEJBImpl
-    extends BizappSessionEJB
-    implements SessionBean
-{
-    private UpdateStatusDAO _updateDAO = Bootstrap.getBean(UpdateStatusDAO.class);
-    private final String CHECK_URL =  "http://updates.hyperic.com/hq-updates";
+@Service
+@Transactional
+public class UpdateBossImpl
+    extends BizappSessionEJB implements UpdateBoss {
+    private UpdateStatusDAO updateDAO;
+    private static final String CHECK_URL = "http://updates.hyperic.com/hq-updates";
 
-    private final Log _log = LogFactory.getLog(UpdateBossEJBImpl.class);
+    private final Log log = LogFactory.getLog(UpdateBossImpl.class);
+
+    private ServerConfigManagerLocal serverConfigManager;
+
+    private PlatformManagerLocal platformManager;
+
+    private ServerManagerLocal serverManager;
+
+    private ServiceManagerLocal serviceManager;
+
+    private UIPluginManagerLocal uiPluginManager;
+
+    @Autowired
+    public UpdateBossImpl(UpdateStatusDAO updateDAO, ServerConfigManagerLocal serverConfigManager,
+                          PlatformManagerLocal platformManager, ServerManagerLocal serverManager,
+                          ServiceManagerLocal serviceManager, UIPluginManagerLocal uiPluginManager) {
+        this.updateDAO = updateDAO;
+        this.serverConfigManager = serverConfigManager;
+        this.platformManager = platformManager;
+        this.serverManager = serverManager;
+        this.serviceManager = serviceManager;
+        this.uiPluginManager = uiPluginManager;
+    }
 
     private String getCheckURL() {
         try {
@@ -84,25 +95,25 @@ public class UpdateBossEJBImpl
             String res = p.getProperty("hq.updateNotify.url");
             if (res != null)
                 return res;
-        } catch(Exception e) {
-            _log.warn("Unable to get notification url", e);
+        } catch (Exception e) {
+            log.warn("Unable to get notification url", e);
         }
         return CHECK_URL;
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void startup() {
         LoggingThreadGroup grp = new LoggingThreadGroup("Update Notifier");
         Thread t = new Thread(grp, new UpdateFetcher(), "Update Notifier");
-
         t.start();
     }
 
+    @SuppressWarnings("unchecked")
     private Properties getRequestInfo(UpdateStatus status) {
         Properties req = new Properties();
-        String guid = ServerConfigManagerEJBImpl.getOne().getGUID();
+        String guid = serverConfigManager.getGUID();
 
         req.setProperty("hq.updateStatusMode", "" + status.getMode().getCode());
         req.setProperty("hq.version", ProductProperties.getVersion());
@@ -116,13 +127,13 @@ public class UpdateBossEJBImpl
         req.setProperty("java.version", System.getProperty("java.version"));
         req.setProperty("java.vendor", System.getProperty("java.vendor"));
 
-        List plats = PlatformManagerEJBImpl.getOne().getPlatformTypeCounts();
-        List svrs  = ServerManagerEJBImpl.getOne().getServerTypeCounts();
-        List svcs  = ServiceManagerEJBImpl.getOne().getServiceTypeCounts();
+        List<Object[]> plats = platformManager.getPlatformTypeCounts();
+        List<Object[]> svrs = serverManager.getServerTypeCounts();
+        List<Object[]> svcs = serviceManager.getServiceTypeCounts();
 
         addResourceProperties(req, plats, "hq.rsrc.plat.");
-        addResourceProperties(req, svrs,  "hq.rsrc.svr.");
-        addResourceProperties(req, svcs,  "hq.rsrc.svc.");
+        addResourceProperties(req, svrs, "hq.rsrc.svr.");
+        addResourceProperties(req, svcs, "hq.rsrc.svc.");
 
         req.putAll(SysStats.getCpuMemStats());
         req.putAll(SysStats.getDBStats());
@@ -131,33 +142,27 @@ public class UpdateBossEJBImpl
         return req;
     }
 
+    @SuppressWarnings("unchecked")
     private Properties getHQUPlugins() {
-        Collection plugins = UIPluginManagerEJBImpl.getOne().findAll();
+        Collection<UIPlugin> plugins = uiPluginManager.findAll();
         Properties res = new Properties();
 
-        for (Iterator i=plugins.iterator(); i.hasNext(); ) {
-            UIPlugin p = (UIPlugin)i.next();
-
-            res.setProperty("hqu.plugin." + p.getName(),
-                            p.getPluginVersion());
+        for (UIPlugin p : plugins) {
+            res.setProperty("hqu.plugin." + p.getName(), p.getPluginVersion());
         }
         return res;
     }
 
-    private void addResourceProperties(Properties p, List resCounts,
-                                       String prefix)
-    {
-        for (Iterator i=resCounts.iterator(); i.hasNext(); ) {
-            Object[] val = (Object[])i.next();
-
+    private void addResourceProperties(Properties p, List<Object[]> resCounts, String prefix) {
+        for (Object[] val : resCounts) {
             p.setProperty(prefix + val[0], "" + val[1]);
         }
     }
 
     /**
      * Meant to be called internally by the fetching thread
-     *
-     * @ejb:interface-method
+     * 
+     * 
      */
     public void fetchReport() {
         UpdateStatus status = getOrCreateStatus();
@@ -179,13 +184,12 @@ public class UpdateBossEJBImpl
             bOs.flush();
             bOs.close();
             reqBytes = bOs.toByteArray();
-        } catch(IOException e) {
-            _log.warn("Error creating report request", e);
+        } catch (IOException e) {
+            log.warn("Error creating report request", e);
             return;
         }
 
-        _log.debug("Generated report.  Size=" + reqBytes.length +
-                   " report:\n" + req);
+        log.debug("Generated report.  Size=" + reqBytes.length + " report:\n" + req);
 
         PostMethod post = new PostMethod(getCheckURL());
         post.addRequestHeader("x-hq-guid", req.getProperty("hq.guid"));
@@ -202,8 +206,8 @@ public class UpdateBossEJBImpl
             statusCode = c.executeMethod(post);
 
             response = post.getResponseBodyAsString();
-        } catch(Exception e) {
-            _log.debug("Unable to get updates", e);
+        } catch (Exception e) {
+            log.debug("Unable to get updates", e);
             return;
         } finally {
             post.releaseConnection();
@@ -217,12 +221,12 @@ public class UpdateBossEJBImpl
         String curReport;
 
         if (response.length() >= 4000) {
-            _log.warn("Update report exceeded 4k");
+            log.warn("Update report exceeded 4k");
             return;
         }
 
         if (statusCode != 200) {
-            _log.debug("Bad status code returned: " + statusCode);
+            log.debug("Bad status code returned: " + statusCode);
             return;
         }
 
@@ -242,8 +246,8 @@ public class UpdateBossEJBImpl
     /**
      * Returns null if there is no status report (or it's been ignored), else
      * the string status report
-     *
-     * @ejb:interface-method
+     * 
+     * 
      */
     public String getUpdateReport() {
         UpdateStatus status = getOrCreateStatus();
@@ -259,13 +263,10 @@ public class UpdateBossEJBImpl
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
-    public void setUpdateMode(int sess, UpdateStatusMode mode)
-        throws SessionException
-    {
-        AuthzSubject subject =
-            SessionManager.getInstance().getSubject(sess);
+    public void setUpdateMode(int sess, UpdateStatusMode mode) throws SessionException {
+        AuthzSubject subject = SessionManager.getInstance().getSubject(sess);
         UpdateStatus status = getOrCreateStatus();
 
         if (!status.getMode().equals(mode))
@@ -280,14 +281,14 @@ public class UpdateBossEJBImpl
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public UpdateStatusMode getUpdateMode() {
         return getOrCreateStatus().getMode();
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void ignoreUpdate() {
         UpdateStatus status = getOrCreateStatus();
@@ -296,11 +297,11 @@ public class UpdateBossEJBImpl
     }
 
     private UpdateStatus getOrCreateStatus() {
-        UpdateStatus res = _updateDAO.get();
+        UpdateStatus res = updateDAO.get();
 
         if (res == null) {
             res = new UpdateStatus("", UpdateStatusMode.MAJOR);
-            _updateDAO.save(res);
+            updateDAO.save(res);
         }
         return res;
     }
@@ -311,15 +312,15 @@ public class UpdateBossEJBImpl
 
         public void run() {
             long interval = getCheckInterval();
-            while(true) {
+            while (true) {
                 try {
-                    UpdateBossEJBImpl.getOne().fetchReport();
-                } catch(Exception e) {
+                    UpdateBossImpl.getOne().fetchReport();
+                } catch (Exception e) {
                     _log.warn("Error getting update notification", e);
                 }
                 try {
                     Thread.sleep(interval);
-                } catch(InterruptedException e) {
+                } catch (InterruptedException e) {
                     return;
                 }
             }
@@ -331,24 +332,15 @@ public class UpdateBossEJBImpl
                 String res = p.getProperty("hq.updateNotify.interval");
                 if (res != null)
                     return Long.parseLong(res);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 _log.warn("Unable to get notification interval", e);
             }
             return CHECK_INTERVAL;
         }
     }
 
-    public static UpdateBossLocal getOne() {
-        try {
-            return UpdateBossUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static UpdateBoss getOne() {
+        return Bootstrap.getBean(UpdateBoss.class);
     }
 
-    public void ejbCreate() { }
-    public void ejbRemove() { }
-    public void ejbActivate() { }
-    public void ejbPassivate() { }
-    public void setSessionContext(SessionContext c) {}
 }

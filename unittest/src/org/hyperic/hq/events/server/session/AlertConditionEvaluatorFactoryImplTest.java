@@ -1,9 +1,9 @@
 package org.hyperic.hq.events.server.session;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -25,14 +25,23 @@ public class AlertConditionEvaluatorFactoryImplTest
 {
     private AlertConditionEvaluatorFactory factory;
     private ZeventEnqueuer zeventEnqueuer;
-    private Map executionStrategyStates = new HashMap();
-    private Map alertConditionEvaluatorStates = new HashMap();
+    private Map<Integer, Serializable> executionStrategyStates = new HashMap<Integer, Serializable>();
+    private Map<Integer, Serializable> alertConditionEvaluatorStates = new HashMap<Integer, Serializable>();
+    private AlertConditionEvaluatorStateRepository alertConditionEvaluatorStateRepository;
 
     public void setUp() throws Exception {
         this.zeventEnqueuer = EasyMock.createMock(ZeventEnqueuer.class);
+        this.alertConditionEvaluatorStateRepository = EasyMock.createMock(AlertConditionEvaluatorStateRepository.class);
         this.factory = new AlertConditionEvaluatorFactoryImpl(zeventEnqueuer,
-                                                              alertConditionEvaluatorStates,
-                                                              executionStrategyStates);
+                                                             alertConditionEvaluatorStateRepository);
+    }
+    
+    private void replay() {
+        EasyMock.replay(zeventEnqueuer, alertConditionEvaluatorStateRepository);
+    }
+    
+    private void verify() {
+        EasyMock.verify(zeventEnqueuer, alertConditionEvaluatorStateRepository);
     }
 
     /**
@@ -61,13 +70,16 @@ public class AlertConditionEvaluatorFactoryImplTest
         alertCondition2.setTrigger(trigger2);
         alertCondition2.setType(EventConstants.TYPE_CONTROL);
         alertDefinition.addCondition(alertCondition2);
-
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getExecutionStrategyStates()).andReturn(executionStrategyStates);
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getAlertConditionEvaluatorStates()).andReturn(alertConditionEvaluatorStates);
+        replay();
         AlertConditionEvaluator evaluator = factory.create(alertDefinition);
+        verify();
         assertTrue(evaluator instanceof RecoveryConditionEvaluator);
         RecoveryConditionEvaluator recoveryConditionEvaluator = (RecoveryConditionEvaluator) evaluator;
         assertTrue(recoveryConditionEvaluator.getExecutionStrategy() instanceof SingleAlertExecutionStrategy);
         assertEquals(0l, recoveryConditionEvaluator.getTimeRange());
-        Set expectedTriggerIds = new HashSet();
+        Set<Integer> expectedTriggerIds = new HashSet<Integer>();
         expectedTriggerIds.add(12345);
         assertEquals(expectedTriggerIds, recoveryConditionEvaluator.getTriggerIds());
         assertEquals(Integer.valueOf(1234), recoveryConditionEvaluator.getAlertTriggerId());
@@ -99,7 +111,11 @@ public class AlertConditionEvaluatorFactoryImplTest
         alertCondition2.setType(EventConstants.TYPE_CONTROL);
         alertDefinition.addCondition(alertCondition2);
 
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getExecutionStrategyStates()).andReturn(executionStrategyStates);
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getAlertConditionEvaluatorStates()).andReturn(alertConditionEvaluatorStates);
+        replay();
         AlertConditionEvaluator evaluator = factory.create(alertDefinition);
+        verify();
         assertTrue(evaluator instanceof MultiConditionEvaluator);
         MultiConditionEvaluator multiConditionEvaluator = (MultiConditionEvaluator) evaluator;
         assertTrue(multiConditionEvaluator.getExecutionStrategy() instanceof CounterExecutionStrategy);
@@ -107,7 +123,7 @@ public class AlertConditionEvaluatorFactoryImplTest
         CounterExecutionStrategy executionStrategy = (CounterExecutionStrategy) multiConditionEvaluator.getExecutionStrategy();
         assertEquals(3l, executionStrategy.getCount());
         assertEquals(4000l, executionStrategy.getTimeRange());
-        Set expectedTriggerIds = new HashSet();
+        Set<Integer> expectedTriggerIds = new HashSet<Integer>();
         expectedTriggerIds.add(1234);
         expectedTriggerIds.add(12345);
         assertEquals(expectedTriggerIds, multiConditionEvaluator.getTriggerIds());
@@ -128,7 +144,11 @@ public class AlertConditionEvaluatorFactoryImplTest
         alertCondition.setTrigger(trigger);
         alertCondition.setType(EventConstants.TYPE_THRESHOLD);
         alertDefinition.addCondition(alertCondition);
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getExecutionStrategyStates()).andReturn(executionStrategyStates);
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getAlertConditionEvaluatorStates()).andReturn(alertConditionEvaluatorStates);
+        replay();
         AlertConditionEvaluator evaluator = factory.create(alertDefinition);
+        verify();
         assertTrue(evaluator instanceof SingleConditionEvaluator);
         assertTrue(((SingleConditionEvaluator) evaluator).getExecutionStrategy() instanceof CounterExecutionStrategy);
         CounterExecutionStrategy executionStrategy = (CounterExecutionStrategy) ((SingleConditionEvaluator) evaluator).getExecutionStrategy();
@@ -142,7 +162,7 @@ public class AlertConditionEvaluatorFactoryImplTest
      */
     public void testCreateExecutionStrategyWithInitialStates() {
         Integer alertDefinitionId = Integer.valueOf(8899);
-        List initialExpirations = new ArrayList();
+        ArrayList<Long> initialExpirations = new ArrayList<Long>();
         initialExpirations.add(System.currentTimeMillis());
         executionStrategyStates.put(alertDefinitionId, initialExpirations);
         AlertDefinition alertDefinition = new AlertDefinition();
@@ -156,7 +176,11 @@ public class AlertConditionEvaluatorFactoryImplTest
         alertCondition.setTrigger(trigger);
         alertCondition.setType(EventConstants.TYPE_THRESHOLD);
         alertDefinition.addCondition(alertCondition);
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getExecutionStrategyStates()).andReturn(executionStrategyStates);
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getAlertConditionEvaluatorStates()).andReturn(alertConditionEvaluatorStates);
+        replay();
         AlertConditionEvaluator evaluator = factory.create(alertDefinition);
+        verify();
         assertTrue(evaluator instanceof SingleConditionEvaluator);
         assertTrue(((SingleConditionEvaluator) evaluator).getExecutionStrategy() instanceof CounterExecutionStrategy);
         CounterExecutionStrategy executionStrategy = (CounterExecutionStrategy) ((SingleConditionEvaluator) evaluator).getExecutionStrategy();
@@ -188,12 +212,16 @@ public class AlertConditionEvaluatorFactoryImplTest
         alertCondition2.setType(EventConstants.TYPE_CONTROL);
         alertDefinition.addCondition(alertCondition2);
 
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getExecutionStrategyStates()).andReturn(executionStrategyStates);
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getAlertConditionEvaluatorStates()).andReturn(alertConditionEvaluatorStates);
+        replay();
         AlertConditionEvaluator evaluator = factory.create(alertDefinition);
+        verify();
         assertTrue(evaluator instanceof RecoveryConditionEvaluator);
         RecoveryConditionEvaluator recoveryConditionEvaluator = (RecoveryConditionEvaluator) evaluator;
         assertTrue(recoveryConditionEvaluator.getExecutionStrategy() instanceof SingleAlertExecutionStrategy);
         assertEquals(0l, recoveryConditionEvaluator.getTimeRange());
-        Set expectedTriggerIds = new HashSet();
+        Set<Integer> expectedTriggerIds = new HashSet<Integer>();
         expectedTriggerIds.add(12345);
         assertEquals(expectedTriggerIds, recoveryConditionEvaluator.getTriggerIds());
         assertEquals(Integer.valueOf(1234), recoveryConditionEvaluator.getAlertTriggerId());
@@ -214,7 +242,11 @@ public class AlertConditionEvaluatorFactoryImplTest
         alertCondition2.setType(EventConstants.TYPE_CONTROL);
         alertDefinition.addCondition(alertCondition2);
 
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getExecutionStrategyStates()).andReturn(executionStrategyStates);
+        EasyMock.expect(alertConditionEvaluatorStateRepository.getAlertConditionEvaluatorStates()).andReturn(alertConditionEvaluatorStates);
+        replay();
         AlertConditionEvaluator evaluator = factory.create(alertDefinition);
+        verify();
         assertTrue(evaluator instanceof SingleConditionEvaluator);
 
         SingleConditionEvaluator singleConditionEvaluator = (SingleConditionEvaluator) evaluator;

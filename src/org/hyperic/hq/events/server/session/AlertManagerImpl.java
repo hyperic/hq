@@ -333,7 +333,7 @@ public class AlertManagerImpl implements AlertManager {
                     alertDef, false);
             }
 
-            EscalatableCreator creator = new ClassicEscalatableCreator(alertDef, event, new Messenger(), this);
+            EscalatableCreator creator = new ClassicEscalatableCreator(alertDef, event, new Messenger(), AlertManagerImpl.getOne());
             Resource res = creator.getAlertDefinition().getResource();
             if (res == null || res.isInAsyncDeleteState()) {
                 return;
