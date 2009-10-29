@@ -40,7 +40,7 @@ import org.hyperic.hq.ui.Constants;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.util.RequestUtils;
+import org.apache.struts.taglib.TagUtils;
 import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 
@@ -350,8 +350,7 @@ public class AvailabilityDecorator extends ColumnDecorator implements Tag {
     }
 
     private String getNA() throws JspException {
-        return RequestUtils.message(this.getPageContext(), null, null, 
-                                    "common.value.notavail");
+        return TagUtils.getInstance().message(this.getPageContext(), null, null, "common.value.notavail");
     }
 
     public int doStartTag() throws JspTagException {

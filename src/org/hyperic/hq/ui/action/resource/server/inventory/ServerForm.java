@@ -25,15 +25,9 @@
 
 package org.hyperic.hq.ui.action.resource.server.inventory;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.ui.action.resource.ResourceForm;
-
-import org.apache.struts.action.ActionError;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * A subclass of <code>ResourceForm</code> that adds convenience

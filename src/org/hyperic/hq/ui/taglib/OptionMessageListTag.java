@@ -36,6 +36,7 @@ import javax.servlet.jsp.JspWriter;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.struts.taglib.TagUtils;
 import org.apache.struts.taglib.html.Constants;
 import org.apache.struts.taglib.html.OptionsCollectionTag;
 import org.apache.struts.taglib.html.SelectTag;
@@ -103,11 +104,8 @@ public class OptionMessageListTag extends OptionsCollectionTag {
      */
     public final int doStartTag() throws JspException {
         try {
-            SelectTag selectTag = (SelectTag)
-                pageContext.getAttribute(Constants.SELECT_KEY);
-
-            Object collection = RequestUtils.lookup(pageContext, name, property, 
-                                                    null);
+            SelectTag selectTag = (SelectTag) pageContext.getAttribute(Constants.SELECT_KEY);
+            Object collection = TagUtils.getInstance().lookup(pageContext, name, property, null);
 
             if (collection == null) {
                 _log.warn("OptionMessageList tag was looking for bean=" + 
@@ -131,8 +129,9 @@ public class OptionMessageListTag extends OptionsCollectionTag {
                     value = String.valueOf( next );
                     key = _baseKey + '.' + value;
                 }
-                String label = RequestUtils.message(pageContext, _bundle, 
-                                                    _locale, key);
+                
+                String label = TagUtils.getInstance().message(pageContext, _bundle, _locale, key);
+                
                 addOption(sb, label, value, selectTag.isMatched(value));
             }
             out.write(sb.toString());

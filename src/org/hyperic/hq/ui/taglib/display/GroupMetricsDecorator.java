@@ -25,16 +25,12 @@
 
 package org.hyperic.hq.ui.taglib.display;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.struts.util.RequestUtils;
-import org.apache.struts.action.Action;
-
-import org.hyperic.hq.ui.Constants;
+import org.apache.struts.taglib.TagUtils;
 
 /**
  * This class acts as a decorator for tables, displaying
@@ -92,14 +88,11 @@ public class GroupMetricsDecorator extends BaseDecorator
         
         try {
             if (tmpIntActive == 0) {
-                return RequestUtils.message(this.getPageContext(), bundle, locale,
-                    "resource.common.monitor.visibility.config.NO");
+                return TagUtils.getInstance().message(this.getPageContext(), bundle, locale, "resource.common.monitor.visibility.config.NO");
             } else if ( tmpIntActive < tmpIntTotal ) {
-                return RequestUtils.message(this.getPageContext(), bundle, locale,
-                    "resource.common.monitor.visibility.config.SOME");
+                return TagUtils.getInstance().message(this.getPageContext(), bundle, locale, "resource.common.monitor.visibility.config.SOME");
             } else {
-                return RequestUtils.message(this.getPageContext(), bundle, locale,
-                    "resource.common.monitor.visibility.config.YES");
+                return TagUtils.getInstance().message(this.getPageContext(), bundle, locale, "resource.common.monitor.visibility.config.YES");
             }
         } catch (JspException je) {
             log.debug("could not look up message: " + je);

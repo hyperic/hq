@@ -33,7 +33,7 @@ import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.apache.struts.util.RequestUtils;
+import org.apache.struts.taglib.TagUtils;
 import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
@@ -87,15 +87,15 @@ public class ResourceTypeName extends TagSupport {
         }
         
         if(AppdefEntityConstants.APPDEF_TYPE_PLATFORM == id)
-            resourceTypeName = RequestUtils.message(pageContext, null, null, "resource.type.Platform", null);
+            resourceTypeName = TagUtils.getInstance().message(pageContext, null, null, "resource.type.Platform", null);
         else if(AppdefEntityConstants.APPDEF_TYPE_SERVER == id)
-            resourceTypeName = RequestUtils.message(pageContext, null, null, "resource.type.Server", null);
+            resourceTypeName = TagUtils.getInstance().message(pageContext, null, null, "resource.type.Server", null);
         else if(AppdefEntityConstants.APPDEF_TYPE_SERVICE == id)
-            resourceTypeName = RequestUtils.message(pageContext, null, null, "resource.type.Service", null);
+            resourceTypeName = TagUtils.getInstance().message(pageContext, null, null, "resource.type.Service", null);
         else if(AppdefEntityConstants.APPDEF_TYPE_APPLICATION == id)
-            resourceTypeName = RequestUtils.message(pageContext, null, null, "resource.type.Application", null);
+            resourceTypeName = TagUtils.getInstance().message(pageContext, null, null, "resource.type.Application", null);
         else if(AppdefEntityConstants.APPDEF_TYPE_GROUP == id)
-            resourceTypeName = RequestUtils.message(pageContext, null, null, "resource.type.Group", null);
+            resourceTypeName = TagUtils.getInstance().message(pageContext, null, null, "resource.type.Group", null);
           
         try {
             String tmpVar = this.getVar();

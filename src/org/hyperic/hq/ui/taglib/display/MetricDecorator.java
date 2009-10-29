@@ -36,7 +36,6 @@ import javax.servlet.jsp.tagext.TagSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.taglib.TagUtils;
-import org.apache.struts.util.RequestUtils;
 import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -118,7 +117,7 @@ public class MetricDecorator extends ColumnDecorator implements Tag {
             String u = (String) evalAttr("unit", getUnit(), String.class);
             String dk = (String) evalAttr("defaultKey", getDefaultKey(),
                                           String.class);
-            Locale l = RequestUtils.retrieveUserLocale(context, locale);
+            Locale l = TagUtils.getInstance().getUserLocale(context, locale);
 
             StringBuffer buf = new StringBuffer();
 

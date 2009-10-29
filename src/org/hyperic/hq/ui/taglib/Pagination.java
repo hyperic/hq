@@ -32,7 +32,7 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.JspWriter;
 
-import org.apache.struts.util.RequestUtils;
+import org.apache.struts.taglib.TagUtils;
 import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.hq.ui.Constants;
@@ -186,7 +186,7 @@ public class Pagination extends PaginationParameters {
 
         if (sets > 1){
             output.append("<td align=\"right\" nowrap><b>");
-            output.append( RequestUtils.message(pageContext, null, null, "ListToolbar.ListSetLabel", null) );
+            output.append( TagUtils.getInstance().message(pageContext, null, null, "ListToolbar.ListSetLabel", null) );
             output.append("</b></td>");
 
             //generate select box

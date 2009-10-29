@@ -52,7 +52,7 @@ import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.util.RequestUtils;
+import org.apache.struts.taglib.TagUtils;
 import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 
@@ -638,15 +638,26 @@ public class TableTag extends TablePropertyTag {
             url = req.getRequestURI();
         }
         
-        Map params = RequestUtils.computeParameters(pageContext, getParamId(),
-						                            getParamName(),
-						                            getParamProperty(),
-						                            getParamScope(), null,
-						                            null, null, false);
+        Map params = TagUtils.getInstance().computeParameters(pageContext, 
+        													  getParamId(),
+        													  getParamName(),
+        													  getParamProperty(),
+        													  getParamScope(), 
+        													  null,
+        													  null, 
+        													  null, 
+        													  false);
         
         try {
-            url = RequestUtils.computeURL(pageContext, null, url, null, null,
-                                          params, null, false);
+            url = TagUtils.getInstance().computeURL(pageContext,
+            										null, 
+            										url, 
+            										null,
+            										null,
+            										null,
+            										params, 
+            										null, 
+            										false);
         } catch (Exception e) {
             throw new JspException("couldn't compute URL" + e);
         }

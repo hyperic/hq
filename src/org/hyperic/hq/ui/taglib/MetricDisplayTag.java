@@ -35,7 +35,6 @@ import javax.servlet.jsp.tagext.TagSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.taglib.TagUtils;
-import org.apache.struts.util.RequestUtils;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.util.units.FormattedNumber;
@@ -91,8 +90,8 @@ public class MetricDisplayTag extends TagSupport {
      * @see javax.servlet.jsp.tagext.Tag#doEndTag()
      */
     public int doEndTag() throws JspException {
-        Locale userLocale = RequestUtils.retrieveUserLocale(pageContext,
-                                                            locale);
+        Locale userLocale = TagUtils.getInstance().getUserLocale(pageContext, locale);
+        
         if (unitIsSet) {
             setUnitVal((String)evalAttr("unit", unit_el, String.class));
         }

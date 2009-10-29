@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.ui.taglib.display;
 
-import java.util.Locale;
-
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.tagext.Tag;
@@ -43,8 +41,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.action.Action;
-import org.apache.struts.util.RequestUtils;
+import org.apache.struts.taglib.TagUtils;
 import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 
@@ -214,7 +211,7 @@ public class ResourceDecorator extends ColumnDecorator implements Tag {
         String typeName = entityId.getTypeName();
         String key = getBaseKey() + '.' + typeName;
         try {
-            String msg = RequestUtils.message(context, bundle, locale, key);
+            String msg = TagUtils.getInstance().message(context, bundle, locale, key);
             return msg != null ? msg : typeName;
         }
         catch (JspException je) {
