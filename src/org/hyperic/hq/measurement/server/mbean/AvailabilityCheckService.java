@@ -41,13 +41,13 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
-import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.AvailabilityCache;
 import org.hyperic.hq.measurement.server.session.MeasDataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.ResourceDataPoint;
-import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
+import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.TimeUtil;
 
@@ -121,7 +121,7 @@ public class AvailabilityCheckService
     private Map getDownPlatforms(Date lDate) {
         final boolean debug = _log.isDebugEnabled();
         AvailabilityCache cache = AvailabilityCache.getInstance();
-        AvailabilityManagerLocal availMan = AvailabilityManagerEJBImpl.getOne();
+        AvailabilityManager availMan = AvailabilityManagerImpl.getOne();
         List platformResources = availMan.getPlatformResources();
         final long now = TimingVoodoo.roundDownTime(
             lDate.getTime(), MeasurementConstants.MINUTE);
@@ -223,7 +223,7 @@ public class AvailabilityCheckService
                 backfillAvails(new ArrayList(backfillPoints.values()));
             }
             // send data to event handlers outside of synchronized block
-            AvailabilityManagerEJBImpl.getOne()
+            AvailabilityManagerImpl.getOne()
                 .sendDataToEventHandlers(backfillPoints);
         } finally {
             synchronized (IS_RUNNING_LOCK) {
@@ -238,8 +238,8 @@ public class AvailabilityCheckService
      */
     private void backfillAvails(List backfillList) {
         final boolean debug = _log.isDebugEnabled();
-        final AvailabilityManagerLocal availMan =
-            AvailabilityManagerEJBImpl.getOne();
+        final AvailabilityManager availMan =
+            AvailabilityManagerImpl.getOne();
         final int batchSize = 500;
         for (int i=0; i<backfillList.size(); i+=batchSize) {
             if (debug) {
@@ -255,8 +255,8 @@ public class AvailabilityCheckService
 
     private Map getBackfillPts(Map downPlatforms, long current) {
         final boolean debug = _log.isDebugEnabled();
-        final AvailabilityManagerLocal availMan =
-            AvailabilityManagerEJBImpl.getOne();
+        final AvailabilityManager availMan =
+            AvailabilityManagerImpl.getOne();
         final AvailabilityCache cache = AvailabilityCache.getInstance();
         final Map rtn = new HashMap();
         final List resourceIds = new ArrayList(downPlatforms.keySet());

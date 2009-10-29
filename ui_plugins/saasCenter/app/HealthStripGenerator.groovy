@@ -8,7 +8,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.measurement.MeasurementConstants
 import org.hyperic.hq.measurement.server.session.AvailabilityDataRLE
-import org.hyperic.hq.measurement.server.session.AvailabilityManagerEJBImpl as AvailMan
+import org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl as AvailMan
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl as DataMan
 import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.hq.measurement.shared.HighLowMetricValue

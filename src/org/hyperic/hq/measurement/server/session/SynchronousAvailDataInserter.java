@@ -27,12 +27,12 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.List;
 
-import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
+import org.hyperic.hq.measurement.shared.AvailabilityManager;
 
 public class SynchronousAvailDataInserter implements DataInserter {
     
-    private final AvailabilityManagerLocal _aMan =
-        AvailabilityManagerEJBImpl.getOne();
+    private final AvailabilityManager _aMan =
+        AvailabilityManagerImpl.getOne();
     
     private final Object _lock;
 

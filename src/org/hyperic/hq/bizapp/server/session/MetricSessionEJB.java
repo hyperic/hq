@@ -78,7 +78,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
+import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.product.MetricValue;
@@ -413,7 +413,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         final Map data = new HashMap();
         final MeasurementManagerLocal mMan = getMetricManager();
         final ResourceManager rMan = getResourceManager();
-        final AvailabilityManagerLocal aMan = getAvailManager();
+        final AvailabilityManager aMan = getAvailManager();
         if (midMap.size() > 0) {
             final List mids = new ArrayList();
             final List aeids = Arrays.asList(ids);

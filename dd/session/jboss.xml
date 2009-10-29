@@ -200,11 +200,6 @@
 
 		</session>
 		<session>
-			<ejb-name>AvailabilityManager</ejb-name>
-			<local-jndi-name>LocalAvailabilityManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>DataManager</ejb-name>
 			<local-jndi-name>LocalDataManager</local-jndi-name>
 
