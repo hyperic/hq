@@ -9,25 +9,25 @@ import org.hyperic.hq.bizapp.server.session.UpdateStatusMode;
 /**
  * Local interface for UpdateBoss.
  */
-public interface UpdateBoss
-{
+public interface UpdateBoss {
 
-   public void startup(  ) ;
+    public void startup();
 
-   /**
-    * Meant to be called internally by the fetching thread
-    */
-   public void fetchReport(  ) ;
+    /**
+     * Meant to be called internally by the fetching thread
+     */
+    public void fetchReport();
 
-   /**
-    * Returns null if there is no status report (or it's been ignored), else the string status report
-    */
-   public java.lang.String getUpdateReport(  ) ;
+    /**
+     * Returns null if there is no status report (or it's been ignored), else
+     * the string status report
+     */
+    public java.lang.String getUpdateReport();
 
-   public void setUpdateMode( int sess, UpdateStatusMode mode ) throws SessionException;
+    public void setUpdateMode(int sess, UpdateStatusMode mode) throws SessionException;
 
-   public UpdateStatusMode getUpdateMode(  ) ;
+    public UpdateStatusMode getUpdateMode();
 
-   public void ignoreUpdate(  ) ;
+    public void ignoreUpdate();
 
 }

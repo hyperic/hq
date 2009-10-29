@@ -56,31 +56,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 /**
  */
 @Service
 @Transactional
 public class UpdateBossImpl
-    extends BizappSessionEJB
-    implements UpdateBoss
-{
+    extends BizappSessionEJB implements UpdateBoss {
     private UpdateStatusDAO updateDAO;
-    private static final String CHECK_URL =  "http://updates.hyperic.com/hq-updates";
+    private static final String CHECK_URL = "http://updates.hyperic.com/hq-updates";
 
     private final Log log = LogFactory.getLog(UpdateBossImpl.class);
-    
+
     private ServerConfigManagerLocal serverConfigManager;
-    
+
     private PlatformManagerLocal platformManager;
-    
+
     private ServerManagerLocal serverManager;
-    
+
     private ServiceManagerLocal serviceManager;
-    
+
     private UIPluginManagerLocal uiPluginManager;
-    
-    
+
     @Autowired
     public UpdateBossImpl(UpdateStatusDAO updateDAO, ServerConfigManagerLocal serverConfigManager,
                           PlatformManagerLocal platformManager, ServerManagerLocal serverManager,
@@ -99,7 +95,7 @@ public class UpdateBossImpl
             String res = p.getProperty("hq.updateNotify.url");
             if (res != null)
                 return res;
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.warn("Unable to get notification url", e);
         }
         return CHECK_URL;
@@ -132,12 +128,12 @@ public class UpdateBossImpl
         req.setProperty("java.vendor", System.getProperty("java.vendor"));
 
         List<Object[]> plats = platformManager.getPlatformTypeCounts();
-        List<Object[]> svrs  = serverManager.getServerTypeCounts();
-        List<Object[]> svcs  = serviceManager.getServiceTypeCounts();
+        List<Object[]> svrs = serverManager.getServerTypeCounts();
+        List<Object[]> svcs = serviceManager.getServiceTypeCounts();
 
         addResourceProperties(req, plats, "hq.rsrc.plat.");
-        addResourceProperties(req, svrs,  "hq.rsrc.svr.");
-        addResourceProperties(req, svcs,  "hq.rsrc.svc.");
+        addResourceProperties(req, svrs, "hq.rsrc.svr.");
+        addResourceProperties(req, svcs, "hq.rsrc.svc.");
 
         req.putAll(SysStats.getCpuMemStats());
         req.putAll(SysStats.getDBStats());
@@ -151,24 +147,21 @@ public class UpdateBossImpl
         Collection<UIPlugin> plugins = uiPluginManager.findAll();
         Properties res = new Properties();
 
-        for (UIPlugin p: plugins ) {
-            res.setProperty("hqu.plugin." + p.getName(),
-                            p.getPluginVersion());
+        for (UIPlugin p : plugins) {
+            res.setProperty("hqu.plugin." + p.getName(), p.getPluginVersion());
         }
         return res;
     }
 
-    private void addResourceProperties(Properties p, List<Object[]> resCounts,
-                                       String prefix)
-    {
-        for (Object[] val: resCounts) {
+    private void addResourceProperties(Properties p, List<Object[]> resCounts, String prefix) {
+        for (Object[] val : resCounts) {
             p.setProperty(prefix + val[0], "" + val[1]);
         }
     }
 
     /**
      * Meant to be called internally by the fetching thread
-     *
+     * 
      * 
      */
     public void fetchReport() {
@@ -191,13 +184,12 @@ public class UpdateBossImpl
             bOs.flush();
             bOs.close();
             reqBytes = bOs.toByteArray();
-        } catch(IOException e) {
+        } catch (IOException e) {
             log.warn("Error creating report request", e);
             return;
         }
 
-        log.debug("Generated report.  Size=" + reqBytes.length +
-                   " report:\n" + req);
+        log.debug("Generated report.  Size=" + reqBytes.length + " report:\n" + req);
 
         PostMethod post = new PostMethod(getCheckURL());
         post.addRequestHeader("x-hq-guid", req.getProperty("hq.guid"));
@@ -214,7 +206,7 @@ public class UpdateBossImpl
             statusCode = c.executeMethod(post);
 
             response = post.getResponseBodyAsString();
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.debug("Unable to get updates", e);
             return;
         } finally {
@@ -254,7 +246,7 @@ public class UpdateBossImpl
     /**
      * Returns null if there is no status report (or it's been ignored), else
      * the string status report
-     *
+     * 
      * 
      */
     public String getUpdateReport() {
@@ -273,11 +265,8 @@ public class UpdateBossImpl
     /**
      * 
      */
-    public void setUpdateMode(int sess, UpdateStatusMode mode)
-        throws SessionException
-    {
-        AuthzSubject subject =
-            SessionManager.getInstance().getSubject(sess);
+    public void setUpdateMode(int sess, UpdateStatusMode mode) throws SessionException {
+        AuthzSubject subject = SessionManager.getInstance().getSubject(sess);
         UpdateStatus status = getOrCreateStatus();
 
         if (!status.getMode().equals(mode))
@@ -323,15 +312,15 @@ public class UpdateBossImpl
 
         public void run() {
             long interval = getCheckInterval();
-            while(true) {
+            while (true) {
                 try {
                     UpdateBossImpl.getOne().fetchReport();
-                } catch(Exception e) {
+                } catch (Exception e) {
                     _log.warn("Error getting update notification", e);
                 }
                 try {
                     Thread.sleep(interval);
-                } catch(InterruptedException e) {
+                } catch (InterruptedException e) {
                     return;
                 }
             }
@@ -343,7 +332,7 @@ public class UpdateBossImpl
                 String res = p.getProperty("hq.updateNotify.interval");
                 if (res != null)
                     return Long.parseLong(res);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 _log.warn("Unable to get notification interval", e);
             }
             return CHECK_INTERVAL;
@@ -351,7 +340,7 @@ public class UpdateBossImpl
     }
 
     public static UpdateBoss getOne() {
-       return Bootstrap.getBean(UpdateBoss.class);
+        return Bootstrap.getBean(UpdateBoss.class);
     }
 
 }
