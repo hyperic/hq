@@ -845,6 +845,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     /**
      * Merge a list of {@link ServiceMergeInfo}s in HQ's appdef model
      */
+    @Transactional
     public void mergeServices(List<ServiceMergeInfo> mergeInfos)
         throws PermissionException, ApplicationException {
         for (ServiceMergeInfo sInfo : mergeInfos) {
