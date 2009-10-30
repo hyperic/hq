@@ -47,8 +47,8 @@ import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
-import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl;
-import org.hyperic.hq.auth.shared.AuthManagerLocal;
+import org.hyperic.hq.auth.server.session.AuthManagerImpl;
+import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
@@ -225,8 +225,8 @@ public abstract class BizappSessionEJB {
         return AgentManagerImpl.getOne();
     }
     
-    public AuthManagerLocal getAuthManager() {
-        return AuthManagerEJBImpl.getOne();
+    public AuthManager getAuthManager() {
+        return AuthManagerImpl.getOne();
     }
 
     public AvailabilityManager getAvailManager() {
