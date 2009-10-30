@@ -15,65 +15,66 @@ import org.hyperic.util.ConfigPropertyException;
  * Local interface for AuthManager.
  */
 public interface AuthManager {
-   /**
-    * Authenticates the user using the given password
-    * @param user The user to authenticate
-    * @param password The password for the user
-    * @return session id that is associated with the user
-    */
-   public int getSessionId( String user,String password ) throws SecurityException, LoginException, ConfigPropertyException, ApplicationException;
+    /**
+     * Authenticates the user using the given password
+     * @param user The user to authenticate
+     * @param password The password for the user
+     * @return session id that is associated with the user
+     */
+    public int getSessionId(String user, String password) throws SecurityException, LoginException,
+        ConfigPropertyException, ApplicationException;
 
-   /**
-    * Get a session ID based on username only
-    * @param user The user to authenticate
-    * @return session id that is associated with the user
-    * @throws ApplicationException if user is not found
-    * @throws LoginException if user account has been disabled
-    */
-   public int getUnauthSessionId( String user ) throws ApplicationException;
+    /**
+     * Get a session ID based on username only
+     * @param user The user to authenticate
+     * @return session id that is associated with the user
+     * @throws ApplicationException if user is not found
+     * @throws LoginException if user account has been disabled
+     */
+    public int getUnauthSessionId(String user) throws ApplicationException;
 
-   /**
-    * Add a user to the internal database
-    * @param subject The subject of the currently logged in user
-    * @param username The username to add
-    * @param password The password for this user
-    */
-   public void addUser( AuthzSubject subject,String username,String password ) ;
+    /**
+     * Add a user to the internal database
+     * @param subject The subject of the currently logged in user
+     * @param username The username to add
+     * @param password The password for this user
+     */
+    public void addUser(AuthzSubject subject, String username, String password);
 
-   /**
-    * Change the password for a user.
-    * @param subject The subject of the currently logged in user
-    * @param username The username whose password will be changed.
-    * @param password The new password for this user
-    */
-   public void changePassword( AuthzSubject subject,String username,String password ) throws PermissionException;
+    /**
+     * Change the password for a user.
+     * @param subject The subject of the currently logged in user
+     * @param username The username whose password will be changed.
+     * @param password The new password for this user
+     */
+    public void changePassword(AuthzSubject subject, String username, String password) throws PermissionException;
 
-   /**
-    * Change the hashed password for a user.
-    * @param subject The subject of the currently logged in user
-    * @param username The username whose password will be changed.
-    * @param password The new password for this user
-    */
-   public void changePasswordHash( AuthzSubject subject,String username,String hash ) throws PermissionException;
+    /**
+     * Change the hashed password for a user.
+     * @param subject The subject of the currently logged in user
+     * @param username The username whose password will be changed.
+     * @param password The new password for this user
+     */
+    public void changePasswordHash(AuthzSubject subject, String username, String hash) throws PermissionException;
 
-   /**
-    * Delete a user from the internal database
-    * @param subject The subject of the currently logged in user
-    * @param username The user to delete
-    */
-   public void deleteUser( AuthzSubject subject,String username ) ;
+    /**
+     * Delete a user from the internal database
+     * @param subject The subject of the currently logged in user
+     * @param username The user to delete
+     */
+    public void deleteUser(AuthzSubject subject, String username);
 
-   /**
-    * Check existence of a user
-    * @param subject The subject of the currently logged in user
-    * @param username The username of the user to get
-    */
-   public boolean isUser( AuthzSubject subject,String username ) ;
+    /**
+     * Check existence of a user
+     * @param subject The subject of the currently logged in user
+     * @param username The username of the user to get
+     */
+    public boolean isUser(AuthzSubject subject, String username);
 
-   /**
-    * Get the principle of a user
-    * @param subject The subject for whom to return the principle
-    */
-   public Principal getPrincipal( AuthzSubject subject ) ;
+    /**
+     * Get the principle of a user
+     * @param subject The subject for whom to return the principle
+     */
+    public Principal getPrincipal(AuthzSubject subject);
 
 }
