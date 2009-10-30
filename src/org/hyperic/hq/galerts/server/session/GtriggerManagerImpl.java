@@ -55,7 +55,7 @@ public class GtriggerManagerImpl implements GtriggerManager {
 
     /**
      * Register a trigger type.
-     *
+     * 
      * @param triggerType Trigger type to register
      * @return the persisted metadata about the trigger type
      */
@@ -65,8 +65,8 @@ public class GtriggerManagerImpl implements GtriggerManager {
         res = gtriggerTypeInfoDao.find(triggerType);
         if (res != null) {
             log.warn("Attempted to register GtriggerType class [" +
-                      triggerType.getClass() + "] but it was already " +
-                      "registered");
+                     triggerType.getClass() + "] but it was already " +
+                     "registered");
             return res;
         }
         res = new GtriggerTypeInfo(triggerType.getClass());
@@ -75,17 +75,16 @@ public class GtriggerManagerImpl implements GtriggerManager {
     }
 
     /**
-     * Unregister a trigger type.  This method will fail if any alert
+     * Unregister a trigger type. This method will fail if any alert
      * definitions are using triggers of this type.
-     *
+     * 
      * @param triggerType Trigger type to unregister
      */
     public void unregisterTriggerType(GtriggerType triggerType) {
         GtriggerTypeInfo info = gtriggerTypeInfoDao.find(triggerType);
 
         if (info == null) {
-            log.warn("Tried to unregister a trigger type which was not " +
-                      "registered");
+            log.warn("Tried to unregister a trigger type which was not registered");
             return;
         }
 
