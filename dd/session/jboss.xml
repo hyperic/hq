@@ -229,11 +229,6 @@
 
 		</session>
 		<session>
-			<ejb-name>GtriggerManager</ejb-name>
-			<local-jndi-name>LocalGtriggerManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>AppdefBoss</ejb-name>
 			<jndi-name>ejb/bizapp/AppdefBoss</jndi-name>
 			<local-jndi-name>LocalAppdefBoss</local-jndi-name>

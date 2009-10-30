@@ -25,46 +25,32 @@
 
 package org.hyperic.hq.galerts.server.session;
 
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
-import org.hyperic.hq.galerts.server.session.GtriggerType;
-import org.hyperic.hq.galerts.shared.GalertManager;
-
-import org.hyperic.hq.galerts.shared.GtriggerManagerLocal;
-import org.hyperic.hq.galerts.shared.GtriggerManagerUtil;
+import org.hyperic.hq.galerts.shared.GtriggerManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @ejb:bean name="GtriggerManager"
- *      jndi-name="ejb/galerts/GtriggerManager"
- *      local-jndi-name="LocalGtriggerManager"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:util generate="physical"
- * @ejb:transaction type="Required"
  */
-public class GtriggerManagerEJBImpl
-    implements SessionBean
-{
-    private final Log _log = LogFactory.getLog(GtriggerManagerEJBImpl.class);
+@Service
+@Transactional
+public class GtriggerManagerImpl implements GtriggerManager {
+    private final Log log = LogFactory.getLog(GtriggerManagerImpl.class);
 
-    private GtriggerTypeInfoDAO _ttypeDAO = Bootstrap.getBean(GtriggerTypeInfoDAO.class);
+    private GtriggerTypeInfoDAO gtriggerTypeInfoDao = Bootstrap.getBean(GtriggerTypeInfoDAO.class);
 
-    public GtriggerManagerEJBImpl() {
-        //_ttypeDAO = new GtriggerTypeInfoDAO(DAOFactory.getDAOFactory());
+    @Autowired
+    public GtriggerManagerImpl(GtriggerTypeInfoDAO gtriggerTypeInfoDao) {
+        this.gtriggerTypeInfoDao = gtriggerTypeInfoDao;
     }
 
     /**
-     * @ejb:interface-method
      */
     public GtriggerTypeInfo findTriggerType(GtriggerType type) {
-        return _ttypeDAO.find(type);
+        return gtriggerTypeInfoDao.find(type);
     }
 
     /**
@@ -72,20 +58,19 @@ public class GtriggerManagerEJBImpl
      *
      * @param triggerType Trigger type to register
      * @return the persisted metadata about the trigger type
-     * @ejb:interface-method
      */
     public GtriggerTypeInfo registerTriggerType(GtriggerType triggerType) {
         GtriggerTypeInfo res;
 
-        res = _ttypeDAO.find(triggerType);
+        res = gtriggerTypeInfoDao.find(triggerType);
         if (res != null) {
-            _log.warn("Attempted to register GtriggerType class [" +
+            log.warn("Attempted to register GtriggerType class [" +
                       triggerType.getClass() + "] but it was already " +
                       "registered");
             return res;
         }
         res = new GtriggerTypeInfo(triggerType.getClass());
-        _ttypeDAO.save(res);
+        gtriggerTypeInfoDao.save(res);
         return res;
     }
 
@@ -94,31 +79,20 @@ public class GtriggerManagerEJBImpl
      * definitions are using triggers of this type.
      *
      * @param triggerType Trigger type to unregister
-     * @ejb:interface-method
      */
     public void unregisterTriggerType(GtriggerType triggerType) {
-        GtriggerTypeInfo info = _ttypeDAO.find(triggerType);
+        GtriggerTypeInfo info = gtriggerTypeInfoDao.find(triggerType);
 
         if (info == null) {
-            _log.warn("Tried to unregister a trigger type which was not " +
+            log.warn("Tried to unregister a trigger type which was not " +
                       "registered");
             return;
         }
 
-        _ttypeDAO.remove(info);
+        gtriggerTypeInfoDao.remove(info);
     }
 
-    public static GtriggerManagerLocal getOne() {
-        try {
-            return GtriggerManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static GtriggerManager getOne() {
+        return Bootstrap.getBean(GtriggerManager.class);
     }
-
-    public void ejbCreate() {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
 }
