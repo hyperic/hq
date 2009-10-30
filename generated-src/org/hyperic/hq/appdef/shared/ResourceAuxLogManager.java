@@ -13,12 +13,12 @@ import org.hyperic.hq.galerts.server.session.GalertDef;
  */
 public interface ResourceAuxLogManager {
 
-   public ResourceAuxLogPojo create( GalertAuxLog log,ResourceAuxLog logInfo ) ;
+    public ResourceAuxLogPojo create(GalertAuxLog log, ResourceAuxLog logInfo);
 
-   public void remove( GalertAuxLog log ) ;
+    public void remove(GalertAuxLog log);
 
-   public ResourceAuxLogPojo find( GalertAuxLog log ) ;
+    public ResourceAuxLogPojo find(GalertAuxLog log);
 
-   public void removeAll( GalertDef def ) ;
+    public void removeAll(GalertDef def);
 
 }
