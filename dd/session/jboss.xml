@@ -33,11 +33,6 @@
 
 		</session>
 		<session>
-			<ejb-name>AuthManager</ejb-name>
-			<local-jndi-name>LocalAuthManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>ControlScheduleManager</ejb-name>
 			<local-jndi-name>LocalControlScheduleManager</local-jndi-name>
 

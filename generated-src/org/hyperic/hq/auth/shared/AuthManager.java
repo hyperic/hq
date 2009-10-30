@@ -3,19 +3,25 @@
  */
 package org.hyperic.hq.auth.shared;
 
+import javax.security.auth.login.LoginException;
+
+import org.hyperic.hq.auth.Principal;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.util.ConfigPropertyException;
+
 /**
  * Local interface for AuthManager.
  */
-public interface AuthManagerLocal
-   extends javax.ejb.EJBLocalObject
-{
+public interface AuthManager {
    /**
     * Authenticates the user using the given password
     * @param user The user to authenticate
     * @param password The password for the user
     * @return session id that is associated with the user
     */
-   public int getSessionId( java.lang.String user,java.lang.String password ) throws java.lang.SecurityException, javax.security.auth.login.LoginException, org.hyperic.util.ConfigPropertyException, org.hyperic.hq.common.ApplicationException;
+   public int getSessionId( String user,String password ) throws SecurityException, LoginException, ConfigPropertyException, ApplicationException;
 
    /**
     * Get a session ID based on username only
@@ -24,7 +30,7 @@ public interface AuthManagerLocal
     * @throws ApplicationException if user is not found
     * @throws LoginException if user account has been disabled
     */
-   public int getUnauthSessionId( java.lang.String user ) throws org.hyperic.hq.common.ApplicationException;
+   public int getUnauthSessionId( String user ) throws ApplicationException;
 
    /**
     * Add a user to the internal database
@@ -32,7 +38,7 @@ public interface AuthManagerLocal
     * @param username The username to add
     * @param password The password for this user
     */
-   public void addUser( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String username,java.lang.String password ) ;
+   public void addUser( AuthzSubject subject,String username,String password ) ;
 
    /**
     * Change the password for a user.
@@ -40,7 +46,7 @@ public interface AuthManagerLocal
     * @param username The username whose password will be changed.
     * @param password The new password for this user
     */
-   public void changePassword( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String username,java.lang.String password ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void changePassword( AuthzSubject subject,String username,String password ) throws PermissionException;
 
    /**
     * Change the hashed password for a user.
@@ -48,26 +54,26 @@ public interface AuthManagerLocal
     * @param username The username whose password will be changed.
     * @param password The new password for this user
     */
-   public void changePasswordHash( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String username,java.lang.String hash ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void changePasswordHash( AuthzSubject subject,String username,String hash ) throws PermissionException;
 
    /**
     * Delete a user from the internal database
     * @param subject The subject of the currently logged in user
     * @param username The user to delete
     */
-   public void deleteUser( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String username ) ;
+   public void deleteUser( AuthzSubject subject,String username ) ;
 
    /**
     * Check existence of a user
     * @param subject The subject of the currently logged in user
     * @param username The username of the user to get
     */
-   public boolean isUser( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String username ) ;
+   public boolean isUser( AuthzSubject subject,String username ) ;
 
    /**
     * Get the principle of a user
     * @param subject The subject for whom to return the principle
     */
-   public org.hyperic.hq.auth.Principal getPrincipal( org.hyperic.hq.authz.server.session.AuthzSubject subject ) ;
+   public Principal getPrincipal( AuthzSubject subject ) ;
 
 }
