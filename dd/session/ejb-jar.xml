@@ -570,19 +570,6 @@
 		<session>
 			<description><![CDATA[]]></description>
 
-			<ejb-name>GtriggerManager</ejb-name>
-
-			<local-home>org.hyperic.hq.galerts.shared.GtriggerManagerLocalHome</local-home>
-			<local>org.hyperic.hq.galerts.shared.GtriggerManagerLocal</local>
-			<ejb-class>org.hyperic.hq.galerts.server.session.GtriggerManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
-			<description><![CDATA[]]></description>
-
 			<ejb-name>AppdefBoss</ejb-name>
 
 			<home>org.hyperic.hq.bizapp.shared.AppdefBossHome</home>
@@ -3769,13 +3756,6 @@
 		<container-transaction>
 			<method>
 				<ejb-name>ReportProcessor</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>GtriggerManager</ejb-name>
 				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>

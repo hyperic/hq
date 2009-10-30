@@ -61,11 +61,11 @@ import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
 import org.hyperic.hq.galerts.server.session.GalertLog;
 import org.hyperic.hq.galerts.server.session.GalertManagerImpl;
-import org.hyperic.hq.galerts.server.session.GtriggerManagerEJBImpl;
+import org.hyperic.hq.galerts.server.session.GtriggerManagerImpl;
 import org.hyperic.hq.galerts.server.session.GtriggerType;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
 import org.hyperic.hq.galerts.shared.GalertManager;
-import org.hyperic.hq.galerts.shared.GtriggerManagerLocal;
+import org.hyperic.hq.galerts.shared.GtriggerManager;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
@@ -106,8 +106,8 @@ public class GalertBossEJBImpl  implements SessionBean
         return Bootstrap.getBean(GalertManager.class);
     }
 
-    public GtriggerManagerLocal getTriggerMan() {
-        return  Bootstrap.getBean(GtriggerManagerLocal.class);
+    public GtriggerManager getTriggerMan() {
+        return  Bootstrap.getBean(GtriggerManager.class);
     }
 
 
