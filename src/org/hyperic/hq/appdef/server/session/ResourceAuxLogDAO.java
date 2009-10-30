@@ -27,14 +27,14 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class ResourceAuxLogDAO extends HibernateDAO {
+public class ResourceAuxLogDAO extends HibernateDAO<ResourceAuxLogPojo> {
     @Autowired
     public ResourceAuxLogDAO(SessionFactory f) {
         super(ResourceAuxLogPojo.class, f);
