@@ -47,21 +47,22 @@ public class GroupUtil {
     /** Get the members of a compatible group. This method will 
      *  complain if the group is not a compatible group.
      */
-    public static List getCompatGroupMembers(AuthzSubject subject,
+    public static List<AppdefEntityID> getCompatGroupMembers(AuthzSubject subject,
                                              AppdefEntityID entity, 
                                              int[] orderSpec) 
         throws AppdefEntityNotFoundException, PermissionException, 
                GroupNotCompatibleException {
         return GroupUtil.getCompatGroupMembers(subject,entity,orderSpec,null);
     }
-    public static List getCompatGroupMembers(AuthzSubject subject,
+    
+    public static List<AppdefEntityID> getCompatGroupMembers(AuthzSubject subject,
                                              AppdefEntityID entity,
                                              int[] orderSpec, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
                GroupNotCompatibleException {
-        List retVal;
+        List<AppdefEntityID> retVal;
         AppdefGroupValue agv;
-        Comparator comparator;
+        Comparator<AppdefEntityID> comparator;
 
         agv = GroupUtil.getGroup(subject,entity,pc);
         if ( !agv.isGroupCompat() ) {
@@ -69,7 +70,7 @@ public class GroupUtil {
         }
 
         if (orderSpec != null) { 
-            comparator = (Comparator) new AppdefCompatGrpComparator(orderSpec);
+            comparator = new AppdefCompatGrpComparator(orderSpec);
         } else {
             comparator = null;
         }
@@ -77,7 +78,7 @@ public class GroupUtil {
         retVal = agv.getAppdefGroupEntries(comparator);
 
         if (retVal == null)
-            retVal = new ArrayList();
+            retVal = new ArrayList<AppdefEntityID>();
 
         return retVal;
     }

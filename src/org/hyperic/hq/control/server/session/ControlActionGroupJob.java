@@ -46,7 +46,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.shared.ControlActionTimeoutException;
 import org.hyperic.hq.control.shared.ControlConstants;
-import org.hyperic.hq.control.shared.ControlManagerLocal;
+import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
 import org.hyperic.hq.events.EventConstants;
@@ -304,7 +304,7 @@ public class ControlActionGroupJob extends ControlJob {
      */
     private int getTimeout(AuthzSubject subject, AppdefEntityID id)
     {
-        ControlManagerLocal cMan = ControlManagerEJBImpl.getOne();
+        ControlManager cMan = ControlManagerImpl.getOne();
 
         int timeout;
         try {

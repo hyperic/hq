@@ -63,15 +63,15 @@ public abstract class ControlPlugin extends GenericPlugin {
     public ControlPlugin() {
     }
 
-    public List getActions() {
-        List actions = null;
+    public List<String> getActions() {
+        List<String> actions = null;
         if (this.data != null) {
             actions = this.data.getControlActions(getTypeInfo());
         }
         if (actions == null) {
             getLog().debug(getName() +
                            " does not specify any control actions");
-            actions = new ArrayList();
+            actions = new ArrayList<String>();
         }
         return actions;
     }

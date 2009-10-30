@@ -5,8 +5,7 @@
 	xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
-		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd"
-		default-lazy-init="true">
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
 <bean class="org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.AppdefManagerEJBImpl" factory-method="getOne"/>
@@ -43,7 +42,6 @@
 <bean class="org.hyperic.hq.common.server.session.AuditManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.common.server.session.TransactionManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.control.server.session.ControlManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.events.server.session.EventLogManagerEJBImpl" factory-method="getOne"/>

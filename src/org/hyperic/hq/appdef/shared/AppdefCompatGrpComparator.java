@@ -34,7 +34,7 @@ import java.io.Serializable;
 * is only intended for use within a compatible group where type is
 * consistent.
 */
-public class AppdefCompatGrpComparator implements Comparator, Serializable {
+public class AppdefCompatGrpComparator implements Comparator<AppdefEntityID>, Serializable {
 
     private int[] orderSpec;
 
@@ -49,13 +49,7 @@ public class AppdefCompatGrpComparator implements Comparator, Serializable {
    * @param instance of AppdefEntityID number 2
    * @return -1,0,1 for less than, equals and greater than
    */
-  public int compare (Object o1, Object o2) {
-    if ( (!(o1 instanceof AppdefEntityID)) ||
-         (!(o2 instanceof AppdefEntityID)) ){
-      throw new IllegalArgumentException (
-         "invalid AppdefEntityID arguments");
-    }
-
+  public int compare (AppdefEntityID o1, AppdefEntityID o2) {
     int o1Int = ((AppdefEntityID)o1).getID();
     int o2Int = ((AppdefEntityID)o2).getID();
     int index1 = findIndex( o1Int );

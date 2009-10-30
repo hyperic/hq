@@ -75,9 +75,9 @@ import org.hyperic.hq.bizapp.shared.ProductBossUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
-import org.hyperic.hq.control.server.session.ControlManagerEJBImpl;
+import org.hyperic.hq.control.server.session.ControlManagerImpl;
 import org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl;
-import org.hyperic.hq.control.shared.ControlManagerLocal;
+import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl;
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
@@ -241,8 +241,8 @@ public abstract class BizappSessionEJB {
         return TrackerManagerEJBImpl.getOne();
     }
 
-    public ControlManagerLocal getControlManager() {
-        return ControlManagerEJBImpl.getOne();
+    public ControlManager getControlManager() {
+        return ControlManagerImpl.getOne();
     }
 
     public ControlScheduleManagerLocal getControlScheduleManager() {

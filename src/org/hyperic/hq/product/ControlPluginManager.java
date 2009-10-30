@@ -75,13 +75,13 @@ public class ControlPluginManager extends PluginManager {
         updatePlugin(plugin, config);
     }
 
-    public List getActions(String name) 
+    public List<String> getActions(String name) 
         throws PluginNotFoundException
     { 
         ControlPlugin plugin = (ControlPlugin)getPlugin(name);
         
         //clone the plugin action list before adding to it
-        List actions = new ArrayList(plugin.getActions());
+        List<String> actions = new ArrayList<String>(plugin.getActions());
 
         // Add any builtin plugin control commands
         for (int i = 0; i < BUILTIN_CMDS.length; i++) {
