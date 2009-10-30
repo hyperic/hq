@@ -1,6 +1,6 @@
 package org.hyperic.hq.hqu.rendit.metaclass
 
-import org.hyperic.hq.auth.server.session.AuthManagerEJBImpl as AuthMan
+import org.hyperic.hq.auth.server.session.AuthManagerImpl as AuthMan
 import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.authz.shared.PermissionManagerFactory
 import org.hyperic.hq.authz.server.session.AuthzSubject
