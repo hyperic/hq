@@ -25,81 +25,54 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.galerts.ResourceAuxLog;
-import org.hyperic.hq.appdef.shared.ResourceAuxLogManagerLocal;
-import org.hyperic.hq.appdef.shared.ResourceAuxLogManagerUtil;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.appdef.shared.ResourceAuxLogManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
-import org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @ejb:bean name="ResourceAuxLogManager"
- *      jndi-name="ejb/common/ResourceAuxLogManager"
- *      local-jndi-name="LocalResourceAuxLogManager"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:util generate="physical"
- * @ejb:transaction type="Required"
  */
-public class ResourceAuxLogManagerEJBImpl
-    implements SessionBean
-{
-    public static ResourceAuxLogManagerLocal getOne() {
-        try {
-            return ResourceAuxLogManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+@org.springframework.stereotype.Service
+@Transactional
+public class ResourceAuxLogManagerImpl implements ResourceAuxLogManager {
+    private ResourceAuxLogDAO resourceAuxLogDao;
+
+    @Autowired
+    public ResourceAuxLogManagerImpl(ResourceAuxLogDAO resourceAuxLogDao) {
+        this.resourceAuxLogDao = resourceAuxLogDao;
     }
 
-    private ResourceAuxLogDAO resourceAuxLogDAO = Bootstrap.getBean(ResourceAuxLogDAO.class);
-
-    private ResourceAuxLogDAO getDAO() {
-        return resourceAuxLogDAO;
+    public static ResourceAuxLogManager getOne() {
+        return Bootstrap.getBean(ResourceAuxLogManager.class);
     }
 
     /**
-     * @ejb:interface-method
      */
     public ResourceAuxLogPojo create(GalertAuxLog log, ResourceAuxLog logInfo) {
-        ResourceAuxLogPojo resourceLog =
-            new ResourceAuxLogPojo(log, logInfo, log.getAlert().getAlertDef());
+        ResourceAuxLogPojo resourceLog = new ResourceAuxLogPojo(log, logInfo, log.getAlert().getAlertDef());
 
-        getDAO().save(resourceLog);
+        resourceAuxLogDao.save(resourceLog);
         return resourceLog;
     }
 
     /**
-     * @ejb:interface-method
      */
     public void remove(GalertAuxLog log) {
-        getDAO().remove(getDAO().find(log));
+        resourceAuxLogDao.remove(resourceAuxLogDao.find(log));
     }
 
     /**
-     * @ejb:interface-method
      */
     public ResourceAuxLogPojo find(GalertAuxLog log) {
-        return getDAO().find(log);
+        return resourceAuxLogDao.find(log);
     }
 
     /**
-     * @ejb:interface-method
      */
     public void removeAll(GalertDef def) {
-        getDAO().removeAll(def);
+        resourceAuxLogDao.removeAll(def);
     }
-
-    public void ejbCreate() { }
-    public void ejbRemove() { }
-    public void ejbActivate() { }
-    public void ejbPassivate() { }
-    public void setSessionContext(SessionContext c) {}
 }

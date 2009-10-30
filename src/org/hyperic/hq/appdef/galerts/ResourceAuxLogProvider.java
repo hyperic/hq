@@ -4,7 +4,7 @@ import java.util.ResourceBundle;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.ResourceAuxLogManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ResourceAuxLogManagerImpl;
 import org.hyperic.hq.appdef.server.session.ResourceAuxLogPojo;
 import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
@@ -35,7 +35,7 @@ public class ResourceAuxLogProvider
     public AlertAuxLog load(int auxLogId, long timestamp, String desc) {
         GalertAuxLog gAuxLog = findGAuxLog(auxLogId);
         ResourceAuxLogPojo auxLog = 
-            ResourceAuxLogManagerEJBImpl.getOne().find(gAuxLog);
+            ResourceAuxLogManagerImpl.getOne().find(gAuxLog);
         
         return new ResourceAuxLog(gAuxLog, auxLog);
     }
@@ -44,10 +44,10 @@ public class ResourceAuxLogProvider
         ResourceAuxLog logInfo = (ResourceAuxLog)log;
         GalertAuxLog gAuxLog = findGAuxLog(auxLogId);
         
-        ResourceAuxLogManagerEJBImpl.getOne().create(gAuxLog, logInfo);
+        ResourceAuxLogManagerImpl.getOne().create(gAuxLog, logInfo);
     }
 
     public void deleteAll(GalertDef def) {
-        ResourceAuxLogManagerEJBImpl.getOne().removeAll(def);
+        ResourceAuxLogManagerImpl.getOne().removeAll(def);
     }
 }

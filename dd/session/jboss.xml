@@ -54,11 +54,6 @@
 
 		</session>
 		<session>
-			<ejb-name>ResourceAuxLogManager</ejb-name>
-			<local-jndi-name>LocalResourceAuxLogManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>ConfigManager</ejb-name>
 			<local-jndi-name>LocalConfigManager</local-jndi-name>
 

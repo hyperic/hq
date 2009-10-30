@@ -15,7 +15,6 @@
 <bean class="org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.appdef.server.session.ResourceAuxLogManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.VirtualManagerEJBImpl" factory-method="getOne"/>

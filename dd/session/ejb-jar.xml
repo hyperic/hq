@@ -119,19 +119,6 @@
 		<session>
 			<description><![CDATA[]]></description>
 
-			<ejb-name>ResourceAuxLogManager</ejb-name>
-
-			<local-home>org.hyperic.hq.appdef.shared.ResourceAuxLogManagerLocalHome</local-home>
-			<local>org.hyperic.hq.appdef.shared.ResourceAuxLogManagerLocal</local>
-			<ejb-class>org.hyperic.hq.appdef.server.session.ResourceAuxLogManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
-			<description><![CDATA[]]></description>
-
 			<ejb-name>ConfigManager</ejb-name>
 
 			<local-home>org.hyperic.hq.appdef.shared.ConfigManagerLocalHome</local-home>
@@ -1295,13 +1282,6 @@
 		<container-transaction>
 			<method>
 				<ejb-name>SchedulerBoss</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>ResourceAuxLogManager</ejb-name>
 				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>

@@ -27,21 +27,22 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class ResourceAuxLogDAO extends HibernateDAO {
+public class ResourceAuxLogDAO
+    extends HibernateDAO<ResourceAuxLogPojo> {
     @Autowired
     public ResourceAuxLogDAO(SessionFactory f) {
         super(ResourceAuxLogPojo.class, f);
     }
 
     ResourceAuxLogPojo findById(Integer id) {
-        return (ResourceAuxLogPojo)super.findById(id);
+        return (ResourceAuxLogPojo) super.findById(id);
     }
 
     void save(ResourceAuxLogPojo log) {
@@ -53,9 +54,8 @@ public class ResourceAuxLogDAO extends HibernateDAO {
     }
 
     ResourceAuxLogPojo find(GalertAuxLog log) {
-        return (ResourceAuxLogPojo) createCriteria()
-            .add(Expression.eq("auxLog", log))
-            .uniqueResult();
+        return (ResourceAuxLogPojo) createCriteria().add(Expression.eq("auxLog", log))
+                                                    .uniqueResult();
     }
 
     void removeAll(GalertDef def) {
