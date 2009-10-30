@@ -85,7 +85,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** The server-side control system.
+/**
+ * The server-side control system.
  */
 @Service
 @Transactional
@@ -108,9 +109,12 @@ public class ControlManagerImpl implements ControlManager {
     private ControlPluginManager controlPluginManager;
 
     @Autowired
-    public ControlManagerImpl(ProductManager productManager, ControlScheduleManagerLocal controlScheduleManager, ControlHistoryDAO controlHistoryDao, 
-                              ResourceTypeDAO resourceTypeDao, ConfigManagerLocal configManager, PlatformManagerLocal platformManager,
-                              AuthzSubjectManagerLocal authzSubjectManager, ServerManagerLocal serverManager, ServiceManagerLocal serviceManager,
+    public ControlManagerImpl(ProductManager productManager, ControlScheduleManagerLocal controlScheduleManager,
+                              ControlHistoryDAO controlHistoryDao,
+                              ResourceTypeDAO resourceTypeDao, ConfigManagerLocal configManager,
+                              PlatformManagerLocal platformManager,
+                              AuthzSubjectManagerLocal authzSubjectManager, ServerManagerLocal serverManager,
+                              ServiceManagerLocal serviceManager,
                               ApplicationManagerLocal applicationManager) {
         this.productManager = productManager;
         this.controlScheduleManager = controlScheduleManager;
@@ -123,12 +127,12 @@ public class ControlManagerImpl implements ControlManager {
         this.serviceManager = serviceManager;
         this.applicationManager = applicationManager;
     }
-    
+
     @PostConstruct
     public void createControlPluginManager() {
         // Get reference to the control plugin manager
         try {
-            controlPluginManager = (ControlPluginManager)productManager.getPluginManager(ProductPlugin.TYPE_CONTROL);
+            controlPluginManager = (ControlPluginManager) productManager.getPluginManager(ProductPlugin.TYPE_CONTROL);
         } catch (Exception e) {
             this.log.error("Unable to get plugin manager", e);
         }
@@ -139,8 +143,7 @@ public class ControlManagerImpl implements ControlManager {
      **/
     public void configureControlPlugin(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException, PluginException, ConfigFetchException,
-               AppdefEntityNotFoundException, AgentNotFoundException
-    {
+        AppdefEntityNotFoundException, AgentNotFoundException {
         // authz check
         checkModifyPermission(subject, id);
 
@@ -151,13 +154,11 @@ public class ControlManagerImpl implements ControlManager {
 
         try {
             pluginType = platformManager.getPlatformPluginName(id);
-            mergedResponse =
-                configManager.getMergedConfigResponse(subject,
-                                             ProductPlugin.TYPE_CONTROL,
-                                             id, true);
+            mergedResponse = configManager.getMergedConfigResponse(subject,
+                                                                   ProductPlugin.TYPE_CONTROL,
+                                                                   id, true);
 
-            ControlCommandsClient client =
-                ControlCommandsClientFactory.getInstance().getClient(id);
+            ControlCommandsClient client = ControlCommandsClientFactory.getInstance().getClient(id);
             client.controlPluginAdd(pluginName, pluginType, mergedResponse);
         } catch (EncodingException e) {
             throw new PluginException("Unable to decode config", e);
@@ -173,19 +174,19 @@ public class ControlManagerImpl implements ControlManager {
      */
     public void doAction(AuthzSubject subject, AppdefEntityID id,
                          String action, String args)
-        throws PluginException, PermissionException
-    {
+        throws PluginException, PermissionException {
         // This method doesn't support groups.
-        if (id.isGroup())
-            throw new IllegalArgumentException ("Cannot perform single "+
-                                                "action on a group.");
-    
+        if (id.isGroup()) {
+            throw new IllegalArgumentException("Cannot perform single " +
+                                               "action on a group.");
+        }
+
         checkControlEnabled(subject, id);
         checkControlPermission(subject, id);
-    
+
         controlScheduleManager.doSingleAction(id, subject, action, args, null);
     }
-    
+
     /**
      * Execute a single control action on a given entity.
      */
@@ -200,18 +201,18 @@ public class ControlManagerImpl implements ControlManager {
      */
     public void doAction(AuthzSubject subject, AppdefEntityID id,
                          String action, ScheduleValue schedule)
-        throws PluginException, PermissionException, SchedulerException
-    {
+        throws PluginException, PermissionException, SchedulerException {
         // This method doesn't support groups.
-        if (id.isGroup())
-            throw new IllegalArgumentException ("Cannot perform single "+
-                                                "action on a group.");
+        if (id.isGroup()) {
+            throw new IllegalArgumentException("Cannot perform single " +
+                                               "action on a group.");
+        }
 
         checkControlEnabled(subject, id);
         checkControlPermission(subject, id);
 
         controlScheduleManager.doScheduledAction(id, subject, action,
-                                                  schedule, null);
+                                                 schedule, null);
     }
 
     /**
@@ -221,11 +222,10 @@ public class ControlManagerImpl implements ControlManager {
                               AppdefEntityID id, String action,
                               String args, int[] order)
         throws PluginException, PermissionException,
-               AppdefEntityNotFoundException, GroupNotCompatibleException
-    {
-        List<AppdefEntityID> groupMembers  = GroupUtil.getCompatGroupMembers(subject, id,
-                                                             order,
-                                                             PageControl.PAGE_ALL);
+               AppdefEntityNotFoundException, GroupNotCompatibleException {
+        List<AppdefEntityID> groupMembers = GroupUtil.getCompatGroupMembers(subject, id,
+                                                                            order,
+                                                                            PageControl.PAGE_ALL);
 
         // For each entity in the list, sanity check config and permissions
         for (AppdefEntityID entity : groupMembers) {
@@ -234,23 +234,18 @@ public class ControlManagerImpl implements ControlManager {
         }
 
         controlScheduleManager.doSingleAction(id, subject, action,
-                                               args, order);
+                                              args, order);
     }
 
     /**
      * Schedule a single control action for a group of given entities.
      * @throws SchedulerException
      */
-    public void doGroupAction(AuthzSubject subject,
-                              AppdefEntityID id,
-                              String action, int[] order,
-                              ScheduleValue schedule)
+    public void doGroupAction(AuthzSubject subject, AppdefEntityID id,
+                              String action, int[] order, ScheduleValue schedule)
         throws PluginException, PermissionException, SchedulerException,
-               GroupNotCompatibleException, AppdefEntityNotFoundException
-    {
-        List<AppdefEntityID> groupMembers = GroupUtil.getCompatGroupMembers(subject, id,
-                                                            order,
-                                                            PageControl.PAGE_ALL);
+        GroupNotCompatibleException, AppdefEntityNotFoundException {
+        List<AppdefEntityID> groupMembers = GroupUtil.getCompatGroupMembers(subject, id, order, PageControl.PAGE_ALL);
 
         // For each entity in the list, sanity check config and permissions
         for (AppdefEntityID entity : groupMembers) {
@@ -258,8 +253,7 @@ public class ControlManagerImpl implements ControlManager {
             checkControlPermission(subject, entity);
         }
 
-        controlScheduleManager.doScheduledAction(id, subject, action,
-                                                  schedule, order);
+        controlScheduleManager.doScheduledAction(id, subject, action, schedule, order);
     }
 
     /**
@@ -267,14 +261,10 @@ public class ControlManagerImpl implements ControlManager {
      * ControlPluginManager
      */
     public List<String> getActions(AuthzSubject subject, AppdefEntityID id)
-        throws PermissionException, PluginNotFoundException, 
-               AppdefEntityNotFoundException, GroupNotCompatibleException
-    {
+        throws PermissionException, PluginNotFoundException,
+        AppdefEntityNotFoundException, GroupNotCompatibleException {
         if (id.isGroup()) {
-            List<AppdefEntityID> groupMembers  = 
-                GroupUtil.getCompatGroupMembers(subject, id,
-                                                null, 
-                                                PageControl.PAGE_ALL);
+            List<AppdefEntityID> groupMembers = GroupUtil.getCompatGroupMembers(subject, id, null, PageControl.PAGE_ALL);
 
             // For each entity in the list, sanity check permissions
             for (AppdefEntityID entity : groupMembers) {
@@ -283,7 +273,7 @@ public class ControlManagerImpl implements ControlManager {
         } else {
             checkControlPermission(subject, id);
         }
-        
+
         String pluginName = platformManager.getPlatformPluginName(id);
         return controlPluginManager.getActions(pluginName);
     }
@@ -306,11 +296,10 @@ public class ControlManagerImpl implements ControlManager {
      */
     public boolean isGroupControlEnabled(AuthzSubject subject,
                                          AppdefEntityID id)
-        throws AppdefEntityNotFoundException, PermissionException
-    {
+        throws AppdefEntityNotFoundException, PermissionException {
         if (!id.isGroup()) {
-            throw new IllegalArgumentException ("Expecting entity of type "+
-                                                "group.");
+            throw new IllegalArgumentException("Expecting entity of type " +
+                                               "group.");
         }
 
         List<AppdefEntityID> members;
@@ -326,12 +315,12 @@ public class ControlManagerImpl implements ControlManager {
             return false;
         }
 
-       for (AppdefEntityID member : members) {
+        for (AppdefEntityID member : members) {
             try {
                 checkControlEnabled(subject, member);
                 return true;
             } catch (PluginException e) {
-                //continue
+                // continue
             }
         }
         return false;
@@ -369,8 +358,7 @@ public class ControlManagerImpl implements ControlManager {
                 }
 
                 checkControlPermission(subject, (AppdefEntityID) members.get(0));
-            }
-            else {
+            } else {
                 checkControlPermission(subject, id);
             }
             controlPluginManager.getPlugin(resType);
@@ -404,8 +392,7 @@ public class ControlManagerImpl implements ControlManager {
      * Check if an entity has been enabled for control
      */
     public void checkControlEnabled(AuthzSubject subject, AppdefEntityID id)
-        throws PluginException
-    {
+        throws PluginException {
         ConfigResponseDB config;
 
         try {
@@ -425,12 +412,8 @@ public class ControlManagerImpl implements ControlManager {
      */
     public ConfigResponse getConfigResponse(AuthzSubject subject,
                                             AppdefEntityID id)
-        throws PluginException
-    {
+        throws PluginException {
         ConfigResponseDB config;
-        ConfigResponse configResponse;
-        byte[] controlResponse;
-
         try {
             config = configManager.getConfigResponse(id);
         } catch (Exception e) {
@@ -442,8 +425,8 @@ public class ControlManagerImpl implements ControlManager {
                                       "configured for " + id);
         }
 
-        controlResponse = config.getControlResponse();
-
+        byte[] controlResponse = config.getControlResponse();
+        ConfigResponse configResponse;
         try {
             configResponse = ConfigResponse.decode(controlResponse);
         } catch (Exception e) {
@@ -453,35 +436,32 @@ public class ControlManagerImpl implements ControlManager {
         return configResponse;
     }
 
-
     // Remote EJB methods for use by agents.
 
     /**
-     * Send an agent a plugin configuration.  This is needed when agents
+     * Send an agent a plugin configuration. This is needed when agents
      * restart, since they do not persist control plugin configuration.
-     *
+     * 
      * @param pluginName Name of the plugin to get the config for
-     * @param merge      If true, merge the product and control config data
+     * @param merge If true, merge the product and control config data
      */
     public byte[] getPluginConfiguration(String pluginName, boolean merge)
-        throws PluginException
-    {
+        throws PluginException {
         try {
             AppdefEntityID id = new AppdefEntityID(pluginName);
 
             AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
 
-            ConfigResponse config = configManager.
-                getMergedConfigResponse(overlord,
-                                        ProductPlugin.TYPE_CONTROL,
-                                        id, merge);
+            ConfigResponse config = configManager.getMergedConfigResponse(overlord,
+                                                                          ProductPlugin.TYPE_CONTROL,
+                                                                          id, merge);
 
             return config.encode();
         } catch (Exception e) {
             // XXX: Could be a bit more specific here when catching
-            //      exceptions, but ideally this should always
-            //      succeed since the agent knows when to pull the
-            //      config.
+            // exceptions, but ideally this should always
+            // succeed since the agent knows when to pull the
+            // config.
             throw new PluginException("Unable to get plugin configuration: " +
                                       e.getMessage());
         }
@@ -525,37 +505,37 @@ public class ControlManagerImpl implements ControlManager {
 
         // Send a control event
         ControlEvent event =
-            new ControlEvent(cLocal.getSubject(),
-                             cLocal.getEntityType().intValue(),
-                             cLocal.getEntityId(),
-                             cLocal.getAction(),
-                             cLocal.getScheduled().booleanValue(),
-                             cLocal.getDateScheduled(),
-                             status);
+                             new ControlEvent(cLocal.getSubject(),
+                                              cLocal.getEntityType().intValue(),
+                                              cLocal.getEntityId(),
+                                              cLocal.getAction(),
+                                              cLocal.getScheduled().booleanValue(),
+                                              cLocal.getDateScheduled(),
+                                              status);
         event.setMessage(msg);
         Messenger sender = new Messenger();
         sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
     }
 
-   /**
-    * Accept an array of appdef entity Ids and verify control permission
-    * on each entity for specified subject. Return only the set of entities
-    * that have authorization.
-    *
-    * @return    List of entities subject is authz to control
-    *            NOTE: Returns an empty list when no resources are found.
-    */
+    /**
+     * Accept an array of appdef entity Ids and verify control permission
+     * on each entity for specified subject. Return only the set of entities
+     * that have authorization.
+     * 
+     * @return List of entities subject is authz to control
+     *         NOTE: Returns an empty list when no resources are found.
+     */
     public List<AppdefEntityID> batchCheckControlPermissions(AuthzSubject caller,
-                                             AppdefEntityID[] entities)
+                                                             AppdefEntityID[] entities)
         throws AppdefEntityNotFoundException, PermissionException {
-        return doBatchCheckControlPermissions(caller,entities);
+        return doBatchCheckControlPermissions(caller, entities);
     }
 
-    protected List<AppdefEntityID> doBatchCheckControlPermissions (AuthzSubject caller,
-                                                   AppdefEntityID[] entities)
+    protected List<AppdefEntityID> doBatchCheckControlPermissions(AuthzSubject caller,
+                                                                  AppdefEntityID[] entities)
         throws AppdefEntityNotFoundException, PermissionException {
         List<ResourceValue> resList = new ArrayList<ResourceValue>();
-        List<String> opList = new ArrayList<String>();;
+        List<String> opList = new ArrayList<String>();
         List<AppdefEntityID> retVal = new ArrayList<AppdefEntityID>();
         ResourceValue[] resArr;
         String[] opArr;
@@ -579,19 +559,19 @@ public class ControlManagerImpl implements ControlManager {
             ResourceValue rv = new ResourceValue();
             rv.setInstanceId(entity.getId());
             rv.setResourceType(resourceTypeDao.findByName(
-                AppdefUtil.appdefTypeIdToAuthzTypeStr(entity.getType())));
+                                              AppdefUtil.appdefTypeIdToAuthzTypeStr(entity.getType())));
             resList.add(rv);
         }
         if (resList.size() > 0) {
             opArr = (String[]) opList.toArray(new String[0]);
-            resArr= (ResourceValue[]) resList.toArray(new ResourceValue[0]);
+            resArr = (ResourceValue[]) resList.toArray(new ResourceValue[0]);
 
             // fetch authz resources and add to return list
             try {
                 PermissionManager pm = PermissionManagerFactory.getInstance();
                 Resource[] authz =
-                    pm.findOperationScopeBySubjectBatch( caller, resArr, opArr);
-                for (int x=0;x<authz.length;x++) {
+                                   pm.findOperationScopeBySubjectBatch(caller, resArr, opArr);
+                for (int x = 0; x < authz.length; x++) {
                     retVal.add(new AppdefEntityID(authz[x]));
                 }
             } catch (FinderException e) {
@@ -609,10 +589,9 @@ public class ControlManagerImpl implements ControlManager {
      */
     protected void checkModifyPermission(AuthzSubject caller,
                                          AppdefEntityID id)
-        throws PermissionException
-    {
+        throws PermissionException {
         int type = id.getType();
-        switch(type) {
+        switch (type) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 platformManager.checkModifyPermission(caller, id);
                 return;
@@ -633,10 +612,9 @@ public class ControlManagerImpl implements ControlManager {
     /** Check control permission for an appdef entity */
     protected void checkControlPermission(AuthzSubject caller,
                                           AppdefEntityID id)
-        throws PermissionException
-    {
+        throws PermissionException {
         int type = id.getType();
-        switch(type) {
+        switch (type) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 platformManager.checkControlPermission(caller, id);
                 return;
@@ -658,17 +636,17 @@ public class ControlManagerImpl implements ControlManager {
     // Groups are fetched and appropriate type is returned.
     private String getControlPermissionByType(AppdefEntityID id) {
         switch (id.getType()) {
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            return AuthzConstants.platformOpControlPlatform;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            return AuthzConstants.serverOpControlServer;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            return AuthzConstants.serviceOpControlService;
-        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-            return AuthzConstants.appOpControlApplication;
-        default:
-            throw new IllegalArgumentException("Invalid appdef type:" +
-                                               id.getType());
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                return AuthzConstants.platformOpControlPlatform;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                return AuthzConstants.serverOpControlServer;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                return AuthzConstants.serviceOpControlService;
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                return AuthzConstants.appOpControlApplication;
+            default:
+                throw new IllegalArgumentException("Invalid appdef type:" +
+                                                   id.getType());
         }
     }
 
