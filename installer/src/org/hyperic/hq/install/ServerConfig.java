@@ -388,7 +388,7 @@ public class ServerConfig extends BaseConfig {
                                            dbChoiceStr),
                         "jdbc:mysql://localhost:3306/" + PRODUCT +
                         //HHQ-3236
-                        "?connectTimeout=60000&amp;socketTimeout=60000"));
+                        "?connectTimeout=60000&amp;socketTimeout=300000"));
                 schema.addOption(new HiddenConfigOption(
                         "server.database-driver", "com.mysql.jdbc.Driver"));
                 schema.addOption(new HiddenConfigOption(
