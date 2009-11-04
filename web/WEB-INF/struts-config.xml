@@ -936,6 +936,39 @@
               <forward name="success" path="/resource/platform/monitor/Config.do?mode=configure"/> 
       </action>
            
+     <!-- Platform Control Actions -->
+     <action path="/resource/platform/control/RemoveHistory"
+             type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+             name="RemoveControlForm"
+             scope="request"
+             input="/resource/platform/Control.do?mode=history">
+        	<forward name="failure" path="/resource/platform/Control.do?mode=history" redirect="true" />
+        	<forward name="success" path="/resource/platform/Control.do?mode=history" redirect="true" />
+     </action>
+
+     <action path="/resource/platform/control/RemoveCurrentStatus"
+             type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+             name="RemoveControlForm"
+             scope="request"
+             input="/resource/platform/Control.do?mode=view">
+     	<forward name="failure" path="/resource/platform/Control.do?mode=view" redirect="true" />
+        <forward name="success" path="/resource/platform/Control.do?mode=view" redirect="true" />
+     </action>
+     
+     <!-- resource service control. this reuses the forms, action classes, and
+           jsp's for server control, it just makes them available at different
+           urls.  -->
+     <action path="/resource/platform/Control"
+             forward=".resource.platform.control.layout">
+     </action>
+      
+     <action path="/resource/platform/PlatformController" 
+             parameter="mode"
+             input="/resource/platform/Control.do"
+             type="org.hyperic.hq.ui.action.resource.platform.control.PlatformControllerAction" >
+     	<set-property property="title" value="Control"/>
+     </action>
+     
       <!-- / -->
       
       <!-- server monitoring actions -->      

@@ -557,7 +557,7 @@ function addRow() {
     emailDiv.setAttribute('class', 'emailDiv');
     emailDiv.setAttribute('id', 'emailinputDiv');
     dojo11.byId('emailinputDiv').style.display = 'none';
-    dojo11.byId('emailinputDiv').innerHTML = "email addresses (comma separated):<br><textarea rows=2 cols=20 id=emailinput name=emailinput onMouseOut=checkEmail();copyOthersEmail(this);></textarea>";
+    dojo11.byId('emailinputDiv').innerHTML = "email addresses (comma separated):<br><textarea rows='2' cols='20' id='emailinput' name='emailinput' onBlur='checkEmail();copyOthersEmail(this);'></textarea>";
 
     td4.appendChild(sysDiv);
     sysDiv.setAttribute('class', 'escInput');
@@ -1042,31 +1042,53 @@ function checkEmail() {
     var emailTextArea = dojo11.byId('emailinput');
     var userListCheck = dojo11.byId('userListDisplay');
     var emailAdds = emailTextArea.value;
-    var illegalChars = /[\(\)\<\>\;\:\\\/\"\'\[\]]/;
-
+    var isEmailAddressesValid = false;
+    
     if (selActionTypeEsc == "NoOp" || selActionTypeEsc == "Syslog" || selActionTypeEsc == "Select" || selActionTypeEsc == "SNMP") {
         return true;
     } else
+    	// first strip the whitespace
+    	var emailAddressesWithWhiteSpaceStripped = emailAdds.split(/\s+/);
+    	var emailAddressCandidates = new Array();
+    	
+    	// now from that list, split by comma to get raw email candidates
+    	for (var x = 0; x < emailAddressesWithWhiteSpaceStripped.length; x++) {
+    	    var emailAddressesWithCommaStripped = emailAddressesWithWhiteSpaceStripped[x].split(/,+/);
 
-            <%--
-           var separatedEmails = emailAdds.split(',');
-            for (i = 0; i < separatedEmails.length; i++) {
-         
-           if(!((separatedEmails[i].indexOf(".") > 2) && (separatedEmails[i].indexOf("@") > 0))) {
-            dojo11.byId('example').style.display= '';
-            dojo11.byId('example').setAttribute((document.all ? 'className' : 'class'), "ErrorBlock");
-            dojo11.byId('okCheck').innerHTML = '<html:img page="/images/tt_error.gif" height="9" width="9" border="0" alt=""/>';
-            dojo11.byId('escMsg').innerHTML ='<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressFormat"/>';
-            return false;
-                }
-            }
-            --%>
+    		for (var y = 0; y < emailAddressesWithCommaStripped.length; y++) {
+    			if (emailAddressesWithCommaStripped[y].length > 0) {
+    				emailAddressCandidates = emailAddressCandidates.concat(emailAddressesWithCommaStripped[y]);
+    			}
+    		}
+    	}
+
+    	var finalEmailAddresses = new Array();
+    	var reg = new RegExp("^[0-9a-zA-Z_.-]+@[0-9a-zA-Z-]+[\.]{1}[0-9a-zA-Z]+[\.]?[0-9a-zA-Z]+$");
+    	
+    	// now find the real emails in the list
+    	for (var x = 0; x < emailAddressCandidates.length; x++) {
+    		if (reg.test(emailAddressCandidates[x])) {
+    			finalEmailAddresses = finalEmailAddresses.concat(emailAddressCandidates[x]);
+    		}
+    	}
+
+		console.log(emailAddressCandidates);
+		console.log(finalEmailAddresses);
+		
+    	if (finalEmailAddresses.length == emailAddressCandidates.length) {
+			// Update the email address with a nice clean list of comma separated email addresses
+			if (finalEmailAddresses.length > 1) {
+				emailTextArea.value = finalEmailAddresses.join(",");
+			}
+
+			isEmailAddressesValid = true;
+    	}
 
         if (selUserEsc == 'Others' && emailAdds == '') {
             showErrorDisplay();
             dojo11.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.noUserSelected"/>';
             return false;
-        } else if (emailAdds.match(illegalChars)) {
+        } else if (!isEmailAddressesValid) {
             showErrorDisplay();
             dojo11.byId('escMsg').innerHTML = '<fmt:message key="error.Error.Tab"/> ' + '<fmt:message key="alert.config.error.invalidEmailAddressInput"/>'
             return false;

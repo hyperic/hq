@@ -120,11 +120,18 @@ var pageData = new Array();
     <c:choose>
 	    <c:when test="${CONST_PLATFORM == entityId.type}">
         <c:set var="fullDef" value=".page.title.resource.platform.full"/>
-        <c:set var="viewsDef" value=".tabs.resource.platform.views"/>
+		<c:choose>
+		      <c:when test="${canControl}">
+		        <c:set var="viewsDef" value=".tabs.resource.platform.views"/>
+		      </c:when>
+		      <c:otherwise>
+		        <c:set var="viewsDef" value=".tabs.resource.platform.views.nocontrol"/>
+		      </c:otherwise>
+        </c:choose>
 	    </c:when>
 	    <c:when test="${CONST_SERVER == entityId.type}">
         <c:set var="fullDef" value=".page.title.resource.server.full"/>
-		    <c:choose>
+		<c:choose>
 		      <c:when test="${canControl}">
             <c:set var="viewsDef" value=".tabs.resource.server.views"/>
 		      </c:when>

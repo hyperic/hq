@@ -170,7 +170,9 @@
     <c:param name="unitScale" value="${metric.unitScale}"/>
   </c:url>
 
-  <li id="<c:out value="${metric.templateId}"/>">
+  <c:set var="metricInstanceId" value="${metric.entityId.appdefKey},${metric.templateId}" />
+  
+  <li id="<c:out value="${metricInstanceId}"/>">
   <table width="650" border="0" cellpadding="2" bgcolor="#DBE3F5">
   <tr>
     <td>
@@ -181,9 +183,9 @@
             <a href="<c:out value="${chartLink}"/>" target="_top"><c:out value="${metric.label}"/></a>
           </td>
             <td colspan="3" align="right">
-            <a href="javascript:moveMetricUp('<c:out value="${metric.templateId}"/>')"><html:img page="/images/dash_icon_up.gif" border="0"/></a>
-            <a href="javascript:moveMetricDown('<c:out value="${metric.templateId}"/>')"><html:img page="/images/dash_icon_down.gif" border="0"/></a>
-            <a href="javascript:removeMetric('<c:out value="${metric.templateId}"/>')"><html:img page="/images/dash-icon_delete.gif" border="0"/></a>
+            <a href="javascript:moveMetricUp('<c:out value="${metricInstanceId}"/>')"><html:img page="/images/dash_icon_up.gif" border="0"/></a>
+            <a href="javascript:moveMetricDown('<c:out value="${metricInstanceId}"/>')"><html:img page="/images/dash_icon_down.gif" border="0"/></a>
+            <a href="javascript:removeMetric('<c:out value="${metricInstanceId}"/>')"><html:img page="/images/dash-icon_delete.gif" border="0"/></a>
             </td>
         </tr>
         <tr>

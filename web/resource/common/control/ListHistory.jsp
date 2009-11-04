@@ -80,45 +80,58 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <c:set var="entityId" value="${Resource.entityId}"/>
 
 <c:choose>
- <c:when test="${section eq 'service'}">
-  <!--  PAGE TITLE -->
-  <tiles:insert definition=".page.title.resource.service.full">
-   <tiles:put name="resource" beanName="Resource"/>
-   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
-   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
-   <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
-  </tiles:insert>
-  <!-- CONTROL BAR -->
-  <tiles:insert definition=".tabs.resource.service.control.list.history">
-   <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
-  </tiles:insert>
- </c:when>
- <c:when test="${section eq 'group'}">
-  <!--  PAGE TITLE -->
-  <tiles:insert definition=".page.title.resource.group.full">
-   <tiles:put name="titleName" beanName="Resource" beanProperty="name"/>
-   <tiles:put name="resource" beanName="Resource"/>
-   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
-   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
-  </tiles:insert>
-  <!-- CONTROL BAR -->
-  <tiles:insert definition=".tabs.resource.group.control.list.history">
-   <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
-  </tiles:insert>
- </c:when>
- <c:otherwise>
-  <!--  PAGE TITLE -->
- <tiles:insert definition=".page.title.resource.server.full">
-   <tiles:put name="resource" beanName="Resource"/>
-   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
-   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
-   <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
- </tiles:insert>
-  <!-- CONTROL BAR -->
-  <tiles:insert definition=".tabs.resource.server.control.list.history">
-   <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
- </tiles:insert>
- </c:otherwise>
+	<c:when test="${section eq 'platform'}">
+  		<!--  PAGE TITLE -->
+  		<tiles:insert definition=".page.title.resource.platform.full">
+   			<tiles:put name="resource" beanName="Resource"/>
+   			<tiles:put name="resourceOwner" beanName="ResourceOwner"/>
+   			<tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+   			<tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
+  		</tiles:insert>
+  		<!-- CONTROL BAR -->
+  		<tiles:insert definition=".tabs.resource.platform.control.list.history">
+   			<tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+  		</tiles:insert>
+ 	</c:when>
+  	<c:when test="${section eq 'service'}">
+  		<!--  PAGE TITLE -->
+  		<tiles:insert definition=".page.title.resource.service.full">
+   			<tiles:put name="resource" beanName="Resource"/>
+   			<tiles:put name="resourceOwner" beanName="ResourceOwner"/>
+   			<tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+   			<tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
+  		</tiles:insert>
+  		<!-- CONTROL BAR -->
+  		<tiles:insert definition=".tabs.resource.service.control.list.history">
+   			<tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+  		</tiles:insert>
+ 	</c:when>
+ 	<c:when test="${section eq 'group'}">
+  		<!--  PAGE TITLE -->
+  		<tiles:insert definition=".page.title.resource.group.full">
+   			<tiles:put name="titleName" beanName="Resource" beanProperty="name"/>
+   			<tiles:put name="resource" beanName="Resource"/>
+   			<tiles:put name="resourceOwner" beanName="ResourceOwner"/>
+   			<tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+  		</tiles:insert>
+  		<!-- CONTROL BAR -->
+  		<tiles:insert definition=".tabs.resource.group.control.list.history">
+   			<tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+  		</tiles:insert>
+ 	</c:when>
+ 	<c:otherwise>
+  		<!--  PAGE TITLE -->
+ 		<tiles:insert definition=".page.title.resource.server.full">
+   			<tiles:put name="resource" beanName="Resource"/>
+   			<tiles:put name="resourceOwner" beanName="ResourceOwner"/>
+   			<tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+   			<tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
+ 		</tiles:insert>
+  		<!-- CONTROL BAR -->
+  		<tiles:insert definition=".tabs.resource.server.control.list.history">
+   			<tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+ 		</tiles:insert>
+ 	</c:otherwise>
 </c:choose>
 <br>
 

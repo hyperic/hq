@@ -26,7 +26,6 @@
 package org.hyperic.hq.ui;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.servlet.FilterChain;
@@ -41,20 +40,9 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AuthBoss;
-import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.pages.SignIn;
-import org.hyperic.hq.ui.server.session.DashboardManagerEJBImpl;
-import org.hyperic.hq.ui.server.session.UserDashboardConfig;
-import org.hyperic.hq.ui.shared.DashboardManagerLocal;
-import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
-import org.hyperic.image.widget.ResourceTree;
 import org.hyperic.ui.tapestry.page.PageListing;
-import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.encoding.Base64;
 
 public final class AuthenticationFilter extends BaseFilter {
