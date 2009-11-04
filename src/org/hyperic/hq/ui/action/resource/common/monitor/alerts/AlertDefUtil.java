@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ *
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -49,6 +49,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -158,14 +159,14 @@ public class AlertDefUtil {
     {
         String msgKey;
         ArrayList args;
-        
+
         // conditions
         ArrayList alertDefConditions = new ArrayList(acvList.length);
         for (int i = 0; i < acvList.length; ++i) {
             AlertConditionValue acv = (AlertConditionValue)acvList[i];
             StringBuffer textValue = new StringBuffer();
             textValue.append( acv.getName() ).append(' ');
-            
+
             switch ( acv.getType() ) {
             case EventConstants.TYPE_CONTROL:
                 textValue.append( acv.getOption() );
@@ -175,7 +176,7 @@ public class AlertDefUtil {
             case EventConstants.TYPE_BASELINE:
                 textValue.append( acv.getComparator() );
                 textValue.append(' ');
-                
+
                 MeasurementTemplate mt = null;
                 Measurement m = null;
                 try {
@@ -184,7 +185,7 @@ public class AlertDefUtil {
                             sessionID,
                             new Integer[] {new Integer(acv.getMeasurementId())},
                             PageControl.PAGE_ALL);
-                        
+
                         if (mtvs.size() > 0)
                             mt = (MeasurementTemplate) mtvs.get(0);
                     }
@@ -196,7 +197,7 @@ public class AlertDefUtil {
                 } catch (Exception e) {
                     // Use NULL values
                 }
-                
+
                 String format = MeasurementConstants.UNITS_NONE;
                 double value = acv.getThreshold();
                 if (acv.getType() != EventConstants.TYPE_BASELINE) {
@@ -208,17 +209,17 @@ public class AlertDefUtil {
                     // Baseline threshold is stored in absolute number
                     value /= 100.0;
                 }
-                
+
                 if (format.equals(MeasurementConstants.UNITS_NONE)) {
                 	textValue.append(String.valueOf(value));
                 } else {
 	                FormattedNumber absoluteFmt = UnitsConvert.convert(value, format);
-	                
+
 	                textValue.append(absoluteFmt.toString());
                 }
-                
-                
-                
+
+
+
                 if (acv.getType() == EventConstants.TYPE_BASELINE) {
                     textValue.append(" of ");
                     textValue.append(
@@ -241,7 +242,7 @@ public class AlertDefUtil {
                     msgKey += ".StringMatch";
                     args.add(acv.getOption());
                 }
-                
+
                 textValue = new StringBuffer(
                         RequestUtils.message(request, msgKey, args.toArray()));
                 break;
@@ -252,7 +253,7 @@ public class AlertDefUtil {
                     msgKey += ".FileMatch";
                     args.add(acv.getOption());
                 }
-                
+
                 textValue = new StringBuffer(
                         RequestUtils.message(request, msgKey, args.toArray()));
                 break;
@@ -282,7 +283,7 @@ public class AlertDefUtil {
      *
      * @param request the http request
      * @param adv the condition
-     */   
+     */
     public static void setEnablementRequestAttributes(HttpServletRequest request,
                                                       AlertDefinitionValue adv)
     {
@@ -297,20 +298,12 @@ public class AlertDefUtil {
         Long enableActionsHowMany = new Long( adv.getCount() );
         Long enableActionsHowManyUnits =
             new Long(Constants.ALERT_ACTION_ENABLE_UNITS_SECONDS);
-                
+
         if (EventConstants.FREQ_EVERYTIME == adv.getFrequencyType()) {
 			enableActionsResource = "alert.config.props.CB.EnableEveryTime";
 		} else if (EventConstants.FREQ_ONCE == adv.getFrequencyType()) {
 			enableActionsResource = "alert.config.props.CB.EnableOnce";
-        } else if ( EventConstants.FREQ_DURATION == adv.getFrequencyType() ) {
-            enableActionsResource = "alert.config.props.CB.EnableTimePeriod";
-            Long[] l = getDurationAndUnits(enableActionsHowLong);
-            enableActionsHowLong = l[0];
-            enableActionsHowLongUnits = l[1];
-            l = getDurationAndUnits(enableActionsHowMany);
-            enableActionsHowMany = l[0];
-            enableActionsHowManyUnits = l[1];
-        } else { // ( EventConstants.FREQ_COUNTER == adv.getFrequencyType() )
+        }  else { // ( EventConstants.FREQ_COUNTER == adv.getFrequencyType() )
             enableActionsResource = "alert.config.props.CB.EnableNumTimesInPeriod";
             Long[] l = getDurationAndUnits(enableActionsHowLong);
             enableActionsHowLong = l[0];
@@ -407,19 +400,23 @@ public class AlertDefUtil {
      * @throws AppdefEntityNotFoundException
      * @throws SessionTimeoutException
      * @throws SessionNotFoundException
+     * @throws GroupNotCompatibleException
      */
     public static List getControlActions(int sessionID, AppdefEntityID adeId, ControlBoss cb)
-        throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PluginNotFoundException, PermissionException, RemoteException {
+        throws SessionNotFoundException, SessionTimeoutException,
+               AppdefEntityNotFoundException, PluginNotFoundException,
+               PermissionException, RemoteException, GroupNotCompatibleException
+    {
             List controlActions;
-            
+
             if (adeId instanceof AppdefEntityTypeID)
                 controlActions =
                     cb.getActions(sessionID, (AppdefEntityTypeID) adeId);
             else
                 controlActions = cb.getActions(sessionID, adeId);
-                
+
             return controlActions;
-        }
+    }
 }
 
 // EOF

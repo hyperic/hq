@@ -25,34 +25,45 @@
 
 package org.hyperic.hq.plugin.weblogic.jmx;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
+import javax.management.MBeanAttributeInfo;
+import javax.management.MBeanInfo;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.management.modelmbean.ModelMBeanAttributeInfo;
+import javax.management.modelmbean.ModelMBeanInfo;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
 import org.hyperic.hq.plugin.weblogic.WeblogicUtil;
+import org.hyperic.hq.product.PluginException;
 
 public class WeblogicDiscover {
 
-    private static Log log = LogFactory.getLog("WeblogicDiscover");
+	private static Log log = LogFactory.getLog("WeblogicDiscover");
 
-    private String adminName = null;
-    private String domain = null;
-    private Properties props;
+	private String adminName = null;
     private String version;
 
-    private HashMap mbeanServers = new HashMap();
-    private HashMap internalApps = new HashMap();
+	private String domain = null;
 
-    private final WeblogicQuery[] SERVICE_QUERIES = {
+	private Properties props;
+
+	private HashMap mbeanServers = new HashMap();
+
+	private HashMap internalApps = new HashMap();
+
+	  private final WeblogicQuery[] SERVICE_QUERIES = {
         new ApplicationQuery(), //has webapp and ejb kids
         new JDBCPoolQuery(),
         new ExqQuery(),
@@ -60,7 +71,7 @@ public class WeblogicDiscover {
         new JTAResourceQuery(),
     };
 
-    public WeblogicDiscover(String version, Properties props) {
+	public WeblogicDiscover(String version, Properties props) {
         this.version = version;
         this.props = props;
     }
@@ -69,195 +80,183 @@ public class WeblogicDiscover {
         return this.version;
     }
 
-    public static Log getLog() {
-        return log;
-    }
 
-    private Properties getProperties(String adminURL,
-                                     String username,
-                                     String password) {
-        Properties props = new Properties();
+	public static Log getLog() {
+		return log;
+	}
 
-        props.put(WeblogicMetric.PROP_ADMIN_URL,
-                  adminURL);
-        props.put(WeblogicMetric.PROP_ADMIN_USERNAME,
-                  username);
-        props.put(WeblogicMetric.PROP_ADMIN_PASSWORD,
-                  password);
+	private Properties getProperties(String adminURL, String username, String password) {
+		Properties props = new Properties();
 
-        return props;
-    }
+		props.put(WeblogicMetric.PROP_ADMIN_URL, adminURL);
+		props.put(WeblogicMetric.PROP_ADMIN_USERNAME, username);
+		props.put(WeblogicMetric.PROP_ADMIN_PASSWORD, password);
 
-    public boolean isAdminSSL() {
-        return getAdminURL().startsWith(ServerQuery.PROTOCOL_T3S);
-    }
+		return props;
+	}
 
-    public String getAdminURL() {
-        return getAdminURL(this.props);
-    }
+	public boolean isAdminSSL() {
+		return getAdminURL().startsWith(ServerQuery.PROTOCOL_T3S);
+	}
 
-    public String getUsername() {
-        return getUsername(this.props);
-    }
+	public String getAdminURL() {
+		return getAdminURL(this.props);
+	}
 
-    public String getPassword() {
-        return getPassword(this.props);
-    }
+	public String getUsername() {
+		return getUsername(this.props);
+	}
 
-    public String getAdminURL(Properties props) {
-        return props.getProperty(WeblogicMetric.PROP_ADMIN_URL);
-    }
+	public String getPassword() {
+		return getPassword(this.props);
+	}
 
-    public String getUsername(Properties props) {
-        return props.getProperty(WeblogicMetric.PROP_ADMIN_USERNAME);
-    }
+	public String getAdminURL(Properties props) {
+		return props.getProperty(WeblogicMetric.PROP_ADMIN_URL);
+	}
 
-    public String getPassword(Properties props) {
-        return props.getProperty(WeblogicMetric.PROP_ADMIN_PASSWORD, "");
-    }
+	public String getUsername(Properties props) {
+		return props.getProperty(WeblogicMetric.PROP_ADMIN_USERNAME);
+	}
 
-    public String getDomain() {
-        return this.domain;
-    }
+	public String getPassword(Properties props) {
+		return props.getProperty(WeblogicMetric.PROP_ADMIN_PASSWORD, "");
+	}
 
-    public String getAdminName() {
-        return this.adminName;
-    }
+	public String getDomain() {
+		return this.domain;
+	}
 
-    public MBeanServer getMBeanServer()
-        throws WeblogicDiscoverException {
-        return getMBeanServer(this.props);
-    }
+	public String getAdminName() {
+		return this.adminName;
+	}
 
-    public MBeanServer getMBeanServer(String url)
-        throws WeblogicDiscoverException {
+	public MBeanServer getMBeanServer() throws WeblogicDiscoverException {
+		return getMBeanServer(this.props);
+	}
 
-        return getMBeanServer(url, getUsername(),  getPassword());
-    }
+	public MBeanServer getMBeanServer(String url) throws WeblogicDiscoverException {
 
-    public MBeanServer getMBeanServer(String url, String user, String pass) 
-        throws WeblogicDiscoverException {
-        return getMBeanServer(getProperties(url, user, pass));
-    }
+		return getMBeanServer(url, getUsername(), getPassword());
+	}
 
-    public MBeanServer getMBeanServer(Properties props) 
-        throws WeblogicDiscoverException {
+	public MBeanServer getMBeanServer(String url, String user, String pass) throws WeblogicDiscoverException {
+		return getMBeanServer(getProperties(url, user, pass));
+	}
 
-        String url = getAdminURL(props);
+	public MBeanServer getMBeanServer(Properties props) throws WeblogicDiscoverException {
 
-        MBeanServer server = (MBeanServer)mbeanServers.get(url);
+		String url = getAdminURL(props);
 
-        if (server != null) {
-            return server;
-        }
+		MBeanServer server = (MBeanServer) mbeanServers.get(url);
 
-        try {
-            server = WeblogicUtil.getMBeanServer(props);
-        } catch (Exception e) {
-            //WeblogicUtil fixes up the exception messages
-            throw new WeblogicDiscoverException(e.getMessage(), e);
-        }
+		if (server != null) {
+			return server;
+		}
 
-        mbeanServers.put(url, server);
+		try {
+			server = WeblogicUtil.getMBeanServer(props);
+		}
+		catch (Exception e) {
+			// WeblogicUtil fixes up the exception messages
+			throw new WeblogicDiscoverException(e.getMessage(), e);
+		}
 
-        return server;
-    }
+		mbeanServers.put(url, server);
 
-    public void find(MBeanServer mServer,
-                     WeblogicQuery query,
-                     List types)
-        throws WeblogicDiscoverException {
+		return server;
+	}
 
-        ObjectName scope;
+	public void find(MBeanServer mServer, WeblogicQuery query, List types) throws WeblogicDiscoverException {
+	    ObjectName scope;
 
         try {
-            scope = new ObjectName(getDomain() + ":" +
-                                   query.getScope() + ",*");
-        } catch (MalformedObjectNameException e) {
-            //wont happen
+            scope = new ObjectName(domain + ":" + query.getScope() + ",*");
+        }
+        catch (MalformedObjectNameException e) {
+            // wont happen
             throw new IllegalArgumentException(e.getMessage());
         }
 
-        for (Iterator it = mServer.queryNames(scope, null).iterator();
-             it.hasNext();) 
-        {
-            ObjectName obj = (ObjectName)it.next();
-            String name = obj.getKeyProperty("Name");
-            if (name.startsWith("__") || //e.g. __weblogic_admin_rmi_queue
-               (name.indexOf("uuid-") != -1)) //wierdo 9.1 stuff
-            {
-                continue;
-            }
+       try{
+            for (Iterator it = mServer.queryNames(scope, null).iterator(); it.hasNext();) {
+                ObjectName obj = (ObjectName) it.next();
+                String name = obj.getKeyProperty("Name");
+                if (name != null) {
+                    if (name.startsWith("__") || (name.indexOf("uuid-") != -1)) // wierdo 9.1 stuff i.e __weblogic_admin_rmi_queue
+                    {
+                        continue;
+                    }
+                }
+                WeblogicQuery type = query.cloneInstance();
+                if (type.getAttributes(mServer, obj)) {
+                    types.add(type);
+                }
+                else {
+                    continue;
+                }
 
-            WeblogicQuery type = query.cloneInstance();
+                WeblogicQuery[] childQueries = query.getChildQueries();
 
-            if (type.getAttributes(mServer, obj)) {
-                types.add(type);
-            }
-            else {
-                continue;
-            }
-
-            WeblogicQuery[] childQueries = query.getChildQueries();
-
-            for (int i=0; i<childQueries.length; i++) {
-                WeblogicQuery childQuery = childQueries[i];
-                childQuery.setParent(type);
-                childQuery.setVersion(type.getVersion());
-                find(mServer, childQuery, types);
-            }
-        }
-    }
-
-    public void init(MBeanServer mServer) 
-        throws WeblogicDiscoverException {
-        try {
-            discoverInit(mServer);
-        } catch (Exception e) {
-            //XXX there are a handful of possible exceptions
-            //most of which will never happen.
-            throw new WeblogicDiscoverException(e.getMessage(), e);
-        }
-    }
-
-    private void discoverInit(MBeanServer mServer)
-        throws Exception {
-        
-        //only exists on the admin server
-        final String scope = "*:Type=ApplicationConfig,*";
-
-        for (Iterator it=mServer.queryNames(new ObjectName(scope), null).iterator();
-             it.hasNext();)
-        {
-            ObjectName oName = (ObjectName)it.next();
-            if (this.domain == null) {
-                this.domain = oName.getDomain();
-            }
-            if (this.adminName == null) {
-                this.adminName = oName.getKeyProperty("Location");
-            }
-
-            String name = oName.getKeyProperty("Name"); 
-
-            //special case for console so we can control it
-            if (name.equals("console")) {
-                continue;
-            }
-
-            boolean isInternal =
-                ((Boolean)mServer.getAttribute(oName, "InternalApp")).booleanValue();
-
-            if (isInternal) {
-                this.internalApps.put(name, Boolean.TRUE);
+                for (int i = 0; i < childQueries.length; i++) {
+                    WeblogicQuery childQuery = childQueries[i];
+                    childQuery.setParent(type);
+                    childQuery.setVersion(type.getVersion());
+                    find( mServer, childQuery, types);
+                }
             }
         }
-    }
+        catch (Exception e) {
+            throw new WeblogicDiscoverException(e);
+        }
+	}
+	
 
-    public boolean isInternalApp(String name) {
-        return this.internalApps.get(name) == Boolean.TRUE;
-    }
+	public void init(MBeanServer mServer) throws WeblogicDiscoverException {
+		try {
+			discoverInit(mServer);
+		}
+		catch (Exception e) {
+			// XXX there are a handful of possible exceptions
+			// most of which will never happen.
+			throw new WeblogicDiscoverException(e.getMessage(), e);
+		}
+	}
 
-    public WeblogicQuery[] getServiceQueries() {
-        return SERVICE_QUERIES;
-    }
+	private void discoverInit(MBeanServer mServer) throws Exception {
+
+		// only exists on the admin server
+		final String scope = "*:Type=ApplicationConfig,*";
+
+		for (Iterator it = mServer.queryNames(new ObjectName(scope), null).iterator(); it.hasNext();) {
+			ObjectName oName = (ObjectName) it.next();
+			if (this.domain == null) {
+				this.domain = oName.getDomain();
+			}
+			if (this.adminName == null) {
+				this.adminName = oName.getKeyProperty("Location");
+			}
+
+			String name = oName.getKeyProperty("Name");
+
+			// special case for console so we can control it
+			if (name.equals("console")) {
+				continue;
+			}
+
+			boolean isInternal = ((Boolean) mServer.getAttribute(oName, "InternalApp")).booleanValue();
+
+			if (isInternal) {
+				this.internalApps.put(name, Boolean.TRUE);
+			}
+		}
+	}
+
+	public boolean isInternalApp(String name) {
+		return this.internalApps.get(name) == Boolean.TRUE;
+	}
+
+	public WeblogicQuery[] getServiceQueries() {
+		return SERVICE_QUERIES;
+	}
 }

@@ -26,8 +26,10 @@
 package org.hyperic.hq.autoinventory.server.session;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -50,6 +52,7 @@ import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerExtValue;
 import org.hyperic.hq.appdef.shared.AIServerValue;
+import org.hyperic.hq.appdef.shared.AIServiceTypeValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManagerLocal;
@@ -58,7 +61,7 @@ import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
-import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
+import org.hyperic.hq.appdef.shared.ServiceTypeFactory;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -72,6 +75,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
 import org.hyperic.hq.product.RuntimeResourceReport;
+import org.hyperic.hq.product.ServiceType;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 
@@ -100,7 +104,9 @@ public class RuntimeReportProcessor {
     
     private AuthzSubject _overlord;
     private List         _serviceMerges = new ArrayList();
+	private Set serviceTypeMerges = new HashSet();
     private String       _agentToken;
+    private ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
     
     public RuntimeReportProcessor () {}
 
@@ -277,6 +283,17 @@ public class RuntimeReportProcessor {
         _log.info("Completed Merging platform into appdef: " +
                  aiplatform.getFqdn());
     }
+    
+	private void updateServiceTypes(AIServerExtValue server, Server foundAppdefServer) {
+		final AIServiceTypeValue[] serviceTypes = server.getAiServiceTypes();
+		if (serviceTypes != null) {
+			for (int i = 0; i < serviceTypes.length; i++) {
+				final ServiceType serviceType= serviceTypeFactory.create(serviceTypes[i], foundAppdefServer.getServerType());
+				serviceTypeMerges.add(serviceType);
+				Util.flushCurrentSession();
+			}
+		}
+	}
 
     /**
      * @param platform the platform that the server is on
@@ -437,6 +454,8 @@ public class RuntimeReportProcessor {
         if (aiserverExt != null) {
 
             _log.info("Updating services for server: " + server.getName());
+            
+        	updateServiceTypes(aiserverExt, server);
 
             List appdefServices;
 
@@ -535,6 +554,10 @@ public class RuntimeReportProcessor {
     
     public List getServiceMerges() {
         return _serviceMerges;
+    }
+    
+    public Set getServiceTypeMerges() {
+    	return serviceTypeMerges;
     }
 
     private boolean turnOffRuntimeDiscovery(AuthzSubject subject,

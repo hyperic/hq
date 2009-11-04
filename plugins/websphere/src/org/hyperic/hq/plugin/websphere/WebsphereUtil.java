@@ -60,6 +60,12 @@ public class WebsphereUtil {
     private static HashMap cache = new HashMap();
 
     private static Log log = LogFactory.getLog("WebSphereUtil");
+    
+    // WAS doesn't expose these anywhere we've found yet
+    private static final String TRUST_STORE = "javax.net.ssl.trustStore";
+    private static final String KEY_STORE = "javax.net.ssl.keyStore";
+    private static final String TRUST_STORE_PWD = "javax.net.ssl.trustStorePassword";
+    private static final String KEY_STORE_PWD = "javax.net.ssl.keyStorePassword";
 
     public static Object getRemoteMBeanValue(Metric metric) 
         throws MetricNotFoundException,
@@ -110,7 +116,13 @@ public class WebsphereUtil {
     public static AdminClient getMBeanServer(Properties cfg)
         throws MetricUnreachableException {
 
-        Properties props = WebspherePMI.getAdminProperties(cfg);
+        Properties props = getAdminProperties(cfg);
+        
+        if (log.isDebugEnabled()) {
+            log.debug("Attempting to create admin client with props " +
+                      props + " from config " + cfg);
+        }
+
         AdminClient mServer;
         WebsphereStopWatch timer = new WebsphereStopWatch();
 
@@ -124,7 +136,53 @@ public class WebsphereUtil {
             log.debug("createAdminClient took: " +
                       timer.getElapsedSeconds() + " seconds");
         }
+
         return mServer;
+    }
+
+    public static Properties getAdminProperties(Properties cfg) {
+        String host =
+            cfg.getProperty(WebsphereProductPlugin.PROP_ADMIN_HOST,
+                            "localhost");
+        String port =
+            cfg.getProperty(WebsphereProductPlugin.PROP_ADMIN_PORT,
+                            "8880");
+    
+        Properties props = new Properties();
+    
+        props.setProperty(AdminClient.CONNECTOR_TYPE,
+                          AdminClient.CONNECTOR_TYPE_SOAP);
+    
+        props.setProperty(AdminClient.CONNECTOR_HOST, host);
+    
+        props.setProperty(AdminClient.CONNECTOR_PORT, port);
+    
+        String user = cfg.getProperty(AdminClient.USERNAME, "");
+        String pass = cfg.getProperty(AdminClient.PASSWORD, "");
+    
+        // user and pass cannot be null because getProperty() is called
+        // with default values
+        if (!user.equals("") && !pass.equals("")) {
+            props.setProperty(AdminClient.USERNAME, user);
+            props.setProperty(AdminClient.PASSWORD, pass);
+            props.setProperty(AdminClient.CONNECTOR_SECURITY_ENABLED, "true");
+            
+            // Set the ssl props, if they're available.  As of this writing, there are no
+            // publicly-available constants for the prop keys, so they're kept in this source file.
+            String trustStore = cfg.getProperty(TRUST_STORE);
+            String keyStore = cfg.getProperty(KEY_STORE);
+            String trustStorePwd = cfg.getProperty(TRUST_STORE_PWD);
+            String keyStorePwd = cfg.getProperty(KEY_STORE_PWD);
+            if (trustStore != null && keyStore != null &&
+                trustStorePwd != null && keyStorePwd != null) {
+                props.setProperty(TRUST_STORE, trustStore);
+                props.setProperty(KEY_STORE, keyStore);
+                props.setProperty(TRUST_STORE_PWD, trustStorePwd);
+                props.setProperty(KEY_STORE_PWD, keyStorePwd);
+            }
+        }
+        
+        return props;
     }
 
     public static AdminClient getMBeanServer(Metric metric)

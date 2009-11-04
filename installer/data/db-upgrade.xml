@@ -9660,15 +9660,6 @@ has already been defined.
       <statement targetDB="mysql">
         drop index AVAIL_RLE_VAL_IDX on HQ_AVAIL_DATA_RLE
       </statement>
-      <statement targetDB="oracle">
-        drop index AVAIL_RLE_ENDTIME_IDX
-      </statement>
-      <statement targetDB="postgresql">
-        drop index AVAIL_RLE_ENDTIME_IDX
-      </statement>
-      <statement targetDB="mysql">
-        drop index AVAIL_RLE_ENDTIME_IDX on HQ_AVAIL_DATA_RLE
-      </statement>
     </schema-directSQL>
   </schemaSpec>
 
@@ -9741,35 +9732,6 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
-  <schemaSpec version="3.139">
-    <schema-alterColumn table="EAM_MEASUREMENT"
-                        column="DSN"
-                        precision="2048"
-                        columnType="VARCHAR2" />
-    <schema-alterColumn table="EAM_GALERT_ACTION_LOG"
-                        column="DETAIL"
-                        precision="1024"
-                        columnType="VARCHAR2" />
-  </schemaSpec>
-
-  <schemaSpec version="3.140">
-    <schema-insert table="EAM_CONFIG_PROPS"
-                   dupFail="false"
-                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (62, 'HQ_ALERTS_ENABLED', 'true', 'true', %%FALSE%%)"/>
-    <schema-insert table="EAM_CONFIG_PROPS"
-                   dupFail="false"
-                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (63, 'HQ_ALERT_NOTIFICATIONS_ENABLED', 'true', 'true', %%FALSE%%)"/>
-  </schemaSpec>
-
-  <schemaSpec version="3.141">
-    <schema-insert table="EAM_CONFIG_PROPS"
-                   dupFail="false"
-                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (64, 'HQ_ALERT_THRESHOLD', '0', '', %%FALSE%%)"/>
-    <schema-insert table="EAM_CONFIG_PROPS"
-                   dupFail="false"
-                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (65, 'HQ_ALERT_THRESHOLD_EMAILS', '', '', %%FALSE%%)"/>
-  </schemaSpec>
-
   <schemaSpec version="3.142">
     <schema-directSQL>
       <statement>
@@ -9784,7 +9746,59 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
+  <schemaSpec version="3.142.1">
+    <schema-directSQL>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="postgresql">
+           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC1AA4E259
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="postgresql">
+           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC9C76C3BB
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="oracle">
+           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC1AA4E259
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="oracle">
+           alter table EAM_ALERT_ACTION_LOG drop constraint FK423FA3CC9C76C3BB
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ALERT" targetDB="mysql">
+           alter table EAM_ALERT_ACTION_LOG drop foreign key FK423FA3CC1AA4E259
+        </statement>
+        <statement desc="Dropping EAM_ALERT_ACTION_LOG constraint to EAM_ACTION" targetDB="mysql">
+           alter table EAM_ALERT_ACTION_LOG drop foreign key FK423FA3CC9C76C3BB
+        </statement>
+    </schema-directSQL>
+  </schemaSpec>
+
   <schemaSpec version="3.143">
+    <schema-alterColumn table="EAM_MEASUREMENT"
+                        column="DSN"
+                        precision="2048"
+                        columnType="VARCHAR2" />
+    <schema-alterColumn table="EAM_GALERT_ACTION_LOG"
+                        column="DETAIL"
+                        precision="1024"
+                        columnType="VARCHAR2" />
+  </schemaSpec>
+
+  <schemaSpec version="3.144">
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (62, 'HQ_ALERTS_ENABLED', 'true', 'true', %%FALSE%%)"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (63, 'HQ_ALERT_NOTIFICATIONS_ENABLED', 'true', 'true', %%FALSE%%)"/>
+  </schemaSpec>
+
+  <schemaSpec version="3.145">
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (64, 'HQ_ALERT_THRESHOLD', '0', '', %%FALSE%%)"/>
+    <schema-insert table="EAM_CONFIG_PROPS"
+                   dupFail="false"
+                   insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (65, 'HQ_ALERT_THRESHOLD_EMAILS', '', '', %%FALSE%%)"/>
+  </schemaSpec>
+
+  <schemaSpec version="3.146">
     <schema-directSQL>
         <statement targetDB="oracle" fail="false">
           ALTER TABLE EAM_ESCALATION_STATE DROP UNIQUE (ALERT_DEF_ID, ALERT_ID)
@@ -9807,7 +9821,7 @@ has already been defined.
           ALTER TABLE EAM_ESCALATION_STATE DROP UNIQUE (ALERT_DEF_ID, ALERT_TYPE)
         </statement>
         <statement targetDB="postgresql" fail="false">
-          DROP INDEX IF EXISTS STATE_IDX
+          DROP INDEX STATE_IDX
         </statement>
         <statement targetDB="mysql" fail="false">
           ALTER TABLE EAM_ESCALATION_STATE DROP INDEX STATE_IDX
@@ -9819,7 +9833,7 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
 
-  <schemaSpec version="3.144">
+  <schemaSpec version="3.147">
     <schema-insert table="EAM_RESOURCE_RELATION"
                    insertCmd="(ID, VERSION_COL, NAME, IS_HIER) VALUES (2, 0, 'network', %%TRUE%%)"/>
     <schema-directSQL>
@@ -9829,20 +9843,32 @@ has already been defined.
         <statement targetDB="oracle">
           ALTER TABLE EAM_RESOURCE_EDGE DROP UNIQUE (FROM_ID, TO_ID, DISTANCE)
         </statement>
-        <statement targetDB="oracle">
+        <statement targetDB="oracle" fail="false">
           DROP INDEX EAM_RESOURCE_EDGE_FROM_ID_KEY
         </statement>
         <statement targetDB="mysql">
-          ALTER TABLE EAM_RESOURCE_EDGE DROP INDEX FROM_ID
+          alter table EAM_RESOURCE_EDGE drop foreign key FKD1FCB6C0A2BF2D92
+        </statement>
+        <statement targetDB="mysql" fail="false">
+          alter table EAM_RESOURCE_EDGE DROP INDEX eam_resource_edge_from_id_key
+        </statement>
+        <statement targetDB="mysql" fail="false">
+          ALTER TABLE EAM_RESOURCE_EDGE DROP INDEX eam_resource_from_id_idx
         </statement>
         <statement>
           ALTER TABLE EAM_RESOURCE_EDGE
-        		ADD CONSTRAINT EAM_RESOURCE_EDGE_FROM_ID_KEY UNIQUE (FROM_ID, TO_ID, REL_ID, DISTANCE)
+          ADD CONSTRAINT EAM_RESOURCE_EDGE_FROM_ID_KEY
+          UNIQUE (FROM_ID, TO_ID, REL_ID, DISTANCE)
+        </statement>
+        <statement targetDB="mysql">
+          ALTER TABLE EAM_RESOURCE_EDGE
+          ADD FOREIGN KEY FKD1FCB6C0A2BF2D92 (from_id)
+          REFERENCES EAM_RESOURCE (ID) ON DELETE CASCADE
         </statement>
     </schema-directSQL>
   </schemaSpec>
 
-  <schemaSpec version="3.145">
+  <schemaSpec version="3.148">
     <schema-addColumn table="EAM_SERVICE" column="AUTOINVENTORYIDENTIFIER" 
                       columnType="VARCHAR2" precision="250"/>
     <schema-directSQL>
@@ -9875,53 +9901,972 @@ has already been defined.
     </schema-directSQL>
   </schemaSpec>
   
-  <schemaSpec version="3.146">
+  <schemaSpec version="3.149">
     <schema-insert table="EAM_CONFIG_PROPS"
                    dupFail="false"
                    insertCmd="(ID, PROPKEY, PROPVALUE, DEFAULT_PROPVALUE, FREAD_ONLY) VALUES (66, 'HQ_HIERARCHICAL_ALERTING_ENABLED', 'true', 'true', %%FALSE%%)"/>
   </schemaSpec>
 
-  <schemaSpec version="3.147">
+  <schemaSpec version="3.150">
   	<schema-update table="EAM_ALERT_DEFINITION" 
-	               column="NOTIFY_FILTERED"
-                   columnType="BOOLEAN" 
-				   value="FALSE" />
+                       column="NOTIFY_FILTERED"
+                       columnType="BOOLEAN" 
+                       value="FALSE" />
   </schemaSpec>
 
-  <schemaSpec version="3.148">
+  <schemaSpec version="3.151">
+    <export-counters exportDir="${jboss.home}"/>
     <schema-directSQL>
-      <statement targetDB='oracle'>
-        DROP INDEX TRIGGER_EVENT_EXPIRATION_IDX
+      <statement desc="Convert frequency type of DURATION to frequency type EVERYTIME">
+        UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 1
       </statement>
-      <statement targetDB='postgresql'>
-        DROP INDEX TRIGGER_EVENT_EXPIRATION_IDX
+      <statement desc="Convert frequency type of NO_DUP to frequency type EVERYTIME">
+        UPDATE EAM_ALERT_DEFINITION SET FREQUENCY_TYPE = 0 WHERE FREQUENCY_TYPE = 3
       </statement>
-      <statement targetDB='mysql'>
-        ALTER TABLE EAM_TRIGGER_EVENT DROP INDEX TRIGGER_EVENT_EXPIRATION_IDX
+      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='oracle'>
+        DROP INDEX ACT_ON_TRIGGER_ID_IDX
       </statement>
-      <statement targetDB='oracle'>
-        DROP INDEX TRIGGER_EVENT_TRIGGER_ID_IDX
+      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='postgresql'>
+        DROP INDEX ACT_ON_TRIGGER_ID_IDX
       </statement>
-      <statement targetDB='postgresql'>
-        DROP INDEX TRIGGER_EVENT_TRIGGER_ID_IDX
+      <statement desc="Drop Foreign Key Constraint on ACT_ON_TRIGGER_ID" targetDB='mysql'>
+        ALTER TABLE EAM_ALERT_DEFINITION DROP FOREIGN KEY FK975407845BC79AEA
       </statement>
-      <statement targetDB='mysql'>
-        ALTER TABLE EAM_TRIGGER_EVENT DROP INDEX TRIGGER_EVENT_TRIGGER_ID_IDX
+      <statement desc="Drop Index ACT_ON_TRIGGER_ID_IDX" targetDB='mysql'>
+        ALTER TABLE EAM_ALERT_DEFINITION DROP INDEX ACT_ON_TRIGGER_ID_IDX
       </statement>
-      <statement targetDB='oracle'>
-        DROP INDEX TRIGGER_EVENT_CTIME_IDX
+      <statement desc="Drop unused EAM_ALERT_DEFINITION column ACT_ON_TRIGGER_ID">
+        ALTER TABLE EAM_ALERT_DEFINITION DROP COLUMN ACT_ON_TRIGGER_ID
       </statement>
-      <statement targetDB='postgresql'>
-        DROP INDEX TRIGGER_EVENT_CTIME_IDX
+      <statement desc="Delete MultiConditionTrigger from EAM_REGISTERED_TRIGGER">
+        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.conditional.MultiConditionTrigger'
       </statement>
-      <statement targetDB='mysql'>
-        ALTER TABLE EAM_TRIGGER_EVENT DROP INDEX TRIGGER_EVENT_CTIME_IDX
+      <statement desc="Delete AvertTrigger from EAM_REGISTERED_TRIGGER">
+        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.AvertTrigger'
       </statement>
-      <statement>
-        CREATE INDEX TRIGGER_EVENT_TRIGGER_ID_IDX ON EAM_TRIGGER_EVENT (TRIGGER_ID, ID)
+      <statement desc="Delete CounterTrigger from EAM_REGISTERED_TRIGGER">
+        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.CounterTrigger'
+      </statement>
+      <statement desc="Delete DurationTrigger from EAM_REGISTERED_TRIGGER">
+        DELETE FROM EAM_REGISTERED_TRIGGER WHERE CLASSNAME = 'org.hyperic.hq.bizapp.server.trigger.frequency.DurationTrigger'
+      </statement>
+      <statement desc="Drop table EAM_TRIGGER_EVENT">
+        DROP TABLE EAM_TRIGGER_EVENT
+      </statement>
+      <statement desc="Drop table EAM_FIRED_TRIGGER">
+        DROP TABLE EAM_FIRED_TRIGGER
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_ESCALATION_STATE table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.152">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_ESCALATION_STATE ADD KEY FKAA7401955029EFD7 (ESCALATION_ID)
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_ESCALATION_STATE DROP INDEX ESCALATION_ID
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_ESCALATION_STATE ADD CONSTRAINT ALERT_DEF_ID UNIQUE (ALERT_DEF_ID,ALERT_TYPE)
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_ESCALATION_STATE DROP INDEX ALERT_DEF_ID_KEY
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_MEASUREMENT_BL table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.153">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_MEASUREMENT_BL DROP FOREIGN KEY FK1877029BAE18683B
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_MEASUREMENT_BL ADD CONSTRAINT FK1877029BB6E3839C
+        FOREIGN KEY (MEASUREMENT_ID) REFERENCES EAM_MEASUREMENT (ID) ON DELETE CASCADE
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_METRIC_AUX_LOGS table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.154">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_METRIC_AUX_LOGS DROP FOREIGN KEY FKE7D70B0B993199C7
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_METRIC_AUX_LOGS ADD CONSTRAINT FKE7D70B0BA1FCB528
+        FOREIGN KEY (METRIC_ID) REFERENCES EAM_MEASUREMENT (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.155">
+    <schema-directSQL>  
+      <!-- the next two stmts are due to case sensitivity issues on EAM_RESOURCE_EDGE_ibfk_1 -->
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE DROP FOREIGN KEY EAM_RESOURCE_ibfk_1
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE DROP FOREIGN KEY eam_resource_ibfk_1
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE ADD CONSTRAINT FK7AC0E15C9E309B2B
+        FOREIGN KEY (RESOURCE_TYPE_ID) REFERENCES EAM_RESOURCE_TYPE (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE_EDGE table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.156">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP INDEX FKD1FCB6C0CCC27921
+      </statement>
+      <!-- the following stmts are ensuring that the unique key is (FROM_ID,TO_ID,REL_ID,DISTANCE) -->
+      <!-- the next two stmts are due to case sensitivity issues on EAM_RESOURCE_EDGE_ibfk_1 -->
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP FOREIGN KEY EAM_RESOURCE_EDGE_ibfk_1
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP FOREIGN KEY eam_resource_edge_ibfk_1
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP FOREIGN KEY FKD1FCB6C0A2BF2D92
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP KEY FROM_ID
+      </statement>
+      <statement targetDB="mysql">
+        ALTER TABLE EAM_RESOURCE_EDGE ADD CONSTRAINT FROM_ID UNIQUE(FROM_ID,TO_ID,REL_ID,DISTANCE)
+      </statement>
+      <statement targetDB="mysql">
+        ALTER TABLE EAM_RESOURCE_EDGE ADD CONSTRAINT FKD1FCB6C0A2BF2D92
+        FOREIGN KEY (FROM_ID) REFERENCES EAM_RESOURCE (ID) ON DELETE CASCADE
+      </statement>
+      <!-- end -->
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE ADD CONSTRAINT FKD1FCB6C0A2BF2D92
+        FOREIGN KEY (FROM_ID) REFERENCES EAM_RESOURCE (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE MODIFY COLUMN VERSION_COL bigint(20) NOT NULL DEFAULT 0
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP INDEX EAM_RESOURCE_EDGE_FROM_ID_KEY
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on HQ_AVAIL_DATA_RLE table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.157">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE HQ_AVAIL_DATA_RLE DROP INDEX AVAIL_RLE_ENDTIME_IDX
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE HQ_AVAIL_DATA_RLE DROP FOREIGN KEY FK6E8F9E9CAE18683B
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE HQ_AVAIL_DATA_RLE ADD CONSTRAINT FK6E8F9E9CB6E3839C
+        FOREIGN KEY (MEASUREMENT_ID) REFERENCES EAM_MEASUREMENT (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE HQ_AVAIL_DATA_RLE DROP CONSTRAINT FK6E8F9E9CAE18683B
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE HQ_AVAIL_DATA_RLE ADD CONSTRAINT FK6E8F9E9CB6E3839C
+        FOREIGN KEY (MEASUREMENT_ID) REFERENCES EAM_MEASUREMENT (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX AVAIL_RLE_ENDTIME_IDX
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_ALERT_ACTION_LOG table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.158">
+    <schema-directSQL>
+      <statement targetDB="mysql" fail="false">
+         ALTER TABLE EAM_ALERT_ACTION_LOG ADD CONSTRAINT FK423FA3CC1AA4E259
+         FOREIGN KEY (ALERT_ID) REFERENCES EAM_ALERT (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="mysql" fail="false">
+         ALTER TABLE EAM_ALERT_ACTION_LOG ADD CONSTRAINT FK423FA3CC9C76C3BB
+         FOREIGN KEY (ACTION_ID) REFERENCES EAM_ACTION (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle">
+         ALTER TABLE EAM_ALERT_ACTION_LOG ADD CONSTRAINT FK423FA3CC1AA4E259
+         FOREIGN KEY (ALERT_ID) REFERENCES EAM_ALERT (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle">
+         ALTER TABLE EAM_ALERT_ACTION_LOG ADD CONSTRAINT FK423FA3CC9C76C3BB
+         FOREIGN KEY (ACTION_ID) REFERENCES EAM_ACTION (ID) ON DELETE CASCADE
       </statement>
     </schema-directSQL>
   </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RES_GRP_RES_MAP table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.159">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RES_GRP_RES_MAP DROP INDEX eam_res_grp_idx
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RES_GRP_RES_MAP ADD CONSTRAINT RESOURCE_ID UNIQUE (RESOURCE_ID,RESOURCE_GROUP_ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_APP_SERVICE table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.160">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_APP_SERVICE DROP INDEX SERVICE_ID
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_APP_SERVICE ADD CONSTRAINT SERVICE_ID UNIQUE (SERVICE_ID,GROUP_ID,APPLICATION_ID)
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_APP_SERVICE DROP INDEX eam_app_service_service_id_key
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE_RELATION table -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.161">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_RELATION DROP INDEX eam_resource_relation_name_key
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_RESOURCE_RELATION ADD CONSTRAINT NAME UNIQUE (NAME)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on left over indexes -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.162">
+    <schema-directSQL>  
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_CRITERIA DROP INDEX FK36EFCAD6DA1B7C9
+      </statement>
+      <statement targetDB="mysql" fail="false">
+        ALTER TABLE EAM_MEASUREMENT DROP INDEX MEAS_ID_CLASS
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on left over indexes -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.163">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_CPROP DROP CONSTRAINT FKE5D047984EAEAB4A
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_CPROP ADD CONSTRAINT FKE5D04798CCF47F9F
+        FOREIGN KEY (KEYID) REFERENCES EAM_CPROP_KEY (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on left over indexes -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.164">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_REQUEST_STAT DROP CONSTRAINT FKE8EBBC725A959C18
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_REQUEST_STAT ADD CONSTRAINT FKE8EBBC72154D0F55
+        FOREIGN KEY (SVCREQ_ID) REFERENCES EAM_SERVICE_REQUEST (ID) ON DELETE CASCADE
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on left over indexes -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.165">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_STAT_ERRORS DROP CONSTRAINT FK6F2383A8B931CEC9
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_STAT_ERRORS ADD CONSTRAINT FK6F2383A8237D366C
+        FOREIGN KEY (ERROR_ID) REFERENCES EAM_ERROR_CODE (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_STAT_ERRORS DROP CONSTRAINT FK6F2383A828D8858D
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_STAT_ERRORS ADD CONSTRAINT FK6F2383A82DE89070
+        FOREIGN KEY (REQSTAT_ID) REFERENCES EAM_REQUEST_STAT (ID) ON DELETE CASCADE
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on left over indexes -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.166">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_SUBJECT ADD CONSTRAINT FK8E4D1FE6E3C7CB1
+        FOREIGN KEY (PREF_CRISPO_ID) REFERENCES EAM_CRISPO (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on left over indexes -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments-->
+  <schemaSpec version="3.167">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_BLOB_TRIGGERS ADD CONSTRAINT EAM_FK_QBT_QT
+        FOREIGN KEY (TRIGGER_NAME, TRIGGER_GROUP) REFERENCES QRTZ_TRIGGERS (TRIGGER_NAME, TRIGGER_GROUP)
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_CRON_TRIGGERS ADD CONSTRAINT EAM_FK_QCT_QT
+        FOREIGN KEY (TRIGGER_NAME, TRIGGER_GROUP) REFERENCES QRTZ_TRIGGERS (TRIGGER_NAME, TRIGGER_GROUP)
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_JOB_LISTENERS ADD CONSTRAINT EAM_FK_QJL_QJD
+        FOREIGN KEY (JOB_NAME, JOB_GROUP) REFERENCES QRTZ_JOB_DETAILS (JOB_NAME, JOB_GROUP) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_SIMPLE_TRIGGERS ADD CONSTRAINT EAM_FK_QST_QT
+        FOREIGN KEY (TRIGGER_NAME, TRIGGER_GROUP) REFERENCES QRTZ_TRIGGERS (TRIGGER_NAME, TRIGGER_GROUP)
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_TRIGGERS ADD CONSTRAINT EAM_FK_QT_QJD
+        FOREIGN KEY (JOB_NAME, JOB_GROUP) REFERENCES QRTZ_JOB_DETAILS (JOB_NAME, JOB_GROUP) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_TRIGGER_LISTENERS ADD CONSTRAINT EAM_FK_QTL_QT
+        FOREIGN KEY (TRIGGER_NAME, TRIGGER_GROUP) REFERENCES QRTZ_TRIGGERS (TRIGGER_NAME, TRIGGER_GROUP) ON DELETE CASCADE
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on columns for oracle -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments -->
+  <schemaSpec version="3.168">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_ALERT_ACTION_LOG MODIFY DETAIL NOT NULL
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_CONTROL_HISTORY MODIFY VERSION_COL NOT NULL
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE QRTZ_TRIGGERS MODIFY PRIORITY NULL
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_APP_SERVICE for oracle -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments -->
+  <schemaSpec version="3.169">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_APP_SERVICE_SERVICE_ID_KEY
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_APP_SERVICE ADD UNIQUE (SERVICE_ID, GROUP_ID, APPLICATION_ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_ESCALATION_STATE for oracle -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments -->
+  <schemaSpec version="3.170">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_ESCALATION_STATE_ID_KEY
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_ESCALATION_STATE DROP CONSTRAINT ALERT_DEF_ID_KEY
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        drop index STATE_IDX
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        ALTER TABLE EAM_ESCALATION_STATE ADD UNIQUE (ALERT_DEF_ID, ALERT_TYPE)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_APP_TYPE_SERVICE_TYPE_MAP for oracle -->
+  <!-- need fail="false" for these.  This is due to the inconsistent
+       entry points of deployments -->
+  <schemaSpec version="3.171">
+    <schema-directSQL>  
+      <statement targetDB="oracle" fail="false">
+        drop index FK5A2C503AAAC031CF
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_AUDIT for oracle -->
+  <!-- The primary key constraint does not have consistent naming -->
+  <schemaSpec version="3.172">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT DROP CONSTRAINT FKE5B6292DC81F5938
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT DROP CONSTRAINT FKE5B6292DE82FBC
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT DROP CONSTRAINT FKE5B6292DFC176AE
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        drop index EAM_AUDIT_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT ADD PRIMARY KEY (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT ADD CONSTRAINT FKE5B6292DC81F5938
+        FOREIGN KEY (PARENT_ID) REFERENCES EAM_AUDIT (ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT ADD CONSTRAINT FKE5B6292DE82FBC
+        FOREIGN KEY (SUBJECT_ID) REFERENCES EAM_SUBJECT (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AUDIT ADD CONSTRAINT FKE5B6292DFC176AE
+        FOREIGN KEY (RESOURCE_ID) REFERENCES EAM_RESOURCE (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_CALENDAR for oracle -->
+  <schemaSpec version="3.173">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_CALENDAR_ENT DROP CONSTRAINT FK84892E98F8214D4D
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_ROLE_CALENDAR DROP CONSTRAINT FKD703BC59F8214D4D
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_CALENDAR DROP PRIMARY KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_CALENDAR DROP UNIQUE (NAME)
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_CALENDAR_PKEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_CALENDAR_NAME_KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_CALENDAR ADD PRIMARY KEY(ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_CALENDAR ADD UNIQUE (NAME)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_CALENDAR_ENT ADD CONSTRAINT FK84892E98F8214D4D FOREIGN KEY (CALENDAR_ID) REFERENCES EAM_CALENDAR (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_ROLE_CALENDAR ADD CONSTRAINT FKD703BC59F8214D4D FOREIGN KEY (CALENDAR_ID) REFERENCES EAM_CALENDAR (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_GALERT_AUX_LOGS for oracle -->
+  <schemaSpec version="3.174">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_AUX_LOGS DROP CONSTRAINT FK859D15ED997CFC6
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_GALERT_AUX_LOGS DROP CONSTRAINT FKE20899066993629F
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_METRIC_AUX_LOGS DROP CONSTRAINT FKE7D70B0B997CFC6
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_GALERT_AUX_LOGS DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_GALERT_AUX_LOGS_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_GALERT_AUX_LOGS ADD PRIMARY KEY (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_GALERT_AUX_LOGS ADD CONSTRAINT FKE20899066993629F
+        FOREIGN KEY (PARENT) REFERENCES EAM_GALERT_AUX_LOGS(ID) ON DELETE CASCADE
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_METRIC_AUX_LOGS ADD CONSTRAINT FKE7D70B0B997CFC6
+        FOREIGN KEY (AUX_LOG_ID) REFERENCES EAM_GALERT_AUX_LOGS(ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_AUX_LOGS ADD CONSTRAINT FK859D15ED997CFC6
+        FOREIGN KEY (AUX_LOG_ID) REFERENCES EAM_GALERT_AUX_LOGS(ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_METRIC_AUX_LOGS for oracle -->
+  <schemaSpec version="3.175">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_METRIC_AUX_LOGS DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_METRIC_AUX_LOGS_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_METRIC_AUX_LOGS ADD PRIMARY KEY (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE_AUX_LOGS for oracle -->
+  <schemaSpec version="3.176">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_AUX_LOGS DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_RESOURCE_AUX_LOGS_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_AUX_LOGS ADD PRIMARY KEY (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE_EDGE for oracle -->
+  <schemaSpec version="3.177">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_RESOURCE_EDGE_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE ADD PRIMARY KEY (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE_EDGE for oracle -->
+  <schemaSpec version="3.178">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        DROP INDEX EAM_RESOURCE_FROM_ID_IDX
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP PRIMARY KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP UNIQUE (FROM_ID, TO_ID, REL_ID, DISTANCE)
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_RESOURCE_EDGE_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE ADD PRIMARY KEY (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE ADD UNIQUE (FROM_ID, TO_ID, REL_ID, DISTANCE)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RESOURCE_RELATION for oracle -->
+  <schemaSpec version="3.179">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_RELATION DROP UNIQUE (NAME)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE DROP CONSTRAINT FKD1FCB6C04405AE5F
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_RELATION DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_RESOURCE_RELATION_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_RELATION ADD PRIMARY KEY (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_EDGE ADD CONSTRAINT FKD1FCB6C04405AE5F FOREIGN KEY (REL_ID) REFERENCES EAM_RESOURCE_RELATION(ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RESOURCE_RELATION ADD UNIQUE (NAME)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_RES_GRP_RES_MAP for oracle
+       Need to ensure the naming is consistent by dropping and readding
+       the unique constraint.  This way it will get the oracle naming
+       convention.  -->
+  <schemaSpec version="3.180">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RES_GRP_RES_MAP DROP UNIQUE (RESOURCE_ID, RESOURCE_GROUP_ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_RES_GRP_RES_MAP ADD UNIQUE (RESOURCE_ID, RESOURCE_GROUP_ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_ROLE_CALENDAR for oracle -->
+  <schemaSpec version="3.181">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_ROLE_CALENDAR DROP PRIMARY KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_ROLE_CALENDAR DROP UNIQUE (ROLE_ID, CALENDAR_ID, CALTYPE)
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_ROLE_CALENDAR_PKEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_ROLE_CALENDAR_ROLE_ID_KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_ROLE_CALENDAR ADD UNIQUE (ROLE_ID, CALENDAR_ID, CALTYPE)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_ROLE_CALENDAR ADD PRIMARY KEY (ID)
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_SUBJECT_ROLE_MAP for oracle -->
+  <schemaSpec version="3.182">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_SUBJECT_ROLE_MAP DROP CONSTRAINT FK320F631499D737AE
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX FK320F631499D737AE
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_SUBJECT_ROLE_MAP ADD CONSTRAINT FK320F631499D737AE
+        FOREIGN KEY (ROLE_ID) REFERENCES EAM_ROLE
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_PLATFORM_SERVER_TYPE_MAP for oracle -->
+  <schemaSpec version="3.183">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_PLATFORM_SERVER_TYPE_MAP DROP CONSTRAINT FK4BE3F5B5E3E1026D
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX FK4BE3F5B5E3E1026D
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_PLATFORM_SERVER_TYPE_MAP ADD CONSTRAINT FK4BE3F5B5E3E1026D
+        FOREIGN KEY (PLATFORM_TYPE_ID) REFERENCES EAM_PLATFORM_TYPE
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_UI_PLUGIN for oracle -->
+  <schemaSpec version="3.184">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW DROP CONSTRAINT FK5FD54E62B5F36A31
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_PLUGIN DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_UI_PLUGIN_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_PLUGIN DROP UNIQUE (NAME)
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_UI_PLUGIN_NAME_KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_PLUGIN ADD PRIMARY KEY (ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_PLUGIN ADD UNIQUE (NAME)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW ADD CONSTRAINT FK5FD54E62B5F36A31 FOREIGN KEY (UI_PLUGIN_ID) REFERENCES EAM_UI_PLUGIN
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on EAM_UI_VIEW for oracle -->
+  <schemaSpec version="3.185">
+    <schema-directSQL>  
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_ATTACHMENT DROP CONSTRAINT FK2807DF20F6253048
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW_ADMIN DROP CONSTRAINT FK7815EB12F6253048
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW_MASTHEAD DROP CONSTRAINT FKC9583392F6253048
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW_RESOURCE DROP CONSTRAINT FKA416A54BF6253048
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW DROP PRIMARY KEY
+      </statement>
+      <!-- only way to clean this out is to drop its dependencies first
+           after that it may not exist, so need fail="false" -->
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_UI_VIEW_PKEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW DROP UNIQUE(PATH)
+      </statement>
+      <statement targetDB="oracle" fail="false">
+        DROP INDEX EAM_UI_VIEW_PATH_KEY
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW ADD PRIMARY KEY(ID)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW ADD UNIQUE(PATH)
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_ATTACHMENT ADD CONSTRAINT FK2807DF20F6253048 FOREIGN KEY (VIEW_ID) REFERENCES EAM_UI_VIEW
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW_ADMIN ADD CONSTRAINT FK7815EB12F6253048 FOREIGN KEY (VIEW_ID) REFERENCES EAM_UI_VIEW
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW_MASTHEAD ADD CONSTRAINT FKC9583392F6253048 FOREIGN KEY (VIEW_ID) REFERENCES EAM_UI_VIEW
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_UI_VIEW_RESOURCE ADD CONSTRAINT FKA416A54BF6253048 FOREIGN KEY (VIEW_ID) REFERENCES EAM_UI_VIEW
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on QRTZ_TRIGGERS for oracle -->
+  <schemaSpec version="3.186">
+    <schema-directSQL>  
+      <!-- need fail="false" due to inconsistent entry points -->
+      <statement targetDB="oracle" fail="false">
+        drop index EAM_FK_QT_QJD
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <!-- Fixes upgrade inconsistencies on MySQL column lengths -->
+  <schemaSpec version="3.187">
+    <schema-directSQL>  
+      <statement targetDB="mysql">
+        alter table EAM_APP_SERVICE modify isgroup bit not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table EAM_GALERT_ACTION_LOG modify detail varchar(1024) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table EAM_MEASUREMENT modify dsn varchar(2048) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table EAM_RESOURCE modify mtime bigint null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_JOB_DETAILS modify job_class_name varchar(250) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_TRIGGERS modify priority int null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_TRIGGERS modify job_name varchar(200) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_TRIGGERS modify job_group varchar(200) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_FIRED_TRIGGERS modify trigger_group varchar(200) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_FIRED_TRIGGERS modify trigger_name varchar(200) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_FIRED_TRIGGERS modify instance_name varchar(200) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_CALENDARS modify calendar_name varchar(200) not null
+      </statement>
+      <statement targetDB="mysql">
+        alter table QRTZ_CRON_TRIGGERS modify cron_expression varchar(200) not null
+      </statement>
+    </schema-directSQL>  
+    <schema-alterColumn table="HQ_AVAIL_DATA_RLE" column="availval" columnType="DOUBLE" nullable="NOT NULL"/>
+  </schemaSpec>
+
+  <!-- Used for AMS merge -->
+  <schemaSpec version="3.188">
+    <schema-alterColumn table="EAM_MEASUREMENT_TEMPL" column="template"
+                        precision="800" columnType="VARCHAR2" nullable="NOT NULL" />
+    <schema-alterColumn table="EAM_RESOURCE" column="name"
+                        precision="500" columnType="VARCHAR2" />
+    <schema-alterColumn table="EAM_RESOURCE" column="sort_name"
+                        precision="500" columnType="VARCHAR2" />
+    <schema-alterColumn table="EAM_SERVICE_TYPE" column="sort_name"
+                        precision="500" columnType="VARCHAR2" />
+    <schema-alterColumn table="EAM_SERVICE_TYPE" column="name"
+                        precision="500" columnType="VARCHAR2" nullable="NOT NULL" />
+  </schemaSpec>
+
+  <schemaSpec version="3.189">
+    <schema-directSQL>  
+      <statement targetDB="postgresql">
+        ALTER TABLE EAM_AGENT DROP CONSTRAINT eam_agent_address_key
+      </statement>
+      <statement targetDB="oracle">
+        ALTER TABLE EAM_AGENT DROP UNIQUE(ADDRESS, PORT)
+      </statement>
+      <statement targetDB="mysql">
+        ALTER TABLE EAM_AGENT DROP INDEX ADDRESS
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <schemaSpec version="3.190">
+    <schema-addColumn table="EAM_EVENT_LOG" column="INSTANCE_ID" columnType="INTEGER"/>	          
+    <schema-directSQL>  
+      <statement desc="Updating alert events" targetDB="postgresql">
+        UPDATE EAM_EVENT_LOG el
+        SET INSTANCE_ID=ad.ID
+        FROM EAM_ALERT_DEFINITION ad, EAM_ALERT al
+        WHERE TYPE='org.hyperic.hq.events.AlertFiredEvent' AND
+        el.SUBJECT=ad.NAME AND ad.RESOURCE_ID=el.RESOURCE_ID
+        AND al.ALERT_DEFINITION_ID=ad.ID AND el.TIMESTAMP=al.CTIME
+      </statement>
+      <statement desc="Updating alert events" targetDB="mysql">
+        UPDATE EAM_EVENT_LOG el, EAM_ALERT_DEFINITION ad,
+        EAM_ALERT al set el.INSTANCE_ID=ad.ID
+        WHERE TYPE='org.hyperic.hq.events.AlertFiredEvent' AND
+        el.SUBJECT=ad.NAME AND ad.RESOURCE_ID=el.RESOURCE_ID
+        AND al.ALERT_DEFINITION_ID=ad.ID AND el.TIMESTAMP=al.CTIME
+      </statement>
+      <statement desc="Updating alert events" targetDB="oracle">
+        UPDATE EAM_EVENT_LOG el
+        SET el.INSTANCE_ID = (
+            SELECT distinct ad.id
+            FROM EAM_ALERT_DEFINITION ad
+            JOIN EAM_ALERT al ON al.ALERT_DEFINITION_ID=ad.ID
+            WHERE TYPE='org.hyperic.hq.events.AlertFiredEvent'
+            AND el.SUBJECT=ad.NAME AND ad.RESOURCE_ID=el.RESOURCE_ID
+            AND el.TIMESTAMP=al.CTIME
+        )
+        where exists (
+            SELECT distinct ad.id
+            FROM EAM_ALERT_DEFINITION ad
+            JOIN EAM_ALERT al ON al.ALERT_DEFINITION_ID=ad.ID
+            WHERE TYPE='org.hyperic.hq.events.AlertFiredEvent'
+            AND el.SUBJECT=ad.NAME AND ad.RESOURCE_ID=el.RESOURCE_ID
+            AND el.TIMESTAMP=al.CTIME
+        )
+      </statement>
+    </schema-directSQL>  
+  </schemaSpec>
+
+  <schemaSpec version="3.191">
+    <schema-alterColumn table="EAM_MEASUREMENT_TEMPL"
+                        column="alias"
+                        precision="100"
+                        columnType="VARCHAR2"
+                        nullable="NOT NULL" />
+  </schemaSpec>
+	
+   <schemaSpec version="3.192">         
+	    <schema-directSQL>  
+	      <statement desc="Updating HQ Health Plugin">
+	        UPDATE EAM_UI_VIEW
+	        SET DESCRIPTION='HQ Health'
+	        WHERE DESCRIPTION='AMS Health'
+	      </statement>   
+	    </schema-directSQL>  
+   </schemaSpec>
 
 </dbupgrade>
 </target>

@@ -59,10 +59,12 @@ goto handleSetupParam
 :startSetup
 if "%SETUP_FILE%"=="" goto defaultSetup
 echo "using setup with file=%SETUP_FILE%"
+echo Please ignore references to missing tools.jar
 call "%ANT_HOME%\bin\ant" -Dinstall.dir="%INSTALL_DIR%" -Dinstall.mode="%INSTALL_MODE%" -Dsetup="%SETUP_FILE%" -f "%INSTALL_DIR%\data\setup.xml" -logger org.hyperic.tools.ant.installer.InstallerLogger
 goto setupDone
 
 :defaultSetup
+echo Please ignore references to missing tools.jar
 call "%ANT_HOME%\bin\ant" -Dinstall.dir="%INSTALL_DIR%" -Dinstall.nowrap=false -Dinstall.mode="%INSTALL_MODE%" -logger org.hyperic.tools.ant.installer.InstallerLogger -f "%INSTALL_DIR%\data\setup.xml"
 goto setupDone
 

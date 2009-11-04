@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.plugin.weblogic.jmx;
 
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,7 +85,7 @@ public class WeblogicQuery {
         return getAttributes(mServer, name, getAttributeNames());
     }
 
-    private void logAttrFailure(ObjectName name, Exception e) {
+    protected void logAttrFailure(ObjectName name, Exception e) {
         String msg = "Failed to get attributes for " + name;
         WeblogicDiscover.getLog().debug(msg, e);
     }
@@ -116,7 +117,7 @@ public class WeblogicQuery {
             //this should not happen either
             logAttrFailure(name, e);
             return false;
-        }
+        } 
 
         if (list == null) {
             //only 6.1 seems to behave this way,

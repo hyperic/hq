@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 
 import javax.ejb.CreateException;
 import javax.ejb.RemoveException;
@@ -49,38 +50,46 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.EscalatableCreator;
+import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.server.session.Alert;
-import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertSortField;
+import org.hyperic.hq.events.TriggerFiredEvent;
+import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
+import org.hyperic.hq.events.shared.AlertDefinitionManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
 import org.hyperic.hq.events.shared.AlertManagerUtil;
 import org.hyperic.hq.events.shared.AlertValue;
+import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.measurement.TimingVoodoo;
+import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
+import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEventSource;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementDAO;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.hyperic.util.stats.ConcurrentStatsCollector;
 
-/** 
+/**
  * @ejb:bean name="AlertManager"
  *      jndi-name="ejb/events/AlertManager"
  *      local-jndi-name="LocalAlertManager"
  *      view-type="local"
  *      type="Stateless"
- * 
+ *
  * @ejb:transaction type="REQUIRED"
  */
 public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     private final String NOTAVAIL = "Not Available";
-    
+
     private final Log _log =
         LogFactory.getLog(AlertManagerEJBImpl.class.getName());
     private final String VALUE_PROCESSOR =
@@ -88,13 +97,14 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
     private Pager valuePager;
     private Pager pojoPager;
-    
+    private EventLogManagerLocal eventLogManager;
+
     public AlertManagerEJBImpl() {}
 
     private AlertDefinitionDAO getAlertDefDAO() {
         return new AlertDefinitionDAO(DAOFactory.getDAOFactory());
     }
-    
+
     private AlertDAO getAlertDAO() {
         return new AlertDAO(DAOFactory.getDAOFactory());
     }
@@ -105,7 +115,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
     /**
      * Create a new alert.
-     * 
+     *
      * @param def The alert definition.
      * @param ctime The alert creation time.
      * @ejb:interface-method
@@ -117,7 +127,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         getAlertDAO().save(alert);
         return alert;
     }
-    
+
     /**
      * Simply mark an alert object as fixed
      *
@@ -125,22 +135,26 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public void setAlertFixed(Alert alert) {
         alert.setFixed(true);
-        
+
         // If the alert definition is set to "recover", then we should enable it.
         AlertDefinition def = alert.getAlertDefinition();
-        
-        if (def.isWillRecover() && !def.isEnabled()) {
-            def.setEnabledStatus(true);
+
+        if (def.isWillRecover()) {
+            try {
+                AlertDefinitionManagerEJBImpl.getOne().updateAlertDefinitionInternalEnable( AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(), def, true);
+            } catch (PermissionException e) {
+                _log.error("Error re-enabling alert with ID: " + def.getId() + " after it was fixed.",e);
+            }
         }
     }
-    
+
     /**
      * Log the details of an action's execution
      *
      * @ejb:interface-method
      */
     public void logActionDetail(Alert alert, Action action, String detail,
-                                AuthzSubject subject) 
+                                AuthzSubject subject)
     {
         alert.createActionLog(detail, action, subject);
     }
@@ -152,7 +166,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             alert.createConditionLog(logs[i].getValue(), cond);
         }
     }
-    
+
     /** Remove alerts
      * @ejb:interface-method
      */
@@ -160,9 +174,9 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         getAlertDAO().deleteByIds(ids);
     }
 
-    /** 
+    /**
      * Remove alerts for an appdef entity
-     * @throws PermissionException 
+     * @throws PermissionException
      * @ejb:interface-method
      */
     public int deleteAlerts(AuthzSubject subj, AppdefEntityID id)
@@ -171,9 +185,9 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         return getAlertDAO().deleteByResource(findResource(id));
     }
 
-    /** 
+    /**
      * Remove alerts for an alert definition
-     * @throws PermissionException 
+     * @throws PermissionException
      * @ejb:interface-method
      */
     public int deleteAlerts(AuthzSubject subj, AlertDefinition ad)
@@ -182,7 +196,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         return getAlertDAO().deleteByAlertDefinition(ad);
     }
 
-    /** 
+    /**
      * Remove alerts for a range of time
      * @ejb:interface-method
      */
@@ -192,7 +206,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
     /**
      * Find an alert by ID
-     * 
+     *
      * @ejb:interface-method
      */
     public AlertValue getById(Integer id) {
@@ -207,13 +221,18 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public Alert findAlertById(Integer id) {
         Alert alert = getAlertDAO().findById(id);
         Hibernate.initialize(alert);
+
+        alert.setAckable(EscalationManagerEJBImpl.getOne()
+                         .isAlertAcknowledgeable(alert.getId(),
+                                                 alert.getDefinition()));
+
         return alert;
     }
 
     /**
      * Find the last alert by definition ID
-     * @throws PermissionException 
-     * 
+     * @throws PermissionException
+     *
      * @ejb:interface-method
      */
     public Alert findLastUnfixedByDefinition(AuthzSubject subj, Integer id)
@@ -225,11 +244,26 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             return null;
         }
     }
+    
+    /**
+     * Find the last alert by definition ID
+     * @throws PermissionException
+     *
+     * @ejb:interface-method
+     */
+    public Alert findLastByDefinition(Integer id) {
+        try {
+            AlertDefinition def = getAlertDefDAO().findById(id);
+            return getAlertDAO().findLastByDefinition(def);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
     /**
      * Find the last alert by definition ID
-     * @throws PermissionException 
-     * 
+     * @throws PermissionException
+     *
      * @ejb:interface-method
      */
     public Alert findLastFixedByDefinition(AlertDefinition def) {
@@ -237,7 +271,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             return getAlertDAO().findLastByDefinition(def, true);
         } catch (Exception e) {
             return null;
-        }        
+        }
     }
 
     /**
@@ -247,7 +281,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public Number getAlertCount() {
         return new Integer(getAlertDAO().size());
     }
-    
+
     /**
      * Get the number of alerts for the given array of AppdefEntityID's
      * @ejb:interface-method
@@ -264,11 +298,81 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
+     * Processes {@link AlertConditionSatisfiedZEvent} that indicate that an alert should be created
+     * 
+     * To minimize StaleStateExceptions, this method should only be called once in one transaction.
+     *      
+     * @ejb:interface-method
+     */
+    public void fireAlert(AlertConditionsSatisfiedZEvent event) {
+        if (!AlertRegulator.getInstance().alertsAllowed()) {
+            _log.debug("Alert not firing because they are not allowed");
+            return;
+        }
+        long startTime = System.currentTimeMillis();
+        try {
+            AlertDefinitionManagerLocal aman =
+                AlertDefinitionManagerEJBImpl.getOne();
+
+            Integer adId = Integer.valueOf(((AlertConditionsSatisfiedZEventSource)event.getSourceId()).getId());
+
+            AlertDefinition alertDef = null;
+
+            //Check persisted alert def status
+            if (!aman.isEnabled(adId)) {
+                  return;
+            }
+
+           alertDef = aman.getByIdNoCheck(adId);
+
+
+           if (alertDef.getFrequencyType() == EventConstants.FREQ_ONCE ||
+                    alertDef.isWillRecover()) {
+                // Disable the alert definition now that we've fired
+                aman.updateAlertDefinitionInternalEnable(
+                            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(),
+                            alertDef,
+                            false);
+            }
+
+            EscalatableCreator creator =
+                new ClassicEscalatableCreator(alertDef, event, new Messenger(), AlertManagerEJBImpl.getOne());
+            Resource res = creator.getAlertDefinition().getResource();
+            if (res == null || res.isInAsyncDeleteState()) {
+                return;
+            }
+
+            // Now start escalation
+            if (alertDef.getEscalation() != null) {
+                EscalationManagerEJBImpl.getOne()
+                                    .startEscalation(alertDef, creator);
+            } else {
+                creator.createEscalatable();
+            }
+            
+            if (_log.isDebugEnabled()) {
+                _log.debug("Alert definition " + alertDef.getName() +
+                           " (id=" + alertDef.getId() + ") fired.");
+            }
+            
+            ConcurrentStatsCollector.getInstance().addStat(System.currentTimeMillis() - startTime,ConcurrentStatsCollector.FIRE_ALERT_TIME);
+        } catch (PermissionException e) {
+            _log.error("Alert not firing due to a permissions issue",e);
+        } catch (ResourceDeletedException e) {
+            _log.debug(e,e);
+        }
+    }
+
+    /**
      * Get a collection of all alerts
      *
      * @ejb:interface-method
      */
     public PageList findAllAlerts() {
+        // TODO - This is messy, from what I can tell this collection contains
+        //        a list of both alert POJOs and AlertValue objects.  Why this
+        //        is done, I haven't figured out yet, just adding a note so I
+        //        don't forget to come back to it.
         Collection res;
 
         res = getAlertDAO().findAll();
@@ -283,7 +387,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
     /**
      * Get a collection of alerts for an AppdefEntityID
-     * @throws PermissionException 
+     * @throws PermissionException
      *
      * @ejb:interface-method
      */
@@ -299,7 +403,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         } else {
             alerts = getAlertDAO().findByResource(resource);
         }
-        
+
         if (pc.getSortorder() == PageControl.SORT_DESC)
             Collections.reverse(alerts);
 
@@ -308,13 +412,13 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
     /**
      * Get a collection of alerts for an AppdefEntityID and time range
-     * @throws PermissionException 
+     * @throws PermissionException
      *
      * @ejb:interface-method
      */
     public PageList findAlerts(AuthzSubject subj, AppdefEntityID id,
                                long begin, long end, PageControl pc)
-        throws PermissionException 
+        throws PermissionException
     {
         canManageAlerts(subj, id);
         List alerts =
@@ -333,13 +437,13 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public List findAlerts(Integer subj, int priority, long timeRange,
                            long endTime, boolean inEsc, boolean notFixed,
-                           Integer groupId, PageInfo pageInfo) 
-        throws PermissionException 
+                           Integer groupId, PageInfo pageInfo)
+        throws PermissionException
     {
         return findAlerts(subj, priority, timeRange, endTime,
                           inEsc, notFixed, groupId, null, pageInfo);
     }
-    
+
     /**
      * A more optimized look up which includes the permission checking
      * @return {@link List} of {@link Alert}s
@@ -348,14 +452,14 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     public List findAlerts(Integer subj, int priority, long timeRange,
                            long endTime, boolean inEsc, boolean notFixed,
                            Integer groupId, Integer alertDefId,
-                           PageInfo pageInfo) 
-        throws PermissionException 
+                           PageInfo pageInfo)
+        throws PermissionException
     {
         // [HHQ-2946] Only round up if end time is not a multiple of a minute
         long mod = endTime % 60000;
         if (mod > 0) {
             // Time voodoo the end time to the nearest minute so that we might
-            // be able to use cached results.    
+            // be able to use cached results.
             endTime = TimingVoodoo.roundUpTime(endTime, 60000);
         }
         return getAlertDAO().findByCreateTimeAndPriority(subj,
@@ -365,28 +469,28 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                                                          groupId, alertDefId,
                                                          pageInfo);
     }
-    
+
     /**
      * Search alerts given a set of criteria
-     * 
+     *
      * @param timeRange
      *            the amount of milliseconds prior to current that the alerts
      *            will be contained in. e.g. the beginning of the time range
      *            will be (current - timeRante)
      * @param page
      *            TODO
-     * 
+     *
      * @param includes {@link List} of {@link AppdefEntityID}s to filter,
      *  may be null for all.
      * @ejb:interface-method
      */
     public List findAlerts(AuthzSubject subj, int count, int priority,
-                           long timeRange, long endTime, List includes) 
-        throws PermissionException 
+                           long timeRange, long endTime, List includes)
+        throws PermissionException
     {
         List result = new ArrayList();
         final Set inclSet = (includes == null) ? null : new HashSet(includes);
-        
+
         for (int index = 0; result.size() < count; index++) {
             // Permission checking included
             PageInfo pInfo = PageInfo.create(index, count, AlertSortField.DATE,
@@ -412,7 +516,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
                     // Add it
                     result.add(alert);
-                    
+
                     // Finished
                     if (result.size() == count) {
                         break;
@@ -423,10 +527,10 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                 return alerts;
             }
         }
-            
+
         return result;
     }
-    
+
     /**
      * Find escalatables for a resource in a given time range.
      *
@@ -434,8 +538,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      *
      * @ejb:interface-method
      */
-    public List findEscalatables(AuthzSubject subj, int count, 
-                                 int priority, long timeRange, long endTime, 
+    public List findEscalatables(AuthzSubject subj, int count,
+                                 int priority, long timeRange, long endTime,
                                  List includes)
         throws PermissionException
     {
@@ -449,8 +553,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
      * @ejb:interface-method
      */
     public int getUnfixedCount(Integer subj, long timeRange, long endTime,
-                               Integer groupId) 
-        throws PermissionException 
+                               Integer groupId)
+        throws PermissionException
     {
         // Time voodoo the end time to the nearest minute so that we might
         // be able to use cached results
@@ -462,7 +566,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
                                                          groupId, null);
         if (count != null)
             return count.intValue();
-            
+
         return 0;
     }
 
@@ -475,8 +579,8 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             if (a.getAlertDefinition().getResource().isInAsyncDeleteState()) {
                 continue;
             }
-            Escalatable e = 
-                ClassicEscalatableCreator.createEscalatable(a, 
+            Escalatable e =
+                ClassicEscalatableCreator.createEscalatable(a,
                                                             getShortReason(a),
                                                             getLongReason(a));
             res.add(e);
@@ -494,9 +598,9 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             new AppdefEntityID(def.getResource());
         AppdefEntityValue aev = new AppdefEntityValue(
             aeid, AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo());
-        
+
         String name = "";
-        
+
         try {
             name = aev.getName();
         } catch (AppdefEntityNotFoundException e) {
@@ -506,16 +610,16 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             // Should never happen
             log.error("Overlord does not have permission for resource " + aeid);
         }
-        
+
         // Get the alert definition's conditions
         Collection clogs = alert.getConditionLog();
-        
+
         StringBuffer text =
             new StringBuffer(def.getName())
                 .append(" ")
                 .append(name)
                 .append(" ");
-        
+
         MeasurementDAO dmDao =
             new MeasurementDAO(DAOFactory.getDAOFactory());
         for (Iterator it = clogs.iterator(); it.hasNext(); ) {
@@ -523,7 +627,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             AlertCondition cond = log.getCondition();
 
             Measurement dm;
-            
+
             switch (cond.getType()) {
             case EventConstants.TYPE_THRESHOLD:
             case EventConstants.TYPE_BASELINE:
@@ -566,7 +670,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         // Get the short reason for the alert
         return text.toString();
     }
-    
+
     /**
      * Get the long reason for an alert
      * @ejb:interface-method
@@ -576,7 +680,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 
         // Get the alert definition's conditions
         Collection clogs = alert.getConditionLog();
-        
+
         AlertConditionLog[] logs = (AlertConditionLog[])
             clogs.toArray(new AlertConditionLog[clogs.size()]);
 
@@ -598,7 +702,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
 //            eventMap.get( cond.getTriggerId() );
 
             Measurement dm = null;
-            
+
             switch (cond.getType()) {
             case EventConstants.TYPE_THRESHOLD:
             case EventConstants.TYPE_BASELINE:
@@ -656,17 +760,22 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
             throw new SystemException(e);
         }
     }
-    
+
+    void setEventLogManager(EventLogManagerLocal eventLogManager) {
+        this.eventLogManager = eventLogManager;
+    }
+
     public void ejbCreate() throws CreateException {
         try {
-        	// Old and busted, we need to phase out the Value objects
+        	// We need to phase out the Value objects...
             valuePager = Pager.getPager(VALUE_PROCESSOR);
-            
-            // New hotness, and start using the POJOs instead
+
+            // ...and start using the POJOs instead
             pojoPager = Pager.getDefaultPager();
         } catch ( Exception e ) {
             throw new CreateException("Could not create value pager:" + e);
         }
+        this.eventLogManager = EventLogManagerEJBImpl.getOne();
     }
 
     public void ejbRemove() {}

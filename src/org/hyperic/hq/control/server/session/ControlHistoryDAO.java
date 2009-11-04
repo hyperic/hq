@@ -79,6 +79,7 @@ public class ControlHistoryDAO extends HibernateDAO
         h.setDescription(description);
         h.setAction(action);
         h.setArgs(args);
+        h.setMessage(message);
         save(h);
         return h;
     }

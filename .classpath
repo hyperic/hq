@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="installer/src"/>
+	<classpathentry kind="src" path="plugins/spring/src/main/java"/>
 	<classpathentry kind="src" path="build/src"/>
 	<classpathentry kind="src" path="plugins/alfresco/src"/>
 	<classpathentry kind="src" path="plugins/apache/src"/>
@@ -36,6 +37,8 @@
 	<classpathentry kind="src" path="plugins/sybase/src"/>
 	<classpathentry kind="src" path="plugins/system/src"/>
 	<classpathentry kind="src" path="plugins/tomcat/src"/>
+	<classpathentry kind="src" path="plugins/vim/src"/>
+	<classpathentry kind="lib" path="plugins/vim/lib/mo.jar"/>
 	<classpathentry kind="src" path="plugins/vmware/src"/>
 	<classpathentry kind="src" path="plugins/weblogic/doc"/>
 	<classpathentry kind="src" path="plugins/weblogic/src"/>
@@ -124,7 +127,6 @@
 	<classpathentry kind="lib" path="thirdparty/lib/mx4j/mx4j-rjmx.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/mx4j/mx4j-tools.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/mx4j/mx4j.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/mysql_jdbc/mysql-connector-java-5.0.5-bin.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/oracle_jdbc/ojdbc14.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/oracle_jdbc/oracle12.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/postgresql/postgresql-7.4.3.jar"/>
@@ -191,10 +193,10 @@
 	<classpathentry kind="lib" path="thirdparty/lib/xml-apis.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/xmlrpc-client-3.1.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/xmlrpc-common-3.1.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/xpp3_min-1.1.3.4.O.jar"/>
+	<classpathentry kind="lib" path="thirdparty/lib/xpp3_min-1.1.4c.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/xslt/xercesImpl-2.6.2.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/xslt/xml-apis-1.0.b2.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/xstream-1.2.1.jar"/>
+	<classpathentry kind="lib" path="thirdparty/lib/xstream-1.3.1.jar"/>
 	<classpathentry kind="lib" path="tools/perftest/lib/commons-cli-1.1.jar"/>
 	<classpathentry kind="lib" path="tools/perftest/lib/commons-collections.jar"/>
 	<classpathentry kind="lib" path="tools/perftest/lib/commons-httpclient-3.0.1.jar"/>
@@ -217,5 +219,8 @@
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jboss-j2ee.jar"/>
 	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jnpserver.jar"/>
+	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.com.sun.xml.bind-2.1.7.jar"/>
+	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.javax.xml.bind-2.1.7.jar"/>
+	<classpathentry kind="lib" path="thirdparty/lib/com.springsource.javax.xml.stream-1.0.1.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

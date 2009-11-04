@@ -36,6 +36,7 @@ public class EventLog extends PersistedObject implements IEventPoint {
     private String   _subject;
     private String   _status;
     private Resource _resource;
+    private Integer instanceId;
     
     // Not persisted
     private int     _eventId;
@@ -44,13 +45,22 @@ public class EventLog extends PersistedObject implements IEventPoint {
     }
 
     protected EventLog(Resource r, String subject, String type, String detail,
-                       long timestamp, String status) {
+                       long timestamp, String status, Integer instanceId) {
         _resource = r;
         _subject = subject;
         _type = type;
         _detail = detail;
         _timestamp = timestamp;
         _status = status;
+        this.instanceId = instanceId;
+    }
+
+    public Integer getInstanceId() {
+        return instanceId;
+    }
+
+    public void setInstanceId(Integer instanceId) {
+        this.instanceId = instanceId;
     }
 
     public String getDetail() {

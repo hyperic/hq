@@ -59,6 +59,17 @@ public class ResourceHubForm extends BaseValidatorForm {
     public static final String CHART_VIEW = "chart";
     public static final String LIST_VIEW  = "list";
 
+    //-------------------------------------query param strings
+    public static final String ENTITY_TYPE_ID_PARAM = "ff";
+    public static final String RESOURCE_TYPE_ID_PARAM = "ft";
+    public static final String GROUP_TYPE_ID_PARAM = "g";
+    public static final String GROUP_ID_PARAM = "fg";
+    public static final String KEYWORDS_PARAM = "keywords";
+    public static final String VIEW_PARAM = "view";
+    public static final String ANY_FLAG_PARAM = "any";
+    public static final String OWNER_FLAG_PARAM = "own";
+    public static final String UNAVAILABLE_FLAG_PARAM = "unavail";
+    
     //-------------------------------------instance variables
 
     private Integer  _ff;

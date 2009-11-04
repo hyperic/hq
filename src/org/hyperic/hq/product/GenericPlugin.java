@@ -75,6 +75,14 @@ public abstract class GenericPlugin {
     private ProductPlugin productPlugin = null;
     protected ConfigResponse config;
     private static String hostname = null;
+    
+    public void setData(PluginData data) {
+        this.data = data;
+    }
+          
+    public PluginData getPluginData() {
+        return this.data;
+    }
 
     static String[] createTypeLabels(String prop) {
         int len = TYPE_LABELS.length;
@@ -452,6 +460,10 @@ public abstract class GenericPlugin {
         }
         if (this.productPlugin == null) {
             this.productPlugin = getProductPlugin(getName());
+        }
+        //XXX seems this is the correct name to use and the above should be removed?
+        if ((this.productPlugin == null) && (getTypeInfo() != null)) {
+            this.productPlugin = getProductPlugin(getTypeInfo().getName());
         }
         return this.productPlugin;
     }

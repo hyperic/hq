@@ -97,9 +97,8 @@ public abstract class ServletDiscoveryPlugin
         String host;
 
         jmxRemote.setJmxUrl(jmxUrl);
-        // XXX: need to add authentication supprt
-        // jmxRemote.setUser(user);
-        // jmxRemote.setPass(password);
+        jmxRemote.setUser(user);
+        jmxRemote.setPassword(password);
  
         Manifest mBeanInfo;
         try {

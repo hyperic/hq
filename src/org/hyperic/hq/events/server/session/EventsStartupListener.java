@@ -28,6 +28,8 @@ package org.hyperic.hq.events.server.session;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.naming.InitialContext;
@@ -38,50 +40,60 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.PropertyNotFoundException;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.common.DiagnosticThread;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
+import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.jdbc.DBUtil;
 
-public class EventsStartupListener 
+public class EventsStartupListener
     implements StartupListener
 {
-    private static final Log _log = 
+    private static final Log _log =
         LogFactory.getLog(EventsStartupListener.class);
     private static final Object LOCK = new Object();
-    private static TriggerChangeCallback _triggerChangeCallback;
     private static AlertDefinitionChangeCallback _alertDefChangeCallback;
-    
+
     public void hqStarted() {
-        // Make sure the escalation enumeration is loaded and registered so 
+        // Make sure the escalation enumeration is loaded and registered so
         // that the escalations run
         ClassicEscalationAlertType.class.getClass();
         AlertableRoleCalendarType.class.getClass();
-        
+
         HQApp app = HQApp.getInstance();
-        
+
         synchronized (LOCK) {
-            _triggerChangeCallback = (TriggerChangeCallback)
-                app.registerCallbackCaller(TriggerChangeCallback.class);
-            
             _alertDefChangeCallback = (AlertDefinitionChangeCallback)
                 app.registerCallbackCaller(AlertDefinitionChangeCallback.class);
         }
-        
+
         AlertDefinitionManagerEJBImpl.getOne().startup();
 
         loadConfigProps("triggers");
         loadConfigProps("actions");
-        
-        DiagnosticThread.addDiagnosticObject(EventTrackerDiagnostic.getInstance());
+
+        ZeventManager.getInstance().registerEventClass(AlertConditionsSatisfiedZEvent.class);
+        Set alertEvents = new HashSet();
+        alertEvents.add(AlertConditionsSatisfiedZEvent.class);
+
+        ZeventManager.getInstance().addBufferedListener(
+            alertEvents, new AlertConditionsSatisfiedListener());
+
+
+        Set triggerEvents = new HashSet();
+        triggerEvents.add(TriggersCreatedZevent.class);
+
+        ZeventManager.getInstance().addBufferedListener(
+                                                        triggerEvents, new TriggersCreatedListener());
+
         cleanupRegisteredTriggers();
     }
-        
+
     private void cleanupRegisteredTriggers() {
         Connection conn = null;
         Statement stmt = null;
         try {
             conn = DBUtil.getConnByContext(
-                new InitialContext(), HQConstants.DATASOURCE);              
+                new InitialContext(), HQConstants.DATASOURCE);
             stmt = conn.createStatement();
             int rows = stmt.executeUpdate(
                 "update EAM_ALERT_CONDITION set trigger_id = null " +
@@ -97,12 +109,6 @@ public class EventsStartupListener
                     "AND EAM_REGISTERED_TRIGGER.alert_definition_id = id" +
                 ")");
             _log.info("deleted " + rows + " rows from EAM_REGISTERED_TRIGGER");
-            rows = stmt.executeUpdate(
-                "delete from EAM_TRIGGER_EVENT where expiration < " +
-                System.currentTimeMillis()
-                );
-            _log.info("deleted " + rows +
-                " expired triggers from EAM_TRIGGER_EVENT");
         } catch (SQLException e) {
             _log.error(e, e);
         } catch (NamingException e) {
@@ -122,12 +128,12 @@ public class EventsStartupListener
             }
 
             _log.info(prop + " list: " + property);
-            
+
             StringTokenizer tok = new StringTokenizer(property, ", ");
             while (tok.hasMoreTokens()) {
                 String className = tok.nextToken();
                     _log.debug("Initialize class: " + className);
-                
+
                 try {
                     Class classObj = Class.forName(className);
                     classObj.newInstance();
@@ -144,13 +150,7 @@ public class EventsStartupListener
             _log.error("Encountered error initializing " + prop, e);
         }
     }
-    
-    static TriggerChangeCallback getChangedTriggerCallback() {
-        synchronized (LOCK) {
-            return _triggerChangeCallback;
-        }
-    }
-    
+
     static AlertDefinitionChangeCallback getAlertDefinitionChangeCallback() {
         synchronized (LOCK) {
             return _alertDefChangeCallback;

@@ -60,7 +60,7 @@ public class MySqlStatsMeasurementPlugin
     private final Log _log = LogFactory.getLog(MySqlStatsMeasurementPlugin.class);
     static final String PROP_JDBC_DRIVER = "DEFAULT_DRIVER",
                         DEFAULT_DRIVER   = "com.mysql.jdbc.Driver";
-    private static final String SELECT_VERSION = "select @@version",
+    private static final String AVAIL_SELECT  = "select 1",
                            SHOW_DATABASES     = "show databases",
                            SLAVE_STATUS       = "slavestatus",
                            TABLE_SERVICE      = "type=table",
@@ -69,7 +69,8 @@ public class MySqlStatsMeasurementPlugin
                            // computed for mysql replication
                            BYTES_BEHIND_MASTER     = "Bytes_Behind_Master",
                            SECONDS_BEHIND_MASTER   = "Seconds_Behind_Master",
-                           LOG_FILES_BEHIND_MASTER = "Log_Files_Behind_Master";
+                           LOG_FILES_BEHIND_MASTER = "Log_Files_Behind_Master",
+                           SLAVE_SQL_RUNNING       = "Slave_SQL_Running";
     private String _driver;
     private JDBCQueryCache _globalStatus = null,
                            _replStatus   = null;
@@ -106,21 +107,21 @@ public class MySqlStatsMeasurementPlugin
             throw e;
         } catch (SQLException e) {
             sqlException = true;
+            _log.debug(e, e);
             if (metric.isAvail()) {
                 return Metric.AVAIL_DOWN;
             }
-            _log.debug(e, e);
             throw new MetricNotFoundException(
                 "Service " + objectName + ":" + alias +
-                " not found: " + e.getMessage(), e);
+                " not found: " + e.getMessage());
         } catch (Exception e) {
+            _log.debug(e, e);
             if (metric.isAvail()) {
                 return Metric.AVAIL_DOWN;
             }
-            _log.debug(e, e);
             throw new MetricNotFoundException(
                 "Service " + objectName + ":" + alias +
-                " not found: " + e.getMessage(), e);
+                " not found: " + e.getMessage());
         } finally {
             setErrorState(sqlException);
         }
@@ -274,19 +275,16 @@ public class MySqlStatsMeasurementPlugin
             Connection conn = getCachedConnection(metric);
             Double val = Double.valueOf(
                 _replStatus.getOnlyRow(conn, valColumn).toString());
-            _log.info("value of " + SECONDS_BEHIND_MASTER + "=" + val);
-            // return a large negative number if this occurs
             if (val == null) {
                 throw new MetricNotFoundException("query for " +
                     SECONDS_BEHIND_MASTER + " returned null");
             }
             return val.doubleValue();
         } else if (metric.isAvail()) {
-            // XXX need to figure out how to determine if repl is down from slave
-            // For now just call another method that will throw an exception
-            // if the server is down
-            getLogFilesBehindMaster(metric);
-            return Metric.AVAIL_UP;
+            Connection conn = getCachedConnection(metric);
+            String s = _replStatus.getOnlyRow(conn, SLAVE_SQL_RUNNING).toString();
+            return (s.equalsIgnoreCase("yes")) ?
+                Metric.AVAIL_UP : Metric.AVAIL_DOWN;
         } else {
             Connection conn = getCachedConnection(metric);
             String s = _replStatus.getOnlyRow(conn, valColumn).toString();
@@ -406,9 +404,10 @@ public class MySqlStatsMeasurementPlugin
         try {
             conn = getCachedConnection(metric);
             stmt = conn.createStatement();
-            stmt.execute(SELECT_VERSION);
+            stmt.executeQuery(AVAIL_SELECT).close();
             return new MetricValue(MeasurementConstants.AVAIL_UP);
         } catch (SQLException e) {
+            _log.debug(e, e);
         } finally {
             // don't close conn, it is cached
             DBUtil.closeStatement(_logCtx, stmt);

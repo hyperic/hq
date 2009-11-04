@@ -71,7 +71,7 @@ public class AvailabilityDownAlertDefinitionCache {
         } else {
             bool = load(key);
         }
-        return bool.booleanValue();
+        return (bool == null ? false : bool.booleanValue());
     }
 
     public void put(AppdefEntityID key, Boolean value) {
@@ -106,7 +106,7 @@ public class AvailabilityDownAlertDefinitionCache {
             for (Iterator it=alertDefs.iterator(); it.hasNext(); ) {
                 AlertDefinition def = (AlertDefinition) it.next();
 
-                if (def.isActive() && adm.isAvailability(def, false)) {
+                if (def.isActive() && def.isAvailability(false)) {
                     value = Boolean.TRUE;
                     break;
                 }
@@ -116,9 +116,8 @@ public class AvailabilityDownAlertDefinitionCache {
             }
             singleton.put(key, value);
             
-        } catch (PermissionException e) {
-            // should not happen for hqadmin
-            throw new SystemException(e);
+        } catch (Exception e) {
+            log.error("Could not get alert definitions for " + key, e);
         }
 
         return value;

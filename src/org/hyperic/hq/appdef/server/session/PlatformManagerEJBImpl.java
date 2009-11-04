@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,6 +46,8 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.agent.AgentConnectionException;
+import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AIIpValue;
@@ -95,6 +98,7 @@ import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.sigar.NetFlags;
+import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
@@ -317,61 +321,26 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         final Resource r = platform.getResource();
         final Audit audit = ResourceAudit.deleteResource(r, subject, 0, 0);
         boolean pushed = false;
-
         try {
             AuditManagerEJBImpl.getOne().pushContainer(audit);
             pushed = true;
-
             checkRemovePermission(subject, platform.getEntityId());
-
             // keep the configresponseId so we can remove it later
             ConfigResponseDB config = platform.getConfigResponse();
-
-            // Remove servers
-            final ServerManagerLocal sMan = getServerManager();
-            final Collection servers = platform.getServersBag();
-            // since we are using the hibernate collection
-            // we need to synchronize
-            synchronized(servers) {
-                for (Iterator i=servers.iterator(); i.hasNext();) {
-                    try {
-                        // this looks funky but the idea is to pull the server
-                        // obj into the session so that it is updated when flushed
-                        Server server =
-                            sMan.findServerById(((Server)i.next()).getId());
-                        // there are instances where we may have a duplicate
-                        // autoinventory identifier btwn platforms
-                        // (sendmail, ntpd, CAM Agent Server, etc...)
-                        final String uniqAiid =
-                            server.getPlatform().getId() +
-                            server.getAutoinventoryIdentifier();
-                        server.setAutoinventoryIdentifier(uniqAiid);
-                        server.setPlatform(null);
-                        i.remove();
-                    } catch (ServerNotFoundException e) {
-                        log.warn(e.getMessage());
-                    }
-                }
-            }
+            removeServerReferences(platform);
             final PlatformDAO dao = getPlatformDAO();
             // this flush ensures that the server's platform_id is set to null
             // before the platform is deleted and the servers cascaded
             dao.getSession().flush();
-            
             getAIQManagerLocal().removeAssociatedAIPlatform(platform);
+            cleanupAgent(platform);
+            platform.getIps().clear();
             dao.remove(platform);
-
-            // remove the config response
             if (config != null) {
                 getConfigResponseDAO().remove(config);
             }
-
-            // remove custom properties
             deleteCustomProperties(aeid);
-
-            // now remove the resource for the platform
             removeAuthzResource(subject, aeid, r);
-
             dao.getSession().flush();
         } catch (RemoveException e) {
             _log.debug("Error while removing Platform");
@@ -384,6 +353,62 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         } finally {
             if (pushed)
                 AuditManagerEJBImpl.getOne().popContainer(false);
+        }
+    }
+
+    private void cleanupAgent(Platform platform) {
+        final Agent agent = platform.getAgent();
+        if (agent == null) {
+            return;
+        }
+        final Collection platforms = agent.getPlatforms();
+        Platform phys = null;
+        for (final Iterator it=platforms.iterator(); it.hasNext(); ) {
+            final Platform p = (Platform)it.next();
+            if (p == null) {
+                continue;
+            }
+            final String platType = platform.getPlatformType().getName();
+            if (PlatformDetector.isSupportedPlatform(platType)) {
+                phys = p;
+            }
+            if (p.getId().equals(platform.getId())) {
+                it.remove();
+            }
+        }
+        if (phys == null) {
+            return;
+        }
+        if (phys.getId().equals(platform.getId())) {
+            AgentManagerEJBImpl.getOne().removeAgentStatus(agent);
+        }
+    }
+
+    private void removeServerReferences(Platform platform) {
+        final ServerManagerLocal sMan = getServerManager();
+        final Collection servers = platform.getServersBag();
+        // since we are using the hibernate collection
+        // we need to synchronize
+        synchronized(servers) {
+            for (final Iterator i=servers.iterator(); i.hasNext();) {
+                try {
+                    // this looks funky but the idea is to pull the server
+                    // obj into the session so that it is updated when flushed
+                    final Server server =
+                        sMan.findServerById(((Server)i.next()).getId());
+                    // there are instances where we may have a duplicate
+                    // autoinventory identifier btwn platforms
+                    // (sendmail, ntpd, CAM Agent Server, etc...)
+                    final String uniqAiid =
+                        server.getPlatform().getId() +
+                        server.getAutoinventoryIdentifier();
+                    server.setAutoinventoryIdentifier(uniqAiid);
+                    server.setPlatform(null);
+                    i.remove();
+                } catch (ServerNotFoundException e) {
+                    log.warn(e.getMessage());
+                }
+            }
         }
     }
 
@@ -713,7 +738,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
 
         String agentToken = aiPlatform.getAgentToken();
         if (p == null)
-            p = getPlatformFromAgentToken(agentToken);
+            p = getPhysPlatformByAgentToken(agentToken);
         
         if (p != null) {
             checkViewPermission(subject, p.getEntityId());
@@ -727,7 +752,12 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         return p;
     }
 
-    private Platform getPlatformFromAgentToken(String agentToken) {
+    /**
+     * @return non-virtual, physical, {@link Platform} associated with the
+     *  agentToken or null if one does not exist.
+     * @ejb:interface-method
+     */
+    public Platform getPhysPlatformByAgentToken(String agentToken) {
         try {
             AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
             Agent agent = aMan.getAgent(agentToken);
@@ -1593,27 +1623,79 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         }
         
         // need to check if IPs have changed, if so update Agent
+        updateAgentIps(subj, aiplatform, platform);
+    }
+    
+    private void updateAgentIps(AuthzSubject subj, AIPlatformValue aiplatform,
+                                Platform platform) {
         List ips = Arrays.asList(aiplatform.getAIIpValues());
         AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
-        Agent currAgent = platform.getAgent();
-        boolean removeCurrAgent = false;
+        Agent agent;
+        try {
+            // make sure we have the current agent that exists on the platform
+            // and associate it
+            agent = aMan.getAgent(aiplatform.getAgentToken());
+            platform.setAgent(agent);
+        } catch (AgentNotFoundException e) {
+            // the agent should exist at this point even if it is a new agent.
+            // something failed at another stage of this process
+            throw new SystemException(e);
+        }
+        boolean changeAgentIp = false;
         for (Iterator it = ips.iterator(); it.hasNext();) {
             AIIpValue ip = (AIIpValue) it.next();
-            if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_ADDED) {
-                try {
-                    Agent agent = aMan.getAgent(aiplatform.getAgentToken());
-                    platform.setAgent(agent);
-                    enableMeasurements(subj, platform);
-                } catch (AgentNotFoundException e) {
-                    throw new ApplicationException(e.getMessage(), e);
-                }
-            } else if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED
-                    && currAgent.getAddress().equals(ip.getAddress())) {
-                removeCurrAgent = true;
+            if (ip.getQueueStatus() == AIQueueConstants.Q_STATUS_REMOVED
+                && agent.getAddress().equals(ip.getAddress())) {
+                changeAgentIp = true;
             }
         }
-        if (removeCurrAgent) {
-            aMan.removeAgent(currAgent);
+        // Keep in mind that a unidirectional agent address
+        // doesn't matter since the communication is always
+        // from agent to server
+        if (changeAgentIp && !agent.isUnidirectional()) {
+            String origIp = agent.getAddress();
+            // In a perfect world this loop would key on platform.getIps() but
+            // then there are other issues with verifying that the agent is up
+            // before approving since platform IPs are updated later in the
+            // code flow.  Since ips contains new and current IP addresses
+            // of the platform it works.
+            for (Iterator it = ips.iterator(); it.hasNext();) {
+                AIIpValue ip = (AIIpValue) it.next();
+                if (ip.getQueueStatus() != AIQueueConstants.Q_STATUS_ADDED &&
+                    // Q_STATUS_PLACEHOLDER in this context simply means that
+                    // the ip is already associated with the platform and there
+                    // is no change.  Therefore it needs to be part of our checks
+                    ip.getQueueStatus() != AIQueueConstants.Q_STATUS_PLACEHOLDER) {
+                    continue;
+                }
+                try {
+                    // if ping succeeds then this address is ok to use
+                    // for the agent ip address.
+                    // This logic is based on a conversation that
+                    // scottmf had with chip 9/17/2009.
+                    agent.setAddress(ip.getAddress());
+                    aMan.pingAgent(subj, agent);
+                    _log.info("updating ip for agentId=" + agent.getId() +
+                              " and platformid=" + platform.getId() +
+                              " from ip=" + origIp +
+                              " to ip=" + ip.getAddress());
+                    platform.setAgent(agent);
+                    enableMeasurements(subj, platform);
+                    break;
+                } catch (AgentConnectionException e) {
+                    // if the agent connection fails then continue
+                } catch (Exception e) {
+                    // something is wrong internally, log the error but continue
+                    _log.error(e, e);
+                }
+                // make sure address does not change if/when last ping fails
+                agent.setAddress(origIp);
+            }
+            if (platform.getAgent() == null) {
+                _log.warn("Removing agent reference from platformid=" + platform.getId() +
+                          ".  Server cannot ping the agent from any IP " +
+                          "associated with the platform");
+            }
         }
     }
 

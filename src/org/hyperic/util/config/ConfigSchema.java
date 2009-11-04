@@ -25,18 +25,24 @@
 
 package org.hyperic.util.config;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class ConfigSchema implements Serializable {
 
-    private static final long serialVersionUID = 8171794117881852319L;
+	private static final long serialVersionUID = 8171794117881852319L;
 
-    private ArrayList configOptions;
+	private ArrayList configOptions;
 
     public ConfigSchema(){
         this.configOptions = new ArrayList();
@@ -112,6 +118,56 @@ public class ConfigSchema implements Serializable {
     public void addOptions(List options){
         this.configOptions.removeAll(options);
         this.configOptions.addAll(options);
+    }
+    
+    public byte[] encode() throws EncodingException {
+    	ObjectOutputStream objectStream = null;
+    	byte[] retVal = null;
+    	try {
+    		final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+    		objectStream = new ObjectOutputStream(byteStream);
+    	
+    		for (Iterator iterator = configOptions.iterator(); iterator.hasNext();) {
+    			final ConfigOption configOption = (ConfigOption) iterator.next();
+    			objectStream.writeObject(configOption);
+    		}
+    		objectStream.writeObject(null);
+    		objectStream.flush();
+    		retVal = byteStream.toByteArray();
+    	} catch (IOException exc) {
+    		throw new EncodingException(exc.toString());
+    	} finally {
+    		// ObjectStreams MUST be closed.
+    		if (objectStream != null)
+    			try {
+    				objectStream.close();
+    		} catch (Exception ex) {
+    		}
+    	}
+    	return retVal;
+    }
+    	 
+    public static ConfigSchema decode(byte[] data) throws EncodingException,
+    	InvalidOptionException, InvalidOptionValueException {
+    	try {
+    		ByteArrayInputStream byteStream = new ByteArrayInputStream(data);
+    		ObjectInputStream objectStream = new ObjectInputStream(byteStream);
+    		ConfigSchema schema = new ConfigSchema();
+    	
+    		// Read attributes
+    		while (true) {
+    			ConfigOption configOption;
+    			if ((configOption = (ConfigOption)objectStream.readObject()) == null) {
+    				break;
+    			}
+    			schema.addOption(configOption);
+    		}
+    		return schema;
+    	} catch (IOException exc) {
+    		throw new EncodingException(exc.toString());
+    	} catch (ClassNotFoundException exc) {
+    		throw new EncodingException(exc.toString());
+    	}
     }
 
     /**

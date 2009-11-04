@@ -56,7 +56,7 @@ public class HierarchicalAlertingManagerEJBImpl
      * 
      * @ejb:interface-method
      */
-    public void suppressMeasurementEvents(Map events) {
+    public void suppressMeasurementEvents(Map events, boolean isFromAgent) {
         //
     }
 

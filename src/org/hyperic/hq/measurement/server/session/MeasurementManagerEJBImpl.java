@@ -83,6 +83,7 @@ import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
+import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.server.session.Measurement;
@@ -189,7 +190,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      * @param props       Configuration data for the instance
      *
      * @return a List of the associated Measurement objects
-     * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
     public List createMeasurements(AppdefEntityID id, Integer[] templates,
@@ -207,41 +207,37 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 "The templates and intervals lists must be the same size");
         }
 
-        try {
-            MeasurementTemplateDAO tDao = getMeasurementTemplateDAO();
-            MeasurementDAO dao = getMeasurementDAO();
-            List metrics = dao.findByTemplatesForInstance(templates, resource);
-            
-            // Put the metrics in a map for lookup
-            Map lookup = new HashMap(metrics.size());
-            for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                Measurement m = (Measurement) it.next();
-                lookup.put(m.getTemplate().getId(), m);
-            }
+        MeasurementTemplateDAO tDao = getMeasurementTemplateDAO();
+        MeasurementDAO dao = getMeasurementDAO();
+        List metrics = dao.findByTemplatesForInstance(templates, resource);
 
-            for (int i = 0; i < templates.length; i++) {
-                MeasurementTemplate t = tDao.get(templates[i]);
-                if (t == null) {
-                    continue;
-                }
-                Measurement m = (Measurement) lookup.get(templates[i]);
-                
-                if (m == null) {
-                    // No measurement, create it
-                    m = createMeasurement(resource, t, props, intervals[i]);
-                } else {
-                    m.setEnabled(intervals[i] != 0);
-                    m.setInterval(intervals[i]);
-                    String dsn = translate(m.getTemplate().getTemplate(), props);
-                    m.setDsn(dsn);
-                    enqueueZeventForMeasScheduleChange(m, intervals[i]);
-                }
-                dmList.add(m);
-            }
-        } finally {
-            // Force a flush to ensure the metrics are stored
-            getMeasurementDAO().getSession().flush();
+        // Put the metrics in a map for lookup
+        Map lookup = new HashMap(metrics.size());
+        for (Iterator it = metrics.iterator(); it.hasNext(); ) {
+            Measurement m = (Measurement) it.next();
+            lookup.put(m.getTemplate().getId(), m);
         }
+
+        for (int i = 0; i < templates.length; i++) {
+            MeasurementTemplate t = tDao.get(templates[i]);
+            if (t == null) {
+                continue;
+            }
+            Measurement m = (Measurement) lookup.get(templates[i]);
+
+            if (m == null) {
+                // No measurement, create it
+                m = createMeasurement(resource, t, props, intervals[i]);
+            } else {
+                m.setEnabled(intervals[i] != 0);
+                m.setInterval(intervals[i]);
+                String dsn = translate(m.getTemplate().getTemplate(), props);
+                m.setDsn(dsn);
+                enqueueZeventForMeasScheduleChange(m, intervals[i]);
+            }
+            dmList.add(m);
+        }
+
         return dmList;
     }
 
@@ -258,9 +254,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         // Authz check
         super.checkModifyPermission(subject.getId(), id);        
 
-        // Call back into ourselves to force a new transaction to be created.
-        List dmList = getOne().createMeasurements(
-            id, templates, intervals, props);
+        List dmList = createMeasurements(id, templates, intervals, props);
         List eids = Collections.singletonList(id);
         AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
         ZeventManager.getInstance().enqueueEventAfterCommit(event);
@@ -341,7 +335,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 intervals[i] = 0;
         }
 
-        return getOne().createMeasurements(subject, id, tids, intervals, props);
+        return createMeasurements(subject, id, tids, intervals, props);
     }
 
     /**
@@ -999,8 +993,12 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             mids.addAll(dao.findIdsByTemplateForInstances(mtids[i], iids));
         }
 
-        // Do the update in bulk
-        dao.updateInterval(mids, interval);
+        for (final Iterator it=mids.iterator(); it.hasNext(); ) {
+            final Integer mid = (Integer)it.next();
+            final Measurement m = dao.findById(mid);
+            m.setEnabled(true);
+            m.setInterval(interval);
+        }
         
         // Update the agent schedule
         for (int i = 0; i < aeids.length; i++) {
@@ -1071,7 +1069,12 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         AppdefEntityID appId = new AppdefEntityID(resource);
         checkModifyPermission(subject.getId(), appId);
         MeasurementDAO dao = getMeasurementDAO();
-        dao.updateInterval(mids, interval);
+        for (final Iterator it=mids.iterator(); it.hasNext(); ) {
+            final Integer mid = (Integer)it.next();
+            final Measurement m = dao.findById(mid);
+            m.setEnabled(true);
+            m.setInterval(interval);
+        }
         List eids = Collections.singletonList(appId);
         AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
         ZeventManager.getInstance().enqueueEventAfterCommit(event);
@@ -1101,82 +1104,6 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
             ZeventManager.getInstance().enqueueEventAfterCommit(event);
         }
-    }
-
-    /**
-     * @param subject
-     * @param mId
-     * @throws MeasurementUnscheduleException 
-     * @throws PermissionException 
-     * @ejb:interface-method
-     */
-    public void disableMeasurement(AuthzSubject subject, Integer mId)
-        throws PermissionException, MeasurementUnscheduleException
-    {
-        disableMeasurements(subject, new Integer[]{mId});
-    }
-
-    /**
-     * Synchronously disables measurements according to the mids array.  Removes
-     * measurements from the cache as well.
-     * XXX scottmf, may be a good idea to add a flag that specifies
-     * if the measurements should be removed in the background / foreground
-     * and removed from cache.
-     * XXX scottmf, probably a bad idea to throw a MeasurementUnscheduleException
-     * if a failure occurs considering this is done in batch without any
-     * error status on what succeeded and what did not.
-     * @param subject {@link AuthzSubject} checks if subject has modify
-     * permission on the {@link AppdefEntityID} associated with the mid
-     * @param mids {@link Integer} array of mids representing a MeasurementId
-     * @ejb:interface-method
-     */
-    public void disableMeasurements(AuthzSubject subject, Integer[] mids)
-        throws PermissionException, MeasurementUnscheduleException
-    {
-        StopWatch watch = new StopWatch();        
-        Integer mid = null;
-        Measurement meas = null;
-        Resource resource = null;
-        AppdefEntityID appId = null;
-        List appIdList = new ArrayList();        
-        List midsList = Arrays.asList(mids);
-        
-        for (Iterator iter=midsList.iterator(); iter.hasNext(); ) {
-            mid = (Integer) iter.next();
-            
-            meas = getMeasurementDAO().get(mid);
-            if (!meas.isEnabled()) {
-                iter.remove();
-                continue;
-            }
-
-            resource = meas.getResource();
-            appId = new AppdefEntityID(resource);
-
-            checkModifyPermission(subject.getId(), appId);
-            appIdList.add(appId);
-
-            meas.setEnabled(false);
-        }
-        
-        if (!midsList.isEmpty()) {
-            mids = (Integer[]) midsList.toArray(new Integer[0]);
-            
-            removeMeasurementsFromCache(mids);
-        
-            watch.markTimeBegin("enqueueZevents");
-            enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-            watch.markTimeEnd("enqueueZevents");
-        
-            // Unscheduling of all metrics for a resource could indicate that
-            // the resource is getting removed.  Send the unschedule synchronously
-            // so that all the necessary plumbing is in place.
-            watch.markTimeBegin("unschedule");
-            MeasurementProcessorEJBImpl.getOne().unschedule(appIdList);
-            watch.markTimeEnd("unschedule");
-            
-            log.debug("disableMeasurements: total=" + mids.length + ", time=" + watch);
-        }        
     }
     
     /**
@@ -1659,6 +1586,35 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                       ": " + e.getMessage(), e);
         }
     }
+   
+   /**
+    * Initializes the units and resource properties of a measurement event
+    *
+    * @ejb:interface-method
+    */
+   public void buildMeasurementEvent(MeasurementEvent event) {      
+       Measurement dm = null;
+       
+       try {
+           dm = getMeasurementDAO().get(event.getInstanceId());
+           int resourceType = dm.getTemplate().getMonitorableType()
+                                   .getAppdefType();
+           event.setResource(new AppdefEntityID(resourceType, dm.getInstanceId()));
+           event.setUnits(dm.getTemplate().getUnits());
+       } catch (Exception e) {
+           if (event == null) {
+               log.warn("Measurement event is null");
+           } else if (dm == null) {
+               log.warn("Measurement is null for measurement event with metric id=" + event.getInstanceId());                
+           } else if (event.getResource() == null) {
+               log.error("Unable to set resource for measurement event with metric id=" + event.getInstanceId(), e);
+           } else if (event.getUnits() == null ) {
+               log.error("Unable to set units for measurement event with metric id=" + event.getInstanceId(), e);
+           } else {
+               log.error("Unable to build measurement event with metric id=" + event.getInstanceId(), e);
+           }
+       }
+   }
 
     public static MeasurementManagerLocal getOne() {
         try {

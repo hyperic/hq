@@ -26,16 +26,14 @@
 package org.hyperic.hq.plugin.weblogic.jmx;
 
 import java.io.File;
-
 import java.util.Properties;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import org.hyperic.hq.product.TypeBuilder;
-
 import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
 import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
+import org.hyperic.hq.product.TypeBuilder;
 
 public class NodeManagerQuery extends BaseServerQuery {
     public static final String MBEAN_TYPE = "NodeManager";

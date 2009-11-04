@@ -1064,7 +1064,7 @@ public class AgentClient {
     }
     
     // returns the startup timeout in milliseconds
-    private int getStartupTimeout(Properties bootProps) {
+    private static int getStartupTimeout(Properties bootProps) {
         int iSleepTime = AGENT_STARTUP_TIMEOUT;
         String sleepTime = bootProps.getProperty(PROP_STARTUP_TIMEOUT);
 
@@ -1084,7 +1084,15 @@ public class AgentClient {
         }
     }
 
-    private static AgentClient initializeAgent(){
+    /**
+     * Initialize the AgentClient
+     *
+     * @param generateToken If set to true, generate the agent token, otherwise
+     * wait until the tokens are available.
+     *
+     * @return An initialized AgentClient
+     */
+    private static AgentClient initializeAgent(boolean generateToken){
         SecureAgentConnection conn;
         AgentConfig cfg;
         String connIp, listenIp, authToken, propFile;
@@ -1127,31 +1135,59 @@ public class AgentClient {
         }
         
         String tokenFile = cfg.getTokenFile();
-        try {
-            authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
-        } catch(FileNotFoundException exc){
-            SYSTEM_ERR.print("- Unable to load agent token file.  Generating" +
-                             " a new one ... ");
+        if (generateToken) {
             try {
-                String nToken = SecurityUtil.generateRandomToken();
-
-                AgentClientUtil.generateNewTokenFile(tokenFile, nToken);
                 authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
-            } catch(IOException oexc){
-                SYSTEM_ERR.println("Unable to setup preliminary agent auth " +
-                                   "tokens: " + exc.getMessage());
+            } catch(FileNotFoundException exc){
+                SYSTEM_ERR.print("- Unable to load agent token file.  Generating" +
+                                 " a new one ... ");
+                try {
+                    String nToken = SecurityUtil.generateRandomToken();
+
+                    AgentClientUtil.generateNewTokenFile(tokenFile, nToken);
+                    authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
+                } catch(IOException oexc){
+                    SYSTEM_ERR.println("Unable to setup preliminary agent auth " +
+                                       "tokens: " + exc.getMessage());
+                    return null;
+                }
+                SYSTEM_ERR.println("Done");
+            } catch(IOException exc){
+                SYSTEM_ERR.println("Unable to get necessary authentication tokens"+
+                               " to talk to agent: " + exc.getMessage());
                 return null;
             }
-            SYSTEM_ERR.println("Done");
-        } catch(IOException exc){
-            SYSTEM_ERR.println("Unable to get necessary authentication tokens"+
-                               " to talk to agent: " + exc.getMessage());
+
+            conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken);
+            return new AgentClient(cfg, conn);
+        } else {
+            // Not the main agent daemon process, wait for the token to become
+            // available.  We will only wait up to the configured agent.startupTimeOut
+            long initializeStartTime = System.currentTimeMillis();
+            long startupTimeout = getStartupTimeout(bootProps);
+            while (initializeStartTime > (System.currentTimeMillis() - startupTimeout)) {
+                try {
+                    authToken = AgentClientUtil.getLocalAuthToken(tokenFile);
+                    conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken);
+                    return new AgentClient(cfg, conn);
+                } catch(FileNotFoundException exc){
+                    SYSTEM_ERR.println("- No token file found, waiting for " +
+                                       "Agent to initialize");
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        SYSTEM_ERR.println("Interrupted! Shutting down");
+                        return null;
+                    }
+                } catch(IOException e) {
+                    SYSTEM_ERR.println("Unable to read preliminary agent auth " +
+                                       "tokens, waiting for Agent to initialize " +
+                                       "(error was: " + e.getMessage() + ")");
+                }
+            }
+            SYSTEM_ERR.println("Timeout waiting for token file");
             return null;
         }
-
-        conn = new SecureAgentConnection(connIp, cfg.getListenPort(), authToken);
-
-        return new AgentClient(cfg, conn);
     }
 
     public static void main(String args[]) {
@@ -1171,7 +1207,13 @@ public class AgentClient {
             return;
         }
 
-        AgentClient client = initializeAgent();
+        AgentClient client;
+        if (args[0].equals("start")) {
+            // Only generate tokens on agent startup.
+            client = initializeAgent(true);
+        } else {
+            client = initializeAgent(false);
+        }
         
         if (client == null) {
             return;

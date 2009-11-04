@@ -17,7 +17,7 @@ ${l.numServices}: ${numServices}
 ${l.numApplications}: ${numApplications}
 ${l.numRoles}: ${numRoles}
 ${l.numUsers}: ${numUsers}
-${l.numAlerts}: ${numAlerts}
+${l.numAlertDefs}: ${numAlertDefs}
 ${l.numResources}: ${numResources}
 ${l.numResourceTypes}: ${numResourceTypes}
 ${l.numGroups}: ${numGroups}

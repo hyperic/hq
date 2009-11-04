@@ -3,6 +3,8 @@ package org.hyperic.hq.ui.util;
 import java.text.StringCharacterIterator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
@@ -24,6 +26,13 @@ import org.hyperic.util.config.ConfigResponse;
 
 public class SaveChartToDashboardUtil {
 	private static Log log = LogFactory.getLog(SaveChartToDashboardUtil.class.getName());
+	
+	private static Pattern AEID_PATTERN_A = 
+	    Pattern.compile(".*[?&]type=(\\d+).*&rid=(\\d+).*",
+                        Pattern.CASE_INSENSITIVE);
+	private static Pattern AEID_PATTERN_B = 
+	    Pattern.compile(".*[?&]rid=(\\d+).*&type=(\\d+).*",
+	                    Pattern.CASE_INSENSITIVE);
 	
 	public enum ResultCode {
 		SUCCESS,
@@ -61,6 +70,22 @@ public class SaveChartToDashboardUtil {
         return result;
 	}
 	
+	public static AppdefEntityID getAppdefEntityIDFromChartUrl(String url) {
+        AppdefEntityID id = null;
+        Matcher matcher = AEID_PATTERN_A.matcher(url);
+        
+        if (matcher.matches()) {
+            id = new AppdefEntityID(matcher.group(1) + ':' + matcher.group(2));            
+        } else {
+            matcher = AEID_PATTERN_B.matcher(url);
+            if (matcher.matches()) {
+                id = new AppdefEntityID(matcher.group(2) + ':' + matcher.group(1));
+            }
+        }
+        
+        return id;
+	}
+	
 	private static String generateChartUrl(ActionForward success, ViewChartForm chartForm, AppdefEntityID adeId, boolean isEE) 
 	throws Exception
 	{
@@ -91,7 +116,7 @@ public class SaveChartToDashboardUtil {
             chartParams.put( "ctype", chartForm.getCtype() );                
         }
         
-        return ActionUtils.changeUrl(success.getPath(), chartParams);		
+        return ActionUtils.changeUrl(success.getPath(), chartParams);
 	}
 	
 	private static ResultCode addChartToDashboard(String name, String url, DashboardConfig dashboardConfig, AuthzBoss boss, WebUser user, HttpServletRequest request) 

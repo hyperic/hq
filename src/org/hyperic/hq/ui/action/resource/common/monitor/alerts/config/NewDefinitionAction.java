@@ -107,8 +107,12 @@ public class NewDefinitionAction extends BaseAction {
         log.trace("adv="+adv);
         
         if (adeId instanceof AppdefEntityTypeID)
-            adv = eb.createResourceTypeAlertDefinition(
-                    sessionID, (AppdefEntityTypeID) adeId, adv);
+            try {
+                adv = eb.createResourceTypeAlertDefinition(
+                        sessionID, (AppdefEntityTypeID) adeId, adv);
+            } catch(Exception e) {
+                return returnFailure(request, mapping, params); 
+            }
         else
             adv = eb.createAlertDefinition(sessionID, adv);
 

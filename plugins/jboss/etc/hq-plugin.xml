@@ -66,6 +66,10 @@
     <filter name="user" value="java.naming.security.principal"/>
 
     <filter name="pass" value="java.naming.security.credentials"/>
+    
+    <filter name="template" value="${OBJECT_NAME}:${alias}" />
+	
+	<property name="template" value="${OBJECT_NAME}:${alias}" />
 
   <!-- appended to each template by MeasurementInfoXML -->
     <property name="template-config"
@@ -91,6 +95,12 @@
 
     <property name="JCAConnectionPool"
 	    value="jboss.jca:service=ManagedConnectionPool,name=%jca.connpool%"/>
+  
+  <property name="measurement-class"
+		value="org.hyperic.hq.plugin.jboss.JBossMeasurementPlugin" />
+  
+  <property name="control-class"
+		value="org.hyperic.hq.plugin.jboss.JBossServiceControlPlugin" />
 
     <metrics name="JBoss 3.2">
         <metric name="Availability"

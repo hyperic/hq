@@ -34,10 +34,12 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -45,6 +47,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.xpath.XPathAPI;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerExtValue;
+import org.hyperic.hq.appdef.shared.AIServiceTypeValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 
 import org.hyperic.hq.autoinventory.ServerSignature;
@@ -85,6 +88,7 @@ public abstract class ServerDetector
     private static final String[] NO_ARGS = new String[0];
     private static final long[] NO_PIDS = new long[0];
     private static final List NO_MODULES = Arrays.asList(NO_ARGS);
+    private static final Set EMPTY_SET = new HashSet(0,1);
 
     private static Sigar sigarImpl = null;
     private static SigarProxy sigar = null;
@@ -94,6 +98,7 @@ public abstract class ServerDetector
     private ConfigResponse cprops = null;
     private String description = null;
     private Properties properties;
+    private PluginUpdater pluginUpdater = new PluginUpdater();
 
     public ServerDetector() {}
 
@@ -166,6 +171,8 @@ public abstract class ServerDetector
                 new AIServiceValue[server.services.size()];
             server.services.toArray(services);
             resource.setAIServiceValues(services);
+            resource.setAiServiceTypes((AIServiceTypeValue[])server.serviceTypes.
+            		toArray(new AIServiceTypeValue[server.serviceTypes.size()]));
 
             platform.addAIServerValue(resource);            
         }
@@ -184,6 +191,7 @@ public abstract class ServerDetector
      * @deprecated - Plugins should not use this method.
      * @see #discoverServers
      * @see #discoverServices
+     * @see #discoverServiceTypes
      */
     public RuntimeResourceReport discoverResources(int serverId,
                                                    AIPlatformValue platform,
@@ -199,6 +207,15 @@ public abstract class ServerDetector
             getLog().debug("discovered " + servers.size() + " servers");
             return discoverServerResources(serverId, platform, config, servers);
         }
+        
+    	final Set serviceTypes = discoverServiceTypes(config);
+    	final List serviceTypeValues = new ArrayList(serviceTypes.size());
+    	for (Iterator iterator = serviceTypes.iterator();iterator.hasNext();) {
+    		final ServiceType serviceType = (ServiceType)iterator.next();
+    		serviceType.getAIServiceTypeValue().setServerId(serverId);
+    		serviceTypeValues.add(serviceType.getAIServiceTypeValue());
+    	}
+    	pluginUpdater.updateServiceTypes(getProductPlugin(), serviceTypes);
         
         //common case discover services only
         List services = discoverServices(config);
@@ -239,6 +256,8 @@ public abstract class ServerDetector
         server.setPlaceholder(true);
         server.setId(new Integer(serverId));
         server.setAIServiceValues(values);
+        server.setAiServiceTypes((AIServiceTypeValue[])serviceTypeValues.toArray(
+        		new AIServiceTypeValue[serviceTypeValues.size()]));
         platform.addAIServerValue(server);
         rrr.addAIPlatform(platform);
         return rrr;
@@ -283,6 +302,11 @@ public abstract class ServerDetector
     protected List discoverServices(ConfigResponse config)
         throws PluginException {
         return null;
+    }
+    
+    protected Set discoverServiceTypes(ConfigResponse config)
+    	throws PluginException {
+    	return EMPTY_SET;
     }
 
     public void init(PluginManager manager)

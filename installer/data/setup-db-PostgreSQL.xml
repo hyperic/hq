@@ -102,6 +102,10 @@
       <else>
         <!-- New installation, copy fresh postgres installation -->
         <echo>^^^INFO: Copying database files...</echo>
+      	<!-- Remove previous install since this is supposed to be a new installation -->
+      	<delete quiet="true">
+    		<fileset dir="${server.hqdb.dir}"/>
+		</delete>
         <antcall target="copy-pg"/>
         <echo>^^^INFO: Configuring database...</echo>
         <replace file="${server.hqdb.dir}/data/postgresql.conf"

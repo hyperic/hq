@@ -153,7 +153,8 @@ public class Tomcat40ServerDetector
             String url = "http://" + address + ":" + port;
             productConfig.setValue(JMXRemote.PROP_JMX_URL, url);
 
-            server.setProductConfig(productConfig);
+            //jmxUser and jmxPass can be configured in agent.properties
+            setProductConfig(server, productConfig);
             server.setConnectProperties(new String[] {
                JMXRemote.PROP_JMX_URL,
             });

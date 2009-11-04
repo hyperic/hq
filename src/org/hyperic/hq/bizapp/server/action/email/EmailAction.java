@@ -121,12 +121,16 @@ public class EmailAction extends EmailActionConfig
                     _log.debug(e.getMessage(), e);
                 }
             }
+            
+            if (_emailAddrs.length == 0) tmp = 0;
         } catch (NumberFormatException e) {
             _log.debug(e.getMessage(), e);
         } catch (ConfigPropertyException e) {
             _log.debug(e.getMessage(), e);
         }
-        _alertThreshold = (_emailAddrs.length == 0) ? 0 : tmp;
+        
+        _alertThreshold = tmp;
+        
         if (_alertThreshold > 0) {
             HQApp.getInstance().getScheduler().scheduleWithFixedDelay(
                 new ThresholdWorker(), Scheduler.NO_INITIAL_DELAY,
@@ -576,7 +580,7 @@ public class EmailAction extends EmailActionConfig
             _continueMsg =
                 _continueMsg.replaceAll("\\{1\\}", EVALUATION_PERIOD/1000+"")
                             .replaceAll("\\{2\\}", THRESHOLD_WINDOW/60000+"");
-            return _continueMsg;
+            return _continueMsg.replaceAll("\\{0\\}", notificationCount+"");
         }
 
         private final String getWindowStartMsg(int notificationCount) {

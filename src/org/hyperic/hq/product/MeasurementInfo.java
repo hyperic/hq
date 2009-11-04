@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.product;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,7 +35,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
  *
  */
 public class MeasurementInfo
-    implements Cloneable {
+    implements Cloneable, Serializable {
 
     public static final String ATTR_NAME            = "name";
     public static final String ATTR_ALIAS           = "alias";
@@ -321,4 +322,5 @@ public class MeasurementInfo
                                                rate);
         }
     }
+    
 }

@@ -33,10 +33,11 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.hyperic.hq.scheduler.shared.SchedulerUtil;
-import org.hyperic.util.pager.PagerProcessor;
+import org.hyperic.util.pager.PagerEventHandler;
+import org.hyperic.util.pager.PagerProcessorExt;
 import org.quartz.Trigger;
 
-public class PagerProcessor_control_schedule implements PagerProcessor {
+public class PagerProcessor_control_schedule implements PagerProcessorExt {
 
     protected static Log log =
         LogFactory.getLog( PagerProcessor_control_schedule.class.getName() );
@@ -89,4 +90,16 @@ public class PagerProcessor_control_schedule implements PagerProcessor {
         }
         return o;
     }
+
+	public PagerEventHandler getEventHandler() {
+		return null;
+	}
+
+	public Object processElement(Object o1, Object o2) {
+		return processElement(o1);
+	}
+
+	public boolean skipNulls() {
+		return true;
+	}
 }

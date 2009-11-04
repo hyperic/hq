@@ -42,7 +42,11 @@ class HealthController
         setJSONMethods(['getSystemStats', 'getDiag', 'cacheData', 
                         'agentData', 'runQuery', 'executeQuery'])
     }
-    
+
+    boolean logRequests() {
+        false
+    }
+
     private getAgentSchema() {
         def res = [
             getData: {pageInfo, params ->
@@ -64,7 +68,7 @@ class HealthController
                  label: {it.agent.port}],
                 [field: AgentSortField.VERSION,
                  width: '10%',
-                 label: {it.version}],
+                 label: {it.agent.version}],
                 [field: [getValue: {localeBundle.build},
                  description:'build', sortable:false],
                  width: '5%',
@@ -243,7 +247,7 @@ class HealthController
             numApplications:   resourceHelper.find(count:'applications'),
             numRoles:   resourceHelper.find(count:'roles'),
             numUsers:  resourceHelper.find(count:'users'),
-            numAlerts:  resourceHelper.find(count:'alerts'),
+            numAlertDefs:  resourceHelper.find(count:'alertDefs'),
             numResources:  resourceHelper.find(count:'resources'),
             numResourceTypes:  resourceHelper.find(count:'resourceTypes'),
             numGroups:  resourceHelper.find(count:'groups'),
@@ -393,7 +397,7 @@ class HealthController
             numApplications:  resourceHelper.find(count:'applications'),
             numRoles:         resourceHelper.find(count:'roles'),
             numUsers:         resourceHelper.find(count:'users'),
-            numAlerts:        resourceHelper.find(count:'alerts'),
+            numAlertDefs:     resourceHelper.find(count:'alertDefs'),
             numResources:     resourceHelper.find(count:'resources'),
             numResourceTypes: resourceHelper.find(count:'resourceTypes'),
             numGroups:        resourceHelper.find(count:'groups'),            
@@ -500,11 +504,6 @@ class HealthController
                     DBUtil.getBooleanValue(true, conn)+" and enabled="+
                     DBUtil.getBooleanValue(false, conn)+" and deleted="+
                     DBUtil.getBooleanValue(false, conn)}],
-          resourceTypeAlertDefsWithTriggers: [ 
-             name: localeBundle['queryResourceTypeAlertDefsWithTriggers'], 
-             query: {conn -> "select id, name, description, resource_id " +
-                             "from EAM_ALERT_DEFINITION where " +
-                             "parent_id = 0 and act_on_trigger_id is not null"}],
           version: [ 
               name: localeBundle['queryVersion'],     
               query:  {conn -> getDatabaseVersionQuery(conn)}],

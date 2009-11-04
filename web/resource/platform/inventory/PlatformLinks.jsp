@@ -12,7 +12,7 @@
   normal use of the program, and does *not* fall under the heading of
   "derived work".
   
-  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  Copyright (C) [2004-2009], Hyperic, Inc.
   This file is part of HQ.
   
   HQ is free software; you can redistribute it and/or modify
@@ -44,13 +44,15 @@
     <c:if test="${canModify}">
             <html:link page="/resource/platform/Inventory.do?mode=editConfig&eid=${resource.entityId}"><fmt:message key="resource.platform.inventory.link.Configure"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>
     </c:if>
-    <tiles:insert definition=".resource.common.quickDelete">
-      <tiles:put name="resource" beanName="resource"/>
-	  <tiles:put name="deleteMessage">
-		<fmt:message key="resource.platform.inventory.link.DeletePlatform"/>
-	  </tiles:put>
-    </tiles:insert>
-	<br>
+    <c:if test="${canRemove}" >
+    	<tiles:insert definition=".resource.common.quickDelete">
+      		<tiles:put name="resource" beanName="resource"/>
+	  		<tiles:put name="deleteMessage">
+				<fmt:message key="resource.platform.inventory.link.DeletePlatform"/>
+	  		</tiles:put>
+    	</tiles:insert>
+		<br>
+	</c:if>
     <c:choose>
         <c:when test="${canCreateChild}" >
             <html:link page="/resource/server/Inventory.do?mode=new&eid=${resource.entityId}"><fmt:message key="resource.platform.inventory.NewServerLink"/><html:img page="/images/title_arrow.gif" width="11" height="9" alt="" border="0"/></html:link><br>

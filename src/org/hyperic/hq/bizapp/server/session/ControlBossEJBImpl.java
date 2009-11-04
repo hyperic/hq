@@ -181,13 +181,11 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      */
     public List getActions(int sessionId, AppdefEntityID id)
         throws PluginNotFoundException, AppdefEntityNotFoundException,
-               SessionNotFoundException, SessionTimeoutException
+               SessionNotFoundException, SessionTimeoutException,
+               PermissionException, GroupNotCompatibleException
     {
-        // fix 5874
-        // controlManager.getActions needs to look up the platform
-        // this needs to be done by the overlord since the caller may have
-        // control for the server, but lack view for the platform
-        return getControlManager().getActions(getOverlord(), id);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return getControlManager().getActions(subject, id);
     }
     
     /**

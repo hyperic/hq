@@ -34,6 +34,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Properties;
 
 import javax.ejb.CreateException;
@@ -49,6 +50,7 @@ import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
+import org.hyperic.hq.agent.commands.AgentUpgrade_result;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.AgentCreateException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
@@ -126,6 +128,18 @@ public class AgentManagerEJBImpl
                                              " not found");
         }
         return agent;
+    }
+    
+    /**
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void removeAgentStatus(Agent agent) {
+        AgentReportStatusDAO dao = getAgentReportStatusDAO();
+        AgentReportStatus status = dao.getReportStatus(agent);
+        if (status != null) {
+            dao.remove(status);
+        }
     }
     
     /**
@@ -1001,9 +1015,7 @@ public class AgentManagerEJBImpl
      * @ejb:interface-method
      * @ejb:transaction type="Required"
      */
-    public void upgradeAgentBundle(AuthzSubject subject,
-                                    AppdefEntityID aid,  
-                                    String bundleFileName) 
+    public void upgradeAgentBundle(AuthzSubject subject, AppdefEntityID aid, String bundleFileName) 
         throws PermissionException, 
                AgentNotFoundException, 
                AgentConnectionException, 
@@ -1017,10 +1029,21 @@ public class AgentManagerEJBImpl
 
         checkCreatePlatformPermission(subject);
 
-        AgentCommandsClient client = AgentCommandsClientFactory.getInstance()
-                .getClient(aid);
+        AgentCommandsClient client = AgentCommandsClientFactory.getInstance().getClient(aid);
         String bundleFilePath = HQConstants.AgentBundleDropDir + "/" + bundleFileName;
-        client.upgrade(bundleFilePath, HQConstants.AgentBundleDropDir);
+        Map updatedAgentInfo = client.upgrade(bundleFilePath, HQConstants.AgentBundleDropDir);
+        
+        if (updatedAgentInfo != null && !updatedAgentInfo.isEmpty()) {
+            // If Map is not empty, we'll handle the data otherwise we do nothing
+            
+            Agent agent = getAgent(aid);
+            String updatedVersion = (String) updatedAgentInfo.get(AgentUpgrade_result.VERSION);
+            
+            if (!agent.getVersion().equals(updatedVersion) && updatedVersion != null) {
+                // Only update if different
+                agent.setVersion(updatedVersion);
+            }
+        }
     }
     
     /**

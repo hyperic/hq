@@ -31,7 +31,7 @@ import java.util.List;
 
 public class EnumerationConfigOption extends ConfigOption
     implements Serializable {
-    private ArrayList _values = new ArrayList(); // Values the enum holds
+    private List _values = new ArrayList(); // Values the enum holds
 
     /**
      * This constructor allows you to create an EnumConfigOption

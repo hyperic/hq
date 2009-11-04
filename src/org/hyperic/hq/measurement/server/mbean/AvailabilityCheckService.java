@@ -50,6 +50,7 @@ import org.hyperic.hq.measurement.server.session.ResourceDataPoint;
 import org.hyperic.hq.measurement.shared.AvailabilityManagerLocal;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.TimeUtil;
+import org.hyperic.util.notReady.NotReadyManager;
 
 /**
  * This job is responsible for filling in missing availabilty metric values.
@@ -77,6 +78,10 @@ public class AvailabilityCheckService
      * @jmx:managed-operation
      */
     public void hitWithDate(Date lDate) {
+        if (!new NotReadyManager().isReady()) {
+            _log.info("availability check service not starting until server is ready.");
+            return;
+        }
         super.hit(lDate);
     }
 

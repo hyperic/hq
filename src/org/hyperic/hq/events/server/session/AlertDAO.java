@@ -24,6 +24,7 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.Query;
@@ -60,16 +61,34 @@ public class AlertDAO extends HibernateDAO {
     }
 
     int deleteByCreateTime(long begin, long end) {
-        String sql = "delete Alert where " +
-        		     "ctime between :timeStart and :timeEnd and " +
-        		     "not id in (select alertId from EscalationState es " +
-        		                "where alertTypeEnum = :type)";
-
-        return getSession().createQuery(sql)
-            .setLong("timeStart", begin)
-            .setLong("timeEnd", end)
-            .setInteger("type", ClassicEscalationAlertType.CLASSIC.getCode())
-            .executeUpdate();
+        // don't want to thrash the Alert cache, so select and do an explicit
+        // remove() on each Object
+        final String sql = new StringBuilder()
+            .append("from Alert where ")
+            .append("ctime between :timeStart and :timeEnd and ")
+            .append("not id in (select alertId from EscalationState es ")
+            .append("where alertTypeEnum = :type)")
+            .toString();
+        final AlertActionLogDAO dao = getFactory().getAlertActionLogDAO();
+        List list = null;
+        int rtn = 0;
+        // due to http://opensource.atlassian.com/projects/hibernate/browse/HHH-1985
+        // need to batch this
+        while (list == null || list.size() > 0) {
+            list = getSession().createQuery(sql)
+                .setLong("timeStart", begin)
+                .setLong("timeEnd", end)
+                .setInteger("type", ClassicEscalationAlertType.CLASSIC.getCode())
+                .setMaxResults(1000)
+                .list();
+            dao.deleteAlertActions(list);
+            for (final Iterator it=list.iterator(); it.hasNext(); ) {
+                final Alert alert = (Alert)it.next();
+                rtn++;
+                remove(alert);
+            }
+        }
+        return rtn;
     }
     
     public List findByResource(Resource res) {
@@ -218,6 +237,18 @@ public class AlertDAO extends HibernateDAO {
             return (Alert) createCriteria()
                 .add(Restrictions.eq("alertDefinition", def))
                 .add(Restrictions.eq("fixed", new Boolean(fixed)))
+                .addOrder(Order.desc("ctime"))
+                .setMaxResults(1)
+                .uniqueResult();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+    
+    public Alert findLastByDefinition(AlertDefinition def) {
+        try {
+            return (Alert) createCriteria()
+                .add(Restrictions.eq("alertDefinition", def))
                 .addOrder(Order.desc("ctime"))
                 .setMaxResults(1)
                 .uniqueResult();

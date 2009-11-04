@@ -43,9 +43,9 @@ var pageData = new Array();
 
 
 <tiles:insert definition=".page.title.resource.platform.full">
-  <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
   <tiles:put name="resource" beanName="Resource"/>
   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
+  <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
 
 <tiles:insert definition=".tabs.resource.platform.inventory.current">

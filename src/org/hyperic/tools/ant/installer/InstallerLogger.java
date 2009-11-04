@@ -130,14 +130,13 @@ public class InstallerLogger implements BuildLogger {
                 isNoWrapMode = false;
             }
         }
-
-
+        
         registerMessageHandler(DEBUG_HANDLER);
         BasicLogger basicLogger = new BasicLogger();
 
         // Make sure raw log is in the same dir as regular log
         logfile = new WritableFile(logfile.getParentFile(),
-                                   logfile.getName() + ".debug");
+                                   logfile.getName() + ".verbose");
         basicLogger.setFile(logfile);
         basicLogger.setLevel("debug");
         basicLogger.register(project);
@@ -192,7 +191,7 @@ public class InstallerLogger implements BuildLogger {
 
             File originalFile = new File(logfileName);
             File originalDir = originalFile.getParentFile();
-            logfile = FileUtil.findWritableFile(new File("."),
+            logfile = FileUtil.findWritableFile(new File("logs"),
                                                 logfileName,
                                                 null,
                                                 "HQ_tmp");

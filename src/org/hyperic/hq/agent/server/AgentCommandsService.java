@@ -26,13 +26,21 @@
 package org.hyperic.hq.agent.server;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.JarURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.util.PropertiesHelper;
 import org.hyperic.hq.agent.AgentConfig;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.AgentUpgradeManager;
@@ -40,6 +48,8 @@ import org.hyperic.hq.agent.FileData;
 import org.hyperic.hq.agent.FileDataResult;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
+import org.hyperic.hq.agent.commands.AgentUpgrade_result;
+import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.transport.util.RemoteInputStream;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.file.FileUtil;
@@ -295,11 +305,15 @@ public class AgentCommandsService implements AgentCommandsClient {
     /**
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#upgrade(java.lang.String, java.lang.String)
      */
-    public void upgrade(String bundle, String destination)
-            throws AgentRemoteException {
+    public Map upgrade(String bundle, String destination)
+    throws AgentRemoteException {
         final File bundleFile = new File(bundle);
         final File workDir = new File(destination, "work");
+        
+        Map result = new HashMap();
+        
         try {
+
             _log.info("Preparing to upgrade agent bundle from file " + bundle +
                     " at destination " + destination);
             // check that we are running in Java Service Wrapper mode
@@ -367,11 +381,55 @@ public class AgentCommandsService implements AgentCommandsClient {
                 }
             }
             _log.info("Successfully upgraded to new agent bundle");
+            
+            try {
+                _log.debug("Creating result map");
+                
+                // Grab the version.properties file from the newly extracted hq-product.jar
+                final String relativePathToJarFile = System.getProperty(AgentConfig.HQ_PRODUCT_JAR_KEY, "./pdk/lib/hq-product.jar");
+                final File hqProductJar = new File(bundleDir, relativePathToJarFile);
+                
+                _log.debug("HQ product jar path: " + hqProductJar.getCanonicalPath());
+                
+                URL jarUrl = new URL("jar:" + hqProductJar.toURL() +"!/");
+                
+                _log.debug("HQ product jar url: " + jarUrl.toString());
+                
+                URL fileUrl = new URL(jarUrl, "version.properties");
+
+                _log.debug("version.properties url is: " + fileUrl.toString());
+                
+                JarURLConnection connection = (JarURLConnection) fileUrl.openConnection();
+                
+                connection.connect();
+                
+                Properties newVersionProperties = new Properties();
+                
+                newVersionProperties.load(connection.getInputStream());
+
+                // Created return map
+                String version = newVersionProperties.getProperty("version");
+                String build = newVersionProperties.getProperty("build.number");
+                
+                _log.debug("VERSION: " + version);
+                _log.debug("BUILD: " + build);
+                _log.debug("BUNDLE_NAME: " + bundleHome);
+                
+                result.put(AgentUpgrade_result.VERSION, version);
+                result.put(AgentUpgrade_result.BUILD, build);
+                result.put(AgentUpgrade_result.BUNDLE_NAME, bundleHome);
+            } catch(MalformedURLException e) {
+                _log.warn("Could not access new version.properties due to a malformed url, version value will not be updated in the database.", e);
+            } catch(IOException e) {
+                _log.warn("Could not read new version.properties file, version value will not be updated in the database.", e);
+            }
         }
         // cleanup work dir files and bundle
         finally {
             doUpgradeCleanup(bundleFile, workDir);
         }
+        
+        return result;
     }
 
     private void doUpgradeCleanup(File bundleFile, File workDir) {

@@ -25,16 +25,21 @@
 
 package org.hyperic.hq.events.server.session;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.ejb.CreateException;
 import javax.ejb.SessionBean;
 import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -45,6 +50,7 @@ import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.events.ResourceEventInterface;
 import org.hyperic.hq.events.server.session.EventLog;
@@ -52,6 +58,7 @@ import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.EventLogManagerUtil;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.TrackEvent;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * <p> Stores Events to and deletes Events from storage</p>
@@ -66,6 +73,9 @@ import org.hyperic.hq.product.TrackEvent;
  */
 public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     
+    private final Log log = LogFactory.getLog(EventLogManagerEJBImpl.class);
+    private final Log traceLog = LogFactory.getLog(EventLogManagerEJBImpl.class.getName() + "Trace");
+
     private final int MSGMAX = TrackEvent.MESSAGE_MAXLEN;
     private final int SRCMAX = TrackEvent.SOURCE_MAXLEN;
     
@@ -113,7 +123,7 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         }
 
         EventLog e = new EventLog(r, subject, event.getClass().getName(),
-                                  detail, event.getTimestamp(), status);
+                                  detail, event.getTimestamp(), status, event.getInstanceId());
         if (save) {
             return getEventLogDAO().create(e);
         } else {
@@ -132,6 +142,16 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
         getEventLogDAO().insertLogs(eventLogs);
     }
     
+    
+    /**
+     * Finds a unique log entry with the specified event type, instance ID, and timestamp.  Returns null if no such entry found.  
+     * If multiple entries are found, returns first one found.
+     * @ejb:interface-method
+     */
+    public EventLog findLog(String typeClass, int instanceId, long timestamp) {
+        return getEventLogDAO().findLog(typeClass, instanceId, timestamp);
+    }
+    
     /** 
      * Find the last event logs of all the resources of a given prototype.
      * (i.e. 'Linux' or 'FileServer File')
@@ -140,6 +160,39 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
      */
     public List findLastLogs(Resource proto) {
         return getEventLogDAO().findLastByType(proto);
+    }
+    
+    /**
+     * Find the last unfixed AlertFiredEvents for each alert definition in the list
+     * 
+     * @param alertDefinitionIds The list of alert definition ids
+     * @return {@link Map} of alert definition id {@link Integer} to {@link AlertFiredEvent}
+     * 
+     * @ejb:interface-method
+     */
+    public Map findLastUnfixedAlertFiredEvents(List alertDefinitionIds) {
+        final boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+        if (debug) watch.markTimeBegin("findUnfixedAlertFiredEventLogs");
+        Map alertFiredMap = getEventLogDAO().findUnfixedAlertFiredEventLogs();
+        if (debug) {
+            watch.markTimeEnd("findUnfixedAlertFiredEventLogs");
+            if (traceLog.isDebugEnabled()) {
+                watch.markTimeBegin("get mapping");
+                for (Iterator it = alertFiredMap.keySet().iterator(); it.hasNext();) {
+                    Integer key = (Integer) it.next();
+                    AlertFiredEvent val = (AlertFiredEvent) alertFiredMap.get(key);
+                    traceLog.debug(
+                            "alertFiredMap alertDefId=" + key
+                                + ", alertFiredEvent=" + val
+                                + ", alert id=" + val.getAlertId()
+                                + ", timestamp=" + val.getTimestamp());
+                }
+                watch.markTimeEnd("get mapping");
+            }
+            log.debug("findLastUnfixedAlertFiredEvents[" + alertFiredMap.size() + "]: " + watch);
+        }
+        return alertFiredMap;
     }
     
     /** 
@@ -174,6 +227,11 @@ public class EventLogManagerEJBImpl extends SessionBase implements SessionBean {
     {
         EventLogDAO eDAO = getEventLogDAO();
         Resource r = ResourceManagerEJBImpl.getOne().findResource(ent);
+        
+        if (r == null || r.isInAsyncDeleteState()) {
+            return new ArrayList(0);
+        }
+        
         Collection eTypes;
         
         if (eventTypes == null)

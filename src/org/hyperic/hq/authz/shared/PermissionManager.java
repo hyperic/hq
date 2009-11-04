@@ -206,12 +206,14 @@ public abstract class PermissionManager extends AuthzSession {
 
     public interface RolePermNativeSQL { 
         String getSQL();
-        Query bindParams(Query q, AuthzSubject subject, List operations);
+        Query bindParams(Query q, AuthzSubject subject, List viewResourcesOperations, List manageAlertOperations);
     }
           
     public abstract RolePermNativeSQL 
-        getRolePermissionNativeSQL(String resourceVar, String subjectParam,
-                                   String opListParam); 
+        getRolePermissionNativeSQL(String resourceVar, String eventLogVar,
+                                   String subjectParam,
+                                   String opListViewResourcesParam,
+                                   String opListManageAlertsParam); 
          
     
     public abstract String getAlertsHQL(boolean inEscalation, boolean notFixed,

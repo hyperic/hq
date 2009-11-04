@@ -96,7 +96,7 @@ public class ResourceHubPortalAction extends BaseAction {
     private static final int DEFAULT_GROUP_TYPE = 1;
     private static final String DEFAULT_RESOURCE_NAME = null;
 
-    private static final String SEPARATOR = " > ";
+    private static final String SEPARATOR = "&nbsp;&rsaquo;&nbsp;";
     private static final String VIEW_ATTRIB = "Resource Hub View";
     private static final String TYPE_ATTRIB = "Resource Hub Apppdef Type";
     private static final String GRP_ATTRIB  = "Resource Hub Group Type";
@@ -123,26 +123,7 @@ public class ResourceHubPortalAction extends BaseAction {
         // Set the view in the form
         HttpSession session = request.getSession();
         WebUser user = SessionUtils.getWebUser(session);
-        
         PageControl pc = RequestUtils.getPageControl(request);
-
-        /* Disable setting of paging preferences
-        if (hubForm.getPs() != null) {
-            user.setPreference(PAGE_ATTRIB, hubForm.getPs());
-            prefChanged = true; // Save new preference
-        } else {
-            try {
-                String pageSizeStr = user.getPreference(PAGE_ATTRIB);
-                Integer pageSize = Integer.valueOf(pageSizeStr);
-                if (pageSize.intValue() != pc.getPagesize()) {
-                    pc.setPagenum(pageSize.intValue());
-                    hubForm.setPs(pageSize);
-                }
-            } catch (InvalidOptionException e) {
-                // Just use default
-            }
-        }
-        */
         
         String view = hubForm.getView();
         if (!ResourceHubForm.LIST_VIEW.equals(view) &&
@@ -205,7 +186,7 @@ public class ResourceHubPortalAction extends BaseAction {
         String ft = hubForm.getFt();
         AppdefEntityTypeID aetid = null;
         if (ff.intValue() != AppdefEntityConstants.APPDEF_TYPE_APPLICATION &&
-            ft != null && ft.length() > 0) {
+            ft != null && ft.length() > 0 && !ft.equals(String.valueOf(DEFAULT_RESOURCE_TYPE))) {
             try {
                 // compat groups use the entity id format for ft
                 aetid = new AppdefEntityTypeID(ft);
@@ -338,6 +319,12 @@ public class ResourceHubPortalAction extends BaseAction {
                                       hubForm.isAny(), hubForm.isOwn(),
                                       hubForm.isUnavail(), pc);
 
+        // Generate root breadcrumb url based on the filter criteria submitted...
+        String rootBrowseUrl = BreadcrumbUtil.createRootBrowseURL(mapping.getInput(), hubForm, pc);
+        
+        // ...store it in the session, so that the bread crumb tag can get at it
+        session.setAttribute(Constants.ROOT_BREADCRUMB_URL_ATTR_NAME, rootBrowseUrl);
+        
         watch.markTimeEnd("findCompatInventory");
 
         request.setAttribute(Constants.ALL_RESOURCES_ATTR, resources);

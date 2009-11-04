@@ -21,7 +21,7 @@
     </property>
 
     <property name="alias" type="string">
-      <column name="ALIAS" not-null="true" length="50"/>
+      <column name="ALIAS" not-null="true" length="100"/>
     </property>
 
     <property name="units" type="string">
@@ -45,7 +45,7 @@
     </property>
 
     <property name="template" type="string">
-      <column name="TEMPLATE" not-null="true" length="500"/>
+      <column name="TEMPLATE" not-null="true" length="800"/>
     </property>
 
     <property name="plugin" type="string">

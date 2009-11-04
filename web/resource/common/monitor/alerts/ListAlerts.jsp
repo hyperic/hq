@@ -145,10 +145,10 @@
 
 
 <tiles:insert  definition=".page.title.events.list.platform">
-    <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
     <tiles:put name="resource" beanName="Resource"/>
     <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
     <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+    <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
 <tiles:insert definition =".tabs.resource.platform.alert.alerts">
     <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
@@ -157,10 +157,10 @@
 </c:if>
 <c:if test="${ CONST_SERVER == entityId.type}">
 <tiles:insert  definition=".page.title.events.list.server">
-    <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
     <tiles:put name="resource" beanName="Resource"/>
     <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
     <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+    <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
     <c:choose>
         <c:when test="${ canControl }">
@@ -179,10 +179,10 @@
 </c:if>
 <c:if test="${ CONST_SERVICE == entityId.type}">
 <tiles:insert  definition=".page.title.events.list.service">
-    <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
     <tiles:put name="resource" beanName="Resource"/>
     <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
     <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+    <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
     <c:choose>
         <c:when test="${ canControl }">
@@ -311,51 +311,36 @@
 </c:choose>
 
 <display:table cellspacing="0" cellpadding="0" width="100%" order="${so}" action="${sortAction}" items="${Alerts}" var="Alert">
-
-<display:column width="1%" property="id" title="<input
-type=\"checkbox\" onclick=\"MyAlertCenter.toggleAll(this)\"
-id=\"${widgetInstanceName}_CheckAllBox\">" isLocalizedTitle="false"
-styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
-<display:alertcheckboxdecorator name="alerts"
-elementId="${widgetInstanceName}|${Resource.entityId.appdefKey}|${Alert.id}|${Alert.maxPauseTime}"
-onclick="MyAlertCenter.toggleAlertButtons(this)"
-fixable="${!Alert.fixed}" acknowledgeable="${Alert.acknowledgeable}"
-styleClass="listMember"/> </display:column>
-
-<display:column width="10%" property="priority"
-title="alerts.alert.AlertList.ListHeader.Priority">
-<display:prioritydecorator
-flagKey="alerts.alert.alertlist.listheader.priority"/>
-</display:column>
-
-<display:column width="20%" property="ctime" sort="true" sortAttr="2"
-defaultSort="true" title="alerts.alert.AlertList.ListHeader.AlertDate"
-href="/alerts/Alerts.do?mode=viewAlert&eid=${Resource.entityId.appdefKey}"
-paramId="a" paramProperty="id" ><display:datedecorator/>
-</display:column>
-
-<display:column width="20%" property="name" sort="true" sortAttr="1"
-defaultSort="false" title="alerts.alert.AlertList.ListHeader.AlertDefinition"
-href="/alerts/Config.do?mode=viewDefinition&eid=${Resource.entityId.appdefKey}"
-paramId="ad" paramProperty="alertDefId"/>
-
-<display:column width="20%" property="conditionFmt"
-title="alerts.alert.AlertList.ListHeader.AlertCondition"/>
-
-<display:column width="12%" property="value"
-title="alerts.alert.AlertList.ListHeader.ActualValue" />
-
-<display:column width="7%" property="fixed"
-                title="alerts.alert.AlertList.ListHeader.Fixed">
-  <display:booleandecorator flagKey="yesno"/>
-</display:column>
-
-<display:column width="11%" property="acknowledgeable"
-                title="alerts.alert.AlertList.ListHeader.Acknowledge"
-                href="/alerts/RemoveAlerts.do?eid=${Resource.entityId.appdefKey}&alerts=${Alert.id}&buttonAction=ACKNOWLEDGE">
-  <display:booleandecorator flagKey="acknowledgeable"/>
-</display:column>
-
+	<display:column width="1%" property="id" 
+	                title="<input type=\"checkbox\" onclick=\"MyAlertCenter.toggleAll(this)\" id=\"${widgetInstanceName}_CheckAllBox\">" 
+	                isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
+		<display:alertcheckboxdecorator name="alerts" onclick="MyAlertCenter.toggleAlertButtons(this)"
+		                                elementId="${widgetInstanceName}|${Resource.entityId.appdefKey}|${Alert.id}|${Alert.maxPauseTime}"
+										fixable="${!Alert.fixed}" acknowledgeable="${Alert.acknowledgeable}" styleClass="listMember"/> 
+	</display:column>
+	<display:column width="10%" property="priority" title="alerts.alert.AlertList.ListHeader.Priority">
+		<display:prioritydecorator flagKey="alerts.alert.alertlist.listheader.priority"/>
+	</display:column>
+	<display:column width="20%" property="ctime" sort="true" sortAttr="2" defaultSort="true" 
+	                title="alerts.alert.AlertList.ListHeader.AlertDate" 
+	                href="/alerts/Alerts.do?mode=viewAlert&eid=${Resource.entityId.appdefKey}" 
+	                paramId="a" paramProperty="id" >
+	    <display:datedecorator/>
+	</display:column>
+	<display:column width="20%" property="name" sort="true" sortAttr="1" defaultSort="false" 
+	                title="alerts.alert.AlertList.ListHeader.AlertDefinition">
+		<display:conditionallinkdecorator test="${Alert.viewable}"
+					                      href="/alerts/Config.do?mode=viewDefinition&eid=${Resource.entityId.appdefKey}&ad=${Alert.alertDefId}" />
+	</display:column>
+	<display:column width="20%" property="conditionFmt" title="alerts.alert.AlertList.ListHeader.AlertCondition"/>
+	<display:column width="12%" property="value" title="alerts.alert.AlertList.ListHeader.ActualValue" />
+	<display:column width="7%" property="fixed" title="alerts.alert.AlertList.ListHeader.Fixed">
+  		<display:booleandecorator flagKey="yesno"/>
+	</display:column>
+	<display:column width="11%" property="acknowledgeable" title="alerts.alert.AlertList.ListHeader.Acknowledge"
+                    href="/alerts/RemoveAlerts.do?eid=${Resource.entityId.appdefKey}&alerts=${Alert.id}&buttonAction=ACKNOWLEDGE">
+  		<display:booleandecorator flagKey="acknowledgeable"/>
+	</display:column>
 </display:table>
 
 <tiles:insert definition=".toolbar.list">

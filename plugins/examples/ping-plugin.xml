@@ -25,6 +25,28 @@
 
 <plugin>
 
+  <!-- extracted to: pdk/work/scripts/ping/hq-ping
+
+    ping will return a 1 if the host is down.  This script will wrap that
+    value and exit with a code of 2, matching what the script plugin would
+    expect.
+  -->
+  <script name="hq-ping">
+  <![CDATA[
+#!/bin/sh
+ping=$1
+switch=$2
+count=$3
+hostname=$4
+
+result=`$ping $switch $count $hostname`
+[ "$?" != "0" ] &&
+    exit 2
+
+exit 0
+  ]]>
+  </script>
+
   <service name="ICMP Ping">
 
     <config>
@@ -49,7 +71,7 @@
     <!-- /sbin/ping www.hyperic.com -c 3 -->
 
     <filter name="template"
-            value="exec:file=%ping%,args=%switch% %count% %hostname%:${alias}"/>
+            value="exec:file=pdk/work/scripts/ping/hq-ping,args=%ping% %switch% %count% %hostname%:${alias}"/>
 
     <metric name="Availability"
             indicator="true"/>

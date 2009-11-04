@@ -98,7 +98,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 <html:form action="/resource/hub/RemoveResource.do">
 
 <tiles:insert definition=".page.title.resource.hub">
-  <tiles:put name="titleName"><c:out value="${navHierarchy}"/></tiles:put>
+  <tiles:put name="titleName"><span id="browseFilters"><c:out value="${navHierarchy}" escapeXml="false" /></span></tiles:put>
 </tiles:insert>
 
 <c:if test="${not empty ResourceSummary}">
@@ -378,7 +378,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <html:link page="/alerts/Config.do?mode=list" paramId="eid" paramName="resource" paramProperty="entityId"><html:img page="/images/icon_hub_a.gif" width="11" height="11" alt="" border="0"/></html:link>
     </c:if>
     </td>
-      <td class="tableCell" align="left" valign="top"><span class="SpanPopup1"><html:link page="/Resource.do" paramId="eid" paramName="resource" paramProperty="entityId"><c:out value="${resource.name}"/></html:link><c:if test="${not empty resource.description}"><span><c:out value="${resource.description}" escapeXml="false"/></span></c:if></span></td>
+      <td class="tableCell" align="left" valign="top"><span class="SpanPopup1"><html:link page="/Resource.do" paramId="eid" paramName="resource" paramProperty="entityId"><c:out value="${resource.name}"/></html:link><c:if test="${not empty resource.description}"><span><c:out value="${resource.description}" /></span></c:if></span></td>
       <!-- Insert metrics tile here -->
       <c:forEach items="${indicatorsMap[resource.entityId]}" var="metric">
         <td class="tableCell" align="middle" valign="top">

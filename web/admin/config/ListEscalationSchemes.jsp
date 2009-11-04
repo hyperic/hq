@@ -1,10 +1,10 @@
-<%@ page language="java" %>
-<%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="struts-logic" prefix="logic" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
+<%@ page language="java"%>
+<%@ page errorPage="/common/Error.jsp"%>
+<%@ taglib uri="jstl-fmt" prefix="fmt"%>
+<%@ taglib uri="struts-html-el" prefix="html"%>
+<%@ taglib uri="struts-tiles" prefix="tiles"%>
+<%@ taglib uri="struts-logic" prefix="logic"%>
+<%@ taglib uri="jstl-c" prefix="c"%>
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -30,7 +30,8 @@
   USA.
  --%>
 
-<tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
+<tiles:insert page="/admin/config/AdminHomeNav.jsp" />
+
 <script type="text/Javascript">
     function changeHighlight(elem) {
            elem.previousSibling.style.display = "";
@@ -43,136 +44,144 @@
         dojo11.byId('createButton').style.display = "none";
     }
 </script>
+
 <table width="100%" cellpadding="0" cellspacing="10">
-<tr>
-<td width="30%" valign="top" id="escalationsList">
-<tiles:insert definition=".portlet.error"/>
-<tiles:insert definition=".portlet.confirm"/>
+	<tr>
+		<td width="30%" valign="top" id="escalationsList">
+			<tiles:insert definition=".portlet.error" /> 
+			<tiles:insert definition=".portlet.confirm" />
 
-    <table width="100%" cellpadding="0" cellspacing="0" class="TableBottomLine">
-    <thead>
-    <tr>
-          <td colspan="2">
-                <table cellpadding="0" cellspacing="0" border="0" width="100%">
-                    <tr>
-                        <td class="BlockTitle"><fmt:message key="common.header.EscalationName"/></td>
-                        <c:if test="${not empty param.escId && useroperations['createEscalation']}"><td class="BlockTitle" id="createButton" style="text-align: right;"><html:link page="/admin/config/Config.do?mode=escalate"><html:img src="/images/tbb_new.gif" border="0"/></html:link></td> </c:if>
-                </tr>
-            </table>
-        </td>
-    </tr>
-    </thead>
-    <tbody id="escalations">
+			<table width="100%" cellpadding="0" cellspacing="0" class="TableBottomLine">
+				<thead>
+					<tr>
+						<td colspan="2">
+							<table cellpadding="0" cellspacing="0" border="0" width="100%">
+								<tr>
+									<td class="BlockTitle">
+										<fmt:message key="common.header.EscalationName" />
+									</td>
+									<c:if test="${not empty param.escId && useroperations['createEscalation']}">
+										<td class="BlockTitle" id="createButton" style="text-align: right;">
+											<html:link page="/admin/config/Config.do?mode=escalate">
+												<html:img src="/images/tbb_new.gif" border="0" />
+											</html:link>
+										</td>
+									</c:if>
+								</tr>
+							</table>
+						</td>
+					</tr>
+				</thead>
+				<tbody id="escalations">
 
-    </tbody>
-    </table>
-</td>
+				</tbody>
+			</table>
+		</td>
 
-<!-- Do the delete button here so that we don't have to try to duplicate it in javascript -->
-<span id="deleteBtn" style="display: none;">&nbsp;
-<c:if test="${useroperations['removeEscalation']}">
-<html:img page="/images/tbb_delete.gif" border="0" onmouseout="imageSwap(this, imagePath + 'tbb_delete', '');" onmousedown="imageSwap(this, imagePath + 'tbb_delete', '_gray')"/>
-</c:if>
-</span>
+		<!-- Do the delete button here so that we don't have to try to duplicate it in javascript -->
+		<span id="deleteBtn" style="display: none;">&nbsp; 
+			<c:if test="${useroperations['removeEscalation']}">
+				<html:img page="/images/tbb_delete.gif" 
+				          border="0" 
+				          onmouseout="imageSwap(this, imagePath + 'tbb_delete', '');" 
+				          onmousedown="imageSwap(this, imagePath + 'tbb_delete', '_gray')" />
+			</c:if> 
+		</span>
 
-<script langugage="text/Javascript">
-function showEscRows(originalRequest) {
-  var escJson = eval( '( { "escalations": ' + originalRequest.responseText + ' })' );
+		<script langugage="text/Javascript">
+			function showEscRows(originalRequest) {
+				var escJson = eval( '( { "escalations": ' + originalRequest.responseText + ' })' );
+  				var schemes = escJson.escalations;
+				var escalations = dojo11.byId('escalations');
 
-  var schemes = escJson.escalations;
+				if (escalations.childNodes.length > 0) {
+    				while(escalations.lastChild) {
+      					escalations.removeChild(escalations.lastChild);
+    				}
+  				}
 
-  var escalations = dojo11.byId('escalations');
-  if (escalations.childNodes.length > 0) {
-    while(escalations.lastChild) {
-      escalations.removeChild(escalations.lastChild);
-    }
-  }
+				if (schemes.length == 0) {
+    				var tr = document.createElement("tr");
 
-  if (schemes.length == 0) {
-    var tr = document.createElement("tr");
-    tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
+    			    tr.setAttribute((document.all ? 'className' : 'class'), "ListRow");
 
-    var td1 = document.createElement("td");
-    td1.setAttribute((document.all ? 'className' : 'class'), "ListCell");
-    td1.setAttribute('colspan', '2');
-    td1.innerHTML = '<fmt:message key="admin.config.message.noEscalations"/>';
-    tr.appendChild(td1);
+    				var td1 = document.createElement("td");
 
-    escalations.appendChild(tr);
-  }
+    			    td1.setAttribute((document.all ? 'className' : 'class'), "ListCell");
+    				td1.setAttribute('colspan', '2');
+    				td1.innerHTML = '<fmt:message key="admin.config.message.noEscalations"/>';
+    				tr.appendChild(td1);
 
-  for (var i = 0; i < schemes.length; i++) {
-    var tr = document.createElement("tr");
-    if ((i % 2) == 0) {
-      tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
-    }
-    else {
-      tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
-    }
+					escalations.appendChild(tr);
+  				}
 
+  				for (var i = 0; i < schemes.length; i++) {
+    				var tr = document.createElement("tr");
 
-    var td2 = document.createElement("td");
-    td2.setAttribute('title', '<fmt:message key="admin.config.message.ClickEscNameEdit"/>')
-    if (schemes[i].id == '<c:out value="${param.escId}"/>') {
-      td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="padding-right:5px;"/>' + '<b>' + schemes[i].name + '</b>';
-      td2.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
-      td2.setAttribute("align", "left");
-    }
-    else {
-      td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="display:none;padding-right:5px;"/>' + '<a href="<html:rewrite page="/admin/config/Config.do?mode=escalate&escId="/>' + schemes[i].id + '" onclick="changeHighlight(this);">' + schemes[i].name + '</a>';
+    			    if ((i % 2) == 0) {
+      					tr.setAttribute((document.all ? 'className' : 'class'), "tableRowEven");
+    				} else {
+      					tr.setAttribute((document.all ? 'className' : 'class'), "tableRowOdd");
+    				}
 
-      td2.setAttribute((document.all ? 'className' : 'class'), 'ListCell');
-    }
-    tr.appendChild(td2);
+					var td2 = document.createElement("td");
 
-    td3 = document.createElement("td");
-    td3.setAttribute('align', 'right');
+				    td2.setAttribute('title', '<fmt:message key="admin.config.message.ClickEscNameEdit"/>')
+    
+    				if (schemes[i].id == '<c:out value="${param.escId}"/>') {
+      					td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="padding-right:5px;"/>' + '<b>' + schemes[i].name.escapeHTML() + '</b>';
+      					td2.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
+      					td2.setAttribute("align", "left");
+    				} else {
+      					td2.innerHTML = '<html:img page="/images/icon_right_arrow.gif" border="0" width="10" height="10" style="display:none;padding-right:5px;"/>' + '<a href="<html:rewrite page="/admin/config/Config.do?mode=escalate&escId="/>' + schemes[i].id + '" onclick="changeHighlight(this);">' + schemes[i].name.escapeHTML() + '</a>';
+						td2.setAttribute((document.all ? 'className' : 'class'), 'ListCell');
+    				}
 
-    if (schemes.length > 1) {
-      td3.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + dojo11.byId('deleteBtn').innerHTML + '</a>';
-    } else {
-        td3.innerHTML="&nbsp;";
-    }
+				    tr.appendChild(td2);
 
-    if (schemes[i].id == '<c:out value="${param.escId}"/>') {
-      td3.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
-    }
-    else {
-      td3.setAttribute((document.all ? 'className' : 'class'), "ListCell");
-    }
+				    td3 = document.createElement("td");
 
-    tr.appendChild(td3);
+				    td3.setAttribute('align', 'right');
 
-    escalations.appendChild(tr);
-  }
-}
+					if (schemes.length > 1) {
+      					td3.innerHTML = '<a href="<html:rewrite action="/admin/config/RemoveEscalation"/>' + '?esc=' + schemes[i].id + '">' + dojo11.byId('deleteBtn').innerHTML + '</a>';
+    				} else {
+        				td3.innerHTML="&nbsp;";
+    				}
 
-  function initEscalationSchemes() {
-    new Ajax.Request('<html:rewrite action="/escalation/ListAllEscalationName"/>', {onSuccess:showEscRows});
-    document.EscalationSchemeForm.action = '<html:rewrite action="/admin/config/Config.do"/>';
-    document.EscalationSchemeForm.mode.value = 'escalate';
-  }
+					if (schemes[i].id == '<c:out value="${param.escId}"/>') {
+						td3.setAttribute((document.all ? 'className' : 'class'), "selectedHighlight");
+    				} else {
+      					td3.setAttribute((document.all ? 'className' : 'class'), "ListCell");
+    				}
 
-  dojo11.addOnLoad(initEscalationSchemes);
+					tr.appendChild(td3);
+					escalations.appendChild(tr);
+  				}
+			}
 
-  var reloadScheme = true;
-</script>
+			function initEscalationSchemes() {
+    			new Ajax.Request('<html:rewrite action="/escalation/ListAllEscalationName"/>', {onSuccess:showEscRows});
+    			document.EscalationSchemeForm.action = '<html:rewrite action="/admin/config/Config.do"/>';
+    			document.EscalationSchemeForm.mode.value = 'escalate';
+  			}
 
+  			dojo11.addOnLoad(initEscalationSchemes);
 
-<br/>
-
-<td valign="top">
-<c:choose>
-  <c:when test="${not empty param.escId}">
-    <tiles:insert page="/admin/config/ViewEscalation.jsp"/>
-  </c:when>
-  <c:otherwise>
-    <tiles:insert page="/admin/config/NewEscalation.jsp"/>
-  </c:otherwise>
-</c:choose>
-</td>
-</tr>
+  			var reloadScheme = true;
+		</script>
+		<br />
+		<td valign="top">
+			<c:choose>
+				<c:when test="${not empty param.escId}">
+					<tiles:insert page="/admin/config/ViewEscalation.jsp" />
+				</c:when>
+				<c:otherwise>
+					<tiles:insert page="/admin/config/NewEscalation.jsp" />
+				</c:otherwise>
+			</c:choose>
+		</td>
+	</tr>
 </table>
-
-<br/>
-<tiles:insert page="/admin/config/AdminHomeNav.jsp"/>
+<br />
+<tiles:insert page="/admin/config/AdminHomeNav.jsp" />

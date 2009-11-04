@@ -30,7 +30,11 @@ class AlertController
         def minPriority = params.getOne('minPriority', '1')
         def severity = AlertSeverity.findByCode(minPriority.toInteger())
     }        
-    
+
+    boolean logRequests() {
+        false
+    }    
+
     private getNow() {
         System.currentTimeMillis()
     }

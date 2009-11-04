@@ -28,6 +28,8 @@ package org.hyperic.hq.agent.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
@@ -231,17 +233,20 @@ public class AgentCommandsClientImpl
     /**
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#upgrade(java.lang.String, java.lang.String)
      */
-    public void upgrade(String tarFile, String destination) 
+    public Map upgrade(String tarFile, String destination) 
         throws AgentRemoteException, AgentConnectionException {
         
         AgentCommandsClient proxy = null;
+        Map result = new HashMap();
         
         try {
             proxy = (AgentCommandsClient)getSynchronousProxy(AgentCommandsClient.class);
-            proxy.upgrade(tarFile, destination);           
+            result = proxy.upgrade(tarFile, destination);           
         } finally {
             safeDestroyService(proxy);
         }
+        
+        return result;
     }
 
     /**

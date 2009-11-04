@@ -42,6 +42,11 @@ implements AlertDefinitionManagerLocal, Verifiable {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public AlertDefinitionValue createAlertDefinition(AlertDefinitionValue a)  {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	public void deleteAlertDefinitions(AuthzSubject subj, Integer[] ids)
 	throws RemoveException, PermissionException {
@@ -60,13 +65,23 @@ implements AlertDefinitionManagerLocal, Verifiable {
 
 	}
 
-	public PageList findAlertDefinitionChildren(Integer id) {
+	public boolean isEnabled(Integer id) {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public PageList findAlertDefinitionChildren(Integer id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public SortedMap findAlertDefinitionNames(AuthzSubject subj, AppdefEntityID id,
 			Integer parentId) throws PermissionException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	public SortedMap findAlertDefinitionNames(AppdefEntityID id,Integer parentId) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -172,11 +187,6 @@ implements AlertDefinitionManagerLocal, Verifiable {
 	}
 
 	public boolean isAlertDefined(AppdefEntityID id, Integer parentId) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
-	public boolean isAvailability(AlertDefinition def, boolean up) {
 		// TODO Auto-generated method stub
 		return false;
 	}

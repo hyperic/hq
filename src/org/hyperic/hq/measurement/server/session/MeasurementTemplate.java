@@ -95,7 +95,7 @@ public class MeasurementTemplate
         return _name;
     }
     
-    void setName(String name) {
+    public void setName(String name) {
         _name = name;
     }
 

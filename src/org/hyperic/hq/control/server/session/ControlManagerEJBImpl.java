@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -189,6 +189,17 @@ public class ControlManagerEJBImpl implements SessionBean {
     
         _controlScheduleManager.doSingleAction(id, subject, action, args, null);
     }
+    
+    /**
+     * Execute a single control action on a given entity.
+     *
+     * @ejb:interface-method view-type="local"
+     */
+    public void doAction(AuthzSubject subject, AppdefEntityID id,
+                         String action) throws PluginException, PermissionException {
+        String args = null;
+        doAction(subject, id, action, args);
+    }
 
     /**
      * Schedule a new control action.
@@ -274,11 +285,25 @@ public class ControlManagerEJBImpl implements SessionBean {
      * @ejb:interface-method view-type="local"
      */
     public List getActions(AuthzSubject subject, AppdefEntityID id)
-        throws PluginNotFoundException, AppdefEntityNotFoundException
+        throws PermissionException, PluginNotFoundException, 
+               AppdefEntityNotFoundException, GroupNotCompatibleException
     {
-        String pluginName;
-   
-        pluginName = getPlatformManager().getPlatformPluginName(id);
+        if (id.isGroup()) {
+            List groupMembers  = 
+                GroupUtil.getCompatGroupMembers(subject, id,
+                                                null, 
+                                                PageControl.PAGE_ALL);
+
+            // For each entity in the list, sanity check permissions
+            for (Iterator i = groupMembers.iterator(); i.hasNext();) {
+                AppdefEntityID entity = (AppdefEntityID) i.next();
+                checkControlPermission(subject, entity);
+            }
+        } else {
+            checkControlPermission(subject, id);
+        }
+        
+        String pluginName = getPlatformManager().getPlatformPluginName(id);
         return _controlManager.getActions(pluginName);
     }
 
@@ -550,6 +575,7 @@ public class ControlManagerEJBImpl implements SessionBean {
                              cLocal.getScheduled().booleanValue(),
                              cLocal.getDateScheduled(),
                              status);
+        event.setMessage(msg);
         Messenger sender = new Messenger();
         sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
     }

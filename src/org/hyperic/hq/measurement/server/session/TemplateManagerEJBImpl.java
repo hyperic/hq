@@ -85,6 +85,8 @@ import org.hyperic.util.pager.PageList;
  * @ejb:transaction type="Required"
  */
 public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
+
+    private static final int ALIAS_LIMIT = 100;
     private final Log log = LogFactory.getLog(TemplateManagerEJBImpl.class);
 
     /**
@@ -346,7 +348,13 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             if (!template.isDefaultOn())
                 template.setDefaultOn(interval != 0);
             
-            dmDao.updateIntervalToTemplateInterval(template);
+            final List measurements =
+                getMeasurementDAO().findByTemplate(template.getId());
+            for (final Iterator it=measurements.iterator(); it.hasNext(); ) {
+                final Measurement m = (Measurement)it.next();
+                m.setEnabled(template.isDefaultOn());
+                m.setInterval(template.getDefaultInterval());
+            }
             
             List appdefEntityIds = 
                 dmDao.findAppdefEntityIdsByTemplate(template.getId());
@@ -553,7 +561,13 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
                     stmt = conn.prepareStatement(templatesql);
                     stmt.setInt(col++, rawid.intValue());
                     stmt.setString(col++, info.getName());
-                    stmt.setString(col++, info.getAlias());
+                    String alias = info.getAlias();
+                    if (alias.length() > ALIAS_LIMIT) {
+                        alias = alias.substring(0, ALIAS_LIMIT);
+                        log.warn("ALIAS field of EAM_MEASUREMENT_TEMPLATE truncated: original value was " +
+                                 info.getAlias() + ", truncated value is " + alias);
+                    }
+                    stmt.setString(col++, alias);
                     stmt.setString(col++, info.getUnits());
                     stmt.setInt(col++, info.getCollectionType());
                     stmt.setBoolean(col++, info.isDefaultOn());

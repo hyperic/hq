@@ -68,7 +68,7 @@
       <column name="AGENT_ID" not-null="false" index="AGENT_ID_IDX"/>
     </many-to-one>
 
-    <bag inverse="true" cascade="all"
+    <bag inverse="true" cascade="all-delete-orphan"
          name="ips" table="EAM_IP" optimistic-lock="false">
       <cache usage="read-write"/>
       <key on-delete="cascade" column="PLATFORM_ID"/>
@@ -78,7 +78,7 @@
     <bag inverse="true" cascade="all" name="serversBag" table="EAM_SERVER"
          optimistic-lock="false">
       <cache usage="read-write"/>
-      <key on-delete="cascade" column="PLATFORM_ID"/>
+      <key column="PLATFORM_ID"/>
       <one-to-many class="Server"/>
     </bag>
     

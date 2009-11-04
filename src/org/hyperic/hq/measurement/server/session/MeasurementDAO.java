@@ -50,7 +50,6 @@ import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 
@@ -81,17 +80,17 @@ public class MeasurementDAO extends HibernateDAO {
     }
     
     /**
+     * Used primarily for preloaded 2nd level cache measurement objects
      * retrieves List<Object[]>
      * [0] = Measurement
      * [1] = MeasurementTemplate
      */
     List findAllEnabledMeasurementsAndTemplates() {
-        Dialect dialect = Util.getDialect();
         String hql = new StringBuilder()
             .append("from Measurement m")
             .append(" join m.template t")
-            .append(" where enabled = ")
-            .append(dialect.toBooleanValueString(true))
+            .append(" left outer join fetch m.baselinesBag b")
+            .append(" where enabled = '1'")
             .toString();
         return getSession().createQuery(hql).list();
     }
@@ -238,46 +237,6 @@ public class MeasurementDAO extends HibernateDAO {
         return appdefEntityIds;
     }
     
-    /**
-     * Set the interval for all the associated Measurements to the
-     * MeasurementTemplate interval. Also, make sure that if the
-     * MeasurementTemplate has default on set, then the associated Measurements
-     * are enabled (and vice versa). 
-     * 
-     * @param template The MeasurementTemplate (that has been persisted, and
-     *                 thus, has its id set).
-     */
-    void updateIntervalToTemplateInterval(MeasurementTemplate template) {        
-        String sql = "update versioned Measurement set " +
-                     "interval = :newInterval, enabled = :isEnabled " +
-                     "where template.id = :tid";
-        
-        getSession().createQuery(sql)
-                    .setLong("newInterval", template.getDefaultInterval())
-                    .setBoolean("isEnabled", template.isDefaultOn())
-                    .setInteger("tid", template.getId().intValue())
-                    .executeUpdate();
-    }
-    
-    /**
-     * Set the interval for all metrics to the specified interval
-     * @param mids  The list of Measurement id's to update
-     * @param interval The new interval in milliseconds
-     */
-    void updateInterval(List mids, long interval) {
-        if (mids.size() == 0)
-            return;
-        
-        String sql = "UPDATE Measurement " +
-                     "SET enabled = true, interval = :interval " +
-                     "WHERE id IN (:ids)";
-
-        getSession().createQuery(sql)
-            .setLong("interval", interval)
-            .setParameterList("ids", mids)
-            .executeUpdate();
-    }
-
     List findByResource(Resource resource)
     {
         return createCriteria()
@@ -483,20 +442,23 @@ public class MeasurementDAO extends HibernateDAO {
         final Query query = getSession().createQuery(sql)
             .setCacheable(true)
             .setCacheRegion("Measurement.findAvailMeasurements");
-        for (int i=0; i<resList.size(); i+=BATCH_SIZE) {
-            int end = Math.min(i + BATCH_SIZE, resList.size());
-            query.setParameterList("resources", resList.subList(i, end));
-            rtn.addAll(query.list());
-        }
+        
         // should be a unique result if only one resource is being examined
         if (resources.size() == 1) {
+            query.setParameterList("resources", resList);            
             Object result = query.uniqueResult();
             if (result != null) {
-                return Collections.singletonList(query.uniqueResult());
+                rtn.add(result);
             }
-            return Collections.EMPTY_LIST;
+        } else {        
+            for (int i=0; i<resList.size(); i+=BATCH_SIZE) {
+                int end = Math.min(i + BATCH_SIZE, resList.size());
+                query.setParameterList("resources", resList.subList(i, end));
+                rtn.addAll(query.list());
+            }
         }
-        return query.list();
+
+        return rtn;
     }
     
     List findAvailMeasurements(ResourceGroup g) {
@@ -638,7 +600,7 @@ public class MeasurementDAO extends HibernateDAO {
        }
        return rtn;
     }
-    
+
     List findAvailMeasurementsByInstances(int type, Integer[] ids) {
         boolean checkIds = (ids != null && ids.length > 0);
         String sql = new StringBuilder()

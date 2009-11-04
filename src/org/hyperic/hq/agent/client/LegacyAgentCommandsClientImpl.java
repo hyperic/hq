@@ -28,6 +28,8 @@ package org.hyperic.hq.agent.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hyperic.hq.agent.AgentCommandsAPI;
 import org.hyperic.hq.agent.AgentConnectionException;
@@ -42,7 +44,9 @@ import org.hyperic.hq.agent.commands.AgentDie_args;
 import org.hyperic.hq.agent.commands.AgentPing_args;
 import org.hyperic.hq.agent.commands.AgentReceiveFileData_args;
 import org.hyperic.hq.agent.commands.AgentRestart_args;
+import org.hyperic.hq.agent.commands.AgentRestart_result;
 import org.hyperic.hq.agent.commands.AgentUpgrade_args;
+import org.hyperic.hq.agent.commands.AgentUpgrade_result;
 import org.hyperic.util.math.MathUtil;
 
 /**
@@ -157,13 +161,19 @@ public class LegacyAgentCommandsClientImpl implements AgentCommandsClient {
     /**
      * @see org.hyperic.hq.agent.client.AgentCommandsClient#upgrade(java.lang.String, java.lang.String)
      */
-    public void upgrade(String tarFile, String destination)
-            throws AgentRemoteException, AgentConnectionException {
+    public Map upgrade(String tarFile, String destination)
+    throws AgentRemoteException, AgentConnectionException {
         // set the arguments to the command
         AgentUpgrade_args args = new AgentUpgrade_args(tarFile, destination);
+        AgentRemoteValue cmdRes = this.agentConn.sendCommand(AgentCommandsAPI.command_upgrade, this.verAPI.getVersion(), args);
+        AgentUpgrade_result upgradeResult = new AgentUpgrade_result(cmdRes);
+        Map result = new HashMap();
 
-        this.agentConn.sendCommand(AgentCommandsAPI.command_upgrade,
-                                   this.verAPI.getVersion(), args);
+        result.put(AgentUpgrade_result.VERSION, upgradeResult.getAgentVersion());
+        result.put(AgentUpgrade_result.BUILD, upgradeResult.getAgentBuild());
+        result.put(AgentUpgrade_result.BUNDLE_NAME, upgradeResult.getAgentBundleName());
+
+        return result;
     }
     
     /**

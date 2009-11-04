@@ -51,6 +51,7 @@ import org.hyperic.hq.ui.util.ConfigurationProxy;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.DashboardUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.util.SaveChartToDashboardUtil;
 import org.hyperic.hq.ui.util.SessionUtils;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
@@ -69,10 +70,6 @@ public class RESTService extends BaseService {
     private static Log log = LogFactory.getLog(RESTService.class);
 
     public static final String SERVICE_NAME = "api";
-
-    private static final Pattern AEID_PATTERN =
-        Pattern.compile(".*type=(\\d+).*rid=(\\d+).*",
-                        Pattern.CASE_INSENSITIVE);
 
     private static final Pattern MTID_PATTERN =
         Pattern.compile(".*&m=(\\d+).*", Pattern.CASE_INSENSITIVE);
@@ -389,25 +386,22 @@ public class RESTService extends BaseService {
                     chartList = StringUtil.explode(res, Constants.DASHBOARD_DELIMITER);
                     if (chartList != null) {
                         ResourceManagerLocal resMan = ResourceManagerEJBImpl.getOne();
-                        Matcher matcher;
                         for (String chartCfg : chartList) {
                             List<String> chart =
                                 StringUtil.explode(chartCfg, ",");
                             //Lookup the rid for the resource in each chart
-                            matcher = AEID_PATTERN.matcher(chart.get(1));
                             Integer resId = 0;
-                            if (matcher.matches()) {
-                                AppdefEntityID aeid =
-                                    new AppdefEntityID(matcher.group(1) + ':' +
-                                                       matcher.group(2));
-                                try {
-                                    Resource resource =
-                                        resMan.findResource(aeid);
+                            try {
+                                AppdefEntityID aeid = SaveChartToDashboardUtil
+                                                        .getAppdefEntityIDFromChartUrl(chart.get(1));
+                                if (aeid != null) {
+                                    Resource resource = resMan.findResource(aeid);
                                     resId = resource.getId();
-                                } catch (Exception e) {
-                                    // Resource removed
-                                    continue;
                                 }
+                            } catch (Exception e) {
+                                // Resource removed
+                                log.debug(e.getLocalizedMessage(), e);
+                                continue;
                             }
                             if (resId.intValue() == resourceIdParam) {
                                 //If the resource exists in the chart then check all the mtids
@@ -480,22 +474,20 @@ public class RESTService extends BaseService {
 	                            // Extract the resource ID & name
 	                            Integer resId = 0;
 	                            String resName = chart.get(0);
-	                            
-	                            matcher = AEID_PATTERN.matcher(chart.get(1));
-	                            
-	                            if (matcher.matches()) {
-	                                AppdefEntityID aeid =
-	                                    new AppdefEntityID(matcher.group(1) + ':' +
-	                                                       matcher.group(2));
-	                                try {
+	                            	                            
+	                            try {
+	                                AppdefEntityID aeid = SaveChartToDashboardUtil
+	                                                        .getAppdefEntityIDFromChartUrl(chart.get(1));	                            
+	                                if (aeid != null) {
 	                                    Resource resource =	resMan.findResource(aeid);
 	                                    
 	                                    resId = resource.getId();
 	                                    resName = resource.getName();
-	                                } catch (Exception e) {
-	                                    // Resource removed
-	                                    continue;
 	                                }
+	                            } catch (Exception e) {
+	                                // Resource removed
+	                                log.debug(e.getLocalizedMessage(), e);
+	                                continue;
 	                            }
 	                            
 	                            // Extract the ctype if exists
@@ -626,14 +618,17 @@ public class RESTService extends BaseService {
         try {
             EventsBoss eb = ContextUtils.getEventsBoss(_servletContext);
             MaintenanceEvent event = null;
+            Integer groupId = Integer.valueOf(groupIdParam);
 
             if ((scheduleParam == null) || (scheduleParam.trim().length() == 0))
             {
             	// Get Scheduled Maintenance Event              
-            	event = eb.getMaintenanceEvent(user.getSessionId(), 
-            	                               Integer.valueOf(groupIdParam));            	
+                event = eb.getMaintenanceEvent(user.getSessionId(), groupId);
+            	if (event == null) {
+            	    event = new MaintenanceEvent(groupId);
+            	}
             } else {
-            	event = new MaintenanceEvent(Integer.valueOf(groupIdParam));
+            	event = new MaintenanceEvent(groupId);
             	
             	if (Boolean.valueOf(scheduleParam).booleanValue()) {
             		// Reschedule Maintenance Event

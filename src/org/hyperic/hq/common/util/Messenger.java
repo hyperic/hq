@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004-2008], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -51,7 +51,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
 
-public class Messenger {
+public class Messenger implements MessagePublisher {
     private static Log _log = LogFactory.getLog(Messenger.class);
 
     // Static Strings for everyone
@@ -89,49 +89,21 @@ public class Messenger {
         _tConn    = tConn;
         _tSession = tSession;
     }
-    
-    /**
-     * Reset the thread local queue.
-     */
-    public static void resetThreadLocalQueue() {
-        ThreadLocalQueue.getInstance().clearEnqueuedObjects();
-    }
-    
-    /**
-     * Enqueue a message on the thread local.
-     * 
-     * @param sObj The message.
-     */
-    public static void enqueueMessage(Serializable sObj) {
-        ThreadLocalQueue.getInstance().enqueueObject(sObj);
-    }
-    
-    /**
-     * Drain the thread local of its enqueued messages.
-     * 
-     * @return The enqueued messages.
-     */
-    public static List drainEnqueuedMessages() {
-        ThreadLocalQueue queue = ThreadLocalQueue.getInstance();
-        List enqueued = queue.getEnqueuedObjects();
-        queue.clearEnqueuedObjects();
-        return enqueued;
-    }
-    
+
     private Queue getQueue(String name) {
         return (Queue) getDestination(name);
     }
-    
+
     private Topic getTopic(String name) {
         return (Topic) getDestination(name);
     }
-    
+
     private Destination getDestination(String name) {
-        
+
         Destination result = null;
-        
+
         try {
-            
+
             Map tlMap = (Map) _localTAndQs.get();
             result = (Destination) tlMap.get(name);
             if (result == null) {
@@ -146,7 +118,7 @@ public class Messenger {
 
                 tlMap.put(name, result);
             }
-            
+
         } catch (NamingException ne) {
             _log.error("Naming error for " + name + ": " + ne.toString());
         }
@@ -223,7 +195,7 @@ public class Messenger {
             }
         }
     }
-    
+
     /**
      * Send message to a Topic.
      */

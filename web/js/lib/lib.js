@@ -3029,11 +3029,11 @@ hyperic.group_manager = function() {
             		checkBox.onclick = new Function("MyGroupManager.dialogs.AddToExistingGroup.toggleButtons(this);");
             		
             		td2.className = "tableCell";
-            		td2.innerHTML = data.groups[i].name + "&nbsp;";
+            		td2.innerHTML = data.groups[i].name.escapeHTML() + "&nbsp;";
             		td3.className = "tableCell";
             		
             		if (data.groups[i].description) {
-            			td3.innerHTML = data.groups[i].description;
+            			td3.innerHTML = data.groups[i].description.escapeHTML();
             		}
             		td3.innerHTML += "&nbsp;";
             		

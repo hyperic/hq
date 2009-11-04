@@ -27,7 +27,9 @@ package org.hyperic.hq.product.jmx;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import javax.management.MBeanServerConnection;
@@ -43,8 +45,8 @@ import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceResource;
-
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.config.ConfigOption;
 import org.hyperic.util.config.ConfigResponse;
@@ -54,6 +56,9 @@ public class MxServerDetector
     extends DaemonDetector
     implements AutoServerDetector
 {
+    private static final String TEMPLATE_PROPERTY = "template";
+    private static final String CONTROL_CLASS_PROPERTY = "control-class";
+    private static final String MEASUREMENT_CLASS_PROPERTY = "measurement-class";
     private static final Log log = LogFactory.getLog(MxServerDetector.class);
     static final String PROP_SERVICE_NAME = "name";
     public static final String PROC_MAIN_CLASS    = "PROC_MAIN_CLASS";
@@ -65,6 +70,9 @@ public class MxServerDetector
         "-Dcom.sun.management.jmxremote";
     protected static final String SUN_JMX_PORT = 
         SUN_JMX_REMOTE + ".port=";
+    
+    private ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
+   
 
     protected static String getMxURL(String port) {
         return
@@ -202,13 +210,13 @@ public class MxServerDetector
         return query.toString();
     }
 
-    protected class MxProcess {
+    public class MxProcess {
         long _pid;
         String _installpath;
         String[] _args;
         String _url;
 
-        protected MxProcess(long pid,
+        public MxProcess(long pid,
                             String[] args,
                             String installpath) {
             _pid = pid;
@@ -299,6 +307,60 @@ public class MxServerDetector
 
         return procs;
     }
+    
+    protected boolean isInstallTypeVersion(MxProcess process) {
+        String dir = process.getInstallPath();
+        return isInstallTypeVersion(dir);
+    }
+    
+    protected  ServerResource getServerResource(MxProcess process) {
+        String dir = process.getInstallPath();
+        //set process.query using the same query used to find the process,
+        //with PROC_HOME_DIR (if defined) expanded to match dir
+        String query = getProcQuery(dir);
+
+        // Create the server resource
+        ServerResource server = newServerResource(dir);
+        adjustClassPath(dir);
+
+        ConfigResponse config = new ConfigResponse();
+        ConfigSchema schema =
+            getConfigSchema(getTypeInfo().getName(),
+                            ProductPlugin.CFGTYPE_IDX_PRODUCT);
+
+        if (schema != null) {
+            ConfigOption option =
+                schema.getOption(PROP_PROCESS_QUERY);
+
+            if (option != null) {
+                // Configure process.query
+                config.setValue(option.getName(), query);
+            }
+        }
+
+        if (process.getURL() != null) {
+            config.setValue(MxUtil.PROP_JMX_URL,
+                            process.getURL());
+        }
+        else {
+            String[] args = process.getArgs();
+            for (int j=0; j<args.length; j++) {
+                if (configureMxURL(config, args[j])) {
+                    break;
+                }
+                else if (configureLocalMxURL(config, args[j], query)) {
+                    //continue as .port might come later
+                }
+            }
+        }
+
+        // default anything not auto-configured
+        setProductConfig(server, config);
+        discoverServerConfig(server, process.getPid());
+
+        server.setMeasurementConfig();
+        return server;
+    }
 
     public List getServerResources(ConfigResponse platformConfig)
         throws PluginException {
@@ -310,56 +372,11 @@ public class MxServerDetector
 
         for (int i=0; i<procs.size(); i++) {
             MxProcess process = (MxProcess)procs.get(i);
-            String dir = process.getInstallPath();
-
-            if (!isInstallTypeVersion(dir)) {
+            
+            if (!isInstallTypeVersion(process)) {
                 continue;
             }
-            //set process.query using the same query used to find the process,
-            //with PROC_HOME_DIR (if defined) expanded to match dir
-            String query = getProcQuery(dir);
-
-            // Create the server resource
-            ServerResource server = newServerResource(dir);
-            adjustClassPath(dir);
-
-            ConfigResponse config = new ConfigResponse();
-            ConfigSchema schema =
-                getConfigSchema(getTypeInfo().getName(),
-                                ProductPlugin.CFGTYPE_IDX_PRODUCT);
-
-            if (schema != null) {
-                ConfigOption option =
-                    schema.getOption(PROP_PROCESS_QUERY);
-
-                if (option != null) {
-                    // Configure process.query
-                    config.setValue(option.getName(), query);
-                }
-            }
-
-            if (process.getURL() != null) {
-                config.setValue(MxUtil.PROP_JMX_URL,
-                                process.getURL());
-            }
-            else {
-                String[] args = process.getArgs();
-                for (int j=0; j<args.length; j++) {
-                    if (configureMxURL(config, args[j])) {
-                        break;
-                    }
-                    else if (configureLocalMxURL(config, args[j], query)) {
-                        //continue as .port might come later
-                    }
-                }
-            }
-
-            // default anything not auto-configured
-            setProductConfig(server, config);
-            discoverServerConfig(server, process.getPid());
-
-            server.setMeasurementConfig();
-            servers.add(server);
+            servers.add(getServerResource(process));
         }
 
         return servers;
@@ -465,5 +482,43 @@ public class MxServerDetector
                 throw new PluginException(e.getMessage(), e);
             }
         }
+    }
+    
+   
+    
+    public Set discoverServiceTypes(ConfigResponse serverConfig)
+	throws PluginException {
+    	 JMXConnector connector;
+         MBeanServerConnection mServer;
+         Set serviceTypes = new HashSet();
+         
+         //plugins need to define these properties at the plugin level to discover dynamic service types
+         if(getProductPlugin().getPluginData()
+			.getProperty(MEASUREMENT_CLASS_PROPERTY) == null || getProductPlugin().getPluginData()
+			.getProperty(CONTROL_CLASS_PROPERTY) == null || getProductPlugin().getPluginData()
+			.getProperty(TEMPLATE_PROPERTY) == null) {
+        	 return serviceTypes;
+         }
+         
+         try {
+             connector = MxUtil.getMBeanConnector(serverConfig.toProperties());
+             mServer = connector.getMBeanServerConnection();
+         } catch (Exception e) {
+             throw new PluginException(e.getMessage(), e);
+         } 
+
+    	try {
+			final Set objectNames = mServer.queryNames(new ObjectName(MBeanUtil.DYNAMIC_SERVICE_DOMAIN + ":*"), null);
+			serviceTypes = serviceTypeFactory.create(getProductPlugin(), (ServerTypeInfo)getTypeInfo(), mServer, objectNames);
+		} catch (Exception e) {
+			 throw new PluginException(e.getMessage(), e);
+		} finally {
+            try {
+                connector.close();
+            } catch (IOException e) {
+                throw new PluginException(e.getMessage(), e);
+            }
+        }
+		return serviceTypes;
     }
 }

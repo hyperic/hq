@@ -114,7 +114,7 @@
       <html:radio property="active" value="true"/>
       <fmt:message key="alert.config.props.PB.ActiveYes"/><br>
       <c:choose>
-      	<c:when test="${alertDef.enabled}">
+      	<c:when test="${empty alertDef or alertDef.enabled}">
 	      <html:radio property="active" value="false"/>
       	</c:when>
       	<c:otherwise>

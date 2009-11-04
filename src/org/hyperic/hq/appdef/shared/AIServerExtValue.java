@@ -44,6 +44,7 @@ import org.hyperic.util.config.ConfigResponse;
 public class AIServerExtValue  extends AIServerValue {
 
     private AIServiceValue[] _aiservices;
+    private AIServiceTypeValue[] aiServiceTypes;
     private boolean _placeholder;
     private boolean autoEnable;
     private int metricConnectHashCode;
@@ -63,7 +64,15 @@ public class AIServerExtValue  extends AIServerValue {
         _aiservices = aiservices;
     }
     
-    public List getAIServiceValuesAsList() {
+    public AIServiceTypeValue[] getAiServiceTypes() {
+		return aiServiceTypes;
+	}
+
+	public void setAiServiceTypes(AIServiceTypeValue[] aiServiceTypes) {
+		this.aiServiceTypes = aiServiceTypes;
+	}
+
+	public List getAIServiceValuesAsList() {
         List res;
         if (_aiservices == null) { 
             res = new ArrayList();
@@ -85,6 +94,12 @@ public class AIServerExtValue  extends AIServerValue {
         AIServiceValue[] newservice = {aiservice};
         _aiservices =
             (AIServiceValue[]) ArrayUtil.combine(_aiservices, newservice);
+    }
+    
+    public void addAIServiceTypeValue (AIServiceTypeValue aiserviceType) {
+        AIServiceTypeValue[] newserviceType = {aiserviceType};
+        aiServiceTypes =
+            (AIServiceTypeValue[]) ArrayUtil.combine(aiServiceTypes, newserviceType);
     }
 
     public boolean getPlaceholder () { return _placeholder; }

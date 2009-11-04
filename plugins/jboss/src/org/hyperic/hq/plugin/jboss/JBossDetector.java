@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -43,12 +44,16 @@ import java.util.jar.JarFile;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.management.ObjectName;
 import javax.naming.Context;
 
 import org.jboss.jmx.adaptor.rmi.RMIAdaptor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.product.jmx.ServiceTypeFactory;
+
 import org.hyperic.hq.product.AutoServerDetector;
 import org.hyperic.hq.product.DaemonDetector;
 import org.hyperic.hq.product.GenericPlugin;
@@ -57,6 +62,7 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ServerControlPlugin;
 import org.hyperic.hq.product.FileServerDetector;
 import org.hyperic.hq.product.ServerResource;
+import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceResource;
 import org.hyperic.hq.plugin.jboss.jmx.ServerQuery;
 import org.hyperic.hq.plugin.jboss.jmx.ServiceQuery;
@@ -91,6 +97,8 @@ public class JBossDetector
     private static final String[] PTQL_QUERIES = {
         "State.Name.sw=java,Args.*.eq=" + JBOSS_MAIN,};
     private static HashMap bindings = new HashMap();
+    
+    
 
     private static File getFileFromURL(String name) {
         try {
@@ -344,6 +352,28 @@ public class JBossDetector
                 (JBossInstance) servers.get(0);
         return instance.getHomePath();
     }
+    
+	public Set discoverServiceTypes(ConfigResponse serverConfig) throws PluginException {
+		Set serviceTypes = new HashSet();
+	         
+		RMIAdaptor mServer;
+	
+	 	try {
+	 		mServer = JBossUtil.getMBeanServer(serverConfig.toProperties());
+	 	} catch (Exception e) {
+	 		throw new PluginException(e.getMessage(), e);
+	 	}
+	
+	    try {
+			final Set objectNames = mServer.queryNames(new ObjectName(org.hyperic.hq.product.jmx.MBeanUtil.DYNAMIC_SERVICE_DOMAIN + ":*"), null);
+			//TODO have to instantiate here due to classloading issues with MBeanServerConnection in 1.4 agent.  Can make an instance variable when agent can be 1.5 compliant.
+			ServiceTypeFactory serviceTypeFactory = new ServiceTypeFactory();
+			serviceTypes = serviceTypeFactory.create(getProductPlugin(), (ServerTypeInfo)getTypeInfo(), mServer, objectNames);
+		} catch (Exception e) {
+			throw new PluginException(e.getMessage(), e);
+		} 
+		return serviceTypes;
+	}
 
     /**
      * Look for for the embedded Tomcat server,

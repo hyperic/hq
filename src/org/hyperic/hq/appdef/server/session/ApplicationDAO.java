@@ -317,4 +317,17 @@ public class ApplicationDAO extends HibernateDAO
         String hql = "from Application where resource.resourceType = null";
         return createQuery(hql).list();
     }
+    
+    public boolean isApplicationService(int applicationId, int serviceId) {
+        String sql = "from Application a " +
+                     "join a.appServices s " +
+                     "where a.id = :aid and s.service.id = :sid";
+        
+        List results = getSession().createQuery(sql)
+                                   .setInteger("aid", applicationId)
+                                   .setInteger("sid", serviceId)
+                                   .list();
+        
+        return results.size() == 1;
+    }
 }

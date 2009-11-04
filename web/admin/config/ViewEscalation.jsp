@@ -95,10 +95,10 @@ function showViewEscResponse(originalRequest) {
         dojo11.byId('escId').value = id;
         dojo11.byId('id').value = id;
     
-        dojo11.byId('name').innerHTML = '<b>' + escName + '</b>';
+        dojo11.byId('name').innerHTML = '<b>' + escName.escapeHTML() + '</b>';
         dojo11.byId('escName').value = escName;
     
-        dojo11.byId('description').innerHTML = description + "&nbsp;";
+        dojo11.byId('description').innerHTML = description.escapeHTML() + "&nbsp;";
         if (description) {
             dojo11.byId('escDesc').value = description;
         }
@@ -112,9 +112,12 @@ function showViewEscResponse(originalRequest) {
             dojo11.byId('allowPauseTrue').checked = "true";
 
             var sel = dojo11.byId('maxWaitTime');
-            for (var i = 0; sel.selectedIndex == 0 && i < sel.length; i++) {
-                sel.options[i].selected =
-                    (sel.options[i].value == tmp.escalation.maxWaitTime);
+
+            for (var i = 0; i < sel.length; i++) {
+            	if (sel.options[i].value == tmp.escalation.maxWaitTime) {
+	                sel.options[i].selected = true;
+	                break;
+	            }
             }
         }
         else {

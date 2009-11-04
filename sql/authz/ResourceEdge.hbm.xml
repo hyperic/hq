@@ -18,8 +18,7 @@
     </version>
 
     <many-to-one name="from">
-      <column name="FROM_ID" not-null="true" unique-key="EAM_RESOURCE_EDGE_IDX"
-              index="EAM_RESOURCE_FROM_ID_IDX"/>
+      <column name="FROM_ID" not-null="true" unique-key="EAM_RESOURCE_EDGE_IDX"/>
     </many-to-one>
 
     <many-to-one name="to">

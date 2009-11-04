@@ -29,16 +29,16 @@ import java.io.File;
 import java.util.Properties;
 
 import javax.management.MBeanServer;
-import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
+
+import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
+import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
+import org.hyperic.hq.product.RtPlugin;
 
 import weblogic.management.descriptors.WebDescriptorMBean;
 import weblogic.management.descriptors.webapp.FilterMBean;
 import weblogic.management.descriptors.webapp.ParameterMBean;
-
-import org.hyperic.hq.product.RtPlugin;
-import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
-import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;
 
 public class WebAppComponentQuery extends ComponentQuery {
     public static final String MBEAN_TYPE = "WebAppComponentRuntime";

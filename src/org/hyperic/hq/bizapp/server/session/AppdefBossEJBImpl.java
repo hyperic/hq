@@ -1349,7 +1349,7 @@ public class AppdefBossEJBImpl
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                     final PlatformManagerLocal pMan = getPlatformManager();
-                    pMan.removePlatform(subject, pMan.findPlatformById(id));
+                    removePlatform(subject, pMan.findPlatformById(id));
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
                     final ServiceManagerLocal svcMan = getServiceManager();

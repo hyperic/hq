@@ -98,6 +98,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.control.shared.ControlManagerLocal;
 import org.hyperic.hq.events.EventConstants;
+import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.measurement.data.TrackEventReport;
 import org.hyperic.hq.measurement.server.session.DataInserterException;
 import org.hyperic.hq.measurement.shared.ConfigChangedEvent;
@@ -794,6 +795,11 @@ public class LatherDispatcher
         
         if (log.isDebugEnabled()) {
             log.debug("Request for " + method + "() from " + ctx.getCallerIP());
+        }
+        
+        if(!HAUtil.isMasterNode()) {
+            log.warn("Non-primary server received communication from an agent.  Request will be denied.");
+            throw new LatherRemoteException("This server is not the primary node in the HA configuration. Agent request denied.");
         }
         
         if(secureCommands.contains(method)){

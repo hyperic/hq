@@ -466,7 +466,7 @@
               scope="request"
               type="org.hyperic.hq.ui.action.admin.user.NewFormPrepareAction">              
         <set-property property="workflow" value="user/New"/>
-        <set-property property="title" value="Admin.User.AssignRole"/>
+        <set-property property="title" value="Admin.User.New"/>
       </action>
 
       <action path="/admin/user/Remove" 
@@ -1757,6 +1757,15 @@
       </action>        
       <!-- / end autogroup monitoring config -->
 
+      <!-- PORTLET ACTIONS -->
+	  <action path="/PortletController"
+              scope="request"
+              type="org.hyperic.hq.ui.action.portlet.DisplayPortletAction" />
+      
+      <action path="/Portlet"
+              forward=".portlet.layout">  
+      </action>
+	  
       <!-- DASHBOARD ACTIONS -->           
       <action path="/DashboardController"
               name="DashboardForm"
@@ -2394,7 +2403,9 @@
               forward=".attach.tab.layout"/>
               
       <action path="/attach/TabBody"
-              type="org.hyperic.hq.ui.action.attach.TabBodyAction"/>
+              type="org.hyperic.hq.ui.action.attach.TabBodyAction">
+      	<set-property property="title" value="Views"/>
+      </action>
               
       <action path="/attach/TabPortal"
               parameter="mode"

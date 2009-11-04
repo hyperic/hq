@@ -160,6 +160,9 @@ class GenericServiceQuery extends ServiceQuery {
     //of the MBean, not the attributes of the ObjectName itself
     public boolean apply(ObjectName name) {
         Map _props = name.getKeyPropertyList();
+        if (this.props.size() != _props.size()) {
+            return false;
+        }
         for (Iterator it = this.props.entrySet().iterator(); it.hasNext();) {
             Map.Entry entry = (Map.Entry) it.next();
             String key = (String) entry.getKey();

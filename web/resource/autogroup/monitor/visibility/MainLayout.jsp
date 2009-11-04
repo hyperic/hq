@@ -65,7 +65,8 @@ var pageData = new Array();
 <c:choose>
   <c:when test="${not empty Resource.name}">
 <tiles:insert definition=".page.title.resource.autogroup">
-  <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" ctype="${ctype}"/></tiles:put>
+  <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
+  <tiles:put name="ctype" beanName="ctype" />
 </tiles:insert>
   </c:when>
   <c:otherwise>

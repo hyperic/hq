@@ -52,17 +52,20 @@
     <td width="20%" class="BlockLabel" style="padding-left: 4px;"><fmt:message key="common.label.EscalationActionLogs"/></td>
     <td class="BlockContent" colspan="2">&nbsp;</td>
   </tr>
-  <c:forEach var="log" varStatus="status" items="${alert.escalationLogs}">
-  <tr>
-    <td width="20%" class="BlockLabel" style="padding-bottom:3px;">
-      <span style="color:#333333;"><hq:dateFormatter value="${log.timeStamp}"/> - </span>
-    </td>
-    <td colspan="2"  class="BlockContent" style="padding-left: 4px;padding-bottom:3px;">
-      <c:out value="${log.detail}"/>
-    </td>
-  </tr>
+  <c:forEach var="log" varStatus="status" items="${alert.actionLog}">
+  	<%-- No action or alert definition means escalation log --%>
+  	<c:if test="${empty log.action || empty log.action.alertDefinition}">
+  	<tr>
+    	<td width="20%" class="BlockLabel" style="padding-bottom:3px;">
+      		<span style="color:#333333;"><hq:dateFormatter value="${log.timeStamp}"/> - </span>
+    	</td>
+    	<td colspan="2"  class="BlockContent" style="padding-left: 4px;padding-bottom:3px;">
+      		<c:out value="${log.detail}"/>
+    	</td>
+  	</tr>
+	</c:if>
   </c:forEach>
-  <c:if test="${alert.acknowledgeable}">
+  <c:if test="${alert.ackable}">
   <tr>
     <td width="20%" class="BlockLabel" style="border-top: solid #D5D8DE 1px;" valign="top" align="right"><span class="BoldText"><fmt:message key="resource.common.alert.ackNote"/></span></td>
     <td colspan="2" class="BlockContent" style="border-top: solid #D5D8DE 1px;">
@@ -73,7 +76,7 @@
   <tr>
     <td width="20%" class="BlockLabel">&nbsp;</td>
     <td width="80%" class="BlockContent">
-		 <c:if test="${escalation.pauseAllowed && alert.acknowledgeable}">
+		 <c:if test="${escalation.pauseAllowed && alert.ackable}">
 			  <div id="AlertEscalationOption" syle="text-align:left;">
 			     <input type="checkbox" name="pause" value="true" checked="checked" onclick="dojo11.byId('pauseTimeSel').disabled = !this.checked;" />&nbsp;<fmt:message key="alert.escalation.pause"/>
 			  </div>	  
@@ -83,7 +86,7 @@
   			     <tiles:put name="labelKey" value="resource.common.alert.action.acknowledge.label"/>
                  <tiles:put name="buttonClick">dojo.byId('mode').setAttribute('value', '<fmt:message key="resource.common.alert.action.acknowledge.label"/>'); document.forms[0].submit();</tiles:put>
                  <c:choose>
-                    <c:when test="${alert.acknowledgeable}">
+                    <c:when test="${alert.ackable}">
                        <tiles:put name="disabled" value="false"/>
                     </c:when>
                     <c:otherwise>

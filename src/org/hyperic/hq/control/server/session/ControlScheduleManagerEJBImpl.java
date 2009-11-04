@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.ejb.FinderException;
 import javax.ejb.SessionBean;
@@ -51,16 +52,18 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.control.server.session.ControlHistory;
-import org.hyperic.hq.control.server.session.ControlSchedule;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlFrequencyValue;
 import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
 import org.hyperic.hq.control.shared.ScheduledJobNotFoundException;
 import org.hyperic.hq.control.shared.ScheduledJobRemoveException;
+import org.hyperic.hq.grouping.server.session.GroupUtil;
+import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.scheduler.ScheduleParseException;
 import org.hyperic.hq.scheduler.ScheduleParser;
@@ -91,6 +94,8 @@ import org.quartz.SimpleTrigger;
 
 public class ControlScheduleManagerEJBImpl 
     extends BaseScheduleManagerEJB implements SessionBean {
+
+    private static final int MAX_HISTORY_TEXT_SIZE = 500;
 
     private Log log = LogFactory.getLog(ControlScheduleManagerEJBImpl.class);
 
@@ -253,14 +258,13 @@ public class ControlScheduleManagerEJBImpl
                         break;
                 } catch (PermissionException e) {
                     i.remove();
-                }
+                } 
             }
 
             // This will remove stale data and update fire times which
             // may result in the list being out of order.  We should
             // probably sort a second time
-            PageList list = schedulePager.seek(pending, 0, rows);
-            list.setTotalSize(pending.size());
+            PageList list = schedulePager.seek(pending, 0, rows);        
             return list;
 
         } finally {
@@ -403,8 +407,24 @@ public class ControlScheduleManagerEJBImpl
      */
     public PageList findJobHistory(AuthzSubject subject, 
                                    AppdefEntityID id, PageControl pc)
-        throws ApplicationException
+        throws PermissionException, AppdefEntityNotFoundException,
+               GroupNotCompatibleException
     {
+        if (id.isGroup()) {
+            List groupMembers  = 
+                GroupUtil.getCompatGroupMembers(subject, id,
+                                                null, 
+                                                PageControl.PAGE_ALL);
+
+            // For each entity in the list, sanity check permissions
+            for (Iterator i = groupMembers.iterator(); i.hasNext();) {
+                AppdefEntityID entity = (AppdefEntityID) i.next();
+                checkControlPermission(subject, entity);
+            }
+        } else {
+            checkControlPermission(subject, id);
+        }
+        
         ControlHistoryDAO histLH;
         Collection hist;
 
@@ -535,6 +555,13 @@ public class ControlScheduleManagerEJBImpl
     public void deleteJobHistory(AuthzSubject subject, Integer[] ids)
         throws ApplicationException
     {
+    	// SpringSource: require admin privileges
+    	PermissionManager pm = PermissionManagerFactory.getInstance();
+    	if (!pm.hasAdminPermission(subject.getId())) {
+    		throw new PermissionException("Admin permission is required to delete job history");
+    	}
+    	// END SpringSource
+    	
         ControlHistoryDAO hdao = getControlHistoryDAO();
 
         for (int i=0; i<ids.length; i++) {
@@ -815,6 +842,16 @@ public class ControlScheduleManagerEJBImpl
             }
         }
     }
+    
+    private String truncateText(int maxSize, String text){
+    	String truncatedText = text;
+    	if (text != null){
+    		if (text.length() > maxSize){
+    			truncatedText = text.substring(0,maxSize-3) + "...";
+    		}
+    	}
+    	return truncatedText;
+    }
 
     /**
      * Create a control history entry
@@ -837,9 +874,10 @@ public class ControlScheduleManagerEJBImpl
                                         String errorMessage)
     {
         return getControlHistoryDAO().create(id, groupId, batchId, subjectName,
-                                             action, args, scheduled, startTime,
-                                             stopTime, scheduleTime, status,
-                                             description, errorMessage);
+        		action, truncateText(MAX_HISTORY_TEXT_SIZE, args), scheduled,
+                startTime, stopTime, scheduleTime,
+                status, truncateText(MAX_HISTORY_TEXT_SIZE, description),
+                truncateText(MAX_HISTORY_TEXT_SIZE, errorMessage));    
     }
 
     /**
@@ -862,7 +900,7 @@ public class ControlScheduleManagerEJBImpl
 
         local.setEndTime(endTime);
         local.setStatus(status);
-        local.setMessage(message);
+        local.setMessage(truncateText(MAX_HISTORY_TEXT_SIZE,message));
     }
 
     /**

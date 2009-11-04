@@ -72,10 +72,10 @@ var pageData = new Array();
 	<c:when test="${CONST_APPLICATION == entityId.type}">
 	 
 	   <tiles:insert definition=".page.title.resource.application.full">
-		  <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
 		  <tiles:put name="resource" beanName="Resource"/>
 		  <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
 		  <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+		  <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 		</tiles:insert>
 
 		<tiles:insert definition=".tabs.resource.application.views">
@@ -87,10 +87,10 @@ var pageData = new Array();
 	<c:when test="${CONST_GROUP == entityId.type}">
 		
 		<tiles:insert definition=".page.title.resource.group.full">
-		  <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}"/></tiles:put>
 		  <tiles:put name="resource" beanName="Resource"/>
 		  <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
 		  <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+		  <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 		</tiles:insert>
 		<c:choose>
 		   <c:when test="${Resource.groupType == CONST_ADHOC_PSS ||
@@ -147,10 +147,10 @@ var pageData = new Array();
     </c:choose>
 
 	   <tiles:insert beanName="fullDef">
-		  <tiles:put name="titleName"><hq:inventoryHierarchy resource="${entityId.appdefKey}" /></tiles:put>
 		  <tiles:put name="resource" beanName="Resource"/>
 		  <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
 		  <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+		  <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 		</tiles:insert>
 		
  		<tiles:insert beanName="viewsDef">

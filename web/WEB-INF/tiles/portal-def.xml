@@ -20,6 +20,10 @@
                 controllerUrl="/Header.do"
                 path="/common/Header.jsp">
     </definition>
+
+    <definition name=".portlet.layout" 
+                controllerUrl="/PortletController.do" 
+				path="/portal/PortletLayout.jsp" />
     
     <definition name=".portal.dash.layout" 
                 extends=".main.layout"

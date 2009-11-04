@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -27,9 +27,14 @@ package org.hyperic.hq.events.server.session;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hibernate.CacheMode;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
@@ -38,6 +43,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -46,19 +52,30 @@ import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.PermissionManager.RolePermNativeSQL;
 import org.hyperic.hq.dao.HibernateDAO;
+import org.hyperic.hq.events.AlertFiredEvent;
 import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.measurement.server.session.Number;
 
 public class EventLogDAO extends HibernateDAO {
     private final String TABLE_EVENT_LOG = "EAM_EVENT_LOG";
     private final String TABLE_EAM_NUMBERS = "EAM_NUMBERS";
+    private final Log log =
+        LogFactory.getLog(EventLogDAO.class.getName());
 
     private static final List VIEW_PERMISSIONS = 
         Arrays.asList(new String[] { 
             AuthzConstants.platformOpViewPlatform,
             AuthzConstants.serverOpViewServer,
             AuthzConstants.serviceOpViewService,
-            AuthzConstants.groupOpViewResourceGroup,
+            AuthzConstants.groupOpViewResourceGroup
+        });
+
+    private static final List MANAGE_ALERT_PERMISSIONS = 
+        Arrays.asList(new String[] { 
+            AuthzConstants.platformOpManageAlerts,
+            AuthzConstants.serverOpManageAlerts,
+            AuthzConstants.serviceOpManageAlerts,
+            AuthzConstants.groupOpManageAlerts
         });
 
     public EventLogDAO(DAOFactory f) {
@@ -92,6 +109,26 @@ public class EventLogDAO extends HibernateDAO {
             return _e;
         }
     }
+    
+    EventLog findLog(String typeClass, int instanceId, long timestamp) {
+        String hql = "select l from EventLog l where l.timestamp = :ts " +
+                     "and l.instanceId = :instId and l.type = :type";
+        Query q = createQuery(hql)
+        .setLong("ts", timestamp)
+        .setInteger("instId", instanceId)
+        .setString("type",typeClass);
+        
+        List events = q.list();
+        if(events.isEmpty()) {
+            return null;
+        }
+        if(events.size() > 1) {
+            log.warn("Found multiple log entries matching the specified " +
+                     "criteria (typeClass=" + typeClass +", instanceId=" + instanceId + 
+                     ", timestamp=" + timestamp + "). Returning the first one.");
+        }
+        return (EventLog) events.iterator().next();
+    }
          
     /**
      * Gets a list of {@link ResourceEventLog}s.  Most arguments
@@ -114,7 +151,7 @@ public class EventLogDAO extends HibernateDAO {
                   
         RolePermNativeSQL roleSql  = PermissionManagerFactory
             .getInstance() 
-            .getRolePermissionNativeSQL("r", "subject", "opList");
+            .getRolePermissionNativeSQL("r", "e", "subject", "opListVR", "opListMA");
         
         
         if (inGroups == null || inGroups.isEmpty())
@@ -165,7 +202,7 @@ public class EventLogDAO extends HibernateDAO {
             .setLong("begin", begin)
             .setLong("end", end)
             .setInteger("maxStatus", maxStatus.getCode());
-        roleSql.bindParams(q, subject, VIEW_PERMISSIONS);
+        roleSql.bindParams(q, subject, VIEW_PERMISSIONS, MANAGE_ALERT_PERMISSIONS);
         
         if (typeClass != null) {
             q.setString("type", typeClass);
@@ -187,6 +224,138 @@ public class EventLogDAO extends HibernateDAO {
             res.add(new ResourceEventLog(e.getResource(), e));
         }
         return res;
+    }
+    
+    /**
+     * @return 0 if there are no unfixed alerts
+     */
+    private final long getOldestUnfixedAlertTime() {
+        Object o = getSession()
+            .createQuery("select min(ctime) from Alert where fixed = '0'")
+            .uniqueResult();
+        if (o == null) {
+            return 0;
+        }
+        return ((Long)o).longValue();
+    }
+    
+    /**
+     * @return {@link Map} of {@link Integer} = AlertDefitionId to
+     *  {@link Map} of <br>
+     *   key {@link AlertInfo} <br>
+     *   value {@link Integer} AlertId
+     */
+    private final Map getUnfixedAlertInfoAfter(long ctime) {
+        final String hql = new StringBuilder(128)
+            .append("SELECT alertDefinition.id, id, ctime ")
+            .append("FROM Alert WHERE ctime >= :ctime and fixed = '0' ")
+            .append("ORDER BY ctime")
+            .toString();
+        final List list = getSession()
+            .createQuery(hql)
+            .setLong("ctime", ctime)
+            .list();
+        final Map alerts = new HashMap(list.size());
+        for (final Iterator it=list.iterator(); it.hasNext(); ) {
+            final Object[] obj = (Object[]) it.next();
+            Map tmp;
+            if (null == (tmp = (Map)alerts.get(obj[0]))) {
+                tmp = new HashMap();
+                alerts.put(obj[0], tmp);
+            }
+            final AlertInfo ai = new AlertInfo((Integer)obj[0], (Long)obj[2]);
+            tmp.put(ai, (Integer)obj[1]);
+        }
+        return alerts;
+    }
+    
+    private class AlertInfo {
+        private final Integer _alertDefId;
+        private final Long _ctime;
+        AlertInfo(Integer alertDefId, Long ctime) {
+            _alertDefId = alertDefId;
+            _ctime = ctime;
+        }
+        AlertInfo(Integer alertDefId, long ctime) {
+            _alertDefId = alertDefId;
+            _ctime = new Long(ctime);
+        }
+        Integer getAlertDefId() {
+            return _alertDefId;
+        }
+        Long getCtime() {
+            return _ctime;
+        }
+        public boolean equals(Object rhs) {
+            if (rhs == this) {
+                return true;
+            }
+            if (rhs instanceof AlertInfo) {
+                AlertInfo obj = (AlertInfo)rhs;
+                return obj.getCtime().equals(_ctime) &&
+                       obj.getAlertDefId().equals(_alertDefId);
+            }
+            return false;
+        }
+        public int hashCode() {
+            return 17*_alertDefId.hashCode() + _ctime.hashCode();
+        }
+    }
+    
+    /**
+     * Find unfixed AlertFiredEvent event logs for each alert definition in the list
+     * 
+     * @param alertDefinitionIds The list of alert definition ids
+     * 
+     * @return {@link Map} of {@link Integer} = AlertDefinitionId to
+     *  {@link AlertFiredEvent}
+     */
+    Map findUnfixedAlertFiredEventLogs() {        
+        final Map rtn = new HashMap();
+        final long ctime = getOldestUnfixedAlertTime();
+        if (ctime == 0) {
+            return Collections.EMPTY_MAP;
+        }
+        final Map alerts = getUnfixedAlertInfoAfter(ctime);
+        final String hql = new StringBuilder(256)
+            .append("FROM EventLog ")
+            .append("WHERE timestamp >= :ctime AND type = :type ")
+            .append("AND instanceId is not null")
+            .toString();
+        final List list = getSession()
+            .createQuery(hql)
+            .setString("type", AlertFiredEvent.class.getName())
+            .setLong("ctime", ctime)
+            .list();
+        for (final Iterator it=list.iterator(); it.hasNext(); ) {
+            final EventLog log = (EventLog)it.next();
+            if (log == null || log.getInstanceId() == null) {
+                continue;
+            }
+            final Map objs = (Map)alerts.get(log.getInstanceId());
+            if (objs == null) {
+                continue;
+            }
+            final Integer alertDefId = log.getInstanceId();
+            final long timestamp     = log.getTimestamp();
+            final Integer alertId =
+                (Integer)objs.get(new AlertInfo(alertDefId, timestamp));
+            if (alertId == null) {
+                continue;
+            }
+            AlertFiredEvent alertFired = 
+                createAlertFiredEvent(alertDefId, alertId, log);
+            rtn.put(alertDefId, alertFired);
+        }
+        return rtn;
+    }
+    
+    private final AlertFiredEvent createAlertFiredEvent(Integer alertDefId,
+                                                        Integer alertId,
+                                                        EventLog eventLog) {
+        return new AlertFiredEvent(alertId, alertDefId, 
+            new AppdefEntityID(eventLog.getResource()), eventLog.getSubject(),
+            eventLog.getTimestamp(), eventLog.getDetail());
     }
     
     List findByEntityAndStatus(Resource r, AuthzSubject user, 
@@ -409,8 +578,7 @@ public class EventLogDAO extends HibernateDAO {
                     sql.append(" UNION ALL ");
                 }
             }
-        }
-        else {
+        } else {
             sql.append("SELECT i AS I FROM ").append(TABLE_EAM_NUMBERS)
                .append(" WHERE i < ").append(intervals)
                .append(" AND EXISTS (")

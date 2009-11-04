@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -63,7 +63,7 @@ public class DBUpgrader extends Task {
     private int    _dbutilType; // this is one of the DBUtil.DATABASE_XXX constants
 
     // The query to find the existing schema version uses these.
-    // It is of the form: 
+    // It is of the form:
     // SELECT valueColumn FROM tableName WHERE keyColumn = keyMatch
     private String _valueColumn;
     private String _tableName;
@@ -165,7 +165,7 @@ public class DBUpgrader extends Task {
             } catch (IllegalArgumentException e) {
                 throw new BuildException("DBUpgrader: " + e.getMessage(), e);
             }
-            log("Starting schema migration: " + _startSchemaVersion 
+            log("Starting schema migration: " + _startSchemaVersion
                 + " -> " + _targetSchemaVersion);
 
             // If the target version is LATEST, then figure out the "real"
@@ -177,17 +177,17 @@ public class DBUpgrader extends Task {
             }
 
             // Ensure that we're not trying to "downgrade" - that is,
-            // ensure that the target version is not earlier than the 
+            // ensure that the target version is not earlier than the
             // existing server version.  In particular, if the target
             // version is LATEST but the actual latest SchemaSpec is
-            // earlier than the current database's schema version, we 
+            // earlier than the current database's schema version, we
             // consider that a downgrade as well.
             if ( _targetSchemaVersion.compareTo(_startSchemaVersion) < 0 ) {
                 throw new BuildException("SchemaSpec: cannot downgrade from "
-                                         + _startSchemaVersion + " -> " 
+                                         + _startSchemaVersion + " -> "
                                          + realTargetSchemaVersion);
             }
-        
+
             size = _schemaSpecs.size();
             SchemaSpec ss;
             c.setAutoCommit(false);
@@ -242,7 +242,7 @@ public class DBUpgrader extends Task {
             version.between(_startSchemaVersion, _targetSchemaVersion);
     }
 
-    private void validateAttributes () throws BuildException {
+    void validateAttributes () throws BuildException {
         if ( _jdbcUrl == null )
             throw new BuildException("DBUpgrader: No 'jdbcUrl' attribute specified.");
 
@@ -284,12 +284,12 @@ public class DBUpgrader extends Task {
     private boolean usePrefix(Connection c) throws SQLException {
         Statement stmt = null;
         ResultSet rs = null;
-       
+
         try {
             _tableName = _tableName.toUpperCase();
             String sql = "SELECT * FROM " + _tableName;
             stmt = c.createStatement();
-            
+
             rs = stmt.executeQuery(sql);
             ResultSetMetaData rsmd = rs.getMetaData();
 
@@ -304,7 +304,7 @@ public class DBUpgrader extends Task {
             DBUtil.closeStatement(ctx, stmt);
             DBUtil.closeResultSet(ctx, rs);
         }
-    }           
+    }
 
     private String loadStartSchemaVersion (Connection c) throws BuildException {
         PreparedStatement ps = null;
@@ -317,9 +317,9 @@ public class DBUpgrader extends Task {
         // tihs because we changed the key/value columns
         // to support mysqls reserved words
         String alternSql
-            = "SELECT PROP" + _valueColumn + " " 
+            = "SELECT PROP" + _valueColumn + " "
             + "FROM " + _tableName + " "
-            + "WHERE PROP" + _keyColumn + " = ?"; 
+            + "WHERE PROP" + _keyColumn + " = ?";
 
         try {
             if(usePrefix(c)) {
@@ -339,7 +339,7 @@ public class DBUpgrader extends Task {
                                          + "schema version!");
             }
             return versionString;
-            
+
         } catch ( SQLException e ) {
             throw new BuildException("Error loading starting schema version: "
                                      + e, e);
@@ -349,9 +349,9 @@ public class DBUpgrader extends Task {
         }
     }
 
-    private void markSchemaModificationInProgress ( Connection c, 
+    private void markSchemaModificationInProgress ( Connection c,
                                                     SchemaVersion fromVersion,
-                                                    SchemaVersion toVersion) 
+                                                    SchemaVersion toVersion)
         throws BuildException {
 
         String versionString

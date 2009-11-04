@@ -64,6 +64,7 @@ import org.hyperic.txsnatch.TxSnatch;
 import org.hyperic.util.callback.CallbackDispatcher;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.thread.ThreadWatchdog;
+import org.hyperic.util.timer.StopWatch;
 import org.jboss.invocation.Invocation;
 
 
@@ -129,6 +130,7 @@ public class HQApp {
                 
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
+                _isShutdown.set(true);
                 _log.info("Running shutdown hooks");
                 _shutdown.shutdown();
                 _log.info("Done running shutdown hooks");
@@ -575,6 +577,7 @@ public class HQApp {
                    // masthead
                    methName.equals("resourcesExistOfType") ||
                    methName.equals("search") || 
+                   methName.equals("initializeTriggers") || 
                    methName.startsWith("are") ||
                    methName.startsWith("check") ||
                    methName.startsWith("dispatch") ||
@@ -622,6 +625,7 @@ public class HQApp {
      * Execute the registered startup classes.
      */
     public void runStartupClasses() {
+        // HHQ-3496 check if HQ is shutdown before running initialization
         if (_isShutdown.get()) {
             throw new SystemException("HQ is shutdown");
         }
@@ -635,6 +639,13 @@ public class HQApp {
         checkDBSchemaState();
 
         for (Iterator i=classNames.iterator(); i.hasNext(); ) {
+            // HHQ-3496
+            // there could be a timing issue from when the shutdown hook will
+            // kick in and when jboss notifies the app of an event.
+            // Don't take any chances, just check the flag each iteration.
+            if (_isShutdown.get()) {
+                throw new SystemException("HQ is shutdown");
+            }
             String name = (String)i.next();
             
             try {
@@ -723,12 +734,17 @@ public class HQApp {
      * Register a listener to be called after a tx has been committed.
      */
     public void addTransactionListener(TransactionListener listener) {
+        final boolean debug = _log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
         List listeners = (List)_txListeners.get();
         
         if (listeners == null) {
             listeners = new ArrayList(1);
             _txListeners.set(listeners);
+            if (debug) watch.markTimeBegin("scheduleCommitCallback");
             scheduleCommitCallback();
+            if (debug) watch.markTimeEnd("scheduleCommitCallback");
         }
         
         listeners.add(listener);
@@ -736,7 +752,12 @@ public class HQApp {
         // Unfortunately, it seems that the Tx synchronization will get called
         // before Hibernate does its flush.  This wasn't the behaviour before,
         // and looks like it will be fixed up again in 3.3.. :-(
+        if (debug) watch.markTimeBegin("flushCurrentSession");
         Util.getSessionFactory().getCurrentSession().flush();
+        if (debug) {
+            watch.markTimeEnd("flushCurrentSession");
+            _log.debug("addTransactionListener: time=" + watch);
+        }
     }
     
     /**

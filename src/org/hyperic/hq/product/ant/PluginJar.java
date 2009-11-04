@@ -51,7 +51,7 @@ public class PluginJar extends Jar {
     private String pluginDir = null;
     private String pluginPackage = null;
     private String pluginClass = null;
-
+   
     public String getDir() {
         if (this.pluginDir == null) {
             String home = getProperty("basedir", ".");

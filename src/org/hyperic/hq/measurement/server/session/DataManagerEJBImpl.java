@@ -501,21 +501,31 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private void sendDataToEventHandlers(Collection data) {
         ArrayList events  = new ArrayList();
         List zevents = new ArrayList();
+        MeasurementManagerLocal measMan = MeasurementManagerEJBImpl.getOne();
         
-        boolean allEventsInteresting = 
+        final boolean allEventsInteresting = 
             Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
         
+        final StopWatch watch = new StopWatch();
+        final boolean debug = _log.isDebugEnabled();
         for (Iterator i = data.iterator(); i.hasNext();) {
             DataPoint dp = (DataPoint) i.next();
             Integer metricId = dp.getMetricId();
             MetricValue val = dp.getMetricValue();
             MeasurementEvent event = new MeasurementEvent(metricId, val);
 
-            if (RegisteredTriggers.isTriggerInterested(event) || allEventsInteresting)
+            if (debug) watch.markTimeBegin("isTriggerInterested");
+            boolean isEventInteresting =
+                allEventsInteresting || RegisteredTriggers.isTriggerInterested(event);
+            if (debug) watch.markTimeEnd("isTriggerInterested");
+            if (isEventInteresting) {
+                measMan.buildMeasurementEvent(event);
                 events.add(event);
+            }
 
             zevents.add(new MeasurementZevent(metricId.intValue(), val));
         }
+        if (debug) _log.debug(watch);
         
         if (!events.isEmpty()) {
             Messenger sender = new Messenger();

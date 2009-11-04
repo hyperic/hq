@@ -2368,3 +2368,29 @@ button span{
 .dijitDialogUnderlay {
 	background-color: #000;
 }
+
+span#browseFilters {
+	font-size:14px;
+}
+
+div#breadcrumbContainer {
+	font-size:1.25em;
+	font-weight:bold;
+	padding:0 1.5em 0.5em;
+}
+	
+ul.breadcrumbs {
+	padding: 0;
+	margin: 0;
+}
+
+ul.breadcrumbs li.item {
+	float: left;
+	list-style: none;
+}
+
+span.returnToLink {
+	font-size: 0.8em;
+	clear: left;
+	display: block;
+}

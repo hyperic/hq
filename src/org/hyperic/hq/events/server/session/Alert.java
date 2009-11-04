@@ -1,26 +1,26 @@
-/*                                                                 
- * NOTE: This copyright does *not* cover user programs that use HQ 
- * program services by normal system calls through the application 
- * program interfaces provided as part of the Hyperic Plug-in Development 
- * Kit or the Hyperic Client Development Kit - this is merely considered 
- * normal use of the program, and does *not* fall under the heading of 
- * "derived work". 
- *  
- * Copyright (C) [2004-2008], Hyperic, Inc. 
- * This file is part of HQ.         
- *  
- * HQ is free software; you can redistribute it and/or modify 
- * it under the terms version 2 of the GNU General Public License as 
- * published by the Free Software Foundation. This program is distributed 
- * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without 
- * even the implied warranty of MERCHANTABILITY or FITNESS FOR A 
- * PARTICULAR PURPOSE. See the GNU General Public License for more 
- * details. 
- *                
- * You should have received a copy of the GNU General Public License 
- * along with this program; if not, write to the Free Software 
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 
- * USA. 
+/*
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ *
+ * Copyright (C) [2004-2008], Hyperic, Inc.
+ * This file is part of HQ.
+ *
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
  */
 
 package org.hyperic.hq.events.server.session;
@@ -40,8 +40,8 @@ import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertValue;
 
-public class Alert 
-    extends PersistedObject 
+public class Alert
+    extends PersistedObject
     implements AlertInterface
 {
     private boolean         _fixed;
@@ -52,29 +52,30 @@ public class Alert
     private Long            _stateId;
     private Long            _ackedBy;
     private AlertValue      _alertVal;
-
-    protected Alert() {
+    private Boolean         _ackable = null;
+    
+    public Alert() {
     }
 
     protected Alert(AlertDefinition def, AlertValue val) {
         val.cleanConditionLog();
         val.cleanActionLog();
-        
+
         // Now just set the entire value object
         setAlertValue(val);
 
         setAlertDefinition(def);
     }
-    
+
     protected AlertActionLog createActionLog(String detail, Action action,
-                                             AuthzSubject fixer) 
+                                             AuthzSubject fixer)
     {
         AlertActionLog res = new AlertActionLog(this, detail, action, fixer);
-    
+
         _actionLog.add(res);
         return res;
     }
-    
+
     protected AlertConditionLog createConditionLog(String value,
                                                    AlertCondition cond)
     {
@@ -83,7 +84,7 @@ public class Alert
         _conditionLog.add(res);
         return res;
     }
-    
+
     public PerformsEscalations getDefinition() {
         return getAlertDefinition();
     }
@@ -99,11 +100,11 @@ public class Alert
     public long getCtime() {
         return _ctime;
     }
-    
+
     protected void setCtime(long ctime) {
         _ctime = ctime;
     }
-    
+
     public long getTimestamp() {
         return getCtime();
     }
@@ -111,7 +112,7 @@ public class Alert
     public AlertDefinition getAlertDefinition() {
         return _alertDefinition;
     }
-    
+
     protected void setAlertDefinition(AlertDefinition alertDefinition) {
         _alertDefinition = alertDefinition;
     }
@@ -119,23 +120,23 @@ public class Alert
     public AlertDefinitionInterface getAlertDefinitionInterface() {
         return getAlertDefinition();
     }
-    
+
     public Collection getActionLog() {
         return Collections.unmodifiableCollection(_actionLog);
     }
-    
+
     protected Collection getActionLogBag() {
         return _actionLog;
     }
-    
+
     protected void setActionLogBag(Collection actionLog) {
         _actionLog = actionLog;
     }
-    
+
     private void addActionLog(AlertActionLog aal) {
         _actionLog.add(aal);
     }
-    
+
     private void removeActionLog(AlertActionLog aal) {
         _actionLog.remove(aal);
     }
@@ -143,41 +144,48 @@ public class Alert
     public Collection getConditionLog() {
         return Collections.unmodifiableCollection(_conditionLog);
     }
-    
+
     protected Collection getConditionLogBag() {
         return _conditionLog;
     }
-    
+
     protected void setConditionLogBag(Collection conditionLog) {
         _conditionLog = conditionLog;
     }
-    
+
     private void addConditionLog(AlertConditionLog acl) {
         _conditionLog.add(acl);
     }
-    
+
     private void removeConditionLog(AlertConditionLog acl) {
         _conditionLog.remove(acl);
     }
-    
+
     protected void setAckedBy(Long ackedBy) {
         _ackedBy = ackedBy;
     }
-    
-    protected Long getAckedBy() { 
+
+    protected Long getAckedBy() {
         return _ackedBy;
     }
-    
+
     protected void setStateId(Long stateId) {
         _stateId = stateId;
     }
-    
+
     protected Long getStateId() {
         return _stateId;
     }
-    
+
     public boolean isAckable() {
-        return getStateId() != null && getAckedBy() == null;
+        // Performing the conditional check to maintain existing functionality
+        return (_ackable == null) ? 
+               (getStateId() != null && getAckedBy() == null) :
+               _ackable.booleanValue();
+    }
+
+    public void setAckable(boolean ackable) {
+        this._ackable = new Boolean(ackable);
     }
     
     /**
@@ -193,7 +201,7 @@ public class Alert
     }
 
     public AlertValue getAlertValue() {
-        if (_alertVal == null) 
+        if (_alertVal == null)
             _alertVal = new AlertValue();
 
         _alertVal.setId(getId());
@@ -202,10 +210,10 @@ public class Alert
         _alertVal.setFixed(isFixed());
 
         _alertVal.removeAllConditionLogs();
-      
+
         for (Iterator i=getConditionLog().iterator(); i.hasNext(); ) {
             AlertConditionLog l = (AlertConditionLog)i.next();
-          
+
             _alertVal.addConditionLog(l.getAlertConditionLogValue());
         }
         _alertVal.cleanConditionLog();
@@ -215,7 +223,7 @@ public class Alert
         for (Iterator i=getActionLog().iterator(); i.hasNext(); ) {
             AlertActionLog l = (AlertActionLog)i.next();
             _alertVal.addActionLog(l);
-            
+
             // No action or alert definition means escalation log
             if (l.getAction() == null ||
                 l.getAction().getAlertDefinition() == null) {
@@ -224,7 +232,7 @@ public class Alert
         }
         _alertVal.cleanActionLog();
         _alertVal.cleanEscalationLog();
-      
+
         return _alertVal;
     }
 
@@ -244,7 +252,7 @@ public class Alert
 
             addConditionLog(aclDao.findById(lv.getId()));
         }
-        
+
         for (Iterator i=val.getRemovedConditionLogs().iterator(); i.hasNext();){
             AlertConditionLogValue lv = (AlertConditionLogValue)i.next();
 
@@ -253,13 +261,13 @@ public class Alert
 
         for (Iterator i=val.getAddedActionLogs().iterator(); i.hasNext(); ) {
             AlertActionLog lv = (AlertActionLog)i.next();
-            
+
             addActionLog(alDao.findById(lv.getId()));
         }
-        
+
         for (Iterator i=val.getRemovedActionLogs().iterator(); i.hasNext(); ) {
             AlertActionLog lv = (AlertActionLog)i.next();
-            
+
             removeActionLog(alDao.findById(lv.getId()));
         }
     }

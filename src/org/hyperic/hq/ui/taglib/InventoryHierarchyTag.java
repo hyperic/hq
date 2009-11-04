@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
@@ -47,6 +48,7 @@ import org.hyperic.util.StringUtil;
  * Such as:
  * Platform > Linux > mazinger.hyperic.net
  */
+@Deprecated
 public class InventoryHierarchyTag extends TagSupport {
 
     private AppdefEntityID resourceId;
@@ -146,7 +148,7 @@ public class InventoryHierarchyTag extends TagSupport {
                 sb.append(StringUtil.replace(StringUtil.replace(
                             StringUtil.replace(
                                     getResourceAnchor(webapp), "@@RID@@", String.valueOf(resourceId.getID()))
-                            , "@@TYPE@@", String.valueOf(resourceId.getType())), "@@NAME@@", arv.getName()));
+                            , "@@TYPE@@", String.valueOf(resourceId.getType())), "@@NAME@@", StringEscapeUtils.escapeHtml(arv.getName())));
                         
             } else {
                 // autogroup
@@ -162,7 +164,7 @@ public class InventoryHierarchyTag extends TagSupport {
                 sb.append(StringUtil.replace(StringUtil.replace(
                         StringUtil.replace(
                                 getResourceAnchor(webapp), "@@RID@@", String.valueOf(resourceId.getID()))
-                        , "@@TYPE@@", String.valueOf(resourceId.getType())), "@@NAME@@", arv.getName()));
+                        , "@@TYPE@@", String.valueOf(resourceId.getType())), "@@NAME@@", StringEscapeUtils.escapeHtml(arv.getName())));
                 
             }
             pageContext.getOut().write(sb.toString());

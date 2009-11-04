@@ -33,9 +33,12 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.TransactionListener;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
-import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
 import org.hyperic.hq.events.ActionExecutionInfo;
@@ -45,96 +48,112 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.TriggerFiredEvent;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
 import org.hyperic.hq.events.shared.AlertManagerLocal;
-import org.hyperic.util.stats.ConcurrentStatsCollector;
+import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
+import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEventPayload;
+
 
 /**
  * This class has the knowledge to create an {@link Escalatable} object
  * based on a {@link TriggerFiredEvent} if the escalation subsytem deems
  * it necessary.
  */
-public class ClassicEscalatableCreator 
+public class ClassicEscalatableCreator
     implements EscalatableCreator
 {
     private static final Log _log =
         LogFactory.getLog(ClassicEscalatableCreator.class);
-    
+
     private final AlertDefinition   _def;
-    private final TriggerFiredEvent _event;
-    
+    private final AlertConditionsSatisfiedZEvent _event;
+
+    private final MessagePublisher messenger;
+    private final AlertManagerLocal alertMan;
+
     /**
      * Creates an instance.
      *
      * @param def The alert definition.
      * @param event The event that triggered the escalation.
+     * @param messenger The messenger to use for publishing AlertFiredEvents
+     * @param alertMan The alert manager to use
      */
-    public ClassicEscalatableCreator(AlertDefinition def,
-                                     TriggerFiredEvent event) { 
+    public ClassicEscalatableCreator(AlertDefinition def, AlertConditionsSatisfiedZEvent event, MessagePublisher messenger, AlertManagerLocal alertMan) {
         _def   = def;
         _event = event;
+        this.messenger = messenger;
+        this.alertMan = alertMan;
     }
-        
+
     /**
      * In the classic escalatable architecture, we still need to support the
-     * execution of the actions defined for the regular alert defintion 
+     * execution of the actions defined for the regular alert defintion
      * (in addition to executing the actions specified by the escalation).
-     * 
+     *
      * Here, we generate the alert and also execute the old-skool actions.
      * May or may not be the right place to do that.
      */
     public Escalatable createEscalatable() throws ResourceDeletedException {
+        Escalatable escalatable = createEscalatableNoNotify();
+        registerAlertFiredEvent(escalatable.getAlertInfo().getId(), (AlertConditionsSatisfiedZEventPayload)_event.getPayload());
+        return escalatable;
+    }
+
+    Escalatable createEscalatableNoNotify() throws ResourceDeletedException {
+        final Alert alert = createAlert();
+        createConditionLogs(alert,(AlertConditionsSatisfiedZEventPayload)_event.getPayload());
+        String shortReason = alertMan.getShortReason(alert);
+        String longReason  = alertMan.getLongReason(alert);
+        executeActions(alert, shortReason, longReason);
+        return createEscalatable(alert, shortReason, longReason);
+    }
+
+    private Alert createAlert() throws ResourceDeletedException {
         Resource r = _def.getResource();
         if (r == null || r.isInAsyncDeleteState()) {
             throw ResourceDeletedException.newInstance(r);
         }
-        AlertManagerLocal alertMan = AlertManagerEJBImpl.getOne();
-        
+        return alertMan.createAlert(_def, ((AlertConditionsSatisfiedZEventPayload)_event.getPayload()).getTimestamp());
+    }
+
+    private void createConditionLogs(final Alert alert, final AlertConditionsSatisfiedZEventPayload payload) {
+        // Create a alert condition logs for every condition that triggered the alert
+
         // Create the trigger event map
         Map trigMap = new HashMap();
-        TriggerFiredEvent[] events = _event.getRootEvents();
+        TriggerFiredEvent[] events = payload.getTriggerFiredEvents();
         for (int i = 0; i < events.length; i++) {
             trigMap.put(events[i].getInstanceId(), events[i]);
         }
-    
-        // Now create the alert
-        Alert alert = alertMan.createAlert(_def, _event.getTimestamp());
 
-        // Create a alert condition logs for every condition that triggered the alert
         Collection conds = _def.getConditions();
         for (Iterator i = conds.iterator(); i.hasNext();) {
             AlertCondition cond = (AlertCondition) i.next();
-            
+
             if (shouldCreateConditionLogFor(cond, trigMap)) {
                 AlertConditionLogValue clog = new AlertConditionLogValue();
                 clog.setCondition(cond.getAlertConditionValue());
-                
+
                 Integer trigId = cond.getTrigger().getId();
                 clog.setValue(trigMap.get(trigId).toString());
-                
+
                 alert.createConditionLog(clog.getValue(), cond);
             }
         }
-    
-        // Regardless of whether or not the actions succeed, we will send an
-        // AlertFiredEvent
-        ConcurrentStatsCollector.getInstance().addStat(
-            1, ConcurrentStatsCollector.ALERT_FIRED_EVENT);
-        Messenger.enqueueMessage(new AlertFiredEvent(_event, alert.getId(), _def));
-        
-        String shortReason = alertMan.getShortReason(alert);
-        String longReason  = alertMan.getLongReason(alert);
-        
+    }
+
+    private void executeActions(Alert alert, String shortReason, String longReason) {
         Collection actions = _def.getActions();
         // Iterate through the actions
         for (Iterator i = actions.iterator(); i.hasNext(); ) {
             Action act = (Action) i.next();
 
             try {
-                ActionExecutionInfo execInfo = 
+                ActionExecutionInfo execInfo =
                     new ActionExecutionInfo(shortReason, longReason,
                                             Collections.EMPTY_LIST);
-                                            
+
                 String detail = act.executeAction(alert, execInfo);
-                
+
                 alertMan.logActionDetail(alert, act, detail, null);
             } catch(Exception e) {
                 // For any exception, just log it.  We can't afford not
@@ -142,31 +161,46 @@ public class ClassicEscalatableCreator
                 _log.warn("Error executing action [" + act + "]", e);
             }
         }
-        
-        return createEscalatable(alert, shortReason, longReason);
     }
-    
+
+    private void registerAlertFiredEvent(final Integer alertId, final AlertConditionsSatisfiedZEventPayload payload) {
+        try {
+            HQApp.getInstance().addTransactionListener(new TransactionListener() {
+                public void afterCommit(boolean success) {
+                    if(success) {
+                        messenger.publishMessage(EventConstants.EVENTS_TOPIC,new AlertFiredEvent(alertId, _def.getId(), new AppdefEntityID(_def.getResource()),_def.getName(),payload.getTimestamp(),
+                                                                     payload.getMessage()));
+                    }
+                }
+                public void beforeCommit() {
+                }
+            });
+        } catch (Throwable t) {
+            _log.error("Error registering to send an AlertFiredEvent on transaction commit.  The alert will be fired, but the event will not be sent.  This could cause a future recovery alert not to fire.", t);
+        }
+    }
+
     public AlertDefinitionInterface getAlertDefinition() {
         return _def;
     }
-    
+
     public static Escalatable createEscalatable(Alert alert, String shortReason,
-                                                String longReason) 
+                                                String longReason)
     {
-        return new ClassicEscalatable(alert, shortReason, longReason); 
+        return new ClassicEscalatable(alert, shortReason, longReason);
     }
-    
-    
+
+
     private boolean shouldCreateConditionLogFor(AlertCondition cond, Map triggerMap) {
         if (cond.getType() == EventConstants.TYPE_ALERT) {
             // Don't create a log for recovery alerts, so that we don't
             // get the multi-condition effect in the logs
             return false;
         }
-        
+
         Integer trigId = cond.getTrigger().getId();
-        
+
         return triggerMap.containsKey(trigId);
-    }    
-    
+    }
+
 }

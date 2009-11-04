@@ -58,29 +58,9 @@ public class ModifyAction extends BaseAction {
         PropertiesForm pForm = (PropertiesForm) form;
         HttpSession session = request.getSession();
         WebUser user = RequestUtils.getWebUser(request);
-
         String forwardStr = Constants.SUCCESS_URL;
-        DashboardConfig dashConfig = DashboardUtils.findDashboard(
-        		(Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID),
-        		user, boss);
+        DashboardConfig dashConfig = DashboardUtils.findDashboard((Integer)session.getAttribute(Constants.SELECTED_DASHBOARD_ID), user, boss);
         ConfigResponse dashPrefs = dashConfig.getConfig();
-        
-        if(pForm.isRemoveClicked()){
-            DashboardUtils
-                .removeResources(pForm.getIds(),
-                                 PropertiesForm.RESOURCES,
-                                 dashPrefs);
-            ConfigurationProxy.getInstance().setDashboardPreferences(session, user,
-            		boss, dashPrefs);
-            forwardStr = "review";
-        }
-
-        ActionForward forward = checkSubmit(request, mapping, form);
-
-        if (forward != null) {
-            return forward;
-        }
-
         String token = pForm.getToken();
 
         // For multi-portlet configuration
@@ -98,6 +78,19 @@ public class ModifyAction extends BaseAction {
             metricKey += token;
             descendingKey += token;
             titleKey += token;
+        }
+        
+        if(pForm.isRemoveClicked()){
+            DashboardUtils.removeResources(pForm.getIds(), resKey, dashPrefs);
+            ConfigurationProxy.getInstance().setDashboardPreferences(session, user, boss, dashPrefs);
+            
+            forwardStr = "review";
+        }
+
+        ActionForward forward = checkSubmit(request, mapping, form);
+
+        if (forward != null) {
+            return forward;
         }
 
         Integer numberToShow = pForm.getNumberToShow();

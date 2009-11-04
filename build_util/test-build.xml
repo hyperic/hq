@@ -66,6 +66,7 @@
        <batchtest todir="${junitResults.dir}" unless="single.test">
            <fileset dir="@{input.dir}">
                <include name="**/*_test.java"/>
+				<include name="**/*Test.java"/>
 
                <!-- XXX scottmf, exclude Critter tests for now, need to upgrade
                         dbunit schema -->
@@ -149,9 +150,8 @@
       </antcall>
       <antcall target="copy-resources"/>
     <instrument input.dir="${basedir}/src" output.dir="${main.clover.dir}"/>
-    <instrument input.dir="${basedir}/unittest/src" output.dir="${test.clover.dir}"/>
     <instrument-java5 input.dir="${basedir}/src" output.dir="${main.clover.dir}"/>
-    <instrument-java5 input.dir="${basedir}/unittest/src" output.dir="${test.clover.dir}"/>
+    <instrument-tests input.dir="${basedir}/unittest/src" output.dir="${test.clover.dir}"/>
   </target>
 
   <target name="clover.compile">
@@ -162,15 +162,18 @@
     </path>
     <path id="main.src.path">
       <path location="${build.dir}/src" />
-          <path location="${main.clover.dir}" />
-      <path location="${test.clover.dir}" />
-      </path>
+      <path location="${main.clover.dir}" />
+    </path>
+    <path id="test.src.path">
+	  <path location="${test.clover.dir}" />
+	</path>
     <path id="compile.classpath">
       <path refid="alljars" />
       <path refid="testjars" />
     </path>
     <compile-app classpath.id="clover.compile.classpath" srcpath.id="main.src.path" output.dir="${build.dir}/classes"/>
     <compile-ui-sources classpath.id="clover.compile.classpath" srcpath.id="main.src.path" output.dir="${build.dir}/classes"/>
+	<compile-test-sources classpath.id="clover.compile.classpath" srcpath.id="test.src.path" output.dir="${build.dir}/classes"/>
   </target>
 
   <target name="clover.init" depends="init">
@@ -224,6 +227,7 @@
             <exclude name="org/hyperic/ui/tapestry/**/*.java" />
           <exclude name="com/hyperic/hq/ui/**/*.java"/>
             <exclude name="com/hyperic/ui/**/*.java"/>
+ 			<exclude name="org/hyperic/hq/types/**/*.java"/>
         </fileset>
       </clover-instr>
       <copy todir="@{output.dir}">
@@ -245,6 +249,7 @@
               <include name="org/hyperic/ui/tapestry/**/*.java" />
             <include name="com/hyperic/hq/ui/**/*.java"/>
               <include name="com/hyperic/ui/**/*.java"/>
+			  <include name="org/hyperic/hq/types/**/*.java"/>
         </fileset>
       </clover-instr>
       <copy todir="@{output.dir}">
@@ -255,5 +260,23 @@
       </copy>
     </sequential>
   </macrodef>
+
+ <macrodef name="instrument-tests">
+    <attribute name="input.dir"/>
+    <attribute name="output.dir"/>
+    <sequential>
+      <clover-instr initstring="${clover.db.file}" destdir="@{output.dir}" source="1.5">
+        <fileset dir="@{input.dir}">
+        </fileset>
+      </clover-instr>
+      <copy todir="@{output.dir}">
+        <fileset dir="@{input.dir}">
+          <exclude name="**/*.java"/>
+          <exclude name="*.java"/>
+        </fileset>
+      </copy>
+    </sequential>
+ </macrodef>
+
 
 </project>

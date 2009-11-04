@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -26,24 +26,24 @@
 package org.hyperic.hq.events.ext;
 
 import org.hyperic.hq.events.InvalidTriggerDataException;
+import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.util.config.ConfigSchema;
 
 /**
- * An interface for triggers which can be dispatched by the 
- * RegisteredDispatcher.  
+ * An interface for triggers which can be dispatched by the
+ * RegisteredDispatcher.
  */
 
 public interface RegisterableTriggerInterface {
-    
+
+    public ConfigSchema getConfigSchema();
+
     /**
-     * Initialize the trigger with a value object.
      *
-     * @param tval  Configuration data for the trigger
-     * @throws InvalidTriggerDataException if the configuration data is invalid.
+     * @return The ID of this trigger
      */
-    public void init(RegisteredTriggerValue tval)
-        throws InvalidTriggerDataException;
+    Integer getId();
 
     /**
      * Get the event classes that the trigger is interested in
@@ -68,6 +68,29 @@ public interface RegisterableTriggerInterface {
      *          for the specific event class
      */
     public Integer[] getInterestedInstanceIDs(Class c);
-    
-    public ConfigSchema getConfigSchema();
+
+    /**
+     * Initialize the trigger with a value object.
+     * @param trigger The trigger data object containing all the configuration data
+     * @param alertConditionEvaluator  The evaluator to use for reporting trigger fired/trigger not fired events
+     * @throws InvalidTriggerDataException if the configuration data is invalid.
+     */
+    public void init(RegisteredTriggerValue trigger, AlertConditionEvaluator alertConditionEvaluator)
+        throws InvalidTriggerDataException;
+
+    /**
+    *
+    * @return true if the trigger is enabled, likely meaning its associated
+    *         alert definition is enabled
+    */
+   boolean isEnabled();
+
+   /**
+    *
+    * @param enabled true to enable the trigger for event processing, false
+    *        otherwise. This state will likely match the enabled state of the
+    *        trigger's associated alert definition
+    */
+   void setEnabled(boolean enabled);
+
 }

@@ -62,7 +62,7 @@
       <many-to-many class="ServerType" column="SERVER_TYPE_ID"/>
     </bag>
 
-    <bag inverse="true" cascade="all" name="platformBag" table="EAM_PLATFORM"
+    <bag inverse="true" name="platformBag" table="EAM_PLATFORM"
          optimistic-lock="false">
       <key on-delete="cascade" column="PLATFORM_TYPE_ID"/>
       <one-to-many class="Platform"/>

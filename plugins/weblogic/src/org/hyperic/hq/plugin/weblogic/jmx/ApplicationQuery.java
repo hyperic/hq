@@ -26,8 +26,8 @@
 package org.hyperic.hq.plugin.weblogic.jmx;
 
 import javax.management.MBeanServer;
-import javax.management.ObjectName;
 import javax.management.MalformedObjectNameException;
+import javax.management.ObjectName;
 
 import org.hyperic.hq.plugin.weblogic.WeblogicMetric;
 import org.hyperic.hq.plugin.weblogic.WeblogicProductPlugin;

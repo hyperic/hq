@@ -218,13 +218,14 @@ public class SST_DirectSQL extends SchemaSpecTask {
                     ps.execute();
                 } catch (SQLException e) {
                     if (!isFail()) {
-                        log(">>>>> SQL failed: " + e);
+                        log(">>>>> SQL failed (will continue): " + e);
                         conn.rollback();
                         conn.commit();
                     } else {
+                        log(">>>>> SQL failed (aborting): " + e);
                         throw e;
                     }
-                } 
+                }
             } catch ( Exception e ) {
                 throw new BuildException("Error executing statement " +
                                          "desc=["+desc+"] SQL=["+sqlStmt+"] "
