@@ -29,113 +29,109 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
-
 public class ShortenTextTag extends TagSupport {
+	private static final long serialVersionUID = 1L;
 
-    private static String LEFT_POSITION = "left";
-    private static String MIDDLE_POSITION = "middle";
-    private static String RIGHT_POSITION = "right";
-    
-    private int maxlength;
-    private String value = null;
-    private String property = null;
-    private String styleClass = "listcellpopup4";
-    private String position = RIGHT_POSITION;
-    private boolean shorten = false;
-    
-    public ShortenTextTag () { super(); }
+	private static String LEFT_POSITION = "left";
+	private static String MIDDLE_POSITION = "middle";
+	private static String RIGHT_POSITION = "right";
 
-    public int doStartTag() throws JspException {
+	private int maxlength;
+	private String value = null;
+	private String property = null;
+	private String styleClass = "listcellpopup4";
+	private String position = RIGHT_POSITION;
+	private boolean shorten = false;
 
-        try {
-            value = (String) ExpressionUtil.evalNotNull("spider", 
-                                                        "value", 
-                                                        getValue(), 
-                                                        String.class, 
-                                                        this, 
-                                                        pageContext );
-        } catch (NullAttributeException ne) {
-            throw new JspTagException("typeId not found: " + ne);
-        } catch (JspException je) {
-            throw new JspTagException( je.toString() );
-        }
+	public int doStartTag() throws JspException {
+		try {
+			String value = getValue();
+	
+			shorten = value.length() > maxlength;
+	
+			if (property != null) {
+				pageContext.setAttribute(property, value);
+			}
+		} catch(NullPointerException npe) {
+			throw new JspTagException(npe);
+		}
+		
+		return SKIP_BODY;
+	}
 
-        shorten = value.length() > maxlength;
-        
-        if (property != null)
-            pageContext.setAttribute(property, value);
-                
-        return SKIP_BODY;
-    }
+	public int doEndTag() throws JspException {
+		try {
+			if (property == null) {
+				if (shorten) {
+					StringBuffer text = new StringBuffer("<abbr");
 
-    public int doEndTag() throws JspException {
-        try {
-            if (property == null) {
-                if (shorten) {
-                    StringBuffer text = new StringBuffer("<abbr");
-                    
-                    text.append(" class=\"").append(styleClass).append("\"")
-                        .append(" title=\"").append(value).append("\">");
-                
-	                if (LEFT_POSITION.equalsIgnoreCase(getPosition())) {
-	                    text.append("...")
-	                        .append(value.substring(value.length()-maxlength));
-	                } else if (MIDDLE_POSITION.equalsIgnoreCase(getPosition())) {
-	                    text.append(value.substring(0, maxlength/2))
-	                        .append("...")
-	                        .append(value.substring(value.length()-((maxlength+1)/2)));
-	                } else {
-	                    text.append(value.substring(0, maxlength))
-	                        .append("...");
-	                }
+					text.append(" class=\"").append(styleClass).append("\"")
+							.append(" title=\"").append(value).append("\">");
 
-	                text.append("</abbr>");
-	                
-	                pageContext.getOut().println(text.toString());                	
-                } else {
-                    pageContext.getOut().println(value);
-                }
-            }
-        } catch (java.io.IOException e) {
-            throw new JspException(e);
-        }
-        
-        return super.doEndTag();
-    }
+					if (LEFT_POSITION.equalsIgnoreCase(getPosition())) {
+						text.append("...").append(
+								value.substring(value.length() - maxlength));
+					} else if (MIDDLE_POSITION.equalsIgnoreCase(getPosition())) {
+						text.append(value.substring(0, maxlength / 2)).append(
+								"...").append(
+								value.substring(value.length()
+										- ((maxlength + 1) / 2)));
+					} else {
+						text.append(value.substring(0, maxlength))
+								.append("...");
+					}
 
-    public String getValue() {
-        return this.value;
-    }    
-    public void setValue(String value) {
-        this.value = value;
-    }
+					text.append("</abbr>");
 
-    public String getProperty() {
-        return this.property;
-    }    
-    public void setProperty(String property) {
-        this.property = property;
-    }
+					pageContext.getOut().println(text.toString());
+				} else {
+					pageContext.getOut().println(value);
+				}
+			}
+		} catch (java.io.IOException e) {
+			throw new JspException(e);
+		}
 
-    public int getMaxlength() {
-        return this.maxlength;
-    }    
-    public void setMaxlength(int preChars) {
-        this.maxlength = preChars;
-    }
-    public String getStyleClass() {
-        return styleClass;
-    }
-    public void setStyleClass(String styleClass) {
-        this.styleClass = styleClass;
-    }
-    
-    public String getPosition() {
-        return this.position;
-    }    
-    public void setPosition(String position) {
-        this.position = position;
-    }
+		return super.doEndTag();
+	}
+
+	public String getValue() {
+		return this.value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
+	}
+
+	public String getProperty() {
+		return this.property;
+	}
+
+	public void setProperty(String property) {
+		this.property = property;
+	}
+
+	public int getMaxlength() {
+		return this.maxlength;
+	}
+
+	public void setMaxlength(int preChars) {
+		this.maxlength = preChars;
+	}
+
+	public String getStyleClass() {
+		return styleClass;
+	}
+
+	public void setStyleClass(String styleClass) {
+		this.styleClass = styleClass;
+	}
+
+	public String getPosition() {
+		return this.position;
+	}
+
+	public void setPosition(String position) {
+		this.position = position;
+	}
 }

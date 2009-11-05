@@ -1,12 +1,13 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-logic-el" prefix="logic" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="hq" prefix="hq" %>
-<%@ taglib uri="display" prefix="display" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -141,27 +142,35 @@
 </c:url>
 
 <c:if test="${ CONST_PLATFORM == entityId.type}">
-<c:set var="entityId" value="${Resource.entityId}"/>
-
-
-<tiles:insert  definition=".page.title.events.list.platform">
-    <tiles:put name="resource" beanName="Resource"/>
-    <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
-    <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
-    <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
-</tiles:insert>
-<tiles:insert definition =".tabs.resource.platform.alert.alerts">
-    <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
-    <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
-</tiles:insert>
+	<c:set var="entityId" value="${Resource.entityId}"/>
+	<tiles:insert  definition=".page.title.events.list.platform">
+	    <tiles:put name="resource" beanName="Resource"/>
+	    <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
+	    <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+	    <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
+	</tiles:insert>
+    <c:choose>
+        <c:when test="${ canControl }">
+			<tiles:insert definition =".tabs.resource.platform.alert.alerts">
+			    <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+			    <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
+			</tiles:insert>
+        </c:when>
+        <c:otherwise>
+            <tiles:insert definition =".tabs.resource.platform.alert.alerts.nocontrol">
+                    <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+                    <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
+            </tiles:insert>
+        </c:otherwise>
+    </c:choose>
 </c:if>
 <c:if test="${ CONST_SERVER == entityId.type}">
-<tiles:insert  definition=".page.title.events.list.server">
-    <tiles:put name="resource" beanName="Resource"/>
-    <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
-    <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
-    <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
-</tiles:insert>
+	<tiles:insert  definition=".page.title.events.list.server">
+	    <tiles:put name="resource" beanName="Resource"/>
+	    <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
+	    <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+	    <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
+	</tiles:insert>
     <c:choose>
         <c:when test="${ canControl }">
             <tiles:insert definition =".tabs.resource.server.alert.alerts">

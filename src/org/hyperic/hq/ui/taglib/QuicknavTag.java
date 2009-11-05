@@ -31,90 +31,72 @@ import javax.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-
 
 /**
  * This class is a two in one tag that that creates a row of quicknav icons for
  * the resource hub.
  */
-public class QuicknavTag extends TagSupport{
+public class QuicknavTag extends TagSupport {
+	private static final long serialVersionUID = 1L;
 
-    //----------------------------------------------------static variables
+	private static Log log = LogFactory.getLog(QuicknavTag.class.getName());
 
-    protected static Log log =
-        LogFactory.getLog(QuicknavTag.class.getName());
+	private AppdefResourceValue resource;
+	private PageContext context;
 
-    //----------------------------------------------------instance variables
+	public AppdefResourceValue getResource() {
+		return resource;
+	}
 
-    private String resource;
-    private PageContext context;
+	public void setResource(AppdefResourceValue s) {
+		resource = s;
+	}
 
-    public QuicknavTag() {
-        super();
-    }
+	public String decorate(Object obj) throws Exception {
+		AppdefResourceValue rv = getResource();
 
-    //----------------------------------------------------public methods
+		if (rv == null) {
+			log.debug("Resource attribute value is null");
 
-    public String getResource() {
-        return resource;
-    }
+			return QuicknavUtil.getNA();
+		}
 
-    public void setResource(String s) {
-        resource = s;
-    }
+		if (rv.getEntityId() == null) {
+			log.debug("Resource entityId value is null");
 
-    public String decorate(Object obj) throws Exception{
-        AppdefResourceValue rv = null;
-        try {
-            rv = (AppdefResourceValue) evalAttr("resource", getResource(),
-                                                AppdefResourceValue.class);
-        } catch (NullAttributeException ne) {
-            log.debug("bean " + getResource() + " not found");
-            return QuicknavUtil.getNA();
-        } catch (JspException je) {
-            log.debug("can't evaluate resource type [" + getResource() + "]",
-                      je);
-            return QuicknavUtil.getNA();
-        }
+			return QuicknavUtil.getNA();
+		}
 
-        if (rv.getEntityId() == null) {
-            return QuicknavUtil.getNA();
-        }
+		return QuicknavUtil.getOutput(rv, context);
+	}
 
-        return QuicknavUtil.getOutput(rv, context);
-    }
+	public int doStartTag() throws JspException {
+		try {
+			String d = decorate(this);
 
-    public int doStartTag() throws JspException {
-        try {
-            String d = decorate(this);
-            context.getOut().write(d);
-        } catch (Exception e) {
-            log.error("Error while displaying nav icons.", e);
-            throw new JspException(e);
-        }
-        return SKIP_BODY;
-    }
+			context.getOut().write(d);
+		} catch (Exception e) {
+			log.error("Error while displaying nav icons.", e);
 
-    public int doEndTag() {
-        release();
-        return EVAL_PAGE;
-    }
+			throw new JspException(e);
+		}
 
-    public void setPageContext(PageContext pc) {
-        context = pc;
-    }
+		return SKIP_BODY;
+	}
 
-    public void release() {
-        context = null;
-        resource = null;
-    }
+	public int doEndTag() {
+		release();
 
-    private Object evalAttr(String name, String value, Class type)
-        throws JspException, NullAttributeException {
-        return ExpressionUtil.evalNotNull("quicknavtag", name, value,
-                                          type, this, context);
-    }
+		return EVAL_PAGE;
+	}
+
+	public void setPageContext(PageContext pc) {
+		context = pc;
+	}
+
+	public void release() {
+		context = null;
+		resource = null;
+	}
 }

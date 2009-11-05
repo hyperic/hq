@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.taglib.display;
 
-import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
@@ -33,193 +32,152 @@ import javax.servlet.jsp.PageContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 
 /**
  * This class is a two in one decorator/tag for use within the display:table
- * tag, it is a ColumnDecorator tag that that creates a column of form element labels.
+ * tag, it is a ColumnDecorator tag that that creates a column of form element
+ * labels.
  */
-public class LabelDecorator extends ColumnDecorator implements Tag
-{
+public class LabelDecorator extends ColumnDecorator implements Tag {
+	private static Log log = LogFactory.getLog(LabelDecorator.class.getName());
 
-    //----------------------------------------------------static variables
+	/**
+	 * The class property of the Label.
+	 */
+	private String styleClass = null;
 
-    private static Log log =
-        LogFactory.getLog(LabelDecorator.class.getName());
+	/**
+	 * The for="foo" property of the Label.
+	 */
+	private String forElement = null;
 
-    //----------------------------------------------------instance variables
+	/**
+	 * The onClick attribute of the Label.
+	 */
+	private String onclick = null;
 
-    /** The class property of the Label.
-     */
-    private String styleClass = null;
+	public LabelDecorator() {
+		styleClass = "listMemberCheckbox";
+		forElement = "";
+		onclick = "";
+	}
 
-    /** The for="foo" property of the Label.
-     */
-    private String forElement = null;
+	public String getStyleClass() {
+		return this.styleClass;
+	}
 
-    /** The onClick attribute of the Label.
-     */
-    private String onclick = null;
+	public void setStyleClass(String c) {
+		this.styleClass = c;
+	}
 
-    // ctors
-    public LabelDecorator() {
-        styleClass = "listMemberCheckbox";
-        forElement = "";
-        onclick = "";
-    }
+	public String getForElement() {
+		return this.forElement;
+	}
 
-    // accessors 
-    public String getStyleClass() {
-        return this.styleClass;
-    }
-    
-    public void setStyleClass(String c) {
-        this.styleClass = c;
-    }
-    
-    public String getForElement() {
-        return this.forElement;
-    }
-    
-    public void setForElement(String n) {
-        this.forElement = n;
-    }
-    
-    public String getOnclick() {
-        return this.onclick;
-    }
-    
-    public void setOnclick(String o) {
-        this.onclick = o;
-    }
-    
-    public String decorate(Object obj) {
-        String name = null, id = null;
-        String value = null, label = null;
-        String click = "";
+	public void setForElement(String n) {
+		this.forElement = n;
+	}
 
-        try {
-            forElement = (String) evalAttr("forElement", this.forElement, String.class);
-        }
-        catch (NullAttributeException ne) {
-            log.debug("bean " + this.forElement + " not found");
-            return "";
-        }
-        catch (JspException je) {
-            log.debug("can't evaluate forElement [" + this.forElement + "]: ", je);
-            return "";
-        }
+	public String getOnclick() {
+		return this.onclick;
+	}
 
-        try {
-            styleClass = (String) evalAttr("styleClass", this.styleClass, String.class);
-        }
-        catch (NullAttributeException ne) {
-            log.debug("bean " + this.styleClass + " not found");
-            return "";
-        }
-        catch (JspException je) {
-            log.debug("can't evaluate styleClass [" + this.styleClass + "]: ", je);
-            return "";
-        }
+	public void setOnclick(String o) {
+		this.onclick = o;
+	}
 
-        try {
-            value = (String) evalAttr("value", this.value, String.class);
-        }
-        catch (NullAttributeException ne) {
-            log.debug("bean " + this.value + " not found");
-            return "";
-        }
-        catch (JspException je) {
-            log.debug("can't evaluate value [" + this.value + "]: ", je);
-            return "";
-        }
+	public String decorate(Object obj) {
+		try {
+			String forElement = getForElement();
+			String style = getStyleClass();
+			String value = getValue();
+			String click = getOnclick();
+	
+			if (value == null) {
+				value = obj.toString();
+			}
+			
+			StringBuffer buf = new StringBuffer();
+	
+			buf.append("<label for=\"");
+			buf.append(forElement);
+			buf.append("\" onclick=\"");
+			buf.append(click);
+			buf.append("\" class=\"");
+			buf.append(style);
+			buf.append("\">");
+			buf.append(value);
+			buf.append("</label>");
+	
+			return buf.toString();
+		} catch(NullPointerException npe) {
+			log.debug(npe.toString());
+		}
+		
+		return "";
+	}
 
-        if (value == null)
-            value = obj.toString();
+	public int doStartTag() throws javax.servlet.jsp.JspException {
+		ColumnTag ancestorTag = (ColumnTag) TagSupport.findAncestorWithClass(this, ColumnTag.class);
+		
+		if (ancestorTag == null) {
+			throw new JspTagException("A LabelDecorator must be used within a ColumnTag.");
+		}
+		
+		ancestorTag.setDecorator(this);
+		
+		return SKIP_BODY;
+	}
 
-        try {
-            click = (String) evalAttr("onclick", this.getOnclick(), String.class);
-        } catch (NullAttributeException e) {
-            // Onclick is empty
-        } catch (JspException e) {
-            // Onclick is empty
-        }
+	public int doEndTag() {
+		return EVAL_PAGE;
+	}
 
-        StringBuffer buf = new StringBuffer();
-        
-        buf.append("<label for=\"");
-        buf.append(forElement);
-        buf.append("\" onclick=\"");
-        buf.append(click);
-        buf.append("\" class=\"");
-        buf.append(styleClass);
-        buf.append("\">");
-        buf.append(value);
-        buf.append("</label>");
-        
-        return buf.toString();
-    }
+	// the JSP tag interface for this decorator
+	Tag parent;
+	PageContext context;
 
-    public int doStartTag() throws javax.servlet.jsp.JspException {
-        ColumnTag ancestorTag = (ColumnTag)TagSupport.findAncestorWithClass(this, ColumnTag.class);
-        if (ancestorTag == null) {
-            throw new JspTagException("A LabelDecorator must be used within a ColumnTag.");
-        }
-        ancestorTag.setDecorator(this);
-        return SKIP_BODY;
-    }
-    
-    public int doEndTag() {
-        return EVAL_PAGE;
-    }
+	/** Holds value of property value. */
+	private String value;
 
-    // the JSP tag interface for this decorator
-    Tag parent;
-    PageContext context;
+	public Tag getParent() {
+		return parent;
+	}
 
-    /** Holds value of property value. */
-    private String value;
-    
-    public Tag getParent() {
-        return parent;
-    }
-    public void setParent(Tag t) {
-        this.parent = t;
-    }
+	public void setParent(Tag t) {
+		this.parent = t;
+	}
 
-    public void setPageContext(PageContext pc) {
-        this.context = pc;
-    }
+	public void setPageContext(PageContext pc) {
+		this.context = pc;
+	}
 
-    public void release() {
-        styleClass = null;
-        forElement = null;
-        onclick = null;
-        parent = null;
-        context = null;
-    }
+	public void release() {
+		styleClass = null;
+		forElement = null;
+		onclick = null;
+		parent = null;
+		context = null;
+	}
 
-    private Object evalAttr(String name, String value, Class type)
-        throws JspException, NullAttributeException {
-        return ExpressionUtil.evalNotNull("Labeldecorator", name, value,
-                                          type, this, context);
-    }
-    
-    /** Getter for property value.
-     * @return Value of property value.
-     *
-     */
-    public String getValue() {
-        return this.value;
-    }
-    
-    /** Setter for property value.
-     * @param value New value of property value.
-     *
-     */
-    public void setValue(String value) {
-        this.value = value;
-    }
-    
+	/**
+	 * Getter for property value.
+	 * 
+	 * @return Value of property value.
+	 * 
+	 */
+	public String getValue() {
+		return this.value;
+	}
+
+	/**
+	 * Setter for property value.
+	 * 
+	 * @param value
+	 *            New value of property value.
+	 * 
+	 */
+	public void setValue(String value) {
+		this.value = value;
+	}
 }

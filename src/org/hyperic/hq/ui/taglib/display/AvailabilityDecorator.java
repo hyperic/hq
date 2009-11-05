@@ -41,369 +41,354 @@ import org.hyperic.hq.ui.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.taglib.TagUtils;
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
-
 
 /**
  * This class is a two in one decorator/tag for use within the
- * <code>TableTag</code>; it is a <code>ColumnDecorator</code> tag
- * that that creates a column of availability icons.
+ * <code>TableTag</code>; it is a <code>ColumnDecorator</code> tag that that
+ * creates a column of availability icons.
  * 
- * One of these days, when the whole DependencyNode thing is cleaned
- * up, a lot of this stuff should just move to it's own decorator just for 
- * DependencyNodes
+ * One of these days, when the whole DependencyNode thing is cleaned up, a lot
+ * of this stuff should just move to it's own decorator just for DependencyNodes
  */
 public class AvailabilityDecorator extends ColumnDecorator implements Tag {
+	private final static String ICON_SRC = "/resource/Availability";
+	private final static String ICON_WIDTH = "12";
+	private final static String ICON_HEIGHT = "12";
+	private final static String ICON_BORDER = "0";
+	private final static String ICON_PRE = "/images/icon_available_";
+	private final static String ICON_UP = ICON_PRE + "green.gif";
+	private final static String ICON_DOWN = ICON_PRE + "red.gif";
+	private final static String ICON_WARN = ICON_PRE + "yellow.gif";
+	private final static String ICON_PAUSED = ICON_PRE + "orange.gif";
+	private final static String ICON_ERR = ICON_PRE + "error.gif";
 
-    //----------------------------------------------------static variables
+	private static Log log = LogFactory.getLog(AvailabilityDecorator.class
+			.getName());
 
-    private final static String ICON_SRC    = "/resource/Availability";
-    private final static String ICON_WIDTH  = "12";
-    private final static String ICON_HEIGHT = "12";
-    private final static String ICON_BORDER = "0";
-    private final static String AVAILABILITY_TIMEOUT = "30000"; /* 30 seconds */
-    
-    private final static String ICON_PRE    = "/images/icon_available_";
-    private final static String ICON_UP     = ICON_PRE + "green.gif";
-    private final static String ICON_DOWN   = ICON_PRE + "red.gif";
-    private final static String ICON_WARN   = ICON_PRE + "yellow.gif";
-    private final static String ICON_PAUSED = ICON_PRE + "orange.gif";
-    private final static String ICON_ERR    = ICON_PRE + "error.gif";
-    
-    private static Log log =
-        LogFactory.getLog(AvailabilityDecorator.class.getName());
+	private AppdefResourceValue resource;
+	private Integer resourceId;
+	private Integer resourceTypeId;
+	private Boolean monitorable; // optional attribute
+	private String value; // optional attribute
 
-    //----------------------------------------------------instance variables
+	// flags
+	private boolean resourceIsSet = false;
+	private boolean resourceIdIsSet = false;
+	private boolean resourceTypeIdIsSet = false;
+	private boolean monitorableIsSet = false;
+	private boolean valueIsSet = false;
 
-    // tag attrs
-    private String resource;
-    private String resourceId;
-    private String resourceTypeId;
-    
-    private String monitorable; // optional attribute
-    private String value;       // optional attribute
+	private PageContext context;
+	private Tag parent;
 
-    // flags
-    private boolean resourceIsSet = false;
-    private boolean resourceIdIsSet = false;
-    private boolean resourceTypeIdIsSet = false;
-    private boolean monitorableIsSet = false;
-    private boolean valueIsSet = false;
-    
-    private PageContext context;
-    private Tag parent;
+	public AppdefResourceValue getResource() {
+		return resource;
+	}
 
-    //----------------------------------------------------constructors
+	public void setResource(AppdefResourceValue s) {
+		resourceIsSet = true;
+		resource = s;
+	}
 
-    public AvailabilityDecorator() {
-        super();
-    }
+	/**
+	 * Returns the resourceId.
+	 * 
+	 * @return String
+	 */
+	public Integer getResourceId() {
+		return resourceId;
+	}
 
-    //----------------------------------------------------public methods
+	/**
+	 * Returns the resourceTypeId.
+	 * 
+	 * @return String
+	 */
+	public Integer getResourceTypeId() {
+		return resourceTypeId;
+	}
 
-    public String getResource() {
-        return resource;
-    }
+	/**
+	 * Sets the resourceId.
+	 * 
+	 * @param resourceId
+	 *            The resourceId to set
+	 */
+	public void setResourceId(Integer resourceId) {
+		resourceIdIsSet = true;
+		this.resourceId = resourceId;
+	}
 
-    public void setResource(String s) {
-        resourceIsSet = true;
-        resource = s;
-    }
+	/**
+	 * @return String
+	 */
+	public Boolean getMonitorable() {
+		return monitorable;
+	}
 
-    /**
-     * Returns the resourceId.
-     * @return String
-     */
-    public String getResourceId() {
-        return resourceId;
-    }
+	/**
+	 * Sets the compatibleGroup.
+	 * 
+	 * @param compatibleGroup
+	 *            The compatibleGroup to set
+	 */
+	public void setMonitorable(Boolean monitorable) {
+		monitorableIsSet = true;
+		this.monitorable = monitorable;
+	}
 
-    /**
-     * Returns the resourceTypeId.
-     * @return String
-     */
-    public String getResourceTypeId() {
-        return resourceTypeId;
-    }
+	/**
+	 * Sets the resourceTypeId.
+	 * 
+	 * @param resourceTypeId
+	 *            The resourceTypeId to set
+	 */
+	public void setResourceTypeId(Integer resourceTypeId) {
+		resourceTypeIdIsSet = true;
+		this.resourceTypeId = resourceTypeId;
+	}
 
-    /**
-     * Sets the resourceId.
-     * @param resourceId The resourceId to set
-     */
-    public void setResourceId(String resourceId) {
-        resourceIdIsSet = true;
-        this.resourceId = resourceId;
-    }
-    
-    /**
-     * @return String
-     */
-    public String getMonitorable() {
-        return monitorable;
-    }
+	/**
+	 * @return String
+	 */
+	public String getValue() {
+		return value;
+	}
 
-    /**
-     * Sets the compatibleGroup.
-     * @param compatibleGroup The compatibleGroup to set
-     */
-    public void setMonitorable(String monitorable) {
-        monitorableIsSet = true;
-        this.monitorable = monitorable;
-    }
+	/**
+	 * Sets the value.
+	 * 
+	 * @param value
+	 *            The value to set
+	 */
+	public void setValue(String value) {
+		valueIsSet = true;
+		this.value = value;
+	}
 
-    /**
-     * Sets the resourceTypeId.
-     * @param resourceTypeId The resourceTypeId to set
-     */
-    public void setResourceTypeId(String resourceTypeId) {
-        resourceTypeIdIsSet = true;
-        this.resourceTypeId = resourceTypeId;
-    }
+	public String decorate(Object obj) throws Exception {
+		if (valueIsSet) {
+			return getOutputByValue();
+		}
 
-    /**
-     * @return String
-     */
-    public String getValue() {
-        return value;
-    }
+		if (resourceIdIsSet && resourceTypeIdIsSet) {
+			try {
+				return getOutputById();
+			} catch (java.lang.NumberFormatException e) {
+				log.debug("bogus params: resourceId=" + resourceId
+						+ " resourceTypeId=" + resourceTypeId);
 
-    /**
-     * Sets the value.
-     * @param value The value to set
-     */
-    public void setValue(String value) {
-        valueIsSet = true;
-        this.value = value;
-    }
-    
-    public String decorate(Object obj) throws Exception{
-        if (valueIsSet) {
-            return getOutputByValue();
-        }
-        
-        if (resourceIdIsSet && resourceTypeIdIsSet) {
-            try {
-                return getOutputById();
-            } catch (java.lang.NumberFormatException e) {
-                log.debug("bogus params: resourceId=" +
-                    resourceId + " resourceTypeId=" + resourceTypeId);
-                return "";
-            }
-        }
-        return getOutputByResource();
-    }
+				return "";
+			}
+		}
 
-    private String getOutputById() throws JspException {
-        Integer id = null;
-        Integer typeId = null;
-        Boolean monitorableFlag = null;
-        try {
-            id =  (Integer) evalAttr("resourceId", this.resourceId,
-                                     Integer.class);
-            typeId = (Integer) evalAttr("resourceType", this.resourceTypeId,
-                                        Integer.class);
-        } catch (NullAttributeException ne) {
-            log.debug("resourceId [" + this.resourceId +
-                      "] and resourceTypeId [" + this.resourceTypeId +
-                      "] not parameterized");
-            return getNA();
-        } catch (JspException je) {
-            log.debug("resourceId [" + this.resourceId +
-                      "] and resourceTypeId [" + this.resourceTypeId +
-                      "] could not be evaluated");
-            return getNA();
-        }
+		return getOutputByResource();
+	}
 
-        if (typeId.intValue() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
-            if (monitorableIsSet) {
-                monitorableFlag = (Boolean)
-                    evalAttr("monitorable", this.monitorable, Boolean.class);
-                
-                if (!monitorableFlag.booleanValue())
-                    return getNA();
-            }
-            else {
-                log.debug("don't know if group is compatible, returning n/a");
-                return getNA();
-            }
-        }
-        
-        return getOutput(new AppdefEntityID(typeId.intValue(), id));
-    }
+	private String getOutputById() throws JspException {
+		Integer id = getResourceId();
+		Integer typeId = getResourceTypeId();
 
-    private String getOutputByResource() throws JspException {
-        AppdefResourceValue resource = null;
-        try {
-            resource =
-                (AppdefResourceValue) evalAttr("resource", this.resource,
-                                               AppdefResourceValue.class);
-        } catch (NullAttributeException ne) {
-            log.debug("bean " + this.resource + " not found");
-            return getNA();
-        } catch (JspException je) {
-            log.debug("can't evaluate resource type [" + this.resource + "]",
-                      je);
-            return getNA();
-        }
+		if (id == null) {
+			log.debug("ResourceId attribute value set to null");
 
-        if (resource.getEntityId() == null)
-            return getNA();
-        else
-            return getOutput(resource.getEntityId());
-    }
+			return getNA();
+		}
 
-    private String getOutputByValue() throws JspException {
-        HttpServletRequest req = (HttpServletRequest) context.getRequest();
-        StringBuffer src = new StringBuffer(req.getContextPath());
+		if (typeId == null) {
+			log.debug("ResourceTypeId attribute value set to null");
 
-        if (monitorableIsSet) {
-            Boolean monitorableFlag = (Boolean)
-                evalAttr("monitorable", this.monitorable, Boolean.class);
-            
-            if (!monitorableFlag.booleanValue()) {
-                if (resourceIdIsSet && resourceTypeIdIsSet) {
-                    Integer id = null;
-                    Integer typeId = null;
-                    try {
-                        id =  (Integer) evalAttr("resourceId", this.resourceId,
-                                                 Integer.class);
-                        typeId = (Integer) evalAttr("resourceType",
-                                                    this.resourceTypeId,
-                                                    Integer.class);
-                        return this.getOutput(
-                            new AppdefEntityID(typeId.intValue(), id));
-                    } catch (NullAttributeException ne) {
-                        log.debug("resourceId [" + this.resourceId +
-                                  "] and resourceTypeId [" +
-                                  this.resourceTypeId +
-                                  "] not parameterized");
-                    } catch (JspException je) {
-                        log.debug("resourceId [" + this.resourceId +
-                                  "] and resourceTypeId [" +
-                                  this.resourceTypeId +
-                                  "] could not be evaluated");
-                    }
-                }
-                
-                // Just return not available
-                return getNA();
-            }
-        }
+			return getNA();
+		}
 
-        String availStr = (String) evalAttr("value", this.value, String.class);
-        double availVal;
-        
-        if (availStr.length() > 0)
-            availVal = Double.parseDouble(availStr);
-        else
-            availVal = Double.NaN;
+		if (typeId.intValue() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
+			if (monitorableIsSet) {
+				Boolean monitorableFlag = getMonitorable();
 
-        if (availVal == MeasurementConstants.AVAIL_DOWN) {
-            src.append(ICON_DOWN);
-        } else if (availVal == MeasurementConstants.AVAIL_UP) {
-            src.append(ICON_UP);
-        } else if (availVal == MeasurementConstants.AVAIL_PAUSED) {
-            src.append(ICON_PAUSED);
-        } else if (availVal < MeasurementConstants.AVAIL_UP &&
-                   availVal > MeasurementConstants.AVAIL_DOWN) {
-            src.append(ICON_WARN);
-        } else {
-            src.append(ICON_ERR);
-        }
+				if (monitorableFlag == null) {
+					monitorableFlag = Boolean.FALSE;
+				}
 
-        StringBuffer buf = new StringBuffer()
-            .append("<img src=\"")
-            .append(src)
-            .append("\" width=\"")
-            .append(ICON_WIDTH)
-            .append("\" height=\"")
-            .append(ICON_HEIGHT)
-            .append("\" alt=\"\" border=\"")
-            .append(ICON_BORDER)
-            .append("\">");
-        return buf.toString();
-    }
+				if (!monitorableFlag.booleanValue()) {
+					return getNA();
+				}
+			} else {
+				log.debug("don't know if group is compatible, returning n/a");
 
-    private String getOutput(AppdefEntityID aeid) {
-        HttpServletRequest req = (HttpServletRequest) context.getRequest();
-        StringBuffer src = new StringBuffer(req.getContextPath());
-        src.append(ICON_SRC)
-           .append("?")
-           .append(Constants.ENTITY_ID_PARAM)
-           .append("=")
-           .append(aeid.getAppdefKey());
+				return getNA();
+			}
+		}
 
-        StringBuffer buf = new StringBuffer();
-        buf.append("<img name=\"avail")
-           .append(aeid.getID())
-           .append("\" src=\"")
-           .append(src)
-           .append("\" width=\"")
-           .append(ICON_WIDTH)
-           .append("\" height=\"")
-           .append(ICON_HEIGHT)
-           .append("\" alt=\"\" border=\"")
-           .append(ICON_BORDER)
-           .append("\">");
-        return buf.toString();
-    }
+		return getOutput(new AppdefEntityID(typeId.intValue(), id));
+	}
 
-    private String getNA() throws JspException {
-        return TagUtils.getInstance().message(this.getPageContext(), null, null, "common.value.notavail");
-    }
+	private String getOutputByResource() throws JspException {
+		AppdefResourceValue resource = getResource();
 
-    public int doStartTag() throws JspTagException {
-        ColumnTag ancestorTag = (ColumnTag)TagSupport.findAncestorWithClass(this, ColumnTag.class);
-        if (ancestorTag == null) {
-            throw new JspTagException("An AvailabilityDecorator must be used within a ColumnTag.");
-        }
-        // the rules are a little more complicated than what can be expressed in the tld...
-        if (resourceIsSet) {
-            if (resourceIdIsSet || resourceTypeIdIsSet) {
-                throw new JspTagException("An AvailabilityDecorator must either specify a 'resource' " +
-                    " attribute or both 'resourceId' and 'resourceTypeId' attributes");
-            }
-        } else if (!valueIsSet) {
-            if (! resourceIdIsSet && ! resourceTypeIdIsSet) {
-                throw new JspTagException("An AvailabilityDecorator must either specify a 'resource' " +
-                    " attribute or both 'resourceId' and 'resourceTypeId' attributes");
-            }
-        }
-        ancestorTag.setDecorator(this);
-        return SKIP_BODY;
-    }
+		if (resource == null) {
+			log.debug("Resource attribute value set to null");
 
-    public int doEndTag() {
-        return EVAL_PAGE;
-    }
+			return getNA();
+		}
 
-    public Tag getParent() {
-        return parent;
-    }
-    public void setParent(Tag t) {
-        this.parent = t;
-    }
+		if (resource.getEntityId() == null) {
+			return getNA();
+		} else {
+			return getOutput(resource.getEntityId());
+		}
+	}
 
-    public void setPageContext(PageContext pc) {
-        this.context = pc;
-    }
+	private String getOutputByValue() throws JspException {
+		HttpServletRequest req = (HttpServletRequest) context.getRequest();
+		StringBuffer src = new StringBuffer(req.getContextPath());
 
-    public void release() {
-        parent = null;
-        context = null;
-        resource = null;
-        resourceId = null;
-        resourceTypeId = null;
-        resourceIsSet = false;
-        resourceIdIsSet = false;
-        resourceTypeIdIsSet = false;
-    }
+		if (monitorableIsSet) {
+			Boolean monitorableFlag = getMonitorable();
 
-    private Object evalAttr(String name, String value, Class type)
-        throws JspException, NullAttributeException {
-        return ExpressionUtil.evalNotNull("availabilitydecorator", name, value,
-                                          type, this, context);
-    }
+			if (monitorableFlag == null) {
+				monitorableFlag = Boolean.FALSE;
+			}
 
+			if (!monitorableFlag.booleanValue()) {
+				if (resourceIdIsSet && resourceTypeIdIsSet) {
+					Integer id = getResourceId();
+					Integer typeId = getResourceTypeId();
+
+					if (id == null) {
+						log.debug("ResourceId attribute value set to null");
+
+						return getNA();
+					}
+
+					if (typeId == null) {
+						log.debug("ResourceTypeId attribute value set to null");
+
+						return getNA();
+					}
+
+					return this.getOutput(new AppdefEntityID(typeId.intValue(),
+							id));
+				}
+
+				// Just return not available
+				return getNA();
+			}
+		}
+
+		String availStr = getValue();
+
+		if (availStr == null) {
+			log.debug("Value attribute value set to null, setting to NaN");
+			availStr = "";
+		}
+
+		double availVal;
+
+		if (availStr.length() > 0) {
+			availVal = Double.parseDouble(availStr);
+		} else {
+			availVal = Double.NaN;
+		}
+
+		if (availVal == MeasurementConstants.AVAIL_DOWN) {
+			src.append(ICON_DOWN);
+		} else if (availVal == MeasurementConstants.AVAIL_UP) {
+			src.append(ICON_UP);
+		} else if (availVal == MeasurementConstants.AVAIL_PAUSED) {
+			src.append(ICON_PAUSED);
+		} else if (availVal < MeasurementConstants.AVAIL_UP
+				&& availVal > MeasurementConstants.AVAIL_DOWN) {
+			src.append(ICON_WARN);
+		} else {
+			src.append(ICON_ERR);
+		}
+
+		StringBuffer buf = new StringBuffer().append("<img src=\"").append(src)
+				.append("\" width=\"").append(ICON_WIDTH)
+				.append("\" height=\"").append(ICON_HEIGHT).append(
+						"\" alt=\"\" border=\"").append(ICON_BORDER).append(
+						"\">");
+
+		return buf.toString();
+	}
+
+	private String getOutput(AppdefEntityID aeid) {
+		HttpServletRequest req = (HttpServletRequest) context.getRequest();
+		StringBuffer src = new StringBuffer(req.getContextPath());
+
+		src.append(ICON_SRC).append("?").append(Constants.ENTITY_ID_PARAM)
+				.append("=").append(aeid.getAppdefKey());
+
+		StringBuffer buf = new StringBuffer();
+
+		buf.append("<img name=\"avail").append(aeid.getID())
+				.append("\" src=\"").append(src).append("\" width=\"").append(
+						ICON_WIDTH).append("\" height=\"").append(ICON_HEIGHT)
+				.append("\" alt=\"\" border=\"").append(ICON_BORDER).append(
+						"\">");
+
+		return buf.toString();
+	}
+
+	private String getNA() throws JspException {
+		return TagUtils.getInstance().message(this.getPageContext(), null,
+				null, "common.value.notavail");
+	}
+
+	public int doStartTag() throws JspTagException {
+		ColumnTag ancestorTag = (ColumnTag) TagSupport.findAncestorWithClass(
+				this, ColumnTag.class);
+
+		if (ancestorTag == null) {
+			throw new JspTagException(
+					"An AvailabilityDecorator must be used within a ColumnTag.");
+		}
+
+		// the rules are a little more complicated than what can be expressed in
+		// the tld...
+		if (resourceIsSet) {
+			if (resourceIdIsSet || resourceTypeIdIsSet) {
+				throw new JspTagException(
+						"An AvailabilityDecorator must either specify a 'resource' "
+								+ " attribute or both 'resourceId' and 'resourceTypeId' attributes");
+			}
+		} else if (!valueIsSet) {
+			if (!resourceIdIsSet && !resourceTypeIdIsSet) {
+				throw new JspTagException(
+						"An AvailabilityDecorator must either specify a 'resource' "
+								+ " attribute or both 'resourceId' and 'resourceTypeId' attributes");
+			}
+		}
+
+		ancestorTag.setDecorator(this);
+
+		return SKIP_BODY;
+	}
+
+	public int doEndTag() {
+		return EVAL_PAGE;
+	}
+
+	public Tag getParent() {
+		return parent;
+	}
+
+	public void setParent(Tag t) {
+		this.parent = t;
+	}
+
+	public void setPageContext(PageContext pc) {
+		this.context = pc;
+	}
+
+	public void release() {
+		parent = null;
+		context = null;
+		resource = null;
+		resourceId = null;
+		resourceTypeId = null;
+		resourceIsSet = false;
+		resourceIdIsSet = false;
+		resourceTypeIdIsSet = false;
+	}
 }

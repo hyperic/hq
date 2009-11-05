@@ -1,9 +1,10 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -32,13 +33,13 @@
 <tiles:importAttribute name="principalBean" ignore="true" />
 <tiles:importAttribute name="rowBean" ignore="true" />
 <c:choose>
-<!-- header -->
 <c:when test="${not empty principalBean}">
+	<!-- header -->
     <th>ID Header (.table must be overridden with a tableComp defined)</th>
     <th>Name Header (.table must be overridden with a tableComp defined)</th>
 </c:when>
-<!-- data -->
 <c:when test="${not empty rowBean}">
+	<!-- data -->
     <td><c:out value="${rowBean.id}" /></td><td><c:out value="${rowBean.name}" /></td>
 </c:when>
 <c:otherwise>

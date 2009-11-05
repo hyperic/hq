@@ -552,10 +552,10 @@ ${errMsg}
         <include name="ant-contrib.jar"/>
         <include name="ant.jar"/>
         <include name="ant-launcher.jar"/>
-        <include name="commons-logging.jar"/>
+        <include name="commons-logging-1.0.4.jar"/>
         <include name="hq-installer.jar"/>
         <include name="hq-boot.jar"/>
-        <include name="jakarta-oro-2.0.7.jar"/>
+        <include name="oro-2.0.8.jar"/>
         <include name="sigar-x86-winnt.dll"/>
         <include name="libsigar-hppa2.0-hp-hpux-11.x.sl"/>
         <include name="libsigar-powerpc-ibm-aix-4.3.x.so"/>

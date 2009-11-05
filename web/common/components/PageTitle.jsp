@@ -1,11 +1,12 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="struts-logic-el" prefix="logic" %>
-<%@ taglib uri="hq" prefix="hq" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -110,21 +111,19 @@
     <td colspan="2" nowrap>
 <c:choose>
   <c:when test="${not empty titleKey}">
+    <c:set var="escapedTitleName">
+  		<c:out value="${titleName}" />
+    </c:set>
+    <c:set var="escapedSubTitleName">
+      	<c:out value="${subTitleName}" />
+    </c:set>
     <fmt:message key="${titleKey}">
-      <c:if test="${not empty titleName}">
-        <span class="resourceTitle">
-        <fmt:param value="${titleName}"/>
-        </span>
-      </c:if>
-      <c:if test="${not empty subTitleName}">
-        <span class="resourceSubTitle">
-        <fmt:param value="${subTitleName}"/>
-        </span>
-      </c:if>
+		<fmt:param value="${escapedTitleName}" />
+		<fmt:param value="${escapedSubTitleName}" />      
     </fmt:message>
   </c:when>
   <c:otherwise>
-    <c:out value="${titleName}" escapeXml="false"/>
+    <c:out value="${titleName}" />
       <c:if test="${not empty subTitleName}">
         <span class="resourceSubTitle">
         <c:out value="${subTitleName}"/>

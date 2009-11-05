@@ -235,13 +235,13 @@
 	<classpathentry kind="lib" path="thirdparty/lib/commons-digester-1.8.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/commons-logging-1.0.4.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/commons-validator-1.3.1.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/jstl-1.0.2.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/oro-2.0.8.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/standard-1.0.6.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/struts-core-1.3.10.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/struts-el-1.3.10.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/struts-taglib-1.3.10.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/struts-tiles-1.3.10.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/struts-extras-1.3.10.jar"/>
+	<classpathentry kind="lib" path="thirdparty/lib/jstl-1.1.2.jar"/>
+	<classpathentry kind="lib" path="thirdparty/lib/standard-1.1.2.jar" sourcepath="/Users/david/Development/opensource/jakarta-taglibs-standard-1.1.2-src/standard/src"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

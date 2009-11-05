@@ -14,6 +14,10 @@
     <put name="titleImg" value="title_platform.gif"/>
   </definition>
   
+  	<definition name=".page.title.resource.platform.full" extends=".page.title.resource.platform">
+    	<put name="linkUrl" value="/resource/platform/inventory/PlatformLinks.jsp"/>
+  	</definition>
+  
   <definition name=".page.title.resource.platform.autodiscovery.full"
               extends=".page.title.resource.platform">
     <put name="linkUrl"
@@ -27,8 +31,33 @@
   <!-- tabs -->
 
   <!-- platform tabs -->
-  <definition name=".tabs.resource.platform" extends=".tabs.resource.nocontrol">
+  <definition name=".tabs.resource.platform" extends=".tabs.resource">
+    <put name="selectedIndex" value="0" />
     <put name="resourceType" value="1" />
+    <putList name="tabList">
+      <item value="Monitor" mode="currentHealth"
+            link="/resource/platform/monitor/Visibility.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Inventory" mode="view"
+            link="/resource/platform/Inventory.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Alert" mode="list"
+            link="/alerts/Alerts.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Control" link="/resource/platform/Control.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Views" mode="list"
+            link="/TabBodyAttach.do"
+            height="21" width="102"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+    </putList> 
+  </definition>
+
+  <definition name=".tabs.resource.platform.nocontrol" extends=".tabs.resource">
     <putList name="tabList">
       <item value="Monitor" mode="currentHealth"
             link="/resource/platform/monitor/Visibility.do"
@@ -56,13 +85,29 @@
     <put name="subSectionName" value="Inventory"/>
   </definition>
   
+  <definition name=".tabs.resource.platform.inventory.nocontrol"
+              extends=".tabs.resource.platform.nocontrol">
+    <put name="selectedIndex"  value="1" />
+    <put name="subSectionName" value="Inventory"/>
+  </definition>
+  
   <definition name=".tabs.resource.platform.views"
               extends=".tabs.resource.platform">
-    <put name="selectedIndex"  value="3" />
+    <put name="selectedIndex"  value="4" />
   </definition>
 
+  <definition name=".tabs.resource.platform.views.nocontrol"
+      extends=".tabs.resource.platform.nocontrol">  
+   	<put name="selectedIndex"  value="3" />
+  </definition>
+  
   <definition name=".tabs.resource.platform.inventory.current"
               extends=".tabs.resource.platform.inventory">
+    <put name="subSelectedIndex" value="0"/>
+  </definition>
+  
+  <definition name=".tabs.resource.platform.inventory.current.nocontrol"
+              extends=".tabs.resource.platform.inventory.nocontrol">
     <put name="subSelectedIndex" value="0"/>
   </definition>
 
@@ -71,20 +116,36 @@
     <put name="subSelectedIndex" value="1"/>
   </definition>
 
-  <!-- monitor subtabs -->
+  <!-- monitor subtabs --> 
   <definition name=".tabs.resource.platform.monitor"
               extends=".tabs.resource.platform">
     <put name="selectedIndex"  value="0" />
     <put name="subSectionName" value="Monitor"/>
   </definition>
 
+  <definition name=".tabs.resource.platform.monitor.nocontrol"
+              extends=".tabs.resource.platform.nocontrol">
+    <put name="selectedIndex"  value="0" />
+    <put name="subSectionName" value="Monitor"/>
+  </definition>  
+
   <definition name=".tabs.resource.platform.monitor.visibility"
               extends=".tabs.resource.platform.monitor">
     <put name="subSelectedIndex" value="0"/>
   </definition>
 
+  <definition name=".tabs.resource.platform.monitor.visibility.nocontrol"
+              extends=".tabs.resource.platform.monitor.nocontrol">
+    <put name="subSelectedIndex" value="0"/>
+  </definition>
+
   <definition name=".tabs.resource.platform.monitor.configVisibility"
               extends=".tabs.resource.platform.monitor">
+    <put name="subSelectedIndex" value="1"/>
+  </definition>
+
+  <definition name=".tabs.resource.platform.monitor.configVisibility.nocontrol"
+              extends=".tabs.resource.platform.monitor.nocontrol">
     <put name="subSelectedIndex" value="1"/>
   </definition>
 
@@ -99,6 +160,22 @@
   </definition>
 
   <!-- alert subtabs -->
+  <definition name=".tabs.resource.platform.alert.nocontrol"
+              extends=".tabs.resource.platform.nocontrol">
+    <put name="selectedIndex"  value="2" />
+    <put name="subSectionName" value="Monitor"/>
+    <putList name="subTabList">
+      <item value="Alerts" mode="list"
+            link="/alerts/Alerts.do"
+            height="25" width="104"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+      <item value="Configure" mode="list"
+            link="/alerts/Config.do"
+            height="25" width="104"
+            classtype="org.hyperic.hq.ui.util.Tab"/>
+    </putList>
+  </definition>
+
   <definition name=".tabs.resource.platform.alert"
               extends=".tabs.resource.platform">
     <put name="selectedIndex"  value="2" />
@@ -120,8 +197,18 @@
     <put name="subSelectedIndex" value="0"/>
   </definition>
 
+  <definition name=".tabs.resource.platform.alert.alerts.nocontrol"
+              extends=".tabs.resource.platform.alert.nocontrol">
+    <put name="subSelectedIndex" value="0"/>
+  </definition>
+
   <definition name=".tabs.resource.platform.alert.configAlerts"
               extends=".tabs.resource.platform.alert">
+    <put name="subSelectedIndex" value="1"/>
+  </definition>
+
+  <definition name=".tabs.resource.platform.alert.configAlerts.nocontrol"
+              extends=".tabs.resource.platform.alert.nocontrol">
     <put name="subSelectedIndex" value="1"/>
   </definition>
 
@@ -223,4 +310,39 @@
               extends=".resource.common.monitor.visibility.listchildresources"
               controllerUrl="/resource/platform/monitor/visibility/ListChildrenResources.do"/>
  
+	<!-- Control Tab -->
+  	<definition name=".tabs.resource.platform.control" extends=".tabs.resource.platform">                                     
+		<put name="selectedIndex"  value="3" />
+   		<putList name="subTabList">
+      		<item value="Current" link="/resource/platform/Control.do" height="25" width="104" mode="view" classtype="org.hyperic.hq.ui.util.Tab"/>
+      		<item value="History" link="/resource/platform/Control.do" height="25" width="104" mode="history" classtype="org.hyperic.hq.ui.util.Tab"/>
+   		</putList>
+   		<put name="subSectionName" value="Control"/>
+   		<put name="subSelectedIndex" value="1"/>
+  	</definition>
+
+	<definition name=".resource.platform.control.list.detail" extends=".resource.common.control.list.detail">
+    	<put name="section" value="platform"/>
+  	</definition>
+
+	<definition name=".resource.platform.control.list.history" extends=".resource.common.control.list.history">
+    	<put name="section" value="platform"/>
+  	</definition>
+
+	<definition name=".resource.platform.control.list.scheduled" extends=".resource.common.control.list.scheduled">
+    	<put name="section" value="platform"/>
+  	</definition>
+    
+  	<definition name=".resource.platform.control.quickControl" extends=".resource.common.control.quickControl" >    
+    	<put name="action" value="/resource/platform/control/QuickControl"/>               
+  	</definition>                                            
+
+  	<definition name=".tabs.resource.platform.control.list.detail" extends=".tabs.resource.platform.control">                            
+   		<put name="subSelectedIndex" value="0"/>
+  	</definition>
+  
+  	<definition name=".tabs.resource.platform.control.list.history" extends=".tabs.resource.platform.control">                            
+   		<put name="subSelectedIndex" value="1"/>
+  	</definition>
+	
 </tiles-definitions>

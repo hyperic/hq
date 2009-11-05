@@ -44,6 +44,7 @@ public class ProblemMetricSummary implements Serializable {
     private int entityCount = 1;
     private boolean single = true;
     private String appdefKey = null;
+    private String resourceName = "";
 
     public ProblemMetricSummary() {
     }
@@ -182,6 +183,14 @@ public class ProblemMetricSummary implements Serializable {
         this.appdefKey = appdefKey;
     }
     
+    public String getResourceName() {
+        return resourceName;
+    }
+
+    public void setResourceName(String resourceName) {
+        this.resourceName = resourceName;
+    }
+
     public boolean getSingle() {
         return single;
     }

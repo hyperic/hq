@@ -33,181 +33,134 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-
 
 /**
  * This decorator writes whatever is in the value attribute
  * 
- *
+ * 
  */
 public class SelectDecorator extends BaseDecorator {
+	private static final String VALUE_KEY = "value";
+	private static final String LABEL_KEY = "label";
 
-    private static final String VALUE_KEY = "value";
-    private static final String LABEL_KEY = "label";
-    
-    private static Log log = LogFactory.getLog(SelectDecorator.class.getName());
+	private static Log log = LogFactory.getLog(SelectDecorator.class.getName());
 
-    private String onchange;
-    private String optionList;
-    private String selectId;
+	private String onchange_el;
+	private List<Map<String, String>> optionList_el;
+	private Integer selectedId_el;
 
-    private String onchange_el;
-    private List optionList_el;
-    private Integer selectedId_el;
+	/**
+	 * don't skip the body
+	 */
+	public int doStartTag() throws JspTagException {
+		Object parent = getParent();
 
-    /**
-     * don't skip the body
-     */
-    public int doStartTag() throws JspTagException {
-        Object parent = getParent();
-        
-        if (parent == null || !(parent instanceof ColumnTag)) {
-            throw new JspTagException("A BaseDecorator must be used within a ColumnTag.");
-        }
-        
-        ((ColumnTag)parent).setDecorator(this);
-        
-        return SKIP_BODY;
-    }
-    
+		if (parent == null || !(parent instanceof ColumnTag)) {
+			throw new JspTagException("A BaseDecorator must be used within a ColumnTag.");
+		}
 
-    /**
-     * tag building is done in the buildTag method.
-     * 
-     * This method is not implemented because the table
-     * body must be evaluated first 
-     *  
-     * @see org.hyperic.hq.ui.taglib.display.ColumnDecorator#decorate(java.lang.Object)
-     */
-    public String decorate(Object obj) {
-        return buildTag();
-    }
+		((ColumnTag) parent).setDecorator(this);
 
-    /**
-     * build the tag
-     */    
-    private String buildTag()
-    {
-        String val = "";
-        StringBuffer error = new StringBuffer();
-        try {
-            onchange_el =  (String) evalAttr("onchange", onchange, String.class);
-        } catch (NullAttributeException e) {
-            error.append(generateErrorComment(e.getClass().getName(), "onchange_el", getOnchange(), e));
-        } catch (JspException e) {
-            error.append(generateErrorComment(e.getClass().getName(), "onchange_el", getOnchange(), e));
-        }
+		return SKIP_BODY;
+	}
 
-        try {
-            optionList_el =  (List) evalAttr("optionList", optionList, List.class);
-        } catch (NullAttributeException e) {
-            error.append(generateErrorComment(e.getClass().getName(), "onchange_el", "", e));
-        } catch (JspException e) {
-            error.append(generateErrorComment(e.getClass().getName(), "onchange_el", "", e));
-        }
+	/**
+	 * tag building is done in the buildTag method.
+	 * 
+	 * This method is not implemented because the table body must be evaluated
+	 * first
+	 * 
+	 * @see org.hyperic.hq.ui.taglib.display.ColumnDecorator#decorate(java.lang.Object)
+	 */
+	public String decorate(Object obj) {
+		return generateOutput();
+	}
 
-        try {
-            selectedId_el =  (Integer) evalAttr("selected", selectId, Integer.class);
-        } catch (NullAttributeException e) {
-            error.append(generateErrorComment(e.getClass().getName(), "selected_el", getSelectedId().toString(), e));
-        } catch (JspException e) {
-            error.append(generateErrorComment(e.getClass().getName(), "selected_el", getSelectedId().toString(), e));
-        }
-        
-        if (error.length() > 0)
-            return error.toString();
-            
-        return generateOutput();   
+	private String generateOutput() {
+		List<Map<String, String>> list = getOptionItems();
 
-    }
-    
-    private String generateOutput() {
-        
-        List list = getOptionList();
+		// do nothing for a null list or list size is zero
+		if (list == null || list.size() == 0) {
+			return "";
+		}
+		
+		// for list with one item, just return the string of the label
+		if (list.size() == 1) {
+			Iterator<Map<String, String>> i = list.iterator();
+			Map<String, String> items = i.next();
+			
+			return items.get(LABEL_KEY);
+		}
 
-        // do nothing for a null list or list size is zero
-        if (list == null || list.size() == 0 )
-            return "";
+		StringBuffer sb = new StringBuffer("<select ");
+		
+		sb.append("onchange=\"").append(getOnchange()).append("\">");
 
-        // for list with one item, just return the string of the label        
-        if (list.size() == 1)
-        {
-            Iterator lIterator = list.iterator();
-            Map items = (Map)lIterator.next();
-            return (String)items.get(LABEL_KEY);
-        }
-        
-        StringBuffer sb = new StringBuffer("<select ");
-        sb.append("onchange=\"");
-        sb.append(getOnchange()).append("\">");
+		for (Iterator<Map<String, String>> i = list.iterator(); i.hasNext();) {
+			Map<String, String> items = i.next();
+			String val = items.get(VALUE_KEY);
+			String label = items.get(LABEL_KEY);
+			Integer intVal = new Integer(val);
 
-        Iterator lIterator = list.iterator();
-        while (lIterator.hasNext())
-        {
-            Map items = (Map)lIterator.next();
-            String val = (String)items.get(VALUE_KEY);
-            String label = (String)items.get(LABEL_KEY);
-            Integer intVal = new Integer(val);
-            
-            sb.append("<option ");
-            if (intVal.intValue() == getSelectedId().intValue())
-                sb.append("\" selected=\"selected\" ");
-            sb.append(" value=\"");
-            sb.append(val).append("\" >");
-            sb.append(label).append("</option>");
-                         
-        }
-        
-        sb.append("</select>");
-        return sb.toString();
-    }
+			sb.append("<option ");
+			
+			if (intVal.intValue() == getSelectedId().intValue()) {
+				sb.append("\" selected=\"selected\" ");
+			}
+			
+			sb.append(" value=\"");
+			sb.append(val).append("\" >");
+			sb.append(label).append("</option>");
+		}
 
-    /**
-     * @return
-     */
-    public String getOnchange() {
-        return onchange_el;
-    }
+		sb.append("</select>");
+		
+		return sb.toString();
+	}
 
-    /**
-     * @param string
-     */
-    public void setOnchange(String string) {
-        onchange = string;
-    }
+	/**
+	 * @return
+	 */
+	public String getOnchange() {
+		return onchange_el;
+	}
 
-    /**
-     * @return
-     */
-    public List getOptionList() {
-        return optionList_el;
-    }
+	/**
+	 * @param string
+	 */
+	public void setOnchange(String value) {
+		onchange_el = value;
+	}
 
-    /**
-     * @param string
-     */
-    public void setOptionItems(String string) {
-        optionList = string;
-    }
+	/**
+	 * @return
+	 */
+	public List<Map<String, String>> getOptionItems() {
+		return optionList_el;
+	}
 
-    /**
-     * @return
-     */
-    public Integer getSelectedId() {
-        return selectedId_el;
-    }
+	/**
+	 * @param string
+	 */
+	public void setOptionItems(List<Map<String, String>> value) {
+		optionList_el = value;
+	}
 
-    /**
-     * @param string
-     */
-    public void setSelectId(String string) {
-        selectId = string;
-    }
+	/**
+	 * @return
+	 */
+	public Integer getSelectedId() {
+		return selectedId_el;
+	}
 
+	/**
+	 * @param string
+	 */
+	public void setSelectId(Integer value) {
+		selectedId_el = value;
+	}
 }

@@ -1,10 +1,10 @@
 <%@ page language="java"%>
 <%@ page errorPage="/common/Error.jsp"%>
-<%@ taglib uri="struts-html-el" prefix="html"%>
-<%@ taglib uri="struts-tiles" prefix="tiles"%>
-<%@ taglib uri="jstl-fmt" prefix="fmt"%>
-<%@ taglib uri="display" prefix="display"%>
-<%@ taglib uri="jstl-c" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -886,8 +886,11 @@ function editEscalation (row) {
           Step 1 - <fmt:message key="common.label.CreateNew" />
           <c:choose>
             <c:when test="${not empty param.aname}">
+              <c:set var="escapedAlertDefName">
+              	<c:out value="${param.aname}" />
+              </c:set>
               <fmt:message key="alert.config.escalation.scheme.for">
-                <fmt:param value="${param.aname}"/>
+                <fmt:param value="${escapedAlertDefName}"/>
               </fmt:message>
               <c:choose>
                 <c:when test="${not empty param.ad}">
