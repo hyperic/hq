@@ -32,6 +32,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -63,7 +64,7 @@ public class WebsphereDetector
         WebsphereProductPlugin.PROP_ADMIN_HOST
     };
 
-    protected Log log =
+    static protected Log log =
         LogFactory.getLog(WebsphereDetector.class.getName());
 
     private static final String PTQL_QUERY =
@@ -116,6 +117,8 @@ public class WebsphereDetector
     }
 
     private File findServerIndex() {
+        log.debug("[findServerIndex] installpath='"+this.installpath+"'");
+
         //any serverindex.xml will do.
         File[] cells =
             new File(this.installpath + "/config/cells").listFiles();
@@ -123,6 +126,8 @@ public class WebsphereDetector
         if (cells == null) {
             return null;
         }
+
+        log.debug("[findServerIndex] cells="+Arrays.asList(cells));
 
         for (int i=0; i<cells.length; i++) {
             File[] nodes =
@@ -135,6 +140,7 @@ public class WebsphereDetector
             for (int j=0; j<nodes.length; j++) {
                 File index = new File(nodes[j], "serverindex.xml");
                 if (index.exists() && index.canRead()) {
+                    log.debug("[findServerIndex] index='"+index.getAbsolutePath()+"'");
                     return index;
                 }
             }
@@ -361,52 +367,49 @@ public class WebsphereDetector
     static final String VERSION_START = "<version>";
     static final String VERSION_END = "</version>";
 
-    protected String getComponentVersion(File file) {
+    protected static String getComponentVersion(File file) {
         Reader reader = null;
+        String res = "";
 
         try {
             reader = new FileReader(file);
-            BufferedReader buffer =
-                new BufferedReader(reader);
+            BufferedReader buffer = new BufferedReader(reader);
             String line;
 
             while ((line = buffer.readLine()) != null) {
                 line = line.trim();
-                if (line.length() == 0) {
-                    continue;
+                int ix = line.indexOf(VERSION_END);
+                if (line.startsWith(VERSION_START) && (ix != -1)) {
+                    res = line.substring(VERSION_START.length(), ix).trim();
                 }
-                int ix;
-                if (!(line.startsWith(VERSION_START) &&
-                     ((ix = line.indexOf(VERSION_END)) != -1)))
-                {
-                    continue;
-                }
-
-                return line.substring(VERSION_START.length(), ix).trim();
             }
-
-            return null;
         } catch (IOException e) {
-            return null;
+            if (log.isDebugEnabled()) {
+                log.error("Error getting the WAS version: " + e.getMessage(), e);
+            }
+            res = null;
         } finally {
             if (reader != null) {
                 try {
                     reader.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
             }
         }
+        return res;
     }
 
     protected boolean isComponentVersion(File file) {
         String version = getComponentVersion(file);
-        if (version == null) {
-            return false;
-        }
+        log.debug("version= '"+version+"' type='"+getTypeInfo().getVersion()+"'");
         return version.startsWith(getTypeInfo().getVersion());
     }
 
     protected List getServerList(File serverDir, String version)
         throws PluginException {
+
+        log.debug("[getServerList] ("+version+") "+serverDir);
+
         File controlScript = null;
 
         if (!isServiceControl()) {
@@ -532,7 +535,7 @@ public class WebsphereDetector
 
         for (int i=0; i<processes.size(); i++) {
             Process process = (Process)processes.get(i);
-            List found = getServerList(new File(process.installRoot), null);
+            List found = getServerList(new File(process.serverRoot), null);
             if (found != null) {
                 servers.addAll(found);
             }

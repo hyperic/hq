@@ -5,10 +5,10 @@
  * Kit or the Hyperic Client Development Kit - this is merely considered
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
- * 
+ *
  * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
  * This file is part of HQ.
- * 
+ *
  * HQ is free software; you can redistribute it and/or modify
  * it under the terms version 2 of the GNU General Public License as
  * published by the Free Software Foundation. This program is distributed
@@ -16,7 +16,7 @@
  * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
@@ -60,14 +60,14 @@ public class WebsphereUtil {
     private static HashMap cache = new HashMap();
 
     private static Log log = LogFactory.getLog("WebSphereUtil");
-    
+
     // WAS doesn't expose these anywhere we've found yet
     private static final String TRUST_STORE = "javax.net.ssl.trustStore";
     private static final String KEY_STORE = "javax.net.ssl.keyStore";
     private static final String TRUST_STORE_PWD = "javax.net.ssl.trustStorePassword";
     private static final String KEY_STORE_PWD = "javax.net.ssl.keyStorePassword";
 
-    public static Object getRemoteMBeanValue(Metric metric) 
+    public static Object getRemoteMBeanValue(Metric metric)
         throws MetricNotFoundException,
         MetricUnreachableException,
         PluginException {
@@ -75,7 +75,7 @@ public class WebsphereUtil {
         return getRemoteMBeanValue(metric, metric.getAttributeName());
     }
 
-    public static Object getRemoteMBeanValue(Metric metric, String attributeName) 
+    public static Object getRemoteMBeanValue(Metric metric, String attributeName)
         throws MetricNotFoundException,
         MetricUnreachableException,
         PluginException {
@@ -89,7 +89,7 @@ public class WebsphereUtil {
         } catch (MalformedObjectNameException e) {
             throw new MetricInvalidException(e.getMessage(), e);
         }
-        
+
         try {
             return mServer.getAttribute(objName,
                                         metric.getAttributeName());
@@ -117,7 +117,7 @@ public class WebsphereUtil {
         throws MetricUnreachableException {
 
         Properties props = getAdminProperties(cfg);
-        
+
         if (log.isDebugEnabled()) {
             log.debug("Attempting to create admin client with props " +
                       props + " from config " + cfg);
@@ -147,26 +147,26 @@ public class WebsphereUtil {
         String port =
             cfg.getProperty(WebsphereProductPlugin.PROP_ADMIN_PORT,
                             "8880");
-    
+
         Properties props = new Properties();
-    
+
         props.setProperty(AdminClient.CONNECTOR_TYPE,
                           AdminClient.CONNECTOR_TYPE_SOAP);
-    
+
         props.setProperty(AdminClient.CONNECTOR_HOST, host);
-    
+
         props.setProperty(AdminClient.CONNECTOR_PORT, port);
-    
+
         String user = cfg.getProperty(AdminClient.USERNAME, "");
         String pass = cfg.getProperty(AdminClient.PASSWORD, "");
-    
+
         // user and pass cannot be null because getProperty() is called
         // with default values
         if (!user.equals("") && !pass.equals("")) {
             props.setProperty(AdminClient.USERNAME, user);
             props.setProperty(AdminClient.PASSWORD, pass);
             props.setProperty(AdminClient.CONNECTOR_SECURITY_ENABLED, "true");
-            
+
             // Set the ssl props, if they're available.  As of this writing, there are no
             // publicly-available constants for the prop keys, so they're kept in this source file.
             String trustStore = cfg.getProperty(TRUST_STORE);
@@ -181,7 +181,7 @@ public class WebsphereUtil {
                 props.setProperty(KEY_STORE_PWD, keyStorePwd);
             }
         }
-        
+
         return props;
     }
 
@@ -220,7 +220,7 @@ public class WebsphereUtil {
                MetricNotFoundException {
 
         double count = 0;
-        
+
         try {
             Set beans = mServer.queryNames(query, null);
             for (Iterator it=beans.iterator(); it.hasNext();) {
@@ -273,7 +273,7 @@ public class WebsphereUtil {
             if (log.isDebugEnabled()) {
                 log.debug(name + " resolved to: " + fullName);
             }
-            
+
             return fullName;
         } catch (Exception e) {
             String msg =
@@ -343,7 +343,7 @@ public class WebsphereUtil {
      */
     public static Object invoke(String objectName,
                                 Properties props,
-                                String method, 
+                                String method,
                                 Object[] args, String[] sig)
         throws PluginException {
 

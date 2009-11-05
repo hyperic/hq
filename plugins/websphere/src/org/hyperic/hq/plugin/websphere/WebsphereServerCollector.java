@@ -87,26 +87,6 @@ public class WebsphereServerCollector extends WebsphereCollector {
                 this.name = null;
             }
         }
-        else if (module.equals("servletSessionsModule")) {
-            this.name = null; //XXX
-            setSource(module);
-        }
-        else if (module.equals("webappModule")) {
-            this.name = null; //XXX
-            setSource(module);
-        }
-        else if (module.equals("beanModule")) {
-            this.name = null; //XXX
-            setSource(module);
-        }
-        else if (module.equals("threadPoolModule")) {
-            this.name = null; //XXX
-            setSource(module);
-        }
-        else if (module.equals("connectionPoolModule")) {
-            this.name = null; //XXX
-            setSource(module);
-        }
     }
 
     public void collect() {
