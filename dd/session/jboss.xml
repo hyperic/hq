@@ -204,11 +204,6 @@
 
 		</session>
 		<session>
-			<ejb-name>EmailManager</ejb-name>
-			<local-jndi-name>LocalEmailManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>ServerConfigManager</ejb-name>
 			<local-jndi-name>LocalServerConfigManager</local-jndi-name>
 
