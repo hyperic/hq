@@ -637,19 +637,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[The service that dispatches heart beats.]]></description>
-
-			<ejb-name>HeartBeatService</ejb-name>
-
-			<local-home>org.hyperic.hq.events.shared.HeartBeatServiceLocalHome</local-home>
-			<local>org.hyperic.hq.events.shared.HeartBeatServiceLocal</local>
-			<ejb-class>org.hyperic.hq.events.server.session.HeartBeatServiceEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[BizApp interface to the Measurement subsystem]]></description>
 
 			<ejb-name>MeasurementBoss</ejb-name>
@@ -4340,13 +4327,6 @@
 					<method-param>java.lang.String</method-param>
 					<method-param>boolean</method-param>
 				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>HeartBeatService</ejb-name>
-				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>

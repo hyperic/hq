@@ -256,11 +256,6 @@
 
 		</session>
 		<session>
-			<ejb-name>HeartBeatService</ejb-name>
-			<local-jndi-name>LocalHeartBeatService</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>MeasurementBoss</ejb-name>
 			<jndi-name>ejb/bizapp/MeasurementBoss</jndi-name>
 			<local-jndi-name>LocalMeasurementBoss</local-jndi-name>

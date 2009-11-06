@@ -27,50 +27,36 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.Date;
 
-import javax.ejb.CreateException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.HeartBeatEvent;
-import org.hyperic.hq.events.shared.HeartBeatServiceLocal;
-import org.hyperic.hq.events.shared.HeartBeatServiceUtil;
+import org.hyperic.hq.events.shared.HeartBeatService;
 import org.hyperic.hq.zevents.ZeventManager;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The service that dispatches heart beats.
- *
- * @ejb:bean name="HeartBeatService"
- *      jndi-name="ejb/events/HeartBeatService"
- *      local-jndi-name="LocalHeartBeatService"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:transaction type="Required"
- *
  */
-public class HeartBeatServiceEJBImpl implements SessionBean {
+@Service
+@Transactional
+public class HeartBeatServiceImpl implements HeartBeatService {
 
-    private final Log log = LogFactory.getLog(HeartBeatServiceEJBImpl.class);
+    private final Log log = LogFactory.getLog(HeartBeatServiceImpl.class);
 
     private String topicName = EventConstants.EVENTS_TOPIC;
 
-    public static HeartBeatServiceLocal getOne() {
-        try {
-            return HeartBeatServiceUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static HeartBeatService getOne() {
+        return Bootstrap.getBean(HeartBeatService.class);
     }
 
     /**
      * Dispatch a heart beat.
      *
      * @param beatTime The heart beat time.
-     * @ejb:interface-method
      */
     public void dispatchHeartBeat(Date beatTime) {
         log.debug("Heart Beat Service started dispatching a heart beat: "+
@@ -80,6 +66,7 @@ public class HeartBeatServiceEJBImpl implements SessionBean {
 
         try {
             // Try to see if RegisteredTriggerManager is available
+            // TODO: Figure out a way to avoid getOne() here
             RegisteredTriggerManagerImpl.getOne();
 
             // Send the heart beat event
@@ -97,16 +84,4 @@ public class HeartBeatServiceEJBImpl implements SessionBean {
 
         log.debug("Heart Beat Service finished dispatching a heart beat: "+beatTime);
     }
-
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() throws CreateException {
-    }
-
-    public void ejbPostCreate() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {}
 }

@@ -3,16 +3,16 @@
  */
 package org.hyperic.hq.events.shared;
 
+import java.util.Date;
+
 /**
  * Local interface for HeartBeatService.
  */
-public interface HeartBeatServiceLocal
-   extends javax.ejb.EJBLocalObject
-{
+public interface HeartBeatService {
    /**
     * Dispatch a heart beat.
     * @param beatTime The heart beat time.
     */
-   public void dispatchHeartBeat( java.util.Date beatTime ) ;
+   public void dispatchHeartBeat( Date beatTime ) ;
 
 }
