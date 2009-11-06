@@ -44,9 +44,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class HeartBeatServiceImpl implements HeartBeatService {
-
     private final Log log = LogFactory.getLog(HeartBeatServiceImpl.class);
-
     private String topicName = EventConstants.EVENTS_TOPIC;
 
     public static HeartBeatService getOne() {
@@ -55,12 +53,12 @@ public class HeartBeatServiceImpl implements HeartBeatService {
 
     /**
      * Dispatch a heart beat.
-     *
+     * 
      * @param beatTime The heart beat time.
      */
     public void dispatchHeartBeat(Date beatTime) {
-        log.debug("Heart Beat Service started dispatching a heart beat: "+
-                   beatTime+", timestamp="+beatTime.getTime());
+        log.debug("Heart Beat Service started dispatching a heart beat: " +
+                  beatTime + ", timestamp=" + beatTime.getTime());
 
         HeartBeatEvent event = new HeartBeatEvent(beatTime);
 
@@ -78,10 +76,10 @@ public class HeartBeatServiceImpl implements HeartBeatService {
 
         try {
             ZeventManager.getInstance().enqueueEvent(event.toZevent());
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             // Do not send out heart beat if thread is interrupted
         }
 
-        log.debug("Heart Beat Service finished dispatching a heart beat: "+beatTime);
+        log.debug("Heart Beat Service finished dispatching a heart beat: " + beatTime);
     }
 }

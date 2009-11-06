@@ -9,10 +9,10 @@ import java.util.Date;
  * Local interface for HeartBeatService.
  */
 public interface HeartBeatService {
-   /**
-    * Dispatch a heart beat.
-    * @param beatTime The heart beat time.
-    */
-   public void dispatchHeartBeat( Date beatTime ) ;
+    /**
+     * Dispatch a heart beat.
+     * @param beatTime The heart beat time.
+     */
+    public void dispatchHeartBeat(Date beatTime);
 
 }
