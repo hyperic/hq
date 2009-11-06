@@ -3554,13 +3554,6 @@
 		</container-transaction>
 		<container-transaction>
 			<method>
-				<ejb-name>EmailManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
 				<ejb-name>ServerConfigManager</ejb-name>
 				<method-name>*</method-name>
 			</method>
