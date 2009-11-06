@@ -64,7 +64,7 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
-import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TemplateManagerUtil;
 import org.hyperic.hq.product.MeasurementInfo;
@@ -360,7 +360,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
             toReschedule.addAll(appdefEntityIds);
         }
         
-        SRNManagerLocal srnManager = getSRNManager();
+        SRNManager srnManager = getSRNManager();
         SRNCache cache = SRNCache.getInstance();
         ScheduleRevNumDAO srnDao = getScheduleRevNumDAO();
 
@@ -392,7 +392,7 @@ public class TemplateManagerEJBImpl extends SessionEJB implements SessionBean {
     { 
         MeasurementDAO dmDao = getMeasurementDAO();
         MeasurementTemplateDAO tmpDao = getMeasurementTemplateDAO();
-        SRNManagerLocal srnMan = getSRNManager();
+        SRNManager srnMan = getSRNManager();
         long current = System.currentTimeMillis();
         
         Map aeids = new HashMap();

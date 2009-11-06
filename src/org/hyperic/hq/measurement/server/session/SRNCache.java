@@ -25,32 +25,32 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.List;
+
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
+
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.dao.DAOFactory;
-
-import java.util.List;
 
 public class SRNCache {
 
     // The cache name, must match the definition in ehcache.xml
     private static String CACHENAME = "SRNCache";
 
-    private static Cache _cache;
+    private static Cache cache;
 
-    private static SRNCache _singleton = new SRNCache();
+    private static SRNCache singleton = new SRNCache();
 
     private ScheduleRevNumDAO scheduleRevNumDAO = Bootstrap.getBean(ScheduleRevNumDAO.class);
 
     public static SRNCache getInstance() {
-        return _singleton;
+        return singleton;
     }
 
     private SRNCache() {
-        _cache = CacheManager.getInstance().getCache(CACHENAME);
+        cache = CacheManager.getInstance().getCache(CACHENAME);
     }
 
     /**
@@ -59,12 +59,12 @@ public class SRNCache {
      * @return The size of the cache
      */
     public long getSize() {
-        return _cache.getSize();
+        return cache.getSize();
     }
 
     public void put(ScheduleRevNum val) {
         Element el = new Element(val.getId(), val);
-        _cache.put(el);
+        cache.put(el);
     }
 
     public ScheduleRevNum get(AppdefEntityID aid) {
@@ -78,7 +78,7 @@ public class SRNCache {
      * the fallback to the database should only occur in clustered setups.
      */
     public ScheduleRevNum get(SrnId id) {
-        Element el = _cache.get(id);
+        Element el = cache.get(id);
         if (el != null) {
             return (ScheduleRevNum)el.getObjectValue();
         }
@@ -92,10 +92,11 @@ public class SRNCache {
     }
 
     public boolean remove(SrnId id) {
-        return _cache.remove(id);
+        return cache.remove(id);
     }
 
-    public List getKeys() {
-        return _cache.getKeys();
+    @SuppressWarnings("unchecked")
+    public List<SrnId> getKeys() {
+        return cache.getKeys();
     }
 }

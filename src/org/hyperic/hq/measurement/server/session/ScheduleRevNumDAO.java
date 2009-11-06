@@ -30,13 +30,13 @@ import java.util.Collection;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class ScheduleRevNumDAO extends HibernateDAO {
+public class ScheduleRevNumDAO extends HibernateDAO<ScheduleRevNum> {
     
     @Autowired
     public ScheduleRevNumDAO(SessionFactory f) {
@@ -80,7 +80,7 @@ public class ScheduleRevNumDAO extends HibernateDAO {
      * @return A Collection of Object arrays with 3 entries, the Integer
      * type, the Integer id, and the Long collection interval.
      */
-    public Collection getMinIntervals() {
+    public Collection<Object[]> getMinIntervals() {
         String sql =
             "select mt.appdefType, m.instanceId, min(m.interval) " +
             "from Measurement m, " +

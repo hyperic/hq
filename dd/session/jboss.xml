@@ -13,11 +13,6 @@
 		-->
 
 		<session>
-			<ejb-name>SRNManager</ejb-name>
-			<local-jndi-name>SRNManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>RoleManager</ejb-name>
 			<local-jndi-name>LocalRoleManager</local-jndi-name>
 
