@@ -53,16 +53,17 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class SRNManagerImpl extends SessionEJB implements SRNManager {
+public class SRNManagerImpl
+    extends SessionEJB implements SRNManager {
     private final Log log = LogFactory.getLog(SRNManagerImpl.class);
-    
+
     private AuthzSubjectManagerLocal authzSubjectManager;
     private MeasurementManagerLocal measurementManager;
     private MeasurementProcessorLocal measurementProcessor;
 
     @Autowired
     public SRNManagerImpl(AuthzSubjectManagerLocal authzSubjectManager, MeasurementManagerLocal measurementManager,
-                             MeasurementProcessorLocal measurementProcessor) {
+                          MeasurementProcessorLocal measurementProcessor) {
         this.authzSubjectManager = authzSubjectManager;
         this.measurementManager = measurementManager;
         this.measurementProcessor = measurementProcessor;
@@ -75,7 +76,7 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
     public void initializeCache() {
         SRNCache cache = SRNCache.getInstance();
 
-        synchronized(cache) {
+        synchronized (cache) {
             if (cache.getSize() > 0) {
                 return;
             }
@@ -90,33 +91,33 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
             log.info("Fetching minimum metric collection intervals.");
 
             Collection<Object[]> entities =
-                scheduleRevNumDAO.getMinIntervals();
+                                            scheduleRevNumDAO.getMinIntervals();
             log.info("Fetched " + entities.size() + " intervals.");
             final boolean debug = log.isDebugEnabled();
             for (Object[] ent : entities) {
-                SrnId id = new SrnId(((Integer)ent[0]).intValue(),
-                                     ((Integer)ent[1]).intValue());
+                SrnId id = new SrnId(((Integer) ent[0]).intValue(),
+                                     ((Integer) ent[1]).intValue());
                 ScheduleRevNum srn = cache.get(id);
                 if (srn == null) {
                     // Create the SRN if it does not exist.
                     srn = scheduleRevNumDAO
-                        .create(((Integer)ent[0]).intValue(),
-                                ((Integer)ent[1]).intValue());
+                                           .create(((Integer) ent[0]).intValue(),
+                                                   ((Integer) ent[1]).intValue());
                     cache.put(srn);
                 }
                 if (debug) {
                     log.debug("Setting min interval to " +
-                               ((Long)ent[2]).longValue() + " for ent " + id);
+                              ((Long) ent[2]).longValue() + " for ent " + id);
                 }
-                srn.setMinInterval(((Long)ent[2]).longValue());
+                srn.setMinInterval(((Long) ent[2]).longValue());
             }
         }
         log.info("SRN Cache initialized");
     }
 
     /**
-     *  Get a SRN
-     *
+     * Get a SRN
+     * 
      * @param aid The entity id to lookup
      * @return The SRN for the given entity
      */
@@ -127,7 +128,7 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
 
     /**
      * Remove a SRN.
-     *
+     * 
      * @param aid The AppdefEntityID to remove.
      */
     public void removeSrn(AppdefEntityID aid) {
@@ -140,14 +141,14 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
 
     /**
      * Increment SRN for the given entity.
-     *
+     * 
      * @param aid The AppdefEntityID to remove.
      * @param newMin The new minimum interval
      * @return The ScheduleRevNum for the given entity id
      */
     public int incrementSrn(AppdefEntityID aid, long newMin) {
         SRNCache cache = SRNCache.getInstance();
-        
+
         SrnId id = new SrnId(aid.getType(), aid.getID());
         ScheduleRevNum srn = scheduleRevNumDAO.get(id);
         final boolean debug = log.isDebugEnabled();
@@ -164,17 +165,17 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
         }
 
         // Update SRN
-        synchronized(srn) {
+        synchronized (srn) {
             int newSrn = srn.getSrn() + 1;
             if (debug) {
-                log.debug("Updating SRN for "+ aid + " to " + newSrn);
+                log.debug("Updating SRN for " + aid + " to " + newSrn);
             }
             srn.setSrn(newSrn);
 
             if (newMin > 0 && newMin < srn.getMinInterval()) {
                 srn.setMinInterval(newMin);
             } else {
-            // Set to default
+                // Set to default
                 Long defaultMin = scheduleRevNumDAO.getMinInterval(aid, true);
                 // If this call to incrementSrn is due to the last metric
                 // for a resource being unscheduled it's possible for
@@ -191,10 +192,10 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
 
     /**
      * Handle a SRN report from an agent.
-     *
+     * 
      * @param srns The list of SRNs from the agent report.
      * @return A Collection of ScheduleRevNum objects that do not have a
-     * corresponding appdef entity. (i.e. Out of sync)
+     *         corresponding appdef entity. (i.e. Out of sync)
      */
     public Collection<AppdefEntityID> reportAgentSRNs(SRN[] srns) {
         SRNCache cache = SRNCache.getInstance();
@@ -206,9 +207,10 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
 
             if (srn == null) {
                 log.error("Agent's reporting for non-existing entity: "
-                           + srns[i].getEntity());
-                // TODO: Generics disagree with the comment; this adds AppdefEntityID 
-                //       and not ScheduleRevNum as the comment suggests
+                          + srns[i].getEntity());
+                // TODO: Generics disagree with the comment; this adds
+                // AppdefEntityID
+                // and not ScheduleRevNum as the comment suggests
                 nonEntities.add(srns[i].getEntity());
                 continue;
             }
@@ -217,14 +219,13 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
                 long current = System.currentTimeMillis();
 
                 if (srns[i].getRevisionNumber() != srn.getSrn()) {
-                    if (srn.getLastReported() >
-                        current - srn.getMinInterval()) {
+                    if (srn.getLastReported() > current - srn.getMinInterval()) {
                         // If the last reported time is less than an
                         // interval ago it could be that we just rescheduled
                         // the agent, so let's not panic yet
                         if (debug) {
                             log.debug("Ignore out-of-date SRN for grace " +
-                                       "period of " + srn.getMinInterval());
+                                      "period of " + srn.getMinInterval());
                         }
                         break;
                     }
@@ -233,25 +234,24 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
                     // given resource.
                     if (debug) {
                         log.debug("SRN value for " + srns[i].getEntity() +
-                                   " is out of date, agent reports " +
-                                   srns[i].getRevisionNumber() +
-                                   " but cached is " + srn.getSrn() +
-                                   " rescheduling metrics..");
+                                  " is out of date, agent reports " +
+                                  srns[i].getRevisionNumber() +
+                                  " but cached is " + srn.getSrn() +
+                                  " rescheduling metrics..");
                     }
                     List<AppdefEntityID> eids = new ArrayList<AppdefEntityID>();
                     eids.add(srns[i].getEntity());
                     AgentScheduleSynchronizer.scheduleBuffered(eids);
-                } 
+                }
                 srn.setLastReported(current);
             }
         }
-
         return nonEntities;
     }
 
     /**
      * Get a List of out-of-sync entities.
-     *
+     * 
      * @return A list of ScheduleReNum objects that are out of sync.
      */
     public List<AppdefEntityID> getOutOfSyncEntities() {
@@ -260,24 +260,22 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
 
         for (ScheduleRevNum srn : srns) {
             AppdefEntityID eid =
-                new AppdefEntityID(srn.getId().getAppdefType(),
-                                   srn.getId().getInstanceId());
+                                 new AppdefEntityID(srn.getId().getAppdefType(),
+                                                    srn.getId().getInstanceId());
             // TODO: Generic disagree with comments
             toReschedule.add(eid);
         }
-
         return toReschedule;
     }
 
     /**
      * Get the list of out-of-sync SRNs based on the number of intervals back
      * to allow.
-     *
+     * 
      * @param intervals The number of intervals to go back
      * @return A List of ScheduleRevNum objects.
      */
     public List<ScheduleRevNum> getOutOfSyncSRNs(int intervals) {
-
         SRNCache cache = SRNCache.getInstance();
         List<SrnId> srnIds = cache.getKeys();
 
@@ -292,14 +290,14 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
             long curInterval = current - srn.getLastReported();
             if (debug) {
                 log.debug("Checking " + id.getAppdefType() + ":" +
-                           id.getInstanceId() + ", last heard from " +
-                           curInterval + "ms ago (max=" + maxInterval + ")");
+                          id.getInstanceId() + ", last heard from " +
+                          curInterval + "ms ago (max=" + maxInterval + ")");
             }
 
             if (curInterval > maxInterval) {
                 if (debug) {
                     log.debug("Reschedule " + id.getAppdefType() + ":" +
-                               id.getInstanceId());
+                              id.getInstanceId());
                 }
                 toReschedule.add(srn);
             }
@@ -310,7 +308,7 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
 
     /**
      * Refresh the SRN for the given entity.
-     *
+     * 
      * @param eid The appdef entity to refresh
      * @return The new ScheduleRevNum object.
      */
@@ -327,24 +325,22 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
 
         return srn;
     }
-    
+
     /**
-     * Reschedule metrics for an appdef entity.  Generally should only
+     * Reschedule metrics for an appdef entity. Generally should only
      * be called from the {@link AgentScheduleSynchronizer}
      * @param List of {@link AppdefEntityId}
      */
     public void reschedule(List<AppdefEntityID> aeids)
         throws MeasurementScheduleException,
-               MonitorAgentException,
-               MeasurementUnscheduleException
-    {
+        MonitorAgentException,
+        MeasurementUnscheduleException {
         AuthzSubject subj = authzSubjectManager.getOverlordPojo();
         List<AppdefEntityID> toReschedule = new ArrayList<AppdefEntityID>();
         List<AppdefEntityID> toUnschedule = new ArrayList<AppdefEntityID>();
         for (AppdefEntityID aeid : aeids) {
             // will return only enabled measurements
-            List<Measurement> meas =
-                measurementManager.findMeasurements(subj, aeid, null, PageControl.PAGE_ALL);
+            List<Measurement> meas = measurementManager.findMeasurements(subj, aeid, null, PageControl.PAGE_ALL);
             if (meas.size() > 0) {
                 toReschedule.add(aeid);
             } else {
@@ -356,7 +352,7 @@ public class SRNManagerImpl extends SessionEJB implements SRNManager {
         measurementProcessor.scheduleSynchronous(toReschedule);
         measurementProcessor.unschedule(toUnschedule);
     }
-    
+
     public static SRNManager getOne() {
         return Bootstrap.getBean(SRNManager.class);
     }

@@ -55,7 +55,7 @@ public class SRNCache {
 
     /**
      * Get the current cache size.
-     *
+     * 
      * @return The size of the cache
      */
     public long getSize() {
@@ -74,15 +74,14 @@ public class SRNCache {
 
     /**
      * Get the SRN entry from the cache falling back to loading from the
-     * database if the SRN is not found.  Since the SRNCache is pre-populated
+     * database if the SRN is not found. Since the SRNCache is pre-populated
      * the fallback to the database should only occur in clustered setups.
      */
     public ScheduleRevNum get(SrnId id) {
         Element el = cache.get(id);
         if (el != null) {
-            return (ScheduleRevNum)el.getObjectValue();
+            return (ScheduleRevNum) el.getObjectValue();
         }
-
 
         ScheduleRevNum srn = scheduleRevNumDAO.get(id);
         if (srn != null) {
