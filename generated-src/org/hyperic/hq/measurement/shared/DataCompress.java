@@ -11,9 +11,9 @@ import javax.naming.NamingException;
  * Local interface for DataCompress.
  */
 public interface DataCompress {
-   /**
-    * Entry point for data compression routines
-    */
-   public void compressData() throws NamingException, SQLException;
+    /**
+     * Entry point for data compression routines
+     */
+    public void compressData() throws NamingException, SQLException;
 
 }

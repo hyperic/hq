@@ -62,31 +62,31 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 // TODO: Use SimpleJdbcTemplate
-public class DataCompressImpl extends SessionEJB implements DataCompress {
+public class DataCompressImpl
+    extends SessionEJB implements DataCompress {
     private final String logCtx = DataCompressImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
 
     // Data tables
-    private final String TAB_DATA    = MeasurementConstants.TAB_DATA;
+    private final String TAB_DATA = MeasurementConstants.TAB_DATA;
     private final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
     private final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
     private final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
-    private final String TAB_PROB    = MeasurementConstants.TAB_PROB;
+    private final String TAB_PROB = MeasurementConstants.TAB_PROB;
 
     // Utility constants
-    private final long HOUR     = MeasurementConstants.HOUR;
+    private final long HOUR = MeasurementConstants.HOUR;
     private final long SIX_HOUR = MeasurementConstants.SIX_HOUR;
-    private final long DAY      = MeasurementConstants.DAY;
+    private final long DAY = MeasurementConstants.DAY;
 
     // Purge intervals, loaded once on first invocation.
     private boolean purgeDefaultsLoaded = false;
     private long purgeRaw, purge1h, purge6h, purge1d, purgeAlert;
-    
-    
+
     private DBUtil dbUtil;
     private ServerConfigManagerLocal serverConfigManager;
     private AlertManager alertManager;
-    
+
     @Autowired
     public DataCompressImpl(DBUtil dbUtil, ServerConfigManagerLocal serverConfigManager, AlertManager alertManager) {
         this.dbUtil = dbUtil;
@@ -97,8 +97,7 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
     /**
      * Get the server purge configuration, loaded on startup.
      */
-    private void loadPurgeDefaults()
-    {
+    private void loadPurgeDefaults() {
         this.log.info("Loading default purge intervals");
         Properties conf;
         try {
@@ -109,9 +108,9 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
         }
 
         String purgeRawString = conf.getProperty(HQConstants.DataPurgeRaw);
-        String purge1hString  = conf.getProperty(HQConstants.DataPurge1Hour);
-        String purge6hString  = conf.getProperty(HQConstants.DataPurge6Hour);
-        String purge1dString  = conf.getProperty(HQConstants.DataPurge1Day);
+        String purge1hString = conf.getProperty(HQConstants.DataPurge1Hour);
+        String purge6hString = conf.getProperty(HQConstants.DataPurge6Hour);
+        String purge1dString = conf.getProperty(HQConstants.DataPurge1Day);
         String purgeAlertString = conf.getProperty(HQConstants.AlertPurge);
 
         try {
@@ -128,8 +127,7 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
     }
 
     private void truncateMeasurementData(long truncateBefore)
-        throws SQLException, NamingException
-    {
+        throws SQLException, NamingException {
         // we can't get any accurate metric tablenames if truncateBefore
         // is less than the base point in time which is used for the
         // tablename calculations
@@ -139,7 +137,7 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
         long currtime = System.currentTimeMillis();
         String currTable = MeasTabManagerUtil.getMeasTabname(currtime);
         long currTruncTime = truncateBefore;
-        //just in case truncateBefore is in the middle of a table
+        // just in case truncateBefore is in the middle of a table
         currTruncTime = MeasTabManagerUtil.getPrevMeasTabTime(currTruncTime);
         String delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
         if (delTable.equals(currTable)) {
@@ -157,21 +155,21 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
             conn.setAutoCommit(false);
             stmt = conn.createStatement();
             StopWatch watch = new StopWatch();
-            log.debug("Truncating tables, starting with -> "+delTable+
-                      " (currTable -> "+currTable+")\n");
+            log.debug("Truncating tables, starting with -> " + delTable +
+                      " (currTable -> " + currTable + ")\n");
             HQDialect dialect = Util.getHQDialect();
             while (!currTable.equals(delTable) &&
                    truncateBefore > currTruncTime) {
                 try {
-                    log.debug("Truncating table "+delTable);
-                    stmt.execute("truncate table "+delTable);
+                    log.debug("Truncating table " + delTable);
+                    stmt.execute("truncate table " + delTable);
                     String sql = dialect.getOptimizeStmt(delTable, 0);
                     stmt.execute(sql);
                 } catch (SQLException e) {
                     log.error(e.getMessage(), e);
                 } finally {
                     currTruncTime =
-                        MeasTabManagerUtil.getPrevMeasTabTime(currTruncTime);
+                                    MeasTabManagerUtil.getPrevMeasTabTime(currTruncTime);
                     delTable = MeasTabManagerUtil.getMeasTabname(currTruncTime);
                 }
             }
@@ -179,7 +177,7 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
             log.info("Done Purging Raw Measurement Data (" +
                      ((watch.getElapsed()) / 1000) + " seconds)");
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
         }
     }
 
@@ -187,18 +185,18 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
      * Entry point for data compression routines
      */
     public void compressData()
-        throws NamingException, SQLException
-    {
+        throws NamingException, SQLException {
         // Load defaults if not already loaded
-        if (!this.purgeDefaultsLoaded)
+        if (!this.purgeDefaultsLoaded) {
             loadPurgeDefaults();
+        }
 
         // Round down to the nearest hour.
         long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), HOUR);
         long last;
 
         // Compress hourly data
-        String metricUnion = MeasTabManagerUtil.getUnionStatement((now-HOUR), now);
+        String metricUnion = MeasTabManagerUtil.getUnionStatement((now - HOUR), now);
         last = compressData(metricUnion, TAB_DATA_1H, HOUR, now);
         // Purge, ensuring we don't purge data not yet compressed.
         truncateMeasurementData(Math.min(now - this.purgeRaw, last));
@@ -226,30 +224,29 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
         log.info("Purging alerts older than " +
                  TimeUtil.toString(now - this.purgeAlert));
         int alertsDeleted =
-            alertManager.deleteAlerts(0, now - this.purgeAlert);
+                            alertManager.deleteAlerts(0, now - this.purgeAlert);
         log.info("Done (Deleted " + alertsDeleted + " alerts)");
     }
 
     /**
      * Compress data.
      * XXX: Perhaps we should put a time limit on this?
-     *      (Something like 5 min during business hrs, 45 min
-     *       otherwise?)
+     * (Something like 5 min during business hrs, 45 min
+     * otherwise?)
      * @return The last timestamp that was compressed
      */
     private long compressData(String fromTable, String toTable, long interval,
                               long now)
-        throws NamingException, SQLException
-    {
-        // First determine the window to operate on.  If no previous
+        throws NamingException, SQLException {
+        // First determine the window to operate on. If no previous
         // compression information is found, the last value from the
-        // table to compress from is used.  (This will only occur on
+        // table to compress from is used. (This will only occur on
         // the first compression run).
         long start = getMaxTimestamp(toTable);
         if (start == 0) {
             // No compressed data found, start from scratch.
             // Need to validate this behaviour with the oracle
-            // JDBC driver.  If no data exists the Postgres driver
+            // JDBC driver. If no data exists the Postgres driver
             // returns 0 for MIN() or MAX().
             start = getMinTimestamp(fromTable);
 
@@ -274,12 +271,11 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
     private long compactData(String fromTable, String toTable,
                              long begin, long now, long interval)
         throws SQLException, NamingException {
-        Connection        conn    = null;
+        Connection conn = null;
         PreparedStatement insStmt = null;
 
         try {
-            conn =
-                dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            conn = dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
 
             // One special case.. If we are compressing from an
             // already compressed table, we'll take the MIN and
@@ -292,12 +288,12 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
             }
 
             insStmt = conn.prepareStatement(
-                    "INSERT INTO " + toTable +
-                    " (measurement_id, timestamp, value, minvalue, maxvalue)" +
-                    " (SELECT measurement_id, ? AS timestamp, " + minMax +
-                    "FROM " + fromTable +
-                    " WHERE timestamp >= ? AND timestamp < ? " +
-                    "GROUP BY measurement_id)");
+                          "INSERT INTO " + toTable +
+                          " (measurement_id, timestamp, value, minvalue, maxvalue)" +
+                          " (SELECT measurement_id, ? AS timestamp, " + minMax +
+                          "FROM " + fromTable +
+                          " WHERE timestamp >= ? AND timestamp < ? " +
+                          "GROUP BY measurement_id)");
 
             StopWatch watch = new StopWatch();
             while (begin < now) {
@@ -328,7 +324,7 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
                 begin = end;
             }
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, conn, insStmt, null);
+            DBUtil.closeJDBCObjects(logCtx, conn, insStmt, null);
         }
 
         // Return the last interval that was compressed.
@@ -336,22 +332,20 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
     }
 
     /**
-     * Get the oldest timestamp in the database.  Getting the minimum time
+     * Get the oldest timestamp in the database. Getting the minimum time
      * is expensive, so this is only called once when the compression
-     * routine runs for the first time.  After the first call, the range
+     * routine runs for the first time. After the first call, the range
      * is cached.
      */
     private long getMinTimestamp(String dataTable)
-        throws SQLException, NamingException
-    {
-        Connection        conn = null;
-        Statement         stmt = null;
-        ResultSet         rs   = null;
+        throws SQLException, NamingException {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
 
         try {
             String sql = "SELECT MIN(timestamp) FROM " + dataTable;
-            conn =
-                dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            conn = dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
 
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
@@ -364,7 +358,7 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
                                        "measurement");
             }
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
     }
 
@@ -372,21 +366,19 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
      * Get the most recent measurement.
      */
     private long getMaxTimestamp(String dataTable)
-        throws SQLException, NamingException
-    {
-        Connection        conn = null;
-        Statement         stmt = null;
-        ResultSet         rs   = null;
+        throws SQLException, NamingException {
+        Connection conn = null;
+        Statement stmt = null;
+        ResultSet rs = null;
 
         try {
-            conn =
-                dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            conn = dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
 
             String sql;
-            if (dbUtil.isPostgreSQL(conn)) {
+            if (DBUtil.isPostgreSQL(conn)) {
                 // Postgres handles this much better
                 sql = "SELECT timestamp FROM " + dataTable +
-                    " ORDER BY timestamp DESC LIMIT 1";
+                      " ORDER BY timestamp DESC LIMIT 1";
             } else {
                 sql = "SELECT MAX(timestamp) FROM " + dataTable;
             }
@@ -402,7 +394,7 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
                 return 0l;
             }
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
         }
     }
 
@@ -410,9 +402,8 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
      * Purge data older than a given time.
      */
     private void purgeMeasurements(String tableName, long purgeAfter)
-        throws SQLException, NamingException
-    {
-        Connection        conn = null;
+        throws SQLException, NamingException {
+        Connection conn = null;
         PreparedStatement stmt = null;
         long interval = HOUR;
         long min = getMinTimestamp(tableName);
@@ -429,7 +420,7 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
         StopWatch watch = new StopWatch();
         try {
             conn =
-                dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+                   dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
             conn.setAutoCommit(false);
 
             long endWindow = purgeAfter;
@@ -453,13 +444,13 @@ public class DataCompressImpl extends SessionEJB implements DataCompress {
                 startWindow -= interval;
             }
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
         }
 
         log.info("Done (" + ((watch.getElapsed()) / 1000) + " seconds)");
     }
 
     public static DataCompress getOne() {
-            return Bootstrap.getBean(DataCompress.class);
+        return Bootstrap.getBean(DataCompress.class);
     }
 }
