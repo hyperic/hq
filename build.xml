@@ -637,7 +637,8 @@
 		<include name="commons-validator-1.3.1.jar" />
         <include name="jstl-1.1.2.jar" />
         <include name="standard-1.1.2.jar" />
-        <include name="struts-core-1.3.10.jar" />               
+      	<include name="spring-struts-2.0.8.jar" />
+      	<include name="struts-core-1.3.10.jar" />               
         <include name="struts-extras-1.3.10.jar" />               
         <include name="struts-taglib-1.3.10.jar" />               
         <include name="struts-tiles-1.3.10.jar" />               
