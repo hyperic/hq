@@ -11,10 +11,8 @@ import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
  * Local interface for EmailManager.
  */
 public interface EmailManager {
-
-   public void sendAlert( EmailFilter filter,AppdefEntityID appEnt,
+    public void sendAlert(EmailFilter filter, AppdefEntityID appEnt,
                           EmailRecipient[] addresses,
-                          String subject,String[] body,String[] htmlBody,int priority,
-                          boolean filterNotifications ) ;
-
+                          String subject, String[] body, String[] htmlBody, int priority,
+                          boolean filterNotifications);
 }

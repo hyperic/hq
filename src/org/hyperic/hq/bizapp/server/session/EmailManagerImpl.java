@@ -41,8 +41,10 @@ import org.springframework.transaction.annotation.Transactional;
  * Email since it is an I/O operation.
  */
 @Service
-@Transactional // Really? TODO
-public class EmailManagerImpl extends SessionEJB implements EmailManager {
+@Transactional
+// Really? TODO
+public class EmailManagerImpl
+    extends SessionEJB implements EmailManager {
     /**
      */
     public void sendAlert(EmailFilter filter, AppdefEntityID appEnt,
