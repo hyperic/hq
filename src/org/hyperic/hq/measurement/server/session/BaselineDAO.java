@@ -41,8 +41,9 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class BaselineDAO extends HibernateDAO {
+public class BaselineDAO extends HibernateDAO<Baseline> {
     private Log _log = LogFactory.getLog(BaselineDAO.class);
 
     @Autowired
@@ -71,8 +72,9 @@ public class BaselineDAO extends HibernateDAO {
     /*
      * @return List of Measurement
      */
-    public List findMeasurementsForBaselines(boolean enabled, long computeTime,
-                                             int maxResults) {
+    @SuppressWarnings("unchecked")
+    public List<Measurement> findMeasurementsForBaselines(boolean enabled, long computeTime,
+                                                          int maxResults) {
         String sql = new StringBuffer()
             .append("SELECT {m.*}")
         	.append(" FROM EAM_MEASUREMENT m")
@@ -93,7 +95,8 @@ public class BaselineDAO extends HibernateDAO {
             .list();
     }
 
-    public List findByInstance(int appdefType, int appdefId) {
+    @SuppressWarnings("unchecked")
+    public List<Baseline> findByInstance(int appdefType, int appdefId) {
         String sql =
             "select b from Baseline b " +
             "where b.measurement.appdefType = ? and " +
@@ -117,14 +120,14 @@ public class BaselineDAO extends HibernateDAO {
             .setInteger(1, instanceId.intValue()).uniqueResult();
     }
 
-    int deleteByIds(Collection ids) {
+    int deleteByIds(Collection<Integer> ids) {
         final String hql =
             "delete from Baseline where measurement.id in (:ids)";
 
         Session session = getSession();
         int count = 0;
-        for (Iterator it = ids.iterator(); it.hasNext(); ) {
-            ArrayList subIds = new ArrayList();
+        for (Iterator<Integer> it = ids.iterator(); it.hasNext(); ) {
+            ArrayList<Integer> subIds = new ArrayList<Integer>();
 
             for (int i = 0; i < DBUtil.IN_CHUNK_SIZE && it.hasNext(); i++) {
                 subIds.add(it.next());
