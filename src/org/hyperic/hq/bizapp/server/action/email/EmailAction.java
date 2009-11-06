@@ -52,8 +52,8 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.bizapp.server.session.EmailManagerEJBImpl;
-import org.hyperic.hq.bizapp.shared.EmailManagerLocal;
+import org.hyperic.hq.bizapp.server.session.EmailManagerImpl;
+import org.hyperic.hq.bizapp.shared.EmailManager;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
@@ -416,8 +416,8 @@ public class EmailAction extends EmailActionConfig
         }
     }
 
-    private static final EmailManagerLocal getEmailMan() {
-        return EmailManagerEJBImpl.getOne();
+    private static final EmailManager getEmailMan() {
+        return EmailManagerImpl.getOne();
     }
 
     private static final long now() {

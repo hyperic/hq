@@ -25,35 +25,27 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
-import org.hyperic.hq.bizapp.shared.EmailManagerLocal;
-import org.hyperic.hq.bizapp.shared.EmailManagerUtil;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.bizapp.shared.EmailManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.SessionEJB;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This SessionEJB is used to ensure that EmailFilter does not fail since it
  * requires an associated session.
  * Class uses transaction type NotSupported so that callers don't get hung up on
  * Email since it is an I/O operation.
- * 
- * @ejb:bean name="EmailManager"
- *      jndi-name="ejb/bizapp/EmailManager"
- *      local-jndi-name="LocalEmailManager"
- *      view-type="local"
- *      type="Stateless"
- *      
- * @ejb:transaction type="Required"
  */
-public class EmailManagerEJBImpl extends SessionEJB implements SessionBean {
-    
+@Service
+@Transactional
+// Really? TODO
+public class EmailManagerImpl
+    extends SessionEJB implements EmailManager {
     /**
-     * @ejb:interface-method
      */
     public void sendAlert(EmailFilter filter, AppdefEntityID appEnt,
                           EmailRecipient[] addresses, String subject,
@@ -63,19 +55,7 @@ public class EmailManagerEJBImpl extends SessionEJB implements SessionBean {
                          filterNotifications);
     }
 
-    public static EmailManagerLocal getOne() {
-        try {
-            return EmailManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    public static EmailManager getOne() {
+        return Bootstrap.getBean(EmailManager.class);
     }
-
-    
-    public void ejbCreate() {}
-    public void ejbPostCreate() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {}
 }

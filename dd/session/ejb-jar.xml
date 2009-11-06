@@ -503,19 +503,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[This SessionEJB is used to ensure that EmailFilter does not fail since it requires an associated session.]]></description>
-
-			<ejb-name>EmailManager</ejb-name>
-
-			<local-home>org.hyperic.hq.bizapp.shared.EmailManagerLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.EmailManagerLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.EmailManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[This class is responsible for setting/getting the server configuration]]></description>
 
 			<ejb-name>ServerConfigManager</ejb-name>
