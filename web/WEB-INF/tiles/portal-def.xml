@@ -47,10 +47,6 @@
                 extends=".main.layout"
                 controllerUrl="/admin/config/ConfigPortal.do" />    
 
-    <definition name=".admin.config.monitor.defaults.layout"
-                extends=".main.layout"
-                controllerUrl="/admin/config/EditResourceTypeDefaults.do"/>
-
     <definition name=".admin.layout" 
                 extends=".main.layout"
                 controllerUrl="/admin/home/AdminHomePortal.do" />
