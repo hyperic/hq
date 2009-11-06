@@ -170,7 +170,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
         }
     }
 
-    public List findByTemplatesForInstance(Integer[] tids, Resource res) {
+    @SuppressWarnings("unchecked")
+    public List<Measurement> findByTemplatesForInstance(Integer[] tids, Resource res) {
         if (tids.length == 0)   // Nothing to do
             return new ArrayList(0);
 
