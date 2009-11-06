@@ -34,7 +34,7 @@ import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.events.shared.HeartBeatServiceLocal;
+import org.hyperic.hq.events.shared.HeartBeatService;
 import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
 
 /**
@@ -83,10 +83,10 @@ public class HeartBeatServiceStartupListener
         private final Log _log = LogFactory.getLog(HeartBeatServiceTask.class);
 
         public void run() {
-            HeartBeatServiceLocal heartBeatService;
+            HeartBeatService heartBeatService;
             
             try {
-                heartBeatService = HeartBeatServiceEJBImpl.getOne();                
+                heartBeatService = HeartBeatServiceImpl.getOne();                
             } catch (SystemException e) {
                 // the server is still starting up or shutting down
                 _log.info("Failed to dispatch heart beat since Heart Beat " +
