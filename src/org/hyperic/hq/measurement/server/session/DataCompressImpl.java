@@ -32,51 +32,39 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import javax.ejb.CreateException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 import javax.naming.NamingException;
 
-import org.hyperic.hibernate.dialect.HQDialect;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
-
-import org.hyperic.hq.events.server.session.AlertManagerImpl;
-import org.hyperic.hq.measurement.shared.DataCompressLocal;
-import org.hyperic.hq.measurement.shared.DataCompressUtil;
+import org.hyperic.hq.measurement.shared.DataCompress;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The DataCompress EJB handles all compression and purging of
  * measurement data in the HQ system.
- *
- * @ejb:bean name="DataCompress"
- *      jndi-name="ejb/measurement/DataCompress"
- *      local-jndi-name="LocalDataCompress"
- *      view-type="local"
- *      type="Stateless"
- *
- * @ejb:transaction type="Required"
  */
-public class DataCompressEJBImpl
-    extends SessionEJB
-    implements SessionBean {
-
-    private final String logCtx = DataCompressEJBImpl.class.getName();
+@Service
+@Transactional
+// TODO: Use SimpleJdbcTemplate
+public class DataCompressImpl extends SessionEJB implements DataCompress {
+    private final String logCtx = DataCompressImpl.class.getName();
     private final Log log = LogFactory.getLog(logCtx);
-    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
 
     // Data tables
     private final String TAB_DATA    = MeasurementConstants.TAB_DATA;
@@ -93,6 +81,18 @@ public class DataCompressEJBImpl
     // Purge intervals, loaded once on first invocation.
     private boolean purgeDefaultsLoaded = false;
     private long purgeRaw, purge1h, purge6h, purge1d, purgeAlert;
+    
+    
+    private DBUtil dbUtil;
+    private ServerConfigManagerLocal serverConfigManager;
+    private AlertManager alertManager;
+    
+    @Autowired
+    public DataCompressImpl(DBUtil dbUtil, ServerConfigManagerLocal serverConfigManager, AlertManager alertManager) {
+        this.dbUtil = dbUtil;
+        this.serverConfigManager = serverConfigManager;
+        this.alertManager = alertManager;
+    }
 
     /**
      * Get the server purge configuration, loaded on startup.
@@ -102,7 +102,7 @@ public class DataCompressEJBImpl
         this.log.info("Loading default purge intervals");
         Properties conf;
         try {
-            conf = ServerConfigManagerEJBImpl.getOne().getConfig();
+            conf = serverConfigManager.getConfig();
         } catch (ConfigPropertyException e) {
             // Not gonna happen
             throw new SystemException(e);
@@ -185,8 +185,6 @@ public class DataCompressEJBImpl
 
     /**
      * Entry point for data compression routines
-     *
-     * @ejb:interface-method
      */
     public void compressData()
         throws NamingException, SQLException
@@ -228,7 +226,7 @@ public class DataCompressEJBImpl
         log.info("Purging alerts older than " +
                  TimeUtil.toString(now - this.purgeAlert));
         int alertsDeleted =
-            AlertManagerImpl.getOne().deleteAlerts(0, now - this.purgeAlert);
+            alertManager.deleteAlerts(0, now - this.purgeAlert);
         log.info("Done (Deleted " + alertsDeleted + " alerts)");
     }
 
@@ -461,21 +459,7 @@ public class DataCompressEJBImpl
         log.info("Done (" + ((watch.getElapsed()) / 1000) + " seconds)");
     }
 
-    public static DataCompressLocal getOne() {
-        try {
-            return DataCompressUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static DataCompress getOne() {
+            return Bootstrap.getBean(DataCompress.class);
     }
-
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() throws CreateException {}
-    public void ejbPostCreate() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {}
 }

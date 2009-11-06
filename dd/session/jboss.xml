@@ -184,11 +184,6 @@
 
 		</session>
 		<session>
-			<ejb-name>DataCompress</ejb-name>
-			<local-jndi-name>LocalDataCompress</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>LiveDataBoss</ejb-name>
 			<local-jndi-name>LocalLiveDataBoss</local-jndi-name>
 

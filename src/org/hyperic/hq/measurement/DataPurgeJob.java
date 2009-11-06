@@ -41,8 +41,8 @@ import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
 import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.EventLogManagerUtil;
-import org.hyperic.hq.measurement.shared.DataCompressLocal;
-import org.hyperic.hq.measurement.server.session.DataCompressEJBImpl;
+import org.hyperic.hq.measurement.shared.DataCompress;
+import org.hyperic.hq.measurement.server.session.DataCompressImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
@@ -96,7 +96,7 @@ public class DataPurgeJob implements Runnable {
         final ServerConfigManagerLocal serverConfig =
             ServerConfigManagerEJBImpl.getOne();
 
-        final DataCompressLocal dataCompress = DataCompressEJBImpl.getOne();
+        final DataCompress dataCompress = DataCompressImpl.getOne();
 
         // First check if we are already running
         synchronized (DataPurgeLockHolder.COMPRESS_RUNNING_LOCK) {
