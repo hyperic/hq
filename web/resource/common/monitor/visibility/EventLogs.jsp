@@ -1,7 +1,7 @@
 <%@ page language="java" %>
-<%@ taglib uri="struts-html" prefix="html" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <c:set var="count" value="0"/>
 <c:forEach var="timeTick" items="${timeIntervals}">

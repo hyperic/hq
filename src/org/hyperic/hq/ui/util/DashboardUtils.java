@@ -47,7 +47,6 @@ import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.Dashboard;
 import org.hyperic.hq.ui.WebUser;
-import org.hyperic.hq.ui.action.portlet.addresource.AddResourcesPrepareAction;
 import org.hyperic.hq.ui.server.session.DashboardConfig;
 import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
 import org.hyperic.hq.ui.shared.DashboardManager;

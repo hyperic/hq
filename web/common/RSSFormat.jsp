@@ -24,9 +24,10 @@
   USA.
  --%>
 <%@ page language="java" contentType="text/xml" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/">
    <channel>
       <title><c:out value="${rssFeed.title}"/></title>

@@ -25,114 +25,72 @@
 
 package org.hyperic.hq.ui.taglib.display;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TagSupport;
-import javax.servlet.jsp.PageContext;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 
 /**
  * This class is a two in one decorator/tag for use within the display:table
  * tag, it is a ColumnDecorator tag that that creates a column of checkboxes.
  */
-public class AlertCheckBoxDecorator extends CheckBoxDecorator
-{
+public class AlertCheckBoxDecorator extends CheckBoxDecorator {
+	private static Log log = LogFactory.getLog(AlertCheckBoxDecorator.class.getName());
 
-    //----------------------------------------------------static variables
+	/**
+	 * The class property of the checkbox.
+	 */
+	private Boolean fixable = null;
 
-    private static Log log =
-        LogFactory.getLog(AlertCheckBoxDecorator.class.getName());
+	/**
+	 * The name="foo" property of the checkbox.
+	 */
+	private Boolean acknowledgeable = null;
 
-    //----------------------------------------------------instance variables
+	public Boolean getFixable() {
+		return this.fixable;
+	}
 
-    /** The class property of the checkbox.
-     */
-    private String fixable = null;
+	public void setFixable(Boolean b) {
+		this.fixable = b;
+	}
 
-    /** The name="foo" property of the checkbox.
-     */
-    private String acknowledgeable = null;
+	public Boolean getAcknowledgeable() {
+		return this.acknowledgeable;
+	}
 
+	public void setAcknowledgeable(Boolean b) {
+		this.acknowledgeable = b;
+	}
 
-    // ctors
-    public AlertCheckBoxDecorator() {
-    }
+	public String decorate(Object obj) {
+		Boolean isFixable = getFixable();
+		Boolean isAcknowledgeable = getAcknowledgeable();
 
-    // accessors 
-    public String getFixable() {
-        return this.fixable;
-    }
-    
-    public void setFixable(String b) {
-        this.fixable = b;
-    }
-    
-    public String getAcknowledgeable() {
-        return this.acknowledgeable;
-    }
-    
-    public void setAcknowledgeable(String b) {
-        this.acknowledgeable = b;
-    }
-    
+		if (isFixable == null) {
+			log.debug("Fixable attribute value set to null");
 
-    public String decorate(Object obj) {        
-        Boolean isFixable;
-        Boolean isAcknowledgeable;
-        
-        try {
-            isFixable = (Boolean) evalAttr("fixable",
-                                           this.fixable,
-                                           Boolean.class);
-        }
-        catch (NullAttributeException ne) {
-            log.debug("bean " + this.fixable + " not found");
-            return "";
-        }
-        catch (JspException je) {
-            log.debug("can't evaluate name [" + this.fixable + "]: ", je);
-            return "";
-        }
+			return "";
+		}
 
-        try {
-            isAcknowledgeable = (Boolean) evalAttr("acknowledgeable", 
-                                                   this.acknowledgeable,
-                                                   Boolean.class);            
-        }
-        catch (NullAttributeException ne) {
-            log.debug("bean " + this.acknowledgeable + " not found");
-            return "";
-        }
-        catch (JspException je) {
-            log.debug("can't evaluate name [" + this.acknowledgeable + "]: ", je);
-            return "";
-        }
+		if (isAcknowledgeable == null) {
+			log.debug("Acknowledgeable attribute value set to null");
 
-        if (isAcknowledgeable.booleanValue()) {
-            setStyleClass("ackableAlert");
-        } else if (isFixable.booleanValue()){
-            setStyleClass("fixableAlert");
-        } else {
-            return "";
-        }
-        
-        return super.decorate(obj);
-    }
-    
-    public void release() {
-        super.release();       
-        fixable = null;
-        acknowledgeable = null;
-    }
-    
-    private Object evalAttr(String name, String value, Class type)
-        throws JspException, NullAttributeException {
-        return ExpressionUtil.evalNotNull("alertcheckboxdecorator", name, value,
-                                          type, this, context);
-    }
+			return "";
+		}
+
+		if (isAcknowledgeable.booleanValue()) {
+			setStyleClass("ackableAlert");
+		} else if (isFixable.booleanValue()) {
+			setStyleClass("fixableAlert");
+		} else {
+			return "";
+		}
+
+		return super.decorate(obj);
+	}
+
+	public void release() {
+		super.release();
+		fixable = null;
+		acknowledgeable = null;
+	}
 }

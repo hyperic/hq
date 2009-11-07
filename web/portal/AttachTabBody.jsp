@@ -1,8 +1,8 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <!-- get the eid and mode here for the parent portal action and use that action instead of mastheadattach -->
 <div style="display:none;">

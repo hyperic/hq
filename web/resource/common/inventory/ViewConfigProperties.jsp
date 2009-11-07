@@ -1,12 +1,13 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="struts-logic-el" prefix="logic" %>
-<%@ taglib uri="display" prefix="display" %>
-<%@ taglib uri="hq" prefix="hq" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -89,10 +90,7 @@
     </tr>
     <tr>
     </c:when>
-<!--    <c:if test="${(status.count % 2) == length}">
-    <td width="25%" class="BlockContent">&nbsp;</td>
-    </c:if> 
-    </c:choose> -->
+    </c:choose>
 </logic:iterate>
 </tr>
 <tr>
@@ -112,10 +110,7 @@
     </tr>
     <tr>
     </c:when>
-<!--    <c:if test="${(status.count % 2) == length}">
-    <td width="25%" class="BlockContent">&nbsp;</td>
-    </c:if> 
-    </c:choose> -->
+    </c:choose>
 </logic:iterate>
 <c:if test="${resourceType == SERVICE && rtSupported}">
 </tr><tr>
@@ -165,10 +160,7 @@
     </tr>
     <tr>
     </c:when>
-<!--    <c:if test="${(status.count % 2) == length}">
-    <td width="25%" class="BlockContent">&nbsp;</td>
-    </c:if> 
-    </c:choose> -->
+    </c:choose>
 </logic:iterate>
 </tr>
 </c:if>
@@ -211,10 +203,7 @@
     </tr>
     <tr>
     </c:when>
-<!--    <c:if test="${(status.count % 2) == length}">
-    <td width="25%" class="BlockContent">&nbsp;</td>
-    </c:if> 
-    </c:choose> -->
+    </c:choose>
 </logic:iterate>
 	</tr>
 </c:if>

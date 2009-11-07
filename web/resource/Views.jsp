@@ -1,10 +1,11 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-html" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="hq" prefix="hq" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -120,11 +121,18 @@ var pageData = new Array();
     <c:choose>
 	    <c:when test="${CONST_PLATFORM == entityId.type}">
         <c:set var="fullDef" value=".page.title.resource.platform.full"/>
-        <c:set var="viewsDef" value=".tabs.resource.platform.views"/>
+		<c:choose>
+		      <c:when test="${canControl}">
+		        <c:set var="viewsDef" value=".tabs.resource.platform.views"/>
+		      </c:when>
+		      <c:otherwise>
+		        <c:set var="viewsDef" value=".tabs.resource.platform.views.nocontrol"/>
+		      </c:otherwise>
+        </c:choose>
 	    </c:when>
 	    <c:when test="${CONST_SERVER == entityId.type}">
         <c:set var="fullDef" value=".page.title.resource.server.full"/>
-		    <c:choose>
+		<c:choose>
 		      <c:when test="${canControl}">
             <c:set var="viewsDef" value=".tabs.resource.server.views"/>
 		      </c:when>

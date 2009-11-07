@@ -49,7 +49,7 @@ public class PaginationParameters extends TagSupport {
     private String action;
     
     /** Holds value of property maxPages. */
-    private String maxPages = Constants.MAX_PAGES.toString();
+    private Integer maxPages = Constants.MAX_PAGES;
     
     /** Holds value of property includeFirstLast. */
     private boolean includeFirstLast = false;
@@ -58,7 +58,7 @@ public class PaginationParameters extends TagSupport {
     private boolean includePreviousNext = true;
     
     /** Holds value of property pageSize. */
-    private String pageSize = Constants.PAGESIZE_DEFAULT.toString();
+    private Integer pageSize = Constants.PAGESIZE_DEFAULT;
     
     /** Holds value of property pageValue. */
     private String pageValue = Constants.PAGENUM_PARAM;
@@ -67,13 +67,13 @@ public class PaginationParameters extends TagSupport {
     private String pageSizeValue = Constants.PAGESIZE_PARAM;
     
     /** Holds value of property listTotalSsize. */
-    private String listTotalSize;
+    private Integer listTotalSize;
           
     /** Holds value of property defaultSortColumn. */
     private String defaultSortColumn;
     
     /** Holds value of property pageNumber. */
-    private String pageNumber;
+    private Integer pageNumber;
     
     //----------------------------------------------------constructors
 
@@ -167,7 +167,7 @@ public class PaginationParameters extends TagSupport {
      * @return Value of property maxPages.
      *
      */
-    public String getMaxPages() {
+    public Integer getMaxPages() {
         return this.maxPages;
     }
     
@@ -175,7 +175,7 @@ public class PaginationParameters extends TagSupport {
      * @param maxPages New value of property maxPages.
      *
      */
-    public void setMaxPages(String maxPages) {
+    public void setMaxPages(Integer maxPages) {
         this.maxPages = maxPages;
     }
     
@@ -215,7 +215,7 @@ public class PaginationParameters extends TagSupport {
      * @return Value of property pageSize.
      *
      */
-    public String getPageSize() {
+    public Integer getPageSize() {
         return this.pageSize;
     }
     
@@ -223,7 +223,7 @@ public class PaginationParameters extends TagSupport {
      * @param pageSize New value of property pageSize.
      *
      */
-    public void setPageSize(String pageSize) {
+    public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
     
@@ -231,7 +231,7 @@ public class PaginationParameters extends TagSupport {
      * @return Value of property listTotalSsize.
      *
      */
-    public String getListTotalSize() {
+    public Integer getListTotalSize() {
         return this.listTotalSize;
     }
     
@@ -239,7 +239,7 @@ public class PaginationParameters extends TagSupport {
      * @param listTotalsize New value of property listTotalsize.
      *
      */
-    public void setListTotalSize(String listTotalSize) {
+    public void setListTotalSize(Integer listTotalSize) {
         this.listTotalSize = listTotalSize;
     }
     
@@ -287,7 +287,7 @@ public class PaginationParameters extends TagSupport {
      * @return Value of property string.
      *
      */
-    public String getPageNumber() {
+    public Integer getPageNumber() {
         return this.pageNumber;
     }
     
@@ -295,7 +295,7 @@ public class PaginationParameters extends TagSupport {
      * @param string New value of property string.
      *
      */
-    public void setPageNumber(String pageNumber) {
+    public void setPageNumber(Integer pageNumber) {
         this.pageNumber = pageNumber;
     }
     

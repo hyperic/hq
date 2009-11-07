@@ -25,99 +25,69 @@
 
 package org.hyperic.hq.ui.taglib.display;
 
-import java.util.Locale;
-
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TagSupport;
-
-import org.apache.struts.util.RequestUtils;
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 
 /**
- * usage
- * <display:column property="priority" width=="10" 
- *          title"alerts.alert.listheader.priority"/>
- * <display:prioritydecorator 
- *      flagKey="application.properties.key.prefix"/>
- *
-*/
-public class AlternateDecorator extends BaseDecorator  {
+ * usage <display:column property="priority" width=="10"
+ * title"alerts.alert.listheader.priority"/> <display:prioritydecorator
+ * flagKey="application.properties.key.prefix"/>
+ * 
+ */
+public class AlternateDecorator extends BaseDecorator {
+	private static Log log = LogFactory.getLog(AlternateDecorator.class
+			.getName());
 
-    private static Log log = 
-        LogFactory.getLog(AlternateDecorator.class.getName());
-    
-    /** Holds value of property secondChoice. */
-    private String secondChoice;
-    
-    // our ColumnDecorator
+	/** Holds value of property secondChoice. */
+	private String secondChoice;
 
-    /**
-     * If string column value exists, use that. Otherwise, return 2nd choice.
-     * 
-     * @see org.apache.taglibs.display.ColumnDecorator#decorate(java.lang.Object)
-     */
-    public String decorate(Object columnValue) {
-        String firstChoice = null;       
-        try {
-            firstChoice = (String)columnValue;
-            firstChoice = (String) evalAttr("firstChoice", firstChoice, String.class);
-        } catch (NullAttributeException ne) {
-            log.debug("bean " + firstChoice + " not found");
-            return "";
-        } catch (JspException je) {
-            log.debug("can't evaluate name [" + firstChoice + "]: ", je);
-            return "";
-        } catch (ClassCastException cce) {
-            log.debug("class cast exception: ", cce);
-        }
-        
-        if (firstChoice == null || "".equals(firstChoice.trim())) {
-            try {
-                secondChoice = (String)evalAttr("secondChoice", 
-                    secondChoice, String.class);
-            } catch (NullAttributeException ne) {
-                log.debug("bean " + secondChoice + " not found");
-                return "";
-            } catch (JspException je) {
-                log.debug("can't evaluate name [" + secondChoice + "]: ", je);
-                return "";
-            } 
-            return secondChoice;
-        } else {
-            return firstChoice;
-        }
+	// our ColumnDecorator
 
-    }
-    
-    /* (non-Javadoc)
-     * @see javax.servlet.jsp.tagext.Tag#release()
-     */
-    public void release() {
-        super.release();
-        secondChoice = null;
-    }
-    
-    
-    /** Getter for property secondChoice.
-     * @return Value of property secondChoice.
-     *
-     */
-    public String getSecondChoice() {
-        return this.secondChoice;
-    }
-    
-    /** Setter for property secondChoice.
-     * @param secondChoice New value of property secondChoice.
-     *
-     */
-    public void setSecondChoice(String secondChoice) {
-        this.secondChoice = secondChoice;
-    }
-    
+	/**
+	 * If string column value exists, use that. Otherwise, return 2nd choice.
+	 * 
+	 * @see org.apache.taglibs.display.ColumnDecorator#decorate(java.lang.Object)
+	 */
+	public String decorate(Object columnValue) {
+		String firstChoice = (String) columnValue;
+
+		if (firstChoice == null || "".equals(firstChoice.trim())) {
+			secondChoice = getSecondChoice();
+
+			return secondChoice;
+		} else {
+			return firstChoice;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.servlet.jsp.tagext.Tag#release()
+	 */
+	public void release() {
+		super.release();
+		secondChoice = null;
+	}
+
+	/**
+	 * Getter for property secondChoice.
+	 * 
+	 * @return Value of property secondChoice.
+	 * 
+	 */
+	public String getSecondChoice() {
+		return this.secondChoice;
+	}
+
+	/**
+	 * Setter for property secondChoice.
+	 * 
+	 * @param secondChoice
+	 *            New value of property secondChoice.
+	 * 
+	 */
+	public void setSecondChoice(String secondChoice) {
+		this.secondChoice = secondChoice;
+	}
 }

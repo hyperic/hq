@@ -38,10 +38,10 @@ import org.apache.commons.validator.Form;
 import org.apache.commons.validator.Validator;
 import org.apache.commons.validator.ValidatorResults;
 import org.apache.commons.validator.ValidatorResources;
-import org.apache.commons.validator.ValidatorResourcesInitializer;
 import org.apache.commons.validator.ValidatorResult;
 import org.apache.commons.validator.ValidatorException;
 import org.apache.commons.validator.ValidatorAction;
+import org.xml.sax.SAXException;
 
 /**                                                       
  * Encapsulates most of specific jakarta commons validator logic and
@@ -97,21 +97,19 @@ public class CommonValidator {
      **/
     private void setValidatorResources (String resourceName, Object bean,
                                         InputStream in)
-        throws IOException
+    throws IOException, SAXException
     {
 		if (getResourceName()==null ||
             !getResourceName().equals(resourceName)) {
 			// remember this resource
 			setResourceName(resourceName);
-			// create a new "validator" resources object. This thing contains
-			// FormSets stored against locale.
-			_validatorResources = new ValidatorResources();
 
 			// Read in the XMLfile
 			in = bean.getClass().getResourceAsStream(resourceName);
 
-			// Now initialize our VR with the xml file contents.
-			ValidatorResourcesInitializer.initialize(_validatorResources, in);
+			// create a new "validator" resources object. This thing contains
+			// FormSets stored against locale.
+			_validatorResources = new ValidatorResources(in);
 		}
     }
 
@@ -132,7 +130,7 @@ public class CommonValidator {
     **/
     public void validate (String validationMappingRes, String formName,
                           Object beanInstance)
-       throws CommonValidatorException
+    throws CommonValidatorException, SAXException
     {
         InputStream xmlStream = null;
 		CommonValidatorException cve = null;
@@ -141,18 +139,17 @@ public class CommonValidator {
         try {
 			// Start by setting the "ValidatorResources" object. Its only
             // created if necessary. Contains FormSets stored against locale.
-			setValidatorResources(validationMappingRes, beanInstance,
-                                  xmlStream);
+			setValidatorResources(validationMappingRes, beanInstance, xmlStream);
 
 			// Get the form for the current locale and Bean.
-			Form form = _validatorResources.get(Locale.getDefault(), formName);
+			Form form = _validatorResources.getForm(Locale.getDefault(), formName);
 
 			// Instantiate the validator (coordinates the validation
 			// while the ValidatorResources implements the validation)
 			Validator validator = new Validator(_validatorResources, formName);
 
 			// Tell the validator which bean to validate against.
-			validator.addResource(Validator.BEAN_KEY, beanInstance);
+			validator.setParameter(Validator.BEAN_PARAM, beanInstance);
 
             // Get the results
 			results = validator.validate();
@@ -161,18 +158,18 @@ public class CommonValidator {
             setValidatorResults(results);
 
 			// Iterate over each of the properties of the Bean which had messages.
-			Iterator propertyNames = results.get();
+			Iterator propertyNames = results.getPropertyNames().iterator();
+			
 			while (propertyNames.hasNext()) {
                 // There were errors. Instantiate CVE
 
 	    		String propertyName = (String) propertyNames.next();
 
 	    		// Get the Field associated with that property in the Form
-	    		Field field = (Field) form.getFieldMap().get(propertyName);
+	    		Field field = (Field) form.getField(propertyName);
 
 	    		// Look up the formatted name of the field from the Field arg0
-	    		String prettyFieldName =
-                    _properties.getString(field.getArg0().getKey());
+	    		String prettyFieldName = _properties.getString(field.getArg(0).getKey());
 
 	    		// Get the result of validating the property.
 	    		ValidatorResult result =

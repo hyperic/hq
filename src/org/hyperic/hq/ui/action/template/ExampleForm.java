@@ -27,11 +27,9 @@ package org.hyperic.hq.ui.action.template;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionError;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 
-import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.BaseValidatorForm;
 
 /**

@@ -26,12 +26,10 @@
 package org.hyperic.hq.ui.taglib;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
-
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 
 /**
  * Define a bundle of properties of a spider object corresponding to
@@ -45,62 +43,50 @@ import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
  * <code>&lt;spider:addToListValueProperty&gt;</code> tags.
  */
 public class AddToListValueTag extends TagSupport {
-
-    //----------------------------------------------------instance variables
-
+    private static final long serialVersionUID = 1L;
+	
     private String id;
-    private HashMap properties;
-
-    //----------------------------------------------------constructors
+    private Map<String, String> properties;
 
     public AddToListValueTag() {
         super();
     }
 
-    //----------------------------------------------------public methods
-
-    /**
-     *
-     */
     public void setId(String id) {
         this.id = id;
     }
 
-    /**
-     *
-     */
-    public void addProperty(String name, String value) {
+    public String getId() {
+		return id;
+	}
+
+	public void addProperty(String name, String value) {
         properties.put(name, value);
     }
 
-    /**
-     *
-     */
     public int doStartTag() throws JspException {
-        properties = new HashMap();
+        properties = new HashMap<String, String>();
+        
         return EVAL_BODY_INCLUDE;
     }
 
-    /**
-     *
-     */
     public int doEndTag() throws JspException {
-        Class clazz = AddToListValuesTag.class;
-        AddToListValuesTag ancestor =
-            (AddToListValuesTag) findAncestorWithClass(this, clazz);
+        AddToListValuesTag ancestor = (AddToListValuesTag) findAncestorWithClass(this, AddToListValuesTag.class);
+        
         if (ancestor == null) {
-            throw new JspException("no ancestor of class " + clazz);
+            throw new JspException("no ancestor of class " + AddToListValuesTag.class.getName());
         }
 
         try {
-            String id = (String) evalAttr("id", this.id, String.class);
-            properties.put("id", id);
-            ancestor.addValue(properties);
-            return EVAL_PAGE;
+        	String id = getId();
+        
+        	properties.put("id", id);
+        	ancestor.addValue(properties);
+        } catch(NullPointerException npe) {
+        	throw new JspException("Id attribute value is null", npe);
         }
-        catch (NullAttributeException ne) {
-            throw new JspException("bean " + this.id + " not found");
-        }
+        
+        return EVAL_PAGE;
     }
 
     /**
@@ -110,12 +96,7 @@ public class AddToListValueTag extends TagSupport {
     public void release() {
         id = null;
         properties = null;
+        
         super.release();
-    }
-
-    private Object evalAttr(String name, String value, Class type)
-        throws JspException, NullAttributeException {
-        return ExpressionUtil.evalNotNull("addToListValue", name,
-                                          value, type, this, pageContext);
     }
 }

@@ -1,7 +1,7 @@
 <%@ page language="java" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-logic" prefix="logic" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
 
 <html:form action="/alerts/SetOpenNMSAction">
 <table width="100%" cellpadding="0" cellspacing="0" border="0" class="TableBottomLine">

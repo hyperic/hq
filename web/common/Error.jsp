@@ -30,9 +30,10 @@
  --%>
 
 
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="struts-html" prefix="html" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <%
 // XXX: move this all into an action
 /* get the exception from one of the many places it could be hiding */

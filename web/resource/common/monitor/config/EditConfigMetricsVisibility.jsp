@@ -1,11 +1,12 @@
 <%@ page language="java" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-logic" prefix="logic" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="display" prefix="display" %>
-<%@ taglib uri="hq" prefix="hq" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -206,7 +207,7 @@
  <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAllRemoveGo(this, widgetProperties, 'listMember1')\" name=\"listMember1All\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderInactiveSorted">
   <display:checkboxdecorator name="mids" onclick="ToggleRemoveGo(this, widgetProperties)" styleClass="listMember1"/>
  </display:column>
- <display:column value="${grpavailmetric.name}" title="resource.common.monitor.visibility.AvailabilityTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
+ <display:column property="name" title="resource.common.monitor.visibility.AvailabilityTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
  <display:column property="activeMembers" title="resource.common.monitor.visibility.config.MembersCollectingTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactive">
   <display:groupmetricdecorator active="${grpavailmetric.activeMembers}" total="${grpavailmetric.totalMembers}"/>
  </display:column> <display:column property="interval" title="resource.common.monitor.visibility.config.CollectionIntervalTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactive">
@@ -223,7 +224,7 @@
  <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAllRemoveGo(this, widgetProperties, 'listMember2')\" name=\"listMember2All\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderInactiveSorted">
   <display:checkboxdecorator name="mids" onclick="ToggleRemoveGo(this, widgetProperties)" styleClass="listMember2"/>
  </display:column>
- <display:column value="${grpthroughmetric.name}" title="resource.common.monitor.visibility.UsageTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
+ <display:column property="name" title="resource.common.monitor.visibility.UsageTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
  <display:column property="activeMembers" title="resource.common.monitor.visibility.config.MembersCollectingTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactive">
   <display:groupmetricdecorator active="${grpthroughmetric.activeMembers}" total="${grpthroughmetric.totalMembers}"/>
  </display:column>
@@ -241,7 +242,7 @@
  <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAllRemoveGo(this, widgetProperties, 'listMember3')\" name=\"listMember3All\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderInactiveSorted">
   <display:checkboxdecorator name="mids" onclick="ToggleRemoveGo(this, widgetProperties)" styleClass="listMember3"/>
  </display:column>
- <display:column value="${grpperfmetric.name}" title="resource.common.monitor.visibility.PerformanceTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
+ <display:column property="name" title="resource.common.monitor.visibility.PerformanceTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
  <display:column property="activeMembers" title="resource.common.monitor.visibility.config.MembersCollectingTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactive">
   <display:groupmetricdecorator active="${grpperfmetric.activeMembers}" total="${grpperfmetric.totalMembers}"/>
  </display:column><display:column property="interval" title="resource.common.monitor.visibility.config.CollectionIntervalTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactive">
@@ -258,7 +259,7 @@
  <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAllRemoveGo(this, widgetProperties, 'listMember4')\" name=\"listMember4All\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderInactiveSorted">
   <display:checkboxdecorator name="mids" onclick="ToggleRemoveGo(this, widgetProperties)" styleClass="listMember4"/>
  </display:column>
- <display:column value="${grputilmetric.name}" title="resource.common.monitor.visibility.UtilizationTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
+ <display:column property="name" title="resource.common.monitor.visibility.UtilizationTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
  <display:column property="activeMembers" title="resource.common.monitor.visibility.config.MembersCollectingTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactive">
   <display:groupmetricdecorator active="${grputilmetric.activeMembers}" total="${grputilmetric.totalMembers}"/>
  </display:column> <display:column property="interval" title="resource.common.monitor.visibility.config.CollectionIntervalTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactive">
@@ -302,7 +303,7 @@
  <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAllRemoveGo(this, widgetProperties, 'listMember2')\" name=\"listMember2All\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderInactiveSorted">
   <display:checkboxdecorator name="mids" onclick="ToggleRemoveGo(this, widgetProperties)" styleClass="listMember2"/>
  </display:column>
- <display:column value="${throughtemplate.name}" title="resource.common.monitor.visibility.UsageTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
+ <display:column property="name" title="resource.common.monitor.visibility.UsageTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
  <%-- <display:column property="instanceId" title="common.header.Description" width="60%" headerStyleClass="ListHeaderInactiveSorted" /> --%>
  <display:column property="defaultInterval" title="resource.common.monitor.visibility.config.CollectionIntervalTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactiveSorted">
   <display:datedecorator isElapsedTime="true"/>
@@ -324,7 +325,7 @@
  <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAllRemoveGo(this, widgetProperties, 'listMember3')\" name=\"listMember3All\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderInactiveSorted">
   <display:checkboxdecorator name="mids" onclick="ToggleRemoveGo(this, widgetProperties)" styleClass="listMember3"/>
  </display:column>
- <display:column value="${perftemplate.name}" title="resource.common.monitor.visibility.PerformanceTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
+ <display:column property="name" title="resource.common.monitor.visibility.PerformanceTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
  <%-- <display:column property="instanceId" title="common.header.Description" width="60%" headerStyleClass="ListHeaderInactiveSorted" />--%>
  <display:column property="defaultInterval" title="resource.common.monitor.visibility.config.CollectionIntervalTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactiveSorted">
   <display:datedecorator isElapsedTime="true"/>
@@ -346,7 +347,7 @@
  <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAllRemoveGo(this, widgetProperties, 'listMember4')\" name=\"listMember4All\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderInactiveSorted">
   <display:checkboxdecorator name="mids" onclick="ToggleRemoveGo(this, widgetProperties)" styleClass="listMember4"/>
  </display:column>
- <display:column value="${utiltemplate.name}" title="resource.common.monitor.visibility.UtilizationTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
+ <display:column property="name" title="resource.common.monitor.visibility.UtilizationTH" sort="true" sortAttr="2" defaultSort="true" width="70%" headerStyleClass="ListHeaderInactiveSorted" />
  <%-- <display:column property="instanceId" title="common.header.Description" width="60%" headerStyleClass="ListHeaderInactiveSorted" />--%>
  <display:column property="defaultInterval" title="resource.common.monitor.visibility.config.CollectionIntervalTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactiveSorted">
   <display:datedecorator isElapsedTime="true"/>
@@ -370,7 +371,7 @@
  <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAllRemoveGo(this, widgetProperties, 'listMember1')\" name=\"listMember1All\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderInactiveSorted">
   <display:checkboxdecorator name="mids" onclick="ToggleRemoveGo(this, widgetProperties)" styleClass="listMember1"/>
  </display:column>
- <display:column value="${availmetric.name}" title="resource.common.monitor.visibility.AvailabilityTH" sort="true" sortAttr="2" defaultSort="true" width="85%" headerStyleClass="ListHeaderInactiveSorted" />
+ <display:column property="name" title="resource.common.monitor.visibility.AvailabilityTH" sort="true" sortAttr="2" defaultSort="true" width="85%" headerStyleClass="ListHeaderInactiveSorted" />
  <%-- <display:column property="instanceId" title="common.header.Description" width="60%" headerStyleClass="ListHeaderInactiveSorted" /> --%>
  <display:column property="interval" title="resource.common.monitor.visibility.config.CollectionIntervalTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactiveSorted">
   <display:datedecorator isElapsedTime="true"/>
@@ -386,7 +387,7 @@
  <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAllRemoveGo(this, widgetProperties, 'listMember2')\" name=\"listMember2All\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderInactiveSorted">
   <display:checkboxdecorator name="mids" onclick="ToggleRemoveGo(this, widgetProperties)" styleClass="listMember2"/>
  </display:column>
- <display:column value="${throughmetric.name}" title="resource.common.monitor.visibility.UsageTH" sort="true" sortAttr="2" defaultSort="true" width="85%" headerStyleClass="ListHeaderInactiveSorted" />
+ <display:column property="name" title="resource.common.monitor.visibility.UsageTH" sort="true" sortAttr="2" defaultSort="true" width="85%" headerStyleClass="ListHeaderInactiveSorted" />
  <%-- <display:column property="instanceId" title="common.header.Description" width="60%" headerStyleClass="ListHeaderInactiveSorted" /> --%>
  <display:column property="interval" title="resource.common.monitor.visibility.config.CollectionIntervalTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactiveSorted">
   <display:datedecorator isElapsedTime="true"/>
@@ -402,7 +403,7 @@
  <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAllRemoveGo(this, widgetProperties, 'listMember3')\" name=\"listMember3All\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderInactiveSorted">
   <display:checkboxdecorator name="mids" onclick="ToggleRemoveGo(this, widgetProperties)" styleClass="listMember3"/>
  </display:column>
- <display:column value="${perfmetric.name}" title="resource.common.monitor.visibility.PerformanceTH" sort="true" sortAttr="2" defaultSort="true" width="85%" headerStyleClass="ListHeaderInactiveSorted" />
+ <display:column property="name" title="resource.common.monitor.visibility.PerformanceTH" sort="true" sortAttr="2" defaultSort="true" width="85%" headerStyleClass="ListHeaderInactiveSorted" />
  <%-- <display:column property="instanceId" title="common.header.Description" width="60%" headerStyleClass="ListHeaderInactiveSorted" />--%>
  <display:column property="interval" title="resource.common.monitor.visibility.config.CollectionIntervalTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactiveSorted">
   <display:datedecorator isElapsedTime="true"/>
@@ -418,7 +419,7 @@
  <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAllRemoveGo(this, widgetProperties, 'listMember4')\" name=\"listMember4All\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderInactiveSorted">
   <display:checkboxdecorator name="mids" onclick="ToggleRemoveGo(this, widgetProperties)" styleClass="listMember4"/>
  </display:column>
- <display:column value="${utilmetric.name}" title="resource.common.monitor.visibility.UtilizationTH" sort="true" sortAttr="2" defaultSort="true" width="85%" headerStyleClass="ListHeaderInactiveSorted" />
+ <display:column property="name" title="resource.common.monitor.visibility.UtilizationTH" sort="true" sortAttr="2" defaultSort="true" width="85%" headerStyleClass="ListHeaderInactiveSorted" />
  <%-- <display:column property="instanceId" title="common.header.Description" width="60%" headerStyleClass="ListHeaderInactiveSorted" />--%>
  <display:column property="interval" title="resource.common.monitor.visibility.config.CollectionIntervalTH" align="center" nowrap="true" width="15%" headerStyleClass="ListHeaderInactiveSorted">
   <display:datedecorator isElapsedTime="true"/>

@@ -1,8 +1,9 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="struts-logic" prefix="logic" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application

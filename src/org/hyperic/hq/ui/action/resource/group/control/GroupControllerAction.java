@@ -36,11 +36,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.struts.Globals;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -50,56 +48,34 @@ import org.hyperic.hq.ui.action.resource.ResourceForm;
 import org.hyperic.hq.ui.action.resource.common.control.ResourceControlController;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
-import org.hyperic.hq.ui.util.SessionUtils;
 
 /**
  * A <code>ResourceControllerAction</code> that sets up group control
  * portals.
  */
 public class GroupControllerAction extends ResourceControlController {
+    protected static Log log = LogFactory.getLog( GroupControllerAction.class.getName() );
+    private Properties map = getKeyMethodMap();
     
-    protected static Log log 
-        = LogFactory.getLog( GroupControllerAction.class.getName() );
-    
-    protected Properties getKeyMethodMap() {
-        Properties map = new Properties();
-
-        map.setProperty(Constants.MODE_VIEW,       "currentControlStatus");
+    public GroupControllerAction() {
         map.setProperty(Constants.MODE_CRNT_DETAIL,"currentControlStatusDetail");
-        map.setProperty(Constants.MODE_HST,        "controlStatusHistory");
-        map.setProperty(Constants.MODE_HST_DETAIL, "controlStatusHistoryDetail");
-        map.setProperty(Constants.MODE_NEW,        "newScheduledControlAction");
-        map.setProperty(Constants.MODE_EDIT,       "editScheduledControlAction");
-        
-        return map;
-        
     }
-      
-    /** Method to call when mode=view.
-     **/
+    
     public ActionForward currentControlStatus(ActionMapping mapping,
                                               ActionForm form,
                                               HttpServletRequest request,
                                               HttpServletResponse response)
     throws Exception {
-        ArrayList portlets = new ArrayList();
+        List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
         
         portlets.add( ".resource.group.control.list.detail" );
         portal.setName( "resource.group.Control.PageTitle.New" );
         portal.addPortlets(portlets);
         
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        setResource(request);
-        
-        // move messages and errors from session to request scope
-        SessionUtils.moveAttribute(request, Globals.MESSAGE_KEY);
-        SessionUtils.moveAttribute(request, Globals.ERROR_KEY);
-
         checkGroupHasMembers(mapping, form, request, response);
-        checkControlEnabled(mapping, form, request, response);
         
-        super.currentControlStatus(mapping,form,request,response);
+        super.currentControlStatus(mapping,form,request,response, portal);
         
         return null;
     }
@@ -111,14 +87,14 @@ public class GroupControllerAction extends ResourceControlController {
                                                     HttpServletRequest request,
                                                     HttpServletResponse response)
     throws Exception {
-        ArrayList portlets = new ArrayList();
+        List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
         
         portlets.add( ".resource.group.control.list.current.detail" );       
         portal.setName( "resource.group.Control.PageTitle.CurrentDetail" );
-        
         portal.addPortlets(portlets);
         portal.setDialog( true );
+        
         request.setAttribute(Constants.PORTAL_KEY, portal);
         setResource(request);
         
@@ -134,19 +110,16 @@ public class GroupControllerAction extends ResourceControlController {
                                               HttpServletRequest request,
                                               HttpServletResponse response)
     throws Exception {
-        ArrayList portlets = new ArrayList();
+        List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
-        setResource(request);
         
         portlets.add( ".resource.group.control.list.history" );
         portal.setName( "resource.group.Control.PageTitle.New" );
-        
         portal.addPortlets(portlets);
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-      
+        
         checkGroupHasMembers(mapping, form, request, response);
                 
-        super.controlStatusHistory(mapping,form,request,response);
+        super.controlStatusHistory(mapping,form,request,response, portal);
         
         return null;
     }
@@ -158,7 +131,7 @@ public class GroupControllerAction extends ResourceControlController {
                                                     HttpServletRequest request,
                                                     HttpServletResponse response)
     throws Exception {
-        ArrayList portlets = new ArrayList();
+        List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
         
         portlets.add( ".resource.group.control.list.history.detail" );
@@ -166,10 +139,9 @@ public class GroupControllerAction extends ResourceControlController {
         portal.addPortlets(portlets);
         portal.setDialog(true);
         
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        setResource(request);
-        
         checkGroupHasMembers(mapping, form, request, response);
+
+        super.controlStatusHistoryDetail(mapping, form, request, response, portal);
         
         return null;
     }
@@ -179,7 +151,7 @@ public class GroupControllerAction extends ResourceControlController {
                                                    HttpServletRequest request,
                                                    HttpServletResponse response)
     throws Exception {
-        ArrayList portlets = new ArrayList();
+        List<String> portlets = new ArrayList<String>();
         Portal portal = new Portal();
         
         portlets.add( ".resource.group.control.new" );
@@ -187,10 +159,9 @@ public class GroupControllerAction extends ResourceControlController {
         portal.addPortlets(portlets);
         portal.setDialog(true);
         
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        setResource(request);
-
         checkGroupHasMembers(mapping, form, request, response);
+        
+        super.newScheduledControlAction(mapping, form, request, response, portal);
         
         return null;
     }
@@ -200,15 +171,13 @@ public class GroupControllerAction extends ResourceControlController {
                                                     HttpServletRequest request,
                                                     HttpServletResponse response)
     throws Exception {
-
-        Portal portal = Portal.createPortal("resource.group.Control.PageTitle.Edit"
-            ,".resource.group.control.edit");
+        Portal portal = Portal.createPortal("resource.group.Control.PageTitle.Edit", ".resource.group.control.edit");
         
         portal.setDialog(true);
-        request.setAttribute(Constants.PORTAL_KEY, portal);
-        setResource(request);
         
         checkGroupHasMembers(mapping, form, request, response);
+
+        super.editScheduledControlAction(mapping, form, request, response, portal);
         
         return null;
     }
@@ -220,24 +189,28 @@ public class GroupControllerAction extends ResourceControlController {
     throws Exception {
         ResourceForm addForm = (ResourceForm)form;
         Integer groupId = null;
+        
         if ( form == null ) {
             groupId = RequestUtils.getResourceId(request);
         } else {
             groupId = addForm.getRid();
         }
+        
         ServletContext ctx = getServlet().getServletContext();                                    
         AppdefBoss boss = ContextUtils.getAppdefBoss(ctx);
+        
         try {
             Integer sessionId = RequestUtils.getSessionId(request);
-            AppdefGroupValue group = boss.findGroup(sessionId.intValue(),
-                                        groupId);
+            AppdefGroupValue group = boss.findGroup(sessionId.intValue(), groupId);
             List entries = group.getGroupEntries();
+            
             if (entries != null && entries.size() < 1) {
-                RequestUtils.setError(request, 
-                    "resource.common.control.error.NoResourcesInGroup");
+                RequestUtils.setError(request, "resource.common.control.error.NoResourcesInGroup");
             }
         } catch (PermissionException pe) {
+            log.warn(pe);
         } catch (ServletException se) {
+            log.warn(se);
         }
     }
 }

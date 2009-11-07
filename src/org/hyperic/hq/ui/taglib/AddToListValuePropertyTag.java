@@ -28,62 +28,53 @@ package org.hyperic.hq.ui.taglib;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
-
 /**
  * Define a property of a spider object to be displayed in a column of
  * each of the "from" and "to" tables in the Add To List widget.
  */
 public class AddToListValuePropertyTag extends TagSupport {
-
-    //----------------------------------------------------instance variables
-
+    private static final long serialVersionUID = 1L;
+	
     private String name;
     private String value;
-
-    //----------------------------------------------------constructors
 
     public AddToListValuePropertyTag() {
         super();
     }
 
-    //----------------------------------------------------public methods
-
-    /**
-     *
-     */
     public void setName(String name) {
         this.name = name;
     }
 
-    /**
-     *
-     */
     public void setValue(String value) {
         this.value = value;
     }
 
-    /**
-     *
-     */
-    public int doEndTag() throws JspException {
-        Class clazz = AddToListValueTag.class;
-        AddToListValueTag ancestor =
-            (AddToListValueTag) findAncestorWithClass(this, clazz);
+    public String getName() {
+		return name;
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public int doEndTag() throws JspException {
+        AddToListValueTag ancestor = (AddToListValueTag) findAncestorWithClass(this, AddToListValueTag.class);
+        
         if (ancestor == null) {
-            throw new JspException("no ancestor of class " + clazz);
+            throw new JspException("no ancestor of class " + AddToListValueTag.class.getName());
         }
 
         try {
-            String value = (String) evalAttr("value", this.value,
-                                             String.class);
-            ancestor.addProperty(name, value);
-            return EVAL_PAGE;
+        	String name = getName();
+        	String value = getValue();
+        
+        	ancestor.addProperty(name, value);
+        } catch(NullPointerException npe) {
+        	throw new JspException("Name or value attribute value is null", npe);
         }
-        catch (NullAttributeException ne) {
-            throw new JspException("bean " + this.value + " not found");
-        }
+        
+        return EVAL_PAGE;
     }
 
     /**
@@ -93,12 +84,7 @@ public class AddToListValuePropertyTag extends TagSupport {
     public void release() {
         name = null;
         value = null;
+        
         super.release();
-    }
-
-    private Object evalAttr(String name, String value, Class type)
-        throws JspException, NullAttributeException {
-        return ExpressionUtil.evalNotNull("addToListValueProperty", name,
-                                          value, type, this, pageContext);
     }
 }

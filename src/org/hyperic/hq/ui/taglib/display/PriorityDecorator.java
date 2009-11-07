@@ -28,14 +28,8 @@ package org.hyperic.hq.ui.taglib.display;
 import java.util.Locale;
 
 import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.tagext.Tag;
-import javax.servlet.jsp.tagext.TagSupport;
 
-import org.apache.struts.util.RequestUtils;
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
+import org.apache.struts.taglib.TagUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -87,7 +81,7 @@ public class PriorityDecorator extends BaseDecorator  {
         }
         String key = "alert.config.props.PB.Priority." + priority;
         try {
-            return RequestUtils.message(getPageContext(), bundle, locale, key);
+            return TagUtils.getInstance().message(getPageContext(), bundle, locale, key);
         } catch (JspException e) {
             return "???" + key + "???";
         }

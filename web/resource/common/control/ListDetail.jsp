@@ -1,12 +1,13 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-bean" prefix="bean" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-logic" prefix="logic" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="hq" prefix="hq" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -40,45 +41,58 @@
 <c:set var="entityId" value="${Resource.entityId}"/>
 
 <c:choose>
- <c:when test="${section eq 'service'}">
- <!--  PAGE TITLE -->
-  <tiles:insert definition=".page.title.resource.service.full">
-   <tiles:put name="resource" beanName="Resource"/>
-   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
-   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
-   <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
-  </tiles:insert>
- <!-- CONTROL BAR -->
- <tiles:insert definition=".tabs.resource.service.control.list.detail">
-  <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
- </tiles:insert>
- </c:when>
- <c:when test="${section eq 'group'}">
- <!--  PAGE TITLE -->
-  <tiles:insert definition=".page.title.resource.group.full">
-   <tiles:put name="titleName" beanName="Resource" beanProperty="name"/>
-   <tiles:put name="resource" beanName="Resource"/>
-   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
-   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
-  </tiles:insert>
- <!-- CONTROL BAR -->
- <tiles:insert definition=".tabs.resource.group.control.current">
-  <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
- </tiles:insert>
- </c:when>
- <c:otherwise>
-  <!--  PAGE TITLE -->
-  <tiles:insert definition=".page.title.resource.server.full">
-   <tiles:put name="resource" beanName="Resource"/>
-   <tiles:put name="resourceOwner" beanName="ResourceOwner"/>
-   <tiles:put name="resourceModifier" beanName="ResourceModifier"/>
-   <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
-  </tiles:insert>
-  <!-- CONTROL BAR -->
-  <tiles:insert definition=".tabs.resource.server.control.list.detail">
-   <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
-  </tiles:insert>
- </c:otherwise>
+	<c:when test="${section eq 'platform'}">
+ 		<!--  PAGE TITLE -->
+  		<tiles:insert definition=".page.title.resource.platform.full">
+   			<tiles:put name="resource" beanName="Resource"/>
+   			<tiles:put name="resourceOwner" beanName="ResourceOwner"/>
+   			<tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+   			<tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
+  		</tiles:insert>
+ 		<!-- CONTROL BAR -->
+ 		<tiles:insert definition=".tabs.resource.platform.control.list.detail">
+  			<tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+ 		</tiles:insert>
+ 	</c:when>
+ 	<c:when test="${section eq 'service'}">
+ 		<!--  PAGE TITLE -->
+  		<tiles:insert definition=".page.title.resource.service.full">
+   			<tiles:put name="resource" beanName="Resource"/>
+   			<tiles:put name="resourceOwner" beanName="ResourceOwner"/>
+   			<tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+   			<tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
+  		</tiles:insert>
+ 		<!-- CONTROL BAR -->
+ 		<tiles:insert definition=".tabs.resource.service.control.list.detail">
+  			<tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+ 		</tiles:insert>
+ 	</c:when>
+ 	<c:when test="${section eq 'group'}">
+ 		<!--  PAGE TITLE -->
+  		<tiles:insert definition=".page.title.resource.group.full">
+   			<tiles:put name="titleName" beanName="Resource" beanProperty="name"/>
+   			<tiles:put name="resource" beanName="Resource"/>
+   			<tiles:put name="resourceOwner" beanName="ResourceOwner"/>
+   			<tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+  		</tiles:insert>
+ 		<!-- CONTROL BAR -->
+ 		<tiles:insert definition=".tabs.resource.group.control.current">
+  			<tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+ 		</tiles:insert>
+ 	</c:when>
+ 	<c:otherwise>
+  		<!--  PAGE TITLE -->
+  		<tiles:insert definition=".page.title.resource.server.full">
+   			<tiles:put name="resource" beanName="Resource"/>
+   			<tiles:put name="resourceOwner" beanName="ResourceOwner"/>
+   			<tiles:put name="resourceModifier" beanName="ResourceModifier"/>
+   			<tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
+  		</tiles:insert>
+  		<!-- CONTROL BAR -->
+  		<tiles:insert definition=".tabs.resource.server.control.list.detail">
+   			<tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+  		</tiles:insert>
+ 	</c:otherwise>
 </c:choose>
 <br>
 

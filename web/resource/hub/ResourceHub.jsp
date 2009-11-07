@@ -1,11 +1,12 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="display" prefix="display" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="hq" prefix="hq" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -378,7 +379,7 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
     <html:link page="/alerts/Config.do?mode=list" paramId="eid" paramName="resource" paramProperty="entityId"><html:img page="/images/icon_hub_a.gif" width="11" height="11" alt="" border="0"/></html:link>
     </c:if>
     </td>
-      <td class="tableCell" align="left" valign="top"><span class="SpanPopup1"><html:link page="/Resource.do" paramId="eid" paramName="resource" paramProperty="entityId"><c:out value="${resource.name}"/></html:link><c:if test="${not empty resource.description}"><span><c:out value="${resource.description}" escapeXml="false"/></span></c:if></span></td>
+      <td class="tableCell" align="left" valign="top"><span class="SpanPopup1"><html:link page="/Resource.do" paramId="eid" paramName="resource" paramProperty="entityId"><c:out value="${resource.name}"/></html:link><c:if test="${not empty resource.description}"><span><c:out value="${resource.description}" /></span></c:if></span></td>
       <!-- Insert metrics tile here -->
       <c:forEach items="${indicatorsMap[resource.entityId]}" var="metric">
         <td class="tableCell" align="middle" valign="top">

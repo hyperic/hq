@@ -155,6 +155,7 @@ public class DashboardPortletBossEJBImpl
             if (!metrics.isEmpty()) {
                 Measurement measurement = (Measurement) metrics.get(0);
                 jObj.put("measurementName", measurement.getTemplate().getName());
+                jObj.put("measurementUnits", measurement.getTemplate().getUnits());
             }
             
             List data = dMan.getHistoricalData(metrics, begin, end,

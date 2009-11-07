@@ -24,13 +24,14 @@
  --%>
 
 <%-- start vit: delete this block --%>
-<%@ taglib uri="struts-bean" prefix="bean" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-logic" prefix="logic" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="hq" prefix="hq" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://struts.apache.org/tags-logic" prefix="logic" %>
+<%@ taglib uri="http://struts.apache.org/tags-bean" prefix="bean" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
+
 <script src="<html:rewrite page="/js/"/>functions.js" type="text/javascript"></script>
 <link rel=stylesheet href="<html:rewrite page="/css/"/>win.css" type="text/css">
 <%-- end vit: delete this block --%>
@@ -101,9 +102,13 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
 </tiles:insert>
 <html:form action="/resource/common/monitor/visibility/CompareMetrics">
 
-<html:link href="javascript:document.CompareMetricsForm.submit()" onclick="clickLink('CompareMetricsForm', 'back')"><fmt:message 
-key="resource.common.monitor.visibility.CompareMetricsReturnLink">
-<fmt:param value="${CompareMetricsForm.name}"/></fmt:message></html:link>
+<html:link href="javascript:document.CompareMetricsForm.submit()" onclick="clickLink('CompareMetricsForm', 'back')">
+	<fmt:message key="resource.common.monitor.visibility.CompareMetricsReturnLink">
+		<fmt:param>
+			<c:out value="${CompareMetricsForm.name}"/>
+		</fmt:param>
+	</fmt:message>
+</html:link>
 <div id="listDiv" style="padding-top: 24px; padding-bottom: 24px;">
 <tiles:insert definition=".header.tab">
   <tiles:put name="tabKey" value="resource.common.monitor.visibility.CompareMetricsTab"/>
@@ -226,9 +231,13 @@ key="resource.common.monitor.visibility.CompareMetricsReturnLink">
 </tiles:insert> 
 </div>
 
-<html:link href="javascript:document.CompareMetricsForm.submit()" onclick="clickLink('CompareMetricsForm', 'back')"><fmt:message 
-key="resource.common.monitor.visibility.CompareMetricsReturnLink">
-<fmt:param value="${CompareMetricsForm.name}"/></fmt:message></html:link>
+<html:link href="javascript:document.CompareMetricsForm.submit()" onclick="clickLink('CompareMetricsForm', 'back')">
+	<fmt:message key="resource.common.monitor.visibility.CompareMetricsReturnLink">
+		<fmt:param>
+			<c:out value="${CompareMetricsForm.name}"/>
+		</fmt:param>
+	</fmt:message>
+</html:link>
 
 <html:hidden property="rid"/>
 <html:hidden property="type"/>

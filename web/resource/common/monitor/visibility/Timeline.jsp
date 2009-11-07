@@ -1,9 +1,9 @@
 <%@ page language="java" %>
-<%@ taglib uri="struts-html" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="hq" prefix="hq" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <tiles:importAttribute name="hideLogs" ignore="true"/>
 
