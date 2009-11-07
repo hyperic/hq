@@ -45,7 +45,7 @@
 <tiles:importAttribute name="eid" ignore="true" />
 <tiles:importAttribute name="ctype" ignore="true" />
 
-<hq:constant var="PLATFORM"
+<hq:constant var="PLATFORM" 
     classname="org.hyperic.hq.appdef.shared.AppdefEntityConstants" 
     symbol="APPDEF_TYPE_PLATFORM"/>
 <hq:constant var="SERVER"
@@ -74,20 +74,22 @@
 	symbol="LIST_VIEW"/>
 
 <c:if test="${not empty resourceOwner}">
-  <hq:owner var="ownerStr" owner="${resourceOwner}"/>
+  	<hq:owner var="ownerStr" owner="${resourceOwner}"/>
 </c:if>
+
 <c:if test="${showSearch}">
     <c:choose>
-    <c:when test="${not empty ResourceHubForm.keywords}">
-      <c:set var="initSearchVal" value="${ResourceHubForm.keywords}"/>
-    </c:when>
-    <c:otherwise>
-      <fmt:message var="initSearchVal" key="resource.hub.search.KeywordSearchText"/>
-    </c:otherwise>
-  </c:choose>
+	    <c:when test="${not empty ResourceHubForm.keywords}">
+    		<c:set var="initSearchVal" value="${ResourceHubForm.keywords}"/>
+    	</c:when>
+    	<c:otherwise>
+      		<fmt:message var="initSearchVal" key="resource.hub.search.KeywordSearchText"/>
+    	</c:otherwise>
+  	</c:choose>
 </c:if>
- <script  type="text/javascript">
-  var help = "<hq:help/>";
+ 
+<script  type="text/javascript">
+	var help = "<hq:help/>";
 </script>
 
 <c:if test="${not empty eid}">
@@ -101,233 +103,250 @@
 </c:if>
 
 <table width="100%" cellspacing="0" cellpadding="0" style="border: 0px;clear:both;">
-  <tr>
-    <td colspan="4">
-
-<table width="100%" border="0" cellspacing="0" cellpadding="0" style="border: 0px; margin-bottom: 10px;">
-  <tr class="PageTitleBar"> 
-    <td width="5"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
-    <td width="15"><html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0"/></td>
-    <td colspan="2" nowrap>
-<c:choose>
-  <c:when test="${not empty titleKey}">
-    <c:set var="escapedTitleName">
-  		<c:out value="${titleName}" />
-    </c:set>
-    <c:set var="escapedSubTitleName">
-      	<c:out value="${subTitleName}" />
-    </c:set>
-    <fmt:message key="${titleKey}">
-		<fmt:param value="${escapedTitleName}" />
-		<fmt:param value="${escapedSubTitleName}" />      
-    </fmt:message>
-  </c:when>
-  <c:otherwise>
-    <c:out value="${titleName}" />
-      <c:if test="${not empty subTitleName}">
-        <span class="resourceSubTitle">
-        <c:out value="${subTitleName}"/>
-        </span>
-      </c:if>
-  </c:otherwise>
-</c:choose>
-    </td>
-<c:choose>
-  <c:when test="${not empty titleBgStyle && not empty titleImg}">
-    <td width="15%" style="padding-right: 20px;"></td>
-  </c:when>
-  <c:otherwise>
-    <td width="10%" style="padding-right: 20px;">&nbsp;</td>
-  </c:otherwise>
-</c:choose>
-  </tr>
-  <tr>
-    <td rowspan="99" class="PageTitle">&nbsp;</td>
-    <td valign="top" align="left" rowspan="99">&nbsp;</td>
-    <td colspan="3">&nbsp;</td>
-  </tr>
-<c:if test="${not empty resource || not empty linkUrl || not empty showSearch}">
-  <tr valign="top"> 
-  <c:choose>
-    <c:when test="${not empty resource}">
-    <td colspan="2">
-      <table width="100%" border="0" cellspacing="0" cellpadding="0">
-        <tr> 
-          <td class="PageTitleSmallText" valign="top">
-      <b><fmt:message key="common.label.Description"/></b>
-      <hq:shortenText maxlength="30" value="${resource.description}" styleClass="ListCellPopup5"/>
-    </td>
-    <td style="width: 5px;">&nbsp;</td>
-    <td class="PageTitleSmallText" valign="top" colspan="2" nowrap>
-      <b><fmt:message key="resource.common.inventory.props.OwnerLabel"/></b> <c:out value="${ownerStr}" escapeXml="false"/> 
-      <c:if test="${not empty resource}">
-        - <html:link page="/resource/${resource.entityId.typeName}/Inventory.do?mode=changeOwner&rid=${resource.id}&type=${resource.entityId.type}"><fmt:message key="resource.common.inventory.props.ChangeButton"/></html:link><br>
-      </c:if>
-          </td>
-        </tr>
-<logic:present name="cprops">
-<c:set var="leftRight" value="1"/>
-<logic:iterate id="cprop" name="cprops">
-  <c:if test="${leftRight > 0}">
-    <tr>
-  </c:if>
-      <td class="PageTitleSmallText" width="33%" valign="top"><b><c:out value="${cprop.key}"/></b><fmt:message key="common.label.Colon"/>
-      <hq:shortenText maxlength="30" value="${cprop.value}" styleClass="ListCellPopup5"/></td>
-  <c:choose>
-  <c:when test="${leftRight < 0}">
-    <c:set var="leftRight" value="${leftRight * -1}"/>
-    <td>&nbsp;</td>
-    </tr>
-  </c:when>
-  <c:otherwise>
-    <c:set var="leftRight" value="${leftRight - 1}"/>
-    <td>&nbsp;</td>
-  </c:otherwise>
-  </c:choose>
-</logic:iterate>
-<c:if test="${leftRight < 0}">
-    <td colspan="3">&nbsp;</td>
-  </tr>
-</c:if>
-</logic:present>
-      <c:if test="${empty ResourceType}">
-        <tr><td colspan="3">
-        <tiles:insert definition=".resource.common.navmap">
-          <tiles:put name="resource" beanName="resource"/>
-        </tiles:insert>
-        <!-- TOOLS -->
-<c:if test="${not empty linkUrl}">
-    <div class="toolsMenuStacked LinkBox">
-        <span onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><img src="/images/arrow_dropdown.gif" border="0" alt="" id="toolMenuArrow"></span>
-        <div style="clear: both"></div>
-        <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -7px; z-index:5">
-            <tiles:insert attribute="linkUrl">
-                <c:if test="${not empty resource}">
-                    <tiles:put name="resource" beanName="resource"/>
-                </c:if>
-            </tiles:insert>
-        </div>
-    </div>
-    <div style="clear:both;"></div>
-</c:if>
-<c:if test="${empty linkUrl}">
-<div style="clear:both;"></div>
-</c:if>
-<!-- END TOOLS -->
-        </td></tr>
-      </c:if>
-      </table>
-    </td>
-    </c:when>
-    
-    <c:when test="${showSearch}">
-    <td style="vertical-align: middle;">
-<c:choose>
-  <c:when test="${ResourceHubForm.ff == PLATFORM}">
-    <c:set var="allTypesKey" value="resource.hub.filter.AllPlatformTypes"/>
-    <c:set var="section" value="platform"/>
-  </c:when>
-  <c:when test="${ResourceHubForm.ff == SERVER}">
-    <c:set var="allTypesKey" value="resource.hub.filter.AllServerTypes"/>
-    <c:set var="section" value="server"/>
-  </c:when>
-  <c:when test="${ResourceHubForm.ff == SERVICE}">
-    <c:set var="allTypesKey" value="resource.hub.filter.AllServiceTypes"/>
-    <c:set var="section" value="service"/>
-  </c:when>
-  <c:when test="${ResourceHubForm.ff == APPLICATION}">
-    <c:set var="section" value="application"/>
-  </c:when>
-  <c:when test="${ResourceHubForm.ff == GROUP}">
-    <c:set var="allTypesKey" value="resource.hub.filter.AllGroupTypes"/>
-    <c:set var="section" value="group"/>
-  </c:when>
-</c:choose>
-<!-- TOOLS -->
-<c:if test="${not empty linkUrl}">
-    <div class="toolsMenu">
-        <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><img src="/images/arrow_dropdown.gif" border="0" alt="" id="toolMenuArrow"></span>
-        <div style="clear: both"></div>
-        <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;z-index:5">
-            <tiles:insert attribute="linkUrl">
-                <c:if test="${not empty resource}">
-                    <tiles:put name="resource" beanName="resource"/>
-                </c:if>
-            </tiles:insert>
-        </div>
-    </div>
-</c:if>
-<!-- END TOOLS -->
-<!-- FILTERBOXZ CONTENTS -->
-<div class="filterBox">
-    <div class="filterBoxTitle">
-        <fmt:message key="resource.hub.Search"/>
-    </div>
-    <div class="filterBoxFields">
-        
-            <html:text property="keywords" size="15" maxlength="40" onfocus="this.select();"
-                value="${initSearchVal}"/>
-            <c:choose>
-                <c:when test="${empty allTypesKey}">
-                    <html:hidden property="ft" value=""/>&nbsp;
-                </c:when>
-                <c:otherwise>
-                    <span style="padding-left: 4px;">
-                        <html:select property="ft" styleClass="FilterFormText" size="1">
-                            <html:option value="" key="${allTypesKey}"/>
-                            <html:optionsCollection property="types"/>
-                        </html:select>
-                    </span>
-                    <c:if test="${not empty AvailableResGrps}">
-                        <span style="padding-left: 4px;">
-                            <html:select property="fg" styleClass="FilterFormText">
-                                <html:option value="" key="resource.hub.filter.AllGroupOption"/>
-                                <html:optionsCollection name="AvailableResGrps"/>
-                            </html:select>
-                        </span>
-                    </c:if>
-                </c:otherwise>
-            </c:choose>
-        
-        
-          <c:if test="${ResourceHubForm.ff != GROUP}">
-            <html:checkbox styleId="unavail" property="unavail" value="true"/>
-            <label for="unavail"><fmt:message key="resource.hub.legend.unavailable"/></label>
-          </c:if>
-            <html:checkbox styleId="own" property="own" value="true"/>
-            <label for="own">
-                <fmt:message key="resource.hub.search.label.Owned">
-                    <fmt:param>
-                    </fmt:param>
-                </fmt:message>
-                <!-- fmt:message caches previous value some times, so take it out of tag -->
-                <c:out value="${sessionScope.webUser.firstName}"/>
-            </label>
-            <span><fmt:message key="resource.hub.search.label.Match"/></span>
-            <html:radio styleId="anyRadio" property="any" value="true"/>
-            <label for="anyRadio"><fmt:message key="any"/></label>
-            <html:radio styleId="allRadio" property="any" value="false"/>
-            <label for="allRadio"><fmt:message key="all"/></label>&nbsp;<html:image page="/images/4.0/icons/accept.png" property="ok" style="padding-left: 6px; vertical-align: text-bottom;"/>
-        
-    </div>
-</div>
-
-<!-- END SEARCHBOX  -->
-
-    </td>
-    </c:when>
-    <c:otherwise>
-    <td class="PageTitleSmallText" colspan="2">&nbsp;</td>
-</c:otherwise>
-</c:choose>
-    <td>&nbsp;</td>
-  </tr>
-</c:if>
-</table>
-
-    </td>
-  </tr>
-  <tr>
-    <td class="PageTitle"><html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/></td>
-    <td><html:img page="/images/spacer.gif" width="20" height="1" alt="" border="0"/></td>
-    <td width="100%">
+	<tr>
+    	<td colspan="4">
+			<table width="100%" border="0" cellspacing="0" cellpadding="0" style="border: 0px; margin-bottom: 10px;">
+				<tr class="PageTitleBar">
+					<td width="5">
+						<html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0" />
+					</td>
+					<td width="15">
+						<html:img page="/images/spacer.gif" width="15" height="1" alt="" border="0" />
+					</td>
+					<td colspan="2" nowrap>
+						<c:choose>
+							<c:when test="${not empty titleKey}">
+								<c:set var="escapedTitleName">
+									<c:out value="${titleName}" />
+								</c:set>
+								<c:set var="escapedSubTitleName">
+									<c:out value="${subTitleName}" />
+								</c:set>
+								<fmt:message key="${titleKey}">
+									<fmt:param value="${escapedTitleName}" />
+									<fmt:param value="${escapedSubTitleName}" />
+								</fmt:message>
+							</c:when>
+							<c:otherwise>
+								<c:out value="${titleName}" escapeXml="false" />
+								
+								<c:if test="${not empty subTitleName}">
+									<span class="resourceSubTitle"> 
+										<c:out value="${subTitleName}" /> 
+									</span>
+								</c:if>
+							</c:otherwise>
+						</c:choose>
+					</td>
+					<c:choose>
+						<c:when test="${not empty titleBgStyle && not empty titleImg}">
+							<td width="15%" style="padding-right: 20px;">&nbsp;</td>
+						</c:when>
+						<c:otherwise>
+							<td width="10%" style="padding-right: 20px;">&nbsp;</td>
+						</c:otherwise>
+					</c:choose>
+				</tr>
+				<tr>
+    				<td rowspan="99" class="PageTitle">&nbsp;</td>
+    				<td valign="top" align="left" rowspan="99">&nbsp;</td>
+    				<td colspan="3">&nbsp;</td>
+  				</tr>
+  				
+				<c:if test="${not empty resource || not empty linkUrl || not empty showSearch}">
+  					<tr valign="top"> 
+  						<c:choose>
+    						<c:when test="${not empty resource}">
+    							<td colspan="2">
+      								<table width="100%" border="0" cellspacing="0" cellpadding="0">
+        								<tr> 
+          									<td class="PageTitleSmallText" valign="top">
+      											<b><fmt:message key="common.label.Description"/></b>
+      											<hq:shortenText maxlength="30" value="${resource.description}" styleClass="ListCellPopup5"/>
+    										</td>
+    										<td style="width: 5px;">&nbsp;</td>
+    										<td class="PageTitleSmallText" valign="top" colspan="2" nowrap>
+      											<b><fmt:message key="resource.common.inventory.props.OwnerLabel"/></b> <c:out value="${ownerStr}" escapeXml="false"/> 
+      											
+      											<c:if test="${not empty resource}">
+      												- 
+      												<html:link page="/resource/${resource.entityId.typeName}/Inventory.do?mode=changeOwner&rid=${resource.id}&type=${resource.entityId.type}">
+      												  	<fmt:message key="resource.common.inventory.props.ChangeButton"/>
+      												</html:link>
+      												<br>
+      											</c:if>
+          									</td>
+        								</tr>
+										<logic:present name="cprops">
+											<c:set var="leftRight" value="1"/>
+											<logic:iterate id="cprop" name="cprops">
+  												<c:if test="${leftRight > 0}">
+    												<tr>
+  												</c:if>
+      											
+      											<td class="PageTitleSmallText" width="33%" valign="top">
+      												<b><c:out value="${cprop.key}"/></b>
+      												<fmt:message key="common.label.Colon"/>
+      												<hq:shortenText maxlength="30" value="${cprop.value}" styleClass="ListCellPopup5"/>
+      											</td>
+  												
+  												<c:choose>
+  													<c:when test="${leftRight < 0}">
+    													<c:set var="leftRight" value="${leftRight * -1}"/>
+    													<td>&nbsp;</td>
+    												</tr>
+  													</c:when>
+  													<c:otherwise>
+    													<c:set var="leftRight" value="${leftRight - 1}"/>
+    													<td>&nbsp;</td>
+  													</c:otherwise>
+  												</c:choose>
+											</logic:iterate>
+											<c:if test="${leftRight < 0}">
+    											<td colspan="3">&nbsp;</td>
+  											</tr>
+											</c:if>
+										</logic:present>
+      									<c:if test="${empty ResourceType}">
+        									<tr>
+        										<td colspan="3">
+        											<tiles:insert definition=".resource.common.navmap">
+          												<tiles:put name="resource" beanName="resource"/>
+        											</tiles:insert>
+        											
+        											<!-- TOOLS -->
+													<c:if test="${not empty linkUrl}">
+	    												<div class="toolsMenuStacked LinkBox">
+	        												<span onclick="toggleMenu('toolMenu');" id="toolMenuSpan">
+	        													<fmt:message key="resource.toolsmenu.text"/>
+	        													<img src="/images/arrow_dropdown.gif" border="0" alt="" id="toolMenuArrow">
+	        												</span>
+															<div style="clear: both"></div>
+	        												<div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -7px; z-index:5">
+	            												<tiles:insert attribute="linkUrl">
+	                												<c:if test="${not empty resource}">
+	                    												<tiles:put name="resource" beanName="resource"/>
+	                												</c:if>
+	            												</tiles:insert>
+	        												</div>
+	    												</div>
+	    												<div style="clear:both;"></div>
+													</c:if>
+													<c:if test="${empty linkUrl}">
+														<div style="clear:both;"></div>
+													</c:if>
+													<!-- END TOOLS -->
+        										</td>
+        									</tr>
+      									</c:if>
+      								</table>
+    							</td>
+    						</c:when>
+    						<c:when test="${showSearch}">
+    							<td style="vertical-align: middle;">
+									<c:choose>
+  										<c:when test="${ResourceHubForm.ff == PLATFORM}">
+    										<c:set var="allTypesKey" value="resource.hub.filter.AllPlatformTypes"/>
+    										<c:set var="section" value="platform"/>
+  										</c:when>
+  										<c:when test="${ResourceHubForm.ff == SERVER}">
+											<c:set var="allTypesKey" value="resource.hub.filter.AllServerTypes"/>
+											<c:set var="section" value="server"/>
+  										</c:when>
+  										<c:when test="${ResourceHubForm.ff == SERVICE}">
+											<c:set var="allTypesKey" value="resource.hub.filter.AllServiceTypes"/>
+											<c:set var="section" value="service"/>
+  										</c:when>
+  										<c:when test="${ResourceHubForm.ff == APPLICATION}">
+    										<c:set var="section" value="application"/>
+  										</c:when>
+  										<c:when test="${ResourceHubForm.ff == GROUP}">
+    										<c:set var="allTypesKey" value="resource.hub.filter.AllGroupTypes"/>
+    										<c:set var="section" value="group"/>
+  										</c:when>
+									</c:choose>
+									<!-- TOOLS -->
+									<c:if test="${not empty linkUrl}">
+									    <div class="toolsMenu">
+									        <span class="LinkBox" onclick="toggleMenu('toolMenu');" id="toolMenuSpan"><fmt:message key="resource.toolsmenu.text"/><img src="/images/arrow_dropdown.gif" border="0" alt="" id="toolMenuArrow"></span>
+									        <div style="clear: both"></div>
+									        <div id="toolMenu" style="display: none; position: absolute; margin-top: 2px; margin-left: -2px;z-index:5">
+									            <tiles:insert attribute="linkUrl">
+									                <c:if test="${not empty resource}">
+									                    <tiles:put name="resource" beanName="resource"/>
+									                </c:if>
+									            </tiles:insert>
+									        </div>
+									    </div>
+									</c:if>
+									<!-- END TOOLS -->
+									<!-- FILTERBOXZ CONTENTS -->
+									<div class="filterBox">
+									    <div class="filterBoxTitle">
+									        <fmt:message key="resource.hub.Search"/>
+									    </div>
+									    <div class="filterBoxFields">
+            								<html:text property="keywords" size="15" maxlength="40" onfocus="this.select();" value="${initSearchVal}"/>
+								            <c:choose>
+								                <c:when test="${empty allTypesKey}">
+								                    <html:hidden property="ft" value=""/>&nbsp;
+								                </c:when>
+								                <c:otherwise>
+								                    <span style="padding-left: 4px;">
+								                        <html:select property="ft" styleClass="FilterFormText" size="1">
+								                            <html:option value="" key="${allTypesKey}"/>
+								                            <html:optionsCollection property="types"/>
+								                        </html:select>
+								                    </span>
+								                    <c:if test="${not empty AvailableResGrps}">
+								                        <span style="padding-left: 4px;">
+								                            <html:select property="fg" styleClass="FilterFormText">
+								                                <html:option value="" key="resource.hub.filter.AllGroupOption"/>
+								                                <html:optionsCollection name="AvailableResGrps"/>
+								                            </html:select>
+								                        </span>
+								                    </c:if>
+								                </c:otherwise>
+								            </c:choose>
+          									<c:if test="${ResourceHubForm.ff != GROUP}">
+            									<html:checkbox styleId="unavail" property="unavail" value="true"/>
+            									<label for="unavail"><fmt:message key="resource.hub.legend.unavailable"/></label>
+          									</c:if>
+            								<html:checkbox styleId="own" property="own" value="true"/>
+            								<label for="own">
+								                <fmt:message key="resource.hub.search.label.Owned">
+								                    <fmt:param>
+								                    </fmt:param>
+								                </fmt:message>
+								                <!-- fmt:message caches previous value some times, so take it out of tag -->
+								                <c:out value="${sessionScope.webUser.firstName}"/>
+								            </label>
+								            <span><fmt:message key="resource.hub.search.label.Match"/></span>
+								            <html:radio styleId="anyRadio" property="any" value="true"/>
+								            <label for="anyRadio"><fmt:message key="any"/></label>
+								            <html:radio styleId="allRadio" property="any" value="false"/>
+								            <label for="allRadio"><fmt:message key="all"/></label>&nbsp;
+								            <html:image page="/images/4.0/icons/accept.png" property="ok" style="padding-left: 6px; vertical-align: text-bottom;"/>
+    									</div>
+									</div>
+									<!-- END SEARCHBOX  -->
+    							</td>
+    						</c:when>
+    						<c:otherwise>
+    							<td class="PageTitleSmallText" colspan="2">&nbsp;</td>
+							</c:otherwise>
+						</c:choose>
+    					<td>&nbsp;</td>
+  					</tr>
+				</c:if>
+			</table>
+    	</td>
+  	</tr>
+  	<tr>
+    	<td class="PageTitle">
+    		<html:img page="/images/spacer.gif" width="5" height="1" alt="" border="0"/>
+    	</td>
+    	<td>
+    		<html:img page="/images/spacer.gif" width="20" height="1" alt="" border="0"/>
+    	</td>
+    	<td width="100%">
