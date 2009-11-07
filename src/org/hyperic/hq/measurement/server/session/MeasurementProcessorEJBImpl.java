@@ -56,7 +56,7 @@ import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
-import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
 import org.hyperic.util.timer.StopWatch;
 
@@ -143,7 +143,7 @@ public class MeasurementProcessorEJBImpl
     public void scheduleEnabled(Agent agent, List eids)
         throws MonitorAgentException
     {
-        final SRNManagerLocal srnMan = getSRNManager();
+        final SRNManager srnMan = getSRNManager();
         final MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
         final AuthzSubject overlord =
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
@@ -200,7 +200,7 @@ public class MeasurementProcessorEJBImpl
 
     private void unschedule(Agent a, AppdefEntityID[] entIds)
         throws MeasurementUnscheduleException, MonitorAgentException {
-        SRNManagerLocal srnManager = getSRNManager();
+        SRNManager srnManager = getSRNManager();
         for (int i = 0; i < entIds.length; i++) {
             try {
                 srnManager.removeSrn(entIds[i]);

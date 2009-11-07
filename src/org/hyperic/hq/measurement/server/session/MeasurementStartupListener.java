@@ -66,7 +66,7 @@ public class MeasurementStartupListener
     public void hqStarted() {
         // Make sure we have the aux-log provider loaded
         MetricAuxLogProvider.class.toString();
-        SRNManagerEJBImpl.getOne().initializeCache();
+        SRNManagerImpl.getOne().initializeCache();
     
         /**
          * Add measurement enabler listener to enable metrics for newly

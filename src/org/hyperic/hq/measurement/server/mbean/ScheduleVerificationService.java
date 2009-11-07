@@ -50,9 +50,9 @@ import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
-import org.hyperic.hq.measurement.server.session.SRNManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.SRNManagerImpl;
 import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
-import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.measurement.shared.SRNManager;
 
 /**
  * This job is responsible for verifying measurement jobs.
@@ -90,7 +90,7 @@ public class ScheduleVerificationService
     }
     
     protected void hitInSession(final Date lDate) {
-        SRNManagerLocal srnMan = SRNManagerEJBImpl.getOne();
+        SRNManager srnMan = SRNManagerImpl.getOne();
         
         // Skip first schedule verification, let the server warm up a bit
         // XXX: We should add a wait attribute for this, similar to the
@@ -106,7 +106,7 @@ public class ScheduleVerificationService
 
 
         // Ask the SRNCache what requires rescheduling
-        SRNManagerLocal srnManager = SRNManagerEJBImpl.getOne();
+        SRNManager srnManager = SRNManagerImpl.getOne();
         Collection toResched = srnManager.getOutOfSyncEntities();
         
         HashSet downAgents = new HashSet();
