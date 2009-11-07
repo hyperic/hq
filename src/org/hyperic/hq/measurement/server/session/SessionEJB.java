@@ -46,7 +46,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.MeasurementPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -127,8 +127,8 @@ public abstract class SessionEJB {
         return measurementPluginManager;
     }
 
-    protected SRNManagerLocal getSRNManager() {
-        return Bootstrap.getBean(SRNManagerLocal.class);
+    protected SRNManager getSRNManager() {
+        return Bootstrap.getBean(SRNManager.class);
     }
 
     protected InitialContext getInitialContext() {

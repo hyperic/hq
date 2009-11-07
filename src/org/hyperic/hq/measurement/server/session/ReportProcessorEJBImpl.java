@@ -54,7 +54,7 @@ import org.hyperic.hq.measurement.data.ValueList;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorUtil;
-import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
 
@@ -208,7 +208,7 @@ public class ReportProcessorEJBImpl
         sendMetricDataToDB(a, priorityAvailPts, true);
 
         // Check the SRNs to make sure the agent is up-to-date
-        SRNManagerLocal srnManager = getSRNManager();
+        SRNManager srnManager = getSRNManager();
         Collection nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
         
         if (report.getAgentToken() != null && nonEntities.size() > 0) {

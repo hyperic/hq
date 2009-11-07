@@ -11,19 +11,6 @@
 
 		<!-- Session Beans -->
 		<session>
-			<description><![CDATA[The tracker manager handles sending agents add and remove operations for the log and config track plugsin.]]></description>
-
-			<ejb-name>SRNManager</ejb-name>
-
-			<local-home>org.hyperic.hq.measurement.shared.SRNManagerLocalHome</local-home>
-			<local>org.hyperic.hq.measurement.shared.SRNManagerLocal</local>
-			<ejb-class>org.hyperic.hq.measurement.server.session.SRNManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[Use this session bean to manipulate Roles and Subjects associated with them.]]></description>
 
 			<ejb-name>RoleManager</ejb-name>
@@ -703,13 +690,6 @@
 			the merge directory called ejb-container-transactions.ent that
 			contains them.
 		-->
-		<container-transaction>
-			<method>
-				<ejb-name>SRNManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
 		<container-transaction>
 			<method>
 				<ejb-name>RoleManager</ejb-name>

@@ -83,14 +83,14 @@ import org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl;
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.ReportProcessorEJBImpl;
-import org.hyperic.hq.measurement.server.session.SRNManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.SRNManagerImpl;
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.TrackerManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
-import org.hyperic.hq.measurement.shared.SRNManagerLocal;
+import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
 import org.hyperic.hq.product.server.session.ProductManagerImpl;
@@ -249,8 +249,8 @@ public abstract class BizappSessionEJB {
         return ControlScheduleManagerEJBImpl.getOne();
     }
 
-    public SRNManagerLocal getSrnManager() {
-        return SRNManagerEJBImpl.getOne();
+    public SRNManager getSrnManager() {
+        return SRNManagerImpl.getOne();
     }
     
     /**
