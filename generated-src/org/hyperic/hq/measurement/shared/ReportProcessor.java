@@ -3,15 +3,16 @@
  */
 package org.hyperic.hq.measurement.shared;
 
+import org.hyperic.hq.measurement.data.MeasurementReport;
+import org.hyperic.hq.measurement.server.session.DataInserterException;
+
 /**
  * Local interface for ReportProcessor.
  */
-public interface ReportProcessorLocal
-   extends javax.ejb.EJBLocalObject
-{
+public interface ReportProcessor {
    /**
     * Method which takes data from the agent (or elsewhere) and throws it into the DataManager, doing the right things with all the derived measurements
     */
-   public void handleMeasurementReport( org.hyperic.hq.measurement.data.MeasurementReport report ) throws org.hyperic.hq.measurement.server.session.DataInserterException;
+   public void handleMeasurementReport( MeasurementReport report ) throws DataInserterException;
 
 }
