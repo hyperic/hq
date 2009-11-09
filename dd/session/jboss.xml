@@ -204,11 +204,6 @@
 
 		</session>
 		<session>
-			<ejb-name>ReportProcessor</ejb-name>
-			<local-jndi-name>LocalReportProcessor</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>AppdefBoss</ejb-name>
 			<jndi-name>ejb/bizapp/AppdefBoss</jndi-name>
 			<local-jndi-name>LocalAppdefBoss</local-jndi-name>
