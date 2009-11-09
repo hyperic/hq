@@ -1,9 +1,10 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="display" prefix="display" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -280,9 +281,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
           <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"fromToggleAll\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
             <display:checkboxdecorator name="availableUser" onclick="ToggleSelection(this, widgetProperties)" styleClass="availableListMember"/>
           </display:column>
-          <display:column value="${user.firstName}" title="admin.role.users.FirstNameTH" width="33%"/>
-          <display:column value="${user.lastName}" title="admin.role.users.LastNameTH" width="33%"/>
-          <display:column value="${user.name}" title="admin.role.users.UsernameTH" sort="true" sortAttr="3" defaultSort="true" width="33%"/>
+          <display:column property="firstName" title="admin.role.users.FirstNameTH" width="33%"/>
+          <display:column property="lastName" title="admin.role.users.LastNameTH" width="33%"/>
+          <display:column property="name" title="admin.role.users.UsernameTH" sort="true" sortAttr="3" defaultSort="true" width="33%"/>
         </display:table>
 
       </div>
@@ -318,9 +319,9 @@ widgetProperties = getWidgetProperties('<c:out value="${widgetInstanceName}"/>')
           <display:column width="1%" property="id" title="<input type=\"checkbox\" onclick=\"ToggleAll(this, widgetProperties)\" name=\"toToggleAll\">" isLocalizedTitle="false" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox">
             <display:checkboxdecorator name="pendingUser" onclick="ToggleSelection(this, widgetProperties)" styleClass="pendingListMember"/>
           </display:column>
-          <display:column value="${user.firstName}" title="admin.role.users.FirstNameTH" width="33%"/>
-          <display:column value="${user.lastName}" title="admin.role.users.LastNameTH" width="33%"/>
-          <display:column value="${user.name}" title="admin.role.users.UsernameTH" sort="true" sortAttr="3" defaultSort="true" width="33%"/>
+          <display:column property="firstName" title="admin.role.users.FirstNameTH" width="33%"/>
+          <display:column property="lastName" title="admin.role.users.LastNameTH" width="33%"/>
+          <display:column property="name" title="admin.role.users.UsernameTH" sort="true" sortAttr="3" defaultSort="true" width="33%"/>
         </display:table>
 
       </div>

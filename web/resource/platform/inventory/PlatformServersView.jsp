@@ -1,8 +1,9 @@
-<%@ taglib uri="struts-html" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="display" prefix="display" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/display.tld" prefix="display" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -103,7 +104,7 @@ serversWidgetProperties = getWidgetProperties('<c:out value="${widgetInstanceNam
       <display:checkboxdecorator name="r" onclick="ToggleSelection(this, serversWidgetProperties)" styleClass="listMember"/>
     </display:column>
     <display:column property="name" title="resource.platform.inventory.servers.ServerTH" href="/resource/server/Inventory.do?mode=view&rid=${server.id}&type=${server.entityId.type}" sort="true" sortAttr="5" defaultSort="true" width="20%"/>
-    <display:column value="${server.serverType.name}" title="resource.platform.inventory.servers.TypeTH" width="20%"/>
+    <display:column property="serverType.name" title="resource.platform.inventory.servers.TypeTH" width="20%"/>
     <display:column property="installPath" title="resource.platform.inventory.servers.InstallPathTH" width="20%"/>
     <display:column property="description" title="common.header.Description" width="20%"/>
     <display:column property="id" title="resource.common.monitor.visibility.AvailabilityTH" width="20%" styleClass="ListCellCheckbox" headerStyleClass="ListHeaderCheckbox" valign="middle">

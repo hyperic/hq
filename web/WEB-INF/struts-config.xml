@@ -360,25 +360,14 @@
 	  <action path="/NoRights" 
               forward="/common/NoRights.jsp">
       </action>
-                          
-      <!--authentication -->
-      <action path="/j_security_check"                             
-              type="org.hyperic.hq.ui.action.authentication.AuthenticateUserAction"
-              name="LoginForm"
-              scope="request"
-              validate="true"
-              input="/Login.do">
-              <!-- do not redirect here or login error messages will not show up -->
-              <forward name="bad" path="/Login.do"/>
-      </action>    
 
       <action path="/Logout" 
-              type="org.hyperic.hq.ui.action.authentication.LogoutAction">              
+              type="org.springframework.web.struts.DelegatingActionProxy">              
               <forward name="success" path="/SignIn.html"/>
       </action>
       
       <action path="/Header"
-            type="org.hyperic.hq.ui.action.common.HeaderAction">
+            type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
 
       <!--======================================================= --> 
@@ -388,15 +377,15 @@
       <!-- These would be either omitted or protected by security --> 
       <!-- in a real application deployment --> 
       <action path="/admin/tiles/reload" 
-              type="org.apache.struts.tiles.actions.ReloadDefinitionsAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
     
       <action path="/admin/tiles/view" 
-              type="org.apache.struts.tiles.actions.ViewDefinitionsAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
     
       <action path="/NothingAction"
               name="ToolbarForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.BaseAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
 
       <!-- admin portal controller -->
@@ -406,7 +395,7 @@
       
       <action path="/admin/home/AdminHomePortal"
               input="/Admin.do"
-              type="org.hyperic.hq.ui.action.admin.home.AdminHomePortalAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Admin"/>
       </action>
         
@@ -418,37 +407,37 @@
       <action path="/admin/user/UserAdminPortal"
               parameter="mode"
               input="/admin/user/UserAdmin.do"
-              type="org.hyperic.hq.ui.action.admin.user.UserAdminPortalAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
       
       <action path="/admin/user/List"
               name="RemoveUserForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.admin.user.ListAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Admin.User.List"/>
       </action>
       
       <action path="/admin/user/View"
-              type="org.hyperic.hq.ui.action.admin.user.ViewAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Admin.User"/>
       </action>
 
       <action path="/admin/user/EditUserFormPrepare"
               name="EditUserForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.admin.user.EditUserFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="user/View"/>
         <set-property property="title" value="Admin.User.Edit"/>
       </action>
 
       <action path="/admin/user/EditPasswordFormPrepare"
-              type="org.hyperic.hq.ui.action.admin.user.EditPasswordPrepareAction">        
+              type="org.springframework.web.struts.DelegatingActionProxy">        
               <set-property property="title" value="Admin.User.Password"/>
       </action>
 
 
       <action path="/admin/user/Edit" 
-              type="org.hyperic.hq.ui.action.admin.user.EditAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="EditUserForm"
               scope="request"
               input="/admin/user/UserAdmin.do?mode=edit"> 
@@ -464,13 +453,13 @@
       <action path="/admin/user/NewFormPrepare"
               name="NewUserForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.admin.user.NewFormPrepareAction">              
+              type="org.springframework.web.struts.DelegatingActionProxy">              
         <set-property property="workflow" value="user/New"/>
         <set-property property="title" value="Admin.User.New"/>
       </action>
 
       <action path="/admin/user/Remove" 
-              type="org.hyperic.hq.ui.action.admin.user.RemoveAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="RemoveUserForm"
               scope="request"
               input="/admin/user/UserAdmin.do?mode=list">
@@ -481,7 +470,7 @@
       </action>
 
       <action path="/admin/user/EditPassword"
-              type="org.hyperic.hq.ui.action.admin.user.EditPasswordAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="EditPasswordForm"
               scope="request"
               input="/admin/user/UserAdmin.do?mode=editPass">              
@@ -494,10 +483,25 @@
                        redirect="true"/>
       </action>      
 
-      <action path="/admin/user/Register*"
+      <action path="/admin/user/Register"
               name="RegisterUserForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.admin.user.Register{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
+              input="/admin/user/UserAdmin.do?mode=register">
+        <set-property property="workflow" value="user/Register"/>
+        <exception key="exception.user.alreadyExists"
+                   type="javax.ejb.CreateException"
+                   path="/admin/user/UserAdmin.do?mode=register"/>
+        <forward name="success" path="/Dashboard.do"/>
+        <forward name="failure" path="/admin/user/UserAdmin.do?mode=register"/>
+        <forward name="reset" path="/admin/user/UserAdmin.do?mode=register" redirect="true"/>
+        <forward name="logout" path="/Logout.do"/>
+      </action>
+      
+      <action path="/admin/user/RegisterFormPrepare"
+              name="RegisterUserForm"
+              scope="request"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/admin/user/UserAdmin.do?mode=register">
         <set-property property="workflow" value="user/Register"/>
         <exception key="exception.user.alreadyExists"
@@ -512,7 +516,7 @@
 
       <!-- Admin plugins -->
       <action path="/admin/user/Plugins"
-              type="org.hyperic.hq.ui.action.admin.plugins.PluginsAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
       
       <!--CONFIG -->
@@ -523,32 +527,22 @@
       <action path="/admin/config/EditConfigPrep"
               name="SystemConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.admin.config.EditConfigPrepAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Admin.HQServer"/>
       </action>
-
-      <action path="/admin/config/EditDefaults"
-              forward=".admin.config.monitor.defaults.layout">
-      </action>
-
-      <action path="/admin/config/EditResourceTypeDefaults"
-              type="org.hyperic.hq.ui.action.admin.config.EditDefaultsAction"
-              scope="request"
-              parameter="mode">
-      </action>
       
-      <action path="/admin/config/*Escalation"
-              type="org.hyperic.hq.ui.action.admin.config.{1}EscalationAction">
+      <action path="/admin/config/RemoveEscalation"
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <forward name="success" path="/admin/config/Config.do?mode=escalate"/>
       </action>
 
       <action path="/MonitorDefaultsHelp"
-              type="org.hyperic.hq.ui.action.BaseAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Admin.Monitor"/>
       </action>
 
       <action path="/EscalationHelp"
-              type="org.hyperic.hq.ui.action.BaseAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Admin.Escalation"/>
       </action>
 
@@ -561,7 +555,7 @@
               forward=".resource.hub.layout"/>
       
       <action path="/Resource"
-              type="org.hyperic.hq.ui.action.resource.DetermineLocationAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="platform" path="/resource/platform/monitor/Visibility.do?mode=currentHealth"/>
               <forward name="application" path="/resource/application/monitor/Visibility.do?mode=currentHealth"/>
               <forward name="server" path="/resource/server/monitor/Visibility.do?mode=currentHealth"/>
@@ -575,7 +569,7 @@
       <action path="/resource/hub/*"
               name="ResourceHubForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.hub.{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/ResourceHub.do">
         <set-property property="title" value="Resources"/>
         <forward name="failure" path="/ResourceHub.do"/>
@@ -587,7 +581,7 @@
       <action path="/resource/common/inventory/EditResourceGeneralPropertiesFormPrepare"
               name="ResourceForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.EditResourceGeneralPropertiesFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="resource/GeneralProperties"/>
         <set-property property="title" value="Inventory.GeneralProperties"/> 
       </action>
@@ -595,7 +589,7 @@
       <action path="/resource/common/inventory/ChangeResourceOwnerFormPrepare"
               name="ChangeResourceOwnerForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="resource/ChangeOwner"/>  
         <set-property property="title" value="Inventory.Owner"/>
       </action>
@@ -603,13 +597,13 @@
       <action path="/resource/common/inventory/AddResourceGroupsFormPrepare"
               name="AddResourceGroupsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Group.AddResource"/>
       </action>
 
       <!-- resource common control -->
       <action path="/ResourceControlHistory"
-              type="org.hyperic.hq.ui.action.resource.DetermineLocationAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="platform" path="/resource/platform/Control.do?mode=history"/>
               <forward name="application" path="/resource/application/Control.do?mode=history"/>
               <forward name="server" path="/resource/server/Control.do?mode=history"/>
@@ -621,21 +615,21 @@
       <action path="/resource/common/control/List*"
               name="RemoveControlJobsForm"
               scope="request"               
-              type="org.hyperic.hq.ui.action.resource.common.control.List{1}Action" >
+              type="org.springframework.web.struts.DelegatingActionProxy" >
       </action>
       
       <action path="/resource/*/control/QuickControl*" 
               name="QuickControlForm"
               scope="request"
               input="/resource/{1}/Control.do?mode=view"          
-              type="org.hyperic.hq.ui.action.resource.common.control.QuickControl{2}Action" >
+              type="org.springframework.web.struts.DelegatingActionProxy" >
         <forward name="new" path="/resource/{1}/Control.do?mode=new"/>              
         <forward name="failure" path="/resource/{1}/Control.do?mode=view" redirect="true"/>
         <forward name="success" path="/resource/{1}/Control.do?mode=view" redirect="true"/>
       </action>
 
       <action path="/resource/common/control/*Status"
-              type="org.hyperic.hq.ui.action.resource.common.control.{1}StatusAction"> 
+              type="org.springframework.web.struts.DelegatingActionProxy"> 
         <forward name="success" path="/common/JSONResponse.jsp"/>
       </action>
 
@@ -643,18 +637,18 @@
       <action path="/resource/platform/InventoryPortal"
               parameter="mode"
               input="/resource/platform/Inventory.do"
-              type="org.hyperic.hq.ui.action.resource.platform.inventory.PlatformInventoryPortalAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
 
       <action path="/resource/platform/inventory/NewPlatformFormPrepare"
               name="NewPlatformForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.platform.inventory.NewPlatformFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Platform.New"/>
       </action>
 
       <action path="/resource/platform/inventory/NewPlatform"
-              type="org.hyperic.hq.ui.action.resource.platform.inventory.NewPlatformAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="NewPlatformForm"
               scope="request"
               validate="true"
@@ -671,12 +665,12 @@
       </action>
 
       <action path="/resource/platform/inventory/ViewPlatform"
-              type="org.hyperic.hq.ui.action.resource.platform.inventory.ViewPlatformAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Platform"/>
       </action>
 
       <action path="/resource/platform/inventory/EditPlatformGeneralProperties"
-              type="org.hyperic.hq.ui.action.resource.platform.inventory.EditPlatformGeneralPropertiesAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="ResourceForm"
               scope="request"
               input="/resource/platform/Inventory.do?mode=edit">
@@ -689,7 +683,7 @@
       </action>
 
       <action path="/resource/platform/inventory/ChangePlatformOwner"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="ChangeResourceOwnerForm"
               scope="request"
               input="/resource/platform/Inventory.do?mode=changeOwner">
@@ -707,7 +701,7 @@
       <action path="/resource/platform/inventory/EditPlatformTypeNetworkProperties*"
               name="EditPlatformTypeNetworkPropertiesForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.platform.inventory.EditPlatformTypeNetworkProperties{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/resource/platform/Inventory.do?mode=editType">
         <set-property property="title" value="Inventory.Platform.Properties"/> 
         <forward name="cancel" path="/resource/platform/Inventory.do?mode=view"
@@ -721,7 +715,7 @@
       </action>
 
       <action path="/resource/platform/inventory/RemoveServers" 
-              type="org.hyperic.hq.ui.action.resource.platform.inventory.RemoveServersAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="RemoveServersForm"
               scope="request"
               input="/resource/platform/inventory.do?mode=view">
@@ -731,7 +725,7 @@
       </action>
 
       <action path="/resource/platform/inventory/EditConfigProperties"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.EditConfigPropertiesAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="CommonConfigForm"
               scope="request"
               input="/resource/platform/Inventory.do?mode=editConfig">
@@ -753,7 +747,7 @@
 
       <action path="/resource/platform/AutoDiscoveryPortal"
               parameter="mode"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.PlatformAutoDiscoveryAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
           input="/resource/platform/AutoDiscovery.do?mode=new">
         <set-property property="workflow" value="autodiscovery/ViewResults"/>
         <forward name="dash"  path="/Dashboard.do" redirect="true"/>
@@ -762,7 +756,7 @@
       <action path="/resource/platform/autodiscovery/NewAutoDiscovery*"
               name="PlatformAutoDiscoveryForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.NewAutoDiscovery{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/resource/platform/AutoDiscovery.do?mode=new">
         <set-property property="workflow" value="autodiscovery/AutoDiscoverySched"/>
         <set-property property="title" value="Inventory.AutoDiscovery"/>
@@ -778,7 +772,7 @@
       <action path="/resource/platform/autodiscovery/EditAutoDiscovery*"
               name="PlatformAutoDiscoveryForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.EditAutoDiscovery{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/resource/platform/AutoDiscovery.do?mode=edit">
         <set-property property="workflow" value="autodiscovery/AutoDiscoverySched"/>
         <set-property property="title" value="Dashboard.AutoDiscovery"/>
@@ -789,14 +783,14 @@
       </action>
       
       <action path="/resource/platform/autodiscovery/ViewAutoDiscovery"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.ViewAutoDiscoveryAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.AutoDiscovery"/>
       </action>
       
       <action path="/resource/platform/autodiscovery/ViewResultsPrep"
               name="AutoDiscoveryResultsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.ViewResultsPrepAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="autodiscovery/ViewResults"/>
         <set-property property="title" value="Inventory.AutoDiscovery.Results"/>
       </action>
@@ -804,14 +798,14 @@
       <action path="/resource/platform/autodiscovery/ScanControl*"
               scope="request"
               name="ResourceForm"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.ScanControl{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/resource/platform/AutoDiscovery.do?mode=view">
         <forward name="failure" path="/resource/platform/AutoDiscovery.do?mode=view"/>
         <forward name="success" path="/resource/platform/AutoDiscovery.do?mode=view"/>
       </action>
       
       <action path="/resource/platform/autodiscovery/ImportAIResources"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.ImportAIResourcesAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="AutoDiscoveryResultsForm"
               scope="request"
               input="/resource/platform/AutoDiscovery.do?mode=results">
@@ -822,7 +816,7 @@
       </action>
 
       <action path="/resource/platform/autodiscovery/RemoveSchedule"
-              type="org.hyperic.hq.ui.action.resource.platform.autodiscovery.RemoveScheduleAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="RemoveResourceForm"
               scope="request">
         <forward name="failure" path="/resource/platform/AutoDiscovery.do?mode=view"/>
@@ -839,7 +833,7 @@
       <action path="/resource/*/monitor/VisibilityPortal"
               parameter="mode"
               input="/resource/{1}/monitor/Visibility.do"
-              type="org.hyperic.hq.ui.action.resource.{1}.monitor.VisibilityPortalAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
 
       <action path="/resource/*/monitor/Config"
@@ -848,7 +842,7 @@
 
       <action path="/resource/*/monitor/ConfigPortal"
               parameter="mode"
-              type="org.hyperic.hq.ui.action.resource.{1}.monitor.ConfigPortalAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/resource/{1}/monitor/Config.do?mode=configure">
       </action>      
      
@@ -856,7 +850,7 @@
               name="MetricDisplayRangeForm"
               scope="request"
               input="/resource/common/monitor/Visibility.do?mode=editRange"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricDisplayRange{1}Action">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="visibility/MetricDisplayRange"/>
         <set-property property="title" value="Monitor.CurrentHealth.DisplayRange"/>
         <forward name="reset" path="/resource/common/monitor/Visibility.do?mode=editRange"/>
@@ -866,10 +860,10 @@
       <action path="/resource/common/monitor/visibility/MetricsControlFormPrepareAction"
               name="MetricsControlForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsControlFormPrepareAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/resource/common/monitor/visibility/CompareMetricsFormPrepare"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CompareMetricsFormPrepareAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="CompareMetricsForm"
               scope="request">
         <set-property property="workflow" value="visibility/MetricDisplayRange"/>
@@ -877,7 +871,7 @@
       </action>
 
       <action path="/resource/common/monitor/visibility/ViewMetricMetadata"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewMetricMetadataAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="MetricMetadataForm"
               scope="request">
         <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
@@ -885,7 +879,7 @@
       </action>
       
       <action path="/resource/common/monitor/visibility/CompareMetrics"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CompareMetricsAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="CompareMetricsForm"
               scope="request"
               input="/resource/common/monitor/Visibility.do?mode=compareMetrics">
@@ -895,7 +889,7 @@
       </action>
 
       <action path="/resource/common/monitor/visibility/ViewDesignatedChart"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewDesignatedChartAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <forward name="redraw" path="/resource/common/monitor/Visibility.do"
                  redirect="true"/>
       </action>
@@ -904,7 +898,7 @@
       <action path="/resource/platform/monitor/visibility/PlatformCurrentHealth"
               name="IndicatorViewsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/resource/platform/monitor/Visibility.do?mode=currentHealth">
         <set-property property="title" value="Monitor.CurrentHealth"/>
       </action>
@@ -915,14 +909,14 @@
               forward="/resource/platform/monitor/Visibility.do?mode=resourceMetrics"/>
 
       <action path="/resource/platform/monitor/visibility/ListChildrenResources"
-              type="org.hyperic.hq.ui.action.resource.platform.monitor.visibility.ListChildrenAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
 
       <!-- platform monitoring config -->    
       <action path="/resource/platform/monitor/config/ConfigMetricsFormPrepare"
               name="MonitoringConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Admin.Monitor.MetricTemplate"/>
       </action>
  
@@ -930,25 +924,58 @@
               name="MonitoringConfigForm"
               scope="request"
               input="/resource/platform/monitor/Config.do?mode=configure"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="remove" path="/resource/platform/monitor/Config.do?mode=configure"/>
               <forward name="failure" path="/resource/platform/monitor/Config.do?mode=configure"/>
               <forward name="success" path="/resource/platform/monitor/Config.do?mode=configure"/> 
       </action>
            
+     <!-- Platform Control Actions -->
+     <action path="/resource/platform/control/RemoveHistory"
+             type="org.springframework.web.struts.DelegatingActionProxy"
+             name="RemoveControlForm"
+             scope="request"
+             input="/resource/platform/Control.do?mode=history">
+        	<forward name="failure" path="/resource/platform/Control.do?mode=history" redirect="true" />
+        	<forward name="success" path="/resource/platform/Control.do?mode=history" redirect="true" />
+     </action>
+
+     <action path="/resource/platform/control/RemoveCurrentStatus"
+             type="org.springframework.web.struts.DelegatingActionProxy"
+             name="RemoveControlForm"
+             scope="request"
+             input="/resource/platform/Control.do?mode=view">
+     	<forward name="failure" path="/resource/platform/Control.do?mode=view" redirect="true" />
+        <forward name="success" path="/resource/platform/Control.do?mode=view" redirect="true" />
+     </action>
+     
+     <!-- resource service control. this reuses the forms, action classes, and
+           jsp's for server control, it just makes them available at different
+           urls.  -->
+     <action path="/resource/platform/Control"
+             forward=".resource.platform.control.layout">
+     </action>
+      
+     <action path="/resource/platform/PlatformController" 
+             parameter="mode"
+             input="/resource/platform/Control.do"
+             type="org.springframework.web.struts.DelegatingActionProxy" >
+     	<set-property property="title" value="Control"/>
+     </action>
+     
       <!-- / -->
       
       <!-- server monitoring actions -->      
       <action path="/resource/server/monitor/visibility/ServerCurrentHealth"
               name="IndicatorViewsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/resource/server/monitor/Visibility.do?mode=currentHealth">
         <set-property property="title" value="Monitor.CurrentHealth"/>
       </action>
 
       <action path="/resource/server/monitor/visibility/ListChildrenResources"
-              type="org.hyperic.hq.ui.action.resource.server.monitor.visibility.ListChildrenAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
 
       <action path="/resource/server/monitor/visibility/FilterServerMetrics"
@@ -956,20 +983,11 @@
               scope="request"
               forward="/resource/server/monitor/Visibility.do?mode=resourceMetrics"/>
 
-      <action path="/resource/server/monitor/visibility/ServerServicesMetricsFormPrepare"
-              name="MetricsDisplayForm"
-              scope="request"
-              type="org.hyperic.hq.ui.action.resource.server.monitor.visibility.ServerServicesMetricsFormPrepareAction">
-        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
-      </action>
-
-      <!-- / -->
-
       <!-- server monitoring config -->    
       <action path="/resource/server/monitor/config/ConfigMetricsFormPrepare"
               name="MonitoringConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
       </action>
  
@@ -977,7 +995,7 @@
               name="MonitoringConfigForm"
               scope="request"
               input="/resource/server/monitor/Config.do?mode=configure"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="remove" path="/resource/server/monitor/Config.do?mode=configure"/>              
               <forward name="failure" path="/resource/server/monitor/Config.do?mode=configure"/>
               <forward name="success" path="/resource/server/monitor/Config.do?mode=configure"/> 
@@ -990,27 +1008,20 @@
       <action path="/resource/application/monitor/visibility/ApplicationCurrentHealth"
               name="IndicatorViewsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/resource/application/monitor/Visibility.do?mode=currentHealth">
         <set-property property="title" value="Monitor.CurrentHealth"/>
       </action>
 
       <action path="/resource/application/monitor/visibility/ListChildrenResources"
-              type="org.hyperic.hq.ui.action.resource.application.monitor.visibility.ListChildrenAction">
-      </action>
-
-      <action path="/resource/application/monitor/visibility/ApplicationServicesFormPrepare"
-              name="MetricsDisplayForm"
-              scope="request"
-              type="org.hyperic.hq.ui.action.resource.application.monitor.visibility.ApplicationServicesFormPrepareAction">
-        <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
 
       <!-- application monitoring config -->      
       <action path="/resource/application/monitor/config/ConfigMetricsFormPrepare"
               name="MonitoringConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Monitor.CurrentHealth.DisplayRange"/>
       </action>
  
@@ -1018,7 +1029,7 @@
               name="MonitoringConfigForm"
               scope="request"
               input="/resource/application/monitor/Config.do?mode=configure"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="remove" path="/resource/application/monitor/Config.do?mode=configure"/>
               <forward name="failure" path="/resource/application/monitor/Config.do?mode=configure"/>
               <forward name="success" path="/resource/application/monitor/Config.do?mode=configure"/> 
@@ -1030,19 +1041,19 @@
       <action path="/resource/server/InventoryPortal"
               parameter="mode"
               input="/resource/server/Inventory.do"
-              type="org.hyperic.hq.ui.action.resource.server.inventory.ServerInventoryPortalAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
           
       <action path="/resource/server/inventory/NewServerFormPrepare"
               name="ServerForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.server.inventory.NewServerFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="server/New"/>
         <set-property property="title" value="Inventory.Server.New"/>
       </action>
 
       <action path="/resource/server/inventory/NewServer"
-              type="org.hyperic.hq.ui.action.resource.server.inventory.NewServerAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="ServerForm"
               scope="request"
               input="/resource/server/Inventory.do?mode=new">
@@ -1055,13 +1066,13 @@
       </action>
 
       <action path="/resource/server/inventory/ViewServer"
-              type="org.hyperic.hq.ui.action.resource.server.inventory.ViewServerAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Server"/>
       </action>
 
       <action path="/resource/*/inventory/RemoveServices" 
               name="RemoveResourceForm"
-              type="org.hyperic.hq.ui.action.resource.server.inventory.RemoveServiceAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               scope="request" input="/resource/server/inventory/ViewServer.jsp">
               <forward name="success" path="/resource/{1}/Inventory.do?mode=view" redirect="true" />
       </action>
@@ -1069,13 +1080,13 @@
       <action path="/resource/server/inventory/EditGeneralFormPrepare"
               name="GeneralServerForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.server.inventory.ServerGeneralFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="server/EditGeneralProperties"/>
         <set-property property="title" value="Inventory.GeneralProperties"/>
       </action>
           
       <action path="/resource/server/inventory/EditGeneralProperties"
-                          type="org.hyperic.hq.ui.action.resource.server.inventory.EditGeneralAction"
+                          type="org.springframework.web.struts.DelegatingActionProxy"
                           name="GeneralServerForm"
                           scope="request"
                           input="/resource/server/Inventory.do?mode=edit">
@@ -1091,12 +1102,12 @@
       <action path="/resource/server/inventory/EditTypeHostFormPrepare"
               name="ServerHostTypeForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.server.inventory.EditTypeHostPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Server.Properties"/>
       </action>
 
       <action path="/resource/server/inventory/EditTypeHostProperties"
-                          type="org.hyperic.hq.ui.action.resource.server.inventory.EditTypeHostAction"
+                          type="org.springframework.web.struts.DelegatingActionProxy"
                           name="ServerHostTypeForm"
                           scope="request"
                       input="/resource/server/Inventory.do?mode=editType">
@@ -1109,7 +1120,7 @@
     </action>
 
     <action path="/resource/server/inventory/EditConfigProperties"
-        type="org.hyperic.hq.ui.action.resource.common.inventory.EditConfigPropertiesAction"
+        type="org.springframework.web.struts.DelegatingActionProxy"
                           name="CommonConfigForm"
                           scope="request"
                       input="/resource/server/Inventory.do?mode=editConfig">
@@ -1124,7 +1135,7 @@
       
       <action path="/resource/server/inventory/RemoveService" 
               name="RemoveResourceForm"
-              type="org.hyperic.hq.ui.action.resource.server.inventory.RemoveServiceAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               scope="request" input="/resource/server/inventory/ViewServer.jsp">
               <forward name="success" path="/resource/server/Inventory.do?mode=view" redirect="true"/>
       </action>
@@ -1139,19 +1150,19 @@
       <action path="/resource/server/ServerController" 
               parameter="mode"
               input="/resource/server/Control.do"
-              type="org.hyperic.hq.ui.action.resource.server.control.ServerControllerAction" >
+              type="org.springframework.web.struts.DelegatingActionProxy" >
         <set-property property="title" value="Control"/>
       </action>
 
       <action path="/resource/server/control/NewFormPrepare"
               name="ServerControlForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.control.NewFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Control.New"/>
       </action>
 
       <action path="/resource/server/control/New"   
-              type="org.hyperic.hq.ui.action.resource.common.control.NewAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="ServerControlForm"
               scope="request"
               input="/resource/server/Control.do?mode=new">
@@ -1168,12 +1179,12 @@
       <action path="/resource/server/control/EditFormPrepare"
               name="ServerControlForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.control.EditFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Control"/>
       </action>
 
       <action path="/resource/server/control/Edit"
-              type="org.hyperic.hq.ui.action.resource.common.control.EditAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="ServerControlForm"
               scope="request"
               input="/resource/server/Control.do?mode=edit">
@@ -1186,7 +1197,7 @@
       </action>
 
       <action path="/resource/server/control/RemoveHistory"
-              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               scope="request"
               name="RemoveControlForm"
               input="/resource/server/Control.do?mode=history">
@@ -1195,20 +1206,16 @@
       </action>
       
       <action path="/resource/server/control/RemoveCurrentStatus"
-              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="RemoveControlForm"
               scope="request"
               input="/resource/server/Control.do?mode=view">
         <forward name="failure" path="/resource/server/Control.do?mode=view" redirect="true" />
         <forward name="success" path="/resource/server/Control.do?mode=view" redirect="true" />
       </action>
-     
-      <action path="/resource/server/control/EditAddToGroups"
-              scope="request"
-              type="org.apache.struts.tiles.actions.TilesAction"/>
 
       <action path="/resource/*/control/RemoveControlJobs"
-              type="org.hyperic.hq.ui.action.resource.common.control.RemoveControlJobsAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="RemoveControlJobsForm"
               scope="request"
               input="/resource/{1}/Control.do?mode=view">
@@ -1221,20 +1228,20 @@
       <!-- resource service actions -->
       <action path="/resource/service/InventoryPortal"
               parameter="mode"
-              type="org.hyperic.hq.ui.action.resource.service.inventory.ServiceInventoryPortalAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/resource/service/Inventory.do">
       </action>
           
       <action path="/resource/service/inventory/NewServiceFormPrepare"
               name="ServiceForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.service.inventory.NewServiceFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="inventory/NewService"/>
         <set-property property="title" value="Inventory.Service.New"/>
       </action>
 
       <action path="/resource/service/inventory/NewService"
-              type="org.hyperic.hq.ui.action.resource.service.inventory.NewServiceAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="ServiceForm"
               scope="request"
               input="/resource/service/Inventory.do?mode=new">
@@ -1250,13 +1257,13 @@
       <action path="/resource/service/inventory/EditGeneralFormPrepare"
               name="ServiceForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.service.inventory.ServiceGeneralFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="service/EditGeneralProperties"/>
         <set-property property="title" value="Inventory.GeneralProperties"/>
       </action>
           
       <action path="/resource/service/inventory/EditGeneralProperties"
-              type="org.hyperic.hq.ui.action.resource.service.inventory.EditGeneralAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="ServiceForm"
               scope="request"
               input="/resource/service/Inventory.do?mode=edit">
@@ -1271,14 +1278,14 @@
 
       <action path="/resource/service/inventory/RemoveApp" 
               name="RemoveResourceForm"
-              type="org.hyperic.hq.ui.action.resource.service.inventory.RemoveAppAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               scope="request" 
                           input="/resource/service/inventory/ViewService.jsp">
               <forward name="success" path="/resource/service/Inventory.do?mode=view" redirect="true"/>
       </action>
           
       <action path="/resource/service/inventory/EditConfigProperties"
-        type="org.hyperic.hq.ui.action.resource.common.inventory.EditConfigPropertiesAction"
+        type="org.springframework.web.struts.DelegatingActionProxy"
                           name="CommonConfigForm"
                           scope="request"
                           input="/resource/service/Inventory.do?mode=editConfig">
@@ -1295,13 +1302,13 @@
       <action path="/resource/service/monitor/visibility/ServiceCurrentHealth"
               name="IndicatorViewsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/resource/service/monitor/Visibility.do?mode=currentHealth">
         <set-property property="title" value="Monitor.CurrentHealth"/>
       </action>
 
       <action path="/resource/common/monitor/visibility/ListVirtualResources"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ListVirtualsAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
 
       <action path="/resource/service/monitor/visibility/FilterServiceMetrics"
@@ -1313,7 +1320,7 @@
       <action path="/resource/service/monitor/config/ConfigMetricsFormPrepare"
               name="MonitoringConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
       </action>
  
@@ -1321,14 +1328,14 @@
               name="MonitoringConfigForm"
               scope="request"
               input="/resource/service/monitor/Config.do?mode=configure"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.config.ConfigMetricsAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="remove" path="/resource/service/monitor/Config.do?mode=configure"/>
               <forward name="failure" path="/resource/service/monitor/Config.do?mode=configure"/>
               <forward name="success" path="/resource/service/monitor/Config.do?mode=configure"/> 
       </action>
            
       <action path="/resource/service/control/RemoveHistory"
-              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="RemoveControlForm"
               scope="request"
               input="/resource/service/Control.do?mode=history">
@@ -1337,7 +1344,7 @@
      </action>
 
      <action path="/resource/service/control/RemoveCurrentStatus"
-              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="RemoveControlForm"
               scope="request"
               input="/resource/service/Control.do?mode=view">
@@ -1355,7 +1362,7 @@
       <action path="/resource/service/ServiceController" 
               parameter="mode"
               input="/resource/service/Control.do"
-              type="org.hyperic.hq.ui.action.resource.service.control.ServiceControllerAction" >
+              type="org.springframework.web.struts.DelegatingActionProxy" >
         <set-property property="title" value="Control"/>
       </action>
       <!-- / -->
@@ -1364,23 +1371,23 @@
       <action path="/resource/application/InventoryPortal"
               parameter="mode"
               input="/resource/application/Inventory.do"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.ApplicationInventoryPortalAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
           
       <action path="/resource/application/inventory/ViewApplication"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.ViewApplicationAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Application"/>
       </action>
           
       <action path="/resource/application/inventory/NewApplicationFormPrepare"
               name="ApplicationForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.NewApplicationFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Application.New"/>
       </action>
 
       <action path="/resource/application/inventory/NewApplication"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.NewApplicationAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="ApplicationForm"
               scope="request"
               input="/resource/application/Inventory.do?mode=new">
@@ -1394,13 +1401,13 @@
       <action path="/resource/application/inventory/EditGeneralFormPrepare"
               name="EditGeneralApplicationForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.EditGeneralPropertiesFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="application/EditGeneralProperties"/>
         <set-property property="title" value="Inventory.GeneralProperties"/>
       </action>
           
       <action path="/resource/application/inventory/EditGeneralProperties"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.EditGeneralPropertiesAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="EditGeneralApplicationForm"
               scope="request"
               input="/resource/application/Inventory.do?mode=edit">
@@ -1416,12 +1423,12 @@
       <action path="/resource/application/inventory/EditApplicationFormPrepare"
               name="EditApplicationForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.EditApplicationPropertiesFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Application"/>
       </action>
           
       <action path="/resource/application/inventory/EditApplicationProperties"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.EditApplicationPropertiesAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="EditApplicationForm"
               scope="request"
               input="/resource/application/Inventory.do?mode=editResource">
@@ -1435,7 +1442,7 @@
 
       <action path="/resource/application/inventory/RemoveServices" 
               name="RemoveAppServicesForm"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.RemoveServicesAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               scope="request" input="/resource/application/inventory/ViewApplication.jsp">
               <forward name="success" path="/resource/application/Inventory.do?mode=view" />
       </action>
@@ -1444,7 +1451,7 @@
 
       <action path="/resource/application/inventory/ListServiceDependencies" 
               name="ListServiceDependenciesForm"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.ListServiceDependenciesAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               scope="request">
         <set-property property="title" value="Inventory.Application"/>
       </action>
@@ -1452,13 +1459,13 @@
       <action path="/resource/application/inventory/AddServiceDependenciesFormPrepare"
               name="AddApplicationServicesForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.AddServiceDependenciesFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Application"/>
       </action>
 
       <action path="/resource/application/inventory/AddServiceDependencies" 
               name="AddApplicationServicesForm"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.AddServiceDependenciesAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               scope="request" input="/resource/application/inventory/ViewApplicationServices.jsp">
         <forward name="cancel"  
               path="/resource/application/Inventory.do?mode=listServiceDependencies"
@@ -1479,7 +1486,7 @@
 
       <action path="/resource/application/inventory/RemoveServiceDependencies" 
               name="RemoveResourceForm"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.RemoveServiceDependenciesAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               scope="request" input="/resource/application/inventory/ViewApplicationServices.jsp">
         <forward name="success" 
               path="/resource/application/Inventory.do?mode=listServiceDependencies"
@@ -1492,13 +1499,13 @@
       <action path="/resource/application/inventory/AddApplicationServiceFormPrepare"
               name="AddApplicationServicesForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.AddApplicationServiceFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Application"/>
       </action>
 
 
       <action path="/resource/application/inventory/AddApplicationServices"
-              type="org.hyperic.hq.ui.action.resource.application.inventory.AddApplicationServiceAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="AddApplicationServicesForm"
               scope="request"
               input="/resource/application/Inventory.do?mode=addServices">
@@ -1523,7 +1530,7 @@
       <action path="/resource/group/inventory/NewGroupFormPrepare"
               name="GroupForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.group.inventory.NewGroupFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="group/NewGroup"/>
         <set-property property="title" value="Inventory.Group.New"/>
       </action>
@@ -1531,13 +1538,13 @@
       <action path="/resource/group/inventory/EditGeneralFormPrepare"
               name="ResourceForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceGeneralFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="group/EditGeneralProperties"/>
         <set-property property="title" value="Inventory.GeneralProperties"/>
        </action>
       
       <action path="/resource/group/inventory/EditGeneralProperties"
-              type="org.hyperic.hq.ui.action.resource.group.inventory.EditGeneralAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="ResourceForm"
               scope="request"
               input="/resource/group/Inventory.do?mode=edit">
@@ -1549,7 +1556,7 @@
       </action>
       
       <action path="/resource/group/inventory/NewGroup"
-              type="org.hyperic.hq.ui.action.resource.group.inventory.NewGroupAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="GroupForm"
               scope="request"
               input="/resource/group/Inventory.do?mode=new">
@@ -1562,19 +1569,19 @@
       </action>
 
       <action path="/resource/group/inventory/ViewGroup"
-              type="org.hyperic.hq.ui.action.resource.group.inventory.ViewGroupAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Group"/>
       </action>
 
       <action path="/resource/group/inventory/AddGroupResourcesFormPrepare"
               name="AddGroupResourcesForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.group.inventory.AddGroupResourcesFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Group.AddResource"/>
       </action>
 
       <action path="/resource/group/inventory/AddGroupResources"
-              type="org.hyperic.hq.ui.action.resource.group.inventory.AddGroupResourcesAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="AddGroupResourcesForm"
               scope="request"
               input="/resource/group/Inventory.do?mode=addResources">
@@ -1589,7 +1596,7 @@
 
       <action path="/resource/group/inventory/RemoveApp" 
               name="RemoveGroupResourcesForm"
-              type="org.hyperic.hq.ui.action.resource.group.inventory.RemoveAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               scope="request" 
               input="/resource/service/Inventory.do?mode=view">
               <forward name="success" path="/resource/group/Inventory.do?mode=view" redirect="true"/>
@@ -1601,7 +1608,7 @@
       <action path="/resource/group/monitor/visibility/GroupCurrentHealth"
               name="IndicatorViewsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentHealthAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/resource/group/monitor/Visibility.do?mode=currentHealth">
         <set-property property="title" value="Monitor.CurrentHealth"/>
         <forward name="success" path="/resource/group/monitor/Visibility.do?mode=currentHealth"/>
@@ -1617,7 +1624,7 @@
       <action path="/resource/common/monitor/visibility/GroupMetricsFormPrepare"
               name="MetricsDisplayForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.group.monitor.visibility.GroupMetricsFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
       </action>
 
@@ -1625,7 +1632,7 @@
       <action path="/resource/group/monitor/config/ConfigMetricsFormPrepare"
               name="MonitoringConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.group.monitor.config.GroupConfigMetricsFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
       </action>
  
@@ -1633,7 +1640,7 @@
               name="MonitoringConfigForm"
               scope="request"
               input="/resource/group/monitor/Config.do?mode=configure"
-              type="org.hyperic.hq.ui.action.resource.group.monitor.config.GroupConfigMetricsAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="remove" path="/resource/group/monitor/Config.do?mode=configure"/>
               <forward name="failure" path="/resource/group/monitor/Config.do?mode=configure"/>
               <forward name="success" path="/resource/group/monitor/Config.do?mode=configure"/> 
@@ -1642,7 +1649,7 @@
       <action path="/resource/group/monitor/config/EditAvailabilityFormPrepare"
               name="GroupMonitoringConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.group.monitor.config.EditAvailabilityFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="failure" path="/resource/group/monitor/Config.do?mode=configure"/>
               <forward name="success" path="/resource/group/monitor/Config.do?mode=configure"/>   
       </action>
@@ -1650,7 +1657,7 @@
       <action path="/resource/group/monitor/config/EditAvailability"
               name="GroupMonitoringConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.group.monitor.config.EditAvailabilityAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="cancel" path="/resource/group/monitor/Config.do?mode=configure" redirect="true"/>
               <forward name="reset" path="/resource/group/monitor/Config.do?mode=edit" redirect="true"/>
               <forward name="failure" path="/resource/group/monitor/Config.do?mode=edit"/>
@@ -1666,11 +1673,11 @@
       <action path="/resource/group/GroupController"
               parameter="mode"
               input="/resource/group/Control.do" 
-              type="org.hyperic.hq.ui.action.resource.group.control.GroupControllerAction" >
+              type="org.springframework.web.struts.DelegatingActionProxy" >
       </action>
       
       <action path="/resource/group/control/RemoveHistory"
-              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="RemoveControlForm"
               scope="request"
               input="/resource/group/Control.do?mode=history">
@@ -1680,7 +1687,7 @@
      </action>
  
      <action path="/resource/group/control/RemoveCurrentStatus"
-              type="org.hyperic.hq.ui.action.resource.common.control.RemoveHistoryAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="RemoveControlForm"
               scope="request"
               input="/resource/group/Control.do?mode=view">
@@ -1689,7 +1696,7 @@
       </action>
               
       <action path="/resource/group/control/ListDetail"       
-              type="org.hyperic.hq.ui.action.resource.group.control.ListDetailAction" >
+              type="org.springframework.web.struts.DelegatingActionProxy" >
         <set-property property="title" value="Inventory.Group"/>
       </action>
             
@@ -1699,7 +1706,7 @@
       <action path="/resource/autogroup/monitor/visibility/AutoGroupCurrentHealth"
               name="IndicatorViewsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.visibility.AutoGroupCurrentHealthAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/resource/autogroup/monitor/Visibility.do?mode=currentHealth">
         <set-property property="title" value="Monitor.CurrentHealth"/>
         <forward name="success" path="/resource/autogroup/monitor/Visibility.do?mode=currentHealth"/>
@@ -1708,7 +1715,7 @@
       </action>
 
       <action path="/resource/autogroup/monitor/visibility/ListChildrenResources"
-              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.visibility.ListChildrenAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/resource/autogroup/monitor/visibility/FilterAutoGroupMetrics"
               name="MetricsFilterForm"
@@ -1716,7 +1723,7 @@
               forward="/resource/autogroup/monitor/Visibility.do?mode=resourceMetrics"/>
 
       <action path="/dashboard/ReorderPortlets" 
-              type="org.hyperic.hq.ui.action.portlet.ReorderAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="success" path="/Dashboard.do" redirect="true"/>
       </action>
 
@@ -1724,7 +1731,7 @@
       <action path="/resource/autogroup/monitor/config/ConfigMetricsFormPrepare"
               name="MonitoringConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.config.AutoGroupConfigMetricsFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
       </action>
  
@@ -1732,35 +1739,17 @@
               name="MonitoringConfigForm"
               scope="request"
               input="/resource/autogroup/monitor/Config.do?mode=configure"
-              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.config.AutoGroupConfigMetricsAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="remove" path="/resource/autogroup/monitor/Config.do?mode=configure"/>
               <forward name="failure" path="/resource/autogroup/monitor/Config.do?mode=configure"/>
               <forward name="success" path="/resource/autogroup/monitor/Config.do?mode=configure"/> 
       </action>
-           
-      <action path="/resource/autogroup/monitor/config/EditAvailabilityFormPrepare"
-              name="GroupMonitoringConfigForm"
-              scope="request"
-              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.config.EditAvailabilityFormPrepareAction">
-              <forward name="failure" path="/resource/autogroup/monitor/Config.do?mode=configure"/>
-              <forward name="success" path="/resource/autogroup/monitor/Config.do?mode=configure"/>   
-      </action>
-      
-      <action path="/resource/autogroup/monitor/config/EditAvailability"
-              name="GroupMonitoringConfigForm"
-              scope="request"
-              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.config.EditAvailabilityAction">
-              <forward name="cancel" path="/resource/autogroup/monitor/Config.do?mode=configure" redirect="true"/>
-              <forward name="reset" path="/resource/autogroup/monitor/Config.do?mode=edit" redirect="true"/>
-              <forward name="failure" path="/resource/autogroup/monitor/Config.do?mode=edit"/>
-              <forward name="success" path="/resource/autogroup/monitor/Config.do?mode=configure"/>     
-      </action>        
       <!-- / end autogroup monitoring config -->
 
       <!-- PORTLET ACTIONS -->
 	  <action path="/PortletController"
               scope="request"
-              type="org.hyperic.hq.ui.action.portlet.DisplayPortletAction" />
+              type="org.springframework.web.struts.DelegatingActionProxy" />
       
       <action path="/Portlet"
               forward=".portlet.layout">  
@@ -1771,7 +1760,7 @@
               name="DashboardForm"
               scope="request"
               input="/Dashboard.do"
-              type="org.hyperic.hq.ui.action.portlet.DisplayDashboardAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Dashboard"/> 
       </action>
       
@@ -1780,7 +1769,7 @@
       </action>
       
       <action path="/SetDashboard"
-            type="org.hyperic.hq.ui.action.portlet.SetDashboardAction"
+            type="org.springframework.web.struts.DelegatingActionProxy"
             name="DashboardForm"
             scope="request"
             input="/Dashboard.do">
@@ -1788,7 +1777,7 @@
       </action>
 	  
       <action path="/SetDefaultDashboard"
-              type="org.hyperic.hq.ui.action.portlet.SetDefaultDashboardAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="DashboardForm"
               scope="request"
               input="/Dashboard.do">
@@ -1800,15 +1789,15 @@
       </action>
       
       <action path="/dashboard/AddContent"
-              type="org.hyperic.hq.ui.action.portlet.addcontent.ViewAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action> 
       
       <action path="/dashboard/RemovePortlet"
-              type="org.hyperic.hq.ui.action.portlet.admin.RemovePortletAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="success" path="/Dashboard.do" redirect="true"/>
       </action>
       <action path="/dashboard/AddPortlet"
-              type="org.hyperic.hq.ui.action.portlet.addcontent.AddPortletAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="AddPortletForm"
               scope="request"
               input="/Dashboard.do">
@@ -1816,7 +1805,7 @@
       </action>                 
       
       <action path="/dashboard/SearchHubPrepare"
-              type="org.hyperic.hq.ui.action.portlet.search.ViewAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="ResourceHubForm"
               scope="request"
               input="/dashboard/SearchHubPrepare.do">  
@@ -1824,7 +1813,7 @@
       </action>
       
       <action path="/dashboard/*SavedQueries"
-              type="org.hyperic.hq.ui.action.portlet.savedqueries.{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="SavedQueriesForm"
               scope="request"
               input="/dashboard/Admin.do?mode=savedQueries">
@@ -1838,23 +1827,23 @@
       <action path="/dashboard/ViewAutoDiscovery"
               name="AIQueueForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.portlet.autoDisc.ViewAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
       <action path="/dashboard/ProcessAutoDiscovery"
               name="AIQueueForm"
               scope="request"
               input="/dashboard/ViewAutoDiscovery"
-              type="org.hyperic.hq.ui.action.portlet.autoDisc.ProcessQueueAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="success" path="/Dashboard.do" redirect="true"/>   
       </action>
       <action path="/dashboard/EditAutoDiscovery"
-              type="org.hyperic.hq.ui.action.portlet.autoDisc.PrepareAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="AutoDiscoveryForm"
               scope="request">
           <set-property property="title" value="Dashboard.AutoDiscovery"/>
       </action>      
       <action path="/dashboard/ModifyAutoDiscovery"
-              type="org.hyperic.hq.ui.action.portlet.autoDisc.ModifyAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="AutoDiscoveryForm"
               scope="request"
               input="/dashboard/Admin.do?mode=autoDiscovery">               
@@ -1864,12 +1853,12 @@
       </action>
 
       <action path="/rss/ViewResourceHealth"
-              type="org.hyperic.hq.ui.action.portlet.resourcehealth.RSSAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/dashboard/*ResourceHealth"
               name="ResourceHealthForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.portlet.resourcehealth.{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/dashboard/EditResourceHealth">               
         <set-property property="title" value="Dashboard.FavoriteResources"/>
         <forward name="success" path="/Dashboard.do" redirect="true"/>   
@@ -1880,21 +1869,21 @@
       </action>
   
       <action path="/dashboard/ViewRecentResources"
-              type="org.hyperic.hq.ui.action.portlet.recentresources.ViewAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/dashboard/ViewRecentlyApproved"
               scope="request"
-              type="org.hyperic.hq.ui.action.portlet.recentlyApproved.ViewAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
 
       <action path="/dashboard/EditRecentlyApproved"
               name="RecentlyApprovedForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.portlet.recentlyApproved.PrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Dashboard.RecentlyAdded"/>
       </action>
       <action path="/dashboard/ModifyRecentlyApproved"
-              type="org.hyperic.hq.ui.action.portlet.recentlyApproved.ModifyAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="RecentlyApprovedForm"
               scope="request"
               input="/dashboard/EditRecentlyApproved">
@@ -1906,12 +1895,12 @@
       </action>
 
       <action path="/rss/ViewCriticalAlerts"
-              type="org.hyperic.hq.ui.action.portlet.criticalalerts.RSSAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/dashboard/*CriticalAlerts"
               name="CriticalAlertsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.portlet.criticalalerts.{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/dashboard/EditCriticalAlerts">               
         <set-property property="title" value="Dashboard.Alerts"/>
         <forward name="success" path="/Dashboard.do" redirect="true"/>   
@@ -1922,7 +1911,7 @@
       </action>
       
       <action path="/dashboard/*SummaryCounts"
-              type="org.hyperic.hq.ui.action.portlet.summaryCounts.{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="SummaryCountsForm"
               scope="request"
               input="/dashboard/Admin.do?mode=summaryCounts">
@@ -1933,17 +1922,17 @@
       </action>            
       
       <action path="/resource/common/QuickFavorites*"
-              type="org.hyperic.hq.ui.action.resource.common.QuickFavorites{1}Action">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="resource/QuickFavorites"/>
         <forward name="success" path="/Dashboard.do"/>
         <forward name="failure" path="/common/GenericError.jsp"/>
       </action>
 
       <action path="/rss/ViewControlActions"
-              type="org.hyperic.hq.ui.action.portlet.controlactions.RSSAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/dashboard/*ControlActions"
-              type="org.hyperic.hq.ui.action.portlet.controlactions.{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="ControlActionsForm"
               scope="request"
               input="/dashboard/Admin.do?mode=controlActions">               
@@ -1955,7 +1944,7 @@
       </action>      
       
       <action path="/dashboard/*AvailSummary"
-              type="org.hyperic.hq.ui.action.portlet.availsummary.{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="AvailSummaryForm"
               input="/dashboard/EditAvailSummary">               
         <set-property property="title" value="Dashboard.Availability"/>
@@ -1967,7 +1956,7 @@
       </action>
 
       <action path="/dashboard/*MetricViewer"
-              type="org.hyperic.hq.ui.action.portlet.metricviewer.{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="MetricViewerForm"
               scope="request"
               input="/dashboard/EditMetricViewer">
@@ -1980,14 +1969,14 @@
       </action>
 
       <action path="/dashboard/AddResourcesPrepareAction"
-              type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesPrepareAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="DashboardAddResourceHealthForm"
               scope="request">
         <set-property property="title" value="Dashboard.AddResources"/>
       </action>
 
       <action path="/dashboard/availSummary/AddResourcesPrepareAction"
-              type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesPrepareAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="DashboardAddResourceHealthForm"
               scope="request">
         <set-property property="title" value="Dashboard.AddResources"/>
@@ -1995,7 +1984,7 @@
       </action>
 
       <action path="/dashboard/*/AddResourcesAction"
-              type="org.hyperic.hq.ui.action.portlet.addresource.AddResourcesAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="DashboardAddResourceHealthForm"
               scope="request"
               input="/dashboard/Admin.do?mode={1}AddResources">              
@@ -2011,7 +2000,7 @@
             
       <!-- BEGIN: events actions -->      
       <action path="/alerts/New"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.NewDefinitionAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="NewAlertDefinitionForm"
               scope="request"
               validate="true"
@@ -2029,19 +2018,19 @@
       <action path="/alerts/ListDefinitions"
               name="RemoveConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ListDefinitionsAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Alert.ListDefinition"/>
       </action>
       
       <action path="/alerts/ListTypeDefinitions"
               name="RemoveConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ListDefinitionsAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Alert.ListTypeDefinition"/>
       </action>
 
       <action path="/alerts/RemoveConfig" 
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveDefinitionAction" 
+              type="org.springframework.web.struts.DelegatingActionProxy" 
               name="RemoveConfigForm"
               scope="request"
               input="/alerts/Config.do?mode=list"> 
@@ -2051,7 +2040,7 @@
       
       <action path="/alerts/ViewDefinition"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Alert.Edit"/>
       </action>
 
@@ -2064,17 +2053,17 @@
       <action path="/alerts/ViewDefinitionEscalation"
               scope="request"
               name="EscalationSchemeForm"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewEscalationAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Alert.Edit"/>
       </action>
 
       <action path="/alerts/ViewOpenNMSAction"
               scope="request"
               name="OpenNMSForm"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.OpenNMSFormPrepareAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/alerts/SetOpenNMSAction"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.OpenNMSFormAction" 
+              type="org.springframework.web.struts.DelegatingActionProxy" 
               name="OpenNMSForm"
               scope="request"
               input="/alerts/Config.do?mode=viewOpenNMS">
@@ -2084,17 +2073,17 @@
 
       <action path="/alerts/ViewSyslogAction"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionSyslogActionAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/alerts/ViewNotifications*"
               name="RemoveNotificationsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.ViewDefinitionNotifications{1}Action">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Alert.Edit"/>
       </action>
               
       <action path="/alerts/Remove*"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.Remove{1}Action" 
+              type="org.springframework.web.struts.DelegatingActionProxy" 
               name="RemoveNotificationsForm"
               scope="request"
               input="/alerts/Config.do?mode=view{1}">
@@ -2103,7 +2092,7 @@
       </action>
       
       <action path="/alerts/*Escalation"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.{1}EscalationAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="EscalationForm"
               scope="request"
               input="/alerts/Config.do?mode=viewEscalation">
@@ -2115,12 +2104,12 @@
       <action path="/alerts/ListAlerts"
               name="FixAlertsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.ListAlertAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Alert.List"/>        
       </action>
 
       <action   path="/alerts/RemoveAlerts" 
-                type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.RemoveAction" 
+                type="org.springframework.web.struts.DelegatingActionProxy" 
                 name="FixAlertsForm"
                 scope="request"
                 input="/alerts/Alerts.do?mode=list">
@@ -2139,14 +2128,14 @@
               name="EditAlertDefinitionPropertiesForm"
               scope="request"
               validate="true"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionPropertiesFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Alert.Properties"/>
       </action>
 
       <action path="/alerts/EditSyslogActionFormPrepare"
               name="EditAlertDefinitionSyslogActionForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionSyslogActionFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
 
       <action path="/alerts/Alerts"
@@ -2156,7 +2145,7 @@
       </action>
 
       <action path="/alerts/config/AddUsers*"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddUsers{1}Action"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="AddAlertUsersForm"
               scope="request"
               input="/alerts/Config.do?mode=addUsers">
@@ -2174,12 +2163,12 @@
     <action path="/alerts/config/AddOthersFormPrepare"
                 name="AddAlertOthersForm"
                 scope="request"
-                type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthersFormPrepareAction">
+                type="org.springframework.web.struts.DelegatingActionProxy">
       <set-property property="title" value="Alert.Notification"/>
     </action>
 
       <action path="/alerts/config/AddOthers"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AddOthersAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="AddAlertOthersForm"
               scope="request"
               input="/alerts/Config.do?mode=addOthers">
@@ -2195,7 +2184,7 @@
       <action path="/alerts/AlertsPortal"
               parameter="mode"
               input="/alerts/Alerts.do"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.PortalAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/alerts/Config"
               forward=".events.config.layout">
@@ -2206,7 +2195,7 @@
       </action>
 
       <action path="/admin/alerts/RemoveConfig" 
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.RemoveDefinitionAction" 
+              type="org.springframework.web.struts.DelegatingActionProxy" 
               name="RemoveConfigForm"
               scope="request"
               input="/admin/alerts/Config.do?mode=list"> 
@@ -2215,14 +2204,14 @@
       </action>
 
       <action path="/alerts/EnableAlerts"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.AlertEnablerAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
             <set-property property="workflow" value="/alerts/EnableAlerts"/>
             <forward name="success" path="/alerts/Config.do"/>
             <forward name="failure" path="/common/GenericError.jsp"/>
       </action>
 
       <action path="/alerts/EditProperties"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionPropertiesAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="EditAlertDefinitionPropertiesForm"
               scope="request"
               validate="true"
@@ -2234,7 +2223,7 @@
       </action>
       
       <action path="/alerts/EditConditions"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionConditionsAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="EditAlertDefinitionConditionsForm"
               scope="request"
               input="/alerts/Config.do?mode=editConditions">
@@ -2247,7 +2236,7 @@
       </action>
       
       <action path="/alerts/EditSyslogAction"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionSyslogActionAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="EditAlertDefinitionSyslogActionForm"
               scope="request"
               input="/alerts/Config.do?mode=editSyslogAction">
@@ -2268,14 +2257,14 @@
               name="IndicatorViewsForm"
               scope="request"
               parameter="action"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.IndicatorChartsAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <forward name="success" path="/resource/common/monitor/visibility/DashCharts.jsp"/>
         <forward name="failure" path="/Dashboard.do" redirect="true"/>
         <forward name="currentHealth" path="/Resource.do?mode=currentHealth"/>
       </action>
 
       <action path="/resource/common/monitor/visibility/MetricsControl"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsControlAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="MetricsControlForm"
               input="/Resource.do?mode=currentHealth"
               validate="true"
@@ -2287,7 +2276,7 @@
       </action>
 
       <action path="/ResourceCurrentHealth"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.AlertMetricsControlAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="AlertMetricsControlForm"
               validate="true"
               scope="request">
@@ -2297,16 +2286,16 @@
       </action>
 
       <action path="/resource/common/monitor/visibility/Timeline"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.TimelineAction" >
+              type="org.springframework.web.struts.DelegatingActionProxy" >
       </action>
 
       <action path="/resource/common/monitor/visibility/EventDetails"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.EventDetailsAction" >
+              type="org.springframework.web.struts.DelegatingActionProxy" >
         <forward name="success" path="/common/AJAXResponse.jsp"/>
       </action>
 
       <action path="/resource/*/inventory/RemoveGroups" 
-              type="org.hyperic.hq.ui.action.resource.common.inventory.RemoveResourceGroupsAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="RemoveResourceGroupsForm"
               scope="request"
               input="/resource/{1}/Inventory.do?mode=view">
@@ -2320,7 +2309,7 @@
       </action>
       
       <action path="/resource/*/inventory/ChangeOwner"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ChangeResourceOwnerAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="ChangeResourceOwnerForm"
               scope="request"
               input="/resource/{1}/Inventory.do?mode=changeOwner">
@@ -2333,7 +2322,7 @@
       </action>
 
       <action path="/resource/*/inventory/Add*Groups"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.AddResourceGroupsAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="AddResourceGroupsForm"
               scope="request"
               input="/resource/{1}/Inventory.do?mode=addGroups">
@@ -2356,61 +2345,61 @@
       <!-- JSON APIs for escalation -->
       <action path="/escalation/save*"
               scope="request"
-              type="org.hyperic.hq.ui.json.action.escalation.crud.Save{1}"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               />
 
       <action path="/escalation/update*"
               scope="request"
-              type="org.hyperic.hq.ui.json.action.escalation.crud.Update{1}"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               />
 
       <action path="/escalation/remove*/*"
               scope="request"
-              type="org.hyperic.hq.ui.json.action.escalation.crud.Remove{1}"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               parameter="{2}"
               />
 
       <action path="/escalation/jsonBy*/*"
               scope="request"
-              type="org.hyperic.hq.ui.json.action.escalation.finder.JsonBy{1}"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               parameter="{2}"/>
 
       <action path="/escalation/listAll*Name"
               scope="request"
-              type="org.hyperic.hq.ui.json.action.escalation.finder.ListAll{1}Name"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               parameter="{2}"/>
 
       <action path="/escalation/json*ByAlertDefId/*"
               scope="request"
-              type="org.hyperic.hq.ui.json.action.escalation.finder.Json{1}ByAlertDefId"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               parameter="{2}"/>
 
       <action path="/escalation/ListAllEscalationName"
               scope="request"
-              type="org.hyperic.hq.ui.json.action.escalation.finder.ListAllEscalationName"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/escalation/ListActiveEscalations"
               scope="request"
-              type="org.hyperic.hq.ui.json.action.escalation.finder.ListActiveEscalations"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/mastheadAttach"
               forward=".attach.layout"/>
               
       <action path="/attach/Masthead"
-              type="org.hyperic.hq.ui.action.attach.MastheadAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
      
       <action path="/TabBodyAttach"
               forward=".attach.tab.layout"/>
               
       <action path="/attach/TabBody"
-              type="org.hyperic.hq.ui.action.attach.TabBodyAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       	<set-property property="title" value="Views"/>
       </action>
               
       <action path="/attach/TabPortal"
               parameter="mode"
               input="/TabBodyAttach.do"
-              type="org.hyperic.hq.ui.action.attach.TabPortalAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
 
   </action-mappings>
@@ -2423,4 +2412,8 @@
 <!-- ================================ Message Resources Definitions -->
     <message-resources parameter="ApplicationResources" null="false"/>    
 
+	<plug-in className="org.springframework.web.struts.ContextLoaderPlugIn">
+ 		<set-property property="contextConfigLocation"
+ 	    	          value="/WEB-INF/spring/action-servlet.xml" />
+	</plug-in> 
 </struts-config>

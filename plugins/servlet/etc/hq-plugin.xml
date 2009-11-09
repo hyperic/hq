@@ -486,7 +486,7 @@ log4j.appender.R=org.apache.log4j.RollingFileAppender
 
   <pre>
   ${CMD.cp} pdk${FILE.sep}lib${FILE.sep}log4j.jar ${installpath}${FILE.sep}common${FILE.sep}lib
-  ${CMD.cp} pdk${FILE.sep}lib${FILE.sep}commons-logging.jar ${installpath}${FILE.sep}common${FILE.sep}lib
+  ${CMD.cp} pdk${FILE.sep}lib${FILE.sep}commons-logging-1.0.4.jar ${installpath}${FILE.sep}common${FILE.sep}lib
   </pre>
 
   <p>Restart Tomcat for the changes to take effect.</p>

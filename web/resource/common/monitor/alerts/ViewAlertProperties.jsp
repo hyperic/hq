@@ -1,10 +1,10 @@
 <%@ page language="java"%>
 <%@ page errorPage="/common/Error.jsp"%>
-<%@ taglib uri="struts-html-el" prefix="html"%>
-<%@ taglib uri="struts-tiles" prefix="tiles"%>
-<%@ taglib uri="jstl-fmt" prefix="fmt"%>
-<%@ taglib uri="jstl-c" prefix="c"%>
-<%@ taglib uri="hq" prefix="hq"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -98,8 +98,8 @@
 			<fmt:message key="alert.config.props.PB.AlertStatus" />
 		</td>
 		<td width="30%" class="BlockContent">
+			<!-- For now, the alert is fixed, or not fixed -->
 			<c:choose>
-				<!-- For now, the alert is fixed, or not fixed -->
 				<c:when test="${alert.fixed}">
 					<html:img page="/images/icon_fixed.gif" 
 					          width="12" 

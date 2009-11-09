@@ -30,6 +30,8 @@ import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.struts.taglib.TagUtils;
 import org.apache.struts.util.RequestUtils;
 
@@ -40,13 +42,14 @@ import org.apache.struts.util.RequestUtils;
  *                    then the property name is used for the title of the column
  *                    (optional)
  */
-public class LocalizedColumnTag extends ColumnTag 
-    implements Cloneable {
-   
-    public boolean defaultSort = false;
-    public boolean isLocalizedTitle = true;
-    public Integer sortAttr = null;
-    public String headerColspan = null;
+public class LocalizedColumnTag extends ColumnTag implements Cloneable {
+    private static final long serialVersionUID = 1L;
+    private static Log log = LogFactory.getLog(LocalizedColumnTag.class.getName());
+    
+	private boolean defaultSort = false;
+    private boolean isLocalizedTitle = true;
+    private Integer sortAttr = null;
+    private Integer headerColspan = null;
     
     public boolean isDefaultSort() {
         return this.defaultSort;
@@ -72,15 +75,15 @@ public class LocalizedColumnTag extends ColumnTag
         sortAttr = i;
     }
 
-    public String getHeaderColspan() {
+    public Integer getHeaderColspan() {
         return headerColspan;
     }
     
-    public void setHeaderColspan(String s) {
+    public void setHeaderColspan(Integer s) {
         headerColspan = s;
     }
 
-    /** internationalize the title */
+    /** i18n the title */
     public String getTitle() {
         if (isLocalizedTitle) {
             Locale userLocale =
@@ -91,6 +94,7 @@ public class LocalizedColumnTag extends ColumnTag
                                                       userLocale.toString(),
                                                       super.getTitle());
             } catch (JspException e) {
+            	log.debug(e);
                 // Do not localize then
             }
         }
@@ -137,6 +141,4 @@ public class LocalizedColumnTag extends ColumnTag
         buf.append(")");
         return buf.toString();
     }
-
 }
-

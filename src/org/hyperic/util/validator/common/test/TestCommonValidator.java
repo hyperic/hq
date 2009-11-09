@@ -31,6 +31,7 @@ import junit.framework.*;
 
 import org.hyperic.util.validator.common.CommonValidator;
 import org.hyperic.util.validator.common.CommonValidatorException;
+import org.xml.sax.SAXException;
 
 
 
@@ -89,43 +90,41 @@ public class TestCommonValidator extends TestCase {
             try {
                 // test the validation
             	bean.setFieldStr1 ("dave-------------------25");
-                commonValidator.validate(validationMappingRes,
-                                         TEST_FORM_1,
-                                         bean);
+                commonValidator.validate(validationMappingRes, TEST_FORM_1, bean);
                 // If we haven't thrown an exception we're okay.
                 fail("should have failed on max username violation");
             } catch (CommonValidatorException ex) {
                 assertTrue (ex.collapseMessages(),true);
+            } catch (SAXException e) {
+            	fail("SAXException thrown" + e.getMessage());
             }
             // Try a bad username (x<3 chars)
             try {
                 // test the validation
             	bean.setFieldStr1 ("dE");
-                commonValidator.validate(validationMappingRes,
-                                         TEST_FORM_1,
-                                         bean);
+                commonValidator.validate(validationMappingRes, TEST_FORM_1, bean);
                 // If we haven't thrown an exception we're okay.
                 fail("should have failed on min username violation");
             } catch (CommonValidatorException ex) {
                 assertTrue (ex.collapseMessages(),true);
+            } catch (SAXException e) {
+            	fail("SAXException thrown" + e.getMessage());
             }
             // Try a bad username (bad chars)
             try {
                 // test the validation
             	bean.setFieldStr1 ("desmond@covalent.net");
-                commonValidator.validate(validationMappingRes,
-                                         TEST_FORM_1,
-                                         bean);
+                commonValidator.validate(validationMappingRes, TEST_FORM_1, bean);
                 // If we haven't thrown an exception we're okay.
                 fail("should have failed");
             } catch (CommonValidatorException ex) {
                 assertTrue (ex.collapseMessages(),true);
+            } catch (SAXException e) {
+            	fail("SAXException thrown" + e.getMessage());
             }
-            
         } catch (CommonValidatorException e) {
             System.out.println ("Errors detected: "+e.collapseMessages());
             fail("Errors in test"+e.collapseMessages());
         }
-        
     }
 }

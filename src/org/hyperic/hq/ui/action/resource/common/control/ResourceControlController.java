@@ -27,6 +27,7 @@ package org.hyperic.hq.ui.action.resource.common.control;
 
 import java.rmi.RemoteException;
 import java.util.List;
+import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -47,12 +48,31 @@ import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.ResourceController;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
+import org.hyperic.hq.ui.Portal;
+import org.hyperic.hq.ui.util.SessionUtils;
 
+import org.apache.struts.Globals;
 /*
  * An abstract subclass of <code>ResourceControllerAction</code> that
  * provides common methods for resource control controller actions.
  */
 public abstract class ResourceControlController extends ResourceController {
+    private Properties keyMethodMap = null;
+
+    protected Properties getKeyMethodMap() {
+        if (keyMethodMap == null) {
+            keyMethodMap = new Properties();
+            
+            keyMethodMap.setProperty(Constants.MODE_LIST, "currentControlStatus");
+            keyMethodMap.setProperty(Constants.MODE_VIEW, "currentControlStatus");
+            keyMethodMap.setProperty(Constants.MODE_HST, "controlStatusHistory");
+            keyMethodMap.setProperty(Constants.MODE_HST_DETAIL, "controlStatusHistory");
+            keyMethodMap.setProperty(Constants.MODE_NEW, "newScheduledControlAction");
+            keyMethodMap.setProperty(Constants.MODE_EDIT, "editScheduledControlAction");
+        }
+        
+        return keyMethodMap;
+    }
 
     protected static final Log log =
         LogFactory.getLog(ResourceControlController.class.getName());
@@ -109,23 +129,87 @@ public abstract class ResourceControlController extends ResourceController {
             log.error("Unexpected exception: " + e, e);
         }
     }
+    
+    private void storePortalDataInRequest(ActionMapping mapping,
+                                          ActionForm form,
+                                          HttpServletRequest request,
+                                          HttpServletResponse response,
+                                          Portal portal,
+                                          boolean checkControlEnabled,
+                                          boolean moveMessages,
+                                          boolean setNavMapLocation) 
+    throws Exception {
+        request.setAttribute(Constants.PORTAL_KEY, portal);
+        
+        if (moveMessages) {
+            // move messages and errors from session to request scope
+            SessionUtils.moveAttribute(request, Globals.MESSAGE_KEY);
+            SessionUtils.moveAttribute(request, Globals.ERROR_KEY);
+        }
+        
+        setResource(request);
+        
+        if (checkControlEnabled) {
+            checkControlEnabled(mapping, form, request, response);
+        }
+        
+        if (setNavMapLocation) {
+            super.setNavMapLocation(request,mapping, Constants.CONTROL_LOC);
+        }
+    }
+    
     public ActionForward currentControlStatus(ActionMapping mapping,
                                               ActionForm form,
                                               HttpServletRequest request,
-                                              HttpServletResponse response)
-        throws Exception {
-        super.setNavMapLocation(request,mapping,
-                                Constants.CONTROL_LOC); 
+                                              HttpServletResponse response,
+                                              Portal portal)
+    throws Exception {
+        storePortalDataInRequest(mapping, form, request, response, portal, true, true, true);
+        
         return null;
     }
     
     public ActionForward controlStatusHistory(ActionMapping mapping,
                                               ActionForm form,
                                               HttpServletRequest request,
-                                              HttpServletResponse response)
-        throws Exception {
-        super.setNavMapLocation(request,mapping,
-                                Constants.CONTROL_LOC); 
+                                              HttpServletResponse response,
+                                              Portal portal)
+    throws Exception {
+        storePortalDataInRequest(mapping, form, request, response, portal, true, false, true);
+        
+        return null;
+    }
+    
+    public ActionForward controlStatusHistoryDetail(ActionMapping mapping,
+                                                    ActionForm form,
+                                                    HttpServletRequest request,
+                                                    HttpServletResponse response,
+                                                    Portal portal)
+    throws Exception {
+        storePortalDataInRequest(mapping, form, request, response, portal, true, false, false);
+       
+        return null;
+    }
+    
+    public ActionForward newScheduledControlAction(ActionMapping mapping,
+                                                   ActionForm form,
+                                                   HttpServletRequest request,
+                                                   HttpServletResponse response,
+                                                   Portal portal)
+    throws Exception {
+        storePortalDataInRequest(mapping, form, request, response, portal, false, false, false);
+        
+        return null;
+    }
+    
+    public ActionForward editScheduledControlAction(ActionMapping mapping,
+                                                    ActionForm form,
+                                                    HttpServletRequest request,
+                                                    HttpServletResponse response, 
+                                                    Portal portal)
+    throws Exception {
+        storePortalDataInRequest(mapping, form, request, response, portal, false, false, false);
+        
         return null;
     }
 }

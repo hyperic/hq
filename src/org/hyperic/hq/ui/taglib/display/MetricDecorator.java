@@ -36,7 +36,6 @@ import javax.servlet.jsp.tagext.TagSupport;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.taglib.TagUtils;
-import org.apache.struts.util.RequestUtils;
 import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
 import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.hq.measurement.UnitsConvert;
@@ -51,33 +50,16 @@ import org.hyperic.util.units.UnitsFormat;
  * that converts and formats metric values for display.
  */
 public class MetricDecorator extends ColumnDecorator implements Tag {
-
-    //----------------------------------------------------static variables
-
     protected String locale = org.apache.struts.Globals.LOCALE_KEY;    
     protected String bundle = org.apache.struts.Globals.MESSAGES_KEY;
-
+    
     protected static String MS_KEY = "metric.tag.units.s.arg";
+    protected static Log log = LogFactory.getLog(MetricDecorator.class.getName());
 
-    protected static Log log =
-        LogFactory.getLog(MetricDecorator.class.getName());
-
-    //----------------------------------------------------instance variables
-
-    // tag attrs
     private String defaultKey;
     private String unit;
-
     private PageContext context;
     private Tag parent;
-
-    //----------------------------------------------------constructors
-
-    public MetricDecorator() {
-        super();
-    }
-
-    //----------------------------------------------------public methods
 
     public String getDefaultKey() {
         return defaultKey;
@@ -107,63 +89,66 @@ public class MetricDecorator extends ColumnDecorator implements Tag {
             // case.
             // PR: 7588
             Double m = null;
+            
             if (obj != null) {
-                String mval =
-                    (String) evalAttr("metric", obj.toString(), String.class);
-                if (mval != null && ! mval.equals("")) {
+            	String mval = obj.toString();
+                
+            	if (mval != null && ! mval.equals("")) {
                     m = new Double(mval);
                 }
             }
 
-            String u = (String) evalAttr("unit", getUnit(), String.class);
-            String dk = (String) evalAttr("defaultKey", getDefaultKey(),
-                                          String.class);
-            Locale l = RequestUtils.retrieveUserLocale(context, locale);
-
+            String u = getUnit();
+            String dk = getDefaultKey();
+            Locale l = TagUtils.getInstance().getUserLocale(context, locale);
             StringBuffer buf = new StringBuffer();
 
-            if ((m == null ||
-                 Double.isNaN(m.doubleValue()) ||
+            if ((m == null || 
+                 Double.isNaN(m.doubleValue()) || 
                  Double.isInfinite(m.doubleValue())) &&
-                dk != null) {
-                buf.append(TagUtils.getInstance().message(context, bundle,
-                                                          l.toString(), dk));
-            }
-            else if (u.equals("ms")) {
+                dk != null) 
+            {
+                buf.append(TagUtils.getInstance().message(context, bundle, l.toString(), dk));
+            } else if (u.equals("ms")) {
                 // we don't care about scaling and such. we just want
                 // to show every metric in seconds with millisecond
                 // resolution
                 String formatted = UnitsFormat.format(new UnitNumber(m.doubleValue(),
-                    UnitsConstants.UNIT_DURATION, UnitsConstants.SCALE_MILLI)).toString();
+                    UnitsConstants.UNIT_DURATION, 
+                    UnitsConstants.SCALE_MILLI)).toString();
+                
                 buf.append(formatted);
-            }
-            else {
-                FormattedNumber f =
-                    UnitsConvert.convert(m.doubleValue(), u, l);
+            } else {
+                FormattedNumber f = UnitsConvert.convert(m.doubleValue(), u, l);
+                
                 buf.append(f.getValue());
-                if (f.getTag() != null && f.getTag().length() > 0)
+                
+                if (f.getTag() != null && f.getTag().length() > 0) {
                     buf.append(" ").append(f.getTag());
+                }
             }
 
             return buf.toString();
-        }
-        catch (JspException je) {
-            log.error(je);
-            throw je;
-        }
-        catch (Exception e) {
+        } catch (NumberFormatException npe) {
+        	log.error(npe);
+            
+        	throw new JspTagException(npe);
+        } catch (Exception e) {
             log.error(e);
+            
             throw new JspException(e);
         }
     }
 
     public int doStartTag() throws JspTagException {
-        ColumnTag ancestorTag =
-            (ColumnTag)TagSupport.findAncestorWithClass(this, ColumnTag.class);
+        ColumnTag ancestorTag = (ColumnTag)TagSupport.findAncestorWithClass(this, ColumnTag.class);
+        
         if (ancestorTag == null) {
             throw new JspTagException("A MetricDecorator must be used within a ColumnTag.");
         }
+        
         ancestorTag.setDecorator(this);
+        
         return SKIP_BODY;
     }
 
@@ -174,6 +159,7 @@ public class MetricDecorator extends ColumnDecorator implements Tag {
     public Tag getParent() {
         return parent;
     }
+    
     public void setParent(Tag t) {
         this.parent = t;
     }
@@ -187,11 +173,5 @@ public class MetricDecorator extends ColumnDecorator implements Tag {
         context = null;
         defaultKey = null;
         unit = null;
-    }
-
-    private Object evalAttr(String name, String value, Class type)
-        throws JspException, NullAttributeException {
-        return ExpressionUtil.evalNotNull("metricdecorator", name, value,
-                                          type, this, context);
     }
 }

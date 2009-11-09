@@ -23,74 +23,77 @@
   USA.
  --%>
 <%@ page pageEncoding="UTF-8"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" %>
-<%@ page errorPage="/common/Error.jsp"  %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<html>
-<head>
-  <tiles:insert attribute="head" />
-  <title>
-   <fmt:message key="${portal.name}">
-    <c:if test="${not empty TitleParam}">
-     <fmt:param value="${TitleParam}"/>
-    </c:if>
-    <c:if test="${not empty TitleParam2}">
-     <fmt:param value="${TitleParam2}"/>
-    </c:if>
-   </fmt:message>
-  </title>
-    <script type="text/javascript">
-        var onloads = [];
-         function initOnloads() {
-        
-            if (arguments.callee.done) return;
-            arguments.callee.done = true;
-           if(typeof(_timer)!="undefined") clearInterval(_timer);
-           for ( var i = 0 ; i < onloads.length ; i++ )
-             onloads[i]();
-        
-        };
-        
-        /* for Mozilla/Opera9 */
-        if (document.addEventListener) {
-            document.addEventListener("DOMContentLoaded", initOnloads, false);
-        }
-        
-        /* for Internet Explorer */
-        /*@cc_on @*/
-        /*@if (@_win32)
-            document.write("<script id=__ie_onload defer src=javascript:void(0)><\/script>");
-            var script = document.getElementById("__ie_onload");
-            script.onreadystatechange = function() {
-                if (this.readyState == "complete") {
-                    initOnloads(); // call the onload handler
-                }
-            };
-        /*@end @*/
-        
-        /* for Safari */
-        /*if (/WebKit/i.test(navigator.userAgent)) { // sniff
-            var _timer = setInterval(function() {
-                if (/loaded|complete/.test(document.readyState)) {
-                    initOnloads(); // call the onload handler
-                }
-            }, 10);
-        }*/
-        
-        /* for other browsers */
-        window.onload = initOnloads;
+<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ page errorPage="/common/Error.jsp"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html"%>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
-    </script>
-</head>
-<body style="background-color: #FFFFFF;" class="tundra" debug="true">
-  <tiles:insert attribute="header" />
-  <div id="migContainer">
-  <tiles:insert attribute='body' />
-  <img src="/images/spacer.gif" width="1" height="60" alt="" border="0" class="footerSpacer" style="clear: both;" id="footerSpacer">
-  <tiles:insert attribute="footer" />
-  </div>
-</body>
+<html>
+	<head>
+		<tiles:insert attribute="head" />
+		<title>
+			<fmt:message key="${portal.name}">
+				<c:if test="${not empty TitleParam}">
+					<fmt:param value="${TitleParam}" />
+				</c:if>
+				<c:if test="${not empty TitleParam2}">
+					<fmt:param value="${TitleParam2}" />
+				</c:if>
+			</fmt:message>
+		</title>
+		<script type="text/javascript">
+        	var onloads = [];
+
+            function initOnloads() {
+        	    if (arguments.callee.done) return;
+
+                arguments.callee.done = true;
+
+                if(typeof(_timer)!="undefined") clearInterval(_timer);
+
+                for ( var i = 0 ; i < onloads.length ; i++ )
+             		onloads[i]();
+	        };
+        
+	        /* for Mozilla/Opera9 */
+	        if (document.addEventListener) {
+	            document.addEventListener("DOMContentLoaded", initOnloads, false);
+	        }
+	        
+	        /* for Internet Explorer */
+	        /*@cc_on @*/
+	        /*@if (@_win32)
+	            document.write("<script id=__ie_onload defer src=javascript:void(0)><\/script>");
+	            var script = document.getElementById("__ie_onload");
+	            script.onreadystatechange = function() {
+	                if (this.readyState == "complete") {
+	                    initOnloads(); // call the onload handler
+	                }
+	            };
+	        /*@end @*/
+	        
+	        /* for Safari */
+	        /*if (/WebKit/i.test(navigator.userAgent)) { // sniff
+	            var _timer = setInterval(function() {
+	                if (/loaded|complete/.test(document.readyState)) {
+	                    initOnloads(); // call the onload handler
+	                }
+	            }, 10);
+	        }*/
+	        
+	        /* for other browsers */
+	        window.onload = initOnloads;
+	    </script>
+	</head>
+	<body style="background-color: #FFFFFF;" class="tundra" debug="true">
+		<tiles:insert attribute="header" />
+
+		<div id="migContainer">
+			<tiles:insert attribute='body' /> 
+			<img src="/images/spacer.gif" width="1" height="60" alt="" border="0" class="footerSpacer" style="clear: both;" id="footerSpacer" /> 
+			<tiles:insert attribute="footer" />
+		</div>
+	</body>
 </html>

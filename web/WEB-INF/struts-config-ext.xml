@@ -20,17 +20,17 @@
 
   <action-mappings type="org.hyperic.hq.ui.action.BaseActionMapping">
 
-      <action path="/ResourceNav" type="org.hyperic.hq.ui.action.resource.NavMapAction">
+      <action path="/ResourceNav" type="org.springframework.web.struts.DelegatingActionProxy">
               <forward name="default" path="/Resource.do" redirect="true"/>
       </action>
 
       <action path="/DashboardAdminController"
-              type="org.hyperic.hq.ui.action.portlet.DashboardAdminController"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               parameter="mode" >
       </action>       
       
       <action path="/admin/user/New" 
-              type="org.hyperic.hq.ui.action.admin.user.NewAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="NewUserForm"
               scope="request"
               input="/admin/user/UserAdmin.do?mode=new">
@@ -49,13 +49,13 @@
       <action path="/admin/config/ConfigPortal" 
               parameter="mode"
               name="EscalationSchemeForm"
-              type="org.hyperic.hq.ui.action.admin.config.ConfigAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
       </action>
 
       <action path="/admin/config/EditConfig"
               name="SystemConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.admin.config.EditConfigAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
 			  input="/admin/config/Config.do?mode=edit">
         <forward name="success"  path="/Admin.do"/>
         <forward name="cancel"   path="/Admin.do" redirect="true"/>
@@ -66,18 +66,18 @@
       <action path="/resource/common/monitor/visibility/ProblemMetricsDisplay"
               name="ProblemMetricsDisplayForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ProblemMetricsDisplayAction" >
+              type="org.springframework.web.struts.DelegatingActionProxy" >
       </action>
 
       <action path="/resource/common/monitor/visibility/ResourceMetricsFormPrepare"
               name="MetricsDisplayForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ResourceMetricsFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
       </action>
 
       <action path="/resource/common/monitor/visibility/CurrentMetricValues"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.CurrentMetricValuesAction" >
+              type="org.springframework.web.struts.DelegatingActionProxy" >
         <forward name="success" path="/common/JSONResponse.jsp"/>
       </action>
 
@@ -86,7 +86,7 @@
               scope="request"
               input="/resource/common/monitor/Visibility.do"
               validate="true"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="visibility/ViewChart"/>
         <!-- path is ignored ... uses returnPath -->
         <forward name="success" path="/" redirect="true"/>
@@ -97,7 +97,7 @@
 
       <action path="/alerts/ViewAlert"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.ViewAlertAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Alert.Detail"/>
               <exception key="exception.AlertNotFoundException"
                          type="org.hyperic.hq.events.AlertNotFoundException"
@@ -107,40 +107,40 @@
       <action path="/alerts/NewFormPrepare"
               name="NewAlertDefinitionForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.NewDefinitionFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Alert.New"/>
       </action>
 
       <action path="/alerts/EditConditionsFormPrepare"
               name="EditAlertDefinitionConditionsForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.EditDefinitionConditionsFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Alert.Edit"/>
       </action>
 
       <action path="/alerts/ConfigPortal"
               parameter="mode"
               input="/alerts/Config.do"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.alerts.config.PortalAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/resource/common/monitor/visibility/ViewChartFormPrepare"
               name="ViewChartForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.ViewChartFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="workflow" value="visibility/ViewChart"/>
         <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
       </action>
 
       <action path="/resource/service/inventory/ViewService"
-              type="org.hyperic.hq.ui.action.resource.service.inventory.ViewServiceAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Service"/>
       </action>
           
       <action path="/resource/hub/MiniChart"
-              type="org.hyperic.hq.ui.action.resource.hub.ResourceDesignatedMetricsAction"/>
+              type="org.springframework.web.struts.DelegatingActionProxy"/>
 
       <action path="/resource/platform/monitor/visibility/PlatformMetrics"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="MetricsDisplayForm"
               scope="request"
               input="/resource/platform/monitor/Visibility.do?mode=resourceMetrics">
@@ -151,7 +151,7 @@
       </action>
 
       <action path="/resource/platform/monitor/visibility/PlatformServersMetrics"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="MetricsDisplayForm"
               scope="request"
               input="/resource/platform/monitor/Visibility.do?mode=deployedServers">
@@ -164,12 +164,12 @@
       <action path="/resource/platform/inventory/EditConfigFormPrepare"
               name="CommonConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceConfigFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Platform.Properties"/>
       </action>
       
       <action path="/resource/server/monitor/visibility/ServerMetrics"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="MetricsDisplayForm"
               scope="request"
               input="/resource/server/monitor/Visibility.do?mode=resourceMetrics">
@@ -180,7 +180,7 @@
       </action>
 
       <action path="/resource/server/monitor/visibility/ServerDeployedServicesMetrics"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="MetricsDisplayForm"
               scope="request"
               input="/resource/server/monitor/Visibility.do?mode=deployedServices">
@@ -191,7 +191,7 @@
       </action>
 	  
       <action path="/resource/server/monitor/visibility/ServerInternalServicesMetrics"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="MetricsDisplayForm"
               scope="request"
               input="/resource/server/monitor/Visibility.do?mode=internalServices">
@@ -204,12 +204,12 @@
       <action path="/resource/server/inventory/EditConfigFormPrepare"
               name="CommonConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceConfigFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Server.Properties"/>
       </action>
 
       <action path="/resource/application/monitor/visibility/ApplicationDeployedServices"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="MetricsDisplayForm"
               scope="request"
               input="/resource/application/monitor/Visibility.do?mode=deployedServices">
@@ -220,7 +220,7 @@
       </action>
 
       <action path="/resource/application/monitor/visibility/ApplicationInternalServices"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="MetricsDisplayForm"
               scope="request"
               input="/resource/application/monitor/Visibility.do?mode=internalServices">
@@ -231,7 +231,7 @@
       </action>
       
       <action path="/resource/service/monitor/visibility/ServiceMetrics"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="MetricsDisplayForm"
               scope="request"
               input="/resource/service/monitor/Visibility.do?mode=resourceMetrics">
@@ -244,12 +244,12 @@
       <action path="/resource/service/inventory/EditConfigFormPrepare"
              name="CommonConfigForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.common.inventory.ResourceConfigFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Inventory.Service"/>
       </action>
 
       <action path="/resource/group/monitor/visibility/GroupMetrics"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="MetricsDisplayForm"
               scope="request"
               input="/resource/group/monitor/Visibility.do?mode=resourceMetrics">
@@ -261,19 +261,19 @@
 
       <action path="/resource/group/InventoryPortal"
               parameter="mode"
-              type="org.hyperic.hq.ui.action.resource.group.inventory.GroupInventoryPortalAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               input="/resource/group/Inventory.do">
       </action>
 
       <action path="/resource/autogroup/monitor/visibility/AutoGroupMetricsFormPrepare"
               name="MetricsDisplayForm"
               scope="request"
-              type="org.hyperic.hq.ui.action.resource.autogroup.monitor.visibility.AutoGroupMetricsFormPrepareAction">
+              type="org.springframework.web.struts.DelegatingActionProxy">
         <set-property property="title" value="Monitor.CurrentHealth.Metrics"/>
       </action>
 
       <action path="/resource/autogroup/monitor/visibility/AutoGroupMetrics"
-              type="org.hyperic.hq.ui.action.resource.common.monitor.visibility.MetricsDisplayAction"
+              type="org.springframework.web.struts.DelegatingActionProxy"
               name="MetricsDisplayForm"
               scope="request"
               input="/resource/autogroup/monitor/Visibility.do?mode=resourceMetrics">

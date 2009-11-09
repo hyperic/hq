@@ -90,36 +90,30 @@ public class ImageButtonDecorator extends ColumnDecorator implements Tag {
     }
 
     public String decorate(Object obj) {
-        String formName = null;
-        try {
-            formName =
-                (String) evalAttr("form", this.form, String.class);
-        }
-        catch (NullAttributeException ne) {
-            log.debug("bean " + this.form + " not found");
-            return "";
-        }
-        catch (JspException je) {
-            log.debug("can't evaluate form type [" + this.form + "]: ", je);
-            return "";
-        }
+    	try {
+	        HttpServletRequest req = (HttpServletRequest) context.getRequest();
+	        String src = req.getContextPath() + page;
+	    	String formName = getForm();
+	    	StringBuffer buf = new StringBuffer();
 
-        HttpServletRequest req = (HttpServletRequest) context.getRequest();
-        String src = req.getContextPath() + page;
+	        buf.append("<input type=\"image\" ");
+	        buf.append("src=\"");
+	        buf.append(src);
+	        buf.append("\" ");
+	        buf.append("border=\"0\" onClick=\"clickSelect('");
+	        buf.append(formName);
+	        buf.append("', '");
+	        buf.append(getInput());
+	        buf.append("', '");
+	        buf.append(obj.toString());
+	        buf.append("');\">");
 
-        StringBuffer buf = new StringBuffer();
-        buf.append("<input type=\"image\" ");
-        buf.append("src=\"");
-        buf.append(src);
-        buf.append("\" ");
-        buf.append("border=\"0\" onClick=\"clickSelect('");
-        buf.append(formName);
-        buf.append("', '");
-        buf.append(getInput());
-        buf.append("', '");
-        buf.append(obj.toString());
-        buf.append("');\">");
-        return buf.toString();
+	        return buf.toString();
+    	} catch(NullPointerException npe) {
+    		log.debug(npe.toString());
+    	}
+    	
+    	return "";
     }
 
     public int doStartTag() throws JspTagException {
@@ -138,6 +132,7 @@ public class ImageButtonDecorator extends ColumnDecorator implements Tag {
     public Tag getParent() {
         return parent;
     }
+    
     public void setParent(Tag t) {
         this.parent = t;
     }
@@ -152,11 +147,5 @@ public class ImageButtonDecorator extends ColumnDecorator implements Tag {
         page = null;
         parent = null;
         context = null;
-    }
-    
-    private Object evalAttr(String name, String value, Class type)
-        throws JspException, NullAttributeException {
-        return ExpressionUtil.evalNotNull("imagebuttondecorator", name, value,
-                                          type, this, context);
     }
 }

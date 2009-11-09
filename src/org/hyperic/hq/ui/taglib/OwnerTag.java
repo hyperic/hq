@@ -29,140 +29,122 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 
 import org.apache.struts.util.ResponseUtils;
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.ui.WebUser;
 import org.hyperic.hq.ui.util.BizappUtils;
 
 /**
- * A JSP tag that formats and prints the "owner information" commonly
- * displayed as part of the attributes of a resource.
+ * A JSP tag that formats and prints the "owner information" commonly displayed
+ * as part of the attributes of a resource.
  */
 public class OwnerTag extends VarSetterBaseTag {
+	private static final long serialVersionUID = 1L;
 
-    //----------------------------------------------------instance variables
+	/* the name of the scoped attribute that holds our user */
+	private Object owner = null;
 
-    /* the name of the scoped attribute that holds our user */
-    private String owner = null;
+	/**
+	 * Set the name of the attribute in page, request, session or application
+	 * scope that holds the <code>OperationOwner</code> object.
+	 * 
+	 * @param owner
+	 *            the name of the scoped attribute
+	 */
+	public void setOwner(Object owner) {
+		this.owner = owner;
+	}
 
-    //----------------------------------------------------constructors
+	public Object getOwner() {
+		return owner;
+	}
 
-    public OwnerTag() {
-        super();
-    }
+	/**
+	 * Process the tag, generating and printing the owner information.
+	 * 
+	 * @exception JspException
+	 *                if the scripting variable can not be found or if there is
+	 *                an error processing the tag
+	 */
+	public final int doStartTag() throws JspException {
+		try {
+			Object owner = getOwner();
 
-    //----------------------------------------------------public methods
+			/*
+			 * XXX: would be nice if WebUser and AuthzSubject implemented a
+			 * common interface or something
+			 */
+			String username;
+			String email;
+			String full;
 
-    /**
-     * Set the name of the attribute in page, request, session or
-     * application scope that holds the <code>OperationOwner</code>
-     * object.
-     *
-     * @param owner the name of the scoped attribute
-     */
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-    
-    /**
-     * Process the tag, generating and printing the owner
-     * information.
-     *
-     * @exception JspException if the scripting variable can not be
-     * found or if there is an error processing the tag
-     */
-    public final int doStartTag() throws JspException {
-        Object owner = null;
+			if (owner instanceof WebUser) {
+				WebUser webUser = (WebUser) owner;
+				username = webUser.getUsername();
+				email = webUser.getEmailAddress();
+				full = BizappUtils.makeSubjectFullName(webUser.getFirstName(),
+						webUser.getLastName());
+			} else if (owner instanceof AuthzSubjectValue) {
+				AuthzSubjectValue subject = (AuthzSubjectValue) owner;
+				username = subject.getName();
+				email = subject.getEmailAddress();
+				full = BizappUtils.makeSubjectFullName(subject.getFirstName(),
+						subject.getLastName());
+			} else {
+				AuthzSubject subject = (AuthzSubject) owner;
+				username = subject.getName();
+				email = subject.getEmailAddress();
+				full = BizappUtils.makeSubjectFullName(subject.getFirstName(),
+						subject.getLastName());
+			}
 
-        try {
-            owner = evalAttr("owner", this.owner, Object.class);
-        }
-        catch (NullAttributeException ne) {
-            throw new JspTagException("bean " + this.owner + " not found");
-        }
-        catch (JspException je) {
-            throw new JspTagException(je.toString());
-        }
+			// if we have an email address:
+			// if we have a username, display full name and linked username
+			// else display linked full name
+			// else
+			// display the full name
+			// if we have a username, display the username
 
-        /* XXX: would be nice if WebUser and AuthzSubject
-         * implemented a common interface or something
-         */
-        String username;
-        String email;
-        String full;
-        if (owner instanceof WebUser) {
-            WebUser webUser = (WebUser) owner;
-            username = webUser.getUsername();
-            email = webUser.getEmailAddress();
-            full = BizappUtils.makeSubjectFullName(webUser.getFirstName(),
-                                                   webUser.getLastName());
-        } else if (owner instanceof AuthzSubjectValue) {
-            AuthzSubjectValue subject = (AuthzSubjectValue) owner;
-            username = subject.getName();
-            email = subject.getEmailAddress();
-            full = BizappUtils.makeSubjectFullName(subject.getFirstName(),
-                                                   subject.getLastName());
-        }
-        else {
-            AuthzSubject subject = (AuthzSubject) owner;
-            username = subject.getName();
-            email = subject.getEmailAddress();
-            full = BizappUtils.makeSubjectFullName(subject.getFirstName(),
-                                                   subject.getLastName());
-        }
+			StringBuffer output = new StringBuffer();
 
-        // if we have an email address:
-        //   if we have a username, display full name and linked username
-        //   else display linked full name
-        // else
-        //   display the full name
-        //   if we have a username, display the username
+			if (email != null && !email.equals("")) {
+				if (username != null && username.length() > 0) {
+					output.append(ResponseUtils.filter(full));
+					output.append(" (<a href=\"mailto:");
+					output.append(ResponseUtils.filter(email));
+					output.append("\">");
+					output.append(ResponseUtils.filter(username));
+					output.append("</a>)");
+				} else {
+					output.append("<a href=\"mailto:");
+					output.append(ResponseUtils.filter(email));
+					output.append("\">");
+					output.append(ResponseUtils.filter(full));
+					output.append("</a>");
+				}
+			} else {
+				output.append(ResponseUtils.filter(full));
+				if (username != null && username.length() > 0) {
+					output.append(" (");
+					output.append(ResponseUtils.filter(username));
+					output.append(")");
+				}
+			}
 
-        StringBuffer output = new StringBuffer();
-        if (email != null && ! email.equals("")) {
-            if (username != null && username.length() > 0) {
-                output.append(ResponseUtils.filter(full));
-                output.append(" (<a href=\"mailto:");
-                output.append(ResponseUtils.filter(email));
-                output.append("\">");
-                output.append(ResponseUtils.filter(username));
-                output.append("</a>)");
-            }
-            else {
-                output.append("<a href=\"mailto:");
-                output.append(ResponseUtils.filter(email));
-                output.append("\">");
-                output.append(ResponseUtils.filter(full));
-                output.append("</a>");
-            }
-        }
-        else {
-            output.append(ResponseUtils.filter(full));
-            if (username != null && username.length() > 0) {
-                output.append(" (");
-                output.append(ResponseUtils.filter(username));
-                output.append(")");
-            }
-        }
+			setScopedVariable(output.toString());
+		} catch (NullPointerException npe) {
+			throw new JspTagException("Owner attribute value is null", npe);
+		}
 
-        setScopedVariable(output.toString());
-        return SKIP_BODY;
-    }
+		return SKIP_BODY;
+	}
 
-    /**
-     * Release tag state.
-     *
-     */
-    public void release() {
-        owner = null;
-        super.release();
-    }
-
-    private Object evalAttr(String name, String value, Class type)
-        throws JspException, NullAttributeException {
-        return ExpressionUtil.evalNotNull("owner", name, value,
-                                          type, this, pageContext);
-    }
+	/**
+	 * Release tag state.
+	 * 
+	 */
+	public void release() {
+		owner = null;
+		super.release();
+	}
 }

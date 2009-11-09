@@ -29,12 +29,8 @@ import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.TagSupport;
-
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
@@ -43,46 +39,31 @@ import org.hyperic.hq.appdef.shared.AIQueueConstants;
  * Generates a String representing the diff for an AIServer
  */
 public class AutoInventoryServerDiff extends TagSupport {
-
-    private String resource;
-    
-    public AutoInventoryServerDiff() { super(); }
+    private static final long serialVersionUID = 1L;
+	
+    private AIServerValue resource;
 
     public int doStartTag() throws JspException{
-
-        JspWriter output = pageContext.getOut();
-        String diffString;
-        AIServerValue serverValue;
-        try {
-            serverValue = (AIServerValue) ExpressionUtil.evalNotNull("spider", 
-                                                        "resource", 
-                                                        getResource(), 
-                                                        AIServerValue.class, 
-                                                        this, 
-                                                        pageContext );
-        }
-        catch (NullAttributeException ne) {
-            throw new JspTagException( " typeId not found");
-        }
-        catch (JspException je) {
-            throw new JspTagException( je.toString() );
-        }
-                                         
-        diffString = AIQueueConstants.getServerDiffString(serverValue.getQueueStatus(), 
-                                               serverValue.getDiff());          
-        try{
+    	try {
+	        JspWriter output = pageContext.getOut();
+	        AIServerValue serverValue = getResource();
+	        String diffString = AIQueueConstants.getServerDiffString(serverValue.getQueueStatus(), 
+	        		                                                 serverValue.getDiff());
+	        
             output.print( diffString);            
-        }
-        catch(IOException e){
+    	} catch(NullPointerException npe) {
+    		throw new JspTagException("Resource attribute value is null", npe);
+    	} catch(IOException e){
             throw new JspException(e);        
         }
+        
         return SKIP_BODY;
     }   
     
-    public String getResource() {
+    public AIServerValue getResource() {
         return this.resource;
     }    
-    public void setResource(String resource) {
+    public void setResource(AIServerValue resource) {
         this.resource = resource;
     }
 }

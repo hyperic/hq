@@ -34,7 +34,7 @@ import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.struts.action.ActionError;
+import org.apache.struts.action.ActionMessage;
 import org.apache.struts.action.ActionErrors;
 import org.apache.struts.action.ActionMapping;
 
@@ -292,8 +292,7 @@ public class ScheduleForm extends CalendarForm  {
                         tmpNumDays = new Integer(Integer.parseInt(numDays));
                     } catch (NumberFormatException nfe) {
                         errs.add( "numDays",
-                        new ActionError("resource.autodiscovery.ScheduleTab.error.numDays",
-                        numDays));
+                        new ActionMessage("resource.autodiscovery.ScheduleTab.error.numDays", numDays));
                     }
                 }
             }
@@ -303,13 +302,12 @@ public class ScheduleForm extends CalendarForm  {
                     tmpNumWeeks = new Integer(Integer.parseInt(numWeeks));
                 } catch (NumberFormatException nfe) {
                     errs.add( "numWeeks",
-                    new ActionError("resource.autodiscovery.ScheduleTab.error.numWeeks",
-                    numWeeks));
+                    new ActionMessage("resource.autodiscovery.ScheduleTab.error.numWeeks", numWeeks));
                 }
                 // check that the user clicked at least one day of the week to occurr on
                 if (recurrenceDay.length == 0) {
                     errs.add( "recurrenceDay",
-                    new ActionError("resource.autodiscovery.ScheduleTab.error.recurrenceDay"));
+                    new ActionMessage("resource.autodiscovery.ScheduleTab.error.recurrenceDay"));
                 }
             }
             else if (recurInterval.equals(RECUR_MONTHLY)) {
@@ -318,7 +316,7 @@ public class ScheduleForm extends CalendarForm  {
                     tmpNumMonths = new Integer(Integer.parseInt(numMonths));
                 } catch (NumberFormatException nfe) {
                     errs.add( "numMonths",
-                    new ActionError("resource.autodiscovery.ScheduleTab.error.numMonths",
+                    new ActionMessage("resource.autodiscovery.ScheduleTab.error.numMonths",
                     numMonths));
                 }
             }
