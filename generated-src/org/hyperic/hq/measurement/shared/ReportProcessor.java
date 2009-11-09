@@ -10,9 +10,10 @@ import org.hyperic.hq.measurement.server.session.DataInserterException;
  * Local interface for ReportProcessor.
  */
 public interface ReportProcessor {
-   /**
-    * Method which takes data from the agent (or elsewhere) and throws it into the DataManager, doing the right things with all the derived measurements
-    */
-   public void handleMeasurementReport( MeasurementReport report ) throws DataInserterException;
+    /**
+     * Method which takes data from the agent (or elsewhere) and throws it into
+     * the DataManager, doing the right things with all the derived measurements
+     */
+    public void handleMeasurementReport(MeasurementReport report) throws DataInserterException;
 
 }

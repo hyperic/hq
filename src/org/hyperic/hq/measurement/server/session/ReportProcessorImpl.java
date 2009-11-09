@@ -63,18 +63,19 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class ReportProcessorImpl extends SessionEJB implements ReportProcessor {
+public class ReportProcessorImpl
+    extends SessionEJB implements ReportProcessor {
     private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
 
     private final long MINUTE = MeasurementConstants.MINUTE;
-    private final long PRIORITY_OFFSET = MINUTE*3;
+    private final long PRIORITY_OFFSET = MINUTE * 3;
 
     private MeasurementManagerLocal measurementManager;
     private MeasurementProcessorLocal measurementProcessor;
     private PlatformManagerLocal platformManager;
     private ServerManagerLocal serverManager;
     private ServiceManagerLocal serviceManager;
-        
+
     @Autowired
     public ReportProcessorImpl(MeasurementManagerLocal measurementManager,
                                MeasurementProcessorLocal measurementProcessor, PlatformManagerLocal platformManager,
@@ -86,17 +87,14 @@ public class ReportProcessorImpl extends SessionEJB implements ReportProcessor {
         this.serviceManager = serviceManager;
     }
 
-    private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts, 
-                          Measurement m, MetricValue[] vals)
-    {
+    private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts,
+                          Measurement m, MetricValue[] vals) {
         final boolean debug = log.isDebugEnabled();
-        for (MetricValue val : vals)
-        {
-            final long now =
-                TimingVoodoo.roundDownTime(System.currentTimeMillis(), MINUTE);
+        for (MetricValue val : vals) {
+            final long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), MINUTE);
             try {
-                //this is just to check if the metricvalue is valid
-                //will throw a NumberFormatException if there is a problem
+                // this is just to check if the metricvalue is valid
+                // will throw a NumberFormatException if there is a problem
                 new BigDecimal(val.getValue());
                 DataPoint dataPoint = new DataPoint(m.getId(), val);
                 if (priorityPts != null && isPriority(now, dataPoint.getTimestamp())) {
@@ -107,23 +105,22 @@ public class ReportProcessorImpl extends SessionEJB implements ReportProcessor {
                 if (debug && m.getTemplate().isAvailability()) {
                     log.debug("availability -> " + dataPoint);
                 }
-            } catch(NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 log.warn("Unable to insert: " + e.getMessage() +
-                          ", metric id=" + m);
+                         ", metric id=" + m);
             }
         }
     }
 
     private boolean isPriority(long timestamp, long metricTimestamp) {
-        if (metricTimestamp >= (timestamp-PRIORITY_OFFSET)) {
+        if (metricTimestamp >= (timestamp - PRIORITY_OFFSET)) {
             return true;
         }
         return false;
     }
 
     private void addData(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m,
-                         MetricValue[] dpts)
-    {
+                         MetricValue[] dpts) {
         long interval = m.getInterval();
 
         // Safeguard against an anomaly
@@ -136,8 +133,7 @@ public class ReportProcessorImpl extends SessionEJB implements ReportProcessor {
         // values for that cycle.
         MetricValue[] passThroughs = new MetricValue[dpts.length];
 
-        for (int i = 0; i < dpts.length; i++)
-        {
+        for (int i = 0; i < dpts.length; i++) {
             // Save data point to DB.
             long retrieval = dpts[i].getTimestamp();
             long adjust = TimingVoodoo.roundDownTime(retrieval, interval);
@@ -156,43 +152,43 @@ public class ReportProcessorImpl extends SessionEJB implements ReportProcessor {
      * derived measurements
      */
     public void handleMeasurementReport(MeasurementReport report)
-        throws DataInserterException
-    {
+        throws DataInserterException {
         final DSNList[] dsnLists = report.getClientIdList();
         final String agentToken = report.getAgentToken();
 
         final List<DataPoint> dataPoints = new ArrayList<DataPoint>(dsnLists.length);
         final List<DataPoint> availPoints = new ArrayList<DataPoint>(dsnLists.length);
-        final List<DataPoint> priorityAvailPts = new ArrayList <DataPoint>(dsnLists.length);
-        
+        final List<DataPoint> priorityAvailPts = new ArrayList<DataPoint>(dsnLists.length);
+
         final boolean debug = log.isDebugEnabled();
         for (DSNList dsnList : dsnLists) {
             Integer dmId = new Integer(dsnList.getClientId());
             Measurement m = measurementManager.getMeasurement(dmId);
-            
+
             // Can't do much if we can't look up the derived measurement
             // If the measurement is enabled, we just throw away their data
-            // instead of trying to throw it into the backfill.  This is 
+            // instead of trying to throw it into the backfill. This is
             // because we don't know the interval to normalize those old
-            // points for.  This is still a problem for people who change their
+            // points for. This is still a problem for people who change their
             // collection period, but the instances should be low.
             if (m == null || !m.isEnabled()) {
                 continue;
             }
-            // Need to check if resource was asynchronously deleted (type == null)
+            // Need to check if resource was asynchronously deleted (type ==
+            // null)
             final Resource res = m.getResource();
             if (res == null || res.isInAsyncDeleteState()) {
                 if (debug) {
                     log.debug("dropping metricId=" + m.getId() +
-                        " since resource is in async delete state");
+                              " since resource is in async delete state");
                 }
                 continue;
             }
             if (!resourceMatchesAgent(res, agentToken)) {
                 log.warn("measurement (id=" + m.getId() + ") was sent to the " +
-                    "HQ server from agent (agentToken=" + agentToken + ")" +
-                    " but resource (id=" + res.getId() + ") is not associated " +
-                    " with that agent.  Dropping measurement.");
+                         "HQ server from agent (agentToken=" + agentToken + ")" +
+                         " but resource (id=" + res.getId() + ") is not associated " +
+                         " with that agent.  Dropping measurement.");
                 continue;
             }
 
@@ -218,14 +214,14 @@ public class ReportProcessorImpl extends SessionEJB implements ReportProcessor {
         // TODO: DI srnManager (see HE-133)
         SRNManager srnManager = getSRNManager();
         Collection<AppdefEntityID> nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
-        
+
         if (report.getAgentToken() != null && nonEntities.size() > 0) {
             // Better tell the agent to stop reporting non-existent entities
             AppdefEntityID[] entIds = (AppdefEntityID[])
-                nonEntities.toArray(new AppdefEntityID[nonEntities.size()]);
+                                      nonEntities.toArray(new AppdefEntityID[nonEntities.size()]);
             try {
                 measurementProcessor.unschedule(
-                    report.getAgentToken(), entIds);
+                                                report.getAgentToken(), entIds);
             } catch (MeasurementUnscheduleException e) {
                 log.error("Cannot unschedule entities: " +
                           StringUtil.arrayToString(entIds));
@@ -242,15 +238,16 @@ public class ReportProcessorImpl extends SessionEJB implements ReportProcessor {
         try {
             if (resType.equals(AuthzConstants.authzPlatform)) {
                 String token = platformManager.findPlatformById(
-                    aeid).getAgent().getAgentToken();
+                                                                aeid).getAgent().getAgentToken();
                 return token.equals(agentToken);
             } else if (resType.equals(AuthzConstants.authzServer)) {
                 String token = serverManager.findServerById(
-                    aeid).getPlatform().getAgent().getAgentToken();
+                                                            aeid).getPlatform().getAgent().getAgentToken();
                 return token.equals(agentToken);
             } else if (resType.equals(AuthzConstants.authzService)) {
                 String token = serviceManager.findServiceById(
-                    aeid).getServer().getPlatform().getAgent().getAgentToken();
+                                                              aeid).getServer().getPlatform().getAgent()
+                                             .getAgentToken();
                 return token.equals(agentToken);
             }
         } catch (PlatformNotFoundException e) {
@@ -267,9 +264,8 @@ public class ReportProcessorImpl extends SessionEJB implements ReportProcessor {
      * Sends the actual data to the DB.
      */
     private void sendMetricDataToDB(DataInserter d, List<DataPoint> dataPoints,
-                                    boolean isPriority) 
-        throws DataInserterException
-    {
+                                    boolean isPriority)
+        throws DataInserterException {
         if (dataPoints.size() <= 0) {
             return;
         }
@@ -278,8 +274,8 @@ public class ReportProcessorImpl extends SessionEJB implements ReportProcessor {
             int size = dataPoints.size();
             long ts = System.currentTimeMillis();
             ReportStatsCollector.getInstance().getCollector().add(size, ts);
-        } catch(InterruptedException e) {
-            throw new SystemException("Interrupted while attempting to " + 
+        } catch (InterruptedException e) {
+            throw new SystemException("Interrupted while attempting to " +
                                       "insert data");
         }
     }
@@ -287,4 +283,4 @@ public class ReportProcessorImpl extends SessionEJB implements ReportProcessor {
     public static ReportProcessor getOne() {
         return Bootstrap.getBean(ReportProcessor.class);
     }
-} 
+}
