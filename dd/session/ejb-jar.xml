@@ -583,21 +583,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[The BizApp's interface to the Events Subsystem]]></description>
-
-			<ejb-name>EventsBoss</ejb-name>
-
-			<home>org.hyperic.hq.bizapp.shared.EventsBossHome</home>
-			<remote>org.hyperic.hq.bizapp.shared.EventsBoss</remote>
-			<local-home>org.hyperic.hq.bizapp.shared.EventsBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.EventsBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.EventsBossEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[BizApp interface to the Measurement subsystem]]></description>
 
 			<ejb-name>MeasurementBoss</ejb-name>
@@ -4202,71 +4187,6 @@
 			<method>
 				<ejb-name>UIPluginManager</ejb-name>
 				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>EventsBoss</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>EventsBoss</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>fixAlert</method-name>
-				<method-params>
-					<method-param>int</method-param>
-					<method-param>org.hyperic.hq.escalation.server.session.EscalationAlertType</method-param>
-					<method-param>java.lang.Integer</method-param>
-					<method-param>java.lang.String</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>EventsBoss</ejb-name>
-				<method-intf>Remote</method-intf>
-				<method-name>fixAlert</method-name>
-				<method-params>
-					<method-param>int</method-param>
-					<method-param>org.hyperic.hq.escalation.server.session.EscalationAlertType</method-param>
-					<method-param>java.lang.Integer</method-param>
-					<method-param>java.lang.String</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>EventsBoss</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>fixAlert</method-name>
-				<method-params>
-					<method-param>int</method-param>
-					<method-param>org.hyperic.hq.escalation.server.session.EscalationAlertType</method-param>
-					<method-param>java.lang.Integer</method-param>
-					<method-param>java.lang.String</method-param>
-					<method-param>boolean</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>EventsBoss</ejb-name>
-				<method-intf>Remote</method-intf>
-				<method-name>fixAlert</method-name>
-				<method-params>
-					<method-param>int</method-param>
-					<method-param>org.hyperic.hq.escalation.server.session.EscalationAlertType</method-param>
-					<method-param>java.lang.Integer</method-param>
-					<method-param>java.lang.String</method-param>
-					<method-param>boolean</method-param>
-				</method-params>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>

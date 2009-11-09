@@ -38,7 +38,7 @@
 			<constructor-arg ref="sessionFactory"/>
 		</bean>
 		
-		<bean class="org.hyperic.hq.authz.shared.PermissionManagerFactory" factory-method="getPermissionManager" autowire="constructor"/>
+		<bean id="permissionManager" class="org.hyperic.hq.authz.shared.PermissionManagerFactory" factory-method="getPermissionManager" autowire="constructor"/>
 		
 	
 </beans>

@@ -29,7 +29,6 @@
 <bean class="org.hyperic.hq.bizapp.server.session.ControlBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.DashboardPortletBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.EventLogBossEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.bizapp.server.session.EventsBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.GalertBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.LatherBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.LiveDataBossEJBImpl" factory-method="getOne"/>
@@ -67,6 +66,8 @@
 <bean class="org.hyperic.hq.events.server.session.AlertConditionEvaluatorRepositoryImpl"/>
 
 <bean class="org.hyperic.hq.events.server.session.TriggersCreatedListener"/>
+
+<!-- END required bean defs for restart storage dir -->
 
 <tx:jta-transaction-manager />
 

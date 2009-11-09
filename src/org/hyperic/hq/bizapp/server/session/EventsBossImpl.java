@@ -40,8 +40,6 @@ import java.util.Set;
 
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
@@ -57,33 +55,36 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
-import org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface;
-import org.hyperic.hq.bizapp.shared.EventsBossLocal;
-import org.hyperic.hq.bizapp.shared.EventsBossUtil;
+import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
@@ -102,15 +103,10 @@ import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.TriggerCreateException;
 import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.server.session.Action;
-import org.hyperic.hq.events.server.session.ActionManagerImpl;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
-import org.hyperic.hq.events.server.session.AlertManagerImpl;
 import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType;
-import org.hyperic.hq.events.server.session.EventsStartupListener;
-import org.hyperic.hq.events.server.session.RegisteredTriggerManagerImpl;
 import org.hyperic.hq.events.shared.ActionManager;
 import org.hyperic.hq.events.shared.ActionValue;
 import org.hyperic.hq.events.shared.AlertConditionValue;
@@ -123,12 +119,12 @@ import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertEscalationAlertType;
 import org.hyperic.hq.galerts.server.session.GalertLogSortField;
-import org.hyperic.hq.galerts.server.session.GalertManagerImpl;
 import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.DefaultMetricEnableCallback;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
@@ -145,58 +141,94 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.quartz.SchedulerException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The BizApp's interface to the Events Subsystem
- *
- * @ejb:bean name="EventsBoss"
- *      jndi-name="ejb/bizapp/EventsBoss"
- *      local-jndi-name="LocalEventsBoss"
- *      view-type="both"
- *      type="Stateless"
- *
- * @ejb:transaction type="Required"
  */
-
-public class EventsBossEJBImpl
-    extends BizappSessionEJB
-    implements SessionBean
+@Service
+@Transactional
+public class EventsBossImpl implements EventsBoss
 {
-    private Log _log = LogFactory.getLog(EventsBossEJBImpl.class);
-    private final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
+    private Log log = LogFactory.getLog(EventsBossImpl.class);
+    
+    private static final String BUNDLE = "org.hyperic.hq.bizapp.Resources";
 
-    private SessionManager manager;
+    private SessionManager sessionManager;
 
-    public EventsBossEJBImpl() {
-        manager = SessionManager.getInstance();
+    private ActionManager actionManager;
+    
+    private AlertDefinitionManager alertDefinitionManager;
+    
+    private AlertManager alertManager;
+    
+    private AppdefBossLocal appdefBoss;
+    
+    private AuthManager authManager;
+    
+    private EscalationManagerLocal escalationManager;
+    
+    private MeasurementManagerLocal measurementManager;
+
+    private PlatformManagerLocal platformManager;
+    
+    private RegisteredTriggerManager registeredTriggerManager;
+    
+    private ResourceManager resourceManager;
+    
+    private ServerManagerLocal serverManager;
+    
+    private ServiceManagerLocal serviceManager;
+    
+    private PermissionManager permissionManager;
+   
+    private GalertManager galertManager;
+    
+    private ResourceGroupManager resourceGroupManager;
+    
+    private AuthzSubjectManagerLocal authzSubjectManager;
+   
+   
+    @Autowired
+    public EventsBossImpl(SessionManager sessionManager, ActionManager actionManager,
+                          AlertDefinitionManager alertDefinitionManager, AlertManager alertManager,
+                          AppdefBossLocal appdefBoss, AuthManager authManager,
+                          EscalationManagerLocal escalationManager, MeasurementManagerLocal measurementManager,
+                          PlatformManagerLocal platformManager, RegisteredTriggerManager registeredTriggerManager,
+                          ResourceManager resourceManager, ServerManagerLocal serverManager,
+                          ServiceManagerLocal serviceManager, PermissionManager permissionManager,
+                          GalertManager galertManager, ResourceGroupManager resourceGroupManager,
+                          AuthzSubjectManagerLocal authzSubjectManager) {
+        this.sessionManager = sessionManager;
+        this.actionManager = actionManager;
+        this.alertDefinitionManager = alertDefinitionManager;
+        this.alertManager = alertManager;
+        this.appdefBoss = appdefBoss;
+        this.authManager = authManager;
+        this.escalationManager = escalationManager;
+        this.measurementManager = measurementManager;
+        this.platformManager = platformManager;
+        this.registeredTriggerManager = registeredTriggerManager;
+        this.resourceManager = resourceManager;
+        this.serverManager = serverManager;
+        this.serviceManager = serviceManager;
+        this.permissionManager = permissionManager;
+        this.galertManager = galertManager;
+        this.resourceGroupManager = resourceGroupManager;
+        this.authzSubjectManager = authzSubjectManager;
     }
 
-    private EscalationManagerLocal getEscMan() {
-        return EscalationManagerEJBImpl.getOne();
+    /**
+     * TODO possibly find another way to return the correct impl of interface if in HQ or HQ EE.  
+     * For now, this has to be lazy b/c using SPEL permissionManager.maintenanceEventManager causes
+     * the Bootstrap.getBean(MaintenanceEventManager) to be invoked during creation of ejb-context.xml (which doesn't work b/c Boostrap.context is still set to dao-context.xml)
+     * @return
+     */
+    private MaintenanceEventManagerInterface getMaintenanceEventManager() {
+        return permissionManager.getMaintenanceEventManager();
     }
-
-    private RegisteredTriggerManager getRTM() {
-        return RegisteredTriggerManagerImpl.getOne();
-    }
-
-    private AlertManager getAM() {
-        return AlertManagerImpl.getOne();
-    }
-
-    private AlertDefinitionManager getADM() {
-        return AlertDefinitionManagerImpl.getOne();
-    }
-
-    private ActionManager getActMan() {
-        return ActionManagerImpl.getOne();
-    }
-
-    private MaintenanceEventManagerInterface getMaintEvtMgr() {
-    	return PermissionManagerFactory.getInstance()
-    	        .getMaintenanceEventManager();
-    }
-
-
 
     /*
      * How the Boss figures out which triggers to create based on conditions
@@ -205,7 +237,7 @@ public class EventsBossEJBImpl
                                 AlertDefinitionValue alertdef)
         throws TriggerCreateException, InvalidOptionException,
                InvalidOptionValueException {
-       getRTM().createTriggers(subject, alertdef);
+       registeredTriggerManager.createTriggers(subject, alertdef);
     }
 
     /**
@@ -246,17 +278,17 @@ public class EventsBossEJBImpl
                 // on saving the AlertCondition.
                 try {
                     Measurement dmv =
-                        getMetricManager().findMeasurement(subject, tid,
+                        measurementManager.findMeasurement(subject, tid,
                             id.getId(), true);
                     clone.setMeasurementId(dmv.getId().intValue());
                 } catch (MeasurementNotFoundException e) {
-                    _log.error("No measurement found for entity "+id+
+                    log.error("No measurement found for entity "+id+
                                " associated with template id="+tid+
                                ". Alert definition name ["+adval.getName()+"]");
-                    _log.debug("Root cause", e);
+                    log.debug("Root cause", e);
 
                     if (failSilently) {
-                        _log.info("Alert condition creation failed. " +
+                        log.info("Alert condition creation failed. " +
                                 "The alert definition for entity "+id+
                                 " with name ["+adval.getName()+
                                 "] should not be created.");
@@ -273,7 +305,7 @@ public class EventsBossEJBImpl
 
                 // Don't need to synch the child alert definition Id lookup.
                 Integer recoverId =
-                    getADM().findChildAlertDefinitionId(id,
+                    alertDefinitionManager.findChildAlertDefinitionId(id,
                                       new Integer(clone.getMeasurementId()),
                                       true);
 
@@ -282,7 +314,7 @@ public class EventsBossEJBImpl
                     // are disabled, just move on.
                     assert false : "recover Id should not be null.";
 
-                    _log.error("A recovery alert has no associated recover " +
+                    log.error("A recovery alert has no associated recover " +
                                "from alert. Setting alert condition " +
                                "measurement Id to 0.");
                     clone.setMeasurementId(0);
@@ -319,7 +351,7 @@ public class EventsBossEJBImpl
                                     actions[i].getId());
             } catch (Exception e) {
                 // Not a valid action, skip it then
-                _log.debug(actions[i].getClassname(), e);
+                log.debug(actions[i].getClassname(), e);
                 continue;
             }
             child.addAction(childAct);
@@ -328,15 +360,15 @@ public class EventsBossEJBImpl
 
     /**
      * Get the number of alerts for the given array of AppdefEntityID's
-     * @ejb:interface-method
+     * 
      */
     public int[] getAlertCount(int sessionID, AppdefEntityID[] ids)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, FinderException {
-        AuthzSubject subject = manager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
 
-        int[] counts = getAM().getAlertCount(ids);
-        counts = GalertManagerImpl.getOne().fillAlertCount(subject, ids,
+        int[] counts = alertManager.getAlertCount(ids);
+        counts = galertManager.fillAlertCount(subject, ids,
                                                               counts);
         return counts;
     }
@@ -344,7 +376,7 @@ public class EventsBossEJBImpl
     /**
      * Create an alert definition
      *
-     * @ejb:interface-method
+     * 
      */
     public AlertDefinitionValue createAlertDefinition(int sessionID,
                                                      AlertDefinitionValue adval)
@@ -353,7 +385,7 @@ public class EventsBossEJBImpl
                InvalidOptionValueException,
                SessionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
         if (adval.getConditions().length == 0) {
@@ -363,14 +395,14 @@ public class EventsBossEJBImpl
         }
 
         // Create list of ID's to create the alert definition
-        List appdefIds = new ArrayList();
+        List<AppdefEntityID> appdefIds = new ArrayList<AppdefEntityID>();
         final AppdefEntityID aeid = getAppdefEntityID(adval);
         appdefIds.add(aeid);
         if (aeid.isGroup()) {
             // Look up the group
             AppdefGroupValue group;
             try {
-                group = getAppdefBoss().findGroup(sessionID,
+                group = appdefBoss.findGroup(sessionID,
                                                   adval.getAppdefId());
             } catch (InvalidAppdefTypeException e) {
                 throw new AlertDefinitionCreateException(e);
@@ -379,14 +411,12 @@ public class EventsBossEJBImpl
             appdefIds.addAll(group.getAppdefGroupEntries());
         }
 
-        ArrayList triggers = new ArrayList();
+        ArrayList<RegisteredTriggerValue> triggers = new ArrayList<RegisteredTriggerValue>();
 
         AlertDefinitionValue parent = null;
-        AlertDefinitionManager adm = getADM();
+       
         // Iterate through to create the appropriate triggers and alertdef
-        for (Iterator it = appdefIds.iterator(); it.hasNext(); ) {
-            AppdefEntityID id = (AppdefEntityID) it.next();
-
+        for (AppdefEntityID id : appdefIds ) {           
             // Reset the value object with this entity ID
             adval.setAppdefType(id.getType());
             adval.setAppdefId(id.getId());
@@ -418,10 +448,11 @@ public class EventsBossEJBImpl
 
             // Now create the alert definition
             AlertDefinitionValue created =
-                adm.createAlertDefinition(subject, adval);
+                alertDefinitionManager.createAlertDefinition(subject, adval);
 
-            if (parent == null)
+            if (parent == null) {
                 parent = created;
+            }
         }
 
         return parent;
@@ -430,7 +461,7 @@ public class EventsBossEJBImpl
     /**
      * Create an alert definition for a resource type
      *
-     * @ejb:interface-method
+     * 
      */
     public AlertDefinitionValue createResourceTypeAlertDefinition(
         int sessionID, AppdefEntityTypeID aetid, AlertDefinitionValue adval)
@@ -438,7 +469,7 @@ public class EventsBossEJBImpl
                PermissionException, InvalidOptionException,
                InvalidOptionValueException,
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubject subject = manager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
         if (adval.getConditions().length == 0) {
@@ -454,7 +485,7 @@ public class EventsBossEJBImpl
         adval.setParentId(EventConstants.TYPE_ALERT_DEF_ID);
 
         // Now create the alert definition
-        parent = getADM().createAlertDefinition(subject, adval);
+        parent = alertDefinitionManager.createAlertDefinition(subject, adval);
 
         adval.setParentId(parent.getId());
 
@@ -463,15 +494,15 @@ public class EventsBossEJBImpl
         switch (aetid.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
             entIds =
-                getPlatformManager().getPlatformIds(subject, aetid.getId());
+                platformManager.getPlatformIds(subject, aetid.getId());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
             entIds =
-                getServerManager().getServerIds(subject, aetid.getId());
+                serverManager.getServerIds(subject, aetid.getId());
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
             entIds =
-                getServiceManager().getServiceIds(subject, aetid.getId());
+                serviceManager.getServiceIds(subject, aetid.getId());
             break;
         default:
             throw new InvalidOptionException(
@@ -479,10 +510,10 @@ public class EventsBossEJBImpl
                 aetid.getType());
         }
 
-        ArrayList triggers = new ArrayList();
+        ArrayList<RegisteredTriggerValue> triggers = new ArrayList<RegisteredTriggerValue>();
 
         // Iterate through to create the appropriate triggers and alertdef
-        AlertDefinitionManager adm = getADM();
+       
         for (int ei = 0; ei < entIds.length; ei++) {
             AppdefEntityID id = new AppdefEntityID(aetid.getType(), entIds[ei]);
 
@@ -516,7 +547,7 @@ public class EventsBossEJBImpl
             setMetricAlertAction(adval);
 
             // Now create the alert definition
-            adm.createAlertDefinition(subject, adval);
+            alertDefinitionManager.createAlertDefinition(subject, adval);
         }
 
         return parent;
@@ -537,7 +568,7 @@ public class EventsBossEJBImpl
                     action.setConfig(config.encode());
                 } catch (EncodingException e) {
                     // This should never happen
-                    _log.error("Empty ConfigResponse threw an encoding error",
+                    log.error("Empty ConfigResponse threw an encoding error",
                               e);
                 }
 
@@ -548,7 +579,7 @@ public class EventsBossEJBImpl
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void inheritResourceTypeAlertDefinition(AuthzSubject subject,
                                                    AppdefEntityID id)
@@ -571,16 +602,15 @@ public class EventsBossEJBImpl
                                          PageControl.SORT_ASC,
                                          SortAttribute.CTIME);
 
-        List defs = getADM().findAlertDefinitions(subject, aetid, pc);
+        List<AlertDefinitionValue> defs = alertDefinitionManager.findAlertDefinitions(subject, aetid, pc);
 
-        AlertDefinitionManager adm = getADM();
-        ArrayList triggers = new ArrayList();
-        for (Iterator it = defs.iterator(); it.hasNext(); ) {
-            AlertDefinitionValue adval = (AlertDefinitionValue) it.next();
-
+       
+        ArrayList<RegisteredTriggerValue> triggers = new ArrayList<RegisteredTriggerValue>();
+        for (AlertDefinitionValue adval : defs ) {
             // Only create if definition does not already exist
-            if (getADM().isAlertDefined(id, adval.getId()))
+            if (alertDefinitionManager.isAlertDefined(id, adval.getId())) {
                 continue;
+            }
 
             // Set the parent ID
             adval.setParentId(adval.getId());
@@ -611,12 +641,12 @@ public class EventsBossEJBImpl
             setMetricAlertAction(adval);
 
             // Now create the alert definition
-            adm.createAlertDefinition(subject, adval);
+            alertDefinitionManager.createAlertDefinition(subject, adval);
         }
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public Action createAction(int sessionID, Integer adid, String className,
                                ConfigResponse config)
@@ -624,28 +654,26 @@ public class EventsBossEJBImpl
                ActionCreateException, RemoveException, FinderException,
                PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
 
-        ArrayList alertdefs = new ArrayList();
+        ArrayList<AlertDefinition> alertdefs = new ArrayList<AlertDefinition>();
 
         // check that the user can actually manage alerts for this resource
-        AlertDefinition ad = getADM().getByIdAndCheck(subject, adid);
+        AlertDefinition ad = alertDefinitionManager.getByIdAndCheck(subject, adid);
         alertdefs.add(ad);
 
         // If there are any children
         alertdefs.addAll(ad.getChildren());
 
         Action root = null;
-        ActionManager actMan = getActMan();
-        for (Iterator it = alertdefs.iterator(); it.hasNext(); ) {
-            ad = (AlertDefinition) it.next();
-
+       
+        for (AlertDefinition alertDef : alertdefs ) {
             try {
                 if (root == null) {
-                    root = actMan.createAction(ad, className, config, null);
+                    root = actionManager.createAction(alertDef, className, config, null);
                 }
                 else {
-                    actMan.createAction(ad, className, config, root);
+                    actionManager.createAction(alertDef, className, config, root);
                 }
             } catch (EncodingException e) {
                 throw new SystemException("Couldn't encode.", e);
@@ -658,61 +686,55 @@ public class EventsBossEJBImpl
     /**
      * Activate/deactivate a collection of alert definitions
      *
-     * @ejb:interface-method
+     * 
      */
     public void activateAlertDefinitions(int sessionID, Integer[] ids,
                                          boolean activate)
         throws SessionNotFoundException, SessionTimeoutException,
                FinderException, PermissionException {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        getADM().updateAlertDefinitionsActiveStatus(subject, ids, activate);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        alertDefinitionManager.updateAlertDefinitionsActiveStatus(subject, ids, activate);
     }
 
     /**
      * Activate or deactivate alert definitions by AppdefEntityID.
      *
-     * @ejb:interface-method
+     * 
      */
     public void activateAlertDefinitions(int sessionID, AppdefEntityID[] eids,
                                          boolean activate)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
 
-        boolean debugEnabled = _log.isDebugEnabled();
+        boolean debugEnabled = log.isDebugEnabled();
         String status = (activate ? "enabled" : "disabled");
-        Resource res = null;
 
         for (int i=0; i<eids.length; i++) {
             AppdefEntityID eid = eids[i];
             if (debugEnabled) {
-                _log.debug("AppdefEntityID [" + eid + "]");
+                log.debug("AppdefEntityID [" + eid + "]");
             }
             if (eid.isGroup()) {
-                ResourceGroupManager rgm = ResourceGroupManagerImpl.getOne();
-                ResourceGroup group = rgm.findResourceGroupById(eid.getId());
+                ResourceGroup group = resourceGroupManager.findResourceGroupById(eid.getId());
 
                 // Get the group alerts
-                GalertManager gam = GalertManagerImpl.getOne();
-                Collection allAlerts = gam.findAlertDefs(group, PageControl.PAGE_ALL);
-                for (Iterator it = allAlerts.iterator(); it.hasNext(); ) {
-                    GalertDef galertDef = (GalertDef) it.next();
-                    gam.enable(galertDef, activate);
+                Collection<GalertDef> allAlerts = galertManager.findAlertDefs(group, PageControl.PAGE_ALL);
+                for (GalertDef galertDef : allAlerts ) {
+                    galertManager.enable(galertDef, activate);
                     if (debugEnabled) {
-                        _log.debug("Group Alert [" + galertDef + "] " + status);
+                        log.debug("Group Alert [" + galertDef + "] " + status);
                     }
                 }
 
                 // Get the resource alerts of the group
-                Collection resources = rgm.getMembers(group);
-                for (Iterator rIter = resources.iterator(); rIter.hasNext(); ) {
-                    res = (Resource) rIter.next();
+                Collection<Resource> resources = resourceGroupManager.getMembers(group);
+                for (Resource res: resources ) {
                     updateAlertDefinitionsActiveStatus(subject, res, activate);
                 }
             } else {
-                res = getResourceManager().findResource(eid);
-                updateAlertDefinitionsActiveStatus(subject, res, activate);
+                updateAlertDefinitionsActiveStatus(subject, resourceManager.findResource(eid), activate);
             }
         }
     }
@@ -721,17 +743,16 @@ public class EventsBossEJBImpl
                                 Resource res, boolean activate)
         throws PermissionException
     {
-        boolean debugEnabled = _log.isDebugEnabled();
+        boolean debugEnabled = log.isDebugEnabled();
         String status = (activate ? "enabled" : "disabled");
 
-        AlertDefinitionManager adm = getADM();
-        Collection allAlerts = adm.findRelatedAlertDefinitions(subject, res);
+        
+        Collection<AlertDefinition> allAlerts = alertDefinitionManager.findRelatedAlertDefinitions(subject, res);
 
-        for (Iterator it = allAlerts.iterator(); it.hasNext();) {
-            AlertDefinition alertDef = (AlertDefinition) it.next();
-            adm.updateAlertDefinitionActiveStatus(subject, alertDef, activate);
+        for (AlertDefinition alertDef : allAlerts) {
+            alertDefinitionManager.updateAlertDefinitionActiveStatus(subject, alertDef, activate);
             if (debugEnabled) {
-                _log.debug("Resource Alert [" + alertDef + "] " + status);
+                log.debug("Resource Alert [" + alertDef + "] " + status);
             }
         }
     }
@@ -739,27 +760,27 @@ public class EventsBossEJBImpl
     /**
      * Update just the basics
      *
-     * @ejb:interface-method
+     * 
      */
     public void updateAlertDefinitionBasic(int sessionID, Integer alertDefId,
                                            String name, String desc,
                                            int priority, boolean activate)
         throws SessionNotFoundException, SessionTimeoutException,
                FinderException, RemoveException, PermissionException {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        getADM().updateAlertDefinitionBasic(subject, alertDefId, name, desc,
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        alertDefinitionManager.updateAlertDefinitionBasic(subject, alertDefId, name, desc,
                                             priority, activate);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void updateAlertDefinition(int sessionID, AlertDefinitionValue adval)
         throws TriggerCreateException, InvalidOptionException,
                InvalidOptionValueException, AlertConditionCreateException,
                ActionCreateException, FinderException, RemoveException,
                SessionNotFoundException, SessionTimeoutException {
-        AuthzSubject subject = manager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // Verify that there are some conditions to evaluate
         if (adval.getConditions().length < 1) {
@@ -767,18 +788,17 @@ public class EventsBossEJBImpl
                 "Conditions cannot be null or empty");
         }
 
-        AlertDefinitionManager adm = getADM();
-        ArrayList triggers = new ArrayList();
+       
+        ArrayList<RegisteredTriggerValue> triggers = new ArrayList<RegisteredTriggerValue>();
         if (EventConstants.TYPE_ALERT_DEF_ID.equals(adval.getParentId()) ||
             adval.getAppdefType() == AppdefEntityConstants.APPDEF_TYPE_GROUP) {
             // A little more work to do for group and type alert definition
-            adval = getADM().updateAlertDefinition(adval);
+            adval = alertDefinitionManager.updateAlertDefinition(adval);
 
-            List children = getADM().findAlertDefinitionChildren(adval.getId());
+            List<AlertDefinitionValue> children = alertDefinitionManager.findAlertDefinitionChildren(adval.getId());
 
-            for (Iterator it = children.iterator(); it.hasNext();) {
-                AlertDefinitionValue child = (AlertDefinitionValue) it.next();
-
+            for (AlertDefinitionValue child : children) {
+                
                 AppdefEntityID id = new AppdefEntityID(child.getAppdefType(),
                                                        child.getAppdefId());
 
@@ -804,18 +824,18 @@ public class EventsBossEJBImpl
                 child.setControlFiltered(adval.getControlFiltered());
 
                 // Triggers are deleted by the manager
-                getRTM().deleteAlertDefinitionTriggers(child.getId());
+                registeredTriggerManager.deleteAlertDefinitionTriggers(child.getId());
                 child.removeAllTriggers();
                 createTriggers(subject, child);
                 triggers.addAll(Arrays.asList(adval.getTriggers()));
 
                 // Now update the alert definition
-                adm.updateAlertDefinition(child);
+                alertDefinitionManager.updateAlertDefinition(child);
             }
         }
         else {
             // First, get rid of the current triggers
-            getRTM().deleteAlertDefinitionTriggers(adval.getId());
+            registeredTriggerManager.deleteAlertDefinitionTriggers(adval.getId());
             adval.removeAllTriggers();
 
             // Now create the new triggers
@@ -823,7 +843,7 @@ public class EventsBossEJBImpl
             triggers.addAll(Arrays.asList(adval.getTriggers()));
 
             // Now update the alert definition
-            adm.updateAlertDefinition(adval);
+            alertDefinitionManager.updateAlertDefinition(adval);
         }
     }
 
@@ -832,104 +852,103 @@ public class EventsBossEJBImpl
      *
      * @param alertId the alert id
      *
-     * @ejb:interface-method
+     * 
      */
-    public List getActionsForAlert(int sessionId, Integer alertId)
+    public List<ActionValue> getActionsForAlert(int sessionId, Integer alertId)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        manager.authenticate(sessionId);
-        return getActMan().getActionsForAlert(alertId.intValue());
+        sessionManager.authenticate(sessionId);
+        return actionManager.getActionsForAlert(alertId.intValue());
     }
 
     /**
      * Update an action
      *
-     * @ejb:interface-method
+     * 
      */
     public void updateAction(int sessionID, ActionValue aval)
         throws SessionNotFoundException, SessionTimeoutException
     {
-        manager.authenticate(sessionID);
-        getActMan().updateAction(aval);
+        sessionManager.authenticate(sessionID);
+        actionManager.updateAction(aval);
     }
 
     /**
      * Delete a collection of alert definitions
      *
-     * @ejb:interface-method
+     * 
      */
     public void deleteAlertDefinitions(int sessionID, Integer[] ids)
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        getADM().deleteAlertDefinitions(subject, ids);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        alertDefinitionManager.deleteAlertDefinitions(subject, ids);
     }
 
     /**
      * Delete list of alerts
      *
-     * @ejb:interface-method
+     * 
      */
     public void deleteAlerts(int sessionID, Integer[] ids)
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException
     {
-        manager.authenticate(sessionID);
-        getAM().deleteAlerts(ids);
+        sessionManager.authenticate(sessionID);
+        alertManager.deleteAlerts(ids);
     }
 
     /**
      * Delete all alerts for a resource
      *
-     * @ejb:interface-method
+     * 
      */
     public int deleteAlerts(int sessionID, AppdefEntityID aeid)
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        return getAM().deleteAlerts(subject, aeid);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        return alertManager.deleteAlerts(subject, aeid);
     }
 
     /**
      * Delete all alerts for a given period of time
      *
-     * @ejb:interface-method
+     * 
      */
     public int deleteAlerts(int sessionID, long begin, long end)
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException
     {
-        manager.authenticate(sessionID);
+        sessionManager.authenticate(sessionID);
         // XXX - check security
-        return getAM().deleteAlerts(begin, end);
+        return alertManager.deleteAlerts(begin, end);
     }
 
     /**
      * Delete all alerts for a list of alert definitions
      * @throws FinderException if alert definition is not found
      *
-     * @ejb:interface-method
+     * 
      */
     public int deleteAlertsForDefinitions(int sessionID, Integer[] adids)
         throws SessionNotFoundException, SessionTimeoutException,
                RemoveException, PermissionException, FinderException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // Delete alerts for definition and its children
         int count = 0;
-        AlertDefinitionManager adm = getADM();
+        
         for (int i = 0; i < adids.length; i++) {
-            AlertDefinition def = adm.getByIdAndCheck(subject, adids[i]);
-            count += getAM().deleteAlerts(subject, def);
+            AlertDefinition def = alertDefinitionManager.getByIdAndCheck(subject, adids[i]);
+            count += alertManager.deleteAlerts(subject, def);
 
-            Collection children = def.getChildren();
+            Collection<AlertDefinition> children = def.getChildren();
 
-            for (Iterator it = children.iterator(); it.hasNext(); ) {
-                AlertDefinition child = (AlertDefinition) it.next();
-                count += getAM().deleteAlerts(subject, child);
+            for (AlertDefinition child : children) {
+                count += alertManager.deleteAlerts(subject, child);
             }
         }
         return count;
@@ -938,29 +957,29 @@ public class EventsBossEJBImpl
     /**
      * Get an alert definition by ID
      *
-     * @ejb:interface-method
+     * 
      */
     public AlertDefinitionValue getAlertDefinition(int sessionID, Integer id)
     throws SessionNotFoundException, SessionTimeoutException,
            FinderException, PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        return getADM().getById(subject, id);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        return alertDefinitionManager.getById(subject, id);
     }
 
     /**
      * Find an alert by ID
      *
-     * @ejb:interface-method
+     * 
      */
     public Alert getAlert(int sessionID, Integer id)
     throws SessionNotFoundException,
            SessionTimeoutException,
            AlertNotFoundException
     {
-        manager.authenticate(sessionID);
+        sessionManager.authenticate(sessionID);
 
-        Alert alert = getAM().findAlertById(id);
+        Alert alert = alertManager.findAlertById(id);
 
         if (alert == null) throw new AlertNotFoundException(id);
 
@@ -970,55 +989,55 @@ public class EventsBossEJBImpl
     /**
      * Get a list of all alert definitions
      *
-     * @ejb:interface-method
+     * 
      */
-    public PageList findAllAlertDefinitions(int sessionID)
+    public PageList<AlertDefinitionValue> findAllAlertDefinitions(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        return getADM().findAllAlertDefinitions(subject);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        return alertDefinitionManager.findAllAlertDefinitions(subject);
     }
 
 	/**
      * Get a collection of alert definitions for a resource
      *
-     * @ejb:interface-method
+     * 
      */
-    public PageList findAlertDefinitions(int sessionID, AppdefEntityID id,
+    public PageList<AlertDefinitionValue> findAlertDefinitions(int sessionID, AppdefEntityID id,
                                          PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        return getADM().findAlertDefinitions(subject, id, pc);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        return alertDefinitionManager.findAlertDefinitions(subject, id, pc);
     }
 
     /**
      * Get a collection of alert definitions for a resource or resource type
-     * @ejb:interface-method
+     * 
      */
-    public PageList findAlertDefinitions(int sessionID, AppdefEntityTypeID id,
+    public PageList<AlertDefinitionValue> findAlertDefinitions(int sessionID, AppdefEntityTypeID id,
                                          PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        return getADM().findAlertDefinitions(subject, id, pc);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        return alertDefinitionManager.findAlertDefinitions(subject, id, pc);
     }
 
     /**
      * Find all alert definition names for a resource
      * @return Map of AlertDefinition names and IDs
-     * @ejb:interface-method
+     * 
      */
-    public Map findAlertDefinitionNames(int sessionID, AppdefEntityID id,
+    public Map<String,Integer> findAlertDefinitionNames(int sessionID, AppdefEntityID id,
                                         Integer parentId)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        return getADM().findAlertDefinitionNames(subject, id, parentId);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        return alertDefinitionManager.findAlertDefinitionNames(subject, id, parentId);
     }
 
    
@@ -1026,28 +1045,28 @@ public class EventsBossEJBImpl
     /**
      * Find all alerts for an appdef resource
      *
-     * @ejb:interface-method
+     * 
      */
-    public PageList findAlerts(int sessionID, AppdefEntityID id, PageControl pc)
+    public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        return getAM().findAlerts(subject, id, pc);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        return alertManager.findAlerts(subject, id, pc);
     }
 
     /**
      * Find all alerts for an appdef resource
      *
-     * @ejb:interface-method
+     * 
      */
-    public PageList findAlerts(int sessionID, AppdefEntityID id,
+    public PageList<Alert> findAlerts(int sessionID, AppdefEntityID id,
                                long begin, long end, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        return getAM().findAlerts(subject, id, begin, end, pc);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        return alertManager.findAlerts(subject, id, begin, end, pc);
     }
 
     /**
@@ -1058,13 +1077,13 @@ public class EventsBossEJBImpl
      * @param timeRange the amount of time from current time to include
      * @param ids the IDs of resources to include or null for ALL
      * @return a list of {@link Escalatable}s
-     * @ejb:interface-method
+     * 
      */
-    public List findRecentAlerts(String username, int count, int priority,
+    public List<Escalatable> findRecentAlerts(String username, int count, int priority,
                                  long timeRange, AppdefEntityID[] ids)
         throws LoginException, ApplicationException, ConfigPropertyException
     {
-        int sessionId = getAuthManager().getUnauthSessionId(username);
+        int sessionId = authManager.getUnauthSessionId(username);
         return findRecentAlerts(sessionId, count, priority, timeRange, ids);
     }
 
@@ -1076,58 +1095,59 @@ public class EventsBossEJBImpl
      * @param timeRange the amount of time from current time to include
      * @param ids the IDs of resources to include or null for ALL
      * @return a list of {@link Escalatable}s
-     * @ejb:interface-method
+     * 
      */
-    public List findRecentAlerts(int sessionID, int count, int priority,
+    public List<Escalatable> findRecentAlerts(int sessionID, int count, int priority,
                                  long timeRange, AppdefEntityID[] ids)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException
     {
-        AuthzSubject subject  = manager.getSubject(sessionID);
+        AuthzSubject subject  = sessionManager.getSubject(sessionID);
         long cur = System.currentTimeMillis();
 
-        List appentResources =
+        List<AppdefEntityID> appentResources =
             ids != null ? appentResources = Arrays.asList(ids) : null;
 
         // Assume if user can be alerted, then they can view resource,
         // otherwise, it'll be filtered out later anyways
-        List alerts = getAM().findEscalatables(subject, count, priority,
+        List<Escalatable> alerts = alertManager.findEscalatables(subject, count, priority,
                                                timeRange, cur, appentResources);
 
         // CheckAlertingScope now only used for galerts
         if (ids == null) {
             // find ALL alertable resources
-            appentResources = getPlatformManager().checkAlertingScope(subject);
+            appentResources = platformManager.checkAlertingScope(subject);
         }
 
-        GalertManager gMan = GalertManagerImpl.getOne();
-        List galerts = gMan.findEscalatables(subject, count, priority,
+        
+        List<Escalatable> galerts = galertManager.findEscalatables(subject, count, priority,
                                              timeRange, cur, appentResources);
         alerts.addAll(galerts);
 
-        Collections.sort(alerts, new Comparator() {
-            public int compare(Object o1, Object o2) {
-                long l1 = ((Escalatable)o1).getAlertInfo().getTimestamp();
-                long l2 = ((Escalatable)o2).getAlertInfo().getTimestamp();
+        Collections.sort(alerts, new Comparator<Escalatable>() {
+            public int compare(Escalatable o1, Escalatable o2) {
+                long l1 = o1.getAlertInfo().getTimestamp();
+                long l2 = o2.getAlertInfo().getTimestamp();
 
                 // Reverse sort
-                if (l1 > l2)
+                if (l1 > l2) {
                     return -1;
-                else if (l1 < l2)
+                } else if (l1 < l2) {
                     return 1;
-                else
+                }else {
                     return 0;
+                }
             }
         });
 
-        Set goodIds = new HashSet();
-        List badIds = new ArrayList();
+        Set<AppdefEntityID> goodIds = new HashSet<AppdefEntityID>();
+        List<AppdefEntityID> badIds = new ArrayList<AppdefEntityID>();
 
-        List res = new ArrayList();
-        for (Iterator i = alerts.iterator();
+        List<Escalatable> res = new ArrayList<Escalatable>();
+        for (Iterator<Escalatable> i = alerts.iterator();
              i.hasNext() && res.size() < count; )
         {
-            Escalatable alert = (Escalatable) i.next();
+            Escalatable alert = i.next();
             PerformsEscalations def = alert.getDefinition();
             AlertDefinitionInterface defInfo = def.getDefinitionInfo();
             AppdefEntityID aeid;
@@ -1160,16 +1180,16 @@ public class EventsBossEJBImpl
     /**
      * Get config schema info for an action class
      *
-     * @ejb:interface-method
+     * 
      */
     public ConfigSchema getActionConfigSchema(int sessionID, String actionClass)
         throws SessionNotFoundException, SessionTimeoutException,
                EncodingException
     {
-        manager.authenticate(sessionID);
+        sessionManager.authenticate(sessionID);
         ActionInterface iface;
         try {
-            Class c = Class.forName(actionClass);
+            Class<?> c = Class.forName(actionClass);
             iface = (ActionInterface) c.newInstance();
         } catch(Exception exc){
             throw new EncodingException("Failed to instantiate class: " + exc);
@@ -1184,16 +1204,16 @@ public class EventsBossEJBImpl
     /**
      * Get config schema info for a trigger class
      *
-     * @ejb:interface-method
+     * 
      */
     public ConfigSchema getRegisteredTriggerConfigSchema(int sessionID,
                                                          String triggerClass)
         throws SessionNotFoundException, SessionTimeoutException,
                EncodingException
     {
-        manager.authenticate(sessionID);
+        sessionManager.authenticate(sessionID);
         RegisterableTriggerInterface iface;
-        Class c;
+        Class<?> c;
 
         try {
             c = Class.forName(triggerClass);
@@ -1205,20 +1225,20 @@ public class EventsBossEJBImpl
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void deleteEscalationByName(int sessionID, String name)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ApplicationException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        Escalation e = getEscMan().findByName(name);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        Escalation e = escalationManager.findByName(name);
 
-        getEscMan().deleteEscalation(subject, e);
+        escalationManager.deleteEscalation(subject, e);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void deleteEscalationById(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -1229,19 +1249,19 @@ public class EventsBossEJBImpl
 
     /**
      * remove escalation by id
-     * @ejb:interface-method
+     * 
      */
     public void deleteEscalationById(int sessionID, Integer[] ids)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ApplicationException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        EscalationManagerLocal escMan = getEscMan();
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+       
 
         for (int i=0; i<ids.length; i++) {
-            Escalation e = escMan.findById(ids[i]);
+            Escalation e = escalationManager.findById(ids[i]);
 
-            escMan.deleteEscalation(subject, e);
+            escalationManager.deleteEscalation(subject, e);
         }
     }
 
@@ -1252,20 +1272,20 @@ public class EventsBossEJBImpl
                                                   EscalationAlertType type)
         throws PermissionException
     {
-        return getEscMan().findByDefId(type, id);
+        return escalationManager.findByDefId(type, id);
     }
 
     /**
      * retrieve escalation name by alert definition id.
      *
-     * @ejb:interface-method
+     * 
      */
     public Integer getEscalationIdByAlertDefId(int sessionID, Integer id,
                                                EscalationAlertType alertType)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, FinderException
     {
-        manager.authenticate(sessionID);
+        sessionManager.authenticate(sessionID);
         Escalation esc = findEscalationByAlertDefId(id, alertType);
         return esc == null ? null : esc.getId();
     }
@@ -1273,7 +1293,7 @@ public class EventsBossEJBImpl
     /**
      * set escalation name by alert definition id.
      *
-     * @ejb:interface-method
+     * 
      */
     public void setEscalationByAlertDefId(int sessionID, Integer id,
                                           Integer escId,
@@ -1281,38 +1301,38 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        manager.authenticate(sessionID);
+        sessionManager.authenticate(sessionID);
         Escalation escalation = findEscalationById(sessionID, escId);
         // TODO: check permission
-        getEscMan().setEscalation(alertType, id, escalation);
+        escalationManager.setEscalation(alertType, id, escalation);
     }
 
     /**
      * unset escalation by alert definition id.
      *
-     * @ejb:interface-method
+     * 
      */
     public void unsetEscalationByAlertDefId(int sessionID, Integer id,
                                             EscalationAlertType alertType)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        manager.authenticate(sessionID);
+        sessionManager.authenticate(sessionID);
         // TODO: check permission
-        getEscMan().setEscalation(alertType, id, null);
+        escalationManager.setEscalation(alertType, id, null);
     }
 
     /**
      * retrieve escalation JSONObject by alert definition id.
      *
-     * @ejb:interface-method
+     * 
      */
     public JSONObject jsonEscalationByAlertDefId(int sessionID, Integer id,
                                                  EscalationAlertType alertType)
         throws SessionException, PermissionException, JSONException,
                FinderException
     {
-        manager.authenticate(sessionID);
+        sessionManager.authenticate(sessionID);
         Escalation e = findEscalationByAlertDefId(id, alertType);
         return e == null ? null
                          : new JSONObject().put(e.getJsonName(), e.toJSON());
@@ -1321,14 +1341,14 @@ public class EventsBossEJBImpl
     /**
      * retrieve escalation object by escalation id.
      *
-     * @ejb:interface-method
+     * 
      */
     public Escalation findEscalationById(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        Escalation e = getEscMan().findById(subject, id);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        Escalation e = escalationManager.findById(subject, id);
 
         // XXX: Temporarily get around lazy loading problem
         e.isPauseAllowed();
@@ -1337,29 +1357,29 @@ public class EventsBossEJBImpl
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void addAction(int sessionID, Escalation e,
                           ActionConfigInterface cfg, long waitTime)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        manager.authenticate(sessionID);
-        getEscMan().addAction(e, cfg, waitTime);
+        sessionManager.authenticate(sessionID);
+        escalationManager.addAction(e, cfg, waitTime);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void removeAction(int sessionID, Integer escId, Integer actId)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        manager.authenticate(sessionID);
-        Escalation e = getEscMan().findById(escId);
+        sessionManager.authenticate(sessionID);
+        Escalation e = escalationManager.findById(escId);
 
         if (e != null) {
-            getEscMan().removeAction(e, actId);
+            escalationManager.removeAction(e, actId);
         }
     }
 
@@ -1367,25 +1387,25 @@ public class EventsBossEJBImpl
      * Retrieve a list of {@link EscalationState}s, representing the active
      * escalations in the system.
      *
-     * @ejb:interface-method
+     * 
      */
-    public List getActiveEscalations(int sessionId, int maxEscalations)
+    public List<EscalationState> getActiveEscalations(int sessionId, int maxEscalations)
         throws SessionException
     {
-        manager.authenticate(sessionId);
+        sessionManager.authenticate(sessionId);
 
-        return getEscMan().getActiveEscalations(maxEscalations);
+        return escalationManager.getActiveEscalations(maxEscalations);
     }
 
     /**
      * Gets the escalatable associated with the specified state
-     * @ejb:interface-method
+     * 
      */
     public Escalatable getEscalatable(int sessionId, EscalationState state)
         throws SessionException
     {
-        manager.authenticate(sessionId);
-        return getEscMan().getEscalatable(state);
+        sessionManager.authenticate(sessionId);
+        return escalationManager.getEscalatable(state);
     }
 
     /**
@@ -1394,17 +1414,16 @@ public class EventsBossEJBImpl
      * Escalation json finders begin with json* to be consistent with
      * DAO finder convention
      *
-     * @ejb:interface-method
+     * 
      */
     public JSONArray listAllEscalationName(int sessionID)
         throws JSONException, SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubject  subject = manager.getSubject(sessionID);
-        Collection all = getEscMan().findAll(subject);
+        AuthzSubject  subject = sessionManager.getSubject(sessionID);
+        Collection<Escalation> all = escalationManager.findAll(subject);
         JSONArray jarr = new JSONArray();
-        for (Iterator i = all.iterator(); i.hasNext(); ) {
-            Escalation esc = (Escalation)i.next();
+        for (Escalation esc  : all ) {
             jarr.put(new JSONObject()
                 .put("id", esc.getId())
                 .put("name", esc.getName()));
@@ -1420,7 +1439,7 @@ public class EventsBossEJBImpl
      * Create a new escalation.  If alertDefId is non-null, the escalation
      * will also be associated with the given alert definition.
      *
-     * @ejb:interface-method
+     * 
      */
     public Escalation createEscalation(int sessionID, String name, String desc,
                                        boolean allowPause, long maxWaitTime,
@@ -1430,17 +1449,17 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, DuplicateObjectException
     {
-        manager.authenticate(sessionID);
-        Escalation res;
+        sessionManager.authenticate(sessionID);
+        
 
         // XXX -- We need to do perm-checking here
 
-        res = getEscMan().createEscalation(name, desc, allowPause, maxWaitTime,
+        Escalation res = escalationManager.createEscalation(name, desc, allowPause, maxWaitTime,
                                            notifyAll, repeat);
 
         if (alertDefId != null) {
             // The alert def needs to use this escalation
-            getEscMan().setEscalation(alertType, alertDefId, res);
+            escalationManager.setEscalation(alertType, alertDefId, res);
         }
         return res;
     }
@@ -1448,7 +1467,7 @@ public class EventsBossEJBImpl
     /**
      * Update basic escalation properties
      *
-     * @ejb:interface-method
+     * 
      */
     public void updateEscalation(int sessionID, Escalation escalation,
                                  String name, String desc, long maxWait,
@@ -1457,14 +1476,14 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, DuplicateObjectException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
 
-        getEscMan().updateEscalation(subject, escalation, name, desc,
+        escalationManager.updateEscalation(subject, escalation, name, desc,
                                      pausable, maxWait, notifyAll, repeat);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public boolean acknowledgeAlert(int sessionID, EscalationAlertType alertType,
                                  Integer alertID, long pauseWaitTime,
@@ -1472,9 +1491,9 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ActionExecuteException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
 
-        return getEscMan().acknowledgeAlert(subject, alertType, alertID,
+        return escalationManager.acknowledgeAlert(subject, alertType, alertID,
                                             moreInfo, pauseWaitTime);
     }
 
@@ -1484,7 +1503,7 @@ public class EventsBossEJBImpl
      * Method WAS "NotSupported" since all the alert fixes may take longer
      * than the jboss transaction timeout.  No need for a transaction in this
      * context.
-     * @ejb:interface-method
+     * 
      */
     public void fixAlert(int sessionID, EscalationAlertType alertType,
                          Integer alertID, String moreInfo)
@@ -1500,7 +1519,7 @@ public class EventsBossEJBImpl
      * Method is "NotSupported" since all the alert fixes may take longer
      * than the jboss transaction timeout.  No need for a transaction in this
      * context.
-     * @ejb:interface-method
+     * 
      */
     public void fixAlert(int sessionID, EscalationAlertType alertType,
                          Integer alertID, String moreInfo,
@@ -1508,7 +1527,7 @@ public class EventsBossEJBImpl
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ActionExecuteException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         if (fixAllPrevious) {
             long fixCount = fixPreviousAlerts(sessionID, alertType,
@@ -1528,7 +1547,7 @@ public class EventsBossEJBImpl
             }
         }
         // fix the selected alert
-        getEscMan().fixAlert(subject, alertType, alertID, moreInfo, false);
+        escalationManager.fixAlert(subject, alertType, alertID, moreInfo, false);
     }
 
     /**
@@ -1537,32 +1556,34 @@ public class EventsBossEJBImpl
      * than the jboss transaction timeout.  No need for a transaction in this
      * context.
      */
+    @SuppressWarnings("unchecked")
     private long fixPreviousAlerts(int sessionID, EscalationAlertType alertType,
                                    Integer alertID, String moreInfo)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, ActionExecuteException
     {
         StopWatch watch = new StopWatch();
-        AuthzSubject subject = manager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
         long fixCount = 0;
-        AlertInterface alert = null;
-        List alertsToFix = null;
+        
+        List<? extends AlertInterface> alertsToFix = null;
 
         // Get all previous unfixed alerts.
         watch.markTimeBegin("fixPreviousAlerts: findAlerts");
         if (alertType.equals(ClassicEscalationAlertType.CLASSIC)) {
-            alert = getAM().findAlertById(alertID);
-            alertsToFix = getAM().findAlerts(
+            AlertInterface alert = alertManager.findAlertById(alertID);
+            alertsToFix = alertManager.findAlerts(
                                        subject.getId(), 0,
                                        alert.getTimestamp(), alert.getTimestamp(),
                                        false, true, null,
                                        alert.getAlertDefinitionInterface().getId(),
                                        PageInfo.getAll(AlertSortField.DATE,
                                                        false));
+            
+            
         } else if (alertType.equals(GalertEscalationAlertType.GALERT)) {
-            GalertManager gMan = GalertManagerImpl.getOne();
-            alert = gMan.findAlertLog(alertID);
-            alertsToFix = gMan.findAlerts(
+            AlertInterface alert = galertManager.findAlertLog(alertID);
+            alertsToFix = galertManager.findAlerts(
                                     subject, AlertSeverity.LOW,
                                     alert.getTimestamp(), alert.getTimestamp(),
                                     false, true, null,
@@ -1574,114 +1595,109 @@ public class EventsBossEJBImpl
         }
         watch.markTimeEnd("fixPreviousAlerts: findAlerts");
 
-        _log.debug("fixPreviousAlerts: alertId = " + alertID
+        log.debug("fixPreviousAlerts: alertId = " + alertID
                         + ", previous alerts to fix = " + (alertsToFix.size()-1)
                         + ", time = " + watch);
 
+        watch.markTimeBegin("fixPreviousAlerts: fixAlert");
         try {
-            watch.markTimeBegin("fixPreviousAlerts: fixAlert");
-
-            for (Iterator it = alertsToFix.iterator(); it.hasNext(); ) {
-                alert = (AlertInterface) it.next();
-
+            for (AlertInterface alert: alertsToFix ) {
                 try {
                     // Suppress notifications for all previous alerts.
                     if (!alert.getId().equals(alertID)) {
-                        getEscMan().fixAlert(subject, alertType, alert.getId(), moreInfo, true);
+                        escalationManager.fixAlert(subject, alertType, alert.getId(), moreInfo, true);
                         fixCount++;
                     }
                 } catch (PermissionException pe) {
                     throw pe;
                 } catch (Exception e) {
                     // continue with next alert
-                    _log.error("Could not fix alert id "
+                    log.error("Could not fix alert id "
                                     + alert.getId() + ": " + e.getMessage(), e);
                 }
             }
         } finally {
             watch.markTimeEnd("fixPreviousAlerts: fixAlert");
-            _log.debug("fixPreviousAlerts: alertId = " + alertID
+            log.debug("fixPreviousAlerts: alertId = " + alertID
                             + ", previous alerts fixed = " + fixCount
                             + ", time = " + watch);
-
-            return fixCount;
+           
         }
+        return fixCount;
     }
 
     /**
      * Get the last fix if available
-     * @ejb:interface-method
+     * 
      */
     public String getLastFix(int sessionID, Integer defId)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, FinderException {
-        AuthzSubject subject = manager.getSubject(sessionID);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // Look for the last fixed alert
-        AlertDefinition def = getADM().getByIdAndCheck(subject, defId);
-        return getEscMan().getLastFix(def);
+        AlertDefinition def = alertDefinitionManager.getByIdAndCheck(subject, defId);
+        return escalationManager.getLastFix(def);
     }
 
     /**
      * Get a maintenance event by group id
      *
-     * @ejb:interface-method
+     * 
      */
     public MaintenanceEvent getMaintenanceEvent(int sessionId, Integer groupId)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, SchedulerException
     {
-    	AuthzSubject subject = manager.getSubject(sessionId);
+    	AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-    	return getMaintEvtMgr().getMaintenanceEvent(subject, groupId);
+    	return getMaintenanceEventManager().getMaintenanceEvent(subject, groupId);
     }
 
     /**
      * Schedule a maintenance event
      *
-     * @ejb:interface-method
+     * 
      */
     public MaintenanceEvent scheduleMaintenanceEvent(int sessionId, MaintenanceEvent event)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, SchedulerException
     {
-    	AuthzSubject subject = manager.getSubject(sessionId);
+    	AuthzSubject subject = sessionManager.getSubject(sessionId);
     	event.setModifiedBy(subject.getName());
 
-    	return getMaintEvtMgr().schedule(subject, event);
+    	return getMaintenanceEventManager().schedule(subject, event);
     }
 
     /**
      * Schedule a maintenance event
      *
-     * @ejb:interface-method
+     * 
      */
     public void unscheduleMaintenanceEvent(int sessionId, MaintenanceEvent event)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, SchedulerException
     {
-    	AuthzSubject subject = manager.getSubject(sessionId);
+    	AuthzSubject subject = sessionManager.getSubject(sessionId);
     	event.setModifiedBy(subject.getName());
 
-    	getMaintEvtMgr().unschedule(subject, event);
+    	getMaintenanceEventManager().unschedule(subject, event);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void startup() {
-        _log.info("Events Boss starting up!");
+        log.info("Events Boss starting up!");
 
         HQApp app = HQApp.getInstance();
         app.registerCallbackListener(DefaultMetricEnableCallback.class,
             new DefaultMetricEnableCallback() {
                 public void metricsEnabled(AppdefEntityID ent) {
                     try {
-                        _log.info("Inheriting type-based alert defs for " +ent);
-                        EventsBossLocal eb = EventsBossEJBImpl.getOne();
-                        AuthzSubject hqadmin = AuthzSubjectManagerEJBImpl
-                            .getOne().getSubjectById(AuthzConstants.rootSubjectId);
-                        eb.inheritResourceTypeAlertDefinition(hqadmin, ent);
+                        log.info("Inheriting type-based alert defs for " +ent);
+                        AuthzSubject hqadmin = authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
+                        getOne().inheritResourceTypeAlertDefinition(hqadmin, ent);
                     } catch(Exception e) {
                         throw new SystemException(e);
                     }
@@ -1692,8 +1708,7 @@ public class EventsBossEJBImpl
         app.registerCallbackListener(ResourceDeleteCallback.class,
             new ResourceDeleteCallback() {
                 public void preResourceDelete(Resource r) throws VetoException {
-                    AlertDefinitionManager adm = getADM();
-                    adm.disassociateResource(r);
+                    alertDefinitionManager.disassociateResource(r);
                 }
             }
         );
@@ -1701,8 +1716,8 @@ public class EventsBossEJBImpl
         app.registerCallbackListener(SubjectRemoveCallback.class,
             new SubjectRemoveCallback() {
                 public void subjectRemoved(AuthzSubject toDelete) {
-                    getEscMan().handleSubjectRemoval(toDelete);
-                    getAM().handleSubjectRemoval(toDelete);
+                    escalationManager.handleSubjectRemoval(toDelete);
+                    alertManager.handleSubjectRemoval(toDelete);
                 }
 
             }
@@ -1710,16 +1725,14 @@ public class EventsBossEJBImpl
 
         // Add listener to remove alert definition and alerts after resources
         // are deleted.
-        HashSet events = new HashSet();
+        HashSet<Class<ResourceDeletedZevent>> events = new HashSet<Class<ResourceDeletedZevent>>();
         events.add (ResourceDeletedZevent.class);
         ZeventManager.getInstance().addBufferedListener(events,
-            new ZeventListener() {
-                public void processEvents(List events) {
-                    AlertDefinitionManager adm = getADM();
-                    for (Iterator i = events.iterator(); i.hasNext();) {
-                        ResourceZevent z = (ResourceZevent) i.next();
+            new ZeventListener<ResourceZevent>() {
+                public void processEvents(List<ResourceZevent> events) {
+                    for (ResourceZevent z : events) {
                         if (z instanceof ResourceDeletedZevent) {
-                            adm.cleanupAlertDefinitions(z.getAppdefEntityID());
+                            alertDefinitionManager.cleanupAlertDefinitions(z.getAppdefEntityID());
                         }
                     }
                 }
@@ -1731,20 +1744,7 @@ public class EventsBossEJBImpl
         );
     }
 
-    public static EventsBossLocal getOne() {
-        try {
-            return EventsBossUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static EventsBoss getOne() {
+       return Bootstrap.getBean(EventsBoss.class);
     }
-
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
 }

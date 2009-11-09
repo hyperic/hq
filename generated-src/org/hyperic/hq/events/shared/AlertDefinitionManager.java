@@ -214,7 +214,7 @@ public interface AlertDefinitionManager {
                                                       org.hyperic.hq.appdef.shared.AppdefEntityID id)
         throws PermissionException;
 
-    public PageList<AlertDefinition> findAlertDefinitions(AuthzSubject subj,
+    public PageList<AlertDefinitionValue> findAlertDefinitions(AuthzSubject subj,
                                                           org.hyperic.hq.appdef.shared.AppdefEntityID id,
                                                           org.hyperic.util.pager.PageControl pc)
         throws PermissionException;
@@ -229,7 +229,7 @@ public interface AlertDefinitionManager {
     /**
      * Get list of alert conditions for a resource or resource type
      */
-    public PageList<AlertDefinition> findAlertDefinitions(AuthzSubject subj,
+    public PageList<AlertDefinitionValue> findAlertDefinitions(AuthzSubject subj,
                                                           org.hyperic.hq.appdef.shared.AppdefEntityTypeID aetid,
                                                           org.hyperic.util.pager.PageControl pc)
         throws PermissionException;
@@ -246,7 +246,7 @@ public interface AlertDefinitionManager {
     /**
      * Get list of children alert definition for a parent alert definition
      */
-    public PageList<AlertDefinition> findAlertDefinitionChildren(Integer id);
+    public PageList<AlertDefinitionValue> findAlertDefinitionChildren(Integer id);
 
     /**
      * Get list of alert definition names for a resource

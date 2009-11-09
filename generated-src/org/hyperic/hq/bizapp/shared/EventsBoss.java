@@ -3,151 +3,170 @@
  */
 package org.hyperic.hq.bizapp.shared;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.FinderException;
+import javax.ejb.RemoveException;
+import javax.security.auth.login.LoginException;
+
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.auth.shared.SessionException;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.DuplicateObjectException;
+import org.hyperic.hq.escalation.server.session.Escalatable;
+import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.escalation.server.session.EscalationAlertType;
+import org.hyperic.hq.escalation.server.session.EscalationState;
+import org.hyperic.hq.events.ActionConfigInterface;
+import org.hyperic.hq.events.ActionCreateException;
+import org.hyperic.hq.events.ActionExecuteException;
+import org.hyperic.hq.events.AlertConditionCreateException;
+import org.hyperic.hq.events.AlertDefinitionCreateException;
+import org.hyperic.hq.events.AlertNotFoundException;
+import org.hyperic.hq.events.MaintenanceEvent;
+import org.hyperic.hq.events.TriggerCreateException;
+import org.hyperic.hq.events.server.session.Action;
+import org.hyperic.hq.events.server.session.Alert;
+import org.hyperic.hq.events.server.session.AlertDefinition;
+import org.hyperic.hq.events.shared.ActionValue;
+import org.hyperic.hq.events.shared.AlertDefinitionValue;
+import org.hyperic.util.ConfigPropertyException;
+import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.config.ConfigSchema;
+import org.hyperic.util.config.InvalidOptionException;
+import org.hyperic.util.config.InvalidOptionValueException;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.quartz.SchedulerException;
+
 /**
- * Remote interface for EventsBoss.
+ * Local interface for EventsBoss.
  */
 public interface EventsBoss
-   extends javax.ejb.EJBObject
 {
    /**
     * Get the number of alerts for the given array of AppdefEntityID's
     */
-   public int[] getAlertCount( int sessionID,org.hyperic.hq.appdef.shared.AppdefEntityID[] ids )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException, java.rmi.RemoteException;
+   public int[] getAlertCount( int sessionID,org.hyperic.hq.appdef.shared.AppdefEntityID[] ids ) throws SessionNotFoundException, SessionTimeoutException, PermissionException, FinderException;
 
    /**
     * Create an alert definition
     */
-   public org.hyperic.hq.events.shared.AlertDefinitionValue createAlertDefinition( int sessionID,org.hyperic.hq.events.shared.AlertDefinitionValue adval )
-      throws org.hyperic.hq.events.AlertDefinitionCreateException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.util.config.InvalidOptionException, org.hyperic.util.config.InvalidOptionValueException, org.hyperic.hq.auth.shared.SessionException, java.rmi.RemoteException;
+   public AlertDefinitionValue createAlertDefinition( int sessionID,AlertDefinitionValue adval ) throws org.hyperic.hq.events.AlertDefinitionCreateException, PermissionException, InvalidOptionException, InvalidOptionValueException, SessionException;
 
    /**
     * Create an alert definition for a resource type
     */
-   public org.hyperic.hq.events.shared.AlertDefinitionValue createResourceTypeAlertDefinition( int sessionID,org.hyperic.hq.appdef.shared.AppdefEntityTypeID aetid,org.hyperic.hq.events.shared.AlertDefinitionValue adval )
-      throws org.hyperic.hq.events.AlertDefinitionCreateException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.util.config.InvalidOptionException, org.hyperic.util.config.InvalidOptionValueException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, java.rmi.RemoteException;
+   public AlertDefinitionValue createResourceTypeAlertDefinition( int sessionID,AppdefEntityTypeID aetid,AlertDefinitionValue adval ) throws org.hyperic.hq.events.AlertDefinitionCreateException, PermissionException, InvalidOptionException, InvalidOptionValueException, SessionNotFoundException, SessionTimeoutException;
 
-   public void inheritResourceTypeAlertDefinition( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID id )
-      throws org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.util.config.InvalidOptionException, org.hyperic.util.config.InvalidOptionValueException, org.hyperic.hq.events.AlertDefinitionCreateException, java.rmi.RemoteException;
+   public void inheritResourceTypeAlertDefinition( AuthzSubject subject,AppdefEntityID id ) throws org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, PermissionException, InvalidOptionException, InvalidOptionValueException, AlertDefinitionCreateException;
 
-   public org.hyperic.hq.events.server.session.Action createAction( int sessionID,java.lang.Integer adid,java.lang.String className,org.hyperic.util.config.ConfigResponse config )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.events.ActionCreateException, javax.ejb.RemoveException, javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public Action createAction( int sessionID,Integer adid,String className,ConfigResponse config ) throws SessionNotFoundException, SessionTimeoutException, ActionCreateException, RemoveException, FinderException, PermissionException;
 
    /**
     * Activate/deactivate a collection of alert definitions
     */
-   public void activateAlertDefinitions( int sessionID,java.lang.Integer[] ids,boolean activate )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public void activateAlertDefinitions( int sessionID,java.lang.Integer[] ids,boolean activate ) throws SessionNotFoundException, SessionTimeoutException, FinderException, PermissionException;
 
    /**
     * Activate or deactivate alert definitions by AppdefEntityID.
     */
-   public void activateAlertDefinitions( int sessionID,org.hyperic.hq.appdef.shared.AppdefEntityID[] eids,boolean activate )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public void activateAlertDefinitions( int sessionID,org.hyperic.hq.appdef.shared.AppdefEntityID[] eids,boolean activate ) throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException;
 
    /**
     * Update just the basics
     */
-   public void updateAlertDefinitionBasic( int sessionID,java.lang.Integer alertDefId,java.lang.String name,java.lang.String desc,int priority,boolean activate )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, javax.ejb.FinderException, javax.ejb.RemoveException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public void updateAlertDefinitionBasic( int sessionID,Integer alertDefId,String name,String desc,int priority,boolean activate ) throws SessionNotFoundException, SessionTimeoutException, FinderException, RemoveException, PermissionException;
 
-   public void updateAlertDefinition( int sessionID,org.hyperic.hq.events.shared.AlertDefinitionValue adval )
-      throws org.hyperic.hq.events.TriggerCreateException, org.hyperic.util.config.InvalidOptionException, org.hyperic.util.config.InvalidOptionValueException, org.hyperic.hq.events.AlertConditionCreateException, org.hyperic.hq.events.ActionCreateException, javax.ejb.FinderException, javax.ejb.RemoveException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, java.rmi.RemoteException;
+   public void updateAlertDefinition( int sessionID,AlertDefinitionValue adval ) throws TriggerCreateException, InvalidOptionException, InvalidOptionValueException, AlertConditionCreateException, ActionCreateException, FinderException, RemoveException, SessionNotFoundException, SessionTimeoutException;
 
    /**
     * Get actions for a given alert.
     * @param alertId the alert id
     */
-   public java.util.List getActionsForAlert( int sessionId,java.lang.Integer alertId )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, java.rmi.RemoteException;
+   public List<ActionValue> getActionsForAlert( int sessionId,Integer alertId ) throws SessionNotFoundException, SessionTimeoutException;
 
    /**
     * Update an action
     */
-   public void updateAction( int sessionID,org.hyperic.hq.events.shared.ActionValue aval )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, java.rmi.RemoteException;
+   public void updateAction( int sessionID,ActionValue aval ) throws SessionNotFoundException, SessionTimeoutException;
 
    /**
     * Delete a collection of alert definitions
     */
-   public void deleteAlertDefinitions( int sessionID,java.lang.Integer[] ids )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, javax.ejb.RemoveException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public void deleteAlertDefinitions( int sessionID,java.lang.Integer[] ids ) throws SessionNotFoundException, SessionTimeoutException, RemoveException, PermissionException;
 
    /**
     * Delete list of alerts
     */
-   public void deleteAlerts( int sessionID,java.lang.Integer[] ids )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, javax.ejb.RemoveException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public void deleteAlerts( int sessionID,java.lang.Integer[] ids ) throws SessionNotFoundException, SessionTimeoutException, RemoveException, PermissionException;
 
    /**
     * Delete all alerts for a resource
     */
-   public int deleteAlerts( int sessionID,org.hyperic.hq.appdef.shared.AppdefEntityID aeid )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, javax.ejb.RemoveException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public int deleteAlerts( int sessionID,AppdefEntityID aeid ) throws SessionNotFoundException, SessionTimeoutException, RemoveException, PermissionException;
 
    /**
     * Delete all alerts for a given period of time
     */
-   public int deleteAlerts( int sessionID,long begin,long end )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, javax.ejb.RemoveException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public int deleteAlerts( int sessionID,long begin,long end ) throws SessionNotFoundException, SessionTimeoutException, RemoveException, PermissionException;
 
    /**
     * Delete all alerts for a list of alert definitions
     * @throws FinderException if alert definition is not found
     */
-   public int deleteAlertsForDefinitions( int sessionID,java.lang.Integer[] adids )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, javax.ejb.RemoveException, org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException, java.rmi.RemoteException;
+   public int deleteAlertsForDefinitions( int sessionID,java.lang.Integer[] adids ) throws SessionNotFoundException, SessionTimeoutException, RemoveException, PermissionException, FinderException;
 
    /**
     * Get an alert definition by ID
     */
-   public org.hyperic.hq.events.shared.AlertDefinitionValue getAlertDefinition( int sessionID,java.lang.Integer id )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public AlertDefinitionValue getAlertDefinition( int sessionID,Integer id ) throws SessionNotFoundException, SessionTimeoutException, FinderException, PermissionException;
 
    /**
     * Find an alert by ID
     */
-   public org.hyperic.hq.events.server.session.Alert getAlert( int sessionID,java.lang.Integer id )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.events.AlertNotFoundException, java.rmi.RemoteException;
+   public Alert getAlert( int sessionID,Integer id ) throws SessionNotFoundException, SessionTimeoutException, AlertNotFoundException;
 
    /**
     * Get a list of all alert definitions
     */
-   public org.hyperic.util.pager.PageList findAllAlertDefinitions( int sessionID )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public PageList<AlertDefinitionValue> findAllAlertDefinitions( int sessionID ) throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
    /**
     * Get a collection of alert definitions for a resource
     */
-   public org.hyperic.util.pager.PageList findAlertDefinitions( int sessionID,org.hyperic.hq.appdef.shared.AppdefEntityID id,org.hyperic.util.pager.PageControl pc )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public PageList<AlertDefinitionValue> findAlertDefinitions( int sessionID,AppdefEntityID id,PageControl pc ) throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
    /**
     * Get a collection of alert definitions for a resource or resource type
     */
-   public org.hyperic.util.pager.PageList findAlertDefinitions( int sessionID,org.hyperic.hq.appdef.shared.AppdefEntityTypeID id,org.hyperic.util.pager.PageControl pc )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public PageList<AlertDefinitionValue> findAlertDefinitions( int sessionID,AppdefEntityTypeID id,PageControl pc ) throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
    /**
     * Find all alert definition names for a resource
     * @return Map of AlertDefinition names and IDs
     */
-   public java.util.Map findAlertDefinitionNames( int sessionID,org.hyperic.hq.appdef.shared.AppdefEntityID id,java.lang.Integer parentId )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
-
-  
+   public Map<String,Integer> findAlertDefinitionNames( int sessionID,AppdefEntityID id,Integer parentId ) throws SessionNotFoundException, SessionTimeoutException, AppdefEntityNotFoundException, PermissionException;
 
    /**
     * Find all alerts for an appdef resource
     */
-   public org.hyperic.util.pager.PageList findAlerts( int sessionID,org.hyperic.hq.appdef.shared.AppdefEntityID id,org.hyperic.util.pager.PageControl pc )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public PageList<Alert> findAlerts( int sessionID,AppdefEntityID id,PageControl pc ) throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
    /**
     * Find all alerts for an appdef resource
     */
-   public org.hyperic.util.pager.PageList findAlerts( int sessionID,org.hyperic.hq.appdef.shared.AppdefEntityID id,long begin,long end,org.hyperic.util.pager.PageControl pc )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public PageList<Alert> findAlerts( int sessionID,AppdefEntityID id,long begin,long end,PageControl pc ) throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
    /**
     * Search alerts given a set of criteria
@@ -158,8 +177,7 @@ public interface EventsBoss
     * @param ids the IDs of resources to include or null for ALL
     * @return a list of {@link Escalatable}s
     */
-   public java.util.List findRecentAlerts( java.lang.String username,int count,int priority,long timeRange,org.hyperic.hq.appdef.shared.AppdefEntityID[] ids )
-      throws javax.security.auth.login.LoginException, org.hyperic.hq.common.ApplicationException, org.hyperic.util.ConfigPropertyException, java.rmi.RemoteException;
+   public List<Escalatable> findRecentAlerts( String username,int count,int priority,long timeRange,org.hyperic.hq.appdef.shared.AppdefEntityID[] ids ) throws LoginException, ApplicationException, ConfigPropertyException;
 
    /**
     * Search recent alerts given a set of criteria
@@ -170,139 +188,113 @@ public interface EventsBoss
     * @param ids the IDs of resources to include or null for ALL
     * @return a list of {@link Escalatable}s
     */
-   public java.util.List findRecentAlerts( int sessionID,int count,int priority,long timeRange,org.hyperic.hq.appdef.shared.AppdefEntityID[] ids )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public List<Escalatable> findRecentAlerts( int sessionID,int count,int priority,long timeRange,org.hyperic.hq.appdef.shared.AppdefEntityID[] ids ) throws SessionNotFoundException, SessionTimeoutException, PermissionException;
 
    /**
     * Get config schema info for an action class
     */
-   public org.hyperic.util.config.ConfigSchema getActionConfigSchema( int sessionID,java.lang.String actionClass )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.util.config.EncodingException, java.rmi.RemoteException;
+   public ConfigSchema getActionConfigSchema( int sessionID,String actionClass ) throws SessionNotFoundException, SessionTimeoutException, org.hyperic.util.config.EncodingException;
 
    /**
     * Get config schema info for a trigger class
     */
-   public org.hyperic.util.config.ConfigSchema getRegisteredTriggerConfigSchema( int sessionID,java.lang.String triggerClass )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.util.config.EncodingException, java.rmi.RemoteException;
+   public ConfigSchema getRegisteredTriggerConfigSchema( int sessionID,String triggerClass ) throws SessionNotFoundException, SessionTimeoutException, org.hyperic.util.config.EncodingException;
 
-   public void deleteEscalationByName( int sessionID,java.lang.String name )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.common.ApplicationException, java.rmi.RemoteException;
+   public void deleteEscalationByName( int sessionID,String name ) throws SessionTimeoutException, SessionNotFoundException, PermissionException, org.hyperic.hq.common.ApplicationException;
 
-   public void deleteEscalationById( int sessionID,java.lang.Integer id )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.common.ApplicationException, java.rmi.RemoteException;
+   public void deleteEscalationById( int sessionID,Integer id ) throws SessionTimeoutException, SessionNotFoundException, PermissionException, org.hyperic.hq.common.ApplicationException;
 
    /**
     * remove escalation by id
     */
-   public void deleteEscalationById( int sessionID,java.lang.Integer[] ids )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.common.ApplicationException, java.rmi.RemoteException;
+   public void deleteEscalationById( int sessionID,java.lang.Integer[] ids ) throws SessionTimeoutException, SessionNotFoundException, PermissionException, org.hyperic.hq.common.ApplicationException;
 
    /**
     * retrieve escalation name by alert definition id.
     */
-   public java.lang.Integer getEscalationIdByAlertDefId( int sessionID,java.lang.Integer id,org.hyperic.hq.escalation.server.session.EscalationAlertType alertType )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException, java.rmi.RemoteException;
+   public Integer getEscalationIdByAlertDefId( int sessionID,Integer id,EscalationAlertType alertType ) throws SessionTimeoutException, SessionNotFoundException, PermissionException, FinderException;
 
    /**
     * set escalation name by alert definition id.
     */
-   public void setEscalationByAlertDefId( int sessionID,java.lang.Integer id,java.lang.Integer escId,org.hyperic.hq.escalation.server.session.EscalationAlertType alertType )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public void setEscalationByAlertDefId( int sessionID,Integer id,Integer escId,EscalationAlertType alertType ) throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
    /**
     * unset escalation by alert definition id.
     */
-   public void unsetEscalationByAlertDefId( int sessionID,java.lang.Integer id,org.hyperic.hq.escalation.server.session.EscalationAlertType alertType )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public void unsetEscalationByAlertDefId( int sessionID,Integer id,EscalationAlertType alertType ) throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
    /**
     * retrieve escalation JSONObject by alert definition id.
     */
-   public org.json.JSONObject jsonEscalationByAlertDefId( int sessionID,java.lang.Integer id,org.hyperic.hq.escalation.server.session.EscalationAlertType alertType )
-      throws org.hyperic.hq.auth.shared.SessionException, org.hyperic.hq.authz.shared.PermissionException, org.json.JSONException, javax.ejb.FinderException, java.rmi.RemoteException;
+   public JSONObject jsonEscalationByAlertDefId( int sessionID,Integer id,EscalationAlertType alertType ) throws org.hyperic.hq.auth.shared.SessionException, PermissionException, JSONException, FinderException;
 
    /**
     * retrieve escalation object by escalation id.
     */
-   public org.hyperic.hq.escalation.server.session.Escalation findEscalationById( int sessionID,java.lang.Integer id )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public Escalation findEscalationById( int sessionID,Integer id ) throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
-   public void addAction( int sessionID,org.hyperic.hq.escalation.server.session.Escalation e,org.hyperic.hq.events.ActionConfigInterface cfg,long waitTime )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public void addAction( int sessionID,Escalation e,ActionConfigInterface cfg,long waitTime ) throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
-   public void removeAction( int sessionID,java.lang.Integer escId,java.lang.Integer actId )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public void removeAction( int sessionID,Integer escId,Integer actId ) throws SessionTimeoutException, SessionNotFoundException, PermissionException;
 
    /**
     * Retrieve a list of {@link EscalationState}s, representing the active escalations in the system.
     */
-   public java.util.List getActiveEscalations( int sessionId,int maxEscalations )
-      throws org.hyperic.hq.auth.shared.SessionException, java.rmi.RemoteException;
+   public List<EscalationState> getActiveEscalations( int sessionId,int maxEscalations ) throws org.hyperic.hq.auth.shared.SessionException;
 
    /**
     * Gets the escalatable associated with the specified state
     */
-   public org.hyperic.hq.escalation.server.session.Escalatable getEscalatable( int sessionId,org.hyperic.hq.escalation.server.session.EscalationState state )
-      throws org.hyperic.hq.auth.shared.SessionException, java.rmi.RemoteException;
+   public Escalatable getEscalatable( int sessionId,EscalationState state ) throws org.hyperic.hq.auth.shared.SessionException;
 
    /**
     * retrieve all escalation policy names as a Array of JSONObject. Escalation json finders begin with json* to be consistent with DAO finder convention
     */
-   public org.json.JSONArray listAllEscalationName( int sessionID )
-      throws org.json.JSONException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, java.rmi.RemoteException;
+   public JSONArray listAllEscalationName( int sessionID ) throws JSONException, SessionTimeoutException, SessionNotFoundException, PermissionException;
 
    /**
     * Create a new escalation. If alertDefId is non-null, the escalation will also be associated with the given alert definition.
     */
-   public org.hyperic.hq.escalation.server.session.Escalation createEscalation( int sessionID,java.lang.String name,java.lang.String desc,boolean allowPause,long maxWaitTime,boolean notifyAll,boolean repeat,org.hyperic.hq.escalation.server.session.EscalationAlertType alertType,java.lang.Integer alertDefId )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.common.DuplicateObjectException, java.rmi.RemoteException;
+   public Escalation createEscalation( int sessionID,String name,String desc,boolean allowPause,long maxWaitTime,boolean notifyAll,boolean repeat,EscalationAlertType alertType,Integer alertDefId ) throws SessionTimeoutException, SessionNotFoundException, PermissionException, DuplicateObjectException;
 
    /**
     * Update basic escalation properties
     */
-   public void updateEscalation( int sessionID,org.hyperic.hq.escalation.server.session.Escalation escalation,java.lang.String name,java.lang.String desc,long maxWait,boolean pausable,boolean notifyAll,boolean repeat )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.common.DuplicateObjectException, java.rmi.RemoteException;
+   public void updateEscalation( int sessionID,Escalation escalation,String name,String desc,long maxWait,boolean pausable,boolean notifyAll,boolean repeat ) throws SessionTimeoutException, SessionNotFoundException, PermissionException, DuplicateObjectException;
 
-   public boolean acknowledgeAlert( int sessionID,org.hyperic.hq.escalation.server.session.EscalationAlertType alertType,java.lang.Integer alertID,long pauseWaitTime,java.lang.String moreInfo )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.events.ActionExecuteException, java.rmi.RemoteException;
+   public boolean acknowledgeAlert( int sessionID,EscalationAlertType alertType,Integer alertID,long pauseWaitTime,String moreInfo ) throws SessionTimeoutException, SessionNotFoundException, PermissionException, ActionExecuteException;
 
    /**
     * Fix a single alert. Method is "NotSupported" since all the alert fixes may take longer than the jboss transaction timeout. No need for a transaction in this context.
     */
-   public void fixAlert( int sessionID,org.hyperic.hq.escalation.server.session.EscalationAlertType alertType,java.lang.Integer alertID,java.lang.String moreInfo )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.events.ActionExecuteException, java.rmi.RemoteException;
+   public void fixAlert( int sessionID,EscalationAlertType alertType,Integer alertID,String moreInfo ) throws SessionTimeoutException, SessionNotFoundException, PermissionException, ActionExecuteException;
 
    /**
     * Fix a batch of alerts. Method is "NotSupported" since all the alert fixes may take longer than the jboss transaction timeout. No need for a transaction in this context.
     */
-   public void fixAlert( int sessionID,org.hyperic.hq.escalation.server.session.EscalationAlertType alertType,java.lang.Integer alertID,java.lang.String moreInfo,boolean fixAllPrevious )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.events.ActionExecuteException, java.rmi.RemoteException;
+   public void fixAlert( int sessionID,EscalationAlertType alertType,Integer alertID,String moreInfo,boolean fixAllPrevious ) throws SessionTimeoutException, SessionNotFoundException, PermissionException, ActionExecuteException;
 
    /**
     * Get the last fix if available
     */
-   public java.lang.String getLastFix( int sessionID,java.lang.Integer defId )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException, java.rmi.RemoteException;
+   public String getLastFix( int sessionID,Integer defId ) throws SessionNotFoundException, SessionTimeoutException, PermissionException, FinderException;
 
    /**
     * Get a maintenance event by group id
     */
-   public org.hyperic.hq.events.MaintenanceEvent getMaintenanceEvent( int sessionId,java.lang.Integer groupId )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.authz.shared.PermissionException, org.quartz.SchedulerException, java.rmi.RemoteException;
+   public MaintenanceEvent getMaintenanceEvent( int sessionId,Integer groupId ) throws SessionNotFoundException, SessionTimeoutException, PermissionException, SchedulerException;
 
    /**
     * Schedule a maintenance event
     */
-   public org.hyperic.hq.events.MaintenanceEvent scheduleMaintenanceEvent( int sessionId,org.hyperic.hq.events.MaintenanceEvent event )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.authz.shared.PermissionException, org.quartz.SchedulerException, java.rmi.RemoteException;
+   public MaintenanceEvent scheduleMaintenanceEvent( int sessionId,MaintenanceEvent event ) throws SessionNotFoundException, SessionTimeoutException, PermissionException, SchedulerException;
 
    /**
     * Schedule a maintenance event
     */
-   public void unscheduleMaintenanceEvent( int sessionId,org.hyperic.hq.events.MaintenanceEvent event )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.authz.shared.PermissionException, org.quartz.SchedulerException, java.rmi.RemoteException;
+   public void unscheduleMaintenanceEvent( int sessionId,MaintenanceEvent event ) throws SessionNotFoundException, SessionTimeoutException, PermissionException, SchedulerException;
 
-   public void startup(  )
-      throws java.rmi.RemoteException;
+   public void startup(  ) ;
 
 }
