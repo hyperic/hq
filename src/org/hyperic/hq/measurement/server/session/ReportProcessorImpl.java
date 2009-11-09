@@ -30,21 +30,19 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
+import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.TimingVoodoo;
@@ -52,73 +50,82 @@ import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
-import org.hyperic.hq.measurement.shared.ReportProcessorUtil;
+import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
+import org.hyperic.hq.measurement.shared.ReportProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.StringUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @ejb:bean name="ReportProcessor"
- *      jndi-name="ejb/measurement/ReportProcessor"
- *      local-jndi-name="LocalReportProcessor"
- *      view-type="local"
- *      type="Stateless"
- * 
- * @ejb:transaction type="Required"
  */
-public class ReportProcessorEJBImpl 
-    extends SessionEJB 
-    implements SessionBean 
-{
-    private final Log _log = LogFactory.getLog(ReportProcessorEJBImpl.class);
+@Service
+@Transactional
+public class ReportProcessorImpl
+    extends SessionEJB implements ReportProcessor {
+    private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
 
     private final long MINUTE = MeasurementConstants.MINUTE;
-    private final long PRIORITY_OFFSET = MINUTE*3;
-    
-    private void addPoint(List points, List priorityPts, Measurement m,
-                          MetricValue[] vals)
-    {
-        final boolean debug = _log.isDebugEnabled();
-        for (int i=0; i<vals.length; i++)
-        {
-            final long now =
-                TimingVoodoo.roundDownTime(System.currentTimeMillis(), MINUTE);
+    private final long PRIORITY_OFFSET = MINUTE * 3;
+
+    private MeasurementManagerLocal measurementManager;
+    private MeasurementProcessorLocal measurementProcessor;
+    private PlatformManagerLocal platformManager;
+    private ServerManagerLocal serverManager;
+    private ServiceManagerLocal serviceManager;
+
+    @Autowired
+    public ReportProcessorImpl(MeasurementManagerLocal measurementManager,
+                               MeasurementProcessorLocal measurementProcessor, PlatformManagerLocal platformManager,
+                               ServerManagerLocal serverManager, ServiceManagerLocal serviceManager) {
+        this.measurementManager = measurementManager;
+        this.measurementProcessor = measurementProcessor;
+        this.platformManager = platformManager;
+        this.serverManager = serverManager;
+        this.serviceManager = serviceManager;
+    }
+
+    private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts,
+                          Measurement m, MetricValue[] vals) {
+        final boolean debug = log.isDebugEnabled();
+        for (MetricValue val : vals) {
+            final long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), MINUTE);
             try {
-                //this is just to check if the metricvalue is valid
-                //will throw a NumberFormatException if there is a problem
-                new BigDecimal(vals[i].getValue());
-                DataPoint pt = new DataPoint(m.getId(), vals[i]);
-                if (priorityPts != null && isPriority(now, pt.getTimestamp())) {
-                    priorityPts.add(pt);
+                // this is just to check if the metricvalue is valid
+                // will throw a NumberFormatException if there is a problem
+                new BigDecimal(val.getValue());
+                DataPoint dataPoint = new DataPoint(m.getId(), val);
+                if (priorityPts != null && isPriority(now, dataPoint.getTimestamp())) {
+                    priorityPts.add(dataPoint);
                 } else {
-                    points.add(pt);
+                    points.add(dataPoint);
                 }
                 if (debug && m.getTemplate().isAvailability()) {
-                    _log.debug("availability -> " + pt);
+                    log.debug("availability -> " + dataPoint);
                 }
-            } catch(NumberFormatException e) {
-                _log.warn("Unable to insert: " + e.getMessage() +
-                          ", metric id=" + m);
+            } catch (NumberFormatException e) {
+                log.warn("Unable to insert: " + e.getMessage() +
+                         ", metric id=" + m);
             }
         }
     }
 
     private boolean isPriority(long timestamp, long metricTimestamp) {
-        if (metricTimestamp >= (timestamp-PRIORITY_OFFSET)) {
+        if (metricTimestamp >= (timestamp - PRIORITY_OFFSET)) {
             return true;
         }
         return false;
     }
 
-    private void addData(List points, List priorityPts, Measurement m,
-                         MetricValue[] dpts)
-    {
+    private void addData(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m,
+                         MetricValue[] dpts) {
         long interval = m.getInterval();
 
         // Safeguard against an anomaly
         if (interval <= 0) {
-            _log.warn("Measurement had bogus interval[" + interval + "]: " + m);
+            log.warn("Measurement had bogus interval[" + interval + "]: " + m);
             interval = 60 * 1000;
         }
 
@@ -126,8 +133,7 @@ public class ReportProcessorEJBImpl
         // values for that cycle.
         MetricValue[] passThroughs = new MetricValue[dpts.length];
 
-        for (int i = 0; i < dpts.length; i++)
-        {
+        for (int i = 0; i < dpts.length; i++) {
             // Save data point to DB.
             long retrieval = dpts[i].getTimestamp();
             long adjust = TimingVoodoo.roundDownTime(retrieval, interval);
@@ -144,55 +150,52 @@ public class ReportProcessorEJBImpl
      * Method which takes data from the agent (or elsewhere) and throws
      * it into the DataManager, doing the right things with all the
      * derived measurements
-     *
-     * @ejb:interface-method
      */
     public void handleMeasurementReport(MeasurementReport report)
-        throws DataInserterException
-    {
+        throws DataInserterException {
         final DSNList[] dsnLists = report.getClientIdList();
         final String agentToken = report.getAgentToken();
 
-        final List dataPoints = new ArrayList(dsnLists.length);
-        final List availPoints = new ArrayList(dsnLists.length);
-        final List priorityAvailPts = new ArrayList(dsnLists.length);
-        
-        final MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
-        final boolean debug = _log.isDebugEnabled();
-        for (int i = 0; i < dsnLists.length; i++) {
-            Integer dmId = new Integer(dsnLists[i].getClientId());
-            Measurement m = mMan.getMeasurement(dmId);
-            
+        final List<DataPoint> dataPoints = new ArrayList<DataPoint>(dsnLists.length);
+        final List<DataPoint> availPoints = new ArrayList<DataPoint>(dsnLists.length);
+        final List<DataPoint> priorityAvailPts = new ArrayList<DataPoint>(dsnLists.length);
+
+        final boolean debug = log.isDebugEnabled();
+        for (DSNList dsnList : dsnLists) {
+            Integer dmId = new Integer(dsnList.getClientId());
+            Measurement m = measurementManager.getMeasurement(dmId);
+
             // Can't do much if we can't look up the derived measurement
             // If the measurement is enabled, we just throw away their data
-            // instead of trying to throw it into the backfill.  This is 
+            // instead of trying to throw it into the backfill. This is
             // because we don't know the interval to normalize those old
-            // points for.  This is still a problem for people who change their
+            // points for. This is still a problem for people who change their
             // collection period, but the instances should be low.
             if (m == null || !m.isEnabled()) {
                 continue;
             }
-            // Need to check if resource was asynchronously deleted (type == null)
+            // Need to check if resource was asynchronously deleted (type ==
+            // null)
             final Resource res = m.getResource();
             if (res == null || res.isInAsyncDeleteState()) {
                 if (debug) {
-                    _log.debug("dropping metricId=" + m.getId() +
-                        " since resource is in async delete state");
+                    log.debug("dropping metricId=" + m.getId() +
+                              " since resource is in async delete state");
                 }
                 continue;
             }
             if (!resourceMatchesAgent(res, agentToken)) {
-                _log.warn("measurement (id=" + m.getId() + ") was sent to the " +
-                    "HQ server from agent (agentToken=" + agentToken + ")" +
-                    " but resource (id=" + res.getId() + ") is not associated " +
-                    " with that agent.  Dropping measurement.");
+                log.warn("measurement (id=" + m.getId() + ") was sent to the " +
+                         "HQ server from agent (agentToken=" + agentToken + ")" +
+                         " but resource (id=" + res.getId() + ") is not associated " +
+                         " with that agent.  Dropping measurement.");
                 continue;
             }
 
             final boolean isAvail = m.getTemplate().isAvailability();
-            final ValueList[] valLists = dsnLists[i].getDsns();
-            for (int j = 0; j < valLists.length; j++) {
-                final MetricValue[] vals = valLists[j].getValues();
+            final ValueList[] valLists = dsnList.getDsns();
+            for (ValueList valList : valLists) {
+                final MetricValue[] vals = valList.getValues();
                 if (isAvail) {
                     addData(availPoints, priorityAvailPts, m, vals);
                 } else {
@@ -208,18 +211,19 @@ public class ReportProcessorEJBImpl
         sendMetricDataToDB(a, priorityAvailPts, true);
 
         // Check the SRNs to make sure the agent is up-to-date
+        // TODO: DI srnManager (see HE-133)
         SRNManager srnManager = getSRNManager();
-        Collection nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
-        
+        Collection<AppdefEntityID> nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
+
         if (report.getAgentToken() != null && nonEntities.size() > 0) {
             // Better tell the agent to stop reporting non-existent entities
             AppdefEntityID[] entIds = (AppdefEntityID[])
-                nonEntities.toArray(new AppdefEntityID[nonEntities.size()]);
+                                      nonEntities.toArray(new AppdefEntityID[nonEntities.size()]);
             try {
-                MeasurementProcessorEJBImpl.getOne().unschedule(
-                    report.getAgentToken(), entIds);
+                measurementProcessor.unschedule(
+                                                report.getAgentToken(), entIds);
             } catch (MeasurementUnscheduleException e) {
-                _log.error("Cannot unschedule entities: " +
+                log.error("Cannot unschedule entities: " +
                           StringUtil.arrayToString(entIds));
             }
         }
@@ -233,24 +237,25 @@ public class ReportProcessorEJBImpl
         final Integer aeid = resource.getInstanceId();
         try {
             if (resType.equals(AuthzConstants.authzPlatform)) {
-                String token = PlatformManagerEJBImpl.getOne().findPlatformById(
-                    aeid).getAgent().getAgentToken();
+                String token = platformManager.findPlatformById(
+                                                                aeid).getAgent().getAgentToken();
                 return token.equals(agentToken);
             } else if (resType.equals(AuthzConstants.authzServer)) {
-                String token = ServerManagerEJBImpl.getOne().findServerById(
-                    aeid).getPlatform().getAgent().getAgentToken();
+                String token = serverManager.findServerById(
+                                                            aeid).getPlatform().getAgent().getAgentToken();
                 return token.equals(agentToken);
             } else if (resType.equals(AuthzConstants.authzService)) {
-                String token = ServiceManagerEJBImpl.getOne().findServiceById(
-                    aeid).getServer().getPlatform().getAgent().getAgentToken();
+                String token = serviceManager.findServiceById(
+                                                              aeid).getServer().getPlatform().getAgent()
+                                             .getAgentToken();
                 return token.equals(agentToken);
             }
         } catch (PlatformNotFoundException e) {
-            _log.warn("Platform not found Id=" + aeid);
+            log.warn("Platform not found Id=" + aeid);
         } catch (ServerNotFoundException e) {
-            _log.warn("Server not found Id=" + aeid);
+            log.warn("Server not found Id=" + aeid);
         } catch (ServiceNotFoundException e) {
-            _log.warn("Service not found Id=" + aeid);
+            log.warn("Service not found Id=" + aeid);
         }
         return false;
     }
@@ -258,10 +263,9 @@ public class ReportProcessorEJBImpl
     /**
      * Sends the actual data to the DB.
      */
-    private void sendMetricDataToDB(DataInserter d, List dataPoints,
-                                    boolean isPriority) 
-        throws DataInserterException
-    {
+    private void sendMetricDataToDB(DataInserter d, List<DataPoint> dataPoints,
+                                    boolean isPriority)
+        throws DataInserterException {
         if (dataPoints.size() <= 0) {
             return;
         }
@@ -270,24 +274,13 @@ public class ReportProcessorEJBImpl
             int size = dataPoints.size();
             long ts = System.currentTimeMillis();
             ReportStatsCollector.getInstance().getCollector().add(size, ts);
-        } catch(InterruptedException e) {
-            throw new SystemException("Interrupted while attempting to " + 
+        } catch (InterruptedException e) {
+            throw new SystemException("Interrupted while attempting to " +
                                       "insert data");
         }
     }
 
-    public static ReportProcessorLocal getOne() {
-        try {
-            return ReportProcessorUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    public static ReportProcessor getOne() {
+        return Bootstrap.getBean(ReportProcessor.class);
     }
-    
-    public void ejbCreate(){}
-    public void ejbPostCreate(){}
-    public void ejbActivate(){}
-    public void ejbPassivate(){}
-    public void ejbRemove(){}
-    public void setSessionContext(SessionContext ctx){}
-} 
+}
