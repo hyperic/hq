@@ -15,34 +15,38 @@ import org.hyperic.hq.measurement.monitor.MonitorAgentException;
  * Local interface for MeasurementProcessor.
  */
 public interface MeasurementProcessor {
-   /**
-    * Ping the agent to make sure it's up
-    */
-   public boolean ping( Agent a ) throws PermissionException;
+    /**
+     * Ping the agent to make sure it's up
+     */
+    public boolean ping(Agent a) throws PermissionException;
 
-   public void scheduleSynchronous( List<AppdefEntityID> aeids ) ;
+    public void scheduleSynchronous(List<AppdefEntityID> aeids);
 
-   public void scheduleEnabled( Agent agent,List<AppdefEntityID> eids ) throws MonitorAgentException;
+    public void scheduleEnabled(Agent agent, List<AppdefEntityID> eids) throws MonitorAgentException;
 
-   /**
-    * Unschedule metrics of multiple appdef entities
-    * @param agentToken the entity whose agent will be contacted for the unschedule
-    * @param entIds the entity IDs whose metrics should be unscheduled
-    * @throws MeasurementUnscheduleException if an error occurs    */
-   public void unschedule( String agentToken,AppdefEntityID[] entIds ) throws MeasurementUnscheduleException;
+    /**
+     * Unschedule metrics of multiple appdef entities
+     * @param agentToken the entity whose agent will be contacted for the
+     *        unschedule
+     * @param entIds the entity IDs whose metrics should be unscheduled
+     * @throws MeasurementUnscheduleException if an error occurs
+     */
+    public void unschedule(String agentToken, AppdefEntityID[] entIds) throws MeasurementUnscheduleException;
 
-   /**
-    * Unschedule metrics of multiple appdef entities
-    * @param agentEnt the entity whose agent will be contacted for the unschedule
-    * @param entIds the entity IDs whose metrics should be unscheduled
-    * @throws MeasurementUnscheduleException if an error occurs    */
-   public void unschedule( AppdefEntityID agentEnt,AppdefEntityID[] entIds ) throws MeasurementUnscheduleException;
+    /**
+     * Unschedule metrics of multiple appdef entities
+     * @param agentEnt the entity whose agent will be contacted for the
+     *        unschedule
+     * @param entIds the entity IDs whose metrics should be unscheduled
+     * @throws MeasurementUnscheduleException if an error occurs
+     */
+    public void unschedule(AppdefEntityID agentEnt, AppdefEntityID[] entIds) throws MeasurementUnscheduleException;
 
-   /**
-    * Unschedule measurements
-    * @param aeids List of {@link AppdefEntityID}
-    * @throws MeasurementUnscheduleException if an error occurs
-    */
-   public void unschedule( List<AppdefEntityID> aeids ) throws MeasurementUnscheduleException;
+    /**
+     * Unschedule measurements
+     * @param aeids List of {@link AppdefEntityID}
+     * @throws MeasurementUnscheduleException if an error occurs
+     */
+    public void unschedule(List<AppdefEntityID> aeids) throws MeasurementUnscheduleException;
 
 }

@@ -61,13 +61,12 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class MeasurementProcessorImpl 
-    extends SessionEJB 
-    implements MeasurementProcessor 
-{
+public class MeasurementProcessorImpl
+    extends SessionEJB
+    implements MeasurementProcessor {
     private final String logCtx = MeasurementProcessorImpl.class.getName();
     private Log log = LogFactory.getLog(logCtx);
-    
+
     private AgentManager agentManager;
     private MeasurementManagerLocal measurementManager;
     private AuthzSubjectManagerLocal authzSubjectManager;
@@ -109,26 +108,25 @@ public class MeasurementProcessorImpl
                     watch.markTimeEnd("scheduleEnabled");
                 }
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             log.error("Exception scheduling [" + aeids + "]: " + e.getMessage(), e);
         }
         if (debug) {
             log.debug(watch);
         }
     }
-    
+
     /**
      * @return Map of {@link Agent} to {@link List<AppdefEntityID>}
      */
     private Map<Integer, List<AppdefEntityID>> getAgentMap(List<AppdefEntityID> aeids) {
-        Map<Integer, List<AppdefEntityID>> rtn 
-            = new HashMap<Integer, List<AppdefEntityID>>(aeids.size());
+        Map<Integer, List<AppdefEntityID>> rtn = new HashMap<Integer, List<AppdefEntityID>>(aeids.size());
         for (AppdefEntityID eid : aeids) {
             Integer agentId;
             try {
                 List<AppdefEntityID> tmp;
                 agentId = agentManager.getAgent(eid).getId();
-                if (null == (tmp = (List<AppdefEntityID>)rtn.get(agentId))) {
+                if (null == (tmp = (List<AppdefEntityID>) rtn.get(agentId))) {
                     tmp = new ArrayList<AppdefEntityID>();
                     rtn.put(agentId, tmp);
                 }
@@ -144,15 +142,13 @@ public class MeasurementProcessorImpl
      * @param eids List<AppdefEntityID>
      */
     public void scheduleEnabled(Agent agent, List<AppdefEntityID> eids)
-        throws MonitorAgentException
-    {
-        final Map<SRN,List<Measurement>> schedMap 
-            = new HashMap<SRN,List<Measurement>>();
+        throws MonitorAgentException {
+        final Map<SRN, List<Measurement>> schedMap = new HashMap<SRN, List<Measurement>>();
         AgentMonitor monitor = new AgentMonitor();
         MeasurementCommandsClient client = null;
         try {
             final ConcurrentStatsCollector stats =
-                ConcurrentStatsCollector.getInstance();
+                                                   ConcurrentStatsCollector.getInstance();
             client = MeasurementCommandsClientFactory.getInstance()
                                                      .getClient(agent);
             // TODO: DI (see HE-133)
@@ -161,26 +157,26 @@ public class MeasurementProcessorImpl
             for (AppdefEntityID eid : eids) {
                 final long begin = now();
                 List<Measurement> measurements =
-                    measurementManager.findEnabledMeasurements(overlord, eid, null);
+                                                 measurementManager.findEnabledMeasurements(overlord, eid, null);
                 int srnNumber = srnMan.incrementSrn(eid, Long.MAX_VALUE);
                 SRN srn = new SRN(eid, srnNumber);
                 schedMap.put(srn, measurements);
                 try {
                     Measurement[] meas =
-                        (Measurement[])measurements.toArray(new Measurement[0]);
+                                         (Measurement[]) measurements.toArray(new Measurement[0]);
                     monitor.schedule(client, srn, meas);
-                    stats.addStat((now()-begin),
-                        ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
+                    stats.addStat((now() - begin),
+                                  ConcurrentStatsCollector.MEASUREMENT_SCHEDULE_TIME);
                 } catch (AgentConnectionException e) {
                     final String emsg = "Error reported by agent @ "
-                        + agent.connectionString() 
-                        +  ": " + e.getMessage();
+                                        + agent.connectionString()
+                                        + ": " + e.getMessage();
                     log.warn(emsg);
                     throw new MonitorAgentException(e.getMessage(), e);
                 } catch (AgentRemoteException e) {
                     final String emsg = "Error reported by agent @ "
-                        + agent.connectionString() 
-                        +  ": " + e.getMessage();
+                                        + agent.connectionString()
+                                        + ": " + e.getMessage();
                     log.warn(emsg);
                     throw new MonitorAgentException(emsg, e);
                 }
@@ -216,10 +212,11 @@ public class MeasurementProcessorImpl
         AgentMonitor monitor = new AgentMonitor();
         monitor.unschedule(a, entIds);
     }
-    
-    /** Unschedule metrics of multiple appdef entities
+
+    /**
+     * Unschedule metrics of multiple appdef entities
      * @param agentToken the entity whose agent will be contacted for the
-     * unschedule
+     *        unschedule
      * @param entIds the entity IDs whose metrics should be unscheduled
      * @throws MeasurementUnscheduleException if an error occurs
      */
@@ -233,9 +230,11 @@ public class MeasurementProcessorImpl
             log.warn("Error unscheduling metrics: " + e.getMessage());
         }
     }
-    
-    /** Unschedule metrics of multiple appdef entities
-     * @param agentEnt the entity whose agent will be contacted for the unschedule
+
+    /**
+     * Unschedule metrics of multiple appdef entities
+     * @param agentEnt the entity whose agent will be contacted for the
+     *        unschedule
      * @param entIds the entity IDs whose metrics should be unscheduled
      * @throws MeasurementUnscheduleException if an error occurs
      */
@@ -250,7 +249,8 @@ public class MeasurementProcessorImpl
         }
     }
 
-    /** Unschedule measurements
+    /**
+     * Unschedule measurements
      * @param aeids List of {@link AppdefEntityID}
      * @throws MeasurementUnscheduleException if an error occurs
      */
@@ -258,7 +258,7 @@ public class MeasurementProcessorImpl
         throws MeasurementUnscheduleException {
         Map<Integer, List<AppdefEntityID>> agents = getAgentMap(aeids);
         for (Map.Entry<Integer, List<AppdefEntityID>> entry : agents.entrySet()) {
-            Agent agent = agentManager.findAgent((Integer)entry.getKey());
+            Agent agent = agentManager.findAgent((Integer) entry.getKey());
             List<AppdefEntityID> eids = entry.getValue();
             unschedule(agent.getAgentToken(),
                        eids.toArray(new AppdefEntityID[0]));
