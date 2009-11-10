@@ -92,18 +92,15 @@ public class CPropManagerImpl implements CPropManager {
 	private PlatformTypeDAO platformTypeDAO;
 	private ServerTypeDAO serverTypeDAO;
 	private ServiceTypeDAO serviceTypeDAO;
-   
+
 	@Autowired
-	public CPropManagerImpl(Messenger sender, 
-			                CpropDAO cPropDAO,
-			                CpropKeyDAO cPropKeyDAO,
-			                PlatformManagerLocal platformManager,
-   		                 	ApplicationManagerLocal applicationManager,
-   		                 	ServerManagerLocal serverManager,
-   		                 	ServiceManagerLocal serviceManager,
-   		                 	PlatformTypeDAO platformTypeDAO,
-   		                 	ServerTypeDAO serverTypeDAO,
-   		                 	ServiceTypeDAO serviceTypeDAO) {
+	public CPropManagerImpl(Messenger sender, CpropDAO cPropDAO,
+			CpropKeyDAO cPropKeyDAO, PlatformManagerLocal platformManager,
+			ApplicationManagerLocal applicationManager,
+			ServerManagerLocal serverManager,
+			ServiceManagerLocal serviceManager,
+			PlatformTypeDAO platformTypeDAO, ServerTypeDAO serverTypeDAO,
+			ServiceTypeDAO serviceTypeDAO) {
 		this.sender = sender;
 		this.cPropDAO = cPropDAO;
 		this.cPropKeyDAO = cPropKeyDAO;
@@ -130,53 +127,51 @@ public class CPropManagerImpl implements CPropManager {
 		return cPropKeyDAO.findByAppdefType(appdefType, appdefTypeId);
 	}
 
+	private AppdefResourceType findResourceType(int appdefType, int appdefTypeId)
+			throws AppdefEntityNotFoundException {
+		Integer id = new Integer(appdefTypeId);
 
-    private AppdefResourceType findResourceType(int appdefType, int appdefTypeId)
-    throws AppdefEntityNotFoundException {
-        Integer id = new Integer(appdefTypeId);
+		if (appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
+			return platformManager.findPlatformType(id);
+		} else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
+			try {
+				return serverManager.findServerType(id);
+			} catch (ObjectNotFoundException exc) {
+				throw new ServerNotFoundException("Server type id="
+						+ appdefTypeId + " not found");
+			}
+		} else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
+			try {
+				return serviceManager.findServiceType(id);
+			} catch (ObjectNotFoundException exc) {
+				throw new ServiceNotFoundException("Service type id="
+						+ appdefTypeId + " not found");
+			}
+		} else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
+			return applicationManager.findApplicationType(id);
+		} else {
+			throw new IllegalArgumentException("Unrecognized appdef type:"
+					+ " " + appdefType);
+		}
+	}
 
-        if (appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            return platformManager.findPlatformType(id);
-        } else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-            try {
-                return serverManager.findServerType(id);
-            } catch (ObjectNotFoundException exc) {
-                throw new ServerNotFoundException("Server type id=" +
-                                                  appdefTypeId +
-                                                  " not found");
-            }
-        } else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-            try {
-                return serviceManager.findServiceType(id);
-            } catch (ObjectNotFoundException exc) {
-                throw new ServiceNotFoundException("Service type id=" +
-                                                   appdefTypeId +
-                                                   " not found");
-            }
-        } else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_APPLICATION) {
-            return applicationManager.findApplicationType(id);
-        } else {
-            throw new IllegalArgumentException("Unrecognized appdef type:" +
-                                               " " + appdefType);
-        }
-    }
-
-    /**
+	/**
 	 * find appdef resource type
 	 */
 	public AppdefResourceType findResourceType(TypeInfo info) {
-        int type = info.getType();
+		int type = info.getType();
 
-        if (type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            return platformTypeDAO.findByName(info.getName());
-        } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-            return serverTypeDAO.findByName(info.getName());
-        } else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-            return serviceTypeDAO.findByName(info.getName());
-        } else {
-            throw new IllegalArgumentException("Unrecognized appdef type: " + info);
-        }
-    }
+		if (type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
+			return platformTypeDAO.findByName(info.getName());
+		} else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
+			return serverTypeDAO.findByName(info.getName());
+		} else if (type == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
+			return serviceTypeDAO.findByName(info.getName());
+		} else {
+			throw new IllegalArgumentException("Unrecognized appdef type: "
+					+ info);
+		}
+	}
 
 	/**
 	 * find Cprop by key to a resource type based on a TypeInfo object.
@@ -217,7 +212,8 @@ public class CPropManagerImpl implements CPropManager {
 	public void addKey(CpropKey key) throws AppdefEntityNotFoundException,
 			CPropKeyExistsException {
 		// Insure that the resource type exists
-		AppdefResourceType recValue = findResourceType(key.getAppdefType(), key.getAppdefTypeId());
+		AppdefResourceType recValue = findResourceType(key.getAppdefType(), key
+				.getAppdefTypeId());
 		CpropKey cpKey = cPropKeyDAO.findByKey(key.getAppdefType(), key
 				.getAppdefTypeId(), key.getKey());
 
@@ -257,7 +253,7 @@ public class CPropManagerImpl implements CPropManager {
 					+ AppdefEntityConstants.typeToString(appdefType) + " "
 					+ appdefTypeId);
 		}
-		
+
 		// cascade on delete to remove Cprop as well
 		cPropKeyDAO.remove(cpKey);
 	}
@@ -305,9 +301,9 @@ public class CPropManagerImpl implements CPropManager {
 					CPROP_TABLE).append(" WHERE KEYID=").append(keyId).append(
 					" AND APPDEF_ID=").append(aID.getID());
 			rs = stmt.executeQuery(sql.toString());
-			
+
 			String oldval = null;
-			
+
 			if (rs.next()) {
 				// vals are the same, no update
 				if ((oldval = rs.getString(1)).equals(val)) {
@@ -316,45 +312,45 @@ public class CPropManagerImpl implements CPropManager {
 			}
 
 			DBUtil.closeStatement(this, stmt);
-			
+
 			if (oldval != null) {
 				stmt = conn.createStatement();
 				sql = new StringBuilder().append("DELETE FROM ").append(
 						CPROP_TABLE).append(" WHERE KEYID=").append(keyId)
 						.append(" AND APPDEF_ID=").append(aID.getID());
-				
+
 				stmt.executeUpdate(sql.toString());
 			}
 
 			// Optionally add new values
 			if (val != null) {
 				String[] chunks = chunk(val, CHUNKSIZE);
-				
+
 				sql = new StringBuilder().append("INSERT INTO ").append(
 						CPROP_TABLE);
 
 				Cprop nprop = new Cprop();
-				
+
 				sql.append(" (id,keyid,appdef_id,value_idx,PROPVALUE) VALUES ")
 						.append("(?, ?, ?, ?, ?)");
 
 				pstmt = conn.prepareStatement(sql.toString());
-				
+
 				pstmt.setInt(2, keyId);
 				pstmt.setInt(3, aID.getID());
-				
+
 				for (int i = 0; i < chunks.length; i++) {
 					int id = Util
 							.generateId(
 									"org.hyperic.hq.appdef.server.session.Cprop",
 									nprop).intValue();
-				
+
 					pstmt.setInt(1, id);
 					pstmt.setInt(4, i);
 					pstmt.setString(5, chunks[i]);
 					pstmt.addBatch();
 				}
-				
+
 				pstmt.executeBatch();
 			}
 
@@ -362,15 +358,16 @@ public class CPropManagerImpl implements CPropManager {
 				log.debug("Entity " + aID.getAppdefKey() + " " + key
 						+ " changed from " + oldval + " to " + val);
 			}
-			
+
 			// Send cprop value changed event
 			CPropChangeEvent event = new CPropChangeEvent(aID, key, oldval, val);
 
 			// Now publish the event
 			sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
 		} catch (SQLException exc) {
-			log.error("Unable to update CPropKey values: " + exc.getMessage(), exc);
-			
+			log.error("Unable to update CPropKey values: " + exc.getMessage(),
+					exc);
+
 			throw new SystemException(exc);
 		} finally {
 			DBUtil.closeResultSet(this, rs);
@@ -407,7 +404,7 @@ public class CPropManagerImpl implements CPropManager {
 		AppdefResourceType recType = aVal.getAppdefResourceType();
 		int typeId = recType.getId().intValue();
 		CpropKey propKey = this.getKey(aID, typeId, key);
-		
+
 		try {
 			Integer pk = propKey.getId();
 			final int keyId = pk.intValue();
@@ -423,7 +420,7 @@ public class CPropManagerImpl implements CPropManager {
 
 			rs = stmt.executeQuery();
 			didSomething = false;
-			
+
 			while (rs.next()) {
 				didSomething = true;
 				buf.append(rs.getString(1));
@@ -464,14 +461,14 @@ public class CPropManagerImpl implements CPropManager {
 					+ CPROP_TABLE + " B WHERE "
 					+ "B.keyid=A.id AND A.appdef_type=? "
 					+ "AND B.appdef_id=? " + "ORDER BY B.value_idx");
-			
+
 			stmt.setInt(1, aID.getType());
 			stmt.setInt(2, aID.getID());
 
 			rs = stmt.executeQuery();
 			lastKey = null;
 			buf = null;
-			
+
 			while (rs.next()) {
 				String keyName = rs.getString(1);
 				String valChunk = rs.getString(2);
@@ -497,7 +494,7 @@ public class CPropManagerImpl implements CPropManager {
 					.error(
 							"Unable to get CPropKey values: "
 									+ exc.getMessage(), exc);
-			
+
 			throw new SystemException(exc);
 		} finally {
 			DBUtil.closeResultSet(this, rs);
@@ -556,7 +553,7 @@ public class CPropManagerImpl implements CPropManager {
 		}
 
 		ConfigResponse cprops;
-		
+
 		try {
 			cprops = ConfigResponse.decode(data);
 		} catch (EncodingException e) {
@@ -571,7 +568,7 @@ public class CPropManagerImpl implements CPropManager {
 		for (Iterator<String> it = cprops.getKeys().iterator(); it.hasNext();) {
 			String key = it.next();
 			String val = cprops.getValue(key);
-			
+
 			try {
 				setValue(aID, typeId, key, val);
 			} catch (CPropKeyNotFoundException e) {
@@ -592,7 +589,7 @@ public class CPropManagerImpl implements CPropManager {
 			stmt = conn.prepareStatement("DELETE FROM " + CPROP_TABLE
 					+ " WHERE keyid IN " + "(SELECT id FROM " + CPROPKEY_TABLE
 					+ " WHERE appdef_type = ?) " + "AND appdef_id = ?");
-			
+
 			stmt.setInt(1, appdefType);
 			stmt.setInt(2, id);
 			stmt.executeUpdate();
@@ -601,7 +598,7 @@ public class CPropManagerImpl implements CPropManager {
 					.error(
 							"Unable to delete CProp values: "
 									+ exc.getMessage(), exc);
-			
+
 			throw new SystemException(exc);
 		} finally {
 			DBUtil.closeStatement(this, stmt);
@@ -630,10 +627,10 @@ public class CPropManagerImpl implements CPropManager {
 		if (res == null) {
 			String msg = "Key, '" + key + "', does " + "not exist for aID="
 					+ aID + ", typeId=" + typeId;
-		
+
 			throw new CPropKeyNotFoundException(msg);
 		}
-		
+
 		return res;
 	}
 
@@ -668,9 +665,9 @@ public class CPropManagerImpl implements CPropManager {
 		if ((strLen % chunkSize) != 0) {
 			nAlloc++;
 		}
-		
+
 		res = new String[nAlloc];
-		
+
 		for (int i = 0; i < nAlloc; i++) {
 			int begIdx, endIdx;
 
@@ -681,7 +678,7 @@ public class CPropManagerImpl implements CPropManager {
 
 			res[i] = src.substring(begIdx, endIdx);
 		}
-		
+
 		return res;
 	}
 }
