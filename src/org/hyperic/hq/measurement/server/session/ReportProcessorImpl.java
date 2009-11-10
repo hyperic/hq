@@ -50,7 +50,7 @@ import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
+import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.ReportProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.product.MetricValue;
@@ -71,14 +71,14 @@ public class ReportProcessorImpl
     private final long PRIORITY_OFFSET = MINUTE * 3;
 
     private MeasurementManagerLocal measurementManager;
-    private MeasurementProcessorLocal measurementProcessor;
+    private MeasurementProcessor measurementProcessor;
     private PlatformManagerLocal platformManager;
     private ServerManagerLocal serverManager;
     private ServiceManagerLocal serviceManager;
 
     @Autowired
     public ReportProcessorImpl(MeasurementManagerLocal measurementManager,
-                               MeasurementProcessorLocal measurementProcessor, PlatformManagerLocal platformManager,
+                               MeasurementProcessor measurementProcessor, PlatformManagerLocal platformManager,
                                ServerManagerLocal serverManager, ServiceManagerLocal serviceManager) {
         this.measurementManager = measurementManager;
         this.measurementProcessor = measurementProcessor;

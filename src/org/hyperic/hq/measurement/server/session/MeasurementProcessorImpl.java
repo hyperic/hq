@@ -27,12 +27,8 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,44 +36,52 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClientFactory;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorUtil;
+import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
 import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @ejb:bean name="MeasurementProcessor"
- *      jndi-name="ejb/measurement/MeasurementProcessor"
- *      local-jndi-name="LocalMeasurementProcessor"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:transaction type="Required"
  */
-public class MeasurementProcessorEJBImpl 
+@Service
+@Transactional
+public class MeasurementProcessorImpl 
     extends SessionEJB 
-    implements SessionBean 
+    implements MeasurementProcessor 
 {
-    private final String logCtx = MeasurementProcessorEJBImpl.class.getName();
+    private final String logCtx = MeasurementProcessorImpl.class.getName();
     private Log log = LogFactory.getLog(logCtx);
+    
+    private AgentManager agentManager;
+    private MeasurementManagerLocal measurementManager;
+    private AuthzSubjectManagerLocal authzSubjectManager;
+
+    @Autowired
+    public MeasurementProcessorImpl(AgentManager agentManager, MeasurementManagerLocal measurementManager,
+                                    AuthzSubjectManagerLocal authzSubjectManager) {
+        this.agentManager = agentManager;
+        this.measurementManager = measurementManager;
+        this.authzSubjectManager = authzSubjectManager;
+    }
 
     /**
      * Ping the agent to make sure it's up
-     * @ejb:interface-method
      */
     public boolean ping(Agent a)
         throws PermissionException {
@@ -88,21 +92,22 @@ public class MeasurementProcessorEJBImpl
 
     /**
      * @param aeids {@link List} of {@link AppdefEntityID}
-     * @ejb:interface-method
      */
-    public void scheduleSynchronous(List aeids) {
-        AgentManager aMan = AgentManagerImpl.getOne();
+    public void scheduleSynchronous(List<AppdefEntityID> aeids) {
         final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         try {
-            Map agents = getAgentMap(aeids);
-            for (Iterator it=agents.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry entry = (Map.Entry)it.next();
-                Agent agent = aMan.findAgent((Integer)entry.getKey());
-                List entityIds = (List)entry.getValue();
-                if (debug) watch.markTimeBegin("scheduleEnabled");
+            Map<Integer, List<AppdefEntityID>> agents = getAgentMap(aeids);
+            for (Map.Entry<Integer, List<AppdefEntityID>> entry : agents.entrySet()) {
+                Agent agent = agentManager.findAgent(entry.getKey());
+                List<AppdefEntityID> entityIds = entry.getValue();
+                if (debug) {
+                    watch.markTimeBegin("scheduleEnabled");
+                }
                 scheduleEnabled(agent, entityIds);
-                if (debug) watch.markTimeEnd("scheduleEnabled");
+                if (debug) {
+                    watch.markTimeEnd("scheduleEnabled");
+                }
             }
         } catch(Exception e) {
             log.error("Exception scheduling [" + aeids + "]: " + e.getMessage(), e);
@@ -115,17 +120,16 @@ public class MeasurementProcessorEJBImpl
     /**
      * @return Map of {@link Agent} to {@link List<AppdefEntityID>}
      */
-    private Map getAgentMap(List aeids) {
-        AgentManager aMan = AgentManagerImpl.getOne();
-        Map rtn = new HashMap(aeids.size());
-        List tmp;
-        for (Iterator it=aeids.iterator(); it.hasNext(); ) {
-            AppdefEntityID eid = (AppdefEntityID)it.next();
+    private Map<Integer, List<AppdefEntityID>> getAgentMap(List<AppdefEntityID> aeids) {
+        Map<Integer, List<AppdefEntityID>> rtn 
+            = new HashMap<Integer, List<AppdefEntityID>>(aeids.size());
+        for (AppdefEntityID eid : aeids) {
             Integer agentId;
             try {
-                agentId = aMan.getAgent(eid).getId();
-                if (null == (tmp = (List)rtn.get(agentId))) {
-                    tmp = new ArrayList();
+                List<AppdefEntityID> tmp;
+                agentId = agentManager.getAgent(eid).getId();
+                if (null == (tmp = (List<AppdefEntityID>)rtn.get(agentId))) {
+                    tmp = new ArrayList<AppdefEntityID>();
                     rtn.put(agentId, tmp);
                 }
                 tmp.add(eid);
@@ -138,16 +142,12 @@ public class MeasurementProcessorEJBImpl
 
     /**
      * @param eids List<AppdefEntityID>
-     * @ejb:interface-method
      */
-    public void scheduleEnabled(Agent agent, List eids)
+    public void scheduleEnabled(Agent agent, List<AppdefEntityID> eids)
         throws MonitorAgentException
     {
-        final SRNManager srnMan = getSRNManager();
-        final MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
-        final AuthzSubject overlord =
-            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
-        final Map schedMap = new HashMap();
+        final Map<SRN,List<Measurement>> schedMap 
+            = new HashMap<SRN,List<Measurement>>();
         AgentMonitor monitor = new AgentMonitor();
         MeasurementCommandsClient client = null;
         try {
@@ -155,11 +155,13 @@ public class MeasurementProcessorEJBImpl
                 ConcurrentStatsCollector.getInstance();
             client = MeasurementCommandsClientFactory.getInstance()
                                                      .getClient(agent);
-            for (Iterator it=eids.iterator(); it.hasNext(); ) {
+            // TODO: DI (see HE-133)
+            final SRNManager srnMan = getSRNManager();
+            final AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+            for (AppdefEntityID eid : eids) {
                 final long begin = now();
-                AppdefEntityID eid = (AppdefEntityID)it.next();
-                List measurements =
-                    mMan.findEnabledMeasurements(overlord, eid, null);
+                List<Measurement> measurements =
+                    measurementManager.findEnabledMeasurements(overlord, eid, null);
                 int srnNumber = srnMan.incrementSrn(eid, Long.MAX_VALUE);
                 SRN srn = new SRN(eid, srnNumber);
                 schedMap.put(srn, measurements);
@@ -200,6 +202,7 @@ public class MeasurementProcessorEJBImpl
 
     private void unschedule(Agent a, AppdefEntityID[] entIds)
         throws MeasurementUnscheduleException, MonitorAgentException {
+        // TODO: DI (see HE-133)
         SRNManager srnManager = getSRNManager();
         for (int i = 0; i < entIds.length; i++) {
             try {
@@ -215,7 +218,6 @@ public class MeasurementProcessorEJBImpl
     }
     
     /** Unschedule metrics of multiple appdef entities
-     * @ejb:interface-method
      * @param agentToken the entity whose agent will be contacted for the
      * unschedule
      * @param entIds the entity IDs whose metrics should be unscheduled
@@ -233,7 +235,6 @@ public class MeasurementProcessorEJBImpl
     }
     
     /** Unschedule metrics of multiple appdef entities
-     * @ejb:interface-method
      * @param agentEnt the entity whose agent will be contacted for the unschedule
      * @param entIds the entity IDs whose metrics should be unscheduled
      * @throws MeasurementUnscheduleException if an error occurs
@@ -252,37 +253,19 @@ public class MeasurementProcessorEJBImpl
     /** Unschedule measurements
      * @param aeids List of {@link AppdefEntityID}
      * @throws MeasurementUnscheduleException if an error occurs
-     * @ejb:interface-method
      */
-    public void unschedule(List aeids)
+    public void unschedule(List<AppdefEntityID> aeids)
         throws MeasurementUnscheduleException {
-        Map agents;
-        agents = getAgentMap(aeids);
-        AgentManager aMan = AgentManagerImpl.getOne();
-        for (Iterator it=agents.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)it.next();
-            Agent agent = aMan.findAgent((Integer)entry.getKey());
-            List eids = (List)entry.getValue();
+        Map<Integer, List<AppdefEntityID>> agents = getAgentMap(aeids);
+        for (Map.Entry<Integer, List<AppdefEntityID>> entry : agents.entrySet()) {
+            Agent agent = agentManager.findAgent((Integer)entry.getKey());
+            List<AppdefEntityID> eids = entry.getValue();
             unschedule(agent.getAgentToken(),
-                       (AppdefEntityID[])eids.toArray(new AppdefEntityID[0]));
+                       eids.toArray(new AppdefEntityID[0]));
         }
     }
 
-    public static MeasurementProcessorLocal getOne() {
-        try {
-            return MeasurementProcessorUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static MeasurementProcessor getOne() {
+        return Bootstrap.getBean(MeasurementProcessor.class);
     }
-    
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() {}
-    public void ejbPostCreate() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {}
 }

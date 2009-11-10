@@ -3,40 +3,46 @@
  */
 package org.hyperic.hq.measurement.shared;
 
+import java.util.List;
+
+import org.hyperic.hq.appdef.Agent;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.measurement.MeasurementUnscheduleException;
+import org.hyperic.hq.measurement.monitor.MonitorAgentException;
+
 /**
  * Local interface for MeasurementProcessor.
  */
-public interface MeasurementProcessorLocal
-   extends javax.ejb.EJBLocalObject
-{
+public interface MeasurementProcessor {
    /**
     * Ping the agent to make sure it's up
     */
-   public boolean ping( org.hyperic.hq.appdef.Agent a ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public boolean ping( Agent a ) throws PermissionException;
 
-   public void scheduleSynchronous( java.util.List aeids ) ;
+   public void scheduleSynchronous( List<AppdefEntityID> aeids ) ;
 
-   public void scheduleEnabled( org.hyperic.hq.appdef.Agent agent,java.util.List eids ) throws org.hyperic.hq.measurement.monitor.MonitorAgentException;
+   public void scheduleEnabled( Agent agent,List<AppdefEntityID> eids ) throws MonitorAgentException;
 
    /**
     * Unschedule metrics of multiple appdef entities
     * @param agentToken the entity whose agent will be contacted for the unschedule
     * @param entIds the entity IDs whose metrics should be unscheduled
     * @throws MeasurementUnscheduleException if an error occurs    */
-   public void unschedule( java.lang.String agentToken,org.hyperic.hq.appdef.shared.AppdefEntityID[] entIds ) throws org.hyperic.hq.measurement.MeasurementUnscheduleException;
+   public void unschedule( String agentToken,AppdefEntityID[] entIds ) throws MeasurementUnscheduleException;
 
    /**
     * Unschedule metrics of multiple appdef entities
     * @param agentEnt the entity whose agent will be contacted for the unschedule
     * @param entIds the entity IDs whose metrics should be unscheduled
     * @throws MeasurementUnscheduleException if an error occurs    */
-   public void unschedule( org.hyperic.hq.appdef.shared.AppdefEntityID agentEnt,org.hyperic.hq.appdef.shared.AppdefEntityID[] entIds ) throws org.hyperic.hq.measurement.MeasurementUnscheduleException;
+   public void unschedule( AppdefEntityID agentEnt,AppdefEntityID[] entIds ) throws MeasurementUnscheduleException;
 
    /**
     * Unschedule measurements
     * @param aeids List of {@link AppdefEntityID}
     * @throws MeasurementUnscheduleException if an error occurs
     */
-   public void unschedule( java.util.List aeids ) throws org.hyperic.hq.measurement.MeasurementUnscheduleException;
+   public void unschedule( List<AppdefEntityID> aeids ) throws MeasurementUnscheduleException;
 
 }

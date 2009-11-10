@@ -40,7 +40,7 @@ import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
+import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.util.pager.PageControl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,11 +59,11 @@ public class SRNManagerImpl
 
     private AuthzSubjectManagerLocal authzSubjectManager;
     private MeasurementManagerLocal measurementManager;
-    private MeasurementProcessorLocal measurementProcessor;
+    private MeasurementProcessor measurementProcessor;
 
     @Autowired
     public SRNManagerImpl(AuthzSubjectManagerLocal authzSubjectManager, MeasurementManagerLocal measurementManager,
-                          MeasurementProcessorLocal measurementProcessor) {
+                          MeasurementProcessor measurementProcessor) {
         this.authzSubjectManager = authzSubjectManager;
         this.measurementManager = measurementManager;
         this.measurementProcessor = measurementProcessor;
