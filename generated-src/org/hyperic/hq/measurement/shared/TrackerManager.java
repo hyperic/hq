@@ -13,19 +13,22 @@ import org.hyperic.util.config.ConfigResponse;
  * Local interface for TrackerManager.
  */
 public interface TrackerManager {
-   /**
-    * Enable log and config tracking for a resource if it has been enabled.
-    */
-   public void enableTrackers( AuthzSubject subject,AppdefEntityID id,ConfigResponse config ) throws PermissionException, PluginException;
+    /**
+     * Enable log and config tracking for a resource if it has been enabled.
+     */
+    public void enableTrackers(AuthzSubject subject, AppdefEntityID id, ConfigResponse config)
+        throws PermissionException, PluginException;
 
-   /**
-    * Disable log and config tracking for a resource.
-    */
-   public void disableTrackers( AuthzSubject subject,AppdefEntityID id,ConfigResponse config ) throws PermissionException, PluginException;
+    /**
+     * Disable log and config tracking for a resource.
+     */
+    public void disableTrackers(AuthzSubject subject, AppdefEntityID id, ConfigResponse config)
+        throws PermissionException, PluginException;
 
-   /**
-    * Toggle log and config tracking for the resource.
-    */
-   public void toggleTrackers( AuthzSubject subject,AppdefEntityID id,ConfigResponse config ) throws PermissionException, PluginException;
+    /**
+     * Toggle log and config tracking for the resource.
+     */
+    public void toggleTrackers(AuthzSubject subject, AppdefEntityID id, ConfigResponse config)
+        throws PermissionException, PluginException;
 
 }

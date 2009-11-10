@@ -51,11 +51,11 @@ import org.springframework.stereotype.Service;
  * The tracker manager handles sending agents add and remove operations
  * for the log and config track plugins.
  */
-@Service // Not transactional
-public class TrackerManagerImpl 
-    extends SessionEJB 
-    implements TrackerManager 
-{
+@Service
+// Not transactional
+public class TrackerManagerImpl
+    extends SessionEJB
+    implements TrackerManager {
     private final Log log = LogFactory.getLog(TrackerManagerImpl.class);
     private PlatformManagerLocal platformManager;
 
@@ -69,19 +69,18 @@ public class TrackerManagerImpl
         return MeasurementCommandsClientFactory.getInstance().getClient(aid);
     }
 
-    /** 
+    /**
      * Enable log or config tracking for the given resource
      */
     private void trackPluginAdd(AuthzSubject subject, AppdefEntityID id,
                                 String pluginType, ConfigResponse response)
-        throws PermissionException, PluginException
-    {
+        throws PermissionException, PluginException {
         try {
             MeasurementCommandsClient client = getClient(id);
             String resourceName = platformManager.getPlatformPluginName(id);
 
-            client.addTrackPlugin(id.getAppdefKey(), pluginType, 
-                                  resourceName, response);        
+            client.addTrackPlugin(id.getAppdefKey(), pluginType,
+                                  resourceName, response);
         } catch (AppdefEntityNotFoundException e) {
             throw new PluginException("Entity not found: " +
                                       e.getMessage());
@@ -100,13 +99,13 @@ public class TrackerManagerImpl
     private void trackPluginRemove(AuthzSubject subject, AppdefEntityID id,
                                    String pluginType)
         throws PermissionException,
-               PluginException {
+        PluginException {
         try {
             MeasurementCommandsClient client = getClient(id);
             client.removeTrackPlugin(id.getAppdefKey(), pluginType);
         } catch (AgentNotFoundException e) {
             log.warn("Agent not found while removing track plugins " +
-                "(this is ok).  Exception Message:" + e.getMessage());
+                     "(this is ok).  Exception Message:" + e.getMessage());
         } catch (AgentConnectionException e) {
             throw new PluginException("Agent error: " + e.getMessage(), e);
         } catch (AgentRemoteException e) {
@@ -119,8 +118,7 @@ public class TrackerManagerImpl
      */
     public void enableTrackers(AuthzSubject subject, AppdefEntityID id,
                                ConfigResponse config)
-        throws PermissionException, PluginException
-    {
+        throws PermissionException, PluginException {
         if (LogTrackPlugin.isEnabled(config, id.getType())) {
             trackPluginAdd(subject, id, ProductPlugin.TYPE_LOG_TRACK, config);
         }
@@ -135,8 +133,7 @@ public class TrackerManagerImpl
      */
     public void disableTrackers(AuthzSubject subject, AppdefEntityID id,
                                 ConfigResponse config)
-        throws PermissionException, PluginException
-    {
+        throws PermissionException, PluginException {
         if (LogTrackPlugin.isEnabled(config, id.getType())) {
             trackPluginRemove(subject, id, ProductPlugin.TYPE_LOG_TRACK);
         }
@@ -151,8 +148,7 @@ public class TrackerManagerImpl
      */
     public void toggleTrackers(AuthzSubject subject, AppdefEntityID id,
                                ConfigResponse config)
-        throws PermissionException, PluginException
-    {
+        throws PermissionException, PluginException {
         if (LogTrackPlugin.isEnabled(config, id.getType())) {
             trackPluginAdd(subject, id, ProductPlugin.TYPE_LOG_TRACK, config);
         } else {
@@ -165,7 +161,7 @@ public class TrackerManagerImpl
             trackPluginRemove(subject, id, ProductPlugin.TYPE_CONFIG_TRACK);
         }
     }
-    
+
     public static TrackerManager getOne() {
         return Bootstrap.getBean(TrackerManager.class);
     }
