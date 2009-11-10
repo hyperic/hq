@@ -82,11 +82,6 @@
 
 		</session>
 		<session>
-			<ejb-name>TrackerManager</ejb-name>
-			<local-jndi-name>LocalTrackerManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>ConfigBoss</ejb-name>
 			<jndi-name>ejb/bizapp/ConfigBoss</jndi-name>
 			<local-jndi-name>LocalConfigBoss</local-jndi-name>

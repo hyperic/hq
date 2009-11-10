@@ -17,7 +17,7 @@ import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerImpl;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.server.session.ServerRestartHandler;
-import org.hyperic.hq.measurement.server.session.TrackerManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.TrackerManagerImpl;
 
 /**
  * 
@@ -68,7 +68,7 @@ public class ServerRestartHandlerEJBImpl implements MessageDrivenBean, MessageLi
         serverRestartHandler = new ServerRestartHandler(ServerManagerEJBImpl.getOne(),
                                                         ConfigManagerEJBImpl.getOne(),
                                                         AutoinventoryManagerImpl.getOne(),
-                                                        TrackerManagerEJBImpl.getOne());
+                                                        TrackerManagerImpl.getOne());
     }
 
     /**
