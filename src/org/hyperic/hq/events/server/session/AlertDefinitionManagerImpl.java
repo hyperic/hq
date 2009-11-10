@@ -859,7 +859,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     /**
      * 
      */
-    public PageList<AlertDefinition> findAlertDefinitions(AuthzSubject subj, AppdefEntityID id, PageControl pc)
+    public PageList<AlertDefinitionValue> findAlertDefinitions(AuthzSubject subj, AppdefEntityID id, PageControl pc)
         throws PermissionException {
         alertPermissionManager.canManageAlerts(subj, id);
         Resource res = resourceManager.findResource(id);
@@ -888,7 +888,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get list of alert conditions for a resource or resource type
      * 
      */
-    public PageList<AlertDefinition> findAlertDefinitions(AuthzSubject subj, AppdefEntityTypeID aetid, PageControl pc)
+    public PageList<AlertDefinitionValue> findAlertDefinitions(AuthzSubject subj, AppdefEntityTypeID aetid, PageControl pc)
         throws PermissionException {
         Resource res = resourceManager.findResourcePrototype(aetid);
         Collection<AlertDefinition> adefs;
@@ -916,7 +916,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get list of children alert definition for a parent alert definition
      * 
      */
-    public PageList<AlertDefinition> findAlertDefinitionChildren(Integer id) {
+    public PageList<AlertDefinitionValue> findAlertDefinitionChildren(Integer id) {
         AlertDefinition def = alertDefDao.findById(id);
 
         PageControl pc = PageControl.PAGE_ALL;

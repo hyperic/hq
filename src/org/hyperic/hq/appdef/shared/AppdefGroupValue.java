@@ -68,7 +68,7 @@ public class AppdefGroupValue
     private String   description;   // group description
     private AuthzSubject subject;   // group owner
     private String   owner;         // String value of owner
-    private PageList groupEntries;  // list of group entries
+    private PageList<GroupEntry> groupEntries;  // list of group entries
     
     private Long    cTime;
     private Long    mTime;
@@ -87,7 +87,7 @@ public class AppdefGroupValue
     }
 
     private void init () {
-        groupEntries = new PageList();
+        groupEntries = new PageList<GroupEntry>();
         appdefResourceTypeValue = new GroupTypeValue();
         clusterId = -1;
     }
@@ -162,7 +162,7 @@ public class AppdefGroupValue
     }
 
     /** The PageList of group entries */
-    public PageList  getGroupEntries() {return this.groupEntries; }
+    public PageList<GroupEntry>  getGroupEntries() {return this.groupEntries; }
 
     /** Fetch the group members as a paged list of AppdefEntityIDs. The group
      *  will always contain a page list of values because ResourceGroupManager
@@ -171,7 +171,7 @@ public class AppdefGroupValue
      *  method (or to GroupUtil's) methods.
      *  @return paged list of members.
      */
-    public PageList  getAppdefGroupEntries () {
+    public PageList<AppdefEntityID>  getAppdefGroupEntries () {
         return getAppdefGroupEntries(null);
     }
 
@@ -183,16 +183,15 @@ public class AppdefGroupValue
      *  @return paged list of members.
      *  @param optional comparator
      */
-    public PageList  getAppdefGroupEntries (Comparator comparator) {
-        List entities = new ArrayList();
-        for (Iterator i=getGroupEntries().iterator();i.hasNext();) {
-            GroupEntry entry = (GroupEntry)i.next();
+    public PageList<AppdefEntityID>  getAppdefGroupEntries (Comparator<AppdefEntityID> comparator) {
+        List<AppdefEntityID> entities = new ArrayList<AppdefEntityID>();
+        for (GroupEntry entry: getGroupEntries()) {
             entities.add( entryToEntity( entry ) );
         }
         if (comparator !=null)
             Collections.sort(entities,comparator);
 
-        return new PageList(entities,getGroupEntries().getTotalSize());
+        return new PageList<AppdefEntityID>(entities,getGroupEntries().getTotalSize());
     }
 
     public Long getCTime() {

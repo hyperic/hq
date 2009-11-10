@@ -286,7 +286,7 @@ public interface PlatformManagerLocal
     * Check the scope of alertable resources for a give subject
     * @return a list of AppdefEntityIds
     */
-   public java.util.List checkAlertingScope( org.hyperic.hq.authz.server.session.AuthzSubject subj ) ;
+   public java.util.List<AppdefEntityID> checkAlertingScope( org.hyperic.hq.authz.server.session.AuthzSubject subj ) ;
 
    /**
     * Check for create child object permission for a given resource Child Resources: Platforms -> servers Servers -> services Any other resource will throw an InvalidAppdefTypeException since no other resources have this parent->child relationship with respect to their permissions

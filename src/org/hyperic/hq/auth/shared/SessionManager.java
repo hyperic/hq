@@ -31,18 +31,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.util.collection.IntHashMap;
-
+import org.springframework.stereotype.Component;
+@Component
 public class SessionManager {
     private final Log _log = LogFactory.getLog(SessionManager.class);
-    private static Random _random = new Random();
-    private static IntHashMap _cache = new IntHashMap();
-    private static SessionManager _manager = new SessionManager();
+    private Random _random = new Random();
+    private IntHashMap _cache = new IntHashMap();
     private static final long DEFAULT_TIMEOUT = 90 * 1000 * 60;
     private static final long HOUR = MeasurementConstants.HOUR;
 
-    private SessionManager() {
+    public SessionManager() {
         final Runnable task = new Runnable() {
             public void run() {
                 try {
@@ -60,7 +61,7 @@ public class SessionManager {
     }
 
     public static SessionManager getInstance() {
-        return _manager;
+        return Bootstrap.getBean(SessionManager.class);
     }
 
     /**

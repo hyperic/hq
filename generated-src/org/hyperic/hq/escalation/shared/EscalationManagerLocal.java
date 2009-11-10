@@ -3,6 +3,9 @@
  */
 package org.hyperic.hq.escalation.shared;
 
+import org.hyperic.hq.escalation.server.session.Escalation;
+import org.hyperic.hq.escalation.server.session.EscalationState;
+
 /**
  * Local interface for EscalationManager.
  */
@@ -42,7 +45,7 @@ public interface EscalationManagerLocal
 
    public org.hyperic.hq.escalation.server.session.Escalation findById( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer id ) throws org.hyperic.hq.authz.shared.PermissionException;
 
-   public java.util.Collection findAll( org.hyperic.hq.authz.server.session.AuthzSubject subject ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public java.util.Collection<Escalation> findAll( org.hyperic.hq.authz.server.session.AuthzSubject subject ) throws org.hyperic.hq.authz.shared.PermissionException;
 
    public org.hyperic.hq.escalation.server.session.Escalation findByName( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String name ) throws org.hyperic.hq.authz.shared.PermissionException;
 
@@ -132,7 +135,7 @@ public interface EscalationManagerLocal
     */
    public java.lang.Number getEscalationCount(  ) ;
 
-   public java.util.List getActiveEscalations( int maxEscalations ) ;
+   public java.util.List<EscalationState> getActiveEscalations( int maxEscalations ) ;
 
    public java.lang.String getLastFix( org.hyperic.hq.escalation.server.session.PerformsEscalations def ) ;
 

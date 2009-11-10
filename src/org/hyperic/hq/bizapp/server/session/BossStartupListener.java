@@ -23,7 +23,7 @@ public class BossStartupListener
     private final Log _log = LogFactory.getLog(BossStartupListener.class);
     
     public void hqStarted() {
-        EventsBossEJBImpl.getOne().startup();
+        EventsBossImpl.getOne().startup();
         EventLogBossEJBImpl.getOne().startup();
         AuthBossEJBImpl.getOne().startup();
         AppdefBossEJBImpl.getOne().startup();

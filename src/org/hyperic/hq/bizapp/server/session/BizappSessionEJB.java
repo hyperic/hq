@@ -66,8 +66,7 @@ import org.hyperic.hq.bizapp.shared.AuthzBossLocal;
 import org.hyperic.hq.bizapp.shared.AuthzBossUtil;
 import org.hyperic.hq.bizapp.shared.ControlBossLocal;
 import org.hyperic.hq.bizapp.shared.ControlBossUtil;
-import org.hyperic.hq.bizapp.shared.EventsBossLocal;
-import org.hyperic.hq.bizapp.shared.EventsBossUtil;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
@@ -82,14 +81,14 @@ import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
 import org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl;
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.ReportProcessorEJBImpl;
+import org.hyperic.hq.measurement.server.session.ReportProcessorImpl;
 import org.hyperic.hq.measurement.server.session.SRNManagerImpl;
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.TrackerManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.ReportProcessorLocal;
+import org.hyperic.hq.measurement.shared.ReportProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
 import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
@@ -100,12 +99,8 @@ public abstract class BizappSessionEJB {
 
     protected SessionContext ctx;
     
-    public EventsBossLocal getEventsBoss() {
-        try {
-            return EventsBossUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException();
-        }
+    public EventsBoss getEventsBoss() {
+       return EventsBossImpl.getOne();
     }
 
     public MeasurementBossLocal getMeasurementBoss() {
@@ -157,8 +152,8 @@ public abstract class BizappSessionEJB {
         }
     }
 
-    public ReportProcessorLocal getReportProcessor() {
-        return ReportProcessorEJBImpl.getOne();
+    public ReportProcessor getReportProcessor() {
+        return ReportProcessorImpl.getOne();
     }
 
     public CPropManager getCPropManager() {

@@ -38,8 +38,10 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class MetricProblemDAO extends HibernateDAO {
+public class MetricProblemDAO
+    extends HibernateDAO<MetricProblem> {
     private static Log _log = LogFactory.getLog(MetricProblemDAO.class);
 
     @Autowired
@@ -73,8 +75,8 @@ public class MetricProblemDAO extends HibernateDAO {
 
         Session session = getSession();
         int count = 0;
-        for (Iterator it = ids.iterator(); it.hasNext(); ) {
-            ArrayList subIds = new ArrayList();
+        for (Iterator<Integer> it = ids.iterator(); it.hasNext();) {
+            ArrayList<Integer> subIds = new ArrayList<Integer>();
 
             for (int i = 0; i < DBUtil.IN_CHUNK_SIZE && it.hasNext(); i++) {
                 subIds.add(it.next());
