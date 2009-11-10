@@ -36,7 +36,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.control.server.session.ControlManagerImpl;
 import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
+import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
@@ -72,7 +72,7 @@ public class ConfigValidatorImpl
                AppdefEntityNotFoundException, InvalidConfigException
     {
         MeasurementManagerLocal dmMan = getMetricManager();
-        TrackerManagerLocal trackerMan = getTrackerManager();
+        TrackerManager trackerMan = getTrackerManager();
 
         ConfigResponse[] responses;
         ConfigManagerLocal cman;

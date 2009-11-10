@@ -188,20 +188,6 @@
 			<transaction-type>Container</transaction-type>
 
 		</session>
-
-		<session>
-			<description><![CDATA[The tracker manager handles sending agents add and remove operations for the log and config track plugins.]]></description>
-
-			<ejb-name>TrackerManager</ejb-name>
-
-			<local-home>org.hyperic.hq.measurement.shared.TrackerManagerLocalHome</local-home>
-			<local>org.hyperic.hq.measurement.shared.TrackerManagerLocal</local>
-			<ejb-class>org.hyperic.hq.measurement.server.session.TrackerManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
 		<session>
 			<description><![CDATA[A boss to provide bizapp client access to the configuration settings]]></description>
 

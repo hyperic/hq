@@ -172,7 +172,7 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.AvailabilityType;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
+import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -1513,7 +1513,7 @@ public class AppdefBossEJBImpl
     private void removeTrackers(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException
     {
-        TrackerManagerLocal trackManager = getTrackerManager();
+        TrackerManager trackManager = getTrackerManager();
         ConfigResponse response;
     
         try {

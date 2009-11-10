@@ -25,78 +25,62 @@
 
 package org.hyperic.hq.measurement.server.session;
 
-import javax.ejb.CreateException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClientFactory;
-import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
-import org.hyperic.hq.measurement.shared.TrackerManagerUtil;
+import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.ConfigTrackPlugin;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * The tracker manager handles sending agents add and remove operations
  * for the log and config track plugins.
- *
- * @ejb:bean name="TrackerManager"
- *      jndi-name="ejb/measurement/TrackerManager"
- *      local-jndi-name="LocalTrackerManager"
- *      view-type="local"
- *      type="Stateless"
  */
-public class TrackerManagerEJBImpl 
-    extends SessionEJB 
-    implements SessionBean 
-{
-    private final Log log = LogFactory.getLog(TrackerManagerEJBImpl.class);
+@Service
+// Not transactional
+public class TrackerManagerImpl
+    extends SessionEJB
+    implements TrackerManager {
+    private final Log log = LogFactory.getLog(TrackerManagerImpl.class);
+    private PlatformManagerLocal platformManager;
 
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() throws CreateException {}
-
-    public void ejbPostCreate() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {}
+    @Autowired
+    public TrackerManagerImpl(PlatformManagerLocal platformManager) {
+        this.platformManager = platformManager;
+    }
 
     private MeasurementCommandsClient getClient(AppdefEntityID aid)
         throws PermissionException, AgentNotFoundException {
-        
         return MeasurementCommandsClientFactory.getInstance().getClient(aid);
     }
 
-    /** 
+    /**
      * Enable log or config tracking for the given resource
      */
     private void trackPluginAdd(AuthzSubject subject, AppdefEntityID id,
                                 String pluginType, ConfigResponse response)
-        throws PermissionException, PluginException
-    {
+        throws PermissionException, PluginException {
         try {
             MeasurementCommandsClient client = getClient(id);
-            String resourceName = PlatformManagerEJBImpl.getOne()
-                .getPlatformPluginName(id);
+            String resourceName = platformManager.getPlatformPluginName(id);
 
-            client.addTrackPlugin(id.getAppdefKey(), pluginType, 
-                                  resourceName, response);        
+            client.addTrackPlugin(id.getAppdefKey(), pluginType,
+                                  resourceName, response);
         } catch (AppdefEntityNotFoundException e) {
             throw new PluginException("Entity not found: " +
                                       e.getMessage());
@@ -115,13 +99,13 @@ public class TrackerManagerEJBImpl
     private void trackPluginRemove(AuthzSubject subject, AppdefEntityID id,
                                    String pluginType)
         throws PermissionException,
-               PluginException {
+        PluginException {
         try {
             MeasurementCommandsClient client = getClient(id);
             client.removeTrackPlugin(id.getAppdefKey(), pluginType);
         } catch (AgentNotFoundException e) {
             log.warn("Agent not found while removing track plugins " +
-                "(this is ok).  Exception Message:" + e.getMessage());
+                     "(this is ok).  Exception Message:" + e.getMessage());
         } catch (AgentConnectionException e) {
             throw new PluginException("Agent error: " + e.getMessage(), e);
         } catch (AgentRemoteException e) {
@@ -131,13 +115,10 @@ public class TrackerManagerEJBImpl
 
     /**
      * Enable log and config tracking for a resource if it has been enabled.
-     *
-     * @ejb:interface-method
      */
     public void enableTrackers(AuthzSubject subject, AppdefEntityID id,
                                ConfigResponse config)
-        throws PermissionException, PluginException
-    {
+        throws PermissionException, PluginException {
         if (LogTrackPlugin.isEnabled(config, id.getType())) {
             trackPluginAdd(subject, id, ProductPlugin.TYPE_LOG_TRACK, config);
         }
@@ -149,13 +130,10 @@ public class TrackerManagerEJBImpl
 
     /**
      * Disable log and config tracking for a resource.
-     *
-     * @ejb:interface-method
      */
     public void disableTrackers(AuthzSubject subject, AppdefEntityID id,
                                 ConfigResponse config)
-        throws PermissionException, PluginException
-    {
+        throws PermissionException, PluginException {
         if (LogTrackPlugin.isEnabled(config, id.getType())) {
             trackPluginRemove(subject, id, ProductPlugin.TYPE_LOG_TRACK);
         }
@@ -167,13 +145,10 @@ public class TrackerManagerEJBImpl
 
     /**
      * Toggle log and config tracking for the resource.
-     *
-     * @ejb:interface-method
      */
     public void toggleTrackers(AuthzSubject subject, AppdefEntityID id,
                                ConfigResponse config)
-        throws PermissionException, PluginException
-    {
+        throws PermissionException, PluginException {
         if (LogTrackPlugin.isEnabled(config, id.getType())) {
             trackPluginAdd(subject, id, ProductPlugin.TYPE_LOG_TRACK, config);
         } else {
@@ -186,12 +161,8 @@ public class TrackerManagerEJBImpl
             trackPluginRemove(subject, id, ProductPlugin.TYPE_CONFIG_TRACK);
         }
     }
-    
-    public static TrackerManagerLocal getOne() {
-        try {
-            return TrackerManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+
+    public static TrackerManager getOne() {
+        return Bootstrap.getBean(TrackerManager.class);
     }
 }

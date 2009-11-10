@@ -84,14 +84,14 @@ import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.ReportProcessorImpl;
 import org.hyperic.hq.measurement.server.session.SRNManagerImpl;
 import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
-import org.hyperic.hq.measurement.server.session.TrackerManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.TrackerManagerImpl;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.ReportProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
-import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
+import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.server.session.ProductManagerImpl;
 import org.hyperic.hq.product.shared.ProductManager;
 
@@ -232,8 +232,8 @@ public abstract class BizappSessionEJB {
         return DataManagerEJBImpl.getOne();
     }
 
-    protected TrackerManagerLocal getTrackerManager() {
-        return TrackerManagerEJBImpl.getOne();
+    protected TrackerManager getTrackerManager() {
+        return TrackerManagerImpl.getOne();
     }
 
     public ControlManager getControlManager() {

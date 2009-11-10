@@ -89,7 +89,7 @@ import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
 import org.hyperic.hq.measurement.shared.MeasurementManagerUtil;
-import org.hyperic.hq.measurement.shared.TrackerManagerLocal;
+import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
@@ -1426,7 +1426,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      */
     public void handleCreateRefreshEvents(List events) {
         ConfigManagerLocal cm = ConfigManagerEJBImpl.getOne();
-        TrackerManagerLocal tm = TrackerManagerEJBImpl.getOne();
+        TrackerManager tm = TrackerManagerImpl.getOne();
         AuthzSubjectManagerLocal aman = AuthzSubjectManagerEJBImpl.getOne();
         List eids = new ArrayList();
         
