@@ -23,11 +23,6 @@
 
 		</session>
 		<session>
-			<ejb-name>CPropManager</ejb-name>
-			<local-jndi-name>LocalCPropManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>ControlScheduleManager</ejb-name>
 			<local-jndi-name>LocalControlScheduleManager</local-jndi-name>
 
@@ -222,12 +217,6 @@
 		<session>
 			<ejb-name>UIPluginManager</ejb-name>
 			<local-jndi-name>LocalUIPluginManager</local-jndi-name>
-
-		</session>
-		<session>
-			<ejb-name>EventsBoss</ejb-name>
-			<jndi-name>ejb/bizapp/EventsBoss</jndi-name>
-			<local-jndi-name>LocalEventsBoss</local-jndi-name>
 
 		</session>
 		<session>

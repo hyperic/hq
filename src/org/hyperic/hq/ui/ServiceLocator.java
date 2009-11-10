@@ -38,6 +38,7 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.server.session.EventsBossImpl;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AIBossHome;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -53,7 +54,6 @@ import org.hyperic.hq.bizapp.shared.ControlBossHome;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.bizapp.shared.EventLogBossHome;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.bizapp.shared.EventsBossHome;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.bizapp.shared.GalertBossHome;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
@@ -84,9 +84,6 @@ public class ServiceLocator {
     
     private final static Class AUTHZ_CLASS   = AuthzBossHome.class;
     private final static String AUTHZ_NAME   = AuthzBossHome.JNDI_NAME;
-    
-    private final static Class EVENTS_CLASS  = EventsBossHome.class;
-    private final static String EVENTS_NAME  = EventsBossHome.JNDI_NAME;
     
     private final static Class MEASURE_CLASS = MeasurementBossHome.class;
     private final static String MEASURE_NAME = MeasurementBossHome.JNDI_NAME;
@@ -248,12 +245,7 @@ public class ServiceLocator {
      * @exception ServiceLocatorException if the lookup or create fails
      */
     public EventsBoss getEventsBoss() throws ServiceLocatorException {
-        EventsBossHome home = (EventsBossHome) lookup(EVENTS_NAME, EVENTS_CLASS);
-        try {
-            return (EventsBoss) home.create();
-        } catch (Exception e) {
-            throw new ServiceLocatorException(e);
-        }
+        return EventsBossImpl.getOne();
     }
     
     /**

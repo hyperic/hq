@@ -52,7 +52,7 @@ import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.CPropManagerLocal;
+import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -100,7 +100,7 @@ public class ProductManagerImpl implements ProductManager {
 
     private ProductPluginManager ppm;
     private ConfigManagerLocal configManager;
-    private CPropManagerLocal cPropManager;
+    private CPropManager cPropManager;
     private TemplateManagerLocal templateManager;
     private AuditManagerLocal auditManager;
     private PluginUpdater pluginUpdater = new PluginUpdater();
@@ -111,7 +111,7 @@ public class ProductManagerImpl implements ProductManager {
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
                               ConfigManagerLocal configManager,
-                              CPropManagerLocal cPropManager, TemplateManagerLocal templateManager,
+                              CPropManager cPropManager, TemplateManagerLocal templateManager,
                               AuditManagerLocal auditManager) {
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;

@@ -31,7 +31,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
-import org.hyperic.hq.appdef.shared.CPropManagerLocal;
+import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
@@ -53,7 +53,7 @@ public class AIQRV_purge implements AIQResourceVisitor {
                               AuthzSubject subject,
                               PlatformManagerLocal pmLocal,
                               ConfigManagerLocal configMgr,
-                              CPropManagerLocal cpropMgr,
+                              CPropManager cpropMgr,
                               List createdResources)
         throws AIQApprovalException, PermissionException
     {
@@ -79,7 +79,7 @@ public class AIQRV_purge implements AIQResourceVisitor {
                             PlatformManagerLocal pmLocal,
                             ServerManagerLocal smLocal,
                             ConfigManagerLocal configMgr,
-                            CPropManagerLocal cpropMgr,
+                            CPropManager cpropMgr,
                             List createdResources)
         throws AIQApprovalException, PermissionException
     {

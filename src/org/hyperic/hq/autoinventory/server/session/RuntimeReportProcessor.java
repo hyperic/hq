@@ -40,7 +40,7 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AIAudit;
 import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
-import org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.CPropManagerImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
@@ -55,7 +55,7 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIServiceTypeValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.CPropManagerLocal;
+import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
@@ -99,8 +99,8 @@ public class RuntimeReportProcessor {
     private final AuthzSubjectManagerLocal
         _subjectMgr = AuthzSubjectManagerEJBImpl.getOne();
     
-    private final CPropManagerLocal
-        _cpropMgr = CPropManagerEJBImpl.getOne();
+    private final CPropManager
+        _cpropMgr = CPropManagerImpl.getOne();
     
     private AuthzSubject _overlord;
     private List<ServiceMergeInfo>         _serviceMerges = new ArrayList<ServiceMergeInfo>();

@@ -28,7 +28,7 @@ CP=\
 ${LIBDIR}/velocity-1.3.1.jar:\
 ${LIBDIR}/ant.jar:\
 ${LIBDIR}/commons-beanutils.jar:\
-${LIBDIR}/commons-logging.jar:\
+${LIBDIR}/commons-logging-1.0.4.jar:\
 ${LIBDIR}/commons-collections.jar:\
 ${LIBDIR}/commons-httpclient-3.1.jar:\
 ${LIBDIR}/log4j.jar:\

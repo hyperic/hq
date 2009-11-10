@@ -151,7 +151,7 @@ public class PermissionManagerImpl
     
    
 
-    public List findOperationScopeBySubject(AuthzSubject subj, String opName,
+    public List<Integer> findOperationScopeBySubject(AuthzSubject subj, String opName,
                                             String resType)
         throws FinderException, PermissionException
     {
@@ -159,25 +159,30 @@ public class PermissionManagerImpl
             _log.debug("Checking Scope for Operation: " + opName +
                        " subject: " + subj);
         }
+        
         ResourceType resTypeBean = getResourceTypeDAO().findByName(resType);
+        
         if (resTypeBean != null) {
             Operation opEJB =
                 getOperationDAO().findByTypeAndName(resTypeBean, opName);
+            
             if (opEJB != null) {
                 return findOperationScopeBySubject(subj, opEJB.getId());
             }
         }
-        return new ArrayList();
+        
+        return new ArrayList<Integer>();
     }
 
-    public List findOperationScopeBySubject(AuthzSubject subj, Integer opId)
+    public List<Integer> findOperationScopeBySubject(AuthzSubject subj, Integer opId)
         throws FinderException, PermissionException
     {
         if (_log.isDebugEnabled()) {
             _log.debug("Checking Scope for Operation: " + opId + " subject: " +
                        subj);
         }
-        List scope = findScopeBySQL(subj, opId);
+        
+        List<Integer> scope = findScopeBySQL(subj, opId);
 
         if (_log.isDebugEnabled()) {
             _log.debug("Scope check returned a size of : " + scope.size() +
@@ -376,14 +381,14 @@ public class PermissionManagerImpl
         }
     }
 
-    private List findScopeBySQL(AuthzSubject subj, Integer opId)
+    private List<Integer> findScopeBySQL(AuthzSubject subj, Integer opId)
         throws FinderException, PermissionException
     {
         Pager defaultPager = Pager.getDefaultPager();
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
-        List instanceIds = null;
+        List<Integer> instanceIds = null;
         try {
             conn = getConnection();
             // Always return all resources
@@ -391,7 +396,7 @@ public class PermissionManagerImpl
             stmt.setInt(1, opId.intValue());
             rs = stmt.executeQuery();
             // now build the list
-            instanceIds = new ArrayList();
+            instanceIds = new ArrayList<Integer>();
             for(int i = 1; rs.next(); i++) {
                 instanceIds.add(new Integer(rs.getInt(1)));
             }

@@ -95,7 +95,7 @@ import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
-import org.hyperic.hq.appdef.shared.CPropManagerLocal;
+import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
@@ -1160,7 +1160,7 @@ public class AppdefBossEJBImpl
                CPropKeyNotFoundException, AppdefEntityNotFoundException,
                PermissionException
     {
-        CPropManagerLocal cpropMan;
+        CPropManager cpropMan;
         AppdefEntityValue aVal;
 
         cpropMan = getCPropManager();
@@ -3810,7 +3810,7 @@ public class AppdefBossEJBImpl
             ((AppdefResourceValue) services.get(0)).getAppdefResourceTypeValue();
         
         // Get the Cprop values
-        CPropManagerLocal cpropMan = getCPropManager();
+        CPropManager cpropMan = getCPropManager();
         List cprops = cpropMan.getCPropValues(type, cprop, pi.isAscending());
         
         List ret = new ArrayList(cprops.size());
