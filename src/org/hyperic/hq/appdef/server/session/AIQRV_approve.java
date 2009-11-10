@@ -39,7 +39,7 @@ import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.CPropManagerLocal;
+import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
@@ -76,7 +76,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                               AuthzSubject subject,
                               PlatformManagerLocal pmLocal,
                               ConfigManagerLocal configMgr,
-                              CPropManagerLocal cpropMgr,
+                              CPropManager cpropMgr,
                               List createdResources)
         throws AIQApprovalException, PermissionException {
 
@@ -244,7 +244,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                             PlatformManagerLocal pmLocal,
                             ServerManagerLocal smLocal,
                             ConfigManagerLocal configMgr,
-                            CPropManagerLocal cpropMgr,
+                            CPropManager cpropMgr,
                             List createdResources)
         throws AIQApprovalException, PermissionException
     {
@@ -284,7 +284,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                      AIPlatformValue aiplatformValue,
                                      AIServer aiserver,
                                      ConfigManagerLocal configMgr,
-                                     CPropManagerLocal cpropMgr,
+                                     CPropManager cpropMgr,
                                      List createdResources,
                                      ServerManagerLocal smLocal)
         throws PermissionException
@@ -320,7 +320,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                      AIPlatformValue aiplatformValue,
                                      AIServer aiserver,
                                      ConfigManagerLocal configMgr,
-                                     CPropManagerLocal cpropMgr,
+                                     CPropManager cpropMgr,
                                      List createdResources,
                                      ServerManagerLocal smLocal)
         throws PermissionException, AIQApprovalException
@@ -372,7 +372,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                    AIPlatformValue aiplatformValue,
                                    AIServer aiserver,
                                    ConfigManagerLocal configMgr,
-                                   CPropManagerLocal cpropMgr,
+                                   CPropManager cpropMgr,
                                    List createdResources,
                                    ServerManagerLocal smLocal)
         throws AIQApprovalException, PermissionException
@@ -479,7 +479,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
     private static void setCustomProperties(AIPlatform aiplatform,
                                             Platform platform,
-                                            CPropManagerLocal cpropMgr) {
+                                            CPropManager cpropMgr) {
         try {
             int typeId =
                 platform.getPlatformType().getId().intValue();
@@ -493,7 +493,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
     private static void setCustomProperties(AIServer aiserver,
                                             Server server,
-                                            CPropManagerLocal cpropMgr) {
+                                            CPropManager cpropMgr) {
         try {
             int typeId = server.getServerType().getId().intValue();
             cpropMgr.setConfigResponse(server.getEntityId(), typeId,

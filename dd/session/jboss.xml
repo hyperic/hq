@@ -23,11 +23,6 @@
 
 		</session>
 		<session>
-			<ejb-name>CPropManager</ejb-name>
-			<local-jndi-name>LocalCPropManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>ControlScheduleManager</ejb-name>
 			<local-jndi-name>LocalControlScheduleManager</local-jndi-name>
 

@@ -28,10 +28,10 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.List;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
 public class CpropKeyDAO extends HibernateDAO
 {
@@ -61,7 +61,7 @@ public class CpropKeyDAO extends HibernateDAO
         return cpropkey;
     }
 
-    List findByAppdefType(int appdefType, int appdefId)
+    List<CpropKey> findByAppdefType(int appdefType, int appdefId)
     {
         String sql = "from CpropKey k where k.appdefType=? and " +
                      "k.appdefTypeId = ?";

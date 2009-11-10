@@ -31,39 +31,34 @@ import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Cprop;
 import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class CpropDAO extends HibernateDAO
-{
-    @Autowired
-    public CpropDAO(SessionFactory f) {
-        super(Cprop.class, f);
-    }
+public class CpropDAO extends HibernateDAO {
+	@Autowired
+	public CpropDAO(SessionFactory f) {
+		super(Cprop.class, f);
+	}
 
-    public Cprop findById(Integer Id)
-    {
-        return (Cprop)super.findById(Id);
-    }
+	public Cprop findById(Integer Id) {
+		return (Cprop) super.findById(Id);
+	}
 
-    public void save(Cprop entity)
-    {
-        super.save(entity);
-    }
+	public void save(Cprop entity) {
+		super.save(entity);
+	}
 
-    public void remove(Cprop entity)
-    {
-        super.remove(entity);
-    }
+	public void remove(Cprop entity) {
+		super.remove(entity);
+	}
 
-    public List findByKeyName(CpropKey key, boolean asc) {
-        Criteria c = createCriteria()
-            .add(Expression.eq("key", key))
-            .addOrder(asc ? Order.asc("propValue") : Order.desc("propValue"));
-        return c.list();
-    }
+	public List<Cprop> findByKeyName(CpropKey key, boolean asc) {
+		Criteria c = createCriteria().add(Expression.eq("key", key)).addOrder(
+				asc ? Order.asc("propValue") : Order.desc("propValue"));
+		return c.list();
+	}
 }

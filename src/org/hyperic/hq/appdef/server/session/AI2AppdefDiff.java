@@ -40,7 +40,7 @@ import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.CPropManagerLocal;
+import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -70,7 +70,7 @@ public class AI2AppdefDiff {
     public AIPlatformValue diffAgainstAppdef(AuthzSubject subject,
                                              PlatformManagerLocal pmLH,
                                              ConfigManagerLocal cmLocal,
-                                             CPropManagerLocal cpropMgr,
+                                             CPropManager cpropMgr,
                                              AIPlatformValue aiplatform)
     {
         AIPlatformValue revisedAIplatform;
@@ -327,7 +327,7 @@ public class AI2AppdefDiff {
 
     private void doServerDiffs(Platform appdefPlatform,
                                ConfigManagerLocal cmLocal,
-                               CPropManagerLocal cpropMgr,
+                               CPropManager cpropMgr,
                                AIPlatformValue aiPlatform,
                                AIPlatformValue revisedAIplatform) {
 
@@ -518,7 +518,7 @@ public class AI2AppdefDiff {
     //that is checking for differences.  however, at this point
     //we have the ai object, the existing appdef object and the cpropMgr.
     //this is simply the easiest place until server AI code is refactored.
-    private void updateCprops(CPropManagerLocal cpropMgr,
+    private void updateCprops(CPropManager cpropMgr,
                               AppdefEntityID id, int type, byte[] data)
     {
         if (data == null) {
