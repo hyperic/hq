@@ -101,6 +101,7 @@ public abstract class Win32EventLogNotification
                 user = "N/A";
             }
             setProp(props, "user", user);
+            setProp(props, "category", record.getCategoryString());
             msg = Metric.translate(this.format, props);
         }
 
