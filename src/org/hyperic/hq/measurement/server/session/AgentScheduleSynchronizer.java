@@ -36,7 +36,7 @@ import net.sf.ehcache.Element;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
+import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.zevents.Zevent;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -70,8 +70,8 @@ public class AgentScheduleSynchronizer {
     void initialize() {
         ZeventListener l = new ZeventListener() {
             public void processEvents(List events) {
-                final MeasurementProcessorLocal mProc =
-                    MeasurementProcessorEJBImpl.getOne();
+                final MeasurementProcessor mProc =
+                    MeasurementProcessorImpl.getOne();
                 List eids = new ArrayList();
                 for (Iterator i=events.iterator(); i.hasNext(); ) {
                     AgentScheduleSyncZevent z = 

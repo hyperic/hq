@@ -63,19 +63,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[]]></description>
-
-			<ejb-name>MeasurementProcessor</ejb-name>
-
-			<local-home>org.hyperic.hq.measurement.shared.MeasurementProcessorLocalHome</local-home>
-			<local>org.hyperic.hq.measurement.shared.MeasurementProcessorLocal</local>
-			<ejb-class>org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[The BizApp's interface to the Scheduler Subsystem.]]></description>
 
 			<ejb-name>SchedulerBoss</ejb-name>
@@ -1074,13 +1061,6 @@
 				<method-params>
 					<method-param>java.lang.Integer</method-param>
 				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>MeasurementProcessor</ejb-name>
-				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>

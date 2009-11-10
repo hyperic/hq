@@ -1175,7 +1175,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             // the resource is getting removed.  Send the unschedule synchronously
             // so that all the necessary plumbing is in place.
             watch.markTimeBegin("unschedule");
-            MeasurementProcessorEJBImpl.getOne().unschedule(appIdList);
+            MeasurementProcessorImpl.getOne().unschedule(appIdList);
             watch.markTimeEnd("unschedule");
             
             log.debug("disableMeasurements: total=" + mids.length + ", time=" + watch);
@@ -1236,7 +1236,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         // the resource is getting removed.  Send the unschedule synchronously
         // so that all the necessary plumbing is in place.
         try {
-            MeasurementProcessorEJBImpl.getOne().unschedule(agentId, ids);
+            MeasurementProcessorImpl.getOne().unschedule(agentId, ids);
         } catch (MeasurementUnscheduleException e) {
             log.error("Unable to disable measurements", e);           
         }
@@ -1287,7 +1287,7 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         // the resource is getting removed.  Send the unschedule synchronously
         // so that all the necessary plumbing is in place.
         try {
-            MeasurementProcessorEJBImpl.getOne().unschedule(
+            MeasurementProcessorImpl.getOne().unschedule(
                 Collections.singletonList(aeid));
         } catch (MeasurementUnscheduleException e) {
             log.error("Unable to disable measurements", e);

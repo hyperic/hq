@@ -49,9 +49,9 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.server.session.MeasurementProcessorEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementProcessorImpl;
 import org.hyperic.hq.measurement.server.session.SRNManagerImpl;
-import org.hyperic.hq.measurement.shared.MeasurementProcessorLocal;
+import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 
 /**
@@ -78,8 +78,8 @@ public class ScheduleVerificationService
 
     private boolean _firstTime = true;
 
-    private MeasurementProcessorLocal getMeasurementProcessor() {
-        return MeasurementProcessorEJBImpl.getOne();
+    private MeasurementProcessor getMeasurementProcessor() {
+        return MeasurementProcessorImpl.getOne();
     }
 
     /**
