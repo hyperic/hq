@@ -31,7 +31,7 @@ import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
-import org.hyperic.hq.appdef.shared.CPropManagerLocal;
+import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
@@ -47,7 +47,7 @@ public abstract class AppdefSessionUtil {
     private AIQueueManagerLocal aiqManagerLocal;
     private ConfigManagerLocal configMgrL;
     private ResourceManager rmLocal;
-    private CPropManagerLocal cpropLocal;
+    private CPropManager cpropLocal;
     // TODO: Remove protected accessor when all subclasses are converted
     protected AgentDAO agentDao = Bootstrap.getBean(AgentDAO.class);
     protected ApplicationDAO applicationDAO = Bootstrap.getBean(ApplicationDAO.class);
@@ -59,9 +59,9 @@ public abstract class AppdefSessionUtil {
     protected ServiceTypeDAO serviceTypeDAO = Bootstrap.getBean(ServiceTypeDAO.class);
     protected ServiceDAO serviceDao = Bootstrap.getBean(ServiceDAO.class);
 
-    protected CPropManagerLocal getCPropManager() {
+    protected CPropManager getCPropManager() {
         if (cpropLocal == null) {
-            cpropLocal = CPropManagerEJBImpl.getOne();
+            cpropLocal = CPropManagerImpl.getOne();
         }
         return cpropLocal;
     }

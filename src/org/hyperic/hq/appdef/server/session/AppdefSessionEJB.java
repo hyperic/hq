@@ -48,7 +48,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
-import org.hyperic.hq.appdef.shared.CPropManagerLocal;
+import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -1028,7 +1028,7 @@ public abstract class AppdefSessionEJB
     } 
 
     protected void deleteCustomProperties(AppdefEntityID aeid) {
-        CPropManagerLocal cpropMan = getCPropManager();
+        CPropManager cpropMan = getCPropManager();
         cpropMan.deleteValues(aeid.getType(), aeid.getID());
     }
 

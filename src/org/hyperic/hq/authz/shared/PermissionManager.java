@@ -139,7 +139,7 @@ public abstract class PermissionManager   {
      * for which the operation is valid
      * @return List of integer instance ids
      */
-    public abstract List
+    public abstract List<Integer>
         findOperationScopeBySubject(AuthzSubject subj, String opName,
                                     String resType)
         throws FinderException, PermissionException;
@@ -149,7 +149,7 @@ public abstract class PermissionManager   {
      * has a given operation.
      * @return List of integer instance ids
      */
-    public abstract List
+    public abstract List<Integer>
         findOperationScopeBySubject(AuthzSubject subj, Integer opId)
         throws FinderException, PermissionException;
 

@@ -56,7 +56,7 @@ import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.CPropManagerLocal;
+import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
@@ -134,7 +134,7 @@ public class AIQueueManagerEJBImpl
         PlatformManagerLocal pmLocal = getPlatformManager();
         AIQueueManagerLocal aiqLocal = getAIQManagerLocal();
         ConfigManagerLocal crmLocal = getConfigManager();
-        CPropManagerLocal cpropMgr = getCPropManager();
+        CPropManager cpropMgr = getCPropManager();
 
         // First, calculate queuestatus and diff with respect to
         // existing appdef data.
@@ -517,7 +517,7 @@ public class AIQueueManagerEJBImpl
         PlatformManagerLocal pmLocal = getPlatformManager();
         ServerManagerLocal smLocal = getServerManager();
         ConfigManagerLocal configMgr = getConfigManager();
-        CPropManagerLocal cpropMgr = getCPropManager();
+        CPropManager cpropMgr = getCPropManager();
 
         AIPlatform aiplatform = null;
         List createdResources = new ArrayList();

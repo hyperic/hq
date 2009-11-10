@@ -37,19 +37,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[]]></description>
-
-			<ejb-name>CPropManager</ejb-name>
-
-			<local-home>org.hyperic.hq.appdef.shared.CPropManagerLocalHome</local-home>
-			<local>org.hyperic.hq.appdef.shared.CPropManagerLocal</local>
-			<ejb-class>org.hyperic.hq.appdef.server.session.CPropManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[Control manager for dealing with scheduled actions]]></description>
 
 			<ejb-name>ControlScheduleManager</ejb-name>
@@ -748,109 +735,6 @@
 				<method-params>
 					<method-param>java.lang.String</method-param>
 					<method-param>java.lang.String</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>CPropManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>CPropManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>getKeys</method-name>
-				<method-params>
-					<method-param>int</method-param>
-					<method-param>int</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>CPropManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>addKey</method-name>
-				<method-params>
-					<method-param>org.hyperic.hq.appdef.server.session.CpropKey</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>CPropManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>deleteKey</method-name>
-				<method-params>
-					<method-param>int</method-param>
-					<method-param>int</method-param>
-					<method-param>java.lang.String</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>CPropManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>setValue</method-name>
-				<method-params>
-					<method-param>org.hyperic.hq.appdef.shared.AppdefEntityID</method-param>
-					<method-param>int</method-param>
-					<method-param>java.lang.String</method-param>
-					<method-param>java.lang.String</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>CPropManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>getValue</method-name>
-				<method-params>
-					<method-param>org.hyperic.hq.appdef.shared.AppdefEntityValue</method-param>
-					<method-param>java.lang.String</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>CPropManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>getEntries</method-name>
-				<method-params>
-					<method-param>org.hyperic.hq.appdef.shared.AppdefEntityID</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>CPropManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>getDescEntries</method-name>
-				<method-params>
-					<method-param>org.hyperic.hq.appdef.shared.AppdefEntityID</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>CPropManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>deleteValues</method-name>
-				<method-params>
-					<method-param>int</method-param>
-					<method-param>int</method-param>
 				</method-params>
 			</method>
 			<trans-attribute>Required</trans-attribute>
