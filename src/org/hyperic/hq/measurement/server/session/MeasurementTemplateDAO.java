@@ -32,14 +32,13 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class MeasurementTemplateDAO extends HibernateDAO {
+public class MeasurementTemplateDAO extends HibernateDAO<MeasurementTemplate> {
 
     private CategoryDAO catDAO;
 
@@ -116,7 +115,8 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         save(mt);
     }
 
-    List findAllTemplates(PageInfo pInfo, Boolean defaultOn) {
+    @SuppressWarnings("unchecked")
+    List<MeasurementTemplate> findAllTemplates(PageInfo pInfo, Boolean defaultOn) {
         String sql = "select t from MeasurementTemplate t";
 
         if (defaultOn != null) {
@@ -133,12 +133,14 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         return pInfo.pageResults(q).list();
     }
 
-    List findTemplates(Integer[] ids) {
+    @SuppressWarnings("unchecked")
+    List<MeasurementTemplate> findTemplates(Integer[] ids) {
         if (ids.length == 1) {
-            Object res = get(ids[0]);
+            MeasurementTemplate res = get(ids[0]);
 
-            if (res == null)
-                return new ArrayList();
+            if (res == null) {
+                return new ArrayList<MeasurementTemplate>();
+            }
 
             return Collections.singletonList(res);
         }
@@ -150,13 +152,14 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .list();
     }
 
-    List findTemplatesByMonitorableType(String type) {
+    List<MeasurementTemplate> findTemplatesByMonitorableType(String type) {
         PageInfo pInfo =
             PageInfo.getAll(MeasurementTemplateSortField.TEMPLATE_NAME, true);
         return findTemplatesByMonitorableType(pInfo, type, null);
     }
 
-    List findTemplatesByMonitorableType(PageInfo pInfo, String type,
+    @SuppressWarnings("unchecked")
+    List<MeasurementTemplate> findTemplatesByMonitorableType(PageInfo pInfo, String type,
                                         Boolean defaultOn)
     {
         String sql =
@@ -180,7 +183,8 @@ public class MeasurementTemplateDAO extends HibernateDAO {
         return pInfo.pageResults(q).list();
     }
 
-    List findTemplatesByMonitorableTypeAndCategory(String type,
+    @SuppressWarnings("unchecked")
+    List<MeasurementTemplate> findTemplatesByMonitorableTypeAndCategory(String type,
                                                    String cat) {
         String sql =
             "select t from MeasurementTemplate t " +
@@ -193,7 +197,8 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setString(1, cat).list();
     }
 
-    List findDefaultsByMonitorableType(String mt, int appdefType) {
+    @SuppressWarnings("unchecked")
+    List<MeasurementTemplate> findDefaultsByMonitorableType(String mt, int appdefType) {
         String sql =
             "select t from MeasurementTemplate t " +
             "join fetch t.monitorableType mt " +
@@ -206,7 +211,8 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setInteger(1, appdefType).list();
     }
 
-    List findDesignatedByMonitorableType(String mt, int appdefType) {
+    @SuppressWarnings("unchecked")
+    List<MeasurementTemplate> findDesignatedByMonitorableType(String mt, int appdefType) {
         String sql =
             "select t from MeasurementTemplate t " +
             "join fetch t.monitorableType mt " +
@@ -219,7 +225,8 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setInteger(1, appdefType).list();
     }
 
-    List findRawByMonitorableType(MonitorableType mt) {
+    @SuppressWarnings("unchecked")
+    List<MeasurementTemplate> findRawByMonitorableType(MonitorableType mt) {
         String sql =
             "select t from MeasurementTemplate t " +
             "where t.monitorableType=?";
@@ -228,7 +235,8 @@ public class MeasurementTemplateDAO extends HibernateDAO {
             .setParameter(0, mt).list();
     }
 
-    List findDerivedByMonitorableType(String name) {
+    @SuppressWarnings("unchecked")
+    List<MeasurementTemplate> findDerivedByMonitorableType(String name) {
         // Oracle doesn't like 'distinct' qualifier on select when
         // there are BLOB attributes.  The Oracle exception is
         // (ORA-00932: inconsistent datatypes: expected - got BLOB)

@@ -478,19 +478,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[The TemplateManagerEJB class is a stateless session bean that can be used to interact with Template EJB's]]></description>
-
-			<ejb-name>TemplateManager</ejb-name>
-
-			<local-home>org.hyperic.hq.measurement.shared.TemplateManagerLocalHome</local-home>
-			<local>org.hyperic.hq.measurement.shared.TemplateManagerLocal</local>
-			<ejb-class>org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[This class is responsible for managing Server objects in appdef and their relationships]]></description>
 
 			<ejb-name>ServerManager</ejb-name>
@@ -3395,13 +3382,6 @@
 		<container-transaction>
 			<method>
 				<ejb-name>AppdefBoss</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>TemplateManager</ejb-name>
 				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>

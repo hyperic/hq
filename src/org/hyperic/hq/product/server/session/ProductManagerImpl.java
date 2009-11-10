@@ -64,7 +64,7 @@ import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
-import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
+import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementInfo;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.PluginException;
@@ -101,7 +101,7 @@ public class ProductManagerImpl implements ProductManager {
     private ProductPluginManager ppm;
     private ConfigManagerLocal configManager;
     private CPropManager cPropManager;
-    private TemplateManagerLocal templateManager;
+    private TemplateManager templateManager;
     private AuditManagerLocal auditManager;
     private PluginUpdater pluginUpdater = new PluginUpdater();
     private static final String ALERT_DEFINITIONS_XML_FILE = "etc/alert-definitions.xml";
@@ -111,7 +111,7 @@ public class ProductManagerImpl implements ProductManager {
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
                               ConfigManagerLocal configManager,
-                              CPropManager cPropManager, TemplateManagerLocal templateManager,
+                              CPropManager cPropManager, TemplateManager templateManager,
                               AuditManagerLocal auditManager) {
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
@@ -199,13 +199,12 @@ public class ProductManagerImpl implements ProductManager {
 
     /**
      */
-    // TOD: G
+    // TODO: G
     public String getMonitoringHelp(AppdefEntityValue entityVal, Map props)
         throws PluginNotFoundException, PermissionException,
         AppdefEntityNotFoundException {
         TypeInfo info = getTypeInfo(entityVal);
-        String help =
-                      ppm.getMeasurementPluginManager().getHelp(info, props);
+        String help = ppm.getMeasurementPluginManager().getHelp(info, props);
         if (help == null) {
             return null;
         }
@@ -360,7 +359,7 @@ public class ProductManagerImpl implements ProductManager {
         // Keep a list of templates to add
         // TODO: G (what are the parameters for the map returned by
         // TemplateManagerLocal.updateTemplates
-        HashMap<MonitorableType, Map<?, ?>> toAdd = new HashMap<MonitorableType, Map<?, ?>>();
+        HashMap<MonitorableType, Map<?,MeasurementInfo>> toAdd = new HashMap<MonitorableType, Map<?,MeasurementInfo>>();
 
         for (int i = 0; i < entities.length; i++) {
             TypeInfo info = entities[i];
@@ -381,7 +380,7 @@ public class ProductManagerImpl implements ProductManager {
             if (measurements != null && measurements.length > 0) {
                 MonitorableType monitorableType =
                                                   templateManager.getMonitorableType(pluginName, info);
-                Map<?, ?> newMeasurements = templateManager.updateTemplates(pluginName, info,
+                Map<?,MeasurementInfo> newMeasurements = templateManager.updateTemplates(pluginName, info,
                                                                             monitorableType,
                                                                             measurements);
                 toAdd.put(monitorableType, newMeasurements);

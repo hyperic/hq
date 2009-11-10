@@ -28,8 +28,8 @@ import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateSortField;
-import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
-import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
+import org.hyperic.hq.measurement.server.session.TemplateManagerImpl;
+import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.types.AlertCondition;
 import org.hyperic.hq.types.AlertDefinition;
@@ -55,19 +55,19 @@ public class AlertDefinitionXmlParser {
     }
 
     private final ResourceManager resourceManager;
-    private final TemplateManagerLocal templateManager;
+    private final TemplateManager templateManager;
     private final AuthzSubjectManagerLocal authzSubjectManager;
     private final AlertDefinitionManager alertDefinitionManager;
 
     public AlertDefinitionXmlParser() {
         this.authzSubjectManager = AuthzSubjectManagerEJBImpl.getOne();
         this.resourceManager = ResourceManagerImpl.getOne();
-        this.templateManager = TemplateManagerEJBImpl.getOne();
+        this.templateManager = TemplateManagerImpl.getOne();
         this.alertDefinitionManager = AlertDefinitionManagerImpl.getOne();
     }
 
     public AlertDefinitionXmlParser(ResourceManager resourceManager,
-                                    TemplateManagerLocal templateManager,
+                                    TemplateManager templateManager,
                                     AuthzSubjectManagerLocal authzSubjectManager,
                                     AlertDefinitionManager alertDefinitionManager)
     {

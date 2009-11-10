@@ -56,12 +56,12 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
-import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.TemplateManagerImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent.MeasurementScheduleZeventSource;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
+import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.HeartBeatZevent;
 import org.hyperic.hq.zevents.Zevent;
@@ -750,7 +750,7 @@ public class MeasurementGtrigger
         _interestedEvents.clear();
         ResourceGroupManager gMan = ResourceGroupManagerImpl.getOne(); 
         AuthzSubjectManagerLocal sMan = AuthzSubjectManagerEJBImpl.getOne(); 
-        TemplateManagerLocal tMan = TemplateManagerEJBImpl.getOne(); 
+        TemplateManager tMan = TemplateManagerImpl.getOne(); 
             
         try {
             ResourceGroup g = gMan.findResourceGroupById(sMan.getOverlordPojo(),
