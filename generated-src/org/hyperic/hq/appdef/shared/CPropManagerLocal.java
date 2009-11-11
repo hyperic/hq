@@ -3,6 +3,9 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import org.hyperic.hq.appdef.server.session.Cprop;
+import org.hyperic.hq.appdef.server.session.CpropKey;
+
 /**
  * Local interface for CPropManager.
  */
@@ -15,7 +18,7 @@ public interface CPropManagerLocal
     * @param appdefTypeId The ID of the appdef resource type
     * @return a List of CPropKeyValue objects
     */
-   public java.util.List getKeys( int appdefType,int appdefTypeId ) ;
+   public java.util.List<CpropKey> getKeys( int appdefType,int appdefTypeId ) ;
 
    /**
     * find appdef resource type
@@ -102,6 +105,6 @@ public interface CPropManagerLocal
    /**
     * Get all Cprops values with specified key name, irregardless of type
     */
-   public java.util.List getCPropValues( org.hyperic.hq.appdef.shared.AppdefResourceTypeValue appdefType,java.lang.String key,boolean asc ) ;
+   public java.util.List<Cprop> getCPropValues( org.hyperic.hq.appdef.shared.AppdefResourceTypeValue appdefType,java.lang.String key,boolean asc ) ;
 
 }

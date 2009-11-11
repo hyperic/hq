@@ -3,6 +3,8 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import org.hyperic.hq.appdef.server.session.Service;
+
 /**
  * Local interface for ServiceManager.
  */
@@ -78,15 +80,15 @@ public interface ServiceManagerLocal
     */
    public org.hyperic.hq.appdef.server.session.ServiceType findServiceTypeByName( java.lang.String name ) ;
 
-   public java.util.Collection findDeletedServices(  ) ;
+   public java.util.Collection<Service> findDeletedServices(  ) ;
 
-   public org.hyperic.util.pager.PageList getAllServiceTypes( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) ;
+   public org.hyperic.util.pager.PageList<ServiceTypeValue> getAllServiceTypes( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) ;
 
-   public org.hyperic.util.pager.PageList getViewableServiceTypes( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<ServiceTypeValue> getViewableServiceTypes( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
 
-   public org.hyperic.util.pager.PageList getServiceTypesByServerType( org.hyperic.hq.authz.server.session.AuthzSubject subject,int serverTypeId ) ;
+   public org.hyperic.util.pager.PageList<ServiceTypeValue> getServiceTypesByServerType( org.hyperic.hq.authz.server.session.AuthzSubject subject,int serverTypeId ) ;
 
-   public org.hyperic.util.pager.PageList findVirtualServiceTypesByPlatform( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platformId ) ;
+   public org.hyperic.util.pager.PageList<ServiceTypeValue> findVirtualServiceTypesByPlatform( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platformId ) ;
 
    public org.hyperic.util.pager.PageList getAllServices( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
 
@@ -101,7 +103,7 @@ public interface ServiceManagerLocal
     */
    public org.hyperic.util.pager.PageList getServicesByServer( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer serverId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ServiceNotFoundException, org.hyperic.hq.appdef.shared.ServerNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
-   public org.hyperic.util.pager.PageList getServicesByServer( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer serverId,java.lang.Integer svcTypeId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ServiceNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<ServiceValue> getServicesByServer( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer serverId,java.lang.Integer svcTypeId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ServiceNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Get service POJOs by server and type.
@@ -110,7 +112,7 @@ public interface ServiceManagerLocal
 
    public java.lang.Integer[] getServiceIdsByServer( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer serverId,java.lang.Integer svcTypeId ) throws org.hyperic.hq.appdef.shared.ServiceNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
-   public java.util.List getServicesByType( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String svcName,boolean asc ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+   public java.util.List<ServiceValue> getServicesByType( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String svcName,boolean asc ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 
    public org.hyperic.util.pager.PageList getServicesByService( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer serviceId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ServiceNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
@@ -129,12 +131,12 @@ public interface ServiceManagerLocal
    /**
     * Get platform services (children of virtual servers)
     */
-   public org.hyperic.util.pager.PageList getPlatformServices( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.ServiceNotFoundException;
+   public org.hyperic.util.pager.PageList<ServiceValue> getPlatformServices( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 
    /**
     * Get platform services (children of virtual servers) of a specified type
     */
-   public org.hyperic.util.pager.PageList getPlatformServices( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platId,java.lang.Integer typeId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.ServiceNotFoundException;
+   public org.hyperic.util.pager.PageList<ServiceValue> getPlatformServices( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platId,java.lang.Integer typeId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 
    /**
     * Get {@link Service}s which are children of the server, and of the specified type.
@@ -161,13 +163,13 @@ public interface ServiceManagerLocal
     */
    public org.hyperic.util.pager.PageList getServicesByPlatform( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platId,java.lang.Integer svcTypeId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ServiceNotFoundException, org.hyperic.hq.appdef.shared.PlatformNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
-   public org.hyperic.util.pager.PageList getServicesByApplication( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer appId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.appdef.shared.ServiceNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<AppdefResourceValue> getServicesByApplication( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer appId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.appdef.shared.ServiceNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
    public org.hyperic.util.pager.PageList getServicesByApplication( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer appId,java.lang.Integer svcTypeId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 
    public java.util.List getServicesByApplication( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer appId ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 
-   public org.hyperic.util.pager.PageList getServiceInventoryByApplication( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer appId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.appdef.shared.ServiceNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<AppdefResourceValue> getServiceInventoryByApplication( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer appId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.appdef.shared.ServiceNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Get all services by application. This is to only be used for the Evident API.

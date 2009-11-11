@@ -3,6 +3,8 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import org.hyperic.hq.appdef.server.session.Application;
+
 /**
  * Local interface for ApplicationManager.
  */
@@ -13,7 +15,7 @@ public interface ApplicationManagerLocal
     * Get all Application types
     * @return list of ApplicationTypeValue objects
     */
-   public java.util.List getAllApplicationTypes( org.hyperic.hq.authz.server.session.AuthzSubject who ) throws javax.ejb.FinderException;
+   public java.util.List<AppdefResourceTypeValue> getAllApplicationTypes( org.hyperic.hq.authz.server.session.AuthzSubject who ) throws javax.ejb.FinderException;
 
    /**
     * Get ApplicationType by ID
@@ -73,7 +75,7 @@ public interface ApplicationManagerLocal
     */
    public org.hyperic.hq.appdef.server.session.Application findApplicationById( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer id ) throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
-   public java.util.Collection findDeletedApplications(  ) ;
+   public java.util.Collection<Application> findDeletedApplications(  ) ;
 
    /**
     * Get all applications.
@@ -94,12 +96,12 @@ public interface ApplicationManagerLocal
     * @param subject
     * @param map key: Integer service ID value: Boolean indicating that the service is an entry point
     */
-   public void setApplicationServices( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer appId,java.util.List entityIds ) throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, javax.ejb.CreateException, org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
+   public void setApplicationServices( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer appId,java.util.List<AppdefEntityID> entityIds ) throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, javax.ejb.CreateException, org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Get all applications for a resource.
     */
-   public org.hyperic.util.pager.PageList getApplicationsByResource( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID resource,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<ApplicationValue> getApplicationsByResource( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.shared.AppdefEntityID resource,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Get all application IDs that use the specified resource.

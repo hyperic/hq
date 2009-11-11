@@ -502,21 +502,7 @@
 
 		</session>
 
-		<session>
-			<description><![CDATA[]]></description>
-
-			<ejb-name>AppdefBoss</ejb-name>
-
-			<home>org.hyperic.hq.bizapp.shared.AppdefBossHome</home>
-			<remote>org.hyperic.hq.bizapp.shared.AppdefBoss</remote>
-			<local-home>org.hyperic.hq.bizapp.shared.AppdefBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.AppdefBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
+		
 		<session>
 			<description><![CDATA[The TemplateManagerEJB class is a stateless session bean that can be used to interact with Template EJB's]]></description>
 
@@ -3539,13 +3525,6 @@
 				<method-name>vacuum</method-name>
 				<method-params>
 				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>AppdefBoss</ejb-name>
-				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>

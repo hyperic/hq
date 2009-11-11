@@ -91,7 +91,7 @@ import org.hyperic.util.timer.StopWatch;
  *      local-jndi-name="LocalDataManager"
  *      view-type="local"
  *      type="Stateless"
- *      transaction-type="Bean"
+ *      transaction-type="Required"
  */
 public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private final String logCtx = DataManagerEJBImpl.class.getName();

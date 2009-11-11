@@ -60,8 +60,7 @@ import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerImpl;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.bizapp.shared.AIBossLocal;
 import org.hyperic.hq.bizapp.shared.AIBossUtil;
-import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
-import org.hyperic.hq.bizapp.shared.AppdefBossUtil;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBossLocal;
 import org.hyperic.hq.bizapp.shared.AuthzBossUtil;
 import org.hyperic.hq.bizapp.shared.ControlBossLocal;
@@ -74,6 +73,7 @@ import org.hyperic.hq.bizapp.shared.ProductBossUtil;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.server.session.ControlManagerImpl;
 import org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl;
 import org.hyperic.hq.control.shared.ControlManager;
@@ -136,12 +136,8 @@ public abstract class BizappSessionEJB {
         }
     }
 
-    public AppdefBossLocal getAppdefBoss() {
-        try {
-            return AppdefBossUtil.getLocalHome().create();
-        } catch (Exception exc) {
-            throw new SystemException(exc);
-        }
+    public AppdefBoss getAppdefBoss() {
+       return Bootstrap.getBean(AppdefBoss.class);
     }
 
     public ControlBossLocal getControlBoss() {

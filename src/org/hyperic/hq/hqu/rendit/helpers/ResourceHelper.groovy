@@ -19,7 +19,7 @@ import org.hyperic.hq.authz.server.session.ResourceManagerImpl
 import org.hyperic.hq.authz.server.session.ResourceSortField
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
-import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl as AppdefBoss
+import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
 import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
