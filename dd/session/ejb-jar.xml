@@ -405,7 +405,7 @@
 			<local>org.hyperic.hq.measurement.shared.DataManagerLocal</local>
 			<ejb-class>org.hyperic.hq.measurement.server.session.DataManagerEJBImpl</ejb-class>
 			<session-type>Stateless</session-type>
-			<transaction-type>Bean</transaction-type>
+			<transaction-type>Container</transaction-type>
 
 		</session>
 
@@ -2703,6 +2703,13 @@
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>
+		<container-transaction>
+				<method>
+					<ejb-name>DataManager</ejb-name>
+					<method-name>*</method-name>
+				</method>
+				<trans-attribute>Required</trans-attribute>
+	    </container-transaction>
 		<container-transaction>
 			<method>
 				<ejb-name>VirtualManager</ejb-name>
