@@ -365,7 +365,7 @@
 			<local>org.hyperic.hq.measurement.shared.DataManagerLocal</local>
 			<ejb-class>org.hyperic.hq.measurement.server.session.DataManagerEJBImpl</ejb-class>
 			<session-type>Stateless</session-type>
-			<transaction-type>Bean</transaction-type>
+			<transaction-type>Container</transaction-type>
 
 		</session>
 
@@ -457,21 +457,6 @@
 			<local-home>org.hyperic.hq.common.shared.ServerConfigManagerLocalHome</local-home>
 			<local>org.hyperic.hq.common.shared.ServerConfigManagerLocal</local>
 			<ejb-class>org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
-			<description><![CDATA[]]></description>
-
-			<ejb-name>AppdefBoss</ejb-name>
-
-			<home>org.hyperic.hq.bizapp.shared.AppdefBossHome</home>
-			<remote>org.hyperic.hq.bizapp.shared.AppdefBoss</remote>
-			<local-home>org.hyperic.hq.bizapp.shared.AppdefBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.AppdefBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl</ejb-class>
 			<session-type>Stateless</session-type>
 			<transaction-type>Container</transaction-type>
 
@@ -2555,6 +2540,13 @@
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>
 		<container-transaction>
+				<method>
+					<ejb-name>DataManager</ejb-name>
+					<method-name>*</method-name>
+				</method>
+				<trans-attribute>Required</trans-attribute>
+	    </container-transaction>
+		<container-transaction>
 			<method>
 				<ejb-name>VirtualManager</ejb-name>
 				<method-name>*</method-name>
@@ -3376,13 +3368,6 @@
 				<method-name>vacuum</method-name>
 				<method-params>
 				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>AppdefBoss</ejb-name>
-				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>

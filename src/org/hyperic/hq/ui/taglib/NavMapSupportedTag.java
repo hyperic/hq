@@ -53,7 +53,7 @@ public class NavMapSupportedTag extends VarSetterBaseTag {
     private Log log = LogFactory.getLog( NavMapSupportedTag.class.getName() );
 
     public final int doStartTag() throws JspException {
-        try {
+    
             HttpServletRequest request = (HttpServletRequest)pageContext.getRequest();
             ServletContext ctx = pageContext.getServletContext();
             AppdefBoss ab = ContextUtils.getAppdefBoss(ctx);
@@ -124,10 +124,7 @@ public class NavMapSupportedTag extends VarSetterBaseTag {
             // now check to see if the server supports the navigation map
             navMapSupported = navMapSupported && ab.isNavMapSupported();
             setScopedVariable( new Boolean(navMapSupported) );
-        } catch (RemoteException e) {
-            log.error("Couldn't interact with bizapp layer.  Assuming NavMap not supported.", e);
-            setScopedVariable(Boolean.FALSE);
-        }
+        
         return SKIP_BODY;
     }
 }

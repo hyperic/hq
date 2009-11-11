@@ -3,6 +3,8 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import org.hyperic.hq.appdef.server.session.Platform;
+
 /**
  * Local interface for PlatformManager.
  */
@@ -33,13 +35,13 @@ public interface PlatformManagerLocal
     * Find all platform types
     * @return List of PlatformTypeValues
     */
-   public org.hyperic.util.pager.PageList getAllPlatformTypes( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) ;
+   public org.hyperic.util.pager.PageList<PlatformTypeValue> getAllPlatformTypes( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) ;
 
    /**
     * Find viewable platform types
     * @return List of PlatformTypeValues
     */
-   public org.hyperic.util.pager.PageList getViewablePlatformTypes( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<PlatformTypeValue> getViewablePlatformTypes( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Get PlatformPluginName for an entity id. There is no authz in this method because it is not needed.
@@ -72,7 +74,7 @@ public interface PlatformManagerLocal
     * @param subject The subject trying to list platforms.
     * @param pc a PageControl object which determines the size of the page and the sorting, if any.
     * @return A List of PlatformValue objects representing all of the platforms that the given subject is allowed to view.    */
-   public org.hyperic.util.pager.PageList getAllPlatforms( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<PlatformValue> getAllPlatforms( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Get platforms created within a given time range.
@@ -80,7 +82,7 @@ public interface PlatformManagerLocal
     * @param range The range in milliseconds.
     * @param size The number of platforms to return.
     * @return A List of PlatformValue objects representing all of the platforms that the given subject is allowed to view that were created within the given range.    */
-   public org.hyperic.util.pager.PageList getRecentPlatforms( org.hyperic.hq.authz.server.session.AuthzSubject subject,long range,int size ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<PlatformValue> getRecentPlatforms( org.hyperic.hq.authz.server.session.AuthzSubject subject,long range,int size ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Get platform light value by id. Does not check permission.
@@ -191,7 +193,7 @@ public interface PlatformManagerLocal
     */
    public java.util.Collection findPlatformPojosByIpAddr( java.lang.String addr ) ;
 
-   public java.util.Collection findDeletedPlatforms(  ) ;
+   public java.util.Collection<Platform> findDeletedPlatforms(  ) ;
 
    /**
     * Update an existing Platform. Requires all Ip's to have been re-added via the platformValue.addIpValue(IpValue) method due to bug 4924

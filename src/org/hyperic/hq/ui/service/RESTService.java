@@ -35,7 +35,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl;
+import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.bizapp.server.session.DashboardPortletBossEJBImpl;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
@@ -192,7 +192,7 @@ public class RESTService extends BaseService {
                 
                 int sessionId = RequestUtils.getSessionId(_request).intValue();
                 
-                PageList resources = AppdefBossEJBImpl.getOne()
+                PageList resources = AppdefBossImpl.getOne()
                     .search(sessionId, AppdefEntityConstants.APPDEF_TYPE_GROUP,
                             regexFilterParam, null, null,
                             new int[] {
@@ -550,7 +550,7 @@ public class RESTService extends BaseService {
                         Resource resource = ResourceManagerImpl.getOne()
                                                 .findResource(aeid);                   
                     
-                        AppdefBossEJBImpl.getOne()
+                        AppdefBossImpl.getOne()
                                  .batchGroupAdd(
                                          user.getSessionId(),
                                          aeid,
@@ -565,7 +565,7 @@ public class RESTService extends BaseService {
                 }
 
                 PageList availableGroups = 
-                    AppdefBossEJBImpl.getOne().findAllGroupsMemberExclusive(
+                    AppdefBossImpl.getOne().findAllGroupsMemberExclusive(
                                                     user.getSessionId(),
                                                     PageControl.PAGE_ALL,
                                                     aeids);

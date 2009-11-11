@@ -3,6 +3,8 @@
  */
 package org.hyperic.hq.appdef.shared;
 
+import org.hyperic.hq.appdef.server.session.Server;
+
 /**
  * Local interface for ServerManager.
  */
@@ -50,7 +52,7 @@ public interface ServerManagerLocal
     * Find all server types
     * @return list of serverTypeValues
     */
-   public org.hyperic.util.pager.PageList getAllServerTypes( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException;
+   public org.hyperic.util.pager.PageList<ServerTypeValue> getAllServerTypes( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException;
 
    public org.hyperic.hq.appdef.server.session.Server getServerByName( org.hyperic.hq.appdef.server.session.Platform host,java.lang.String name ) ;
 
@@ -58,7 +60,7 @@ public interface ServerManagerLocal
     * Find viewable server types
     * @return list of serverTypeValues
     */
-   public org.hyperic.util.pager.PageList getViewableServerTypes( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<ServerTypeValue> getViewableServerTypes( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Find viewable server non-virtual types for a platform
@@ -70,13 +72,13 @@ public interface ServerManagerLocal
     * Find viewable server types for a platform
     * @return list of serverTypeValues
     */
-   public org.hyperic.util.pager.PageList getServerTypesByPlatform( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platId,boolean excludeVirtual,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.PlatformNotFoundException, org.hyperic.hq.appdef.shared.ServerNotFoundException;
+   public org.hyperic.util.pager.PageList<ServerTypeValue> getServerTypesByPlatform( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platId,boolean excludeVirtual,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.PlatformNotFoundException, org.hyperic.hq.appdef.shared.ServerNotFoundException;
 
    /**
     * Find all ServerTypes for a givent PlatformType id. This can go once we begin passing POJOs to the UI layer.
     * @return A list of ServerTypeValue objects for thie PlatformType.
     */
-   public org.hyperic.util.pager.PageList getServerTypesByPlatformType( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platformTypeId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+   public org.hyperic.util.pager.PageList<ServerTypeValue> getServerTypesByPlatformType( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platformTypeId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 
    public org.hyperic.hq.appdef.server.session.Server findServerByAIID( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.hq.appdef.server.session.Platform platform,java.lang.String aiid ) throws org.hyperic.hq.authz.shared.PermissionException;
 
@@ -104,7 +106,7 @@ public interface ServerManagerLocal
 
    public java.util.List findServersByType( org.hyperic.hq.appdef.server.session.Platform p,org.hyperic.hq.appdef.server.session.ServerType st ) ;
 
-   public java.util.Collection findDeletedServers(  ) ;
+   public java.util.Collection<Server> findDeletedServers(  ) ;
 
    /**
     * Get server lite value by id. Does not check permission.
@@ -143,7 +145,7 @@ public interface ServerManagerLocal
     * @param excludeVirtual true if you dont want virtual (fake container) servers in the returned list
     * @param pc The page control.
     * @return A PageList of ServerValue objects representing servers on the specified platform that the subject is allowed to view.    */
-   public org.hyperic.util.pager.PageList getServersByPlatform( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platId,boolean excludeVirtual,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ServerNotFoundException, org.hyperic.hq.appdef.shared.PlatformNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<ServerValue> getServersByPlatform( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platId,boolean excludeVirtual,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ServerNotFoundException, org.hyperic.hq.appdef.shared.PlatformNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Get servers by server type and platform.
@@ -152,14 +154,14 @@ public interface ServerManagerLocal
     * @param platId platform id.
     * @param pc The page control.
     * @return A PageList of ServerValue objects representing servers on the specified platform that the subject is allowed to view.    */
-   public org.hyperic.util.pager.PageList getServersByPlatform( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platId,java.lang.Integer servTypeId,boolean excludeVirtual,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ServerNotFoundException, org.hyperic.hq.appdef.shared.PlatformNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<ServerValue> getServersByPlatform( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platId,java.lang.Integer servTypeId,boolean excludeVirtual,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ServerNotFoundException, org.hyperic.hq.appdef.shared.PlatformNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Get servers by server type and platform.
     * @param subject The subject trying to list servers.
     * @param platId platform id.
     * @return A PageList of ServerValue objects representing servers on the specified platform that the subject is allowed to view.    */
-   public org.hyperic.util.pager.PageList getServersByPlatformServiceType( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platId,java.lang.Integer svcTypeId ) throws org.hyperic.hq.appdef.shared.ServerNotFoundException, org.hyperic.hq.appdef.shared.PlatformNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<ServerValue> getServersByPlatformServiceType( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer platId,java.lang.Integer svcTypeId ) throws org.hyperic.hq.appdef.shared.ServerNotFoundException, org.hyperic.hq.appdef.shared.PlatformNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Get servers by server type and platform.
@@ -197,7 +199,7 @@ public interface ServerManagerLocal
     * @param appId Application id.
     * @param pc The page control for this page list.
     * @return A List of ServerValue objects representing servers that support the given application that the subject is allowed to view.    */
-   public org.hyperic.util.pager.PageList getServersByApplication( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer appId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ServerNotFoundException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<ServerValue> getServersByApplication( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer appId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ServerNotFoundException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Get servers by application and serverType.
@@ -205,7 +207,7 @@ public interface ServerManagerLocal
     * @param appId Application id.
     * @param pc The page control for this page list.
     * @return A List of ServerValue objects representing servers that support the given application that the subject is allowed to view.    */
-   public org.hyperic.util.pager.PageList getServersByApplication( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer appId,java.lang.Integer servTypeId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ServerNotFoundException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<ServerValue> getServersByApplication( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer appId,java.lang.Integer servTypeId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.appdef.shared.ServerNotFoundException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Get server IDs by application and serverType.

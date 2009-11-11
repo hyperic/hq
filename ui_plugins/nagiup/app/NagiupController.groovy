@@ -1,5 +1,5 @@
 import org.hyperic.hq.appdef.server.session.CPropResourceSortField
-import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl
+import org.hyperic.hq.bizapp.server.session.AppdefBossImpl
 import org.hyperic.hq.hqu.rendit.html.DojoUtil
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.util.units.UnitsFormat

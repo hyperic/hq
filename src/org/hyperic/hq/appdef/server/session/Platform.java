@@ -145,7 +145,7 @@ public class Platform extends PlatformBase
     /**
      * @return the readonly collection of servers
      */
-    public Collection getServers() {
+    public Collection<Server> getServers() {
         return Collections.unmodifiableCollection(_servers);
     }
 
