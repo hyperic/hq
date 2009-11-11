@@ -25,92 +25,105 @@ import org.hyperic.util.pager.PageControl;
  * Local interface for TemplateManager.
  */
 public interface TemplateManager {
-   /**
-    * Get a MeasurementTemplate
-    */
-   public MeasurementTemplate getTemplate( Integer id ) ;
+    /**
+     * Get a MeasurementTemplate
+     */
+    public MeasurementTemplate getTemplate(Integer id);
 
-   /**
-    * Look up measurement templates for an array of template IDs
-    */
-   public List<MeasurementTemplate> getTemplates( List<Integer> ids ) ;
+    /**
+     * Look up measurement templates for an array of template IDs
+     */
+    public List<MeasurementTemplate> getTemplates(List<Integer> ids);
 
-   /**
-    * Look up a measurement templates for an array of template IDs
-    * @throws FinderException if no measurement templates are found.
-    * @return a MeasurementTemplate value
-    */
-   public List<MeasurementTemplate> getTemplates( Integer[] ids,PageControl pc ) throws TemplateNotFoundException;
+    /**
+     * Look up a measurement templates for an array of template IDs
+     * @throws FinderException if no measurement templates are found.
+     * @return a MeasurementTemplate value
+     */
+    public List<MeasurementTemplate> getTemplates(Integer[] ids, PageControl pc) throws TemplateNotFoundException;
 
-   /**
-    * Get all the templates. Must be superuser to execute.
-    * @param pInfo must contain a sort field of type {@link MeasurementTemplateSortField}
-    * @param defaultOn If non-null, return templates with defaultOn == defaultOn
-    * @return a list of {@link MeasurementTemplate}s
-    */
-   public List<MeasurementTemplate> findTemplates( AuthzSubject user,PageInfo pInfo,Boolean defaultOn ) throws PermissionException;
+    /**
+     * Get all the templates. Must be superuser to execute.
+     * @param pInfo must contain a sort field of type
+     *        {@link MeasurementTemplateSortField}
+     * @param defaultOn If non-null, return templates with defaultOn ==
+     *        defaultOn
+     * @return a list of {@link MeasurementTemplate}s
+     */
+    public List<MeasurementTemplate> findTemplates(AuthzSubject user, PageInfo pInfo, Boolean defaultOn)
+        throws PermissionException;
 
-   /**
-    * Get all templates for a given MonitorableType
-    * @param pInfo must contain a sort field of type {@link MeasurementTemplateSortField}
-    * @param defaultOn If non-null, return templates with defaultOn == defaultOn
-    * @return a list of {@link MeasurementTemplate}s
-    */
-   public List<MeasurementTemplate> findTemplatesByMonitorableType( AuthzSubject user,PageInfo pInfo,String type,Boolean defaultOn ) throws PermissionException;
+    /**
+     * Get all templates for a given MonitorableType
+     * @param pInfo must contain a sort field of type
+     *        {@link MeasurementTemplateSortField}
+     * @param defaultOn If non-null, return templates with defaultOn ==
+     *        defaultOn
+     * @return a list of {@link MeasurementTemplate}s
+     */
+    public List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user, PageInfo pInfo, String type,
+                                                                    Boolean defaultOn) throws PermissionException;
 
-   /**
-    * Look up a measurement templates for a monitorable type and category.
-    * @return a MeasurementTemplate value
-    */
-   public List<MeasurementTemplate> findTemplates( String type,String cat,Integer[] excludeIds,PageControl pc ) ;
+    /**
+     * Look up a measurement templates for a monitorable type and category.
+     * @return a MeasurementTemplate value
+     */
+    public List<MeasurementTemplate> findTemplates(String type, String cat, Integer[] excludeIds, PageControl pc);
 
-   /**
-    * Look up a measurement templates for a monitorable type and filtered by categories and keyword.
-    * @return a MeasurementTemplate value
-    */
-   public List<MeasurementTemplate> findTemplates( String type,long filters,String keyword ) ;
+    /**
+     * Look up a measurement templates for a monitorable type and filtered by
+     * categories and keyword.
+     * @return a MeasurementTemplate value
+     */
+    public List<MeasurementTemplate> findTemplates(String type, long filters, String keyword);
 
-   /**
-    * Look up a measurement template IDs for a monitorable type.
-    * @return an array of ID values
-    */
-   public Integer[] findTemplateIds( String type ) ;
+    /**
+     * Look up a measurement template IDs for a monitorable type.
+     * @return an array of ID values
+     */
+    public Integer[] findTemplateIds(String type);
 
-   /**
-    * Update the default interval for a list of meas. templates
-    * @subject - the subject
-    * @param templIds - a list of integer template ids
-    * @param interval - the interval of collection to set to
-    */
-   public void updateTemplateDefaultInterval( AuthzSubject subject,Integer[] templIds,long interval ) ;
+    /**
+     * Update the default interval for a list of meas. templates
+     * @subject - the subject
+     * @param templIds - a list of integer template ids
+     * @param interval - the interval of collection to set to
+     */
+    public void updateTemplateDefaultInterval(AuthzSubject subject, Integer[] templIds, long interval);
 
-   /**
-    * Make metrics disabled by default for a list of meas. templates
-    * @param templIds - a list of integer template ids
-    */
-   public void setTemplateEnabledByDefault( AuthzSubject subject,Integer[] templIds,boolean on ) ;
+    /**
+     * Make metrics disabled by default for a list of meas. templates
+     * @param templIds - a list of integer template ids
+     */
+    public void setTemplateEnabledByDefault(AuthzSubject subject, Integer[] templIds, boolean on);
 
-   /**
-    * Get the MonitorableType id, creating it if it does not exist.
-    */
-   public MonitorableType getMonitorableType( String pluginName,TypeInfo info ) ;
+    /**
+     * Get the MonitorableType id, creating it if it does not exist.
+     */
+    public MonitorableType getMonitorableType(String pluginName, TypeInfo info);
 
-   /**
-    * Update measurement templates for a given entity. This still needs some refactoring.
-    * @return A map of measurement info's that are new and will need to be created.
-    */
-   public Map<String, MeasurementInfo> updateTemplates( String pluginName,TypeInfo ownerEntity,MonitorableType monitorableType,MeasurementInfo[] tmpls ) throws CreateException, RemoveException;
+    /**
+     * Update measurement templates for a given entity. This still needs some
+     * refactoring.
+     * @return A map of measurement info's that are new and will need to be
+     *         created.
+     */
+    public Map<String, MeasurementInfo> updateTemplates(String pluginName, TypeInfo ownerEntity,
+                                                        MonitorableType monitorableType, MeasurementInfo[] tmpls)
+        throws CreateException, RemoveException;
 
-   /**
-    * Add new measurement templates for a plugin. This does a batch style insert, and expects a map of maps indexed by the monitorable type id.
-    */
-   public void createTemplates( String pluginName,Map<MonitorableType,Map<?,MeasurementInfo>> toAdd ) throws CreateException;
+    /**
+     * Add new measurement templates for a plugin. This does a batch style
+     * insert, and expects a map of maps indexed by the monitorable type id.
+     */
+    public void createTemplates(String pluginName, Map<MonitorableType, Map<?, MeasurementInfo>> toAdd)
+        throws CreateException;
 
-   public void setDesignated( MeasurementTemplate tmpl,boolean designated ) ;
+    public void setDesignated(MeasurementTemplate tmpl, boolean designated);
 
-   /**
-    * Set the measurement templates to be "designated" for a monitorable type.
-    */
-   public void setDesignatedTemplates( String mType,Integer[] desigIds ) ;
+    /**
+     * Set the measurement templates to be "designated" for a monitorable type.
+     */
+    public void setDesignatedTemplates(String mType, Integer[] desigIds);
 
 }
