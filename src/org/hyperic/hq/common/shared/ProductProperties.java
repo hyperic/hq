@@ -27,7 +27,9 @@ package org.hyperic.hq.common.shared;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
+import java.util.Enumeration;
 import java.util.Properties;
 
 import org.apache.commons.logging.Log;
@@ -74,9 +76,37 @@ public class ProductProperties {
     }
 
     private static void load(String name, boolean required) {
-        InputStream in =
-            ProductProperties.class.getClassLoader().
-                getResourceAsStream(name);
+        //XXX unhardcode these filenames here and elsewhere
+        final String[] jars = { //we should find one or the other
+            "hq-product.jar",   //agent side (including command-line)
+            "hq.jar"            //server side
+        };
+        ClassLoader loader = ProductProperties.class.getClassLoader();
+        InputStream in = null;
+        try { //XXX must be better way other than renaming these files w/ an hq- prefix?
+            //HHQ-3528 make sure we find {version,product}.properties in the right place(s)
+            //also note AgentCommandsService.upgrade has its own way but only works for the agent
+            for (Enumeration urls = loader.getResources(name); urls.hasMoreElements(); ) {
+                URL url = (URL)urls.nextElement();
+                for (int i=0; i<jars.length; i++) {
+                    //example: url == file:/.../pdk/lib/hq-product.jar!/version.properties
+                    if (url.getFile().endsWith(jars[i] + "!/" + name)) {
+                        in = url.openStream();
+                        _log.debug("Found " + name + " via " + url);
+                        break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            //fallthru
+        }
+
+        if (in == null) {
+            //fallback to the old fashioned way
+            if ((in = loader.getResourceAsStream(name)) != null) {
+                _log.debug("Found " + name + " via getResourceAsStream");
+            }
+        }
 
         if (in == null) {
             if (required) {
