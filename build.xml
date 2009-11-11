@@ -600,7 +600,22 @@
 	    </hq-javac>
 	</sequential>
 </macrodef>
-	 
+
+  <target name="pack-hq-ui-jar">
+   <jar file="${war.dir}/WEB-INF/lib/hq-ui.jar" basedir="${hq.home}/build/classes" update="true">
+     <include name="org/hyperic/hq/ui/**" />
+     <fileset dir="${basedir}/src">
+       <include name="org/hyperic/hq/ui/**/*.html" />
+       <include name="org/hyperic/hq/ui/**/*.page" />
+       <include name="org/hyperic/hq/ui/**/*.properties" />
+     </fileset>
+     <include name="servletunit/struts/**" />
+     <exclude name="org/hyperic/hq/ui/server/session/**" />
+     <exclude name="org/hyperic/hq/ui/shared/**" />
+     <exclude name="org/hyperic/hq/ui/tapestry/**" />
+   </jar>
+  </target> 
+  
   <target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )"
           depends="pack-ear,pack-test">
     <mkdir dir="${war.dir}" />
@@ -666,18 +681,7 @@
       </fileset>
     </copy>
 
-    <jar file="${war.dir}/WEB-INF/lib/hq-ui.jar" basedir="${hq.home}/build/classes" update="true">
-      <include name="org/hyperic/hq/ui/**" />
-      <fileset dir="${basedir}/src">
-        <include name="org/hyperic/hq/ui/**/*.html" />
-        <include name="org/hyperic/hq/ui/**/*.page" />
-        <include name="org/hyperic/hq/ui/**/*.properties" />
-      </fileset>
-      <include name="servletunit/struts/**" />
-      <exclude name="org/hyperic/hq/ui/server/session/**" />
-      <exclude name="org/hyperic/hq/ui/shared/**" />
-      <exclude name="org/hyperic/hq/ui/tapestry/**" />
-    </jar>
+    <antcall target="pack-hq-ui-jar"/>
 
     <jar file="${war.dir}/WEB-INF/lib/hq-tapestry-lib.jar" basedir="${hq.home}/build/classes" update="true">
       <include name="org/hyperic/ui/tapestry/**" />
