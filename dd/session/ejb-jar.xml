@@ -383,21 +383,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[The BizApp's interface to the Authz Subsystem]]></description>
-
-			<ejb-name>AuthzBoss</ejb-name>
-
-			<home>org.hyperic.hq.bizapp.shared.AuthzBossHome</home>
-			<remote>org.hyperic.hq.bizapp.shared.AuthzBoss</remote>
-			<local-home>org.hyperic.hq.bizapp.shared.AuthzBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.AuthzBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.AuthzBossEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[External API into the live data system.]]></description>
 
 			<ejb-name>LiveDataBoss</ejb-name>
@@ -2812,13 +2797,6 @@
 					<method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
 					<method-param>org.hyperic.hq.appdef.shared.AppdefEntityID</method-param>
 				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>AuthzBoss</ejb-name>
-				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>

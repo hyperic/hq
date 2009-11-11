@@ -26,7 +26,6 @@
 package org.hyperic.hq.bizapp.server.session;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,6 @@ import java.util.Map;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
-import javax.ejb.SessionBean;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
@@ -42,59 +40,89 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
+import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.bizapp.shared.AuthzBossLocal;
-import org.hyperic.hq.bizapp.shared.AuthzBossUtil;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** 
  * The BizApp's interface to the Authz Subsystem
  *
- * @ejb:bean name="AuthzBoss"
- *      jndi-name="ejb/bizapp/AuthzBoss"
- *      local-jndi-name="LocalAuthzBoss"
- *      view-type="both"
- *      type="Stateless"
- * @ejb:transaction type="Required"
  */
-public class AuthzBossEJBImpl extends BizappSessionEJB 
-    implements SessionBean {
+@Service
+@Transactional
+public class AuthzBossImpl implements AuthzBoss {
 
-    private SessionManager manager    = SessionManager.getInstance();
+    private SessionManager sessionManager;
 
-    protected Log log = LogFactory.getLog(AuthzBossEJBImpl.class.getName());
+    protected Log log = LogFactory.getLog(AuthzBossImpl.class.getName());
     protected boolean debug = log.isDebugEnabled();
 
-    public AuthzBossEJBImpl() {}
+    private AppdefBoss appdefBoss;
+    
+    private AuthManager authManager;
+    
+    private AuthzSubjectManagerLocal authzSubjectManager;
+    
+    private ResourceGroupManager resourceGroupManager;
+    
+    private ResourceManager resourceManager;
+    
+    private DashboardManager dashboardManager;
+    
+    private PermissionManager permissionManager;
+    
+    
+    @Autowired
+    public AuthzBossImpl(SessionManager sessionManager, AppdefBoss appdefBoss, AuthManager authManager,
+                         AuthzSubjectManagerLocal authzSubjectManager, ResourceGroupManager resourceGroupManager,
+                         ResourceManager resourceManager, DashboardManager dashboardManager, PermissionManager permissionManager) {
+        this.sessionManager = sessionManager;
+        this.appdefBoss = appdefBoss;
+        this.authManager = authManager;
+        this.authzSubjectManager = authzSubjectManager;
+        this.resourceGroupManager = resourceGroupManager;
+        this.resourceManager = resourceManager;
+        this.dashboardManager = dashboardManager;
+        this.permissionManager = permissionManager;
+    }
 
     /**
      * Check if the current logged in user can administer CAM
      * @return true - if user has adminsterCAM op false otherwise
-     * @ejb:interface-method
+     * 
      */
     public boolean hasAdminPermission(int sessionId)
         throws FinderException, 
                SessionTimeoutException, SessionNotFoundException {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        return pm.hasAdminPermission(subject.getId());
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return permissionManager.hasAdminPermission(subject.getId());
     }
 
     /**
@@ -102,14 +130,14 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * <code>ResourceTypeValue</code> objects representing every
      * resource type in the system that the user is allowed to view.
      *
-     * @ejb:interface-method
+     * 
      */
-    public List getAllResourceTypes(Integer sessionId, PageControl pc)
+    public List<ResourceType> getAllResourceTypes(Integer sessionId, PageControl pc)
         throws CreateException, FinderException,
                PermissionException, SessionTimeoutException, 
                SessionNotFoundException {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        return getResourceManager().getAllResourceTypes(subject, pc);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return resourceManager.getAllResourceTypes(subject, pc);
     }
 
     /**
@@ -117,9 +145,9 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * <code>ResourceTypeValue</code> objects representing every
      * resource type in the system that the user is allowed to view.
      *
-     * @ejb:interface-method
+     * 
      */
-    public List getAllResourceTypes(Integer sessionId)
+    public List<ResourceType> getAllResourceTypes(Integer sessionId)
         throws CreateException, FinderException,
                PermissionException, SessionTimeoutException, 
                SessionNotFoundException {
@@ -131,14 +159,13 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * <code>OperationValue</code> objects representing every
      * resource type in the system that the user is allowed to view.
      *
-     * @ejb:interface-method
+     * 
      */
-    public List getAllOperations(Integer sessionId, PageControl pc)
+    public List<Operation> getAllOperations(Integer sessionId, PageControl pc)
         throws FinderException, PermissionException,
                SessionTimeoutException, SessionNotFoundException {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        return pm.getAllOperations(subject, pc);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return permissionManager.getAllOperations(subject, pc);
     }
 
     /**
@@ -146,9 +173,9 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * <code>OperationValue</code> objects representing every
      * resource type in the system that the user is allowed to view.
      *
-     * @ejb:interface-method
+     * 
      */
-    public List getAllOperations(Integer sessionId)
+    public List<Operation> getAllOperations(Integer sessionId)
         throws FinderException, PermissionException,
                SessionTimeoutException, SessionNotFoundException {
         return getAllOperations(sessionId, null);
@@ -159,14 +186,14 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * <code>AuthzSubjectValue</code> objects representing every
      * resource type in the system that the user is allowed to view.
      *
-     * @ejb:interface-method
+     * 
      */
-    public PageList getAllSubjects(Integer sessionId, Collection excludes,
+    public PageList<AuthzSubjectValue> getAllSubjects(Integer sessionId, Collection<Integer> excludes,
                                    PageControl pc)
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException, PermissionException {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        return getAuthzSubjectManager().getAllSubjects(subject, excludes, pc);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return authzSubjectManager.getAllSubjects(subject, excludes, pc);
     }
 
     /**
@@ -174,28 +201,28 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * <code>AuthzSubjectValue</code> objects corresponding to the specified
      * id values.
      * 
-     * @ejb:interface-method
+     * 
      */
-    public PageList getSubjectsById(Integer sessionId, Integer[] ids,
+    public PageList<AuthzSubjectValue> getSubjectsById(Integer sessionId, Integer[] ids,
                                     PageControl pc)
         throws PermissionException, SessionTimeoutException,
                SessionNotFoundException {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        return getAuthzSubjectManager().getSubjectsById(subject, ids, pc);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return authzSubjectManager.getSubjectsById(subject, ids, pc);
     }
 
     /**
      * Return a sorted, paged <code>List</code> of
      * <code>AuthzSubjectValue</code> objects matching name as substring
      *  
-     * @ejb:interface-method
+     * 
      */
-    public PageList getSubjectsByName(Integer sessionId, String name,
+    public PageList<AuthzSubjectValue> getSubjectsByName(Integer sessionId, String name,
                                       PageControl pc)
         throws PermissionException, SessionTimeoutException,
                SessionNotFoundException {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        return getAuthzSubjectManager().findMatchingName(name, pc);
+        sessionManager.getSubject(sessionId);
+        return authzSubjectManager.findMatchingName(name, pc);
     }
 
     /**
@@ -203,13 +230,13 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * <code>ResourceGroupValue</code> objects representing every
      * resource type in the system that the user is allowed to view.
      *
-     * @ejb:interface-method
+     * 
      */
-    public List getAllResourceGroups(Integer sessionId, PageControl pc)
+    public List<ResourceGroupValue> getAllResourceGroups(Integer sessionId, PageControl pc)
         throws FinderException, PermissionException,
                SessionTimeoutException, SessionNotFoundException {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        return getResourceGroupManager().getAllResourceGroups(subject, pc);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return resourceGroupManager.getAllResourceGroups(subject, pc);
     }
 
     /**
@@ -217,31 +244,31 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * <code>ResourceGroupValue</code> objects corresponding to the
      * specified id values.
      *
-     * @ejb:interface-method
+     * 
      */
-    public PageList getResourceGroupsById(Integer sessionId, Integer[] ids,
+    public PageList<ResourceGroupValue> getResourceGroupsById(Integer sessionId, Integer[] ids,
                                           PageControl pc)
         throws FinderException, PermissionException,
                SessionTimeoutException, SessionNotFoundException {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        return getResourceGroupManager().getResourceGroupsById(subject, ids,
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return resourceGroupManager.getResourceGroupsById(subject, ids,
                                                                pc);
     }
     
     /**
-     * @ejb.interface-method
+     * 
      */
-    public Map findResourcesByIds(Integer sessionId, AppdefEntityID[] entities)
+    public Map<AppdefEntityID, Resource> findResourcesByIds(Integer sessionId, AppdefEntityID[] entities)
         throws SessionNotFoundException, SessionTimeoutException
     {
         // get the user
-        AuthzSubject subject = manager.getSubject(sessionId);
-        Map appdefMap = new LinkedHashMap();
+        sessionManager.getSubject(sessionId);
+        Map<AppdefEntityID, Resource> appdefMap = new LinkedHashMap<AppdefEntityID, Resource>();
 
         // cheaper to find the resource first
-        ResourceManager resMan = getResourceManager();
+       
         for (int i = 0; i < entities.length; i++) {
-            Resource res = resMan.findResource(entities[i]);
+            Resource res = resourceManager.findResource(entities[i]);
             if (res != null && !res.isInAsyncDeleteState()) {
                 try {
                     appdefMap.put(new AppdefEntityID(res), res);
@@ -258,15 +285,14 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * Remove the user identified by the given ids from the subject as well 
      * as principal tables.
      *
-     * @ejb:interface-method
+     * 
      */
     public void removeSubject(Integer sessionId, Integer[] ids)
         throws FinderException, RemoveException, PermissionException,
                SessionTimeoutException, SessionNotFoundException {
         // check for timeout
-        AuthzSubject whoami = manager.getSubject(sessionId);
+        AuthzSubject whoami = sessionManager.getSubject(sessionId);
         try {
-            AuthzSubjectManagerLocal mgr = getAuthzSubjectManager();
             for (int i = 0; i < ids.length; i++) {
                 AuthzSubject aSubject = findSubjectById(sessionId, ids[i]); 
                 /* Note: This has not been finalized. At present, however,
@@ -284,24 +310,22 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
                         "Users are not permitted to remove themselves.");
                 }
                 // reassign ownership of all things appdef
-                getAppdefBoss().resetResourceOwnership(
+                appdefBoss.resetResourceOwnership(
                     sessionId.intValue(), aSubject);
                 // reassign ownership of all things authz
                 resetResourceOwnership(sessionId, aSubject);
                 
                 // delete in auth
-                getAuthManager().deleteUser(whoami, aSubject.getName());
+               authManager.deleteUser(whoami, aSubject.getName());
                 
                 // remove from authz
-                mgr.removeSubject(whoami, ids[i]);
+                authzSubjectManager.removeSubject(whoami, ids[i]);
             }
         } catch (UpdateException e) {
-            rollback();
             throw new RemoveException(
                 "Unable to reset ownership of owned resources: " 
                 + e.getMessage());   
         } catch (AppdefEntityNotFoundException e) {
-            rollback();
             throw new RemoveException(
                 "Unable to reset ownership of owned resources: "
                 + e.getMessage());
@@ -320,14 +344,13 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
                                         AuthzSubject currentOwner) 
         throws FinderException, UpdateException, PermissionException {
         // first look up the resources by owner
-        Collection resources
-            = getResourceManager().findResourceByOwner(currentOwner);
-        for(Iterator it = resources.iterator(); it.hasNext(); ) {
-            Resource aRes = (Resource) it.next();
+        Collection<Resource> resources
+            = resourceManager.findResourceByOwner(currentOwner);
+        for(Resource aRes: resources) {
             String resType = aRes.getResourceType().getName();    
             if(resType.equals(AuthzConstants.roleResourceTypeName)) {
-                getResourceManager().setResourceOwner(getOverlord(), aRes,
-                                                      getOverlord());
+                resourceManager.setResourceOwner(authzSubjectManager.getOverlordPojo(), aRes,
+                    authzSubjectManager.getOverlordPojo());
             }
         }
     }
@@ -335,7 +358,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
     /**
      * Update a subject
      *
-     * @ejb:interface-method
+     * 
      */
     public void updateSubject(Integer sessionId, AuthzSubject target,
                               Boolean active, String dsn, String dept,
@@ -343,8 +366,8 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
                               String phone, String sms, Boolean useHtml)
         throws PermissionException, SessionException 
     {
-        AuthzSubject whoami = manager.getSubject(sessionId);
-        getAuthzSubjectManager().updateSubject(whoami, target, active, dsn,
+        AuthzSubject whoami = sessionManager.getSubject(sessionId);
+        authzSubjectManager.updateSubject(whoami, target, active, dsn,
                                                dept, email, first, last,
                                                phone, sms, useHtml);
     }
@@ -353,7 +376,7 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * Create the user identified by the given ids from the subject as well 
      * as principal tables.
      *
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject createSubject(Integer sessionId, String name,
                                       boolean active, String dsn, String dept,
@@ -363,29 +386,29 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
         throws PermissionException, CreateException, SessionException 
     {
         // check for timeout
-        AuthzSubject whoami = manager.getSubject(sessionId);
+        AuthzSubject whoami = sessionManager.getSubject(sessionId);
 
-        AuthzSubjectManagerLocal subjMan = getAuthzSubjectManager();
-        return subjMan.createSubject(whoami, name, active, dsn, dept, email,
+        
+        return authzSubjectManager.createSubject(whoami, name, active, dsn, dept, email,
                                      first, last, phone, sms, useHtml);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject getCurrentSubject(int sessionid) 
         throws SessionException
     {
-        return manager.getSubject(sessionid);
+        return sessionManager.getSubject(sessionid);
     }
     
     /**
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject getCurrentSubject(String name)
         throws SessionException, ApplicationException
     {
-        int sessionId = getAuthManager().getUnauthSessionId(name);
+        int sessionId =authManager.getUnauthSessionId(name);
         return getCurrentSubject(sessionId);
     }
     
@@ -396,28 +419,28 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * @throws SessionNotFoundException 
      * @throws PermissionException 
      *
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject findSubjectById(Integer sessionId, Integer subjectId)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
         // check for timeout
-        AuthzSubject subj = manager.getSubject(sessionId);
-        return getAuthzSubjectManager().findSubjectById(subj, subjectId);
+        AuthzSubject subj = sessionManager.getSubject(sessionId);
+        return authzSubjectManager.findSubjectById(subj, subjectId);
     }
 
     /**
      * Return the <code>AuthzSubject</code> object identified by
      * the given username.
      *
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject findSubjectByName(Integer sessionId, String subjectName)
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException, PermissionException {
         // check for timeout
-        AuthzSubject subj = manager.getSubject(sessionId);
-        return getAuthzSubjectManager().findSubjectByName(subj, subjectName);
+        AuthzSubject subj = sessionManager.getSubject(sessionId);
+        return authzSubjectManager.findSubjectByName(subj, subjectName);
     }
 
     /**
@@ -428,15 +451,15 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * be displayed, and the user viewing the resource does not 
      * have permissions to view other users.
      * See bug #5452 for more information
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject findSubjectByNameNoAuthz(Integer sessionId,
                                                  String subjectName)
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException, PermissionException {
         // check for timeout
-        manager.authenticate(sessionId.intValue());
-        return getAuthzSubjectManager().findSubjectByName(subjectName);
+        sessionManager.authenticate(sessionId.intValue());
+        return authzSubjectManager.findSubjectByName(subjectName);
     }
 
     /**
@@ -444,24 +467,24 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
      * @throws ApplicationException
      * @throws ConfigPropertyException
      * @throws LoginException
-     * @ejb:interface-method
+     * 
      */
     public ConfigResponse getUserPrefs(String username)
         throws SessionNotFoundException, ApplicationException,
                ConfigPropertyException {
-        int sessionId = getAuthManager().getUnauthSessionId(username);
-        AuthzSubject subject = manager.getSubject(sessionId);
+        int sessionId =authManager.getUnauthSessionId(username);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getUserPrefs(new Integer(sessionId), subject.getId());
     }
     
     /**
      * Return a ConfigResponse matching the UserPreferences
-     * @ejb:interface-method
+     * 
      */
     public ConfigResponse getUserPrefs(Integer sessionId, Integer subjectId) {
         try {
-            AuthzSubject who = manager.getSubject(sessionId);
-            return getAuthzSubjectManager().getUserPrefs(who, subjectId);
+            AuthzSubject who = sessionManager.getSubject(sessionId);
+            return authzSubjectManager.getUserPrefs(who, subjectId);
         } catch (Exception e) {
             throw new SystemException(e);
         }
@@ -469,63 +492,53 @@ public class AuthzBossEJBImpl extends BizappSessionEJB
 
     /**
      * Set the UserPreferences 
-     * @ejb:interface-method
+     * 
      */
     public void setUserPrefs(Integer sessionId, Integer subjectId,
                              ConfigResponse prefs)
         throws ApplicationException, SessionTimeoutException,
                SessionNotFoundException 
     {
-        AuthzSubject who = manager.getSubject(sessionId);
-        getAuthzSubjectManager().setUserPrefs(who, subjectId, prefs);
+        AuthzSubject who = sessionManager.getSubject(sessionId);
+        authzSubjectManager.setUserPrefs(who, subjectId, prefs);
         getUserPrefs(sessionId, subjectId);
     }
     
     /**
      * Get the current user's dashboard
-     * @ejb:interface-method
+     * 
      */
     public ConfigResponse getUserDashboardConfig(Integer sessionId)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
-        AuthzSubject subj = manager.getSubject(sessionId);
-        return DashboardManagerImpl.getOne()
+        AuthzSubject subj = sessionManager.getSubject(sessionId);
+        return dashboardManager
             .getUserDashboard(subj, subj).getConfig();
     }
 
     /**
      * Get the email of a user by name
-     * @ejb:interface-method
+     * 
      */
     public String getEmailByName(Integer sessionId, String userName) 
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException {
-        manager.authenticate(sessionId.intValue());
-        return getAuthzSubjectManager().getEmailByName(userName);
+        sessionManager.authenticate(sessionId.intValue());
+        return authzSubjectManager.getEmailByName(userName);
     }
 
     /**
      * Get the email of a user by id
-     * @ejb:interface-method
+     * 
      */
     public String getEmailById(Integer sessionId, Integer userId) 
         throws FinderException, SessionTimeoutException,
                SessionNotFoundException {
-        manager.authenticate(sessionId.intValue());
-        return getAuthzSubjectManager().getEmailById(userId);
+        sessionManager.authenticate(sessionId.intValue());
+        return authzSubjectManager.getEmailById(userId);
     }
     
-    public static AuthzBossLocal getOne() {
-        try {
-            return AuthzBossUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static AuthzBoss getOne() {
+        return Bootstrap.getBean(AuthzBoss.class);
     }
-
-    /** @ejb:create-method */
-    public void ejbCreate() {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
 }

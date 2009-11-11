@@ -62,6 +62,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.authz.shared.ResourceGroupValue;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
@@ -416,7 +417,7 @@ public class ResourceGroupManagerImpl
      * Get all the resource groups including the root resource group.
      * 
      */
-    public List<ResourceGroup> getAllResourceGroups(AuthzSubject subject, PageControl pc)
+    public List<ResourceGroupValue> getAllResourceGroups(AuthzSubject subject, PageControl pc)
         throws PermissionException, FinderException {
         return getAllResourceGroups(subject, pc, false);
     }
@@ -696,7 +697,7 @@ public class ResourceGroupManagerImpl
     /**
      * Get all the resource groups excluding the root resource group and paged
      */
-    private PageList<ResourceGroup> getAllResourceGroups(AuthzSubject subject,
+    private PageList<ResourceGroupValue> getAllResourceGroups(AuthzSubject subject,
                                                          PageControl pc,
                                                          boolean excludeRoot)
         throws PermissionException, FinderException {
@@ -711,12 +712,12 @@ public class ResourceGroupManagerImpl
      * @param pc Paging information for the request
      * 
      */
-    public PageList<ResourceGroup> getResourceGroupsById(AuthzSubject whoami,
+    public PageList<ResourceGroupValue> getResourceGroupsById(AuthzSubject whoami,
                                                          Integer[] ids,
                                                          PageControl pc)
         throws PermissionException, FinderException {
         if (ids.length == 0)
-            return new PageList<ResourceGroup>();
+            return new PageList<ResourceGroupValue>();
 
         PageControl allPc = new PageControl();
         // get all roles, sorted but not paged
@@ -739,7 +740,7 @@ public class ResourceGroupManagerImpl
         }
 
         // TODO: G
-        PageList<ResourceGroup> plist =
+        PageList<ResourceGroupValue> plist =
                                         _groupPager.seek(groups, pc.getPagenum(), pc.getPagesize());
         plist.setTotalSize(groups.size());
 

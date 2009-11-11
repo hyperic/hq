@@ -135,7 +135,7 @@ public interface ResourceManager {
      * @param subject
      * @param pc Paging information for the request
      */
-    public List getAllResourceTypes(AuthzSubject subject, PageControl pc);
+    public List<ResourceType> getAllResourceTypes(AuthzSubject subject, PageControl pc);
 
     /**
      * Get viewable resources either by "type" OR "resource name" OR

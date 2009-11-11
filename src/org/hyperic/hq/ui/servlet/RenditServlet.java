@@ -38,7 +38,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.bizapp.server.session.AuthzBossEJBImpl;
+import org.hyperic.hq.bizapp.server.session.AuthzBossImpl;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.hqu.RequestInvocationBindings;
 import org.hyperic.hq.ui.util.RequestUtils;
@@ -176,7 +176,7 @@ public class RenditServlet
         AuthzSubject user;
         
         try {
-            user = AuthzBossEJBImpl.getOne().getCurrentSubject(sessId);
+            user = AuthzBossImpl.getOne().getCurrentSubject(sessId);
         } catch(SessionException e) {
             // Could not get the current user.  We should default to a 'nobody'
             // user here.

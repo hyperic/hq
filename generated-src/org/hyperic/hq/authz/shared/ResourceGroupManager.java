@@ -125,7 +125,7 @@ public interface ResourceGroupManager
    /**
     * Get all the resource groups including the root resource group.
     */
-   public List<ResourceGroup> getAllResourceGroups( AuthzSubject subject,PageControl pc ) throws PermissionException, javax.ejb.FinderException;
+   public List<ResourceGroupValue> getAllResourceGroups( AuthzSubject subject,PageControl pc ) throws PermissionException, javax.ejb.FinderException;
 
    /**
     * Get all the members of a group.
@@ -200,7 +200,7 @@ public interface ResourceGroupManager
     * @param ids the resource group ids
     * @param pc Paging information for the request
     */
-   public PageList<ResourceGroup> getResourceGroupsById( AuthzSubject whoami,Integer[] ids,PageControl pc ) throws PermissionException, FinderException;
+   public PageList<ResourceGroupValue> getResourceGroupsById( AuthzSubject whoami,Integer[] ids,PageControl pc ) throws PermissionException, FinderException;
 
    /**
     * Change owner of a group.
