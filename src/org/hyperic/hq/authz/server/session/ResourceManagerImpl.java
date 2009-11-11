@@ -459,7 +459,7 @@ public class ResourceManagerImpl
      * 
      */
     // TODO: G
-    public List getAllResourceTypes(AuthzSubject subject, PageControl pc) {
+    public List<ResourceType> getAllResourceTypes(AuthzSubject subject, PageControl pc) {
         Collection<ResourceType> resTypes = resourceTypeDAO.findAll();
         pc = PageControl.initDefaults(pc, SortAttribute.RESTYPE_NAME);
         return resourceTypePager.seek(resTypes, pc.getPagenum(), pc.getPagesize());

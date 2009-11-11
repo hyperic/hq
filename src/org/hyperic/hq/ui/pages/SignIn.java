@@ -200,9 +200,7 @@ public abstract class SignIn extends BasePage {
             // User not logged in
         } catch (SessionTimeoutException e) {
             // User session has expired
-        } catch (RemoteException e) {
-            // Cannot look up this user
-        }
+        } 
     }
 
     private static ConfigResponse getUserPrefs(ServletContext ctx,

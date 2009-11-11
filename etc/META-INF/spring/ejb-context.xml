@@ -22,7 +22,6 @@
 <bean class="org.hyperic.hq.autoinventory.server.session.AIScheduleManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.AIBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.AuthBossEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.bizapp.server.session.AuthzBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.ConfigBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.ControlBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.DashboardPortletBossEJBImpl" factory-method="getOne"/>

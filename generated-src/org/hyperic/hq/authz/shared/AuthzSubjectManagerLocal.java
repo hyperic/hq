@@ -47,18 +47,18 @@ public interface AuthzSubjectManagerLocal
 
    public org.hyperic.hq.authz.server.session.AuthzSubject findSubjectByName( java.lang.String name ) ;
 
-   public org.hyperic.util.pager.PageList findMatchingName( java.lang.String name,org.hyperic.util.pager.PageControl pc ) ;
+   public org.hyperic.util.pager.PageList<AuthzSubjectValue> findMatchingName( java.lang.String name,org.hyperic.util.pager.PageControl pc ) ;
 
    /**
     * List all subjects in the system
     * @param excludes the IDs of subjects to exclude from result    */
-   public org.hyperic.util.pager.PageList getAllSubjects( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.util.Collection excludes,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<AuthzSubjectValue> getAllSubjects( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.util.Collection<Integer> excludes,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Get the subjects with the specified ids NOTE: This method returns an empty PageList if a null or empty array of ids is received.
     * @param ids the subject ids
     */
-   public org.hyperic.util.pager.PageList getSubjectsById( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer[] ids,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public org.hyperic.util.pager.PageList<AuthzSubjectValue> getSubjectsById( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer[] ids,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException;
 
    /**
     * Find the e-mail of the subject specified by id

@@ -170,6 +170,7 @@ import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
@@ -229,6 +230,8 @@ public class AppdefBossImpl implements AppdefBoss {
     private TrackerManager trackerManager;
 
     private AppdefManagerLocal appdefManager;
+    
+    private ZeventEnqueuer zEventManager;
 
     protected Log log = LogFactory.getLog(AppdefBossImpl.class.getName());
     protected boolean debug = log.isDebugEnabled();
@@ -246,7 +249,7 @@ public class AppdefBossImpl implements AppdefBoss {
                           AIBossLocal aiBoss, ResourceGroupManager resourceGroupManager,
                           ResourceManager resourceManager, ServerManagerLocal serverManager,
                           ServiceManagerLocal serviceManager, TrackerManager trackerManager,
-                          AppdefManagerLocal appdefManager) {
+                          AppdefManagerLocal appdefManager, ZeventEnqueuer zEventManager) {
         this.sessionManager = sessionManager;
         this.agentManager = agentManager;
         this.aiQueueManager = aiQueueManager;
@@ -267,6 +270,7 @@ public class AppdefBossImpl implements AppdefBoss {
         this.serviceManager = serviceManager;
         this.trackerManager = trackerManager;
         this.appdefManager = appdefManager;
+        this.zEventManager = zEventManager;
     }
 
     /**
@@ -1242,7 +1246,7 @@ public class AppdefBossImpl implements AppdefBoss {
             log.debug("removeAppdefEntity() for " + aeid + " executed in " + timer.getElapsed());
         }
 
-        ZeventManager.getInstance().enqueueEventAfterCommit(new ResourcesCleanupZevent());
+        zEventManager.enqueueEventAfterCommit(new ResourcesCleanupZevent());
 
         return removed;
     }
@@ -3042,7 +3046,7 @@ public class AppdefBossImpl implements AppdefBoss {
                     }
                     events.add(new ResourceUpdatedZevent(eventSubject, ade, allConfigs));
                 }
-                ZeventManager.getInstance().enqueueEventsAfterCommit(events);
+                zEventManager.enqueueEventsAfterCommit(events);
             }
 
             if (entityId.isServer() || entityId.isService()) {
@@ -3236,7 +3240,7 @@ public class AppdefBossImpl implements AppdefBoss {
         // are deleted.
         HashSet<Class<ResourcesCleanupZevent>> events = new HashSet<Class<ResourcesCleanupZevent>>();
         events.add(ResourcesCleanupZevent.class);
-        ZeventManager.getInstance().addBufferedListener(events, new ZeventListener<ResourcesCleanupZevent>() {
+        zEventManager.addBufferedListener(events, new ZeventListener<ResourcesCleanupZevent>() {
             public void processEvents(List<ResourcesCleanupZevent> events) {
                 for (Iterator<ResourcesCleanupZevent> i = events.iterator(); i.hasNext();) {
                     try {
@@ -3253,7 +3257,7 @@ public class AppdefBossImpl implements AppdefBoss {
                 return "AppdefBoss.removeDeletedResources";
             }
         });
-        ZeventManager.getInstance().enqueueEventAfterCommit(new ResourcesCleanupZevent());
+        zEventManager.enqueueEventAfterCommit(new ResourcesCleanupZevent());
     }
 
     public static AppdefBoss getOne() {
