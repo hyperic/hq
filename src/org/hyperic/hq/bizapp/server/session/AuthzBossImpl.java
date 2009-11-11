@@ -71,9 +71,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** 
+/**
  * The BizApp's interface to the Authz Subsystem
- *
+ * 
  */
 @Service
 @Transactional
@@ -85,24 +85,24 @@ public class AuthzBossImpl implements AuthzBoss {
     protected boolean debug = log.isDebugEnabled();
 
     private AppdefBoss appdefBoss;
-    
+
     private AuthManager authManager;
-    
+
     private AuthzSubjectManagerLocal authzSubjectManager;
-    
+
     private ResourceGroupManager resourceGroupManager;
-    
+
     private ResourceManager resourceManager;
-    
+
     private DashboardManager dashboardManager;
-    
+
     private PermissionManager permissionManager;
-    
-    
+
     @Autowired
     public AuthzBossImpl(SessionManager sessionManager, AppdefBoss appdefBoss, AuthManager authManager,
                          AuthzSubjectManagerLocal authzSubjectManager, ResourceGroupManager resourceGroupManager,
-                         ResourceManager resourceManager, DashboardManager dashboardManager, PermissionManager permissionManager) {
+                         ResourceManager resourceManager, DashboardManager dashboardManager,
+                         PermissionManager permissionManager) {
         this.sessionManager = sessionManager;
         this.appdefBoss = appdefBoss;
         this.authManager = authManager;
@@ -118,95 +118,84 @@ public class AuthzBossImpl implements AuthzBoss {
      * @return true - if user has adminsterCAM op false otherwise
      * 
      */
-    public boolean hasAdminPermission(int sessionId)
-        throws FinderException, 
-               SessionTimeoutException, SessionNotFoundException {
+    public boolean hasAdminPermission(int sessionId) throws FinderException, SessionTimeoutException,
+        SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return permissionManager.hasAdminPermission(subject.getId());
     }
 
     /**
      * Return a sorted, paged <code>List</code> of
-     * <code>ResourceTypeValue</code> objects representing every
-     * resource type in the system that the user is allowed to view.
-     *
+     * <code>ResourceTypeValue</code> objects representing every resource type
+     * in the system that the user is allowed to view.
+     * 
      * 
      */
-    public List<ResourceType> getAllResourceTypes(Integer sessionId, PageControl pc)
-        throws CreateException, FinderException,
-               PermissionException, SessionTimeoutException, 
-               SessionNotFoundException {
+    public List<ResourceType> getAllResourceTypes(Integer sessionId, PageControl pc) throws CreateException,
+        FinderException, PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return resourceManager.getAllResourceTypes(subject, pc);
     }
 
     /**
-     * Return the full <code>List</code> of
-     * <code>ResourceTypeValue</code> objects representing every
-     * resource type in the system that the user is allowed to view.
-     *
+     * Return the full <code>List</code> of <code>ResourceTypeValue</code>
+     * objects representing every resource type in the system that the user is
+     * allowed to view.
+     * 
      * 
      */
-    public List<ResourceType> getAllResourceTypes(Integer sessionId)
-        throws CreateException, FinderException,
-               PermissionException, SessionTimeoutException, 
-               SessionNotFoundException {
+    public List<ResourceType> getAllResourceTypes(Integer sessionId) throws CreateException, FinderException,
+        PermissionException, SessionTimeoutException, SessionNotFoundException {
         return getAllResourceTypes(sessionId, null);
     }
 
     /**
-     * Return a sorted, paged <code>List</code> of
-     * <code>OperationValue</code> objects representing every
-     * resource type in the system that the user is allowed to view.
-     *
+     * Return a sorted, paged <code>List</code> of <code>OperationValue</code>
+     * objects representing every resource type in the system that the user is
+     * allowed to view.
+     * 
      * 
      */
-    public List<Operation> getAllOperations(Integer sessionId, PageControl pc)
-        throws FinderException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException {
+    public List<Operation> getAllOperations(Integer sessionId, PageControl pc) throws FinderException,
+        PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return permissionManager.getAllOperations(subject, pc);
     }
 
     /**
-     * Return the full <code>List</code> of
-     * <code>OperationValue</code> objects representing every
-     * resource type in the system that the user is allowed to view.
-     *
+     * Return the full <code>List</code> of <code>OperationValue</code> objects
+     * representing every resource type in the system that the user is allowed
+     * to view.
+     * 
      * 
      */
-    public List<Operation> getAllOperations(Integer sessionId)
-        throws FinderException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException {
+    public List<Operation> getAllOperations(Integer sessionId) throws FinderException, PermissionException,
+        SessionTimeoutException, SessionNotFoundException {
         return getAllOperations(sessionId, null);
     }
 
     /**
      * Return a sorted, paged <code>List</code> of
-     * <code>AuthzSubjectValue</code> objects representing every
-     * resource type in the system that the user is allowed to view.
-     *
+     * <code>AuthzSubjectValue</code> objects representing every resource type
+     * in the system that the user is allowed to view.
+     * 
      * 
      */
-    public PageList<AuthzSubjectValue> getAllSubjects(Integer sessionId, Collection<Integer> excludes,
-                                   PageControl pc)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException, PermissionException {
+    public PageList<AuthzSubjectValue> getAllSubjects(Integer sessionId, Collection<Integer> excludes, PageControl pc)
+        throws FinderException, SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return authzSubjectManager.getAllSubjects(subject, excludes, pc);
     }
 
     /**
      * Return a sorted, paged <code>List</code> of
-     * <code>AuthzSubjectValue</code> objects corresponding to the specified
-     * id values.
+     * <code>AuthzSubjectValue</code> objects corresponding to the specified id
+     * values.
      * 
      * 
      */
-    public PageList<AuthzSubjectValue> getSubjectsById(Integer sessionId, Integer[] ids,
-                                    PageControl pc)
-        throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException {
+    public PageList<AuthzSubjectValue> getSubjectsById(Integer sessionId, Integer[] ids, PageControl pc)
+        throws PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return authzSubjectManager.getSubjectsById(subject, ids, pc);
     }
@@ -214,59 +203,52 @@ public class AuthzBossImpl implements AuthzBoss {
     /**
      * Return a sorted, paged <code>List</code> of
      * <code>AuthzSubjectValue</code> objects matching name as substring
-     *  
+     * 
      * 
      */
-    public PageList<AuthzSubjectValue> getSubjectsByName(Integer sessionId, String name,
-                                      PageControl pc)
-        throws PermissionException, SessionTimeoutException,
-               SessionNotFoundException {
+    public PageList<AuthzSubjectValue> getSubjectsByName(Integer sessionId, String name, PageControl pc)
+        throws PermissionException, SessionTimeoutException, SessionNotFoundException {
         sessionManager.getSubject(sessionId);
         return authzSubjectManager.findMatchingName(name, pc);
     }
 
     /**
      * Return a sorted, paged <code>List</code> of
-     * <code>ResourceGroupValue</code> objects representing every
-     * resource type in the system that the user is allowed to view.
-     *
+     * <code>ResourceGroupValue</code> objects representing every resource type
+     * in the system that the user is allowed to view.
+     * 
      * 
      */
-    public List<ResourceGroupValue> getAllResourceGroups(Integer sessionId, PageControl pc)
-        throws FinderException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException {
+    public List<ResourceGroupValue> getAllResourceGroups(Integer sessionId, PageControl pc) throws FinderException,
+        PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return resourceGroupManager.getAllResourceGroups(subject, pc);
     }
 
     /**
      * Return a sorted, paged <code>List</code> of
-     * <code>ResourceGroupValue</code> objects corresponding to the
-     * specified id values.
-     *
+     * <code>ResourceGroupValue</code> objects corresponding to the specified id
+     * values.
+     * 
      * 
      */
-    public PageList<ResourceGroupValue> getResourceGroupsById(Integer sessionId, Integer[] ids,
-                                          PageControl pc)
-        throws FinderException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException {
+    public PageList<ResourceGroupValue> getResourceGroupsById(Integer sessionId, Integer[] ids, PageControl pc)
+        throws FinderException, PermissionException, SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return resourceGroupManager.getResourceGroupsById(subject, ids,
-                                                               pc);
+        return resourceGroupManager.getResourceGroupsById(subject, ids, pc);
     }
-    
+
     /**
      * 
      */
     public Map<AppdefEntityID, Resource> findResourcesByIds(Integer sessionId, AppdefEntityID[] entities)
-        throws SessionNotFoundException, SessionTimeoutException
-    {
+        throws SessionNotFoundException, SessionTimeoutException {
         // get the user
         sessionManager.getSubject(sessionId);
         Map<AppdefEntityID, Resource> appdefMap = new LinkedHashMap<AppdefEntityID, Resource>();
 
         // cheaper to find the resource first
-       
+
         for (int i = 0; i < entities.length; i++) {
             Resource res = resourceManager.findResource(entities[i]);
             if (res != null && !res.isInAsyncDeleteState()) {
@@ -277,186 +259,157 @@ public class AuthzBossImpl implements AuthzBoss {
                 }
             }
         }
-        
+
         return appdefMap;
     }
 
     /**
-     * Remove the user identified by the given ids from the subject as well 
-     * as principal tables.
-     *
+     * Remove the user identified by the given ids from the subject as well as
+     * principal tables.
+     * 
      * 
      */
-    public void removeSubject(Integer sessionId, Integer[] ids)
-        throws FinderException, RemoveException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException {
+    public void removeSubject(Integer sessionId, Integer[] ids) throws FinderException, RemoveException,
+        PermissionException, SessionTimeoutException, SessionNotFoundException {
         // check for timeout
         AuthzSubject whoami = sessionManager.getSubject(sessionId);
         try {
             for (int i = 0; i < ids.length; i++) {
-                AuthzSubject aSubject = findSubjectById(sessionId, ids[i]); 
-                /* Note: This has not been finalized. At present, however,
-                    the consensus is that a user should be able to be deleted
-                    if they are logged in. Therefore, this fix may not be
-                    needed ...  BUG-4169 - DSE
-                if (isLoggedIn(username)) {
-                    throw new RemoveException ("User is logged in");
-                } 
-                */
+                AuthzSubject aSubject = findSubjectById(sessionId, ids[i]);
+                /*
+                 * Note: This has not been finalized. At present, however, the
+                 * consensus is that a user should be able to be deleted if they
+                 * are logged in. Therefore, this fix may not be needed ...
+                 * BUG-4169 - DSE if (isLoggedIn(username)) { throw new
+                 * RemoveException ("User is logged in"); }
+                 */
 
                 // Verify that the user is not trying to delete themself.
                 if (whoami.getName().equals(aSubject.getName())) {
-                    throw new PermissionException(
-                        "Users are not permitted to remove themselves.");
+                    throw new PermissionException("Users are not permitted to remove themselves.");
                 }
                 // reassign ownership of all things appdef
-                appdefBoss.resetResourceOwnership(
-                    sessionId.intValue(), aSubject);
+                appdefBoss.resetResourceOwnership(sessionId.intValue(), aSubject);
                 // reassign ownership of all things authz
                 resetResourceOwnership(sessionId, aSubject);
-                
+
                 // delete in auth
-               authManager.deleteUser(whoami, aSubject.getName());
-                
+                authManager.deleteUser(whoami, aSubject.getName());
+
                 // remove from authz
                 authzSubjectManager.removeSubject(whoami, ids[i]);
             }
         } catch (UpdateException e) {
-            throw new RemoveException(
-                "Unable to reset ownership of owned resources: " 
-                + e.getMessage());   
+            throw new RemoveException("Unable to reset ownership of owned resources: " + e.getMessage());
         } catch (AppdefEntityNotFoundException e) {
-            throw new RemoveException(
-                "Unable to reset ownership of owned resources: "
-                + e.getMessage());
+            throw new RemoveException("Unable to reset ownership of owned resources: " + e.getMessage());
         }
     }
-    
+
     /**
-     * Update all the authz resources owned by this user to be owned
-     * by the root user. This is done to prevent resources from being
-     * orphaned in the UI due to its display restrictions. This method
-     * should only get called before a user is about to be deleted
+     * Update all the authz resources owned by this user to be owned by the root
+     * user. This is done to prevent resources from being orphaned in the UI due
+     * to its display restrictions. This method should only get called before a
+     * user is about to be deleted
      * @param subject- the user about to be removed
      * 
      */
-    private void resetResourceOwnership(Integer sessionId,
-                                        AuthzSubject currentOwner) 
-        throws FinderException, UpdateException, PermissionException {
+    private void resetResourceOwnership(Integer sessionId, AuthzSubject currentOwner) throws FinderException,
+        UpdateException, PermissionException {
         // first look up the resources by owner
-        Collection<Resource> resources
-            = resourceManager.findResourceByOwner(currentOwner);
-        for(Resource aRes: resources) {
-            String resType = aRes.getResourceType().getName();    
-            if(resType.equals(AuthzConstants.roleResourceTypeName)) {
-                resourceManager.setResourceOwner(authzSubjectManager.getOverlordPojo(), aRes,
-                    authzSubjectManager.getOverlordPojo());
+        Collection<Resource> resources = resourceManager.findResourceByOwner(currentOwner);
+        for (Resource aRes : resources) {
+            String resType = aRes.getResourceType().getName();
+            if (resType.equals(AuthzConstants.roleResourceTypeName)) {
+                resourceManager.setResourceOwner(authzSubjectManager.getOverlordPojo(), aRes, authzSubjectManager
+                    .getOverlordPojo());
             }
         }
     }
-                            
+
     /**
      * Update a subject
-     *
+     * 
      * 
      */
-    public void updateSubject(Integer sessionId, AuthzSubject target,
-                              Boolean active, String dsn, String dept,
-                              String email, String first, String last,
-                              String phone, String sms, Boolean useHtml)
-        throws PermissionException, SessionException 
-    {
+    public void updateSubject(Integer sessionId, AuthzSubject target, Boolean active, String dsn, String dept,
+                              String email, String first, String last, String phone, String sms, Boolean useHtml)
+        throws PermissionException, SessionException {
         AuthzSubject whoami = sessionManager.getSubject(sessionId);
-        authzSubjectManager.updateSubject(whoami, target, active, dsn,
-                                               dept, email, first, last,
-                                               phone, sms, useHtml);
+        authzSubjectManager.updateSubject(whoami, target, active, dsn, dept, email, first, last, phone, sms, useHtml);
     }
-    
+
     /**
-     * Create the user identified by the given ids from the subject as well 
-     * as principal tables.
-     *
+     * Create the user identified by the given ids from the subject as well as
+     * principal tables.
+     * 
      * 
      */
-    public AuthzSubject createSubject(Integer sessionId, String name,
-                                      boolean active, String dsn, String dept,
-                                      String email, String first, String last,
-                                      String phone, String sms,
-                                      boolean useHtml) 
-        throws PermissionException, CreateException, SessionException 
-    {
+    public AuthzSubject createSubject(Integer sessionId, String name, boolean active, String dsn, String dept,
+                                      String email, String first, String last, String phone, String sms, boolean useHtml)
+        throws PermissionException, CreateException, SessionException {
         // check for timeout
         AuthzSubject whoami = sessionManager.getSubject(sessionId);
 
-        
-        return authzSubjectManager.createSubject(whoami, name, active, dsn, dept, email,
-                                     first, last, phone, sms, useHtml);
+        return authzSubjectManager.createSubject(whoami, name, active, dsn, dept, email, first, last, phone, sms,
+            useHtml);
     }
 
     /**
      * 
      */
-    public AuthzSubject getCurrentSubject(int sessionid) 
-        throws SessionException
-    {
+    public AuthzSubject getCurrentSubject(int sessionid) throws SessionException {
         return sessionManager.getSubject(sessionid);
     }
-    
+
     /**
      * 
      */
-    public AuthzSubject getCurrentSubject(String name)
-        throws SessionException, ApplicationException
-    {
-        int sessionId =authManager.getUnauthSessionId(name);
+    public AuthzSubject getCurrentSubject(String name) throws SessionException, ApplicationException {
+        int sessionId = authManager.getUnauthSessionId(name);
         return getCurrentSubject(sessionId);
     }
-    
+
     /**
-     * Return the <code>AuthzSubject</code> object identified by
-     * the given subject id.
-     * @throws SessionTimeoutException 
-     * @throws SessionNotFoundException 
-     * @throws PermissionException 
-     *
+     * Return the <code>AuthzSubject</code> object identified by the given
+     * subject id.
+     * @throws SessionTimeoutException
+     * @throws SessionNotFoundException
+     * @throws PermissionException
+     * 
      * 
      */
-    public AuthzSubject findSubjectById(Integer sessionId, Integer subjectId)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException {
+    public AuthzSubject findSubjectById(Integer sessionId, Integer subjectId) throws SessionNotFoundException,
+        SessionTimeoutException, PermissionException {
         // check for timeout
         AuthzSubject subj = sessionManager.getSubject(sessionId);
         return authzSubjectManager.findSubjectById(subj, subjectId);
     }
 
     /**
-     * Return the <code>AuthzSubject</code> object identified by
-     * the given username.
-     *
+     * Return the <code>AuthzSubject</code> object identified by the given
+     * username.
+     * 
      * 
      */
-    public AuthzSubject findSubjectByName(Integer sessionId, String subjectName)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException, PermissionException {
+    public AuthzSubject findSubjectByName(Integer sessionId, String subjectName) throws FinderException,
+        SessionTimeoutException, SessionNotFoundException, PermissionException {
         // check for timeout
         AuthzSubject subj = sessionManager.getSubject(sessionId);
         return authzSubjectManager.findSubjectByName(subj, subjectName);
     }
 
     /**
-     * Return the <code>AuthzSubject</code> object identified by
-     * the given username. This method should only be used in cases
-     * where displaying the user does not require an Authz check. An
-     * example of this is when the owner and last modifier need to 
-     * be displayed, and the user viewing the resource does not 
-     * have permissions to view other users.
-     * See bug #5452 for more information
+     * Return the <code>AuthzSubject</code> object identified by the given
+     * username. This method should only be used in cases where displaying the
+     * user does not require an Authz check. An example of this is when the
+     * owner and last modifier need to be displayed, and the user viewing the
+     * resource does not have permissions to view other users. See bug #5452 for
+     * more information
      * 
      */
-    public AuthzSubject findSubjectByNameNoAuthz(Integer sessionId,
-                                                 String subjectName)
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException, PermissionException {
+    public AuthzSubject findSubjectByNameNoAuthz(Integer sessionId, String subjectName) throws FinderException,
+        SessionTimeoutException, SessionNotFoundException, PermissionException {
         // check for timeout
         sessionManager.authenticate(sessionId.intValue());
         return authzSubjectManager.findSubjectByName(subjectName);
@@ -469,14 +422,13 @@ public class AuthzBossImpl implements AuthzBoss {
      * @throws LoginException
      * 
      */
-    public ConfigResponse getUserPrefs(String username)
-        throws SessionNotFoundException, ApplicationException,
-               ConfigPropertyException {
-        int sessionId =authManager.getUnauthSessionId(username);
+    public ConfigResponse getUserPrefs(String username) throws SessionNotFoundException, ApplicationException,
+        ConfigPropertyException {
+        int sessionId = authManager.getUnauthSessionId(username);
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getUserPrefs(new Integer(sessionId), subject.getId());
     }
-    
+
     /**
      * Return a ConfigResponse matching the UserPreferences
      * 
@@ -491,38 +443,32 @@ public class AuthzBossImpl implements AuthzBoss {
     }
 
     /**
-     * Set the UserPreferences 
+     * Set the UserPreferences
      * 
      */
-    public void setUserPrefs(Integer sessionId, Integer subjectId,
-                             ConfigResponse prefs)
-        throws ApplicationException, SessionTimeoutException,
-               SessionNotFoundException 
-    {
+    public void setUserPrefs(Integer sessionId, Integer subjectId, ConfigResponse prefs) throws ApplicationException,
+        SessionTimeoutException, SessionNotFoundException {
         AuthzSubject who = sessionManager.getSubject(sessionId);
         authzSubjectManager.setUserPrefs(who, subjectId, prefs);
         getUserPrefs(sessionId, subjectId);
     }
-    
+
     /**
      * Get the current user's dashboard
      * 
      */
-    public ConfigResponse getUserDashboardConfig(Integer sessionId)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException {
+    public ConfigResponse getUserDashboardConfig(Integer sessionId) throws SessionNotFoundException,
+        SessionTimeoutException, PermissionException {
         AuthzSubject subj = sessionManager.getSubject(sessionId);
-        return dashboardManager
-            .getUserDashboard(subj, subj).getConfig();
+        return dashboardManager.getUserDashboard(subj, subj).getConfig();
     }
 
     /**
      * Get the email of a user by name
      * 
      */
-    public String getEmailByName(Integer sessionId, String userName) 
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException {
+    public String getEmailByName(Integer sessionId, String userName) throws FinderException, SessionTimeoutException,
+        SessionNotFoundException {
         sessionManager.authenticate(sessionId.intValue());
         return authzSubjectManager.getEmailByName(userName);
     }
@@ -531,13 +477,12 @@ public class AuthzBossImpl implements AuthzBoss {
      * Get the email of a user by id
      * 
      */
-    public String getEmailById(Integer sessionId, Integer userId) 
-        throws FinderException, SessionTimeoutException,
-               SessionNotFoundException {
+    public String getEmailById(Integer sessionId, Integer userId) throws FinderException, SessionTimeoutException,
+        SessionNotFoundException {
         sessionManager.authenticate(sessionId.intValue());
         return authzSubjectManager.getEmailById(userId);
     }
-    
+
     public static AuthzBoss getOne() {
         return Bootstrap.getBean(AuthzBoss.class);
     }
