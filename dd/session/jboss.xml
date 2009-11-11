@@ -195,11 +195,6 @@
 
 		</session>
 		<session>
-			<ejb-name>TemplateManager</ejb-name>
-			<local-jndi-name>LocalTemplateManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>ServerManager</ejb-name>
 			<local-jndi-name>LocalServerManager</local-jndi-name>
 

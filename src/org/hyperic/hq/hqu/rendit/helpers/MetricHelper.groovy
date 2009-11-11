@@ -1,6 +1,6 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
-import org.hyperic.hq.measurement.server.session.TemplateManagerEJBImpl
+import org.hyperic.hq.measurement.server.session.TemplateManagerImpl
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.hq.measurement.server.session.MeasurementTemplateSortField
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl
@@ -10,7 +10,7 @@ import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.util.pager.PageControl
 
 class MetricHelper extends BaseHelper {
-    private tmplMan = TemplateManagerEJBImpl.one
+    private tmplMan = TemplateManagerImpl.one
     private measMan = MeasurementManagerEJBImpl.one
 
     MetricHelper(AuthzSubject user) {

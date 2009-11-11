@@ -20,7 +20,7 @@ import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.shared.TemplateManagerLocal;
+import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.types.AlertCondition;
 import org.hyperic.hq.types.AlertDefinition;
@@ -39,7 +39,7 @@ public class AlertDefinitionXmlParserTest
 
     private AuthzSubjectManagerLocal authSubjectManager;
 
-    private TemplateManagerLocal templateManager;
+    private TemplateManager templateManager;
 
     private AlertDefinitionManager alertDefinitionManager;
 
@@ -63,7 +63,7 @@ public class AlertDefinitionXmlParserTest
         super.setUp();
         this.resourceManager = (ResourceManager) EasyMock.createMock(ResourceManager.class);
         this.authSubjectManager = (AuthzSubjectManagerLocal) EasyMock.createMock(AuthzSubjectManagerLocal.class);
-        this.templateManager = (TemplateManagerLocal) EasyMock.createMock(TemplateManagerLocal.class);
+        this.templateManager = (TemplateManager) EasyMock.createMock(TemplateManager.class);
         this.alertDefinitionManager = (AlertDefinitionManager) EasyMock.createMock(AlertDefinitionManager.class);
         this.parser = new AlertDefinitionXmlParser(resourceManager,
                                                    templateManager,

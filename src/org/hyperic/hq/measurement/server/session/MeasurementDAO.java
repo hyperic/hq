@@ -43,7 +43,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.type.IntegerType;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
@@ -56,9 +55,8 @@ import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class MeasurementDAO extends HibernateDAO<Measurement> {
-    private final Log _log = LogFactory.getLog(MeasurementDAO.class);
 
+public class MeasurementDAO extends HibernateDAO<Measurement> {
     private static final String ALIAS_CLAUSE = " upper(t.alias) = '" +
     				MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
 
@@ -88,7 +86,7 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
      * [0] = Measurement
      * [1] = MeasurementTemplate
      */
-    List findAllEnabledMeasurementsAndTemplates() {
+    List<Measurement> findAllEnabledMeasurementsAndTemplates() {
         Dialect dialect = Util.getDialect();
         String hql = new StringBuilder()
             .append("from Measurement m")
@@ -105,7 +103,7 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
      */
     void remove(MeasurementTemplate mt) {
         String sql = "from Measurement where template.id=?";
-        List measurements = getSession().createQuery(sql)
+        List<Measurement> measurements = getSession().createQuery(sql)
             .setInteger(0, mt.getId().intValue())
             .list();
 
@@ -203,7 +201,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             .list();
     }
 
-    List findByTemplate(Integer id) {
+    @SuppressWarnings("unchecked")
+    List<Measurement> findByTemplate(Integer id) {
         String sql = "select distinct m from Measurement m " +
                      "join m.template t " +
                      "where t.id=?";
@@ -219,20 +218,20 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
      * @param id The measurement template id.
      * @return A list of AppdefEntityID objects.
      */
-    List findAppdefEntityIdsByTemplate(Integer id) {
+    @SuppressWarnings("unchecked")
+    List<AppdefEntityID> findAppdefEntityIdsByTemplate(Integer id) {
         String sql = "select distinct mt.appdefType, m.instanceId from " +
         		     "Measurement m join m.template t " +
                      "join t.monitorableType mt where t.id=?";
         
-        List results = getSession()
+        List<Object[]> results = getSession()
                    .createQuery(sql)
                    .setInteger(0, id.intValue())
                    .list();
         
-        List appdefEntityIds = new ArrayList(results.size());
+        List<AppdefEntityID> appdefEntityIds = new ArrayList<AppdefEntityID>(results.size());
         
-        for (Iterator iter = results.iterator(); iter.hasNext();) {
-            Object[] result = (Object[]) iter.next();
+        for (Object[] result : results) {
             int appdefType = ((Integer)result[0]).intValue();
             int instanceId = ((Integer)result[1]).intValue();            
             appdefEntityIds.add(new AppdefEntityID(appdefType, instanceId));
