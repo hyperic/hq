@@ -40,7 +40,10 @@ var pageData = new Array();
   <c:set var="ctype" value="3:${param.resourceType}"/>
 </c:if>
 
+<hq:constant classname="org.hyperic.hq.ui.Constants" 
+    symbol="CONTROL_ENABLED_ATTR" var="CONST_CONTROLLABLE" />
 
+<c:set var="canControl" value="${requestScope[CONST_CONTROLLABLE]}"/>
 
 <tiles:insert definition=".page.title.resource.platform.full">
   <tiles:put name="resource" beanName="Resource"/>
@@ -48,10 +51,20 @@ var pageData = new Array();
   <tiles:put name="eid" beanName="entityId" beanProperty="appdefKey" />
 </tiles:insert>
 
-<tiles:insert definition=".tabs.resource.platform.inventory.current">
-  <tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
-  <tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
-</tiles:insert>
+<c:choose>
+	<c:when test="${canControl}">
+		<tiles:insert definition=".tabs.resource.platform.inventory.current">
+  			<tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+  			<tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
+		</tiles:insert>
+    </c:when>
+    <c:otherwise>
+		<tiles:insert definition=".tabs.resource.platform.inventory.current.nocontrol">
+  			<tiles:put name="resourceId" beanName="Resource" beanProperty="id"/>
+  			<tiles:put name="resourceType" beanName="entityId" beanProperty="type"/>
+		</tiles:insert>
+    </c:otherwise>
+</c:choose>
 
 <tiles:insert definition=".portlet.confirm"/>
 <tiles:insert definition=".portlet.error"/>

@@ -155,6 +155,10 @@
                 extends=".main.layout"
                 controllerUrl="/DashboardAdminController.do" />                
 
+    <definition name=".resource.platform.control.layout" 
+                extends=".main.layout"
+                controllerUrl="/resource/platform/PlatformController.do" />
+
     <definition name=".resource.server.control.layout" 
                 extends=".main.layout"
                 controllerUrl="/resource/server/ServerController.do" />

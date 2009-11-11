@@ -2394,3 +2394,11 @@ span.returnToLink {
 	clear: left;
 	display: block;
 }
+
+.emphasizedCell {
+	padding: 3px;
+	background-color: #ddd;
+	color: #333;
+	border-bottom: 1px solid #eee;
+	font-style: italic;
+}

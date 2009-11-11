@@ -758,7 +758,7 @@ hyperic.widget = hyperic.widget || {};
 */
 hyperic.widget.Chart = function(node, kwArgs) {
     var that = this;
-    that.subscriptions=[];
+    that.subscriptions=[];	
     that.create = function(node, kwArgs) {
     	// display the metric name for a multiple metric single resource chart
     	var chartDisplayName = kwArgs.name;  
@@ -766,7 +766,7 @@ hyperic.widget.Chart = function(node, kwArgs) {
     	{
         	if(chartDisplayName.indexOf(kwArgs.measurementName) == -1)
             {
-        		chartDisplayName += ': ' + kwArgs.measurementName;
+        		chartDisplayName += ': ' + kwArgs.measurementName + ", Units: " + kwArgs.measurementUnits;
             }     		
     	}
 
@@ -2102,6 +2102,7 @@ hyperic.dashboard.chartWidget = function(node, portletName, portletLabel) {
                         }
                     }
                     that.charts[chart].measurementName = data[0].measurementName;
+                    that.charts[chart].measurementUnits = data[0].measurementUnits;
                     that.charts[chart].last_updated = new Date();
                     that.charts[chart].maxTitleLength = (that.sheets.content.offsetWidth - 150) * 1.5;
                 }
