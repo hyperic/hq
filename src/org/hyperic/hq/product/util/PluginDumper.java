@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.hyperic.hq.agent.AgentConfig;
+import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.product.AutoinventoryPluginManager;
 import org.hyperic.hq.product.CollectorExecutor;
@@ -262,7 +263,7 @@ public class PluginDumper {
     private void getopt(String[] args) {
         int opt;
         Getopt parser =
-            new Getopt("plugindumper", args, "hp:t:m:a:o:D:");
+            new Getopt("plugindumper", args, "hvp:t:m:a:o:D:");
         parser.setOpterr(false);
         PluginDumperConfig config = this.config;
         
@@ -295,6 +296,10 @@ public class PluginDumper {
                 }
                 config.props.setProperty(key, val);
                 config.defines.setProperty(key, val);
+                break;
+              case 'v':
+                System.out.println(ProductProperties.getVersion() +
+                                   " (build #" + ProductProperties.getBuild() + ")");
                 break;
               case 'h':
               default:
