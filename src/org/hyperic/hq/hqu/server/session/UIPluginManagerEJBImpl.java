@@ -35,10 +35,8 @@ import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
@@ -47,20 +45,11 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
-import org.hyperic.hq.hqu.ViewDescriptor;
 import org.hyperic.hq.hqu.RenditServer;
+import org.hyperic.hq.hqu.RenditServerImpl;
+import org.hyperic.hq.hqu.ViewDescriptor;
 import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
 import org.hyperic.hq.hqu.shared.UIPluginManagerUtil;
-import org.hyperic.hq.hqu.server.session.AttachType;
-import org.hyperic.hq.hqu.server.session.Attachment;
-import org.hyperic.hq.hqu.server.session.UIPlugin;
-import org.hyperic.hq.hqu.server.session.View;
-import org.hyperic.hq.hqu.server.session.ViewAdmin;
-import org.hyperic.hq.hqu.server.session.ViewAdminCategory;
-import org.hyperic.hq.hqu.server.session.ViewMasthead;
-import org.hyperic.hq.hqu.server.session.ViewMastheadCategory;
-import org.hyperic.hq.hqu.server.session.ViewResource;
-import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
 
 /**
  * @ejb:bean name="UIPluginManager"
@@ -322,7 +311,7 @@ public class UIPluginManagerEJBImpl
                                                        Resource viewedRsrc,
                                                        AuthzSubject user)
     {
-        RenditServer rs = RenditServer.getInstance();
+        RenditServer rs = RenditServerImpl.getInstance();
 
         Collection res = new ArrayList();
         for (Iterator i=attachments.iterator(); i.hasNext(); ) {

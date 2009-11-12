@@ -71,6 +71,7 @@ import org.hyperic.hq.events.InvalidActionDataException;
 import org.hyperic.hq.events.Notify;
 import org.hyperic.hq.events.server.session.AlertRegulator;
 import org.hyperic.hq.hqu.RenditServer;
+import org.hyperic.hq.hqu.RenditServerImpl;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
@@ -154,7 +155,7 @@ public class EmailAction extends EmailActionConfig
         File templateFile = new File(templateDir, filename);
         StringWriter output = new StringWriter();
         try {
-            RenditServer.getInstance().renderTemplate(templateFile, params,
+            RenditServerImpl.getInstance().renderTemplate(templateFile, params,
                                                       output);
 
             if (_log.isDebugEnabled())

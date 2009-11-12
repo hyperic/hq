@@ -331,19 +331,6 @@
 		<session>
 			<description><![CDATA[]]></description>
 
-			<ejb-name>TransactionManager</ejb-name>
-
-			<local-home>org.hyperic.hq.common.shared.TransactionManagerLocalHome</local-home>
-			<local>org.hyperic.hq.common.shared.TransactionManagerLocal</local>
-			<ejb-class>org.hyperic.hq.common.server.session.TransactionManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
-			<description><![CDATA[]]></description>
-
 			<ejb-name>ControlBoss</ejb-name>
 
 			<home>org.hyperic.hq.bizapp.shared.ControlBossHome</home>
@@ -2506,13 +2493,6 @@
 		<container-transaction>
 			<method>
 				<ejb-name>MaintenanceEventManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>TransactionManager</ejb-name>
 				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>

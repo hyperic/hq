@@ -64,6 +64,7 @@ import org.hyperic.hq.bizapp.server.session.SystemAudit;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.RenditServer;
+import org.hyperic.hq.hqu.RenditServerImpl;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
@@ -833,7 +834,7 @@ public class ProductPluginDeployer
 
         unpackJar(di.url, destDir, prefix);
 
-        RenditServer rendit = RenditServer.getInstance();
+        RenditServer rendit = RenditServerImpl.getInstance();
         if (rendit.getSysDir() != null) { //rendit.isReady() ?
             if (exists) {
                 //update ourselves to avoid having to delete,sleep,unpack
