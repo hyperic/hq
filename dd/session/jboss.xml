@@ -48,11 +48,7 @@
 			<local-jndi-name>LocalAIScheduleManager</local-jndi-name>
 
 		</session>
-		<session>
-			<ejb-name>Scheduler</ejb-name>
-			<local-jndi-name>LocalQuartzScheduler</local-jndi-name>
 
-		</session>
 		<session>
 			<ejb-name>HierarchicalAlertingManager</ejb-name>
 			<local-jndi-name>LocalHierarchicalAlertingManager</local-jndi-name>

@@ -342,6 +342,9 @@
 	<copy file="${hq.home}/etc/hibernate.properties"
           todir="${ear.dir}"/>
 	
+		<copy file="${hq.home}/etc/quartz.properties"
+	          todir="${ear.dir}"/>
+	
     <copy file="etc/ehcache.xml" todir="${ear.dir}"/>
 
 
@@ -371,14 +374,7 @@
     </replace>
     <copy todir="${ear.dir}/measurement-mbeans.sar/META-INF" 
           file="etc/jboss/measurement/sar/jboss-service.xml" />
-    <copy todir="${ear.dir}/scheduler-mbeans.sar/META-INF" 
-          file="etc/jboss/scheduler/sar/jboss-service.xml" />
-    <replace file="${ear.dir}/scheduler-mbeans.sar/META-INF/jboss-service.xml">
-      <replacefilter token="@@@server.quartzDelegate@@@" value="${quartz.delegate}"/>
-    </replace>
-
-   
-
+    
     <!-- Write version resource -->
     <antcall target="write-version-file">
       <param name="version-file"
@@ -1921,10 +1917,7 @@
       </fileset>
     </copy>
 
-    <!-- The installer needs a copy of the unsubstituted version of
-         certain subsystems jboss-service files -->
-    <copy file="etc/jboss/scheduler/sar/jboss-service.xml"
-          toFile="${archive-dir}/installer-${version}/data/hq-engine/scheduler-service.xml"/>
+   
 
     <!-- Truncate all JSPs and .do files  They are all pre-compiled -->
     <truncate>

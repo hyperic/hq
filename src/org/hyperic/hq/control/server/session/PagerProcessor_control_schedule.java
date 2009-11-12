@@ -32,10 +32,9 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.shared.ControlConstants;
-import org.hyperic.hq.scheduler.shared.SchedulerLocal;
-import org.hyperic.hq.scheduler.shared.SchedulerUtil;
 import org.hyperic.util.pager.PagerEventHandler;
 import org.hyperic.util.pager.PagerProcessorExt;
+import org.quartz.Scheduler;
 import org.quartz.Trigger;
 
 public class PagerProcessor_control_schedule implements PagerProcessorExt {
@@ -52,8 +51,8 @@ public class PagerProcessor_control_schedule implements PagerProcessorExt {
         try {
             if (o instanceof ControlSchedule) {
 
-                SchedulerLocal scheduler =
-                    SchedulerUtil.getLocalHome().create();
+                Scheduler scheduler =
+                    Bootstrap.getBean(Scheduler.class);
                 ControlSchedule s = (ControlSchedule)o;
                 Trigger trigger;
                 try {

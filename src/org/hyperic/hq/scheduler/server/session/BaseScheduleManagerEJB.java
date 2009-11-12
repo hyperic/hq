@@ -38,13 +38,12 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.scheduler.shared.SchedulerLocal;
-import org.hyperic.hq.scheduler.shared.SchedulerUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.Pager;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.Scheduler;
 
 /**
  * Implements common functionality shared by various schedule managers,
@@ -56,7 +55,7 @@ public abstract class BaseScheduleManagerEJB {
     public static final String SCHED_SEPARATOR = "-";
     private int dbType;
 
-    protected SchedulerLocal _scheduler;
+    protected Scheduler _scheduler;
 
     private String jobPrefix;
     private String schedulePrefix;
@@ -122,7 +121,7 @@ public abstract class BaseScheduleManagerEJB {
 
         try {
             // Get a reference to the scheduler
-            this._scheduler = SchedulerUtil.getLocalHome().create();
+            this._scheduler = Bootstrap.getBean(Scheduler.class);
 
             // Setup the pagers
             this.historyPager = Pager.getPager(getHistoryPagerClass());
@@ -130,11 +129,7 @@ public abstract class BaseScheduleManagerEJB {
 
             // Note the type of database
             setDbType();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (Exception e) {
+        }  catch (Exception e) {
             // IllegialAccessException, InvocationException..
             throw new SystemException(e);
         }
