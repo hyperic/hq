@@ -4,7 +4,7 @@ import org.hyperic.hq.product.MetricValue
 import org.hyperic.hq.measurement.UnitsConvert
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl
 import org.hyperic.hq.measurement.server.session.TemplateManagerImpl
-import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl
+import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl
 import org.hyperic.hq.measurement.server.session.Measurement
 import org.hyperic.util.pager.PageControl
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
@@ -15,7 +15,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 class MetricCategory {
     private static dataMan = DataManagerEJBImpl.one
     private static tmplMan = TemplateManagerImpl.one
-    private static measMan = MeasurementManagerEJBImpl.one
+    private static measMan = MeasurementManagerImpl.one
 
     static String urlFor(Measurement d, Map context) {
         def template = d.template

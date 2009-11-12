@@ -116,7 +116,7 @@ import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.ConfigPropertyException;
@@ -583,7 +583,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     {
         final AuthzSubject subject = manager.getSubject(sessionId);
 
-        MeasurementManagerLocal dmm = getMetricManager();
+        MeasurementManager dmm = getMetricManager();
         if (id == null) {
             getTemplateManager().setTemplateEnabledByDefault(subject, tids, 
                                                              false);
@@ -786,7 +786,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @ejb:interface-method
      */
     public Map getLastIndicatorValues(Integer sessionId, AppdefEntityID aeid) {
-        final MeasurementManagerLocal metricManager = getMetricManager();
+        final MeasurementManager metricManager = getMetricManager();
         List metrics = metricManager.findDesignatedMeasurements(aeid);
         long interval = 0;
         for (Iterator it = metrics.iterator(); it.hasNext();) {
@@ -2276,7 +2276,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         //cats.put(MeasurementConstants.CAT_THROUGHPUT, null);
 
         // Look up metrics by group first
-        MeasurementManagerLocal mman = getMetricManager();
+        MeasurementManager mman = getMetricManager();
         for (Iterator it = cats.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry) it.next();
             List metrics =

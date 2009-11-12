@@ -72,10 +72,10 @@ import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
 import org.json.JSONArray;
@@ -119,7 +119,7 @@ public class DashboardPortletBossEJBImpl
     {
         JSONArray rtn = new JSONArray();
         ResourceManager resMan = getResourceManager();
-        MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
+        MeasurementManager mMan = MeasurementManagerImpl.getOne();
         DataManagerLocal dMan = DataManagerEJBImpl.getOne();
         DateFormat dateFmt =
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);

@@ -30,12 +30,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
@@ -45,6 +42,7 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.type.IntegerType;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -86,7 +84,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
      * [0] = Measurement
      * [1] = MeasurementTemplate
      */
-    List<Measurement> findAllEnabledMeasurementsAndTemplates() {
+    @SuppressWarnings("unchecked")
+    List<Object[]> findAllEnabledMeasurementsAndTemplates() {
         Dialect dialect = Util.getDialect();
         String hql = new StringBuilder()
             .append("from Measurement m")
@@ -101,17 +100,14 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
      * Remove all measurements associated with a MeasurementTemplate
      * @param mt The MeasurementTemplate for the Measurements to be removed.
      */
+    @SuppressWarnings("unchecked")
     void remove(MeasurementTemplate mt) {
         String sql = "from Measurement where template.id=?";
         List<Measurement> measurements = getSession().createQuery(sql)
             .setInteger(0, mt.getId().intValue())
             .list();
 
-
-
-        for (Iterator it = measurements.iterator(); it.hasNext();) {
-
-            Measurement meas = (Measurement) it.next();
+        for (Measurement meas : measurements) {
             remove(meas);
         }
     }
@@ -186,9 +182,11 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             .list();
     }
 
-    List findIdsByTemplateForInstances(Integer tid, Integer[] iids) {
-        if (iids.length == 0)
-            return new ArrayList(0);
+    @SuppressWarnings("unchecked")
+    List<Integer> findIdsByTemplateForInstances(Integer tid, Integer[] iids) {
+        if (iids.length == 0) {
+            return new ArrayList<Integer>(0);
+        }
 
         String sql = "select id from Measurement " +
                      "where template.id = :tid and instanceId IN (:ids)";
@@ -240,7 +238,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
         return appdefEntityIds;
     }
     
-    List findByResource(Resource resource)
+    @SuppressWarnings("unchecked")
+    List<Measurement> findByResource(Resource resource)
     {
         return createCriteria()
             .add(Restrictions.eq("resource", resource))
@@ -249,12 +248,11 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             .list();
     }
 
-    int deleteByIds(List ids) {
+    int deleteByIds(List<Integer> ids) {
         int count = 0;
         // need to remove one at a time to avoid EhCache clearing the
         // measurement cache which would lead to thrashing
-        for (Iterator it=ids.iterator(); it.hasNext(); ) {
-            Integer id = (Integer)it.next();
+        for (Integer id : ids) {
             Measurement meas = findById(id);
             if (meas == null) {
                 continue;
@@ -265,9 +263,10 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
         return count;
     }
 
-    public List findEnabledByResource(Resource resource) {
+    @SuppressWarnings("unchecked")
+    public List<Measurement> findEnabledByResource(Resource resource) {
         if (resource == null || resource.isInAsyncDeleteState()) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         String sql =
             "select m from Measurement m " +
@@ -282,7 +281,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             .setCacheRegion("Measurement.findEnabledByResource").list();
     }
 
-    List findDefaultsByResource(Resource resource) {
+    @SuppressWarnings("unchecked")
+    List<Measurement> findDefaultsByResource(Resource resource) {
         return getSession()
             .createQuery("select m from Measurement m join m.template t " +
                          "where t.defaultOn = true and m.resource = ? " +
@@ -291,7 +291,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             .list();
     }
 
-    List findByInstanceForCategory(int type, int id, String cat) {
+    @SuppressWarnings("unchecked")
+    List<Measurement> findByInstanceForCategory(int type, int id, String cat) {
         String sql =
             "select m from Measurement m " +
             "join m.template t " +
@@ -307,7 +308,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             .setString(2, cat).list();
     }
 
-    List findByResourceForCategory(Resource resource, String cat) {
+    @SuppressWarnings("unchecked")
+    List<Measurement> findByResourceForCategory(Resource resource, String cat) {
         String sql =
             "select m from Measurement m " +
             "join m.template t " +
@@ -333,7 +335,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             .uniqueResult();
     }
 
-    List findDesignatedByResourceForCategory(Resource resource, String cat)
+    @SuppressWarnings("unchecked")
+    List<Measurement> findDesignatedByResourceForCategory(Resource resource, String cat)
     {
         String sql =
             "select m from Measurement m " +
@@ -352,7 +355,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             .list();
     }
 
-    List findDesignatedByResource(Resource resource) {
+    @SuppressWarnings("unchecked")
+    List<Measurement> findDesignatedByResource(Resource resource) {
         String sql =
             "select m from Measurement m " +
             "join m.template t " +
@@ -367,7 +371,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             .list();
     }
 
-    List findDesignatedByCategoryForGroup(ResourceGroup g, String cat) {
+    @SuppressWarnings("unchecked")
+    List<Measurement> findDesignatedByCategoryForGroup(ResourceGroup g, String cat) {
         String sql =
             "select m from Measurement m, GroupMember gm " +
             "join m.template t " +
@@ -383,7 +388,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             .list();
         }
 
-    List findByCategory(String cat) {
+    @SuppressWarnings("unchecked")
+    List<Measurement> findByCategory(String cat) {
         String sql =
             "select distinct m from Measurement m " +
             "join m.template t " +
@@ -422,22 +428,22 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
      * @return {@link Measurement}.  May return null.
      */
     Measurement findAvailMeasurement(Resource resource) {
-        List list = Collections.singletonList(resource);
-        list = findAvailMeasurements(list);
+        List<Measurement> list = findAvailMeasurements(Collections.singletonList(resource));
         if (list.size() == 0) {
             return null;
         }
         return (Measurement)list.get(0);
     }
 
-    List findAvailMeasurements(Collection resources) {
+    @SuppressWarnings("unchecked")
+    List<Measurement> findAvailMeasurements(Collection<Resource> resources) {
         if (resources.isEmpty()) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
-        List resList = new ArrayList(resources);
+        List<Resource> resList = new ArrayList<Resource>(resources);
         // sort to give the query cache best chance of reuse
         Collections.sort(resList);
-        List rtn = new ArrayList(resList.size());
+        List<Measurement> rtn = new ArrayList<Measurement>(resList.size());
         final String sql = new StringBuilder()
             .append("select m from Measurement m ")
             .append("join m.template t ")
@@ -450,7 +456,7 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
         // should be a unique result if only one resource is being examined
         if (resources.size() == 1) {
             query.setParameterList("resources", resList);            
-            Object result = query.uniqueResult();
+            Measurement result = (Measurement) query.uniqueResult();
             if (result != null) {
                 rtn.add(result);
             }
@@ -465,7 +471,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
         return rtn;
     }
 
-    List findAvailMeasurements(ResourceGroup g) {
+    @SuppressWarnings("unchecked")
+    List<Measurement> findAvailMeasurements(ResourceGroup g) {
         String hql = "select m from GroupMember gm, " +
         		     "Measurement m join m.template t " +
         		     "where m.resource = gm.resource and gm.group = :group and "
@@ -477,10 +484,11 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             .list();
     }
 
-    List findMeasurements(Integer[] tids, Integer[] iids) {
+    @SuppressWarnings("unchecked")
+    List<Measurement> findMeasurements(Integer[] tids, Integer[] iids) {
         // sort to take advantage of query cache
-        final List iidList = Arrays.asList(iids);
-        final List tidList = Arrays.asList(tids);
+        final List<Integer> iidList = Arrays.asList(iids);
+        final List<Integer> tidList = Arrays.asList(tids);
         Collections.sort(tidList);
         Collections.sort(iidList);
         final String sql = new StringBuilder()
@@ -496,7 +504,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             .list();
     }
 
-    List findAvailMeasurements(Integer[] tids, Integer[] iids) {
+    @SuppressWarnings("unchecked")
+    List<Measurement> findAvailMeasurements(Integer[] tids, Integer[] iids) {
         String sql = new StringBuilder()
             .append("select m from Measurement m ")
             .append("join m.template t ")
@@ -630,7 +639,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
         return q.list();
     }
 
-    List findMetricsCountMismatch(String plugin) {
+    @SuppressWarnings("unchecked")
+    List<java.lang.Number[]> findMetricsCountMismatch(String plugin) {
         return getSession().createSQLQuery(
             "SELECT 1, S.ID FROM EAM_MONITORABLE_TYPE MT, EAM_PLATFORM_TYPE ST "
               + "INNER JOIN EAM_PLATFORM S ON PLATFORM_TYPE_ID = ST.ID " +
@@ -669,7 +679,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             .list();
     }
 
-    List findMetricCountSummaries() {
+    @SuppressWarnings("unchecked")
+    List<CollectionSummary> findMetricCountSummaries() {
         String sql =
             "SELECT COUNT(m.template_id) AS total, " +
             "m.coll_interval/60000 AS coll_interval, " +
@@ -682,14 +693,13 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             " and m.enabled = :enabled " +
             "GROUP BY m.template_id, t.name, mt.name, m.coll_interval " +
             "ORDER BY total DESC";
-        List vals = getSession().createSQLQuery(sql)
+        List<Object[]> vals = getSession().createSQLQuery(sql)
             .setBoolean("enabled", true)
             .list();
 
-        List res = new ArrayList(vals.size());
+        List<CollectionSummary> res = new ArrayList<CollectionSummary>(vals.size());
 
-        for (Iterator i=vals.iterator(); i.hasNext(); ) {
-            Object[] v = (Object[])i.next();
+        for (Object[] v : vals) {
             java.lang.Number total = (java.lang.Number)v[0];
             java.lang.Number interval = (java.lang.Number)v[1];
             String metricName = (String)v[2];
@@ -702,9 +712,10 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     }
 
     /**
-     * @see MeasurementManagerEJBImpl#findAgentOffsetTuples()
+     * @see MeasurementManagerImpl#findAgentOffsetTuples()
      */
-    List findAgentOffsetTuples() {
+    @SuppressWarnings("unchecked")
+    List<Object[]> findAgentOffsetTuples() {
         String sql = "select a, p, s, meas from Agent a " +
             "join a.platforms p " +
             "join p.platformType pt " +
@@ -723,9 +734,10 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     }
 
     /**
-     * @see MeasurementManagerEJBImpl#findNumMetricsPerAgent()
+     * @see MeasurementManagerImpl#findNumMetricsPerAgent()
      */
-    Map findNumMetricsPerAgent() {
+    @SuppressWarnings("unchecked")
+    Map<Agent, Long> findNumMetricsPerAgent() {
         String platSQL =
             "select a.id, count(m) from Agent a " +
             "join a.platforms p, " +
@@ -760,13 +772,12 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             "and m.enabled = true " +
             "group by a";
         String[] queries = {platSQL, serverSQL, serviceSQL};
-        Map idToCount = new HashMap();
+        Map<Integer, Long> idToCount = new HashMap<Integer, Long>();
 
         for (int i=0; i<queries.length; i++) {
-            List tuples = getSession().createQuery(queries[i]).list();
+            List<Object[]> tuples = getSession().createQuery(queries[i]).list();
 
-            for (Iterator j=tuples.iterator(); j.hasNext(); ) {
-                Object[] tuple = (Object[])j.next();
+            for (Object[] tuple : tuples) {
                 Integer id = (Integer)tuple[0];
                 java.lang.Number count = (java.lang.Number)tuple[1];
                 Long curCount;
@@ -780,12 +791,11 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             }
         }
 
-        Map res = new HashMap(idToCount.size());
+        Map<Agent, Long> res = new HashMap<Agent, Long>(idToCount.size());
         AgentManager agentMan = AgentManagerImpl.getOne();
-        for (Iterator i=idToCount.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry ent = (Map.Entry)i.next();
-            Integer id = (Integer)ent.getKey();
-            Long count = (Long)ent.getValue();
+        for (Map.Entry<Integer, Long> ent : idToCount.entrySet()) {
+            Integer id = ent.getKey();
+            Long count = ent.getValue();
 
             res.put(agentMan.findAgent(id), count);
         }
@@ -795,10 +805,9 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     int clearResource(Resource resource) {
         // need to do this one measurement at a time to avoid the whole EhCache
         // being cleared due to bulk updates
-        List list = findByResource(resource);
+        List<Measurement> list = findByResource(resource);
         int count = 0;
-        for (Iterator it=list.iterator(); it.hasNext(); ) {
-            Measurement meas = (Measurement)it.next();
+        for (Measurement meas : list) {
             if (meas == null) {
                 continue;
             }
@@ -814,7 +823,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
      *
      * @return A List of Measurement ID's.
      */
-    List findOrphanedMeasurements() {
+    @SuppressWarnings("unchecked")
+    List<Integer> findOrphanedMeasurements() {
         String sql = "SELECT id FROM Measurement WHERE resource IS NULL";
         return getSession().createQuery(sql).list();
     }

@@ -49,7 +49,7 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.DSNList;
 import org.hyperic.hq.measurement.data.MeasurementReport;
 import org.hyperic.hq.measurement.data.ValueList;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.ReportProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
@@ -70,14 +70,14 @@ public class ReportProcessorImpl
     private final long MINUTE = MeasurementConstants.MINUTE;
     private final long PRIORITY_OFFSET = MINUTE * 3;
 
-    private MeasurementManagerLocal measurementManager;
+    private MeasurementManager measurementManager;
     private MeasurementProcessor measurementProcessor;
     private PlatformManagerLocal platformManager;
     private ServerManagerLocal serverManager;
     private ServiceManagerLocal serviceManager;
 
     @Autowired
-    public ReportProcessorImpl(MeasurementManagerLocal measurementManager,
+    public ReportProcessorImpl(MeasurementManager measurementManager,
                                MeasurementProcessor measurementProcessor, PlatformManagerLocal platformManager,
                                ServerManagerLocal serverManager, ServiceManagerLocal serviceManager) {
         this.measurementManager = measurementManager;

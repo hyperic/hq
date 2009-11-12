@@ -3,9 +3,9 @@ package org.hyperic.hq.measurement.server.mbean;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.DataPoint;
@@ -66,8 +66,8 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
      */
     public void populate(long max) throws Exception {
 
-        MeasurementManagerLocal dmManager =
-            MeasurementManagerEJBImpl.getOne();
+        MeasurementManager dmManager =
+            MeasurementManagerImpl.getOne();
         DataManagerLocal dataMan = DataManagerEJBImpl.getOne();
 
         long detailedPurgeInterval = getDetailedPurgeInterval();

@@ -43,7 +43,7 @@ import org.hyperic.hq.events.shared.EventLogManagerLocal;
 import org.hyperic.hq.events.shared.EventLogManagerUtil;
 import org.hyperic.hq.measurement.shared.DataCompress;
 import org.hyperic.hq.measurement.server.session.DataCompressImpl;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
 
@@ -242,7 +242,7 @@ public class DataPurgeJob implements Runnable {
         long start = System.currentTimeMillis();
         try {
             int dcount =
-                MeasurementManagerEJBImpl.getOne().removeOrphanedMeasurements();
+                MeasurementManagerImpl.getOne().removeOrphanedMeasurements();
             _log.info("Removed " + dcount + " measurements in " +
                       ((System.currentTimeMillis() - start)/1000) + " seconds.");
         } catch (Throwable t) {

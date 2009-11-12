@@ -45,7 +45,7 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.zevents.ZeventManager;
 
 public class MeasurementStartupListener
@@ -102,7 +102,7 @@ public class MeasurementStartupListener
 
             public void preResourceDelete(Resource r)
                 throws VetoException {
-                MeasurementManagerEJBImpl.getOne()
+                MeasurementManagerImpl.getOne()
                     .handleResourceDelete(r);
             }
             
@@ -182,7 +182,7 @@ public class MeasurementStartupListener
     }
 
     private void prefetchEnabledMeasurementsAndTemplates() {
-        MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
+        MeasurementManager mMan = MeasurementManagerImpl.getOne();
         mMan.findAllEnabledMeasurementsAndTemplates();
     }
 

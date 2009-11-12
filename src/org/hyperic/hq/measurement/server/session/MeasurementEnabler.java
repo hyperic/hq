@@ -42,7 +42,7 @@ class MeasurementEnabler
             log.debug("handling refresh event list size=" + e.size());
         }
         
-        MeasurementManagerEJBImpl.getOne().handleCreateRefreshEvents(e);
+        MeasurementManagerImpl.getOne().handleCreateRefreshEvents(e);
     }
     
     public String toString() {

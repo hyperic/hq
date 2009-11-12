@@ -124,7 +124,7 @@ import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.DefaultMetricEnableCallback;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
@@ -169,7 +169,7 @@ public class EventsBossImpl implements EventsBoss {
 
     private EscalationManagerLocal escalationManager;
 
-    private MeasurementManagerLocal measurementManager;
+    private MeasurementManager measurementManager;
 
     private PlatformManagerLocal platformManager;
 
@@ -193,7 +193,7 @@ public class EventsBossImpl implements EventsBoss {
     public EventsBossImpl(SessionManager sessionManager, ActionManager actionManager,
                           AlertDefinitionManager alertDefinitionManager, AlertManager alertManager,
                           AppdefBossLocal appdefBoss, AuthManager authManager,
-                          EscalationManagerLocal escalationManager, MeasurementManagerLocal measurementManager,
+                          EscalationManagerLocal escalationManager, MeasurementManager measurementManager,
                           PlatformManagerLocal platformManager, RegisteredTriggerManager registeredTriggerManager,
                           ResourceManager resourceManager, ServerManagerLocal serverManager,
                           ServiceManagerLocal serviceManager, PermissionManager permissionManager,

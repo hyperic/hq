@@ -171,7 +171,7 @@ import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.AvailabilityType;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.PluginException;
@@ -3851,7 +3851,7 @@ public class AppdefBossEJBImpl
         MeasurementTemplate mt = (MeasurementTemplate) templs.get(0);
 
         // Find all measurement IDs
-        MeasurementManagerLocal dmMan = getMetricManager();
+        MeasurementManager dmMan = getMetricManager();
         
         Integer[] instIds = (Integer[])
             res.keySet().toArray(new Integer[services.size()]);

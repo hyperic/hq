@@ -53,14 +53,14 @@ import org.hyperic.hq.galerts.processor.Gtrigger;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategy;
 import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent;
 import org.hyperic.hq.measurement.server.session.TemplateManagerImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementScheduleZevent.MeasurementScheduleZeventSource;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventPayload;
 import org.hyperic.hq.measurement.server.session.MeasurementZevent.MeasurementZeventSource;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.HeartBeatZevent;
@@ -672,7 +672,7 @@ public class MeasurementGtrigger
                                  long nonReportingResourceFiredTime) {
         // Assemble the aux info
         List auxLogs = new ArrayList();
-        MeasurementManagerLocal dmMan = getDMMan();
+        MeasurementManager dmMan = getDMMan();
         AuthzSubject overlord = 
             AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
         for (Iterator i=srcId2MetricValue.entrySet().iterator(); i.hasNext(); ) {
@@ -736,8 +736,8 @@ public class MeasurementGtrigger
         return auxLogs;
     }
     
-    private MeasurementManagerLocal getDMMan() {
-        return MeasurementManagerEJBImpl.getOne();
+    private MeasurementManager getDMMan() {
+        return MeasurementManagerImpl.getOne();
     }
     
     private ResourceGroupManager getRGMan() {

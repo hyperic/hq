@@ -437,19 +437,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[The MeasurementManager provides APIs to deal with Measurement objects.]]></description>
-
-			<ejb-name>MeasurementManager</ejb-name>
-
-			<local-home>org.hyperic.hq.measurement.shared.MeasurementManagerLocalHome</local-home>
-			<local>org.hyperic.hq.measurement.shared.MeasurementManagerLocal</local>
-			<ejb-class>org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[This class is responsible for setting/getting the server configuration]]></description>
 
 			<ejb-name>ServerConfigManager</ejb-name>
@@ -3319,24 +3306,6 @@
 				<method-params>
 					<method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
 					<method-param>org.hyperic.hq.appdef.shared.AppdefEntityID</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>MeasurementManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>MeasurementManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>syncPluginMetrics</method-name>
-				<method-params>
-					<method-param>java.lang.String</method-param>
 				</method-params>
 			</method>
 			<trans-attribute>Required</trans-attribute>

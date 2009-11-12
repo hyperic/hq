@@ -44,7 +44,6 @@
 <bean class="org.hyperic.hq.events.server.session.MaintenanceEventManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.DataManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.MetricAuxLogManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl" factory-method="getOne"/>
 

@@ -32,7 +32,7 @@ import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.hq.measurement.server.session.ReportStatsCollector;
 import org.hyperic.hq.zevents.ZeventManager;
 
@@ -49,7 +49,7 @@ public class HQInternalService implements HQInternalServiceMBean {
     }
 
     public double getMetricsCollectedPerMinute() { 
-        List vals = MeasurementManagerEJBImpl.getOne()
+        List vals = MeasurementManagerImpl.getOne()
                         .findMetricCountSummaries();
         double total = 0.0;
         
