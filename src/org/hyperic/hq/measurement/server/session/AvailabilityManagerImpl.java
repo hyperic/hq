@@ -129,11 +129,17 @@ public class AvailabilityManagerImpl
     private MessagePublisher messenger;
 
     @Autowired
-    public AvailabilityManagerImpl(MeasurementManager measurementManager, ResourceManager resourceManager,
+    public AvailabilityManagerImpl(ResourceManager resourceManager,
                                    MessagePublisher messenger) {
-        this.measurementManager = measurementManager;
         this.resourceManager = resourceManager;
         this.messenger = messenger;
+    }
+
+    // To break AvailabilityManager - MeasurementManager circular dependency
+    // TODO: Check why we need this when we have MeasurementManagerImpl.setCircularDependencies()?
+    @Autowired
+    public void setMeasurementManager(MeasurementManager measurementManager) {
+        this.measurementManager = measurementManager;
     }
 
     /**

@@ -118,18 +118,24 @@ public class MeasurementManagerImpl
     private ConfigManagerLocal configManager;
 
     @Autowired
-    public MeasurementManagerImpl(AvailabilityManager availabilityManager, ResourceManager resourceManager,
+    public MeasurementManagerImpl(ResourceManager resourceManager,
                                   ResourceGroupManager resourceGroupManager,
                                   ApplicationManagerLocal applicationManager,
                                   AuthzSubjectManagerLocal authzSubjectManager,
-                                  MeasurementProcessor measurementProcessor, ConfigManagerLocal configManager) {
-        this.availabilityManager = availabilityManager;
+                                  ConfigManagerLocal configManager) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
         this.applicationManager = applicationManager;
         this.authzSubjectManager = authzSubjectManager;
-        this.measurementProcessor = measurementProcessor;
         this.configManager = configManager;
+    }
+
+    // TODO: Better way?
+    @Autowired
+    public void setCircularDependencies(AvailabilityManager availabilityManager, 
+                                        MeasurementProcessor measurementProcessor) {
+        this.availabilityManager = availabilityManager;
+        this.measurementProcessor = measurementProcessor;
     }
 
     /**
