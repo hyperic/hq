@@ -779,10 +779,18 @@ public class AvailabilityManagerEJBImpl
         for (Iterator it=_removeMap.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry)it.next();
             AvailabilityDataRLE rle = (AvailabilityDataRLE)entry.getValue();
+            // if we call remove() on an object which is already in the session
+            // hibernate will throw NonUniqueObjectExceptions
+            if (_dao.getSession().contains(rle)) {
+                _dao.getSession().evict(rle);
+            }
             _dao.remove(rle);
         }
-        // for some reason if flush is not run, then create() will throw
-        // Hibernate NonUniqueObjectExceptions
+        // addData() could be overwriting RLE data points (i.e. from 0.0 to 1.0)
+        // with the same ID.  If this is the scenario, then we must run
+        // flush() in order to ensure that these old objects are not in the
+        // session when the equivalent create() on the same ID is run,
+        // thus avoiding NonUniqueObjectExceptions
         _dao.getSession().flush();
         for (Iterator it=_createMap.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry entry = (Map.Entry)it.next();
