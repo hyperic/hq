@@ -1,4 +1,4 @@
-import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl as MM
+import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl as MM
 import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl as PB
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl as SCM
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as subMan

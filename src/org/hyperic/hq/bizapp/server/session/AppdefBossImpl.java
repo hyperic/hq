@@ -165,14 +165,13 @@ import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
 import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.AvailabilityType;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
-import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
@@ -213,7 +212,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     private PermissionManager permissionManager;
 
-    private MeasurementManagerLocal measurementManager;
+    private MeasurementManager measurementManager;
 
     private PlatformManagerLocal platformManager;
 
@@ -245,7 +244,7 @@ public class AppdefBossImpl implements AppdefBoss {
                           AuthzSubjectManagerLocal authzSubjectManager, AutoinventoryManager autoinventoryManager,
                           AvailabilityManager availabilityManager, ConfigManagerLocal configManager,
                           CPropManager cPropManager, PermissionManager permissionManager,
-                          MeasurementManagerLocal measurementManager, PlatformManagerLocal platformManager,
+                          MeasurementManager measurementManager, PlatformManagerLocal platformManager,
                           AIBossLocal aiBoss, ResourceGroupManager resourceGroupManager,
                           ResourceManager resourceManager, ServerManagerLocal serverManager,
                           ServiceManagerLocal serviceManager, TrackerManager trackerManager,
