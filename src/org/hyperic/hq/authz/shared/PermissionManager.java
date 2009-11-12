@@ -36,6 +36,7 @@ import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.CloningBossInterface;
 import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -212,7 +213,7 @@ public abstract class PermissionManager   {
      *
      * @return a list of Integers representing instance ids
      */
-    public abstract List
+    public abstract List<Operation>
         getAllOperations(AuthzSubject subject, PageControl pc)
         throws PermissionException, FinderException;
 

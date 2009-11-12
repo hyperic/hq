@@ -38,15 +38,14 @@ import javax.servlet.ServletContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.bizapp.server.session.EventsBossImpl;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AIBossHome;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.AppdefBossHome;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthBossHome;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.bizapp.shared.AuthzBossHome;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ConfigBossHome;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
@@ -73,17 +72,13 @@ import org.hyperic.hq.ui.util.UIUtils;
  */
 public class ServiceLocator {
     
-    private final static Class APPDEF_CLASS  = AppdefBossHome.class;
-    private final static String APPDEF_NAME  = AppdefBossHome.JNDI_NAME;
+   
 
     private final static Class AI_CLASS      = AIBossHome.class;
     private final static String AI_NAME      = AIBossHome.JNDI_NAME;
     
     private final static Class AUTH_CLASS    = AuthBossHome.class;
     private final static String AUTH_NAME    = AuthBossHome.JNDI_NAME;
-    
-    private final static Class AUTHZ_CLASS   = AuthzBossHome.class;
-    private final static String AUTHZ_NAME   = AuthzBossHome.JNDI_NAME;
     
     private final static Class MEASURE_CLASS = MeasurementBossHome.class;
     private final static String MEASURE_NAME = MeasurementBossHome.JNDI_NAME;
@@ -163,12 +158,7 @@ public class ServiceLocator {
      * @exception ServiceLocatorException if the lookup or create fails
      */
     public AppdefBoss getAppdefBoss() throws ServiceLocatorException {
-        AppdefBossHome home = (AppdefBossHome) lookup(APPDEF_NAME, APPDEF_CLASS);
-        try {
-            return (AppdefBoss) home.create();
-        } catch (Exception e) {
-            throw new ServiceLocatorException(e);
-        }
+        return AppdefBossImpl.getOne();
     }
     
     /**
@@ -211,12 +201,7 @@ public class ServiceLocator {
      * @exception ServiceLocatorException if the lookup or create fails
      */
     public AuthzBoss getAuthzBoss() throws ServiceLocatorException {
-        AuthzBossHome home = (AuthzBossHome) lookup(AUTHZ_NAME, AUTHZ_CLASS);
-        try {
-            return (AuthzBoss) home.create();
-        } catch (Exception e) {
-            throw new ServiceLocatorException(e);
-        }
+        return Bootstrap.getBean(AuthzBoss.class);
     }
 
     /**

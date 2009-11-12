@@ -125,7 +125,7 @@ public class Server extends ServerBase
         _configResponse = configResponse;
     }
 
-    public Collection getServices() {
+    public Collection<Service> getServices() {
         return _services;
     }
 

@@ -26,7 +26,7 @@ public class BossStartupListener
         EventsBossImpl.getOne().startup();
         EventLogBossEJBImpl.getOne().startup();
         AuthBossEJBImpl.getOne().startup();
-        AppdefBossEJBImpl.getOne().startup();
+        AppdefBossImpl.getOne().startup();
         ProductBossEJBImpl.getOne().preload();
         
         try {

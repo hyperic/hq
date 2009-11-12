@@ -49,7 +49,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.ControlBossLocal;
 import org.hyperic.hq.bizapp.shared.ControlBossUtil;
 import org.hyperic.hq.common.ApplicationException;
@@ -591,7 +591,7 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
         
         try {
             // Get the controllable groups, too
-            AppdefBossLocal aboss = AppdefBossEJBImpl.getOne();
+            AppdefBoss aboss = AppdefBossImpl.getOne();
             
             List groups = aboss.findCompatInventory(
                 sessionID, groupType, AppdefEntityConstants.APPDEF_TYPE_GROUP,

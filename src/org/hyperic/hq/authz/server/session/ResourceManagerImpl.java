@@ -55,7 +55,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceEdgeCreateException;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl;
+import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.context.Bootstrap;
@@ -328,9 +328,9 @@ public class ResourceManagerImpl
      * Removes the specified resource by nulling out its resourceType. Will not
      * null the resourceType of the resource which is passed in. These resources
      * need to be cleaned up eventually by
-     * {@link AppdefBossEJBImpl.removeDeletedResources}. This may be done in the
+     * {@link AppdefBossImpl.removeDeletedResources}. This may be done in the
      * background via zevent by issuing a {@link ResourcesCleanupZevent}.
-     * @see {@link AppdefBossEJBImpl.removeDeletedResources}
+     * @see {@link AppdefBossImpl.removeDeletedResources}
      * @see {@link ResourcesCleanupZevent}
      * @param r {@link Resource} resource to be removed.
      * @param nullResourceType tells the method to null out the resourceType
@@ -459,7 +459,7 @@ public class ResourceManagerImpl
      * 
      */
     // TODO: G
-    public List getAllResourceTypes(AuthzSubject subject, PageControl pc) {
+    public List<ResourceType> getAllResourceTypes(AuthzSubject subject, PageControl pc) {
         Collection<ResourceType> resTypes = resourceTypeDAO.findAll();
         pc = PageControl.initDefaults(pc, SortAttribute.RESTYPE_NAME);
         return resourceTypePager.seek(resTypes, pc.getPagenum(), pc.getPagesize());

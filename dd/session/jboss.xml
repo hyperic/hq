@@ -158,12 +158,6 @@
 
 		</session>
 		<session>
-			<ejb-name>AuthzBoss</ejb-name>
-			<jndi-name>ejb/bizapp/AuthzBoss</jndi-name>
-			<local-jndi-name>LocalAuthzBoss</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>LiveDataBoss</ejb-name>
 			<local-jndi-name>LocalLiveDataBoss</local-jndi-name>
 
@@ -181,12 +175,6 @@
 		<session>
 			<ejb-name>ServerConfigManager</ejb-name>
 			<local-jndi-name>LocalServerConfigManager</local-jndi-name>
-
-		</session>
-		<session>
-			<ejb-name>AppdefBoss</ejb-name>
-			<jndi-name>ejb/bizapp/AppdefBoss</jndi-name>
-			<local-jndi-name>LocalAppdefBoss</local-jndi-name>
 
 		</session>
 		<session>

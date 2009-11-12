@@ -75,7 +75,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.bizapp.shared.AppdefBossLocal;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
@@ -163,7 +163,7 @@ public class EventsBossImpl implements EventsBoss {
 
     private AlertManager alertManager;
 
-    private AppdefBossLocal appdefBoss;
+    private AppdefBoss appdefBoss;
 
     private AuthManager authManager;
 
@@ -192,7 +192,7 @@ public class EventsBossImpl implements EventsBoss {
     @Autowired
     public EventsBossImpl(SessionManager sessionManager, ActionManager actionManager,
                           AlertDefinitionManager alertDefinitionManager, AlertManager alertManager,
-                          AppdefBossLocal appdefBoss, AuthManager authManager,
+                          AppdefBoss appdefBoss, AuthManager authManager,
                           EscalationManagerLocal escalationManager, MeasurementManager measurementManager,
                           PlatformManagerLocal platformManager, RegisteredTriggerManager registeredTriggerManager,
                           ResourceManager resourceManager, ServerManagerLocal serverManager,

@@ -16,10 +16,11 @@ import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceEdge;
 import org.hyperic.hq.authz.server.session.ResourceRelation;
 import org.hyperic.hq.authz.server.session.ResourceSortField;
 import org.hyperic.hq.authz.server.session.ResourceType;
-import org.hyperic.hq.bizapp.server.session.AppdefBossEJBImpl;
+import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -110,9 +111,9 @@ public interface ResourceManager {
      * Removes the specified resource by nulling out its resourceType. Will not
      * null the resourceType of the resource which is passed in. These resources
      * need to be cleaned up eventually by
-     * {@link AppdefBossEJBImpl.removeDeletedResources}. This may be done in the
+     * {@link AppdefBossImpl.removeDeletedResources}. This may be done in the
      * background via zevent by issuing a {@link ResourcesCleanupZevent}.
-     * @see {@link AppdefBossEJBImpl.removeDeletedResources}
+     * @see {@link AppdefBossImpl.removeDeletedResources}
      * @see {@link ResourcesCleanupZevent}
      * @param r {@link Resource} resource to be removed.
      * @param nullResourceType tells the method to null out the resourceType
@@ -134,7 +135,7 @@ public interface ResourceManager {
      * @param subject
      * @param pc Paging information for the request
      */
-    public List getAllResourceTypes(AuthzSubject subject, PageControl pc);
+    public List<ResourceType> getAllResourceTypes(AuthzSubject subject, PageControl pc);
 
     /**
      * Get viewable resources either by "type" OR "resource name" OR
@@ -142,7 +143,7 @@ public interface ResourceManager {
      * @param subject
      * @return Map of resource values
      */
-    public List findViewableInstances(AuthzSubject subject, String typeName, String resName, String appdefTypeStr,
+    public List<Integer> findViewableInstances(AuthzSubject subject, String typeName, String resName, String appdefTypeStr,
                                       Integer typeId, PageControl pc);
 
     /**
@@ -150,7 +151,7 @@ public interface ResourceManager {
      * @param subject
      * @return Map of resource values
      */
-    public PageList findViewables(AuthzSubject subject, String searchFor, PageControl pc);
+    public PageList<Resource> findViewables(AuthzSubject subject, String searchFor, PageControl pc);
 
     /**
      * Get viewable resources either by "type" OR "resource name" OR
@@ -158,12 +159,12 @@ public interface ResourceManager {
      * @param subject
      * @return Map of resource values
      */
-    public Map findAllViewableInstances(AuthzSubject subject);
+    public Map<String, List<Integer>> findAllViewableInstances(AuthzSubject subject);
 
     /**
      * Find all the resources which are descendents of the given resource
      */
-    public List findResourcesByParent(AuthzSubject subject, Resource res);
+    public List<Resource> findResourcesByParent(AuthzSubject subject, Resource res);
 
     /**
      * Find all the resources of an authz resource type
@@ -171,25 +172,25 @@ public interface ResourceManager {
      * @param pInfo A pager, using a sort field of {@link ResourceSortField}
      * @return a list of {@link Resource}s
      */
-    public List findResourcesOfType(int resourceType, PageInfo pInfo);
+    public List<Resource> findResourcesOfType(int resourceType, PageInfo pInfo);
 
     /**
      * Find all the resources which have the specified prototype
      * @return a list of {@link Resource}s
      */
-    public List findResourcesOfPrototype(Resource proto, PageInfo pInfo);
+    public List<Resource> findResourcesOfPrototype(Resource proto, PageInfo pInfo);
 
     /**
      * Get all resources which are prototypes of platforms, servers, and
      * services and have a resource of that type in the inventory.
      */
-    public List findAppdefPrototypes();
+    public List<Resource> findAppdefPrototypes();
 
     /**
      * Get all resources which are prototypes of platforms, servers, and
      * services.
      */
-    public List findAllAppdefPrototypes();
+    public List<Resource> findAllAppdefPrototypes();
 
     /**
      * Get viewable service resources. Service resources include individual
@@ -198,20 +199,20 @@ public interface ResourceManager {
      * @param pc control
      * @return PageList of resource values
      */
-    public PageList findViewableSvcResources(AuthzSubject subject, String resourceName, PageControl pc);
+    public PageList<Resource> findViewableSvcResources(AuthzSubject subject, String resourceName, PageControl pc);
 
     /**
      * Gets all the Resources owned by the given Subject.
      * @param subject The owner.
      * @return Array of resources owned by the given subject.
      */
-    public Collection findResourceByOwner(AuthzSubject owner);
+    public Collection<Resource> findResourceByOwner(AuthzSubject owner);
 
-    public Collection findResourceEdges(ResourceRelation relation, Resource parent);
+    public Collection<ResourceEdge> findResourceEdges(ResourceRelation relation, Resource parent);
 
     public boolean isResourceChildOf(Resource parent, Resource child);
 
-    public List findResourceEdges(ResourceRelation relation, Integer resourceId, List<Integer> platformTypeIds,
+    public List<ResourceEdge> findResourceEdges(ResourceRelation relation, Integer resourceId, List<Integer> platformTypeIds,
                                   String platformName);
 
     public void createResourceEdges(AuthzSubject subject, ResourceRelation relation, AppdefEntityID parent,

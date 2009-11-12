@@ -43,7 +43,6 @@ $Header: /var/cvsroot/hyperic_hq/web/admin/sql.jsp,v 1.3 2005/04/21 20:38:26 dou
 <%@ page import="org.hyperic.hq.context.Bootstrap" %>
 
 <%@ page import="org.hyperic.hq.bizapp.shared.AuthzBoss" %>
-<%@ page import="org.hyperic.hq.bizapp.shared.AuthzBossUtil" %>
 <%@ page import="org.hyperic.hq.common.shared.HQConstants" %>
 <%@ page import="org.hyperic.hq.ui.util.SessionUtils" %>
 
@@ -269,7 +268,7 @@ boolean isAdmin = true;
 try {
     // Before doing anything, check for admin permissions
     if (ctx == null) initCtx();
-    AuthzBoss authzBoss = AuthzBossUtil.getHome().create();
+    AuthzBoss authzBoss = (AuthzBoss)Bootstrap.getBean(AuthzBoss.class);
     if (!authzBoss.hasAdminPermission(SessionUtils.getWebUser(session).getSessionId().intValue())) {
         isAdmin = false;
         throw new IllegalAccessException("You do not have admin permissions");
