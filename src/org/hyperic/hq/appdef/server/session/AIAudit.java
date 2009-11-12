@@ -32,7 +32,7 @@ import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
-import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
 import org.hyperic.util.i18n.MessageBundle;
@@ -71,7 +71,7 @@ public class AIAudit extends Audit {
                                   AuditNature.CREATE,
                                   MSGS.format("auditMsg.import.approve"));
         
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
     
@@ -83,7 +83,7 @@ public class AIAudit extends Audit {
                                   MSGS.format("auditMsg.import.runtime",
                                               reporter.getAddress()));
         
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
 }

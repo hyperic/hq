@@ -74,7 +74,7 @@ public class AuditDAO extends HibernateDAO {
             .executeUpdate();
     }
 
-    List find(PageInfo pInfo, AuthzSubject me, long startTime, long endTime,
+    List<Audit> find(PageInfo pInfo, AuthzSubject me, long startTime, long endTime,
               AuditImportance minImportance, AuditPurpose purpose,
               AuthzSubject target, String klazz)
     {

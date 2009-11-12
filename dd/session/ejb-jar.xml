@@ -490,19 +490,6 @@
 
 		</session>
 
-		<session>
-			<description><![CDATA[]]></description>
-
-			<ejb-name>AuditManager</ejb-name>
-
-			<local-home>org.hyperic.hq.common.shared.AuditManagerLocalHome</local-home>
-			<local>org.hyperic.hq.common.shared.AuditManagerLocal</local>
-			<ejb-class>org.hyperic.hq.common.server.session.AuditManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
 		<!--
 			To add session beans that you have deployment descriptor info for,
 			add a file to your XDoclet merge directory called session-beans.xml
@@ -4185,13 +4172,6 @@
 					<method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
 					<method-param>org.hyperic.hq.appdef.shared.AppdefEntityID</method-param>
 				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>AuditManager</ejb-name>
-				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>

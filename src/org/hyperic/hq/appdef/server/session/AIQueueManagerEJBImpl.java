@@ -71,7 +71,7 @@ import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
@@ -479,14 +479,14 @@ public class AIQueueManagerEJBImpl
         try {
             if (action == AIQueueConstants.Q_DECISION_APPROVE) {
                 approved = true;
-                AuditManagerEJBImpl.getOne()
+                AuditManagerImpl.getOne()
                                    .pushContainer(AIAudit.newImportAudit(s));
             }
             return _processQueue(subject, platformList, serverList, ipList,
                                  action, true);
         } finally {
             if (approved)
-                AuditManagerEJBImpl.getOne().popContainer(false);
+                AuditManagerImpl.getOne().popContainer(false);
         }
     }
 

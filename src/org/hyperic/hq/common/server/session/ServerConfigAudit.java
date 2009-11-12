@@ -72,7 +72,7 @@ public class ServerConfigAudit extends Audit {
         res.setFieldName(propKey);
         res.setOldFieldValue(old);
         res.setNewFieldValue(newVal);
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
 

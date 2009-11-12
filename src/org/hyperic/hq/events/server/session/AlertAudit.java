@@ -28,7 +28,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
-import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
 import org.hyperic.util.i18n.MessageBundle;
@@ -75,7 +75,7 @@ public class AlertAudit extends Audit {
                                                   AuditNature.DISABLE,
                                         msg, System.currentTimeMillis());  
         
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
 
@@ -88,7 +88,7 @@ public class AlertAudit extends Audit {
                                         AuditNature.DELETE,
                                         msg, System.currentTimeMillis());  
         
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
 }

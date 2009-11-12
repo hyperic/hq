@@ -31,7 +31,7 @@ import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
-import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
 import org.hyperic.util.i18n.MessageBundle;
@@ -77,7 +77,7 @@ public class PluginAudit extends Audit {
                                           PLUGIN_DEPLOYED, AuditImportance.HIGH,
                                           AuditNature.CREATE, msg, start, end); 
         
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
     
@@ -91,7 +91,7 @@ public class PluginAudit extends Audit {
                                           PLUGIN_UPDATED, AuditImportance.HIGH,
                                           AuditNature.UPDATE, msg, start, end); 
         
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
 }
