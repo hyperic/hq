@@ -90,12 +90,6 @@
 
 		</session>
 		<session>
-			<ejb-name>AuthBoss</ejb-name>
-			<jndi-name>ejb/bizapp/AuthBoss</jndi-name>
-			<local-jndi-name>LocalAuthBoss</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>AppdefStatManager</ejb-name>
 			<local-jndi-name>LocalAppdefStatManager</local-jndi-name>
 

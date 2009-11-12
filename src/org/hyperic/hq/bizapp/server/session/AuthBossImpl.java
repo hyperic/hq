@@ -25,56 +25,67 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Iterator;
 
 import javax.ejb.AccessLocalException;
 import javax.ejb.FinderException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 import javax.security.auth.login.LoginException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.server.session.UserAudit;
 import org.hyperic.hq.auth.server.session.UserLoginZevent;
+import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
-import org.hyperic.hq.bizapp.shared.AuthBossUtil;
-import org.hyperic.hq.bizapp.shared.AuthBossLocal;
 import org.hyperic.util.ConfigPropertyException;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
 
 /** 
  * The BizApp's interface to the Auth Subsystem
  *
- * @ejb:bean name="AuthBoss"
- *      jndi-name="ejb/bizapp/AuthBoss"
- *      local-jndi-name="LocalAuthBoss"
- *      view-type="both"
- *      type="Stateless"
- * @ejb:transaction type="Required"
  */
-public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
-    private SessionManager manager = SessionManager.getInstance();
+@Service
+@Transactional
+public class AuthBossImpl implements AuthBoss {
+    private SessionManager sessionManager;
 
-    private Log _log = LogFactory.getLog(AuthBossEJBImpl.class);
+    private Log log = LogFactory.getLog(AuthBossImpl.class);
+    
+    private AuthManager authManager;
+    
+    private AuthzSubjectManagerLocal authzSubjectManager;
 
-    public AuthBossEJBImpl() {}
+    private ZeventEnqueuer zEventManager;
+  
+    @Autowired
+    public AuthBossImpl(SessionManager sessionManager, AuthManager authManager,
+                        AuthzSubjectManagerLocal authzSubjectManager, ZeventEnqueuer zEventManager) {
+        this.sessionManager = sessionManager;
+        this.authManager = authManager;
+        this.authzSubjectManager = authzSubjectManager;
+        this.zEventManager = zEventManager;
+    }
 
-    public class UserZeventListener implements ZeventListener {
+    public class UserZeventListener implements ZeventListener<UserLoginZevent> {
 
-        public void processEvents(final List events) {
+        public void processEvents(final List<UserLoginZevent> events) {
             // Process events needs to occur within a session due to
             // UserAudit accessing pojo's outside of an EJBImpl.
             try {
@@ -86,21 +97,19 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
                     }
 
                     public void run() throws Exception {
-                        for (Iterator i = events.iterator(); i.hasNext();) {
-
-                            UserLoginZevent z = (UserLoginZevent) i.next();
+                        for (UserLoginZevent z : events) {
                             UserLoginZevent.UserLoginZeventPayload p =
                                     (UserLoginZevent.UserLoginZeventPayload) z.getPayload();
                             Integer subjectId = p.getSubjectId();
                             // Re-look up subject
                             AuthzSubject sub =
-                                    getAuthzSubjectManager().getSubjectById(subjectId);
+                                    authzSubjectManager.getSubjectById(subjectId);
                             UserAudit.loginAudit(sub);
                         }
                     }
                 });
             } catch (Exception e) {
-                _log.error("Exception running login audit", e);
+                log.error("Exception running login audit", e);
             }
         }
 
@@ -114,12 +123,12 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * allows for read-only operations to succeed properly when accessed
      * via HQU
      *
-     * @ejb:interface-method
+     * 
      */
     public void startup() {
-        HashSet events = new HashSet();
+        HashSet<Class<UserLoginZevent>> events = new HashSet<Class<UserLoginZevent>>();
         events.add(UserLoginZevent.class);
-        ZeventManager.getInstance().addBufferedListener(events,
+        zEventManager.addBufferedListener(events,
                                                         new UserZeventListener());
     }
 
@@ -128,18 +137,17 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param username The name of the user.
      * @param password The password.
      * @return An integer representing the session ID of the logged-in user.
-     * @ejb:interface-method
+     * 
      */
     public int login ( String username, String password ) 
         throws SecurityException, LoginException, ApplicationException,
                ConfigPropertyException 
     {
         try {
-            int res = getAuthManager().getSessionId(username, password);
-            AuthzSubject s = manager.getSubject(res);
+            int res = authManager.getSessionId(username, password);
+            AuthzSubject s = sessionManager.getSubject(res);
             UserLoginZevent evt = new UserLoginZevent(s.getId());
-            ZeventManager.getInstance().enqueueEventAfterCommit(evt);
-
+            zEventManager.enqueueEventAfterCommit(evt);
             return res;
         } catch (AccessLocalException e) {
             throw new LoginException(e.getMessage());
@@ -150,7 +158,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * Login a guest.
      *
      * @return An integer representing the session ID of the logged-in user.
-     * @ejb:interface-method
+     * 
      */
     public int loginGuest () 
         throws SecurityException, LoginException, ApplicationException,
@@ -158,10 +166,10 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     {
         try {
             AuthzSubject guest =
-                getAuthzSubjectManager().getSubjectById(AuthzConstants.guestId);
+                authzSubjectManager.getSubjectById(AuthzConstants.guestId);
             
             if (guest != null && guest.getActive()) {
-                return manager.put(guest);
+                return sessionManager.put(guest);
             }
             throw new LoginException("Guest account not enabled");
         } catch (AccessLocalException e) {
@@ -172,26 +180,26 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
     /**
      * Logout a user.
      * @param sessionID The session id for the current user
-     * @ejb:interface-method
+     * 
      */
     public void logout (int sessionID) {
         try {
-            UserAudit.logoutAudit(manager.getSubject(sessionID));
+            UserAudit.logoutAudit(sessionManager.getSubject(sessionID));
         } catch(SessionException e) {
         }
-        manager.invalidate(sessionID);
+        sessionManager.invalidate(sessionID);
     }
 
     /**
      * Check if a user is logged in.
      * @param username The name of the user.
      * @return a boolean| true if logged in and false if not.
-     * @ejb:interface-method
+     * 
      */
     public boolean isLoggedIn(String username) {
         boolean loggedIn = false;
         try {
-            if (manager.getIdFromUsername(username) > 0)
+            if (sessionManager.getIdFromUsername(username) > 0)
                 loggedIn = true;
         } catch (SessionNotFoundException e) {
             // safely ignore
@@ -208,13 +216,13 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param username The username to add
      * @param password The password for this user
      *
-     * @ejb:interface-method
+     * 
      */
     public void addUser(int sessionID, String username, String password)
         throws SessionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        getAuthManager().addUser(subject, username, password);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        authManager.addUser(subject, username, password);
     }
 
     /**
@@ -223,41 +231,28 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param username The user whose password should be updated
      * @param password The new password for the user
      *
-     * @ejb:interface-method
+     * 
      */
     public void changePassword(int sessionID, String username, String password) 
         throws FinderException, PermissionException, SessionException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        getAuthManager().changePassword(subject, username, password);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        authManager.changePassword(subject, username, password);
     }
 
     /**
      * Check existence of a user
      *
-     * @ejb:interface-method
+     * 
      */
     public boolean isUser(int sessionID, String username)
         throws SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubject subject = manager.getSubject(sessionID);
-        return getAuthManager().isUser(subject, username);
+        AuthzSubject subject = sessionManager.getSubject(sessionID);
+        return authManager.isUser(subject, username);
     }
 
-    public static AuthBossLocal getOne() {
-        try {
-            return AuthBossUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static AuthBoss getOne() {
+       return Bootstrap.getBean(AuthBoss.class);
     }
-
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
 }

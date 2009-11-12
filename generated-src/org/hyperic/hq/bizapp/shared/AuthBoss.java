@@ -3,17 +3,25 @@
  */
 package org.hyperic.hq.bizapp.shared;
 
+import javax.ejb.FinderException;
+import javax.security.auth.login.LoginException;
+
+import org.hyperic.hq.auth.shared.SessionException;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.util.ConfigPropertyException;
+
 /**
- * Remote interface for AuthBoss.
+ * Local interface for AuthBoss.
  */
 public interface AuthBoss
-   extends javax.ejb.EJBObject
 {
    /**
     * Add buffered listener to register login audits post commit. This allows for read-only operations to succeed properly when accessed via HQU
     */
-   public void startup(  )
-      throws java.rmi.RemoteException;
+   public void startup(  ) ;
 
    /**
     * Login a user.
@@ -21,30 +29,26 @@ public interface AuthBoss
     * @param password The password.
     * @return An integer representing the session ID of the logged-in user.
     */
-   public int login( java.lang.String username,java.lang.String password )
-      throws java.lang.SecurityException, javax.security.auth.login.LoginException, org.hyperic.hq.common.ApplicationException, org.hyperic.util.ConfigPropertyException, java.rmi.RemoteException;
+   public int login( String username,String password ) throws SecurityException, LoginException, ApplicationException, ConfigPropertyException;
 
    /**
     * Login a guest.
     * @return An integer representing the session ID of the logged-in user.
     */
-   public int loginGuest(  )
-      throws java.lang.SecurityException, javax.security.auth.login.LoginException, org.hyperic.hq.common.ApplicationException, org.hyperic.util.ConfigPropertyException, java.rmi.RemoteException;
+   public int loginGuest(  ) throws SecurityException, LoginException, ApplicationException, ConfigPropertyException;
 
    /**
     * Logout a user.
     * @param sessionID The session id for the current user
     */
-   public void logout( int sessionID )
-      throws java.rmi.RemoteException;
+   public void logout( int sessionID ) ;
 
    /**
     * Check if a user is logged in.
     * @param username The name of the user.
     * @return a boolean| true if logged in and false if not.
     */
-   public boolean isLoggedIn( java.lang.String username )
-      throws java.rmi.RemoteException;
+   public boolean isLoggedIn( String username ) ;
 
    /**
     * Add a user to the internal database
@@ -52,8 +56,7 @@ public interface AuthBoss
     * @param username The username to add
     * @param password The password for this user
     */
-   public void addUser( int sessionID,java.lang.String username,java.lang.String password )
-      throws org.hyperic.hq.auth.shared.SessionException, java.rmi.RemoteException;
+   public void addUser( int sessionID,String username,String password ) throws SessionException;
 
    /**
     * Change a password for a user
@@ -61,13 +64,11 @@ public interface AuthBoss
     * @param username The user whose password should be updated
     * @param password The new password for the user
     */
-   public void changePassword( int sessionID,java.lang.String username,java.lang.String password )
-      throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.auth.shared.SessionException, java.rmi.RemoteException;
+   public void changePassword( int sessionID,String username,String password ) throws FinderException, PermissionException, SessionException;
 
    /**
     * Check existence of a user
     */
-   public boolean isUser( int sessionID,java.lang.String username )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, java.rmi.RemoteException;
+   public boolean isUser( int sessionID,String username ) throws SessionTimeoutException, SessionNotFoundException;
 
 }

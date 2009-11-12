@@ -44,7 +44,6 @@ import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AIBossHome;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
-import org.hyperic.hq.bizapp.shared.AuthBossHome;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ConfigBossHome;
@@ -76,9 +75,6 @@ public class ServiceLocator {
 
     private final static Class AI_CLASS      = AIBossHome.class;
     private final static String AI_NAME      = AIBossHome.JNDI_NAME;
-    
-    private final static Class AUTH_CLASS    = AuthBossHome.class;
-    private final static String AUTH_NAME    = AuthBossHome.JNDI_NAME;
     
     private final static Class MEASURE_CLASS = MeasurementBossHome.class;
     private final static String MEASURE_NAME = MeasurementBossHome.JNDI_NAME;
@@ -184,10 +180,9 @@ public class ServiceLocator {
      *
      * @exception ServiceLocatorException if the lookup or create fails
      */
-    public AuthBoss getAuthBoss() throws ServiceLocatorException {
-        AuthBossHome home = (AuthBossHome) lookup(AUTH_NAME, AUTH_CLASS);
+    public AuthBoss getAuthBoss() throws ServiceLocatorException {   
         try {
-            return (AuthBoss) home.create();
+            return Bootstrap.getBean(AuthBoss.class);
         } catch (Exception e) {
             throw new ServiceLocatorException(e);
         }
