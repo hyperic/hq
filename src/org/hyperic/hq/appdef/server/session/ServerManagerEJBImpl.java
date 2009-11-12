@@ -71,7 +71,7 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
-import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.util.ArrayUtil;
@@ -480,7 +480,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         boolean pushed = false;
 
         try {
-            AuditManagerEJBImpl.getOne().pushContainer(audit);
+            AuditManagerImpl.getOne().pushContainer(audit);
             pushed = true;
             if (!server.getServerType().isVirtual()) {
                 checkRemovePermission(subject, server.getEntityId());
@@ -538,7 +538,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             dao.getSession().flush();
         } finally {
             if (pushed) {
-                AuditManagerEJBImpl.getOne().popContainer(true);
+                AuditManagerImpl.getOne().popContainer(true);
             }
         }
     }

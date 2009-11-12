@@ -2,7 +2,7 @@ package org.hyperic.hq.hqu.rendit.helpers
 
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.common.server.session.AuditManagerEJBImpl
+import org.hyperic.hq.common.server.session.AuditManagerImpl
 import org.hyperic.hq.common.server.session.AuditPurpose
 import org.hyperic.hq.common.server.session.AuditImportance
 

@@ -88,7 +88,7 @@ import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
-import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
@@ -318,7 +318,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         final Audit audit = ResourceAudit.deleteResource(r, subject, 0, 0);
         boolean pushed = false;
         try {
-            AuditManagerEJBImpl.getOne().pushContainer(audit);
+            AuditManagerImpl.getOne().pushContainer(audit);
             pushed = true;
             checkRemovePermission(subject, platform.getEntityId());
             // keep the configresponseId so we can remove it later
@@ -348,7 +348,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             throw e;
         } finally {
             if (pushed)
-                AuditManagerEJBImpl.getOne().popContainer(false);
+                AuditManagerImpl.getOne().popContainer(false);
         }
     }
 

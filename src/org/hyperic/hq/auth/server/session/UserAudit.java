@@ -29,7 +29,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubjectField;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.AuditImportance;
-import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.common.server.session.AuditNature;
 import org.hyperic.hq.common.server.session.AuditPurpose;
 import org.hyperic.util.i18n.MessageBundle;
@@ -72,7 +72,7 @@ public class UserAudit extends Audit {
                                       AuditNature.START, msg); 
                                       
         
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
     
@@ -82,7 +82,7 @@ public class UserAudit extends Audit {
                                       AuditImportance.LOW, 
                                       AuditNature.STOP, msg); 
         
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
     
@@ -96,7 +96,7 @@ public class UserAudit extends Audit {
                                       USER_CREATE, AuditImportance.HIGH, 
                                       AuditNature.CREATE, msg); 
         
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
     
@@ -115,7 +115,7 @@ public class UserAudit extends Audit {
         res.setFieldName(field.getValue());
         res.setOldFieldValue(oldVal);
         res.setNewFieldValue(newVal);
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
     

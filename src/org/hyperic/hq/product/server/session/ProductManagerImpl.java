@@ -58,7 +58,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
-import org.hyperic.hq.common.shared.AuditManagerLocal;
+import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
@@ -102,7 +102,7 @@ public class ProductManagerImpl implements ProductManager {
     private ConfigManagerLocal configManager;
     private CPropManager cPropManager;
     private TemplateManager templateManager;
-    private AuditManagerLocal auditManager;
+    private AuditManager auditManager;
     private PluginUpdater pluginUpdater = new PluginUpdater();
     private static final String ALERT_DEFINITIONS_XML_FILE = "etc/alert-definitions.xml";
     private AlertDefinitionManager alertDefinitionManager;
@@ -112,7 +112,7 @@ public class ProductManagerImpl implements ProductManager {
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
                               ConfigManagerLocal configManager,
                               CPropManager cPropManager, TemplateManager templateManager,
-                              AuditManagerLocal auditManager) {
+                              AuditManager auditManager) {
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
         this.configManager = configManager;

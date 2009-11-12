@@ -199,7 +199,7 @@ public abstract class Audit
         _children = c;
     }
     
-    public Collection getChildren() {
+    public Collection<Audit> getChildren() {
         return Collections.unmodifiableCollection(_children);
     }
     

@@ -25,15 +25,10 @@
 
 package org.hyperic.hq.common.server.session;
 
-import java.util.Iterator;
 import java.util.List;
-
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
@@ -41,39 +36,39 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.AuditManagerLocal;
-import org.hyperic.hq.common.shared.AuditManagerUtil;
-import org.hyperic.hq.common.server.session.AuditImportance;
-import org.hyperic.hq.common.server.session.AuditPurpose;
-import org.hyperic.hq.common.server.session.Audit;
+import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.context.Bootstrap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
- * @ejb:bean name="AuditManager"
- *      jndi-name="ejb/common/AuditManager"
- *      local-jndi-name="LocalAuditManager"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:util generate="physical"
- * @ejb:transaction type="Required"
+ *
  */
-public class AuditManagerEJBImpl implements SessionBean {
-    private final Log _log = LogFactory.getLog(AuditManagerEJBImpl.class);
-    private static final ThreadLocal CONTAINERS = new ThreadLocal();
+@Service
+@Transactional
+public class AuditManagerImpl implements AuditManager {
+    private final Log log = LogFactory.getLog(AuditManagerImpl.class);
+    private static final ThreadLocal<Audit> CONTAINERS = new ThreadLocal<Audit>();
 
    
-    private AuditDAO _DAO = Bootstrap.getBean(AuditDAO.class);
+    private AuditDAO auditDao;
+    
+    @Autowired
+    public AuditManagerImpl(AuditDAO auditDao) {
+        this.auditDao = auditDao;
+    }
 
     /**
      * Save an audit and all of it's children.
      *
-     * @ejb:interface-method
+     * 
      */
     public void saveAudit(Audit a) {
-        if (a.getStartTime() == 0)
+        if (a.getStartTime() == 0) {
             a.setStartTime(System.currentTimeMillis());
+        }
 
         if (getCurrentAudit() != null) {
             getCurrentAudit().addChild(a);
@@ -83,15 +78,13 @@ public class AuditManagerEJBImpl implements SessionBean {
     }
 
     private void saveRecursively(Audit a) {
-        _DAO.save(a);
+        auditDao.save(a);
 
-        if (_log.isDebugEnabled()) {
-            _log.debug("Audit: " + a);
+        if (log.isDebugEnabled()) {
+            log.debug("Audit: " + a);
         }
 
-        for (Iterator i=a.getChildren().iterator(); i.hasNext(); ) {
-            Audit child = (Audit)i.next();
-
+        for (Audit child: a.getChildren()) {
             saveRecursively(child);
         }
     }
@@ -99,32 +92,30 @@ public class AuditManagerEJBImpl implements SessionBean {
     /**
      * If there is currently an audit in progress (a container), fetch it.
      *
-     * @ejb:interface-method
+     * 
      */
     public Audit getCurrentAudit() {
-        return (Audit)CONTAINERS.get();
+        return CONTAINERS.get();
     }
 
     /**
      * Delete an audit and all its children.
      *
-     * @ejb:interface-method
+     * 
      */
     public void deleteAudit(Audit a) {
         deleteRecursively(a);
     }
 
     private void deleteRecursively(Audit a) {
-        for (Iterator i=a.getChildren().iterator(); i.hasNext(); ) {
-            Audit child = (Audit)i.next();
-
+        for (Audit child:a.getChildren()) {
             deleteRecursively(child);
         }
-        _DAO.remove(a);
+        auditDao.remove(a);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void popAll() {
         Audit a = getCurrentAudit();
@@ -132,16 +123,18 @@ public class AuditManagerEJBImpl implements SessionBean {
 
         try {
             while (a != null && a.getParent() != null) {
-                if (a.getEndTime() == 0)
+                if (a.getEndTime() == 0) {
                     a.setEndTime(now);
+                }
                 a = a.getParent();
             }
 
             if (a != null) {
-                _log.warn("Unpopped audit container: " + a.getMessage() +
+                log.warn("Unpopped audit container: " + a.getMessage() +
                           ":  This should be closed manually!");
-                if (a.getEndTime() != 0)
+                if (a.getEndTime() != 0) {
                     a.setEndTime(now);
+                }
                 saveRecursively(a);
             }
         } finally {
@@ -155,7 +148,7 @@ public class AuditManagerEJBImpl implements SessionBean {
      * @param allowEmpty If true, allow the container to pop and be saved
      *                   with no children.  If the container is empty, and
      *                   this is true, simply delete it
-     * @ejb:interface-method
+     * 
      */
     public void popContainer(boolean allowEmpty) {
         Audit a = getCurrentAudit();
@@ -190,7 +183,7 @@ public class AuditManagerEJBImpl implements SessionBean {
      * Push a global audit container onto the stack.  Any subsequent audits
      * created (via saveAudit) will be added to this container.
      *
-     * @ejb:interface-method
+     * 
      */
     public void pushContainer(Audit newContainer) {
         Audit currentContainer = getCurrentAudit();
@@ -213,36 +206,36 @@ public class AuditManagerEJBImpl implements SessionBean {
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
-    public List find(AuthzSubject me, PageInfo pInfo,
+    public List<Audit> find(AuthzSubject me, PageInfo pInfo,
                      long startTime, long endTime,
                      AuditImportance minImportance, AuditPurpose purpose,
                      AuthzSubject target, String klazz)
     {
-        return _DAO.find(pInfo, me, startTime, endTime, minImportance, purpose,
+        return auditDao.find(pInfo, me, startTime, endTime, minImportance, purpose,
                          target, klazz);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void handleResourceDelete(Resource r) {
-        _DAO.handleResourceDelete(r);
+        auditDao.handleResourceDelete(r);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void handleSubjectDelete(AuthzSubject s) {
-        _DAO.handleSubjectDelete(s);
+        auditDao.handleSubjectDelete(s);
     }
 
     private static class ResourceDeleteWatcher
         implements ResourceDeleteCallback
     {
         public void preResourceDelete(Resource r) {
-            AuditManagerEJBImpl.getOne().handleResourceDelete(r);
+            getOne().handleResourceDelete(r);
         }
     }
 
@@ -250,15 +243,15 @@ public class AuditManagerEJBImpl implements SessionBean {
         implements SubjectRemoveCallback
     {
         public void subjectRemoved(AuthzSubject toDelete) {
-            AuditManagerEJBImpl.getOne().handleSubjectDelete(toDelete);
+            getOne().handleSubjectDelete(toDelete);
         }
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void startup() {
-        _log.info("Audit Manager starting up");
+        log.info("Audit Manager starting up");
 
         HQApp.getInstance()
                 .registerCallbackListener(ResourceDeleteCallback.class,
@@ -269,17 +262,7 @@ public class AuditManagerEJBImpl implements SessionBean {
                                           new SubjectDeleteWatcher());
     }
 
-    public static AuditManagerLocal getOne() {
-        try {
-            return AuditManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static AuditManager getOne() {
+        return Bootstrap.getBean(AuditManager.class);
     }
-
-    public void ejbCreate() { }
-    public void ejbRemove() { }
-    public void ejbActivate() { }
-    public void ejbPassivate() { }
-    public void setSessionContext(SessionContext c) {}
 }

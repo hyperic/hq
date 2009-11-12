@@ -73,7 +73,7 @@ import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.server.session.Audit;
-import org.hyperic.hq.common.server.session.AuditManagerEJBImpl;
+import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.product.RuntimeResourceReport;
 import org.hyperic.hq.product.ServiceType;
 import org.hyperic.util.StringUtil;
@@ -123,12 +123,12 @@ public class RuntimeReportProcessor {
         boolean pushed = false;
         
         try {
-            AuditManagerEJBImpl.getOne().pushContainer(audit);
+            AuditManagerImpl.getOne().pushContainer(audit);
             pushed = true; 
             _processRuntimeReport(subject, crrr); 
         } finally {
             if (pushed) {
-                AuditManagerEJBImpl.getOne().popContainer(false);
+                AuditManagerImpl.getOne().popContainer(false);
             }
         }
     }

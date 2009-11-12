@@ -184,11 +184,6 @@
 			<local-jndi-name>LocalCloningBoss</local-jndi-name>
 
 		</session>
-		<session>
-			<ejb-name>AuditManager</ejb-name>
-			<local-jndi-name>LocalAuditManager</local-jndi-name>
-
-		</session>
 
 		<!--
 			write a merge file jboss-webservices.ent for webservice-description

@@ -32,7 +32,7 @@ public class CommonStartupListener
     implements StartupListener
 {
     public void hqStarted() {
-        AuditManagerEJBImpl.getOne().startup();
+        AuditManagerImpl.getOne().startup();
         DashboardManagerImpl.getOne().startup();
     }
 }

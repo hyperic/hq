@@ -74,7 +74,7 @@ public class ResourceAudit extends Audit {
                                               AuditNature.CREATE,
                                               msg, start, end);  
         
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
     
@@ -93,7 +93,7 @@ public class ResourceAudit extends Audit {
                                               AuditNature.DELETE,
                                               msg, start, end);  
         
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
 
@@ -107,7 +107,7 @@ public class ResourceAudit extends Audit {
                                               AuditImportance.HIGH,
                                               AuditNature.MOVE,
                                               msg, start, end);
-        AuditManagerEJBImpl.getOne().saveAudit(res);
+        AuditManagerImpl.getOne().saveAudit(res);
         return res;
     }
 }
