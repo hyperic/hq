@@ -68,7 +68,7 @@ import org.hyperic.hq.common.DuplicateObjectException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.events.shared.EventLogManagerLocal;
+import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.GroupException;
 import org.hyperic.hq.grouping.shared.GroupDuplicateNameException;
@@ -105,7 +105,7 @@ public class ResourceGroupManagerImpl
     private ResourceEdgeDAO resourceEdgeDAO;
 
     private AuthzSubjectManagerLocal authzSubjectManager;
-    private EventLogManagerLocal eventLogManager;
+    private EventLogManager eventLogManager;
 
     private ResourceManager resourceManager;
     private PlatformManagerLocal platformManager;
@@ -115,7 +115,7 @@ public class ResourceGroupManagerImpl
 
     @Autowired
     public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO, AuthzSubjectManagerLocal authzSubjectManager,
-                                    EventLogManagerLocal eventLogManager,
+                                    EventLogManager eventLogManager,
                                     PlatformManagerLocal platformManager, ServerManagerLocal serverManager,
                                     ServiceManagerLocal serviceManager, ApplicationManagerLocal applicationManager,
                                     ResourceManager resourceManager) {

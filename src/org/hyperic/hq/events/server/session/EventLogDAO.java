@@ -35,7 +35,6 @@ import org.hibernate.FlushMode;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
@@ -53,12 +52,12 @@ import org.hyperic.hq.measurement.server.session.Number;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class EventLogDAO extends HibernateDAO {
+public class EventLogDAO extends HibernateDAO<EventLog> {
     private final String TABLE_EVENT_LOG = "EAM_EVENT_LOG";
     private final String TABLE_EAM_NUMBERS = "EAM_NUMBERS";
     private PermissionManager permissionManager;
 
-    private static final List VIEW_PERMISSIONS =
+    private static final List<String> VIEW_PERMISSIONS =
         Arrays.asList(new String[] {
             AuthzConstants.platformOpViewPlatform,
             AuthzConstants.serverOpViewServer,
@@ -111,9 +110,9 @@ public class EventLogDAO extends HibernateDAO {
      *                   {@link ResourceGroup}s which will contain the resulting
      *                   logs
      */
-    List findLogs(AuthzSubject subject, long begin, long end, PageInfo pInfo,
+    List<ResourceEventLog> findLogs(AuthzSubject subject, long begin, long end, PageInfo pInfo,
                   EventLogStatus maxStatus, String typeClass,
-                  Collection inGroups)
+                  Collection<ResourceGroup> inGroups)
     {
         EventLogSortField sort = (EventLogSortField)pInfo.getSort();
         boolean doGroupFilter = false;
@@ -179,24 +178,22 @@ public class EventLogDAO extends HibernateDAO {
         }
 
         if (doGroupFilter) {
-            List inGroupIds = new ArrayList(inGroups.size());
-            for (Iterator i=inGroups.iterator(); i.hasNext(); ) {
-                ResourceGroup g = (ResourceGroup)i.next();
+            List<Integer> inGroupIds = new ArrayList<Integer>(inGroups.size());
+            for (ResourceGroup g: inGroups) {
                 inGroupIds.add(g.getId());
             }
             q.setParameterList("inGroups", inGroupIds);
         }
 
-        List vals = pInfo.pageResults(q).list();
-        List res = new ArrayList(vals.size());
-        for (Iterator i=vals.iterator(); i.hasNext(); ) {
-            EventLog e = (EventLog)i.next();
+        List<EventLog> vals = pInfo.pageResults(q).list();
+        List<ResourceEventLog> res = new ArrayList<ResourceEventLog>(vals.size());
+        for (EventLog e: vals) {
             res.add(new ResourceEventLog(e.getResource(), e));
         }
         return res;
     }
 
-    List findByEntityAndStatus(Resource r, AuthzSubject user,
+    List<EventLog> findByEntityAndStatus(Resource r, AuthzSubject user,
                                long begin, long end,
                                String status)
     {
@@ -217,8 +214,8 @@ public class EventLogDAO extends HibernateDAO {
                                                  VIEW_PERMISSIONS).list();
     }
 
-    List findByEntity(AuthzSubject subject, Resource r, long begin, long end,
-                      Collection eventTypes)
+    List<EventLog> findByEntity(AuthzSubject subject, Resource r, long begin, long end,
+                      Collection<String> eventTypes)
     {
         EdgePermCheck wherePermCheck =
             permissionManager.makePermCheckHql("rez", false);
@@ -243,7 +240,7 @@ public class EventLogDAO extends HibernateDAO {
                                                  0, VIEW_PERMISSIONS).list();
     }
 
-    List findByGroup(Resource g, long begin, long end, Collection eventTypes) {
+    List<EventLog> findByGroup(Resource g, long begin, long end, Collection<String> eventTypes) {
         String hql = "select l from EventLog l join l.resource res " +
                      "left outer join res.groupBag gb " +
                      "left outer join gb.group g " +
@@ -266,7 +263,7 @@ public class EventLogDAO extends HibernateDAO {
         return q.list();
     }
 
-    List findLastByType(Resource proto) {
+    List<EventLog> findLastByType(Resource proto) {
         String hql = "select {ev.*} from EAM_EVENT_LOG ev, " +
             "(select resource_id, max(EAM_EVENT_LOG.timestamp) as maxt " +
              "from EAM_EVENT_LOG, EAM_RESOURCE res " +

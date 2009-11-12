@@ -50,7 +50,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.hq.zevents.ZeventListener;
 import org.hyperic.hq.bizapp.shared.AuthBossUtil;
-import org.hyperic.hq.bizapp.shared.AuthBossLocal;
+import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.util.ConfigPropertyException;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
@@ -244,7 +244,7 @@ public class AuthBossEJBImpl extends BizappSessionEJB implements SessionBean {
         return getAuthManager().isUser(subject, username);
     }
 
-    public static AuthBossLocal getOne() {
+    public static AuthBoss getOne() {
         try {
             return AuthBossUtil.getLocalHome().create();
         } catch(Exception e) {

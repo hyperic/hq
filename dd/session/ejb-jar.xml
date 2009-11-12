@@ -78,21 +78,6 @@
 		</session>
 
 		<session>
-			<description><![CDATA[<p> Stores Events to and deletes Events from storage</p>]]></description>
-
-			<ejb-name>EventLogManager</ejb-name>
-
-			<local-home>org.hyperic.hq.events.shared.EventLogManagerLocalHome</local-home>
-			<local>org.hyperic.hq.events.shared.EventLogManagerLocal</local>
-			<ejb-class>org.hyperic.hq.events.server.session.EventLogManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-
-
-		<session>
 			<description><![CDATA[Manager for dealing with scheduled autoinventory scans.]]></description>
 
 			<ejb-name>AIScheduleManager</ejb-name>
@@ -1175,13 +1160,6 @@
 					<method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
 					<method-param>org.hyperic.hq.appdef.shared.AppdefEntityID</method-param>
 				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>EventLogManager</ejb-name>
-				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>

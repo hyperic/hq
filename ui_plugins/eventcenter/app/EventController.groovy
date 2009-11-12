@@ -3,7 +3,7 @@ import org.hyperic.hq.measurement.shared.ResourceLogEvent
 import org.hyperic.hq.measurement.shared.ConfigChangedEvent
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.hqu.rendit.html.DojoUtil
-import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl
+import org.hyperic.hq.events.server.session.EventLogManagerImpl
 import org.hyperic.hq.events.server.session.EventLogSortField
 import org.hyperic.hq.events.server.session.EventLog
 import org.hyperic.hibernate.PageInfo

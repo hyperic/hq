@@ -3,11 +3,24 @@
  */
 package org.hyperic.hq.events.shared;
 
+import java.util.Collection;
+import java.util.List;
+
+import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
+import org.hyperic.hq.events.AbstractEvent;
+import org.hyperic.hq.events.EventLogStatus;
+import org.hyperic.hq.events.server.session.EventLog;
+import org.hyperic.hq.events.server.session.EventLogDAO.ResourceEventLog;
+
 /**
  * Local interface for EventLogManager.
  */
-public interface EventLogManagerLocal
-   extends javax.ejb.EJBLocalObject
+public interface EventLogManager
 {
    /**
     * Create a new vanilla log item.
@@ -16,7 +29,7 @@ public interface EventLogManagerLocal
     * @param status The log item status.
     * @param save <code>true</code> to persist the log item; <code>false</code> to create a transient log item only.
     */
-   public org.hyperic.hq.events.server.session.EventLog createLog( org.hyperic.hq.events.AbstractEvent event,java.lang.String subject,java.lang.String status,boolean save ) throws org.hyperic.hq.authz.server.shared.ResourceDeletedException;
+   public EventLog createLog( AbstractEvent event,String subject,String status,boolean save ) throws ResourceDeletedException;
 
    /**
     * Insert the event logs in batch.
@@ -27,22 +40,22 @@ public interface EventLogManagerLocal
    /**
     * Find the last event logs of all the resources of a given prototype. (i.e. 'Linux' or 'FileServer File')
     */
-   public java.util.List findLastLogs( org.hyperic.hq.authz.server.session.Resource proto ) ;
+   public List<EventLog> findLastLogs( Resource proto ) ;
 
    /**
     * Get a list of {@link ResourceEventLog}s in a given interval, with the maximum specified status. If specified, typeClass dictates the full classname of the rows to check (i.e. org.hyperic.hq.....ResourceLogEvent) If specified, inGroups must be a collection of {@link ResourceGroup}s which the resulting logs will be associated with.
     */
-   public java.util.List findLogs( org.hyperic.hq.authz.server.session.AuthzSubject subject,long begin,long end,org.hyperic.hibernate.PageInfo pInfo,org.hyperic.hq.events.EventLogStatus maxStatus,java.lang.String typeClass,java.util.Collection inGroups ) ;
+   public List<ResourceEventLog> findLogs( AuthzSubject subject,long begin,long end,PageInfo pInfo,EventLogStatus maxStatus,String typeClass,Collection<ResourceGroup> inGroups ) ;
 
    /**
     * Get a list of log records based on resource, event type and time range. All resources which are descendents of the passed resource will also have their event logs included
     */
-   public java.util.List findLogs( org.hyperic.hq.appdef.shared.AppdefEntityID ent,org.hyperic.hq.authz.server.session.AuthzSubject user,java.lang.String[] eventTypes,long begin,long end ) ;
+   public List<EventLog> findLogs( AppdefEntityID ent,AuthzSubject user,java.lang.String[] eventTypes,long begin,long end ) ;
 
    /**
     * Get a list of log records based on resource, status and time range. All resources which are descendants of the passed resource will also have their event logs included
     */
-   public java.util.List findLogs( org.hyperic.hq.appdef.shared.AppdefEntityID ent,org.hyperic.hq.authz.server.session.AuthzSubject user,java.lang.String status,long begin,long end ) ;
+   public List<EventLog> findLogs( AppdefEntityID ent,AuthzSubject user,String status,long begin,long end ) ;
 
    /**
     * Retrieve the total number of event logs.
@@ -58,12 +71,12 @@ public interface EventLogManagerLocal
     * @param intervals The number of intervals.
     * @return The boolean array with length equal to the number of intervals specified.
     */
-   public boolean[] logsExistPerInterval( org.hyperic.hq.appdef.shared.AppdefEntityID entityId,org.hyperic.hq.authz.server.session.AuthzSubject subject,long begin,long end,int intervals ) ;
+   public boolean[] logsExistPerInterval( AppdefEntityID entityId,AuthzSubject subject,long begin,long end,int intervals ) ;
 
    /**
     * Delete event logs for the given resource TODO: Authz check.
     */
-   public int deleteLogs( org.hyperic.hq.authz.server.session.Resource r ) ;
+   public int deleteLogs( Resource r ) ;
 
    /**
     * Purge old event logs.
