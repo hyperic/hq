@@ -25,7 +25,7 @@ public class BossStartupListener
     public void hqStarted() {
         EventsBossImpl.getOne().startup();
         EventLogBossEJBImpl.getOne().startup();
-        AuthBossEJBImpl.getOne().startup();
+        AuthBossImpl.getOne().startup();
         AppdefBossImpl.getOne().startup();
         ProductBossEJBImpl.getOne().preload();
         
