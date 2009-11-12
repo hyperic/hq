@@ -48,7 +48,7 @@ import org.hyperic.hq.events.ActionInterface;
 import org.hyperic.hq.events.AlertDefinitionInterface;
 import org.hyperic.hq.events.AlertInterface;
 import org.hyperic.hq.events.InvalidActionDataException;
-import org.hyperic.hq.hqu.RenditServer;
+import org.hyperic.hq.hqu.RenditServerImpl;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.InvalidOptionException;
@@ -183,7 +183,7 @@ public class OpenNMSAction implements ActionInterface {
         File templateFile = new File(templateDir, filename);
         StringWriter output = new StringWriter();
         try {
-            RenditServer.getInstance().renderTemplate(templateFile, params, 
+            RenditServerImpl.getInstance().renderTemplate(templateFile, params, 
                                                       output);
             
             if (_log.isDebugEnabled())

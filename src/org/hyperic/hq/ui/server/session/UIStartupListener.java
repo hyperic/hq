@@ -26,15 +26,15 @@ package org.hyperic.hq.ui.server.session;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.List;
 import java.util.HashSet;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.hqu.RenditServer;
+import org.hyperic.hq.hqu.RenditServerImpl;
 import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.file.DirWatcher;
@@ -78,7 +78,7 @@ public class UIStartupListener implements StartupListener {
             File warDir    = new File(earDir, "hq.war");
             File pluginDir = new File(warDir, "hqu");
             File sysDir    = new File(earDir, "rendit_sys");
-            RenditServer.getInstance().setSysDir(sysDir);
+            RenditServerImpl.getInstance().setSysDir(sysDir);
 
             _log.info("HQU SysDir = [" + sysDir.getAbsolutePath() + "]");
             _log.info("Watching for HQU plugins in [" + 
@@ -90,7 +90,7 @@ public class UIStartupListener implements StartupListener {
                         return;
 
                     try {
-                        RenditServer.getInstance().addPluginDir(f);
+                        RenditServerImpl.getInstance().addPluginDir(f);
                     } catch(Exception e) {
                         _log.warn("Unable to add plugin in [" +
                                   f.getAbsolutePath() + "]", e);
@@ -101,7 +101,7 @@ public class UIStartupListener implements StartupListener {
                     if (f.getName().equals("public"))
                         return;
 
-                    RenditServer.getInstance().removePluginDir(f.getName());
+                    RenditServerImpl.getInstance().removePluginDir(f.getName());
                 }
             };
 

@@ -31,7 +31,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletRequest;
 
 import org.apache.catalina.Globals;
 import org.apache.commons.logging.Log;
@@ -39,7 +38,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.server.session.AuthzBossImpl;
-import org.hyperic.hq.hqu.RenditServer;
+import org.hyperic.hq.hqu.RenditServerImpl;
 import org.hyperic.hq.hqu.RequestInvocationBindings;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.StringUtil;
@@ -190,7 +189,7 @@ public class RenditServlet
                                           req, resp, getServletContext());
         long start = System.currentTimeMillis();
         try {
-            RenditServer.getInstance().handleRequest(plugin, b); 
+            RenditServerImpl.getInstance().handleRequest(plugin, b); 
         } catch(Exception e) {
             throw new ServletException(e);
         } finally {
