@@ -36,10 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -76,7 +73,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
@@ -86,9 +83,9 @@ import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.monitor.LiveMeasurementException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementManagerUtil;
+import org.hyperic.hq.measurement.shared.AvailabilityManager;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.Metric;
 import org.hyperic.hq.product.MetricValue;
@@ -97,36 +94,57 @@ import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The MeasurementManager provides APIs to deal with Measurement objects.
- *
- * @ejb:bean name="MeasurementManager"
- *      jndi-name="ejb/measurement/MeasurementManager"
- *      local-jndi-name="LocalMeasurementManager"
- *      view-type="local"
- *      type="Stateless"
- * 
- * @ejb:transaction type="Required"
  */
-public class MeasurementManagerEJBImpl extends SessionEJB
-    implements SessionBean 
-{
-    private final Log log = LogFactory.getLog(MeasurementManagerEJBImpl.class);
+@org.springframework.stereotype.Service
+@Transactional
+public class MeasurementManagerImpl
+    extends SessionEJB
+    implements MeasurementManager {
+    private final Log log = LogFactory.getLog(MeasurementManagerImpl.class);
+    // XXX scottmf, need to re-evalutate why SAMPLE_SIZE is used
+    private final int SAMPLE_SIZE = 10;
+
+    private AvailabilityManager availabilityManager;
+    private ResourceManager resourceManager;
+    private ResourceGroupManager resourceGroupManager;
+    private ApplicationManagerLocal applicationManager;
+    private AuthzSubjectManagerLocal authzSubjectManager;
+    private MeasurementProcessor measurementProcessor;
+    private ConfigManagerLocal configManager;
+
+    @Autowired
+    public MeasurementManagerImpl(AvailabilityManager availabilityManager, ResourceManager resourceManager,
+                                  ResourceGroupManager resourceGroupManager,
+                                  ApplicationManagerLocal applicationManager,
+                                  AuthzSubjectManagerLocal authzSubjectManager,
+                                  MeasurementProcessor measurementProcessor, ConfigManagerLocal configManager) {
+        this.availabilityManager = availabilityManager;
+        this.resourceManager = resourceManager;
+        this.resourceGroupManager = resourceGroupManager;
+        this.applicationManager = applicationManager;
+        this.authzSubjectManager = authzSubjectManager;
+        this.measurementProcessor = measurementProcessor;
+        this.configManager = configManager;
+    }
 
     /**
      * Translate a template string into a DSN
      */
-    private String translate(String tmpl, ConfigResponse config){
+    private String translate(String tmpl, ConfigResponse config) {
         try {
             return getMPM().translate(tmpl, config);
         } catch (org.hyperic.hq.product.PluginNotFoundException e) {
             return tmpl;
         }
     }
-    
+
     /**
-     * Enqueue a {@link MeasurementScheduleZevent} on the zevent queue 
+     * Enqueue a {@link MeasurementScheduleZevent} on the zevent queue
      * corresponding to the change in schedule for the measurement.
      * 
      * @param dm The Measurement
@@ -134,29 +152,26 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      */
     private void enqueueZeventForMeasScheduleChange(Measurement dm,
                                                     long interval) {
-        
+
         MeasurementScheduleZevent event =
-            new MeasurementScheduleZevent(dm.getId().intValue(), interval);
+                                          new MeasurementScheduleZevent(dm.getId().intValue(), interval);
         ZeventManager.getInstance().enqueueEventAfterCommit(event);
     }
-    
+
     /**
-     * Enqueue a {@link MeasurementScheduleZevent} on the zevent queue 
+     * Enqueue a {@link MeasurementScheduleZevent} on the zevent queue
      * corresponding to collection disabled for the measurements.
      * 
      * @param mids The measurement ids.
      */
     private void enqueueZeventsForMeasScheduleCollectionDisabled(Integer[] mids) {
-        List events = new ArrayList(mids.length);
-        
-        for (int i = 0; i < mids.length; i++) {
-            Integer mid = mids[i];
-            
+        List<MeasurementScheduleZevent> events = new ArrayList<MeasurementScheduleZevent>(mids.length);
+
+        for (Integer mid : mids) {
             if (mid != null) {
-                events.add(new MeasurementScheduleZevent(mid.intValue(), 0));                
+                events.add(new MeasurementScheduleZevent(mid.intValue(), 0));
             }
         }
-        
         ZeventManager.getInstance().enqueueEventsAfterCommit(events);
     }
 
@@ -164,10 +179,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                                           MeasurementTemplate mt,
                                           ConfigResponse props,
                                           long interval)
-        throws MeasurementCreateException
-    {
+        throws MeasurementCreateException {
         String dsn = translate(mt.getTemplate(), props);
-        return getMeasurementDAO().create(instanceId, mt, dsn, interval);
+        return measurementDAO.create(instanceId, mt, dsn, interval);
     }
 
     /**
@@ -176,48 +190,45 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      */
     private void removeMeasurementsFromCache(Integer[] mids) {
         MetricDataCache cache = MetricDataCache.getInstance();
-        for (int i = 0; i < mids.length; i++) {
-            cache.remove(mids[i]);
+        for (Integer mid : mids) {
+            cache.remove(mid);
         }
     }
 
     /**
      * Create Measurement objects based their templates
-     *
-     * @param templates   List of Integer template IDs to add
-     * @param id          instance ID (appdef resource) the templates are for
-     * @param intervals   Millisecond interval that the measurement is polled
-     * @param props       Configuration data for the instance
-     *
+     * 
+     * @param templates List of Integer template IDs to add
+     * @param id instance ID (appdef resource) the templates are for
+     * @param intervals Millisecond interval that the measurement is polled
+     * @param props Configuration data for the instance
+     * 
      * @return a List of the associated Measurement objects
-     * @ejb:interface-method
      */
-    public List createMeasurements(AppdefEntityID id, Integer[] templates,
-                                   long[] intervals, ConfigResponse props)
-        throws MeasurementCreateException, TemplateNotFoundException
-    {
+    public List<Measurement> createMeasurements(AppdefEntityID id, Integer[] templates,
+                                                long[] intervals, ConfigResponse props)
+        throws MeasurementCreateException, TemplateNotFoundException {
         Resource resource = getResource(id);
         if (resource == null || resource.isInAsyncDeleteState()) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
-        ArrayList dmList   = new ArrayList();
 
-        if(intervals.length != templates.length){
+        if (intervals.length != templates.length) {
             throw new IllegalArgumentException(
-                "The templates and intervals lists must be the same size");
+                                               "The templates and intervals lists must be the same size");
         }
 
-        MeasurementTemplateDAO tDao = getMeasurementTemplateDAO();
-        MeasurementDAO dao = getMeasurementDAO();
-        List metrics = dao.findByTemplatesForInstance(templates, resource);
+        MeasurementTemplateDAO tDao = measurementTemplateDAO;
+        MeasurementDAO dao = measurementDAO;
+        List<Measurement> metrics = dao.findByTemplatesForInstance(templates, resource);
 
         // Put the metrics in a map for lookup
-        Map lookup = new HashMap(metrics.size());
-        for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-            Measurement m = (Measurement) it.next();
+        Map<Integer, Measurement> lookup = new HashMap<Integer, Measurement>(metrics.size());
+        for (Measurement m : metrics) {
             lookup.put(m.getTemplate().getId(), m);
         }
 
+        ArrayList<Measurement> dmList = new ArrayList<Measurement>();
         for (int i = 0; i < templates.length; i++) {
             MeasurementTemplate t = tDao.get(templates[i]);
             if (t == null) {
@@ -243,19 +254,17 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Create Measurements and enqueue for scheduling after commit
-     * @ejb:interface-method
      */
-    public List createMeasurements(AuthzSubject subject, AppdefEntityID id,
-                                   Integer[] templates, long[] intervals,
-                                   ConfigResponse props)
+    public List<Measurement> createMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                                Integer[] templates, long[] intervals,
+                                                ConfigResponse props)
         throws PermissionException, MeasurementCreateException,
-               TemplateNotFoundException
-    {
+        TemplateNotFoundException {
         // Authz check
-        super.checkModifyPermission(subject.getId(), id);        
+        super.checkModifyPermission(subject.getId(), id);
 
-        List dmList = createMeasurements(id, templates, intervals, props);
-        List eids = Collections.singletonList(id);
+        List<Measurement> dmList = createMeasurements(id, templates, intervals, props);
+        List<AppdefEntityID> eids = Collections.singletonList(id);
         AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
         ZeventManager.getInstance().enqueueEventAfterCommit(event);
         return dmList;
@@ -263,59 +272,57 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Create Measurement objects based their templates and default intervals
-     *
-     * @param templates   List of Integer template IDs to add
-     * @param id          instance ID (appdef resource) the templates are for
-     * @param props       Configuration data for the instance
-     *
+     * 
+     * @param templates List of Integer template IDs to add
+     * @param id instance ID (appdef resource) the templates are for
+     * @param props Configuration data for the instance
+     * 
      * @return a List of the associated Measurement objects
-     * @ejb:interface-method
      */
-    public List createMeasurements(AuthzSubject subject, AppdefEntityID id,
-                                   Integer[] templates, ConfigResponse props)
+    public List<Measurement> createMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                                Integer[] templates, ConfigResponse props)
         throws PermissionException, MeasurementCreateException,
-               TemplateNotFoundException {
+        TemplateNotFoundException {
         long[] intervals = new long[templates.length];
         for (int i = 0; i < templates.length; i++) {
             MeasurementTemplate tmpl =
-                getMeasurementTemplateDAO().findById(templates[i]);
+                                       measurementTemplateDAO.findById(templates[i]);
             intervals[i] = tmpl.getDefaultInterval();
         }
-        
+
         return createMeasurements(subject, id, templates, intervals, props);
     }
-    
+
     /**
-     * @ejb:interface-method
      */
     public Measurement findMeasurementById(Integer mid) {
-        return getMeasurementDAO().findById(mid);
+        return measurementDAO.findById(mid);
     }
 
     /**
      * Create Measurement objects for an appdef entity based on default
-     * templates.  This method will only create them if there currently no
+     * templates. This method will only create them if there currently no
      * metrics enabled for the appdef entity.
-     *
-     * @param subject     Spider subject
-     * @param id          appdef entity ID of the resource
-     * @param mtype       The string name of the plugin type
-     * @param props       Configuration data for the instance
-     *
+     * 
+     * @param subject Spider subject
+     * @param id appdef entity ID of the resource
+     * @param mtype The string name of the plugin type
+     * @param props Configuration data for the instance
+     * 
      * @return a List of the associated Measurement objects
      */
-    private List createDefaultMeasurements(AuthzSubject subject,
-                                           AppdefEntityID id,
-                                           String mtype,
-                                           ConfigResponse props)
+    private List<Measurement> createDefaultMeasurements(AuthzSubject subject,
+                                                        AppdefEntityID id,
+                                                        String mtype,
+                                                        ConfigResponse props)
         throws TemplateNotFoundException, PermissionException,
-               MeasurementCreateException {
+        MeasurementCreateException {
         // We're going to make sure there aren't metrics already
-        List dms = findMeasurements(subject, id, null, PageControl.PAGE_ALL);
+        List<Measurement> dms = findMeasurements(subject, id, null, PageControl.PAGE_ALL);
 
         // Find the templates
-        Collection mts =
-            getMeasurementTemplateDAO().findTemplatesByMonitorableType(mtype);
+        Collection<MeasurementTemplate> mts =
+                                              measurementTemplateDAO.findTemplatesByMonitorableType(mtype);
 
         if (mts.size() == 0 || (dms.size() != 0 && dms.size() == mts.size())) {
             return dms;
@@ -324,9 +331,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         Integer[] tids = new Integer[mts.size()];
         long[] intervals = new long[mts.size()];
 
-        Iterator it = mts.iterator();
+        Iterator<MeasurementTemplate> it = mts.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            MeasurementTemplate tmpl = (MeasurementTemplate)it.next();
+            MeasurementTemplate tmpl = it.next();
             tids[i] = tmpl.getId();
 
             if (tmpl.isDefaultOn())
@@ -344,26 +351,25 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      */
     private void updateMeasurements(AuthzSubject subject, AppdefEntityID id,
                                     ConfigResponse props)
-        throws PermissionException, MeasurementCreateException
-    {
+        throws PermissionException, MeasurementCreateException {
         try {
-            List all = getMeasurementDAO().findByResource(getResource(id));
-            List mcol = new ArrayList();
-            for (Iterator it = all.iterator(); it.hasNext();) {
+            List<Measurement> all = measurementDAO.findByResource(getResource(id));
+            List<Measurement> mcol = new ArrayList<Measurement>();
+            for (Measurement dm : all) {
                 // Translate all dsns
-                Measurement dm = (Measurement)it.next();
                 dm.setDsn(translate(dm.getTemplate().getTemplate(), props));
-                
+
                 // Now see which Measurements need to be rescheduled
-                if (dm.isEnabled())
+                if (dm.isEnabled()) {
                     mcol.add(dm);
+                }
             }
 
             Integer[] templates = new Integer[mcol.size()];
             long[] intervals = new long[mcol.size()];
             int idx = 0;
-            for (Iterator it = mcol.iterator(); it.hasNext(); idx++) {
-                Measurement dm = (Measurement)it.next();
+            for (Iterator<Measurement> it = mcol.iterator(); it.hasNext(); idx++) {
+                Measurement dm = it.next();
                 templates[idx] = dm.getTemplate().getId();
                 intervals[idx] = dm.getInterval();
             }
@@ -378,33 +384,31 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Remove all measurements no longer associated with a resource.
-     *
-     * @ejb:interface-method
+     * 
      * @return The number of Measurement objects removed.
      */
     public int removeOrphanedMeasurements() {
         final int MAX_MIDS = 200;
-        
+
         StopWatch watch = new StopWatch();
-        MetricDeleteCallback cb = 
-            MeasurementStartupListener.getMetricDeleteCallbackObj();
-        MeasurementDAO dao = getMeasurementDAO();
-        List mids = dao.findOrphanedMeasurements();
-        
+        MetricDeleteCallback cb = MeasurementStartupListener.getMetricDeleteCallbackObj();
+        MeasurementDAO dao = measurementDAO;
+        List<Integer> mids = dao.findOrphanedMeasurements();
+
         // Shrink the list down to MAX_MIDS so that we spread out the work over
         // successive data purges
         if (mids.size() > MAX_MIDS) {
             mids = mids.subList(0, MAX_MIDS);
         }
-        
+
         if (mids.size() > 0) {
             cb.beforeMetricsDelete(mids);
             dao.deleteByIds(mids);
         }
 
         if (log.isDebugEnabled()) {
-            log.debug("MeasurementManager.removeOrphanedMeasurements() "+
-            		  watch);
+            log.debug("MeasurementManager.removeOrphanedMeasurements() " +
+                      watch);
         }
         return mids.size();
     }
@@ -412,12 +416,10 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     /**
      * Look up a Measurement for a Resource and Measurement alias
      * @return a The Measurement for the Resource of the given alias.
-     * @ejb:interface-method
      */
     public Measurement getMeasurement(AuthzSubject s, Resource r, String alias)
-        throws MeasurementNotFoundException
-    {
-        Measurement m = getMeasurementDAO().findByAliasAndID(alias, r);
+        throws MeasurementNotFoundException {
+        Measurement m = measurementDAO.findByAliasAndID(alias, r);
         if (m == null) {
             throw new MeasurementNotFoundException(alias + " for " + r.getName()
                                                    + " not found");
@@ -427,32 +429,29 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Get a Measurement by Id.
-     * @ejb:interface-method
      */
     public Measurement getMeasurement(Integer mid) {
-        return getMeasurementDAO().get(mid);
+        return measurementDAO.get(mid);
     }
 
     /**
      * Get the live measurement values for a given resource.
      * @param id The id of the resource
-     * @ejb:interface-method
      */
     public void getLiveMeasurementValues(AuthzSubject subject,
                                          AppdefEntityID id)
         throws PermissionException, LiveMeasurementException,
-               MeasurementNotFoundException
-    {
-        List mcol = 
-            getMeasurementDAO().findEnabledByResource(getResource(id));
+        MeasurementNotFoundException {
+        List<Measurement> mcol =
+                                 measurementDAO.findEnabledByResource(getResource(id));
         String[] dsns = new String[mcol.size()];
         Integer availMeasurement = null; // For insert of AVAIL down
-        Iterator it = mcol.iterator();
 
+        Iterator<Measurement> it = mcol.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            Measurement dm = (Measurement)it.next();
+            Measurement dm = (Measurement) it.next();
             dsns[i] = dm.getDsn();
-            
+
             MeasurementTemplate template = dm.getTemplate();
 
             if (template.getAlias().equals(Metric.ATTR_AVAIL)) {
@@ -464,9 +463,9 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                  " measurements");
         try {
             getLiveMeasurementValues(id, dsns);
-        } catch (LiveMeasurementException e) {            
+        } catch (LiveMeasurementException e) {
             log.info("Resource " + id + " reports it is unavailable, setting " +
-                     "measurement ID " + availMeasurement + " to DOWN: "+ e);
+                     "measurement ID " + availMeasurement + " to DOWN: " + e);
 
             // Only print the full stack trace in debug mode
             if (log.isDebugEnabled()) {
@@ -475,63 +474,53 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
             if (availMeasurement != null) {
                 MetricValue val = new MetricValue(MeasurementConstants.AVAIL_DOWN);
-                AvailabilityManagerImpl.getOne().addData(availMeasurement,
-                                                            val);
+                availabilityManager.addData(availMeasurement, val);
             }
         }
     }
 
     /**
      * Count of metrics enabled for a particular entity
-     *
+     * 
      * @return a The number of metrics enabled for the given entity
-     * @ejb:interface-method
      */
     public int getEnabledMetricsCount(AuthzSubject subject, AppdefEntityID id) {
         final Resource res = getResource(id);
         if (res == null || res.isInAsyncDeleteState()) {
             return 0;
         }
-        final List mcol = getMeasurementDAO().findEnabledByResource(res);
+        final List<Measurement> mcol = measurementDAO.findEnabledByResource(res);
         return mcol.size();
     }
 
     /**
      * @param subject {@link AuthzSubject}
      * @param resIdsToTemplIds {@link Map} of {@link Integer} of resourceIds to
-     * {@link List} of templateIds
+     *        {@link List} of templateIds
      * @return {@link Map} of {@link Resource} to {@link List} of
-     * {@link Measurement}s
+     *         {@link Measurement}s
      * @throws PermissionException
-     * @ejb:interface-method
      */
-    public Map findMeasurements(AuthzSubject subject, Map resIdsToTemplIds)
-        throws PermissionException
-    {
-        Map rtn = new HashMap();
-        MeasurementDAO dao = getMeasurementDAO();
-        ResourceManager rMan = ResourceManagerImpl.getOne();
-        ResourceGroupManager gMan = ResourceGroupManagerImpl.getOne();
-        for (Iterator i=resIdsToTemplIds.entrySet().iterator(); i.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)i.next();
-            Integer resId = (Integer)entry.getKey();
-            List templs = (List)entry.getValue();
-            Integer[] tids = (Integer[])templs.toArray(new Integer[0]);
-            Resource resource = rMan.findResourceById(resId);
+    public Map<Resource, List<Measurement>> findMeasurements(AuthzSubject subject,
+                                                             Map<Integer, List<Integer>> resIdsToTemplIds)
+        throws PermissionException {
+        Map<Resource, List<Measurement>> rtn = new HashMap<Resource, List<Measurement>>();
+        for (Map.Entry<Integer, List<Integer>> entry : resIdsToTemplIds.entrySet()) {
+            Integer resId = entry.getKey();
+            List<Integer> templs = entry.getValue();
+            Integer[] tids = templs.toArray(new Integer[0]);
+            Resource resource = resourceManager.findResourceById(resId);
             // checkModifyPermission(subject.getId(), appId);
             Integer resTypeId = resource.getResourceType().getId();
             if (resTypeId.equals(AuthzConstants.authzGroup)) {
-                ResourceGroup grp = gMan.findResourceGroupById(
-                    subject, resource.getInstanceId());
-                Collection mems = gMan.getMembers(grp);
-                for (Iterator it=mems.iterator(); it.hasNext(); ) {
-                    Resource res = (Resource)it.next();
-                    rtn.put(
-                        res, dao.findByTemplatesForInstance(tids, res));
+                ResourceGroup grp = resourceGroupManager.findResourceGroupById(
+                                                                               subject, resource.getInstanceId());
+                Collection<Resource> mems = resourceGroupManager.getMembers(grp);
+                for (Resource res : mems) {
+                    rtn.put(res, measurementDAO.findByTemplatesForInstance(tids, res));
                 }
             } else {
-                rtn.put(
-                    resource, dao.findByTemplatesForInstance(tids, resource));
+                rtn.put(resource, measurementDAO.findByTemplatesForInstance(tids, resource));
             }
         }
         return rtn;
@@ -540,229 +529,206 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     /**
      * Find the Measurement corresponding to the given MeasurementTemplate id
      * and instance id.
-     *
+     * 
      * @param tid The MeasurementTemplate id
      * @param aeid The entity id.
      * @return a Measurement value
-     * @ejb:interface-method
      */
     public Measurement findMeasurement(AuthzSubject subject,
                                        Integer tid, AppdefEntityID aeid)
         throws MeasurementNotFoundException {
-        List metrics = getMeasurementDAO()
-            .findByTemplatesForInstance(new Integer[] {tid}, getResource(aeid));
+        List<Measurement> metrics = measurementDAO
+                                                  .findByTemplatesForInstance(new Integer[] { tid }, getResource(aeid));
 
         if (metrics.size() == 0) {
             throw new MeasurementNotFoundException("No measurement found " +
                                                    "for " + aeid + " with " +
                                                    "template " + tid);
         }
-        return (Measurement) metrics.get(0);
+        return metrics.get(0);
     }
 
     /**
      * Look up a Measurement, allowing for the query to return a stale copy of
      * the Measurement (for efficiency reasons).
-     *
+     * 
      * @param subject The subject.
      * @param tid The template Id.
      * @param iid The instance Id.
-     * @param allowStale <code>true</code> to allow stale copies of an alert 
-     *                   definition in the query results; <code>false</code> to 
-     *                   never allow stale copies, potentially always forcing a 
-     *                   sync with the database.
+     * @param allowStale <code>true</code> to allow stale copies of an alert
+     *        definition in the query results; <code>false</code> to
+     *        never allow stale copies, potentially always forcing a
+     *        sync with the database.
      * @return The Measurement
-     * @ejb:interface-method
      */
     public Measurement findMeasurement(AuthzSubject subject,
                                        Integer tid,
                                        Integer iid,
                                        boolean allowStale)
         throws MeasurementNotFoundException {
-        
-        Measurement dm = getMeasurementDAO()
-            .findByTemplateForInstance(tid, iid, allowStale);
-            
+
+        Measurement dm = measurementDAO.findByTemplateForInstance(tid, iid, allowStale);
+
         if (dm == null) {
             throw new MeasurementNotFoundException("No measurement found " +
                                                    "for " + iid + " with " +
                                                    "template " + tid);
         }
-        
+
         return dm;
     }
-        
+
     /**
-     * Look up a list of  Measurements for a template and instances
-     *
+     * Look up a list of Measurements for a template and instances
+     * 
      * @return a list of Measurement's
-     * @ejb:interface-method
      */
-    public List findMeasurements(AuthzSubject subject, Integer tid,
-                                 AppdefEntityID[] aeids) {
-        MeasurementDAO dao = getMeasurementDAO();
-        ArrayList results = new ArrayList();
-        for (int i = 0; i < aeids.length; i++) {
-            results.addAll(dao.findByTemplatesForInstance(new Integer[] { tid },
-                                                          getResource(aeids[i])));
+    public List<Measurement> findMeasurements(AuthzSubject subject, Integer tid,
+                                              AppdefEntityID[] aeids) {
+        ArrayList<Measurement> results = new ArrayList<Measurement>();
+        for (AppdefEntityID aeid : aeids) {
+            results.addAll(measurementDAO.findByTemplatesForInstance(new Integer[] { tid },
+                                                                     getResource(aeid)));
         }
         return results;
     }
 
     /**
      * Look up a list of Measurements for a template and instances
-     *
+     * 
      * @return An array of Measurement ids.
-     * @ejb:interface-method
      */
     public Integer[] findMeasurementIds(AuthzSubject subject, Integer tid,
                                         Integer[] ids) {
-        List results =
-            getMeasurementDAO().findIdsByTemplateForInstances(tid, ids);
-        return (Integer[]) results.toArray(new Integer[results.size()]);
+        List<Integer> results =
+                                measurementDAO.findIdsByTemplateForInstances(tid, ids);
+        return results.toArray(new Integer[results.size()]);
     }
-    
+
     /**
      * Look up a list of Measurements for a category
      * XXX: Why is this method called findMeasurements() but only returns
      * enabled measurements if cat == null??
-     *
+     * 
      * @return a List of Measurement objects.
-     * @ejb:interface-method
      */
-    public List findMeasurements(AuthzSubject subject, AppdefEntityID id,
-                                 String cat, PageControl pc) {
-        List meas;
-            
+    public List<Measurement> findMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                              String cat, PageControl pc) {
+        List<Measurement> meas;
+
         // See if category is valid
         if (cat == null || Arrays.binarySearch(
-            MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
-            meas = getMeasurementDAO().findEnabledByResource(getResource(id));
+                                               MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
+            meas = measurementDAO.findEnabledByResource(getResource(id));
         } else {
-            meas = getMeasurementDAO().findByResourceForCategory(getResource(id),
-                                                                 cat);
+            meas = measurementDAO.findByResourceForCategory(getResource(id), cat);
         }
-    
+
         return meas;
     }
 
     /**
      * Look up a list of enabled Measurements for a category
-     *
+     * 
      * @return a list of {@link Measurement}
-     * @ejb:interface-method
      */
-    public List findEnabledMeasurements(AuthzSubject subject, AppdefEntityID id,
-                                        String cat) {
-        List mcol;
-            
+    public List<Measurement> findEnabledMeasurements(AuthzSubject subject, AppdefEntityID id,
+                                                     String cat) {
+        List<Measurement> mcol;
+
         // See if category is valid
         if (cat == null || Arrays.binarySearch(
-            MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
-            mcol = getMeasurementDAO()
-                .findEnabledByResource(getResource(id));
+                                               MeasurementConstants.VALID_CATEGORIES, cat) < 0) {
+            mcol = measurementDAO.findEnabledByResource(getResource(id));
         } else {
-            mcol = getMeasurementDAO().
-                findByResourceForCategory(getResource(id), cat);
+            mcol = measurementDAO.findByResourceForCategory(getResource(id), cat);
         }
         return mcol;
     }
 
     /**
      * Look up a List of designated Measurements for an entity
-     *
+     * 
      * @return A List of Measurements
-     * @ejb:interface-method
      */
-    public List findDesignatedMeasurements(AppdefEntityID id) {
-        return getMeasurementDAO()
-            .findDesignatedByResource(getResource(id));
+    public List<Measurement> findDesignatedMeasurements(AppdefEntityID id) {
+        return measurementDAO.findDesignatedByResource(getResource(id));
     }
 
     /**
      * Look up a list of designated Measurements for an entity for a category
-     *
+     * 
      * @return A List of Measurements
-     * @ejb:interface-method
      */
-    public List findDesignatedMeasurements(AuthzSubject subject,
-                                           AppdefEntityID id, String cat) {
-        return getMeasurementDAO()
-            .findDesignatedByResourceForCategory(getResource(id), cat);
+    public List<Measurement> findDesignatedMeasurements(AuthzSubject subject,
+                                                        AppdefEntityID id, String cat) {
+        return measurementDAO.findDesignatedByResourceForCategory(getResource(id), cat);
     }
 
     /**
      * Look up a list of designated Measurements for an group for a category
-     *
+     * 
      * @return A List of Measurements
-     * @ejb:interface-method
      */
-    public List findDesignatedMeasurements(AuthzSubject subject,
-                                           ResourceGroup g, String cat) {
-        return getMeasurementDAO().findDesignatedByCategoryForGroup(g, cat);
+    public List<Measurement> findDesignatedMeasurements(AuthzSubject subject,
+                                                        ResourceGroup g, String cat) {
+        return measurementDAO.findDesignatedByCategoryForGroup(g, cat);
     }
 
     /**
      * Get an Availabilty Measurement by AppdefEntityId
      * @deprecated Use getAvailabilityMeasurement(Resource) instead.
-     *
-     * @ejb:interface-method
+     * 
      */
     public Measurement getAvailabilityMeasurement(AuthzSubject subject,
-                                                  AppdefEntityID id)
-    {
+                                                  AppdefEntityID id) {
         return getAvailabilityMeasurement(getResource(id));
     }
 
     /**
-     * Get an Availability Measurement by Resource.  May return null.
-     * @ejb:interface-method
+     * Get an Availability Measurement by Resource. May return null.
      */
     public Measurement getAvailabilityMeasurement(Resource r) {
-        return getMeasurementDAO().findAvailMeasurement(r);
+        return measurementDAO.findAvailMeasurement(r);
     }
-    
+
     /**
      * Look up a list of Measurement objects by category
-     *
-     * @ejb:interface-method
+     * 
      */
-    public List findMeasurementsByCategory(String cat)
-    {
-        return getMeasurementDAO().findByCategory(cat);
+    public List<Measurement> findMeasurementsByCategory(String cat) {
+        return measurementDAO.findByCategory(cat);
     }
 
     /**
      * Look up a Map of Measurements for a Category
-     *
-     * XXX: This method needs to be re-thought.  It only returns a single
-     *      designated metric per category even though HQ supports multiple
-     *      designates per category.
-     *
-     *  @return A List of designated Measurements keyed by AppdefEntityID
-     *
-     * @ejb:interface-method
+     * 
+     * XXX: This method needs to be re-thought. It only returns a single
+     * designated metric per category even though HQ supports multiple
+     * designates per category.
+     * 
+     * @return A List of designated Measurements keyed by AppdefEntityID
+     * 
      */
-    public Map findDesignatedMeasurements(AuthzSubject subject,
-                                          AppdefEntityID[] ids, String cat)
+    public Map<AppdefEntityID, Measurement> findDesignatedMeasurements(AuthzSubject subject,
+                                                                       AppdefEntityID[] ids, String cat)
         throws MeasurementNotFoundException {
 
-        Map midMap = new HashMap();
-        if (ids.length == 0)
+        Map<AppdefEntityID, Measurement> midMap = new HashMap<AppdefEntityID, Measurement>();
+        if (ids.length == 0) {
             return midMap;
+        }
 
-        for (int i = 0; i < ids.length; i++) {
-            AppdefEntityID id = ids[i];
+        for (AppdefEntityID id : ids) {
             try {
-                List metrics = getMeasurementDAO().
-                    findDesignatedByResourceForCategory(getResource(id),
-                                                        cat);
+                List<Measurement> metrics = measurementDAO.
+                                                          findDesignatedByResourceForCategory(getResource(id), cat);
 
                 if (metrics.size() == 0) {
                     throw new FinderException("No metrics found");
                 }
 
-                Measurement m = (Measurement) metrics.get(0);
+                Measurement m = metrics.get(0);
                 midMap.put(id, m);
             } catch (FinderException e) {
                 // Throw an exception if we're only looking for one
@@ -778,56 +744,50 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * TODO: scottmf, need to do some more work to handle other authz resource
-     *  types other than platform, server, service, and group
+     * types other than platform, server, service, and group
      * 
      * @return {@link Map} of {@link Integer} to {@link List} of
-     * {@link Measurement}s, Integer => Resource.getId(),
-     * @ejb:interface-method
+     *         {@link Measurement}s, Integer => Resource.getId(),
      */
-    public Map getAvailMeasurements(Collection resources) {
-        final Map rtn = new HashMap(resources.size());
-        final List res = new ArrayList(resources.size());
-        final ResourceManager resMan = ResourceManagerImpl.getOne();
-        final MeasurementDAO dao = getMeasurementDAO();
-        for (Iterator it=resources.iterator(); it.hasNext(); ) {
-            Object o = it.next();
+    public Map<Integer, List<Measurement>> getAvailMeasurements(Collection<?> resources) {
+        final Map<Integer, List<Measurement>> rtn = new HashMap<Integer, List<Measurement>>(resources.size());
+        final List<Resource> res = new ArrayList<Resource>(resources.size());
+        for (Object o : resources) {
             Resource resource = null;
             if (o == null) {
                 continue;
             } else if (o instanceof AppdefEntityValue) {
                 AppdefEntityValue rv = (AppdefEntityValue) o;
                 AppdefEntityID aeid = rv.getID();
-                resource = resMan.findResource(aeid);
+                resource = resourceManager.findResource(aeid);
             } else if (o instanceof AppdefEntityID) {
                 AppdefEntityID aeid = (AppdefEntityID) o;
-                resource = resMan.findResource(aeid);
+                resource = resourceManager.findResource(aeid);
             } else if (o instanceof AppdefResource) {
-                AppdefResource r = (AppdefResource)o;
-                resource = resMan.findResource(r.getEntityId());
+                AppdefResource r = (AppdefResource) o;
+                resource = resourceManager.findResource(r.getEntityId());
             } else if (o instanceof Resource) {
                 resource = (Resource) o;
             } else if (o instanceof ResourceGroup) {
                 ResourceGroup grp = (ResourceGroup) o;
                 resource = grp.getResource();
-                rtn.put(resource.getId(), dao.findAvailMeasurements(grp));
+                rtn.put(resource.getId(), measurementDAO.findAvailMeasurements(grp));
                 continue;
-            } else if (o instanceof AppdefResourceValue){
+            } else if (o instanceof AppdefResourceValue) {
                 AppdefResourceValue r = (AppdefResourceValue) o;
                 AppdefEntityID aeid = r.getEntityId();
-                resource = resMan.findResource(aeid);
+                resource = resourceManager.findResource(aeid);
             } else {
-                resource = resMan.findResourceById((Integer) o);
+                resource = resourceManager.findResourceById((Integer) o);
             }
             if (resource == null || resource.isInAsyncDeleteState()) {
                 continue;
             }
             final ResourceType type = resource.getResourceType();
             if (type.getId().equals(AuthzConstants.authzGroup)) {
-                final ResourceGroupManager resGrpMan =
-                    ResourceGroupManagerImpl.getOne();
                 ResourceGroup grp =
-                    resGrpMan.getResourceGroupByResource(resource);
-                rtn.put(resource.getId(), dao.findAvailMeasurements(grp));
+                                    resourceGroupManager.getResourceGroupByResource(resource);
+                rtn.put(resource.getId(), measurementDAO.findAvailMeasurements(grp));
                 continue;
             } else if (type.getId().equals(AuthzConstants.authzApplication)) {
                 rtn.putAll(getAvailMeas(resource));
@@ -835,97 +795,87 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             }
             res.add(resource);
         }
-        List ids = getMeasurementDAO().findAvailMeasurements(res);
+        List<Measurement> ids = measurementDAO.findAvailMeasurements(res);
         // may be null if measurements have not been configured
         if (ids == null) {
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
-        for (Iterator it=ids.iterator(); it.hasNext(); ) {
-            Measurement m = (Measurement)it.next();
+        for (Measurement m : ids) {
             rtn.put(m.getResource().getId(), Collections.singletonList(m));
         }
         return rtn;
     }
 
-    private final Map getAvailMeas(Resource application) {
+    private final Map<Integer, List<Measurement>> getAvailMeas(Resource application) {
         final Integer typeId = application.getResourceType().getId();
         if (!typeId.equals(AuthzConstants.authzApplication)) {
-            return Collections.EMPTY_MAP;
+            return Collections.emptyMap();
         }
-        final ApplicationManagerLocal appMan =
-            ApplicationManagerEJBImpl.getOne();
-        final AuthzSubject overlord =
-            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        final AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         try {
-            final Application app = appMan.findApplicationById(
-                overlord, application.getInstanceId());
-            final Collection appServices = app.getAppServices();
-            final List resources = new ArrayList(appServices.size());
-            for (final Iterator it=appServices.iterator(); it.hasNext(); ) {
-                final AppService appService = (AppService)it.next();
+            final Application app = applicationManager.findApplicationById(
+                                                                           overlord, application.getInstanceId());
+            final Collection<AppService> appServices = app.getAppServices();
+            final List<Resource> resources = new ArrayList<Resource>(appServices.size());
+            for (AppService appService : appServices) {
                 resources.addAll(getAppResources(appService));
             }
             return getAvailMeasurements(resources);
         } catch (ApplicationNotFoundException e) {
             log.warn("cannot find Application by id = " +
-                application.getInstanceId());
+                     application.getInstanceId());
         } catch (PermissionException e) {
             log.error("error finding application using overlord", e);
         }
-        return Collections.EMPTY_MAP;
+        return Collections.emptyMap();
     }
 
-    private final List getAppResources(AppService appService) {
+    private final List<Resource> getAppResources(AppService appService) {
         if (!appService.isIsGroup()) {
             final Service service = appService.getService();
             if (service == null || service.getResource() == null ||
                 service.getResource().isInAsyncDeleteState()) {
-                return Collections.EMPTY_LIST;
+                return Collections.emptyList();
             }
             return Collections.singletonList(service.getResource());
         }
         final ResourceGroup group = appService.getResourceGroup();
         final Resource resource = group.getResource();
         if (resource == null || resource.isInAsyncDeleteState()) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
-        final ResourceGroupManager rgMan =
-            ResourceGroupManagerImpl.getOne();
-        return new ArrayList(rgMan.getMembers(group));
+        return new ArrayList<Resource>(resourceGroupManager.getMembers(group));
     }
 
     /**
      * Look up a list of Measurement intervals for template IDs.
-     *
+     * 
      * @return a map keyed by template ID and values of metric intervals
-     * There is no entry if a metric is disabled or does not exist for the
-     * given entity or entities.  However, if there are multiple entities, and
-     * the intervals differ or some enabled/not enabled, then the value will
-     * be "0" to denote varying intervals.
-     *
-     * @ejb:interface-method
+     *         There is no entry if a metric is disabled or does not exist for
+     *         the
+     *         given entity or entities. However, if there are multiple
+     *         entities, and
+     *         the intervals differ or some enabled/not enabled, then the value
+     *         will
+     *         be "0" to denote varying intervals.
      */
-    public Map findMetricIntervals(AuthzSubject subject, AppdefEntityID[] aeids,
-                                   Integer[] tids) {
+    public Map<Integer, Long> findMetricIntervals(AuthzSubject subject, AppdefEntityID[] aeids,
+                                                  Integer[] tids) {
         final Long disabled = new Long(-1);
-        MeasurementDAO ddao = getMeasurementDAO();
-        Map intervals = new HashMap(tids.length);
-        
-        ResourceManager resMan = ResourceManagerImpl.getOne();
+        MeasurementDAO ddao = measurementDAO;
+        Map<Integer, Long> intervals = new HashMap<Integer, Long>(tids.length);
 
-        for (int ind = 0; ind < aeids.length; ind++) {
-            Resource res = resMan.findResource(aeids[ind]);
-            List metrics = ddao.findByTemplatesForInstance(tids, res);
+        for (AppdefEntityID aeid : aeids) {
+            Resource res = resourceManager.findResource(aeid);
+            List<Measurement> metrics = ddao.findByTemplatesForInstance(tids, res);
 
-            for (Iterator i = metrics.iterator(); i.hasNext();)
-            {
-                Measurement dm = (Measurement) i.next();
+            for (Measurement dm : metrics) {
                 Long interval = new Long(dm.getInterval());
 
                 if (!dm.isEnabled()) {
                     interval = disabled;
                 }
-                
+
                 Integer templateId = dm.getTemplate().getId();
                 Long previous = (Long) intervals.get(templateId);
 
@@ -938,19 +888,18 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                 }
             }
         }
-        
+
         // Filter by template IDs, since we only pay attention to what was
         // passed, but may have more than that in our map.
-        for (int i=0; i<tids.length; i++) {
-            if (!intervals.containsKey(tids[i]))
-                intervals.put(tids[i], null);
+        for (Integer tid : tids) {
+            if (!intervals.containsKey(tid)) {
+                intervals.put(tid, null);
+            }
         }
-        
-        // Copy the keys, since we are going to be modifying the interval map
-        Set keys = new HashSet(intervals.keySet());
-        for (Iterator i = keys.iterator(); i.hasNext();) {
-            Integer templateId = (Integer) i.next();
 
+        // Copy the keys, since we are going to be modifying the interval map
+        Set<Integer> keys = new HashSet<Integer>(intervals.keySet());
+        for (Integer templateId : keys) {
             if (disabled.equals(intervals.get(templateId))) { // Disabled
                 // so don't return it
                 intervals.remove(templateId);
@@ -959,84 +908,74 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
         return intervals;
     }
-    
+
     /**
      * @return List<Object[]> - [0] = Measurement, [1] MeasurementTemplate
-     * @ejb:interface-method
      */
-    public List findAllEnabledMeasurementsAndTemplates() {
-        MeasurementDAO dao = getMeasurementDAO();
-        return dao.findAllEnabledMeasurementsAndTemplates();
+    public List<Object[]> findAllEnabledMeasurementsAndTemplates() {
+        return measurementDAO.findAllEnabledMeasurementsAndTemplates();
     }
 
     /**
      * Set the interval of Measurements based their template ID's
      * Enable Measurements and enqueue for scheduling after commit
-     *
-     * @ejb:interface-method
+     * 
      */
     public void enableMeasurements(AuthzSubject subject, AppdefEntityID[] aeids,
                                    Integer[] mtids, long interval)
         throws MeasurementNotFoundException, MeasurementCreateException,
-               TemplateNotFoundException, PermissionException {
+        TemplateNotFoundException, PermissionException {
 
-        MeasurementDAO dao = getMeasurementDAO();
         // Create a list of IDs
         Integer[] iids = new Integer[aeids.length];
         for (int i = 0; i < aeids.length; i++) {
             checkModifyPermission(subject.getId(), aeids[i]);
             iids[i] = aeids[i].getId();
         }
-        
-        List mids = new ArrayList(aeids.length * mtids.length);
-        for (int i = 0; i < mtids.length; i++) {
-            mids.addAll(dao.findIdsByTemplateForInstances(mtids[i], iids));
+
+        List<Integer> mids = new ArrayList<Integer>(aeids.length * mtids.length);
+        for (Integer mtid : mtids) {
+            mids.addAll(measurementDAO.findIdsByTemplateForInstances(mtid, iids));
         }
 
-        for (final Iterator it=mids.iterator(); it.hasNext(); ) {
-            final Integer mid = (Integer)it.next();
-            final Measurement m = dao.findById(mid);
+        for (Integer mid : mids) {
+            final Measurement m = measurementDAO.findById(mid);
             m.setEnabled(true);
             m.setInterval(interval);
         }
-        
+
         // Update the agent schedule
+        // TODO: Really? just publish the same event many times?
         for (int i = 0; i < aeids.length; i++) {
             AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(
-                Arrays.asList(aeids));
+                                                                        Arrays.asList(aeids));
             ZeventManager.getInstance().enqueueEventAfterCommit(event);
         }
-    } 
+    }
 
     /**
-     * Enable a collection of metrics, enqueue for scheduling 
+     * Enable a collection of metrics, enqueue for scheduling
      * after commit
-     * @ejb:interface-method
      */
     public void enableMeasurements(AuthzSubject subject, Integer[] mids)
-        throws PermissionException
-    {
-        StopWatch watch = new StopWatch();        
-        Integer mid = null;
-        Measurement meas = null;
+        throws PermissionException {
+        StopWatch watch = new StopWatch();
         Resource resource = null;
         AppdefEntityID appId = null;
-        List appIdList = new ArrayList();        
-        List midsList = Arrays.asList(mids);
-        
-        watch.markTimeBegin("setEnabled");
-        for (Iterator iter=midsList.iterator(); iter.hasNext(); ) {
-            mid = (Integer) iter.next();
-            
-            meas = getMeasurementDAO().get(mid);
+        List<AppdefEntityID> appIdList = new ArrayList<AppdefEntityID>();
+        List<Integer> midsList = Arrays.asList(mids);
 
-            if (!meas.isEnabled()) {                
+        watch.markTimeBegin("setEnabled");
+        for (Integer mid : midsList) {
+            Measurement meas = measurementDAO.get(mid);
+
+            if (!meas.isEnabled()) {
                 resource = meas.getResource();
                 appId = new AppdefEntityID(resource);
 
-                checkModifyPermission(subject.getId(), appId);                
+                checkModifyPermission(subject.getId(), appId);
                 appIdList.add(appId);
-                
+
                 meas.setEnabled(true);
             }
         }
@@ -1051,39 +990,36 @@ public class MeasurementManagerEJBImpl extends SessionEJB
             log.debug("enableMeasurements: total=" + appIdList.size() + ", time=" + watch);
         }
     }
-    
+
     /**
      * Enable the Measurement and enqueue for scheduling after commit
-     * @ejb:interface-method
      */
     public void enableMeasurement(AuthzSubject subject, Integer mId,
                                   long interval)
-        throws PermissionException
-    {
-        final List mids = Collections.singletonList(mId);
-        Measurement meas = getMeasurementDAO().get(mId);
+        throws PermissionException {
+        final List<Integer> mids = Collections.singletonList(mId);
+        Measurement meas = measurementDAO.get(mId);
         if (meas.isEnabled()) {
             return;
         }
         Resource resource = meas.getResource();
         AppdefEntityID appId = new AppdefEntityID(resource);
         checkModifyPermission(subject.getId(), appId);
-        MeasurementDAO dao = getMeasurementDAO();
-        for (final Iterator it=mids.iterator(); it.hasNext(); ) {
-            final Integer mid = (Integer)it.next();
+        MeasurementDAO dao = measurementDAO;
+        for (Integer mid : mids) {
             final Measurement m = dao.findById(mid);
             m.setEnabled(true);
             m.setInterval(interval);
         }
-        List eids = Collections.singletonList(appId);
+        List<AppdefEntityID> eids = Collections.singletonList(appId);
         AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
         ZeventManager.getInstance().enqueueEventAfterCommit(event);
     }
-    
+
     /**
-     * Enable the default on metrics for a given resource, enqueue for scheduling 
+     * Enable the default on metrics for a given resource, enqueue for
+     * scheduling
      * after commit
-     * @ejb:interface-method
      */
     public void enableDefaultMeasurements(AuthzSubject subj, Resource r)
         throws PermissionException {
@@ -1091,16 +1027,15 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         checkModifyPermission(subj.getId(), appId);
         boolean sendToAgent = false;
 
-        List metrics = getMeasurementDAO().findDefaultsByResource(r);
-        for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-            Measurement dm = (Measurement)it.next();
+        List<Measurement> metrics = measurementDAO.findDefaultsByResource(r);
+        for (Measurement dm : metrics) {
             if (!dm.isEnabled()) {
                 dm.setEnabled(true);
                 sendToAgent = true;
             }
         }
         if (sendToAgent) {
-            List eids = Collections.singletonList(appId);
+            List<AppdefEntityID> eids = Collections.singletonList(appId);
             AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
             ZeventManager.getInstance().enqueueEventAfterCommit(event);
         }
@@ -1109,45 +1044,42 @@ public class MeasurementManagerEJBImpl extends SessionEJB
     /**
      * @param subject
      * @param mId
-     * @throws MeasurementUnscheduleException 
-     * @throws PermissionException 
-     * @ejb:interface-method
+     * @throws MeasurementUnscheduleException
+     * @throws PermissionException
      */
     public void disableMeasurement(AuthzSubject subject, Integer mId)
-        throws PermissionException, MeasurementUnscheduleException
-    {
-        disableMeasurements(subject, new Integer[]{mId});
+        throws PermissionException, MeasurementUnscheduleException {
+        disableMeasurements(subject, new Integer[] { mId });
     }
 
     /**
-     * Synchronously disables measurements according to the mids array.  Removes
+     * Synchronously disables measurements according to the mids array. Removes
      * measurements from the cache as well.
      * XXX scottmf, may be a good idea to add a flag that specifies
      * if the measurements should be removed in the background / foreground
      * and removed from cache.
-     * XXX scottmf, probably a bad idea to throw a MeasurementUnscheduleException
+     * XXX scottmf, probably a bad idea to throw a
+     * MeasurementUnscheduleException
      * if a failure occurs considering this is done in batch without any
      * error status on what succeeded and what did not.
      * @param subject {@link AuthzSubject} checks if subject has modify
-     * permission on the {@link AppdefEntityID} associated with the mid
+     *        permission on the {@link AppdefEntityID} associated with the mid
      * @param mids {@link Integer} array of mids representing a MeasurementId
-     * @ejb:interface-method
      */
     public void disableMeasurements(AuthzSubject subject, Integer[] mids)
-        throws PermissionException, MeasurementUnscheduleException
-    {
-        StopWatch watch = new StopWatch();        
+        throws PermissionException, MeasurementUnscheduleException {
+        StopWatch watch = new StopWatch();
         Integer mid = null;
         Measurement meas = null;
         Resource resource = null;
         AppdefEntityID appId = null;
-        List appIdList = new ArrayList();        
-        List midsList = Arrays.asList(mids);
-        
-        for (Iterator iter=midsList.iterator(); iter.hasNext(); ) {
-            mid = (Integer) iter.next();
-            
-            meas = getMeasurementDAO().get(mid);
+        List<AppdefEntityID> appIdList = new ArrayList<AppdefEntityID>();
+        List<Integer> midsList = Arrays.asList(mids);
+
+        for (Iterator<Integer> iter = midsList.iterator(); iter.hasNext();) {
+            mid = iter.next();
+
+            meas = measurementDAO.get(mid);
             if (!meas.isEnabled()) {
                 iter.remove();
                 continue;
@@ -1161,36 +1093,35 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
             meas.setEnabled(false);
         }
-        
+
         if (!midsList.isEmpty()) {
-            mids = (Integer[]) midsList.toArray(new Integer[0]);
-            
+            mids = midsList.toArray(new Integer[0]);
+
             removeMeasurementsFromCache(mids);
-        
+
             watch.markTimeBegin("enqueueZevents");
             enqueueZeventsForMeasScheduleCollectionDisabled(mids);
             watch.markTimeEnd("enqueueZevents");
-        
+
             // Unscheduling of all metrics for a resource could indicate that
-            // the resource is getting removed.  Send the unschedule synchronously
+            // the resource is getting removed. Send the unschedule
+            // synchronously
             // so that all the necessary plumbing is in place.
             watch.markTimeBegin("unschedule");
-            MeasurementProcessorImpl.getOne().unschedule(appIdList);
+            measurementProcessor.unschedule(appIdList);
             watch.markTimeEnd("unschedule");
-            
+
             log.debug("disableMeasurements: total=" + mids.length + ", time=" + watch);
-        }        
+        }
     }
-    
+
     /**
-     * @throws PermissionException 
-     * @ejb:interface-method
+     * @throws PermissionException
      */
     public void updateMeasurementInterval(AuthzSubject subject, Integer mId,
                                           long interval)
-        throws PermissionException
-    {
-        Measurement meas = getMeasurementDAO().get(mId);
+        throws PermissionException {
+        Measurement meas = measurementDAO.get(mId);
         meas.setEnabled((interval != 0));
         meas.setInterval(interval);
         Resource resource = meas.getResource();
@@ -1201,51 +1132,50 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
     /**
      * Disable all measurements for the given resources.
-     *
+     * 
      * @param agentId The entity id to use to look up the agent connection
      * @param ids The list of entitys to unschedule
-     * @ejb:interface-method
-     *
-     * NOTE: This method requires all entity ids to be monitored by the same
-     * agent as specified by the agentId
+     * 
+     *        NOTE: This method requires all entity ids to be monitored by the
+     *        same
+     *        agent as specified by the agentId
      */
     public void disableMeasurements(AuthzSubject subject, AppdefEntityID agentId,
                                     AppdefEntityID[] ids)
         throws PermissionException {
 
-        MeasurementDAO dao = getMeasurementDAO();
+        MeasurementDAO dao = measurementDAO;
         for (int i = 0; i < ids.length; i++) {
             checkModifyPermission(subject.getId(), ids[i]);
 
-            List mcol = dao.findEnabledByResource(getResource(ids[i]));
-            
+            List<Measurement> mcol = dao.findEnabledByResource(getResource(ids[i]));
+
             Integer[] mids = new Integer[mcol.size()];
-            Iterator it = mcol.iterator();
+            Iterator<Measurement> it = mcol.iterator();
             for (int j = 0; it.hasNext(); j++) {
-                Measurement dm = (Measurement) it.next();
+                Measurement dm = it.next();
                 dm.setEnabled(false);
                 mids[j] = dm.getId();
             }
 
             removeMeasurementsFromCache(mids);
-            
+
             enqueueZeventsForMeasScheduleCollectionDisabled(mids);
         }
 
         // Unscheduling of all metrics for a resource could indicate that
-        // the resource is getting removed.  Send the unschedule synchronously
+        // the resource is getting removed. Send the unschedule synchronously
         // so that all the necessary plumbing is in place.
         try {
-            MeasurementProcessorImpl.getOne().unschedule(agentId, ids);
+            measurementProcessor.unschedule(agentId, ids);
         } catch (MeasurementUnscheduleException e) {
-            log.error("Unable to disable measurements", e);           
+            log.error("Unable to disable measurements", e);
         }
     }
 
     /**
      * Disable all Measurements for a resource
-     *
-     * @ejb:interface-method
+     * 
      */
     public void disableMeasurements(AuthzSubject subject, AppdefEntityID id)
         throws PermissionException {
@@ -1253,29 +1183,29 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         checkModifyPermission(subject.getId(), id);
         disableMeasurements(subject, getResource(id));
     }
-    
+
     /**
      * Disable all Measurements for a resource
-     *
-     * @ejb:interface-method
+     * 
      */
     public void disableMeasurements(AuthzSubject subject, Resource res)
         throws PermissionException {
-        List mcol = getMeasurementDAO().findEnabledByResource(res);
-        
-        if (mcol.size() == 0)
+        List<Measurement> mcol = measurementDAO.findEnabledByResource(res);
+
+        if (mcol.size() == 0) {
             return;
-        
+        }
+
         Integer[] mids = new Integer[mcol.size()];
-        Iterator it = mcol.iterator();
+        Iterator<Measurement> it = mcol.iterator();
         AppdefEntityID aeid = null;
         for (int i = 0; it.hasNext(); i++) {
-            Measurement dm = (Measurement)it.next();
+            Measurement dm = it.next();
             dm.setEnabled(false);
             mids[i] = dm.getId();
             if (aeid == null) {
                 aeid = new AppdefEntityID(dm.getTemplate().getMonitorableType()
-                                              .getAppdefType(),
+                                            .getAppdefType(),
                                           dm.getInstanceId());
             }
         }
@@ -1284,165 +1214,147 @@ public class MeasurementManagerEJBImpl extends SessionEJB
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
 
         // Unscheduling of all metrics for a resource could indicate that
-        // the resource is getting removed.  Send the unschedule synchronously
+        // the resource is getting removed. Send the unschedule synchronously
         // so that all the necessary plumbing is in place.
         try {
-            MeasurementProcessorImpl.getOne().unschedule(
-                Collections.singletonList(aeid));
+            measurementProcessor.unschedule(Collections.singletonList(aeid));
         } catch (MeasurementUnscheduleException e) {
             log.error("Unable to disable measurements", e);
         }
     }
-    
+
     /**
      * XXX: not sure why all the findMeasurements require an authz if they
      * do not check the viewPermissions??
-     * @ejb:interface-method
      */
-    public List findMeasurements(AuthzSubject subject, Resource res) {
-        return getMeasurementDAO().findByResource(res);
+    public List<Measurement> findMeasurements(AuthzSubject subject, Resource res) {
+        return measurementDAO.findByResource(res);
     }
 
     /**
      * Disable measurements for an instance
      * Enqueues reschedule events after commit
-     *
-     * @ejb:interface-method
+     * 
      */
     public void disableMeasurements(AuthzSubject subject, AppdefEntityID id,
                                     Integer[] tids)
         throws PermissionException {
         // Authz check
         checkModifyPermission(subject.getId(), id);
-        
+
         Resource resource = getResource(id);
-        List mcol = getMeasurementDAO().findByResource(resource);
-        HashSet tidSet = null;
+        List<Measurement> mcol = measurementDAO.findByResource(resource);
+        HashSet<Integer> tidSet = null;
         if (tids != null) {
-            tidSet = new HashSet(Arrays.asList(tids));
-        }            
-        
-        List toUnschedule = new ArrayList();
-        for (Iterator it = mcol.iterator(); it.hasNext(); ) {
-            Measurement dm = (Measurement)it.next();
+            tidSet = new HashSet<Integer>(Arrays.asList(tids));
+        }
+
+        List<Integer> toUnschedule = new ArrayList<Integer>();
+        for (Measurement dm : mcol) {
             // Check to see if we need to remove this one
-            if (tidSet != null && 
-                !tidSet.contains(dm.getTemplate().getId()))
-                    continue;
+            if (tidSet != null &&
+                !tidSet.contains(dm.getTemplate().getId())) {
+                continue;
+            }
 
             dm.setEnabled(false);
             toUnschedule.add(dm.getId());
         }
 
-        Integer[] mids = 
-            (Integer[])toUnschedule.toArray(new Integer[toUnschedule.size()]);
-        
+        Integer[] mids = toUnschedule.toArray(new Integer[toUnschedule.size()]);
+
         removeMeasurementsFromCache(mids);
-        
+
         enqueueZeventsForMeasScheduleCollectionDisabled(mids);
-        
-        List eids = Collections.singletonList(id);
+
+        List<AppdefEntityID> eids = Collections.singletonList(id);
         AgentScheduleSyncZevent event = new AgentScheduleSyncZevent(eids);
         ZeventManager.getInstance().enqueueEventAfterCommit(event);
     }
 
     /**
-     * @ejb:interface-method
      */
     public void syncPluginMetrics(String plugin) {
-        ConfigManagerLocal cm = ConfigManagerEJBImpl.getOne();
-        List entities = getMeasurementDAO().findMetricsCountMismatch(plugin);
-        
-        AuthzSubject overlord =
-            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        List<java.lang.Number[]> entities = measurementDAO.findMetricsCountMismatch(plugin);
 
-        for (Iterator it = entities.iterator(); it.hasNext(); ) {
-            Object[] vals = (Object[]) it.next();
-            
-            java.lang.Number type = (java.lang.Number) vals[0];
-            java.lang.Number id = (java.lang.Number) vals[1];
-            AppdefEntityID aeid =
-                new AppdefEntityID(type.intValue(), id.intValue());
+        AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+
+        for (java.lang.Number[] vals : entities) {
+            java.lang.Number type = vals[0];
+            java.lang.Number id = vals[1];
+            AppdefEntityID aeid = new AppdefEntityID(type.intValue(), id.intValue());
 
             try {
                 log.info("syncPluginMetrics sync'ing metrics for " + aeid);
                 ConfigResponse c =
-                    cm.getMergedConfigResponse(overlord,
-                                               ProductPlugin.TYPE_MEASUREMENT,
-                                               aeid, true);
+                                   configManager.getMergedConfigResponse(overlord,
+                                                                         ProductPlugin.TYPE_MEASUREMENT,
+                                                                         aeid, true);
                 enableDefaultMetrics(overlord, aeid, c, false);
             } catch (AppdefEntityNotFoundException e) {
                 // Move on since we did this query based on measurement table
                 // not resource table
             } catch (PermissionException e) {
                 // Quite impossible
-                assert(false);
+                assert (false);
             } catch (Exception e) {
                 // No valid configuration to use to enable metrics
             }
         }
     }
-    
+
     /**
-     * Gets a summary of the metrics which are scheduled for collection, 
+     * Gets a summary of the metrics which are scheduled for collection,
      * across all resource types and metrics.
      * 
      * @return a list of {@link CollectionSummary} beans
-     * @ejb:interface-method
      */
-    public List findMetricCountSummaries() {
-        return getMeasurementDAO().findMetricCountSummaries();
+    public List<CollectionSummary> findMetricCountSummaries() {
+        return measurementDAO.findMetricCountSummaries();
     }
-    
+
     /**
-     * Find a list of tuples (of size 4) consisting of 
-     *   the {@link Agent}
-     *   the {@link Platform} it manages 
-     *   the {@link Server} representing the Agent
-     *   the {@link Measurement} that contains the Server Offset value
+     * Find a list of tuples (of size 4) consisting of
+     * the {@link Agent} the {@link Platform} it manages
+     * the {@link Server} representing the Agent
+     * the {@link Measurement} that contains the Server Offset value
      * 
-     * @ejb:interface-method
      */
-    public List findAgentOffsetTuples() {
-        return getMeasurementDAO().findAgentOffsetTuples();
+    public List<Object[]> findAgentOffsetTuples() {
+        return measurementDAO.findAgentOffsetTuples();
     }
-    
+
     /**
      * Get the # of metrics that each agent is collecting.
      * 
      * @return a map of {@link Agent} onto Longs indicating how many metrics
-     *         that agent is collecting. 
-     * @ejb:interface-method
+     *         that agent is collecting.
      */
-    public Map findNumMetricsPerAgent() {
-        return getMeasurementDAO().findNumMetricsPerAgent();
+    public Map<Agent, Long> findNumMetricsPerAgent() {
+        return measurementDAO.findNumMetricsPerAgent();
     }
 
     /**
-     * Handle events from the {@link MeasurementEnabler}.  This method
+     * Handle events from the {@link MeasurementEnabler}. This method
      * is required to place the operation within a transaction (and session)
      * 
-     * @ejb:interface-method
      */
-    public void handleCreateRefreshEvents(List events) {
-        ConfigManagerLocal cm = ConfigManagerEJBImpl.getOne();
+    public void handleCreateRefreshEvents(List<ResourceZevent> events) {
         TrackerManager tm = TrackerManagerImpl.getOne();
-        AuthzSubjectManagerLocal aman = AuthzSubjectManagerEJBImpl.getOne();
-        List eids = new ArrayList();
-        
-        for (Iterator i=events.iterator(); i.hasNext(); ) {
-            ResourceZevent z = (ResourceZevent)i.next();
-            AuthzSubject subject = aman.findSubjectById(z.getAuthzSubjectId());
+        List<AppdefEntityID> eids = new ArrayList<AppdefEntityID>();
+
+        for (ResourceZevent z : events) {
+            AuthzSubject subject = authzSubjectManager.findSubjectById(z.getAuthzSubjectId());
             AppdefEntityID id = z.getAppdefEntityID();
             final Resource r = getResource(id);
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
             boolean isCreate, isRefresh;
-    
+
             isCreate = z instanceof ResourceCreatedZevent;
             isRefresh = z instanceof ResourceRefreshZevent;
-    
+
             try {
                 // Handle reschedules for when agents are updated.
                 if (isRefresh) {
@@ -1450,90 +1362,79 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                     eids.add(id);
                     continue;
                 }
-    
+
                 // For either create or update events, schedule the default
                 // metrics
                 ConfigResponse c =
-                    cm.getMergedConfigResponse(subject,
-                                               ProductPlugin.TYPE_MEASUREMENT,
-                                               id, true);
+                                   configManager.getMergedConfigResponse(subject,
+                                                                         ProductPlugin.TYPE_MEASUREMENT,
+                                                                         id, true);
                 if (getEnabledMetricsCount(subject, id) == 0) {
                     log.info("Enabling default metrics for [" + id + "]");
                     enableDefaultMetrics(subject, id, c, true);
-                }
-                else {
+                } else {
                     // Update the configuration
                     updateMeasurements(subject, id, c);
                 }
-    
+
                 if (isCreate) {
                     // On initial creation of the service check if log or config
-                    // tracking is enabled.  If so, enable it.  We don't auto
+                    // tracking is enabled. If so, enable it. We don't auto
                     // enable log or config tracking for update events since
                     // in the callback we don't know if that flag has changed.
                     tm.enableTrackers(subject, id, c);
                 }
-    
+
             } catch (ConfigFetchException e) {
                 log.debug("Config not set for [" + id + "]", e);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 log.warn("Unable to enable default metrics for [" + id + "]", e);
             }
         }
         AgentScheduleSynchronizer.scheduleBuffered(eids);
     }
 
-    // XXX scottmf, need to re-evalutate why SAMPLE_SIZE is used
-    private final int SAMPLE_SIZE = 10;
     private String[] getTemplatesToCheck(AuthzSubject s,
                                          AppdefEntityID id)
-        throws AppdefEntityNotFoundException, PermissionException
-    {
-        MeasurementTemplateDAO dao = getMeasurementTemplateDAO();
+        throws AppdefEntityNotFoundException, PermissionException {
         String mType = (new AppdefEntityValue(id, s)).getMonitorableType();
-        List templates = dao.findDefaultsByMonitorableType(mType, id.getType());
-        List dsnList = new ArrayList(SAMPLE_SIZE);
+        List<MeasurementTemplate> templates = measurementTemplateDAO.findDefaultsByMonitorableType(mType, id.getType());
+        List<String> dsnList = new ArrayList<String>(SAMPLE_SIZE);
         int idx = 0;
         int availIdx = -1;
-        MeasurementTemplate template;
-        for (int i=0; i<templates.size(); i++) {
-
-            template = (MeasurementTemplate)templates.get(i);
-
+        for (MeasurementTemplate template : templates) {
             if (template.isAvailability() && template.isDesignate()) {
                 availIdx = idx;
             }
 
             if (idx == availIdx
-                || (availIdx == -1 && idx < (SAMPLE_SIZE-1))
-                || (availIdx != -1 && idx < SAMPLE_SIZE))
-            {
+                || (availIdx == -1 && idx < (SAMPLE_SIZE - 1))
+                || (availIdx != -1 && idx < SAMPLE_SIZE)) {
                 dsnList.add(template.getTemplate());
                 // Increment only after we have successfully added DSN
                 idx++;
-                if (idx >= SAMPLE_SIZE) break;
+                if (idx >= SAMPLE_SIZE)
+                    break;
             }
         }
 
-        return (String[]) dsnList.toArray(new String[dsnList.size()]);
+        return dsnList.toArray(new String[dsnList.size()]);
     }
 
     /**
      * Check a configuration to see if it returns DSNs which the agent
-     * can use to successfully monitor an entity.  This routine will
+     * can use to successfully monitor an entity. This routine will
      * attempt to get live DSN values from the entity.
-     *
+     * 
      * @param entity Entity to check the configuration for
      * @param config Configuration to check
-     *
-     * @ejb:interface-method
+     * 
      */
     public void checkConfiguration(AuthzSubject subject,
                                    AppdefEntityID entity,
                                    ConfigResponse config)
         throws PermissionException, InvalidConfigException,
-               AppdefEntityNotFoundException
-    {
+        AppdefEntityNotFoundException {
         String[] templates = getTemplatesToCheck(subject, entity);
 
         // there are no metric templates, just return
@@ -1552,66 +1453,61 @@ public class MeasurementManagerEJBImpl extends SessionEJB
 
         try {
             getLiveMeasurementValues(entity, dsns);
-        } catch(LiveMeasurementException exc){
+        } catch (LiveMeasurementException exc) {
             throw new InvalidConfigException("Invalid configuration: " +
                                              exc.getMessage(), exc);
         }
     }
-    
+
     /**
      * @return List {@link Measurement} of MeasurementIds
-     * @ejb:interface-method
      */
-    public List getMeasurements(Integer[] tids, Integer[] aeids) {
-        return getMeasurementDAO().findMeasurements(tids, aeids);
+    public List<Measurement> getMeasurements(Integer[] tids, Integer[] aeids) {
+        return measurementDAO.findMeasurements(tids, aeids);
     }
 
     /**
      * Get live measurement values for a series of DSNs
-     *
-     * NOTE:  Since this routine allows callers to pass in arbitrary
-     *        DSNs, the caller must do all the appropriate translation,
-     *        etc.
-     *
-     * @param entity  Entity to get the measurement values from
-     * @param dsns    Translated DSNs to fetch from the entity
-     *
+     * 
+     * NOTE: Since this routine allows callers to pass in arbitrary
+     * DSNs, the caller must do all the appropriate translation,
+     * etc.
+     * 
+     * @param entity Entity to get the measurement values from
+     * @param dsns Translated DSNs to fetch from the entity
+     * 
      * @return A list of MetricValue objects for each DSN passed
      */
     private MetricValue[] getLiveMeasurementValues(AppdefEntityID entity,
                                                    String[] dsns)
-        throws LiveMeasurementException, PermissionException
-    {
+        throws LiveMeasurementException, PermissionException {
         try {
             AgentMonitor monitor = new AgentMonitor();
             Agent a = getAgent(entity);
 
             return monitor.getLiveValues(a, dsns);
-        } catch(MonitorAgentException e){
+        } catch (MonitorAgentException e) {
             throw new LiveMeasurementException(e.getMessage(), e);
         }
     }
 
     /**
      * Resource to be deleted, dissociate metrics from resource
-     * @ejb:interface-method
      */
     public void handleResourceDelete(Resource r) {
-        getMeasurementDAO().clearResource(r);
+        measurementDAO.clearResource(r);
     }
-    
+
     /**
-     * Enable the default metrics for a resource.  This should only
-     * be called by the {@link MeasurementEnabler}.  If you want the behavior
-     * of this method, use the {@link MeasurementEnabler} 
+     * Enable the default metrics for a resource. This should only
+     * be called by the {@link MeasurementEnabler}. If you want the behavior
+     * of this method, use the {@link MeasurementEnabler}
      */
     private void enableDefaultMetrics(AuthzSubject subj, AppdefEntityID id,
                                       ConfigResponse config, boolean verify)
-        throws AppdefEntityNotFoundException, PermissionException 
-    {
-        ConfigManagerLocal cfgMan = ConfigManagerEJBImpl.getOne();
+        throws AppdefEntityNotFoundException, PermissionException {
         String mtype;
-    
+
         try {
             if (id.isPlatform() || id.isServer() || id.isService()) {
                 AppdefEntityValue av = new AppdefEntityValue(id, subj);
@@ -1622,90 +1518,73 @@ public class MeasurementManagerEJBImpl extends SessionEJB
                     // removeOrphanedMeasurements()
                     return;
                 }
-            }
-            else {
+            } else {
                 return;
             }
         } catch (Exception e) {
             log.error("Unable to enable default metrics for [" + id + "]", e);
             return;
         }
-    
+
         // Check the configuration
         if (verify) {
             try {
                 checkConfiguration(subj, id, config);
             } catch (InvalidConfigException e) {
                 log.warn("Error turning on default metrics, configuration (" +
-                          config + ") " + "couldn't be validated", e);
-                cfgMan.setValidationError(subj, id, e.getMessage());
+                         config + ") " + "couldn't be validated", e);
+                configManager.setValidationError(subj, id, e.getMessage());
                 return;
             } catch (Exception e) {
                 log.warn("Error turning on default metrics, " +
-                          "error in validation", e);
-                cfgMan.setValidationError(subj, id, e.getMessage());
+                         "error in validation", e);
+                configManager.setValidationError(subj, id, e.getMessage());
                 return;
             }
         }
-    
+
         // Enable the metrics
         try {
             createDefaultMeasurements(subj, id, mtype, config);
-            cfgMan.clearValidationError(subj, id);
-    
+            configManager.clearValidationError(subj, id);
+
             // Execute the callback so other people can do things when the
             // metrics have been created (like create type-based alerts)
             MeasurementStartupListener.getDefaultEnableObj().metricsEnabled(id);
         } catch (Exception e) {
             log.warn("Unable to enable default metrics for id=" + id +
-                      ": " + e.getMessage(), e);
-        }
-    }
-   
-   /**
-    * Initializes the units and resource properties of a measurement event
-    *
-    * @ejb:interface-method
-    */
-   public void buildMeasurementEvent(MeasurementEvent event) {      
-       Measurement dm = null;
-       
-       try {
-           dm = getMeasurementDAO().get(event.getInstanceId());
-           int resourceType = dm.getTemplate().getMonitorableType()
-                                   .getAppdefType();
-           event.setResource(new AppdefEntityID(resourceType, dm.getInstanceId()));
-           event.setUnits(dm.getTemplate().getUnits());
-       } catch (Exception e) {
-           if (event == null) {
-               log.warn("Measurement event is null");
-           } else if (dm == null) {
-               log.warn("Measurement is null for measurement event with metric id=" + event.getInstanceId());                
-           } else if (event.getResource() == null) {
-               log.error("Unable to set resource for measurement event with metric id=" + event.getInstanceId(), e);
-           } else if (event.getUnits() == null ) {
-               log.error("Unable to set units for measurement event with metric id=" + event.getInstanceId(), e);
-           } else {
-               log.error("Unable to build measurement event with metric id=" + event.getInstanceId(), e);
-           }
-       }
-   }
-
-    public static MeasurementManagerLocal getOne() {
-        try {
-            return MeasurementManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
+                     ": " + e.getMessage(), e);
         }
     }
 
     /**
-     * @ejb:create-method
+     * Initializes the units and resource properties of a measurement event
      */
-    public void ejbCreate() throws CreateException {}
-    public void ejbPostCreate() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx){}
+    public void buildMeasurementEvent(MeasurementEvent event) {
+        Measurement dm = null;
+
+        try {
+            dm = measurementDAO.get(event.getInstanceId());
+            int resourceType = dm.getTemplate().getMonitorableType()
+                                 .getAppdefType();
+            event.setResource(new AppdefEntityID(resourceType, dm.getInstanceId()));
+            event.setUnits(dm.getTemplate().getUnits());
+        } catch (Exception e) {
+            if (event == null) {
+                log.warn("Measurement event is null");
+            } else if (dm == null) {
+                log.warn("Measurement is null for measurement event with metric id=" + event.getInstanceId());
+            } else if (event.getResource() == null) {
+                log.error("Unable to set resource for measurement event with metric id=" + event.getInstanceId(), e);
+            } else if (event.getUnits() == null) {
+                log.error("Unable to set units for measurement event with metric id=" + event.getInstanceId(), e);
+            } else {
+                log.error("Unable to build measurement event with metric id=" + event.getInstanceId(), e);
+            }
+        }
+    }
+
+    public static MeasurementManager getOne() {
+        return Bootstrap.getBean(MeasurementManager.class);
+    }
 }

@@ -80,7 +80,7 @@ import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
 
@@ -168,7 +168,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         }
             
         // Now get the aggregate data, keyed by template ID's
-        final MeasurementManagerLocal mMan = getMetricManager();
+        final MeasurementManager mMan = getMetricManager();
         final DataManagerLocal dMan = getDataMan();
         final List measurements = mMan.getMeasurements(tids, eids);
         final Map datamap =
@@ -411,7 +411,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         final double[] result = new double[ids.length];
         Arrays.fill(result, MeasurementConstants.AVAIL_UNKNOWN);
         final Map data = new HashMap();
-        final MeasurementManagerLocal mMan = getMetricManager();
+        final MeasurementManager mMan = getMetricManager();
         final ResourceManager rMan = getResourceManager();
         final AvailabilityManager aMan = getAvailManager();
         if (midMap.size() > 0) {
@@ -607,7 +607,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
     protected final Map getMidMap(AppdefEntityID[] ids, Map measCache) {
         final Map rtn = new HashMap(ids.length);
         final ResourceManager rMan = getResourceManager();
-        final MeasurementManagerLocal mMan = getMetricManager();
+        final MeasurementManager mMan = getMetricManager();
         final List toGet = new ArrayList();
         for (final Iterator it=Arrays.asList(ids).iterator(); it.hasNext(); ) {
             final AppdefEntityID id = (AppdefEntityID)it.next();

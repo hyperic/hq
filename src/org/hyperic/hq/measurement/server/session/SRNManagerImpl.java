@@ -39,7 +39,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.util.pager.PageControl;
@@ -58,11 +58,11 @@ public class SRNManagerImpl
     private final Log log = LogFactory.getLog(SRNManagerImpl.class);
 
     private AuthzSubjectManagerLocal authzSubjectManager;
-    private MeasurementManagerLocal measurementManager;
+    private MeasurementManager measurementManager;
     private MeasurementProcessor measurementProcessor;
 
     @Autowired
-    public SRNManagerImpl(AuthzSubjectManagerLocal authzSubjectManager, MeasurementManagerLocal measurementManager,
+    public SRNManagerImpl(AuthzSubjectManagerLocal authzSubjectManager, MeasurementManager measurementManager,
                           MeasurementProcessor measurementProcessor) {
         this.authzSubjectManager = authzSubjectManager;
         this.measurementManager = measurementManager;

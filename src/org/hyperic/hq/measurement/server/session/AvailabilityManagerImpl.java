@@ -63,7 +63,7 @@ import org.hyperic.hq.measurement.ext.DownMetricValue;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.AvailabilityMetricValue;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -122,14 +122,14 @@ public class AvailabilityManagerImpl
 
     private static final long MAX_DATA_BACKLOG_TIME = 7 * MeasurementConstants.DAY;
 
-    private MeasurementManagerLocal measurementManager;
+    private MeasurementManager measurementManager;
 
     private ResourceManager resourceManager;
 
     private MessagePublisher messenger;
 
     @Autowired
-    public AvailabilityManagerImpl(MeasurementManagerLocal measurementManager, ResourceManager resourceManager,
+    public AvailabilityManagerImpl(MeasurementManager measurementManager, ResourceManager resourceManager,
                                    MessagePublisher messenger) {
         this.measurementManager = measurementManager;
         this.resourceManager = resourceManager;

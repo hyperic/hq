@@ -89,7 +89,7 @@ import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 
 /**
  * This class is responsible for managing Server objects in appdef
@@ -346,7 +346,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         }
 
         // Unschedule measurements
-        MeasurementManagerEJBImpl.getOne().disableMeasurements(subject,
+        MeasurementManagerImpl.getOne().disableMeasurements(subject,
                                                                target.getResource());
 
         // Reset Server parent id

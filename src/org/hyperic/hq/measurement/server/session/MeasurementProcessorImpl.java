@@ -48,7 +48,7 @@ import org.hyperic.hq.measurement.agent.client.AgentMonitor;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClient;
 import org.hyperic.hq.measurement.agent.client.MeasurementCommandsClientFactory;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
@@ -68,11 +68,11 @@ public class MeasurementProcessorImpl
     private Log log = LogFactory.getLog(logCtx);
 
     private AgentManager agentManager;
-    private MeasurementManagerLocal measurementManager;
+    private MeasurementManager measurementManager;
     private AuthzSubjectManagerLocal authzSubjectManager;
 
     @Autowired
-    public MeasurementProcessorImpl(AgentManager agentManager, MeasurementManagerLocal measurementManager,
+    public MeasurementProcessorImpl(AgentManager agentManager, MeasurementManager measurementManager,
                                     AuthzSubjectManagerLocal authzSubjectManager) {
         this.agentManager = agentManager;
         this.measurementManager = measurementManager;

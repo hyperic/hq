@@ -72,7 +72,7 @@ import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.zevents.ZeventManager;
@@ -204,7 +204,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @ejb:interface-method
      */
     public void addData(Integer mid, MetricValue mv, boolean overwrite) {
-        MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
+        MeasurementManager mMan = MeasurementManagerImpl.getOne();
         Measurement meas = mMan.getMeasurement(mid);
         List pts = Collections.singletonList(new DataPoint(meas.getId(), mv));
 
@@ -504,7 +504,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private void sendDataToEventHandlers(Collection data) {
         ArrayList events  = new ArrayList();
         List zevents = new ArrayList();
-        MeasurementManagerLocal measMan = MeasurementManagerEJBImpl.getOne();
+        MeasurementManager measMan = MeasurementManagerImpl.getOne();
         
         boolean allEventsInteresting = 
             Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);

@@ -35,7 +35,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.control.server.session.ControlManagerImpl;
 import org.hyperic.hq.control.shared.ControlManager;
-import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
@@ -71,7 +71,7 @@ public class ConfigValidatorImpl
         throws EncodingException, PermissionException,
                AppdefEntityNotFoundException, InvalidConfigException
     {
-        MeasurementManagerLocal dmMan = getMetricManager();
+        MeasurementManager dmMan = getMetricManager();
         TrackerManager trackerMan = getTrackerManager();
 
         ConfigResponse[] responses;

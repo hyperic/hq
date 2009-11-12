@@ -59,7 +59,7 @@ public class Application extends AppdefResource
     private String _opsContact;
     private String _businessContact;
     private ApplicationType _applicationType;
-    private Collection _appServices;
+    private Collection<AppService> _appServices;
     /**
      * default constructor
      */
@@ -119,7 +119,7 @@ public class Application extends AppdefResource
         _applicationType = applicationType;
     }
 
-    public Collection getAppServices()
+    public Collection<AppService> getAppServices()
     {
         return _appServices;
     }
