@@ -44,8 +44,6 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
@@ -62,11 +60,8 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
@@ -109,7 +104,7 @@ public class MeasurementManagerImpl
     // XXX scottmf, need to re-evalutate why SAMPLE_SIZE is used
     private final int SAMPLE_SIZE = 10;
 
-    private AvailabilityManager availabilityManager;
+    
     private ResourceManager resourceManager;
     private ResourceGroupManager resourceGroupManager;
     private ApplicationManagerLocal applicationManager;
@@ -480,7 +475,7 @@ public class MeasurementManagerImpl
 
             if (availMeasurement != null) {
                 MetricValue val = new MetricValue(MeasurementConstants.AVAIL_DOWN);
-                availabilityManager.addData(availMeasurement, val);
+                getAvailabilityManager().addData(availMeasurement, val);
             }
         }
     }

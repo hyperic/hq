@@ -43,8 +43,8 @@ import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.LoggableInterface;
 import org.hyperic.hq.events.server.session.EventLog;
-import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
-import org.hyperic.hq.events.shared.EventLogManagerLocal;
+import org.hyperic.hq.events.server.session.EventLogManagerImpl;
+import org.hyperic.hq.events.shared.EventLogManager;
 
 /** 
  * The LoggingDispatcher Message-Drive Bean is intended to be used
@@ -98,7 +98,7 @@ public class LoggingDispatcherEJBImpl
      * @param event The event.
      */
     private void logEvent(AbstractEvent event) {
-        EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
+        EventLogManager elMan = EventLogManagerImpl.getOne();
         
         try {
             if (event.isLoggingSupported()) {
@@ -111,7 +111,7 @@ public class LoggingDispatcherEJBImpl
     }
     
     private void logEvents(Collection events) {
-        EventLogManagerLocal elMan = EventLogManagerEJBImpl.getOne();
+        EventLogManager elMan = EventLogManagerImpl.getOne();
         List loggableEvents = new ArrayList();
         
         for (Iterator it = events.iterator(); it.hasNext();) {

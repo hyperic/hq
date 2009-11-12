@@ -38,8 +38,8 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl;
-import org.hyperic.hq.events.shared.EventLogManagerLocal;
+import org.hyperic.hq.events.server.session.EventLogManagerImpl;
+import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.SystemException;
@@ -65,7 +65,7 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
 
     private Log _log = LogFactory.getLog(EventLogBossEJBImpl.class);
     
-    private EventLogManagerLocal eventLogManager = null;
+    private EventLogManager eventLogManager = null;
 
     private SessionManager manager;
 
@@ -73,9 +73,9 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
         manager = SessionManager.getInstance();
     }
 
-    private EventLogManagerLocal getELM() {
+    private EventLogManager getELM() {
         if (eventLogManager == null) {
-            eventLogManager = EventLogManagerEJBImpl.getOne();
+            eventLogManager = EventLogManagerImpl.getOne();
         }
         return eventLogManager;
     }
@@ -192,7 +192,7 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
         app.registerCallbackListener(ResourceDeleteCallback.class,
             new ResourceDeleteCallback() {
                 public void preResourceDelete(Resource r) throws VetoException {
-                    EventLogManagerLocal elm = EventLogManagerEJBImpl.getOne();
+                    EventLogManager elm = EventLogManagerImpl.getOne();
                     elm.deleteLogs(r);
                 }
             }

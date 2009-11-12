@@ -39,8 +39,8 @@ import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
-import org.hyperic.hq.events.shared.EventLogManagerLocal;
-import org.hyperic.hq.events.shared.EventLogManagerUtil;
+import org.hyperic.hq.events.server.session.EventLogManagerImpl;
+import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.measurement.shared.DataCompress;
 import org.hyperic.hq.measurement.server.session.DataCompressImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
@@ -262,8 +262,8 @@ public class DataPurgeJob implements Runnable {
         long purgeEventLog = Long.parseLong(purgeEventString);
 
         // Purge event logs
-        EventLogManagerLocal eventLogManager =
-            EventLogManagerUtil.getLocalHome().create();
+        EventLogManager eventLogManager =
+            EventLogManagerImpl.getOne();
 
         _log.info("Purging event logs older than " +
             TimeUtil.toString(now - purgeEventLog));

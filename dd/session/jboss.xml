@@ -39,11 +39,6 @@
 
 		</session>
 		<session>
-			<ejb-name>EventLogManager</ejb-name>
-			<local-jndi-name>LocalEventLogManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>AIScheduleManager</ejb-name>
 			<local-jndi-name>LocalAIScheduleManager</local-jndi-name>
 

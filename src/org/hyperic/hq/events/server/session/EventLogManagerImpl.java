@@ -31,55 +31,50 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-import javax.naming.NamingException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.EventLogStatus;
 import org.hyperic.hq.events.ResourceEventInterface;
-import org.hyperic.hq.events.server.session.EventLog;
-import org.hyperic.hq.events.shared.EventLogManagerLocal;
-import org.hyperic.hq.events.shared.EventLogManagerUtil;
+import org.hyperic.hq.events.server.session.EventLogDAO.ResourceEventLog;
+import org.hyperic.hq.events.shared.EventLogManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.product.TrackEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p> Stores Events to and deletes Events from storage</p>
  *
- * @ejb:bean name="EventLogManager"
- *      jndi-name="ejb/events/EventLogManager"
- *      local-jndi-name="LocalEventLogManager"
- *      view-type="local"
- *      type="Stateless"
- *
- * @ejb:transaction type="Required"
  */
-public class EventLogManagerEJBImpl implements SessionBean {
+@Service
+@Transactional
+public class EventLogManagerImpl implements EventLogManager {
 
-    private final int MSGMAX = TrackEvent.MESSAGE_MAXLEN;
-    private final int SRCMAX = TrackEvent.SOURCE_MAXLEN;
+    private static final int MSGMAX = TrackEvent.MESSAGE_MAXLEN;
+    private static final int SRCMAX = TrackEvent.SOURCE_MAXLEN;
 
     private final Log log =
-        LogFactory.getLog(EventLogManagerEJBImpl.class.getName());
+        LogFactory.getLog(EventLogManagerImpl.class.getName());
 
-    private EventLogDAO eventLogDAO = Bootstrap.getBean(EventLogDAO.class);
+    private EventLogDAO eventLogDAO;
 
-    private EventLogDAO getEventLogDAO() {
-        return eventLogDAO;
+    private ResourceManager resourceManager;
+    
+    @Autowired
+    public EventLogManagerImpl(EventLogDAO eventLogDAO, ResourceManager resourceManager) {
+        this.eventLogDAO = eventLogDAO;
+        this.resourceManager = resourceManager;
     }
 
     /**
@@ -91,7 +86,7 @@ public class EventLogManagerEJBImpl implements SessionBean {
      * @param save <code>true</code> to persist the log item;
      *             <code>false</code> to create a transient log item only.
      *
-     * @ejb:interface-method
+     * 
      */
     public EventLog createLog(AbstractEvent event,
                               String subject,
@@ -114,7 +109,7 @@ public class EventLogManagerEJBImpl implements SessionBean {
         if (event instanceof ResourceEventInterface) {
             AppdefEntityID aeId =
                 ((ResourceEventInterface) event).getResource();
-            r = ResourceManagerImpl.getOne().findResource(aeId);
+            r = resourceManager.findResource(aeId);
             if (r == null || r.isInAsyncDeleteState()) {
                 final String m = aeId + " has already been deleted";
                 throw new ResourceDeletedException(m);
@@ -124,7 +119,7 @@ public class EventLogManagerEJBImpl implements SessionBean {
         EventLog e = new EventLog(r, subject, event.getClass().getName(),
                                   detail, event.getTimestamp(), status);
         if (save) {
-            return getEventLogDAO().create(e);
+            return eventLogDAO.create(e);
         } else {
             return e;
         }
@@ -135,20 +130,20 @@ public class EventLogManagerEJBImpl implements SessionBean {
      * 
      * @param eventLogs The event logs.
      * 
-     * @ejb:interface-method
+     * 
      */
     public void insertEventLogs(EventLog[] eventLogs) {
-        getEventLogDAO().insertLogs(eventLogs);
+        eventLogDAO.insertLogs(eventLogs);
     }
     
     /** 
      * Find the last event logs of all the resources of a given prototype.
      * (i.e. 'Linux' or 'FileServer File')
      * 
-     * @ejb:interface-method
+     * 
      */
-    public List findLastLogs(Resource proto) {
-        return getEventLogDAO().findLastByType(proto);
+    public List<EventLog> findLastLogs(Resource proto) {
+        return eventLogDAO.findLastByType(proto);
     }
     
     /** 
@@ -161,13 +156,13 @@ public class EventLogManagerEJBImpl implements SessionBean {
      * If specified, inGroups must be a collection of {@link ResourceGroup}s
      * which the resulting logs will be associated with.
      * 
-     * @ejb:interface-method
+     * 
      */
-    public List findLogs(AuthzSubject subject, long begin, long end,
+    public List<ResourceEventLog> findLogs(AuthzSubject subject, long begin, long end,
                          PageInfo pInfo, EventLogStatus maxStatus,
-                         String typeClass, Collection inGroups)
+                         String typeClass, Collection<ResourceGroup> inGroups)
     {
-        return getEventLogDAO().findLogs(subject, begin, end, pInfo, maxStatus, 
+        return eventLogDAO.findLogs(subject, begin, end, pInfo, maxStatus, 
                                          typeClass, inGroups);
     }
 
@@ -176,30 +171,30 @@ public class EventLogManagerEJBImpl implements SessionBean {
      * All resources which are descendents of the passed resource will also
      * have their event logs included
      * 
-     * @ejb:interface-method
+     * 
      */
-    public List findLogs(AppdefEntityID ent, AuthzSubject user, 
+    @SuppressWarnings("unchecked")
+    public List<EventLog> findLogs(AppdefEntityID ent, AuthzSubject user, 
                          String[] eventTypes, long begin, long end)
     {
-        EventLogDAO eDAO = getEventLogDAO();
-        Resource r = ResourceManagerImpl.getOne().findResource(ent);
+        Resource r = resourceManager.findResource(ent);
         
         if (r == null || r.isInAsyncDeleteState()) {
-            return new ArrayList(0);
+            return new ArrayList<EventLog>(0);
         }
         
-        Collection eTypes;
+        Collection<String> eTypes;
         
-        if (eventTypes == null)
+        if (eventTypes == null) {
             eTypes = Collections.EMPTY_LIST;
-        else
+        }else {
             eTypes = Arrays.asList(eventTypes);
-        
+        }
         if (r.getResourceType().getId().equals(AuthzConstants.authzGroup)) {
-            return eDAO.findByGroup(r, begin, end, eTypes);
+            return eventLogDAO.findByGroup(r, begin, end, eTypes);
         }
         else {
-            return eDAO.findByEntity(user, r, begin, end, eTypes);
+            return eventLogDAO.findByEntity(user, r, begin, end, eTypes);
         }
     }
 
@@ -208,13 +203,13 @@ public class EventLogManagerEJBImpl implements SessionBean {
      * All resources which are descendants of the passed resource will also
      * have their event logs included
      *
-     * @ejb:interface-method
+     * 
      */
-    public List findLogs(AppdefEntityID ent, AuthzSubject user, String status,
+    public List<EventLog> findLogs(AppdefEntityID ent, AuthzSubject user, String status,
                          long begin, long end)
     {
-        Resource r = ResourceManagerImpl.getOne().findResource(ent);
-        return getEventLogDAO().findByEntityAndStatus(r, user, begin, end,
+        Resource r = resourceManager.findResource(ent);
+        return eventLogDAO.findByEntityAndStatus(r, user, begin, end,
                                                       status);
     }
 
@@ -222,10 +217,10 @@ public class EventLogManagerEJBImpl implements SessionBean {
      * Retrieve the total number of event logs.
      *
      * @return The total number of event logs.
-     * @ejb:interface-method
+     * 
      */
     public int getTotalNumberLogs() {
-        return getEventLogDAO().getTotalNumberLogs();
+        return eventLogDAO.getTotalNumberLogs();
     }
 
     /**
@@ -242,25 +237,25 @@ public class EventLogManagerEJBImpl implements SessionBean {
      * @param intervals The number of intervals.
      * @return The boolean array with length equal to the number of intervals
      *         specified.
-     * @ejb:interface-method
+     * 
      */
     public boolean[] logsExistPerInterval(AppdefEntityID entityId,
                                           AuthzSubject subject,
                                           long begin, long end,
                                           int intervals)
     {
-        Resource r = ResourceManagerImpl.getOne().findResource(entityId);
-        return getEventLogDAO().logsExistPerInterval(r, subject, begin, end,
+        Resource r = resourceManager.findResource(entityId);
+        return eventLogDAO.logsExistPerInterval(r, subject, begin, end,
                                                      intervals);
     }
 
     /**
      * Delete event logs for the given resource
      * TODO: Authz check.
-     * @ejb:interface-method
+     * 
      */
     public int deleteLogs(Resource r) {
-        return getEventLogDAO().deleteLogs(r);
+        return eventLogDAO.deleteLogs(r);
     }
 
     /**
@@ -273,7 +268,7 @@ public class EventLogManagerEJBImpl implements SessionBean {
      * If set to -1, then this method will delete all records up to and
      * including the most recent record.
      * @return The number of records removed.
-     * @ejb:interface-method
+     * 
      */
     public int deleteLogs(long from, long to) {
         if (log.isDebugEnabled()) {
@@ -281,7 +276,7 @@ public class EventLogManagerEJBImpl implements SessionBean {
         }
 
         if (from == -1) {
-            from = getEventLogDAO().getMinimumTimeStamp();
+            from = eventLogDAO.getMinimumTimeStamp();
 
             if (from == -1) {
                 return 0;
@@ -306,26 +301,10 @@ public class EventLogManagerEJBImpl implements SessionBean {
         long interval = Math.max(MeasurementConstants.DAY,
                                  (to - from) / 60);
 
-        return getEventLogDAO().deleteLogs(from, to, interval);
+        return eventLogDAO.deleteLogs(from, to, interval);
     }
-
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() {}
-    public void ejbPostCreate() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {}
-
-    public static EventLogManagerLocal getOne() {
-        try {
-            return EventLogManagerUtil.getLocalHome().create();
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        }
+    
+    public static EventLogManager getOne() {
+        return Bootstrap.getBean(EventLogManager.class);
     }
 }
