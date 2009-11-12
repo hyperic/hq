@@ -52,11 +52,12 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-@Repository
 
-public class MeasurementDAO extends HibernateDAO<Measurement> {
+@Repository
+public class MeasurementDAO
+    extends HibernateDAO<Measurement> {
     private static final String ALIAS_CLAUSE = " upper(t.alias) = '" +
-    				MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
+                                               MeasurementConstants.CAT_AVAILABILITY.toUpperCase() + "' ";
 
     @Autowired
     public MeasurementDAO(SessionFactory f) {
@@ -64,11 +65,11 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     }
 
     public Measurement findById(Integer id) {
-        return (Measurement)super.findById(id);
+        return (Measurement) super.findById(id);
     }
 
     public Measurement get(Integer id) {
-        return (Measurement)super.get(id);
+        return (Measurement) super.get(id);
     }
 
     void remove(Measurement entity) {
@@ -88,11 +89,11 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     List<Object[]> findAllEnabledMeasurementsAndTemplates() {
         Dialect dialect = Util.getDialect();
         String hql = new StringBuilder()
-            .append("from Measurement m")
-            .append(" join m.template t")
-            .append(" where enabled = ")
-            .append(dialect.toBooleanValueString(true))
-            .toString();
+                                        .append("from Measurement m")
+                                        .append(" join m.template t")
+                                        .append(" where enabled = ")
+                                        .append(dialect.toBooleanValueString(true))
+                                        .toString();
         return getSession().createQuery(hql).list();
     }
 
@@ -104,8 +105,8 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     void remove(MeasurementTemplate mt) {
         String sql = "from Measurement where template.id=?";
         List<Measurement> measurements = getSession().createQuery(sql)
-            .setInteger(0, mt.getId().intValue())
-            .list();
+                                                     .setInteger(0, mt.getId().intValue())
+                                                     .list();
 
         for (Measurement meas : measurements) {
             remove(meas);
@@ -129,13 +130,13 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     /**
      * Look up a Measurement, allowing for the query to return a stale
      * copy (for efficiency reasons).
-     *
+     * 
      * @param tid The MeasurementTemplate id
      * @param iid The instance id
      * @param allowStale <code>true</code> to allow stale copies of an alert
-     *                   definition in the query results; <code>false</code> to
-     *                   never allow stale copies, potentially always forcing a
-     *                   sync with the database.
+     *        definition in the query results; <code>false</code> to
+     *        never allow stale copies, potentially always forcing a
+     *        sync with the database.
      * @return The Measurement or <code>null</code>.
      */
     Measurement findByTemplateForInstance(Integer tid, Integer iid,
@@ -149,16 +150,16 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             }
 
             String sql =
-                "select distinct m from Measurement m " +
-                "join m.template t " +
-                "where t.id=? and m.instanceId=?";
+                         "select distinct m from Measurement m " +
+                         "join m.template t " +
+                         "where t.id=? and m.instanceId=?";
 
             return (Measurement) getSession().createQuery(sql)
-                .setInteger(0, tid.intValue())
-                .setInteger(1, iid.intValue())
-                .setCacheable(true)
-                .setCacheRegion("Measurement.findByTemplateForInstance")
-                .uniqueResult();
+                                             .setInteger(0, tid.intValue())
+                                             .setInteger(1, iid.intValue())
+                                             .setCacheable(true)
+                                             .setCacheRegion("Measurement.findByTemplateForInstance")
+                                             .uniqueResult();
         } finally {
             session.setFlushMode(oldFlushMode);
         }
@@ -166,20 +167,20 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
 
     @SuppressWarnings("unchecked")
     public List<Measurement> findByTemplatesForInstance(Integer[] tids, Resource res) {
-        if (tids.length == 0)   // Nothing to do
+        if (tids.length == 0) // Nothing to do
             return new ArrayList(0);
 
         String sql =
-            "select m from Measurement m " +
-            "join m.template t " +
-            "where t.id in (:tids) and m.resource = :res";
+                     "select m from Measurement m " +
+                     "join m.template t " +
+                     "where t.id in (:tids) and m.resource = :res";
 
         return getSession().createQuery(sql)
-            .setParameterList("tids", tids)
-            .setParameter("res", res)
-            .setCacheable(true)     // Share the cache for now
-            .setCacheRegion("Measurement.findByTemplateForInstance")
-            .list();
+                           .setParameterList("tids", tids)
+                           .setParameter("res", res)
+                           .setCacheable(true) // Share the cache for now
+                           .setCacheRegion("Measurement.findByTemplateForInstance")
+                           .list();
     }
 
     @SuppressWarnings("unchecked")
@@ -192,11 +193,11 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
                      "where template.id = :tid and instanceId IN (:ids)";
 
         return getSession().createQuery(sql)
-            .setInteger("tid", tid.intValue())
-            .setParameterList("ids", iids)
-            .setCacheable(true)
-            .setCacheRegion("Measurement.findIdsByTemplateForInstances")
-            .list();
+                           .setInteger("tid", tid.intValue())
+                           .setParameterList("ids", iids)
+                           .setCacheable(true)
+                           .setCacheRegion("Measurement.findIdsByTemplateForInstances")
+                           .list();
     }
 
     @SuppressWarnings("unchecked")
@@ -206,46 +207,45 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
                      "where t.id=?";
 
         return getSession().createQuery(sql)
-               .setInteger(0, id.intValue()).list();
+                           .setInteger(0, id.intValue()).list();
     }
 
     /**
      * Find the AppdefEntityID objects for all the Measurements
      * associated with the MeasurementTemplate.
-     *
+     * 
      * @param id The measurement template id.
      * @return A list of AppdefEntityID objects.
      */
     @SuppressWarnings("unchecked")
     List<AppdefEntityID> findAppdefEntityIdsByTemplate(Integer id) {
         String sql = "select distinct mt.appdefType, m.instanceId from " +
-        		     "Measurement m join m.template t " +
+                     "Measurement m join m.template t " +
                      "join t.monitorableType mt where t.id=?";
-        
+
         List<Object[]> results = getSession()
-                   .createQuery(sql)
-                   .setInteger(0, id.intValue())
-                   .list();
-        
+                                             .createQuery(sql)
+                                             .setInteger(0, id.intValue())
+                                             .list();
+
         List<AppdefEntityID> appdefEntityIds = new ArrayList<AppdefEntityID>(results.size());
-        
+
         for (Object[] result : results) {
-            int appdefType = ((Integer)result[0]).intValue();
-            int instanceId = ((Integer)result[1]).intValue();            
+            int appdefType = ((Integer) result[0]).intValue();
+            int instanceId = ((Integer) result[1]).intValue();
             appdefEntityIds.add(new AppdefEntityID(appdefType, instanceId));
         }
-        
+
         return appdefEntityIds;
     }
-    
+
     @SuppressWarnings("unchecked")
-    List<Measurement> findByResource(Resource resource)
-    {
+    List<Measurement> findByResource(Resource resource) {
         return createCriteria()
-            .add(Restrictions.eq("resource", resource))
-            .setCacheable(true)
-            .setCacheRegion("Measurement.findByResource")
-            .list();
+                               .add(Restrictions.eq("resource", resource))
+                               .setCacheable(true)
+                               .setCacheRegion("Measurement.findByResource")
+                               .list();
     }
 
     int deleteByIds(List<Integer> ids) {
@@ -269,140 +269,139 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
             return Collections.emptyList();
         }
         String sql =
-            "select m from Measurement m " +
-            "join m.template t " +
-            "where m.enabled = true and " +
-            "m.resource = ? " +
-            "order by t.name";
+                     "select m from Measurement m " +
+                     "join m.template t " +
+                     "where m.enabled = true and " +
+                     "m.resource = ? " +
+                     "order by t.name";
 
         return getSession().createQuery(sql)
-            .setParameter(0, resource)
-            .setCacheable(true)
-            .setCacheRegion("Measurement.findEnabledByResource").list();
+                           .setParameter(0, resource)
+                           .setCacheable(true)
+                           .setCacheRegion("Measurement.findEnabledByResource").list();
     }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findDefaultsByResource(Resource resource) {
         return getSession()
-            .createQuery("select m from Measurement m join m.template t " +
-                         "where t.defaultOn = true and m.resource = ? " +
-                         "order by m.id ")
-            .setParameter(0, resource)
-            .list();
+                           .createQuery("select m from Measurement m join m.template t " +
+                                        "where t.defaultOn = true and m.resource = ? " +
+                                        "order by m.id ")
+                           .setParameter(0, resource)
+                           .list();
     }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findByInstanceForCategory(int type, int id, String cat) {
         String sql =
-            "select m from Measurement m " +
-            "join m.template t " +
-            "join t.monitorableType mt " +
-            "join t.category c " +
-            "where mt.appdefType = ? and " +
-            "m.instanceId = ? and " +
-            "c.name = ?";
+                     "select m from Measurement m " +
+                     "join m.template t " +
+                     "join t.monitorableType mt " +
+                     "join t.category c " +
+                     "where mt.appdefType = ? and " +
+                     "m.instanceId = ? and " +
+                     "c.name = ?";
 
         return getSession().createQuery(sql)
-            .setInteger(0, type)
-            .setInteger(1, id)
-            .setString(2, cat).list();
+                           .setInteger(0, type)
+                           .setInteger(1, id)
+                           .setString(2, cat).list();
     }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findByResourceForCategory(Resource resource, String cat) {
         String sql =
-            "select m from Measurement m " +
-            "join m.template t " +
-            "join t.category c " +
-            "where m.resource = ? and m.enabled = true and c.name = ? " +
-            "order by t.name";
+                     "select m from Measurement m " +
+                     "join m.template t " +
+                     "join t.category c " +
+                     "where m.resource = ? and m.enabled = true and c.name = ? " +
+                     "order by t.name";
 
         return getSession().createQuery(sql)
-            .setParameter(0, resource)
-            .setString(1, cat).list();
+                           .setParameter(0, resource)
+                           .setString(1, cat).list();
     }
 
     Measurement findByAliasAndID(String alias, Resource resource) {
 
         String sql =
-            "select distinct m from Measurement m " +
-            "join m.template t " +
-            "where t.alias = ? and m.resource = ?";
+                     "select distinct m from Measurement m " +
+                     "join m.template t " +
+                     "where t.alias = ? and m.resource = ?";
 
-        return (Measurement)getSession().createQuery(sql)
-            .setString(0, alias)
-            .setParameter(1, resource)
-            .uniqueResult();
+        return (Measurement) getSession().createQuery(sql)
+                                         .setString(0, alias)
+                                         .setParameter(1, resource)
+                                         .uniqueResult();
     }
 
     @SuppressWarnings("unchecked")
-    List<Measurement> findDesignatedByResourceForCategory(Resource resource, String cat)
-    {
+    List<Measurement> findDesignatedByResourceForCategory(Resource resource, String cat) {
         String sql =
-            "select m from Measurement m " +
-            "join m.template t " +
-            "join t.category c " +
-            "where m.resource = ? and " +
-            "t.designate = true and " +
-            "c.name = ? " +
-            "order by t.name";
+                     "select m from Measurement m " +
+                     "join m.template t " +
+                     "join t.category c " +
+                     "where m.resource = ? and " +
+                     "t.designate = true and " +
+                     "c.name = ? " +
+                     "order by t.name";
 
         return getSession().createQuery(sql)
-            .setParameter(0, resource)
-            .setParameter(1, cat)
-            .setCacheable(true)
-            .setCacheRegion("Measurement.findDesignatedByResourceForCategory")
-            .list();
+                           .setParameter(0, resource)
+                           .setParameter(1, cat)
+                           .setCacheable(true)
+                           .setCacheRegion("Measurement.findDesignatedByResourceForCategory")
+                           .list();
     }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findDesignatedByResource(Resource resource) {
         String sql =
-            "select m from Measurement m " +
-            "join m.template t " +
-            "where m.resource = ? and " +
-            "t.designate = true " +
-            "order by t.name";
+                     "select m from Measurement m " +
+                     "join m.template t " +
+                     "where m.resource = ? and " +
+                     "t.designate = true " +
+                     "order by t.name";
 
         return getSession().createQuery(sql)
-            .setParameter(0, resource)
-            .setCacheable(true)
-            .setCacheRegion("Measurement.findDesignatedByResource")
-            .list();
+                           .setParameter(0, resource)
+                           .setCacheable(true)
+                           .setCacheRegion("Measurement.findDesignatedByResource")
+                           .list();
     }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findDesignatedByCategoryForGroup(ResourceGroup g, String cat) {
         String sql =
-            "select m from Measurement m, GroupMember gm " +
-            "join m.template t " +
-            "join t.category c " +
-            "where gm.group = :group and gm.resource = m.resource " +
-            "and t.designate = true and c.name = :cat order by t.name";
+                     "select m from Measurement m, GroupMember gm " +
+                     "join m.template t " +
+                     "join t.category c " +
+                     "where gm.group = :group and gm.resource = m.resource " +
+                     "and t.designate = true and c.name = :cat order by t.name";
 
         return getSession().createQuery(sql)
-            .setParameter("group", g)
-            .setParameter("cat", cat)
-            .setCacheable(true)
-            .setCacheRegion("Measurement.findDesignatedByCategoryForGroup")
-            .list();
-        }
+                           .setParameter("group", g)
+                           .setParameter("cat", cat)
+                           .setCacheable(true)
+                           .setCacheRegion("Measurement.findDesignatedByCategoryForGroup")
+                           .list();
+    }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findByCategory(String cat) {
         String sql =
-            "select distinct m from Measurement m " +
-            "join m.template t " +
-            "join t.monitorableType mt " +
-            "join t.category c " +
-            "where m.enabled = true " +
-            "and c.name = ?";
+                     "select distinct m from Measurement m " +
+                     "join m.template t " +
+                     "join t.monitorableType mt " +
+                     "join t.category c " +
+                     "where m.enabled = true " +
+                     "and c.name = ?";
 
         return getSession().createQuery(sql)
-            .setString(0, cat)
-            .setCacheable(true)
-            .setCacheRegion("Measurement.findByCategory")
-            .list();
+                           .setString(0, cat)
+                           .setCacheable(true)
+                           .setCacheRegion("Measurement.findByCategory")
+                           .list();
     }
 
     /**
@@ -411,28 +410,28 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     @SuppressWarnings("unchecked")
     List<Integer> findAllAvailIds() {
         String sql = new StringBuilder()
-            .append("select m.id from Measurement m ")
-            .append("join m.template t ")
-            .append("where ")
-            .append(ALIAS_CLAUSE)
-            .append("and m.resource is not null ")
-            .append("order BY m.id").toString();
+                                        .append("select m.id from Measurement m ")
+                                        .append("join m.template t ")
+                                        .append("where ")
+                                        .append(ALIAS_CLAUSE)
+                                        .append("and m.resource is not null ")
+                                        .append("order BY m.id").toString();
         return getSession()
-            .createQuery(sql)
-            .setCacheable(true)
-            .setCacheRegion("Measurement.findAllAvailIds")
-            .list();
+                           .createQuery(sql)
+                           .setCacheable(true)
+                           .setCacheRegion("Measurement.findAllAvailIds")
+                           .list();
     }
 
     /**
-     * @return {@link Measurement}.  May return null.
+     * @return {@link Measurement}. May return null.
      */
     Measurement findAvailMeasurement(Resource resource) {
         List<Measurement> list = findAvailMeasurements(Collections.singletonList(resource));
         if (list.size() == 0) {
             return null;
         }
-        return (Measurement)list.get(0);
+        return (Measurement) list.get(0);
     }
 
     @SuppressWarnings("unchecked")
@@ -445,23 +444,23 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
         Collections.sort(resList);
         List<Measurement> rtn = new ArrayList<Measurement>(resList.size());
         final String sql = new StringBuilder()
-            .append("select m from Measurement m ")
-            .append("join m.template t ")
-            .append("where m.resource in (:resources) AND ")
-            .append(ALIAS_CLAUSE).toString();
+                                              .append("select m from Measurement m ")
+                                              .append("join m.template t ")
+                                              .append("where m.resource in (:resources) AND ")
+                                              .append(ALIAS_CLAUSE).toString();
         final Query query = getSession().createQuery(sql)
-            .setCacheable(true)
-            .setCacheRegion("Measurement.findAvailMeasurements");
-        
+                                        .setCacheable(true)
+                                        .setCacheRegion("Measurement.findAvailMeasurements");
+
         // should be a unique result if only one resource is being examined
         if (resources.size() == 1) {
-            query.setParameterList("resources", resList);            
+            query.setParameterList("resources", resList);
             Measurement result = (Measurement) query.uniqueResult();
             if (result != null) {
                 rtn.add(result);
             }
-        } else {        
-            for (int i=0; i<resList.size(); i+=BATCH_SIZE) {
+        } else {
+            for (int i = 0; i < resList.size(); i += BATCH_SIZE) {
                 int end = Math.min(i + BATCH_SIZE, resList.size());
                 query.setParameterList("resources", resList.subList(i, end));
                 rtn.addAll(query.list());
@@ -474,14 +473,14 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     @SuppressWarnings("unchecked")
     List<Measurement> findAvailMeasurements(ResourceGroup g) {
         String hql = "select m from GroupMember gm, " +
-        		     "Measurement m join m.template t " +
-        		     "where m.resource = gm.resource and gm.group = :group and "
-        		     + ALIAS_CLAUSE;
+                     "Measurement m join m.template t " +
+                     "where m.resource = gm.resource and gm.group = :group and "
+                     + ALIAS_CLAUSE;
         return createQuery(hql)
-            .setParameter("group", g)
-            .setCacheable(true)
-            .setCacheRegion("Measurement.findAvailMeasurementsForGroup")
-            .list();
+                               .setParameter("group", g)
+                               .setCacheable(true)
+                               .setCacheRegion("Measurement.findAvailMeasurementsForGroup")
+                               .list();
     }
 
     @SuppressWarnings("unchecked")
@@ -492,141 +491,139 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
         Collections.sort(tidList);
         Collections.sort(iidList);
         final String sql = new StringBuilder()
-            .append("select m from Measurement m ")
-            .append("join m.template t ")
-            .append("where m.instanceId in (:iids) AND t.id in (:tids)")
-            .toString();
+                                              .append("select m from Measurement m ")
+                                              .append("join m.template t ")
+                                              .append("where m.instanceId in (:iids) AND t.id in (:tids)")
+                                              .toString();
         return getSession().createQuery(sql)
-            .setParameterList("iids", iidList, new IntegerType())
-            .setParameterList("tids", tidList, new IntegerType())
-            .setCacheable(true)
-            .setCacheRegion("Measurement.findMeasurements")
-            .list();
+                           .setParameterList("iids", iidList, new IntegerType())
+                           .setParameterList("tids", tidList, new IntegerType())
+                           .setCacheable(true)
+                           .setCacheRegion("Measurement.findMeasurements")
+                           .list();
     }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findAvailMeasurements(Integer[] tids, Integer[] iids) {
         String sql = new StringBuilder()
-            .append("select m from Measurement m ")
-            .append("join m.template t ")
-            .append("where m.instanceId in (:iids) AND t.id in (:tids) AND ")
-            .append(ALIAS_CLAUSE).toString();
+                                        .append("select m from Measurement m ")
+                                        .append("join m.template t ")
+                                        .append("where m.instanceId in (:iids) AND t.id in (:tids) AND ")
+                                        .append(ALIAS_CLAUSE).toString();
         return getSession().createQuery(sql)
-            .setParameterList("iids", iids)
-            .setParameterList("tids", tids).list();
+                           .setParameterList("iids", iids)
+                           .setParameterList("tids", tids).list();
     }
 
     /**
      * @param {@link List} of {@link Integer} resource ids
-     * @return {@link Object[]}
-     * 0 = {@link Integer}
-     * 1 = {@link List} of Availability {@link Measurement}s
-     * Measurements which are children of the resource
+     * @return {@link Object[]} 0 = {@link Integer} 1 = {@link List} of
+     *         Availability {@link Measurement}s
+     *         Measurements which are children of the resource
      */
     @SuppressWarnings("unchecked")
     final List<Object[]> findRelatedAvailMeasurements(final List<Integer> resourceIds,
-                                            final String resourceRelationType) {
-       if (resourceIds.isEmpty()) {
-           return Collections.EMPTY_LIST;
-       }
+                                                      final String resourceRelationType) {
+        if (resourceIds.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
 
-       final String sql = new StringBuilder()
-           .append("select e.from.id,m from Measurement m ")
-           .append("join m.resource.toEdges e ")
-           .append("join m.template t ")
-           .append("join e.relation r ")
-           .append("where m.resource is not null ")
-           .append("and e.distance > 0 ")
-           .append("and r.name = :relationType ")
-           .append("and e.from in (:resourceIds) and ")
-           .append(ALIAS_CLAUSE).toString();
+        final String sql = new StringBuilder()
+                                              .append("select e.from.id,m from Measurement m ")
+                                              .append("join m.resource.toEdges e ")
+                                              .append("join m.template t ")
+                                              .append("join e.relation r ")
+                                              .append("where m.resource is not null ")
+                                              .append("and e.distance > 0 ")
+                                              .append("and r.name = :relationType ")
+                                              .append("and e.from in (:resourceIds) and ")
+                                              .append(ALIAS_CLAUSE).toString();
 
-       // create a new list so that the original list is not modified
-       // and sort the resource ids so that the results are more cacheable
-       final List sortedResourceIds = new ArrayList(resourceIds);
-       Collections.sort(sortedResourceIds);
+        // create a new list so that the original list is not modified
+        // and sort the resource ids so that the results are more cacheable
+        final List sortedResourceIds = new ArrayList(resourceIds);
+        Collections.sort(sortedResourceIds);
 
-       final HQDialect dialect = Util.getHQDialect();
-       final int max = (dialect.getMaxExpressions() <= 0) ?
-           Integer.MAX_VALUE : dialect.getMaxExpressions();
-       final List rtn = new ArrayList(sortedResourceIds.size());
-       for (int i=0; i<sortedResourceIds.size(); i+=max) {
-           final int end = Math.min(i+max, sortedResourceIds.size());
-           final List list = sortedResourceIds.subList(i, end);
-           rtn.addAll(getSession()
-               .createQuery(sql)
-               .setParameterList("resourceIds", list, new IntegerType())
-               .setParameter("relationType", resourceRelationType)
-               .setCacheable(true)
-               .setCacheRegion("Measurement.findRelatedAvailMeasurements")
-               .list());
-       }
-       return rtn;
+        final HQDialect dialect = Util.getHQDialect();
+        final int max = (dialect.getMaxExpressions() <= 0) ?
+                                                          Integer.MAX_VALUE : dialect.getMaxExpressions();
+        final List rtn = new ArrayList(sortedResourceIds.size());
+        for (int i = 0; i < sortedResourceIds.size(); i += max) {
+            final int end = Math.min(i + max, sortedResourceIds.size());
+            final List list = sortedResourceIds.subList(i, end);
+            rtn.addAll(getSession()
+                                   .createQuery(sql)
+                                   .setParameterList("resourceIds", list, new IntegerType())
+                                   .setParameter("relationType", resourceRelationType)
+                                   .setCacheable(true)
+                                   .setCacheRegion("Measurement.findRelatedAvailMeasurements")
+                                   .list());
+        }
+        return rtn;
     }
 
     /**
      * @param {@link List} of {@link Integer} resource ids
-     * @return {@link Object[]}
-     * 0 = {@link Integer}
-     * 1 = {@link List} of Availability {@link Measurement}s
-     * Availability measurements which are parents of the resourceId
+     * @return {@link Object[]} 0 = {@link Integer} 1 = {@link List} of
+     *         Availability {@link Measurement}s
+     *         Availability measurements which are parents of the resourceId
      */
     @SuppressWarnings("unchecked")
     List<Object[]> findParentAvailMeasurements(List resourceIds,
-                                     String resourceRelationType) {
+                                               String resourceRelationType) {
         if (resourceIds.isEmpty()) {
             return Collections.EMPTY_LIST;
         }
 
         // Needs to be ordered by DISTANCE in descending order so that
         // it's immediate parent is the first record
-       final String sql = new StringBuilder()
-           .append("select e.from.id, m from Measurement m ")
-           .append("join m.resource.toEdges e ")
-           .append("join m.template t ")
-           .append("join e.relation r ")
-           .append("where m.resource is not null ")
-           .append("and e.distance < 0 ")
-           .append("and r.name = :relationType ")
-           .append("and e.from in (:resourceIds) and ")
-           .append(ALIAS_CLAUSE)
-           .append("order by e.from.id, e.distance desc ").toString();
+        final String sql = new StringBuilder()
+                                              .append("select e.from.id, m from Measurement m ")
+                                              .append("join m.resource.toEdges e ")
+                                              .append("join m.template t ")
+                                              .append("join e.relation r ")
+                                              .append("where m.resource is not null ")
+                                              .append("and e.distance < 0 ")
+                                              .append("and r.name = :relationType ")
+                                              .append("and e.from in (:resourceIds) and ")
+                                              .append(ALIAS_CLAUSE)
+                                              .append("order by e.from.id, e.distance desc ").toString();
 
-       // create a new list so that the original list is not modified
-       // and sort the resource ids so that the results are more cacheable
-       final List sortedResourceIds = new ArrayList(resourceIds);
-       Collections.sort(sortedResourceIds);
+        // create a new list so that the original list is not modified
+        // and sort the resource ids so that the results are more cacheable
+        final List sortedResourceIds = new ArrayList(resourceIds);
+        Collections.sort(sortedResourceIds);
 
-       final List rtn = new ArrayList(sortedResourceIds.size());
-       final HQDialect dialect = Util.getHQDialect();
-       final int max = (dialect.getMaxExpressions() <= 0) ?
-                           Integer.MAX_VALUE : dialect.getMaxExpressions();
+        final List rtn = new ArrayList(sortedResourceIds.size());
+        final HQDialect dialect = Util.getHQDialect();
+        final int max = (dialect.getMaxExpressions() <= 0) ?
+                                                          Integer.MAX_VALUE : dialect.getMaxExpressions();
 
-       for (int i=0; i<sortedResourceIds.size(); i+=max) {
-           final int end = Math.min(i+max, sortedResourceIds.size());
-           final List list = sortedResourceIds.subList(i, end);
-           rtn.addAll(getSession()
-                       .createQuery(sql)
-                       .setParameterList("resourceIds", list, new IntegerType())
-                       .setParameter("relationType", resourceRelationType)
-                       .setCacheable(true)
-                       .setCacheRegion("Measurement.findParentAvailMeasurements")
-                       .list());
-       }
-       return rtn;
+        for (int i = 0; i < sortedResourceIds.size(); i += max) {
+            final int end = Math.min(i + max, sortedResourceIds.size());
+            final List list = sortedResourceIds.subList(i, end);
+            rtn.addAll(getSession()
+                                   .createQuery(sql)
+                                   .setParameterList("resourceIds", list, new IntegerType())
+                                   .setParameter("relationType", resourceRelationType)
+                                   .setCacheable(true)
+                                   .setCacheRegion("Measurement.findParentAvailMeasurements")
+                                   .list());
+        }
+        return rtn;
     }
 
     @SuppressWarnings("unchecked")
     List<Measurement> findAvailMeasurementsByInstances(int type, Integer[] ids) {
         boolean checkIds = (ids != null && ids.length > 0);
         String sql = new StringBuilder()
-            .append("select m from Measurement m ")
-            .append("join m.template t ")
-            .append("join t.monitorableType mt ")
-            .append("where mt.appdefType = :type and ")
-            .append("m.resource is not null and ")
-            .append((checkIds ? "m.instanceId in (:ids) and " : ""))
-            .append(ALIAS_CLAUSE).toString();
+                                        .append("select m from Measurement m ")
+                                        .append("join m.template t ")
+                                        .append("join t.monitorableType mt ")
+                                        .append("where mt.appdefType = :type and ")
+                                        .append("m.resource is not null and ")
+                                        .append((checkIds ? "m.instanceId in (:ids) and " : ""))
+                                        .append(ALIAS_CLAUSE).toString();
 
         Query q = getSession().createQuery(sql).setInteger("type", type);
 
@@ -642,68 +639,68 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     @SuppressWarnings("unchecked")
     List<java.lang.Number[]> findMetricsCountMismatch(String plugin) {
         return getSession().createSQLQuery(
-            "SELECT 1, S.ID FROM EAM_MONITORABLE_TYPE MT, EAM_PLATFORM_TYPE ST "
-              + "INNER JOIN EAM_PLATFORM S ON PLATFORM_TYPE_ID = ST.ID " +
-            "WHERE ST.PLUGIN = MT.PLUGIN AND MT.PLUGIN = :plugin AND " +
-                  "MT.NAME = ST.NAME AND " +
-                  "(SELECT COUNT(M.ID) FROM EAM_MEASUREMENT M," +
+                                           "SELECT 1, S.ID FROM EAM_MONITORABLE_TYPE MT, EAM_PLATFORM_TYPE ST "
+                                           + "INNER JOIN EAM_PLATFORM S ON PLATFORM_TYPE_ID = ST.ID " +
+                                           "WHERE ST.PLUGIN = MT.PLUGIN AND MT.PLUGIN = :plugin AND " +
+                                           "MT.NAME = ST.NAME AND " +
+                                           "(SELECT COUNT(M.ID) FROM EAM_MEASUREMENT M," +
                                            "EAM_MEASUREMENT_TEMPL T " +
-                   "WHERE M.TEMPLATE_ID = T.ID AND " +
-                         "T.MONITORABLE_TYPE_ID = MT.ID AND " +
-                         "INSTANCE_ID = S.ID) < " +
-                  "(SELECT COUNT(T.ID) FROM EAM_MEASUREMENT_TEMPL T " +
-                   "WHERE MONITORABLE_TYPE_ID = MT.ID) GROUP BY S.ID UNION " +
-            "SELECT 2, S.ID FROM EAM_MONITORABLE_TYPE MT, EAM_SERVER_TYPE ST " +
-                "INNER JOIN EAM_SERVER S ON SERVER_TYPE_ID = ST.ID " +
-            "WHERE ST.PLUGIN = MT.PLUGIN AND MT.PLUGIN = :plugin AND " +
-                  "MT.NAME = ST.NAME AND " +
-                  "(SELECT COUNT(M.ID) FROM EAM_MEASUREMENT M," +
+                                           "WHERE M.TEMPLATE_ID = T.ID AND " +
+                                           "T.MONITORABLE_TYPE_ID = MT.ID AND " +
+                                           "INSTANCE_ID = S.ID) < " +
+                                           "(SELECT COUNT(T.ID) FROM EAM_MEASUREMENT_TEMPL T " +
+                                           "WHERE MONITORABLE_TYPE_ID = MT.ID) GROUP BY S.ID UNION " +
+                                           "SELECT 2, S.ID FROM EAM_MONITORABLE_TYPE MT, EAM_SERVER_TYPE ST " +
+                                           "INNER JOIN EAM_SERVER S ON SERVER_TYPE_ID = ST.ID " +
+                                           "WHERE ST.PLUGIN = MT.PLUGIN AND MT.PLUGIN = :plugin AND " +
+                                           "MT.NAME = ST.NAME AND " +
+                                           "(SELECT COUNT(M.ID) FROM EAM_MEASUREMENT M," +
                                            "EAM_MEASUREMENT_TEMPL T " +
-                   "WHERE M.TEMPLATE_ID = T.ID AND " +
-                         "T.MONITORABLE_TYPE_ID = MT.ID AND " +
-                         "INSTANCE_ID = S.ID) < " +
-                  "(SELECT COUNT(T.ID) FROM EAM_MEASUREMENT_TEMPL T " +
-                   "WHERE MONITORABLE_TYPE_ID = MT.ID) GROUP BY S.ID UNION " +
-            "SELECT 3, S.ID FROM EAM_MONITORABLE_TYPE MT, EAM_SERVICE_TYPE ST "+
-                "INNER JOIN EAM_SERVICE S ON SERVICE_TYPE_ID = ST.ID " +
-            "WHERE ST.PLUGIN = MT.PLUGIN AND MT.PLUGIN = :plugin AND " +
-                  "MT.NAME = ST.NAME AND " +
-                  "(SELECT COUNT(M.ID) FROM EAM_MEASUREMENT M," +
+                                           "WHERE M.TEMPLATE_ID = T.ID AND " +
+                                           "T.MONITORABLE_TYPE_ID = MT.ID AND " +
+                                           "INSTANCE_ID = S.ID) < " +
+                                           "(SELECT COUNT(T.ID) FROM EAM_MEASUREMENT_TEMPL T " +
+                                           "WHERE MONITORABLE_TYPE_ID = MT.ID) GROUP BY S.ID UNION " +
+                                           "SELECT 3, S.ID FROM EAM_MONITORABLE_TYPE MT, EAM_SERVICE_TYPE ST " +
+                                           "INNER JOIN EAM_SERVICE S ON SERVICE_TYPE_ID = ST.ID " +
+                                           "WHERE ST.PLUGIN = MT.PLUGIN AND MT.PLUGIN = :plugin AND " +
+                                           "MT.NAME = ST.NAME AND " +
+                                           "(SELECT COUNT(M.ID) FROM EAM_MEASUREMENT M," +
                                            "EAM_MEASUREMENT_TEMPL T " +
-                   "WHERE M.TEMPLATE_ID = T.ID AND " +
-                         "T.MONITORABLE_TYPE_ID = MT.ID AND " +
-                         "INSTANCE_ID = S.ID) < " +
-                  "(SELECT COUNT(T.ID) FROM EAM_MEASUREMENT_TEMPL T " +
-                   "WHERE MONITORABLE_TYPE_ID = MT.ID) GROUP BY S.ID")
-            .setString("plugin", plugin)
-            .list();
+                                           "WHERE M.TEMPLATE_ID = T.ID AND " +
+                                           "T.MONITORABLE_TYPE_ID = MT.ID AND " +
+                                           "INSTANCE_ID = S.ID) < " +
+                                           "(SELECT COUNT(T.ID) FROM EAM_MEASUREMENT_TEMPL T " +
+                                           "WHERE MONITORABLE_TYPE_ID = MT.ID) GROUP BY S.ID")
+                           .setString("plugin", plugin)
+                           .list();
     }
 
     @SuppressWarnings("unchecked")
     List<CollectionSummary> findMetricCountSummaries() {
         String sql =
-            "SELECT COUNT(m.template_id) AS total, " +
-            "m.coll_interval/60000 AS coll_interval, " +
-            "t.name AS name, mt.name AS type " +
-            "FROM EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t, " +
-            "EAM_MONITORABLE_TYPE mt " +
-            "WHERE m.template_id = t.id " +
-            " and t.monitorable_type_id=mt.id " +
-            " and m.coll_interval > 0 " +
-            " and m.enabled = :enabled " +
-            "GROUP BY m.template_id, t.name, mt.name, m.coll_interval " +
-            "ORDER BY total DESC";
+                     "SELECT COUNT(m.template_id) AS total, " +
+                     "m.coll_interval/60000 AS coll_interval, " +
+                     "t.name AS name, mt.name AS type " +
+                     "FROM EAM_MEASUREMENT m, EAM_MEASUREMENT_TEMPL t, " +
+                     "EAM_MONITORABLE_TYPE mt " +
+                     "WHERE m.template_id = t.id " +
+                     " and t.monitorable_type_id=mt.id " +
+                     " and m.coll_interval > 0 " +
+                     " and m.enabled = :enabled " +
+                     "GROUP BY m.template_id, t.name, mt.name, m.coll_interval " +
+                     "ORDER BY total DESC";
         List<Object[]> vals = getSession().createSQLQuery(sql)
-            .setBoolean("enabled", true)
-            .list();
+                                          .setBoolean("enabled", true)
+                                          .list();
 
         List<CollectionSummary> res = new ArrayList<CollectionSummary>(vals.size());
 
         for (Object[] v : vals) {
-            java.lang.Number total = (java.lang.Number)v[0];
-            java.lang.Number interval = (java.lang.Number)v[1];
-            String metricName = (String)v[2];
-            String resourceName = (String)v[3];
+            java.lang.Number total = (java.lang.Number) v[0];
+            java.lang.Number interval = (java.lang.Number) v[1];
+            String metricName = (String) v[2];
+            String resourceName = (String) v[3];
 
             res.add(new CollectionSummary(total.intValue(), interval.intValue(),
                                           metricName, resourceName));
@@ -717,18 +714,18 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     @SuppressWarnings("unchecked")
     List<Object[]> findAgentOffsetTuples() {
         String sql = "select a, p, s, meas from Agent a " +
-            "join a.platforms p " +
-            "join p.platformType pt " +
-            "join p.serversBag s " +
-            "join s.serverType st, " +
-            "Measurement as meas " +
-            "join meas.template as templ " +
-            "join templ.monitorableType as mt " +
-            "where " +
-            "pt.plugin = 'system' " +
-            "and templ.name = 'Server Offset' " +
-            "and meas.instanceId = s.id " +
-            "and st.name = 'HQ Agent' ";
+                     "join a.platforms p " +
+                     "join p.platformType pt " +
+                     "join p.serversBag s " +
+                     "join s.serverType st, " +
+                     "Measurement as meas " +
+                     "join meas.template as templ " +
+                     "join templ.monitorableType as mt " +
+                     "where " +
+                     "pt.plugin = 'system' " +
+                     "and templ.name = 'Server Offset' " +
+                     "and meas.instanceId = s.id " +
+                     "and st.name = 'HQ Agent' ";
 
         return getSession().createQuery(sql).list();
     }
@@ -739,50 +736,50 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     @SuppressWarnings("unchecked")
     Map<Agent, Long> findNumMetricsPerAgent() {
         String platSQL =
-            "select a.id, count(m) from Agent a " +
-            "join a.platforms p, " +
-            "Measurement as m " +
-            "join m.template templ " +
-            "join templ.monitorableType monType " +
-            "where " +
-            " monType.appdefType = '1' and m.instanceId = p.id " +
-            "and m.enabled = true " +
-            "group by a";
+                         "select a.id, count(m) from Agent a " +
+                         "join a.platforms p, " +
+                         "Measurement as m " +
+                         "join m.template templ " +
+                         "join templ.monitorableType monType " +
+                         "where " +
+                         " monType.appdefType = '1' and m.instanceId = p.id " +
+                         "and m.enabled = true " +
+                         "group by a";
         String serverSQL =
-            "select a.id, count(m) from Agent a " +
-            "join a.platforms p " +
-            "join p.serversBag s, " +
-            "Measurement as m " +
-            "join m.template templ " +
-            "join templ.monitorableType monType " +
-            "where " +
-            " monType.appdefType = '2' and m.instanceId = s.id " +
-            "and m.enabled = true " +
-            "group by a";
+                           "select a.id, count(m) from Agent a " +
+                           "join a.platforms p " +
+                           "join p.serversBag s, " +
+                           "Measurement as m " +
+                           "join m.template templ " +
+                           "join templ.monitorableType monType " +
+                           "where " +
+                           " monType.appdefType = '2' and m.instanceId = s.id " +
+                           "and m.enabled = true " +
+                           "group by a";
         String serviceSQL =
-            "select a.id, count(m) from Agent a " +
-            "join a.platforms p " +
-            "join p.serversBag s " +
-            "join s.services v, " +
-            "Measurement as m " +
-            "join m.template templ " +
-            "join templ.monitorableType monType " +
-            "where " +
-            " monType.appdefType = '3' and m.instanceId = v.id " +
-            "and m.enabled = true " +
-            "group by a";
-        String[] queries = {platSQL, serverSQL, serviceSQL};
+                            "select a.id, count(m) from Agent a " +
+                            "join a.platforms p " +
+                            "join p.serversBag s " +
+                            "join s.services v, " +
+                            "Measurement as m " +
+                            "join m.template templ " +
+                            "join templ.monitorableType monType " +
+                            "where " +
+                            " monType.appdefType = '3' and m.instanceId = v.id " +
+                            "and m.enabled = true " +
+                            "group by a";
+        String[] queries = { platSQL, serverSQL, serviceSQL };
         Map<Integer, Long> idToCount = new HashMap<Integer, Long>();
 
-        for (int i=0; i<queries.length; i++) {
+        for (int i = 0; i < queries.length; i++) {
             List<Object[]> tuples = getSession().createQuery(queries[i]).list();
 
             for (Object[] tuple : tuples) {
-                Integer id = (Integer)tuple[0];
-                java.lang.Number count = (java.lang.Number)tuple[1];
+                Integer id = (Integer) tuple[0];
+                java.lang.Number count = (java.lang.Number) tuple[1];
                 Long curCount;
 
-                curCount = (Long)idToCount.get(id);
+                curCount = (Long) idToCount.get(id);
                 if (curCount == null) {
                     curCount = new Long(0);
                 }
@@ -820,7 +817,7 @@ public class MeasurementDAO extends HibernateDAO<Measurement> {
     /**
      * Find a list of Measurement ID's that are no longer associated with a
      * resource.
-     *
+     * 
      * @return A List of Measurement ID's.
      */
     @SuppressWarnings("unchecked")
