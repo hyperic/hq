@@ -36,11 +36,11 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.bizapp.shared.SchedulerBossLocal;
 import org.hyperic.hq.bizapp.shared.SchedulerBossUtil;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
-import org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl;
-import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.utils.Key;
 
@@ -255,8 +255,8 @@ public class SchedulerBossEJBImpl implements SessionBean {
     //-------------------------------------------------------------------------
     //-- private helpers
     //-------------------------------------------------------------------------
-    private SchedulerLocal getSched() {
-        return SchedulerEJBImpl.getOne();
+    private Scheduler getSched() {
+        return Bootstrap.getBean(Scheduler.class);
     }
 }
 

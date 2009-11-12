@@ -105,18 +105,7 @@
 
 		</session>
 
-		<session>
-			<description><![CDATA[The Scheduler session bean is a proxy to the Quartz scheduler MBean that is used for scheduling jobs to be executed within the application server.]]></description>
-
-			<ejb-name>Scheduler</ejb-name>
-
-			<local-home>org.hyperic.hq.scheduler.shared.SchedulerLocalHome</local-home>
-			<local>org.hyperic.hq.scheduler.shared.SchedulerLocal</local>
-			<ejb-class>org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
+		
 
 		<session>
 			<description><![CDATA[The HierarchicalAlertingManager provides APIs to manage alert suppression.]]></description>
@@ -1248,13 +1237,6 @@
 					<method-param>org.hyperic.hq.authz.server.session.AuthzSubject</method-param>
 					<method-param>java.lang.Integer[]</method-param>
 				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>Scheduler</ejb-name>
-				<method-name>*</method-name>
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>

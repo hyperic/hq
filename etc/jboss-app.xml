@@ -15,9 +15,6 @@
     <service>events-mbeans.sar</service>
   </module>
   <module>
-    <service>scheduler-mbeans.sar</service>
-  </module>
-  <module>
     <service>measurement-mbeans.sar</service>
   </module>
   <module>

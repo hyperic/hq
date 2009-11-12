@@ -61,12 +61,12 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
-import org.hyperic.hq.scheduler.server.session.SchedulerEJBImpl;
-import org.hyperic.hq.scheduler.shared.SchedulerLocal;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.collection.IntHashMap;
 import org.quartz.JobDetail;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
 import org.quartz.Trigger;
@@ -342,7 +342,7 @@ public class EmailFilter {
         // Create new job name with the appId
         String name = EmailFilterJob.class.getName() + platId + "Job";
 
-        SchedulerLocal scheduler = SchedulerEJBImpl.getOne();
+        Scheduler scheduler = Bootstrap.getBean(Scheduler.class);
 
         synchronized (SCHEDULER_LOCK) {
 

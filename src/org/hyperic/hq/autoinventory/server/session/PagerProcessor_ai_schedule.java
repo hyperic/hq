@@ -31,11 +31,12 @@ import org.hyperic.util.pager.PagerProcessorExt;
 import org.hyperic.util.pager.PagerEventHandler;
 
 import org.hyperic.hq.autoinventory.AISchedule;
+import org.hyperic.hq.context.Bootstrap;
 
-import org.hyperic.hq.scheduler.shared.SchedulerLocal;
-import org.hyperic.hq.scheduler.shared.SchedulerUtil;
+
 import org.hyperic.dao.DAOFactory;
 
+import org.quartz.Scheduler;
 import org.quartz.Trigger;
 
 public class PagerProcessor_ai_schedule implements PagerProcessorExt {
@@ -52,8 +53,8 @@ public class PagerProcessor_ai_schedule implements PagerProcessorExt {
         if (o == null) return null;
         try {
             if (o instanceof AISchedule) {
-                SchedulerLocal scheduler = 
-                    SchedulerUtil.getLocalHome().create();
+                Scheduler scheduler = 
+                    Bootstrap.getBean(Scheduler.class);
                 AISchedule s = (AISchedule)o;
                 Trigger trigger;
                 try {
