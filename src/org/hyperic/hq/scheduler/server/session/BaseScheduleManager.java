@@ -28,8 +28,7 @@ package org.hyperic.hq.scheduler.server.session;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import javax.ejb.CreateException;
-import javax.ejb.SessionContext;
+import javax.annotation.PostConstruct;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -37,7 +36,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.Pager;
@@ -50,12 +48,12 @@ import org.quartz.Scheduler;
  * for example the ControlScheduleManager and AIScheduleManager
  * session beans.
  */
-public abstract class BaseScheduleManagerEJB {
+public abstract class BaseScheduleManager {
 
     public static final String SCHED_SEPARATOR = "-";
     private int dbType;
 
-    protected Scheduler _scheduler;
+    protected Scheduler scheduler;
 
     private String jobPrefix;
     private String schedulePrefix;
@@ -70,8 +68,13 @@ public abstract class BaseScheduleManagerEJB {
     protected abstract String getJobPrefix ();
     protected abstract String getSchedulePrefix ();
 
-    protected DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
-
+    protected DBUtil dbUtil;
+    
+    public BaseScheduleManager(Scheduler scheduler, DBUtil dbUtil) {
+        this.scheduler = scheduler;
+        this.dbUtil = dbUtil;
+    }
+    
     // Helper methods
     protected String getPrefix(AppdefEntityID id)
     {
@@ -113,16 +116,10 @@ public abstract class BaseScheduleManagerEJB {
         dataMap.put(BaseJob.PROP_ORDER, orderStr);
     }
 
-    /**
-     * A pseudo-ejbCreate method called by subclasses from their
-     * real ejbCreate implementations.
-     */
-    protected void ejbCreate() {
-
+   
+    @PostConstruct
+    protected void initialize() {
         try {
-            // Get a reference to the scheduler
-            this._scheduler = Bootstrap.getBean(Scheduler.class);
-
             // Setup the pagers
             this.historyPager = Pager.getPager(getHistoryPagerClass());
             this.schedulePager = Pager.getPager(getSchedulePagerClass());
@@ -138,10 +135,6 @@ public abstract class BaseScheduleManagerEJB {
         this.schedulePrefix = getSchedulePrefix();
     }
 
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {}
 
     protected int getDbType() { return this.dbType; }
     protected void setDbType () {
@@ -149,13 +142,13 @@ public abstract class BaseScheduleManagerEJB {
         try {
             conn = dbUtil.getConnByContext(
                 new InitialContext(), HQConstants.DATASOURCE);
-            this.dbType = dbUtil.getDBType(conn);
+            this.dbType = DBUtil.getDBType(conn);
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (SQLException e) {
             //log and continue
         } finally {
-            dbUtil.closeConnection(null,conn);
+            DBUtil.closeConnection(null,conn);
         }
     }
 }

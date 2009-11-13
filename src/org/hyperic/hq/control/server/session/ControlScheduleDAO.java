@@ -7,7 +7,6 @@ import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.scheduler.ScheduleValue;
@@ -39,7 +38,7 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class ControlScheduleDAO extends HibernateDAO
+public class ControlScheduleDAO extends HibernateDAO<ControlSchedule>
 {
     @Autowired
     public ControlScheduleDAO(SessionFactory f) {
@@ -89,7 +88,7 @@ public class ControlScheduleDAO extends HibernateDAO
     }
 
 
-    public Collection findByFireTime(boolean asc)
+    public Collection<ControlSchedule> findByFireTime(boolean asc)
     {
         return createCriteria()
             .addOrder(asc
@@ -98,12 +97,12 @@ public class ControlScheduleDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByEntity(int type, int id)
+    public Collection<ControlSchedule> findByEntity(int type, int id)
     {
         return createFindByEntity(type, id).list();
     }
 
-    public Collection findByEntityAction(int type, int id, boolean asc)
+    public Collection<ControlSchedule> findByEntityAction(int type, int id, boolean asc)
     {
         return
             createFindByEntity(type, id)
@@ -113,7 +112,7 @@ public class ControlScheduleDAO extends HibernateDAO
                 .list();
     }
 
-    public Collection findByEntityFireTime(int type, int id, boolean asc)
+    public Collection<ControlSchedule> findByEntityFireTime(int type, int id, boolean asc)
     {
         return
             createFindByEntity(type, id)

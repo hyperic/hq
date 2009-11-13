@@ -6,7 +6,6 @@ import java.util.Collection;
 import javax.ejb.CreateException;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.autoinventory.AISchedule;
 import org.hyperic.hq.scheduler.ScheduleValue;
@@ -38,7 +37,7 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class AIScheduleDAO extends HibernateDAO
+public class AIScheduleDAO extends HibernateDAO<AISchedule>
 {
     @Autowired
     public AIScheduleDAO(SessionFactory f) {
@@ -118,7 +117,7 @@ public class AIScheduleDAO extends HibernateDAO
         return findByEntityFireTime(type, id, true);
     }
 
-    public Collection findByEntityFireTime(int type, int id, boolean asc) {
+    public Collection<AISchedule> findByEntityFireTime(int type, int id, boolean asc) {
         String sql="from AISchedule where entityId=? and entityType=? " +
                    "order by nextFireTime " + (asc ? "asc" : "desc");
         return getSession().createQuery(sql)
@@ -127,7 +126,7 @@ public class AIScheduleDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByEntityScanName(int type, int id, boolean asc) {
+    public Collection<AISchedule> findByEntityScanName(int type, int id, boolean asc) {
         String sql="from AISchedule where entityId=? and entityType=? " +
                    "order by scanName " + (asc ? "asc" : "desc");
         return getSession().createQuery(sql)

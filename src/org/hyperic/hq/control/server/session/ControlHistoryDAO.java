@@ -30,13 +30,12 @@ import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class ControlHistoryDAO extends HibernateDAO
+public class ControlHistoryDAO extends HibernateDAO<ControlHistory>
 {
     @Autowired
     public ControlHistoryDAO(SessionFactory f) {
@@ -88,7 +87,7 @@ public class ControlHistoryDAO extends HibernateDAO
         return h;
     }
 
-    public Collection findByStartTime(long time, boolean asc)
+    public Collection<ControlHistory> findByStartTime(long time, boolean asc)
     {
         return createCriteria()
             .add(Expression.gt("startTime", new Long(time)))
@@ -96,40 +95,40 @@ public class ControlHistoryDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByEntity(int type, int id)
+    public Collection<ControlHistory> findByEntity(int type, int id)
     {
         return createFindByEntity(type, id).list();
     }
 
-    public Collection findByEntityStartTime(int type, int id, boolean asc)
+    public Collection<ControlHistory> findByEntityStartTime(int type, int id, boolean asc)
     {
         return createFindByEntity(type, id)
             .addOrder(asc ? Order.asc("startTime") : Order.desc("startTime"))
             .list();
     }
 
-    public Collection findByEntityAction(int type, int id, boolean asc)
+    public Collection<ControlHistory> findByEntityAction(int type, int id, boolean asc)
     {
         return createFindByEntity(type, id)
             .addOrder(asc ? Order.asc("action") : Order.desc("action"))
             .list();
     }
 
-    public Collection findByEntityStatus(int type, int id, boolean asc)
+    public Collection<ControlHistory> findByEntityStatus(int type, int id, boolean asc)
     {
         return createFindByEntity(type, id)
             .addOrder(asc ? Order.asc("status") : Order.desc("status"))
             .list();
     }
 
-    public Collection findByEntityDuration(int type, int id, boolean asc)
+    public Collection<ControlHistory> findByEntityDuration(int type, int id, boolean asc)
     {
         return createFindByEntity(type, id)
             .addOrder(asc ? Order.asc("duration") : Order.desc("duration"))
             .list();
     }
 
-    public Collection findByEntityDateScheduled(int type, int id, boolean asc)
+    public Collection<ControlHistory> findByEntityDateScheduled(int type, int id, boolean asc)
     {
         return createFindByEntity(type, id)
             .addOrder(asc
@@ -138,7 +137,7 @@ public class ControlHistoryDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByGroupStartTime(int groupId,int batchId, boolean asc)
+    public Collection<ControlHistory> findByGroupStartTime(int groupId,int batchId, boolean asc)
     {
         return createFindByGroup(groupId, batchId)
             .addOrder(asc
@@ -147,7 +146,7 @@ public class ControlHistoryDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByGroupAction(int groupId, int batchId, boolean asc)
+    public Collection<ControlHistory> findByGroupAction(int groupId, int batchId, boolean asc)
     {
         return createFindByGroup(groupId, batchId)
             .addOrder(asc
@@ -156,7 +155,7 @@ public class ControlHistoryDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByGroupStatus(int groupId, int batchId, boolean asc)
+    public Collection<ControlHistory> findByGroupStatus(int groupId, int batchId, boolean asc)
     {
         return createFindByGroup(groupId, batchId)
             .addOrder(asc
@@ -165,7 +164,7 @@ public class ControlHistoryDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByGroupDuration(int groupId, int batchId, boolean asc)
+    public Collection<ControlHistory> findByGroupDuration(int groupId, int batchId, boolean asc)
     {
         return createFindByGroup(groupId, batchId)
             .addOrder(asc
@@ -174,7 +173,7 @@ public class ControlHistoryDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByGroupDateScheduled(int groupId, int batchId,
+    public Collection<ControlHistory> findByGroupDateScheduled(int groupId, int batchId,
                                                boolean asc)
     {
         return createFindByGroup(groupId, batchId)

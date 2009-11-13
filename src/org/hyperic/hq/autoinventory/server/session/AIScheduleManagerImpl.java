@@ -31,68 +31,80 @@ import java.util.Date;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.autoinventory.AIHistory;
 import org.hyperic.hq.autoinventory.AISchedule;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
-import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
-import org.hyperic.hq.autoinventory.shared.AIScheduleManagerUtil;
+import org.hyperic.hq.autoinventory.shared.AIScheduleManager;
+import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.AIHistoryDAO;
 import org.hyperic.hq.dao.AIScheduleDAO;
 import org.hyperic.hq.scheduler.ScheduleParseException;
 import org.hyperic.hq.scheduler.ScheduleParser;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
-import org.hyperic.hq.scheduler.server.session.BaseScheduleManagerEJB;
+import org.hyperic.hq.scheduler.server.session.BaseScheduleManager;
+import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.SortAttribute;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
+import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.SimpleTrigger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+
 
 /**
  * Manager for dealing with scheduled autoinventory scans.
  *
- * @ejb:bean name="AIScheduleManager"
- *      jndi-name="ejb/autoinventory/AIScheduleManager"
- *      local-jndi-name="LocalAIScheduleManager"
- *      view-type="local"
- *      type="Stateless"
  */
-public class AIScheduleManagerEJBImpl
-    extends BaseScheduleManagerEJB implements SessionBean {
+@Service
+public class AIScheduleManagerImpl
+    extends BaseScheduleManager implements AIScheduleManager {
 
-    private final String GROUP = "autoinventory";
-    private final Log _log =
-        LogFactory.getLog(AIScheduleManagerEJBImpl.class.getName());
+    private static final String GROUP = "autoinventory";
+    private final Log log =
+        LogFactory.getLog(AIScheduleManagerImpl.class.getName());
 
-    private final String JOB_PREFIX      = "aiScan";
-    private final String SCHEDULE_PREFIX = "interval";
+    private static final String JOB_PREFIX      = "aiScan";
+    private static final String SCHEDULE_PREFIX = "interval";
 
-    private final String PAGER_BASE =
+    private static final String PAGER_BASE =
         "org.hyperic.hq.autoinventory.server.session.";
-    private final String HISTORY_PAGER =
+    private static final String HISTORY_PAGER =
         PAGER_BASE + "PagerProcessor_ai_history";
-    private final String SCHEDULE_PAGER =
+    private static final String SCHEDULE_PAGER =
         PAGER_BASE + "PagerProcessor_ai_schedule";
 
-    private AIScheduleDAO sl;
-
+    private AIScheduleDAO aiScheduleDao;
+    private PlatformManagerLocal platformManager;
+    private AIHistoryDAO aiHistoryDao;
+    
+    @Autowired
+    public AIScheduleManagerImpl(Scheduler scheduler, DBUtil dbUtil, AIScheduleDAO aiScheduleDao, PlatformManagerLocal platformManager, AIHistoryDAO aiHistoryDAO) {
+        super(scheduler, dbUtil);
+        this.aiScheduleDao = aiScheduleDao;
+        this.platformManager = platformManager;
+        this.aiHistoryDao = aiHistoryDAO;
+    }
+    
     protected String getHistoryPagerClass  () { return HISTORY_PAGER; }
     protected String getSchedulePagerClass () { return SCHEDULE_PAGER; }
     protected String getJobPrefix          () { return JOB_PREFIX; }
@@ -140,9 +152,10 @@ public class AIScheduleManagerEJBImpl
 
     /**
      * Schedule an AI scan on an appdef entity (platform or group of platforms)
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
+    @Transactional
     public void doScheduledScan(AuthzSubject subject,
                                 AppdefEntityID id,
                                 ScanConfigurationCore scanConfig,
@@ -152,14 +165,11 @@ public class AIScheduleManagerEJBImpl
         throws AutoinventoryException, CreateException,
                DuplicateAIScanNameException, ScheduleWillNeverFireException
     {
-        // Scheduled jobs are persisted in the autoinventory subsystem
-        AIScheduleDAO asdao = DAOFactory.getDAOFactory().getAIScheduleDAO();
-
         // find the os for the platform
         Platform pValue = null;
         try {
             pValue =
-                PlatformManagerEJBImpl.getOne().findPlatformById(id.getId());
+                platformManager.findPlatformById(id.getId());
         } catch (PlatformNotFoundException e) {
             throw new AutoinventoryException(e);
         }
@@ -169,7 +179,7 @@ public class AIScheduleManagerEJBImpl
         String triggerName = getTriggerName(subject, id, configid);
 
         // Setup the quartz job class that will handle this ai action.
-        Class jobClass = id.isGroup() ? AIScanGroupJob.class : AIScanJob.class;
+        Class<?> jobClass = id.isGroup() ? AIScanGroupJob.class : AIScanJob.class;
 
         JobDetail jobDetail = new JobDetail(jobName, GROUP, jobClass);
 
@@ -183,12 +193,12 @@ public class AIScheduleManagerEJBImpl
             trigger.setVolatility(true);
 
             try {
-                _log.info("Scheduling job for immediate execution: " +
+                log.info("Scheduling job for immediate execution: " +
                           jobDetail);
-                _scheduler.scheduleJob(jobDetail, trigger);
+                scheduler.scheduleJob(jobDetail, trigger);
                 return;
             } catch (SchedulerException e) {
-                _log.error("Unable to schedule job: " + e.getMessage());
+                log.error("Unable to schedule job: " + e.getMessage());
                 return;
             }
         }
@@ -197,7 +207,7 @@ public class AIScheduleManagerEJBImpl
         try {
             cronStr = ScheduleParser.getCronString(schedule);
         } catch (ScheduleParseException e) {
-            _log.error("Unable to get cron string: " + e.getMessage());
+            log.error("Unable to get cron string: " + e.getMessage());
             throw new AutoinventoryException(e);
         }
 
@@ -211,11 +221,11 @@ public class AIScheduleManagerEJBImpl
                 if (nextFire == null) {
                     throw new ScheduleWillNeverFireException();
                 }
-                _scheduler.scheduleJob(jobDetail, trigger);
+                scheduler.scheduleJob(jobDetail, trigger);
 
-                checkUniqueName(asdao, scanName);
+                checkUniqueName(aiScheduleDao, scanName);
                 AISchedule aiLoc =
-                    asdao.create(id,
+                    aiScheduleDao.create(id,
                                  subject.getName(),
                                  scanName, scanDesc,
                                  schedule,
@@ -228,7 +238,7 @@ public class AIScheduleManagerEJBImpl
             } catch (ScheduleWillNeverFireException e) {
                 throw e;
             } catch (Exception e) {
-                _log.error("Unable to schedule job: " + e.getMessage());
+                log.error("Unable to schedule job: " + e.getMessage());
                 throw new AutoinventoryException(e);
             }
         } else {
@@ -243,11 +253,11 @@ public class AIScheduleManagerEJBImpl
                 if (nextFire == null) {
                     throw new ScheduleWillNeverFireException();
                 }
-                _scheduler.scheduleJob(jobDetail, trigger);
+                scheduler.scheduleJob(jobDetail, trigger);
 
-                checkUniqueName(asdao, scanName);
+                checkUniqueName(aiScheduleDao, scanName);
                 AISchedule aiLoc =
-                    asdao.create(id, subject.getName(),
+                    aiScheduleDao.create(id, subject.getName(),
                                  scanName, scanDesc,
                                  schedule,
                                  nextFire.getTime(),
@@ -259,11 +269,11 @@ public class AIScheduleManagerEJBImpl
             } catch (ScheduleWillNeverFireException e) {
                 throw e;
             } catch (ParseException e) {
-                _log.error("Unable to setup cron trigger: " +
+                log.error("Unable to setup cron trigger: " +
                                e.getMessage());
                 throw new AutoinventoryException(e);
             } catch (Exception e) {
-                _log.error("Unable to schedule job: " + e.getMessage());
+                log.error("Unable to schedule job: " + e.getMessage());
                 throw new AutoinventoryException(e);
             }
         }
@@ -271,26 +281,27 @@ public class AIScheduleManagerEJBImpl
 
     /**
      * Get a list of scheduled scans based on appdef id
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     *
      */
-    public PageList findScheduledJobs(AuthzSubject subject,
+    @Transactional
+    public PageList<AIScheduleValue> findScheduledJobs(AuthzSubject subject,
                                       AppdefEntityID id, PageControl pc)
         throws FinderException {
-        AIScheduleDAO sl = DAOFactory.getDAOFactory().getAIScheduleDAO();
-        Collection schedule;
+        
 
         // default the sorting to the next fire time
         pc = PageControl.initDefaults(pc, SortAttribute.CONTROL_NEXTFIRE);
 
+        Collection<AISchedule> schedule;
         int sortAttr = pc.getSortattribute();
         switch (sortAttr) {
         case SortAttribute.RESOURCE_NAME:
-            schedule = sl.findByEntityScanName(id.getType(), id.getID(),
+            schedule = aiScheduleDao.findByEntityScanName(id.getType(), id.getID(),
                                                pc.isAscending());
             break;
         case SortAttribute.CONTROL_NEXTFIRE:
-            schedule = sl.findByEntityFireTime(id.getType(), id.getID(),
+            schedule = aiScheduleDao.findByEntityFireTime(id.getType(), id.getID(),
                                                pc.isAscending());
             break;
 
@@ -299,7 +310,8 @@ public class AIScheduleManagerEJBImpl
         }
 
         // The pager will remove any stale data
-        PageList list = this.schedulePager.seek(schedule,
+        //TODO: G
+        PageList<AIScheduleValue> list = this.schedulePager.seek(schedule,
                                                 pc.getPagenum(),
                                                 pc.getPagesize());
         list.setTotalSize(schedule.size());
@@ -308,65 +320,66 @@ public class AIScheduleManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
+    @Transactional
     public AISchedule findScheduleByID(AuthzSubject subject,
                                             Integer id)
         throws FinderException, CreateException
     {
 
-        return sl.findById(id);
+        return aiScheduleDao.findById(id);
     }
 
     /**
      * Get a job history based on appdef id
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      *
      */
-    public PageList findJobHistory(AuthzSubject subject,
+    @Transactional
+    public PageList<AIHistory> findJobHistory(AuthzSubject subject,
                                    AppdefEntityID id, PageControl pc)
         throws FinderException
     {
-        AIHistoryDAO histLH = DAOFactory.getDAOFactory().getAIHistoryDAO();
-        Collection hist;
-
+        
         // default the sorting to the date started
         pc = PageControl.initDefaults(pc, SortAttribute.CONTROL_STARTED);
 
+        Collection<AIHistory> hist;
         int sortAttr = pc.getSortattribute();
         switch(sortAttr) {
           case SortAttribute.CONTROL_STATUS:
-              hist = histLH.findByEntityStatus(id.getType(),
+              hist = aiHistoryDao.findByEntityStatus(id.getType(),
                                                id.getID(),
                                                pc.isAscending());
             break;
           case SortAttribute.CONTROL_STARTED:
-              hist = histLH.findByEntityStartTime(id.getType(),
+              hist = aiHistoryDao.findByEntityStartTime(id.getType(),
                                                   id.getID(),
                                                   pc.isAscending());
             break;
           case SortAttribute.CONTROL_ELAPSED:
-              hist = histLH.findByEntityDuration(id.getType(),
+              hist = aiHistoryDao.findByEntityDuration(id.getType(),
                                                  id.getID(),
                                                  pc.isAscending());
             break;
           case SortAttribute.CONTROL_DATESCHEDULED:
-              hist = histLH.findByEntityDateScheduled(id.getType(),
+              hist = aiHistoryDao.findByEntityDateScheduled(id.getType(),
                                                       id.getID(),
                                                       pc.isAscending());
             break;
           case SortAttribute.CONTROL_ENTITYNAME:
             // No need to sort since all will have the same name
-            hist = histLH.findByEntity(id.getType(), id.getID());
+            hist = aiHistoryDao.findByEntity(id.getType(), id.getID());
             break;
           default:
             throw new FinderException("Unknown sort attribute: " +
                                       sortAttr);
         }
 
-        PageList list = this.historyPager.seek(hist,
+        PageList<AIHistory> list = this.historyPager.seek(hist,
                                                pc.getPagenum(),
                                                pc.getPagesize());
         list.setTotalSize(hist.size());
@@ -375,20 +388,18 @@ public class AIScheduleManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
+    @Transactional
     public void deleteAIJob(AuthzSubject subject, Integer ids[])
         throws AutoinventoryException
     {
-        AIScheduleDAO asdao = DAOFactory.getDAOFactory().getAIScheduleDAO();
-        AISchedule aiScheduleLocal;
-
         for (int i = 0; i < ids.length; i++) {
             try {
-                aiScheduleLocal = asdao.findById(ids[i]);
-                _scheduler.deleteJob(aiScheduleLocal.getJobName(), GROUP);
-                asdao.remove(aiScheduleLocal);
+                AISchedule aiScheduleLocal = aiScheduleDao.findById(ids[i]);
+                scheduler.deleteJob(aiScheduleLocal.getJobName(), GROUP);
+                aiScheduleDao.remove(aiScheduleLocal);
             } catch (Exception e) {
                 throw new AutoinventoryException("Unable to remove job: " +
                                                  e.getMessage());
@@ -408,21 +419,7 @@ public class AIScheduleManagerEJBImpl
         return;
     }
 
-    public static AIScheduleManagerLocal getOne() {
-        try {
-            return AIScheduleManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    public static AIScheduleManager getOne() {
+        return Bootstrap.getBean(AIScheduleManager.class);
     }
-
-    /** @ejb:create-method */
-    public void ejbCreate() {
-        super.ejbCreate();
-    }
-    public void ejbPostCreate() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {}
 }

@@ -91,7 +91,7 @@ import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClient;
 import org.hyperic.hq.autoinventory.agent.client.AICommandsClientFactory;
 import org.hyperic.hq.autoinventory.server.session.RuntimeReportProcessor.ServiceMergeInfo;
-import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
+import org.hyperic.hq.autoinventory.shared.AIScheduleManager;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
@@ -124,7 +124,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     protected final String DATASOURCE_NAME = HQConstants.DATASOURCE;
 
     private AutoinventoryPluginManager aiPluginManager;
-    private AIScheduleManagerLocal aiScheduleManager;
+    private AIScheduleManager aiScheduleManager;
 
     private AgentReportStatusDAO agentReportStatusDao;
     private AIHistoryDAO aiHistoryDao;
@@ -143,7 +143,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     @Autowired
     public AutoinventoryManagerImpl(AgentReportStatusDAO agentReportStatusDao, AIHistoryDAO aiHistoryDao,
                                     AIPlatformDAO aiPlatformDao, ProductManager productManager, ServerManagerLocal serverManager,
-                                    AIScheduleManagerLocal aiScheduleManager, ResourceManager resourceManager, ConfigManagerLocal configManager,
+                                    AIScheduleManager aiScheduleManager, ResourceManager resourceManager, ConfigManagerLocal configManager,
                                     AgentManager agentManager, CPropManager cPropManager, ServiceManagerLocal serviceManager,
                                     AuthzSubjectManagerLocal authzSubjectManager, AIQueueManagerLocal aiQueueManager) {
         this.agentReportStatusDao = agentReportStatusDao;
