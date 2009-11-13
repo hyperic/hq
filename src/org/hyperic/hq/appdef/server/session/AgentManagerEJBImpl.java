@@ -210,7 +210,7 @@ public class AgentManagerEJBImpl
      * @ejb:transaction type="Required"
      */
     public List getAgents(){
-        return new ArrayList(getAgentDAO().findAll());
+        return getAgentDAO().findAll();
     }
 
     /**

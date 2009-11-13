@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.List;
 
 import org.hibernate.Query;
+import org.hibernate.criterion.Order;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.Agent;
@@ -64,6 +65,14 @@ public class AgentDAO extends HibernateDAO
                              agentToken, version); 
         save(ag);
         return ag;
+    }
+    
+    public List findAll() {
+        return getSession()
+                   .createCriteria(Agent.class)
+                   .addOrder(Order.asc("address"))
+                   .addOrder(Order.asc("port"))
+                   .list();
     }
     
     public List findByIP(String ip) {
