@@ -111,6 +111,8 @@ public class MeasurementManagerImpl
     private AuthzSubjectManagerLocal authzSubjectManager;
     private MeasurementProcessor measurementProcessor;
     private ConfigManagerLocal configManager;
+    private AvailabilityManager availabilityManager;
+    
 
     @Autowired
     public MeasurementManagerImpl(ResourceManager resourceManager,
@@ -475,7 +477,7 @@ public class MeasurementManagerImpl
 
             if (availMeasurement != null) {
                 MetricValue val = new MetricValue(MeasurementConstants.AVAIL_DOWN);
-                getAvailabilityManager().addData(availMeasurement, val);
+                availabilityManager.addData(availMeasurement, val);
             }
         }
     }
