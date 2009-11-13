@@ -48,7 +48,7 @@ public class HAStartupListener
         _log.info("Starting services");
 
         startConfigService(server);
-        startScheduler(server);
+       
         startHAService(server);
         MeasurementStartupListener.startDataPurgeWorker();
         HAUtil.setHAService(this);
@@ -84,16 +84,4 @@ public class HAStartupListener
             _log.info("Unable to start service: "+e);
         }
     }
-
-    private void startScheduler(MBeanServer server)
-    {
-        try {
-            ObjectName o = new ObjectName("hyperic.jmx:type=Service,name=Scheduler");
-            server.invoke(o, "startScheduler", new Object[] {}, new String[] {});
-        } catch (Exception e) {
-            _log.info("Unable to start service: "+e);
-        }
-    }
-
-   
 }
