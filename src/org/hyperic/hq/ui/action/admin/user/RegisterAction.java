@@ -40,7 +40,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -98,7 +98,7 @@ public class RegisterAction extends BaseAction {
         log.trace("registering subject [" + webUser.getUsername() + "]");
         
         AuthzSubject target = 
-            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(userForm.getId()); 
+            AuthzSubjectManagerImpl.getOne().findSubjectById(userForm.getId()); 
         authzBoss.updateSubject(sessionId, target, Boolean.TRUE,
                                 HQConstants.ApplicationName,
                                 userForm.getDepartment(),

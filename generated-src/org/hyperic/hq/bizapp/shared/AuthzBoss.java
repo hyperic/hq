@@ -92,7 +92,7 @@ public interface AuthzBoss {
      * Return a sorted, paged <code>List</code> of
      * <code>AuthzSubjectValue</code> objects matching name as substring
      */
-    public PageList<AuthzSubjectValue> getSubjectsByName(Integer sessionId, String name, PageControl pc)
+    public PageList<AuthzSubject> getSubjectsByName(Integer sessionId, String name, PageControl pc)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException;
 
     /**

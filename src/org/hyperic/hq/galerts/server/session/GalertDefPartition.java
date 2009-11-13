@@ -31,8 +31,8 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
@@ -76,7 +76,7 @@ public abstract class GalertDefPartition
         public void execute(Integer id, ExecutionReason execReason) {
             EscalationManagerLocal eman = EscalationManagerEJBImpl.getOne();
             GalertManager gman = GalertManagerImpl.getOne();
-            AuthzSubjectManagerLocal aman = AuthzSubjectManagerEJBImpl.getOne();
+            AuthzSubjectManager aman = AuthzSubjectManagerImpl.getOne();
             AuthzSubject overlord = aman.getOverlordPojo();
             
             GalertDef def = gman.findById(id);

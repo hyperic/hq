@@ -37,7 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.events.server.session.AlertDefinition;
@@ -99,7 +99,7 @@ public class AvailabilityDownAlertDefinitionCache {
              
         try {
             AlertDefinitionManager adm = AlertDefinitionManagerImpl.getOne();
-            AuthzSubject hqadmin = AuthzSubjectManagerEJBImpl.getOne()
+            AuthzSubject hqadmin = AuthzSubjectManagerImpl.getOne()
                                         .getSubjectById(AuthzConstants.rootSubjectId);
             Collection alertDefs = adm.findAlertDefinitions(hqadmin, key);
 

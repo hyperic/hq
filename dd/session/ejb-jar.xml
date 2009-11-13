@@ -23,18 +23,7 @@
 
 		</session>
 
-		<session>
-			<description><![CDATA[Session bean to manipulate Subjects]]></description>
-
-			<ejb-name>AuthzSubjectManager</ejb-name>
-
-			<local-home>org.hyperic.hq.authz.shared.AuthzSubjectManagerLocalHome</local-home>
-			<local>org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal</local>
-			<ejb-class>org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
+		
 
 		
 
@@ -499,37 +488,6 @@
 		<container-transaction>
 			<method>
 				<ejb-name>RoleManager</ejb-name>
-				<method-intf>Remote</method-intf>
-				<method-name>findSubjectByAuth</method-name>
-				<method-params>
-					<method-param>java.lang.String</method-param>
-					<method-param>java.lang.String</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>AuthzSubjectManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>AuthzSubjectManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>findSubjectByAuth</method-name>
-				<method-params>
-					<method-param>java.lang.String</method-param>
-					<method-param>java.lang.String</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>AuthzSubjectManager</ejb-name>
 				<method-intf>Remote</method-intf>
 				<method-name>findSubjectByAuth</method-name>
 				<method-params>

@@ -86,23 +86,7 @@ public abstract class AuthzSession {
         return resourceTypeDAO.findTypeResourceType();
     }
 
-    /**
-     * Find the subject that has the given name and authentication source.
-     * @param name Name of the subject.
-     * @param authDsn DSN of the authentication source. Authentication sources
-     *        are defined externally.
-     * @return The value-object of the subject of the given name and
-     *         authenticating source.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
-     */
-    public AuthzSubject findSubjectByAuth(String name, String authDsn) throws SubjectNotFoundException {
-        AuthzSubject subject = authzSubjectDAO.findByAuth(name, authDsn);
-        if (subject == null) {
-            throw new SubjectNotFoundException("Can't find subject: name=" + name + ",authDsn=" + authDsn);
-        }
-        return subject;
-    }
+    
 
     protected Set toPojos(Object[] vals) {
         Set ret = new HashSet();

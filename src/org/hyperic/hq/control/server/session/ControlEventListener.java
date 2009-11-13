@@ -33,8 +33,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.zevents.ZeventListener;
 
@@ -45,7 +45,7 @@ public class ControlEventListener
 
     public void processEvents(List events) {
         ControlScheduleManager cM = ControlScheduleManagerImpl.getOne();
-        AuthzSubjectManagerLocal azMan = AuthzSubjectManagerEJBImpl.getOne();
+        AuthzSubjectManager azMan = AuthzSubjectManagerImpl.getOne();
 
         for (Iterator i = events.iterator(); i.hasNext();) {
             ResourceZevent z = (ResourceZevent) i.next();

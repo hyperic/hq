@@ -2,7 +2,7 @@ package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hq.authz.shared.AuthzConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo

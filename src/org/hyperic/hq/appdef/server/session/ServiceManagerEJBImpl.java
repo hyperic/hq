@@ -59,7 +59,7 @@ import org.hyperic.hq.appdef.shared.ServiceManagerUtil;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
@@ -1353,7 +1353,7 @@ public class ServiceManagerEJBImpl extends AppdefSessionEJB
                VetoException
     {
         AuthzSubject overlord =
-            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
 
         // First, put all of the infos into a Hash
         HashMap infoMap = new HashMap();

@@ -9,7 +9,7 @@ import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException
 import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
 import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl as ProductBoss

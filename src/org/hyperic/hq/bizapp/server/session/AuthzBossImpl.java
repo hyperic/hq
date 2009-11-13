@@ -50,7 +50,7 @@ import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -88,7 +88,7 @@ public class AuthzBossImpl implements AuthzBoss {
 
     private AuthManager authManager;
 
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
 
     private ResourceGroupManager resourceGroupManager;
 
@@ -100,7 +100,7 @@ public class AuthzBossImpl implements AuthzBoss {
 
     @Autowired
     public AuthzBossImpl(SessionManager sessionManager, AppdefBoss appdefBoss, AuthManager authManager,
-                         AuthzSubjectManagerLocal authzSubjectManager, ResourceGroupManager resourceGroupManager,
+                         AuthzSubjectManager authzSubjectManager, ResourceGroupManager resourceGroupManager,
                          ResourceManager resourceManager, DashboardManager dashboardManager,
                          PermissionManager permissionManager) {
         this.sessionManager = sessionManager;
@@ -206,7 +206,7 @@ public class AuthzBossImpl implements AuthzBoss {
      * 
      * 
      */
-    public PageList<AuthzSubjectValue> getSubjectsByName(Integer sessionId, String name, PageControl pc)
+    public PageList<AuthzSubject> getSubjectsByName(Integer sessionId, String name, PageControl pc)
         throws PermissionException, SessionTimeoutException, SessionNotFoundException {
         sessionManager.getSubject(sessionId);
         return authzSubjectManager.findMatchingName(name, pc);

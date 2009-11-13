@@ -25,62 +25,92 @@
 
 package org.hyperic.hq.authz.server.session;
 
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.CreateException;
-import javax.ejb.EJBException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
-import javax.ejb.SessionBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.auth.server.session.UserAudit;
+import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerUtil;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
+import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.server.session.Crispo;
-import org.hyperic.hq.common.server.session.CrispoManagerImpl;
+import org.hyperic.hq.common.shared.CrispoManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/** Session bean to manipulate Subjects
+/**
  *
  *
- * @ejb:bean name="AuthzSubjectManager"
- *      jndi-name="ejb/authz/AuthzSubjectManager"
- *      local-jndi-name="LocalAuthzSubjectManager"
- *      view-type="local"
- *      type="Stateless"
- * 
- * @ejb:util generate="physical"
- * @ejb:transaction type="Required"
  */
-public class AuthzSubjectManagerEJBImpl
-    extends AuthzSession implements SessionBean {
+@Service
+@Transactional
+public class AuthzSubjectManagerImpl  implements AuthzSubjectManager {
 
-    private final Log _log = LogFactory.getLog(AuthzSubjectManagerEJBImpl.class);
+    private final Log log = LogFactory.getLog(AuthzSubjectManagerImpl.class);
 
-    private final String SUBJECT_PAGER = PagerProcessor_subject.class.getName();
-    private Pager _subjectPager;
+    private static final String SUBJECT_PAGER = PagerProcessor_subject.class.getName();
+    private Pager subjectPager;
+    private AuthzSubjectDAO authzSubjectDAO;
+    private ResourceTypeDAO resourceTypeDAO;
+    private ResourceDAO resourceDAO;
+    private CrispoManager crispoManager;
+    private PermissionManager permissionManager;
+   
+   
 
-    public AuthzSubjectManagerEJBImpl() {}
+    
+    @Autowired
+    public AuthzSubjectManagerImpl(AuthzSubjectDAO authzSubjectDAO, ResourceTypeDAO resourceTypeDAO,
+                               ResourceDAO resourceDAO, CrispoManager crispoManager, PermissionManager permissionManager) {
+        this.authzSubjectDAO = authzSubjectDAO;
+        this.resourceTypeDAO = resourceTypeDAO;
+        this.resourceDAO = resourceDAO;
+        this.crispoManager = crispoManager;
+        this.permissionManager = permissionManager;
+    }
+
+    @PostConstruct
+    public void afterPropertiesSet() throws Exception{
+        subjectPager = Pager.getPager(SUBJECT_PAGER);
+    }
+    
+    /**
+     * Find the subject that has the given name and authentication source.
+     * @param name Name of the subject.
+     * @param authDsn DSN of the authentication source. Authentication sources
+     *        are defined externally.
+     * @return The value-object of the subject of the given name and
+     *         authenticating source.
+     */
+    public AuthzSubject findSubjectByAuth(String name, String authDsn) throws SubjectNotFoundException {
+        AuthzSubject subject = authzSubjectDAO.findByAuth(name, authDsn);
+        if (subject == null) {
+            throw new SubjectNotFoundException("Can't find subject: name=" + name + ",authDsn=" + authDsn);
+        }
+        return subject;
+    }
 
     /** 
      * Create a subject.
      * @param whoami The current running user.
      * @return Value-object for the new Subject.
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject createSubject(AuthzSubject whoami, String name,
                                       boolean active, String dsn, String dept,
@@ -88,19 +118,19 @@ public class AuthzSubjectManagerEJBImpl
                                       String phone, String sms, boolean html)
         throws PermissionException, CreateException 
     {
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
-        pm.check(whoami.getId(), getRootResourceType(),
+       
+        permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(),
                  AuthzConstants.rootResourceId,
                  AuthzConstants.subjectOpCreateSubject);
-        AuthzSubjectDAO dao = getSubjectDAO();
+       
 
-        AuthzSubject existing = dao.findByName(name);
+        AuthzSubject existing = authzSubjectDAO.findByName(name);
         if (existing != null) {
             throw new CreateException("A system user already exists with " +
                                       name);
         }
 
-        AuthzSubject subjectPojo = dao.create(whoami, name, active, dsn,
+        AuthzSubject subjectPojo = authzSubjectDAO.create(whoami, name, active, dsn,
                                               dept, email, first, last, phone, 
                                               sms, html);
 
@@ -116,7 +146,7 @@ public class AuthzSubjectManagerEJBImpl
      * 
      * The rest of the parameters specify settings to update.  If they are 
      * null, then no change will be made to them.
-     * @ejb:interface-method
+     * 
      */
     public void updateSubject(AuthzSubject whoami, AuthzSubject target,
                               Boolean active, String dsn, String dept,
@@ -124,10 +154,10 @@ public class AuthzSubjectManagerEJBImpl
                               String phone, String sms, Boolean useHtml)
         throws PermissionException 
     {
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
+        
 
         if(!whoami.getId().equals(target.getId())) {
-            pm.check(whoami.getId(), getRootResourceType().getId(),
+            permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType().getId(),
                      AuthzConstants.rootResourceId,
                      AuthzConstants.perm_viewSubject);
         }
@@ -194,14 +224,14 @@ public class AuthzSubjectManagerEJBImpl
 
     /**
      * Check if a subject can modify users  
-     * @ejb:interface-method
+     * 
      */
     public void checkModifyUsers(AuthzSubject caller)
         throws PermissionException 
     {
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        pm.check(caller.getId(),
-                 getRootResourceType(),
+        
+        permissionManager.check(caller.getId(),
+            resourceTypeDAO.findTypeResourceType(),
                  AuthzConstants.rootResourceId,
                  AuthzConstants.subjectOpModifySubject);
     }
@@ -211,7 +241,7 @@ public class AuthzSubjectManagerEJBImpl
      * 
      * @param whoami  The current running user.
      * @param subject The ID of the subject to delete.
-     * @ejb:interface-method
+     * 
      */
     public void removeSubject(AuthzSubject whoami, Integer subject)
         throws RemoveException, PermissionException 
@@ -221,47 +251,47 @@ public class AuthzSubjectManagerEJBImpl
             throw new RemoveException("Root user can not be deleted");
         }
 
-        AuthzSubjectDAO dao = getSubjectDAO();
-        AuthzSubject toDelete = dao.findById(subject);
+        
+        AuthzSubject toDelete = authzSubjectDAO.findById(subject);
 
         // XXX Should we do anything special for the "suicide" case?
         // Perhaps a _log message?
         if ( !whoami.getId().equals(subject) ) {
-            PermissionManager pm = PermissionManagerFactory.getInstance(); 
-            pm.check(whoami.getId(), getRootResourceType().getId(),
+            
+            permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType().getId(),
                      AuthzConstants.rootResourceId,
                      AuthzConstants.perm_removeSubject);
         }
         
         // Reassign all resources to the root user before deleting
-        getResourceDAO()
+        resourceDAO
             .reassignResources(subject.intValue(),
                                AuthzConstants.rootSubjectId.intValue());
 
         // Call the subject remove callback before subject is actually removed
         AuthzStartupListener.getSubjectRemoveCallback().subjectRemoved(toDelete);
         
-        dao.remove(toDelete);
+        authzSubjectDAO.remove(toDelete);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject findByAuth(String name, String authDsn) {
-        return getSubjectDAO().findByAuth(name, authDsn);
+        return authzSubjectDAO.findByAuth(name, authDsn);
     }
     
     
     /**
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject findSubjectById(AuthzSubject whoami, Integer id)
         throws PermissionException 
     {
-        PermissionManager pm = PermissionManagerFactory.getInstance(); 
+        
         // users can see their own entries without requiring special permission
         if(!whoami.getId().equals(id)) {
-            pm.check(whoami.getId(), getRootResourceType().getId(),
+            permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType().getId(),
                      AuthzConstants.rootResourceId,
                      AuthzConstants.perm_viewSubject);
         }
@@ -269,21 +299,21 @@ public class AuthzSubjectManagerEJBImpl
     }
 
     /** 
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject findSubjectById(Integer id) {
-        return getSubjectDAO().findById(id);
+        return authzSubjectDAO.findById(id);
     }
     
     /** 
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject getSubjectById(Integer id) {
-        return getSubjectDAO().getById(id);
+        return authzSubjectDAO.getById(id);
     }
     
     /** 
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject findSubjectByName(AuthzSubject whoami, String name)
         throws PermissionException 
@@ -292,48 +322,49 @@ public class AuthzSubjectManagerEJBImpl
     }
 
     /** 
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject findSubjectByName(String name) {
-        return getSubjectDAO().findByName(name);
+        return authzSubjectDAO.findByName(name);
     }
 
     /** 
-     * @ejb:interface-method
+     * 
      */
-    public PageList findMatchingName(String name, PageControl pc) {
-        return getSubjectDAO().findMatchingName(name, pc);
+    public PageList<AuthzSubject> findMatchingName(String name, PageControl pc) {
+        return authzSubjectDAO.findMatchingName(name, pc);
     }
     
     /** 
      * List all subjects in the system
-     * @ejb:interface-method
+     * 
      * @param excludes the IDs of subjects to exclude from result
      */
-    public PageList getAllSubjects(AuthzSubject whoami,
-                                   Collection excludes, PageControl pc)
+    public PageList<AuthzSubjectValue> getAllSubjects(AuthzSubject whoami,
+                                   Collection<Integer> excludes, PageControl pc)
         throws FinderException, PermissionException {
-        Collection subjects;
+        
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
         
-        AuthzSubjectDAO dao = getSubjectDAO();
+       
         // if a user does not have permission to view subjects, 
         // all they can see is their own entry.
-        AuthzSubject who = dao.findById(whoami.getId());
-
+        AuthzSubject who = authzSubjectDAO.findById(whoami.getId());
+        Collection<AuthzSubject> subjects;
         try {
-            PermissionManager pm = PermissionManagerFactory.getInstance(); 
-            pm.check(whoami.getId(), getRootResourceType(),
+             
+            permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(),
                      AuthzConstants.rootResourceId,
                      AuthzConstants.subjectOpViewSubject);
             
-            if (!pm.hasGuestRole()) {
-                if (excludes == null)
-                    excludes = new ArrayList(1);
+            if (!permissionManager.hasGuestRole()) {
+                if (excludes == null) {
+                    excludes = new ArrayList<Integer>(1);
+                }
                 excludes.add(AuthzConstants.guestId);
             }
         } catch (PermissionException e) {
-            PageList plist = new PageList();
+            PageList<AuthzSubjectValue> plist = new PageList<AuthzSubjectValue>();
 
             // return a list with only the one entry.
             plist.add(who.getAuthzSubjectValue());
@@ -344,27 +375,27 @@ public class AuthzSubjectManagerEJBImpl
         switch (pc.getSortattribute()) {
         case SortAttribute.SUBJECT_NAME:
             if (who.isRoot())
-                subjects = dao.findAllRoot_orderName(excludes,
+                subjects = authzSubjectDAO.findAllRoot_orderName(excludes,
                                                      pc.isAscending());
             else
-                subjects = dao.findAll_orderName(excludes, pc.isAscending());
+                subjects = authzSubjectDAO.findAll_orderName(excludes, pc.isAscending());
             break;
 
         case SortAttribute.FIRST_NAME:
             if (who.isRoot())
-                subjects = dao.findAllRoot_orderFirstName(excludes,
+                subjects = authzSubjectDAO.findAllRoot_orderFirstName(excludes,
                                                           pc.isAscending());
             else
-                subjects = dao.findAll_orderFirstName(excludes,
+                subjects = authzSubjectDAO.findAll_orderFirstName(excludes,
                                                       pc.isAscending());
             break;
 
         case SortAttribute.LAST_NAME:
             if (who.isRoot())
-                subjects = dao.findAllRoot_orderLastName(excludes,
+                subjects = authzSubjectDAO.findAllRoot_orderLastName(excludes,
                                                          pc.isAscending());
             else
-                subjects = dao.findAll_orderLastName(excludes,
+                subjects = authzSubjectDAO.findAll_orderLastName(excludes,
                                                      pc.isAscending());
             break;
 
@@ -373,7 +404,7 @@ public class AuthzSubjectManagerEJBImpl
                                       pc.getSortattribute());
         }                
         
-        return _subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize() );
+        return subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize() );
     }
 
     /** 
@@ -382,9 +413,9 @@ public class AuthzSubjectManagerEJBImpl
      * NOTE: This method returns an empty PageList if a null or
      *       empty array of ids is received.
      * @param ids the subject ids
-     * @ejb:interface-method
+     * 
      */
-    public PageList getSubjectsById(AuthzSubject subject,
+    public PageList<AuthzSubjectValue> getSubjectsById(AuthzSubject subject,
                                     Integer[] ids,
                                     PageControl pc)
         throws PermissionException {
@@ -393,26 +424,26 @@ public class AuthzSubjectManagerEJBImpl
         // call this method with an empty ids array. In this case, simply return
         // an empty page list.
         if (ids == null || ids.length == 0) {
-            return new PageList();
+            return new PageList<AuthzSubjectValue>();
         }
 
         // find the requested subjects
-        PageList subjects = getSubjectDAO().findById_orderName(ids, pc);
+        PageList<AuthzSubject> subjects = authzSubjectDAO.findById_orderName(ids, pc);
 
         // check permission unless the list includes only the id of
         // the subject being requested. This is ugly mostly because
         // we're using a list api to possibly look up a single Item
         if(subjects.size() > 0) {
-            _log.debug("Checking if Subject: " + subject.getName() +
+            log.debug("Checking if Subject: " + subject.getName() +
                       " can list subjects.");
-            PermissionManager pm = PermissionManagerFactory.getInstance(); 
-            pm.check(subject.getId(), getRootResourceType(),
+           
+            permissionManager.check(subject.getId(), resourceTypeDAO.findTypeResourceType(),
                      AuthzConstants.rootResourceId,
                      AuthzConstants.subjectOpViewSubject);
         }
 
         // Need to convert to value objects
-        return new PageList(_subjectPager.seek(subjects, PageControl.PAGE_ALL),
+        return new PageList<AuthzSubjectValue>(subjectPager.seek(subjects, PageControl.PAGE_ALL),
                             subjects.getTotalSize());
     }
 
@@ -420,10 +451,10 @@ public class AuthzSubjectManagerEJBImpl
      * Find the e-mail of the subject specified by id
      * @param id id of the subject.
      * @return The e-mail address of the subject
-     * @ejb:interface-method
+     * 
      */
     public String getEmailById(Integer id) {
-        AuthzSubject subject = getSubjectDAO().findById(id);
+        AuthzSubject subject = authzSubjectDAO.findById(id);
         return subject.getEmailAddress();
     }
 
@@ -431,16 +462,16 @@ public class AuthzSubjectManagerEJBImpl
      * Find the e-mail of the subject specified by name
      * @param userName Name of the subjects.
      * @return The e-mail address of the subject
-     * @ejb:interface-method
+     * 
      */
     public String getEmailByName(String userName) {
-        AuthzSubject subject = getSubjectDAO().findByName(userName);
+        AuthzSubject subject = authzSubjectDAO.findByName(userName);
         return subject.getEmailAddress();
     }
 
     /**
      * Get the Preferences for a specified user
-     * @ejb:interface-method
+     * 
      */
     public ConfigResponse getUserPrefs(AuthzSubject who, Integer subjId)
         throws PermissionException
@@ -448,13 +479,12 @@ public class AuthzSubjectManagerEJBImpl
         // users can always see their own prefs.
         if(!who.getId().equals(subjId)) { 
             // check that the caller can see users
-            PermissionManager pm = PermissionManagerFactory.getInstance();
-            pm.check(who.getId(), getRootResourceType(),
+            permissionManager.check(who.getId(), resourceTypeDAO.findTypeResourceType(),
                      AuthzConstants.rootResourceId,
                      AuthzConstants.subjectOpViewSubject);
         }
 
-        AuthzSubject targ = getSubjectDAO().findById(subjId);
+        AuthzSubject targ = authzSubjectDAO.findById(subjId);
         Crispo c = targ.getPrefs();
         if (c == null)
             return new ConfigResponse();
@@ -463,7 +493,7 @@ public class AuthzSubjectManagerEJBImpl
 
     /**
      * Set the Preferences for a specified user
-     * @ejb:interface-method
+     * 
      */
     public void setUserPrefs(AuthzSubject who, Integer subjId,
                              ConfigResponse prefs) 
@@ -472,46 +502,30 @@ public class AuthzSubjectManagerEJBImpl
         // check to see if the user attempting the modification
         // is the same as the one being modified
         if(!(who.getId().intValue() == subjId.intValue())) {
-            PermissionManager pm = PermissionManagerFactory.getInstance(); 
-            pm.check(who.getId(), getRootResourceType(),
+           
+            permissionManager.check(who.getId(), resourceTypeDAO.findTypeResourceType(),
                      AuthzConstants.rootResourceId,
                      AuthzConstants.subjectOpModifySubject);
         }
 
-        AuthzSubject targ = getSubjectDAO().findById(subjId);
+        AuthzSubject targ = authzSubjectDAO.findById(subjId);
         
         if (targ.getPrefs() != null)
-            CrispoManagerImpl.getOne().update(targ.getPrefs(), prefs);
+            crispoManager.update(targ.getPrefs(), prefs);
         else {
-            Crispo newPrefs = CrispoManagerImpl.getOne().create(prefs);
+            Crispo newPrefs = crispoManager.create(prefs);
             targ.setPrefs(newPrefs);
         }
     }
     
     /**
-     * @ejb:interface-method
+     * 
      */
     public AuthzSubject getOverlordPojo() {
-        return getSubjectDAO().findById(AuthzConstants.overlordId);
+        return authzSubjectDAO.findById(AuthzConstants.overlordId);
     }
     
-    public static AuthzSubjectManagerLocal getOne() {
-        try {
-            return AuthzSubjectManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static AuthzSubjectManager getOne() {
+        return Bootstrap.getBean(AuthzSubjectManager.class);
     }
-
-    public void ejbCreate() throws CreateException {
-        try {
-            _subjectPager = Pager.getPager(SUBJECT_PAGER);
-        } catch (Exception e) {
-            throw new CreateException("Could not create Pager: " + e);
-        }
-    }
-    
-    public void ejbActivate() throws EJBException, RemoteException {}
-    public void ejbPassivate() throws EJBException, RemoteException {}
-    public void ejbRemove() throws EJBException, RemoteException {}
 }

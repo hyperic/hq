@@ -3,7 +3,7 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 
 import org.hyperic.hq.authz.shared.PermissionException
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.measurement.MeasurementConstants

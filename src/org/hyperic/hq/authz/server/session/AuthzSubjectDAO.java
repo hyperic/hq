@@ -46,7 +46,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class AuthzSubjectDAO
-    extends HibernateDAO
+    extends HibernateDAO<AuthzSubject>
 {
     @Autowired
     public AuthzSubjectDAO(SessionFactory f) {
@@ -138,7 +138,7 @@ public class AuthzSubjectDAO
             .add(Restrictions.eq("system", Boolean.FALSE));
     }
 
-    public PageList findMatchingName(String name, PageControl pc) {
+    public PageList<AuthzSubject> findMatchingName(String name, PageControl pc) {
         Integer count = (Integer) findMatchingNameCriteria(name)
             .setProjection(Projections.rowCount())
             .uniqueResult();
@@ -156,7 +156,7 @@ public class AuthzSubjectDAO
         return createCriteria().add(Restrictions.in("id", ids));
     }
 
-    public PageList findById_orderName(Integer[] ids, PageControl pc) {
+    public PageList<AuthzSubject> findById_orderName(Integer[] ids, PageControl pc) {
         Integer count = (Integer) findById_orderNameCriteria(ids)
             .setProjection(Projections.rowCount())
             .uniqueResult();
@@ -193,29 +193,29 @@ public class AuthzSubjectDAO
 
     }
 
-    public Collection findAll_orderName(Collection excludes, boolean asc) {
+    public Collection<AuthzSubject> findAll_orderName(Collection excludes, boolean asc) {
         return findAll_order(false, "sortName", asc, excludes);
     }
 
-    public Collection findAll_orderFirstName(Collection excludes, boolean asc) {
+    public Collection<AuthzSubject> findAll_orderFirstName(Collection excludes, boolean asc) {
         return findAll_order(false, "firstName", asc, excludes);
     }
 
-    public Collection findAll_orderLastName(Collection excludes, boolean asc) {
+    public Collection<AuthzSubject> findAll_orderLastName(Collection excludes, boolean asc) {
         return findAll_order(false, "lastName", asc, excludes);
     }
 
-    public Collection findAllRoot_orderName(Collection excludes, boolean asc) {
+    public Collection<AuthzSubject> findAllRoot_orderName(Collection excludes, boolean asc) {
         return findAll_order(true, "sortName", asc, excludes);
     }
 
-    public Collection findAllRoot_orderFirstName(Collection excludes,
+    public Collection<AuthzSubject> findAllRoot_orderFirstName(Collection excludes,
                                                  boolean asc)
     {
         return findAll_order(true, "firstName", asc, excludes);
     }
 
-    public Collection findAllRoot_orderLastName(Collection excludes,
+    public Collection<AuthzSubject> findAllRoot_orderLastName(Collection excludes,
                                                 boolean asc)
     {
         return findAll_order(true, "lastName", asc, excludes);

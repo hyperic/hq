@@ -14,11 +14,11 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.events.EventConstants;
@@ -56,11 +56,11 @@ public class AlertDefinitionXmlParser {
 
     private final ResourceManager resourceManager;
     private final TemplateManager templateManager;
-    private final AuthzSubjectManagerLocal authzSubjectManager;
+    private final AuthzSubjectManager authzSubjectManager;
     private final AlertDefinitionManager alertDefinitionManager;
 
     public AlertDefinitionXmlParser() {
-        this.authzSubjectManager = AuthzSubjectManagerEJBImpl.getOne();
+        this.authzSubjectManager = AuthzSubjectManagerImpl.getOne();
         this.resourceManager = ResourceManagerImpl.getOne();
         this.templateManager = TemplateManagerImpl.getOne();
         this.alertDefinitionManager = AlertDefinitionManagerImpl.getOne();
@@ -68,7 +68,7 @@ public class AlertDefinitionXmlParser {
 
     public AlertDefinitionXmlParser(ResourceManager resourceManager,
                                     TemplateManager templateManager,
-                                    AuthzSubjectManagerLocal authzSubjectManager,
+                                    AuthzSubjectManager authzSubjectManager,
                                     AlertDefinitionManager alertDefinitionManager)
     {
         this.resourceManager = resourceManager;

@@ -43,7 +43,7 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.common.ApplicationException;
@@ -68,13 +68,13 @@ public class AuthBossImpl implements AuthBoss {
 
     private AuthManager authManager;
 
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
 
     private ZeventEnqueuer zEventManager;
 
     @Autowired
     public AuthBossImpl(SessionManager sessionManager, AuthManager authManager,
-                        AuthzSubjectManagerLocal authzSubjectManager, ZeventEnqueuer zEventManager) {
+                        AuthzSubjectManager authzSubjectManager, ZeventEnqueuer zEventManager) {
         this.sessionManager = sessionManager;
         this.authManager = authManager;
         this.authzSubjectManager = authzSubjectManager;

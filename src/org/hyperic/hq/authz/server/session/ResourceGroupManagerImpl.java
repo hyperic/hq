@@ -56,7 +56,7 @@ import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -104,7 +104,7 @@ public class ResourceGroupManagerImpl
 
     private ResourceEdgeDAO resourceEdgeDAO;
 
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
     private EventLogManager eventLogManager;
 
     private ResourceManager resourceManager;
@@ -114,7 +114,7 @@ public class ResourceGroupManagerImpl
     private ApplicationManagerLocal applicationManager;
 
     @Autowired
-    public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO, AuthzSubjectManagerLocal authzSubjectManager,
+    public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO, AuthzSubjectManager authzSubjectManager,
                                     EventLogManager eventLogManager,
                                     PlatformManagerLocal platformManager, ServerManagerLocal serverManager,
                                     ServiceManagerLocal serviceManager, ApplicationManagerLocal applicationManager,

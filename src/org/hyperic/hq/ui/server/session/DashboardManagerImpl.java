@@ -37,14 +37,14 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleCreateCallback;
 import org.hyperic.hq.authz.server.session.RoleRemoveCallback;
 import org.hyperic.hq.authz.server.session.RoleRemoveFromSubjectCallback;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -73,11 +73,11 @@ public class DashboardManagerImpl implements DashboardManager {
 
     private DashboardConfigDAO dashDao;
     private CrispoManager crispoManager;
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
 
     @Autowired
     public DashboardManagerImpl(DashboardConfigDAO dashDao, CrispoManager crispoManager,
-                                AuthzSubjectManagerLocal authzSubjectManager) {
+                                AuthzSubjectManager authzSubjectManager) {
         this.dashDao = dashDao;
         this.crispoManager = crispoManager;
         this.authzSubjectManager = authzSubjectManager;

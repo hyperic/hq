@@ -76,7 +76,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AIHistory;
@@ -137,7 +137,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private AgentManager agentManager;
     private CPropManager cPropManager;
     private ServiceManagerLocal serviceManager;
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
     private AIQueueManagerLocal aiQueueManager;
 
     @Autowired
@@ -145,7 +145,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                                     AIPlatformDAO aiPlatformDao, ProductManager productManager, ServerManagerLocal serverManager,
                                     AIScheduleManager aiScheduleManager, ResourceManager resourceManager, ConfigManagerLocal configManager,
                                     AgentManager agentManager, CPropManager cPropManager, ServiceManagerLocal serviceManager,
-                                    AuthzSubjectManagerLocal authzSubjectManager, AIQueueManagerLocal aiQueueManager) {
+                                    AuthzSubjectManager authzSubjectManager, AIQueueManagerLocal aiQueueManager) {
         this.agentReportStatusDao = agentReportStatusDao;
         this.aiHistoryDao = aiHistoryDao;
         this.aiPlatformDao = aiPlatformDao;

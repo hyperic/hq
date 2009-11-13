@@ -35,7 +35,7 @@ import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.shared.HQConstants;
@@ -62,11 +62,11 @@ public class AuthManagerImpl implements AuthManager {
     private PrincipalDAO principalDao;
 
     private ProductManager productManager;
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
 
     @Autowired
     public AuthManagerImpl(PrincipalDAO principalDao, ProductManager productManager,
-                           AuthzSubjectManagerLocal authzSubjectManager) {
+                           AuthzSubjectManager authzSubjectManager) {
         this.principalDao = principalDao;
         this.productManager = productManager;
         this.authzSubjectManager = authzSubjectManager;

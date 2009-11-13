@@ -54,7 +54,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -101,7 +101,7 @@ public class ControlManagerImpl implements ControlManager {
 
     private ConfigManagerLocal configManager;
     private PlatformManagerLocal platformManager;
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
     private ServerManagerLocal serverManager;
     private ServiceManagerLocal serviceManager;
     private ApplicationManagerLocal applicationManager;
@@ -113,7 +113,7 @@ public class ControlManagerImpl implements ControlManager {
                               ControlHistoryDAO controlHistoryDao,
                               ResourceTypeDAO resourceTypeDao, ConfigManagerLocal configManager,
                               PlatformManagerLocal platformManager,
-                              AuthzSubjectManagerLocal authzSubjectManager, ServerManagerLocal serverManager,
+                              AuthzSubjectManager authzSubjectManager, ServerManagerLocal serverManager,
                               ServiceManagerLocal serviceManager,
                               ApplicationManagerLocal applicationManager) {
         this.productManager = productManager;

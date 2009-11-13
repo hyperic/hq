@@ -25,7 +25,7 @@
 package org.hyperic.hq.bizapp.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -66,7 +66,7 @@ public class SystemAudit extends Audit {
     }
     
     public static AuthzSubject getOverlord() {
-        return AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+        return AuthzSubjectManagerImpl.getOne().getOverlordPojo();
     }
     
     public static SystemAudit createUpAudit(long startupTime) {

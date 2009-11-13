@@ -46,7 +46,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.util.Messenger;
@@ -103,7 +103,7 @@ public class AlertManagerImpl implements AlertManager {
 
     private AlertDefinitionManager alertDefinitionManager;
 
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
 
     private EscalationManagerLocal escalationManager;
 
@@ -112,7 +112,7 @@ public class AlertManagerImpl implements AlertManager {
                             AlertActionLogDAO alertActionLogDAO, AlertDAO alertDAO,
                             AlertConditionDAO alertConditionDAO, MeasurementDAO measurementDAO,
                             ResourceManager resourceManager, AlertDefinitionManager alertDefinitionManager,
-                            AuthzSubjectManagerLocal authzSubjectManager, EscalationManagerLocal escalationManager) {
+                            AuthzSubjectManager authzSubjectManager, EscalationManagerLocal escalationManager) {
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;
         this.alertActionLogDAO = alertActionLogDAO;

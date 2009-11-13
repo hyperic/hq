@@ -2,7 +2,7 @@ import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate
 import org.hyperic.hq.measurement.server.session.Measurement
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.apache.commons.logging.Log

@@ -41,10 +41,10 @@ import org.hyperic.hq.appdef.galerts.ResourceAuxLog;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.SimpleAlertAuxLog;
@@ -674,7 +674,7 @@ public class MeasurementGtrigger
         List auxLogs = new ArrayList();
         MeasurementManager dmMan = getDMMan();
         AuthzSubject overlord = 
-            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
         for (Iterator i=srcId2MetricValue.entrySet().iterator(); i.hasNext(); ) {
             Map.Entry ent = (Map.Entry)i.next();
             MeasurementZeventSource src = (MeasurementZeventSource)ent.getKey();
@@ -749,7 +749,7 @@ public class MeasurementGtrigger
         
         _interestedEvents.clear();
         ResourceGroupManager gMan = ResourceGroupManagerImpl.getOne(); 
-        AuthzSubjectManagerLocal sMan = AuthzSubjectManagerEJBImpl.getOne(); 
+        AuthzSubjectManager sMan = AuthzSubjectManagerImpl.getOne(); 
         TemplateManager tMan = TemplateManagerImpl.getOne(); 
             
         try {

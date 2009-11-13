@@ -59,7 +59,7 @@ import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerUtil;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
@@ -1355,7 +1355,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         Collection curServers = stDao.findByPlugin(plugin);
 
         AuthzSubject overlord =
-            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
         ResourceGroupManager resGroupMan =
             ResourceGroupManagerImpl.getOne();
         ResourceManager resMan = ResourceManagerImpl.getOne();

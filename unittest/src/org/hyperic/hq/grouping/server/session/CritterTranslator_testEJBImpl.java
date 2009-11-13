@@ -39,11 +39,11 @@ import junit.framework.Assert;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.MixedGroupType;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
@@ -110,7 +110,7 @@ public class CritterTranslator_testEJBImpl implements SessionBean {
 
     private void testOwnershipCritter(String subject, int expectedSize) {
         OwnedCritterType type = new OwnedCritterType();
-        AuthzSubjectManagerLocal aMan = AuthzSubjectManagerEJBImpl.getOne();
+        AuthzSubjectManager aMan = AuthzSubjectManagerImpl.getOne();
         AuthzSubject subj = aMan.findSubjectByName(subject);
         testCritter(subject, type.newInstance(subj), expectedSize);
     }
@@ -187,7 +187,7 @@ public class CritterTranslator_testEJBImpl implements SessionBean {
     }
 
     private CritterTranslationContext getTranslationContext() {
-        AuthzSubjectManagerLocal aMan = AuthzSubjectManagerEJBImpl.getOne();
+        AuthzSubjectManager aMan = AuthzSubjectManagerImpl.getOne();
         AuthzSubject overlord = aMan.getOverlordPojo();
         return new CritterTranslationContext(overlord);
     }

@@ -53,7 +53,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -90,7 +90,7 @@ public class EmailFilter {
     private void replaceAppdefEntityHolders(AppdefEntityID appEnt,
                                             String[] strs) {
         AuthzSubject overlord =
-            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
 
         try {
             AppdefEntityValue entVal =

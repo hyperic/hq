@@ -356,14 +356,6 @@ public interface RoleManagerLocal
     */
    public java.util.Collection findAllOperations(  ) ;
 
-   /**
-    * Find the subject that has the given name and authentication source.
-    * @param name Name of the subject.
-    * @param authDsn DSN of the authentication source. Authentication sources are defined externally.
-    * @return The value-object of the subject of the given name and authenticating source.
-    */
-   public org.hyperic.hq.authz.server.session.AuthzSubject findSubjectByAuth( java.lang.String name,java.lang.String authDsn ) throws org.hyperic.hq.auth.shared.SubjectNotFoundException;
-
    public org.hyperic.hq.authz.server.session.ResourceRelation getContainmentRelation(  ) ;
 
    public org.hyperic.hq.authz.server.session.ResourceRelation getNetworkRelation(  ) ;

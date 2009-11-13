@@ -228,17 +228,6 @@ public interface ResourceManager {
     public void removeResourceEdges(AuthzSubject subject, ResourceRelation relation, Resource parent)
         throws PermissionException;
 
-    /**
-     * Find the subject that has the given name and authentication source.
-     * @param name Name of the subject.
-     * @param authDsn DSN of the authentication source. Authentication sources
-     *        are defined externally.
-     * @return The value-object of the subject of the given name and
-     *         authenticating source.
-     */
-    public org.hyperic.hq.authz.server.session.AuthzSubject findSubjectByAuth(String name, String authDsn)
-        throws SubjectNotFoundException;
-
     public ResourceRelation getContainmentRelation();
 
     public ResourceRelation getNetworkRelation();

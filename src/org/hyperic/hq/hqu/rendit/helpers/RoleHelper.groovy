@@ -2,7 +2,7 @@ package org.hyperic.hq.hqu.rendit.helpers
 
 import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl as RoleMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as SubMan
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as SubMan
 import org.hyperic.hq.authz.server.session.Role
 import org.hyperic.hq.authz.shared.RoleValue
 import org.hyperic.hq.authz.server.session.Operation

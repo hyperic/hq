@@ -29,8 +29,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.util.StringUtil;
@@ -49,11 +49,11 @@ public abstract class BaseJob implements Job {
     public static final String PROP_ORDER          = "order";
     public static final String PROP_DESCRIPTION    = "description";
 
-    protected AuthzSubjectManagerLocal manager = null;
+    protected AuthzSubjectManager manager = null;
     
-    protected AuthzSubjectManagerLocal getSubjectManager() {
+    protected AuthzSubjectManager getSubjectManager() {
         if (manager == null)
-            manager = AuthzSubjectManagerEJBImpl.getOne();
+            manager = AuthzSubjectManagerImpl.getOne();
         return manager;
     }
     

@@ -25,7 +25,7 @@
 package org.hyperic.hq.product.server.session;
 
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -71,7 +71,7 @@ public class PluginAudit extends Audit {
                                           long end) 
     {
         AuthzSubject overlord = 
-            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
         String msg = MSGS.format("auditMsg.plugin.deploy", pluginName);
         PluginAudit res = new PluginAudit(getSystemResource(), overlord, 
                                           PLUGIN_DEPLOYED, AuditImportance.HIGH,
@@ -85,7 +85,7 @@ public class PluginAudit extends Audit {
                                           long end) 
     {
         AuthzSubject overlord = 
-            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
         String msg = MSGS.format("auditMsg.plugin.update", pluginName);
         PluginAudit res = new PluginAudit(getSystemResource(), overlord, 
                                           PLUGIN_UPDATED, AuditImportance.HIGH,
