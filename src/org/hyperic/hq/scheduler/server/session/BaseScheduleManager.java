@@ -44,9 +44,8 @@ import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 
 /**
- * Implements common functionality shared by various schedule managers,
- * for example the ControlScheduleManager and AIScheduleManager
- * session beans.
+ * Implements common functionality shared by various schedule managers, for
+ * example the ControlScheduleManager and AIScheduleManager session beans.
  */
 public abstract class BaseScheduleManager {
 
@@ -63,47 +62,38 @@ public abstract class BaseScheduleManager {
 
     // Subclasses implement these method so that we can
     // do a lot of stuff uniformly at this common base-class level.
-    protected abstract String getHistoryPagerClass ();
-    protected abstract String getSchedulePagerClass ();
-    protected abstract String getJobPrefix ();
-    protected abstract String getSchedulePrefix ();
+    protected abstract String getHistoryPagerClass();
+
+    protected abstract String getSchedulePagerClass();
+
+    protected abstract String getJobPrefix();
+
+    protected abstract String getSchedulePrefix();
 
     protected DBUtil dbUtil;
-    
+
     public BaseScheduleManager(Scheduler scheduler, DBUtil dbUtil) {
         this.scheduler = scheduler;
         this.dbUtil = dbUtil;
     }
-    
+
     // Helper methods
-    protected String getPrefix(AppdefEntityID id)
-    {
+    protected String getPrefix(AppdefEntityID id) {
         return id.getID() + SCHED_SEPARATOR + id.getType();
     }
 
-    protected String getJobName(AuthzSubject subject,
-                                AppdefEntityID id, String instanceIdentifier)
-    {
-        return jobPrefix + SCHED_SEPARATOR + getPrefix(id)  +
-            SCHED_SEPARATOR + instanceIdentifier + SCHED_SEPARATOR +
-            System.currentTimeMillis();
+    protected String getJobName(AuthzSubject subject, AppdefEntityID id, String instanceIdentifier) {
+        return jobPrefix + SCHED_SEPARATOR + getPrefix(id) + SCHED_SEPARATOR + instanceIdentifier + SCHED_SEPARATOR +
+               System.currentTimeMillis();
     }
 
-    protected String getTriggerName(AuthzSubject subject,
-                                    AppdefEntityID id, String instanceIdentifier)
-    {
-        return schedulePrefix + SCHED_SEPARATOR + getPrefix(id) +
-            SCHED_SEPARATOR + instanceIdentifier + SCHED_SEPARATOR +
-            System.currentTimeMillis();
+    protected String getTriggerName(AuthzSubject subject, AppdefEntityID id, String instanceIdentifier) {
+        return schedulePrefix + SCHED_SEPARATOR + getPrefix(id) + SCHED_SEPARATOR + instanceIdentifier +
+               SCHED_SEPARATOR + System.currentTimeMillis();
     }
 
-    protected void setupJobData(JobDetail jobDetail,
-                                AuthzSubject subject,
-                                AppdefEntityID id,
-                                String scheduleString,
-                                Boolean scheduled,
-                                int[] order)
-    {
+    protected void setupJobData(JobDetail jobDetail, AuthzSubject subject, AppdefEntityID id, String scheduleString,
+                                Boolean scheduled, int[] order) {
         JobDataMap dataMap = jobDetail.getJobDataMap();
         dataMap.put(BaseJob.PROP_ID, id.getId().toString());
         dataMap.put(BaseJob.PROP_TYPE, new Integer(id.getType()).toString());
@@ -116,7 +106,6 @@ public abstract class BaseScheduleManager {
         dataMap.put(BaseJob.PROP_ORDER, orderStr);
     }
 
-   
     @PostConstruct
     protected void initialize() {
         try {
@@ -126,7 +115,7 @@ public abstract class BaseScheduleManager {
 
             // Note the type of database
             setDbType();
-        }  catch (Exception e) {
+        } catch (Exception e) {
             // IllegialAccessException, InvocationException..
             throw new SystemException(e);
         }
@@ -135,20 +124,21 @@ public abstract class BaseScheduleManager {
         this.schedulePrefix = getSchedulePrefix();
     }
 
+    protected int getDbType() {
+        return this.dbType;
+    }
 
-    protected int getDbType() { return this.dbType; }
-    protected void setDbType () {
+    protected void setDbType() {
         Connection conn = null;
         try {
-            conn = dbUtil.getConnByContext(
-                new InitialContext(), HQConstants.DATASOURCE);
+            conn = dbUtil.getConnByContext(new InitialContext(), HQConstants.DATASOURCE);
             this.dbType = DBUtil.getDBType(conn);
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (SQLException e) {
-            //log and continue
+            // log and continue
         } finally {
-            DBUtil.closeConnection(null,conn);
+            DBUtil.closeConnection(null, conn);
         }
     }
 }

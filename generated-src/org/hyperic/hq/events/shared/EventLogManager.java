@@ -20,70 +20,92 @@ import org.hyperic.hq.events.server.session.EventLogDAO.ResourceEventLog;
 /**
  * Local interface for EventLogManager.
  */
-public interface EventLogManager
-{
-   /**
-    * Create a new vanilla log item.
-    * @param event The event to log.
-    * @param subject The log item subject.
-    * @param status The log item status.
-    * @param save <code>true</code> to persist the log item; <code>false</code> to create a transient log item only.
-    */
-   public EventLog createLog( AbstractEvent event,String subject,String status,boolean save ) throws ResourceDeletedException;
+public interface EventLogManager {
+    /**
+     * Create a new vanilla log item.
+     * @param event The event to log.
+     * @param subject The log item subject.
+     * @param status The log item status.
+     * @param save <code>true</code> to persist the log item; <code>false</code>
+     *        to create a transient log item only.
+     */
+    public EventLog createLog(AbstractEvent event, String subject, String status, boolean save)
+        throws ResourceDeletedException;
 
-   /**
-    * Insert the event logs in batch.
-    * @param eventLogs The event logs.
-    */
-   public void insertEventLogs( org.hyperic.hq.events.server.session.EventLog[] eventLogs ) ;
+    /**
+     * Insert the event logs in batch.
+     * @param eventLogs The event logs.
+     */
+    public void insertEventLogs(org.hyperic.hq.events.server.session.EventLog[] eventLogs);
 
-   /**
-    * Find the last event logs of all the resources of a given prototype. (i.e. 'Linux' or 'FileServer File')
-    */
-   public List<EventLog> findLastLogs( Resource proto ) ;
+    /**
+     * Find the last event logs of all the resources of a given prototype. (i.e.
+     * 'Linux' or 'FileServer File')
+     */
+    public List<EventLog> findLastLogs(Resource proto);
 
-   /**
-    * Get a list of {@link ResourceEventLog}s in a given interval, with the maximum specified status. If specified, typeClass dictates the full classname of the rows to check (i.e. org.hyperic.hq.....ResourceLogEvent) If specified, inGroups must be a collection of {@link ResourceGroup}s which the resulting logs will be associated with.
-    */
-   public List<ResourceEventLog> findLogs( AuthzSubject subject,long begin,long end,PageInfo pInfo,EventLogStatus maxStatus,String typeClass,Collection<ResourceGroup> inGroups ) ;
+    /**
+     * Get a list of {@link ResourceEventLog}s in a given interval, with the
+     * maximum specified status. If specified, typeClass dictates the full
+     * classname of the rows to check (i.e. org.hyperic.hq.....ResourceLogEvent)
+     * If specified, inGroups must be a collection of {@link ResourceGroup}s
+     * which the resulting logs will be associated with.
+     */
+    public List<ResourceEventLog> findLogs(AuthzSubject subject, long begin, long end, PageInfo pInfo,
+                                           EventLogStatus maxStatus, String typeClass,
+                                           Collection<ResourceGroup> inGroups);
 
-   /**
-    * Get a list of log records based on resource, event type and time range. All resources which are descendents of the passed resource will also have their event logs included
-    */
-   public List<EventLog> findLogs( AppdefEntityID ent,AuthzSubject user,java.lang.String[] eventTypes,long begin,long end ) ;
+    /**
+     * Get a list of log records based on resource, event type and time range.
+     * All resources which are descendents of the passed resource will also have
+     * their event logs included
+     */
+    public List<EventLog> findLogs(AppdefEntityID ent, AuthzSubject user, java.lang.String[] eventTypes, long begin,
+                                   long end);
 
-   /**
-    * Get a list of log records based on resource, status and time range. All resources which are descendants of the passed resource will also have their event logs included
-    */
-   public List<EventLog> findLogs( AppdefEntityID ent,AuthzSubject user,String status,long begin,long end ) ;
+    /**
+     * Get a list of log records based on resource, status and time range. All
+     * resources which are descendants of the passed resource will also have
+     * their event logs included
+     */
+    public List<EventLog> findLogs(AppdefEntityID ent, AuthzSubject user, String status, long begin, long end);
 
-   /**
-    * Retrieve the total number of event logs.
-    * @return The total number of event logs.
-    */
-   public int getTotalNumberLogs(  ) ;
+    /**
+     * Retrieve the total number of event logs.
+     * @return The total number of event logs.
+     */
+    public int getTotalNumberLogs();
 
-   /**
-    * Get an array of booleans, each element indicating whether or not there are log records for that respective interval, for a particular entity over a given time range. This method also takes descendents of the passed-resource into consideration.
-    * @param entityId The entity.
-    * @param begin The begin timestamp for the time range.
-    * @param end The end timestamp for the time range.
-    * @param intervals The number of intervals.
-    * @return The boolean array with length equal to the number of intervals specified.
-    */
-   public boolean[] logsExistPerInterval( AppdefEntityID entityId,AuthzSubject subject,long begin,long end,int intervals ) ;
+    /**
+     * Get an array of booleans, each element indicating whether or not there
+     * are log records for that respective interval, for a particular entity
+     * over a given time range. This method also takes descendents of the
+     * passed-resource into consideration.
+     * @param entityId The entity.
+     * @param begin The begin timestamp for the time range.
+     * @param end The end timestamp for the time range.
+     * @param intervals The number of intervals.
+     * @return The boolean array with length equal to the number of intervals
+     *         specified.
+     */
+    public boolean[] logsExistPerInterval(AppdefEntityID entityId, AuthzSubject subject, long begin, long end,
+                                          int intervals);
 
-   /**
-    * Delete event logs for the given resource TODO: Authz check.
-    */
-   public int deleteLogs( Resource r ) ;
+    /**
+     * Delete event logs for the given resource TODO: Authz check.
+     */
+    public int deleteLogs(Resource r);
 
-   /**
-    * Purge old event logs.
-    * @param from Delete all records starting from (and including) this time. If set to -1, then this method will delete all records from the earliest record forward.
-    * @param to Delete all records up to (and including) this time. If set to -1, then this method will delete all records up to and including the most recent record.
-    * @return The number of records removed.
-    */
-   public int deleteLogs( long from,long to ) ;
+    /**
+     * Purge old event logs.
+     * @param from Delete all records starting from (and including) this time.
+     *        If set to -1, then this method will delete all records from the
+     *        earliest record forward.
+     * @param to Delete all records up to (and including) this time. If set to
+     *        -1, then this method will delete all records up to and including
+     *        the most recent record.
+     * @return The number of records removed.
+     */
+    public int deleteLogs(long from, long to);
 
 }
