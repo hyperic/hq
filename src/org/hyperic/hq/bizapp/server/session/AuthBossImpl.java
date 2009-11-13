@@ -55,11 +55,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-
-/** 
+/**
  * The BizApp's interface to the Auth Subsystem
- *
+ * 
  */
 @Service
 @Transactional
@@ -67,13 +65,13 @@ public class AuthBossImpl implements AuthBoss {
     private SessionManager sessionManager;
 
     private Log log = LogFactory.getLog(AuthBossImpl.class);
-    
+
     private AuthManager authManager;
-    
+
     private AuthzSubjectManagerLocal authzSubjectManager;
 
     private ZeventEnqueuer zEventManager;
-  
+
     @Autowired
     public AuthBossImpl(SessionManager sessionManager, AuthManager authManager,
                         AuthzSubjectManagerLocal authzSubjectManager, ZeventEnqueuer zEventManager) {
@@ -89,25 +87,24 @@ public class AuthBossImpl implements AuthBoss {
             // Process events needs to occur within a session due to
             // UserAudit accessing pojo's outside of an EJBImpl.
             try {
-                org.hyperic.hq.hibernate.SessionManager.runInSession(
-                    new org.hyperic.hq.hibernate.SessionManager.SessionRunner() {
+                org.hyperic.hq.hibernate.SessionManager
+                    .runInSession(new org.hyperic.hq.hibernate.SessionManager.SessionRunner() {
 
-                    public String getName() {
-                        return "UserLoginListener";
-                    }
-
-                    public void run() throws Exception {
-                        for (UserLoginZevent z : events) {
-                            UserLoginZevent.UserLoginZeventPayload p =
-                                    (UserLoginZevent.UserLoginZeventPayload) z.getPayload();
-                            Integer subjectId = p.getSubjectId();
-                            // Re-look up subject
-                            AuthzSubject sub =
-                                    authzSubjectManager.getSubjectById(subjectId);
-                            UserAudit.loginAudit(sub);
+                        public String getName() {
+                            return "UserLoginListener";
                         }
-                    }
-                });
+
+                        public void run() throws Exception {
+                            for (UserLoginZevent z : events) {
+                                UserLoginZevent.UserLoginZeventPayload p = (UserLoginZevent.UserLoginZeventPayload) z
+                                    .getPayload();
+                                Integer subjectId = p.getSubjectId();
+                                // Re-look up subject
+                                AuthzSubject sub = authzSubjectManager.getSubjectById(subjectId);
+                                UserAudit.loginAudit(sub);
+                            }
+                        }
+                    });
             } catch (Exception e) {
                 log.error("Exception running login audit", e);
             }
@@ -119,17 +116,15 @@ public class AuthBossImpl implements AuthBoss {
     }
 
     /**
-     * Add buffered listener to register login audits post commit.  This
-     * allows for read-only operations to succeed properly when accessed
-     * via HQU
-     *
+     * Add buffered listener to register login audits post commit. This allows
+     * for read-only operations to succeed properly when accessed via HQU
+     * 
      * 
      */
     public void startup() {
         HashSet<Class<UserLoginZevent>> events = new HashSet<Class<UserLoginZevent>>();
         events.add(UserLoginZevent.class);
-        zEventManager.addBufferedListener(events,
-                                                        new UserZeventListener());
+        zEventManager.addBufferedListener(events, new UserZeventListener());
     }
 
     /**
@@ -139,10 +134,8 @@ public class AuthBossImpl implements AuthBoss {
      * @return An integer representing the session ID of the logged-in user.
      * 
      */
-    public int login ( String username, String password ) 
-        throws SecurityException, LoginException, ApplicationException,
-               ConfigPropertyException 
-    {
+    public int login(String username, String password) throws SecurityException, LoginException, ApplicationException,
+        ConfigPropertyException {
         try {
             int res = authManager.getSessionId(username, password);
             AuthzSubject s = sessionManager.getSubject(res);
@@ -156,18 +149,14 @@ public class AuthBossImpl implements AuthBoss {
 
     /**
      * Login a guest.
-     *
+     * 
      * @return An integer representing the session ID of the logged-in user.
      * 
      */
-    public int loginGuest () 
-        throws SecurityException, LoginException, ApplicationException,
-               ConfigPropertyException 
-    {
+    public int loginGuest() throws SecurityException, LoginException, ApplicationException, ConfigPropertyException {
         try {
-            AuthzSubject guest =
-                authzSubjectManager.getSubjectById(AuthzConstants.guestId);
-            
+            AuthzSubject guest = authzSubjectManager.getSubjectById(AuthzConstants.guestId);
+
             if (guest != null && guest.getActive()) {
                 return sessionManager.put(guest);
             }
@@ -182,10 +171,10 @@ public class AuthBossImpl implements AuthBoss {
      * @param sessionID The session id for the current user
      * 
      */
-    public void logout (int sessionID) {
+    public void logout(int sessionID) {
         try {
             UserAudit.logoutAudit(sessionManager.getSubject(sessionID));
-        } catch(SessionException e) {
+        } catch (SessionException e) {
         }
         sessionManager.invalidate(sessionID);
     }
@@ -211,16 +200,14 @@ public class AuthBossImpl implements AuthBoss {
 
     /**
      * Add a user to the internal database
-     *
+     * 
      * @param sessionID The session id for the current user
      * @param username The username to add
      * @param password The password for this user
-     *
+     * 
      * 
      */
-    public void addUser(int sessionID, String username, String password)
-        throws SessionException
-    {
+    public void addUser(int sessionID, String username, String password) throws SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         authManager.addUser(subject, username, password);
     }
@@ -230,29 +217,26 @@ public class AuthBossImpl implements AuthBoss {
      * @param sessionID The session id for the current user
      * @param username The user whose password should be updated
      * @param password The new password for the user
-     *
+     * 
      * 
      */
-    public void changePassword(int sessionID, String username, String password) 
-        throws FinderException, PermissionException, SessionException
-    {
+    public void changePassword(int sessionID, String username, String password) throws FinderException,
+        PermissionException, SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         authManager.changePassword(subject, username, password);
     }
 
     /**
      * Check existence of a user
-     *
+     * 
      * 
      */
-    public boolean isUser(int sessionID, String username)
-        throws SessionTimeoutException, SessionNotFoundException
-    {
+    public boolean isUser(int sessionID, String username) throws SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return authManager.isUser(subject, username);
     }
 
     public static AuthBoss getOne() {
-       return Bootstrap.getBean(AuthBoss.class);
+        return Bootstrap.getBean(AuthBoss.class);
     }
 }

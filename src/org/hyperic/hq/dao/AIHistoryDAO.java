@@ -3,7 +3,6 @@ package org.hyperic.hq.dao;
 import java.util.Collection;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.autoinventory.AIHistory;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
@@ -36,7 +35,7 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class AIHistoryDAO extends HibernateDAO
+public class AIHistoryDAO extends HibernateDAO<AIHistory>
 {
     @Autowired
     public AIHistoryDAO(SessionFactory f) {
@@ -92,7 +91,7 @@ public class AIHistoryDAO extends HibernateDAO
         return h;
     }
 
-    public Collection findByEntity(int type, int id)
+    public Collection<AIHistory> findByEntity(int type, int id)
     {
         String sql="from AIHistory where entityType=? and entityId=?";
         return getSession().createQuery(sql)
@@ -119,7 +118,7 @@ public class AIHistoryDAO extends HibernateDAO
         return findByEntityStartTime(type, id, true);
     }
 
-    public Collection findByEntityStartTime(int type, int id, boolean asc)
+    public Collection<AIHistory> findByEntityStartTime(int type, int id, boolean asc)
     {
         String sql="from AIHistory where entityType=? and entityId=? " +
                    "order by startTime " +
@@ -148,7 +147,7 @@ public class AIHistoryDAO extends HibernateDAO
         return findByEntityStatus(type, id, true);
     }
 
-    public Collection findByEntityStatus(int type, int id, boolean asc)
+    public Collection<AIHistory> findByEntityStatus(int type, int id, boolean asc)
     {
         String sql="from AIHistory where entityType=? and entityId=? " +
                    "order by status " +
@@ -177,7 +176,7 @@ public class AIHistoryDAO extends HibernateDAO
         return findByEntityDuration(type, id, true);
     }
 
-    public Collection findByEntityDuration(int type, int id, boolean asc)
+    public Collection<AIHistory> findByEntityDuration(int type, int id, boolean asc)
     {
         String sql="from AIHistory where entityType=? and entityId=? " +
                    "order by duration " +
@@ -206,7 +205,7 @@ public class AIHistoryDAO extends HibernateDAO
         return findByEntityDateScheduled(type, id, true);
     }
 
-    public Collection findByEntityDateScheduled(int type, int id, boolean asc)
+    public Collection<AIHistory> findByEntityDateScheduled(int type, int id, boolean asc)
     {
         String sql="from AIHistory where entityType=? and entityId=? " +
                    "order by dateScheduled " +

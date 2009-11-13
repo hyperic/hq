@@ -28,8 +28,7 @@ package org.hyperic.hq.scheduler.server.session;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import javax.ejb.CreateException;
-import javax.ejb.SessionContext;
+import javax.annotation.PostConstruct;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -37,7 +36,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.Pager;
@@ -46,16 +44,15 @@ import org.quartz.JobDetail;
 import org.quartz.Scheduler;
 
 /**
- * Implements common functionality shared by various schedule managers,
- * for example the ControlScheduleManager and AIScheduleManager
- * session beans.
+ * Implements common functionality shared by various schedule managers, for
+ * example the ControlScheduleManager and AIScheduleManager session beans.
  */
-public abstract class BaseScheduleManagerEJB {
+public abstract class BaseScheduleManager {
 
     public static final String SCHED_SEPARATOR = "-";
     private int dbType;
 
-    protected Scheduler _scheduler;
+    protected Scheduler scheduler;
 
     private String jobPrefix;
     private String schedulePrefix;
@@ -65,42 +62,38 @@ public abstract class BaseScheduleManagerEJB {
 
     // Subclasses implement these method so that we can
     // do a lot of stuff uniformly at this common base-class level.
-    protected abstract String getHistoryPagerClass ();
-    protected abstract String getSchedulePagerClass ();
-    protected abstract String getJobPrefix ();
-    protected abstract String getSchedulePrefix ();
+    protected abstract String getHistoryPagerClass();
 
-    protected DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
+    protected abstract String getSchedulePagerClass();
+
+    protected abstract String getJobPrefix();
+
+    protected abstract String getSchedulePrefix();
+
+    protected DBUtil dbUtil;
+
+    public BaseScheduleManager(Scheduler scheduler, DBUtil dbUtil) {
+        this.scheduler = scheduler;
+        this.dbUtil = dbUtil;
+    }
 
     // Helper methods
-    protected String getPrefix(AppdefEntityID id)
-    {
+    protected String getPrefix(AppdefEntityID id) {
         return id.getID() + SCHED_SEPARATOR + id.getType();
     }
 
-    protected String getJobName(AuthzSubject subject,
-                                AppdefEntityID id, String instanceIdentifier)
-    {
-        return jobPrefix + SCHED_SEPARATOR + getPrefix(id)  +
-            SCHED_SEPARATOR + instanceIdentifier + SCHED_SEPARATOR +
-            System.currentTimeMillis();
+    protected String getJobName(AuthzSubject subject, AppdefEntityID id, String instanceIdentifier) {
+        return jobPrefix + SCHED_SEPARATOR + getPrefix(id) + SCHED_SEPARATOR + instanceIdentifier + SCHED_SEPARATOR +
+               System.currentTimeMillis();
     }
 
-    protected String getTriggerName(AuthzSubject subject,
-                                    AppdefEntityID id, String instanceIdentifier)
-    {
-        return schedulePrefix + SCHED_SEPARATOR + getPrefix(id) +
-            SCHED_SEPARATOR + instanceIdentifier + SCHED_SEPARATOR +
-            System.currentTimeMillis();
+    protected String getTriggerName(AuthzSubject subject, AppdefEntityID id, String instanceIdentifier) {
+        return schedulePrefix + SCHED_SEPARATOR + getPrefix(id) + SCHED_SEPARATOR + instanceIdentifier +
+               SCHED_SEPARATOR + System.currentTimeMillis();
     }
 
-    protected void setupJobData(JobDetail jobDetail,
-                                AuthzSubject subject,
-                                AppdefEntityID id,
-                                String scheduleString,
-                                Boolean scheduled,
-                                int[] order)
-    {
+    protected void setupJobData(JobDetail jobDetail, AuthzSubject subject, AppdefEntityID id, String scheduleString,
+                                Boolean scheduled, int[] order) {
         JobDataMap dataMap = jobDetail.getJobDataMap();
         dataMap.put(BaseJob.PROP_ID, id.getId().toString());
         dataMap.put(BaseJob.PROP_TYPE, new Integer(id.getType()).toString());
@@ -113,23 +106,16 @@ public abstract class BaseScheduleManagerEJB {
         dataMap.put(BaseJob.PROP_ORDER, orderStr);
     }
 
-    /**
-     * A pseudo-ejbCreate method called by subclasses from their
-     * real ejbCreate implementations.
-     */
-    protected void ejbCreate() {
-
+    @PostConstruct
+    protected void initialize() {
         try {
-            // Get a reference to the scheduler
-            this._scheduler = Bootstrap.getBean(Scheduler.class);
-
             // Setup the pagers
             this.historyPager = Pager.getPager(getHistoryPagerClass());
             this.schedulePager = Pager.getPager(getSchedulePagerClass());
 
             // Note the type of database
             setDbType();
-        }  catch (Exception e) {
+        } catch (Exception e) {
             // IllegialAccessException, InvocationException..
             throw new SystemException(e);
         }
@@ -138,24 +124,21 @@ public abstract class BaseScheduleManagerEJB {
         this.schedulePrefix = getSchedulePrefix();
     }
 
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {}
+    protected int getDbType() {
+        return this.dbType;
+    }
 
-    protected int getDbType() { return this.dbType; }
-    protected void setDbType () {
+    protected void setDbType() {
         Connection conn = null;
         try {
-            conn = dbUtil.getConnByContext(
-                new InitialContext(), HQConstants.DATASOURCE);
-            this.dbType = dbUtil.getDBType(conn);
+            conn = dbUtil.getConnByContext(new InitialContext(), HQConstants.DATASOURCE);
+            this.dbType = DBUtil.getDBType(conn);
         } catch (NamingException e) {
             throw new SystemException(e);
         } catch (SQLException e) {
-            //log and continue
+            // log and continue
         } finally {
-            dbUtil.closeConnection(null,conn);
+            DBUtil.closeConnection(null, conn);
         }
     }
 }

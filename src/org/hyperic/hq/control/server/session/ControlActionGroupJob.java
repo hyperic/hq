@@ -35,7 +35,6 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -47,8 +46,7 @@ import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.shared.ControlActionTimeoutException;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlManager;
-import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
-import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
+import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
@@ -60,9 +58,6 @@ import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.Trigger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 /**
  * A quartz job class for handling control actions on a group entity
@@ -111,8 +106,8 @@ public class ControlActionGroupJob extends ControlJob {
             int longestTimeout = 0;
 
             // create group entry in the history
-            ControlScheduleManagerLocal cLocal =
-                ControlScheduleManagerUtil.getLocalHome().create();
+            ControlScheduleManager cLocal =
+                ControlScheduleManagerImpl.getOne();
             ControlHistory historyValue =
                 cLocal.createHistory(id, null, null, subject.getName(),
                                      action, args, scheduled, startTime,
@@ -179,12 +174,6 @@ public class ControlActionGroupJob extends ControlJob {
         } catch (ApplicationException e) {
             // Shouldnt happen
             errMsg = "Application error: " + e.getMessage();
-        } catch (CreateException e) {
-            // Shouldnt happen
-            errMsg = "System error";
-        } catch (NamingException e) {
-            // Shouldt happen
-            errMsg = "System error";
         } finally {
 
             if (groupId != null) {
@@ -194,8 +183,8 @@ public class ControlActionGroupJob extends ControlJob {
 
                 try {
                     // Update group history entry
-                    ControlScheduleManagerLocal cLocal =
-                        ControlScheduleManagerUtil.getLocalHome().create();
+                    ControlScheduleManager cLocal =
+                       ControlScheduleManagerImpl.getOne();
                     cLocal.updateHistory(groupId, System.currentTimeMillis(),
                                          status, errMsg);
 
@@ -227,7 +216,7 @@ public class ControlActionGroupJob extends ControlJob {
         throws ControlActionTimeoutException,
                ApplicationException
     {
-        ControlScheduleManagerLocal cMan = ControlScheduleManagerEJBImpl.getOne();
+        ControlScheduleManager cMan = ControlScheduleManagerImpl.getOne();
 
         long start = System.currentTimeMillis();
 
@@ -258,7 +247,7 @@ public class ControlActionGroupJob extends ControlJob {
         throws ControlActionTimeoutException,
                ApplicationException
     {
-        ControlScheduleManagerLocal cMan = ControlScheduleManagerEJBImpl.getOne();
+        ControlScheduleManager cMan = ControlScheduleManagerImpl.getOne();
 
         long start = System.currentTimeMillis();
 

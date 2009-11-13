@@ -42,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 /**
  *
  */
@@ -52,9 +51,8 @@ public class AuditManagerImpl implements AuditManager {
     private final Log log = LogFactory.getLog(AuditManagerImpl.class);
     private static final ThreadLocal<Audit> CONTAINERS = new ThreadLocal<Audit>();
 
-   
     private AuditDAO auditDao;
-    
+
     @Autowired
     public AuditManagerImpl(AuditDAO auditDao) {
         this.auditDao = auditDao;
@@ -62,7 +60,7 @@ public class AuditManagerImpl implements AuditManager {
 
     /**
      * Save an audit and all of it's children.
-     *
+     * 
      * 
      */
     public void saveAudit(Audit a) {
@@ -84,14 +82,14 @@ public class AuditManagerImpl implements AuditManager {
             log.debug("Audit: " + a);
         }
 
-        for (Audit child: a.getChildren()) {
+        for (Audit child : a.getChildren()) {
             saveRecursively(child);
         }
     }
 
     /**
      * If there is currently an audit in progress (a container), fetch it.
-     *
+     * 
      * 
      */
     public Audit getCurrentAudit() {
@@ -100,7 +98,7 @@ public class AuditManagerImpl implements AuditManager {
 
     /**
      * Delete an audit and all its children.
-     *
+     * 
      * 
      */
     public void deleteAudit(Audit a) {
@@ -108,7 +106,7 @@ public class AuditManagerImpl implements AuditManager {
     }
 
     private void deleteRecursively(Audit a) {
-        for (Audit child:a.getChildren()) {
+        for (Audit child : a.getChildren()) {
             deleteRecursively(child);
         }
         auditDao.remove(a);
@@ -130,8 +128,7 @@ public class AuditManagerImpl implements AuditManager {
             }
 
             if (a != null) {
-                log.warn("Unpopped audit container: " + a.getMessage() +
-                          ":  This should be closed manually!");
+                log.warn("Unpopped audit container: " + a.getMessage() + ":  This should be closed manually!");
                 if (a.getEndTime() != 0) {
                     a.setEndTime(now);
                 }
@@ -144,23 +141,22 @@ public class AuditManagerImpl implements AuditManager {
 
     /**
      * Pop the audit container off the stack.
-     *
-     * @param allowEmpty If true, allow the container to pop and be saved
-     *                   with no children.  If the container is empty, and
-     *                   this is true, simply delete it
+     * 
+     * @param allowEmpty If true, allow the container to pop and be saved with
+     *        no children. If the container is empty, and this is true, simply
+     *        delete it
      * 
      */
     public void popContainer(boolean allowEmpty) {
         Audit a = getCurrentAudit();
 
         if (a == null) {
-            throw new RuntimeException("Expected to pop a container, but had " +
-                                       "none");
+            throw new RuntimeException("Expected to pop a container, but had " + "none");
         }
 
         a.setEndTime(System.currentTimeMillis());
         if (a.getParent() == null) {
-            // Root level container.  Save off
+            // Root level container. Save off
             try {
                 if (!allowEmpty && a.getChildren().isEmpty()) {
                     deleteRecursively(a);
@@ -180,9 +176,9 @@ public class AuditManagerImpl implements AuditManager {
     }
 
     /**
-     * Push a global audit container onto the stack.  Any subsequent audits
+     * Push a global audit container onto the stack. Any subsequent audits
      * created (via saveAudit) will be added to this container.
-     *
+     * 
      * 
      */
     public void pushContainer(Audit newContainer) {
@@ -190,8 +186,7 @@ public class AuditManagerImpl implements AuditManager {
 
         newContainer.setStartTime(System.currentTimeMillis());
         if (currentContainer == null) {
-            HQApp.getInstance().addTransactionListener(new TransactionListener()
-            {
+            HQApp.getInstance().addTransactionListener(new TransactionListener() {
                 public void beforeCommit() {
                     popAll();
                 }
@@ -208,13 +203,9 @@ public class AuditManagerImpl implements AuditManager {
     /**
      * 
      */
-    public List<Audit> find(AuthzSubject me, PageInfo pInfo,
-                     long startTime, long endTime,
-                     AuditImportance minImportance, AuditPurpose purpose,
-                     AuthzSubject target, String klazz)
-    {
-        return auditDao.find(pInfo, me, startTime, endTime, minImportance, purpose,
-                         target, klazz);
+    public List<Audit> find(AuthzSubject me, PageInfo pInfo, long startTime, long endTime,
+                            AuditImportance minImportance, AuditPurpose purpose, AuthzSubject target, String klazz) {
+        return auditDao.find(pInfo, me, startTime, endTime, minImportance, purpose, target, klazz);
     }
 
     /**
@@ -231,17 +222,13 @@ public class AuditManagerImpl implements AuditManager {
         auditDao.handleSubjectDelete(s);
     }
 
-    private static class ResourceDeleteWatcher
-        implements ResourceDeleteCallback
-    {
+    private static class ResourceDeleteWatcher implements ResourceDeleteCallback {
         public void preResourceDelete(Resource r) {
             getOne().handleResourceDelete(r);
         }
     }
 
-    private static class SubjectDeleteWatcher
-        implements SubjectRemoveCallback
-    {
+    private static class SubjectDeleteWatcher implements SubjectRemoveCallback {
         public void subjectRemoved(AuthzSubject toDelete) {
             getOne().handleSubjectDelete(toDelete);
         }
@@ -253,13 +240,9 @@ public class AuditManagerImpl implements AuditManager {
     public void startup() {
         log.info("Audit Manager starting up");
 
-        HQApp.getInstance()
-                .registerCallbackListener(ResourceDeleteCallback.class,
-                                          new ResourceDeleteWatcher());
+        HQApp.getInstance().registerCallbackListener(ResourceDeleteCallback.class, new ResourceDeleteWatcher());
 
-        HQApp.getInstance()
-                .registerCallbackListener(SubjectRemoveCallback.class,
-                                          new SubjectDeleteWatcher());
+        HQApp.getInstance().registerCallbackListener(SubjectRemoveCallback.class, new SubjectDeleteWatcher());
     }
 
     public static AuditManager getOne() {

@@ -35,7 +35,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
 import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
-import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
+import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.zevents.ZeventListener;
 
 public class ControlEventListener
@@ -44,7 +44,7 @@ public class ControlEventListener
     private static Log _log = LogFactory.getLog(ControlEventListener.class);
 
     public void processEvents(List events) {
-        ControlScheduleManagerLocal cM = ControlScheduleManagerEJBImpl.getOne();
+        ControlScheduleManager cM = ControlScheduleManagerImpl.getOne();
         AuthzSubjectManagerLocal azMan = AuthzSubjectManagerEJBImpl.getOne();
 
         for (Iterator i = events.iterator(); i.hasNext();) {

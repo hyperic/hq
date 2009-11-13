@@ -27,7 +27,7 @@ import org.hyperic.hq.events.server.session.AlertManagerImpl as AlertMan
 import org.hyperic.hq.events.server.session.EventLogManagerImpl as EventMan
 import org.hyperic.hq.livedata.server.session.LiveDataManagerImpl as liveDataMan
 import org.hyperic.hq.control.server.session.ControlManagerImpl as CMan
-import org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl as CSMan
+import org.hyperic.hq.control.server.session.ControlScheduleManagerImpl as CSMan
 import org.hyperic.hq.product.PluginNotFoundException
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl as DMan
 

@@ -67,7 +67,7 @@ import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
 import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.shared.ControlManager;
-import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
+import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
@@ -95,7 +95,7 @@ public class ControlManagerImpl implements ControlManager {
     private final Log log = LogFactory.getLog(ControlManagerImpl.class.getName());
 
     private ProductManager productManager;
-    private ControlScheduleManagerLocal controlScheduleManager;
+    private ControlScheduleManager controlScheduleManager;
     private ControlHistoryDAO controlHistoryDao;
     private ResourceTypeDAO resourceTypeDao;
 
@@ -109,7 +109,7 @@ public class ControlManagerImpl implements ControlManager {
     private ControlPluginManager controlPluginManager;
 
     @Autowired
-    public ControlManagerImpl(ProductManager productManager, ControlScheduleManagerLocal controlScheduleManager,
+    public ControlManagerImpl(ProductManager productManager, ControlScheduleManager controlScheduleManager,
                               ControlHistoryDAO controlHistoryDao,
                               ResourceTypeDAO resourceTypeDao, ConfigManagerLocal configManager,
                               PlatformManagerLocal platformManager,

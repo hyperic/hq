@@ -54,8 +54,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * <p> Stores Events to and deletes Events from storage</p>
- *
+ * <p>
+ * Stores Events to and deletes Events from storage
+ * </p>
+ * 
  */
 @Service
 @Transactional
@@ -64,13 +66,12 @@ public class EventLogManagerImpl implements EventLogManager {
     private static final int MSGMAX = TrackEvent.MESSAGE_MAXLEN;
     private static final int SRCMAX = TrackEvent.SOURCE_MAXLEN;
 
-    private final Log log =
-        LogFactory.getLog(EventLogManagerImpl.class.getName());
+    private final Log log = LogFactory.getLog(EventLogManagerImpl.class.getName());
 
     private EventLogDAO eventLogDAO;
 
     private ResourceManager resourceManager;
-    
+
     @Autowired
     public EventLogManagerImpl(EventLogDAO eventLogDAO, ResourceManager resourceManager) {
         this.eventLogDAO = eventLogDAO;
@@ -79,21 +80,17 @@ public class EventLogManagerImpl implements EventLogManager {
 
     /**
      * Create a new vanilla log item.
-     *
+     * 
      * @param event The event to log.
      * @param subject The log item subject.
      * @param status The log item status.
-     * @param save <code>true</code> to persist the log item;
-     *             <code>false</code> to create a transient log item only.
-     *
+     * @param save <code>true</code> to persist the log item; <code>false</code>
+     *        to create a transient log item only.
+     * 
      * 
      */
-    public EventLog createLog(AbstractEvent event,
-                              String subject,
-                              String status,
-                              boolean save)
-        throws ResourceDeletedException
-    {
+    public EventLog createLog(AbstractEvent event, String subject, String status, boolean save)
+        throws ResourceDeletedException {
         String detail = event.toString();
         if (detail.length() > MSGMAX) {
             detail = detail.substring(0, MSGMAX - 1);
@@ -107,8 +104,7 @@ public class EventLogManagerImpl implements EventLogManager {
 
         Resource r = null;
         if (event instanceof ResourceEventInterface) {
-            AppdefEntityID aeId =
-                ((ResourceEventInterface) event).getResource();
+            AppdefEntityID aeId = ((ResourceEventInterface) event).getResource();
             r = resourceManager.findResource(aeId);
             if (r == null || r.isInAsyncDeleteState()) {
                 final String m = aeId + " has already been deleted";
@@ -116,15 +112,14 @@ public class EventLogManagerImpl implements EventLogManager {
             }
         }
 
-        EventLog e = new EventLog(r, subject, event.getClass().getName(),
-                                  detail, event.getTimestamp(), status);
+        EventLog e = new EventLog(r, subject, event.getClass().getName(), detail, event.getTimestamp(), status);
         if (save) {
             return eventLogDAO.create(e);
         } else {
             return e;
         }
     }
-    
+
     /**
      * Insert the event logs in batch.
      * 
@@ -135,87 +130,79 @@ public class EventLogManagerImpl implements EventLogManager {
     public void insertEventLogs(EventLog[] eventLogs) {
         eventLogDAO.insertLogs(eventLogs);
     }
-    
-    /** 
-     * Find the last event logs of all the resources of a given prototype.
-     * (i.e. 'Linux' or 'FileServer File')
+
+    /**
+     * Find the last event logs of all the resources of a given prototype. (i.e.
+     * 'Linux' or 'FileServer File')
      * 
      * 
      */
     public List<EventLog> findLastLogs(Resource proto) {
         return eventLogDAO.findLastByType(proto);
     }
-    
-    /** 
-     * Get a list of {@link ResourceEventLog}s in a given interval, with
-     * the maximum specified status.
+
+    /**
+     * Get a list of {@link ResourceEventLog}s in a given interval, with the
+     * maximum specified status.
      * 
-     * If specified, typeClass dictates the full classname of the rows
-     * to check (i.e. org.hyperic.hq.....ResourceLogEvent)
+     * If specified, typeClass dictates the full classname of the rows to check
+     * (i.e. org.hyperic.hq.....ResourceLogEvent)
      * 
      * If specified, inGroups must be a collection of {@link ResourceGroup}s
      * which the resulting logs will be associated with.
      * 
      * 
      */
-    public List<ResourceEventLog> findLogs(AuthzSubject subject, long begin, long end,
-                         PageInfo pInfo, EventLogStatus maxStatus,
-                         String typeClass, Collection<ResourceGroup> inGroups)
-    {
-        return eventLogDAO.findLogs(subject, begin, end, pInfo, maxStatus, 
-                                         typeClass, inGroups);
+    public List<ResourceEventLog> findLogs(AuthzSubject subject, long begin, long end, PageInfo pInfo,
+                                           EventLogStatus maxStatus, String typeClass,
+                                           Collection<ResourceGroup> inGroups) {
+        return eventLogDAO.findLogs(subject, begin, end, pInfo, maxStatus, typeClass, inGroups);
     }
 
-    /** 
+    /**
      * Get a list of log records based on resource, event type and time range.
-     * All resources which are descendents of the passed resource will also
-     * have their event logs included
+     * All resources which are descendents of the passed resource will also have
+     * their event logs included
      * 
      * 
      */
     @SuppressWarnings("unchecked")
-    public List<EventLog> findLogs(AppdefEntityID ent, AuthzSubject user, 
-                         String[] eventTypes, long begin, long end)
-    {
+    public List<EventLog> findLogs(AppdefEntityID ent, AuthzSubject user, String[] eventTypes, long begin, long end) {
         Resource r = resourceManager.findResource(ent);
-        
+
         if (r == null || r.isInAsyncDeleteState()) {
             return new ArrayList<EventLog>(0);
         }
-        
+
         Collection<String> eTypes;
-        
+
         if (eventTypes == null) {
             eTypes = Collections.EMPTY_LIST;
-        }else {
+        } else {
             eTypes = Arrays.asList(eventTypes);
         }
         if (r.getResourceType().getId().equals(AuthzConstants.authzGroup)) {
             return eventLogDAO.findByGroup(r, begin, end, eTypes);
-        }
-        else {
+        } else {
             return eventLogDAO.findByEntity(user, r, begin, end, eTypes);
         }
     }
 
     /**
-     * Get a list of log records based on resource, status and time range.
-     * All resources which are descendants of the passed resource will also
-     * have their event logs included
-     *
+     * Get a list of log records based on resource, status and time range. All
+     * resources which are descendants of the passed resource will also have
+     * their event logs included
+     * 
      * 
      */
-    public List<EventLog> findLogs(AppdefEntityID ent, AuthzSubject user, String status,
-                         long begin, long end)
-    {
+    public List<EventLog> findLogs(AppdefEntityID ent, AuthzSubject user, String status, long begin, long end) {
         Resource r = resourceManager.findResource(ent);
-        return eventLogDAO.findByEntityAndStatus(r, user, begin, end,
-                                                      status);
+        return eventLogDAO.findByEntityAndStatus(r, user, begin, end, status);
     }
 
     /**
      * Retrieve the total number of event logs.
-     *
+     * 
      * @return The total number of event logs.
      * 
      */
@@ -227,10 +214,10 @@ public class EventLogManagerImpl implements EventLogManager {
      * Get an array of booleans, each element indicating whether or not there
      * are log records for that respective interval, for a particular entity
      * over a given time range.
-     *
+     * 
      * This method also takes descendents of the passed-resource into
      * consideration.
-     *
+     * 
      * @param entityId The entity.
      * @param begin The begin timestamp for the time range.
      * @param end The end timestamp for the time range.
@@ -239,19 +226,14 @@ public class EventLogManagerImpl implements EventLogManager {
      *         specified.
      * 
      */
-    public boolean[] logsExistPerInterval(AppdefEntityID entityId,
-                                          AuthzSubject subject,
-                                          long begin, long end,
-                                          int intervals)
-    {
+    public boolean[] logsExistPerInterval(AppdefEntityID entityId, AuthzSubject subject, long begin, long end,
+                                          int intervals) {
         Resource r = resourceManager.findResource(entityId);
-        return eventLogDAO.logsExistPerInterval(r, subject, begin, end,
-                                                     intervals);
+        return eventLogDAO.logsExistPerInterval(r, subject, begin, end, intervals);
     }
 
     /**
-     * Delete event logs for the given resource
-     * TODO: Authz check.
+     * Delete event logs for the given resource TODO: Authz check.
      * 
      */
     public int deleteLogs(Resource r) {
@@ -260,13 +242,13 @@ public class EventLogManagerImpl implements EventLogManager {
 
     /**
      * Purge old event logs.
-     *
+     * 
      * @param from Delete all records starting from (and including) this time.
-     * If set to -1, then this method will delete all records from the
-     * earliest record forward.
-     * @param to Delete all records up to (and including) this time.
-     * If set to -1, then this method will delete all records up to and
-     * including the most recent record.
+     *        If set to -1, then this method will delete all records from the
+     *        earliest record forward.
+     * @param to Delete all records up to (and including) this time. If set to
+     *        -1, then this method will delete all records up to and including
+     *        the most recent record.
      * @return The number of records removed.
      * 
      */
@@ -298,12 +280,11 @@ public class EventLogManagerImpl implements EventLogManager {
 
         // Now that we have valid from/to values, figure out what the
         // interval is (don't loop more than 60 times)
-        long interval = Math.max(MeasurementConstants.DAY,
-                                 (to - from) / 60);
+        long interval = Math.max(MeasurementConstants.DAY, (to - from) / 60);
 
         return eventLogDAO.deleteLogs(from, to, interval);
     }
-    
+
     public static EventLogManager getOne() {
         return Bootstrap.getBean(EventLogManager.class);
     }

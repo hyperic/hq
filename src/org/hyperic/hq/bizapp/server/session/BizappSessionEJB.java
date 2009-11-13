@@ -74,9 +74,9 @@ import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.server.session.ControlManagerImpl;
-import org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl;
+import org.hyperic.hq.control.server.session.ControlScheduleManagerImpl;
 import org.hyperic.hq.control.shared.ControlManager;
-import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
+import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl;
 import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
@@ -231,8 +231,8 @@ public abstract class BizappSessionEJB {
         return ControlManagerImpl.getOne();
     }
 
-    public ControlScheduleManagerLocal getControlScheduleManager() {
-        return ControlScheduleManagerEJBImpl.getOne();
+    public ControlScheduleManager getControlScheduleManager() {
+        return ControlScheduleManagerImpl.getOne();
     }
 
     public SRNManager getSrnManager() {

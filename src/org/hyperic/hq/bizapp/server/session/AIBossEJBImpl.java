@@ -58,8 +58,8 @@ import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.ScanStateCore;
-import org.hyperic.hq.autoinventory.server.session.AIScheduleManagerEJBImpl;
-import org.hyperic.hq.autoinventory.shared.AIScheduleManagerLocal;
+import org.hyperic.hq.autoinventory.server.session.AIScheduleManagerImpl;
+import org.hyperic.hq.autoinventory.shared.AIScheduleManager;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.bizapp.shared.AIBossLocal;
@@ -87,8 +87,8 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
     protected Log log = LogFactory.getLog(AIBossEJBImpl.class.getName());
 
-    private AIScheduleManagerLocal getAIScheduleManager() {
-        return AIScheduleManagerEJBImpl.getOne();
+    private AIScheduleManager getAIScheduleManager() {
+        return AIScheduleManagerImpl.getOne();
     }
 
     public AIBossEJBImpl() {}

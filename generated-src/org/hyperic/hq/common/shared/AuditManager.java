@@ -15,42 +15,45 @@ import org.hyperic.hq.common.server.session.AuditPurpose;
 /**
  * Local interface for AuditManager.
  */
-public interface AuditManager
-{
-   /**
-    * Save an audit and all of it's children.
-    */
-   public void saveAudit( Audit a ) ;
+public interface AuditManager {
+    /**
+     * Save an audit and all of it's children.
+     */
+    public void saveAudit(Audit a);
 
-   /**
-    * If there is currently an audit in progress (a container), fetch it.
-    */
-   public Audit getCurrentAudit(  ) ;
+    /**
+     * If there is currently an audit in progress (a container), fetch it.
+     */
+    public Audit getCurrentAudit();
 
-   /**
-    * Delete an audit and all its children.
-    */
-   public void deleteAudit( Audit a ) ;
+    /**
+     * Delete an audit and all its children.
+     */
+    public void deleteAudit(Audit a);
 
-   public void popAll(  ) ;
+    public void popAll();
 
-   /**
-    * Pop the audit container off the stack.
-    * @param allowEmpty If true, allow the container to pop and be saved with no children. If the container is empty, and this is true, simply delete it
-    */
-   public void popContainer( boolean allowEmpty ) ;
+    /**
+     * Pop the audit container off the stack.
+     * @param allowEmpty If true, allow the container to pop and be saved with
+     *        no children. If the container is empty, and this is true, simply
+     *        delete it
+     */
+    public void popContainer(boolean allowEmpty);
 
-   /**
-    * Push a global audit container onto the stack. Any subsequent audits created (via saveAudit) will be added to this container.
-    */
-   public void pushContainer( Audit newContainer ) ;
+    /**
+     * Push a global audit container onto the stack. Any subsequent audits
+     * created (via saveAudit) will be added to this container.
+     */
+    public void pushContainer(Audit newContainer);
 
-   public List<Audit> find( AuthzSubject me,PageInfo pInfo,long startTime,long endTime,AuditImportance minImportance,AuditPurpose purpose,AuthzSubject target,String klazz ) ;
+    public List<Audit> find(AuthzSubject me, PageInfo pInfo, long startTime, long endTime,
+                            AuditImportance minImportance, AuditPurpose purpose, AuthzSubject target, String klazz);
 
-   public void handleResourceDelete( Resource r ) ;
+    public void handleResourceDelete(Resource r);
 
-   public void handleSubjectDelete( AuthzSubject s ) ;
+    public void handleSubjectDelete(AuthzSubject s);
 
-   public void startup(  ) ;
+    public void startup();
 
 }

@@ -43,8 +43,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
 import org.hyperic.hq.control.agent.client.ControlCommandsClientFactory;
 import org.hyperic.hq.control.shared.ControlConstants;
-import org.hyperic.hq.control.shared.ControlScheduleManagerLocal;
-import org.hyperic.hq.control.shared.ControlScheduleManagerUtil;
+import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.scheduler.server.session.BaseJob;
 
@@ -89,8 +88,8 @@ public abstract class ControlJob extends BaseJob {
             String productName = PlatformManagerUtil.getLocalHome().create()
                 .getPlatformPluginName(id);
 
-            ControlScheduleManagerLocal cLocal =
-                ControlScheduleManagerUtil.getLocalHome().create();
+            ControlScheduleManager cLocal =
+                ControlScheduleManagerImpl.getOne();
 
             // Regular command
 
@@ -130,8 +129,8 @@ public abstract class ControlJob extends BaseJob {
                 try {
                     AppdefEntityID aid = (gid != null) ? gid : id;
 
-                    ControlScheduleManagerLocal cLocal =
-                        ControlScheduleManagerUtil.getLocalHome().create();
+                    ControlScheduleManager cLocal =
+                        ControlScheduleManagerImpl.getOne();
 
                     // Remove the old history
                     if (commandHistory != null)
