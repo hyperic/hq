@@ -50,10 +50,10 @@ import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.auth.server.session.AuthManagerImpl;
 import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerImpl;
@@ -171,8 +171,8 @@ public abstract class BizappSessionEJB {
         return AppdefStatManagerEJBImpl.getOne();
     }    
     
-    public AuthzSubjectManagerLocal getAuthzSubjectManager() {
-        return AuthzSubjectManagerEJBImpl.getOne();
+    public AuthzSubjectManager getAuthzSubjectManager() {
+        return AuthzSubjectManagerImpl.getOne();
     }
 
     public AutoinventoryManager getAutoInventoryManager() {

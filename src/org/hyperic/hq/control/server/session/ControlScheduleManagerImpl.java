@@ -605,6 +605,7 @@ public class ControlScheduleManagerImpl
      * 
      * 
      */
+    @Transactional
     public void removeScheduledJobs(AuthzSubject subject, AppdefEntityID id) throws ScheduledJobRemoveException {
 
         // Any associated triggers will be automatically removed by Quartz.

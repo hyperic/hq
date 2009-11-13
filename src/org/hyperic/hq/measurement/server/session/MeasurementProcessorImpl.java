@@ -40,7 +40,7 @@ import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
@@ -69,11 +69,11 @@ public class MeasurementProcessorImpl
 
     private AgentManager agentManager;
     private MeasurementManager measurementManager;
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
 
     @Autowired
     public MeasurementProcessorImpl(AgentManager agentManager, MeasurementManager measurementManager,
-                                    AuthzSubjectManagerLocal authzSubjectManager) {
+                                    AuthzSubjectManager authzSubjectManager) {
         this.agentManager = agentManager;
         this.measurementManager = measurementManager;
         this.authzSubjectManager = authzSubjectManager;

@@ -3,7 +3,7 @@ package org.hyperic.hq.hqu.rendit.helpers
 import java.util.List
 
 import org.hyperic.hq.auth.server.session.AuthManagerImpl as AuthMan
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as SubjectMan
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as SubjectMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 
 /**

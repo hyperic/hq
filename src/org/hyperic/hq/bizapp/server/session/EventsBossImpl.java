@@ -70,7 +70,7 @@ import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.SubjectRemoveCallback;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
@@ -187,7 +187,7 @@ public class EventsBossImpl implements EventsBoss {
 
     private ResourceGroupManager resourceGroupManager;
 
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
 
     @Autowired
     public EventsBossImpl(SessionManager sessionManager, ActionManager actionManager,
@@ -198,7 +198,7 @@ public class EventsBossImpl implements EventsBoss {
                           ResourceManager resourceManager, ServerManagerLocal serverManager,
                           ServiceManagerLocal serviceManager, PermissionManager permissionManager,
                           GalertManager galertManager, ResourceGroupManager resourceGroupManager,
-                          AuthzSubjectManagerLocal authzSubjectManager) {
+                          AuthzSubjectManager authzSubjectManager) {
         this.sessionManager = sessionManager;
         this.actionManager = actionManager;
         this.alertDefinitionManager = alertDefinitionManager;

@@ -26,7 +26,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -77,7 +77,7 @@ public class AIAudit extends Audit {
     
     public static AIAudit newRuntimeImportAudit(Agent reporter) {
         AuthzSubject overlord = 
-            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
         AIAudit res = new AIAudit(overlord, getSystemResource(), IMPORT_RUNTIME,
                                   AuditImportance.MEDIUM, AuditNature.CREATE,
                                   MSGS.format("auditMsg.import.runtime",

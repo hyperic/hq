@@ -39,7 +39,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.events.ActionExecuteException;
@@ -96,7 +96,7 @@ public class OpenNMSAction implements ActionInterface {
         // Look up the platform
         AppdefEntityID aeid = new AppdefEntityID(alertdef.getResource());
         AppdefEntityValue arv =
-            new AppdefEntityValue(aeid, AuthzSubjectManagerEJBImpl.getOne()
+            new AppdefEntityValue(aeid, AuthzSubjectManagerImpl.getOne()
                                           .getOverlordPojo());
         try {
             List platforms = arv.getAssociatedPlatforms(PageControl.PAGE_ALL);

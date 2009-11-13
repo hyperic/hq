@@ -17,7 +17,6 @@
 <bean class="org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.VirtualManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.authz.server.session.RoleManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.AIBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.ConfigBossEJBImpl" factory-method="getOne"/>

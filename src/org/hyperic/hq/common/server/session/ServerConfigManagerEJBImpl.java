@@ -46,7 +46,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.ConfigProperty;
 import org.hyperic.hq.common.SystemException;
@@ -528,7 +528,7 @@ public class ServerConfigManagerEJBImpl implements SessionBean {
                 return "unknown";
             p.setProperty("HQ-GUID", res);
             try {
-                setConfig(AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo(),
+                setConfig(AuthzSubjectManagerImpl.getOne().getOverlordPojo(),
                           p);
             } catch(Exception e) {
                 throw new SystemException(e);

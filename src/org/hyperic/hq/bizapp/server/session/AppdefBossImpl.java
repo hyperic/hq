@@ -127,7 +127,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroupSortField;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.GroupCreationException;
 import org.hyperic.hq.authz.shared.MixedGroupType;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -200,7 +200,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     private ApplicationManagerLocal applicationManager;
 
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
 
     private AutoinventoryManager autoinventoryManager;
 
@@ -241,7 +241,7 @@ public class AppdefBossImpl implements AppdefBoss {
     @Autowired
     public AppdefBossImpl(SessionManager sessionManager, AgentManager agentManager, AIQueueManagerLocal aiQueueManager,
                           AppdefStatManagerLocal appdefStatManager, ApplicationManagerLocal applicationManager,
-                          AuthzSubjectManagerLocal authzSubjectManager, AutoinventoryManager autoinventoryManager,
+                          AuthzSubjectManager authzSubjectManager, AutoinventoryManager autoinventoryManager,
                           AvailabilityManager availabilityManager, ConfigManagerLocal configManager,
                           CPropManager cPropManager, PermissionManager permissionManager,
                           MeasurementManager measurementManager, PlatformManagerLocal platformManager,

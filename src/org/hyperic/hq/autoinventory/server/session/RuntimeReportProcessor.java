@@ -65,8 +65,8 @@ import org.hyperic.hq.appdef.shared.ServiceTypeFactory;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.CompositeRuntimeResourceReport;
@@ -96,8 +96,8 @@ public class RuntimeReportProcessor {
     private final ConfigManagerLocal
         _configMgr = ConfigManagerEJBImpl.getOne();
     
-    private final AuthzSubjectManagerLocal
-        _subjectMgr = AuthzSubjectManagerEJBImpl.getOne();
+    private final AuthzSubjectManager
+        _subjectMgr = AuthzSubjectManagerImpl.getOne();
     
     private final CPropManager
         _cpropMgr = CPropManagerImpl.getOne();

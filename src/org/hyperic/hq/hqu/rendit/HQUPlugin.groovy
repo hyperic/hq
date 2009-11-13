@@ -5,7 +5,7 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as AuthzMan
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl as ResourceMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
@@ -255,7 +255,7 @@ class HQUPlugin implements IHQUPlugin {
     }
     
     protected AuthzSubject getOverlord() {
-        AuthzMan.one.getOverlordPojo() 
+        AuthzMan.one.getOverlordPojo()
     }
     
     AttachmentDescriptor getAttachmentDescriptor(Attachment a, Resource r,

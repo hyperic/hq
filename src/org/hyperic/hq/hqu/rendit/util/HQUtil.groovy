@@ -1,6 +1,6 @@
 package org.hyperic.hq.hqu.rendit.util
 
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as asm
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as asm
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.common.shared.HQConstants
 import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl

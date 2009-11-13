@@ -64,7 +64,7 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
@@ -190,7 +190,7 @@ public class AIQueueManagerEJBImpl
     {
         // XXX: Fix this..
         AuthzSubject subject =
-            AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
 
         return queue(subject, aiplatform.getAIPlatformValue(), true, isApproval,
                      false);
@@ -473,7 +473,7 @@ public class AIQueueManagerEJBImpl
                RemoveException, AIQApprovalException
     {
         AuthzSubject s =
-            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId());
+            AuthzSubjectManagerImpl.getOne().findSubjectById(subject.getId());
         boolean approved = false;
 
         try {

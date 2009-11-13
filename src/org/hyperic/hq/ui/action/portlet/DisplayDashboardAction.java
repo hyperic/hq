@@ -42,7 +42,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -159,7 +159,7 @@ public class DisplayDashboardAction extends TilesAction {
 		//      we can squeeze in, this will suffice for the time being
 		if (dashPrefs.getValue(Constants.USER_PORTLETS_FIRST) == null && dashPrefs.getValue(Constants.USER_PORTLETS_SECOND) == null) {
 		    ConfigResponse defaultRoleDashPrefs = (ConfigResponse) ctx.getAttribute(Constants.DEF_ROLE_DASH_PREFS);
-		    AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();
+		    AuthzSubject overlord = AuthzSubjectManagerImpl.getOne().getOverlordPojo();
 		    
 		    dashManager.configureDashboard(overlord, dashboardConfig, defaultRoleDashPrefs);
 		    dashPrefs.merge(defaultRoleDashPrefs, true); 

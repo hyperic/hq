@@ -48,10 +48,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.bizapp.server.session.EmailManagerImpl;
 import org.hyperic.hq.bizapp.shared.EmailManager;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
@@ -145,8 +145,8 @@ public class EmailAction extends EmailActionConfig
     public EmailAction() {
     }
 
-    protected final AuthzSubjectManagerLocal getSubjMan() {
-        return AuthzSubjectManagerEJBImpl.getOne();
+    protected final AuthzSubjectManager getSubjMan() {
+        return AuthzSubjectManagerImpl.getOne();
     }
 
     private String renderTemplate(String filename, Map params) {

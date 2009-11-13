@@ -4,7 +4,7 @@ import org.hyperic.hq.auth.server.session.AuthManagerImpl as AuthMan
 import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.authz.shared.PermissionManagerFactory
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as SubMan
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as SubMan
 import org.hyperic.hq.bizapp.server.session.AuthzBossImpl as AuthzBoss
 import org.hyperic.util.config.ConfigResponse
 

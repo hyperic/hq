@@ -18,11 +18,6 @@
 
 		</session>
 		<session>
-			<ejb-name>AuthzSubjectManager</ejb-name>
-			<local-jndi-name>LocalAuthzSubjectManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>SchedulerBoss</ejb-name>
 			<jndi-name>ejb/bizapp/SchedulerBoss</jndi-name>
 			<local-jndi-name>LocalSchedulerBoss</local-jndi-name>

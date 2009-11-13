@@ -49,7 +49,7 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
@@ -88,14 +88,14 @@ public class ResourceManagerImpl
     private ServerManagerLocal serverManager;
     private ServiceManagerLocal serviceManager;
     private ApplicationManagerLocal applicationManager;
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
     private ConfigManagerLocal configManager;
 
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformManagerLocal platformManager,
                                ServerManagerLocal serverManager, ServiceManagerLocal serviceManager,
                                ApplicationManagerLocal applicationManager,
-                               AuthzSubjectManagerLocal authzSubjectManager, ConfigManagerLocal configManager) {
+                               AuthzSubjectManager authzSubjectManager, ConfigManagerLocal configManager) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.platformManager = platformManager;
         this.serverManager = serverManager;

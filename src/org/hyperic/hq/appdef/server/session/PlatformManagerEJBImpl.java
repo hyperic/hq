@@ -74,7 +74,7 @@ import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
@@ -1560,7 +1560,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         }
 
         Resource prototype = ResourceManagerImpl.getOne().findRootResource();
-        AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne()
+        AuthzSubject overlord = AuthzSubjectManagerImpl.getOne()
                 .getOverlordPojo();
 
         // Now create the left-overs

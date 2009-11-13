@@ -64,7 +64,7 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
@@ -108,7 +108,7 @@ public class MeasurementManagerImpl
     private ResourceManager resourceManager;
     private ResourceGroupManager resourceGroupManager;
     private ApplicationManagerLocal applicationManager;
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
     private MeasurementProcessor measurementProcessor;
     private ConfigManagerLocal configManager;
     private AvailabilityManager availabilityManager;
@@ -118,7 +118,7 @@ public class MeasurementManagerImpl
     public MeasurementManagerImpl(ResourceManager resourceManager,
                                   ResourceGroupManager resourceGroupManager,
                                   ApplicationManagerLocal applicationManager,
-                                  AuthzSubjectManagerLocal authzSubjectManager,
+                                  AuthzSubjectManager authzSubjectManager,
                                   ConfigManagerLocal configManager) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;

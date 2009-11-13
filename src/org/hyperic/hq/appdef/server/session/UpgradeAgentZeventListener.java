@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.zevents.ZeventListener;
 
 /**
@@ -45,7 +45,7 @@ public class UpgradeAgentZeventListener implements ZeventListener {
      */
     public void processEvents(List events) {
         AgentManager agentMan = AgentManagerImpl.getOne();
-        AuthzSubject overlord = AuthzSubjectManagerEJBImpl.getOne()
+        AuthzSubject overlord = AuthzSubjectManagerImpl.getOne()
                 .getOverlordPojo();
 
         for (Iterator iter = events.iterator(); iter.hasNext();) {

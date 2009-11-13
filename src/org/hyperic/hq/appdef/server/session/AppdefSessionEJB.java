@@ -52,7 +52,7 @@ import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl;
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -194,7 +194,7 @@ public abstract class AppdefSessionEJB
         
         ResourceManager rm = getResourceManager();
         AuthzSubject s = 
-            AuthzSubjectManagerEJBImpl.getOne().findSubjectById(subject.getId()); 
+            AuthzSubjectManagerImpl.getOne().findSubjectById(subject.getId()); 
         rm.removeResource(s, r);
         
         // Send resource delete event
@@ -1051,7 +1051,7 @@ public abstract class AppdefSessionEJB
      * bean which wants to call an authz bound method while bypassing the check.
      */
     protected AuthzSubject getOverlord() {
-        return AuthzSubjectManagerEJBImpl.getOne().getOverlordPojo();             
+        return AuthzSubjectManagerImpl.getOne().getOverlordPojo();             
     }
 
     protected InitialContext getInitialContext() {

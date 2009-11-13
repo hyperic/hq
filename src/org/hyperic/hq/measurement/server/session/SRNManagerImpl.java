@@ -34,7 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.shared.AuthzSubjectManagerLocal;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
@@ -57,12 +57,12 @@ public class SRNManagerImpl
     extends SessionEJB implements SRNManager {
     private final Log log = LogFactory.getLog(SRNManagerImpl.class);
 
-    private AuthzSubjectManagerLocal authzSubjectManager;
+    private AuthzSubjectManager authzSubjectManager;
     private MeasurementManager measurementManager;
     private MeasurementProcessor measurementProcessor;
 
     @Autowired
-    public SRNManagerImpl(AuthzSubjectManagerLocal authzSubjectManager, MeasurementManager measurementManager,
+    public SRNManagerImpl(AuthzSubjectManager authzSubjectManager, MeasurementManager measurementManager,
                           MeasurementProcessor measurementProcessor) {
         this.authzSubjectManager = authzSubjectManager;
         this.measurementManager = measurementManager;
