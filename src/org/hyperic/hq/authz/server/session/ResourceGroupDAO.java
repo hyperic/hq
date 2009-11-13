@@ -436,7 +436,7 @@ public class ResourceGroupDAO extends HibernateDAO
             Integer protoType = prototype.getResourceType().getId();
             if (protoType.equals(AuthzConstants.authzPlatformProto) ||
                 protoType.equals(AuthzConstants.authzServerProto)   ||
-                protoType.equals(AuthzConstants.authzService)) {
+                protoType.equals(AuthzConstants.authzServiceProto)) {
                 hql += " or g.groupType = " +
                        AppdefEntityConstants.APPDEF_TYPE_GROUP_ADHOC_PSS;
             } else if (protoType.equals(AuthzConstants.authzApplicationProto)) {
