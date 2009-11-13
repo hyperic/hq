@@ -60,7 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class AuthzSubjectManagerImpl  implements AuthzSubjectManager {
+public class AuthzSubjectManagerImpl implements AuthzSubjectManager {
 
     private final Log log = LogFactory.getLog(AuthzSubjectManagerImpl.class);
 
@@ -71,13 +71,11 @@ public class AuthzSubjectManagerImpl  implements AuthzSubjectManager {
     private ResourceDAO resourceDAO;
     private CrispoManager crispoManager;
     private PermissionManager permissionManager;
-   
-   
 
-    
     @Autowired
     public AuthzSubjectManagerImpl(AuthzSubjectDAO authzSubjectDAO, ResourceTypeDAO resourceTypeDAO,
-                               ResourceDAO resourceDAO, CrispoManager crispoManager, PermissionManager permissionManager) {
+                                   ResourceDAO resourceDAO, CrispoManager crispoManager,
+                                   PermissionManager permissionManager) {
         this.authzSubjectDAO = authzSubjectDAO;
         this.resourceTypeDAO = resourceTypeDAO;
         this.resourceDAO = resourceDAO;
@@ -86,10 +84,10 @@ public class AuthzSubjectManagerImpl  implements AuthzSubjectManager {
     }
 
     @PostConstruct
-    public void afterPropertiesSet() throws Exception{
+    public void afterPropertiesSet() throws Exception {
         subjectPager = Pager.getPager(SUBJECT_PAGER);
     }
-    
+
     /**
      * Find the subject that has the given name and authentication source.
      * @param name Name of the subject.
@@ -106,171 +104,139 @@ public class AuthzSubjectManagerImpl  implements AuthzSubjectManager {
         return subject;
     }
 
-    /** 
+    /**
      * Create a subject.
      * @param whoami The current running user.
      * @return Value-object for the new Subject.
      * 
      */
-    public AuthzSubject createSubject(AuthzSubject whoami, String name,
-                                      boolean active, String dsn, String dept,
-                                      String email, String first, String last,
-                                      String phone, String sms, boolean html)
-        throws PermissionException, CreateException 
-    {
-       
-        permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(),
-                 AuthzConstants.rootResourceId,
-                 AuthzConstants.subjectOpCreateSubject);
-       
+    public AuthzSubject createSubject(AuthzSubject whoami, String name, boolean active, String dsn, String dept,
+                                      String email, String first, String last, String phone, String sms, boolean html)
+        throws PermissionException, CreateException {
+
+        permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(), AuthzConstants.rootResourceId,
+            AuthzConstants.subjectOpCreateSubject);
 
         AuthzSubject existing = authzSubjectDAO.findByName(name);
         if (existing != null) {
-            throw new CreateException("A system user already exists with " +
-                                      name);
+            throw new CreateException("A system user already exists with " + name);
         }
 
-        AuthzSubject subjectPojo = authzSubjectDAO.create(whoami, name, active, dsn,
-                                              dept, email, first, last, phone, 
-                                              sms, html);
+        AuthzSubject subjectPojo = authzSubjectDAO.create(whoami, name, active, dsn, dept, email, first, last, phone,
+            sms, html);
 
         UserAudit.createAudit(whoami, subjectPojo);
         return subjectPojo;
     }
 
-    /** 
+    /**
      * Update user settings for the target
      * 
      * @param whoami The current running user.
      * @param target The subject to save.
      * 
-     * The rest of the parameters specify settings to update.  If they are 
-     * null, then no change will be made to them.
+     *        The rest of the parameters specify settings to update. If they are
+     *        null, then no change will be made to them.
      * 
      */
-    public void updateSubject(AuthzSubject whoami, AuthzSubject target,
-                              Boolean active, String dsn, String dept,
-                              String email, String firstName, String lastName, 
-                              String phone, String sms, Boolean useHtml)
-        throws PermissionException 
-    {
-        
+    public void updateSubject(AuthzSubject whoami, AuthzSubject target, Boolean active, String dsn, String dept,
+                              String email, String firstName, String lastName, String phone, String sms, Boolean useHtml)
+        throws PermissionException {
 
-        if(!whoami.getId().equals(target.getId())) {
+        if (!whoami.getId().equals(target.getId())) {
             permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType().getId(),
-                     AuthzConstants.rootResourceId,
-                     AuthzConstants.perm_viewSubject);
+                AuthzConstants.rootResourceId, AuthzConstants.perm_viewSubject);
         }
-        
+
         if (active != null && target.getActive() != active.booleanValue()) {
             // Root user can not be disabled
             if (target.getId().equals(AuthzConstants.rootSubjectId)) {
-                throw new PermissionException("Cannot change active status of "+
-                                              "root user");
+                throw new PermissionException("Cannot change active status of " + "root user");
             }
-            
+
             target.setActive(active.booleanValue());
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.ACTIVE, 
-                                  target.getActive() + "", active + "");
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.ACTIVE, target.getActive() + "", active + "");
         }
-        
+
         if (dsn != null && !dsn.equals(target.getAuthDsn())) {
             target.setAuthDsn(dsn);
         }
-        
+
         if (dept != null && !dept.equals(target.getDepartment())) {
             target.setDepartment(dept);
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.DEPT, 
-                                  target.getDepartment(), dept);
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.DEPT, target.getDepartment(), dept);
         }
-        
+
         if (email != null && !email.equals(target.getEmailAddress())) {
             target.setEmailAddress(email);
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.EMAIL, 
-                                  target.getEmailAddress(), email);
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.EMAIL, target.getEmailAddress(), email);
         }
-        
-        if (useHtml != null && target.getHtmlEmail() != useHtml.booleanValue()){
+
+        if (useHtml != null && target.getHtmlEmail() != useHtml.booleanValue()) {
             target.setHtmlEmail(useHtml.booleanValue());
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.HTML, 
-                                  target.getHtmlEmail() + "",
-                                  useHtml + "");
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.HTML, target.getHtmlEmail() + "", useHtml + "");
         }
-        
+
         if (firstName != null && !firstName.equals(target.getFirstName())) {
             target.setFirstName(firstName);
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.FIRSTNAME, 
-                                  target.getFirstName(), firstName);
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.FIRSTNAME, target.getFirstName(), firstName);
         }
 
         if (lastName != null && !lastName.equals(target.getLastName())) {
             target.setLastName(lastName);
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.LASTNAME, 
-                                  target.getLastName(), lastName);
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.LASTNAME, target.getLastName(), lastName);
         }
 
         if (phone != null && !phone.equals(target.getPhoneNumber())) {
             target.setPhoneNumber(phone);
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.PHONE, 
-                                  target.getPhoneNumber(), phone);
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.PHONE, target.getPhoneNumber(), phone);
         }
 
         if (sms != null && !sms.equals(target.getSMSAddress())) {
             target.setSMSAddress(sms);
-            UserAudit.updateAudit(whoami, target, AuthzSubjectField.SMS, 
-                                  target.getSMSAddress(), sms);
+            UserAudit.updateAudit(whoami, target, AuthzSubjectField.SMS, target.getSMSAddress(), sms);
         }
     }
 
     /**
-     * Check if a subject can modify users  
+     * Check if a subject can modify users
      * 
      */
-    public void checkModifyUsers(AuthzSubject caller)
-        throws PermissionException 
-    {
-        
-        permissionManager.check(caller.getId(),
-            resourceTypeDAO.findTypeResourceType(),
-                 AuthzConstants.rootResourceId,
-                 AuthzConstants.subjectOpModifySubject);
+    public void checkModifyUsers(AuthzSubject caller) throws PermissionException {
+
+        permissionManager.check(caller.getId(), resourceTypeDAO.findTypeResourceType(), AuthzConstants.rootResourceId,
+            AuthzConstants.subjectOpModifySubject);
     }
 
-    /** 
+    /**
      * Delete the specified subject.
      * 
-     * @param whoami  The current running user.
+     * @param whoami The current running user.
      * @param subject The ID of the subject to delete.
      * 
      */
-    public void removeSubject(AuthzSubject whoami, Integer subject)
-        throws RemoveException, PermissionException 
-    {
+    public void removeSubject(AuthzSubject whoami, Integer subject) throws RemoveException, PermissionException {
         // no removing of the root user!
         if (subject.equals(AuthzConstants.rootSubjectId)) {
             throw new RemoveException("Root user can not be deleted");
         }
 
-        
         AuthzSubject toDelete = authzSubjectDAO.findById(subject);
 
         // XXX Should we do anything special for the "suicide" case?
         // Perhaps a _log message?
-        if ( !whoami.getId().equals(subject) ) {
-            
+        if (!whoami.getId().equals(subject)) {
+
             permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType().getId(),
-                     AuthzConstants.rootResourceId,
-                     AuthzConstants.perm_removeSubject);
+                AuthzConstants.rootResourceId, AuthzConstants.perm_removeSubject);
         }
-        
+
         // Reassign all resources to the root user before deleting
-        resourceDAO
-            .reassignResources(subject.intValue(),
-                               AuthzConstants.rootSubjectId.intValue());
+        resourceDAO.reassignResources(subject.intValue(), AuthzConstants.rootSubjectId.intValue());
 
         // Call the subject remove callback before subject is actually removed
         AuthzStartupListener.getSubjectRemoveCallback().subjectRemoved(toDelete);
-        
+
         authzSubjectDAO.remove(toDelete);
     }
 
@@ -280,20 +246,16 @@ public class AuthzSubjectManagerImpl  implements AuthzSubjectManager {
     public AuthzSubject findByAuth(String name, String authDsn) {
         return authzSubjectDAO.findByAuth(name, authDsn);
     }
-    
-    
+
     /**
      * 
      */
-    public AuthzSubject findSubjectById(AuthzSubject whoami, Integer id)
-        throws PermissionException 
-    {
-        
+    public AuthzSubject findSubjectById(AuthzSubject whoami, Integer id) throws PermissionException {
+
         // users can see their own entries without requiring special permission
-        if(!whoami.getId().equals(id)) {
+        if (!whoami.getId().equals(id)) {
             permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType().getId(),
-                     AuthzConstants.rootResourceId,
-                     AuthzConstants.perm_viewSubject);
+                AuthzConstants.rootResourceId, AuthzConstants.perm_viewSubject);
         }
         return findSubjectById(id);
     }
@@ -304,20 +266,18 @@ public class AuthzSubjectManagerImpl  implements AuthzSubjectManager {
     public AuthzSubject findSubjectById(Integer id) {
         return authzSubjectDAO.findById(id);
     }
-    
+
     /** 
      * 
      */
     public AuthzSubject getSubjectById(Integer id) {
         return authzSubjectDAO.getById(id);
     }
-    
+
     /** 
      * 
      */
-    public AuthzSubject findSubjectByName(AuthzSubject whoami, String name)
-        throws PermissionException 
-    {
+    public AuthzSubject findSubjectByName(AuthzSubject whoami, String name) throws PermissionException {
         return findSubjectByName(name);
     }
 
@@ -334,29 +294,26 @@ public class AuthzSubjectManagerImpl  implements AuthzSubjectManager {
     public PageList<AuthzSubject> findMatchingName(String name, PageControl pc) {
         return authzSubjectDAO.findMatchingName(name, pc);
     }
-    
-    /** 
+
+    /**
      * List all subjects in the system
      * 
      * @param excludes the IDs of subjects to exclude from result
      */
-    public PageList<AuthzSubjectValue> getAllSubjects(AuthzSubject whoami,
-                                   Collection<Integer> excludes, PageControl pc)
+    public PageList<AuthzSubjectValue> getAllSubjects(AuthzSubject whoami, Collection<Integer> excludes, PageControl pc)
         throws FinderException, PermissionException {
-        
+
         pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
-        
-       
-        // if a user does not have permission to view subjects, 
+
+        // if a user does not have permission to view subjects,
         // all they can see is their own entry.
         AuthzSubject who = authzSubjectDAO.findById(whoami.getId());
         Collection<AuthzSubject> subjects;
         try {
-             
+
             permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(),
-                     AuthzConstants.rootResourceId,
-                     AuthzConstants.subjectOpViewSubject);
-            
+                AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
+
             if (!permissionManager.hasGuestRole()) {
                 if (excludes == null) {
                     excludes = new ArrayList<Integer>(1);
@@ -373,51 +330,43 @@ public class AuthzSubjectManagerImpl  implements AuthzSubjectManager {
         }
 
         switch (pc.getSortattribute()) {
-        case SortAttribute.SUBJECT_NAME:
-            if (who.isRoot())
-                subjects = authzSubjectDAO.findAllRoot_orderName(excludes,
-                                                     pc.isAscending());
-            else
-                subjects = authzSubjectDAO.findAll_orderName(excludes, pc.isAscending());
-            break;
+            case SortAttribute.SUBJECT_NAME:
+                if (who.isRoot())
+                    subjects = authzSubjectDAO.findAllRoot_orderName(excludes, pc.isAscending());
+                else
+                    subjects = authzSubjectDAO.findAll_orderName(excludes, pc.isAscending());
+                break;
 
-        case SortAttribute.FIRST_NAME:
-            if (who.isRoot())
-                subjects = authzSubjectDAO.findAllRoot_orderFirstName(excludes,
-                                                          pc.isAscending());
-            else
-                subjects = authzSubjectDAO.findAll_orderFirstName(excludes,
-                                                      pc.isAscending());
-            break;
+            case SortAttribute.FIRST_NAME:
+                if (who.isRoot())
+                    subjects = authzSubjectDAO.findAllRoot_orderFirstName(excludes, pc.isAscending());
+                else
+                    subjects = authzSubjectDAO.findAll_orderFirstName(excludes, pc.isAscending());
+                break;
 
-        case SortAttribute.LAST_NAME:
-            if (who.isRoot())
-                subjects = authzSubjectDAO.findAllRoot_orderLastName(excludes,
-                                                         pc.isAscending());
-            else
-                subjects = authzSubjectDAO.findAll_orderLastName(excludes,
-                                                     pc.isAscending());
-            break;
+            case SortAttribute.LAST_NAME:
+                if (who.isRoot())
+                    subjects = authzSubjectDAO.findAllRoot_orderLastName(excludes, pc.isAscending());
+                else
+                    subjects = authzSubjectDAO.findAll_orderLastName(excludes, pc.isAscending());
+                break;
 
-        default:
-            throw new FinderException("Unrecognized sort attribute: " +
-                                      pc.getSortattribute());
-        }                
-        
-        return subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize() );
+            default:
+                throw new FinderException("Unrecognized sort attribute: " + pc.getSortattribute());
+        }
+
+        return subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize());
     }
 
-    /** 
+    /**
      * Get the subjects with the specified ids
-     *
-     * NOTE: This method returns an empty PageList if a null or
-     *       empty array of ids is received.
+     * 
+     * NOTE: This method returns an empty PageList if a null or empty array of
+     * ids is received.
      * @param ids the subject ids
      * 
      */
-    public PageList<AuthzSubjectValue> getSubjectsById(AuthzSubject subject,
-                                    Integer[] ids,
-                                    PageControl pc)
+    public PageList<AuthzSubjectValue> getSubjectsById(AuthzSubject subject, Integer[] ids, PageControl pc)
         throws PermissionException {
 
         // PR7251 - Sometimes and for no good reason, different parts of the UI
@@ -433,18 +382,16 @@ public class AuthzSubjectManagerImpl  implements AuthzSubjectManager {
         // check permission unless the list includes only the id of
         // the subject being requested. This is ugly mostly because
         // we're using a list api to possibly look up a single Item
-        if(subjects.size() > 0) {
-            log.debug("Checking if Subject: " + subject.getName() +
-                      " can list subjects.");
-           
+        if (subjects.size() > 0) {
+            log.debug("Checking if Subject: " + subject.getName() + " can list subjects.");
+
             permissionManager.check(subject.getId(), resourceTypeDAO.findTypeResourceType(),
-                     AuthzConstants.rootResourceId,
-                     AuthzConstants.subjectOpViewSubject);
+                AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
         }
 
         // Need to convert to value objects
-        return new PageList<AuthzSubjectValue>(subjectPager.seek(subjects, PageControl.PAGE_ALL),
-                            subjects.getTotalSize());
+        return new PageList<AuthzSubjectValue>(subjectPager.seek(subjects, PageControl.PAGE_ALL), subjects
+            .getTotalSize());
     }
 
     /**
@@ -473,15 +420,12 @@ public class AuthzSubjectManagerImpl  implements AuthzSubjectManager {
      * Get the Preferences for a specified user
      * 
      */
-    public ConfigResponse getUserPrefs(AuthzSubject who, Integer subjId)
-        throws PermissionException
-    {
+    public ConfigResponse getUserPrefs(AuthzSubject who, Integer subjId) throws PermissionException {
         // users can always see their own prefs.
-        if(!who.getId().equals(subjId)) { 
+        if (!who.getId().equals(subjId)) {
             // check that the caller can see users
-            permissionManager.check(who.getId(), resourceTypeDAO.findTypeResourceType(),
-                     AuthzConstants.rootResourceId,
-                     AuthzConstants.subjectOpViewSubject);
+            permissionManager.check(who.getId(), resourceTypeDAO.findTypeResourceType(), AuthzConstants.rootResourceId,
+                AuthzConstants.subjectOpViewSubject);
         }
 
         AuthzSubject targ = authzSubjectDAO.findById(subjId);
@@ -495,21 +439,17 @@ public class AuthzSubjectManagerImpl  implements AuthzSubjectManager {
      * Set the Preferences for a specified user
      * 
      */
-    public void setUserPrefs(AuthzSubject who, Integer subjId,
-                             ConfigResponse prefs) 
-        throws PermissionException 
-    {
+    public void setUserPrefs(AuthzSubject who, Integer subjId, ConfigResponse prefs) throws PermissionException {
         // check to see if the user attempting the modification
         // is the same as the one being modified
-        if(!(who.getId().intValue() == subjId.intValue())) {
-           
-            permissionManager.check(who.getId(), resourceTypeDAO.findTypeResourceType(),
-                     AuthzConstants.rootResourceId,
-                     AuthzConstants.subjectOpModifySubject);
+        if (!(who.getId().intValue() == subjId.intValue())) {
+
+            permissionManager.check(who.getId(), resourceTypeDAO.findTypeResourceType(), AuthzConstants.rootResourceId,
+                AuthzConstants.subjectOpModifySubject);
         }
 
         AuthzSubject targ = authzSubjectDAO.findById(subjId);
-        
+
         if (targ.getPrefs() != null)
             crispoManager.update(targ.getPrefs(), prefs);
         else {
@@ -517,14 +457,14 @@ public class AuthzSubjectManagerImpl  implements AuthzSubjectManager {
             targ.setPrefs(newPrefs);
         }
     }
-    
+
     /**
      * 
      */
     public AuthzSubject getOverlordPojo() {
         return authzSubjectDAO.findById(AuthzConstants.overlordId);
     }
-    
+
     public static AuthzSubjectManager getOne() {
         return Bootstrap.getBean(AuthzSubjectManager.class);
     }
