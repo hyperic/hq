@@ -148,7 +148,7 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
-import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
+import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.hq.grouping.Critter;
 import org.hyperic.hq.grouping.CritterList;
 import org.hyperic.hq.grouping.CritterTranslationContext;
@@ -281,7 +281,7 @@ public class AppdefBossImpl implements AppdefBoss {
      * to dao-context.xml)
      * @return
      */
-    private MaintenanceEventManagerInterface getMaintenanceEventManager() {
+    private MaintenanceEventManager getMaintenanceEventManager() {
         return permissionManager.getMaintenanceEventManager();
     }
 

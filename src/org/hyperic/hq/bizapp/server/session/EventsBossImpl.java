@@ -113,7 +113,7 @@ import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManager;
-import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
+import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.hq.events.shared.RegisteredTriggerManager;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.galerts.server.session.GalertDef;
@@ -227,7 +227,7 @@ public class EventsBossImpl implements EventsBoss {
      * to dao-context.xml)
      * @return
      */
-    private MaintenanceEventManagerInterface getMaintenanceEventManager() {
+    private MaintenanceEventManager getMaintenanceEventManager() {
         return permissionManager.getMaintenanceEventManager();
     }
 

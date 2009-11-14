@@ -44,7 +44,7 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManagerInterface;
-import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
+import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.util.pager.PageControl;
 
 public abstract class PermissionManager   {
@@ -340,7 +340,7 @@ public abstract class PermissionManager   {
     /**
      * Return the MaintenanceEventManager implementation
      */
-    public abstract MaintenanceEventManagerInterface getMaintenanceEventManager();
+    public abstract MaintenanceEventManager getMaintenanceEventManager();
 
     /**
      * Return the CloningBoss implementation

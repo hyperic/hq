@@ -212,18 +212,7 @@
 
 		</session>
 
-		<session>
-			<description><![CDATA[The MaintenanceEventManager provides APIs to manage maintenance events.]]></description>
-
-			<ejb-name>MaintenanceEventManager</ejb-name>
-
-			<local-home>org.hyperic.hq.events.shared.MaintenanceEventManagerLocalHome</local-home>
-			<local>org.hyperic.hq.events.shared.MaintenanceEventManagerLocal</local>
-			<ejb-class>org.hyperic.hq.events.server.session.MaintenanceEventManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
+		
 
 		<session>
 			<description><![CDATA[]]></description>
@@ -1961,13 +1950,7 @@
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>MaintenanceEventManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
+		
 		<container-transaction>
 			<method>
 				<ejb-name>ControlBoss</ejb-name>
