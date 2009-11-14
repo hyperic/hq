@@ -7,7 +7,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl as GroupMan
 import org.hyperic.hq.authz.shared.AuthzConstants
-import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface
+import org.hyperic.hq.events.shared.MaintenanceEventManager
 import org.hyperic.hq.authz.shared.PermissionManagerFactory
 import org.hyperic.hq.events.MaintenanceEvent
 
@@ -15,7 +15,7 @@ class ResourceGroupCategory {
     private static groupMan = GroupMan.one
     private static rsrcMan  = RsrcMan.one
 
-    private static MaintenanceEventManagerInterface maintMan =
+    private static MaintenanceEventManager maintMan =
         PermissionManagerFactory.getInstance().getMaintenanceEventManager();
 
     static String urlFor(ResourceGroup r, String context) {

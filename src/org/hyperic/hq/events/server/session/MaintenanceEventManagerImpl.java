@@ -25,37 +25,29 @@
 
 package org.hyperic.hq.events.server.session;
 
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
-import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
-import org.hyperic.hq.events.shared.MaintenanceEventManagerLocal;
-import org.hyperic.hq.events.shared.MaintenanceEventManagerUtil;
+import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.quartz.SchedulerException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The MaintenanceEventManager provides APIs to manage maintenance events.
  *
- * @ejb:bean name="MaintenanceEventManager"
- *      jndi-name="ejb/events/MaintenanceEventManager"
- *      local-jndi-name="LocalMaintenanceEventManager"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:interface local-extends="MaintenanceEventManagerInterface, javax.ejb.EJBLocalObject"
- * @ejb:transaction type="Required"
  *
  */
-public class MaintenanceEventManagerEJBImpl 
-    implements MaintenanceEventManagerInterface, SessionBean
+@Service
+@Transactional
+public class MaintenanceEventManagerImpl 
+    implements MaintenanceEventManager
 {
 	/**
      * Get the maintenance event for the group
      * 
-     * @ejb:interface-method 
+     *  
      */
     public MaintenanceEvent getMaintenanceEvent(AuthzSubject subject,
     											Integer groupId)
@@ -67,7 +59,7 @@ public class MaintenanceEventManagerEJBImpl
     /**
      * Unschedule a maintenance event
      * 
-     * @ejb:interface-method 
+     *  
      */
     public void unschedule(AuthzSubject subject, MaintenanceEvent event)
     	throws PermissionException, SchedulerException
@@ -78,7 +70,7 @@ public class MaintenanceEventManagerEJBImpl
     /**
      * Schedule or reschedule a maintenance event
      * 
-     * @ejb:interface-method 
+     *  
      */    
     public MaintenanceEvent schedule(AuthzSubject subject, MaintenanceEvent event) 
     	throws PermissionException, SchedulerException
@@ -90,7 +82,7 @@ public class MaintenanceEventManagerEJBImpl
      * Disable or enable monitors (alerts, measurements) for the group
      * and its resources during the maintenance event.
      * 
-     * @ejb:interface-method 
+     *  
      */        
     public void manageMonitors(AuthzSubject admin, MaintenanceEvent event) 
 		throws PermissionException
@@ -101,7 +93,7 @@ public class MaintenanceEventManagerEJBImpl
     /**
      * Perform group permission check
      * 
-     * @ejb:interface-method 
+     *  
      */
     public boolean canSchedule(AuthzSubject subject, MaintenanceEvent event) 
     {
@@ -111,20 +103,8 @@ public class MaintenanceEventManagerEJBImpl
     /**
      * Get local home object
      */
-    public static MaintenanceEventManagerLocal getOne() {
-        try {
-            return MaintenanceEventManagerUtil.getLocalHome().create();
-        } catch(Exception e) { 
-            throw new SystemException(e);
-        }
+    public static MaintenanceEventManager getOne() {
+       return Bootstrap.getBean(MaintenanceEventManager.class);
     }
     
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
 }

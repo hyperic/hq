@@ -55,9 +55,9 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.server.session.HierarchicalAlertingManagerEJBImpl;
-import org.hyperic.hq.events.server.session.MaintenanceEventManagerEJBImpl;
+import org.hyperic.hq.events.server.session.MaintenanceEventManagerImpl;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManagerInterface;
-import org.hyperic.hq.events.shared.MaintenanceEventManagerInterface;
+import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
@@ -579,8 +579,8 @@ public class PermissionManagerImpl
         return "";
     }
 
-    public MaintenanceEventManagerInterface getMaintenanceEventManager() {
-        return MaintenanceEventManagerEJBImpl.getOne();
+    public MaintenanceEventManager getMaintenanceEventManager() {
+        return MaintenanceEventManagerImpl.getOne();
     }
 
     public CloningBossInterface getCloningBoss() {

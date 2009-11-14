@@ -30,7 +30,7 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.quartz.SchedulerException;
 
-public interface MaintenanceEventManagerInterface {
+public interface MaintenanceEventManager {
     /**
      * Get the maintenance event for the group
      */

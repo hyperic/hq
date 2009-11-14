@@ -29,7 +29,6 @@
 <bean class="org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.events.server.session.HierarchicalAlertingManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.events.server.session.MaintenanceEventManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.DataManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.MetricAuxLogManagerEJBImpl" factory-method="getOne"/>
