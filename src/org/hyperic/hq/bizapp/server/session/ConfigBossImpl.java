@@ -51,14 +51,13 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class ConfigBossImpl implements ConfigBoss
-{
+public class ConfigBossImpl implements ConfigBoss {
     private SessionManager sessionManager;
-    
+
     private ServerConfigManagerLocal serverConfigManager;
-    
-    private PermissionManager permissionManager;  
-    
+
+    private PermissionManager permissionManager;
+
     private MBeanServer mbeanServer;
 
     @Autowired
@@ -82,8 +81,7 @@ public class ConfigBossImpl implements ConfigBoss
      * Get the configuration properties for a specified prefix
      * 
      */
-    public Properties getConfig(String prefix) throws ConfigPropertyException
-    {
+    public Properties getConfig(String prefix) throws ConfigPropertyException {
         return serverConfigManager.getConfig(prefix);
     }
 
@@ -91,11 +89,8 @@ public class ConfigBossImpl implements ConfigBoss
      * Set the top-level configuration properties
      * 
      */
-    public void setConfig(int sessId, Properties props) 
-        throws ApplicationException, ConfigPropertyException  
-    {
-        AuthzSubject subject = 
-           sessionManager.getSubject(sessId);
+    public void setConfig(int sessId, Properties props) throws ApplicationException, ConfigPropertyException {
+        AuthzSubject subject = sessionManager.getSubject(sessId);
         serverConfigManager.setConfig(subject, props);
     }
 
@@ -103,11 +98,9 @@ public class ConfigBossImpl implements ConfigBoss
      * Set the configuration properties for a prefix
      * 
      */
-    public void setConfig(int sessId, String prefix, Properties props) 
-        throws ApplicationException, ConfigPropertyException 
-    {
-        AuthzSubject subject = 
-            sessionManager.getSubject(sessId);
+    public void setConfig(int sessId, String prefix, Properties props) throws ApplicationException,
+        ConfigPropertyException {
+        AuthzSubject subject = sessionManager.getSubject(sessId);
         serverConfigManager.setConfig(subject, prefix, props);
     }
 
@@ -117,33 +110,29 @@ public class ConfigBossImpl implements ConfigBoss
      */
     public void restartConfig() {
         try {
-            ObjectName objName =
-                new ObjectName("hyperic.jmx:type=Service,name=ProductConfig");
-            mbeanServer.invoke(objName, "restart", new Object[] {},
-                          new String[] {});
+            ObjectName objName = new ObjectName("hyperic.jmx:type=Service,name=ProductConfig");
+            mbeanServer.invoke(objName, "restart", new Object[] {}, new String[] {});
         } catch (Exception e) {
             throw new SystemException(e);
         }
     }
 
     /**
-     * Perform routine database maintenance.  Must have admin permissions.
-     * @return The time it took to vaccum, in milliseconds, or -1 if the 
+     * Perform routine database maintenance. Must have admin permissions.
+     * @return The time it took to vaccum, in milliseconds, or -1 if the
      *         database is not PostgreSQL.
      * 
      */
-    public long vacuum (int sessionId)
-        throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException {
+    public long vacuum(int sessionId) throws SessionTimeoutException, SessionNotFoundException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-       
+
         if (!permissionManager.hasAdminPermission(subject.getId())) {
             throw new PermissionException("Only admins can vacuum the DB");
         }
         return serverConfigManager.vacuum();
     }
-    
+
     public static ConfigBoss getOne() {
-      return Bootstrap.getBean(ConfigBoss.class);
+        return Bootstrap.getBean(ConfigBoss.class);
     }
 }
