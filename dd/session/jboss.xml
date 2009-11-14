@@ -13,11 +13,6 @@
 		-->
 
 		<session>
-			<ejb-name>RoleManager</ejb-name>
-			<local-jndi-name>LocalRoleManager</local-jndi-name>
-
-		</session>
-		<session>
 			<ejb-name>SchedulerBoss</ejb-name>
 			<jndi-name>ejb/bizapp/SchedulerBoss</jndi-name>
 			<local-jndi-name>LocalSchedulerBoss</local-jndi-name>

@@ -1,6 +1,6 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
-import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl as RoleMan
+import org.hyperic.hq.authz.server.session.RoleManagerImpl as RoleMan
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as SubMan
 import org.hyperic.hq.authz.server.session.Role

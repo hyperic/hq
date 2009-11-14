@@ -99,7 +99,7 @@ public class Role extends AuthzNamedBean {
         getOperations().add(op);
     }
     
-    public Collection getOperations() {
+    public Collection<Operation> getOperations() {
         return _operations;
     }
     
@@ -107,7 +107,7 @@ public class Role extends AuthzNamedBean {
         _operations = val;
     }
 
-    public Collection getSubjects() {
+    public Collection<AuthzSubject> getSubjects() {
         return _subjects;
     }
     
@@ -139,7 +139,7 @@ public class Role extends AuthzNamedBean {
         return res;
     }
     
-    public Collection getCalendars() {
+    public Collection<RoleCalendar> getCalendars() {
         return Collections.unmodifiableCollection(_calendars);
     }
     

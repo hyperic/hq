@@ -28,6 +28,7 @@ package org.hyperic.hq.authz.server.session;
 import org.hyperic.util.pager.PagerProcessor;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.values.OwnedRoleValue;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.dao.DAOFactory;
 
 public class PagerProcessor_ownedRole implements PagerProcessor {
@@ -40,7 +41,7 @@ public class PagerProcessor_ownedRole implements PagerProcessor {
             if ( o instanceof Role) {
                 Role role = (Role)o;
 
-                int numSubjects = DAOFactory.getDAOFactory().getRoleDAO()
+                int numSubjects = Bootstrap.getBean(AuthzSubjectDAO.class)
                     .size(role.getSubjects());
 
                 OwnedRoleValue value = new OwnedRoleValue(role);

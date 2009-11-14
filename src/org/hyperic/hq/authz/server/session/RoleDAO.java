@@ -41,7 +41,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class RoleDAO extends HibernateDAO {
+public class RoleDAO extends HibernateDAO<Role> {
     @Autowired
     public RoleDAO(SessionFactory f) {
         super(Role.class, f);
@@ -150,14 +150,14 @@ public class RoleDAO extends HibernateDAO {
             .uniqueResult();
     }
 
-    public Collection findAll_orderName(boolean asc) {
+    public Collection<Role> findAll_orderName(boolean asc) {
         return getSession()
             .createQuery("from Role order by sortName " +
                          (asc ? "asc" : "desc"))
             .list();
     }
 
-    public Collection findBySystem_orderName(boolean system, boolean asc) {
+    public Collection<Role> findBySystem_orderName(boolean system, boolean asc) {
         return getSession()
             .createQuery("from Role where system = ? order by sortName " +
                          (asc ? "asc" : "desc"))
@@ -165,7 +165,7 @@ public class RoleDAO extends HibernateDAO {
             .list();
     }
 
-    public Collection findBySystemAndSubject_orderName(boolean system,
+    public Collection<Role> findBySystemAndSubject_orderName(boolean system,
                                                        Integer sid, boolean asc)
     {
         return getSession()
@@ -179,7 +179,7 @@ public class RoleDAO extends HibernateDAO {
     }
 
 
-    public Collection findBySystemAndSubject_orderMember(boolean system,
+    public Collection<Role> findBySystemAndSubject_orderMember(boolean system,
                                                          Integer sid,
                                                          boolean asc)
     {
@@ -193,7 +193,7 @@ public class RoleDAO extends HibernateDAO {
             .list();
     }
 
-    public Collection findBySystemAndAvailableForSubject_orderName(
+    public Collection<Role> findBySystemAndAvailableForSubject_orderName(
         boolean system, Integer sid, boolean asc) {
         return getSession()
             .createQuery("select distinct r from Role r, AuthzSubject s " +
@@ -216,7 +216,7 @@ public class RoleDAO extends HibernateDAO {
             .uniqueResult();
     }
 
-    public Collection findAvailableForGroup(boolean system, Integer groupId)
+    public Collection<Role> findAvailableForGroup(boolean system, Integer groupId)
     {
         return getSession()
             .createQuery("from Role r " +

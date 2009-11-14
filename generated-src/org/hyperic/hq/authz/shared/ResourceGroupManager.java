@@ -12,7 +12,6 @@ import javax.ejb.FinderException;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -241,6 +240,5 @@ public interface ResourceGroupManager
 
    public ResourceRelation getContainmentRelation(  ) ;
 
-   public ResourceRelation getNetworkRelation(  ) ;
 
 }

@@ -230,6 +230,4 @@ public interface ResourceManager {
 
     public ResourceRelation getContainmentRelation();
 
-    public ResourceRelation getNetworkRelation();
-
 }
