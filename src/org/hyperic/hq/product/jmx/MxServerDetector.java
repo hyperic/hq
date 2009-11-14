@@ -202,7 +202,7 @@ public class MxServerDetector
         return query.toString();
     }
 
-    public class MxProcess {
+    public static class MxProcess {
         long _pid;
         String _installpath;
         String[] _args;
