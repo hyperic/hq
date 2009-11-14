@@ -66,8 +66,6 @@ public class HelpTag extends VarSetterBaseTag {
         Properties props;
         try {
             props = boss.getConfig();
-        } catch (RemoteException e) {
-            throw new JspException(e);
         } catch (ConfigPropertyException e) {
             throw new JspException(e);
         }

@@ -53,12 +53,7 @@
 			<local-jndi-name>LocalAIBoss</local-jndi-name>
 
 		</session>
-		<session>
-			<ejb-name>ConfigBoss</ejb-name>
-			<jndi-name>ejb/bizapp/ConfigBoss</jndi-name>
-			<local-jndi-name>LocalConfigBoss</local-jndi-name>
-
-		</session>
+		
 		<session>
 			<ejb-name>EventLogBoss</ejb-name>
 			<jndi-name>ejb/bizapp/EventLogBoss</jndi-name>

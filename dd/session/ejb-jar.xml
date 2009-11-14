@@ -113,20 +113,7 @@
 			<transaction-type>Container</transaction-type>
 
 		</session>
-		<session>
-			<description><![CDATA[A boss to provide bizapp client access to the configuration settings]]></description>
-
-			<ejb-name>ConfigBoss</ejb-name>
-
-			<home>org.hyperic.hq.bizapp.shared.ConfigBossHome</home>
-			<remote>org.hyperic.hq.bizapp.shared.ConfigBoss</remote>
-			<local-home>org.hyperic.hq.bizapp.shared.ConfigBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.ConfigBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.ConfigBossEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
+		
 
 		<session>
 			<description><![CDATA[The BizApp's interface to the Events/Logs]]></description>
@@ -1050,13 +1037,7 @@
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>ConfigBoss</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
+		
 		<container-transaction>
 			<method>
 				<ejb-name>EventLogBoss</ejb-name>
