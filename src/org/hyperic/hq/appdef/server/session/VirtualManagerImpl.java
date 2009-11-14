@@ -54,27 +54,24 @@ import org.hyperic.hq.context.Bootstrap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-
 /**
- * This class is responsible for managing Server objects in appdef
- * and their relationships
+ * This class is responsible for managing Server objects in appdef and their
+ * relationships
  */
 @org.springframework.stereotype.Service
 @Transactional
 public class VirtualManagerImpl implements VirtualManager {
 
-
     private VirtualDAO virtualDAO;
-    
+
     private PlatformDAO platformDAO;
-    
+
     private ServerDAO serverDAO;
-    
+
     private ServiceDAO serviceDAO;
-    
+
     private ResourceManager resourceManager;
-    
-    
+
     @Autowired
     public VirtualManagerImpl(VirtualDAO virtualDAO, PlatformDAO platformDAO, ServerDAO serverDAO,
                               ServiceDAO serviceDAO, ResourceManager resourceManager) {
@@ -94,7 +91,7 @@ public class VirtualManagerImpl implements VirtualManager {
         throws PlatformNotFoundException, PermissionException {
         Collection<Platform> platforms = platformDAO.findVirtualByProcessId(vmId);
         List<PlatformValue> platVals = new ArrayList<PlatformValue>();
-        for (Platform platform : platforms ) {
+        for (Platform platform : platforms) {
             platVals.add(platform.getPlatformValue());
         }
         return platVals;
@@ -105,11 +102,11 @@ public class VirtualManagerImpl implements VirtualManager {
      * @return a list of virtual server values
      * 
      */
-    public List<ServerValue> findVirtualServersByVM(AuthzSubject subject, Integer vmId)
-        throws ServerNotFoundException, PermissionException {
+    public List<ServerValue> findVirtualServersByVM(AuthzSubject subject, Integer vmId) throws ServerNotFoundException,
+        PermissionException {
         Collection<Server> servers = serverDAO.findVirtualByProcessId(vmId);
         List<ServerValue> serverVals = new ArrayList<ServerValue>();
-        for (Server server: servers ) {
+        for (Server server : servers) {
             serverVals.add(server.getServerValue());
         }
         return serverVals;
@@ -125,7 +122,7 @@ public class VirtualManagerImpl implements VirtualManager {
         throws ServiceNotFoundException, PermissionException {
         Collection<Service> services = serviceDAO.findVirtualByProcessId(vmId);
         List<ServiceValue> svcVals = new ArrayList<ServiceValue>();
-        for (Service service: services ) {
+        for (Service service : services) {
             svcVals.add(service.getServiceValue());
         }
         return svcVals;
@@ -136,40 +133,38 @@ public class VirtualManagerImpl implements VirtualManager {
      * @return list of virtual resource values
      * 
      */
-    public List<AppdefResourceValue> findVirtualResourcesByPhysical(AuthzSubject subject,
-                                               AppdefEntityID aeid)
+    public List<AppdefResourceValue> findVirtualResourcesByPhysical(AuthzSubject subject, AppdefEntityID aeid)
         throws AppdefEntityNotFoundException, PermissionException {
         Collection<AppdefResource> appResources = new ArrayList<AppdefResource>();
         switch (aeid.getType()) {
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 appResources.addAll(platformDAO.findVirtualByPhysicalId(aeid.getId()));
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 appResources.addAll(serverDAO.findVirtualByPysicalId(aeid.getId()));
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            appResources.addAll(serviceDAO.findVirtualByPysicalId(aeid.getId()));
-            break;
-        default:
-            throw new InvalidAppdefTypeException(
-                "Appdef Entity Type: " + aeid.getType() +
-                " does not support virtual resources");
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                appResources.addAll(serviceDAO.findVirtualByPysicalId(aeid.getId()));
+                break;
+            default:
+                throw new InvalidAppdefTypeException("Appdef Entity Type: " + aeid.getType() +
+                                                     " does not support virtual resources");
         }
 
         List<AppdefResourceValue> resourcesList = new ArrayList<AppdefResourceValue>();
-        for (Iterator<AppdefResource> it = appResources.iterator(); it.hasNext(); ) {
+        for (Iterator<AppdefResource> it = appResources.iterator(); it.hasNext();) {
             switch (aeid.getType()) {
-            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                resourcesList.add(((Platform) it.next()).getPlatformValue());
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                resourcesList.add(((Server) it.next()).getServerValue());
-                break;
-            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                resourcesList.add(((Service) it.next()).getServiceValue());
-                break;
-            default:
-                break;
+                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                    resourcesList.add(((Platform) it.next()).getPlatformValue());
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                    resourcesList.add(((Server) it.next()).getServerValue());
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    resourcesList.add(((Service) it.next()).getServiceValue());
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -181,21 +176,14 @@ public class VirtualManagerImpl implements VirtualManager {
      * 
      * 
      */
-    public void associateEntities(AuthzSubject subj,
-                                  Integer processId,
-                                  AppdefEntityID[] aeids)
-        throws FinderException {
-        
-           
-            for (int i = 0; i < aeids.length; i++) {
-               String typeStr =
-                   AppdefUtil.appdefTypeIdToAuthzTypeStr(aeids[i].getType());
-               Resource res =
-                   resourceManager.findResourceByTypeAndInstanceId(typeStr,
-                                                          aeids[i].getId());
-               virtualDAO.createVirtual(res, processId);
-            }
-     
+    public void associateEntities(AuthzSubject subj, Integer processId, AppdefEntityID[] aeids) throws FinderException {
+
+        for (int i = 0; i < aeids.length; i++) {
+            String typeStr = AppdefUtil.appdefTypeIdToAuthzTypeStr(aeids[i].getType());
+            Resource res = resourceManager.findResourceByTypeAndInstanceId(typeStr, aeids[i].getId());
+            virtualDAO.createVirtual(res, processId);
+        }
+
     }
 
     /**
@@ -204,41 +192,32 @@ public class VirtualManagerImpl implements VirtualManager {
      * 
      * 
      */
-    public void associateToPhysical(AuthzSubject subj,
-                                    Integer physicalId,
-                                    AppdefEntityID aeid)
-        throws FinderException {
+    public void associateToPhysical(AuthzSubject subj, Integer physicalId, AppdefEntityID aeid) throws FinderException {
         Resource resource;
         switch (aeid.getType()) {
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            resource =
-                platformDAO.findVirtualByInstanceId(aeid.getId());
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            resource =
-                serverDAO.findVirtualByInstanceId(aeid.getId());
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            resource =
-                serviceDAO.findVirtualByInstanceId(aeid.getId());
-            break;
-        default:
-            throw new InvalidAppdefTypeException(
-                "Cannot associate appdefType " + aeid.getType() +
-                " to physical resource");
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                resource = platformDAO.findVirtualByInstanceId(aeid.getId());
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                resource = serverDAO.findVirtualByInstanceId(aeid.getId());
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                resource = serviceDAO.findVirtualByInstanceId(aeid.getId());
+                break;
+            default:
+                throw new InvalidAppdefTypeException("Cannot associate appdefType " + aeid.getType() +
+                                                     " to physical resource");
         }
 
         if (resource != null) {
             Virtual virt = virtualDAO.findByResource(resource.getId());
             virt.setPhysicalId(physicalId);
-        }
-        else {
-            throw new FinderException(aeid.toString() +
-                " is not registered as a virtual resource");
+        } else {
+            throw new FinderException(aeid.toString() + " is not registered as a virtual resource");
         }
     }
-    
+
     public static VirtualManager getOne() {
-       return Bootstrap.getBean(VirtualManager.class);
+        return Bootstrap.getBean(VirtualManager.class);
     }
 }
