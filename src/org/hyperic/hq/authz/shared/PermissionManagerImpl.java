@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.ejb.FinderException;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -45,15 +44,11 @@ import org.hibernate.Query;
 import org.hyperic.hq.appdef.server.session.CloningBossEJBImpl;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.CloningBossInterface;
-import org.hyperic.hq.authz.server.session.AuthzSession;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
-import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.server.session.ResourceType;
-import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.authz.server.session.Role;
 import org.hyperic.hq.authz.server.session.RoleDAO;
 import org.hyperic.hq.common.SystemException;

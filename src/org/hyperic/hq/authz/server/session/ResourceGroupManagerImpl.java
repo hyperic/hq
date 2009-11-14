@@ -37,6 +37,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.ejb.FinderException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
@@ -90,14 +92,12 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @Service
-public class ResourceGroupManagerImpl
-    extends AuthzSession
-    implements ResourceGroupManager {
+public class ResourceGroupManagerImpl implements ResourceGroupManager {
     private Pager _groupPager;
     private Pager _ownedGroupPager;
-    private final String GROUP_PAGER =
+    private static final String GROUP_PAGER =
                                        PagerProcessor_resourceGroup.class.getName();
-    private final String OWNEDGROUP_PAGER =
+    private static final String OWNEDGROUP_PAGER =
                                             PagerProcessor_ownedResourceGroup.class.getName();
 
     private GroupChangeCallback groupChangeCallback;
@@ -106,27 +106,35 @@ public class ResourceGroupManagerImpl
 
     private AuthzSubjectManager authzSubjectManager;
     private EventLogManager eventLogManager;
-
+    private final Log log = LogFactory.getLog(ResourceGroupManagerImpl.class);
     private ResourceManager resourceManager;
     private PlatformManagerLocal platformManager;
     private ServerManagerLocal serverManager;
     private ServiceManagerLocal serviceManager;
     private ApplicationManagerLocal applicationManager;
+    private ResourceGroupDAO resourceGroupDAO;
+    private ResourceDAO resourceDAO;
+    private ResourceRelationDAO resourceRelationDAO;
+
 
     @Autowired
     public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO, AuthzSubjectManager authzSubjectManager,
-                                    EventLogManager eventLogManager,
+                                    EventLogManager eventLogManager, ResourceManager resourceManager,
                                     PlatformManagerLocal platformManager, ServerManagerLocal serverManager,
                                     ServiceManagerLocal serviceManager, ApplicationManagerLocal applicationManager,
-                                    ResourceManager resourceManager) {
-        // this.groupChangeCallback = groupChangeCallback;
+                                    ResourceGroupDAO resourceGroupDAO, ResourceDAO resourceDAO,
+                                    ResourceRelationDAO resourceRelationDAO) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.authzSubjectManager = authzSubjectManager;
         this.eventLogManager = eventLogManager;
+        this.resourceManager = resourceManager;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
         this.applicationManager = applicationManager;
+        this.resourceGroupDAO = resourceGroupDAO;
+        this.resourceDAO = resourceDAO;
+        this.resourceRelationDAO = resourceRelationDAO;
     }
 
     @PostConstruct
@@ -854,6 +862,30 @@ public class ResourceGroupManagerImpl
 
         return resourceGroupDAO.getMetricsCollecting(g, templateId);
     }
+    
+    public ResourceRelation getContainmentRelation() {
+        return resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID);
+    }
+    
+    private Resource findPrototype(AppdefEntityTypeID id) {
+        Integer authzType;
+
+        switch (id.getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                authzType = AuthzConstants.authzPlatformProto;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                authzType = AuthzConstants.authzServerProto;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                authzType = AuthzConstants.authzServiceProto;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported prototype type: " + id.getType());
+        }
+        return resourceDAO.findByInstanceId(authzType, id.getId());
+    }
+
 
     public static ResourceGroupManager getOne() {
         return Bootstrap.getBean(ResourceGroupManager.class);

@@ -3,14 +3,31 @@
  */
 package org.hyperic.hq.authz.shared;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import javax.ejb.CreateException;
+import javax.ejb.FinderException;
+import javax.ejb.RemoveException;
+import javax.naming.NamingException;
+
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.Operation;
+import org.hyperic.hq.authz.server.session.Role;
+import org.hyperic.hq.authz.server.session.RoleCalendar;
+import org.hyperic.hq.authz.server.session.RoleCalendarType;
+import org.hyperic.hq.authz.values.OwnedRoleValue;
+import org.hyperic.util.pager.PageControl;
+import org.hyperic.util.pager.PageList;
+
 /**
  * Local interface for RoleManager.
  */
-public interface RoleManagerLocal
-   extends javax.ejb.EJBLocalObject
+public interface RoleManager
 {
 
-   public boolean isRootRoleMember( org.hyperic.hq.authz.server.session.AuthzSubject subject ) ;
+   public boolean isRootRoleMember( AuthzSubject subject ) ;
 
    /**
     * Create a role.
@@ -24,7 +41,7 @@ public interface RoleManagerLocal
     * @throws FinderException Unable to find a given or dependent entities.
     * @throws PermissionException whoami may not perform createResource on the covalentAuthzRole ResourceType.
     */
-   public java.lang.Integer createOwnedRole( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.shared.RoleValue role,org.hyperic.hq.authz.server.session.Operation[] operations,java.lang.Integer[] subjectIds,java.lang.Integer[] groupIds ) throws javax.ejb.FinderException, org.hyperic.hq.authz.shared.AuthzDuplicateNameException, org.hyperic.hq.authz.shared.PermissionException;
+   public Integer createOwnedRole( AuthzSubject whoami,RoleValue role,org.hyperic.hq.authz.server.session.Operation[] operations,java.lang.Integer[] subjectIds,java.lang.Integer[] groupIds ) throws FinderException, AuthzDuplicateNameException, PermissionException;
 
    /**
     * Delete the specified role.
@@ -32,7 +49,7 @@ public interface RoleManagerLocal
     * @param role The role to delete.
     * @throws RemoveException Unable to delete the specified entity.
     */
-   public void removeRole( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer rolePk ) throws javax.ejb.RemoveException, org.hyperic.hq.authz.shared.PermissionException;
+   public void removeRole( AuthzSubject whoami,Integer rolePk ) throws javax.ejb.RemoveException, PermissionException;
 
    /**
     * Write the specified entity out to permanent storage.
@@ -40,7 +57,7 @@ public interface RoleManagerLocal
     * @param role The role to save.
     * @throws PermissionException whoami may not perform modifyRole on this role.
     */
-   public void saveRole( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.shared.RoleValue role ) throws org.hyperic.hq.authz.shared.AuthzDuplicateNameException, org.hyperic.hq.authz.shared.PermissionException;
+   public void saveRole( AuthzSubject whoami,RoleValue role ) throws org.hyperic.hq.authz.shared.AuthzDuplicateNameException, PermissionException;
 
    /**
     * Change the owner of the role.
@@ -49,7 +66,7 @@ public interface RoleManagerLocal
     * @param ownerVal The new owner of the role..
     * @throws PermissionException whoami may not perform modifyRole on this role.
     */
-   public void changeOwner( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer id,org.hyperic.hq.authz.server.session.AuthzSubject owner ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void changeOwner( AuthzSubject whoami,Integer id,AuthzSubject owner ) throws PermissionException;
 
    /**
     * Associate operations with this role.
@@ -59,7 +76,7 @@ public interface RoleManagerLocal
     * @throws FinderException Unable to find a given or dependent entities.
     * @throws PermissionException whoami may not perform addOperation on this role.
     */
-   public void addOperations( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.Role role,org.hyperic.hq.authz.server.session.Operation[] operations ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void addOperations( AuthzSubject whoami,Role role,org.hyperic.hq.authz.server.session.Operation[] operations ) throws PermissionException;
 
    /**
     * Disassociate all operations from this role.
@@ -68,7 +85,7 @@ public interface RoleManagerLocal
     * @throws FinderException Unable to find a given or dependent entities.
     * @throws PermissionException whoami may not perform removeOperation on this role.
     */
-   public void removeAllOperations( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.Role role ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void removeAllOperations( AuthzSubject whoami,Role role ) throws PermissionException;
 
    /**
     * Set the operations for this role. To get the operations call getOperations() on the value-object.
@@ -78,7 +95,7 @@ public interface RoleManagerLocal
     * @throws FinderException Unable to find a given or dependent entities.
     * @throws PermissionException whoami is not allowed to perform setOperations on this role.
     */
-   public void setOperations( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer id,org.hyperic.hq.authz.server.session.Operation[] operations ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void setOperations( AuthzSubject whoami,Integer id,org.hyperic.hq.authz.server.session.Operation[] operations ) throws PermissionException;
 
    /**
     * Associate ResourceGroups with this role.
@@ -88,7 +105,7 @@ public interface RoleManagerLocal
     * @throws FinderException Unable to find a given or dependent entities.
     * @throws PermissionException whoami is not allowed to perform addResourceGroup on this role.
     */
-   public void addResourceGroups( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer rid,java.lang.Integer[] gids ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void addResourceGroups( AuthzSubject whoami,Integer rid,java.lang.Integer[] gids ) throws PermissionException;
 
    /**
     * Associate ResourceGroup with list of roles.
@@ -98,7 +115,7 @@ public interface RoleManagerLocal
     * @throws PermissionException whoami is not allowed to perform addResourceGroup on this role.
     * @throws FinderException SQL error looking up roles scope
     */
-   public void addResourceGroupRoles( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer gid,java.lang.Integer[] ids ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public void addResourceGroupRoles( AuthzSubject whoami,Integer gid,java.lang.Integer[] ids ) throws PermissionException, FinderException;
 
    /**
     * Disassociate ResourceGroups from this role.
@@ -108,7 +125,7 @@ public interface RoleManagerLocal
     * @throws FinderException Unable to find a given or dependent entities.
     * @throws PermissionException whoami is not allowed to perform modifyRole on this role.
     */
-   public void removeResourceGroups( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer id,java.lang.Integer[] gids ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void removeResourceGroups( AuthzSubject whoami,Integer id,java.lang.Integer[] gids ) throws PermissionException;
 
    /**
     * Disassociate roles from this ResourceGroup.
@@ -118,7 +135,7 @@ public interface RoleManagerLocal
     * @throws FinderException Unable to find a given or dependent entities.
     * @throws PermissionException whoami is not allowed to perform modifyRole on this role.
     */
-   public void removeResourceGroupRoles( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer gid,java.lang.Integer[] ids ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void removeResourceGroupRoles( AuthzSubject whoami,Integer gid,java.lang.Integer[] ids ) throws PermissionException;
 
    /**
     * Disassociate all ResourceGroups of this role from this role.
@@ -128,34 +145,34 @@ public interface RoleManagerLocal
     * @throws NamingException
     * @throws PermissionException whoami is not allowed to perform modifyRole on this role.
     */
-   public void removeAllResourceGroups( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.Role role ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void removeAllResourceGroups( AuthzSubject whoami,Role role ) throws PermissionException;
 
    /**
     * Get the # of roles within HQ inventory
     */
-   public java.lang.Number getRoleCount(  ) ;
+   public Number getRoleCount(  ) ;
 
    /**
     * Get the # of subjects within HQ inventory
     */
-   public java.lang.Number getSubjectCount(  ) ;
+   public Number getSubjectCount(  ) ;
 
    /**
     * Get a Role by id
     */
-   public org.hyperic.hq.authz.server.session.Role getRoleById( int id ) ;
+   public Role getRoleById( int id ) ;
 
-   public org.hyperic.hq.authz.server.session.Role findRoleById( int id ) ;
+   public Role findRoleById( int id ) ;
 
-   public org.hyperic.hq.authz.server.session.Role findRoleByName( java.lang.String name ) ;
+   public Role findRoleByName( String name ) ;
 
    /**
     * Create a calendar under a role for a specific type. Calendars created in this manner are tied directly to the role and should not be used by other roles.
     * @throws PermissionException if user is not allowed to modify role
     */
-   public org.hyperic.hq.authz.server.session.RoleCalendar createCalendar( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.Role r,java.lang.String calendarName,org.hyperic.hq.authz.server.session.RoleCalendarType type ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public RoleCalendar createCalendar( AuthzSubject whoami,Role r,String calendarName,RoleCalendarType type ) throws PermissionException;
 
-   public boolean removeCalendar( org.hyperic.hq.authz.server.session.RoleCalendar c ) ;
+   public boolean removeCalendar( RoleCalendar c ) ;
 
    /**
     * Find the owned role that has the given ID.
@@ -163,7 +180,7 @@ public interface RoleManagerLocal
     * @return The owned value-object of the role of the given ID.
     * @throws FinderException Unable to find a given or dependent entities.
     */
-   public org.hyperic.hq.authz.values.OwnedRoleValue findOwnedRoleById( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer id ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public OwnedRoleValue findOwnedRoleById( AuthzSubject whoami,Integer id ) throws PermissionException;
 
    /**
     * Get role permission Map For a given role id, find the resource types and permissions which are supported by it
@@ -171,16 +188,16 @@ public interface RoleManagerLocal
     * @param roleId
     * @return map - keys are resource type names, values are lists of operation values which are supported on the resouce type.
     */
-   public java.util.Map getRoleOperationMap( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer roleId ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public Map<String, List<Operation>> getRoleOperationMap( AuthzSubject subject,Integer roleId ) throws PermissionException;
 
-   public java.util.Collection getAllRoles(  ) ;
+   public Collection<Role> getAllRoles(  ) ;
 
    /**
     * List all Roles in the system
     * @param pc Paging information for the request
     * @return List a list of RoleValues
     */
-   public java.util.List getAllRoles( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws javax.ejb.FinderException;
+   public List<RoleValue> getAllRoles( AuthzSubject subject,PageControl pc ) throws FinderException;
 
    /**
     * List all OwnedRoles in the system
@@ -188,14 +205,14 @@ public interface RoleManagerLocal
     * @param pc Paging and sorting information.
     * @return List a list of OwnedRoleValues
     */
-   public java.util.List getAllOwnedRoles( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) ;
+   public List<OwnedRoleValue> getAllOwnedRoles( AuthzSubject subject,PageControl pc ) ;
 
    /**
     * List all Roles in the system, except system roles.
     * @return List a list of OwnedRoleValues that are not system roles
     * @throws FinderException if sort attribute is unrecognized
     */
-   public org.hyperic.util.pager.PageList getAllNonSystemOwnedRoles( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer[] excludeIds,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public PageList<OwnedRoleValue> getAllNonSystemOwnedRoles( AuthzSubject subject,java.lang.Integer[] excludeIds,PageControl pc ) throws PermissionException, FinderException;
 
    /**
     * Get the roles with the specified ids
@@ -205,7 +222,7 @@ public interface RoleManagerLocal
     * @throws FinderException
     * @throws PermissionException
     */
-   public org.hyperic.util.pager.PageList getRolesById( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer[] ids,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public PageList<RoleValue> getRolesById( AuthzSubject whoami,java.lang.Integer[] ids,PageControl pc ) throws PermissionException, FinderException;
 
    /**
     * Associate roles with this subject.
@@ -214,7 +231,7 @@ public interface RoleManagerLocal
     * @param roles The roles to associate with the subject.
     * @throws PermissionException whoami may not perform addRole on this subject.
     */
-   public void addRoles( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer[] roles ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void addRoles( AuthzSubject whoami,AuthzSubject subject,java.lang.Integer[] roles ) throws PermissionException;
 
    /**
     * Disassociate roles from this subject.
@@ -223,7 +240,7 @@ public interface RoleManagerLocal
     * @param roles The subjects to disassociate.
     * @throws PermissionException whoami may not perform removeRole on this subject.
     */
-   public void removeRoles( org.hyperic.hq.authz.server.session.AuthzSubject whoami,org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer[] roles ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public void removeRoles( AuthzSubject whoami,AuthzSubject subject,java.lang.Integer[] roles ) throws PermissionException, FinderException;
 
    /**
     * Get the roles for a subject
@@ -232,7 +249,7 @@ public interface RoleManagerLocal
     * @param pc Paging and sorting information.
     * @return Set of Roles
     */
-   public java.util.List getRoles( org.hyperic.hq.authz.server.session.AuthzSubject subjectValue,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public List<RoleValue> getRoles( AuthzSubject subjectValue,PageControl pc ) throws PermissionException;
 
    /**
     * Get the owned roles for a subject.
@@ -241,7 +258,7 @@ public interface RoleManagerLocal
     * @param pc Paging and sorting information.
     * @return Set of Roles
     */
-   public java.util.List getOwnedRoles( org.hyperic.hq.authz.server.session.AuthzSubject subject,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public List<OwnedRoleValue> getOwnedRoles( AuthzSubject subject,PageControl pc ) throws PermissionException;
 
    /**
     * Get the owned roles for a subject, except system roles.
@@ -253,7 +270,7 @@ public interface RoleManagerLocal
     * @throws FinderException Unable to find a given or dependent entities.
     * @throws PermissionException caller is not allowed to perform listRoles on this role.
     * @throws FinderException SQL error looking up roles scope    */
-   public org.hyperic.util.pager.PageList getNonSystemOwnedRoles( org.hyperic.hq.authz.server.session.AuthzSubject callerSubjectValue,org.hyperic.hq.authz.server.session.AuthzSubject intendedSubjectValue,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public PageList<OwnedRoleValue> getNonSystemOwnedRoles( AuthzSubject callerSubjectValue,AuthzSubject intendedSubjectValue,PageControl pc ) throws PermissionException, FinderException;
 
    /**
     * Get the owned roles for a subject, except system roles.
@@ -265,7 +282,7 @@ public interface RoleManagerLocal
     * @throws FinderException Unable to find a given or dependent entities.
     * @throws PermissionException caller is not allowed to perform listRoles on this role.
     * @throws FinderException SQL error looking up roles scope    */
-   public org.hyperic.util.pager.PageList getNonSystemOwnedRoles( org.hyperic.hq.authz.server.session.AuthzSubject callerSubjectValue,org.hyperic.hq.authz.server.session.AuthzSubject intendedSubjectValue,java.lang.Integer[] excludeIds,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public PageList<OwnedRoleValue> getNonSystemOwnedRoles( AuthzSubject callerSubjectValue,AuthzSubject intendedSubjectValue,java.lang.Integer[] excludeIds,PageControl pc ) throws PermissionException, FinderException;
 
    /**
     * List the roles that this subject is not in and that are not one of the specified roles.
@@ -277,7 +294,7 @@ public interface RoleManagerLocal
     * @throws PermissionException whoami is not allowed to perform listRoles on this role.
     * @throws FinderException
     */
-   public org.hyperic.util.pager.PageList getAvailableRoles( org.hyperic.hq.authz.server.session.AuthzSubject whoami,boolean system,java.lang.Integer subjectId,java.lang.Integer[] roleIds,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public PageList<RoleValue> getAvailableRoles( AuthzSubject whoami,boolean system,Integer subjectId,java.lang.Integer[] roleIds,PageControl pc ) throws PermissionException, FinderException;
 
    /**
     * List the roles that this subject is not in and that are not one of the specified roles.
@@ -289,18 +306,18 @@ public interface RoleManagerLocal
     * @throws PermissionException whoami is not allowed to perform listRoles on this role.
     * @throws FinderException if the sort attribute was not recognized
     */
-   public org.hyperic.util.pager.PageList getAvailableGroupRoles( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer groupId,java.lang.Integer[] roleIds,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public PageList<RoleValue> getAvailableGroupRoles( AuthzSubject whoami,Integer groupId,java.lang.Integer[] roleIds,PageControl pc ) throws PermissionException, FinderException;
 
    /**
     * Get the resource groups applicable to a given role
     */
-   public org.hyperic.util.pager.PageList getResourceGroupsByRoleIdAndSystem( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.Integer roleId,boolean system,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public PageList<ResourceGroupValue> getResourceGroupsByRoleIdAndSystem( AuthzSubject subject,Integer roleId,boolean system,PageControl pc ) throws PermissionException, FinderException;
 
    /**
     * Return the roles of a group
     * @throws PermissionException
     */
-   public org.hyperic.util.pager.PageList getResourceGroupRoles( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer groupId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public PageList<RoleValue> getResourceGroupRoles( AuthzSubject whoami,Integer groupId,PageControl pc ) throws PermissionException;
 
    /**
     * List the groups not in this role and not one of the specified groups.
@@ -310,7 +327,7 @@ public interface RoleManagerLocal
     * @throws PermissionException whoami is not allowed to perform listGroups on this role.
     * @throws FinderException
     */
-   public org.hyperic.util.pager.PageList getAvailableResourceGroups( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer roleId,java.lang.Integer[] groupIds,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public PageList<ResourceGroupValue> getAvailableResourceGroups( AuthzSubject whoami,Integer roleId,java.lang.Integer[] groupIds,PageControl pc ) throws PermissionException, FinderException;
 
    /**
     * List the subjects in this role.
@@ -320,7 +337,7 @@ public interface RoleManagerLocal
     * @throws PermissionException whoami is not allowed to perform listSubjects on this role.
     * @throws FinderException if the sort attribute is not recognized
     */
-   public org.hyperic.util.pager.PageList getSubjects( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer roleId,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public PageList<AuthzSubjectValue> getSubjects( AuthzSubject whoami,Integer roleId,PageControl pc ) throws PermissionException, FinderException;
 
    /**
     * List the subjects not in this role and not one of the specified subjects.
@@ -331,7 +348,7 @@ public interface RoleManagerLocal
     * @throws PermissionException whoami is not allowed to perform listSubjects on this role.
     * @throws FinderException if the sort attribute is not recognized
     */
-   public org.hyperic.util.pager.PageList getAvailableSubjects( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer roleId,java.lang.Integer[] subjectIds,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException, javax.ejb.FinderException;
+   public PageList<AuthzSubjectValue> getAvailableSubjects( AuthzSubject whoami,Integer roleId,java.lang.Integer[] subjectIds,PageControl pc ) throws PermissionException, FinderException;
 
    /**
     * Add subjects to this role.
@@ -340,7 +357,7 @@ public interface RoleManagerLocal
     * @param sids Ids of ubjects to add to role.
     * @throws PermissionException whoami is not allowed to perform addSubject on this role.
     */
-   public void addSubjects( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer id,java.lang.Integer[] sids ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void addSubjects( AuthzSubject whoami,Integer id,java.lang.Integer[] sids ) throws PermissionException;
 
    /**
     * Remove subjects from this role.
@@ -349,15 +366,11 @@ public interface RoleManagerLocal
     * @param ids The ids of the subjects to remove.
     * @throws PermissionException whoami is not allowed to perform removeSubject on this role.
     */
-   public void removeSubjects( org.hyperic.hq.authz.server.session.AuthzSubject whoami,java.lang.Integer id,java.lang.Integer[] ids ) throws org.hyperic.hq.authz.shared.PermissionException;
+   public void removeSubjects( AuthzSubject whoami,Integer id,java.lang.Integer[] ids ) throws PermissionException;
 
    /**
     * Find all {@link Operation} objects
     */
-   public java.util.Collection findAllOperations(  ) ;
-
-   public org.hyperic.hq.authz.server.session.ResourceRelation getContainmentRelation(  ) ;
-
-   public org.hyperic.hq.authz.server.session.ResourceRelation getNetworkRelation(  ) ;
+   public Collection<Operation> findAllOperations(  ) ;
 
 }

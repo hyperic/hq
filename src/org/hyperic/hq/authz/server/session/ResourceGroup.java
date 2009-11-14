@@ -307,7 +307,7 @@ public class ResourceGroup extends PersistedObject
         return _resource;
     }
     
-    public Collection getRoles() {
+    public Collection<Role> getRoles() {
         return _roles;
     }
 

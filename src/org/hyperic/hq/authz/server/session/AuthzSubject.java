@@ -174,7 +174,7 @@ public class AuthzSubject extends AuthzNamedBean {
         _resource = val;
     }
 
-    public Collection getRoles() {
+    public Collection<Role> getRoles() {
         return _roles;
     }
 

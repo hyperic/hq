@@ -187,14 +187,14 @@ public class AuthzSubjectDAO
         return findAll_order(true, "lastName", asc, excludes);
     }
 
-    public Collection findByRoleId_orderName(Integer roleId, boolean asc) {
+    public Collection<AuthzSubject> findByRoleId_orderName(Integer roleId, boolean asc) {
         return getSession().createQuery(
             "select s from AuthzSubject s join fetch s.roles r " + "where r.id = ? and " +
                 "(s.system = false or s.id = " + AuthzConstants.rootSubjectId + ") order by s.sortName " +
                 (asc ? "asc" : "desc")).setInteger(0, roleId.intValue()).list();
     }
 
-    public Collection findByNotRoleId_orderName(Integer roleId, boolean asc) {
+    public Collection<AuthzSubject> findByNotRoleId_orderName(Integer roleId, boolean asc) {
         return getSession().createQuery(
             "select distinct s from AuthzSubject s, Role r " + "where r.id = ? and s.id not in " +
                 "(select id from r.subjects) and " + "s.system = false order by s.sortName " + (asc ? "asc" : "desc"))

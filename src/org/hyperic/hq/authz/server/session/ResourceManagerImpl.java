@@ -32,6 +32,8 @@ import java.util.Set;
 
 import javax.ejb.FinderException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.server.session.Platform;
@@ -80,8 +82,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional
 @Service
-public class ResourceManagerImpl
-    extends AuthzSession implements ResourceManager {
+public class ResourceManagerImpl implements ResourceManager {
+
+    private final Log log = LogFactory.getLog(ResourceManagerImpl.class);
     private Pager resourceTypePager = null;
     private ResourceEdgeDAO resourceEdgeDAO;
     private PlatformManagerLocal platformManager;
@@ -90,12 +93,18 @@ public class ResourceManagerImpl
     private ApplicationManagerLocal applicationManager;
     private AuthzSubjectManager authzSubjectManager;
     private ConfigManagerLocal configManager;
+    private AuthzSubjectDAO authzSubjectDAO;
+    private ResourceDAO resourceDAO;
+    private ResourceTypeDAO resourceTypeDAO;
+    private ResourceRelationDAO resourceRelationDAO;
 
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformManagerLocal platformManager,
                                ServerManagerLocal serverManager, ServiceManagerLocal serviceManager,
-                               ApplicationManagerLocal applicationManager,
-                               AuthzSubjectManager authzSubjectManager, ConfigManagerLocal configManager) {
+                               ApplicationManagerLocal applicationManager, AuthzSubjectManager authzSubjectManager,
+                               ConfigManagerLocal configManager, AuthzSubjectDAO authzSubjectDAO,
+                               ResourceDAO resourceDAO, ResourceTypeDAO resourceTypeDAO,
+                               ResourceRelationDAO resourceRelationDAO) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
@@ -103,7 +112,10 @@ public class ResourceManagerImpl
         this.applicationManager = applicationManager;
         this.authzSubjectManager = authzSubjectManager;
         this.configManager = configManager;
-        
+        this.authzSubjectDAO = authzSubjectDAO;
+        this.resourceDAO = resourceDAO;
+        this.resourceTypeDAO = resourceTypeDAO;
+        this.resourceRelationDAO = resourceRelationDAO;
         resourceTypePager = Pager.getDefaultPager();
     }
 
@@ -185,7 +197,7 @@ public class ResourceManagerImpl
      */
     public void moveResource(AuthzSubject owner, Resource target, Resource destination) {
         long start = System.currentTimeMillis();
-        
+
         ResourceRelation relation = getContainmentRelation();
 
         // Clean out edges for the current target
@@ -324,6 +336,25 @@ public class ResourceManagerImpl
         return findPrototype(id);
     }
 
+    private Resource findPrototype(AppdefEntityTypeID id) {
+        Integer authzType;
+
+        switch (id.getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                authzType = AuthzConstants.authzPlatformProto;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                authzType = AuthzConstants.authzServerProto;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                authzType = AuthzConstants.authzServiceProto;
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported prototype type: " + id.getType());
+        }
+        return resourceDAO.findByInstanceId(authzType, id.getId());
+    }
+
     /**
      * Removes the specified resource by nulling out its resourceType. Will not
      * null the resourceType of the resource which is passed in. These resources
@@ -371,7 +402,7 @@ public class ResourceManagerImpl
         if (debug) {
             watch.markTimeEnd("removeResourcePerms.pmCheck");
         }
-        
+
         ResourceEdgeDAO edgeDao = resourceEdgeDAO;
         if (debug) {
             watch.markTimeBegin("removeResourcePerms.findEdges");
@@ -710,7 +741,7 @@ public class ResourceManagerImpl
         final PermissionManager pm = PermissionManagerFactory.getInstance();
 
         pm.check(subject.getId(), parentResource.getResourceType(), parentResource.getInstanceId(),
-                 AuthzConstants.platformOpModifyPlatform);
+            AuthzConstants.platformOpModifyPlatform);
 
         ConfigResponseDB config = configManager.getConfigResponse(parent);
         if (config != null) {
@@ -806,7 +837,7 @@ public class ResourceManagerImpl
         final PermissionManager pm = PermissionManagerFactory.getInstance();
 
         pm.check(subject.getId(), parentResource.getResourceType(), parentResource.getInstanceId(),
-                 AuthzConstants.platformOpModifyPlatform);
+            AuthzConstants.platformOpModifyPlatform);
 
         if (parentResource != null && !parentResource.isInAsyncDeleteState()) {
             ResourceEdgeDAO eDAO = resourceEdgeDAO;
@@ -843,9 +874,13 @@ public class ResourceManagerImpl
         final PermissionManager pm = PermissionManagerFactory.getInstance();
 
         pm.check(subject.getId(), parent.getResourceType(), parent.getInstanceId(),
-                 AuthzConstants.platformOpModifyPlatform);
+            AuthzConstants.platformOpModifyPlatform);
 
         resourceEdgeDAO.deleteEdges(parent, relation);
+    }
+
+    public ResourceRelation getContainmentRelation() {
+        return resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID);
     }
 
     public static ResourceManager getOne() {

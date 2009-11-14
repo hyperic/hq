@@ -3,7 +3,7 @@ package org.hyperic.hq.hqu.rendit.metaclass
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.Operation
 import org.hyperic.hq.authz.server.session.Role
-import org.hyperic.hq.authz.server.session.RoleManagerEJBImpl as RoleMan
+import org.hyperic.hq.authz.server.session.RoleManagerImpl as RoleMan
 import org.hyperic.hq.authz.shared.RoleValue
 
 class RoleCategory {
