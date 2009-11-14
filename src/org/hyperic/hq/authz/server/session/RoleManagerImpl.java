@@ -67,35 +67,35 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Manipulates Roles and Subjects associated with them.
- * All arguments and return values are value-objects.
+ * Manipulates Roles and Subjects associated with them. All arguments and return
+ * values are value-objects.
  * 
  */
 @Service
 @Transactional
 public class RoleManagerImpl implements RoleManager {
 
-	private final Log log = LogFactory.getLog(RoleManagerImpl.class);
-	private Pager subjectPager;
-	private Pager rolePager;
-	private Pager groupPager;
-	private Pager ownedRolePager;
-	private static final String SUBJECT_PAGER = "org.hyperic.hq.authz.server.session.PagerProcessor_subject";
-	private static final String ROLE_PAGER = "org.hyperic.hq.authz.server.session.PagerProcessor_role";
-	private static final String OWNEDROLE_PAGER = "org.hyperic.hq.authz.server.session.PagerProcessor_ownedRole";
-	private static final String GROUP_PAGER = "org.hyperic.hq.authz.server.session.PagerProcessor_resourceGroup";
-	private RoleCalendarDAO roleCalendarDAO;
-	private OperationDAO operationDAO;
-	private ResourceGroupDAO resourceGroupDAO;
-	private ResourceTypeDAO resourceTypeDAO;
-	private RoleDAO roleDAO;
-	private AuthzSubjectDAO authzSubjectDAO;
-	private ResourceDAO resourceDAO;
-	private CalendarManager calendarManager;
-	private PermissionManager permissionManager;
-	
-	@Autowired
-	public RoleManagerImpl(RoleCalendarDAO roleCalendarDAO, OperationDAO operationDAO,
+    private final Log log = LogFactory.getLog(RoleManagerImpl.class);
+    private Pager subjectPager;
+    private Pager rolePager;
+    private Pager groupPager;
+    private Pager ownedRolePager;
+    private static final String SUBJECT_PAGER = "org.hyperic.hq.authz.server.session.PagerProcessor_subject";
+    private static final String ROLE_PAGER = "org.hyperic.hq.authz.server.session.PagerProcessor_role";
+    private static final String OWNEDROLE_PAGER = "org.hyperic.hq.authz.server.session.PagerProcessor_ownedRole";
+    private static final String GROUP_PAGER = "org.hyperic.hq.authz.server.session.PagerProcessor_resourceGroup";
+    private RoleCalendarDAO roleCalendarDAO;
+    private OperationDAO operationDAO;
+    private ResourceGroupDAO resourceGroupDAO;
+    private ResourceTypeDAO resourceTypeDAO;
+    private RoleDAO roleDAO;
+    private AuthzSubjectDAO authzSubjectDAO;
+    private ResourceDAO resourceDAO;
+    private CalendarManager calendarManager;
+    private PermissionManager permissionManager;
+
+    @Autowired
+    public RoleManagerImpl(RoleCalendarDAO roleCalendarDAO, OperationDAO operationDAO,
                            ResourceGroupDAO resourceGroupDAO, ResourceTypeDAO resourceTypeDAO, RoleDAO roleDAO,
                            AuthzSubjectDAO authzSubjectDAO, ResourceDAO resourceDAO, CalendarManager calendarManager,
                            PermissionManager permissionManager) {
@@ -111,1484 +111,1306 @@ public class RoleManagerImpl implements RoleManager {
     }
 
     @PostConstruct
-	public void afterPropertiesSet() throws Exception {
-	    subjectPager = Pager.getPager(SUBJECT_PAGER);
+    public void afterPropertiesSet() throws Exception {
+        subjectPager = Pager.getPager(SUBJECT_PAGER);
         rolePager = Pager.getPager(ROLE_PAGER);
         groupPager = Pager.getPager(GROUP_PAGER);
         ownedRolePager = Pager.getPager(OWNEDROLE_PAGER);
-	}
+    }
 
-	/**
-	 * Validate that a role is ok to be added or updated
-	 * 
-	 * @param aRole
-	 * @throws AuthzDuplicateNameException
-	 */
-	private void validateRole(RoleValue aRole)
-			throws AuthzDuplicateNameException {
-		Role role = roleDAO.findByName(aRole.getName());
-		if (role != null) {
-			throw new AuthzDuplicateNameException("A role named: "
-					+ aRole.getName() + " already exists");
-		}
+    /**
+     * Validate that a role is ok to be added or updated
+     * 
+     * @param aRole
+     * @throws AuthzDuplicateNameException
+     */
+    private void validateRole(RoleValue aRole) throws AuthzDuplicateNameException {
+        Role role = roleDAO.findByName(aRole.getName());
+        if (role != null) {
+            throw new AuthzDuplicateNameException("A role named: " + aRole.getName() + " already exists");
+        }
 
-	}
+    }
 
-	private Role lookupRole(RoleValue role) {
-		return lookupRole(role.getId());
-	}
+    private Role lookupRole(RoleValue role) {
+        return lookupRole(role.getId());
+    }
 
-	private Role lookupRole(Integer id) {
-		return roleDAO.findById(id);
-	}
+    private Role lookupRole(Integer id) {
+        return roleDAO.findById(id);
+    }
 
-	private ResourceGroup lookupGroup(Integer id) {
-		return resourceGroupDAO.findById(id);
-	}
+    private ResourceGroup lookupGroup(Integer id) {
+        return resourceGroupDAO.findById(id);
+    }
 
-	/**
+    /**
 	 * 
 	 */
-	public boolean isRootRoleMember(AuthzSubject subject) {
-		return getRootRoleIfMember(subject) != null;
-	}
+    public boolean isRootRoleMember(AuthzSubject subject) {
+        return getRootRoleIfMember(subject) != null;
+    }
 
-	private Role getRootRoleIfMember(AuthzSubject subject) {
-		// Look up the root role
-		Role rootRole = roleDAO.findById(AuthzConstants.rootRoleId);
-		// Look up the calling subject
-		if (rootRole.getSubjects().contains(subject)) {
-			return rootRole;
-		}
+    private Role getRootRoleIfMember(AuthzSubject subject) {
+        // Look up the root role
+        Role rootRole = roleDAO.findById(AuthzConstants.rootRoleId);
+        // Look up the calling subject
+        if (rootRole.getSubjects().contains(subject)) {
+            return rootRole;
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	/**
-	 * Filter a collection of roleLocal objects to only include those viewable
-	 * by the specified user
-	 * 
-	 * @throws FinderException
-	 *             SQL error looking up roles scope
-	 */
-	private Collection<Role> filterViewableRoles(AuthzSubject who, Collection<Role> roles)
-			throws PermissionException, FinderException {
-		return filterViewableRoles(who, roles, null);
-	}
+    /**
+     * Filter a collection of roleLocal objects to only include those viewable
+     * by the specified user
+     * 
+     * @throws FinderException SQL error looking up roles scope
+     */
+    private Collection<Role> filterViewableRoles(AuthzSubject who, Collection<Role> roles) throws PermissionException,
+        FinderException {
+        return filterViewableRoles(who, roles, null);
+    }
 
-	/**
-	 * Filter a collection of roleLocal object to only include those viewable by
-	 * the specific user and not in the list of ids passed in as excluded
-	 * 
-	 * @param who
-	 *            - the user
-	 * @param roles
-	 *            - the list of role locals
-	 * @param excludeIds
-	 *            - role ids which should be excluded from the return list
-	 * 
-	 * @throws FinderException
-	 *             SQL error looking up roles scope
-	 */
-	private Collection<Role> filterViewableRoles(AuthzSubject who, Collection<Role> roles,
-			Integer[] excludeIds) throws PermissionException, FinderException {
-		try {
-			
-			permissionManager.check(who.getId(), resourceTypeDAO
-					.findByName(AuthzConstants.roleResourceTypeName),
-					AuthzConstants.rootResourceId,
-					AuthzConstants.roleOpViewRole);
-		} catch (PermissionException e) {
-			return new ArrayList<Role>(0);
-		}
+    /**
+     * Filter a collection of roleLocal object to only include those viewable by
+     * the specific user and not in the list of ids passed in as excluded
+     * 
+     * @param who - the user
+     * @param roles - the list of role locals
+     * @param excludeIds - role ids which should be excluded from the return
+     *        list
+     * 
+     * @throws FinderException SQL error looking up roles scope
+     */
+    private Collection<Role> filterViewableRoles(AuthzSubject who, Collection<Role> roles, Integer[] excludeIds)
+        throws PermissionException, FinderException {
+        try {
 
-		List<Integer> excludeList = null;
-		boolean hasExclude = (excludeIds != null && excludeIds.length > 0);
-		if (hasExclude) {
-			excludeList = Arrays.asList(excludeIds);
-		}
+            permissionManager.check(who.getId(), resourceTypeDAO.findByName(AuthzConstants.roleResourceTypeName),
+                AuthzConstants.rootResourceId, AuthzConstants.roleOpViewRole);
+        } catch (PermissionException e) {
+            return new ArrayList<Role>(0);
+        }
 
-		// Throw out the excludes
-		for (Iterator<Role> i = roles.iterator(); i.hasNext();) {
-			Role role = i.next();
-			Integer pk = role.getId();
-			if (hasExclude && excludeList.contains(pk)) {
-				i.remove();
-			}
-		}
-		return roles;
-	}
+        List<Integer> excludeList = null;
+        boolean hasExclude = (excludeIds != null && excludeIds.length > 0);
+        if (hasExclude) {
+            excludeList = Arrays.asList(excludeIds);
+        }
 
-	/**
-	 * Create a role.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param role
-	 *            The to be created.
-	 * @param operations
-	 *            Operations to associate with the new role. Use null if you
-	 *            want to associate operations later.
-	 * @param subjectIds
-	 *            Ids of subjects to add to the new role. Use null to add
-	 *            subjects later.
-	 * @param groupIds
-	 *            Ids of resource groups to add to the new role. Use null to add
-	 *            subjects later.
-	 * @return OwnedRoleValue for the role.
-	 * @throws CreateException
-	 *             Unable to create the specified entity.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * @throws PermissionException
-	 *             whoami may not perform createResource on the
-	 *             covalentAuthzRole ResourceType.
-	 * 
-	 */
-	public Integer createOwnedRole(AuthzSubject whoami, RoleValue role,
-			Operation[] operations, Integer[] subjectIds, Integer[] groupIds)
-			throws FinderException, AuthzDuplicateNameException,
-			PermissionException {
-		
-		validateRole(role);
+        // Throw out the excludes
+        for (Iterator<Role> i = roles.iterator(); i.hasNext();) {
+            Role role = i.next();
+            Integer pk = role.getId();
+            if (hasExclude && excludeList.contains(pk)) {
+                i.remove();
+            }
+        }
+        return roles;
+    }
 
-		
-		permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(),
-				AuthzConstants.rootResourceId, AuthzConstants.roleOpCreateRole);
+    /**
+     * Create a role.
+     * 
+     * @param whoami The current running user.
+     * @param role The to be created.
+     * @param operations Operations to associate with the new role. Use null if
+     *        you want to associate operations later.
+     * @param subjectIds Ids of subjects to add to the new role. Use null to add
+     *        subjects later.
+     * @param groupIds Ids of resource groups to add to the new role. Use null
+     *        to add subjects later.
+     * @return OwnedRoleValue for the role.
+     * @throws CreateException Unable to create the specified entity.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami may not perform createResource on the
+     *         covalentAuthzRole ResourceType.
+     * 
+     */
+    public Integer createOwnedRole(AuthzSubject whoami, RoleValue role, Operation[] operations, Integer[] subjectIds,
+                                   Integer[] groupIds) throws FinderException, AuthzDuplicateNameException,
+        PermissionException {
 
-		Role roleLocal = roleDAO.create(whoami, role);
+        validateRole(role);
 
-		// Associated operations
-		roleLocal.setOperations(toPojos(operations));
+        permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(), AuthzConstants.rootResourceId,
+            AuthzConstants.roleOpCreateRole);
 
-		if (subjectIds != null) {
-			HashSet<AuthzSubject> sLocals = new HashSet<AuthzSubject>(subjectIds.length);
-			for (int si = 0; si < subjectIds.length; si++) {
-				sLocals.add(authzSubjectDAO.findById(subjectIds[si]));
-			}
-			// Associated subjects
-			roleLocal.setSubjects(sLocals);
-		}
+        Role roleLocal = roleDAO.create(whoami, role);
 
-		if (groupIds != null) {
-			HashSet<ResourceGroup> gLocals = new HashSet<ResourceGroup>(groupIds.length);
-			for (int gi = 0; gi < groupIds.length; gi++) {
-				gLocals.add(lookupGroup(groupIds[gi]));
-			}
-			// Associated resource groups
-			roleLocal.setResourceGroups(gLocals);
-		}
+        // Associated operations
+        roleLocal.setOperations(toPojos(operations));
 
-		AuthzStartupListener.getRoleCreateCallback().roleCreated(roleLocal);
-		return roleLocal.getId();
-	}
+        if (subjectIds != null) {
+            HashSet<AuthzSubject> sLocals = new HashSet<AuthzSubject>(subjectIds.length);
+            for (int si = 0; si < subjectIds.length; si++) {
+                sLocals.add(authzSubjectDAO.findById(subjectIds[si]));
+            }
+            // Associated subjects
+            roleLocal.setSubjects(sLocals);
+        }
 
-	/**
-	 * Delete the specified role.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param role
-	 *            The role to delete.
-	 * @throws RemoveException
-	 *             Unable to delete the specified entity.
-	 * 
-	 */
-	public void removeRole(AuthzSubject whoami, Integer rolePk)
-			throws RemoveException, PermissionException {
-		// Don't delete the super user role
-		if (rolePk.equals(AuthzConstants.rootRoleId)) {
-			throw new RemoveException("Superuser role cannot be removed");
-		}
+        if (groupIds != null) {
+            HashSet<ResourceGroup> gLocals = new HashSet<ResourceGroup>(groupIds.length);
+            for (int gi = 0; gi < groupIds.length; gi++) {
+                gLocals.add(lookupGroup(groupIds[gi]));
+            }
+            // Associated resource groups
+            roleLocal.setResourceGroups(gLocals);
+        }
 
-		
-		Role role = roleDAO.findById(rolePk);
+        AuthzStartupListener.getRoleCreateCallback().roleCreated(roleLocal);
+        return roleLocal.getId();
+    }
 
-		
-		permissionManager.check(whoami.getId(), role.getResource().getResourceType(), role
-				.getId(), AuthzConstants.roleOpRemoveRole);
+    /**
+     * Delete the specified role.
+     * 
+     * @param whoami The current running user.
+     * @param role The role to delete.
+     * @throws RemoveException Unable to delete the specified entity.
+     * 
+     */
+    public void removeRole(AuthzSubject whoami, Integer rolePk) throws RemoveException, PermissionException {
+        // Don't delete the super user role
+        if (rolePk.equals(AuthzConstants.rootRoleId)) {
+            throw new RemoveException("Superuser role cannot be removed");
+        }
 
-		AuthzStartupListener.getRoleRemoveCallback().roleRemoved(role);
-		for (RoleCalendar c : role.getCalendars()) {
-			removeCalendar(c);
-		}
-		roleDAO.remove(role);
-	}
+        Role role = roleDAO.findById(rolePk);
 
-	/**
-	 * Write the specified entity out to permanent storage.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param role
-	 *            The role to save.
-	 * @throws PermissionException
-	 *             whoami may not perform modifyRole on this role.
-	 * 
-	 */
-	public void saveRole(AuthzSubject whoami, RoleValue role)
-			throws AuthzDuplicateNameException, PermissionException {
-		Role roleLocal = lookupRole(role);
-		if (!roleLocal.getName().equals(role.getName())) {
-			// Name has changed... check it
-			validateRole(role);
-		}
+        permissionManager.check(whoami.getId(), role.getResource().getResourceType(), role.getId(),
+            AuthzConstants.roleOpRemoveRole);
 
-		
-		permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(),
-				roleLocal.getId(), AuthzConstants.roleOpModifyRole);
-		roleLocal.setRoleValue(role);
-	}
+        AuthzStartupListener.getRoleRemoveCallback().roleRemoved(role);
+        for (RoleCalendar c : role.getCalendars()) {
+            removeCalendar(c);
+        }
+        roleDAO.remove(role);
+    }
 
-	/**
-	 * Change the owner of the role.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param id
-	 *            The ID of the role to change
-	 * @param ownerVal
-	 *            The new owner of the role..
-	 * @throws PermissionException
-	 *             whoami may not perform modifyRole on this role.
-	 * 
-	 */
-	public void changeOwner(AuthzSubject whoami, Integer id, AuthzSubject owner)
-			throws PermissionException {
-		Role roleLocal = lookupRole(id);
+    /**
+     * Write the specified entity out to permanent storage.
+     * 
+     * @param whoami The current running user.
+     * @param role The role to save.
+     * @throws PermissionException whoami may not perform modifyRole on this
+     *         role.
+     * 
+     */
+    public void saveRole(AuthzSubject whoami, RoleValue role) throws AuthzDuplicateNameException, PermissionException {
+        Role roleLocal = lookupRole(role);
+        if (!roleLocal.getName().equals(role.getName())) {
+            // Name has changed... check it
+            validateRole(role);
+        }
 
-		
-		permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(),
-				roleLocal.getId(), AuthzConstants.roleOpModifyRole);
+        permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(), roleLocal.getId(),
+            AuthzConstants.roleOpModifyRole);
+        roleLocal.setRoleValue(role);
+    }
 
-		roleLocal.getResource().setOwner(owner);
-	}
+    /**
+     * Change the owner of the role.
+     * 
+     * @param whoami The current running user.
+     * @param id The ID of the role to change
+     * @param ownerVal The new owner of the role..
+     * @throws PermissionException whoami may not perform modifyRole on this
+     *         role.
+     * 
+     */
+    public void changeOwner(AuthzSubject whoami, Integer id, AuthzSubject owner) throws PermissionException {
+        Role roleLocal = lookupRole(id);
 
-	/**
-	 * Associate operations with this role.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param role
-	 *            The role.
-	 * @param operations
-	 *            The operations to associate with the role.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * @throws PermissionException
-	 *             whoami may not perform addOperation on this role.
-	 * 
-	 */
-	public void addOperations(AuthzSubject whoami, Role role,
-			Operation[] operations) throws PermissionException {
-		Set<Operation> opLocals = toPojos(operations);
+        permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(), roleLocal.getId(),
+            AuthzConstants.roleOpModifyRole);
 
-		// roleLocal.setWhoami(lookupSubject(whoami));
-		role.getOperations().addAll(opLocals);
-	}
+        roleLocal.getResource().setOwner(owner);
+    }
 
-	/**
-	 * Disassociate all operations from this role.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param role
-	 *            The role.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * @throws PermissionException
-	 *             whoami may not perform removeOperation on this role.
-	 * 
-	 */
-	public void removeAllOperations(AuthzSubject whoami, Role role)
-			throws PermissionException {
-		// roleLocal.setWhoami(lookupSubject(whoami));
-		role.getOperations().clear();
-	}
+    /**
+     * Associate operations with this role.
+     * 
+     * @param whoami The current running user.
+     * @param role The role.
+     * @param operations The operations to associate with the role.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami may not perform addOperation on this
+     *         role.
+     * 
+     */
+    public void addOperations(AuthzSubject whoami, Role role, Operation[] operations) throws PermissionException {
+        Set<Operation> opLocals = toPojos(operations);
 
-	/**
-	 * Set the operations for this role. To get the operations call
-	 * getOperations() on the value-object.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param id
-	 *            The ID of the role.
-	 * @param operations
-	 *            Operations to associate with this role.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * @throws PermissionException
-	 *             whoami is not allowed to perform setOperations on this role.
-	 * 
-	 */
-	public void setOperations(AuthzSubject whoami, Integer id,
-			Operation[] operations) throws PermissionException {
-		if (operations != null) {
-			Role roleLocal = lookupRole(id);
+        // roleLocal.setWhoami(lookupSubject(whoami));
+        role.getOperations().addAll(opLocals);
+    }
 
-			permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(),
-					roleLocal.getId(), AuthzConstants.roleOpModifyRole);
+    /**
+     * Disassociate all operations from this role.
+     * 
+     * @param whoami The current running user.
+     * @param role The role.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami may not perform removeOperation on
+     *         this role.
+     * 
+     */
+    public void removeAllOperations(AuthzSubject whoami, Role role) throws PermissionException {
+        // roleLocal.setWhoami(lookupSubject(whoami));
+        role.getOperations().clear();
+    }
 
-			Set<Operation> opLocals = toPojos(operations);
-			roleLocal.setOperations(opLocals);
-		}
-	}
+    /**
+     * Set the operations for this role. To get the operations call
+     * getOperations() on the value-object.
+     * 
+     * @param whoami The current running user.
+     * @param id The ID of the role.
+     * @param operations Operations to associate with this role.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform
+     *         setOperations on this role.
+     * 
+     */
+    public void setOperations(AuthzSubject whoami, Integer id, Operation[] operations) throws PermissionException {
+        if (operations != null) {
+            Role roleLocal = lookupRole(id);
 
-	/**
-	 * Associate ResourceGroups with this role.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param role
-	 *            This role.
-	 * @param gids
-	 *            The ids of the groups to associate with this role.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * @throws PermissionException
-	 *             whoami is not allowed to perform addResourceGroup on this
-	 *             role.
-	 * 
-	 */
-	public void addResourceGroups(AuthzSubject whoami, Integer rid,
-			Integer[] gids) throws PermissionException {
-		Role roleLocal = roleDAO.findById(rid);
-		for (int i = 0; i < gids.length; i++) {
-			ResourceGroup group = lookupGroup(gids[i]);
-			group.addRole(roleLocal);
-		}
-	}
+            permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(), roleLocal.getId(),
+                AuthzConstants.roleOpModifyRole);
 
-	/**
-	 * Associate ResourceGroup with list of roles.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param roles
-	 *            The roles.
-	 * @param ids
-	 *            The id of the group to associate with the roles.
-	 * @throws PermissionException
-	 *             whoami is not allowed to perform addResourceGroup on this
-	 *             role.
-	 * @throws FinderException
-	 *             SQL error looking up roles scope
-	 * 
-	 */
-	public void addResourceGroupRoles(AuthzSubject whoami, Integer gid,
-			Integer[] ids) throws PermissionException, FinderException {
-		ResourceGroup group = lookupGroup(gid);
-		for (int i = 0; i < ids.length; i++) {
-			Role roleLocal = lookupRole(ids[i]);
-			group.addRole(roleLocal);
-		}
-	}
+            Set<Operation> opLocals = toPojos(operations);
+            roleLocal.setOperations(opLocals);
+        }
+    }
 
-	/**
-	 * Disassociate ResourceGroups from this role.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param id
-	 *            This role.
-	 * @param gids
-	 *            The ids of the groups to disassociate.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * @throws PermissionException
-	 *             whoami is not allowed to perform modifyRole on this role.
-	 * 
-	 */
-	public void removeResourceGroups(AuthzSubject whoami, Integer id,
-			Integer[] gids) throws PermissionException {
-		Role roleLocal = lookupRole(id);
+    /**
+     * Associate ResourceGroups with this role.
+     * 
+     * @param whoami The current running user.
+     * @param role This role.
+     * @param gids The ids of the groups to associate with this role.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform
+     *         addResourceGroup on this role.
+     * 
+     */
+    public void addResourceGroups(AuthzSubject whoami, Integer rid, Integer[] gids) throws PermissionException {
+        Role roleLocal = roleDAO.findById(rid);
+        for (int i = 0; i < gids.length; i++) {
+            ResourceGroup group = lookupGroup(gids[i]);
+            group.addRole(roleLocal);
+        }
+    }
 
-		
-		permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(),
-				roleLocal.getId(), AuthzConstants.roleOpModifyRole);
+    /**
+     * Associate ResourceGroup with list of roles.
+     * 
+     * @param whoami The current running user.
+     * @param roles The roles.
+     * @param ids The id of the group to associate with the roles.
+     * @throws PermissionException whoami is not allowed to perform
+     *         addResourceGroup on this role.
+     * @throws FinderException SQL error looking up roles scope
+     * 
+     */
+    public void addResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids) throws PermissionException,
+        FinderException {
+        ResourceGroup group = lookupGroup(gid);
+        for (int i = 0; i < ids.length; i++) {
+            Role roleLocal = lookupRole(ids[i]);
+            group.addRole(roleLocal);
+        }
+    }
 
-		for (int i = 0; i < gids.length; i++) {
-			roleLocal.removeResourceGroup(lookupGroup(gids[i]));
-		}
-	}
+    /**
+     * Disassociate ResourceGroups from this role.
+     * 
+     * @param whoami The current running user.
+     * @param id This role.
+     * @param gids The ids of the groups to disassociate.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform modifyRole
+     *         on this role.
+     * 
+     */
+    public void removeResourceGroups(AuthzSubject whoami, Integer id, Integer[] gids) throws PermissionException {
+        Role roleLocal = lookupRole(id);
 
-	/**
-	 * Disassociate roles from this ResourceGroup.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param role
-	 *            This role.
-	 * @param ids
-	 *            The ids of the groups to disassociate.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * @throws PermissionException
-	 *             whoami is not allowed to perform modifyRole on this role.
+        permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(), roleLocal.getId(),
+            AuthzConstants.roleOpModifyRole);
+
+        for (int i = 0; i < gids.length; i++) {
+            roleLocal.removeResourceGroup(lookupGroup(gids[i]));
+        }
+    }
+
+    /**
+     * Disassociate roles from this ResourceGroup.
+     * 
+     * @param whoami The current running user.
+     * @param role This role.
+     * @param ids The ids of the groups to disassociate.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform modifyRole
+     *         on this role.
+     * 
+     */
+    public void removeResourceGroupRoles(AuthzSubject whoami, Integer gid, Integer[] ids) throws PermissionException {
+
+        ResourceGroup group = lookupGroup(gid);
+        for (int i = 0; i < ids.length; i++) {
+            Role roleLocal = lookupRole(ids[i]);
+
+            permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(), roleLocal.getId(),
+                AuthzConstants.roleOpModifyRole);
+
+            roleLocal.removeResourceGroup(group);
+        }
+    }
+
+    /**
+     * Disassociate all ResourceGroups of this role from this role.
+     * 
+     * @param whoami The current running user.
+     * @param role This role.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws NamingException
+     * @throws PermissionException whoami is not allowed to perform modifyRole
+     *         on this role.
+     * 
+     */
+    public void removeAllResourceGroups(AuthzSubject whoami, Role role) throws PermissionException {
+
+        permissionManager.check(whoami.getId(), role.getResource().getResourceType(), role.getId(),
+            AuthzConstants.roleOpModifyRole);
+        role.clearResourceGroups();
+    }
+
+    /**
+     * Get the # of roles within HQ inventory
+     * 
+     * 
+     */
+    public Number getRoleCount() {
+        return new Integer(roleDAO.size());
+    }
+
+    /**
+     * Get the # of subjects within HQ inventory
+     * 
+     * 
+     */
+    public Number getSubjectCount() {
+        return new Integer(authzSubjectDAO.size());
+    }
+
+    /**
+     * Get a Role by id
+     * 
+     * 
+     */
+    public Role getRoleById(int id) {
+        return roleDAO.get(new Integer(id));
+    }
+
+    /**
 	 * 
 	 */
-	public void removeResourceGroupRoles(AuthzSubject whoami, Integer gid,
-			Integer[] ids) throws PermissionException {
-		
+    public Role findRoleById(int id) {
+        return lookupRole(new Integer(id));
+    }
 
-		ResourceGroup group = lookupGroup(gid);
-		for (int i = 0; i < ids.length; i++) {
-			Role roleLocal = lookupRole(ids[i]);
-
-			permissionManager.check(whoami.getId(), roleLocal.getResource().getResourceType(),
-					roleLocal.getId(), AuthzConstants.roleOpModifyRole);
-
-			roleLocal.removeResourceGroup(group);
-		}
-	}
-
-	/**
-	 * Disassociate all ResourceGroups of this role from this role.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param role
-	 *            This role.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * @throws NamingException
-	 * @throws PermissionException
-	 *             whoami is not allowed to perform modifyRole on this role.
+    /**
 	 * 
 	 */
-	public void removeAllResourceGroups(AuthzSubject whoami, Role role)
-			throws PermissionException {
-		
-		permissionManager.check(whoami.getId(), role.getResource().getResourceType(), role
-				.getId(), AuthzConstants.roleOpModifyRole);
-		role.clearResourceGroups();
-	}
+    public Role findRoleByName(String name) {
+        return roleDAO.findByName(name);
+    }
 
-	/**
-	 * Get the # of roles within HQ inventory
-	 * 
-	 * 
-	 */
-	public Number getRoleCount() {
-		return new Integer(roleDAO.size());
-	}
+    /**
+     * Create a calendar under a role for a specific type. Calendars created in
+     * this manner are tied directly to the role and should not be used by other
+     * roles.
+     * 
+     * @throws PermissionException if user is not allowed to modify role
+     * 
+     */
+    public RoleCalendar createCalendar(AuthzSubject whoami, Role r, String calendarName, RoleCalendarType type)
+        throws PermissionException {
 
-	/**
-	 * Get the # of subjects within HQ inventory
-	 * 
-	 * 
-	 */
-	public Number getSubjectCount() {
-		return new Integer(authzSubjectDAO.size());
-	}
+        permissionManager.check(whoami.getId(), r.getResource().getResourceType(), r.getId(),
+            AuthzConstants.roleOpModifyRole);
 
-	/**
-	 * Get a Role by id
-	 * 
+        Calendar cal = calendarManager.createCalendar(calendarName);
+        RoleCalendar res = new RoleCalendar(r, cal, type);
+        r.addCalendar(res);
+        return res;
+    }
+
+    /**
 	 * 
 	 */
-	public Role getRoleById(int id) {
-		return roleDAO.get(new Integer(id));
-	}
-
-	/**
-	 * 
-	 */
-	public Role findRoleById(int id) {
-		return lookupRole(new Integer(id));
-	}
-
-	/**
-	 * 
-	 */
-	public Role findRoleByName(String name) {
-		return roleDAO.findByName(name);
-	}
-
-	/**
-	 * Create a calendar under a role for a specific type. Calendars created in
-	 * this manner are tied directly to the role and should not be used by other
-	 * roles.
-	 * 
-	 * @throws PermissionException
-	 *             if user is not allowed to modify role
-	 * 
-	 */
-	public RoleCalendar createCalendar(AuthzSubject whoami, Role r,
-			String calendarName, RoleCalendarType type)
-			throws PermissionException {
-		
-		permissionManager.check(whoami.getId(), r.getResource().getResourceType(), r.getId(),
-				AuthzConstants.roleOpModifyRole);
-
-		Calendar cal = calendarManager
-				.createCalendar(calendarName);
-		RoleCalendar res = new RoleCalendar(r, cal, type);
-		r.addCalendar(res);
-		return res;
-	}
-
-	/**
-	 * 
-	 */
-	public boolean removeCalendar(RoleCalendar c) {
-		boolean res = c.getRole().removeCalendar(c);
-		roleCalendarDAO.remove(c);
-		calendarManager.remove(c.getCalendar());
-		return res;
-	}
-
-	/**
-	 * Find the owned role that has the given ID.
-	 * 
-	 * @param id
-	 *            The ID of the role you're looking for.
-	 * @return The owned value-object of the role of the given ID.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * 
-	 */
-	public OwnedRoleValue findOwnedRoleById(AuthzSubject whoami, Integer id)
-			throws PermissionException {
-		
-		Role local = roleDAO.findById(id);
-
-		int numSubjects =authzSubjectDAO.size(local.getSubjects());
-
-		
-		permissionManager.check(whoami.getId(), local.getResource().getResourceType(), id,
-				AuthzConstants.roleOpViewRole);
-
-		OwnedRoleValue value = new OwnedRoleValue(local);
-		value.setMemberCount(numSubjects);
-
-		return value;
-	}
-
-	/**
-	 * Get role permission Map For a given role id, find the resource types and
-	 * permissions which are supported by it
-	 * 
-	 * @param subject
-	 * @param roleId
-	 * @return map - keys are resource type names, values are lists of operation
-	 *         values which are supported on the resouce type.
-	 * 
-	 */
-	public Map<String, List<Operation>> getRoleOperationMap(AuthzSubject subject, Integer roleId)
-			throws PermissionException {
-		Map<String, List<Operation>> theMap = new HashMap<String, List<Operation>>();
-		// find the role by id
-		Role role = roleDAO.findById(roleId);
-		// now get the operations
-		Collection<Operation> operations = role.getOperations();
-		// now for each operation, get the supported resource type
-		
-		for (Operation anOp: operations)  {
-			// now get the resource Type for the op
-			ResourceType resType = anOp.getResourceType();
-			// check if there's a key for this entry
-			if (theMap.containsKey(resType.getName())) {
-				// looks like this res type is accounted for
-				// add the operation to the list
-				theMap.get(resType.getName()).add(anOp);
-			} else {
-				// key's not there, add it
-				List<Operation> opList = new ArrayList<Operation>();
-				opList.add(anOp);
-				theMap.put(resType.getName(), opList);
-			}
-		}
-		return theMap;
-	}
-
-	/**
-	 * @return a list of {@link Role}s
-	 * 
-	 */
-	public Collection<Role> getAllRoles() {
-		return roleDAO.findAll();
-	}
-
-	private Collection<Role> getAllRoles(AuthzSubject subject, int sort, boolean asc) {
-		switch (sort) {
-		default:
-		case SortAttribute.ROLE_NAME:
-			return roleDAO.findAll_orderName(asc);
-		}
-	}
-
-	/**
-	 * List all Roles in the system
-	 * 
-	 * @param pc
-	 *            Paging information for the request
-	 * @return List a list of RoleValues
-	 * 
-	 */
-	public List<RoleValue> getAllRoles(AuthzSubject subject, PageControl pc)
-			throws FinderException {
-		pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
-		Collection<Role> roles = getAllRoles(subject, pc.getSortattribute(), pc
-				.isAscending());
-
-		return rolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
-	}
-
-	/**
-	 * List all OwnedRoles in the system
-	 * 
-	 * @param subject
-	 * @param pc
-	 *            Paging and sorting information.
-	 * @return List a list of OwnedRoleValues
-	 * 
-	 */
-	public List<OwnedRoleValue> getAllOwnedRoles(AuthzSubject subject, PageControl pc) {
-		Collection<Role> roles = roleDAO.findAll();
-		pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
-		return ownedRolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
-	}
-
-	/**
-	 * List all Roles in the system, except system roles.
-	 * 
-	 * @return List a list of OwnedRoleValues that are not system roles
-	 * @throws FinderException
-	 *             if sort attribute is unrecognized
-	 * 
-	 */
-	public PageList<OwnedRoleValue> getAllNonSystemOwnedRoles(AuthzSubject subject,
-			Integer[] excludeIds, PageControl pc) throws PermissionException,
-			FinderException {
-		
-		pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
-		int attr = pc.getSortattribute();
-		Collection<Role> roles;
-		switch (attr) {
-
-		case SortAttribute.ROLE_NAME:
-			roles = roleDAO.findBySystem_orderName(false,
-					!pc.isDescending());
-			break;
-
-		default:
-			throw new FinderException("Unrecognized sort attribute: " + attr);
-		}
-
-		// 6729 - if caller is a member of the root role, show it
-		// 5345 - allow access to the root role by the root user so it can
-		// be used by others
-		Role rootRole = getRootRoleIfMember(subject);
-		if (rootRole != null) {
-			ArrayList<Role> newList = new ArrayList<Role>();
-			newList.add(rootRole);
-			newList.addAll(roles);
-			roles = newList;
-		}
-
-		roles = filterViewableRoles(subject, roles, excludeIds);
-
-		PageList<OwnedRoleValue> plist = ownedRolePager.seek(roles, pc.getPagenum(), pc
-				.getPagesize());
-		plist.setTotalSize(roles.size());
-		return plist;
-	}
-
-	/**
-	 * Get the roles with the specified ids
-	 * 
-	 * @param subject
-	 * @param ids
-	 *            the role ids
-	 * @param pc
-	 *            Paging information for the request
-	 * @throws FinderException
-	 * @throws PermissionException
-	 * 
-	 * 
-	 */
-	public PageList<RoleValue> getRolesById(AuthzSubject whoami, Integer[] ids,
-			PageControl pc) throws PermissionException, FinderException {
-
-		List<Role> roles = getRolesByIds(whoami, ids, pc);
-
-		PageList<RoleValue> plist = rolePager.seek(roles, pc.getPagenum(), pc
-				.getPagesize());
-		plist.setTotalSize(roles.size());
-
-		return plist;
-	}
-
-	private List<Role> getRolesByIds(AuthzSubject whoami, Integer[] ids,
-			PageControl pc) throws PermissionException, FinderException {
-		
-		permissionManager.check(whoami.getId(), AuthzConstants.roleResourceTypeName,
-				AuthzConstants.rootResourceId, AuthzConstants.roleOpViewRole);
-
-		Collection<Role> all = getAllRoles(whoami, pc.getSortattribute(), pc
-				.isAscending());
-
-		// build an index of ids
-		HashSet<Integer> index = new HashSet<Integer>();
-		for (int i = 0; i < ids.length; i++) {
-			Integer id = ids[i];
-			index.add(id);
-		}
-		int numToFind = index.size();
-
-		// find the requested roles
-		List<Role> roles = new ArrayList<Role>(ids.length);
-		Iterator<Role> i = all.iterator();
-		while (i.hasNext() && roles.size() < numToFind) {
-			Role r =  i.next();
-			if (index.contains(r.getId())) {
-				roles.add(r);
-			}
-		}
-		return roles;
-	}
-
-	/**
-	 * Associate roles with this subject.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param subject
-	 *            The subject.
-	 * @param roles
-	 *            The roles to associate with the subject.
-	 * @throws PermissionException
-	 *             whoami may not perform addRole on this subject.
-	 * 
-	 */
-	public void addRoles(AuthzSubject whoami, AuthzSubject subject,
-			Integer[] roles) throws PermissionException {
-		for (int i = 0; i < roles.length; i++) {
-			subject.addRole(lookupRole(roles[i]));
-		}
-	}
-
-	/**
-	 * Disassociate roles from this subject.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param subject
-	 *            The subject.
-	 * @param roles
-	 *            The subjects to disassociate.
-	 * @throws PermissionException
-	 *             whoami may not perform removeRole on this subject.
-	 * 
-	 */
-	public void removeRoles(AuthzSubject whoami, AuthzSubject subject,
-			Integer[] roles) throws PermissionException, FinderException {
-		Collection<Role> roleLocals = getRolesByIds(whoami, roles,
-				PageControl.PAGE_ALL);
-
-		RoleRemoveFromSubjectCallback callback = AuthzStartupListener
-				.getRoleRemoveFromSubjectCallback();
-
-		
-		for (Role role: roleLocals) {
-			callback.roleRemovedFromSubject(role, subject);
-			subject.removeRole(role);
-		}
-	}
-
-	/**
-	 * Get the roles for a subject
-	 * 
-	 * @param whoami
-	 * @param subject
-	 * @param pc
-	 *            Paging and sorting information.
-	 * @return Set of Roles
-	 * 
-	 */
-	public List<RoleValue> getRoles(AuthzSubject subjectValue, PageControl pc)
-			throws PermissionException {
-		Collection<Role> roles = subjectValue.getRoles();
-		pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
-		return rolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
-	}
-
-	/**
-	 * Get the owned roles for a subject.
-	 * 
-	 * @param whoami
-	 * @param subject
-	 * @param pc
-	 *            Paging and sorting information.
-	 * @return Set of Roles
-	 * 
-	 */
-	public List<OwnedRoleValue> getOwnedRoles(AuthzSubject subject, PageControl pc)
-			throws PermissionException {
-		Collection<Role> roles = subject.getRoles();
-		pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
-		return ownedRolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
-	}
-
-	/**
-	 * Get the owned roles for a subject, except system roles.
-	 * 
-	 * @param callerSubjectValue
-	 *            is the subject of caller.
-	 * @param intendedSubjectValue
-	 *            is the subject of intended subject.
-	 * @param pc
-	 *            The PageControl object for paging results.
-	 * @return List a list of OwnedRoleValues that are not system roles
-	 * 
-	 * @throws CreateException
-	 *             indicating ejb creation / container failure.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * @throws PermissionException
-	 *             caller is not allowed to perform listRoles on this role.
-	 * @throws FinderException
-	 *             SQL error looking up roles scope
-	 */
-	public PageList<OwnedRoleValue> getNonSystemOwnedRoles(AuthzSubject callerSubjectValue,
-			AuthzSubject intendedSubjectValue, PageControl pc)
-			throws PermissionException, FinderException {
-		return getNonSystemOwnedRoles(callerSubjectValue, intendedSubjectValue,
-				null, pc);
-	}
-
-	/**
-	 * Get the owned roles for a subject, except system roles.
-	 * 
-	 * @param callerSubjectValue
-	 *            is the subject of caller.
-	 * @param intendedSubjectValue
-	 *            is the subject of intended subject.
-	 * @param pc
-	 *            The PageControl object for paging results.
-	 * @return List a list of OwnedRoleValues that are not system roles
-	 * 
-	 * @throws CreateException
-	 *             indicating ejb creation / container failure.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * @throws PermissionException
-	 *             caller is not allowed to perform listRoles on this role.
-	 * @throws FinderException
-	 *             SQL error looking up roles scope
-	 */
-	public PageList<OwnedRoleValue> getNonSystemOwnedRoles(AuthzSubject callerSubjectValue,
-			AuthzSubject intendedSubjectValue, Integer[] excludeIds,
-			PageControl pc) throws PermissionException, FinderException {
-
-		
-
-		// Fetch all roles presently assigned to the assignee
-		Collection<Role> roles;
-
-		pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
-
-		switch (pc.getSortattribute()) {
-		case SortAttribute.ROLE_NAME:
-			roles = roleDAO.findBySystemAndSubject_orderName(false,
-					intendedSubjectValue.getId(), pc.isAscending());
-			break;
-		case SortAttribute.ROLE_MEMBER_CNT:
-			roles = roleDAO.findBySystemAndSubject_orderMember(false,
-					intendedSubjectValue.getId(), pc.isAscending());
-			break;
-		default:
-			throw new IllegalArgumentException("Invalid sort parameter");
-		}
-		
-
-		if (isRootRoleMember(intendedSubjectValue)) {
-			ArrayList<Role> roleList = new ArrayList<Role>(roles.size() + 1);
-
-			Role rootRole = roleDAO.findById(AuthzConstants.rootRoleId);
-
-			// We need to insert into the right place
-			boolean done = false;
-			for (Role role: roles) {
-				if (!done) {
-					if (pc.getSortattribute() == SortAttribute.ROLE_NAME) {
-						if ((pc.isAscending() && role.getName().compareTo(
-								rootRole.getName()) > 0)
-								|| (pc.isDescending() && role.getName()
-										.compareTo(rootRole.getName()) < 0)) {
-							roleList.add(rootRole);
-							done = true;
-						}
-					} else if (pc.getSortattribute() == SortAttribute.ROLE_MEMBER_CNT) {
-						if ((pc.isAscending() && role.getSubjects().size() > rootRole
-								.getSubjects().size())
-								|| (pc.isDescending() && role.getSubjects()
-										.size() < rootRole.getSubjects().size())) {
-							roleList.add(rootRole);
-							done = true;
-						}
-					}
-				}
-				roleList.add(role);
-			}
-
-			if (!done) {
-				roleList.add(rootRole);
-			}
-
-			roles = roleList;
-		}
-
-		// Filter out only those roles that the caller is able to see.
-		Collection<Role> viewableRoles = filterViewableRoles(callerSubjectValue, roles,
-				excludeIds);
-
-		return ownedRolePager.seek(viewableRoles, pc.getPagenum(), pc
-				.getPagesize());
-	}
-
-	/**
-	 * List the roles that this subject is not in and that are not one of the
-	 * specified roles.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param system
-	 *            If true, then only system roles are returned. If false, then
-	 *            only non-system roles are returned.
-	 * @param subjectId
-	 *            The id of the subject.
-	 * @return List of roles.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * @throws PermissionException
-	 *             whoami is not allowed to perform listRoles on this role.
-	 * @throws FinderException
-	 * 
-	 */
-	public PageList<RoleValue> getAvailableRoles(AuthzSubject whoami, boolean system,
-			Integer subjectId, Integer[] roleIds, PageControl pc)
-			throws PermissionException, FinderException {
-		Collection<Role> foundRoles;
-		pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
-		int attr = pc.getSortattribute();
-		switch (attr) {
-
-		case SortAttribute.ROLE_NAME:
-			foundRoles = roleDAO
-					.findBySystemAndAvailableForSubject_orderName(system,
-							whoami.getId(), !pc.isDescending());
-			break;
-
-		default:
-			throw new FinderException("Unrecognized sort attribute: " + attr);
-		}
-
-		HashSet<Integer> index = new HashSet<Integer>();
-		if (roleIds != null) {
-			index.addAll(Arrays.asList(roleIds));
-		}
-
-		Collection<Role> roles = new ArrayList<Role>();
-		
-		for(Role r: foundRoles) {
-			if (!index.contains(r.getId())) {
-				roles.add(r);
-			}
-		}
-
-		// AUTHZ Check
-		// filter the viewable roles
-		roles = filterViewableRoles(whoami, roles);
-
-		PageList<RoleValue> plist = new PageList<RoleValue>();
-		plist = rolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
-		plist.setTotalSize(roles.size());
-		// 6729 - if caller is a member of the root role, show it
-		// 5345 - allow access to the root role by the root user so it can
-		// be used by others
-		if (isRootRoleMember(whoami) && pc.getPagenum() == 0
-				&& !index.contains(AuthzConstants.rootRoleId)) {
-			Role role = roleDAO.findAvailableRoleForSubject(
-					AuthzConstants.rootRoleId, subjectId);
-			if (role == null) {
-				return plist;
-			}
-			OwnedRoleValue rootRoleValue = role.getOwnedRoleValue();
-			PageList<RoleValue> newList = new PageList<RoleValue>();
-			newList.add(rootRoleValue);
-			newList.addAll(plist);
-			newList.setTotalSize(plist.getTotalSize() + 1);
-			return newList;
-		}
-		return plist;
-	}
-
-	/**
-	 * List the roles that this subject is not in and that are not one of the
-	 * specified roles.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param system
-	 *            If true, then only system roles are returned. If false, then
-	 *            only non-system roles are returned.
-	 * @param groupId
-	 *            The id of the subject.
-	 * @return List of roles.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * @throws PermissionException
-	 *             whoami is not allowed to perform listRoles on this role.
-	 * @throws FinderException
-	 *             if the sort attribute was not recognized
-	 * 
-	 */
-	public PageList<RoleValue> getAvailableGroupRoles(AuthzSubject whoami,
-			Integer groupId, Integer[] roleIds, PageControl pc)
-			throws PermissionException, FinderException {
-		Collection<Role> foundRoles;
-		pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
-		int attr = pc.getSortattribute();
-		
-		switch (attr) {
-		case SortAttribute.ROLE_NAME:
-			foundRoles = roleDAO.findAvailableForGroup(false, groupId);
-			break;
-		default:
-			throw new FinderException("Unrecognized sort attribute: " + attr);
-		}
-
-		log.debug("Found " + foundRoles.size() + " available roles for group "
-				+ groupId + " before permission checking");
-
-		HashSet<Integer> index = new HashSet<Integer>();
-		if (roleIds != null) {
-			index.addAll(Arrays.asList(roleIds));
-		}
-
-		// Grep out the specified roles
-		ArrayList<Role> roles = new ArrayList<Role>();
-	
-		for (Role r: roles) {
-			if (!index.contains(r.getId())) {
-				roles.add(r);
-			}
-		}
-
-		log.debug("Found " + roles.size() + " available roles for group "
-				+ groupId + " after exclusions");
-
-		// AUTHZ Check - filter the viewable roles
-		roles = (ArrayList)filterViewableRoles(whoami, roles);
-
-		if (isRootRoleMember(whoami) && pc.getPagenum() == 0
-				&& !index.contains(AuthzConstants.rootRoleId)) {
-			foundRoles = roleDAO.findAvailableForGroup(true, groupId);
-			for (Role role: foundRoles) {
-				if (role.getId().equals(AuthzConstants.rootRoleId)) {
-					roles.add(role);
-				}
-			}
-		}
-
-		if (pc.isDescending()) {
-			Collections.reverse(roles);
-		}
-
-		log.debug("Found " + roles.size() + " available roles for group "
-				+ groupId + " after permission checking");
-
-		PageList<RoleValue> plist = rolePager.seek(roles, pc.getPagenum(), pc
-				.getPagesize());
-		plist.setTotalSize(roles.size());
-
-		return plist;
-	}
-
-	/**
-	 * Get the resource groups applicable to a given role
-	 * 
-	 * 
-	 */
-	public PageList<ResourceGroupValue> getResourceGroupsByRoleIdAndSystem(AuthzSubject subject,
-			Integer roleId, boolean system, PageControl pc)
-			throws PermissionException, FinderException {
-		// first find the role by its id
-		roleDAO.findById(roleId);
-
-		// now check to make sure the user can list resource groups
-		Collection<ResourceGroup> groups;
-		pc = PageControl.initDefaults(pc, SortAttribute.RESGROUP_NAME);
-		int attr = pc.getSortattribute();
-		
-		switch (attr) {
-		case SortAttribute.RESGROUP_NAME:
-			groups = resourceGroupDAO.findByRoleIdAndSystem_orderName(roleId, system, pc
-					.isAscending());
-			break;
-
-		default:
-			throw new FinderException("Unrecognized sort attribute: " + attr);
-		}
-
-		// now get viewable group pks
-		groups = filterViewableGroups(subject, groups);
-
-		PageList<ResourceGroupValue> plist = groupPager.seek(groups, pc);
-		plist.setTotalSize(groups.size());
-
-		return plist;
-	}
-
-	/**
-	 * Return the roles of a group
-	 * 
-	 * @throws PermissionException
-	 * 
-	 * 
-	 */
-	public PageList<RoleValue> getResourceGroupRoles(AuthzSubject whoami, Integer groupId,
-			PageControl pc) throws PermissionException {
-		ResourceGroup resGrp = resourceGroupDAO.findById(groupId);
-
-		
-		permissionManager.check(whoami.getId(), AuthzConstants.authzGroup, resGrp.getId(),
-				AuthzConstants.perm_viewResourceGroup);
-
-		Collection<Role> roles = resGrp.getRoles();
-
-		TreeMap<String,Role> map = new TreeMap<String, Role>();
-		for (Role role: roles) {
-			int attr = pc.getSortattribute();
-			switch (attr) {
-			case SortAttribute.ROLE_NAME:
-			default:
-				map.put(role.getName(), role);
-			}
-		}
-
-		ArrayList<Role> list = new ArrayList<Role>(map.values());
-
-		if (pc.isDescending()) {
-			Collections.reverse(list);
-		}
-
-		PageList<RoleValue> plist = rolePager
-				.seek(list, pc.getPagenum(), pc.getPagesize());
-		plist.setTotalSize(roles.size());
-
-		return plist;
-	}
-
-	/**
-	 * Filter a collection of groupLocal objects to only include those viewable
-	 * by the specified user
-	 */
-	private Collection<ResourceGroup> filterViewableGroups(AuthzSubject who, Collection<ResourceGroup> groups)
-			throws PermissionException, FinderException {
-		// finally scope down to only the ones the user can see
-		
-		List<Integer> viewable = permissionManager.findOperationScopeBySubject(who,
-				AuthzConstants.groupOpViewResourceGroup,
-				AuthzConstants.groupResourceTypeName);
-
-		for (Iterator<ResourceGroup> i = groups.iterator(); i.hasNext();) {
-			ResourceGroup resGrp = i.next();
-
-			if (!viewable.contains(resGrp.getId())) {
-				i.remove();
-			}
-		}
-		return groups;
-	}
-
-	/**
-	 * List the groups not in this role and not one of the specified groups.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param roleId
-	 *            The id of the role.
-	 * @return List of groups in this role.
-	 * @throws PermissionException
-	 *             whoami is not allowed to perform listGroups on this role.
-	 * @throws FinderException
-	 * 
-	 */
-	public PageList<ResourceGroupValue> getAvailableResourceGroups(AuthzSubject whoami,
-			Integer roleId, Integer[] groupIds, PageControl pc)
-			throws PermissionException, FinderException {
-		
-		Role role = roleDAO.findById(roleId);
-		Collection<ResourceGroup> noRoles;
-		Collection<ResourceGroup> otherRoles;
-		pc = PageControl.initDefaults(pc, SortAttribute.RESGROUP_NAME);
-		int attr = pc.getSortattribute();
-		
-		switch (attr) {
-		case SortAttribute.RESGROUP_NAME:
-			noRoles = resourceGroupDAO.findWithNoRoles_orderName(pc.isAscending());
-			otherRoles = resourceGroupDAO.findByNotRoleId_orderName(role.getId(), pc
-					.isAscending());
-			break;
-
-		default:
-			throw new FinderException("Unrecognized sort attribute: " + attr);
-		}
-
-		// FIXME- merging these two sorted lists probably causes the
-		// final list to not be sorted correctly. fix this by
-		// combining the two finders into one!
-		// FIX for 6924 - dont include duplicate groups
-		for (ResourceGroup groupEJB: otherRoles) {
-			if (!noRoles.contains(groupEJB)) {
-				noRoles.add(groupEJB);
-			}
-		}
-
-		// build an index of groupIds
-		int numToFind = (groupIds == null) ? 0 : groupIds.length;
-		HashSet<Integer> index = new HashSet<Integer>();
-		for (int i = 0; i < numToFind; i++) {
-			index.add(groupIds[i]);
-		}
-
-		// Add the groups that the role already owns
-		Collection<ResourceGroup> belongs = resourceGroupDAO.findByRoleIdAndSystem_orderName(roleId,
-				false, true);
-		for (ResourceGroup s: belongs) {
-			index.add(s.getId());
-		}
-
-		// grep out the specified groups
-		Collection<ResourceGroup> groups = new ArrayList<ResourceGroup>(noRoles.size());
-		for (ResourceGroup s: noRoles) {
-			if (!index.contains(s.getId())) {
-				groups.add(s);
-			}
-		}
-
-		// AUTHZ Check
-		// finally scope down to only the ones the user can see
-		groups = filterViewableGroups(whoami, groups);
-
-		PageList<ResourceGroupValue> plist = groupPager.seek(groups, pc.getPagenum(), pc
-				.getPagesize());
-
-		plist.setTotalSize(groups.size());
-
-		return plist;
-	}
-
-	/**
-	 * List the subjects in this role.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param roleId
-	 *            The id of the role.
-	 * @return List of subjects in this role.
-	 * @throws PermissionException
-	 *             whoami is not allowed to perform listSubjects on this role.
-	 * @throws FinderException
-	 *             if the sort attribute is not recognized
-	 * 
-	 * 
-	 */
-	public PageList<AuthzSubjectValue> getSubjects(AuthzSubject whoami, Integer roleId,
-			PageControl pc) throws PermissionException, FinderException {
-		Role roleLocal = roleDAO.get(roleId);
-
-		if (roleLocal == null) {
-			return new PageList<AuthzSubjectValue>();
-		}
-
-		// check if this user is a member of this role
-		boolean roleHasUser = roleLocal.getSubjects().contains(whoami);
-		// check whether the user can see subjects other than himself
-		try {
-			
-			permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(),
-					AuthzConstants.rootResourceId,
-					AuthzConstants.subjectOpViewSubject);
-		} catch (PermissionException e) {
-			// if the user does not have permission to view subjects
-			// but he is in the role, return a collection with only one
-			// item... himself.
-			if (roleHasUser) {
-				PageList<AuthzSubjectValue> subjects = new PageList<AuthzSubjectValue>();
-				subjects.add(whoami.getAuthzSubjectValue());
-				subjects.setTotalSize(1);
-				return subjects;
-			}
-			// otherwise return an empty list
-			// fixes 5628 - user viewing role lacking view subjects
-			// causes permissionexception
-			return new PageList<AuthzSubjectValue>();
-		}
-		Collection<AuthzSubject> subjects;
-		pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
-
-		switch (pc.getSortattribute()) {
-		case SortAttribute.SUBJECT_NAME:
-			subjects = authzSubjectDAO.findByRoleId_orderName(
-					roleLocal.getId(), pc.isAscending());
-			break;
-		default:
-			throw new FinderException("Unrecognized sort attribute: "
-					+ pc.getSortattribute());
-		}
-
-		PageList<AuthzSubjectValue> plist = new PageList<AuthzSubjectValue>();
-		plist = subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize());
-		plist.setTotalSize(subjects.size());
-
-		return plist;
-	}
-
-	/**
-	 * List the subjects not in this role and not one of the specified subjects.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param roleId
-	 *            The id of the role.
-	 * @return List of subjects in this role.
-	 * @throws FinderException
-	 *             Unable to find a given or dependent entities.
-	 * @throws PermissionException
-	 *             whoami is not allowed to perform listSubjects on this role.
-	 * @throws FinderException
-	 *             if the sort attribute is not recognized
-	 * 
-	 * 
-	 */
-	public PageList<AuthzSubjectValue> getAvailableSubjects(AuthzSubject whoami, Integer roleId,
-			Integer[] subjectIds, PageControl pc) throws PermissionException,
-			FinderException {
-		Role roleLocal = lookupRole(roleId);
-
-		/** TODO PermissionCheck scope for viewSubject **/
-		Collection<AuthzSubject> otherRoles;
-		pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
-
-		switch (pc.getSortattribute()) {
-		case SortAttribute.SUBJECT_NAME:
-			otherRoles = authzSubjectDAO.findByNotRoleId_orderName(
-					roleLocal.getId(), pc.isAscending());
-			break;
-		default:
-			throw new FinderException("Unrecognized sort attribute: "
-					+ pc.getSortattribute());
-		}
-
-		// build an index of subjectIds
-		int numToFind = subjectIds.length;
-		HashSet<Integer> index = new HashSet<Integer>(Arrays.asList(subjectIds));
-
-		// grep out the specified subjects
-		ArrayList<AuthzSubject> subjects = new ArrayList<AuthzSubject>(numToFind);
-		for (AuthzSubject subj : otherRoles) {
-			if (!index.contains(subj.getId())) {
-				subjects.add(subj);
-			}
-		}
-
-		PageList<AuthzSubjectValue> plist = new PageList<AuthzSubjectValue>();
-		plist = subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize());
-		plist.setTotalSize(subjects.size());
-
-		return plist;
-	}
-
-	/**
-	 * Add subjects to this role.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param id
-	 *            The ID of the role.
-	 * @param sids
-	 *            Ids of ubjects to add to role.
-	 * @throws PermissionException
-	 *             whoami is not allowed to perform addSubject on this role.
-	 * 
-	 */
-	public void addSubjects(AuthzSubject whoami, Integer id, Integer[] sids)
-			throws PermissionException {
-		Role role = lookupRole(id);
-		for (int i = 0; i < sids.length; i++) {
-		    authzSubjectDAO.findById(sids[i]).addRole(role);
-		}
-	}
-
-	/**
-	 * Remove subjects from this role.
-	 * 
-	 * @param whoami
-	 *            The current running user.
-	 * @param id
-	 *            The ID of the role.
-	 * @param ids
-	 *            The ids of the subjects to remove.
-	 * @throws PermissionException
-	 *             whoami is not allowed to perform removeSubject on this role.
-	 * 
-	 * 
-	 */
-	public void removeSubjects(AuthzSubject whoami, Integer id, Integer[] ids)
-			throws PermissionException {
-		Role roleLocal = lookupRole(id);
-		for (int i = 0; i < ids.length; i++) {
-			AuthzSubject subj = authzSubjectDAO.findById(ids[i]);
-			subj.removeRole(roleLocal);
-		}
-	}
-
-	/**
-	 * Find all {@link Operation} objects
-	 * 
-	 * 
-	 */
-	public Collection<Operation> findAllOperations() {
-		return operationDAO.findAllOrderByName();
-	}
-	
-	 protected Set toPojos(Object[] vals) {
-	        Set ret = new HashSet();
-	        if (vals == null || vals.length == 0) {
-	            return ret;
-	        }
-	        for (int i = 0; i < vals.length; i++) {
-	            if (vals[i] instanceof Operation) {
-	                ret.add(vals[i]);
-	            } else if (vals[i] instanceof ResourceValue) {
-	                ret.add(lookupResource((ResourceValue) vals[i]));
-	            } else if (vals[i] instanceof RoleValue) {
-	                ret.add(roleDAO.findById(((RoleValue) vals[i]).getId()));
-	            } else if (vals[i] instanceof ResourceGroupValue) {
-	                ret.add(resourceGroupDAO.findById(((ResourceGroupValue) vals[i]).getId()));
-	            } else {
-	                log.error("Invalid type.");
-	            }
-
-	        }
-	        return ret;
-   }
-	 
-	  private Resource lookupResource(ResourceValue resource) {
-	        if (resource.getId() == null) {
-	            ResourceType type = resource.getResourceType();
-	            return resourceDAO.findByInstanceId(type, resource.getInstanceId());
-	        }
-	        return resourceDAO.findById(resource.getId());
-	    }
-
-
-	public static RoleManager getOne() {
-		return Bootstrap.getBean(RoleManager.class);
-	}
+    public boolean removeCalendar(RoleCalendar c) {
+        boolean res = c.getRole().removeCalendar(c);
+        roleCalendarDAO.remove(c);
+        calendarManager.remove(c.getCalendar());
+        return res;
+    }
+
+    /**
+     * Find the owned role that has the given ID.
+     * 
+     * @param id The ID of the role you're looking for.
+     * @return The owned value-object of the role of the given ID.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * 
+     */
+    public OwnedRoleValue findOwnedRoleById(AuthzSubject whoami, Integer id) throws PermissionException {
+
+        Role local = roleDAO.findById(id);
+
+        int numSubjects = authzSubjectDAO.size(local.getSubjects());
+
+        permissionManager.check(whoami.getId(), local.getResource().getResourceType(), id,
+            AuthzConstants.roleOpViewRole);
+
+        OwnedRoleValue value = new OwnedRoleValue(local);
+        value.setMemberCount(numSubjects);
+
+        return value;
+    }
+
+    /**
+     * Get role permission Map For a given role id, find the resource types and
+     * permissions which are supported by it
+     * 
+     * @param subject
+     * @param roleId
+     * @return map - keys are resource type names, values are lists of operation
+     *         values which are supported on the resouce type.
+     * 
+     */
+    public Map<String, List<Operation>> getRoleOperationMap(AuthzSubject subject, Integer roleId)
+        throws PermissionException {
+        Map<String, List<Operation>> theMap = new HashMap<String, List<Operation>>();
+        // find the role by id
+        Role role = roleDAO.findById(roleId);
+        // now get the operations
+        Collection<Operation> operations = role.getOperations();
+        // now for each operation, get the supported resource type
+
+        for (Operation anOp : operations) {
+            // now get the resource Type for the op
+            ResourceType resType = anOp.getResourceType();
+            // check if there's a key for this entry
+            if (theMap.containsKey(resType.getName())) {
+                // looks like this res type is accounted for
+                // add the operation to the list
+                theMap.get(resType.getName()).add(anOp);
+            } else {
+                // key's not there, add it
+                List<Operation> opList = new ArrayList<Operation>();
+                opList.add(anOp);
+                theMap.put(resType.getName(), opList);
+            }
+        }
+        return theMap;
+    }
+
+    /**
+     * @return a list of {@link Role}s
+     * 
+     */
+    public Collection<Role> getAllRoles() {
+        return roleDAO.findAll();
+    }
+
+    private Collection<Role> getAllRoles(AuthzSubject subject, int sort, boolean asc) {
+        switch (sort) {
+            default:
+            case SortAttribute.ROLE_NAME:
+                return roleDAO.findAll_orderName(asc);
+        }
+    }
+
+    /**
+     * List all Roles in the system
+     * 
+     * @param pc Paging information for the request
+     * @return List a list of RoleValues
+     * 
+     */
+    public List<RoleValue> getAllRoles(AuthzSubject subject, PageControl pc) throws FinderException {
+        pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
+        Collection<Role> roles = getAllRoles(subject, pc.getSortattribute(), pc.isAscending());
+
+        return rolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
+    }
+
+    /**
+     * List all OwnedRoles in the system
+     * 
+     * @param subject
+     * @param pc Paging and sorting information.
+     * @return List a list of OwnedRoleValues
+     * 
+     */
+    public List<OwnedRoleValue> getAllOwnedRoles(AuthzSubject subject, PageControl pc) {
+        Collection<Role> roles = roleDAO.findAll();
+        pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
+        return ownedRolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
+    }
+
+    /**
+     * List all Roles in the system, except system roles.
+     * 
+     * @return List a list of OwnedRoleValues that are not system roles
+     * @throws FinderException if sort attribute is unrecognized
+     * 
+     */
+    public PageList<OwnedRoleValue> getAllNonSystemOwnedRoles(AuthzSubject subject, Integer[] excludeIds, PageControl pc)
+        throws PermissionException, FinderException {
+
+        pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
+        int attr = pc.getSortattribute();
+        Collection<Role> roles;
+        switch (attr) {
+
+            case SortAttribute.ROLE_NAME:
+                roles = roleDAO.findBySystem_orderName(false, !pc.isDescending());
+                break;
+
+            default:
+                throw new FinderException("Unrecognized sort attribute: " + attr);
+        }
+
+        // 6729 - if caller is a member of the root role, show it
+        // 5345 - allow access to the root role by the root user so it can
+        // be used by others
+        Role rootRole = getRootRoleIfMember(subject);
+        if (rootRole != null) {
+            ArrayList<Role> newList = new ArrayList<Role>();
+            newList.add(rootRole);
+            newList.addAll(roles);
+            roles = newList;
+        }
+
+        roles = filterViewableRoles(subject, roles, excludeIds);
+
+        PageList<OwnedRoleValue> plist = ownedRolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
+        plist.setTotalSize(roles.size());
+        return plist;
+    }
+
+    /**
+     * Get the roles with the specified ids
+     * 
+     * @param subject
+     * @param ids the role ids
+     * @param pc Paging information for the request
+     * @throws FinderException
+     * @throws PermissionException
+     * 
+     * 
+     */
+    public PageList<RoleValue> getRolesById(AuthzSubject whoami, Integer[] ids, PageControl pc)
+        throws PermissionException, FinderException {
+
+        List<Role> roles = getRolesByIds(whoami, ids, pc);
+
+        PageList<RoleValue> plist = rolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
+        plist.setTotalSize(roles.size());
+
+        return plist;
+    }
+
+    private List<Role> getRolesByIds(AuthzSubject whoami, Integer[] ids, PageControl pc) throws PermissionException,
+        FinderException {
+
+        permissionManager.check(whoami.getId(), AuthzConstants.roleResourceTypeName, AuthzConstants.rootResourceId,
+            AuthzConstants.roleOpViewRole);
+
+        Collection<Role> all = getAllRoles(whoami, pc.getSortattribute(), pc.isAscending());
+
+        // build an index of ids
+        HashSet<Integer> index = new HashSet<Integer>();
+        for (int i = 0; i < ids.length; i++) {
+            Integer id = ids[i];
+            index.add(id);
+        }
+        int numToFind = index.size();
+
+        // find the requested roles
+        List<Role> roles = new ArrayList<Role>(ids.length);
+        Iterator<Role> i = all.iterator();
+        while (i.hasNext() && roles.size() < numToFind) {
+            Role r = i.next();
+            if (index.contains(r.getId())) {
+                roles.add(r);
+            }
+        }
+        return roles;
+    }
+
+    /**
+     * Associate roles with this subject.
+     * 
+     * @param whoami The current running user.
+     * @param subject The subject.
+     * @param roles The roles to associate with the subject.
+     * @throws PermissionException whoami may not perform addRole on this
+     *         subject.
+     * 
+     */
+    public void addRoles(AuthzSubject whoami, AuthzSubject subject, Integer[] roles) throws PermissionException {
+        for (int i = 0; i < roles.length; i++) {
+            subject.addRole(lookupRole(roles[i]));
+        }
+    }
+
+    /**
+     * Disassociate roles from this subject.
+     * 
+     * @param whoami The current running user.
+     * @param subject The subject.
+     * @param roles The subjects to disassociate.
+     * @throws PermissionException whoami may not perform removeRole on this
+     *         subject.
+     * 
+     */
+    public void removeRoles(AuthzSubject whoami, AuthzSubject subject, Integer[] roles) throws PermissionException,
+        FinderException {
+        Collection<Role> roleLocals = getRolesByIds(whoami, roles, PageControl.PAGE_ALL);
+
+        RoleRemoveFromSubjectCallback callback = AuthzStartupListener.getRoleRemoveFromSubjectCallback();
+
+        for (Role role : roleLocals) {
+            callback.roleRemovedFromSubject(role, subject);
+            subject.removeRole(role);
+        }
+    }
+
+    /**
+     * Get the roles for a subject
+     * 
+     * @param whoami
+     * @param subject
+     * @param pc Paging and sorting information.
+     * @return Set of Roles
+     * 
+     */
+    public List<RoleValue> getRoles(AuthzSubject subjectValue, PageControl pc) throws PermissionException {
+        Collection<Role> roles = subjectValue.getRoles();
+        pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
+        return rolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
+    }
+
+    /**
+     * Get the owned roles for a subject.
+     * 
+     * @param whoami
+     * @param subject
+     * @param pc Paging and sorting information.
+     * @return Set of Roles
+     * 
+     */
+    public List<OwnedRoleValue> getOwnedRoles(AuthzSubject subject, PageControl pc) throws PermissionException {
+        Collection<Role> roles = subject.getRoles();
+        pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
+        return ownedRolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
+    }
+
+    /**
+     * Get the owned roles for a subject, except system roles.
+     * 
+     * @param callerSubjectValue is the subject of caller.
+     * @param intendedSubjectValue is the subject of intended subject.
+     * @param pc The PageControl object for paging results.
+     * @return List a list of OwnedRoleValues that are not system roles
+     * 
+     * @throws CreateException indicating ejb creation / container failure.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException caller is not allowed to perform listRoles on
+     *         this role.
+     * @throws FinderException SQL error looking up roles scope
+     */
+    public PageList<OwnedRoleValue> getNonSystemOwnedRoles(AuthzSubject callerSubjectValue,
+                                                           AuthzSubject intendedSubjectValue, PageControl pc)
+        throws PermissionException, FinderException {
+        return getNonSystemOwnedRoles(callerSubjectValue, intendedSubjectValue, null, pc);
+    }
+
+    /**
+     * Get the owned roles for a subject, except system roles.
+     * 
+     * @param callerSubjectValue is the subject of caller.
+     * @param intendedSubjectValue is the subject of intended subject.
+     * @param pc The PageControl object for paging results.
+     * @return List a list of OwnedRoleValues that are not system roles
+     * 
+     * @throws CreateException indicating ejb creation / container failure.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException caller is not allowed to perform listRoles on
+     *         this role.
+     * @throws FinderException SQL error looking up roles scope
+     */
+    public PageList<OwnedRoleValue> getNonSystemOwnedRoles(AuthzSubject callerSubjectValue,
+                                                           AuthzSubject intendedSubjectValue, Integer[] excludeIds,
+                                                           PageControl pc) throws PermissionException, FinderException {
+
+        // Fetch all roles presently assigned to the assignee
+        Collection<Role> roles;
+
+        pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
+
+        switch (pc.getSortattribute()) {
+            case SortAttribute.ROLE_NAME:
+                roles = roleDAO.findBySystemAndSubject_orderName(false, intendedSubjectValue.getId(), pc.isAscending());
+                break;
+            case SortAttribute.ROLE_MEMBER_CNT:
+                roles = roleDAO.findBySystemAndSubject_orderMember(false, intendedSubjectValue.getId(), pc
+                    .isAscending());
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid sort parameter");
+        }
+
+        if (isRootRoleMember(intendedSubjectValue)) {
+            ArrayList<Role> roleList = new ArrayList<Role>(roles.size() + 1);
+
+            Role rootRole = roleDAO.findById(AuthzConstants.rootRoleId);
+
+            // We need to insert into the right place
+            boolean done = false;
+            for (Role role : roles) {
+                if (!done) {
+                    if (pc.getSortattribute() == SortAttribute.ROLE_NAME) {
+                        if ((pc.isAscending() && role.getName().compareTo(rootRole.getName()) > 0) ||
+                            (pc.isDescending() && role.getName().compareTo(rootRole.getName()) < 0)) {
+                            roleList.add(rootRole);
+                            done = true;
+                        }
+                    } else if (pc.getSortattribute() == SortAttribute.ROLE_MEMBER_CNT) {
+                        if ((pc.isAscending() && role.getSubjects().size() > rootRole.getSubjects().size()) ||
+                            (pc.isDescending() && role.getSubjects().size() < rootRole.getSubjects().size())) {
+                            roleList.add(rootRole);
+                            done = true;
+                        }
+                    }
+                }
+                roleList.add(role);
+            }
+
+            if (!done) {
+                roleList.add(rootRole);
+            }
+
+            roles = roleList;
+        }
+
+        // Filter out only those roles that the caller is able to see.
+        Collection<Role> viewableRoles = filterViewableRoles(callerSubjectValue, roles, excludeIds);
+
+        return ownedRolePager.seek(viewableRoles, pc.getPagenum(), pc.getPagesize());
+    }
+
+    /**
+     * List the roles that this subject is not in and that are not one of the
+     * specified roles.
+     * 
+     * @param whoami The current running user.
+     * @param system If true, then only system roles are returned. If false,
+     *        then only non-system roles are returned.
+     * @param subjectId The id of the subject.
+     * @return List of roles.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform listRoles on
+     *         this role.
+     * @throws FinderException
+     * 
+     */
+    public PageList<RoleValue> getAvailableRoles(AuthzSubject whoami, boolean system, Integer subjectId,
+                                                 Integer[] roleIds, PageControl pc) throws PermissionException,
+        FinderException {
+        Collection<Role> foundRoles;
+        pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
+        int attr = pc.getSortattribute();
+        switch (attr) {
+
+            case SortAttribute.ROLE_NAME:
+                foundRoles = roleDAO.findBySystemAndAvailableForSubject_orderName(system, whoami.getId(), !pc
+                    .isDescending());
+                break;
+
+            default:
+                throw new FinderException("Unrecognized sort attribute: " + attr);
+        }
+
+        HashSet<Integer> index = new HashSet<Integer>();
+        if (roleIds != null) {
+            index.addAll(Arrays.asList(roleIds));
+        }
+
+        Collection<Role> roles = new ArrayList<Role>();
+
+        for (Role r : foundRoles) {
+            if (!index.contains(r.getId())) {
+                roles.add(r);
+            }
+        }
+
+        // AUTHZ Check
+        // filter the viewable roles
+        roles = filterViewableRoles(whoami, roles);
+
+        PageList<RoleValue> plist = new PageList<RoleValue>();
+        plist = rolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
+        plist.setTotalSize(roles.size());
+        // 6729 - if caller is a member of the root role, show it
+        // 5345 - allow access to the root role by the root user so it can
+        // be used by others
+        if (isRootRoleMember(whoami) && pc.getPagenum() == 0 && !index.contains(AuthzConstants.rootRoleId)) {
+            Role role = roleDAO.findAvailableRoleForSubject(AuthzConstants.rootRoleId, subjectId);
+            if (role == null) {
+                return plist;
+            }
+            OwnedRoleValue rootRoleValue = role.getOwnedRoleValue();
+            PageList<RoleValue> newList = new PageList<RoleValue>();
+            newList.add(rootRoleValue);
+            newList.addAll(plist);
+            newList.setTotalSize(plist.getTotalSize() + 1);
+            return newList;
+        }
+        return plist;
+    }
+
+    /**
+     * List the roles that this subject is not in and that are not one of the
+     * specified roles.
+     * 
+     * @param whoami The current running user.
+     * @param system If true, then only system roles are returned. If false,
+     *        then only non-system roles are returned.
+     * @param groupId The id of the subject.
+     * @return List of roles.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform listRoles on
+     *         this role.
+     * @throws FinderException if the sort attribute was not recognized
+     * 
+     */
+    public PageList<RoleValue> getAvailableGroupRoles(AuthzSubject whoami, Integer groupId, Integer[] roleIds,
+                                                      PageControl pc) throws PermissionException, FinderException {
+        Collection<Role> foundRoles;
+        pc = PageControl.initDefaults(pc, SortAttribute.ROLE_NAME);
+        int attr = pc.getSortattribute();
+
+        switch (attr) {
+            case SortAttribute.ROLE_NAME:
+                foundRoles = roleDAO.findAvailableForGroup(false, groupId);
+                break;
+            default:
+                throw new FinderException("Unrecognized sort attribute: " + attr);
+        }
+
+        log.debug("Found " + foundRoles.size() + " available roles for group " + groupId +
+                  " before permission checking");
+
+        HashSet<Integer> index = new HashSet<Integer>();
+        if (roleIds != null) {
+            index.addAll(Arrays.asList(roleIds));
+        }
+
+        // Grep out the specified roles
+        ArrayList<Role> roles = new ArrayList<Role>();
+
+        for (Role r : roles) {
+            if (!index.contains(r.getId())) {
+                roles.add(r);
+            }
+        }
+
+        log.debug("Found " + roles.size() + " available roles for group " + groupId + " after exclusions");
+
+        // AUTHZ Check - filter the viewable roles
+        roles = (ArrayList) filterViewableRoles(whoami, roles);
+
+        if (isRootRoleMember(whoami) && pc.getPagenum() == 0 && !index.contains(AuthzConstants.rootRoleId)) {
+            foundRoles = roleDAO.findAvailableForGroup(true, groupId);
+            for (Role role : foundRoles) {
+                if (role.getId().equals(AuthzConstants.rootRoleId)) {
+                    roles.add(role);
+                }
+            }
+        }
+
+        if (pc.isDescending()) {
+            Collections.reverse(roles);
+        }
+
+        log.debug("Found " + roles.size() + " available roles for group " + groupId + " after permission checking");
+
+        PageList<RoleValue> plist = rolePager.seek(roles, pc.getPagenum(), pc.getPagesize());
+        plist.setTotalSize(roles.size());
+
+        return plist;
+    }
+
+    /**
+     * Get the resource groups applicable to a given role
+     * 
+     * 
+     */
+    public PageList<ResourceGroupValue> getResourceGroupsByRoleIdAndSystem(AuthzSubject subject, Integer roleId,
+                                                                           boolean system, PageControl pc)
+        throws PermissionException, FinderException {
+        // first find the role by its id
+        roleDAO.findById(roleId);
+
+        // now check to make sure the user can list resource groups
+        Collection<ResourceGroup> groups;
+        pc = PageControl.initDefaults(pc, SortAttribute.RESGROUP_NAME);
+        int attr = pc.getSortattribute();
+
+        switch (attr) {
+            case SortAttribute.RESGROUP_NAME:
+                groups = resourceGroupDAO.findByRoleIdAndSystem_orderName(roleId, system, pc.isAscending());
+                break;
+
+            default:
+                throw new FinderException("Unrecognized sort attribute: " + attr);
+        }
+
+        // now get viewable group pks
+        groups = filterViewableGroups(subject, groups);
+
+        PageList<ResourceGroupValue> plist = groupPager.seek(groups, pc);
+        plist.setTotalSize(groups.size());
+
+        return plist;
+    }
+
+    /**
+     * Return the roles of a group
+     * 
+     * @throws PermissionException
+     * 
+     * 
+     */
+    public PageList<RoleValue> getResourceGroupRoles(AuthzSubject whoami, Integer groupId, PageControl pc)
+        throws PermissionException {
+        ResourceGroup resGrp = resourceGroupDAO.findById(groupId);
+
+        permissionManager.check(whoami.getId(), AuthzConstants.authzGroup, resGrp.getId(),
+            AuthzConstants.perm_viewResourceGroup);
+
+        Collection<Role> roles = resGrp.getRoles();
+
+        TreeMap<String, Role> map = new TreeMap<String, Role>();
+        for (Role role : roles) {
+            int attr = pc.getSortattribute();
+            switch (attr) {
+                case SortAttribute.ROLE_NAME:
+                default:
+                    map.put(role.getName(), role);
+            }
+        }
+
+        ArrayList<Role> list = new ArrayList<Role>(map.values());
+
+        if (pc.isDescending()) {
+            Collections.reverse(list);
+        }
+
+        PageList<RoleValue> plist = rolePager.seek(list, pc.getPagenum(), pc.getPagesize());
+        plist.setTotalSize(roles.size());
+
+        return plist;
+    }
+
+    /**
+     * Filter a collection of groupLocal objects to only include those viewable
+     * by the specified user
+     */
+    private Collection<ResourceGroup> filterViewableGroups(AuthzSubject who, Collection<ResourceGroup> groups)
+        throws PermissionException, FinderException {
+        // finally scope down to only the ones the user can see
+
+        List<Integer> viewable = permissionManager.findOperationScopeBySubject(who,
+            AuthzConstants.groupOpViewResourceGroup, AuthzConstants.groupResourceTypeName);
+
+        for (Iterator<ResourceGroup> i = groups.iterator(); i.hasNext();) {
+            ResourceGroup resGrp = i.next();
+
+            if (!viewable.contains(resGrp.getId())) {
+                i.remove();
+            }
+        }
+        return groups;
+    }
+
+    /**
+     * List the groups not in this role and not one of the specified groups.
+     * 
+     * @param whoami The current running user.
+     * @param roleId The id of the role.
+     * @return List of groups in this role.
+     * @throws PermissionException whoami is not allowed to perform listGroups
+     *         on this role.
+     * @throws FinderException
+     * 
+     */
+    public PageList<ResourceGroupValue> getAvailableResourceGroups(AuthzSubject whoami, Integer roleId,
+                                                                   Integer[] groupIds, PageControl pc)
+        throws PermissionException, FinderException {
+
+        Role role = roleDAO.findById(roleId);
+        Collection<ResourceGroup> noRoles;
+        Collection<ResourceGroup> otherRoles;
+        pc = PageControl.initDefaults(pc, SortAttribute.RESGROUP_NAME);
+        int attr = pc.getSortattribute();
+
+        switch (attr) {
+            case SortAttribute.RESGROUP_NAME:
+                noRoles = resourceGroupDAO.findWithNoRoles_orderName(pc.isAscending());
+                otherRoles = resourceGroupDAO.findByNotRoleId_orderName(role.getId(), pc.isAscending());
+                break;
+
+            default:
+                throw new FinderException("Unrecognized sort attribute: " + attr);
+        }
+
+        // FIXME- merging these two sorted lists probably causes the
+        // final list to not be sorted correctly. fix this by
+        // combining the two finders into one!
+        // FIX for 6924 - dont include duplicate groups
+        for (ResourceGroup groupEJB : otherRoles) {
+            if (!noRoles.contains(groupEJB)) {
+                noRoles.add(groupEJB);
+            }
+        }
+
+        // build an index of groupIds
+        int numToFind = (groupIds == null) ? 0 : groupIds.length;
+        HashSet<Integer> index = new HashSet<Integer>();
+        for (int i = 0; i < numToFind; i++) {
+            index.add(groupIds[i]);
+        }
+
+        // Add the groups that the role already owns
+        Collection<ResourceGroup> belongs = resourceGroupDAO.findByRoleIdAndSystem_orderName(roleId, false, true);
+        for (ResourceGroup s : belongs) {
+            index.add(s.getId());
+        }
+
+        // grep out the specified groups
+        Collection<ResourceGroup> groups = new ArrayList<ResourceGroup>(noRoles.size());
+        for (ResourceGroup s : noRoles) {
+            if (!index.contains(s.getId())) {
+                groups.add(s);
+            }
+        }
+
+        // AUTHZ Check
+        // finally scope down to only the ones the user can see
+        groups = filterViewableGroups(whoami, groups);
+
+        PageList<ResourceGroupValue> plist = groupPager.seek(groups, pc.getPagenum(), pc.getPagesize());
+
+        plist.setTotalSize(groups.size());
+
+        return plist;
+    }
+
+    /**
+     * List the subjects in this role.
+     * 
+     * @param whoami The current running user.
+     * @param roleId The id of the role.
+     * @return List of subjects in this role.
+     * @throws PermissionException whoami is not allowed to perform listSubjects
+     *         on this role.
+     * @throws FinderException if the sort attribute is not recognized
+     * 
+     * 
+     */
+    public PageList<AuthzSubjectValue> getSubjects(AuthzSubject whoami, Integer roleId, PageControl pc)
+        throws PermissionException, FinderException {
+        Role roleLocal = roleDAO.get(roleId);
+
+        if (roleLocal == null) {
+            return new PageList<AuthzSubjectValue>();
+        }
+
+        // check if this user is a member of this role
+        boolean roleHasUser = roleLocal.getSubjects().contains(whoami);
+        // check whether the user can see subjects other than himself
+        try {
+
+            permissionManager.check(whoami.getId(), resourceTypeDAO.findTypeResourceType(),
+                AuthzConstants.rootResourceId, AuthzConstants.subjectOpViewSubject);
+        } catch (PermissionException e) {
+            // if the user does not have permission to view subjects
+            // but he is in the role, return a collection with only one
+            // item... himself.
+            if (roleHasUser) {
+                PageList<AuthzSubjectValue> subjects = new PageList<AuthzSubjectValue>();
+                subjects.add(whoami.getAuthzSubjectValue());
+                subjects.setTotalSize(1);
+                return subjects;
+            }
+            // otherwise return an empty list
+            // fixes 5628 - user viewing role lacking view subjects
+            // causes permissionexception
+            return new PageList<AuthzSubjectValue>();
+        }
+        Collection<AuthzSubject> subjects;
+        pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
+
+        switch (pc.getSortattribute()) {
+            case SortAttribute.SUBJECT_NAME:
+                subjects = authzSubjectDAO.findByRoleId_orderName(roleLocal.getId(), pc.isAscending());
+                break;
+            default:
+                throw new FinderException("Unrecognized sort attribute: " + pc.getSortattribute());
+        }
+
+        PageList<AuthzSubjectValue> plist = new PageList<AuthzSubjectValue>();
+        plist = subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize());
+        plist.setTotalSize(subjects.size());
+
+        return plist;
+    }
+
+    /**
+     * List the subjects not in this role and not one of the specified subjects.
+     * 
+     * @param whoami The current running user.
+     * @param roleId The id of the role.
+     * @return List of subjects in this role.
+     * @throws FinderException Unable to find a given or dependent entities.
+     * @throws PermissionException whoami is not allowed to perform listSubjects
+     *         on this role.
+     * @throws FinderException if the sort attribute is not recognized
+     * 
+     * 
+     */
+    public PageList<AuthzSubjectValue> getAvailableSubjects(AuthzSubject whoami, Integer roleId, Integer[] subjectIds,
+                                                            PageControl pc) throws PermissionException, FinderException {
+        Role roleLocal = lookupRole(roleId);
+
+        /** TODO PermissionCheck scope for viewSubject **/
+        Collection<AuthzSubject> otherRoles;
+        pc = PageControl.initDefaults(pc, SortAttribute.SUBJECT_NAME);
+
+        switch (pc.getSortattribute()) {
+            case SortAttribute.SUBJECT_NAME:
+                otherRoles = authzSubjectDAO.findByNotRoleId_orderName(roleLocal.getId(), pc.isAscending());
+                break;
+            default:
+                throw new FinderException("Unrecognized sort attribute: " + pc.getSortattribute());
+        }
+
+        // build an index of subjectIds
+        int numToFind = subjectIds.length;
+        HashSet<Integer> index = new HashSet<Integer>(Arrays.asList(subjectIds));
+
+        // grep out the specified subjects
+        ArrayList<AuthzSubject> subjects = new ArrayList<AuthzSubject>(numToFind);
+        for (AuthzSubject subj : otherRoles) {
+            if (!index.contains(subj.getId())) {
+                subjects.add(subj);
+            }
+        }
+
+        PageList<AuthzSubjectValue> plist = new PageList<AuthzSubjectValue>();
+        plist = subjectPager.seek(subjects, pc.getPagenum(), pc.getPagesize());
+        plist.setTotalSize(subjects.size());
+
+        return plist;
+    }
+
+    /**
+     * Add subjects to this role.
+     * 
+     * @param whoami The current running user.
+     * @param id The ID of the role.
+     * @param sids Ids of ubjects to add to role.
+     * @throws PermissionException whoami is not allowed to perform addSubject
+     *         on this role.
+     * 
+     */
+    public void addSubjects(AuthzSubject whoami, Integer id, Integer[] sids) throws PermissionException {
+        Role role = lookupRole(id);
+        for (int i = 0; i < sids.length; i++) {
+            authzSubjectDAO.findById(sids[i]).addRole(role);
+        }
+    }
+
+    /**
+     * Remove subjects from this role.
+     * 
+     * @param whoami The current running user.
+     * @param id The ID of the role.
+     * @param ids The ids of the subjects to remove.
+     * @throws PermissionException whoami is not allowed to perform
+     *         removeSubject on this role.
+     * 
+     * 
+     */
+    public void removeSubjects(AuthzSubject whoami, Integer id, Integer[] ids) throws PermissionException {
+        Role roleLocal = lookupRole(id);
+        for (int i = 0; i < ids.length; i++) {
+            AuthzSubject subj = authzSubjectDAO.findById(ids[i]);
+            subj.removeRole(roleLocal);
+        }
+    }
+
+    /**
+     * Find all {@link Operation} objects
+     * 
+     * 
+     */
+    public Collection<Operation> findAllOperations() {
+        return operationDAO.findAllOrderByName();
+    }
+
+    protected Set toPojos(Object[] vals) {
+        Set ret = new HashSet();
+        if (vals == null || vals.length == 0) {
+            return ret;
+        }
+        for (int i = 0; i < vals.length; i++) {
+            if (vals[i] instanceof Operation) {
+                ret.add(vals[i]);
+            } else if (vals[i] instanceof ResourceValue) {
+                ret.add(lookupResource((ResourceValue) vals[i]));
+            } else if (vals[i] instanceof RoleValue) {
+                ret.add(roleDAO.findById(((RoleValue) vals[i]).getId()));
+            } else if (vals[i] instanceof ResourceGroupValue) {
+                ret.add(resourceGroupDAO.findById(((ResourceGroupValue) vals[i]).getId()));
+            } else {
+                log.error("Invalid type.");
+            }
+
+        }
+        return ret;
+    }
+
+    private Resource lookupResource(ResourceValue resource) {
+        if (resource.getId() == null) {
+            ResourceType type = resource.getResourceType();
+            return resourceDAO.findByInstanceId(type, resource.getInstanceId());
+        }
+        return resourceDAO.findById(resource.getId());
+    }
+
+    public static RoleManager getOne() {
+        return Bootstrap.getBean(RoleManager.class);
+    }
 }
