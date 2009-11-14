@@ -434,7 +434,7 @@ public class PlatformDAO extends HibernateDAO<Platform> {
         return dao.findVirtualByInstanceId(id, AuthzConstants.platformResType);
     }
 
-    public Collection findVirtualByProcessId(Integer id) {
+    public Collection<Platform> findVirtualByProcessId(Integer id) {
         VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO();
         Collection resources =
             dao.findVirtualByProcessId(id, AuthzConstants.platformResType);
@@ -446,7 +446,7 @@ public class PlatformDAO extends HibernateDAO<Platform> {
         return platforms;
     }
 
-    public Collection findVirtualByPhysicalId(Integer id) {
+    public Collection<Platform> findVirtualByPhysicalId(Integer id) {
         VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO();
         Collection resources =
             dao.findVirtualByPysicalId(id, AuthzConstants.platformResType);
