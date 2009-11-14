@@ -45,5 +45,8 @@
 			<property name="configLocation" value="classpath:/quartz.properties"/>
 		</bean>
 		
+		<!--  TODO replace with Spring's JMX support -->
+		<bean class="org.hyperic.hq.product.server.MBeanUtil" factory-method="getMBeanServer"/>
+		
 	
 </beans>

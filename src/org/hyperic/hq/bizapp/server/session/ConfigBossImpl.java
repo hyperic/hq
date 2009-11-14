@@ -27,8 +27,6 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.util.Properties;
 
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
@@ -38,87 +36,90 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
-import org.hyperic.hq.bizapp.shared.ConfigBossLocal;
-import org.hyperic.hq.bizapp.shared.ConfigBossUtil;
+import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
-import org.hyperic.hq.product.server.MBeanUtil;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.ConfigPropertyException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * A boss to provide bizapp client access to the configuration settings
- * @ejb:bean name="ConfigBoss"
- *      jndi-name="ejb/bizapp/ConfigBoss"
- *      local-jndi-name="LocalConfigBoss"
- *      view-type="both"
- *      type="Stateless"
- * @ejb:transaction type="Required"
  */
-public class ConfigBossEJBImpl 
-    extends BizappSessionEJB
-    implements SessionBean 
+@Service
+@Transactional
+public class ConfigBossImpl implements ConfigBoss
 {
-    private SessionManager sessionManager = SessionManager.getInstance();
+    private SessionManager sessionManager;
+    
+    private ServerConfigManagerLocal serverConfigManager;
+    
+    private PermissionManager permissionManager;  
+    
+    private MBeanServer mbeanServer;
 
-    private ServerConfigManagerLocal getCfgMan() {
-        return ServerConfigManagerEJBImpl.getOne();
+    @Autowired
+    public ConfigBossImpl(SessionManager sessionManager, ServerConfigManagerLocal serverConfigManager,
+                          PermissionManager permissionManager, MBeanServer mbeanServer) {
+        this.sessionManager = sessionManager;
+        this.serverConfigManager = serverConfigManager;
+        this.permissionManager = permissionManager;
+        this.mbeanServer = mbeanServer;
     }
 
     /**
      * Get the top-level configuration properties
-     * @ejb:interface-method
+     * 
      */
     public Properties getConfig() throws ConfigPropertyException {
-        return getCfgMan().getConfig();
+        return serverConfigManager.getConfig();
     }
 
     /**
      * Get the configuration properties for a specified prefix
-     * @ejb:interface-method
+     * 
      */
     public Properties getConfig(String prefix) throws ConfigPropertyException
     {
-        return getCfgMan().getConfig(prefix);
+        return serverConfigManager.getConfig(prefix);
     }
 
     /**
      * Set the top-level configuration properties
-     * @ejb:interface-method
+     * 
      */
     public void setConfig(int sessId, Properties props) 
         throws ApplicationException, ConfigPropertyException  
     {
         AuthzSubject subject = 
-            SessionManager.getInstance().getSubject(sessId);
-        getCfgMan().setConfig(subject, props);
+           sessionManager.getSubject(sessId);
+        serverConfigManager.setConfig(subject, props);
     }
 
     /**
      * Set the configuration properties for a prefix
-     * @ejb:interface-method
+     * 
      */
     public void setConfig(int sessId, String prefix, Properties props) 
         throws ApplicationException, ConfigPropertyException 
     {
         AuthzSubject subject = 
-            SessionManager.getInstance().getSubject(sessId);
-        getCfgMan().setConfig(subject, prefix, props);
+            sessionManager.getSubject(sessId);
+        serverConfigManager.setConfig(subject, prefix, props);
     }
 
     /**
      * Restart the config Service
-     * @ejb:interface-method
+     * 
      */
     public void restartConfig() {
         try {
-            MBeanServer server = MBeanUtil.getMBeanServer();
-
             ObjectName objName =
                 new ObjectName("hyperic.jmx:type=Service,name=ProductConfig");
-            server.invoke(objName, "restart", new Object[] {},
+            mbeanServer.invoke(objName, "restart", new Object[] {},
                           new String[] {});
         } catch (Exception e) {
             throw new SystemException(e);
@@ -129,30 +130,20 @@ public class ConfigBossEJBImpl
      * Perform routine database maintenance.  Must have admin permissions.
      * @return The time it took to vaccum, in milliseconds, or -1 if the 
      *         database is not PostgreSQL.
-     * @ejb:interface-method
+     * 
      */
     public long vacuum (int sessionId)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        PermissionManager pm = PermissionManagerFactory.getInstance();
-        if (!pm.hasAdminPermission(subject.getId())) {
+       
+        if (!permissionManager.hasAdminPermission(subject.getId())) {
             throw new PermissionException("Only admins can vacuum the DB");
         }
-        return getServerConfigManager().vacuum();
+        return serverConfigManager.vacuum();
     }
     
-    public static ConfigBossLocal getOne() {
-        try {
-            return ConfigBossUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    public static ConfigBoss getOne() {
+      return Bootstrap.getBean(ConfigBoss.class);
     }
-
-    public void ejbCreate() { }
-    public void ejbRemove() { }
-    public void ejbActivate() { }
-    public void ejbPassivate() { }
-    public void setSessionContext(SessionContext c) {}
 }

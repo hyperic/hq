@@ -46,7 +46,6 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
-import org.hyperic.hq.bizapp.shared.ConfigBossHome;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.ControlBossHome;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
@@ -78,9 +77,6 @@ public class ServiceLocator {
     
     private final static Class MEASURE_CLASS = MeasurementBossHome.class;
     private final static String MEASURE_NAME = MeasurementBossHome.JNDI_NAME;
-    
-    private final static Class CONFIG_CLASS = ConfigBossHome.class;
-    private final static String CONFIG_NAME = ConfigBossHome.JNDI_NAME;
 
     public static final Class EVENT_LOG_CLASS = EventLogBossHome.class;
     public static final String EVENT_LOG_NAME = EventLogBossHome.JNDI_NAME;
@@ -209,12 +205,7 @@ public class ServiceLocator {
      * @return An instance of the ConfigBoss
      */
     public ConfigBoss getConfigBoss() throws ServiceLocatorException {
-        ConfigBossHome home = (ConfigBossHome) lookup(CONFIG_NAME, CONFIG_CLASS);
-        try {
-            return (ConfigBoss) home.create();
-        } catch (Exception e) {
-            throw new ServiceLocatorException(e);
-        }
+       return Bootstrap.getBean(ConfigBoss.class);
     }
     
     /**

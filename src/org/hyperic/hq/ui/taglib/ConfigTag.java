@@ -102,9 +102,7 @@ public class ConfigTag extends VarSetterBaseTag {
             }
         } catch (NullPointerException npe) {
             log.error("Prop or Value attribute value is null", npe);
-        } catch (RemoteException re) {
-            log.error("RemoteException throw while retrieving config", re);
-		} catch (ConfigPropertyException cpe) {
+        } catch (ConfigPropertyException cpe) {
             log.error("ConfigPropertyException thrown while retrieving config", cpe);
 		}
 
