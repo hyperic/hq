@@ -202,13 +202,13 @@ public class MxServerDetector
         return query.toString();
     }
 
-    protected class MxProcess {
+    public class MxProcess {
         long _pid;
         String _installpath;
         String[] _args;
         String _url;
 
-        protected MxProcess(long pid,
+        public MxProcess(long pid,
                             String[] args,
                             String installpath) {
             _pid = pid;
