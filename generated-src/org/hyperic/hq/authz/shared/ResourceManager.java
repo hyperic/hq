@@ -13,7 +13,6 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
-import org.hyperic.hq.auth.shared.SubjectNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceEdge;
@@ -229,5 +228,7 @@ public interface ResourceManager {
         throws PermissionException;
 
     public ResourceRelation getContainmentRelation();
+    
+    ResourceRelation getNetworkRelation();
 
 }

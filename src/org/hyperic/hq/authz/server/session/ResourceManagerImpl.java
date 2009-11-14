@@ -882,6 +882,10 @@ public class ResourceManagerImpl implements ResourceManager {
     public ResourceRelation getContainmentRelation() {
         return resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID);
     }
+    
+    public ResourceRelation getNetworkRelation() {
+        return resourceRelationDAO.findById(AuthzConstants.RELATION_NETWORK_ID);
+    }
 
     public static ResourceManager getOne() {
         return Bootstrap.getBean(ResourceManager.class);
