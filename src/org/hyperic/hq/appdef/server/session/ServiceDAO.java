@@ -380,7 +380,7 @@ public class ServiceDAO extends HibernateDAO
         return dao.findVirtualByInstanceId(id, AuthzConstants.serviceResType);
     }
 
-    public Collection findVirtualByProcessId(Integer id) {
+    public Collection<Service> findVirtualByProcessId(Integer id) {
         VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO();
         Collection resources =
             dao.findVirtualByProcessId(id, AuthzConstants.serviceResType);
@@ -392,7 +392,7 @@ public class ServiceDAO extends HibernateDAO
         return services;
     }
 
-    public Collection findVirtualByPysicalId(Integer id) {
+    public Collection<Service> findVirtualByPysicalId(Integer id) {
         VirtualDAO dao = DAOFactory.getDAOFactory().getVirtualDAO();
         Collection resources =
             dao.findVirtualByPysicalId(id, AuthzConstants.serviceResType);

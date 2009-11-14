@@ -108,11 +108,7 @@
 			<local-jndi-name>LocalDataManager</local-jndi-name>
 
 		</session>
-		<session>
-			<ejb-name>VirtualManager</ejb-name>
-			<local-jndi-name>LocalVirtualManager</local-jndi-name>
-
-		</session>
+		
 		<session>
 			<ejb-name>LiveDataBoss</ejb-name>
 			<local-jndi-name>LocalLiveDataBoss</local-jndi-name>
