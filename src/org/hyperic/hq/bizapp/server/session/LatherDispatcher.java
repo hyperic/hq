@@ -7,7 +7,8 @@ import org.hyperic.lather.LatherValue;
 public interface LatherDispatcher {
 
     void destroy();
-    LatherValue dispatch(LatherContext ctx, String method, 
-                         LatherValue arg) throws LatherRemoteException;
+
+    LatherValue dispatch(LatherContext ctx, String method, LatherValue arg) throws LatherRemoteException;
+
     boolean methIsTransactional(String meth);
 }

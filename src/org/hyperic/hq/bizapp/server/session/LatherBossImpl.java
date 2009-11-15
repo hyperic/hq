@@ -42,73 +42,61 @@ import org.springframework.transaction.annotation.Transactional;
  */
 
 @Transactional
-public class LatherBossImpl
-    implements LatherBoss
-{
-    private final Log log =
-        LogFactory.getLog(LatherBossImpl.class.getName());
+public class LatherBossImpl implements LatherBoss {
+    private final Log log = LogFactory.getLog(LatherBossImpl.class.getName());
 
     private LatherDispatcher dispatcher;
-    
-    
-   
+
     public LatherBossImpl(LatherDispatcher dispatcher) {
         this.dispatcher = dispatcher;
     }
+
     @PreDestroy
     public void destroyDispatcher() {
         if (dispatcher != null) {
             dispatcher.destroy();
         }
     }
+
     /**
      * 
      */
-    public LatherValue dispatchWithTx(LatherContext ctx, String method, 
-                                      LatherValue arg)
-        throws LatherRemoteException
-    {
-        
-       return dispatchWithoutTx(ctx, method, arg);
-        
+    public LatherValue dispatchWithTx(LatherContext ctx, String method, LatherValue arg) throws LatherRemoteException {
+
+        return dispatchWithoutTx(ctx, method, arg);
+
     }
 
     /**
      * 
      * 
      */
-    public LatherValue dispatchWithoutTx(LatherContext ctx, String method, 
-                                         LatherValue arg)
-        throws LatherRemoteException
-    {
+    public LatherValue dispatchWithoutTx(LatherContext ctx, String method, LatherValue arg)
+        throws LatherRemoteException {
         try {
             return dispatcher.dispatch(ctx, method, arg);
-        } catch(RuntimeException exc){
+        } catch (RuntimeException exc) {
             log.error("Error dispatching method '" + method + "'", exc);
-            throw new LatherRemoteException("Runtime exception: " + 
-                                            exc.getMessage());
+            throw new LatherRemoteException("Runtime exception: " + exc.getMessage());
         }
     }
 
     /**
-     * The main dispatch command which is called via the JBoss-lather 
-     * servlet.  It is the responsibility of this routine to take the
-     * method/args, and route it to the correct method.
-     *
-     * @param ctx     Information about the remote caller
-     * @param method  Name of the method to invoke
-     * @param arg     LatherValue argument object to pass to the method
-     *
-     * @return an instantiated subclass of the LatherValue class, 
-     *         representing the result of the invoked method
-     *
+     * The main dispatch command which is called via the JBoss-lather servlet.
+     * It is the responsibility of this routine to take the method/args, and
+     * route it to the correct method.
+     * 
+     * @param ctx Information about the remote caller
+     * @param method Name of the method to invoke
+     * @param arg LatherValue argument object to pass to the method
+     * 
+     * @return an instantiated subclass of the LatherValue class, representing
+     *         the result of the invoked method
+     * 
      * 
      * 
      */
-    public LatherValue dispatch(LatherContext ctx, String method, 
-                                LatherValue arg)
-        throws LatherRemoteException
-    {
+    public LatherValue dispatch(LatherContext ctx, String method, LatherValue arg) throws LatherRemoteException {
         if (dispatcher.methIsTransactional(method)) {
             return dispatchWithTx(ctx, method, arg);
         } else {
@@ -116,7 +104,6 @@ public class LatherBossImpl
         }
     }
 
-   
     public static LatherBoss getOne() {
         return Bootstrap.getBean(LatherBoss.class);
     }
