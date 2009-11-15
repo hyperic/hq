@@ -48,7 +48,7 @@ import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.events.shared.HierarchicalAlertingManagerInterface;
+import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.util.pager.PageControl;
 
@@ -555,6 +555,6 @@ public abstract class PermissionManager   {
     /**
      * Return the HierarchicalAlertingManager implementation
      */
-    public abstract HierarchicalAlertingManagerInterface getHierarchicalAlertingManager();
+    public abstract HierarchicalAlertingManager getHierarchicalAlertingManager();
 
 }

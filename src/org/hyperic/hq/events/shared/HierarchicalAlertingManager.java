@@ -27,7 +27,10 @@ package org.hyperic.hq.events.shared;
 
 import java.util.Map;
 
-public interface HierarchicalAlertingManagerInterface {
+import org.hyperic.hq.measurement.ext.MeasurementEvent;
+import org.hyperic.hq.measurement.server.session.ResourceDataPoint;
+
+public interface HierarchicalAlertingManager {
 
     /**
      * Determine whether the measurement events can
@@ -36,11 +39,11 @@ public interface HierarchicalAlertingManagerInterface {
      * @param events Map<Integer, MeasurementEvent> Integer => Resource.getId()
      * @param isFromAgent --> indicates whether the events came from the agent or backfiller
      */
-    public void suppressMeasurementEvents(Map events, boolean isFromAgent);
+    public void suppressMeasurementEvents(Map<Integer,MeasurementEvent> events, boolean isFromAgent);
     
     /**
      * Perform a simple "secondary" availability check for down platforms.
      */
-    public void performSecondaryAvailabilityCheck(Map downPlatforms);
+    public void performSecondaryAvailabilityCheck(Map<Integer,ResourceDataPoint> downPlatforms);
 
 }

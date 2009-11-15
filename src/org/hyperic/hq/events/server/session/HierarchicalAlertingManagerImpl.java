@@ -26,66 +26,48 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.Map;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.events.shared.HierarchicalAlertingManagerInterface;
-import org.hyperic.hq.events.shared.HierarchicalAlertingManagerLocal;
-import org.hyperic.hq.events.shared.HierarchicalAlertingManagerUtil;
-import org.hyperic.hq.measurement.server.session.DataPoint;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
+import org.hyperic.hq.measurement.ext.MeasurementEvent;
+import org.hyperic.hq.measurement.server.session.ResourceDataPoint;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The HierarchicalAlertingManager provides APIs to manage alert suppression.
  *
- * @ejb:bean name="HierarchicalAlertingManager"
- *      jndi-name="ejb/events/HierarchicalAlertingManager"
- *      local-jndi-name="LocalHierarchicalAlertingManager"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:interface local-extends="HierarchicalAlertingManagerInterface, javax.ejb.EJBLocalObject"
- * @ejb:transaction type="Required"
  *
  */
-public class HierarchicalAlertingManagerEJBImpl 
-    implements HierarchicalAlertingManagerInterface, SessionBean
+@Service
+@Transactional
+public class HierarchicalAlertingManagerImpl 
+    implements HierarchicalAlertingManager
 {   
     /**
      * Determine whether the measurement events can
      * be suppressed as part of hierarchical alerting
      * 
-     * @ejb:interface-method
+     * 
      */
-    public void suppressMeasurementEvents(Map events, boolean isFromAgent) {
+    public void suppressMeasurementEvents(Map<Integer,MeasurementEvent> events, boolean isFromAgent) {
         //
     }
 
     /**
      * Perform a simple "secondary" availability check for down platforms.
      * 
-     * @ejb:interface-method
+     * 
      */
-    public void performSecondaryAvailabilityCheck(Map downPlatforms) {
-        //
+    public void performSecondaryAvailabilityCheck(Map<Integer, ResourceDataPoint> downPlatforms) {
+        //   
     }
 
     /**
      * Get local home object
      */
-    public static HierarchicalAlertingManagerLocal getOne() {
-        try {
-            return HierarchicalAlertingManagerUtil.getLocalHome().create();
-        } catch(Exception e) { 
-            throw new SystemException(e);
-        }
+    public static HierarchicalAlertingManager getOne() {
+       return Bootstrap.getBean(HierarchicalAlertingManager.class);
     }
-    
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
+  
 }

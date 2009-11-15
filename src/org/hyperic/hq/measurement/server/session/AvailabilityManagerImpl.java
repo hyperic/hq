@@ -506,7 +506,7 @@ public class AvailabilityManagerImpl
      * @return Map<Integer, MetricValue> Integer => Measurement.getId()
      * 
      */
-    public Map<Integer, MetricValue> getLastAvail(Collection<Object> resources,
+    public Map<Integer, MetricValue> getLastAvail(Collection<? extends Object> resources,
                                                   Map<Integer, List<Measurement>> measCache) {
         final Set<Integer> midsToGet = new HashSet<Integer>(resources.size());
         final List<Resource> resToGet = new ArrayList<Resource>(resources.size());
