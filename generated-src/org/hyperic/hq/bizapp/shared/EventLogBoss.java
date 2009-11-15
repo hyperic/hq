@@ -13,42 +13,53 @@ import org.hyperic.hq.events.server.session.EventLog;
 /**
  * Local interface for EventLogBoss.
  */
-public interface EventLogBoss
-{
-   /**
-    * Find events based on event type and time range for a resource
-    * @param eventType Event classname (ControlEvent.class.getName())
-    * @return List of EventLogValue objects or an empty List if no events are found
-    */
-   public List<EventLog> getEvents( int sessionId,String eventType,AppdefEntityID id,long beginTime,long endTime ) throws SessionNotFoundException, SessionTimeoutException;
+public interface EventLogBoss {
+    /**
+     * Find events based on event type and time range for a resource
+     * @param eventType Event classname (ControlEvent.class.getName())
+     * @return List of EventLogValue objects or an empty List if no events are
+     *         found
+     */
+    public List<EventLog> getEvents(int sessionId, String eventType, AppdefEntityID id, long beginTime, long endTime)
+        throws SessionNotFoundException, SessionTimeoutException;
 
-   /**
-    * Find events based on event type and time range for multiple resources
-    * @param eventType Event classname (ControlEvent.class.getName())
-    * @return List of EventLogValue objects or an empty List if no events are found
-    */
-   public List<EventLog> getEvents( int sessionId,String eventType,org.hyperic.hq.appdef.shared.AppdefEntityID[] ids,long beginTime,long endTime ) throws SessionNotFoundException, SessionTimeoutException;
+    /**
+     * Find events based on event type and time range for multiple resources
+     * @param eventType Event classname (ControlEvent.class.getName())
+     * @return List of EventLogValue objects or an empty List if no events are
+     *         found
+     */
+    public List<EventLog> getEvents(int sessionId, String eventType, org.hyperic.hq.appdef.shared.AppdefEntityID[] ids,
+                                    long beginTime, long endTime) throws SessionNotFoundException,
+        SessionTimeoutException;
 
-   /**
-    * Find events based on event type and time range for multiple resources
-    * @param eventTypes Array of event class names. (ControlEvent.class.getName())
-    * @return List of EventLogValue objects or an empty List if no events are found
-    */
-   public List<EventLog> getEvents( int sessionId,AppdefEntityID aeid,java.lang.String[] eventTypes,long beginTime,long endTime ) throws SessionNotFoundException, SessionTimeoutException;
+    /**
+     * Find events based on event type and time range for multiple resources
+     * @param eventTypes Array of event class names.
+     *        (ControlEvent.class.getName())
+     * @return List of EventLogValue objects or an empty List if no events are
+     *         found
+     */
+    public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid, java.lang.String[] eventTypes, long beginTime,
+                                    long endTime) throws SessionNotFoundException, SessionTimeoutException;
 
-   /**
-    * Find events based on status and time range for multiple resources
-    * @return List of EventLogValue objects or an empty List if no events are found
-    */
-   public List<EventLog> getEvents( int sessionId,AppdefEntityID aeid,String status,long beginTime,long endTime ) throws SessionNotFoundException, SessionTimeoutException;
+    /**
+     * Find events based on status and time range for multiple resources
+     * @return List of EventLogValue objects or an empty List if no events are
+     *         found
+     */
+    public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid, String status, long beginTime, long endTime)
+        throws SessionNotFoundException, SessionTimeoutException;
 
-   /**
-    * Get an array of boolean indicating if logs exist per interval, for an entity over a given time range.
-    * @param aeid the entity ID
-    * @return boolean array indicating if logs exist per interval.
-    */
-   public boolean[] logsExistPerInterval( int sessionId,AppdefEntityID aeid,long beginTime,long endTime,int intervals ) throws SessionNotFoundException, SessionTimeoutException;
+    /**
+     * Get an array of boolean indicating if logs exist per interval, for an
+     * entity over a given time range.
+     * @param aeid the entity ID
+     * @return boolean array indicating if logs exist per interval.
+     */
+    public boolean[] logsExistPerInterval(int sessionId, AppdefEntityID aeid, long beginTime, long endTime,
+                                          int intervals) throws SessionNotFoundException, SessionTimeoutException;
 
-   public void startup(  ) ;
+    public void startup();
 
 }

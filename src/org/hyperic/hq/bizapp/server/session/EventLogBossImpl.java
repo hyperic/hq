@@ -47,9 +47,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/** 
+/**
  * The BizApp's interface to the Events/Logs
- *
+ * 
  * 
  */
 @Service
@@ -57,13 +57,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class EventLogBossImpl implements EventLogBoss {
 
     private final Log log = LogFactory.getLog(EventLogBossImpl.class);
-    
+
     private EventLogManager eventLogManager;
 
     private SessionManager sessionManager;
-    
+
     private HQApp hqApp;
-    
+
     @Autowired
     public EventLogBossImpl(EventLogManager eventLogManager, SessionManager sessionManager, HQApp hqApp) {
         this.eventLogManager = eventLogManager;
@@ -73,103 +73,85 @@ public class EventLogBossImpl implements EventLogBoss {
 
     /**
      * Find events based on event type and time range for a resource
-     *
-     * @param eventType Event classname (ControlEvent.class.getName())
-     * @return List of EventLogValue objects or an empty List if
-     *         no events are found
      * 
-     *  
+     * @param eventType Event classname (ControlEvent.class.getName())
+     * @return List of EventLogValue objects or an empty List if no events are
+     *         found
+     * 
+     * 
      */
-    public List<EventLog> getEvents(int sessionId, String eventType, AppdefEntityID id, 
-                          long beginTime, long endTime)
-        throws SessionNotFoundException, SessionTimeoutException
-    {
+    public List<EventLog> getEvents(int sessionId, String eventType, AppdefEntityID id, long beginTime, long endTime)
+        throws SessionNotFoundException, SessionTimeoutException {
         // We ignore the subject for now
         sessionManager.authenticate(sessionId);
-        return getEvents(sessionId, eventType, new AppdefEntityID[] { id },
-                         beginTime, endTime);
+        return getEvents(sessionId, eventType, new AppdefEntityID[] { id }, beginTime, endTime);
     }
 
     /**
-     * Find events based on event type and time range for multiple
-     * resources
-     *
+     * Find events based on event type and time range for multiple resources
+     * 
      * @param eventType Event classname (ControlEvent.class.getName())
-     * @return List of EventLogValue objects or an empty List if
-     *         no events are found
+     * @return List of EventLogValue objects or an empty List if no events are
+     *         found
      * 
      * 
      */
-    public List<EventLog> getEvents(int sessionId, String eventType, 
-                          AppdefEntityID ids[],
-                          long beginTime, long endTime)
-        throws SessionNotFoundException, SessionTimeoutException 
-    {
+    public List<EventLog> getEvents(int sessionId, String eventType, AppdefEntityID ids[], long beginTime, long endTime)
+        throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         List<EventLog> events = new ArrayList<EventLog>();
-    
-        for (int i=0; i <ids.length; i++) {
-            events.addAll(eventLogManager.findLogs(ids[i], subject, 
-                                            new String[] { eventType },
-                                            beginTime, endTime));
+
+        for (int i = 0; i < ids.length; i++) {
+            events.addAll(eventLogManager.findLogs(ids[i], subject, new String[] { eventType }, beginTime, endTime));
         }
-    
+
         return events;
     }
 
     /**
-     * Find events based on event type and time range for multiple
-     * resources
-     *
-     * @param eventTypes Array of event class names. (ControlEvent.class.getName())
-     * @return List of EventLogValue objects or an empty List if
-     *         no events are found
+     * Find events based on event type and time range for multiple resources
+     * 
+     * @param eventTypes Array of event class names.
+     *        (ControlEvent.class.getName())
+     * @return List of EventLogValue objects or an empty List if no events are
+     *         found
      * 
      * 
      */
-    public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid,
-                          String[] eventTypes, long beginTime, long endTime)
-        throws SessionNotFoundException, SessionTimeoutException 
-    {
+    public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid, String[] eventTypes, long beginTime,
+                                    long endTime) throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubject user = sessionManager.getSubject(sessionId);
         return eventLogManager.findLogs(aeid, user, eventTypes, beginTime, endTime);
     }
 
     /**
-     * Find events based on status and time range for multiple
-     * resources
-     *
-     * @return List of EventLogValue objects or an empty List if
-     *         no events are found
+     * Find events based on status and time range for multiple resources
+     * 
+     * @return List of EventLogValue objects or an empty List if no events are
+     *         found
      * 
      * 
      */
-    public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid,
-                          String status, long beginTime, long endTime)
-        throws SessionNotFoundException, SessionTimeoutException 
-    {
+    public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid, String status, long beginTime, long endTime)
+        throws SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return eventLogManager.findLogs(aeid, subject, status, beginTime, endTime);
     }
 
-    /** 
-     * Get an array of boolean indicating if logs exist per interval, 
-     * for an entity over a given time range.
-     *
+    /**
+     * Get an array of boolean indicating if logs exist per interval, for an
+     * entity over a given time range.
+     * 
      * @param aeid the entity ID
      * @return boolean array indicating if logs exist per interval.
      * 
      * 
      */
-    public boolean[] logsExistPerInterval(int sessionId, AppdefEntityID aeid,
-                                          long beginTime, long endTime,
-                                          int intervals)
-        throws SessionNotFoundException, SessionTimeoutException 
-    {
+    public boolean[] logsExistPerInterval(int sessionId, AppdefEntityID aeid, long beginTime, long endTime,
+                                          int intervals) throws SessionNotFoundException, SessionTimeoutException {
         // We ignore the subject for now.
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return eventLogManager.logsExistPerInterval(aeid, subject, beginTime, endTime,
-                                             intervals);
+        return eventLogManager.logsExistPerInterval(aeid, subject, beginTime, endTime, intervals);
     }
 
     /**
@@ -178,19 +160,15 @@ public class EventLogBossImpl implements EventLogBoss {
     public void startup() {
         log.info("Event Log Boss starting up!");
 
-        
+        hqApp.registerCallbackListener(ResourceDeleteCallback.class, new ResourceDeleteCallback() {
+            public void preResourceDelete(Resource r) throws VetoException {
 
-        hqApp.registerCallbackListener(ResourceDeleteCallback.class,
-            new ResourceDeleteCallback() {
-                public void preResourceDelete(Resource r) throws VetoException {
-                   
-                    eventLogManager.deleteLogs(r);
-                }
+                eventLogManager.deleteLogs(r);
             }
-        );
+        });
     }
 
     public static EventLogBoss getOne() {
-       return Bootstrap.getBean(EventLogBoss.class);
+        return Bootstrap.getBean(EventLogBoss.class);
     }
 }
