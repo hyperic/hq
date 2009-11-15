@@ -34,6 +34,7 @@ import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.measurement.galerts.MetricAuxLog;
 import org.hyperic.hq.measurement.shared.MetricAuxLogManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,26 +43,25 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class MetricAuxLogManagerImpl implements MetricAuxLogManager
-{
+public class MetricAuxLogManagerImpl implements MetricAuxLogManager {
     private static final int CHUNKSIZE = 500;
-
-    
 
     private MetricAuxLogDAO metricAuxLogDAO;
 
-    public static MetricAuxLogManager getOne() {
-       return Bootstrap.getBean(MetricAuxLogManager.class);
+    @Autowired
+    public MetricAuxLogManagerImpl(MetricAuxLogDAO metricAuxLogDAO) {
+        this.metricAuxLogDAO = metricAuxLogDAO;
     }
 
-   
+    public static MetricAuxLogManager getOne() {
+        return Bootstrap.getBean(MetricAuxLogManager.class);
+    }
 
     /**
      * 
      */
     public MetricAuxLogPojo create(GalertAuxLog log, MetricAuxLog logInfo) {
-        MetricAuxLogPojo metricLog =
-            new MetricAuxLogPojo(log, logInfo, log.getAlert().getAlertDef());
+        MetricAuxLogPojo metricLog = new MetricAuxLogPojo(log, logInfo, log.getAlert().getAlertDef());
 
         metricAuxLogDAO.save(metricLog);
         return metricLog;
@@ -82,22 +82,22 @@ public class MetricAuxLogManagerImpl implements MetricAuxLogManager
     }
 
     /**
-     * Callback, invoked when metrics are deleted.  Since we still want to keep
+     * Callback, invoked when metrics are deleted. Since we still want to keep
      * the measurement around, we delete the value from the metric_aux_log and
      * transform the entry in the galert_aux_log to a regular entry.
-     *
+     * 
      * 
      */
     public void metricsDeleted(Collection<Integer> mids) {
-    	if (mids != null) {
-    		
-    		List<Integer> asList = (mids instanceof List<?> ? (List<Integer>) mids : new ArrayList<Integer>(mids));
+        if (mids != null) {
+
+            List<Integer> asList = (mids instanceof List<?> ? (List<Integer>) mids : new ArrayList<Integer>(mids));
 
             for (int i = 0; i < asList.size(); i += CHUNKSIZE) {
                 int end = Math.min(i + CHUNKSIZE, asList.size());
-            	metricAuxLogDAO.resetAuxType(asList.subList(i, end));
-            	metricAuxLogDAO.deleteByMetricIds(asList.subList(i, end));
+                metricAuxLogDAO.resetAuxType(asList.subList(i, end));
+                metricAuxLogDAO.deleteByMetricIds(asList.subList(i, end));
             }
-    	}
+        }
     }
 }

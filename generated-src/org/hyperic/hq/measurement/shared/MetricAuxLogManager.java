@@ -13,18 +13,19 @@ import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
 /**
  * Local interface for MetricAuxLogManager.
  */
-public interface MetricAuxLogManager
-{
+public interface MetricAuxLogManager {
 
-   public MetricAuxLogPojo create( GalertAuxLog log,MetricAuxLog logInfo ) ;
+    public MetricAuxLogPojo create(GalertAuxLog log, MetricAuxLog logInfo);
 
-   public void removeAll( GalertDef def ) ;
+    public void removeAll(GalertDef def);
 
-   public MetricAuxLogPojo find( GalertAuxLog log ) ;
+    public MetricAuxLogPojo find(GalertAuxLog log);
 
-   /**
-    * Callback, invoked when metrics are deleted. Since we still want to keep the measurement around, we delete the value from the metric_aux_log and transform the entry in the galert_aux_log to a regular entry.
-    */
-   public void metricsDeleted( Collection<Integer> mids ) ;
+    /**
+     * Callback, invoked when metrics are deleted. Since we still want to keep
+     * the measurement around, we delete the value from the metric_aux_log and
+     * transform the entry in the galert_aux_log to a regular entry.
+     */
+    public void metricsDeleted(Collection<Integer> mids);
 
 }

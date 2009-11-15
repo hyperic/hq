@@ -36,7 +36,6 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.type.IntegerType;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.dao.HibernateDAO;
@@ -45,8 +44,10 @@ import org.hyperic.hq.galerts.server.session.GalertAuxLogProvider;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
 @Repository
-public class MetricAuxLogDAO extends HibernateDAO<MetricAuxLogPojo> {
+public class MetricAuxLogDAO
+    extends HibernateDAO<MetricAuxLogPojo> {
     private static Log _log = LogFactory.getLog(MetricAuxLogDAO.class);
 
     @Autowired
@@ -55,7 +56,7 @@ public class MetricAuxLogDAO extends HibernateDAO<MetricAuxLogPojo> {
     }
 
     MetricAuxLogPojo findById(Integer id) {
-        return (MetricAuxLogPojo)super.findById(id);
+        return (MetricAuxLogPojo) super.findById(id);
     }
 
     void save(MetricAuxLogPojo log) {
@@ -67,33 +68,28 @@ public class MetricAuxLogDAO extends HibernateDAO<MetricAuxLogPojo> {
     }
 
     int deleteByMetricIds(Collection<Integer> ids) {
-        final String hql =
-            "delete from MetricAuxLogPojo where metric.id in (:ids)";
+        final String hql = "delete from MetricAuxLogPojo where metric.id in (:ids)";
 
         Session session = getSession();
         HQDialect dialect = Util.getHQDialect();
         int maxExprs;
         if (-1 == (maxExprs = dialect.getMaxExpressions())) {
-            return session.createQuery(hql)
-                .setParameterList("ids", ids)
-                .executeUpdate();
+            return session.createQuery(hql).setParameterList("ids", ids).executeUpdate();
         }
 
         int count = 0;
         ArrayList<Integer> subIds = new ArrayList<Integer>(maxExprs);
-        for (Iterator<Integer> it = ids.iterator(); it.hasNext(); ) {
+        for (Iterator<Integer> it = ids.iterator(); it.hasNext();) {
             subIds.clear();
 
             for (int i = 0; i < maxExprs && it.hasNext(); i++) {
                 subIds.add(it.next());
             }
 
-            count += session.createQuery(hql).setParameterList("ids", subIds)
-                            .executeUpdate();
+            count += session.createQuery(hql).setParameterList("ids", subIds).executeUpdate();
 
             if (_log.isDebugEnabled()) {
-                _log.debug("deleteByMetricIds() " + subIds.size() + " of " +
-                           ids.size() + " metric IDs");
+                _log.debug("deleteByMetricIds() " + subIds.size() + " of " + ids.size() + " metric IDs");
             }
         }
 
@@ -101,9 +97,7 @@ public class MetricAuxLogDAO extends HibernateDAO<MetricAuxLogPojo> {
     }
 
     MetricAuxLogPojo find(GalertAuxLog log) {
-        return (MetricAuxLogPojo) createCriteria()
-            .add(Expression.eq("auxLog", log))
-            .uniqueResult();
+        return (MetricAuxLogPojo) createCriteria().add(Expression.eq("auxLog", log)).uniqueResult();
     }
 
     Collection find(Collection mids) {
@@ -112,19 +106,16 @@ public class MetricAuxLogDAO extends HibernateDAO<MetricAuxLogPojo> {
         String sql = "from MetricAuxLogPojo p where p.metric.id in (:metrics)";
         int maxExprs;
         if (-1 == (maxExprs = dialect.getMaxExpressions())) {
-            return getSession()
-                .createQuery(sql).setParameterList("metrics", mids).list();
+            return getSession().createQuery(sql).setParameterList("metrics", mids).list();
         }
-        int i=0;
+        int i = 0;
         ArrayList metrics = new ArrayList(maxExprs);
-        for (Iterator it=mids.iterator(); it.hasNext(); i++) {
+        for (Iterator it = mids.iterator(); it.hasNext(); i++) {
             if (i != 0 && (i % maxExprs) == 0) {
                 metrics.add(it.next());
-                rtn.addAll(getSession()
-                    .createQuery(sql)
-                    .setParameterList("metrics", metrics).list());
+                rtn.addAll(getSession().createQuery(sql).setParameterList("metrics", metrics).list());
                 metrics.clear();
-            } else  {
+            } else {
                 metrics.add(it.next());
                 continue;
             }
@@ -135,39 +126,32 @@ public class MetricAuxLogDAO extends HibernateDAO<MetricAuxLogPojo> {
     void removeAll(GalertDef def) {
         String sql = "delete from MetricAuxLogPojo p where p.alertDef = :def";
 
-        getSession().createQuery(sql)
-                    .setParameter("def", def)
-                    .executeUpdate();
+        getSession().createQuery(sql).setParameter("def", def).executeUpdate();
     }
 
     /**
-     * Resets the associated type between an aux log and other subsystems
-     * (such as metrics, resource, etc.)
+     * Resets the associated type between an aux log and other subsystems (such
+     * as metrics, resource, etc.)
      */
     void resetAuxType(Collection<Integer> mids) {
-        String hql = "update GalertAuxLog g set g.auxType = :type " +
-                     "where exists (select p.id from MetricAuxLogPojo p " +
-                                   "where p.auxLog = g and " +
-                                         "p.metric.id in (:metrics))";
+        String hql = "update GalertAuxLog g set g.auxType = :type "
+                     + "where exists (select p.id from MetricAuxLogPojo p " + "where p.auxLog = g and "
+                     + "p.metric.id in (:metrics))";
 
         HQDialect dialect = Util.getHQDialect();
         int maxExprs;
         if (-1 == (maxExprs = dialect.getMaxExpressions())) {
-            getSession().createQuery(hql)
-                .setInteger("type", GalertAuxLogProvider.INSTANCE.getCode())
-                .setParameterList("metrics", mids, new IntegerType())
-                .executeUpdate();
+            getSession().createQuery(hql).setInteger("type", GalertAuxLogProvider.INSTANCE.getCode()).setParameterList(
+                "metrics", mids, new IntegerType()).executeUpdate();
             return;
         }
-        int i=0;
+        int i = 0;
         ArrayList metrics = new ArrayList(maxExprs);
-        for (Iterator it=mids.iterator(); it.hasNext(); i++) {
+        for (Iterator it = mids.iterator(); it.hasNext(); i++) {
             if (i != 0 && (i % maxExprs) == 0) {
                 metrics.add(it.next());
-                getSession().createQuery(hql)
-                    .setInteger("type", GalertAuxLogProvider.INSTANCE.getCode())
-                    .setParameterList("metrics", metrics, new IntegerType())
-                    .executeUpdate();
+                getSession().createQuery(hql).setInteger("type", GalertAuxLogProvider.INSTANCE.getCode())
+                    .setParameterList("metrics", metrics, new IntegerType()).executeUpdate();
                 metrics.clear();
             } else {
                 metrics.add(it.next());
