@@ -54,9 +54,9 @@ import org.hyperic.hq.authz.server.session.RoleDAO;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.events.server.session.HierarchicalAlertingManagerEJBImpl;
+import org.hyperic.hq.events.server.session.HierarchicalAlertingManagerImpl;
 import org.hyperic.hq.events.server.session.MaintenanceEventManagerImpl;
-import org.hyperic.hq.events.shared.HierarchicalAlertingManagerInterface;
+import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.jdbc.DBUtil;
@@ -587,7 +587,7 @@ public class PermissionManagerImpl
     	return CloningBossImpl.getOne();
     }
 
-    public HierarchicalAlertingManagerInterface getHierarchicalAlertingManager() {
-        return HierarchicalAlertingManagerEJBImpl.getOne();
+    public HierarchicalAlertingManager getHierarchicalAlertingManager() {
+        return HierarchicalAlertingManagerImpl.getOne();
     }
 }

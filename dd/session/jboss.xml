@@ -25,11 +25,7 @@
 		</session>
 		
 
-		<session>
-			<ejb-name>HierarchicalAlertingManager</ejb-name>
-			<local-jndi-name>LocalHierarchicalAlertingManager</local-jndi-name>
-
-		</session>
+	
 		<session>
 			<ejb-name>GalertBoss</ejb-name>
 			<jndi-name>ejb/bizapp/GalertBoss</jndi-name>

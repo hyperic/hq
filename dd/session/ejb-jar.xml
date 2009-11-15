@@ -43,18 +43,7 @@
 
 		
 
-		<session>
-			<description><![CDATA[The HierarchicalAlertingManager provides APIs to manage alert suppression.]]></description>
-
-			<ejb-name>HierarchicalAlertingManager</ejb-name>
-
-			<local-home>org.hyperic.hq.events.shared.HierarchicalAlertingManagerLocalHome</local-home>
-			<local>org.hyperic.hq.events.shared.HierarchicalAlertingManagerLocal</local>
-			<ejb-class>org.hyperic.hq.events.server.session.HierarchicalAlertingManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
+		
 
 		<session>
 			<description><![CDATA[The BizApp's interface to the Events Subsystem]]></description>
@@ -731,13 +720,7 @@
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>HierarchicalAlertingManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
+		
 		<container-transaction>
 			<method>
 				<ejb-name>GalertBoss</ejb-name>

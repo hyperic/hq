@@ -76,7 +76,7 @@ public interface AvailabilityManager {
 
     public Map<Integer, double[]> getAggregateData(Integer[] tids, Integer[] iids, long begin, long end);
 
-    public Map<Integer, MetricValue> getLastAvail(Collection<Object> resources,
+    public Map<Integer, MetricValue> getLastAvail(Collection<? extends Object> resources,
                                                   Map<Integer, List<Measurement>> measCache);
 
     public MetricValue getLastAvail(Measurement m);

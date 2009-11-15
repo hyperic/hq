@@ -23,24 +23,49 @@
  * USA.
  */
 
-package org.hyperic.hq.events.shared;
+package org.hyperic.hq.events.server.session;
 
 import java.util.Map;
 
-public interface HierarchicalAlertingManagerInterface {
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
+import org.hyperic.hq.measurement.ext.MeasurementEvent;
+import org.hyperic.hq.measurement.server.session.ResourceDataPoint;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * The HierarchicalAlertingManager provides APIs to manage alert suppression.
+ * 
+ * 
+ */
+@Service
+@Transactional
+public class HierarchicalAlertingManagerImpl implements HierarchicalAlertingManager {
+    /**
+     * Determine whether the measurement events can be suppressed as part of
+     * hierarchical alerting
+     * 
+     * 
+     */
+    public void suppressMeasurementEvents(Map<Integer, MeasurementEvent> events, boolean isFromAgent) {
+        //
+    }
 
     /**
-     * Determine whether the measurement events can
-     * be suppressed as part of hierarchical alerting
-     * 
-     * @param events Map<Integer, MeasurementEvent> Integer => Resource.getId()
-     * @param isFromAgent --> indicates whether the events came from the agent or backfiller
-     */
-    public void suppressMeasurementEvents(Map events, boolean isFromAgent);
-    
-    /**
      * Perform a simple "secondary" availability check for down platforms.
+     * 
+     * 
      */
-    public void performSecondaryAvailabilityCheck(Map downPlatforms);
+    public void performSecondaryAvailabilityCheck(Map<Integer, ResourceDataPoint> downPlatforms) {
+        //   
+    }
+
+    /**
+     * Get local home object
+     */
+    public static HierarchicalAlertingManager getOne() {
+        return Bootstrap.getBean(HierarchicalAlertingManager.class);
+    }
 
 }
