@@ -41,160 +41,139 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-/** 
+/**
  * The BizApp's interface to the Scheduler Subsystem.
- *
+ * 
  */
 @Service
 @Transactional
 public class SchedulerBossImpl implements SchedulerBoss {
-    
+
     private SessionManager sessionManager;
     private Scheduler scheduler;
 
-    
-    
     @Autowired
     public SchedulerBossImpl(SessionManager sessionManager, Scheduler scheduler) {
         this.sessionManager = sessionManager;
         this.scheduler = scheduler;
     }
 
-    //-------------------------------------------------------------------------
-    //-- interface methods
-    //-------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // -- interface methods
+    // -------------------------------------------------------------------------
     /**
      * Get a list of all job groups in the scheduler.
-     *
+     * 
      * 
      */
-    public String[] getJobGroupNames(int sessionID)
-        throws SessionNotFoundException, SessionTimeoutException,
-               SchedulerException
-    {
+    public String[] getJobGroupNames(int sessionID) throws SessionNotFoundException, SessionTimeoutException,
+        SchedulerException {
         sessionManager.authenticate(sessionID);
         return scheduler.getJobGroupNames();
     }
 
     /**
      * Get a list of all trigger groups in the scheduler.
-     *
+     * 
      * 
      */
-    public String[] getTriggerGroupNames(int sessionID)
-        throws SessionNotFoundException, SessionTimeoutException,
-               SchedulerException
-    {
+    public String[] getTriggerGroupNames(int sessionID) throws SessionNotFoundException, SessionTimeoutException,
+        SchedulerException {
         sessionManager.authenticate(sessionID);
         return scheduler.getTriggerGroupNames();
     }
 
     /**
      * Get a list of all jobs in a given group.
-     *
+     * 
      * @param jobGroup the group whose jobs should be listed
-     *
+     * 
      * 
      */
-    public String[] getJobNames(int sessionID, String jobGroup)
-        throws SessionNotFoundException, SessionTimeoutException,
-               SchedulerException
-    {
+    public String[] getJobNames(int sessionID, String jobGroup) throws SessionNotFoundException,
+        SessionTimeoutException, SchedulerException {
         sessionManager.authenticate(sessionID);
         return scheduler.getJobNames(jobGroup);
     }
 
     /**
      * Get a list of all triggers in a given group.
-     *
+     * 
      * @param triggerGroup the group whose triggers should be listed
-     *
+     * 
      * 
      */
-    public String[] getTriggerNames(int sessionID, String triggerGroup)
-        throws SessionNotFoundException, SessionTimeoutException,
-               SchedulerException
-    {
+    public String[] getTriggerNames(int sessionID, String triggerGroup) throws SessionNotFoundException,
+        SessionTimeoutException, SchedulerException {
         sessionManager.authenticate(sessionID);
         return scheduler.getTriggerNames(triggerGroup);
     }
 
     /**
      * Get a list of all currently-executing jobs.
-     *
+     * 
      * 
      */
     @SuppressWarnings("unchecked")
-    public Key[] getCurrentlyExecutingJobs(int sessionID)
-        throws SessionNotFoundException, SessionTimeoutException,
-               SchedulerException
-    {
+    public Key[] getCurrentlyExecutingJobs(int sessionID) throws SessionNotFoundException, SessionTimeoutException,
+        SchedulerException {
         sessionManager.authenticate(sessionID);
         List<JobExecutionContext> execJobs = scheduler.getCurrentlyExecutingJobs();
         Key[] jobKeys = new Key[execJobs.size()];
-        for (int i=0; i<jobKeys.length; ++i) {
+        for (int i = 0; i < jobKeys.length; ++i) {
             JobExecutionContext jec = execJobs.get(i);
             JobDetail jd = jec.getJobDetail();
-            jobKeys[i] = new Key( jd.getName(), jd.getGroup() );
+            jobKeys[i] = new Key(jd.getName(), jd.getGroup());
         }
 
         return jobKeys;
     }
 
     /**
-     * Remove a previously-scheduled job and all of its associated
-     * triggers.
-     *
+     * Remove a previously-scheduled job and all of its associated triggers.
+     * 
      * @param jobName the name of the job to be removed
      * @param groupName the name of the group
      * @return true if a job was removed, false otherwise
-     *
+     * 
      * 
      */
-    public boolean deleteJob(int sessionID, String jobName, String groupName)
-        throws SessionNotFoundException, SessionTimeoutException,
-               SchedulerException
-    {
+    public boolean deleteJob(int sessionID, String jobName, String groupName) throws SessionNotFoundException,
+        SessionTimeoutException, SchedulerException {
         sessionManager.authenticate(sessionID);
         return scheduler.deleteJob(jobName, groupName);
     }
 
     /**
      * Remove the given schedule from the scheduler.
-     *
+     * 
      * @param scheduleName the name of the schedule to delete
      * @param groupName the name of the group
      * @return true if a schedule was deleted, false otherwise
-     *
+     * 
      * 
      */
-    public boolean deleteSchedule(int sessionID, String scheduleName,
-                                  String groupName)
-        throws SessionNotFoundException, SessionTimeoutException,
-               SchedulerException
-    {
+    public boolean deleteSchedule(int sessionID, String scheduleName, String groupName)
+        throws SessionNotFoundException, SessionTimeoutException, SchedulerException {
         sessionManager.authenticate(sessionID);
         return scheduler.unscheduleJob(scheduleName, groupName);
     }
 
     /**
      * Remove the given group of schedules from the scheduler.
-     *
+     * 
      * @param groupName the name of the group
      * @return number of schedules deleted
-     *
+     * 
      * 
      */
-    public int deleteScheduleGroup(int sessionID, String groupName)
-        throws SessionNotFoundException, SessionTimeoutException,
-               SchedulerException
-    {
+    public int deleteScheduleGroup(int sessionID, String groupName) throws SessionNotFoundException,
+        SessionTimeoutException, SchedulerException {
         sessionManager.authenticate(sessionID);
         String[] triggersInGroup = scheduler.getTriggerNames(groupName);
         int numDeleted = 0;
-        for (int i=0; i<triggersInGroup.length; ++i) {
-            if ( scheduler.unscheduleJob(triggersInGroup[i], groupName) ) {
+        for (int i = 0; i < triggersInGroup.length; ++i) {
+            if (scheduler.unscheduleJob(triggersInGroup[i], groupName)) {
                 ++numDeleted;
             }
         }
@@ -204,29 +183,28 @@ public class SchedulerBossImpl implements SchedulerBoss {
 
     /**
      * Remove the given group of jobs from the scheduler.
-     *
+     * 
      * @param groupName the name of the group
      * @return number of jobs deleted
-     *
+     * 
      * 
      */
-    public int deleteJobGroup(int sessionID, String groupName)
-        throws SessionNotFoundException, SessionTimeoutException,
-               SchedulerException
-    {
+    public int deleteJobGroup(int sessionID, String groupName) throws SessionNotFoundException,
+        SessionTimeoutException, SchedulerException {
         sessionManager.authenticate(sessionID);
         String[] jobsInGroup = scheduler.getJobNames(groupName);
         int numDeleted = 0;
-        for (int i=0; i<jobsInGroup.length; ++i) {
-            if ( scheduler.deleteJob(jobsInGroup[i], groupName) ) { ++numDeleted; }
+        for (int i = 0; i < jobsInGroup.length; ++i) {
+            if (scheduler.deleteJob(jobsInGroup[i], groupName)) {
+                ++numDeleted;
+            }
         }
 
         return numDeleted;
     }
-    
-    public static SchedulerBoss getOne() {
-       return Bootstrap.getBean(SchedulerBoss.class);
-    }
-    
-}
 
+    public static SchedulerBoss getOne() {
+        return Bootstrap.getBean(SchedulerBoss.class);
+    }
+
+}
