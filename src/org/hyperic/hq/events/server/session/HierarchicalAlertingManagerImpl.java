@@ -36,21 +36,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The HierarchicalAlertingManager provides APIs to manage alert suppression.
- *
- *
+ * 
+ * 
  */
 @Service
 @Transactional
-public class HierarchicalAlertingManagerImpl 
-    implements HierarchicalAlertingManager
-{   
+public class HierarchicalAlertingManagerImpl implements HierarchicalAlertingManager {
     /**
-     * Determine whether the measurement events can
-     * be suppressed as part of hierarchical alerting
+     * Determine whether the measurement events can be suppressed as part of
+     * hierarchical alerting
      * 
      * 
      */
-    public void suppressMeasurementEvents(Map<Integer,MeasurementEvent> events, boolean isFromAgent) {
+    public void suppressMeasurementEvents(Map<Integer, MeasurementEvent> events, boolean isFromAgent) {
         //
     }
 
@@ -67,7 +65,7 @@ public class HierarchicalAlertingManagerImpl
      * Get local home object
      */
     public static HierarchicalAlertingManager getOne() {
-       return Bootstrap.getBean(HierarchicalAlertingManager.class);
+        return Bootstrap.getBean(HierarchicalAlertingManager.class);
     }
-  
+
 }

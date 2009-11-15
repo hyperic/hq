@@ -33,17 +33,18 @@ import org.hyperic.hq.measurement.server.session.ResourceDataPoint;
 public interface HierarchicalAlertingManager {
 
     /**
-     * Determine whether the measurement events can
-     * be suppressed as part of hierarchical alerting
+     * Determine whether the measurement events can be suppressed as part of
+     * hierarchical alerting
      * 
      * @param events Map<Integer, MeasurementEvent> Integer => Resource.getId()
-     * @param isFromAgent --> indicates whether the events came from the agent or backfiller
+     * @param isFromAgent --> indicates whether the events came from the agent
+     *        or backfiller
      */
-    public void suppressMeasurementEvents(Map<Integer,MeasurementEvent> events, boolean isFromAgent);
-    
+    public void suppressMeasurementEvents(Map<Integer, MeasurementEvent> events, boolean isFromAgent);
+
     /**
      * Perform a simple "secondary" availability check for down platforms.
      */
-    public void performSecondaryAvailabilityCheck(Map<Integer,ResourceDataPoint> downPlatforms);
+    public void performSecondaryAvailabilityCheck(Map<Integer, ResourceDataPoint> downPlatforms);
 
 }
