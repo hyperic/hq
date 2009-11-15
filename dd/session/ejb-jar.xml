@@ -11,20 +11,7 @@
 
 		<!-- Session Beans -->
 		
-		<session>
-			<description><![CDATA[The BizApp's interface to the Scheduler Subsystem.]]></description>
-
-			<ejb-name>SchedulerBoss</ejb-name>
-
-			<home>org.hyperic.hq.bizapp.shared.SchedulerBossHome</home>
-			<remote>org.hyperic.hq.bizapp.shared.SchedulerBoss</remote>
-			<local-home>org.hyperic.hq.bizapp.shared.SchedulerBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.SchedulerBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.SchedulerBossEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
+		
 
 		<session>
 			<description><![CDATA[]]></description>
@@ -392,13 +379,7 @@
 			contains them.
 		-->
 		
-		<container-transaction>
-			<method>
-				<ejb-name>SchedulerBoss</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
+		
 		<container-transaction>
 			<method>
 				<ejb-name>ConfigManager</ejb-name>

@@ -27,42 +27,38 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.util.List;
 
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.bizapp.shared.SchedulerBossLocal;
-import org.hyperic.hq.bizapp.shared.SchedulerBossUtil;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.bizapp.shared.SchedulerBoss;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.utils.Key;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /** 
  * The BizApp's interface to the Scheduler Subsystem.
  *
- * @ejb:bean name="SchedulerBoss"
- *      jndi-name="ejb/bizapp/SchedulerBoss"
- *      local-jndi-name="LocalSchedulerBoss"
- *      view-type="both"
- *      type="Stateless"
- * @ejb:transaction type="Required"
  */
-public class SchedulerBossEJBImpl implements SessionBean {
-    private SessionManager manager;
+@Service
+@Transactional
+public class SchedulerBossImpl implements SchedulerBoss {
+    
+    private SessionManager sessionManager;
+    private Scheduler scheduler;
 
-    /**
-     * Constructor.
-     */
-    public SchedulerBossEJBImpl() {
-        this.manager = SessionManager.getInstance();
+    
+    
+    @Autowired
+    public SchedulerBossImpl(SessionManager sessionManager, Scheduler scheduler) {
+        this.sessionManager = sessionManager;
+        this.scheduler = scheduler;
     }
 
     //-------------------------------------------------------------------------
@@ -71,27 +67,27 @@ public class SchedulerBossEJBImpl implements SessionBean {
     /**
      * Get a list of all job groups in the scheduler.
      *
-     * @ejb:interface-method
+     * 
      */
     public String[] getJobGroupNames(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.authenticate(sessionID);
-        return getSched().getJobGroupNames();
+        sessionManager.authenticate(sessionID);
+        return scheduler.getJobGroupNames();
     }
 
     /**
      * Get a list of all trigger groups in the scheduler.
      *
-     * @ejb:interface-method
+     * 
      */
     public String[] getTriggerGroupNames(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.authenticate(sessionID);
-        return getSched().getTriggerGroupNames();
+        sessionManager.authenticate(sessionID);
+        return scheduler.getTriggerGroupNames();
     }
 
     /**
@@ -99,14 +95,14 @@ public class SchedulerBossEJBImpl implements SessionBean {
      *
      * @param jobGroup the group whose jobs should be listed
      *
-     * @ejb:interface-method
+     * 
      */
     public String[] getJobNames(int sessionID, String jobGroup)
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.authenticate(sessionID);
-        return getSched().getJobNames(jobGroup);
+        sessionManager.authenticate(sessionID);
+        return scheduler.getJobNames(jobGroup);
     }
 
     /**
@@ -114,30 +110,31 @@ public class SchedulerBossEJBImpl implements SessionBean {
      *
      * @param triggerGroup the group whose triggers should be listed
      *
-     * @ejb:interface-method
+     * 
      */
     public String[] getTriggerNames(int sessionID, String triggerGroup)
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.authenticate(sessionID);
-        return getSched().getTriggerNames(triggerGroup);
+        sessionManager.authenticate(sessionID);
+        return scheduler.getTriggerNames(triggerGroup);
     }
 
     /**
      * Get a list of all currently-executing jobs.
      *
-     * @ejb:interface-method
+     * 
      */
+    @SuppressWarnings("unchecked")
     public Key[] getCurrentlyExecutingJobs(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.authenticate(sessionID);
-        List execJobs = getSched().getCurrentlyExecutingJobs();
+        sessionManager.authenticate(sessionID);
+        List<JobExecutionContext> execJobs = scheduler.getCurrentlyExecutingJobs();
         Key[] jobKeys = new Key[execJobs.size()];
         for (int i=0; i<jobKeys.length; ++i) {
-            JobExecutionContext jec = (JobExecutionContext)execJobs.get(i);
+            JobExecutionContext jec = execJobs.get(i);
             JobDetail jd = jec.getJobDetail();
             jobKeys[i] = new Key( jd.getName(), jd.getGroup() );
         }
@@ -153,14 +150,14 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * @param groupName the name of the group
      * @return true if a job was removed, false otherwise
      *
-     * @ejb:interface-method
+     * 
      */
     public boolean deleteJob(int sessionID, String jobName, String groupName)
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.authenticate(sessionID);
-        return getSched().deleteJob(jobName, groupName);
+        sessionManager.authenticate(sessionID);
+        return scheduler.deleteJob(jobName, groupName);
     }
 
     /**
@@ -170,15 +167,15 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * @param groupName the name of the group
      * @return true if a schedule was deleted, false otherwise
      *
-     * @ejb:interface-method
+     * 
      */
     public boolean deleteSchedule(int sessionID, String scheduleName,
                                   String groupName)
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.authenticate(sessionID);
-        return getSched().unscheduleJob(scheduleName, groupName);
+        sessionManager.authenticate(sessionID);
+        return scheduler.unscheduleJob(scheduleName, groupName);
     }
 
     /**
@@ -187,17 +184,17 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * @param groupName the name of the group
      * @return number of schedules deleted
      *
-     * @ejb:interface-method
+     * 
      */
     public int deleteScheduleGroup(int sessionID, String groupName)
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.authenticate(sessionID);
-        String[] triggersInGroup = getSched().getTriggerNames(groupName);
+        sessionManager.authenticate(sessionID);
+        String[] triggersInGroup = scheduler.getTriggerNames(groupName);
         int numDeleted = 0;
         for (int i=0; i<triggersInGroup.length; ++i) {
-            if ( getSched().unscheduleJob(triggersInGroup[i], groupName) ) {
+            if ( scheduler.unscheduleJob(triggersInGroup[i], groupName) ) {
                 ++numDeleted;
             }
         }
@@ -211,53 +208,25 @@ public class SchedulerBossEJBImpl implements SessionBean {
      * @param groupName the name of the group
      * @return number of jobs deleted
      *
-     * @ejb:interface-method
+     * 
      */
     public int deleteJobGroup(int sessionID, String groupName)
         throws SessionNotFoundException, SessionTimeoutException,
                SchedulerException
     {
-        manager.authenticate(sessionID);
-        String[] jobsInGroup = getSched().getJobNames(groupName);
+        sessionManager.authenticate(sessionID);
+        String[] jobsInGroup = scheduler.getJobNames(groupName);
         int numDeleted = 0;
         for (int i=0; i<jobsInGroup.length; ++i) {
-            if ( getSched().deleteJob(jobsInGroup[i], groupName) ) { ++numDeleted; }
+            if ( scheduler.deleteJob(jobsInGroup[i], groupName) ) { ++numDeleted; }
         }
 
         return numDeleted;
     }
     
-    public static SchedulerBossLocal getOne() {
-        try {
-            return SchedulerBossUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static SchedulerBoss getOne() {
+       return Bootstrap.getBean(SchedulerBoss.class);
     }
-
-    //-------------------------------------------------------------------------
-    //-- session-bean methods
-    //-------------------------------------------------------------------------
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() {}
-
-    public void ejbRemove() {}
-
-    public void ejbActivate() {}
-
-    public void ejbPassivate() {}
-
-    public void setSessionContext(SessionContext ctx) {}
-
-
-    //-------------------------------------------------------------------------
-    //-- private helpers
-    //-------------------------------------------------------------------------
-    private Scheduler getSched() {
-        return Bootstrap.getBean(Scheduler.class);
-    }
+    
 }
 
-// EOF
