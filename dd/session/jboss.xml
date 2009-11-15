@@ -56,12 +56,7 @@
 			<local-jndi-name>LocalServiceManager</local-jndi-name>
 
 		</session>
-		<session>
-			<ejb-name>LatherBoss</ejb-name>
-			<jndi-name>ejb/bizapp/LatherBoss</jndi-name>
-			<local-jndi-name>LocalLatherBoss</local-jndi-name>
-
-		</session>
+		
 		<session>
 			<ejb-name>ApplicationManager</ejb-name>
 			<local-jndi-name>LocalApplicationManager</local-jndi-name>

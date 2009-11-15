@@ -25,67 +25,66 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import javax.ejb.CreateException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-import javax.naming.NamingException;
+import javax.annotation.PreDestroy;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.bizapp.shared.LatherBossLocal;
-import org.hyperic.hq.bizapp.shared.LatherBossUtil;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.bizapp.shared.LatherBoss;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.lather.LatherContext;
 import org.hyperic.lather.LatherRemoteException;
 import org.hyperic.lather.LatherValue;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Lather Boss.
  * 
- * @ejb:bean name="LatherBoss"
- *      jndi-name="ejb/bizapp/LatherBoss"
- *      local-jndi-name="LocalLatherBoss"
- *      view-type="both"
- *      type="Stateless"
- * @ejb:transaction type="Required"
  */
-public class LatherBossEJBImpl
-    extends BizappSessionEJB
-    implements SessionBean
+
+@Transactional
+public class LatherBossImpl
+    implements LatherBoss
 {
-    private final Log _log =
-        LogFactory.getLog(LatherBossEJBImpl.class.getName());
+    private final Log log =
+        LogFactory.getLog(LatherBossImpl.class.getName());
 
-    private LatherDispatcher _dispatcher = new LatherDispatcher();
-    private SessionContext _ctx;
-
+    private LatherDispatcher dispatcher;
+    
+    
+   
+    public LatherBossImpl(LatherDispatcher dispatcher) {
+        this.dispatcher = dispatcher;
+    }
+    @PreDestroy
+    public void destroyDispatcher() {
+        if (dispatcher != null) {
+            dispatcher.destroy();
+        }
+    }
     /**
-     * @ejb:interface-method
+     * 
      */
     public LatherValue dispatchWithTx(LatherContext ctx, String method, 
                                       LatherValue arg)
         throws LatherRemoteException
     {
-        try {
-            return dispatchWithoutTx(ctx, method, arg);
-        } catch (LatherRemoteException e) {
-            _ctx.setRollbackOnly();
-            throw e;
-        }
+        
+       return dispatchWithoutTx(ctx, method, arg);
+        
     }
 
     /**
      * 
-     * @ejb:interface-method
+     * 
      */
     public LatherValue dispatchWithoutTx(LatherContext ctx, String method, 
                                          LatherValue arg)
         throws LatherRemoteException
     {
         try {
-            return _dispatcher.dispatch(ctx, method, arg);
+            return dispatcher.dispatch(ctx, method, arg);
         } catch(RuntimeException exc){
-            _log.error("Error dispatching method '" + method + "'", exc);
+            log.error("Error dispatching method '" + method + "'", exc);
             throw new LatherRemoteException("Runtime exception: " + 
                                             exc.getMessage());
         }
@@ -104,40 +103,22 @@ public class LatherBossEJBImpl
      *         representing the result of the invoked method
      *
      * 
-     * @ejb:interface-method
+     * 
      */
     public LatherValue dispatch(LatherContext ctx, String method, 
                                 LatherValue arg)
         throws LatherRemoteException
     {
-        if (_dispatcher.methIsTransactional(method)) {
-            return getOne().dispatchWithTx(ctx, method, arg);
+        if (dispatcher.methIsTransactional(method)) {
+            return dispatchWithTx(ctx, method, arg);
         } else {
             return dispatchWithoutTx(ctx, method, arg);
         }
     }
 
-    public void ejbCreate() {}
-
-    public void ejbRemove() {
-        if (_dispatcher != null) {
-            _dispatcher.destroy();
-        }
-    }
-    
-    public static LatherBossLocal getOne() {
-        try {
-            return LatherBossUtil.getLocalHome().create();
-        } catch (CreateException e) {
-            throw new SystemException(e);
-        } catch (NamingException e) {
-            throw new SystemException(e);
-        }
+   
+    public static LatherBoss getOne() {
+        return Bootstrap.getBean(LatherBoss.class);
     }
 
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {
-        _ctx = ctx;
-    }
 }

@@ -37,14 +37,14 @@ public class PlatformNode
 {
     private ResourceTree  tree;
     private Platform platform;
-    private ArrayList     servers;
+    private ArrayList<ServerNode>     servers;
 
     private boolean       showServers = false;
 
     PlatformNode(ResourceTree tree, Platform platform){
         this.tree     = tree;
         this.platform = platform;
-        this.servers  = new ArrayList();
+        this.servers  = new ArrayList<ServerNode>();
     }
 
     public Platform getPlatform(){
@@ -59,7 +59,7 @@ public class PlatformNode
         return node;
     }
 
-    public List getServers(){
+    public List<ServerNode> getServers(){
         return this.servers;
     }
 
@@ -78,15 +78,15 @@ public class PlatformNode
     public int getNumResources(){
         int num = getNumServers();
 
-        for (Iterator i = getServerIterator(); i.hasNext();) {
-            ServerNode s = (ServerNode)i.next();
+        for (Iterator<ServerNode> i = getServerIterator(); i.hasNext();) {
+            ServerNode s = i.next();
             num += s.getNumServices();
         }
 
         return num;
     }
     
-    public Iterator getServerIterator(){
+    public Iterator<ServerNode> getServerIterator(){
         return this.servers.iterator();
     }
 

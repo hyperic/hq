@@ -38,14 +38,14 @@ public class ServerNode
     private ResourceTree tree;
     private PlatformNode ownerPlatform;
     private Server  server;
-    private ArrayList    services;
+    private ArrayList<ServiceNode>    services;
 
     ServerNode(ResourceTree tree, PlatformNode ownerPlatform, Server server)
     {
         this.tree          = tree;
         this.ownerPlatform = ownerPlatform;
         this.server        = server;
-        this.services      = new ArrayList();
+        this.services      = new ArrayList<ServiceNode>();
     }
 
     public Server getServer(){
@@ -64,7 +64,7 @@ public class ServerNode
         return node;
     }
 
-    public List getServices(){
+    public List<ServiceNode> getServices(){
         return this.services;
     }
 
@@ -72,7 +72,7 @@ public class ServerNode
         return this.services.size();
     }
 
-    public Iterator getServiceIterator(){
+    public Iterator<ServiceNode> getServiceIterator(){
         return this.services.iterator();
     }
     

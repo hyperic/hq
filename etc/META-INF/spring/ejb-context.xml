@@ -19,7 +19,6 @@
 <bean class="org.hyperic.hq.bizapp.server.session.ControlBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.DashboardPortletBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.GalertBossEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.bizapp.server.session.LatherBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.LiveDataBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.MeasurementBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl" factory-method="getOne"/>
@@ -28,7 +27,10 @@
 <bean class="org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.DataManagerEJBImpl" factory-method="getOne"/>
 
-
+<!--  TODO figure out a way to switch b/w impls of same EE and .org interface when autowiring -->
+<bean class="org.hyperic.hq.bizapp.server.session.LatherBossImpl">
+	<constructor-arg ref="latherDispatcher"/>
+</bean>
 
 <!--  These components have to be initialized here instead of through @Component because HQApp restart storage dir is set through ProductPluginDeployer loadConfig() after server is started.-->
 <!--  TODO configure storage dir separately once we're off JBoss and then these can be instantiated through component scanning-->

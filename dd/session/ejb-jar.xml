@@ -118,20 +118,7 @@
 
 		</session>
 
-		<session>
-			<description><![CDATA[Lather Boss.]]></description>
-
-			<ejb-name>LatherBoss</ejb-name>
-
-			<home>org.hyperic.hq.bizapp.shared.LatherBossHome</home>
-			<remote>org.hyperic.hq.bizapp.shared.LatherBoss</remote>
-			<local-home>org.hyperic.hq.bizapp.shared.LatherBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.LatherBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.LatherBossEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
+	
 
 		<session>
 			<description><![CDATA[This class is responsible for managing Application objects in appdef and their relationships]]></description>
@@ -1594,13 +1581,7 @@
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>LatherBoss</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
+		
 		<container-transaction>
 			<method>
 				<ejb-name>ApplicationManager</ejb-name>

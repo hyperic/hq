@@ -3,18 +3,19 @@
  */
 package org.hyperic.hq.bizapp.shared;
 
+import org.hyperic.lather.LatherContext;
+import org.hyperic.lather.LatherRemoteException;
+import org.hyperic.lather.LatherValue;
+
 /**
- * Remote interface for LatherBoss.
+ * Local interface for LatherBoss.
  */
 public interface LatherBoss
-   extends javax.ejb.EJBObject
 {
 
-   public org.hyperic.lather.LatherValue dispatchWithTx( org.hyperic.lather.LatherContext ctx,java.lang.String method,org.hyperic.lather.LatherValue arg )
-      throws org.hyperic.lather.LatherRemoteException, java.rmi.RemoteException;
+   public LatherValue dispatchWithTx( LatherContext ctx,String method,LatherValue arg ) throws LatherRemoteException;
 
-   public org.hyperic.lather.LatherValue dispatchWithoutTx( org.hyperic.lather.LatherContext ctx,java.lang.String method,org.hyperic.lather.LatherValue arg )
-      throws org.hyperic.lather.LatherRemoteException, java.rmi.RemoteException;
+   public LatherValue dispatchWithoutTx( LatherContext ctx,String method,LatherValue arg ) throws LatherRemoteException;
 
    /**
     * The main dispatch command which is called via the JBoss-lather servlet. It is the responsibility of this routine to take the method/args, and route it to the correct method.
@@ -23,7 +24,6 @@ public interface LatherBoss
     * @param arg LatherValue argument object to pass to the method
     * @return an instantiated subclass of the LatherValue class, representing the result of the invoked method
     */
-   public org.hyperic.lather.LatherValue dispatch( org.hyperic.lather.LatherContext ctx,java.lang.String method,org.hyperic.lather.LatherValue arg )
-      throws org.hyperic.lather.LatherRemoteException, java.rmi.RemoteException;
+   public LatherValue dispatch( LatherContext ctx,String method,LatherValue arg ) throws LatherRemoteException;
 
 }

@@ -40,12 +40,12 @@ import org.hyperic.hq.appdef.shared.ApplicationValue;
 public class ResourceTree 
     implements java.io.Serializable
 {
-    private ArrayList apps;
-    private ArrayList platforms;
+    private ArrayList<ApplicationValue> apps;
+    private ArrayList<PlatformNode> platforms;
 
     public ResourceTree(){
-        this.apps      = new ArrayList();
-        this.platforms = new ArrayList();
+        this.apps      = new ArrayList<ApplicationValue>();
+        this.platforms = new ArrayList<PlatformNode>();
     }
     
     public ApplicationNode addApplication(ApplicationValue app){
@@ -56,7 +56,7 @@ public class ResourceTree
         return node;
     }
 
-    public Iterator getApplications(){
+    public Iterator<ApplicationValue> getApplications(){
         return this.apps.iterator();
     }
 
@@ -68,11 +68,11 @@ public class ResourceTree
         return node;
     }
 
-    public List getPlatforms(){
+    public List<PlatformNode> getPlatforms(){
         return this.platforms;
     }
 
-    public Iterator getPlatformIterator(){
+    public Iterator<PlatformNode> getPlatformIterator(){
         return this.platforms.iterator();
     }
 

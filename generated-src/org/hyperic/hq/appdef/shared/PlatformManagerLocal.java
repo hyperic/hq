@@ -125,7 +125,7 @@ public interface PlatformManagerLocal
    /**
     * Get the platform by agent token
     */
-   public java.util.Collection getPlatformPksByAgentToken( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String agentToken ) throws org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+   public java.util.Collection<Integer> getPlatformPksByAgentToken( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String agentToken ) throws org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 
    /**
     * Get the platform that hosts the server that provides the specified service.
