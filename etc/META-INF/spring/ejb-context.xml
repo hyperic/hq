@@ -27,7 +27,7 @@
 <bean class="org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.measurement.server.session.DataManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.measurement.server.session.MetricAuxLogManagerEJBImpl" factory-method="getOne"/>
+
 
 
 <!--  These components have to be initialized here instead of through @Component because HQApp restart storage dir is set through ProductPluginDeployer loadConfig() after server is started.-->
