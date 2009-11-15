@@ -54,56 +54,48 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class CloningBossImpl 
-    implements CloningBoss {
-    
+public class CloningBossImpl implements CloningBoss {
 
     public CloningBossImpl() {
     }
-    
+
     /**
      * @param subj
      * @param pType platform type
      * @param nameRegEx regex which matches either the platform fqdn or the
-     * resource sortname
+     *        resource sortname
      * 
      */
-    public List<Platform> findPlatformsByTypeAndName(AuthzSubject subj, Integer pType,
-                                           String nameRegEx) {
+    public List<Platform> findPlatformsByTypeAndName(AuthzSubject subj, Integer pType, String nameRegEx) {
         throw new UnsupportedOperationException();
     }
-    
+
     /**
      * @param subj Method ensures that the master platform has viewable
-     * permissions and the clone targets have modifiable permissions.
+     *        permissions and the clone targets have modifiable permissions.
      * @param platformId master platform id
      * @param cloneTaretIds List<Integer> List of Platform Ids to be cloned
      * 
      */
-    public void clonePlatform(AuthzSubject subj, Integer platformId,
-                              List<Integer> cloneTargetIds)
-        throws SessionNotFoundException, SessionTimeoutException,
-               SessionException, PermissionException, PlatformNotFoundException
-    {
+    public void clonePlatform(AuthzSubject subj, Integer platformId, List<Integer> cloneTargetIds)
+        throws SessionNotFoundException, SessionTimeoutException, SessionException, PermissionException,
+        PlatformNotFoundException {
         throw new UnsupportedOperationException();
     }
 
     /**
      * 
      */
-    public void clonePlatform(AuthzSubject subj, Platform master,
-                              Platform clone)
-        throws AppdefEntityNotFoundException, ConfigFetchException,
-               PermissionException, FinderException, CreateException,
-               NamingException, SessionNotFoundException,
-               SessionTimeoutException, SessionException, VetoException,
-               AppdefDuplicateNameException, ValidationException,
-               GroupNotCompatibleException, UpdateException, EncodingException {
+    public void clonePlatform(AuthzSubject subj, Platform master, Platform clone) throws AppdefEntityNotFoundException,
+        ConfigFetchException, PermissionException, FinderException, CreateException, NamingException,
+        SessionNotFoundException, SessionTimeoutException, SessionException, VetoException,
+        AppdefDuplicateNameException, ValidationException, GroupNotCompatibleException, UpdateException,
+        EncodingException {
         throw new UnsupportedOperationException();
     }
-    
+
     public static CloningBoss getOne() {
         return Bootstrap.getBean(CloningBoss.class);
     }
-    
+
 }
