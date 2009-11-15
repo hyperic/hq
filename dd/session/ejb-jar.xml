@@ -91,21 +91,7 @@
 		</session>
 		
 
-		<session>
-			<description><![CDATA[The BizApp's interface to the Events/Logs]]></description>
-
-			<ejb-name>EventLogBoss</ejb-name>
-
-			<home>org.hyperic.hq.bizapp.shared.EventLogBossHome</home>
-			<remote>org.hyperic.hq.bizapp.shared.EventLogBoss</remote>
-			<local-home>org.hyperic.hq.bizapp.shared.EventLogBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.EventLogBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.EventLogBossEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
+		
 		<session>
 			<description><![CDATA[AppdefStatManagerEJB provides summary and aggregate statistical information for appdef related entities.]]></description>
 
@@ -967,13 +953,7 @@
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>
 		
-		<container-transaction>
-			<method>
-				<ejb-name>EventLogBoss</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
+		
 		<container-transaction>
 			<method>
 				<ejb-name>AppdefStatManager</ejb-name>

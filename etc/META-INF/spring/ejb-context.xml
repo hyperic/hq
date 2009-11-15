@@ -18,7 +18,6 @@
 <bean class="org.hyperic.hq.bizapp.server.session.AIBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.ControlBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.DashboardPortletBossEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.bizapp.server.session.EventLogBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.GalertBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.LatherBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.LiveDataBossEJBImpl" factory-method="getOne"/>
