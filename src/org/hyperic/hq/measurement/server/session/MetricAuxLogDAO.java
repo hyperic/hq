@@ -46,7 +46,7 @@ import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class MetricAuxLogDAO extends HibernateDAO {
+public class MetricAuxLogDAO extends HibernateDAO<MetricAuxLogPojo> {
     private static Log _log = LogFactory.getLog(MetricAuxLogDAO.class);
 
     @Autowired
@@ -66,7 +66,7 @@ public class MetricAuxLogDAO extends HibernateDAO {
         super.remove(log);
     }
 
-    int deleteByMetricIds(Collection ids) {
+    int deleteByMetricIds(Collection<Integer> ids) {
         final String hql =
             "delete from MetricAuxLogPojo where metric.id in (:ids)";
 
@@ -80,8 +80,8 @@ public class MetricAuxLogDAO extends HibernateDAO {
         }
 
         int count = 0;
-        ArrayList subIds = new ArrayList(maxExprs);
-        for (Iterator it = ids.iterator(); it.hasNext(); ) {
+        ArrayList<Integer> subIds = new ArrayList<Integer>(maxExprs);
+        for (Iterator<Integer> it = ids.iterator(); it.hasNext(); ) {
             subIds.clear();
 
             for (int i = 0; i < maxExprs && it.hasNext(); i++) {
@@ -144,7 +144,7 @@ public class MetricAuxLogDAO extends HibernateDAO {
      * Resets the associated type between an aux log and other subsystems
      * (such as metrics, resource, etc.)
      */
-    void resetAuxType(Collection mids) {
+    void resetAuxType(Collection<Integer> mids) {
         String hql = "update GalertAuxLog g set g.auxType = :type " +
                      "where exists (select p.id from MetricAuxLogPojo p " +
                                    "where p.auxLog = g and " +

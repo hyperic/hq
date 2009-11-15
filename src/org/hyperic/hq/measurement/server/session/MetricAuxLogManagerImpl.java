@@ -27,77 +27,58 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.measurement.galerts.MetricAuxLog;
-import org.hyperic.hq.measurement.shared.MetricAuxLogManagerLocal;
-import org.hyperic.hq.measurement.shared.MetricAuxLogManagerUtil;
+import org.hyperic.hq.measurement.shared.MetricAuxLogManager;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @ejb:bean name="MetricAuxLogManager"
- *      jndi-name="ejb/common/MetricAuxLogManager"
- *      local-jndi-name="LocalMetricAuxLogManager"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:util generate="physical"
- * @ejb:transaction type="Required"
+ 
  */
-public class MetricAuxLogManagerEJBImpl
-    implements SessionBean
+@Service
+@Transactional
+public class MetricAuxLogManagerImpl implements MetricAuxLogManager
 {
     private static final int CHUNKSIZE = 500;
 
-    private final Log _log =
-        LogFactory.getLog(MetricAuxLogManagerEJBImpl.class);
+    
 
-    private MetricAuxLogDAO metricAuxLogDAO = Bootstrap.getBean(MetricAuxLogDAO.class);
+    private MetricAuxLogDAO metricAuxLogDAO;
 
-    public static MetricAuxLogManagerLocal getOne() {
-        try {
-            return MetricAuxLogManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static MetricAuxLogManager getOne() {
+       return Bootstrap.getBean(MetricAuxLogManager.class);
     }
 
-    private MetricAuxLogDAO getDAO() {
-        return metricAuxLogDAO;
-    }
+   
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public MetricAuxLogPojo create(GalertAuxLog log, MetricAuxLog logInfo) {
         MetricAuxLogPojo metricLog =
             new MetricAuxLogPojo(log, logInfo, log.getAlert().getAlertDef());
 
-        getDAO().save(metricLog);
+        metricAuxLogDAO.save(metricLog);
         return metricLog;
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void removeAll(GalertDef def) {
-        getDAO().removeAll(def);
+        metricAuxLogDAO.removeAll(def);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public MetricAuxLogPojo find(GalertAuxLog log) {
-        return getDAO().find(log);
+        return metricAuxLogDAO.find(log);
     }
 
     /**
@@ -105,24 +86,18 @@ public class MetricAuxLogManagerEJBImpl
      * the measurement around, we delete the value from the metric_aux_log and
      * transform the entry in the galert_aux_log to a regular entry.
      *
-     * @ejb:interface-method
+     * 
      */
-    public void metricsDeleted(Collection mids) {
+    public void metricsDeleted(Collection<Integer> mids) {
     	if (mids != null) {
-    		MetricAuxLogDAO dao = getDAO();
-    		List asList = (mids instanceof List ? (List) mids : new ArrayList(mids));
+    		
+    		List<Integer> asList = (mids instanceof List<?> ? (List<Integer>) mids : new ArrayList<Integer>(mids));
 
             for (int i = 0; i < asList.size(); i += CHUNKSIZE) {
                 int end = Math.min(i + CHUNKSIZE, asList.size());
-            	dao.resetAuxType(asList.subList(i, end));
-            	dao.deleteByMetricIds(asList.subList(i, end));
+            	metricAuxLogDAO.resetAuxType(asList.subList(i, end));
+            	metricAuxLogDAO.deleteByMetricIds(asList.subList(i, end));
             }
     	}
     }
-
-    public void ejbCreate() { }
-    public void ejbRemove() { }
-    public void ejbActivate() { }
-    public void ejbPassivate() { }
-    public void setSessionContext(SessionContext c) {}
 }

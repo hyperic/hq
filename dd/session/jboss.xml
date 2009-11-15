@@ -67,11 +67,7 @@
 			<local-jndi-name>LocalApplicationManager</local-jndi-name>
 
 		</session>
-		<session>
-			<ejb-name>MetricAuxLogManager</ejb-name>
-			<local-jndi-name>LocalMetricAuxLogManager</local-jndi-name>
-
-		</session>
+		
 		<session>
 			<ejb-name>ProductBoss</ejb-name>
 			<jndi-name>ejb/bizapp/ProductBoss</jndi-name>

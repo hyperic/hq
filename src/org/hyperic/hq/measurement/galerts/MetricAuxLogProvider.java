@@ -33,7 +33,7 @@ import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.galerts.server.session.GalertAuxLog;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertManagerImpl;
-import org.hyperic.hq.measurement.server.session.MetricAuxLogManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.MetricAuxLogManagerImpl;
 import org.hyperic.hq.measurement.server.session.MetricAuxLogPojo;
 
 /**
@@ -63,7 +63,7 @@ public class MetricAuxLogProvider
     public AlertAuxLog load(int auxLogId, long timestamp, String desc) {
         GalertAuxLog gAuxLog = findGAuxLog(auxLogId);
         MetricAuxLogPojo auxLog = 
-            MetricAuxLogManagerEJBImpl.getOne().find(gAuxLog);
+            MetricAuxLogManagerImpl.getOne().find(gAuxLog);
         
         return new MetricAuxLog(gAuxLog, auxLog);
     }
@@ -72,10 +72,10 @@ public class MetricAuxLogProvider
         MetricAuxLog logInfo = (MetricAuxLog)log;
         GalertAuxLog gAuxLog = findGAuxLog(auxLogId);
         
-        MetricAuxLogManagerEJBImpl.getOne().create(gAuxLog, logInfo);
+        MetricAuxLogManagerImpl.getOne().create(gAuxLog, logInfo);
     }
 
     public void deleteAll(GalertDef def) {
-        MetricAuxLogManagerEJBImpl.getOne().removeAll(def);
+        MetricAuxLogManagerImpl.getOne().removeAll(def);
     }
 }

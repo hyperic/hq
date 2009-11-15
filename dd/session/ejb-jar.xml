@@ -146,18 +146,7 @@
 
 		</session>
 
-		<session>
-			<description><![CDATA[]]></description>
-
-			<ejb-name>MetricAuxLogManager</ejb-name>
-
-			<local-home>org.hyperic.hq.measurement.shared.MetricAuxLogManagerLocalHome</local-home>
-			<local>org.hyperic.hq.measurement.shared.MetricAuxLogManagerLocal</local>
-			<ejb-class>org.hyperic.hq.measurement.server.session.MetricAuxLogManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
+		
 
 		<session>
 			<description><![CDATA[The Product Boss]]></description>
@@ -1867,13 +1856,7 @@
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>MetricAuxLogManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
+		
 		<container-transaction>
 			<method>
 				<ejb-name>ProductBoss</ejb-name>
