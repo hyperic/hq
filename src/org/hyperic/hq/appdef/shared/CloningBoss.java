@@ -45,41 +45,34 @@ import org.hyperic.util.config.EncodingException;
 /**
  * Business interface for the CloningBoss EJB
  */
-public interface CloningBossInterface {
-    
+public interface CloningBoss {
+
     /**
      * @param subj
      * @param pType platform type
      * @param nameRegEx regex which matches either the platform fqdn or the
-     * resource sortname
+     *        resource sortname
      */
-    public List findPlatformsByTypeAndName(AuthzSubject subj, Integer pType,
-                                           String nameRegEx)
-    	throws RemoteException;
-    
+    public List<Platform> findPlatformsByTypeAndName(AuthzSubject subj, Integer pType, String nameRegEx)
+        throws RemoteException;
+
     /**
      * @param subj Method ensures that the master platform has viewable
-     * permissions and the clone targets have modifiable permissions.
+     *        permissions and the clone targets have modifiable permissions.
      * @param platformId master platform id
      * @param cloneTaretIds List<Integer> List of Platform Ids to be cloned
      */
-    public void clonePlatform(AuthzSubject subj, Integer platformId,
-                              List cloneTargetIds)
-        throws SessionNotFoundException, SessionTimeoutException,
-               SessionException, PermissionException, PlatformNotFoundException,
-               RemoteException;
+    public void clonePlatform(AuthzSubject subj, Integer platformId, List<Integer> cloneTargetIds)
+        throws SessionNotFoundException, SessionTimeoutException, SessionException, PermissionException,
+        PlatformNotFoundException, RemoteException;
 
     /**
      * 
      */
-    public void clonePlatform(AuthzSubject subj, Platform master,
-                              Platform clone)
-        throws AppdefEntityNotFoundException, ConfigFetchException,
-               PermissionException, FinderException, CreateException,
-               NamingException, SessionNotFoundException,
-               SessionTimeoutException, SessionException, VetoException,
-               AppdefDuplicateNameException, ValidationException,
-               GroupNotCompatibleException, UpdateException, EncodingException,
-               RemoteException;
-    
+    public void clonePlatform(AuthzSubject subj, Platform master, Platform clone) throws AppdefEntityNotFoundException,
+        ConfigFetchException, PermissionException, FinderException, CreateException, NamingException,
+        SessionNotFoundException, SessionTimeoutException, SessionException, VetoException,
+        AppdefDuplicateNameException, ValidationException, GroupNotCompatibleException, UpdateException,
+        EncodingException, RemoteException;
+
 }

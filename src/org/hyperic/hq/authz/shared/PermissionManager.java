@@ -26,6 +26,7 @@
 package org.hyperic.hq.authz.shared;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.ejb.FinderException;
@@ -33,13 +34,17 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.hibernate.Query;
-import org.hyperic.hq.appdef.shared.CloningBossInterface;
+import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.CloningBoss;
+import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.OperationDAO;
 import org.hyperic.hq.authz.server.session.PagerProcessor_operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDAO;
+import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
 import org.hyperic.hq.context.Bootstrap;
@@ -71,6 +76,206 @@ public abstract class PermissionManager   {
     protected ResourceDAO getResourceDAO() {
         return Bootstrap.getBean(ResourceDAO.class);
     }
+    
+    /**
+     * Check a permission 
+     * @param subject - who
+     * @param rtV - type of resource
+     * @param id - the id of the object
+     * @param operation - the name of the operation to perform
+     */
+    protected void checkPermission(AuthzSubject subject, ResourceType rtV,
+                                   Integer id, String operation)
+        throws PermissionException 
+    {
+        Integer opId = getOpIdByResourceType(rtV, operation);
+        check(subject.getId(), rtV.getId(), id, opId);
+    }
+    
+    /**
+     * Find an operation by name inside a ResourceTypeValue object
+     * @param rtV - the resource type value object
+     * @return operationId 
+     * @throws PermissionException - if the op is not found
+     */
+    private Integer getOpIdByResourceType(ResourceType rtV, String opName)
+        throws PermissionException {
+            Collection ops = rtV.getOperations();
+            for(Iterator it = ops.iterator(); it.hasNext(); ) {
+                Operation op = (Operation) it.next();
+                if(op.getName().equals(opName)) {
+                    return op.getId();
+                }
+            }
+            throw new PermissionException("Operation: " + opName 
+                + " not valid for ResourceType: " + rtV.getName());
+    }
+    
+    /**
+     * Check for modify permission for a given resource
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void checkModifyPermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException 
+    {
+        int type = id.getType();
+        String opName;
+
+        switch (type) {
+        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            opName = AuthzConstants.platformOpModifyPlatform;
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            opName = AuthzConstants.serverOpModifyServer;
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+            opName = AuthzConstants.serviceOpModifyService;
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+            opName = AuthzConstants.appOpModifyApplication;
+            break;
+        case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+            opName = AuthzConstants.groupOpModifyResourceGroup;
+            break;
+        default:
+            throw new InvalidAppdefTypeException("Unknown type: " + type);
+        }
+
+        // now check
+        checkPermission(subject, id, opName);
+    }
+    
+    /**
+     * Check a permission
+     */
+    protected void checkPermission(AuthzSubject subject, AppdefEntityID id,
+                                   String operation) 
+        throws PermissionException 
+    {
+        ResourceType rtv = null;            
+        try {
+            // get the resource type
+            rtv = getAuthzResourceType(id);
+        } catch (Exception e) {
+            throw new PermissionException(e);
+        }
+        
+        // never wrap permission exception unless absolutely necessary
+        Integer instanceId = id.getId();
+        // now call the protected method
+        checkPermission(subject, rtv, instanceId, operation);
+    } 
+    
+    /**
+     * Get the authz resource type by AppdefEntityId
+     */
+    protected ResourceType getAuthzResourceType(AppdefEntityID id)
+        throws FinderException {
+        int type = id.getType();
+        switch(type) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                return getPlatformResourceType();
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                return getServerResourceType();
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                return getServiceResourceType();
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                return getApplicationResourceType();
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                return getGroupResourceType();
+            default:
+                throw new InvalidAppdefTypeException("Type: " + type +
+                                                     " unknown");
+        }
+    }
+    
+    /**
+     * Get the platform resource type
+     * @return platformResType
+     */
+    protected ResourceType getPlatformResourceType() 
+        throws FinderException {
+        return getResourceType(AuthzConstants.platformResType);
+    }
+    
+    /**
+     * Get the application resource type
+     * @return applicationResType
+     */
+    protected ResourceType getApplicationResourceType() 
+        throws FinderException {
+        return getResourceType(AuthzConstants.applicationResType);
+    }
+
+    /**
+     * Get the Server Resource Type
+     * @return ResourceTypeValye
+     */
+    protected ResourceType getServerResourceType() 
+        throws FinderException {
+        return getResourceType(AuthzConstants.serverResType);
+    }
+
+    /**
+     * Get the Service Resource Type
+     * @return ResourceTypeValye
+     */
+    protected ResourceType getServiceResourceType() 
+        throws FinderException {
+        return getResourceType(AuthzConstants.serviceResType);
+    }
+
+    /**
+     * Get the Authz Resource Type for a Group
+     * @return ResourceTypeValue
+     */
+     public ResourceType getGroupResourceType()
+         throws FinderException {
+         return getResourceType(AuthzConstants.groupResourceTypeName);
+     }
+     
+     /**
+      * Get the authz resource type 
+      * @param resType - the constant indicating the resource type
+      * (from AuthzConstants)
+      */
+     protected ResourceType getResourceType(String resType) 
+         throws FinderException {
+         return ResourceManagerImpl.getOne().findResourceTypeByName(resType);
+     }
+     
+     /**
+      * Check for view permission for a given resource
+      * @ejb:interface-method
+      * @ejb:transaction type="Required"
+      */
+     public void checkViewPermission(AuthzSubject subject, AppdefEntityID id)
+         throws PermissionException {
+         int type = id.getType();
+         String opName = null;
+         switch (type) {
+             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                 opName = AuthzConstants.platformOpViewPlatform;
+                 break;
+             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                 opName = AuthzConstants.serverOpViewServer;
+                 break;
+             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                 opName = AuthzConstants.serviceOpViewService;
+                 break;
+             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                 opName = AuthzConstants.appOpViewApplication;
+                 break;
+             case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                 opName = AuthzConstants.groupOpViewResourceGroup;
+                 break;
+             default:
+                 throw new InvalidAppdefTypeException("Unknown type: " + type);
+         }
+         // now check
+         checkPermission(subject, id, opName);
+     }
 
 
     /**
@@ -345,7 +550,7 @@ public abstract class PermissionManager   {
     /**
      * Return the CloningBoss implementation
      */
-    public abstract CloningBossInterface getCloningBoss();
+    public abstract CloningBoss getCloningBoss();
 
     /**
      * Return the HierarchicalAlertingManager implementation

@@ -25,21 +25,15 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.rmi.RemoteException;
 import java.util.List;
 
 import javax.ejb.CreateException;
-import javax.ejb.EJBException;
 import javax.ejb.FinderException;
-import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.CloningBossInterface;
-import org.hyperic.hq.appdef.shared.CloningBossUtil;
+import org.hyperic.hq.appdef.shared.CloningBoss;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
@@ -49,84 +43,59 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.util.config.EncodingException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @ejb:bean name="CloningBoss"
- *      jndi-name="ejb/appdef/CloningBoss" 
- *      local-jndi-name="LocalCloningBoss"
- *      view-type="both"
- *      type="Stateless"
- * 
- * @ejb:interface extends="CloningBossInterface, javax.ejb.EJBObject"
- * 		local-extends="CloningBossInterface, javax.ejb.EJBLocalObject"
- * 
- * @ejb:transaction type="Required"
  */
-public class CloningBossEJBImpl extends AppdefSessionEJB
-    implements CloningBossInterface, SessionBean {
-    
-    private final Log _log = LogFactory.getLog(CloningBossEJBImpl.class);
+@Service
+@Transactional
+public class CloningBossImpl implements CloningBoss {
 
-    public CloningBossEJBImpl() {
+    public CloningBossImpl() {
     }
-    
+
     /**
      * @param subj
      * @param pType platform type
      * @param nameRegEx regex which matches either the platform fqdn or the
-     * resource sortname
-     * @ejb:interface-method
+     *        resource sortname
+     * 
      */
-    public List findPlatformsByTypeAndName(AuthzSubject subj, Integer pType,
-                                           String nameRegEx) {
-        throw new UnsupportedOperationException();
-    }
-    
-    /**
-     * @param subj Method ensures that the master platform has viewable
-     * permissions and the clone targets have modifiable permissions.
-     * @param platformId master platform id
-     * @param cloneTaretIds List<Integer> List of Platform Ids to be cloned
-     * @ejb:interface-method
-     */
-    public void clonePlatform(AuthzSubject subj, Integer platformId,
-                              List cloneTargetIds)
-        throws SessionNotFoundException, SessionTimeoutException,
-               SessionException, PermissionException, PlatformNotFoundException
-    {
+    public List<Platform> findPlatformsByTypeAndName(AuthzSubject subj, Integer pType, String nameRegEx) {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * @ejb:interface-method
+     * @param subj Method ensures that the master platform has viewable
+     *        permissions and the clone targets have modifiable permissions.
+     * @param platformId master platform id
+     * @param cloneTaretIds List<Integer> List of Platform Ids to be cloned
+     * 
      */
-    public void clonePlatform(AuthzSubject subj, Platform master,
-                              Platform clone)
-        throws AppdefEntityNotFoundException, ConfigFetchException,
-               PermissionException, FinderException, CreateException,
-               NamingException, SessionNotFoundException,
-               SessionTimeoutException, SessionException, VetoException,
-               AppdefDuplicateNameException, ValidationException,
-               GroupNotCompatibleException, UpdateException, EncodingException {
+    public void clonePlatform(AuthzSubject subj, Integer platformId, List<Integer> cloneTargetIds)
+        throws SessionNotFoundException, SessionTimeoutException, SessionException, PermissionException,
+        PlatformNotFoundException {
         throw new UnsupportedOperationException();
     }
-    
-    public static CloningBossInterface getOne() {
-        try {
-        	return CloningBossUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+
+    /**
+     * 
+     */
+    public void clonePlatform(AuthzSubject subj, Platform master, Platform clone) throws AppdefEntityNotFoundException,
+        ConfigFetchException, PermissionException, FinderException, CreateException, NamingException,
+        SessionNotFoundException, SessionTimeoutException, SessionException, VetoException,
+        AppdefDuplicateNameException, ValidationException, GroupNotCompatibleException, UpdateException,
+        EncodingException {
+        throw new UnsupportedOperationException();
     }
-    
-    /** @ejb:create-method */
-    public void ejbCreate() throws CreateException {}
-    public void ejbActivate() throws EJBException, RemoteException {}
-    public void ejbPassivate() throws EJBException, RemoteException {}
-    public void ejbRemove() throws EJBException, RemoteException {}
-    
+
+    public static CloningBoss getOne() {
+        return Bootstrap.getBean(CloningBoss.class);
+    }
+
 }

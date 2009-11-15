@@ -41,9 +41,9 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
-import org.hyperic.hq.appdef.server.session.CloningBossEJBImpl;
+import org.hyperic.hq.appdef.server.session.CloningBossImpl;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.shared.CloningBossInterface;
+import org.hyperic.hq.appdef.shared.CloningBoss;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -583,8 +583,8 @@ public class PermissionManagerImpl
         return MaintenanceEventManagerImpl.getOne();
     }
 
-    public CloningBossInterface getCloningBoss() {
-    	return CloningBossEJBImpl.getOne();
+    public CloningBoss getCloningBoss() {
+    	return CloningBossImpl.getOne();
     }
 
     public HierarchicalAlertingManagerInterface getHierarchicalAlertingManager() {
