@@ -45,12 +45,7 @@
 
 		</session>
 		
-		<session>
-			<ejb-name>EventLogBoss</ejb-name>
-			<jndi-name>ejb/bizapp/EventLogBoss</jndi-name>
-			<local-jndi-name>LocalEventLogBoss</local-jndi-name>
-
-		</session>
+		
 		<session>
 			<ejb-name>AppdefStatManager</ejb-name>
 			<local-jndi-name>LocalAppdefStatManager</local-jndi-name>

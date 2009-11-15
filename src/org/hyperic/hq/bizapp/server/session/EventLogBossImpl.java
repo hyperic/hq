@@ -28,56 +28,47 @@ package org.hyperic.hq.bizapp.server.session;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.events.server.session.EventLogManagerImpl;
-import org.hyperic.hq.events.shared.EventLogManager;
-import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
+import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.bizapp.shared.EventLogBossLocal;
-import org.hyperic.hq.bizapp.shared.EventLogBossUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.events.server.session.EventLog;
+import org.hyperic.hq.events.shared.EventLogManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** 
  * The BizApp's interface to the Events/Logs
  *
- * @ejb:bean name="EventLogBoss"
- *      jndi-name="ejb/bizapp/EventLogBoss"
- *      local-jndi-name="LocalEventLogBoss"
- *      view-type="both"
- *      type="Stateless"
  * 
- * @ejb:transaction type="Required"
  */
-public class EventLogBossEJBImpl extends BizappSessionEJB implements
-        SessionBean {
+@Service
+@Transactional
+public class EventLogBossImpl implements EventLogBoss {
 
-    private Log _log = LogFactory.getLog(EventLogBossEJBImpl.class);
+    private final Log log = LogFactory.getLog(EventLogBossImpl.class);
     
-    private EventLogManager eventLogManager = null;
+    private EventLogManager eventLogManager;
 
-    private SessionManager manager;
-
-    public EventLogBossEJBImpl() {
-        manager = SessionManager.getInstance();
-    }
-
-    private EventLogManager getELM() {
-        if (eventLogManager == null) {
-            eventLogManager = EventLogManagerImpl.getOne();
-        }
-        return eventLogManager;
+    private SessionManager sessionManager;
+    
+    private HQApp hqApp;
+    
+    @Autowired
+    public EventLogBossImpl(EventLogManager eventLogManager, SessionManager sessionManager, HQApp hqApp) {
+        this.eventLogManager = eventLogManager;
+        this.sessionManager = sessionManager;
+        this.hqApp = hqApp;
     }
 
     /**
@@ -87,14 +78,14 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
      * @return List of EventLogValue objects or an empty List if
      *         no events are found
      * 
-     * @ejb:interface-method 
+     *  
      */
-    public List getEvents(int sessionId, String eventType, AppdefEntityID id, 
+    public List<EventLog> getEvents(int sessionId, String eventType, AppdefEntityID id, 
                           long beginTime, long endTime)
         throws SessionNotFoundException, SessionTimeoutException
     {
         // We ignore the subject for now
-        manager.authenticate(sessionId);
+        sessionManager.authenticate(sessionId);
         return getEvents(sessionId, eventType, new AppdefEntityID[] { id },
                          beginTime, endTime);
     }
@@ -107,18 +98,18 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
      * @return List of EventLogValue objects or an empty List if
      *         no events are found
      * 
-     * @ejb:interface-method
+     * 
      */
-    public List getEvents(int sessionId, String eventType, 
+    public List<EventLog> getEvents(int sessionId, String eventType, 
                           AppdefEntityID ids[],
                           long beginTime, long endTime)
         throws SessionNotFoundException, SessionTimeoutException 
     {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        List events = new ArrayList();
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        List<EventLog> events = new ArrayList<EventLog>();
     
         for (int i=0; i <ids.length; i++) {
-            events.addAll(getELM().findLogs(ids[i], subject, 
+            events.addAll(eventLogManager.findLogs(ids[i], subject, 
                                             new String[] { eventType },
                                             beginTime, endTime));
         }
@@ -134,14 +125,14 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
      * @return List of EventLogValue objects or an empty List if
      *         no events are found
      * 
-     * @ejb:interface-method
+     * 
      */
-    public List getEvents(int sessionId, AppdefEntityID aeid,
+    public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid,
                           String[] eventTypes, long beginTime, long endTime)
         throws SessionNotFoundException, SessionTimeoutException 
     {
-        AuthzSubject user = manager.getSubject(sessionId);
-        return getELM().findLogs(aeid, user, eventTypes, beginTime, endTime);
+        AuthzSubject user = sessionManager.getSubject(sessionId);
+        return eventLogManager.findLogs(aeid, user, eventTypes, beginTime, endTime);
     }
 
     /**
@@ -151,14 +142,14 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
      * @return List of EventLogValue objects or an empty List if
      *         no events are found
      * 
-     * @ejb:interface-method
+     * 
      */
-    public List getEvents(int sessionId, AppdefEntityID aeid,
+    public List<EventLog> getEvents(int sessionId, AppdefEntityID aeid,
                           String status, long beginTime, long endTime)
         throws SessionNotFoundException, SessionTimeoutException 
     {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        return getELM().findLogs(aeid, subject, status, beginTime, endTime);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return eventLogManager.findLogs(aeid, subject, status, beginTime, endTime);
     }
 
     /** 
@@ -168,7 +159,7 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
      * @param aeid the entity ID
      * @return boolean array indicating if logs exist per interval.
      * 
-     * @ejb:interface-method
+     * 
      */
     public boolean[] logsExistPerInterval(int sessionId, AppdefEntityID aeid,
                                           long beginTime, long endTime,
@@ -176,42 +167,30 @@ public class EventLogBossEJBImpl extends BizappSessionEJB implements
         throws SessionNotFoundException, SessionTimeoutException 
     {
         // We ignore the subject for now.
-        AuthzSubject subject = manager.getSubject(sessionId);
-        return getELM().logsExistPerInterval(aeid, subject, beginTime, endTime,
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return eventLogManager.logsExistPerInterval(aeid, subject, beginTime, endTime,
                                              intervals);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void startup() {
-        _log.info("Event Log Boss starting up!");
+        log.info("Event Log Boss starting up!");
 
-        HQApp app = HQApp.getInstance();
+        
 
-        app.registerCallbackListener(ResourceDeleteCallback.class,
+        hqApp.registerCallbackListener(ResourceDeleteCallback.class,
             new ResourceDeleteCallback() {
                 public void preResourceDelete(Resource r) throws VetoException {
-                    EventLogManager elm = EventLogManagerImpl.getOne();
-                    elm.deleteLogs(r);
+                   
+                    eventLogManager.deleteLogs(r);
                 }
             }
         );
     }
 
-    public static EventLogBossLocal getOne() {
-        try {
-            return EventLogBossUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static EventLogBoss getOne() {
+       return Bootstrap.getBean(EventLogBoss.class);
     }
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
 }
