@@ -3,76 +3,78 @@
  */
 package org.hyperic.hq.bizapp.shared;
 
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.quartz.SchedulerException;
+
 /**
- * Remote interface for SchedulerBoss.
+ * Local interface for SchedulerBoss.
  */
-public interface SchedulerBoss
-   extends javax.ejb.EJBObject
-{
-   /**
-    * Get a list of all job groups in the scheduler.
-    */
-   public java.lang.String[] getJobGroupNames( int sessionID )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.quartz.SchedulerException, java.rmi.RemoteException;
+public interface SchedulerBoss {
+    /**
+     * Get a list of all job groups in the scheduler.
+     */
+    public java.lang.String[] getJobGroupNames(int sessionID) throws SessionNotFoundException, SessionTimeoutException,
+        SchedulerException;
 
-   /**
-    * Get a list of all trigger groups in the scheduler.
-    */
-   public java.lang.String[] getTriggerGroupNames( int sessionID )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.quartz.SchedulerException, java.rmi.RemoteException;
+    /**
+     * Get a list of all trigger groups in the scheduler.
+     */
+    public java.lang.String[] getTriggerGroupNames(int sessionID) throws SessionNotFoundException,
+        SessionTimeoutException, SchedulerException;
 
-   /**
-    * Get a list of all jobs in a given group.
-    * @param jobGroup the group whose jobs should be listed
-    */
-   public java.lang.String[] getJobNames( int sessionID,java.lang.String jobGroup )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.quartz.SchedulerException, java.rmi.RemoteException;
+    /**
+     * Get a list of all jobs in a given group.
+     * @param jobGroup the group whose jobs should be listed
+     */
+    public java.lang.String[] getJobNames(int sessionID, String jobGroup) throws SessionNotFoundException,
+        SessionTimeoutException, SchedulerException;
 
-   /**
-    * Get a list of all triggers in a given group.
-    * @param triggerGroup the group whose triggers should be listed
-    */
-   public java.lang.String[] getTriggerNames( int sessionID,java.lang.String triggerGroup )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.quartz.SchedulerException, java.rmi.RemoteException;
+    /**
+     * Get a list of all triggers in a given group.
+     * @param triggerGroup the group whose triggers should be listed
+     */
+    public java.lang.String[] getTriggerNames(int sessionID, String triggerGroup) throws SessionNotFoundException,
+        SessionTimeoutException, SchedulerException;
 
-   /**
-    * Get a list of all currently-executing jobs.
-    */
-   public org.quartz.utils.Key[] getCurrentlyExecutingJobs( int sessionID )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.quartz.SchedulerException, java.rmi.RemoteException;
+    /**
+     * Get a list of all currently-executing jobs.
+     */
+    public org.quartz.utils.Key[] getCurrentlyExecutingJobs(int sessionID) throws SessionNotFoundException,
+        SessionTimeoutException, SchedulerException;
 
-   /**
-    * Remove a previously-scheduled job and all of its associated triggers.
-    * @param jobName the name of the job to be removed
-    * @param groupName the name of the group
-    * @return true if a job was removed, false otherwise
-    */
-   public boolean deleteJob( int sessionID,java.lang.String jobName,java.lang.String groupName )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.quartz.SchedulerException, java.rmi.RemoteException;
+    /**
+     * Remove a previously-scheduled job and all of its associated triggers.
+     * @param jobName the name of the job to be removed
+     * @param groupName the name of the group
+     * @return true if a job was removed, false otherwise
+     */
+    public boolean deleteJob(int sessionID, String jobName, String groupName) throws SessionNotFoundException,
+        SessionTimeoutException, SchedulerException;
 
-   /**
-    * Remove the given schedule from the scheduler.
-    * @param scheduleName the name of the schedule to delete
-    * @param groupName the name of the group
-    * @return true if a schedule was deleted, false otherwise
-    */
-   public boolean deleteSchedule( int sessionID,java.lang.String scheduleName,java.lang.String groupName )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.quartz.SchedulerException, java.rmi.RemoteException;
+    /**
+     * Remove the given schedule from the scheduler.
+     * @param scheduleName the name of the schedule to delete
+     * @param groupName the name of the group
+     * @return true if a schedule was deleted, false otherwise
+     */
+    public boolean deleteSchedule(int sessionID, String scheduleName, String groupName)
+        throws SessionNotFoundException, SessionTimeoutException, SchedulerException;
 
-   /**
-    * Remove the given group of schedules from the scheduler.
-    * @param groupName the name of the group
-    * @return number of schedules deleted
-    */
-   public int deleteScheduleGroup( int sessionID,java.lang.String groupName )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.quartz.SchedulerException, java.rmi.RemoteException;
+    /**
+     * Remove the given group of schedules from the scheduler.
+     * @param groupName the name of the group
+     * @return number of schedules deleted
+     */
+    public int deleteScheduleGroup(int sessionID, String groupName) throws SessionNotFoundException,
+        SessionTimeoutException, SchedulerException;
 
-   /**
-    * Remove the given group of jobs from the scheduler.
-    * @param groupName the name of the group
-    * @return number of jobs deleted
-    */
-   public int deleteJobGroup( int sessionID,java.lang.String groupName )
-      throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.quartz.SchedulerException, java.rmi.RemoteException;
+    /**
+     * Remove the given group of jobs from the scheduler.
+     * @param groupName the name of the group
+     * @return number of jobs deleted
+     */
+    public int deleteJobGroup(int sessionID, String groupName) throws SessionNotFoundException,
+        SessionTimeoutException, SchedulerException;
 
 }
