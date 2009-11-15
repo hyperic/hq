@@ -45,7 +45,7 @@ import org.hyperic.util.config.EncodingException;
 /**
  * Business interface for the CloningBoss EJB
  */
-public interface CloningBossInterface {
+public interface CloningBoss {
     
     /**
      * @param subj
@@ -53,7 +53,7 @@ public interface CloningBossInterface {
      * @param nameRegEx regex which matches either the platform fqdn or the
      * resource sortname
      */
-    public List findPlatformsByTypeAndName(AuthzSubject subj, Integer pType,
+    public List<Platform> findPlatformsByTypeAndName(AuthzSubject subj, Integer pType,
                                            String nameRegEx)
     	throws RemoteException;
     
@@ -64,7 +64,7 @@ public interface CloningBossInterface {
      * @param cloneTaretIds List<Integer> List of Platform Ids to be cloned
      */
     public void clonePlatform(AuthzSubject subj, Integer platformId,
-                              List cloneTargetIds)
+                              List<Integer> cloneTargetIds)
         throws SessionNotFoundException, SessionTimeoutException,
                SessionException, PermissionException, PlatformNotFoundException,
                RemoteException;

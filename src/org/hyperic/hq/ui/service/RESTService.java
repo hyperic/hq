@@ -24,7 +24,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.CloningBossInterface;
+import org.hyperic.hq.appdef.shared.CloningBoss;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -687,7 +687,7 @@ public class RESTService extends BaseService {
             return ERROR_GENERIC;
 
         try {
-        	CloningBossInterface cloningBoss = PermissionManagerFactory
+        	CloningBoss cloningBoss = PermissionManagerFactory
         											.getInstance()
         											.getCloningBoss();
 

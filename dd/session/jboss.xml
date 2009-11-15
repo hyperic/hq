@@ -145,13 +145,7 @@
 			<local-jndi-name>LocalMeasurementBoss</local-jndi-name>
 
 		</session>
-		<session>
-			<ejb-name>CloningBoss</ejb-name>
-			<jndi-name>ejb/appdef/CloningBoss</jndi-name>
-			<local-jndi-name>LocalCloningBoss</local-jndi-name>
-
-		</session>
-
+		
 		<!--
 			write a merge file jboss-webservices.ent for webservice-description
 		-->

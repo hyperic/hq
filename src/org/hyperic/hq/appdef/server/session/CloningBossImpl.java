@@ -25,21 +25,15 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.rmi.RemoteException;
 import java.util.List;
 
 import javax.ejb.CreateException;
-import javax.ejb.EJBException;
 import javax.ejb.FinderException;
-import javax.ejb.SessionBean;
 import javax.naming.NamingException;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.CloningBossInterface;
-import org.hyperic.hq.appdef.shared.CloningBossUtil;
+import org.hyperic.hq.appdef.shared.CloningBoss;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
@@ -49,29 +43,22 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.util.config.EncodingException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @ejb:bean name="CloningBoss"
- *      jndi-name="ejb/appdef/CloningBoss" 
- *      local-jndi-name="LocalCloningBoss"
- *      view-type="both"
- *      type="Stateless"
- * 
- * @ejb:interface extends="CloningBossInterface, javax.ejb.EJBObject"
- * 		local-extends="CloningBossInterface, javax.ejb.EJBLocalObject"
- * 
- * @ejb:transaction type="Required"
  */
-public class CloningBossEJBImpl extends AppdefSessionEJB
-    implements CloningBossInterface, SessionBean {
+@Service
+@Transactional
+public class CloningBossImpl 
+    implements CloningBoss {
     
-    private final Log _log = LogFactory.getLog(CloningBossEJBImpl.class);
 
-    public CloningBossEJBImpl() {
+    public CloningBossImpl() {
     }
     
     /**
@@ -79,9 +66,9 @@ public class CloningBossEJBImpl extends AppdefSessionEJB
      * @param pType platform type
      * @param nameRegEx regex which matches either the platform fqdn or the
      * resource sortname
-     * @ejb:interface-method
+     * 
      */
-    public List findPlatformsByTypeAndName(AuthzSubject subj, Integer pType,
+    public List<Platform> findPlatformsByTypeAndName(AuthzSubject subj, Integer pType,
                                            String nameRegEx) {
         throw new UnsupportedOperationException();
     }
@@ -91,10 +78,10 @@ public class CloningBossEJBImpl extends AppdefSessionEJB
      * permissions and the clone targets have modifiable permissions.
      * @param platformId master platform id
      * @param cloneTaretIds List<Integer> List of Platform Ids to be cloned
-     * @ejb:interface-method
+     * 
      */
     public void clonePlatform(AuthzSubject subj, Integer platformId,
-                              List cloneTargetIds)
+                              List<Integer> cloneTargetIds)
         throws SessionNotFoundException, SessionTimeoutException,
                SessionException, PermissionException, PlatformNotFoundException
     {
@@ -102,7 +89,7 @@ public class CloningBossEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void clonePlatform(AuthzSubject subj, Platform master,
                               Platform clone)
@@ -115,18 +102,8 @@ public class CloningBossEJBImpl extends AppdefSessionEJB
         throw new UnsupportedOperationException();
     }
     
-    public static CloningBossInterface getOne() {
-        try {
-        	return CloningBossUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    public static CloningBoss getOne() {
+        return Bootstrap.getBean(CloningBoss.class);
     }
-    
-    /** @ejb:create-method */
-    public void ejbCreate() throws CreateException {}
-    public void ejbActivate() throws EJBException, RemoteException {}
-    public void ejbPassivate() throws EJBException, RemoteException {}
-    public void ejbRemove() throws EJBException, RemoteException {}
     
 }

@@ -181,7 +181,7 @@ public interface PlatformManagerLocal
     */
    public org.hyperic.util.pager.PageList findPlatformsByIpAddr( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String addr,org.hyperic.util.pager.PageControl pc ) throws org.hyperic.hq.authz.shared.PermissionException;
 
-   public java.util.List findPlatformPojosByTypeAndName( org.hyperic.hq.authz.server.session.AuthzSubject subj,java.lang.Integer pType,java.lang.String regEx ) ;
+   public java.util.List<Platform> findPlatformPojosByTypeAndName( org.hyperic.hq.authz.server.session.AuthzSubject subj,java.lang.Integer pType,java.lang.String regEx ) ;
 
    public java.util.List findParentPlatformPojosByNetworkRelation( org.hyperic.hq.authz.server.session.AuthzSubject subj,java.util.List platformTypeIds,java.lang.String platformName,java.lang.Boolean hasChildren ) ;
 
