@@ -195,16 +195,7 @@
     <copy file="${hq.home}/installer/data/hq-engine/org.jboss.deployment.MainDeployer-xmbean.xml"
           tofile="${jboss.home}/server/default/conf/xmdesc/org.jboss.deployment.MainDeployer-xmbean.xml" />
 
-    <delete dir="${jboss-deploy-dir}/lather-jboss.sar" />
-    <unzip src="${lather.lib}/lather-jboss.sar"
-           dest="${jboss-deploy-dir}/lather-jboss.sar"
-           overwrite="false"/>
-    <mkdir dir="${jboss-deploy-dir}/lather-jboss.sar/org/hyperic/util/notReady"/>
-    <copy todir="${jboss-deploy-dir}/lather-jboss.sar/org/hyperic/util/notReady">
-        <fileset dir="${hq.home}/build/classes/org/hyperic/util/notReady">
-            <include name="*.class"/>
-        </fileset>
-    </copy>
+   
 
     <!-- Copy over hq-ds.xml file and substitute db properties -->
     <delete file="${jboss-deploy-dir}/hq-ds.xml"/>
@@ -263,11 +254,7 @@
 
     <property name="jboss-deploy-dir"
               value="${jboss.home}/server/default/deploy"/> 
-    <copy todir="${jboss-deploy-dir}/lather-jboss.sar/org/hyperic/util/notReady">
-        <fileset dir="${hq.home}/build/classes/org/hyperic/util/notReady">
-            <include name="*.class"/>
-        </fileset>
-    </copy>
+   
     <antcall target="instrument-jboss"/>
   </target>
 

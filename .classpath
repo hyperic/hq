@@ -67,7 +67,7 @@
 	<classpathentry kind="lib" path="thirdparty/lib/commons-codec-1.3.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/commons-collections-3.2.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/commons-fileupload-1.2.1.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/commons-httpclient-3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/commons-httpclient-3.1.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/commons-lang-2.3.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/commons-modeler.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/db2_jdbc/db2jcc_license_cu.jar"/>

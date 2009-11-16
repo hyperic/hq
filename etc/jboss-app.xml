@@ -20,4 +20,7 @@
   <module>
     <service>autoinventory-mbeans.sar</service>
   </module>
+  <module>
+    <service>lather-jboss.sar</service>
+  </module>
 </jboss-app> 

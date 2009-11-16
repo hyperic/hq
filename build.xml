@@ -364,6 +364,8 @@
     <mkdir dir="${ear.dir}/scheduler-mbeans.sar/META-INF" />
     <mkdir dir="${ear.dir}/hq-agent-bundles" />
 
+   
+
     <copy todir="${ear.dir}/autoinventory-mbeans.sar/META-INF" 
           file="etc/jboss/autoinventory/sar/jboss-service.xml" />
     <copy todir="${ear.dir}/events-mbeans.sar/META-INF" 
@@ -374,6 +376,17 @@
     </replace>
     <copy todir="${ear.dir}/measurement-mbeans.sar/META-INF" 
           file="etc/jboss/measurement/sar/jboss-service.xml" />
+
+	<delete dir="${ear.dir}/lather-jboss.sar" />
+   	<unzip src="${lather.lib}/lather-jboss.sar"
+		          dest="${ear.dir}/lather-jboss.sar"
+		          overwrite="false"/>
+    <mkdir dir="${ear.dir}/lather-jboss.sar/org/hyperic/util/notReady"/>
+	<copy todir="${ear.dir}/lather-jboss.sar/org/hyperic/util/notReady">
+		<fileset dir="${hq.home}/build/classes/org/hyperic/util/notReady">
+		           <include name="*.class"/>
+		       </fileset>
+	</copy>
     
     <!-- Write version resource -->
     <antcall target="write-version-file">
