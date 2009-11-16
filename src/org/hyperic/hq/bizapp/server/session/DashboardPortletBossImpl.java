@@ -34,45 +34,39 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.ejb.FinderException;
-import javax.ejb.SessionBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.server.session.AppdefSessionEJB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.bizapp.shared.DashboardPortletBossLocal;
-import org.hyperic.hq.bizapp.shared.DashboardPortletBossUtil;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.bizapp.shared.DashboardPortletBoss;
+import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalation;
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
 import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
-import org.hyperic.hq.events.server.session.AlertManagerImpl;
 import org.hyperic.hq.events.server.session.AlertSortField;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
+import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.AlertManager;
+import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertLog;
-import org.hyperic.hq.galerts.server.session.GalertManagerImpl;
 import org.hyperic.hq.galerts.shared.GalertManager;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -81,26 +75,63 @@ import org.hyperic.util.timer.StopWatch;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @ejb:bean name="DashboardPortletBoss"
- *      jndi-name="ejb/bizapp/DashboardPortletBoss"
- *      local-jndi-name="LocalDashboardPortletBoss"
- *      view-type="both"
- *      type="Stateless"
- * @ejb:transaction type="Required"
  */
-public class DashboardPortletBossEJBImpl
-    extends AppdefSessionEJB
-    implements SessionBean {
+@Service
+@Transactional
+public class DashboardPortletBossImpl implements DashboardPortletBoss
+{
 
     private static final String ALERT_CRITICAL = "red",
                                 ALERT_WARN     = "yellow",
                                 ALERT_UNKNOWN  = "gray",
                                 ALERT_OK       = "green";
     
-    private final Log _log =
-        LogFactory.getLog(DashboardPortletBossEJBImpl.class);
+    private final Log log =
+        LogFactory.getLog(DashboardPortletBossImpl.class);
+    
+    private PermissionManager permissionManager;
+    
+    private ResourceManager resourceManager;
+    
+    private MeasurementManager measurementManager;
+    
+    private DataManagerLocal dataManager;
+    
+    private MeasurementBossLocal measurementBoss;
+    
+    private ResourceGroupManager resourceGroupManager;
+    
+    private GalertManager galertManager;
+    
+    private AlertManager alertManager;
+    
+    private AlertDefinitionManager alertDefinitionManager;
+    
+    private EscalationManagerLocal escalationManager;
+
+    @Autowired
+    public DashboardPortletBossImpl(PermissionManager permissionManager, ResourceManager resourceManager,
+                                    MeasurementManager measurementManager, DataManagerLocal dataManager,
+                                    MeasurementBossLocal measurementBoss, ResourceGroupManager resourceGroupManager,
+                                    GalertManager galertManager, AlertManager alertManager,
+                                    AlertDefinitionManager alertDefinitionManager,
+                                    EscalationManagerLocal escalationManager) {
+        this.permissionManager = permissionManager;
+        this.resourceManager = resourceManager;
+        this.measurementManager = measurementManager;
+        this.dataManager = dataManager;
+        this.measurementBoss = measurementBoss;
+        this.resourceGroupManager = resourceGroupManager;
+        this.galertManager = galertManager;
+        this.alertManager = alertManager;
+        this.alertDefinitionManager = alertDefinitionManager;
+        this.escalationManager = escalationManager;
+    }
 
     /**
      * @return JSONArray made up of several JSONObjects.  Output looks similar
@@ -109,7 +140,7 @@ public class DashboardPortletBossEJBImpl
      *            "2008-07-09T10:48:28-0700":[1],"2008-07-09T10:58:28-0700":[1]},
      *    "resourceName":"clone-0"}]]
      * @throws PermissionException 
-     * @ejb:interface-method
+     * 
      */
     public JSONArray getMeasurementData(AuthzSubject subj,
                                         Integer resId, Integer mtid, 
@@ -118,14 +149,13 @@ public class DashboardPortletBossEJBImpl
         throws PermissionException
     {
         JSONArray rtn = new JSONArray();
-        ResourceManager resMan = getResourceManager();
-        MeasurementManager mMan = MeasurementManagerImpl.getOne();
-        DataManagerLocal dMan = DataManagerEJBImpl.getOne();
+      
+        
         DateFormat dateFmt =
             new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
         long intv = (end - begin) / 60;
         JSONObject jObj = new JSONObject();
-        Resource res = resMan.findResourceById(resId);
+        Resource res = resourceManager.findResourceById(resId);
         if (res == null || res.isInAsyncDeleteState()) {
             return rtn;
         }
@@ -135,13 +165,13 @@ public class DashboardPortletBossEJBImpl
 
             AppdefEntityID[] aeids;
             if (aeid.isGroup()) {
-                List members =
+                List<AppdefEntityID> members =
                     GroupUtil.getCompatGroupMembers(subj, aeid, null,
                                                     PageControl.PAGE_ALL);
                 aeids = (AppdefEntityID[])
                 members.toArray(new AppdefEntityID[members.size()]);
             } else if (ctype != null) {
-                aeids = MeasurementBossEJBImpl.getOne()
+                aeids = measurementBoss
                                     .getAutoGroupMemberIDs(
                                             subj,
                                             new AppdefEntityID[] { aeid },
@@ -149,24 +179,24 @@ public class DashboardPortletBossEJBImpl
             } else {
                 aeids = new AppdefEntityID[] { aeid };
             }
-            List metrics = mMan.findMeasurements(subj, mtid, aeids);
+            List<Measurement> metrics = measurementManager.findMeasurements(subj, mtid, aeids);
 
             // Get measurement name
             if (!metrics.isEmpty()) {
-                Measurement measurement = (Measurement) metrics.get(0);
+                Measurement measurement = metrics.get(0);
                 jObj.put("measurementName", measurement.getTemplate().getName());
                 jObj.put("measurementUnits", measurement.getTemplate().getUnits());
             }
             
-            List data = dMan.getHistoricalData(metrics, begin, end,
+            List<HighLowMetricValue> data = dataManager.getHistoricalData(metrics, begin, end,
                                                intv, 0, true,
                                                PageControl.PAGE_ALL);
 
             JSONObject dataObj = new JSONObject();
             jObj.put("data", dataObj);
-            for (Iterator dit = data.iterator(); dit.hasNext();) {
+            for (HighLowMetricValue pt : data) {
                 JSONArray array = new JSONArray();
-                HighLowMetricValue pt = (HighLowMetricValue) dit.next();
+              
                 double val = pt.getValue();
                 if (Double.isNaN(val) || Double.isInfinite(val)) {
                     continue;
@@ -189,43 +219,43 @@ public class DashboardPortletBossEJBImpl
     /**
      * @throws PermissionException 
      * @throws JSONException 
-     * @ejb:interface-method
+     * 
      */
     public JSONObject getAllGroups(AuthzSubject subj)
         throws PermissionException, JSONException
     {
         JSONObject rtn = new JSONObject();
-        Collection groups =
-            ResourceGroupManagerImpl.getOne().getAllResourceGroups(subj, true);
-        for (Iterator i=groups.iterator(); i.hasNext(); ) {
-            ResourceGroup group = (ResourceGroup)i.next();
+        Collection<ResourceGroup> groups =
+            resourceGroupManager.getAllResourceGroups(subj, true);
+        for (ResourceGroup group : groups ) {
+            
             rtn.put(group.getId().toString(), group.getName());
         }
         return rtn;
     }
     
     /**
-     * @ejb:interface-method
+     * 
      */
-    public JSONObject getAlertCounts(AuthzSubject subj, List groupIds,
+    public JSONObject getAlertCounts(AuthzSubject subj, List<Integer> groupIds,
                                      PageInfo pageInfo)
         throws PermissionException, JSONException, FinderException
     {
         final long PORTLET_RANGE = MeasurementConstants.DAY * 3;
         
         JSONObject rtn = new JSONObject();
-        ResourceGroupManager rgMan = ResourceGroupManagerImpl.getOne();
+       
         final int maxRecords = pageInfo.getStartRow() + pageInfo.getPageSize();
         int i=0;
-        for (Iterator it=groupIds.iterator(); it.hasNext(); i++) {
+        for (Iterator<Integer> it=groupIds.iterator(); it.hasNext(); i++) {
             if ( maxRecords > 0 && i > maxRecords ) {
                 break;
             }
             if (i < pageInfo.getStartRow()) {
                 continue;
             }
-            Integer gId = (Integer)it.next();
-            ResourceGroup group = rgMan.findResourceGroupById(subj, gId);
+            Integer gId = it.next();
+            ResourceGroup group = resourceGroupManager.findResourceGroupById(subj, gId);
             if (group != null) {
                 JSONArray array = new JSONArray()
                     .put(getResourceStatus(subj, group, PORTLET_RANGE))
@@ -239,24 +269,24 @@ public class DashboardPortletBossEJBImpl
     private String getGroupStatus(AuthzSubject subj, ResourceGroup group,
                                   long range)
     {
-        boolean debug = _log.isDebugEnabled();
+        boolean debug = log.isDebugEnabled();
         String rtn = ALERT_OK;
         long now = System.currentTimeMillis();
 
         try {
             long begin = now - range;
-            GalertManager gaMan = GalertManagerImpl.getOne();
-            List galerts = gaMan.findUnfixedAlertLogsByTimeWindow(group, begin,
+            
+            List<GalertLog> galerts = galertManager.findUnfixedAlertLogsByTimeWindow(group, begin,
                                                                    now);
             if (debug) {
-                _log.debug("getGroupStatus: findUnfixedAlertLogsByTimeWindow execution time(ms)=" 
+                log.debug("getGroupStatus: findUnfixedAlertLogsByTimeWindow execution time(ms)=" 
                                 + (System.currentTimeMillis()-now));
             }            
-            GalertLog galert = null;
-            for (Iterator i = galerts.iterator(); i.hasNext();) {
-                galert = (GalertLog)i.next();
+            
+            for (GalertLog galert: galerts) {
+                
                 try {
-                    checkAlertingPermission(subj, galert.getAlertDef().getAppdefID());
+                    permissionManager.checkAlertingPermission(subj, galert.getAlertDef().getAppdefID());
                 } catch (PermissionException pe) {
                     // continue to next group alert
                     continue;
@@ -273,7 +303,7 @@ public class DashboardPortletBossEJBImpl
             // Is it that there are no alerts or that there are no alert
             // definitions?
             if (rtn.equals(ALERT_OK)) {
-                List galertDefs = gaMan.findAlertDefs(group, PageControl.PAGE_ALL);
+                List<GalertDef> galertDefs = galertManager.findAlertDefs(group, PageControl.PAGE_ALL);
                 if (galertDefs.size() == 0) {
                     return ALERT_UNKNOWN;
                 }
@@ -282,7 +312,7 @@ public class DashboardPortletBossEJBImpl
             return rtn;            
         } finally {
             if (debug) {
-                _log.debug("getGroupStatus: groupId=" + group.getId()
+                log.debug("getGroupStatus: groupId=" + group.getId()
                                 +", execution time(ms)=" + (System.currentTimeMillis()-now));
             }
         }        
@@ -291,7 +321,7 @@ public class DashboardPortletBossEJBImpl
     private String getResourceStatus(AuthzSubject subj, ResourceGroup group,
                                      long range)
         throws FinderException {
-        boolean debug = _log.isDebugEnabled();
+        boolean debug = log.isDebugEnabled();
         long now = System.currentTimeMillis();
         StopWatch watch = new StopWatch(now);
         
@@ -299,29 +329,30 @@ public class DashboardPortletBossEJBImpl
             long begin = now - range;
             
             watch.markTimeBegin("getResourceStatus: getUnfixedCount");
-            AlertManager alMan = AlertManagerImpl.getOne();
-            int unfixed = alMan.getUnfixedCount(subj.getId(), begin, now,
+           
+            int unfixed = alertManager.getUnfixedCount(subj.getId(), begin, now,
                                                  group.getId());
             watch.markTimeEnd("getResourceStatus: getUnfixedCount");
             
             // There are unfixed alerts
             if (unfixed > 0) {
                 watch.markTimeBegin("getResourceStatus: findAlerts");            
-                List alerts =
-                    alMan.findAlerts(subj.getId(), 0, begin, now,
+                List<Alert> alerts =
+                    alertManager.findAlerts(subj.getId(), 0, begin, now,
                                       true, true, group.getId(),
                                       PageInfo.getAll(AlertSortField.FIXED,
                                                       true));
                 watch.markTimeEnd("getResourceStatus: findAlerts");
 
 				// Are all unfixed alerts in escalation?
-                if (alerts.size() != unfixed)
+                if (alerts.size() != unfixed) {
                     return ALERT_CRITICAL;
+                }
 
 				// Make sure that all unfixed alerts have been ack'ed
-                Alert alert = null;
-                for (Iterator it = alerts.iterator(); it.hasNext(); ) {
-                    alert = (Alert) it.next();
+               
+                for (Alert alert: alerts ) {
+                    
                     if (!isAckd(subj, alert)) {
                         return ALERT_CRITICAL;
                     }
@@ -331,26 +362,24 @@ public class DashboardPortletBossEJBImpl
             else {
                 // Is it that there are no alerts or that there are no alert
                 // definitions?
-                ResourceGroupManager rgMan =
-                    ResourceGroupManagerImpl.getOne();
-                AlertDefinitionManager adMan =
-                    AlertDefinitionManagerImpl.getOne();
-                Collection resources = rgMan.getMembers(group);
+                
+              
+                Collection<Resource> resources = resourceGroupManager.getMembers(group);
                 PageControl pc = new PageControl(0, 1);
-                Resource r = null;
-                AppdefEntityID aId = null;
-                List alertDefs = null;
-                for (Iterator i = resources.iterator(); i.hasNext();) {
-                    r = (Resource) i.next();
-                    aId = new AppdefEntityID(r);
+               
+               
+                List<AlertDefinitionValue> alertDefs = null;
+                for (Resource r: resources) {
+                   
+                    AppdefEntityID aId = new AppdefEntityID(r);
     
                     try {
-                        checkViewPermission(subj, aId);
+                        permissionManager.checkViewPermission(subj, aId);
                     } catch (PermissionException pe) {
                         // go to next resource
                         continue;
                     }
-                    alertDefs = adMan.findAlertDefinitions(
+                    alertDefs = alertDefinitionManager.findAlertDefinitions(
                         subj, new AppdefEntityID(r), pc);
                     if (alertDefs.size() > 0) {
                         return ALERT_OK;
@@ -361,7 +390,7 @@ public class DashboardPortletBossEJBImpl
             // User has no permission to see these resources
         } finally {
             if (debug) {
-                _log.debug("getResourceStatus: groupId=" + group.getId() +
+                log.debug("getResourceStatus: groupId=" + group.getId() +
                            ", execution time =" + watch);
             }            
         }
@@ -377,22 +406,13 @@ public class DashboardPortletBossEJBImpl
         if (esc == null || esc.getMaxPauseTime() == 0) {
             return false;
         }
-        EscalationManagerLocal escMan = EscalationManagerEJBImpl.getOne();
-        EscalationState state = escMan.findEscalationState(alertDef);
+        
+        EscalationState state = escalationManager.findEscalationState(alertDef);
         return state != null && state.getAcknowledgedBy() != null;
     }
 
-    public static DashboardPortletBossLocal getOne() {
-        try {
-            return DashboardPortletBossUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    public static DashboardPortletBoss getOne() {
+      return Bootstrap.getBean(DashboardPortletBoss.class);
     }
-
-    public void ejbCreate() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
 
 }

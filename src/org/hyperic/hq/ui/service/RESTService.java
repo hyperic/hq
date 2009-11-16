@@ -36,10 +36,10 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
-import org.hyperic.hq.bizapp.server.session.DashboardPortletBossEJBImpl;
+import org.hyperic.hq.bizapp.server.session.DashboardPortletBossImpl;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.bizapp.shared.DashboardPortletBossLocal;
+import org.hyperic.hq.bizapp.shared.DashboardPortletBoss;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;
@@ -239,8 +239,8 @@ public class RESTService extends BaseService {
                 
                 PageInfo pi = PageInfo.create(PageControl.PAGE_ALL, null);
                 
-                DashboardPortletBossLocal dashBoss =
-                    DashboardPortletBossEJBImpl.getOne();
+                DashboardPortletBoss dashBoss =
+                    DashboardPortletBossImpl.getOne();
 
                 res = dashBoss.getAlertCounts(me, gids, pi).toString();
             }
@@ -319,7 +319,7 @@ public class RESTService extends BaseService {
                     }
                 }
                 // Only do one metric
-                res = DashboardPortletBossEJBImpl.getOne()
+                res = DashboardPortletBossImpl.getOne()
                             .getMeasurementData(
                                     me, 
                                     new Integer(resourceIdParam),
