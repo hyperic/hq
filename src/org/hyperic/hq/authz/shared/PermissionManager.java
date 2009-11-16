@@ -36,6 +36,7 @@ import javax.naming.NamingException;
 import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.CloningBoss;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -90,6 +91,235 @@ public abstract class PermissionManager   {
     {
         Integer opId = getOpIdByResourceType(rtV, operation);
         check(subject.getId(), rtV.getId(), id, opId);
+    }
+    
+    /**
+     * Check for control permission for a given resource
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void checkControlPermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException 
+    {
+        int type = id.getType();
+        String opName;
+        switch (type) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                opName = AuthzConstants.platformOpControlPlatform;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                opName = AuthzConstants.serverOpControlServer;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                opName = AuthzConstants.serviceOpControlService;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                opName = AuthzConstants.appOpControlApplication;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                opName = AuthzConstants.groupOpControlResourceGroup;
+                break;
+            default:
+                throw new InvalidAppdefTypeException("Unknown type: " + type);
+        }
+        // now check
+        checkPermission(subject, id, opName);
+    }
+    
+    /**
+     * Get the AppdefResourcePermissions for a given resource
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     *
+     * XXX: DON'T USE THIS!!
+     * @deprecated Use the individual check*Permission methods instead.
+     *
+     */ 
+    public AppdefResourcePermissions 
+        getResourcePermissions(AuthzSubject who, AppdefEntityID eid)
+        throws FinderException {
+            boolean canView = false;
+            boolean canModify = false;
+            boolean canCreateChild = false;
+            boolean canRemove = false;
+            boolean canMonitor = false;
+            boolean canControl = false;
+            boolean canAlert = false;
+            try {
+                checkViewPermission(who, eid);
+                canView = true;
+            } catch (PermissionException e) {
+            }
+            try {
+                checkModifyPermission(who, eid);
+                canModify = true;
+            } catch (PermissionException e) {
+            }
+            try {
+                checkRemovePermission(who, eid);
+                canRemove = true;
+            } catch (PermissionException e) {
+            }    
+            try {
+                checkControlPermission(who, eid);
+                canControl = true;
+            } catch (PermissionException e) { 
+            }
+            try {
+                checkMonitorPermission(who, eid);
+                canMonitor = true;
+            } catch (PermissionException e) {
+            }
+            try {
+                checkAlertingPermission(who, eid);
+                canAlert = true;
+            } catch (PermissionException e) {                
+            }
+            try {
+                if (!eid.isService()) {
+                    checkCreateChildPermission(who, eid);                    
+                    canCreateChild = true;
+                }
+            } catch (PermissionException e) {
+            } catch (InvalidAppdefTypeException e) {
+            }
+            // finally create the object
+            return new AppdefResourcePermissions(who, eid,
+                                                 canView,
+                                                 canCreateChild,
+                                                 canModify,
+                                                 canRemove,
+                                                 canControl,
+                                                 canMonitor,
+                                                 canAlert);
+    }
+    
+    /**
+     * Check for control permission for a given resource
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void checkRemovePermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException {
+        int type = id.getType();
+        String opName = null;
+        switch (type) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                opName = AuthzConstants.platformOpRemovePlatform;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                opName = AuthzConstants.serverOpRemoveServer;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                opName = AuthzConstants.serviceOpRemoveService;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                opName = AuthzConstants.appOpRemoveApplication;
+                break; 
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                opName = AuthzConstants.groupOpRemoveResourceGroup;
+                break;
+            default:
+                throw new InvalidAppdefTypeException("Unknown type: " + type);
+        }
+        // now check
+        checkPermission(subject, id, opName);
+    }
+
+    /**
+     * Check for monitor permission for a given resource
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void checkMonitorPermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException {
+        int type = id.getType();
+        String opName;
+        switch (type) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                opName = AuthzConstants.platformOpMonitorPlatform;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                opName = AuthzConstants.serverOpMonitorServer;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                opName = AuthzConstants.serviceOpMonitorService;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                opName = AuthzConstants.appOpMonitorApplication;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                opName = AuthzConstants.groupOpMonitorResourceGroup;
+                break;
+            default:
+                throw new InvalidAppdefTypeException("Unknown type: " + type);
+        }
+        // now check
+        checkPermission(subject, id, opName);
+    } 
+
+    /**
+     * Check for manage alerts permission for a given resource
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void checkAlertingPermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException {
+        int type = id.getType();
+        String opName;
+        switch (type) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                opName = AuthzConstants.platformOpManageAlerts;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                opName = AuthzConstants.serverOpManageAlerts;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                opName = AuthzConstants.serviceOpManageAlerts;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                opName = AuthzConstants.appOpManageAlerts;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                opName = AuthzConstants.groupOpManageAlerts;
+                break;                
+            default:
+                throw new InvalidAppdefTypeException("Unknown type: " + type);
+        }
+        // now check
+        checkPermission(subject, id, opName);
+    }
+    /**
+     * Check for create child object permission for a given resource
+     * Child Resources:
+     * Platforms -> servers
+     * Servers -> services
+     * Any other resource will throw an InvalidAppdefTypeException since no other
+     * resources have this parent->child relationship with respect to their permissions
+     * @param subject 
+     * @param id - what
+     * @param subject - who
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void checkCreateChildPermission(AuthzSubject subject,
+                                           AppdefEntityID id)
+        throws PermissionException {
+        int type = id.getType();
+        String opName = null;
+        switch (type) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                opName = AuthzConstants.platformOpAddServer;
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                opName = AuthzConstants.serverOpAddService;
+                break;
+            default:
+                throw new InvalidAppdefTypeException("Type: " +
+                    type + " does not support child resource creat operations");
+        }
+        // now check
+        checkPermission(subject, id, opName);
     }
     
     /**

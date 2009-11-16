@@ -78,7 +78,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefInventorySummary;
-import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
+import org.hyperic.hq.appdef.shared.AppdefManager;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
@@ -228,7 +228,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     private TrackerManager trackerManager;
 
-    private AppdefManagerLocal appdefManager;
+    private AppdefManager appdefManager;
     
     private ZeventEnqueuer zEventManager;
 
@@ -248,7 +248,7 @@ public class AppdefBossImpl implements AppdefBoss {
                           AIBossLocal aiBoss, ResourceGroupManager resourceGroupManager,
                           ResourceManager resourceManager, ServerManagerLocal serverManager,
                           ServiceManagerLocal serviceManager, TrackerManager trackerManager,
-                          AppdefManagerLocal appdefManager, ZeventEnqueuer zEventManager) {
+                          AppdefManager appdefManager, ZeventEnqueuer zEventManager) {
         this.sessionManager = sessionManager;
         this.agentManager = agentManager;
         this.aiQueueManager = aiQueueManager;
@@ -2765,7 +2765,7 @@ public class AppdefBossImpl implements AppdefBoss {
     public AppdefResourcePermissions getResourcePermissions(int sessionId, AppdefEntityID id)
         throws SessionNotFoundException, SessionTimeoutException, FinderException {
         AuthzSubject who = sessionManager.getSubject(sessionId);
-        return appdefManager.getResourcePermissions(who, id);
+        return permissionManager.getResourcePermissions(who, id);
     }
 
     /**

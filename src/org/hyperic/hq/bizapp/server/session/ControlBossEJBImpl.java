@@ -35,13 +35,13 @@ import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.AppdefManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AppdefManagerImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
-import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
+import org.hyperic.hq.appdef.shared.AppdefManager;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -84,10 +84,10 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     // Session manager
     private SessionManager sessionManager = SessionManager.getInstance();
 
-    AppdefManagerLocal appdefMgr = null;
-    private AppdefManagerLocal getAppdefManager() {
+    AppdefManager appdefMgr = null;
+    private AppdefManager getAppdefManager() {
         if(appdefMgr == null){
-            appdefMgr = AppdefManagerEJBImpl.getOne();
+            appdefMgr = AppdefManagerImpl.getOne();
         }
         return appdefMgr;
     }
