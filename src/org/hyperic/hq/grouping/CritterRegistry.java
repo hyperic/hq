@@ -88,7 +88,7 @@ public class CritterRegistry {
         }
     }
     
-    public Collection getCritterTypes() {
+    public Collection<CritterType> getCritterTypes() {
         synchronized (_registry) {
             return Collections.unmodifiableCollection(_registry.values());
         }
