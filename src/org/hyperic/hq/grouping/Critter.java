@@ -29,6 +29,7 @@ import java.util.List;
 
 import org.hibernate.Query;
 import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.grouping.prop.CritterProp;
 
 /**
  * A {@link Critter} is a criteria, able to aid in composing complex SQL.
@@ -38,7 +39,7 @@ public interface Critter {
      * Get a list of {@link CritterProps}s which are the current
      * values set for this critter.
      */
-    List getProps();
+    List<CritterProp> getProps();
     
     /**
      * Get a SQL segment, suitable for placement within a where clause.

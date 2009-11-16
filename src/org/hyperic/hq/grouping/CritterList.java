@@ -46,7 +46,7 @@ public class CritterList {
         _isAny    = isAny;
     }
     
-    public List getCritters() {
+    public List<Critter> getCritters() {
         return Collections.unmodifiableList(_critters);
     }
     
