@@ -18,14 +18,14 @@ import org.json.JSONObject;
 /**
  * Local interface for DashboardPortletBoss.
  */
-public interface DashboardPortletBoss
-{
+public interface DashboardPortletBoss {
 
-   public JSONArray getMeasurementData( AuthzSubject subj,Integer resId,Integer mtid,AppdefEntityTypeID ctype,long begin,long end ) throws PermissionException;
+    public JSONArray getMeasurementData(AuthzSubject subj, Integer resId, Integer mtid, AppdefEntityTypeID ctype,
+                                        long begin, long end) throws PermissionException;
 
-   public JSONObject getAllGroups( AuthzSubject subj ) throws PermissionException, JSONException;
+    public JSONObject getAllGroups(AuthzSubject subj) throws PermissionException, JSONException;
 
-   public JSONObject getAlertCounts( AuthzSubject subj,List<Integer> groupIds,PageInfo pageInfo ) throws PermissionException, JSONException, FinderException;
+    public JSONObject getAlertCounts(AuthzSubject subj, List<Integer> groupIds, PageInfo pageInfo)
+        throws PermissionException, JSONException, FinderException;
 
-  
 }

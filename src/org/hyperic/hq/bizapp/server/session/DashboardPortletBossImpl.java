@@ -83,35 +83,31 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class DashboardPortletBossImpl implements DashboardPortletBoss
-{
+public class DashboardPortletBossImpl implements DashboardPortletBoss {
 
-    private static final String ALERT_CRITICAL = "red",
-                                ALERT_WARN     = "yellow",
-                                ALERT_UNKNOWN  = "gray",
-                                ALERT_OK       = "green";
-    
-    private final Log log =
-        LogFactory.getLog(DashboardPortletBossImpl.class);
-    
+    private static final String ALERT_CRITICAL = "red", ALERT_WARN = "yellow", ALERT_UNKNOWN = "gray",
+        ALERT_OK = "green";
+
+    private final Log log = LogFactory.getLog(DashboardPortletBossImpl.class);
+
     private PermissionManager permissionManager;
-    
+
     private ResourceManager resourceManager;
-    
+
     private MeasurementManager measurementManager;
-    
+
     private DataManagerLocal dataManager;
-    
+
     private MeasurementBossLocal measurementBoss;
-    
+
     private ResourceGroupManager resourceGroupManager;
-    
+
     private GalertManager galertManager;
-    
+
     private AlertManager alertManager;
-    
+
     private AlertDefinitionManager alertDefinitionManager;
-    
+
     private EscalationManagerLocal escalationManager;
 
     @Autowired
@@ -134,25 +130,20 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss
     }
 
     /**
-     * @return JSONArray made up of several JSONObjects.  Output looks similar
-     * to this:
-     * [[{"data":{"2008-07-09T10:45:28-0700":[1],"2008-07-09T10:46:28-0700":[1],
-     *            "2008-07-09T10:48:28-0700":[1],"2008-07-09T10:58:28-0700":[1]},
-     *    "resourceName":"clone-0"}]]
-     * @throws PermissionException 
+     * @return JSONArray made up of several JSONObjects. Output looks similar to
+     *         this:
+     *         [[{"data":{"2008-07-09T10:45:28-0700":[1],"2008-07-09T10:46:28-0700"
+     *         :[1],
+     *         "2008-07-09T10:48:28-0700":[1],"2008-07-09T10:58:28-0700":[1]},
+     *         "resourceName":"clone-0"}]]
+     * @throws PermissionException
      * 
      */
-    public JSONArray getMeasurementData(AuthzSubject subj,
-                                        Integer resId, Integer mtid, 
-                                        AppdefEntityTypeID ctype,
-                                        long begin, long end)
-        throws PermissionException
-    {
+    public JSONArray getMeasurementData(AuthzSubject subj, Integer resId, Integer mtid, AppdefEntityTypeID ctype,
+                                        long begin, long end) throws PermissionException {
         JSONArray rtn = new JSONArray();
-      
-        
-        DateFormat dateFmt =
-            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
+
+        DateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
         long intv = (end - begin) / 60;
         JSONObject jObj = new JSONObject();
         Resource res = resourceManager.findResourceById(resId);
@@ -165,17 +156,10 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss
 
             AppdefEntityID[] aeids;
             if (aeid.isGroup()) {
-                List<AppdefEntityID> members =
-                    GroupUtil.getCompatGroupMembers(subj, aeid, null,
-                                                    PageControl.PAGE_ALL);
-                aeids = (AppdefEntityID[])
-                members.toArray(new AppdefEntityID[members.size()]);
+                List<AppdefEntityID> members = GroupUtil.getCompatGroupMembers(subj, aeid, null, PageControl.PAGE_ALL);
+                aeids = (AppdefEntityID[]) members.toArray(new AppdefEntityID[members.size()]);
             } else if (ctype != null) {
-                aeids = measurementBoss
-                                    .getAutoGroupMemberIDs(
-                                            subj,
-                                            new AppdefEntityID[] { aeid },
-                                            ctype); 
+                aeids = measurementBoss.getAutoGroupMemberIDs(subj, new AppdefEntityID[] { aeid }, ctype);
             } else {
                 aeids = new AppdefEntityID[] { aeid };
             }
@@ -187,16 +171,15 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss
                 jObj.put("measurementName", measurement.getTemplate().getName());
                 jObj.put("measurementUnits", measurement.getTemplate().getUnits());
             }
-            
-            List<HighLowMetricValue> data = dataManager.getHistoricalData(metrics, begin, end,
-                                               intv, 0, true,
-                                               PageControl.PAGE_ALL);
+
+            List<HighLowMetricValue> data = dataManager.getHistoricalData(metrics, begin, end, intv, 0, true,
+                PageControl.PAGE_ALL);
 
             JSONObject dataObj = new JSONObject();
             jObj.put("data", dataObj);
             for (HighLowMetricValue pt : data) {
                 JSONArray array = new JSONArray();
-              
+
                 double val = pt.getValue();
                 if (Double.isNaN(val) || Double.isInfinite(val)) {
                     continue;
@@ -217,38 +200,33 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss
     }
 
     /**
-     * @throws PermissionException 
-     * @throws JSONException 
+     * @throws PermissionException
+     * @throws JSONException
      * 
      */
-    public JSONObject getAllGroups(AuthzSubject subj)
-        throws PermissionException, JSONException
-    {
+    public JSONObject getAllGroups(AuthzSubject subj) throws PermissionException, JSONException {
         JSONObject rtn = new JSONObject();
-        Collection<ResourceGroup> groups =
-            resourceGroupManager.getAllResourceGroups(subj, true);
-        for (ResourceGroup group : groups ) {
-            
+        Collection<ResourceGroup> groups = resourceGroupManager.getAllResourceGroups(subj, true);
+        for (ResourceGroup group : groups) {
+
             rtn.put(group.getId().toString(), group.getName());
         }
         return rtn;
     }
-    
+
     /**
      * 
      */
-    public JSONObject getAlertCounts(AuthzSubject subj, List<Integer> groupIds,
-                                     PageInfo pageInfo)
-        throws PermissionException, JSONException, FinderException
-    {
+    public JSONObject getAlertCounts(AuthzSubject subj, List<Integer> groupIds, PageInfo pageInfo)
+        throws PermissionException, JSONException, FinderException {
         final long PORTLET_RANGE = MeasurementConstants.DAY * 3;
-        
+
         JSONObject rtn = new JSONObject();
-       
+
         final int maxRecords = pageInfo.getStartRow() + pageInfo.getPageSize();
-        int i=0;
-        for (Iterator<Integer> it=groupIds.iterator(); it.hasNext(); i++) {
-            if ( maxRecords > 0 && i > maxRecords ) {
+        int i = 0;
+        for (Iterator<Integer> it = groupIds.iterator(); it.hasNext(); i++) {
+            if (maxRecords > 0 && i > maxRecords) {
                 break;
             }
             if (i < pageInfo.getStartRow()) {
@@ -257,41 +235,38 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss
             Integer gId = it.next();
             ResourceGroup group = resourceGroupManager.findResourceGroupById(subj, gId);
             if (group != null) {
-                JSONArray array = new JSONArray()
-                    .put(getResourceStatus(subj, group, PORTLET_RANGE))
-                    .put(getGroupStatus(subj, group, PORTLET_RANGE));
-                rtn.put(group.getId().toString(), array);  
+                JSONArray array = new JSONArray().put(getResourceStatus(subj, group, PORTLET_RANGE)).put(
+                    getGroupStatus(subj, group, PORTLET_RANGE));
+                rtn.put(group.getId().toString(), array);
             }
         }
         return rtn;
     }
 
-    private String getGroupStatus(AuthzSubject subj, ResourceGroup group,
-                                  long range)
-    {
+    private String getGroupStatus(AuthzSubject subj, ResourceGroup group, long range) {
         boolean debug = log.isDebugEnabled();
         String rtn = ALERT_OK;
         long now = System.currentTimeMillis();
 
         try {
             long begin = now - range;
-            
-            List<GalertLog> galerts = galertManager.findUnfixedAlertLogsByTimeWindow(group, begin,
-                                                                   now);
+
+            List<GalertLog> galerts = galertManager.findUnfixedAlertLogsByTimeWindow(group, begin, now);
             if (debug) {
-                log.debug("getGroupStatus: findUnfixedAlertLogsByTimeWindow execution time(ms)=" 
-                                + (System.currentTimeMillis()-now));
-            }            
-            
-            for (GalertLog galert: galerts) {
-                
+                log.debug("getGroupStatus: findUnfixedAlertLogsByTimeWindow execution time(ms)=" +
+                          (System.currentTimeMillis() - now));
+            }
+
+            for (GalertLog galert : galerts) {
+
                 try {
                     permissionManager.checkAlertingPermission(subj, galert.getAlertDef().getAppdefID());
                 } catch (PermissionException pe) {
                     // continue to next group alert
                     continue;
                 }
-                // a galert always has an associated escalation which may or may not
+                // a galert always has an associated escalation which may or may
+                // not
                 // be acknowledged.
                 if (galert.hasEscalationState() && galert.isAcknowledged()) {
                     rtn = ALERT_WARN;
@@ -299,7 +274,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss
                     return ALERT_CRITICAL;
                 }
             }
-            
+
             // Is it that there are no alerts or that there are no alert
             // definitions?
             if (rtn.equals(ALERT_OK)) {
@@ -309,78 +284,68 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss
                 }
             }
 
-            return rtn;            
+            return rtn;
         } finally {
             if (debug) {
-                log.debug("getGroupStatus: groupId=" + group.getId()
-                                +", execution time(ms)=" + (System.currentTimeMillis()-now));
+                log.debug("getGroupStatus: groupId=" + group.getId() + ", execution time(ms)=" +
+                          (System.currentTimeMillis() - now));
             }
-        }        
+        }
     }
-    
-    private String getResourceStatus(AuthzSubject subj, ResourceGroup group,
-                                     long range)
-        throws FinderException {
+
+    private String getResourceStatus(AuthzSubject subj, ResourceGroup group, long range) throws FinderException {
         boolean debug = log.isDebugEnabled();
         long now = System.currentTimeMillis();
         StopWatch watch = new StopWatch(now);
-        
+
         try {
             long begin = now - range;
-            
+
             watch.markTimeBegin("getResourceStatus: getUnfixedCount");
-           
-            int unfixed = alertManager.getUnfixedCount(subj.getId(), begin, now,
-                                                 group.getId());
+
+            int unfixed = alertManager.getUnfixedCount(subj.getId(), begin, now, group.getId());
             watch.markTimeEnd("getResourceStatus: getUnfixedCount");
-            
+
             // There are unfixed alerts
             if (unfixed > 0) {
-                watch.markTimeBegin("getResourceStatus: findAlerts");            
-                List<Alert> alerts =
-                    alertManager.findAlerts(subj.getId(), 0, begin, now,
-                                      true, true, group.getId(),
-                                      PageInfo.getAll(AlertSortField.FIXED,
-                                                      true));
+                watch.markTimeBegin("getResourceStatus: findAlerts");
+                List<Alert> alerts = alertManager.findAlerts(subj.getId(), 0, begin, now, true, true, group.getId(),
+                    PageInfo.getAll(AlertSortField.FIXED, true));
                 watch.markTimeEnd("getResourceStatus: findAlerts");
 
-				// Are all unfixed alerts in escalation?
+                // Are all unfixed alerts in escalation?
                 if (alerts.size() != unfixed) {
                     return ALERT_CRITICAL;
                 }
 
-				// Make sure that all unfixed alerts have been ack'ed
-               
-                for (Alert alert: alerts ) {
-                    
+                // Make sure that all unfixed alerts have been ack'ed
+
+                for (Alert alert : alerts) {
+
                     if (!isAckd(subj, alert)) {
                         return ALERT_CRITICAL;
                     }
                 }
                 return ALERT_WARN;
-            }
-            else {
+            } else {
                 // Is it that there are no alerts or that there are no alert
                 // definitions?
-                
-              
+
                 Collection<Resource> resources = resourceGroupManager.getMembers(group);
                 PageControl pc = new PageControl(0, 1);
-               
-               
+
                 List<AlertDefinitionValue> alertDefs = null;
-                for (Resource r: resources) {
-                   
+                for (Resource r : resources) {
+
                     AppdefEntityID aId = new AppdefEntityID(r);
-    
+
                     try {
                         permissionManager.checkViewPermission(subj, aId);
                     } catch (PermissionException pe) {
                         // go to next resource
                         continue;
                     }
-                    alertDefs = alertDefinitionManager.findAlertDefinitions(
-                        subj, new AppdefEntityID(r), pc);
+                    alertDefs = alertDefinitionManager.findAlertDefinitions(subj, new AppdefEntityID(r), pc);
                     if (alertDefs.size() > 0) {
                         return ALERT_OK;
                     }
@@ -390,29 +355,26 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss
             // User has no permission to see these resources
         } finally {
             if (debug) {
-                log.debug("getResourceStatus: groupId=" + group.getId() +
-                           ", execution time =" + watch);
-            }            
+                log.debug("getResourceStatus: groupId=" + group.getId() + ", execution time =" + watch);
+            }
         }
         return ALERT_UNKNOWN;
     }
 
-    private boolean isAckd(AuthzSubject subj, Alert alert)
-        throws FinderException
-    {
+    private boolean isAckd(AuthzSubject subj, Alert alert) throws FinderException {
         AlertDefinition alertDef = alert.getAlertDefinition();
         // a resource alert may not have an associated escalation
         Escalation esc = alertDef.getEscalation();
         if (esc == null || esc.getMaxPauseTime() == 0) {
             return false;
         }
-        
+
         EscalationState state = escalationManager.findEscalationState(alertDef);
         return state != null && state.getAcknowledgedBy() != null;
     }
 
     public static DashboardPortletBoss getOne() {
-      return Bootstrap.getBean(DashboardPortletBoss.class);
+        return Bootstrap.getBean(DashboardPortletBoss.class);
     }
 
 }
