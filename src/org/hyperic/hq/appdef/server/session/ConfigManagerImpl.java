@@ -64,8 +64,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  */
 @Service
-public class ConfigManagerImpl implements ConfigManager
-{
+public class ConfigManagerImpl implements ConfigManager {
     private static final int MAX_VALIDATION_ERR_LEN = 512;
     protected final Log log = LogFactory.getLog(ConfigManagerImpl.class.getName());
     private ConfigResponseDAO configResponseDAO;
@@ -76,9 +75,7 @@ public class ConfigManagerImpl implements ConfigManager
     private ServiceDAO serviceDAO;
     private ServerDAO serverDAO;
     private PlatformDAO platformDAO;
-    
-    
-    
+
     @Autowired
     public ConfigManagerImpl(ConfigResponseDAO configResponseDAO, PlatformManagerLocal platformManager,
                              ServerManagerLocal serverManager, ServiceManagerLocal serviceManager,
@@ -97,9 +94,7 @@ public class ConfigManagerImpl implements ConfigManager
     /**
      * 
      */
-    public ConfigResponseDB createConfigResponse(byte[] productResponse,
-                                                 byte[] measResponse,
-                                                 byte[] controlResponse,
+    public ConfigResponseDB createConfigResponse(byte[] productResponse, byte[] measResponse, byte[] controlResponse,
                                                  byte[] rtResponse) {
         ConfigResponseDB cr = configResponseDAO.create();
         cr.setProductResponse(productResponse);
@@ -110,12 +105,12 @@ public class ConfigManagerImpl implements ConfigManager
     }
 
     /**
-     *
+     * 
      * Get the ConfigResponse for the given ID, creating it if it does not
      * already exist.
-     *
      * 
-     *
+     * 
+     * 
      */
     @Transactional
     public ConfigResponseDB getConfigResponse(AppdefEntityID id) {
@@ -123,25 +118,22 @@ public class ConfigManagerImpl implements ConfigManager
         return getConfigResponse(configResponseDAO, id);
     }
 
-    private ConfigResponseDB getConfigResponse(ConfigResponseDAO dao,
-                                               AppdefEntityID id) {
+    private ConfigResponseDB getConfigResponse(ConfigResponseDAO dao, AppdefEntityID id) {
         ConfigResponseDB config;
 
-        switch(id.getType()){
-        case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            config = dao.findByPlatformId(id.getId());
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            config = dao.findByServerId(id.getId());
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            config = dao.findByServiceId(id.getId());
-            break;
-        case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-        default:
-            throw new IllegalArgumentException("The passed entity type " +
-                                               "does not support config " +
-                                               "responses");
+        switch (id.getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                config = dao.findByPlatformId(id.getId());
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                config = dao.findByServerId(id.getId());
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                config = dao.findByServiceId(id.getId());
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+            default:
+                throw new IllegalArgumentException("The passed entity type " + "does not support config " + "responses");
         }
 
         return config;
@@ -150,16 +142,13 @@ public class ConfigManagerImpl implements ConfigManager
     /**
      * 
      */
-    public String getPluginName(AppdefEntityID id)
-        throws AppdefEntityNotFoundException
-    {
+    public String getPluginName(AppdefEntityID id) throws AppdefEntityNotFoundException {
         Integer intID = id.getId();
         String pname;
 
         switch (id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                Platform plat =
-                    platformManager.findPlatformById(intID);
+                Platform plat = platformManager.findPlatformById(intID);
                 pname = plat.getPlatformType().getPlugin();
                 break;
 
@@ -169,66 +158,55 @@ public class ConfigManagerImpl implements ConfigManager
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                org.hyperic.hq.appdef.server.session.Service service =
-                    serviceManager.findServiceById(intID);
+                org.hyperic.hq.appdef.server.session.Service service = serviceManager.findServiceById(intID);
                 pname = service.getServiceType().getPlugin();
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
             default:
-                throw new IllegalArgumentException("The passed entity type " +
-                    "does not support config responses");
+                throw new IllegalArgumentException("The passed entity type " + "does not support config responses");
         }
 
         return pname;
     }
 
     /**
-     * Get a config response object merged through the hierarchy.
-     * All entities are merged with the product's config response, and
-     * any entity lower than them in the config stack.  Config responses
-     * defining a specific attribute will override the same attribute if
-     * it was declared lower in the application stack.  Only entities
-     * within the same plugin will be processed, so the most likely
-     * situation is a simple service + server + product or server + product
-     * merge.
-     *
-     * Example:  Get the SERVICE MEASUREMENT merged response:
-     *              PRODUCT[platform] + MEASUREMENT[platform]
-     *              PRODUCT[server] + MEASUREMENT[server] +
-     *              PRODUCT[service] + MEASUREMENT[service]
-     *
-     *           Get the SERVER PRODUCT merged response:
-     *              PRODUCT[platform]
-     *              PRODUCT[server]
-     *
-     *           Get the PLATFORM PRODUCT merged response:
-     *              PRODUCT[platform]
-     *
+     * Get a config response object merged through the hierarchy. All entities
+     * are merged with the product's config response, and any entity lower than
+     * them in the config stack. Config responses defining a specific attribute
+     * will override the same attribute if it was declared lower in the
+     * application stack. Only entities within the same plugin will be
+     * processed, so the most likely situation is a simple service + server +
+     * product or server + product merge.
+     * 
+     * Example: Get the SERVICE MEASUREMENT merged response: PRODUCT[platform] +
+     * MEASUREMENT[platform] PRODUCT[server] + MEASUREMENT[server] +
+     * PRODUCT[service] + MEASUREMENT[service]
+     * 
+     * Get the SERVER PRODUCT merged response: PRODUCT[platform] PRODUCT[server]
+     * 
+     * Get the PLATFORM PRODUCT merged response: PRODUCT[platform]
+     * 
      * In addition to the configuration, some inventory properties are also
      * merged in to aid in auto-configuration done by autoinventory.
-     *
-     * For Servers and Services:
-     *   The install path of the server is included
-     *
-     * For all Resources:
-     *   The first non-loopback ip address, fqdn, platform name and type.
-     *
+     * 
+     * For Servers and Services: The install path of the server is included
+     * 
+     * For all Resources: The first non-loopback ip address, fqdn, platform name
+     * and type.
+     * 
      * @param productType One of ProductPlugin.*
-     * @param id          An AppdefEntityID of the object to get config for
-     *
+     * @param id An AppdefEntityID of the object to get config for
+     * 
      * @return the merged ConfigResponse
-     *
+     * 
      * 
      * 
      */
     @Transactional
-    public ConfigResponse getMergedConfigResponse(AuthzSubject subject,
-                                                  String productType,
-                                                  AppdefEntityID id,
-                                                  boolean required)
-        throws AppdefEntityNotFoundException, ConfigFetchException,
-               EncodingException, PermissionException {
+    public ConfigResponse getMergedConfigResponse(AuthzSubject subject, String productType, AppdefEntityID id,
+                                                  boolean required) throws AppdefEntityNotFoundException,
+        ConfigFetchException, EncodingException, PermissionException {
         ConfigResponseDB configValue;
         AppdefEntityID platformId = null, serverId = null, serviceId = null;
         byte[][] responseList; // List of config responses to merge
@@ -241,17 +219,15 @@ public class ConfigManagerImpl implements ConfigManager
         boolean isServerOrService = false;
         boolean isProductType = productType.equals(ProductPlugin.TYPE_PRODUCT);
 
-        if(id.getType() != AppdefEntityConstants.APPDEF_TYPE_PLATFORM &&
-           id.getType() != AppdefEntityConstants.APPDEF_TYPE_SERVER &&
-           id.getType() != AppdefEntityConstants.APPDEF_TYPE_SERVICE)
-        {
-            throw new IllegalArgumentException(id + " doesn't support " +
-                                               "config merging");
+        if (id.getType() != AppdefEntityConstants.APPDEF_TYPE_PLATFORM &&
+            id.getType() != AppdefEntityConstants.APPDEF_TYPE_SERVER &&
+            id.getType() != AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
+            throw new IllegalArgumentException(id + " doesn't support " + "config merging");
         }
 
         // Setup
         responseList = new byte[6][];
-        responseIdx  = 0;
+        responseIdx = 0;
 
         if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
             server = getServerStuffForService(id.getId());
@@ -269,8 +245,7 @@ public class ConfigManagerImpl implements ConfigManager
         } else if (id.getType() == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
             platform = getPlatformStuffForServer(id.getId());
             if (platform != null) {
-                platformId =
-                    AppdefEntityID.newPlatformID(new Integer(platform.id));
+                platformId = AppdefEntityID.newPlatformID(new Integer(platform.id));
                 serverId = id;
                 server = getServerStuffForServer(serverId.getId());
                 isServerOrService = true;
@@ -285,21 +260,18 @@ public class ConfigManagerImpl implements ConfigManager
         if (platformId != null) {
             // hardcode required=false for server/service types
             // e.g. unlikely that a platform will have control config
-            boolean platformConfigRequired =
-                isServerOrService ? false : required;
+            boolean platformConfigRequired = isServerOrService ? false : required;
 
             configValue = getConfigResponse(platformId);
-            data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT,
-                                    platformId, platformConfigRequired);
+            data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT, platformId, platformConfigRequired);
             responseList[responseIdx++] = data;
 
-            if(!isProductType) {
-                if(productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
+            if (!isProductType) {
+                if (productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
                     // Skip merging of response time configuration
                     // since platforms don't have it.
                 } else {
-                    data = getConfigForType(configValue, productType,
-                                            platformId, platformConfigRequired);
+                    data = getConfigForType(configValue, productType, platformId, platformConfigRequired);
                     responseList[responseIdx++] = data;
                 }
             }
@@ -311,19 +283,17 @@ public class ConfigManagerImpl implements ConfigManager
                 required = isProductType ? origReq : false;
 
             configValue = getConfigResponse(serverId);
-            data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT,
-                                    serverId, required);
+            data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT, serverId, required);
             responseList[responseIdx++] = data;
 
-            if(!isProductType) {
+            if (!isProductType) {
                 required = id.isServer() && origReq; // Reset the required flag
 
                 if (productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
                     // Skip merging of response time configuration
                     // since servers don't have it.
                 } else {
-                    data = getConfigForType(configValue, productType, serverId,
-                                            required);
+                    data = getConfigForType(configValue, productType, serverId, required);
                     responseList[responseIdx++] = data;
                 }
             }
@@ -334,12 +304,11 @@ public class ConfigManagerImpl implements ConfigManager
             required = isProductType ? origReq : false;
 
             configValue = getConfigResponse(id);
-            data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT, id,
-                                    required);
+            data = getConfigForType(configValue, ProductPlugin.TYPE_PRODUCT, id, required);
             responseList[responseIdx++] = data;
 
             if (!isProductType) {
-                required = origReq;     // Reset the required flag
+                required = origReq; // Reset the required flag
                 data = getConfigForType(configValue, productType, id, required);
                 responseList[responseIdx++] = data;
             }
@@ -347,7 +316,7 @@ public class ConfigManagerImpl implements ConfigManager
 
         // Merge everything together
         res = new ConfigResponse();
-        for(int i=0; i<responseIdx; i++){
+        for (int i = 0; i < responseIdx; i++) {
             if (responseList[i] == null || responseList[i].length == 0) {
                 continue;
             }
@@ -361,20 +330,18 @@ public class ConfigManagerImpl implements ConfigManager
                 res.setValue(ProductPlugin.PROP_PLATFORM_NAME, platform.name);
                 res.setValue(ProductPlugin.PROP_PLATFORM_FQDN, platform.fqdn);
                 res.setValue(ProductPlugin.PROP_PLATFORM_TYPE, platform.typeName);
-                res.setValue(ProductPlugin.PROP_PLATFORM_IP,   platform.ip);
-                res.setValue(ProductPlugin.PROP_PLATFORM_ID,
-                             String.valueOf(platform.id));
+                res.setValue(ProductPlugin.PROP_PLATFORM_IP, platform.ip);
+                res.setValue(ProductPlugin.PROP_PLATFORM_ID, String.valueOf(platform.id));
             }
         } catch (Exception exc) {
             log.warn("Error setting platform properies: " + exc, exc);
         }
 
         // Set installpath attribute for server and service types.
-        if(isServerOrService && server != null) {
+        if (isServerOrService && server != null) {
             try {
-                res.setValue(ProductPlugin.PROP_INSTALLPATH,
-                             server.installPath);
-            } catch(Exception exc){
+                res.setValue(ProductPlugin.PROP_INSTALLPATH, server.installPath);
+            } catch (Exception exc) {
                 log.warn("Error setting installpath property: " + exc, exc);
             }
         }
@@ -383,8 +350,8 @@ public class ConfigManagerImpl implements ConfigManager
     }
 
     /**
-     * Clear the validation error string for a config response, indicating
-     * that the current config is valid
+     * Clear the validation error string for a config response, indicating that
+     * the current config is valid
      * 
      */
     public void clearValidationError(AuthzSubject subject, AppdefEntityID id) {
@@ -395,30 +362,27 @@ public class ConfigManagerImpl implements ConfigManager
     /**
      * Method to merge configs, maintaining any existing values that are not
      * present in the AI config (e.g. log/config track enablement)
-     *
+     * 
      * @param existingBytes The existing configuration
      * @param newBytes The new configuration
      * @param overwrite TODO
      * @param force TODO
      * @return The newly merged configuration
      */
-    private static byte[] mergeConfig(byte[] existingBytes, byte[] newBytes,
-                                      boolean overwrite, boolean force)
-    {
+    private static byte[] mergeConfig(byte[] existingBytes, byte[] newBytes, boolean overwrite, boolean force) {
         if (force || (existingBytes == null) || (existingBytes.length == 0)) {
             return newBytes;
         }
 
         if ((newBytes == null) || (newBytes.length == 0)) {
-            //likely a manually created platform service where
-            //inventory-properties are auto-discovered but config
-            //is left unchanged.
+            // likely a manually created platform service where
+            // inventory-properties are auto-discovered but config
+            // is left unchanged.
             return existingBytes;
         }
 
         try {
-            ConfigResponse existingConfig =
-                ConfigResponse.decode(existingBytes);
+            ConfigResponse existingConfig = ConfigResponse.decode(existingBytes);
             ConfigResponse newConfig = ConfigResponse.decode(newBytes);
             existingConfig.merge(newConfig, overwrite);
             return existingConfig.encode();
@@ -427,26 +391,21 @@ public class ConfigManagerImpl implements ConfigManager
         }
     }
 
-
     /**
      * Update the validation error string for a config response
      * @param validationError The error string that occured during validation.
-     * If this is null, that means that no error occurred and the config is
-     * valid.
+     *        If this is null, that means that no error occurred and the config
+     *        is valid.
      * 
      * 
      */
     @Transactional
-    public void setValidationError(AuthzSubject subject,
-                                   AppdefEntityID id,
-                                   String validationError) {
+    public void setValidationError(AuthzSubject subject, AppdefEntityID id, String validationError) {
         ConfigResponseDB config = getConfigResponse(id);
 
         if (validationError != null) {
             if (validationError.length() > MAX_VALIDATION_ERR_LEN) {
-                validationError =
-                    validationError.substring(0, MAX_VALIDATION_ERR_LEN-3) +
-                        "...";
+                validationError = validationError.substring(0, MAX_VALIDATION_ERR_LEN - 3) + "...";
             }
         }
 
@@ -455,36 +414,30 @@ public class ConfigManagerImpl implements ConfigManager
 
     /**
      * Set the config response for an entity/type combination.
-     *
-     * @param id       ID of the object to set the repsonse fo
+     * 
+     * @param id ID of the object to set the repsonse fo
      * @param response The response
-     * @param type     One of ProductPlugin.TYPE_*
-     *
-     * @return an array of entities which may be affected by the change
-     *         in configuration.  For updates to platform and service configs,
-     *         there are no other entities other than the given ID returned.
-     *         If a server is updated, the associated services may require
-     *         changes.  The passed entity will always be returned in the
-     *         array.
-     *
+     * @param type One of ProductPlugin.TYPE_*
+     * 
+     * @return an array of entities which may be affected by the change in
+     *         configuration. For updates to platform and service configs, there
+     *         are no other entities other than the given ID returned. If a
+     *         server is updated, the associated services may require changes.
+     *         The passed entity will always be returned in the array.
+     * 
      * 
      * 
      */
     @Transactional
-    public AppdefEntityID setConfigResponse(AuthzSubject subject,
-                                            AppdefEntityID id,
-                                            ConfigResponse response,
-                                            String type,
-                                            boolean sendConfigEvent)
-        throws ConfigFetchException, AppdefEntityNotFoundException,
-               PermissionException, EncodingException, FinderException
-    {
+    public AppdefEntityID setConfigResponse(AuthzSubject subject, AppdefEntityID id, ConfigResponse response,
+                                            String type, boolean sendConfigEvent) throws ConfigFetchException,
+        AppdefEntityNotFoundException, PermissionException, EncodingException, FinderException {
         byte[] productBytes = null;
         byte[] measurementBytes = null;
         byte[] controlBytes = null;
         byte[] rtBytes = null;
 
-        if(type.equals(ProductPlugin.TYPE_PRODUCT)) {
+        if (type.equals(ProductPlugin.TYPE_PRODUCT)) {
             productBytes = response.encode();
         } else if (type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
             measurementBytes = response.encode();
@@ -497,12 +450,9 @@ public class ConfigManagerImpl implements ConfigManager
             throw new IllegalArgumentException("Unknown config type: " + type);
         }
 
-
         ConfigResponseDB existingConfig = getConfigResponse(configResponseDAO, id);
-        return configureResponse(subject, existingConfig, id,
-                                 productBytes, measurementBytes,
-                                 controlBytes, rtBytes, null,
-                                 sendConfigEvent, false);
+        return configureResponse(subject, existingConfig, id, productBytes, measurementBytes, controlBytes, rtBytes,
+            null, sendConfigEvent, false);
     }
 
     /**
@@ -510,57 +460,47 @@ public class ConfigManagerImpl implements ConfigManager
      *
      */
     @Transactional
-    public AppdefEntityID configureResponse(AuthzSubject subject,
-                                            ConfigResponseDB existingConfig,
-                                            AppdefEntityID appdefID,
-                                            byte[] productConfig,
-                                            byte[] measurementConfig,
-                                            byte[] controlConfig,
-                                            byte[] rtConfig,
-                                            Boolean userManaged,
-                                            boolean sendConfigEvent,
-                                            boolean force) {
+    public AppdefEntityID configureResponse(AuthzSubject subject, ConfigResponseDB existingConfig,
+                                            AppdefEntityID appdefID, byte[] productConfig, byte[] measurementConfig,
+                                            byte[] controlConfig, byte[] rtConfig, Boolean userManaged,
+                                            boolean sendConfigEvent, boolean force) {
         boolean wasUpdated = false;
         byte[] configBytes;
 
-        boolean overwrite =
-            ((userManaged != null) && userManaged.booleanValue()) || //via UI or CLI
-            !existingConfig.isUserManaged(); //via AI, dont overwrite changes made via UI or CLI
+        boolean overwrite = ((userManaged != null) && userManaged.booleanValue()) || // via
+                                                                                     // UI
+                                                                                     // or
+                                                                                     // CLI
+                            !existingConfig.isUserManaged(); // via AI, dont
+                                                             // overwrite
+                                                             // changes made via
+                                                             // UI or CLI
 
-        configBytes = mergeConfig(existingConfig.getProductResponse(),
-                                  productConfig, overwrite, force);
-        if (!AICompare.configsEqual(configBytes,
-                                    existingConfig.getProductResponse())) {
+        configBytes = mergeConfig(existingConfig.getProductResponse(), productConfig, overwrite, force);
+        if (!AICompare.configsEqual(configBytes, existingConfig.getProductResponse())) {
             existingConfig.setProductResponse(configBytes);
             wasUpdated = true;
         }
 
-        configBytes = mergeConfig(existingConfig.getMeasurementResponse(),
-                                  measurementConfig, overwrite, force);
-        if (!AICompare.configsEqual(configBytes,
-                                    existingConfig.getMeasurementResponse())) {
+        configBytes = mergeConfig(existingConfig.getMeasurementResponse(), measurementConfig, overwrite, force);
+        if (!AICompare.configsEqual(configBytes, existingConfig.getMeasurementResponse())) {
             existingConfig.setMeasurementResponse(configBytes);
             wasUpdated = true;
         }
 
-        configBytes = mergeConfig(existingConfig.getControlResponse(),
-                                  controlConfig, overwrite, false);
-        if (!AICompare.configsEqual(configBytes,
-                                    existingConfig.getControlResponse())) {
+        configBytes = mergeConfig(existingConfig.getControlResponse(), controlConfig, overwrite, false);
+        if (!AICompare.configsEqual(configBytes, existingConfig.getControlResponse())) {
             existingConfig.setControlResponse(configBytes);
             wasUpdated = true;
         }
 
-        configBytes = mergeConfig(existingConfig.getResponseTimeResponse(),
-                                  rtConfig, overwrite, false);
-        if (!AICompare.configsEqual(configBytes,
-                                    existingConfig.getResponseTimeResponse())) {
+        configBytes = mergeConfig(existingConfig.getResponseTimeResponse(), rtConfig, overwrite, false);
+        if (!AICompare.configsEqual(configBytes, existingConfig.getResponseTimeResponse())) {
             existingConfig.setResponseTimeResponse(configBytes);
             wasUpdated = true;
         }
 
-        if (userManaged != null &&
-            existingConfig.getUserManaged() != userManaged.booleanValue()) {
+        if (userManaged != null && existingConfig.getUserManaged() != userManaged.booleanValue()) {
             existingConfig.setUserManaged(userManaged.booleanValue());
             wasUpdated = true;
         }
@@ -569,8 +509,7 @@ public class ConfigManagerImpl implements ConfigManager
             // XXX: Need to cascade and send events for each resource that may
             // have been affected by this config update.
             if (sendConfigEvent) {
-                ResourceUpdatedZevent event =
-                    new ResourceUpdatedZevent(subject, appdefID);
+                ResourceUpdatedZevent event = new ResourceUpdatedZevent(subject, appdefID);
                 zeventManager.enqueueEventAfterCommit(event);
             }
 
@@ -580,18 +519,17 @@ public class ConfigManagerImpl implements ConfigManager
         }
     }
 
-    /** Update the appdef entities based on TypeInfo
+    /**
+     * Update the appdef entities based on TypeInfo
      * 
      * 
      */
     @Transactional
-    public void updateAppdefEntities(String pluginName,
-                                     TypeInfo[] entities)
-        throws FinderException, RemoveException, CreateException, VetoException
-    {
+    public void updateAppdefEntities(String pluginName, TypeInfo[] entities) throws FinderException, RemoveException,
+        CreateException, VetoException {
         ArrayList<TypeInfo> platforms = new ArrayList<TypeInfo>();
-        ArrayList<TypeInfo> servers   = new ArrayList<TypeInfo>();
-        ArrayList<TypeInfo> services  = new ArrayList<TypeInfo>();
+        ArrayList<TypeInfo> servers = new ArrayList<TypeInfo>();
+        ArrayList<TypeInfo> services = new ArrayList<TypeInfo>();
 
         // Organize the entity infos first
         for (int i = 0; i < entities.length; i++) {
@@ -614,122 +552,95 @@ public class ConfigManagerImpl implements ConfigManager
 
         // Update platforms
         if (platforms.size() > 0) {
-            this.platformManager.updatePlatformTypes(
-                pluginName, (PlatformTypeInfo[])
-                platforms.toArray(new PlatformTypeInfo[0]));
+            this.platformManager.updatePlatformTypes(pluginName, (PlatformTypeInfo[]) platforms
+                .toArray(new PlatformTypeInfo[0]));
         }
 
         // Update servers
         if (servers.size() > 0) {
-            serverManager.updateServerTypes(pluginName,
-                (ServerTypeInfo[]) servers.toArray(new ServerTypeInfo[0]));
+            serverManager.updateServerTypes(pluginName, (ServerTypeInfo[]) servers.toArray(new ServerTypeInfo[0]));
         }
 
         // Update services
         if (services.size() > 0) {
-            serviceManager.updateServiceTypes(pluginName,
-                (ServiceTypeInfo[]) services.toArray(new ServiceTypeInfo[0]));
+            serviceManager.updateServiceTypes(pluginName, (ServiceTypeInfo[]) services.toArray(new ServiceTypeInfo[0]));
         }
     }
 
-    private byte[] getConfigForType(ConfigResponseDB val,
-                                    String productType,
-                                    AppdefEntityID id,
-                                    boolean fail)
-        throws ConfigFetchException
-    {
+    private byte[] getConfigForType(ConfigResponseDB val, String productType, AppdefEntityID id, boolean fail)
+        throws ConfigFetchException {
         byte[] res;
 
-        if(productType.equals(ProductPlugin.TYPE_PRODUCT)){
+        if (productType.equals(ProductPlugin.TYPE_PRODUCT)) {
             res = val.getProductResponse();
-        } else if(productType.equals(ProductPlugin.TYPE_CONTROL)){
+        } else if (productType.equals(ProductPlugin.TYPE_CONTROL)) {
             res = val.getControlResponse();
-        } else if(productType.equals(ProductPlugin.TYPE_MEASUREMENT)){
+        } else if (productType.equals(ProductPlugin.TYPE_MEASUREMENT)) {
             res = val.getMeasurementResponse();
-        } else if(productType.equals(ProductPlugin.TYPE_AUTOINVENTORY)){
+        } else if (productType.equals(ProductPlugin.TYPE_AUTOINVENTORY)) {
             res = val.getAutoInventoryResponse();
-        } else if(productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)){
+        } else if (productType.equals(ProductPlugin.TYPE_RESPONSE_TIME)) {
             res = val.getResponseTimeResponse();
         } else {
             throw new IllegalArgumentException("Unknown product type");
         }
 
-        if((res == null || res.length == 0) && fail) {
+        if ((res == null || res.length == 0) && fail) {
             throw new ConfigFetchException(productType, id);
         }
         return res;
     }
 
     public static ConfigManager getOne() {
-      return Bootstrap.getBean(ConfigManager.class);
+        return Bootstrap.getBean(ConfigManager.class);
     }
 
-   
+    private ServerConfigStuff getServerStuffForService(Integer id) throws AppdefEntityNotFoundException {
 
-    private ServerConfigStuff getServerStuffForService(Integer id)
-        throws AppdefEntityNotFoundException {
-
-        
         org.hyperic.hq.appdef.server.session.Service service = serviceDAO.findById(id);
         Server server = service.getServer();
         if (server == null) {
             return null;
         }
-        return new ServerConfigStuff(server.getId().intValue(),
-                                     server.getInstallPath());
+        return new ServerConfigStuff(server.getId().intValue(), server.getInstallPath());
     }
 
-    private ServerConfigStuff getServerStuffForServer(Integer id)
-        throws AppdefEntityNotFoundException {
+    private ServerConfigStuff getServerStuffForServer(Integer id) throws AppdefEntityNotFoundException {
 
-        
         Server server = serverDAO.findById(id);
 
-        return new ServerConfigStuff(server.getId().intValue(),
-                                     server.getInstallPath());
+        return new ServerConfigStuff(server.getId().intValue(), server.getInstallPath());
     }
 
-    private PlatformConfigStuff getPlatformStuffForServer(Integer id)
-        throws AppdefEntityNotFoundException {
+    private PlatformConfigStuff getPlatformStuffForServer(Integer id) throws AppdefEntityNotFoundException {
 
-       
         Server server = serverDAO.findById(id);
         Platform platform = server.getPlatform();
         if (platform == null) {
             return null;
         }
 
-        PlatformConfigStuff pConfig =
-            new PlatformConfigStuff(platform.getId().intValue(),
-                                    platform.getName(),
-                                    platform.getFqdn(),
-                                    platform.getPlatformType().getName());
+        PlatformConfigStuff pConfig = new PlatformConfigStuff(platform.getId().intValue(), platform.getName(), platform
+            .getFqdn(), platform.getPlatformType().getName());
         loadPlatformIp(platform, pConfig);
         return pConfig;
     }
 
-    private PlatformConfigStuff getPlatformStuffForPlatform(Integer id)
-        throws AppdefEntityNotFoundException {
+    private PlatformConfigStuff getPlatformStuffForPlatform(Integer id) throws AppdefEntityNotFoundException {
 
-        
         Platform platform = platformDAO.findById(id);
 
-        PlatformConfigStuff pConfig =
-            new PlatformConfigStuff(platform.getId().intValue(),
-                                    platform.getName(),
-                                    platform.getFqdn(),
-                                    platform.getPlatformType().getName());
+        PlatformConfigStuff pConfig = new PlatformConfigStuff(platform.getId().intValue(), platform.getName(), platform
+            .getFqdn(), platform.getPlatformType().getName());
         loadPlatformIp(platform, pConfig);
         return pConfig;
     }
 
-    private void  loadPlatformIp(Platform platform,
-                                 PlatformConfigStuff pConfig)
-        throws AppdefEntityNotFoundException {
+    private void loadPlatformIp(Platform platform, PlatformConfigStuff pConfig) throws AppdefEntityNotFoundException {
 
         Collection<Ip> ips = platform.getIps();
-        for (Ip ip : ips ) {
-           
+        for (Ip ip : ips) {
+
             if (!ip.getAddress().equals("127.0.0.1")) {
                 // First non-loopback address
                 pConfig.ip = ip.getAddress();
@@ -742,6 +653,7 @@ public class ConfigManagerImpl implements ConfigManager
     class ServerConfigStuff {
         public int id;
         public String installPath;
+
         public ServerConfigStuff(int id, String installPath) {
             this.id = id;
             this.installPath = installPath;
@@ -755,8 +667,7 @@ public class ConfigManagerImpl implements ConfigManager
         public String fqdn;
         public String typeName;
 
-        public PlatformConfigStuff(int id, String name, String fqdn,
-                                   String typeName) {
+        public PlatformConfigStuff(int id, String name, String fqdn, String typeName) {
             this.id = id;
             this.name = name;
             this.fqdn = fqdn;
