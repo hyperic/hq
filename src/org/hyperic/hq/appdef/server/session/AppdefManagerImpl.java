@@ -55,8 +55,6 @@ import org.hyperic.util.jdbc.DBUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-
-
 /**
  * This class is responsible for managing appdef objects in EE
  * 
@@ -64,47 +62,41 @@ import org.springframework.transaction.annotation.Transactional;
 @org.springframework.stereotype.Service
 @Transactional
 public class AppdefManagerImpl implements AppdefManager {
-    
+
     private final Log log = LogFactory.getLog(AppdefManagerImpl.class.getName());
-    
+
     private PlatformDAO platformDAO;
-    
+
     private PlatformTypeDAO platformTypeDAO;
-    
+
     private ServerDAO serverDAO;
-    
+
     private ServerTypeDAO serverTypeDAO;
-    
+
     private ServiceDAO serviceDAO;
-    
+
     private ServiceTypeDAO serviceTypeDAO;
-    
+
     private PermissionManager permissionManager;
-    
+
     private ResourceManager resourceManager;
-  
+
     private static final String OPERABLE_SQL =
     /* ex. "SELECT DISTINCT(server_type_id) FROM eam_server " + */
-    " s, EAM_CONFIG_RESPONSE c, EAM_RESOURCE r, EAM_OPERATION o, " +
-        "EAM_RESOURCE_TYPE t, EAM_ROLE_OPERATION_MAP ro, " +
-        "EAM_ROLE_RESOURCE_GROUP_MAP g, " +
-        "EAM_RES_GRP_RES_MAP rg " +
-    "WHERE t.name = ? AND o.resource_type_id = t.id AND o.name = ? AND " +
-          "operation_id = o.id AND ro.role_id = g.role_id AND " +
-          "g.resource_group_id = rg.resource_group_id AND " +
-          "rg.resource_id = r.id AND r.resource_type_id = t.id AND " +
-          "r.instance_id = s.id AND s.config_response_id = c.id AND " +
-          "c.control_response is not null AND " +
-          "(r.subject_id = ? OR EXISTS " +
-          "(SELECT * FROM EAM_SUBJECT_ROLE_MAP sr " +
-           "WHERE sr.role_id = g.role_id AND subject_id = ?))";
-    
-    
+    " s, EAM_CONFIG_RESPONSE c, EAM_RESOURCE r, EAM_OPERATION o, " + "EAM_RESOURCE_TYPE t, EAM_ROLE_OPERATION_MAP ro, "
+        + "EAM_ROLE_RESOURCE_GROUP_MAP g, " + "EAM_RES_GRP_RES_MAP rg "
+        + "WHERE t.name = ? AND o.resource_type_id = t.id AND o.name = ? AND "
+        + "operation_id = o.id AND ro.role_id = g.role_id AND " + "g.resource_group_id = rg.resource_group_id AND "
+        + "rg.resource_id = r.id AND r.resource_type_id = t.id AND "
+        + "r.instance_id = s.id AND s.config_response_id = c.id AND " + "c.control_response is not null AND "
+        + "(r.subject_id = ? OR EXISTS " + "(SELECT * FROM EAM_SUBJECT_ROLE_MAP sr "
+        + "WHERE sr.role_id = g.role_id AND subject_id = ?))";
+
     @Autowired
     public AppdefManagerImpl(PlatformDAO platformDAO, PlatformTypeDAO platformTypeDAO, ServerDAO serverDAO,
                              ServerTypeDAO serverTypeDAO, ServiceDAO serviceDAO, ServiceTypeDAO serviceTypeDAO,
                              PermissionManager permissionManager, ResourceManager resourceManager) {
-       
+
         this.platformDAO = platformDAO;
         this.platformTypeDAO = platformTypeDAO;
         this.serverDAO = serverDAO;
@@ -115,27 +107,19 @@ public class AppdefManagerImpl implements AppdefManager {
         this.resourceManager = resourceManager;
     }
 
-    private List<Integer> findOperableResourceColumn(AuthzSubject subj,
-                                            String resourceTable,
-                                            String resourceColumn,
-                                            String resType,
-                                            String operation,
-                                            String addCond) {
+    private List<Integer> findOperableResourceColumn(AuthzSubject subj, String resourceTable, String resourceColumn,
+                                                     String resType, String operation, String addCond) {
         List<Integer> resTypeIds = new ArrayList<Integer>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
             Connection conn = Util.getConnection();
 
-            StringBuffer sql = new StringBuffer("SELECT DISTINCT(s.")
-                .append(resourceColumn)
-                .append(") FROM ")
-                .append(resourceTable)
-                .append(OPERABLE_SQL);
+            StringBuffer sql = new StringBuffer("SELECT DISTINCT(s.").append(resourceColumn).append(") FROM ").append(
+                resourceTable).append(OPERABLE_SQL);
 
             if (addCond != null) {
-                sql.append(" AND s.")
-                   .append(addCond);
+                sql.append(" AND s.").append(addCond);
             }
 
             stmt = conn.prepareStatement(sql.toString());
@@ -155,8 +139,7 @@ public class AppdefManagerImpl implements AppdefManager {
             return resTypeIds;
         } catch (SQLException e) {
             log.error("Error getting scope by SQL", e);
-            throw new SystemException("SQL Error getting scope: " +
-                                      e.getMessage());
+            throw new SystemException("SQL Error getting scope: " + e.getMessage());
         } finally {
             DBUtil.closeJDBCObjects(AppdefManagerImpl.class, null, stmt, rs);
             Util.endConnection();
@@ -170,22 +153,15 @@ public class AppdefManagerImpl implements AppdefManager {
      * @throws PermissionException
      * 
      */
-    public Map<String, AppdefEntityID> getControllablePlatformTypes(AuthzSubject subject)
-        throws PermissionException {
-        List<Integer> typeIds =
-            findOperableResourceColumn(subject,
-                                       "EAM_PLATFORM",
-                                       "platform_type_id",
-                                       AuthzConstants.platformResType,
-                                       AuthzConstants.platformOpControlPlatform,
-                                       null);
+    public Map<String, AppdefEntityID> getControllablePlatformTypes(AuthzSubject subject) throws PermissionException {
+        List<Integer> typeIds = findOperableResourceColumn(subject, "EAM_PLATFORM", "platform_type_id",
+            AuthzConstants.platformResType, AuthzConstants.platformOpControlPlatform, null);
 
         TreeMap<String, AppdefEntityID> platformTypes = new TreeMap<String, AppdefEntityID>();
-        for (Integer typeId : typeIds ) {
+        for (Integer typeId : typeIds) {
             try {
                 PlatformType pt = platformTypeDAO.findById(typeId);
-                platformTypes.put(pt.getName(),
-                                  AppdefEntityTypeID.newPlatformID(typeId));
+                platformTypes.put(pt.getName(), AppdefEntityTypeID.newPlatformID(typeId));
             } catch (ObjectNotFoundException e) {
                 continue;
             }
@@ -203,20 +179,15 @@ public class AppdefManagerImpl implements AppdefManager {
      */
     public Map<String, AppdefEntityID> getControllablePlatformNames(AuthzSubject subject, int tid)
         throws PermissionException {
-        List<Integer> ids =
-            findOperableResourceColumn(subject,
-                                       "EAM_PLATFORM", "id",
-                                       AuthzConstants.platformResType,
-                                       AuthzConstants.platformOpControlPlatform,
-                                       "platform_type_id=" + tid);
+        List<Integer> ids = findOperableResourceColumn(subject, "EAM_PLATFORM", "id", AuthzConstants.platformResType,
+            AuthzConstants.platformOpControlPlatform, "platform_type_id=" + tid);
 
         TreeMap<String, AppdefEntityID> platformNames = new TreeMap<String, AppdefEntityID>();
-        for (Integer id : ids ) {
-            
+        for (Integer id : ids) {
+
             try {
                 Platform plat = platformDAO.findById(id);
-                platformNames.put(plat.getName(),
-                                  AppdefEntityID.newPlatformID(id));
+                platformNames.put(plat.getName(), AppdefEntityID.newPlatformID(id));
             } catch (ObjectNotFoundException e) {
                 continue;
             }
@@ -232,24 +203,18 @@ public class AppdefManagerImpl implements AppdefManager {
      * @throws PermissionException
      * 
      */
-    public Map<String, AppdefEntityTypeID> getControllableServerTypes(AuthzSubject subject)
-        throws PermissionException {
-        List<Integer> typeIds =
-            findOperableResourceColumn(subject,
-                                       "EAM_SERVER",
-                                       "server_type_id",
-                                       AuthzConstants.serverResType,
-                                       AuthzConstants.serverOpControlServer,
-                                       null);
+    public Map<String, AppdefEntityTypeID> getControllableServerTypes(AuthzSubject subject) throws PermissionException {
+        List<Integer> typeIds = findOperableResourceColumn(subject, "EAM_SERVER", "server_type_id",
+            AuthzConstants.serverResType, AuthzConstants.serverOpControlServer, null);
 
         TreeMap<String, AppdefEntityTypeID> serverTypes = new TreeMap<String, AppdefEntityTypeID>();
-        for (Integer typeId : typeIds ) {
-          
+        for (Integer typeId : typeIds) {
+
             try {
                 ServerType st = serverTypeDAO.findById(typeId);
                 if (!st.isVirtual())
-                    serverTypes.put(st.getName(), new AppdefEntityTypeID(
-                        AppdefEntityConstants.APPDEF_TYPE_SERVER, typeId));
+                    serverTypes.put(st.getName(), new AppdefEntityTypeID(AppdefEntityConstants.APPDEF_TYPE_SERVER,
+                        typeId));
             } catch (ObjectNotFoundException e) {
                 continue;
             }
@@ -265,17 +230,14 @@ public class AppdefManagerImpl implements AppdefManager {
      * @throws PermissionException
      * 
      */
-    public Map<String, AppdefEntityID>  getControllableServerNames(AuthzSubject subject, int tid)
+    public Map<String, AppdefEntityID> getControllableServerNames(AuthzSubject subject, int tid)
         throws PermissionException {
-        List<Integer> ids =
-            findOperableResourceColumn(subject, "EAM_SERVER", "id",
-                                       AuthzConstants.serverResType,
-                                       AuthzConstants.serverOpControlServer,
-                                       "server_type_id=" + tid);
+        List<Integer> ids = findOperableResourceColumn(subject, "EAM_SERVER", "id", AuthzConstants.serverResType,
+            AuthzConstants.serverOpControlServer, "server_type_id=" + tid);
 
         TreeMap<String, AppdefEntityID> serverNames = new TreeMap<String, AppdefEntityID>();
-        for (Integer id  :ids ) {
-           
+        for (Integer id : ids) {
+
             try {
                 Server svr = serverDAO.findById(id);
                 serverNames.put(svr.getName(), AppdefEntityID.newServerID(id));
@@ -294,23 +256,17 @@ public class AppdefManagerImpl implements AppdefManager {
      * @throws PermissionException
      * 
      */
-    public Map<String, AppdefEntityTypeID> getControllableServiceTypes(AuthzSubject subject)
-        throws PermissionException {
-        List<Integer> typeIds =
-            findOperableResourceColumn(subject,
-                                       "EAM_SERVICE",
-                                       "service_type_id",
-                                       AuthzConstants.serviceResType,
-                                       AuthzConstants.serviceOpControlService,
-                                       null);
+    public Map<String, AppdefEntityTypeID> getControllableServiceTypes(AuthzSubject subject) throws PermissionException {
+        List<Integer> typeIds = findOperableResourceColumn(subject, "EAM_SERVICE", "service_type_id",
+            AuthzConstants.serviceResType, AuthzConstants.serviceOpControlService, null);
 
         TreeMap<String, AppdefEntityTypeID> serviceTypes = new TreeMap<String, AppdefEntityTypeID>();
         for (Integer typeId : typeIds) {
-            
+
             try {
                 ServiceType st = serviceTypeDAO.findById(typeId);
-                serviceTypes.put(st.getName(), new AppdefEntityTypeID(
-                    AppdefEntityConstants.APPDEF_TYPE_SERVICE, typeId));
+                serviceTypes.put(st.getName(),
+                    new AppdefEntityTypeID(AppdefEntityConstants.APPDEF_TYPE_SERVICE, typeId));
             } catch (ObjectNotFoundException e) {
                 continue;
             }
@@ -326,21 +282,17 @@ public class AppdefManagerImpl implements AppdefManager {
      * @throws PermissionException
      * 
      */
-    public Map<String, AppdefEntityID>  getControllableServiceNames(AuthzSubject subject, int tid)
+    public Map<String, AppdefEntityID> getControllableServiceNames(AuthzSubject subject, int tid)
         throws PermissionException {
-        List<Integer> ids =
-            findOperableResourceColumn(subject, "EAM_SERVICE", "id",
-                                       AuthzConstants.serviceResType,
-                                       AuthzConstants.serviceOpControlService,
-                                       "service_type_id=" + tid);
+        List<Integer> ids = findOperableResourceColumn(subject, "EAM_SERVICE", "id", AuthzConstants.serviceResType,
+            AuthzConstants.serviceOpControlService, "service_type_id=" + tid);
 
         TreeMap<String, AppdefEntityID> serviceNames = new TreeMap<String, AppdefEntityID>();
-        for (Integer id : ids ) {
-           
+        for (Integer id : ids) {
+
             try {
                 Service svc = serviceDAO.findById(id);
-                serviceNames.put(svc.getName(),
-                                 AppdefEntityID.newServiceID(id));
+                serviceNames.put(svc.getName(), AppdefEntityID.newServiceID(id));
             } catch (ObjectNotFoundException e) {
                 continue;
             }
@@ -348,15 +300,14 @@ public class AppdefManagerImpl implements AppdefManager {
 
         return serviceNames;
     }
-    
+
     /**
      * Change appdef entity owner
-     *
+     * 
      * 
      */
-    public void changeOwner(AuthzSubject who, AppdefResource res,
-                            AuthzSubject newOwner)
-        throws PermissionException, ServerNotFoundException {
+    public void changeOwner(AuthzSubject who, AppdefResource res, AuthzSubject newOwner) throws PermissionException,
+        ServerNotFoundException {
         // check if the caller can modify this server
         permissionManager.checkModifyPermission(who, res.getEntityId());
         // now get its authz resource
@@ -366,9 +317,9 @@ public class AppdefManagerImpl implements AppdefManager {
         // update the modified field in the appdef table -- YUCK
         res.setModifiedBy(who.getName());
     }
-    
+
     public static AppdefManager getOne() {
         return Bootstrap.getBean(AppdefManager.class);
-      }
+    }
 
 }
