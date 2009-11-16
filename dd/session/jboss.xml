@@ -13,13 +13,6 @@
 		-->
 
 		
-		<session>
-			<ejb-name>ConfigManager</ejb-name>
-			<local-jndi-name>LocalConfigManager</local-jndi-name>
-
-		</session>
-		
-
 	
 		<session>
 			<ejb-name>GalertBoss</ejb-name>

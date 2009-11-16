@@ -57,7 +57,7 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -133,7 +133,7 @@ public class AIQueueManagerEJBImpl
         AIPlatformDAO aiplatformLH = getAIPlatformDAO();
         PlatformManagerLocal pmLocal = getPlatformManager();
         AIQueueManagerLocal aiqLocal = getAIQManagerLocal();
-        ConfigManagerLocal crmLocal = getConfigManager();
+        ConfigManager crmLocal = getConfigManager();
         CPropManager cpropMgr = getCPropManager();
 
         // First, calculate queuestatus and diff with respect to
@@ -516,7 +516,7 @@ public class AIQueueManagerEJBImpl
 
         PlatformManagerLocal pmLocal = getPlatformManager();
         ServerManagerLocal smLocal = getServerManager();
-        ConfigManagerLocal configMgr = getConfigManager();
+        ConfigManager configMgr = getConfigManager();
         CPropManager cpropMgr = getCPropManager();
 
         AIPlatform aiplatform = null;

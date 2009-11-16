@@ -42,12 +42,12 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ConfigManagerImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -192,7 +192,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws AppdefEntityNotFoundException, PermissionException, 
                ConfigFetchException, EncodingException
     {
-        ConfigManagerLocal cman;
+        ConfigManager cman;
 
         // Get the merged config
         cman = getConfigManager();
@@ -293,7 +293,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                PluginNotFoundException, PluginException, PermissionException,
                AppdefEntityNotFoundException
     {
-        ConfigManagerLocal  cman = getConfigManager();
+        ConfigManager  cman = getConfigManager();
         ConfigResponse      baseResponse = null;
 
         AuthzSubject overlord = getOverlord();
@@ -347,7 +347,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
 
         String name;
         if (type.equals(ProductPlugin.TYPE_PRODUCT)) {
-            name = ConfigManagerEJBImpl.getOne().getPluginName(id);
+            name = ConfigManagerImpl.getOne().getPluginName(id);
         }
         else {
             name = getPlatformManager().getPlatformPluginName(id);
@@ -408,7 +408,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                InvalidConfigException, ConfigFetchException,
                AppdefEntityNotFoundException
     {
-        ConfigManagerLocal cMan;
+        ConfigManager cMan;
         boolean doRollback = true;
         try {
             cMan = getConfigManager();

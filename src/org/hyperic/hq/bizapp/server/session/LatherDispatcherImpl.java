@@ -62,7 +62,7 @@ import org.hyperic.hq.appdef.shared.AgentUnauthorizedException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceValue;
@@ -151,7 +151,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
 
     private AutoinventoryManager autoinventoryManager;
 
-    private ConfigManagerLocal configManager;
+    private ConfigManager configManager;
 
     private ControlManager controlManager;
 
@@ -168,7 +168,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     @Autowired
     public LatherDispatcherImpl(SessionManager sessionManager, AgentManager agentManager, AuthManager authManager,
                                 AuthzSubjectManager authzSubjectManager, AutoinventoryManager autoinventoryManager,
-                                ConfigManagerLocal configManager, ControlManager controlManager,
+                                ConfigManager configManager, ControlManager controlManager,
                                 MeasurementManager measurementManager, PlatformManagerLocal platformManager,
                                 ReportProcessor reportProcessor, ServerManagerLocal serverManager,
                                 ZeventEnqueuer zeventManager) {

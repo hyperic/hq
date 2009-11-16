@@ -32,7 +32,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
@@ -45,7 +45,7 @@ import org.hyperic.hq.product.TypeInfo;
 
 public abstract class AppdefSessionUtil {
     private AIQueueManagerLocal aiqManagerLocal;
-    private ConfigManagerLocal configMgrL;
+    private ConfigManager configMgrL;
     private ResourceManager rmLocal;
     private CPropManager cpropLocal;
     // TODO: Remove protected accessor when all subclasses are converted
@@ -66,9 +66,9 @@ public abstract class AppdefSessionUtil {
         return cpropLocal;
     }
 
-    protected ConfigManagerLocal getConfigManager() {
+    protected ConfigManager getConfigManager() {
         if (configMgrL == null) {
-            configMgrL = ConfigManagerEJBImpl.getOne();
+            configMgrL = ConfigManagerImpl.getOne();
         }
         return configMgrL;
     }

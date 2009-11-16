@@ -45,7 +45,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
@@ -99,7 +99,7 @@ public class ControlManagerImpl implements ControlManager {
     private ControlHistoryDAO controlHistoryDao;
     private ResourceTypeDAO resourceTypeDao;
 
-    private ConfigManagerLocal configManager;
+    private ConfigManager configManager;
     private PlatformManagerLocal platformManager;
     private AuthzSubjectManager authzSubjectManager;
     private ServerManagerLocal serverManager;
@@ -111,7 +111,7 @@ public class ControlManagerImpl implements ControlManager {
     @Autowired
     public ControlManagerImpl(ProductManager productManager, ControlScheduleManager controlScheduleManager,
                               ControlHistoryDAO controlHistoryDao,
-                              ResourceTypeDAO resourceTypeDao, ConfigManagerLocal configManager,
+                              ResourceTypeDAO resourceTypeDao, ConfigManager configManager,
                               PlatformManagerLocal platformManager,
                               AuthzSubjectManager authzSubjectManager, ServerManagerLocal serverManager,
                               ServiceManagerLocal serviceManager,

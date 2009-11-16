@@ -2,7 +2,7 @@ package org.hyperic.hq.hqu.rendit.util
 
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.server.session.CPropManagerImpl as CPropMan
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl as ConfigMan
+import org.hyperic.hq.appdef.server.session.ConfigManagerImpl as ConfigMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan

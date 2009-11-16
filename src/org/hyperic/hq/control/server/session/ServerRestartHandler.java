@@ -9,7 +9,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.measurement.shared.TrackerManager;
@@ -33,7 +33,7 @@ public class ServerRestartHandler {
 
     private final ServerManagerLocal serverManager;
 
-    private final ConfigManagerLocal configManager;
+    private final ConfigManager configManager;
 
     private final AutoinventoryManager autoInvManager;
 
@@ -42,7 +42,7 @@ public class ServerRestartHandler {
     private long startDelay = 15l;
 
     public ServerRestartHandler(ServerManagerLocal serverManager,
-                                ConfigManagerLocal configManager,
+                                ConfigManager configManager,
                                 AutoinventoryManager autoInvManager,
                                 TrackerManager trackerManager)
     {

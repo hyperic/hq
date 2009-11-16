@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -52,7 +52,7 @@ public class AIQRV_ignore implements AIQResourceVisitor {
     public void visitPlatform(AIPlatform aiplatform,
                               AuthzSubject subject,
                               PlatformManagerLocal pmLocal,
-                              ConfigManagerLocal configMgr,
+                              ConfigManager configMgr,
                               CPropManager cpropMgr,
                               List createdResources)
         throws AIQApprovalException, PermissionException {
@@ -68,7 +68,7 @@ public class AIQRV_ignore implements AIQResourceVisitor {
                             AuthzSubject subject,
                             PlatformManagerLocal pmLocal,
                             ServerManagerLocal smLocal,
-                            ConfigManagerLocal configMgr,
+                            ConfigManager configMgr,
                             CPropManager cpropMgr,
                             List createdResources)
         throws AIQApprovalException, PermissionException {

@@ -41,7 +41,7 @@ import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AIAudit;
 import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.server.session.CPropManagerImpl;
-import org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ConfigManagerImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -56,7 +56,7 @@ import org.hyperic.hq.appdef.shared.AIServiceTypeValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerValue;
@@ -93,8 +93,8 @@ public class RuntimeReportProcessor {
     private final ServiceManagerLocal
         _serviceMgr = ServiceManagerEJBImpl.getOne();
     
-    private final ConfigManagerLocal
-        _configMgr = ConfigManagerEJBImpl.getOne();
+    private final ConfigManager
+        _configMgr = ConfigManagerImpl.getOne();
     
     private final AuthzSubjectManager
         _subjectMgr = AuthzSubjectManagerImpl.getOne();

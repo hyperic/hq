@@ -57,7 +57,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -110,7 +110,7 @@ public class MeasurementManagerImpl
     private ApplicationManagerLocal applicationManager;
     private AuthzSubjectManager authzSubjectManager;
     private MeasurementProcessor measurementProcessor;
-    private ConfigManagerLocal configManager;
+    private ConfigManager configManager;
     private AvailabilityManager availabilityManager;
     
 
@@ -119,7 +119,7 @@ public class MeasurementManagerImpl
                                   ResourceGroupManager resourceGroupManager,
                                   ApplicationManagerLocal applicationManager,
                                   AuthzSubjectManager authzSubjectManager,
-                                  ConfigManagerLocal configManager) {
+                                  ConfigManager configManager) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
         this.applicationManager = applicationManager;

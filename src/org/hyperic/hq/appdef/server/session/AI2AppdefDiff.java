@@ -41,7 +41,7 @@ import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -69,7 +69,7 @@ public class AI2AppdefDiff {
      */
     public AIPlatformValue diffAgainstAppdef(AuthzSubject subject,
                                              PlatformManagerLocal pmLH,
-                                             ConfigManagerLocal cmLocal,
+                                             ConfigManager cmLocal,
                                              CPropManager cpropMgr,
                                              AIPlatformValue aiplatform)
     {
@@ -326,7 +326,7 @@ public class AI2AppdefDiff {
     }
 
     private void doServerDiffs(Platform appdefPlatform,
-                               ConfigManagerLocal cmLocal,
+                               ConfigManager cmLocal,
                                CPropManager cpropMgr,
                                AIPlatformValue aiPlatform,
                                AIPlatformValue revisedAIplatform) {

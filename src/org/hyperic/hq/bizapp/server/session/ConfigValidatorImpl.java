@@ -28,7 +28,7 @@ package org.hyperic.hq.bizapp.server.session;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -75,7 +75,7 @@ public class ConfigValidatorImpl
         TrackerManager trackerMan = getTrackerManager();
 
         ConfigResponse[] responses;
-        ConfigManagerLocal cman;
+        ConfigManager cman;
 
         cman      = getConfigManager();
         responses = new ConfigResponse[ids.length];

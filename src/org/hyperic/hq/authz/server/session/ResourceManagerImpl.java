@@ -42,7 +42,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
@@ -92,7 +92,7 @@ public class ResourceManagerImpl implements ResourceManager {
     private ServiceManagerLocal serviceManager;
     private ApplicationManagerLocal applicationManager;
     private AuthzSubjectManager authzSubjectManager;
-    private ConfigManagerLocal configManager;
+    private ConfigManager configManager;
     private AuthzSubjectDAO authzSubjectDAO;
     private ResourceDAO resourceDAO;
     private ResourceTypeDAO resourceTypeDAO;
@@ -102,7 +102,7 @@ public class ResourceManagerImpl implements ResourceManager {
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformManagerLocal platformManager,
                                ServerManagerLocal serverManager, ServiceManagerLocal serviceManager,
                                ApplicationManagerLocal applicationManager, AuthzSubjectManager authzSubjectManager,
-                               ConfigManagerLocal configManager, AuthzSubjectDAO authzSubjectDAO,
+                               ConfigManager configManager, AuthzSubjectDAO authzSubjectDAO,
                                ResourceDAO resourceDAO, ResourceTypeDAO resourceTypeDAO,
                                ResourceRelationDAO resourceRelationDAO) {
         this.resourceEdgeDAO = resourceEdgeDAO;

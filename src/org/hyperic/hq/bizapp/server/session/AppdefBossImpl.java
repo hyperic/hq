@@ -90,7 +90,7 @@ import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
@@ -206,7 +206,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     private AvailabilityManager availabilityManager;
 
-    private ConfigManagerLocal configManager;
+    private ConfigManager configManager;
 
     private CPropManager cPropManager;
 
@@ -242,7 +242,7 @@ public class AppdefBossImpl implements AppdefBoss {
     public AppdefBossImpl(SessionManager sessionManager, AgentManager agentManager, AIQueueManagerLocal aiQueueManager,
                           AppdefStatManagerLocal appdefStatManager, ApplicationManagerLocal applicationManager,
                           AuthzSubjectManager authzSubjectManager, AutoinventoryManager autoinventoryManager,
-                          AvailabilityManager availabilityManager, ConfigManagerLocal configManager,
+                          AvailabilityManager availabilityManager, ConfigManager configManager,
                           CPropManager cPropManager, PermissionManager permissionManager,
                           MeasurementManager measurementManager, PlatformManagerLocal platformManager,
                           AIBossLocal aiBoss, ResourceGroupManager resourceGroupManager,

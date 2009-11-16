@@ -53,7 +53,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -99,7 +99,7 @@ public class ProductManagerImpl implements ProductManager {
     private Log log = LogFactory.getLog(ProductManagerImpl.class);
 
     private ProductPluginManager ppm;
-    private ConfigManagerLocal configManager;
+    private ConfigManager configManager;
     private CPropManager cPropManager;
     private TemplateManager templateManager;
     private AuditManager auditManager;
@@ -110,7 +110,7 @@ public class ProductManagerImpl implements ProductManager {
 
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
-                              ConfigManagerLocal configManager,
+                              ConfigManager configManager,
                               CPropManager cPropManager, TemplateManager templateManager,
                               AuditManager auditManager) {
         this.pluginDao = pluginDao;

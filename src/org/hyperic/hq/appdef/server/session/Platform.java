@@ -101,7 +101,7 @@ public class Platform extends PlatformBase
         _agent = agent;
     }
 
-    public Collection getIps() {
+    public Collection<Ip> getIps() {
         return _ips;
     }
 

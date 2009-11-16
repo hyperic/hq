@@ -46,7 +46,7 @@ import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
@@ -235,7 +235,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         byte[] measResponse = cr.getMeasurementResponse();
         byte[] controlResponse = cr.getControlResponse();
         byte[] rtResponse = cr.getResponseTimeResponse();
-        ConfigManagerLocal cMan = ConfigManagerEJBImpl.getOne();
+        ConfigManager cMan = ConfigManagerImpl.getOne();
         ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
 
         if (s == null) {

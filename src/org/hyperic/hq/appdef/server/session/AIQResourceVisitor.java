@@ -29,7 +29,7 @@ import java.util.List;
 
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -43,7 +43,7 @@ public interface AIQResourceVisitor {
     public void visitPlatform(AIPlatform aiplatform,
                               AuthzSubject subject,
                               PlatformManagerLocal pmLocal,
-                              ConfigManagerLocal configMgr,
+                              ConfigManager configMgr,
                               CPropManager cpropMgr,
                               List createdResources)
         throws AIQApprovalException, PermissionException;
@@ -57,7 +57,7 @@ public interface AIQResourceVisitor {
                             AuthzSubject subject,
                             PlatformManagerLocal pmLocal,
                             ServerManagerLocal smLocal,
-                            ConfigManagerLocal configMgr,
+                            ConfigManager configMgr,
                             CPropManager cpropMgr,
                             List createdResources)
         throws AIQApprovalException, PermissionException;

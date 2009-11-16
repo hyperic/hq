@@ -27,77 +27,81 @@ package org.hyperic.hq.appdef.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
-import javax.ejb.SessionBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.Ip;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
-import org.hyperic.hq.appdef.shared.ConfigManagerUtil;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AICompare;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TypeInfo;
-import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
- * @ejb:bean name="ConfigManager"
- *      jndi-name="ejb/appdef/ConfigManager"
- *      local-jndi-name="LocalConfigManager"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:util generate="physical"
  */
-public class ConfigManagerEJBImpl
-    extends AppdefSessionEJB
-    implements SessionBean
+@Service
+public class ConfigManagerImpl implements ConfigManager
 {
-    private final int MAX_VALIDATION_ERR_LEN = 512;
-    private final String logCtx = ConfigManagerEJBImpl.class.getName();
-    protected Log log = LogFactory.getLog(logCtx);
-
-    private PlatformManagerLocal getPlatformManagerLocal(){
-        return PlatformManagerEJBImpl.getOne();
-    }
-
-    private ServerManagerLocal getServerManagerLocal(){
-        return ServerManagerEJBImpl.getOne();
-    }
-
-    private ServiceManagerLocal getServiceManagerLocal(){
-        return ServiceManagerEJBImpl.getOne();
+    private static final int MAX_VALIDATION_ERR_LEN = 512;
+    protected final Log log = LogFactory.getLog(ConfigManagerImpl.class.getName());
+    private ConfigResponseDAO configResponseDAO;
+    private PlatformManagerLocal platformManager;
+    private ServerManagerLocal serverManager;
+    private ServiceManagerLocal serviceManager;
+    private ZeventEnqueuer zeventManager;
+    private ServiceDAO serviceDAO;
+    private ServerDAO serverDAO;
+    private PlatformDAO platformDAO;
+    
+    
+    
+    @Autowired
+    public ConfigManagerImpl(ConfigResponseDAO configResponseDAO, PlatformManagerLocal platformManager,
+                             ServerManagerLocal serverManager, ServiceManagerLocal serviceManager,
+                             ZeventEnqueuer zeventManager, ServiceDAO serviceDAO, ServerDAO serverDAO,
+                             PlatformDAO platformDAO) {
+        this.configResponseDAO = configResponseDAO;
+        this.platformManager = platformManager;
+        this.serverManager = serverManager;
+        this.serviceManager = serviceManager;
+        this.zeventManager = zeventManager;
+        this.serviceDAO = serviceDAO;
+        this.serverDAO = serverDAO;
+        this.platformDAO = platformDAO;
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public ConfigResponseDB createConfigResponse(byte[] productResponse,
                                                  byte[] measResponse,
                                                  byte[] controlResponse,
                                                  byte[] rtResponse) {
-        ConfigResponseDB cr = getConfigResponseDAO().create();
+        ConfigResponseDB cr = configResponseDAO.create();
         cr.setProductResponse(productResponse);
         cr.setMeasurementResponse(measResponse);
         cr.setControlResponse(controlResponse);
@@ -110,12 +114,13 @@ public class ConfigManagerEJBImpl
      * Get the ConfigResponse for the given ID, creating it if it does not
      * already exist.
      *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     *
      */
+    @Transactional
     public ConfigResponseDB getConfigResponse(AppdefEntityID id) {
 
-        return getConfigResponse(getConfigResponseDAO(), id);
+        return getConfigResponse(configResponseDAO, id);
     }
 
     private ConfigResponseDB getConfigResponse(ConfigResponseDAO dao,
@@ -143,7 +148,7 @@ public class ConfigManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public String getPluginName(AppdefEntityID id)
         throws AppdefEntityNotFoundException
@@ -154,18 +159,18 @@ public class ConfigManagerEJBImpl
         switch (id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                 Platform plat =
-                    getPlatformManagerLocal().findPlatformById(intID);
+                    platformManager.findPlatformById(intID);
                 pname = plat.getPlatformType().getPlugin();
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                Server serv = getServerManagerLocal().findServerById(intID);
+                Server serv = serverManager.findServerById(intID);
                 pname = serv.getServerType().getPlugin();
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                Service service =
-                    getServiceManagerLocal().findServiceById(intID);
+                org.hyperic.hq.appdef.server.session.Service service =
+                    serviceManager.findServiceById(intID);
                 pname = service.getServiceType().getPlugin();
                 break;
 
@@ -214,9 +219,10 @@ public class ConfigManagerEJBImpl
      *
      * @return the merged ConfigResponse
      *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
+    @Transactional
     public ConfigResponse getMergedConfigResponse(AuthzSubject subject,
                                                   String productType,
                                                   AppdefEntityID id,
@@ -379,7 +385,7 @@ public class ConfigManagerEJBImpl
     /**
      * Clear the validation error string for a config response, indicating
      * that the current config is valid
-     * @ejb:interface-method
+     * 
      */
     public void clearValidationError(AuthzSubject subject, AppdefEntityID id) {
         ConfigResponseDB config = getConfigResponse(id);
@@ -427,9 +433,10 @@ public class ConfigManagerEJBImpl
      * @param validationError The error string that occured during validation.
      * If this is null, that means that no error occurred and the config is
      * valid.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
+    @Transactional
     public void setValidationError(AuthzSubject subject,
                                    AppdefEntityID id,
                                    String validationError) {
@@ -443,7 +450,7 @@ public class ConfigManagerEJBImpl
             }
         }
 
-        getConfigResponseDAO().setValidationError(config, validationError);
+        configResponseDAO.setValidationError(config, validationError);
     }
 
     /**
@@ -460,9 +467,10 @@ public class ConfigManagerEJBImpl
      *         changes.  The passed entity will always be returned in the
      *         array.
      *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
+    @Transactional
     public AppdefEntityID setConfigResponse(AuthzSubject subject,
                                             AppdefEntityID id,
                                             ConfigResponse response,
@@ -490,7 +498,7 @@ public class ConfigManagerEJBImpl
         }
 
 
-        ConfigResponseDB existingConfig = getConfigResponse(getConfigResponseDAO(), id);
+        ConfigResponseDB existingConfig = getConfigResponse(configResponseDAO, id);
         return configureResponse(subject, existingConfig, id,
                                  productBytes, measurementBytes,
                                  controlBytes, rtBytes, null,
@@ -498,9 +506,10 @@ public class ConfigManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     *
      */
+    @Transactional
     public AppdefEntityID configureResponse(AuthzSubject subject,
                                             ConfigResponseDB existingConfig,
                                             AppdefEntityID appdefID,
@@ -562,7 +571,7 @@ public class ConfigManagerEJBImpl
             if (sendConfigEvent) {
                 ResourceUpdatedZevent event =
                     new ResourceUpdatedZevent(subject, appdefID);
-                ZeventManager.getInstance().enqueueEventAfterCommit(event);
+                zeventManager.enqueueEventAfterCommit(event);
             }
 
             return appdefID;
@@ -572,16 +581,17 @@ public class ConfigManagerEJBImpl
     }
 
     /** Update the appdef entities based on TypeInfo
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
+    @Transactional
     public void updateAppdefEntities(String pluginName,
                                      TypeInfo[] entities)
         throws FinderException, RemoveException, CreateException, VetoException
     {
-        ArrayList platforms = new ArrayList();
-        ArrayList servers   = new ArrayList();
-        ArrayList services  = new ArrayList();
+        ArrayList<TypeInfo> platforms = new ArrayList<TypeInfo>();
+        ArrayList<TypeInfo> servers   = new ArrayList<TypeInfo>();
+        ArrayList<TypeInfo> services  = new ArrayList<TypeInfo>();
 
         // Organize the entity infos first
         for (int i = 0; i < entities.length; i++) {
@@ -604,20 +614,20 @@ public class ConfigManagerEJBImpl
 
         // Update platforms
         if (platforms.size() > 0) {
-            this.getPlatformManagerLocal().updatePlatformTypes(
+            this.platformManager.updatePlatformTypes(
                 pluginName, (PlatformTypeInfo[])
                 platforms.toArray(new PlatformTypeInfo[0]));
         }
 
         // Update servers
         if (servers.size() > 0) {
-            this.getServerManagerLocal().updateServerTypes(pluginName,
+            serverManager.updateServerTypes(pluginName,
                 (ServerTypeInfo[]) servers.toArray(new ServerTypeInfo[0]));
         }
 
         // Update services
         if (services.size() > 0) {
-            this.getServiceManagerLocal().updateServiceTypes(pluginName,
+            serviceManager.updateServiceTypes(pluginName,
                 (ServiceTypeInfo[]) services.toArray(new ServiceTypeInfo[0]));
         }
     }
@@ -650,24 +660,17 @@ public class ConfigManagerEJBImpl
         return res;
     }
 
-    public static ConfigManagerLocal getOne() {
-        try {
-            return ConfigManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static ConfigManager getOne() {
+      return Bootstrap.getBean(ConfigManager.class);
     }
 
-    public void ejbCreate() throws CreateException {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
+   
 
     private ServerConfigStuff getServerStuffForService(Integer id)
         throws AppdefEntityNotFoundException {
 
-        ServiceDAO dao = DAOFactory.getDAOFactory().getServiceDAO();
-        Service service = dao.findById(id);
+        
+        org.hyperic.hq.appdef.server.session.Service service = serviceDAO.findById(id);
         Server server = service.getServer();
         if (server == null) {
             return null;
@@ -679,8 +682,8 @@ public class ConfigManagerEJBImpl
     private ServerConfigStuff getServerStuffForServer(Integer id)
         throws AppdefEntityNotFoundException {
 
-        ServerDAO dao = DAOFactory.getDAOFactory().getServerDAO();
-        Server server = dao.findById(id);
+        
+        Server server = serverDAO.findById(id);
 
         return new ServerConfigStuff(server.getId().intValue(),
                                      server.getInstallPath());
@@ -689,8 +692,8 @@ public class ConfigManagerEJBImpl
     private PlatformConfigStuff getPlatformStuffForServer(Integer id)
         throws AppdefEntityNotFoundException {
 
-        ServerDAO dao = DAOFactory.getDAOFactory().getServerDAO();
-        Server server = dao.findById(id);
+       
+        Server server = serverDAO.findById(id);
         Platform platform = server.getPlatform();
         if (platform == null) {
             return null;
@@ -708,8 +711,8 @@ public class ConfigManagerEJBImpl
     private PlatformConfigStuff getPlatformStuffForPlatform(Integer id)
         throws AppdefEntityNotFoundException {
 
-        PlatformDAO dao = DAOFactory.getDAOFactory().getPlatformDAO();
-        Platform platform = dao.findById(id);
+        
+        Platform platform = platformDAO.findById(id);
 
         PlatformConfigStuff pConfig =
             new PlatformConfigStuff(platform.getId().intValue(),
@@ -724,9 +727,9 @@ public class ConfigManagerEJBImpl
                                  PlatformConfigStuff pConfig)
         throws AppdefEntityNotFoundException {
 
-        Collection ips = platform.getIps();
-        for (Iterator i = ips.iterator(); i.hasNext(); ) {
-            Ip ip = (Ip)i.next();
+        Collection<Ip> ips = platform.getIps();
+        for (Ip ip : ips ) {
+           
             if (!ip.getAddress().equals("127.0.0.1")) {
                 // First non-loopback address
                 pConfig.ip = ip.getAddress();

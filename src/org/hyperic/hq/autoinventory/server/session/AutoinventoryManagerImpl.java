@@ -64,7 +64,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
@@ -133,7 +133,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private ProductManager productManager;
     private ServerManagerLocal serverManager;
     private ResourceManager resourceManager;
-    private ConfigManagerLocal configManager;
+    private ConfigManager configManager;
     private AgentManager agentManager;
     private CPropManager cPropManager;
     private ServiceManagerLocal serviceManager;
@@ -143,7 +143,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     @Autowired
     public AutoinventoryManagerImpl(AgentReportStatusDAO agentReportStatusDao, AIHistoryDAO aiHistoryDao,
                                     AIPlatformDAO aiPlatformDao, ProductManager productManager, ServerManagerLocal serverManager,
-                                    AIScheduleManager aiScheduleManager, ResourceManager resourceManager, ConfigManagerLocal configManager,
+                                    AIScheduleManager aiScheduleManager, ResourceManager resourceManager, ConfigManager configManager,
                                     AgentManager agentManager, CPropManager cPropManager, ServiceManagerLocal serviceManager,
                                     AuthzSubjectManager authzSubjectManager, AIQueueManagerLocal aiQueueManager) {
         this.agentReportStatusDao = agentReportStatusDao;

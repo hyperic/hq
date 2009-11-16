@@ -40,7 +40,7 @@ import org.hyperic.hq.appdef.shared.AIQueueConstants;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerValue;
@@ -75,7 +75,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
     public void visitPlatform(AIPlatform aiplatform,
                               AuthzSubject subject,
                               PlatformManagerLocal pmLocal,
-                              ConfigManagerLocal configMgr,
+                              ConfigManager configMgr,
                               CPropManager cpropMgr,
                               List createdResources)
         throws AIQApprovalException, PermissionException {
@@ -243,7 +243,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                             AuthzSubject subject,
                             PlatformManagerLocal pmLocal,
                             ServerManagerLocal smLocal,
-                            ConfigManagerLocal configMgr,
+                            ConfigManager configMgr,
                             CPropManager cpropMgr,
                             List createdResources)
         throws AIQApprovalException, PermissionException
@@ -283,7 +283,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
     private void handleStatusRemoved(AuthzSubject subject, Platform platform,
                                      AIPlatformValue aiplatformValue,
                                      AIServer aiserver,
-                                     ConfigManagerLocal configMgr,
+                                     ConfigManager configMgr,
                                      CPropManager cpropMgr,
                                      List createdResources,
                                      ServerManagerLocal smLocal)
@@ -319,7 +319,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                      Platform platform,
                                      AIPlatformValue aiplatformValue,
                                      AIServer aiserver,
-                                     ConfigManagerLocal configMgr,
+                                     ConfigManager configMgr,
                                      CPropManager cpropMgr,
                                      List createdResources,
                                      ServerManagerLocal smLocal)
@@ -371,7 +371,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                    Platform platform,
                                    AIPlatformValue aiplatformValue,
                                    AIServer aiserver,
-                                   ConfigManagerLocal configMgr,
+                                   ConfigManager configMgr,
                                    CPropManager cpropMgr,
                                    List createdResources,
                                    ServerManagerLocal smLocal)

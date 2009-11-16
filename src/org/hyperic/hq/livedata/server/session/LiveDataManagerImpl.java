@@ -45,7 +45,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
-import org.hyperic.hq.appdef.shared.ConfigManagerLocal;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.context.Bootstrap;
@@ -83,10 +83,10 @@ public class LiveDataManagerImpl implements LiveDataManager {
 
     private ProductManager productManager;
 
-    private ConfigManagerLocal configManager;
+    private ConfigManager configManager;
 
     @Autowired
-    public LiveDataManagerImpl(ProductManager productManager, ConfigManagerLocal configManager) {
+    public LiveDataManagerImpl(ProductManager productManager, ConfigManager configManager) {
         this.productManager = productManager;
         this.configManager = configManager;
     }
