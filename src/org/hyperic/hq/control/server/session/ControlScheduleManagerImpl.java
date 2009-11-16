@@ -46,7 +46,7 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.AppdefManagerLocal;
+import org.hyperic.hq.appdef.shared.AppdefManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
@@ -104,12 +104,12 @@ public class ControlScheduleManagerImpl
 
     private ControlHistoryDAO controlHistoryDAO;
     private ControlScheduleDAO controlScheduleDAO;
-    private AppdefManagerLocal appdefManager;
+    private AppdefManager appdefManager;
     private PermissionManager permissionManager;
 
     @Autowired
     public ControlScheduleManagerImpl(Scheduler scheduler, DBUtil dbUtil, ControlHistoryDAO controlHistoryDAO,
-                                      ControlScheduleDAO controlScheduleDAO, AppdefManagerLocal appdefManager,
+                                      ControlScheduleDAO controlScheduleDAO, AppdefManager appdefManager,
                                       PermissionManager permissionManager) {
         super(scheduler, dbUtil);
         this.controlHistoryDAO = controlHistoryDAO;
@@ -814,7 +814,7 @@ public class ControlScheduleManagerImpl
      *         Operation for the given resource.
      */
     private void checkControlPermission(AuthzSubject caller, AppdefEntityID id) throws PermissionException {
-        appdefManager.checkControlPermission(caller, id);
+        permissionManager.checkControlPermission(caller, id);
     }
 
     private class ControlHistoryLocalComparatorAsc implements Comparator<ControlHistory> {

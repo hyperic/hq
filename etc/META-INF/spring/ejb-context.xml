@@ -8,7 +8,6 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
 <bean class="org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.appdef.server.session.AppdefManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.AppdefStatManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.ConfigManagerEJBImpl" factory-method="getOne"/>
