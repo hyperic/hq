@@ -80,7 +80,7 @@ public interface DataManagerLocal
     * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl#getHistoricalData()
     * @return the list of data points
     */
-   public org.hyperic.util.pager.PageList getHistoricalData( java.util.List measurements,long begin,long end,long interval,int type,boolean returnMetricNulls,org.hyperic.util.pager.PageControl pc ) ;
+   public org.hyperic.util.pager.PageList<HighLowMetricValue> getHistoricalData( java.util.List measurements,long begin,long end,long interval,int type,boolean returnMetricNulls,org.hyperic.util.pager.PageControl pc ) ;
 
    /**
     * Get the last MetricValue for the given Measurement.
