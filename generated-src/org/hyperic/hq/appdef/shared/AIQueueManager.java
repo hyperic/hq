@@ -14,7 +14,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 
@@ -36,7 +35,7 @@ public interface AIQueueManager
     * @param showAlreadyProcessed If true, even resources that have already been processed (approved or not approved) will be shown.
     * @return A List of AIPlatformValue objects representing the contents of the autoinventory queue.
     */
-   public PageList  getQueue( AuthzSubject  subject,boolean showIgnored,boolean showPlaceholders,boolean showAlreadyProcessed,PageControl  pc ) ;
+   public PageList<AIPlatformValue>  getQueue( AuthzSubject  subject,boolean showIgnored,boolean showPlaceholders,boolean showAlreadyProcessed,PageControl  pc ) ;
 
    /**
     * Get an AIPlatformValue by id.
@@ -78,7 +77,7 @@ public interface AIQueueManager
     * @param action One of the AIQueueCQ _DECISION_XXX constants indicating what to do with the platforms, ips and servers.
     * @return A List of AppdefResource's that were created as a result of processing the queue.
     */
-   public List  processQueue( AuthzSubject  subject,List  platformList,List  serverList,List  ipList,int action ) throws FinderException , PermissionException , ValidationException , RemoveException , AIQApprovalException ;
+   public List<AppdefResource>  processQueue( AuthzSubject  subject,List<Integer>  platformList,List<Integer>  serverList,List<Integer>  ipList,int action ) throws FinderException , PermissionException , ValidationException , RemoveException , AIQApprovalException ;
 
    /**
     * Remove an AI platform from the queue.

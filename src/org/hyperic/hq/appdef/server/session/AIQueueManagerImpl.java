@@ -101,6 +101,19 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private final AI2AppdefDiff appdefDiffProcessor = new AI2AppdefDiff();
     private final AIQSynchronizer queueSynchronizer = new AIQSynchronizer();
     
+    private AIServerDAO aIServerDAO;
+    private AIIpDAO aiIpDAO;
+    private AIPlatformDAO aiPlatformDAO;
+    private ConfigManager configManager;
+    private CPropManager cPropManager;
+    private PlatformDAO platformDAO;
+    private PlatformManagerLocal platformManager;
+    private ServerManagerLocal serverManager;
+    private PermissionManager permissionManager;
+    private AuditManager auditManager;
+    private AuthzSubjectManager authzSubjectManager;
+    protected final Log log = LogFactory.getLog(AIQueueManagerImpl.class.getName());
+    
     @Autowired
     public AIQueueManagerImpl(AIServerDAO aIServerDAO, AIIpDAO aiIpDAO, AIPlatformDAO aiPlatformDAO,
                               ConfigManager configManager, CPropManager cPropManager, PlatformDAO platformDAO,
@@ -121,23 +134,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
         this.authzSubjectManager = authzSubjectManager;
     }
 
-    private AIServerDAO aIServerDAO;
-    private AIIpDAO aiIpDAO;
-    private AIPlatformDAO aiPlatformDAO;
-    private ConfigManager configManager;
-    private CPropManager cPropManager;
-    private PlatformDAO platformDAO;
-    private PlatformManagerLocal platformManager;
-    private ServerManagerLocal serverManager;
-    private PermissionManager permissionManager;
-    private AuditManager auditManager;
-    private AuthzSubjectManager authzSubjectManager;
-   
-
-    protected final Log log = LogFactory.getLog(AIQueueManagerImpl.class.getName());
-
-   
-
+  
     /**
      * Try to queue a candidate platform discovered via autoinventory.
      * @param aiplatform The platform that we got from the recent autoinventory
@@ -233,12 +230,12 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * 
      */
     @Transactional
-    public PageList getQueue(AuthzSubject subject, boolean showIgnored,
+    public PageList<AIPlatformValue> getQueue(AuthzSubject subject, boolean showIgnored,
                              boolean showPlaceholders,
                              boolean showAlreadyProcessed, PageControl pc)
     {
-        Collection queue;
-        PageList results;
+        Collection<AIPlatform> queue;
+        PageList<AIPlatformValue> results;
         pc = PageControl.initDefaults(pc, SortAttribute.DEFAULT);
 
         try {
@@ -268,14 +265,14 @@ public class AIQueueManagerImpl implements AIQueueManager {
             // keep it if the user has canCreatePlatforms permission.
             // If the aiplatform is not new, then make sure the user has
             // view permissions on the platform that backs the aiplatform.
-            Iterator iter = queue.iterator();
-            AIPlatform aipLocal;
-            Platform pValue;
+            Iterator<AIPlatform> iter = queue.iterator();
+          
+            
             AppdefEntityID aid;
             Integer ppk;
             while (iter.hasNext()) {
-                aipLocal = (AIPlatform) iter.next();
-                pValue = null;
+                AIPlatform  aipLocal = iter.next();
+                Platform pValue = null;
                 if (aipLocal.getQueueStatus() != AIQueueConstants.Q_STATUS_ADDED) {
                     try {
                         pValue = getPlatformByAI(subject, aipLocal);
@@ -464,12 +461,12 @@ public class AIQueueManagerImpl implements AIQueueManager {
                                        String address)
     {
         // XXX Do authz check
-        List aiips = aiIpDAO.findByAddress(address);
+        List<AIIp> aiips = aiIpDAO.findByAddress(address);
         if (aiips.size() == 0) {
             return null;
         }
 
-        return ((AIIp) aiips.get(0)).getAIIpValue();
+        return  aiips.get(0).getAIIpValue();
     }
 
     /**
@@ -492,10 +489,10 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * 
      */
     @Transactional
-    public List processQueue(AuthzSubject subject,
-                             List platformList,
-                             List serverList,
-                             List ipList,
+    public List<AppdefResource> processQueue(AuthzSubject subject,
+                             List<Integer> platformList,
+                             List<Integer> serverList,
+                             List<Integer> ipList,
                              int action)
         throws FinderException, PermissionException, ValidationException,
                RemoveException, AIQApprovalException
@@ -518,10 +515,10 @@ public class AIQueueManagerImpl implements AIQueueManager {
         }
     }
 
-    private List _processQueue(AuthzSubject subject,
-                               List platformList,
-                               List serverList,
-                               List ipList,
+    private List<AppdefResource> _processQueue(AuthzSubject subject,
+                               List<Integer> platformList,
+                               List<Integer> serverList,
+                               List<Integer> ipList,
                                int action,
                                boolean verifyLiveAgent)
         throws FinderException, PermissionException, ValidationException,
@@ -532,15 +529,15 @@ public class AIQueueManagerImpl implements AIQueueManager {
         boolean isPurgeAction
             = (action == AIQueueConstants.Q_DECISION_PURGE);
         int i;
-        Iterator iter;
+       
 
-        Map aiplatformsToResync = new HashMap();
-        Map aiserversToRemove = new HashMap();
+        Map<Integer, Object> aiplatformsToResync = new HashMap<Integer, Object>();
+        Map<String, AIServer> aiserversToRemove = new HashMap<String, AIServer>();
         Object marker = new Object();
 
         
         AIPlatform aiplatform = null;
-        List createdResources = new ArrayList();
+        List<AppdefResource> createdResources = new ArrayList<AppdefResource>();
 
         // Create our visitor based on the action
         AIQResourceVisitor visitor
@@ -548,7 +545,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
 
         if (platformList != null) {
             for ( i=0; i<platformList.size(); i++ ) {
-                final Integer id = (Integer) platformList.get(i);
+                final Integer id =  platformList.get(i);
 
                 if (id == null) {
                     log.error("processQueue: platform with ID=null");
@@ -663,20 +660,21 @@ public class AIQueueManagerImpl implements AIQueueManager {
 
         // If the action was "approve", then resync queued platforms 
         // to appdef, now that appdef may have been updated.
+        
         if (isApproveAction) {
-            iter = aiplatformsToResync.keySet().iterator();
-            while ( iter.hasNext() ) { 
-                final Integer id = (Integer) iter.next();
+          
+            for ( Integer id : aiplatformsToResync.keySet() ) { 
+               
                 aiplatform = aiPlatformDAO.get(id);
                 syncQueue(aiplatform, isApproveAction);
             }
             
             if (aiplatform != null) {
                 // See above note, now we remove approved servers from the queue
-                Collection servers = aiplatform.getAIServers();
+                Collection<AIServer> servers = aiplatform.getAIServers();
                 if (servers != null) {
-                    for (Iterator it=servers.iterator(); it.hasNext(); ) {
-                        AIServer aiServer = (AIServer)it.next();
+                    for (Iterator<AIServer> it=servers.iterator(); it.hasNext(); ) {
+                        AIServer aiServer = it.next();
                         String aiid = aiServer.getAutoinventoryIdentifier();
                         if (aiserversToRemove.containsKey(aiid)) {
                             it.remove();
@@ -688,15 +686,15 @@ public class AIQueueManagerImpl implements AIQueueManager {
         return createdResources;
     }
     
-    private boolean ipIsUpdated(AIPlatform aiplatform, Collection ipList) {
+    private boolean ipIsUpdated(AIPlatform aiplatform, Collection<Integer> ipList) {
         if (AIQueueConstants.Q_STATUS_CHANGED != aiplatform.getQueueStatus()) {
             return false;
         }
        
         boolean added = false;
         boolean removed = false;
-        for (final Iterator it=ipList.iterator(); it.hasNext(); ) {
-            final Integer id = (Integer)it.next();
+        for (Integer id: ipList) {
+            
             final AIIp aiip = aiIpDAO.get(id);
             if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus()) {
                 removed = true;
@@ -756,21 +754,21 @@ public class AIQueueManagerImpl implements AIQueueManager {
      * may return null if there are no associated AIPlatforms.
      */
     private AIPlatform getAIPlatformByPlatform(Platform platform) {
-        Collection ips = platform.getIps();
+        Collection<Ip> ips = platform.getIps();
         // We can't use the FQDN to find a platform, because
         // the FQDN can change too easily.  Instead we use the
         // IP address now.  For now, if we get one IP address
         // match (and it isn't localhost), we assume that it is
         // the same platform.  In the future, we are probably going
         // to need to do better.
-        for (Iterator i = ips.iterator(); i.hasNext(); ) {
-            Ip qip = (Ip) i.next();
+        for (Iterator<Ip> i = ips.iterator();i.hasNext();) {
+            Ip qip = i.next();
 
             String mac = qip.getMacAddress();
 
             if (mac != null && mac.length() > 0 &&
                 !mac.equals(NetFlags.NULL_HWADDR)) {
-                List addrs = aiIpDAO.findByMACAddress(qip.getMacAddress());
+                List<AIIp> addrs = aiIpDAO.findByMACAddress(qip.getMacAddress());
                 if (addrs.size() > 0) {
                     AIPlatform aiplatform = ((AIIp)addrs.get(0)).getAIPlatform();
                     return aiplatform;
@@ -790,9 +788,9 @@ public class AIQueueManagerImpl implements AIQueueManager {
                 continue;
             }
 
-            List addrs = aiIpDAO.findByAddress(address);
+            List<AIIp> addrs = aiIpDAO.findByAddress(address);
             if (addrs.size() > 0) {
-                AIPlatform aiplatform = ((AIIp) addrs.get(0)).getAIPlatform();
+                AIPlatform aiplatform =  addrs.get(0).getAIPlatform();
                 return aiplatform;
             }
         }
