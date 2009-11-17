@@ -25,77 +25,57 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.auth.shared.SessionManager;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.authz.shared.AuthzSubjectValue;
-import org.hyperic.hq.agent.AgentConnectionException;
-import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.bizapp.shared.LiveDataBoss;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.livedata.server.session.LiveDataManagerImpl;
+import org.hyperic.hq.livedata.shared.LiveDataCommand;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataManager;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
-import org.hyperic.hq.livedata.shared.LiveDataCommand;
-import org.hyperic.hq.livedata.server.session.LiveDataManagerImpl;
 import org.hyperic.hq.product.PluginException;
-import org.hyperic.hq.auth.shared.SessionManager;
-import org.hyperic.hq.auth.shared.SessionTimeoutException;
-import org.hyperic.hq.auth.shared.SessionNotFoundException;
-import org.hyperic.hq.bizapp.shared.LiveDataBossLocal;
-import org.hyperic.hq.bizapp.shared.LiveDataBossUtil;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.events.shared.AlertDefinitionManager;
-import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
-
-import javax.ejb.SessionBean;
-import javax.ejb.CreateException;
-import javax.ejb.EJBException;
-import javax.ejb.SessionContext;
-import java.rmi.RemoteException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * External API into the live data system.
- *
- * @ejb:bean name="LiveDataBoss"
- *      jndi-name="ejb/bizapp/LiveDataBoss"
- *      local-jndi-name="LocalLiveDataBoss"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:transaction type="Required"
  */
 
-public class LiveDataBossEJBImpl implements SessionBean {
+@Service
+@Transactional
+public class LiveDataBossImpl implements LiveDataBoss {
+    private SessionManager sessionManager;
+    private LiveDataManager liveDataManager;
 
-    protected SessionManager _manager = SessionManager.getInstance();
-
-    /** @ejb:create-method */
-    public void ejbCreate() throws CreateException {}
-    public void ejbActivate() throws EJBException, RemoteException {}
-    public void ejbPassivate() throws EJBException, RemoteException {}
-    public void ejbRemove() throws EJBException, RemoteException {}
-    public void setSessionContext(SessionContext ctx) {}
+    @Autowired
+    public LiveDataBossImpl(SessionManager sessionManager, LiveDataManager liveDataManager) {
+        this.sessionManager = sessionManager;
+        this.liveDataManager = liveDataManager;
+    }
 
     /**
      * Get live data for a given resource
-     *
-     * @ejb:interface-method
      */
     public LiveDataResult getLiveData(int sessionId, LiveDataCommand command)
         throws PermissionException, AgentNotFoundException,
                AppdefEntityNotFoundException, LiveDataException,
                SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubject subject = _manager.getSubject(sessionId);
-        LiveDataManager manager = LiveDataManagerImpl.getOne();
-        return manager.getData(subject, command);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return liveDataManager.getData(subject, command);
     }
 
     /**
      * Get live data for the given commands
-     *
-     * @ejb:interface-method 
      */
     public LiveDataResult[] getLiveData(int sessionId,
                                         LiveDataCommand[] commands)
@@ -103,45 +83,34 @@ public class LiveDataBossEJBImpl implements SessionBean {
                AppdefEntityNotFoundException, LiveDataException,
                SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubject subject = _manager.getSubject(sessionId);
-        LiveDataManager manager = LiveDataManagerImpl.getOne();
-        return manager.getData(subject, commands);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return liveDataManager.getData(subject, commands);
     }
 
     /**
      * Get the commands for a given resource.
-     *
-     * @ejb:interface-method 
      */
     public String[] getLiveDataCommands(int sessionId, AppdefEntityID id)
         throws PluginException, PermissionException,
                SessionTimeoutException, SessionNotFoundException
     {
-        AuthzSubject subject = _manager.getSubject(sessionId);
-        LiveDataManager manager = LiveDataManagerImpl.getOne();
-        return manager.getCommands(subject, id);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return liveDataManager.getCommands(subject, id);
     }
 
     /**
      * Get the ConfigSchema for this resource
-     *
-     * @ejb:interface-method 
      */
     public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id,
                                         String command)
         throws PluginException, PermissionException,
                SessionTimeoutException, SessionNotFoundException    
     {
-        AuthzSubject subject = _manager.getSubject(sessionId);
-        LiveDataManager manager = LiveDataManagerImpl.getOne();
-        return manager.getConfigSchema(subject, id, command);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return liveDataManager.getConfigSchema(subject, id, command);
     }
     
-    public static LiveDataBossLocal getOne() {
-        try {
-            return LiveDataBossUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static LiveDataBoss getOne() {
+        return Bootstrap.getBean(LiveDataBoss.class);
     }
 }

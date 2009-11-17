@@ -146,22 +146,6 @@
 		</session>
 
 		
-
-		<session>
-			<description><![CDATA[External API into the live data system.]]></description>
-
-			<ejb-name>LiveDataBoss</ejb-name>
-
-			<local-home>org.hyperic.hq.bizapp.shared.LiveDataBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.LiveDataBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.LiveDataBossEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		
-
 		<session>
 			<description><![CDATA[This class is responsible for managing Platform objects in appdef and their relationships]]></description>
 
@@ -998,14 +982,6 @@
 				</method>
 				<trans-attribute>Required</trans-attribute>
 	    </container-transaction>
-		
-		<container-transaction>
-			<method>
-				<ejb-name>LiveDataBoss</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
 		
 		<container-transaction>
 			<method>
