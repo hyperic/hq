@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -35,82 +36,130 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
-import javax.ejb.SessionBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
+import org.hyperic.dao.DAOFactory;
+import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerUtil;
-import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
+import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
-import org.hyperic.hq.common.server.session.AuditManagerImpl;
 import org.hyperic.hq.common.server.session.ResourceAudit;
+import org.hyperic.hq.common.shared.AuditManager;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.ServerTypeInfo;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.ArrayUtil;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-import org.hyperic.dao.DAOFactory;
-import org.hibernate.ObjectNotFoundException;
-import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.PlatformType;
-import org.hyperic.hq.appdef.server.session.ServerType;
-import org.hyperic.hq.appdef.server.session.ServiceType;
-import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This class is responsible for managing Server objects in appdef
  * and their relationships
- * @ejb:bean name="ServerManager"
- *      jndi-name="ejb/appdef/ServerManager"
- *      local-jndi-name="LocalServerManager"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:util generate="physical"
- * @ejb:transaction type="Required"
  */
-public class ServerManagerEJBImpl extends AppdefSessionEJB
-    implements SessionBean {
+@org.springframework.stereotype.Service
+@Transactional
+public class ServerManagerImpl implements ServerManager  {
 
-    private Log log = LogFactory.getLog(ServerManagerEJBImpl.class);
+    private final Log log = LogFactory.getLog(ServerManagerImpl.class);
 
-    private final String VALUE_PROCESSOR
+    private static final String VALUE_PROCESSOR
         = "org.hyperic.hq.appdef.server.session.PagerProcessor_server";
-    private Pager valuePager = null;
-    private final Integer APPDEF_RES_TYPE_UNDEFINED = new Integer(-1);
+    private Pager valuePager;
+    private static final Integer APPDEF_RES_TYPE_UNDEFINED = new Integer(-1);
+    
+    private PermissionManager permissionManager;
+    private ApplicationDAO applicationDAO;
+    private ConfigResponseDAO configResponseDAO;
+    private PlatformDAO platformDAO;
+    private PlatformManagerLocal platformManager;
+    private ServerDAO serverDAO;
+    private PlatformTypeDAO platformTypeDAO;
+    private ResourceManager resourceManager;
+    private ServerTypeDAO serverTypeDAO;
+    private ServiceDAO serviceDAO;
+    private ServiceTypeDAO serviceTypeDAO;
+    private ServiceManagerLocal serviceManager;
+    private CPropManager cpropManager;
+    private ConfigManager configManager;
+    private MeasurementManager measurementManager;
+    private AuditManager auditManager;
+    private AuthzSubjectManager authzSubjectManager;
+    private ResourceGroupManager resourceGroupManager;
+    private ZeventEnqueuer zeventManager;
+    
+    
+    @Autowired
+    public ServerManagerImpl(PermissionManager permissionManager, ApplicationDAO applicationDAO,
+                             ConfigResponseDAO configResponseDAO, PlatformDAO platformDAO,
+                             PlatformManagerLocal platformManager, ServerDAO serverDAO,
+                             PlatformTypeDAO platformTypeDAO, ResourceManager resourceManager,
+                             ServerTypeDAO serverTypeDAO, ServiceDAO serviceDAO, ServiceTypeDAO serviceTypeDAO,
+                             ServiceManagerLocal serviceManager, CPropManager cpropManager,
+                             ConfigManager configManager, MeasurementManager measurementManager,
+                             AuditManager auditManager, AuthzSubjectManager authzSubjectManager,
+                             ResourceGroupManager resourceGroupManager, ZeventEnqueuer zeventManager) {
+        
+        this.permissionManager = permissionManager;
+        this.applicationDAO = applicationDAO;
+        this.configResponseDAO = configResponseDAO;
+        this.platformDAO = platformDAO;
+        this.platformManager = platformManager;
+        this.serverDAO = serverDAO;
+        this.platformTypeDAO = platformTypeDAO;
+        this.resourceManager = resourceManager;
+        this.serverTypeDAO = serverTypeDAO;
+        this.serviceDAO = serviceDAO;
+        this.serviceTypeDAO = serviceTypeDAO;
+        this.serviceManager = serviceManager;
+        this.cpropManager = cpropManager;
+        this.configManager = configManager;
+        this.measurementManager = measurementManager;
+        this.auditManager = auditManager;
+        this.authzSubjectManager = authzSubjectManager;
+        this.resourceGroupManager = resourceGroupManager;
+        this.zeventManager = zeventManager;
+    }
 
     /**
      * Validate a server value object which is to be created on this
@@ -130,9 +179,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         }
         if(msg == null) {
             Integer id = server.getServerType().getId();
-            Collection stypes = p.getPlatformType().getServerTypes();
-            for (Iterator i = stypes.iterator(); i.hasNext();) {
-                ServerType sVal = (ServerType)i.next();
+            Collection<ServerType> stypes = p.getPlatformType().getServerTypes();
+            for (ServerType sVal : stypes) {
+              
                 if(sVal.getId().equals(id))
                     return;
             }
@@ -143,6 +192,37 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         if (msg != null) {
             throw new ValidationException(msg);
         }
+    }
+    
+    /**
+     * Filter a list of {@link Server}s by their viewability by the subject 
+     */
+    protected List<Server> filterViewableServers(Collection<Server> servers, AuthzSubject who) 
+    {
+        
+        List<Server> res = new ArrayList<Server>();
+        ResourceType type;
+        Operation op;
+        
+        try {
+            type  =  resourceManager.findResourceTypeByName(AuthzConstants.serverResType);
+            op = getOperationByName(type, AuthzConstants.serverOpViewServer);
+        } catch(Exception e) {
+            throw new SystemException("Internal error", e);
+        }
+        
+        Integer typeId = type.getId();
+        
+        for (Server s : servers ) {
+          
+            try {
+                permissionManager.check(who.getId(), typeId, s.getId(), op.getId());
+                res.add(s);
+            } catch(PermissionException e) {
+                // Ok
+            }
+        }
+        return res;
     }
 
     /**
@@ -163,11 +243,12 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         }
         if(msg == null) {
             Integer id = sv.getServerType().getId();
-            Collection stypes = p.getPlatformType().getServerTypes();
-            for (Iterator i = stypes.iterator(); i.hasNext();) {
-                ServerType sVal = (ServerType)i.next();
-                if(sVal.getId().equals(id))
+            Collection<ServerType> stypes = p.getPlatformType().getServerTypes();
+            for (ServerType sVal : stypes) {
+               
+                if(sVal.getId().equals(id)) {
                     return;
+                }
             }
             msg = "Servers of type '" + sv.getServerType().getName() +
                 "' cannot be created on platforms of type '" +
@@ -206,7 +287,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Clone a Server to a target Platform
-     * @ejb:interface-method
+     * 
      */
     public Server cloneServer(AuthzSubject subject, Platform targetPlatform,
                               Server serverToClone)
@@ -215,9 +296,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     {
         Server s = null;
         // See if we already have this server type
-        for (Iterator it = targetPlatform.getServers().iterator(); it.hasNext();)
+        for (Server server  : targetPlatform.getServers())
         {
-            Server server = (Server) it.next();
+           
             if (server.getServerType().equals(serverToClone.getServerType())) {
                 // Do nothing if it's a Network server
                 if (server.getServerType().getName().equals("NetworkServer")) {
@@ -235,11 +316,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         byte[] measResponse = cr.getMeasurementResponse();
         byte[] controlResponse = cr.getControlResponse();
         byte[] rtResponse = cr.getResponseTimeResponse();
-        ConfigManager cMan = ConfigManagerImpl.getOne();
-        ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
+       
 
         if (s == null) {
-            ConfigResponseDB configResponse = cMan.createConfigResponse(
+            ConfigResponseDB configResponse = configManager.createConfigResponse(
                 productResponse, measResponse, controlResponse, rtResponse);
             s = new Server();
             s.setName(getTargetServerName(targetPlatform, serverToClone));
@@ -266,10 +346,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
             Integer stid = serverToClone.getServerType().getId();
 
-            ServerType st = getServerTypeDAO().findById(stid);
+            ServerType st = serverTypeDAO.findById(stid);
             s.setServerType(st);
             validateNewServer(targetPlatform, s);
-            getServerDAO().create(s);
+            serverDAO.create(s);
             // Add server to parent collection
             targetPlatform.getServersBag().add(s);
 
@@ -278,10 +358,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // Send resource create event
             ResourceCreatedZevent zevent =
                 new ResourceCreatedZevent(subject, s.getEntityId());
-            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+            zeventManager.enqueueEventAfterCommit(zevent);
         }
         else {
-            cMan.configureResponse(subject, cr, s.getEntityId(),
+            configManager.configureResponse(subject, cr, s.getEntityId(),
                                    productResponse, measResponse,
                                    controlResponse, rtResponse,
                                    null, true, true);
@@ -293,13 +373,42 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 Service svc = services[i];
 
                 if (!svc.getServiceType().getName().equals("CPU")) {
-                    svcMan.removeService(subject, svc);
+                    serviceManager.removeService(subject, svc);
                 }
             }
         }
 
         return s;
     }
+    
+    /**
+     * Get the scope of viewable servers for a given user
+     * @param whoami - the user
+     * @return List of ServerPK's for which subject has 
+     * AuthzConstants.serverOpViewServer
+     */
+    protected List<Integer> getViewableServers(AuthzSubject whoami) 
+        throws FinderException, PermissionException
+    {
+        if (log.isDebugEnabled()) {
+            log.debug("Checking viewable servers for subject: " +
+                      whoami.getName());
+        }
+      
+        Operation op =
+            getOperationByName(resourceManager.findResourceTypeByName(AuthzConstants.serverResType), 
+                               AuthzConstants.serverOpViewServer);
+        List<Integer> idList =  permissionManager.findOperationScopeBySubject(whoami, op.getId());
+
+        if (log.isDebugEnabled()) {
+            log.debug("There are: " + idList.size() + " viewable servers");
+        }
+        List<Integer> keyList = new ArrayList<Integer>(idList.size());
+        for(int i=0; i < idList.size(); i++) {
+            keyList.add(idList.get(i));
+        }
+        return keyList;
+    } 
 
     /**
      * Move a Server to the given Platform
@@ -313,22 +422,23 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @throws org.hyperic.hq.common.VetoException If the operation canot be
      * performed due to incompatible types.
      *
-     * @ejb:interface-method
+     * 
      */
     public void moveServer(AuthzSubject subject, Server target,
                            Platform destination)
         throws VetoException, PermissionException
     {
-        ResourceManager rMan = getResourceManager();
+        
 
         try {
             // Permission checking on destination
-            checkPermission(subject, getPlatformResourceType(),
+           
+            permissionManager.checkPermission(subject,  resourceManager.findResourceTypeByName(AuthzConstants.platformResType),
                             destination.getId(),
                             AuthzConstants.platformOpAddServer);
 
             // Permission check on target
-            checkPermission(subject, getServerResourceType(),
+            permissionManager.checkPermission(subject,  resourceManager.findResourceTypeByName(AuthzConstants.serverResType),
                             target.getId(), AuthzConstants.serverOpRemoveServer);
         } catch (FinderException e) {
             // TODO: FinderException needs to be expelled from this class.
@@ -346,7 +456,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         }
 
         // Unschedule measurements
-        MeasurementManagerImpl.getOne().disableMeasurements(subject,
+        measurementManager.disableMeasurements(subject,
                                                                target.getResource());
 
         // Reset Server parent id
@@ -357,7 +467,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         destination.getServersBag().add(target);
 
         // Move Authz resource.
-        rMan.moveResource(subject, target.getResource(), destination.getResource());
+        resourceManager.moveResource(subject, target.getResource(), destination.getResource());
 
         // Flush server move
         DAOFactory.getDAOFactory().getCurrentSession().flush();
@@ -365,16 +475,16 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         // Reschedule metrics
         ResourceUpdatedZevent zevent =
             new ResourceUpdatedZevent(subject, target.getEntityId());
-        ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+       zeventManager.enqueueEventAfterCommit(zevent);
 
         // Must also move all dependent services so that ancestor edges are
         // rebuilt and that service metrics are re-scheduled
-        ArrayList services = new ArrayList(); // copy list since the move will modify the server collection.
+        ArrayList<Service> services = new ArrayList<Service>(); // copy list since the move will modify the server collection.
         services.addAll(target.getServices());
 
-        for (Iterator i = services.iterator(); i.hasNext(); ) {
-            Service s = (Service)i.next();
-            getServiceManager().moveService(subject, s, target);
+        for (Service s : services ) {
+            
+            serviceManager.moveService(subject, s, target);
         }
     }
 
@@ -383,7 +493,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      *
      * @return ServerValue - the saved value object
      * @exception CreateException - if it fails to add the server
-     * @ejb:interface-method
+     * 
      */
     public Server createServer(AuthzSubject subject, Integer platformId,
                                Integer serverTypeId, ServerValue sValue)
@@ -393,8 +503,8 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         try {
             trimStrings(sValue);
 
-            Platform platform = getPlatformDAO().findById(platformId);
-            ServerType serverType = getServerTypeDAO().findById(serverTypeId);
+            Platform platform = platformDAO.findById(platformId);
+            ServerType serverType = serverTypeDAO.findById(serverTypeId);
 
             sValue.setServerType(serverType.getServerTypeValue());
             sValue.setOwner(subject.getName());
@@ -404,7 +514,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             validateNewServer(platform, sValue);
 
             // create it
-            Server server = getServerDAO().create(sValue, platform);
+            Server server = serverDAO.create(sValue, platform);
 
             // Add server to parent collection
             platform.getServersBag().add(server);
@@ -414,7 +524,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // Send resource create event
             ResourceCreatedZevent zevent =
                 new ResourceCreatedZevent(subject, server.getEntityId());
-            ZeventManager.getInstance().enqueueEventAfterCommit(zevent);
+            zeventManager.enqueueEventAfterCommit(zevent);
 
             return server;
         } catch (CreateException e) {
@@ -431,7 +541,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @throws FinderException
      * @throws CreateException
      * @throws PermissionException
-     * @ejb:interface-method
+     * 
      */
     public Server createVirtualServer(AuthzSubject subject, Platform platform,
                                       ServerType st)
@@ -454,10 +564,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         sv.setOwner(subject.getName());
         sv.setModifiedBy(subject.getName());
 
-        Server server = getServerDAO().create(sv, platform);
+        Server server = serverDAO.create(sv, platform);
 
         // Add server to parent collection
-        Collection servers = platform.getServersBag();
+        Collection<Server> servers = platform.getServersBag();
         if (!servers.contains(server)) {
             servers.add(server);
         }
@@ -469,7 +579,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * A removeServer method that takes a ServerLocal.  Used by
      * PlatformManager.removePlatform when cascading removal to servers.
-     * @ejb:interface-method
+     * 
      */
     public void removeServer(AuthzSubject subject, Server server)
         throws RemoveException, PermissionException, VetoException
@@ -480,22 +590,22 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         boolean pushed = false;
 
         try {
-            AuditManagerImpl.getOne().pushContainer(audit);
+            auditManager.pushContainer(audit);
             pushed = true;
             if (!server.getServerType().isVirtual()) {
-                checkRemovePermission(subject, server.getEntityId());
+                permissionManager.checkRemovePermission(subject, server.getEntityId());
             }
 
             // Service manager will update the collection, so we need to copy
-            final ServiceManagerLocal sMan = getServiceManager();
-            Collection services = server.getServices();
+           
+            Collection<Service> services = server.getServices();
             synchronized(services) {
-                for (final Iterator i = services.iterator(); i.hasNext(); ) {
+                for (final Iterator<Service> i = services.iterator(); i.hasNext(); ) {
                     try {
                         // this looks funky but the idea is to pull the service
                         // obj into the session so that it is updated when flushed
                         final Service service =
-                            sMan.findServiceById(((Service)i.next()).getId());
+                            serviceManager.findServiceById(i.next().getId());
                         final String currAiid =
                             service.getAutoinventoryIdentifier();
                         final Integer id = service.getId();
@@ -509,10 +619,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 }
             }
 
-            final ServerDAO dao = getServerDAO();
+            
             // this flush ensures that the service's server_id is set to null
             // before the server is deleted and the services cascaded
-            dao.getSession().flush();
+            serverDAO.getSession().flush();
 
             // Remove server from parent Platform Server collection.
             Platform platform = server.getPlatform();
@@ -523,65 +633,65 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // Keep config response ID so it can be deleted later.
             final ConfigResponseDB config = server.getConfigResponse();
 
-            dao.remove(server);
+            serverDAO.remove(server);
 
             // Remove the config response
             if (config != null) {
-                getConfigResponseDAO().remove(config);
+                configResponseDAO.remove(config);
             }
-
-            deleteCustomProperties(aeid);
+            cpropManager.deleteValues(aeid.getType(), aeid.getID());
+           
 
             // Remove authz resource
             removeAuthzResource(subject, aeid, r);
 
-            dao.getSession().flush();
+            serverDAO.getSession().flush();
         } finally {
             if (pushed) {
-                AuditManagerImpl.getOne().popContainer(true);
+                auditManager.popContainer(true);
             }
         }
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void handleResourceDelete(Resource resource) {
-        getServerDAO().clearResource(resource);
+        serverDAO.clearResource(resource);
     }
 
     /**
      * Find all server types
      * @return list of serverTypeValues
-     * @ejb:interface-method
+     * 
      */
-    public PageList getAllServerTypes(AuthzSubject subject, PageControl pc)
+    public PageList<ServerTypeValue> getAllServerTypes(AuthzSubject subject, PageControl pc)
         throws FinderException {
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
-        return valuePager.seek(getServerTypeDAO().findAllOrderByName(), pc);
+        return valuePager.seek(serverTypeDAO.findAllOrderByName(), pc);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public Server getServerByName(Platform host, String name) {
-        return getServerDAO().findByName(host, name);
+        return serverDAO.findByName(host, name);
     }
 
 
     /**
      * Find viewable server types
      * @return list of serverTypeValues
-     * @ejb:interface-method
+     * 
      */
-    public PageList getViewableServerTypes(AuthzSubject subject,
+    public PageList<ServerTypeValue> getViewableServerTypes(AuthzSubject subject,
                                            PageControl pc)
         throws FinderException, PermissionException {
         // build the server types from the visible list of servers
-        final List authzPks = getViewableServers(subject);
-        final Collection serverTypes =
-            getServerDAO().getServerTypes(authzPks, true);
+        final List<Integer> authzPks = getViewableServers(subject);
+        final Collection<ServerType> serverTypes =
+            serverDAO.getServerTypes(authzPks, true);
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
         return valuePager.seek(serverTypes, pc);
@@ -590,9 +700,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Find viewable server non-virtual types for a platform
      * @return list of serverTypeValues
-     * @ejb:interface-method
+     * 
      */
-    public PageList getServerTypesByPlatform(AuthzSubject subject,
+    public PageList<ServerTypeValue> getServerTypesByPlatform(AuthzSubject subject,
                                              Integer platId,
                                              PageControl pc)
         throws PermissionException, PlatformNotFoundException,
@@ -603,9 +713,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Find viewable server types for a platform
      * @return list of serverTypeValues
-     * @ejb:interface-method
+     * 
      */
-    public PageList getServerTypesByPlatform(AuthzSubject subject,
+    public PageList<ServerTypeValue> getServerTypesByPlatform(AuthzSubject subject,
                                              Integer platId,
                                              boolean excludeVirtual,
                                              PageControl pc)
@@ -613,13 +723,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                ServerNotFoundException {
 
         // build the server types from the visible list of servers
-        Collection servers = getServersByPlatformImpl(subject,
+        Collection<Server> servers = getServersByPlatformImpl(subject,
                                                       platId,
                                                       APPDEF_RES_TYPE_UNDEFINED,
                                                       excludeVirtual,
                                                       pc);
 
-        Collection serverTypes = filterResourceTypes(servers);
+        Collection<AppdefResourceType> serverTypes = filterResourceTypes(servers);
 
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
@@ -632,34 +742,34 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * This can go once we begin passing POJOs to the UI layer.
      *
      * @return A list of ServerTypeValue objects for thie PlatformType.
-     * @ejb:interface-method
+     * 
      */
-    public PageList getServerTypesByPlatformType(AuthzSubject subject,
+    public PageList<ServerTypeValue> getServerTypesByPlatformType(AuthzSubject subject,
                                                  Integer platformTypeId,
                                                  PageControl pc)
         throws PlatformNotFoundException
     {
         PlatformType platType =
-            getPlatformManager().findPlatformType(platformTypeId);
+            platformManager.findPlatformType(platformTypeId);
 
-        Collection serverTypes = platType.getServerTypes();
+        Collection<ServerType> serverTypes = platType.getServerTypes();
 
         return valuePager.seek(serverTypes, pc);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public Server findServerByAIID(AuthzSubject subject,
                                    Platform platform, String aiid)
         throws PermissionException {
-        checkViewPermission(subject, platform.getEntityId());
-        return getServerDAO().findServerByAIID(platform, aiid);
+        permissionManager.checkViewPermission(subject, platform.getEntityId());
+        return serverDAO.findServerByAIID(platform, aiid);
     }
 
     /**
      * Find a Server by Id.
-     * @ejb:interface-method
+     * 
      */
     public Server findServerById(Integer id) throws ServerNotFoundException {
         Server server = getServerById(id);
@@ -673,29 +783,29 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get a Server by Id.
-     * @ejb:interface-method
+     * 
      * @return The Server with the given id, or null if not found.
      */
     public Server getServerById(Integer id) {
-        return getServerDAO().get(id);
+        return serverDAO.get(id);
     }
 
     /**
      * Find a ServerType by id
-     * @ejb:interface-method
+     * 
      */
     public ServerType findServerType(Integer id) {
-        return getServerTypeDAO().findById(id);
+        return serverTypeDAO.findById(id);
     }
 
     /**
      * Find a server type by name
      * @param name - the name of the server
      * @return ServerTypeValue
-     * @ejb:interface-method
+     * 
      */
     public ServerType findServerTypeByName(String name) throws FinderException {
-        ServerType type = getServerTypeDAO().findByName(name);
+        ServerType type = serverTypeDAO.findByName(name);
         if (type == null) {
             throw new FinderException("name not found: " + name);
         }
@@ -703,34 +813,36 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
-    public List findServersByType(Platform p, ServerType st) {
-        return getServerDAO().findByPlatformAndType_orderName(p.getId(),
+    public List<Server> findServersByType(Platform p, ServerType st) {
+        return serverDAO.findByPlatformAndType_orderName(p.getId(),
                                                               st.getId());
     }
 
     /**
-     * @ejb.interface-method
+     * 
      */
-    public Collection findDeletedServers() {
-        return getServerDAO().findDeletedServers();
+    public Collection<Server> findDeletedServers() {
+        return serverDAO.findDeletedServers();
     }
 
     /**
      * Get server lite value by id.  Does not check permission.
-     * @ejb:interface-method
+     * 
      */
     public Server getServerById(AuthzSubject subject, Integer id)
         throws ServerNotFoundException, PermissionException {
         Server server = findServerById(id);
-        checkViewPermission(subject, server.getEntityId());
+        permissionManager.checkViewPermission(subject, server.getEntityId());
         return server;
     }
+    
+    /**
 
     /**
      * Get server IDs by server type.
-     * @ejb:interface-method
+     * 
      *
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
@@ -738,22 +850,22 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      */
     public Integer[] getServerIds(AuthzSubject subject, Integer servTypeId)
         throws PermissionException {
-        ServerDAO sLHome;
+        
         try {
-            sLHome = getServerDAO();
-            Collection servers = sLHome.findByType(servTypeId);
+          
+            Collection<Server> servers = serverDAO.findByType(servTypeId);
             if (servers.size() == 0) {
                 return new Integer[0];
             }
-            List serverIds = new ArrayList(servers.size());
+            List<Integer> serverIds = new ArrayList<Integer>(servers.size());
 
             // now get the list of PKs
-            Collection viewable = super.getViewableServers(subject);
+            Collection<Integer> viewable = getViewableServers(subject);
             // and iterate over the ejbList to remove any item not in the
             // viewable list
             int i = 0;
-            for (Iterator it = servers.iterator(); it.hasNext(); i++) {
-                Server aEJB = (Server) it.next();
+            for (Iterator<Server> it = servers.iterator(); it.hasNext(); i++) {
+                Server aEJB =  it.next();
                 if (viewable.contains(aEJB.getId())) {
                     // add the item, user can see it
                     serverIds.add(aEJB.getId());
@@ -769,30 +881,30 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get server by service.
-     * @ejb:interface-method
+     * 
      */
     public ServerValue getServerByService(AuthzSubject subject, Integer sID)
         throws ServerNotFoundException, ServiceNotFoundException,
                PermissionException
     {
-        Service svc = getServiceDAO().findById(sID);
+        Service svc = serviceDAO.findById(sID);
         Server s = svc.getServer();
-        checkViewPermission(subject, s.getEntityId());
+        permissionManager.checkViewPermission(subject, s.getEntityId());
         return s.getServerValue();
     }
 
     /**
      * Get server by service.  The virtual servers are not filtere out of
      * returned list.
-     * @ejb:interface-method
+     * 
      */
-    public PageList getServersByServices(AuthzSubject subject, List sIDs)
+    public PageList<ServerValue> getServersByServices(AuthzSubject subject, List<AppdefEntityID> sIDs)
         throws PermissionException, ServerNotFoundException
     {
-        Set servers = new HashSet();
-        for (Iterator i = sIDs.iterator(); i.hasNext(); ) {
-            AppdefEntityID svcId = (AppdefEntityID) i.next();
-            Service svc = getServiceDAO().findById(svcId.getId());
+        Set<Server> servers = new HashSet<Server>();
+        for ( AppdefEntityID svcId : sIDs) {
+           
+            Service svc = serviceDAO.findById(svcId.getId());
 
             servers.add(svc.getServer());
         }
@@ -803,15 +915,15 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get all servers.
-     * @ejb:interface-method
+     * 
      *
      * @param subject The subject trying to list servers.
      * @return A List of ServerValue objects representing all of the
      * servers that the given subject is allowed to view.
      */
-    public PageList getAllServers(AuthzSubject subject, PageControl pc)
+    public PageList<ServerValue> getAllServers(AuthzSubject subject, PageControl pc)
         throws FinderException, PermissionException {
-        Collection servers = getViewableServers(subject, pc);
+        Collection<Server> servers = getViewableServers(subject, pc);
 
         // valuePager converts local/remote interfaces to value objects
         // as it pages through them.
@@ -824,11 +936,11 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return List of ServerLocals for which subject has
      * AuthzConstants.serverOpViewServer
      */
-    private Collection getViewableServers(AuthzSubject subject,
+    private Collection<Server> getViewableServers(AuthzSubject subject,
                                           PageControl pc)
         throws PermissionException, FinderException {
-        Collection servers;
-        List authzPks = getViewableServers(subject);
+        Collection<Server> servers;
+        List<Integer> authzPks = getViewableServers(subject);
         int attr = -1;
         if (pc != null) {
             attr = pc.getSortattribute();
@@ -848,10 +960,10 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @param serverIds {@link Collection} of {@link Server.getId}
      * @return {@link Collection} of {@link Server}
      */
-    private Collection getServersFromIds(Collection serverIds, boolean asc) {
-        final List rtn = new ArrayList(serverIds.size());
-        for (Iterator it=serverIds.iterator(); it.hasNext(); ) {
-            final Integer id = (Integer)it.next();
+    private Collection<Server> getServersFromIds(Collection<Integer> serverIds, boolean asc) {
+        final List<Server> rtn = new ArrayList<Server>(serverIds.size());
+        for (Integer id: serverIds ) {
+           
             try {
                 final Server server = findServerById(id);
                 final Resource r = server.getResource();
@@ -868,21 +980,21 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
-    public Collection getViewableServers(AuthzSubject subject,
+    public Collection<Server> getViewableServers(AuthzSubject subject,
                                          Platform platform) {
         return filterViewableServers(platform.getServers(), subject);
     }
 
-    private Collection getServersByPlatformImpl( AuthzSubject subject,
+    private Collection<Server> getServersByPlatformImpl( AuthzSubject subject,
                                                  Integer platId,
                                                  Integer servTypeId,
                                                  boolean excludeVirtual,
                                                  PageControl pc)
         throws PermissionException, ServerNotFoundException,
                PlatformNotFoundException {
-        List authzPks;
+        List<Integer> authzPks;
         try {
             authzPks = getViewableServers(subject);
         } catch(FinderException exc){
@@ -890,28 +1002,28 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 "No (viewable) servers associated with platform " + platId);
         }
 
-        List servers;
+        List<Server> servers;
         // first, if they specified a server type, then filter on it
         if(!servTypeId.equals(APPDEF_RES_TYPE_UNDEFINED)) {
             if(!excludeVirtual) {
-                servers = getServerDAO()
+                servers = serverDAO
                     .findByPlatformAndType_orderName(platId, servTypeId);
             } else {
-                servers = getServerDAO()
+                servers = serverDAO
                     .findByPlatformAndType_orderName(platId, servTypeId,
                                                      Boolean.FALSE);
             }
         }
         else {
             if(!excludeVirtual) {
-                servers = getServerDAO().findByPlatform_orderName(platId);
+                servers = serverDAO.findByPlatform_orderName(platId);
             } else {
-                servers = getServerDAO()
+                servers = serverDAO
                     .findByPlatform_orderName(platId, Boolean.FALSE);
             }
         }
-        for(Iterator i = servers.iterator(); i.hasNext();) {
-            Server aServer = (Server) i.next();
+        for(Iterator<Server> i = servers.iterator(); i.hasNext();) {
+            Server aServer = i.next();
 
             // Keep the virtual ones, we need them so that child services can be
             // added.  Otherwise, no one except the super user will have access
@@ -935,7 +1047,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get servers by platform.
-     * @ejb:interface-method
+     * 
      *
      * @param subject The subject trying to list servers.
      * @param platId platform id.
@@ -945,7 +1057,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
-    public PageList getServersByPlatform ( AuthzSubject subject,
+    public PageList<ServerValue> getServersByPlatform ( AuthzSubject subject,
                                            Integer platId,
                                            boolean excludeVirtual,
                                            PageControl pc)
@@ -959,7 +1071,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Get servers by server type and platform.
      *
-     * @ejb:interface-method
+     * 
      *
      * @param subject
      *            The subject trying to list servers.
@@ -972,7 +1084,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A PageList of ServerValue objects representing servers on the
      *         specified platform that the subject is allowed to view.
      */
-    public PageList getServersByPlatform ( AuthzSubject subject,
+    public PageList<ServerValue> getServersByPlatform ( AuthzSubject subject,
                                            Integer platId,
                                            Integer servTypeId,
                                            boolean excludeVirtual,
@@ -980,7 +1092,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         throws ServerNotFoundException, PlatformNotFoundException,
                PermissionException
     {
-        Collection servers = getServersByPlatformImpl(subject, platId,
+        Collection<Server> servers = getServersByPlatformImpl(subject, platId,
                                                       servTypeId,
                                                       excludeVirtual, pc);
 
@@ -991,14 +1103,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get servers by server type and platform.
-     * @ejb:interface-method
+     * 
      *
      * @param subject The subject trying to list servers.
      * @param platId platform id.
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
-    public PageList getServersByPlatformServiceType( AuthzSubject subject,
+    public PageList<ServerValue> getServersByPlatformServiceType( AuthzSubject subject,
                                                      Integer platId,
                                                      Integer svcTypeId)
         throws ServerNotFoundException, PlatformNotFoundException,
@@ -1006,13 +1118,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         PageControl pc = PageControl.PAGE_ALL;
         Integer servTypeId;
         try {
-            ServiceType typeV = getServiceTypeDAO().findById(svcTypeId);
+            ServiceType typeV = serviceTypeDAO.findById(svcTypeId);
             servTypeId = typeV.getServerType().getId();
         } catch (ObjectNotFoundException e) {
             throw new ServerNotFoundException("Service Type not found", e);
         }
 
-        Collection servers =
+        Collection<Server> servers =
             getServersByPlatformImpl(subject, platId, servTypeId, false, pc);
 
         // valuePager converts local/remote interfaces to value objects
@@ -1022,26 +1134,26 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get servers by server type and platform.
-     * @ejb:interface-method
+     * 
      * @param subject The subject trying to list servers.
      * @param typeId server type id.
      *
      * @return A PageList of ServerValue objects representing servers on the
      * specified platform that the subject is allowed to view.
      */
-    public List getServersByType( AuthzSubject subject, String name)
+    public List<ServerValue> getServersByType( AuthzSubject subject, String name)
         throws PermissionException, InvalidAppdefTypeException {
         try {
-            ServerType ejb = getServerTypeDAO().findByName(name);
+            ServerType ejb = serverTypeDAO.findByName(name);
             if (ejb == null) {
-                return new PageList();
+                return new PageList<ServerValue>();
             }
 
-            Collection servers = getServerDAO().findByType(ejb.getId());
+            Collection<Server> servers = serverDAO.findByType(ejb.getId());
 
-            List authzPks = getViewableServers(subject);
-            for(Iterator i = servers.iterator(); i.hasNext();) {
-                Integer sPK = ((Server) i.next()).getId();
+            List<Integer> authzPks = getViewableServers(subject);
+            for(Iterator<Server> i = servers.iterator(); i.hasNext();) {
+                Integer sPK =  i.next().getId();
                 // remove server if its not viewable
                 if(!authzPks.contains(sPK))
                     i.remove();
@@ -1051,13 +1163,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             // as it pages through them.
             return valuePager.seek(servers, PageControl.PAGE_ALL);
         } catch (FinderException e) {
-            return new ArrayList(0);
+            return new ArrayList<ServerValue>(0);
         }
     }
 
     /**
      * Get non-virtual server IDs by server type and platform.
-     * @ejb:interface-method
+     * 
      *
      * @param subject The subject trying to list servers.
      * @param platId platform id.
@@ -1075,7 +1187,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get non-virtual server IDs by server type and platform.
-     * @ejb:interface-method
+     * 
      *
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
@@ -1093,7 +1205,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get server IDs by server type and platform.
-     * @ejb:interface-method
+     * 
      *
      * @param subject The subject trying to list servers.
      * @param servTypeId server type id.
@@ -1108,14 +1220,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         throws ServerNotFoundException, PlatformNotFoundException,
                PermissionException
     {
-        Collection servers = getServersByPlatformImpl(subject, platId,
+        Collection<Server> servers = getServersByPlatformImpl(subject, platId,
                                                       servTypeId,
                                                       excludeVirtual, null);
 
         Integer[] ids = new Integer[servers.size()];
-        Iterator it = servers.iterator();
+        Iterator<Server> it = servers.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            Server server = (Server) it.next();
+            Server server = it.next();
             ids[i] = server.getId();
         }
 
@@ -1130,21 +1242,17 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A List of ServerValue objects representing servers that support
      * the given application that the subject is allowed to view.
      */
-    private Collection getServersByApplicationImpl(AuthzSubject subject,
+    private Collection<Server> getServersByApplicationImpl(AuthzSubject subject,
                                                    Integer appId,
                                                    Integer servTypeId)
         throws ServerNotFoundException, ApplicationNotFoundException,
                PermissionException {
-        Iterator it;
-        List authzPks;
+        
+        List<Integer> authzPks;
         Application appLocal;
-        Collection appServiceCollection;
-        HashMap serverCollection;
-
-        ApplicationDAO appLocalHome = getApplicationDAO();
-
+   
         try {
-            appLocal = appLocalHome.findById(appId);
+            appLocal = applicationDAO.findById(appId);
         } catch(ObjectNotFoundException exc){
             throw new ApplicationNotFoundException(appId, exc);
         }
@@ -1157,36 +1265,38 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                               "application " + appId, e);
         }
 
-        serverCollection = new HashMap();
+        HashMap<Integer,Server> serverCollection = new HashMap<Integer,Server>();
 
         // XXX - a better solution is to control the viewable set returned by
         //       ejbql finders. This will be forthcoming.
 
-        appServiceCollection = appLocal.getAppServices();
-        it = appServiceCollection.iterator();
+        Collection<AppService>  appServiceCollection = appLocal.getAppServices();
+        Iterator<AppService> it = appServiceCollection.iterator();
 
         while (it.hasNext()) {
 
-            AppService appService = (AppService) it.next();
+            AppService appService =  it.next();
 
             if ( appService.isIsGroup() ) {
-                Collection services =
+                Collection<Service> services =
                     getServiceCluster(appService.getResourceGroup())
                         .getServices();
 
-                Iterator serviceIterator = services.iterator();
+                Iterator<Service> serviceIterator = services.iterator();
                 while ( serviceIterator.hasNext() ) {
-                    Service service = (Service)serviceIterator.next();
+                    Service service = serviceIterator.next();
                     Server server = service.getServer();
 
                     // Don't bother with entire cluster if type is platform svc
-                    if (server.getServerType().isVirtual())
+                    if (server.getServerType().isVirtual()) {
                         break;
+                    }
 
                     Integer serverId = server.getId();
 
-                    if (serverCollection.containsKey(serverId))
+                    if (serverCollection.containsKey(serverId)) {
                         continue;
+                    }
 
                     serverCollection.put(serverId, server);
                 }
@@ -1203,9 +1313,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
         }
 
-        for(Iterator i = serverCollection.entrySet().iterator(); i.hasNext();) {
-            Map.Entry entry = (Map.Entry) i.next();
-            Server aServer = (Server) entry.getValue();
+        for(Iterator<Map.Entry<Integer, Server>> i = serverCollection.entrySet().iterator(); i.hasNext();) {
+            Map.Entry<Integer,Server> entry = i.next();
+            Server aServer = entry.getValue();
 
             // first, if they specified a server type, then filter on it
             if(servTypeId != APPDEF_RES_TYPE_UNDEFINED &&
@@ -1223,7 +1333,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get servers by application.
-     * @ejb:interface-method
+     * 
      *
      * @param subject The subject trying to list servers.
      * @param appId Application id.
@@ -1231,7 +1341,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A List of ServerValue objects representing servers that support
      * the given application that the subject is allowed to view.
      */
-    public PageList getServersByApplication(AuthzSubject subject,
+    public PageList<ServerValue> getServersByApplication(AuthzSubject subject,
                                             Integer appId, PageControl pc)
         throws ServerNotFoundException, ApplicationNotFoundException,
                PermissionException {
@@ -1241,7 +1351,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get servers by application and serverType.
-     * @ejb:interface-method
+     * 
      *
      * @param subject The subject trying to list servers.
      * @param appId Application id.
@@ -1249,11 +1359,11 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * @return A List of ServerValue objects representing servers that support
      * the given application that the subject is allowed to view.
      */
-    public PageList getServersByApplication(AuthzSubject subject, Integer appId,
+    public PageList<ServerValue> getServersByApplication(AuthzSubject subject, Integer appId,
                                             Integer servTypeId, PageControl pc)
         throws ServerNotFoundException, ApplicationNotFoundException,
                PermissionException {
-        Collection serverCollection =
+        Collection<Server> serverCollection =
             getServersByApplicationImpl(subject, appId, servTypeId);
 
         // valuePager converts local/remote interfaces to value objects
@@ -1263,7 +1373,7 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get server IDs by application and serverType.
-     * @ejb:interface-method
+     * 
      *
      * @param subject The subject trying to list servers.
      * @param appId Application id.
@@ -1275,13 +1385,13 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                                                Integer servTypeId)
         throws ServerNotFoundException, ApplicationNotFoundException,
                PermissionException {
-        Collection servers =
+        Collection<Server> servers =
             getServersByApplicationImpl(subject, appId, servTypeId);
 
         Integer[] ids = new Integer[servers.size()];
-        Iterator it = servers.iterator();
+        Iterator<Server> it = servers.iterator();
         for (int i = 0; it.hasNext(); i++) {
-            Server server = (Server) it.next();
+            Server server =  it.next();
             ids[i] = server.getId();
         }
 
@@ -1291,15 +1401,15 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
     /**
      * Update a server
      * @param existing
-     * @ejb:interface-method
+     * 
      */
     public Server updateServer(AuthzSubject subject, ServerValue existing)
         throws PermissionException, UpdateException,
                AppdefDuplicateNameException, ServerNotFoundException {
         try {
             Server server =
-                getServerDAO().findById(existing.getId());
-            checkModifyPermission(subject, server.getEntityId());
+                serverDAO.findById(existing.getId());
+            permissionManager.checkModifyPermission(subject, server.getEntityId());
             existing.setModifiedBy(subject.getName());
             existing.setMTime(new Long(System.currentTimeMillis()));
             trimStrings(existing);
@@ -1322,22 +1432,22 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Update server types
-     * @ejb:interface-method
+     * 
      */
     public void updateServerTypes(String plugin, ServerTypeInfo[] infos)
         throws CreateException, FinderException, RemoveException, VetoException
     {
         // First, put all of the infos into a Hash
-        HashMap infoMap = new HashMap();
+        HashMap<String, ServerTypeInfo> infoMap = new HashMap<String, ServerTypeInfo>();
         for (int i = 0; i < infos.length; i++) {
             String name = infos[i].getName();
             ServerTypeInfo sinfo =
-                (ServerTypeInfo)infoMap.get(name);
+                infoMap.get(name);
 
             if (sinfo == null) {
                 //first time we've seen this type
                 //clone it incase we have to update the platforms
-                infoMap.put(name, infos[i].clone());
+                infoMap.put(name, (ServerTypeInfo)infos[i].clone());
             }
             else {
                 //already seen this type; just update the platforms.
@@ -1351,41 +1461,41 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             }
         }
 
-        ServerTypeDAO stDao = getServerTypeDAO();
-        Collection curServers = stDao.findByPlugin(plugin);
+        
+        Collection<ServerType> curServers = serverTypeDAO.findByPlugin(plugin);
 
         AuthzSubject overlord =
-            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
-        ResourceGroupManager resGroupMan =
-            ResourceGroupManagerImpl.getOne();
-        ResourceManager resMan = ResourceManagerImpl.getOne();
+           authzSubjectManager.getOverlordPojo();
+     
+       
 
-        for (Iterator i = curServers.iterator(); i.hasNext();) {
-            ServerType serverType = (ServerType) i.next();
+        for (ServerType serverType : curServers) {
+          
             String serverName = serverType.getName();
             ServerTypeInfo sinfo =
                 (ServerTypeInfo) infoMap.remove(serverName);
 
             if (sinfo == null) {
-                deleteServerType(serverType, overlord, resGroupMan, resMan);
+                deleteServerType(serverType, overlord, resourceGroupManager, resourceManager);
             } else {
                 String curDesc = serverType.getDescription();
-                Collection curPlats = serverType.getPlatformTypes();
+                Collection<PlatformType> curPlats = serverType.getPlatformTypes();
                 String newDesc = sinfo.getDescription();
                 String[] newPlats = sinfo.getValidPlatformTypes();
                 boolean  updatePlats;
 
                 log.debug("Updating ServerType: " + serverName);
 
-                if (!newDesc.equals(curDesc))
+                if (!newDesc.equals(curDesc)) {
                     serverType.setDescription(newDesc);
+                }
 
                 // See if we need to update the supported platforms
                 updatePlats = newPlats.length != curPlats.size();
                 if(updatePlats == false){
                     // Ensure that the lists are the same
-                    for(Iterator k = curPlats.iterator(); k.hasNext(); ){
-                        PlatformType pLocal = (PlatformType)k.next();
+                    for(PlatformType pLocal : curPlats ){
+                       
                         int j;
 
                         for(j=0; j<newPlats.length; j++){
@@ -1406,11 +1516,11 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
         }
 
         Resource prototype =
-            ResourceManagerImpl.getOne().findRootResource();
+           resourceManager.findRootResource();
 
         // Now create the left-overs
-        for (Iterator i = infoMap.values().iterator(); i.hasNext(); ) {
-            ServerTypeInfo sinfo = (ServerTypeInfo) i.next();
+        for (ServerTypeInfo sinfo : infoMap.values()) {
+           
             ServerType stype = new ServerType();
 
             log.debug("Creating new ServerType: " + sinfo.getName());
@@ -1421,26 +1531,145 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
             String newPlats[] = sinfo.getValidPlatformTypes();
             findAndSetPlatformType(newPlats, stype);
 
-            stype = stDao.create(stype);
-            createAuthzResource(overlord, getServerPrototypeResourceType(),
-                                prototype, stype.getId(), stype.getName(),
+            stype = serverTypeDAO.create(stype);
+            resourceManager.createResource(overlord,  resourceManager.findResourceTypeByName(AuthzConstants.serverPrototypeTypeName),
+                                prototype, stype.getId(), stype.getName(),false,
                                 null);  // No parent
         }
     }
+    
+    /**
+     * Find an operation by name inside a ResourcetypeValue object
+     */
+    protected Operation getOperationByName(ResourceType rtV,
+                                                String opName)
+        throws PermissionException
+    {
+        Collection<Operation> ops = rtV.getOperations();
+        for(Operation op : ops ) {
+           
+            if(op.getName().equals(opName)) {
+                return op;
+            }
+        }
+        throw new PermissionException("Operation: " + opName +
+                                      " not valid for ResourceType: " +
+                                      rtV.getName());
+    }
+    
+    /**
+     * Map a ResourceGroup to ServiceCluster, just temporary,
+     * should be able to remove when done with the
+     * ServiceCluster to ResourceGroup Migration
+     */
+    protected ServiceCluster getServiceCluster(ResourceGroup group) {
+        if (group == null) {
+            return null;
+        }
+        ServiceCluster sc = new ServiceCluster();
+        sc.setName(group.getName());
+        sc.setDescription(group.getDescription());
+        sc.setGroup(group);
+        
+        Collection<Resource> resources = 
+           resourceGroupManager.getMembers(group);
+    
+        Set<Service> services = new HashSet<Service>(resources.size());
+       
+        ServiceType st = null;
+        for (Resource resource : resources) {
+          
+            // this should not be the case
+            if (!resource.getResourceType().getId()
+                    .equals(AuthzConstants.authzService)) {
+                continue;
+            }
+            Service service = serviceDAO.findById(resource.getInstanceId());
+            if (st == null) {
+                st = service.getServiceType();
+            }
+            services.add(service);
+            service.setResourceGroup(sc.getGroup());
+        }
+        sc.setServices(services);
+        
+        if (st == null && group.getResourcePrototype() != null) {
+            st = serviceTypeDAO
+                .findById(group.getResourcePrototype().getInstanceId());
+        }
+        
+        if (st != null) {
+            sc.setServiceType(st);
+        }
+        return sc;
+    }
+    
+    /**
+     * builds a list of resource types from the list of resources
+     * @param resources - {@link Collection} of {@link AppdefResource}
+     * @param {@link Collection} of {@link AppdefResourceType}
+     */
+    protected Collection<AppdefResourceType> filterResourceTypes(Collection<? extends AppdefResource> resources) {
+        final Set<AppdefResourceType> resTypes = new HashSet<AppdefResourceType>();
+        for (AppdefResource o : resources) {
+          
+            if (o == null) {
+                continue;
+            }
+            final AppdefResourceType rt = o.getAppdefResourceType();
+            if (rt != null) {
+                resTypes.add(rt);
+            }
+        }
+        final List<AppdefResourceType> rtn = new ArrayList<AppdefResourceType>(resTypes);
+        Collections.sort(rtn, new Comparator<AppdefResourceType>() {
+            private String getName(Object obj) {
+                if (obj instanceof AppdefResourceType) {
+                    return ((AppdefResourceType) obj).getSortName();
+                }
+                return "";
+            }
+            public int compare(AppdefResourceType o1, AppdefResourceType o2) {
+                  return getName(o1).compareTo(getName(o2));
+            }
+        });
+        return rtn;
+    }
+    
+    /**
+     * remove the authz resource entry
+     */
+    protected void removeAuthzResource(AuthzSubject subject,
+                                       AppdefEntityID aeid, Resource r)
+        throws RemoveException, PermissionException, VetoException 
+    {
+        if (log.isDebugEnabled())
+            log.debug("Removing authz resource: " + aeid);
+        
+       
+        AuthzSubject s = 
+            authzSubjectManager.findSubjectById(subject.getId()); 
+        resourceManager.removeResource(s, r);
+        
+        // Send resource delete event
+        ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, aeid);
+        zeventManager.enqueueEventAfterCommit(zevent);
+    }
+
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void deleteServerType(ServerType serverType, AuthzSubject overlord,
                                  ResourceGroupManager resGroupMan,
                                  ResourceManager resMan)
         throws VetoException, RemoveException {
         // Need to remove all service types
-        ServiceManagerLocal svcMan = ServiceManagerEJBImpl.getOne();
+       
         ServiceType[] types = (ServiceType[])
             serverType.getServiceTypes().toArray(new ServiceType[0]);
         for (int i = 0; i < types.length; i++) {
-            svcMan.deleteServiceType(types[i], overlord, resGroupMan, resMan);
+            serviceManager.deleteServiceType(types[i], overlord, resGroupMan, resMan);
         }
 
         log.debug("Removing ServerType: " + serverType.getName());
@@ -1462,14 +1691,14 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 "Overlord should not run into PermissionException";
         }
 
-        ServerTypeDAO dao = getServerTypeDAO();
-        dao.remove(serverType);
+        
+        serverTypeDAO.remove(serverType);
 
         resMan.removeResource(overlord, proto);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void setAutodiscoveryZombie(Server server, boolean zombie) {
         server.setAutodiscoveryZombie(zombie);
@@ -1481,11 +1710,9 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      */
     private void findAndSetPlatformType(String[] platNames, ServerType stype)
         throws FinderException {
-        PlatformTypeDAO platHome =
-            getPlatformTypeDAO();
-
+       
         for (int i = 0; i < platNames.length; i++) {
-            PlatformType pType = platHome.findByName(platNames[i]);
+            PlatformType pType = platformTypeDAO.findByName(platNames[i]);
             if (pType == null) {
                 throw new FinderException("Could not find platform type '" +
                                           platNames[i] + "'");
@@ -1507,24 +1734,24 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
                 " for subject: " + subject);
         }
         AppdefEntityID platId = server.getPlatform().getEntityId();
-        checkPermission(subject, getPlatformResourceType(), platId.getId(),
+        permissionManager.checkPermission(subject, resourceManager.findResourceTypeByName(AuthzConstants.platformResType), platId.getId(),
                         AuthzConstants.platformOpAddServer);
 
-        ResourceType serverProto = getServerPrototypeResourceType();
+        ResourceType serverProto =  resourceManager.findResourceTypeByName(AuthzConstants.serverPrototypeTypeName);
         ServerType serverType = server.getServerType();
-        Resource proto = ResourceManagerImpl.getOne()
+        Resource proto = resourceManager
             .findResourceByInstanceId(serverProto, serverType.getId());
-        Resource parent = getResourceManager().findResource(platId);
+        Resource parent = resourceManager.findResource(platId);
 
         if (parent == null) {
             throw new SystemException("Unable to find parent platform [id=" +
                                       platId + "]");
         }
-        Resource resource = createAuthzResource(subject,
-                                                getServerResourceType(), proto,
-                                                server.getId(),
-                                                server.getName(),
-                                                serverType.isVirtual(), parent);
+        Resource resource = resourceManager.createResource(subject,
+            resourceManager.findResourceTypeByName(AuthzConstants.serverResType), proto,
+            server.getId(),
+            server.getName(),
+            serverType.isVirtual(), parent);
         server.setResource(resource);
     }
 
@@ -1549,44 +1776,29 @@ public class ServerManagerEJBImpl extends AppdefSessionEJB
      * the server type, the second element is the # of servers of that
      * type in the inventory.
      *
-     * @ejb:interface-method
+     * 
      */
-    public List getServerTypeCounts() {
-        return getServerDAO().getServerTypeCounts();
+    public List<Object[]> getServerTypeCounts() {
+        return serverDAO.getServerTypeCounts();
     }
 
     /**
      * Get the # of servers within HQ inventory.  This method ingores virtual
      * server types.
-     * @ejb:interface-method
+     * 
      */
     public Number getServerCount() {
-        return getServerDAO().getServerCount();
+        return serverDAO.getServerCount();
     }
 
-    public static ServerManagerLocal getOne() {
-        try {
-            return ServerManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static ServerManager getOne() {
+        return Bootstrap.getBean(ServerManager.class);
     }
 
-    /**
-     * Create a server manager session bean.
-     * @exception CreateException If an error occurs creating the pager
-     * for the bean.
-     */
-    public void ejbCreate() throws CreateException {
-        try {
+   @PostConstruct
+    public void afterPropertiesSet() throws Exception {
+        
             valuePager = Pager.getPager(VALUE_PROCESSOR);
-        } catch ( Exception e ) {
-            throw new CreateException("Could not create value pager:" + e);
-        }
+       
     }
-
-
-    public void ejbRemove() { }
-    public void ejbActivate() { }
-    public void ejbPassivate() { }
 }

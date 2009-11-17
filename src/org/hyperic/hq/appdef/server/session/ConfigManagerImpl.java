@@ -42,7 +42,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -69,7 +69,7 @@ public class ConfigManagerImpl implements ConfigManager {
     protected final Log log = LogFactory.getLog(ConfigManagerImpl.class.getName());
     private ConfigResponseDAO configResponseDAO;
     private PlatformManagerLocal platformManager;
-    private ServerManagerLocal serverManager;
+    private ServerManager serverManager;
     private ServiceManagerLocal serviceManager;
     private ZeventEnqueuer zeventManager;
     private ServiceDAO serviceDAO;
@@ -78,7 +78,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
     @Autowired
     public ConfigManagerImpl(ConfigResponseDAO configResponseDAO, PlatformManagerLocal platformManager,
-                             ServerManagerLocal serverManager, ServiceManagerLocal serviceManager,
+                             ServerManager serverManager, ServiceManagerLocal serviceManager,
                              ZeventEnqueuer zeventManager, ServiceDAO serviceDAO, ServerDAO serverDAO,
                              PlatformDAO platformDAO) {
         this.configResponseDAO = configResponseDAO;

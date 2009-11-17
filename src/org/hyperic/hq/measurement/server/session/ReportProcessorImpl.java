@@ -35,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
@@ -73,13 +73,13 @@ public class ReportProcessorImpl
     private MeasurementManager measurementManager;
     private MeasurementProcessor measurementProcessor;
     private PlatformManagerLocal platformManager;
-    private ServerManagerLocal serverManager;
+    private ServerManager serverManager;
     private ServiceManagerLocal serviceManager;
 
     @Autowired
     public ReportProcessorImpl(MeasurementManager measurementManager,
                                MeasurementProcessor measurementProcessor, PlatformManagerLocal platformManager,
-                               ServerManagerLocal serverManager, ServiceManagerLocal serviceManager) {
+                               ServerManager serverManager, ServiceManagerLocal serviceManager) {
         this.measurementManager = measurementManager;
         this.measurementProcessor = measurementProcessor;
         this.platformManager = platformManager;

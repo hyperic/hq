@@ -36,7 +36,7 @@ import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.server.session.CPropManagerImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerImpl;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AgentManager;
@@ -45,7 +45,7 @@ import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.auth.server.session.AuthManagerImpl;
 import org.hyperic.hq.auth.shared.AuthManager;
@@ -179,8 +179,8 @@ public abstract class BizappSessionEJB {
         return AutoinventoryManagerImpl.getOne();
     }
 
-    public ServerManagerLocal getServerManager() {
-        return ServerManagerEJBImpl.getOne();
+    public ServerManager getServerManager() {
+        return ServerManagerImpl.getOne();
     }
 
     public ServiceManagerLocal getServiceManager() {

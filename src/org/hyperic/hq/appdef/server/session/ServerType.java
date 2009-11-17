@@ -76,7 +76,7 @@ public class ServerType extends AppdefResourceType
         _virtual = virtual;
     }
 
-    public Collection getPlatformTypes() {
+    public Collection<PlatformType> getPlatformTypes() {
         return _platformTypes;
     }
 
@@ -89,7 +89,7 @@ public class ServerType extends AppdefResourceType
         ptype.getServerTypesBag().add(this);
     }
 
-    public Collection getServers() {
+    public Collection<Server> getServers() {
         return _servers;
     }
 
@@ -97,7 +97,7 @@ public class ServerType extends AppdefResourceType
         _servers = servers;
     }
 
-    public Collection getServiceTypes() {
+    public Collection<ServiceType> getServiceTypes() {
         return _serviceTypes;
     }
 

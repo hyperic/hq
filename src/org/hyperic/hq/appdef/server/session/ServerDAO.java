@@ -49,7 +49,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class ServerDAO extends HibernateDAO
+public class ServerDAO extends HibernateDAO<Server>
 {
     @Autowired
     public ServerDAO(SessionFactory f) {
@@ -142,7 +142,7 @@ public class ServerDAO extends HibernateDAO
      * @param serverIds - {@link List} of {@link Integer}
      * @return {@link Collection} of {@link ServerType}
      */
-    Collection getServerTypes(final List serverIds, final boolean asc) {
+    Collection<ServerType> getServerTypes(final List serverIds, final boolean asc) {
         final String hql = new StringBuilder()
             .append("SELECT distinct s.serverType")
             .append(" FROM Server s")
@@ -169,7 +169,7 @@ public class ServerDAO extends HibernateDAO
         return rtn;
     }
 
-    public Collection findByType(Integer sTypeId)
+    public Collection<Server> findByType(Integer sTypeId)
     {
         String sql="from Server where serverType.id=?";
         return getSession().createQuery(sql)
@@ -177,7 +177,7 @@ public class ServerDAO extends HibernateDAO
             .list();
     }
 
-    public List findByPlatform_orderName(Integer id)
+    public List<Server> findByPlatform_orderName(Integer id)
     {
         String sql="from Server where platform.id=? " +
                    "order by resource.sortName";
@@ -186,7 +186,7 @@ public class ServerDAO extends HibernateDAO
             .list();
     }
 
-    public List findByPlatform_orderName(Integer id, Boolean virtual)
+    public List<Server> findByPlatform_orderName(Integer id, Boolean virtual)
     {
         String sql="from Server where platform.id=? and " +
                    "serverType.virtual=? " +
@@ -199,7 +199,7 @@ public class ServerDAO extends HibernateDAO
             .list();
     }
 
-    public List findByPlatformAndType_orderName(Integer id, Integer tid)
+    public List<Server> findByPlatformAndType_orderName(Integer id, Integer tid)
     {
         String sql="from Server where platform.id=? and " +
                    "serverType.id=? " +
@@ -210,7 +210,7 @@ public class ServerDAO extends HibernateDAO
             .list();
     }
 
-    public List findByPlatformAndType_orderName(Integer id, Integer tid,
+    public List<Server> findByPlatformAndType_orderName(Integer id, Integer tid,
                                                 Boolean isVirtual)
     {
         String sql="select s from Server s join s.serverType st " +
@@ -283,7 +283,7 @@ public class ServerDAO extends HibernateDAO
         return servers;
     }
 
-    public List getServerTypeCounts() {
+    public List<Object[]> getServerTypeCounts() {
         String sql = "select t.name, count(*) from ServerType t, " +
                      "Server s where s.serverType = t " +
                      "group by t.name order by t.name";
@@ -304,7 +304,7 @@ public class ServerDAO extends HibernateDAO
             .executeUpdate();
     }
 
-    public Collection findDeletedServers() {
+    public Collection<Server> findDeletedServers() {
         String hql = "from Server where resource.resourceType = null";
         return createQuery(hql).list();
     }

@@ -59,7 +59,7 @@ public class AppdefStartupListener
                     // Go ahead and let every appdef type handle a resource
                     // delete
                     PlatformManagerEJBImpl.getOne().handleResourceDelete(r);
-                    ServerManagerEJBImpl.getOne().handleResourceDelete(r);
+                    ServerManagerImpl.getOne().handleResourceDelete(r);
                     ServiceManagerEJBImpl.getOne().handleResourceDelete(r);
                     ApplicationManagerImpl.getOne().handleResourceDelete(r);
                 }

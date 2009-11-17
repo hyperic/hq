@@ -31,7 +31,7 @@ import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AIIp;
@@ -56,7 +56,7 @@ public interface AIQResourceVisitor {
     public void visitServer(AIServer aiserver,
                             AuthzSubject subject,
                             PlatformManagerLocal pmLocal,
-                            ServerManagerLocal smLocal,
+                            ServerManager smLocal,
                             ConfigManager configMgr,
                             CPropManager cpropMgr,
                             List createdResources)

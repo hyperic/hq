@@ -93,7 +93,7 @@ public class PlatformType extends AppdefResourceType {
         _plugin = plugin;
     }
 
-    public Collection getServerTypes() {
+    public Collection<ServerType> getServerTypes() {
         return Collections.unmodifiableCollection(_serverTypes);
     }
     

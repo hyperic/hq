@@ -51,7 +51,7 @@ import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
@@ -87,7 +87,7 @@ public class CPropManagerImpl implements CPropManager {
 	private CpropKeyDAO cPropKeyDAO;
 	private PlatformManagerLocal platformManager;
 	private ApplicationManager applicationManager;
-	private ServerManagerLocal serverManager;
+	private ServerManager serverManager;
 	private ServiceManagerLocal serviceManager;
 	private PlatformTypeDAO platformTypeDAO;
 	private ServerTypeDAO serverTypeDAO;
@@ -97,7 +97,7 @@ public class CPropManagerImpl implements CPropManager {
 	public CPropManagerImpl(Messenger sender, CpropDAO cPropDAO,
 			CpropKeyDAO cPropKeyDAO, PlatformManagerLocal platformManager,
 			ApplicationManager applicationManager,
-			ServerManagerLocal serverManager,
+			ServerManager serverManager,
 			ServiceManagerLocal serviceManager,
 			PlatformTypeDAO platformTypeDAO, ServerTypeDAO serverTypeDAO,
 			ServiceTypeDAO serviceTypeDAO) {

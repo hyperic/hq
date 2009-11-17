@@ -18,7 +18,7 @@ import org.hyperic.hq.appdef.server.session.Server
 import org.hyperic.hq.appdef.server.session.Service
 import org.hyperic.hq.appdef.shared.ServerValue
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
+import org.hyperic.hq.appdef.server.session.ServerManagerImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
 import org.hyperic.hq.common.VetoException

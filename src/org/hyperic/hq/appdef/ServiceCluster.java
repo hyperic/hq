@@ -106,7 +106,7 @@ public class ServiceCluster extends AppdefBean
         _services.clear();
     }
     
-    public Collection getServices() {
+    public Collection<Service> getServices() {
         return _services;
     }
 

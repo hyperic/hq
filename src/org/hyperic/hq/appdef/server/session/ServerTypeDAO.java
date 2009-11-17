@@ -29,7 +29,6 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.hibernate.SessionFactory;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -38,7 +37,7 @@ import org.springframework.stereotype.Repository;
  *
  */
 @Repository
-public class ServerTypeDAO extends HibernateDAO
+public class ServerTypeDAO extends HibernateDAO<ServerType>
 {
     @Autowired
     public ServerTypeDAO(SessionFactory f) {
@@ -90,7 +89,7 @@ public class ServerTypeDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public Collection findByPlugin(String plugin)
+    public Collection<ServerType> findByPlugin(String plugin)
     {
         String sql="from ServerType where plugin=?";
         return getSession().createQuery(sql)

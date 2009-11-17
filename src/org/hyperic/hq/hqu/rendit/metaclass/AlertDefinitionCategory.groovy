@@ -9,7 +9,7 @@ import org.hyperic.hq.events.server.session.ClassicEscalationAlertType
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.server.session.AppdefResourceType
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl
+import org.hyperic.hq.appdef.server.session.ServerManagerImpl
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl
 
 class AlertDefinitionCategory {
@@ -69,7 +69,7 @@ class AlertDefinitionCategory {
         if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
             return PlatformManagerEJBImpl.one.findPlatformType(appdefId)
         } else if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
-            return ServerManagerEJBImpl.one.findServerType(appdefId)
+            return ServerManagerImpl.one.findServerType(appdefId)
         } else if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
             return ServiceManagerEJBImpl.one.findServiceType(appdefId)
         } else {

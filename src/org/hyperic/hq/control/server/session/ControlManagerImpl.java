@@ -43,12 +43,10 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -102,7 +100,6 @@ public class ControlManagerImpl implements ControlManager {
     private ConfigManager configManager;
     private PlatformManagerLocal platformManager;
     private AuthzSubjectManager authzSubjectManager;
-    private ServerManagerLocal serverManager;
     private ServiceManagerLocal serviceManager;
     private PermissionManager permissionManager;
     private ControlPluginManager controlPluginManager;
@@ -112,7 +109,7 @@ public class ControlManagerImpl implements ControlManager {
                               ControlHistoryDAO controlHistoryDao,
                               ResourceTypeDAO resourceTypeDao, ConfigManager configManager,
                               PlatformManagerLocal platformManager,
-                              AuthzSubjectManager authzSubjectManager, ServerManagerLocal serverManager,
+                              AuthzSubjectManager authzSubjectManager, 
                               ServiceManagerLocal serviceManager,
                               PermissionManager permissionManager) {
         this.productManager = productManager;
@@ -122,7 +119,6 @@ public class ControlManagerImpl implements ControlManager {
         this.configManager = configManager;
         this.platformManager = platformManager;
         this.authzSubjectManager = authzSubjectManager;
-        this.serverManager = serverManager;
         this.serviceManager = serviceManager;
         this.permissionManager = permissionManager;
     }
@@ -595,7 +591,7 @@ public class ControlManagerImpl implements ControlManager {
                 platformManager.checkModifyPermission(caller, id);
                 return;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                serverManager.checkModifyPermission(caller, id);
+                permissionManager.checkModifyPermission(caller, id);
                 return;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 serviceManager.checkModifyPermission(caller, id);
@@ -618,7 +614,7 @@ public class ControlManagerImpl implements ControlManager {
                 platformManager.checkControlPermission(caller, id);
                 return;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                serverManager.checkControlPermission(caller, id);
+                permissionManager.checkControlPermission(caller, id);
                 return;
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 serviceManager.checkControlPermission(caller, id);

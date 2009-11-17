@@ -12,7 +12,7 @@ import javax.jms.ObjectMessage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ConfigManagerImpl;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
 import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerImpl;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.shared.ControlConstants;
@@ -65,7 +65,7 @@ public class ServerRestartHandlerEJBImpl implements MessageDrivenBean, MessageLi
      * @ejb:create-method
      */
     public void ejbCreate() {
-        serverRestartHandler = new ServerRestartHandler(ServerManagerEJBImpl.getOne(),
+        serverRestartHandler = new ServerRestartHandler(ServerManagerImpl.getOne(),
                                                         ConfigManagerImpl.getOne(),
                                                         AutoinventoryManagerImpl.getOne(),
                                                         TrackerManagerImpl.getOne());

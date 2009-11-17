@@ -66,7 +66,7 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -131,7 +131,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private AIPlatformDAO aiPlatformDao;
 
     private ProductManager productManager;
-    private ServerManagerLocal serverManager;
+    private ServerManager serverManager;
     private ResourceManager resourceManager;
     private ConfigManager configManager;
     private AgentManager agentManager;
@@ -144,7 +144,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
 
     @Autowired
     public AutoinventoryManagerImpl(AgentReportStatusDAO agentReportStatusDao, AIHistoryDAO aiHistoryDao,
-                                    AIPlatformDAO aiPlatformDao, ProductManager productManager, ServerManagerLocal serverManager,
+                                    AIPlatformDAO aiPlatformDao, ProductManager productManager, ServerManager serverManager,
                                     AIScheduleManager aiScheduleManager, ResourceManager resourceManager, ConfigManager configManager,
                                     AgentManager agentManager, CPropManager cPropManager, ServiceManagerLocal serviceManager,
                                     AuthzSubjectManager authzSubjectManager, AIQueueManager aiQueueManager, PermissionManager permissionManager) {

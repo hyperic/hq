@@ -10,7 +10,7 @@ import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.measurement.shared.TrackerManager;
 import org.hyperic.hq.product.ProductPlugin;
@@ -31,7 +31,7 @@ public class ServerRestartHandler {
 
     private final Log log = LogFactory.getLog(ServerRestartHandler.class.getName());
 
-    private final ServerManagerLocal serverManager;
+    private final ServerManager serverManager;
 
     private final ConfigManager configManager;
 
@@ -41,7 +41,7 @@ public class ServerRestartHandler {
 
     private long startDelay = 15l;
 
-    public ServerRestartHandler(ServerManagerLocal serverManager,
+    public ServerRestartHandler(ServerManager serverManager,
                                 ConfigManager configManager,
                                 AutoinventoryManager autoInvManager,
                                 TrackerManager trackerManager)
