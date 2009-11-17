@@ -9,7 +9,6 @@ import org.hyperic.hq.appdef.server.session.Application;
  * Local interface for ApplicationManager.
  */
 public interface ApplicationManagerLocal
-   extends javax.ejb.EJBLocalObject
 {
    /**
     * Get all Application types
