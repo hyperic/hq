@@ -78,6 +78,7 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -110,6 +111,24 @@ public class ApplicationManagerImpl implements ApplicationManager {
     private ZeventEnqueuer zeventManager;
 
     private HQApp hqApp;
+    
+    
+    @Autowired
+    public ApplicationManagerImpl(ApplicationTypeDAO applicationTypeDAO, AppServiceDAO appServiceDAO,
+                                  ApplicationDAO applicationDAO, ServiceManagerLocal serviceManager,
+                                  ResourceManager resourceManager, PermissionManager permissionManager,
+                                  AuthzSubjectManager authzSubjectManager, ZeventEnqueuer zeventManager, HQApp hqApp) {
+        
+        this.applicationTypeDAO = applicationTypeDAO;
+        this.appServiceDAO = appServiceDAO;
+        this.applicationDAO = applicationDAO;
+        this.serviceManager = serviceManager;
+        this.resourceManager = resourceManager;
+        this.permissionManager = permissionManager;
+        this.authzSubjectManager = authzSubjectManager;
+        this.zeventManager = zeventManager;
+        this.hqApp = hqApp;
+    }
 
     /**
      * Get all Application types
