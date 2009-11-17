@@ -57,7 +57,7 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.auth.shared.SessionException;
@@ -179,7 +179,7 @@ public class EventsBossImpl implements EventsBoss {
 
     private ServerManager serverManager;
 
-    private ServiceManagerLocal serviceManager;
+    private ServiceManager serviceManager;
 
     private PermissionManager permissionManager;
 
@@ -196,7 +196,7 @@ public class EventsBossImpl implements EventsBoss {
                           EscalationManagerLocal escalationManager, MeasurementManager measurementManager,
                           PlatformManagerLocal platformManager, RegisteredTriggerManager registeredTriggerManager,
                           ResourceManager resourceManager, ServerManager serverManager,
-                          ServiceManagerLocal serviceManager, PermissionManager permissionManager,
+                          ServiceManager serviceManager, PermissionManager permissionManager,
                           GalertManager galertManager, ResourceGroupManager resourceGroupManager,
                           AuthzSubjectManager authzSubjectManager) {
         this.sessionManager = sessionManager;

@@ -5,7 +5,7 @@ import org.hyperic.hq.appdef.server.session.CPropManagerImpl as CPropMan
 import org.hyperic.hq.appdef.server.session.ConfigManagerImpl as ConfigMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl as ServerMan
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
+import org.hyperic.hq.appdef.server.session.ServiceManagerImpl as ServiceMan
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException
 import org.hyperic.hq.auth.shared.SessionManager
 import org.hyperic.hq.authz.server.session.AuthzSubject

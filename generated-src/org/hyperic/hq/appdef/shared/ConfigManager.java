@@ -89,10 +89,5 @@ public interface ConfigManager {
                                             byte[] controlConfig, byte[] rtConfig, Boolean userManaged,
                                             boolean sendConfigEvent, boolean force);
 
-    /**
-     * Update the appdef entities based on TypeInfo
-     */
-    public void updateAppdefEntities(String pluginName, org.hyperic.hq.product.TypeInfo[] entities)
-        throws FinderException, RemoveException, CreateException, VetoException;
 
 }

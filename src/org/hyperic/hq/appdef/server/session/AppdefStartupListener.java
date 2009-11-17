@@ -60,7 +60,7 @@ public class AppdefStartupListener
                     // delete
                     PlatformManagerEJBImpl.getOne().handleResourceDelete(r);
                     ServerManagerImpl.getOne().handleResourceDelete(r);
-                    ServiceManagerEJBImpl.getOne().handleResourceDelete(r);
+                    ServiceManagerImpl.getOne().handleResourceDelete(r);
                     ApplicationManagerImpl.getOne().handleResourceDelete(r);
                 }
             });

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.FinderException;
+import javax.ejb.RemoveException;
 
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -230,5 +231,8 @@ public interface ResourceManager {
     public ResourceRelation getContainmentRelation();
     
     ResourceRelation getNetworkRelation();
+    
+    void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r) throws RemoveException,
+    PermissionException, VetoException;
 
 }

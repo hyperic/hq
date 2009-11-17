@@ -60,7 +60,7 @@ import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -118,7 +118,7 @@ public class ServerManagerImpl implements ServerManager {
     private ServerTypeDAO serverTypeDAO;
     private ServiceDAO serviceDAO;
     private ServiceTypeDAO serviceTypeDAO;
-    private ServiceManagerLocal serviceManager;
+    private ServiceManager serviceManager;
     private CPropManager cpropManager;
     private ConfigManager configManager;
     private MeasurementManager measurementManager;
@@ -133,7 +133,7 @@ public class ServerManagerImpl implements ServerManager {
                              PlatformManagerLocal platformManager, ServerDAO serverDAO,
                              PlatformTypeDAO platformTypeDAO, ResourceManager resourceManager,
                              ServerTypeDAO serverTypeDAO, ServiceDAO serviceDAO, ServiceTypeDAO serviceTypeDAO,
-                             ServiceManagerLocal serviceManager, CPropManager cpropManager,
+                             ServiceManager serviceManager, CPropManager cpropManager,
                              ConfigManager configManager, MeasurementManager measurementManager,
                              AuditManager auditManager, AuthzSubjectManager authzSubjectManager,
                              ResourceGroupManager resourceGroupManager, ZeventEnqueuer zeventManager) {
@@ -608,7 +608,7 @@ public class ServerManagerImpl implements ServerManager {
             cpropManager.deleteValues(aeid.getType(), aeid.getID());
 
             // Remove authz resource
-            removeAuthzResource(subject, aeid, r);
+            resourceManager.removeAuthzResource(subject, aeid, r);
 
             serverDAO.getSession().flush();
         } finally {
@@ -1164,7 +1164,7 @@ public class ServerManagerImpl implements ServerManager {
             AppService appService = it.next();
 
             if (appService.isIsGroup()) {
-                Collection<Service> services = getServiceCluster(appService.getResourceGroup()).getServices();
+                Collection<Service> services = serviceManager.getServiceCluster(appService.getResourceGroup()).getServices();
 
                 Iterator<Service> serviceIterator = services.iterator();
                 while (serviceIterator.hasNext()) {
@@ -1413,48 +1413,7 @@ public class ServerManagerImpl implements ServerManager {
         throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " + rtV.getName());
     }
 
-    /**
-     * Map a ResourceGroup to ServiceCluster, just temporary, should be able to
-     * remove when done with the ServiceCluster to ResourceGroup Migration
-     */
-    protected ServiceCluster getServiceCluster(ResourceGroup group) {
-        if (group == null) {
-            return null;
-        }
-        ServiceCluster sc = new ServiceCluster();
-        sc.setName(group.getName());
-        sc.setDescription(group.getDescription());
-        sc.setGroup(group);
-
-        Collection<Resource> resources = resourceGroupManager.getMembers(group);
-
-        Set<Service> services = new HashSet<Service>(resources.size());
-
-        ServiceType st = null;
-        for (Resource resource : resources) {
-
-            // this should not be the case
-            if (!resource.getResourceType().getId().equals(AuthzConstants.authzService)) {
-                continue;
-            }
-            Service service = serviceDAO.findById(resource.getInstanceId());
-            if (st == null) {
-                st = service.getServiceType();
-            }
-            services.add(service);
-            service.setResourceGroup(sc.getGroup());
-        }
-        sc.setServices(services);
-
-        if (st == null && group.getResourcePrototype() != null) {
-            st = serviceTypeDAO.findById(group.getResourcePrototype().getInstanceId());
-        }
-
-        if (st != null) {
-            sc.setServiceType(st);
-        }
-        return sc;
-    }
+ 
 
     /**
      * builds a list of resource types from the list of resources
@@ -1489,21 +1448,7 @@ public class ServerManagerImpl implements ServerManager {
         return rtn;
     }
 
-    /**
-     * remove the authz resource entry
-     */
-    protected void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r) throws RemoveException,
-        PermissionException, VetoException {
-        if (log.isDebugEnabled())
-            log.debug("Removing authz resource: " + aeid);
-
-        AuthzSubject s = authzSubjectManager.findSubjectById(subject.getId());
-        resourceManager.removeResource(s, r);
-
-        // Send resource delete event
-        ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, aeid);
-        zeventManager.enqueueEventAfterCommit(zevent);
-    }
+   
 
     /**
      * 

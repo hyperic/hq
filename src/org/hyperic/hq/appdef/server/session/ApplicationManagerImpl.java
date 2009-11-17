@@ -52,7 +52,7 @@ import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyTree;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -100,7 +100,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     private ApplicationDAO applicationDAO;
 
-    private ServiceManagerLocal serviceManager;
+    private ServiceManager serviceManager;
 
     private ResourceManager resourceManager;
 
@@ -115,7 +115,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     
     @Autowired
     public ApplicationManagerImpl(ApplicationTypeDAO applicationTypeDAO, AppServiceDAO appServiceDAO,
-                                  ApplicationDAO applicationDAO, ServiceManagerLocal serviceManager,
+                                  ApplicationDAO applicationDAO, ServiceManager serviceManager,
                                   ResourceManager resourceManager, PermissionManager permissionManager,
                                   AuthzSubjectManager authzSubjectManager, ZeventEnqueuer zeventManager, HQApp hqApp) {
         

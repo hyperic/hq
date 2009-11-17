@@ -27,6 +27,7 @@ package org.hyperic.hq.product.server.session;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +54,9 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.ConfigManager;
+import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
@@ -66,6 +69,7 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.measurement.server.session.MonitorableType;
 import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MeasurementInfo;
+import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.Plugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
@@ -76,6 +80,7 @@ import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.ServerTypeInfo;
 import org.hyperic.hq.product.ServiceType;
+import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.pluginxml.PluginData;
 import org.hyperic.hq.product.server.MBeanUtil;
@@ -99,7 +104,7 @@ public class ProductManagerImpl implements ProductManager {
     private Log log = LogFactory.getLog(ProductManagerImpl.class);
 
     private ProductPluginManager ppm;
-    private ConfigManager configManager;
+    
     private CPropManager cPropManager;
     private TemplateManager templateManager;
     private AuditManager auditManager;
@@ -107,23 +112,74 @@ public class ProductManagerImpl implements ProductManager {
     private static final String ALERT_DEFINITIONS_XML_FILE = "etc/alert-definitions.xml";
     private AlertDefinitionManager alertDefinitionManager;
     private PluginDAO pluginDao;
+    private PlatformManagerLocal platformManager;
+    private ServerManager serverManager;
+    private ServiceManager serviceManager;
 
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
-                              ConfigManager configManager,
                               CPropManager cPropManager, TemplateManager templateManager,
-                              AuditManager auditManager) {
+                              AuditManager auditManager, ServerManager serverManager, ServiceManager serviceManager, PlatformManagerLocal platformManager) {
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
-        this.configManager = configManager;
         this.cPropManager = cPropManager;
         this.templateManager = templateManager;
         this.auditManager = auditManager;
+        this.serverManager = serverManager;
+        this.serviceManager = serviceManager;
+        this.platformManager = platformManager;
         try {
             ppm = getProductPluginManager();
         } catch (PluginException e) {
             log.error("Unable to initialize plugin manager: " +
                       e.getMessage());
+        }
+    }
+    
+    /**
+     * Update the appdef entities based on TypeInfo
+     * 
+     * 
+     */
+    private void updateAppdefEntities(String pluginName, TypeInfo[] entities) throws FinderException, RemoveException,
+        CreateException, VetoException {
+        ArrayList<TypeInfo> platforms = new ArrayList<TypeInfo>();
+        ArrayList<TypeInfo> servers = new ArrayList<TypeInfo>();
+        ArrayList<TypeInfo> services = new ArrayList<TypeInfo>();
+
+        // Organize the entity infos first
+        for (int i = 0; i < entities.length; i++) {
+            TypeInfo ei = entities[i];
+
+            switch (ei.getType()) {
+                case TypeInfo.TYPE_PLATFORM:
+                    platforms.add(ei);
+                    break;
+                case TypeInfo.TYPE_SERVER:
+                    servers.add(ei);
+                    break;
+                case TypeInfo.TYPE_SERVICE:
+                    services.add(ei);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        // Update platforms
+        if (platforms.size() > 0) {
+            this.platformManager.updatePlatformTypes(pluginName, (PlatformTypeInfo[]) platforms
+                .toArray(new PlatformTypeInfo[0]));
+        }
+
+        // Update servers
+        if (servers.size() > 0) {
+            serverManager.updateServerTypes(pluginName, (ServerTypeInfo[]) servers.toArray(new ServerTypeInfo[0]));
+        }
+
+        // Update services
+        if (services.size() > 0) {
+            serviceManager.updateServiceTypes(pluginName, (ServiceTypeInfo[]) services.toArray(new ServiceTypeInfo[0]));
         }
     }
 
@@ -354,7 +410,7 @@ public class ProductManagerImpl implements ProductManager {
         PluginInfo pInfo = ppm.getPluginInfo(pluginName);
 
         TypeInfo[] entities = pplugin.getTypes();
-        configManager.updateAppdefEntities(pluginName, entities);
+        updateAppdefEntities(pluginName, entities);
 
         // Keep a list of templates to add
         // TODO: G (what are the parameters for the map returned by

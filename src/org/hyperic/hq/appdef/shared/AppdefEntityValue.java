@@ -33,12 +33,16 @@ import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
+import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
+import org.hyperic.hq.appdef.server.session.ServerType;
 import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServiceManagerImpl;
+import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
@@ -57,7 +61,7 @@ public class AppdefEntityValue {
     private PlatformManagerLocal    platformManagerLocal;
     private ApplicationManager applicationManagerLocal;
     private ServerManager      serverManagerLocal;
-    private ServiceManagerLocal     serviceManagerLocal;
+    private ServiceManager     serviceManagerLocal;
 
     private Application             application = null;
     private Platform                _platform    = null;
@@ -100,9 +104,9 @@ public class AppdefEntityValue {
         return serverManagerLocal;
     }
 
-    private ServiceManagerLocal getServiceManager() {
+    private ServiceManager getServiceManager() {
         if(serviceManagerLocal == null){
-            serviceManagerLocal = ServiceManagerEJBImpl.getOne();
+            serviceManagerLocal = ServiceManagerImpl.getOne();
         }
         return serviceManagerLocal;
     }
@@ -368,14 +372,15 @@ public class AppdefEntityValue {
             if (g.isMixed())
                 throw new IllegalStateException("Can't return for mixed group: "
                                                 + _id);
-            ResourceGroupManager groupMan = 
-                ResourceGroupManagerImpl.getOne();
-            return groupMan.getAppdefResourceType(getSubject(), g);
+       
+            return AppdefResourceValue.getAppdefResourceType(getSubject(), g);
         default:
             throw new IllegalStateException("Unknown appdef entity type");
         }
     }
     
+   
+   
     /**
      * Get the AppdefGroupValue if this was a group
      */
@@ -551,7 +556,7 @@ public class AppdefEntityValue {
     public PageList getAssociatedServices(PageControl pc)
         throws PermissionException, AppdefEntityNotFoundException,
                ApplicationNotFoundException {
-        ServiceManagerLocal sManager;
+        ServiceManager sManager;
         PageList res;
         Integer iId;
         
@@ -590,7 +595,7 @@ public class AppdefEntityValue {
     public PageList getAssociatedServices(Integer typeId, PageControl pc)
         throws ApplicationNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
-        ServiceManagerLocal sManager;
+        ServiceManager sManager;
         PageList res;
         Integer iId;
 
@@ -628,7 +633,7 @@ public class AppdefEntityValue {
     public List getAssociatedServiceIds(Integer typeId)
         throws ApplicationNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
-        ServiceManagerLocal sManager;
+        ServiceManager sManager;
         List vals, res;
         Integer iId;
         Integer[] sids;
@@ -678,7 +683,7 @@ public class AppdefEntityValue {
     public AppdefEntityID[] getFlattenedServiceIds()
         throws ApplicationNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
-        ServiceManagerLocal sManager = getServiceManager();
+        ServiceManager sManager = getServiceManager();
         PageControl pc = PageControl.PAGE_ALL;
         
         AppdefEntityID[] servEntIds;

@@ -47,7 +47,7 @@ import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
 import org.hyperic.hq.appdef.server.session.Service;
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServiceManagerImpl;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIServerExtValue;
@@ -60,7 +60,7 @@ import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerValue;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceTypeFactory;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -90,8 +90,8 @@ public class RuntimeReportProcessor {
     private final ServerManager
         _serverMgr = ServerManagerImpl.getOne();
     
-    private final ServiceManagerLocal
-        _serviceMgr = ServiceManagerEJBImpl.getOne();
+    private final ServiceManager
+        _serviceMgr = ServiceManagerImpl.getOne();
     
     private final ConfigManager
         _configMgr = ConfigManagerImpl.getOne();

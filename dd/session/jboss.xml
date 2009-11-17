@@ -39,12 +39,6 @@
 			<local-jndi-name>LocalAppdefStatManager</local-jndi-name>
 
 		</session>
-		<session>
-			<ejb-name>ServiceManager</ejb-name>
-			<local-jndi-name>LocalServiceManager</local-jndi-name>
-
-		</session>
-		
 		
 		
 		<session>

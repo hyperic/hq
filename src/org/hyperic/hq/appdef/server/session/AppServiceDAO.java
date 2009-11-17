@@ -11,7 +11,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.AppSvcDependency;
 import org.hyperic.hq.appdef.ServiceCluster;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceGroupDAO;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -95,7 +95,7 @@ public class AppServiceDAO extends HibernateDAO
         ResourceGroup gr = resourceGroupDAO
             .findById(cpk);
 
-        ServiceManagerLocal sMan = ServiceManagerEJBImpl.getOne();
+        ServiceManager sMan = ServiceManagerImpl.getOne();
         ServiceType type =
             sMan.findServiceType(gr.getResourcePrototype().getInstanceId());
         AppService a = new AppService();

@@ -37,7 +37,7 @@ import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -74,12 +74,12 @@ public class ReportProcessorImpl
     private MeasurementProcessor measurementProcessor;
     private PlatformManagerLocal platformManager;
     private ServerManager serverManager;
-    private ServiceManagerLocal serviceManager;
+    private ServiceManager serviceManager;
 
     @Autowired
     public ReportProcessorImpl(MeasurementManager measurementManager,
                                MeasurementProcessor measurementProcessor, PlatformManagerLocal platformManager,
-                               ServerManager serverManager, ServiceManagerLocal serviceManager) {
+                               ServerManager serverManager, ServiceManager serviceManager) {
         this.measurementManager = measurementManager;
         this.measurementProcessor = measurementProcessor;
         this.platformManager = platformManager;
