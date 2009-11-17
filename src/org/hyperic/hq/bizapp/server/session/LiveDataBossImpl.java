@@ -35,7 +35,6 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.LiveDataBoss;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.livedata.server.session.LiveDataManagerImpl;
 import org.hyperic.hq.livedata.shared.LiveDataCommand;
 import org.hyperic.hq.livedata.shared.LiveDataException;
 import org.hyperic.hq.livedata.shared.LiveDataManager;
@@ -67,9 +66,8 @@ public class LiveDataBossImpl implements LiveDataBoss {
      */
     public LiveDataResult getLiveData(int sessionId, LiveDataCommand command)
         throws PermissionException, AgentNotFoundException,
-               AppdefEntityNotFoundException, LiveDataException,
-               SessionTimeoutException, SessionNotFoundException
-    {
+        AppdefEntityNotFoundException, LiveDataException,
+        SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return liveDataManager.getData(subject, command);
     }
@@ -80,9 +78,8 @@ public class LiveDataBossImpl implements LiveDataBoss {
     public LiveDataResult[] getLiveData(int sessionId,
                                         LiveDataCommand[] commands)
         throws PermissionException, AgentNotFoundException,
-               AppdefEntityNotFoundException, LiveDataException,
-               SessionTimeoutException, SessionNotFoundException
-    {
+        AppdefEntityNotFoundException, LiveDataException,
+        SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return liveDataManager.getData(subject, commands);
     }
@@ -92,8 +89,7 @@ public class LiveDataBossImpl implements LiveDataBoss {
      */
     public String[] getLiveDataCommands(int sessionId, AppdefEntityID id)
         throws PluginException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException
-    {
+        SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return liveDataManager.getCommands(subject, id);
     }
@@ -104,12 +100,11 @@ public class LiveDataBossImpl implements LiveDataBoss {
     public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id,
                                         String command)
         throws PluginException, PermissionException,
-               SessionTimeoutException, SessionNotFoundException    
-    {
+        SessionTimeoutException, SessionNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return liveDataManager.getConfigSchema(subject, id, command);
     }
-    
+
     public static LiveDataBoss getOne() {
         return Bootstrap.getBean(LiveDataBoss.class);
     }

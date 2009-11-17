@@ -19,24 +19,30 @@ import org.hyperic.util.config.ConfigSchema;
  * Local interface for LiveDataBoss.
  */
 public interface LiveDataBoss {
-   /**
-    * Get live data for a given resource
-    */
-   public LiveDataResult getLiveData( int sessionId,LiveDataCommand command ) throws PermissionException, AgentNotFoundException, AppdefEntityNotFoundException, LiveDataException, SessionTimeoutException, SessionNotFoundException;
+    /**
+     * Get live data for a given resource
+     */
+    public LiveDataResult getLiveData(int sessionId, LiveDataCommand command) throws PermissionException,
+        AgentNotFoundException, AppdefEntityNotFoundException, LiveDataException, SessionTimeoutException,
+        SessionNotFoundException;
 
-   /**
-    * Get live data for the given commands
-    */
-   public LiveDataResult[] getLiveData( int sessionId,LiveDataCommand[] commands ) throws PermissionException, AgentNotFoundException, AppdefEntityNotFoundException, LiveDataException, SessionTimeoutException, SessionNotFoundException;
+    /**
+     * Get live data for the given commands
+     */
+    public LiveDataResult[] getLiveData(int sessionId, LiveDataCommand[] commands) throws PermissionException,
+        AgentNotFoundException, AppdefEntityNotFoundException, LiveDataException, SessionTimeoutException,
+        SessionNotFoundException;
 
-   /**
-    * Get the commands for a given resource.
-    */
-   public String[] getLiveDataCommands( int sessionId,AppdefEntityID id ) throws PluginException, PermissionException, SessionTimeoutException, SessionNotFoundException;
+    /**
+     * Get the commands for a given resource.
+     */
+    public String[] getLiveDataCommands(int sessionId, AppdefEntityID id) throws PluginException, PermissionException,
+        SessionTimeoutException, SessionNotFoundException;
 
-   /**
-    * Get the ConfigSchema for this resource
-    */
-   public ConfigSchema getConfigSchema( int sessionId,AppdefEntityID id,String command ) throws PluginException, PermissionException, SessionTimeoutException, SessionNotFoundException;
+    /**
+     * Get the ConfigSchema for this resource
+     */
+    public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id, String command) throws PluginException,
+        PermissionException, SessionTimeoutException, SessionNotFoundException;
 
 }
