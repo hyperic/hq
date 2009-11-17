@@ -47,7 +47,7 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class AIPlatformDAO extends HibernateDAO
+public class AIPlatformDAO extends HibernateDAO<AIPlatform>
 {
     private static final Log log = LogFactory.getLog(AIPlatformDAO.class);
 
@@ -121,7 +121,7 @@ public class AIPlatformDAO extends HibernateDAO
         return p;
     }
 
-    public Collection findAllNotIgnored()
+    public Collection<AIPlatform> findAllNotIgnored()
     {
         String sql="from AIPlatform where ignored=false and " +
                    "lastApproved < modifiedTime " +
@@ -129,13 +129,13 @@ public class AIPlatformDAO extends HibernateDAO
         return getSession().createQuery(sql).list();
     }
 
-    public Collection findAllNotIgnoredIncludingProcessed()
+    public Collection<AIPlatform> findAllNotIgnoredIncludingProcessed()
     {
         String sql="from AIPlatform where ignored=false order by name";
         return getSession().createQuery(sql).list();
     }
 
-    public Collection findAllIncludingProcessed()
+    public Collection<AIPlatform> findAllIncludingProcessed()
     {
         String sql="from AIPlatform order by name";
         return getSession().createQuery(sql).list();

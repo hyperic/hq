@@ -74,7 +74,7 @@ public class AIIpDAO extends HibernateDAO
         return ip;
     }
 
-    public List findByAddress(String addr)
+    public List<AIIp> findByAddress(String addr)
     {
         String sql="from AIIp where address=?";
         return getSession().createQuery(sql)
@@ -83,7 +83,7 @@ public class AIIpDAO extends HibernateDAO
     }
 
 
-    public List findByMACAddress(String addr)
+    public List<AIIp> findByMACAddress(String addr)
     {
         String sql="from AIIp where macAddress=?";
         return getSession().createQuery(sql)

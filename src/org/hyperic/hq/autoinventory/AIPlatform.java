@@ -276,7 +276,7 @@ public class AIPlatform extends PlatformBase
         this.aiips = aiips;
     }
 
-    public Collection getAIServers()
+    public Collection<AIServer> getAIServers()
     {
         return this.aiservers;
     }
