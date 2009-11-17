@@ -32,27 +32,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.CreateException;
+import javax.annotation.PostConstruct;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
-import javax.ejb.SessionBean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.agent.client.AgentCommandsClient;
 import org.hyperic.hq.agent.client.AgentCommandsClientFactory;
 import org.hyperic.hq.appdef.Ip;
-import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
-import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
-import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
+import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -64,14 +60,15 @@ import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.autoinventory.AIIp;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.autoinventory.AIServer;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.common.server.session.AuditManagerImpl;
+import org.hyperic.hq.common.shared.AuditManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.AIIpDAO;
 import org.hyperic.hq.dao.AIPlatformDAO;
@@ -82,38 +79,64 @@ import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This class is responsible for managing the various autoinventory
  * queues.
- * @ejb:bean name="AIQueueManager"
- *      jndi-name="ejb/appdef/AIQueueManager"
- *      local-jndi-name="LocalAIQueueManager"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:util generate="physical"
+ *
  *
  */
-public class AIQueueManagerEJBImpl
-    extends AppdefSessionEJB implements SessionBean {
-    protected final String AIPLATFORM_PROCESSOR
+@Service
+public class AIQueueManagerImpl implements AIQueueManager {
+    protected static final String AIPLATFORM_PROCESSOR
         = "org.hyperic.hq.appdef.server.session.PagerProcessor_aiplatform";
-    protected final String AIPLATFORM_PROCESSOR_NOPLACEHOLDERS
+    protected static final String AIPLATFORM_PROCESSOR_NOPLACEHOLDERS
         = "org.hyperic.hq.appdef.server.session.PagerProcessor_aiplatform_excludePlaceholders";
-    private Pager aiplatformPager = null;
-    private Pager aiplatformPager_noplaceholders = null;
+    private Pager aiplatformPager;
+    private Pager aiplatformPagerNoPlaceholders;
 
     private final AI2AppdefDiff appdefDiffProcessor = new AI2AppdefDiff();
     private final AIQSynchronizer queueSynchronizer = new AIQSynchronizer();
-    private AIServerDAO aIServerDAO = Bootstrap.getBean(AIServerDAO.class);
-
-    public AIQueueManagerEJBImpl () {}
-
-    protected Log log = LogFactory.getLog(AIQueueManagerEJBImpl.class.getName());
-
-    private AIServerDAO getAIServerDAO() {
-        return aIServerDAO;
+    
+    @Autowired
+    public AIQueueManagerImpl(AIServerDAO aIServerDAO, AIIpDAO aiIpDAO, AIPlatformDAO aiPlatformDAO,
+                              ConfigManager configManager, CPropManager cPropManager, PlatformDAO platformDAO,
+                              PlatformManagerLocal platformManager, ServerManagerLocal serverManager,
+                              PermissionManager permissionManager, AuditManager auditManager,
+                              AuthzSubjectManager authzSubjectManager) {
+      
+        this.aIServerDAO = aIServerDAO;
+        this.aiIpDAO = aiIpDAO;
+        this.aiPlatformDAO = aiPlatformDAO;
+        this.configManager = configManager;
+        this.cPropManager = cPropManager;
+        this.platformDAO = platformDAO;
+        this.platformManager = platformManager;
+        this.serverManager = serverManager;
+        this.permissionManager = permissionManager;
+        this.auditManager = auditManager;
+        this.authzSubjectManager = authzSubjectManager;
     }
+
+    private AIServerDAO aIServerDAO;
+    private AIIpDAO aiIpDAO;
+    private AIPlatformDAO aiPlatformDAO;
+    private ConfigManager configManager;
+    private CPropManager cPropManager;
+    private PlatformDAO platformDAO;
+    private PlatformManagerLocal platformManager;
+    private ServerManagerLocal serverManager;
+    private PermissionManager permissionManager;
+    private AuditManager auditManager;
+    private AuthzSubjectManager authzSubjectManager;
+   
+
+    protected final Log log = LogFactory.getLog(AIQueueManagerImpl.class.getName());
+
+   
 
     /**
      * Try to queue a candidate platform discovered via autoinventory.
@@ -121,26 +144,23 @@ public class AIQueueManagerEJBImpl
      * data that we are wanting to queue.  This may return null if the appdef
      * platform was removed because the AI platform had a qstat of "remove" that
      * was approved.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
+    @Transactional
     public AIPlatformValue queue(AuthzSubject subject,
                                  AIPlatformValue aiplatform,
                                  boolean updateServers,
                                  boolean isApproval,
                                  boolean isReport)
     {
-        AIPlatformDAO aiplatformLH = getAIPlatformDAO();
-        PlatformManagerLocal pmLocal = getPlatformManager();
-        AIQueueManagerLocal aiqLocal = getAIQManagerLocal();
-        ConfigManager crmLocal = getConfigManager();
-        CPropManager cpropMgr = getCPropManager();
-
+        
+        
         // First, calculate queuestatus and diff with respect to
         // existing appdef data.
         AIPlatformValue revisedAIplatform
             = appdefDiffProcessor.diffAgainstAppdef(subject,
-                                                    pmLocal, crmLocal, cpropMgr,
+                                                    platformManager, configManager, cPropManager,
                                                     aiplatform);
 
         // A null return from diffAgainstAppdef means that
@@ -150,14 +170,14 @@ public class AIQueueManagerEJBImpl
         if (revisedAIplatform == null) {
             // log.info("AIQmgr.queue (post appdef-diff): aiplatform=NULL");
             AIPlatform aiplatformLocal;
-            aiplatformLocal = aiplatformLH.get(aiplatform.getId());
+            aiplatformLocal = aiPlatformDAO.get(aiplatform.getId());
             removeFromQueue(aiplatformLocal);
             return null;
         }
 
         // Synchronize current AI data into existing queue.
-        revisedAIplatform = queueSynchronizer.sync(subject, aiqLocal,
-                                                   aiplatformLH,
+        revisedAIplatform = queueSynchronizer.sync(subject, this,
+                                                   aiPlatformDAO,
                                                    revisedAIplatform,
                                                    updateServers, isApproval,
                                                    isReport);
@@ -190,7 +210,7 @@ public class AIQueueManagerEJBImpl
     {
         // XXX: Fix this..
         AuthzSubject subject =
-            AuthzSubjectManagerImpl.getOne().getOverlordPojo();
+           authzSubjectManager.getOverlordPojo();
 
         return queue(subject, aiplatform.getAIPlatformValue(), true, isApproval,
                      false);
@@ -209,9 +229,10 @@ public class AIQueueManagerEJBImpl
      * been processed (approved or not approved) will be shown.
      * @return A List of AIPlatformValue objects representing the contents
      * of the autoinventory queue.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
+    @Transactional
     public PageList getQueue(AuthzSubject subject, boolean showIgnored,
                              boolean showPlaceholders,
                              boolean showAlreadyProcessed, PageControl pc)
@@ -223,21 +244,21 @@ public class AIQueueManagerEJBImpl
         try {
             if (showIgnored) {
                 if (showAlreadyProcessed) {
-                    queue = getAIPlatformDAO().findAllIncludingProcessed();
+                    queue = aiPlatformDAO.findAllIncludingProcessed();
                 } else {
-                    queue = getAIPlatformDAO().findAll();
+                    queue = aiPlatformDAO.findAll();
                 }
             } else {
                 if (showAlreadyProcessed) {
-                    queue = getAIPlatformDAO().findAllNotIgnoredIncludingProcessed();
+                    queue = aiPlatformDAO.findAllNotIgnoredIncludingProcessed();
                 } else {
-                    queue = getAIPlatformDAO().findAllNotIgnored();
+                    queue = aiPlatformDAO.findAllNotIgnored();
                 }
             }
 
             boolean canCreatePlatforms;
             try {
-                checkCreatePlatformPermission(subject);
+                permissionManager.checkCreatePlatformPermission(subject);
                 canCreatePlatforms = true;
             } catch (PermissionException pe) {
                 canCreatePlatforms = false;
@@ -278,7 +299,7 @@ public class AIQueueManagerEJBImpl
                     aid = AppdefEntityID.newPlatformID(ppk);
 
                     try {
-                        checkModifyPermission(subject, aid);
+                        permissionManager.checkModifyPermission(subject, aid);
                     } catch (PermissionException e) {
                         if (log.isDebugEnabled()) {
                             log.debug("Removing platform because the " +
@@ -297,7 +318,7 @@ public class AIQueueManagerEJBImpl
                                                pc.getPagenum(),
                                                pc.getPagesize());
             } else {
-                results = aiplatformPager_noplaceholders.seek(queue,
+                results = aiplatformPagerNoPlaceholders.seek(queue,
                                                               pc.getPagenum(),
                                                               pc.getPagesize());
             }
@@ -312,15 +333,16 @@ public class AIQueueManagerEJBImpl
     /**
      * Get an AIPlatformValue by id.
      *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      * @return An AIPlatformValue with the given id, or null if that platform
      * id is not present in the queue.
      */
+    @Transactional
     public AIPlatformValue findAIPlatformById(AuthzSubject subject,
                                               int aiplatformID) {
 
-        AIPlatform aiplatform = getAIPlatformDAO().get(new Integer(aiplatformID));
+        AIPlatform aiplatform = aiPlatformDAO.get(new Integer(aiplatformID));
 
         if (aiplatform == null) {
             return null;
@@ -332,11 +354,12 @@ public class AIQueueManagerEJBImpl
     /**
      * Get an AIPlatformValue by FQDN.
      *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      * @return The AIPlatformValue with the given FQDN, or null if that FQDN does
      * not exist in the queue.
      */
+    @Transactional
     public AIPlatformValue findAIPlatformByFqdn(AuthzSubject subject,
                                                 String fqdn)
     {
@@ -344,7 +367,7 @@ public class AIQueueManagerEJBImpl
         AIPlatformValue aiplatformValue = null;
 
         // XXX Do authz check
-        AIPlatform aiPlatform = getAIPlatformDAO().findByFQDN(fqdn);
+        AIPlatform aiPlatform = aiPlatformDAO.findByFQDN(fqdn);
         aiplatformValue = aiPlatform.getAIPlatformValue();
 
         if (aiplatformValue == null) {
@@ -358,15 +381,16 @@ public class AIQueueManagerEJBImpl
     /**
      * Get an AIServerValue by Id.
      *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      * @return The AIServerValue with the given id, or null if that server id
      * does not exist in the queue.
      */
+    @Transactional
     public AIServerValue findAIServerById(AuthzSubject subject,
                                           int serverID)
     {
-        AIServer aiserver = getAIServerDAO().get(new Integer(serverID));
+        AIServer aiserver = aIServerDAO.get(new Integer(serverID));
 
         if (aiserver == null) {
             return null;
@@ -376,7 +400,7 @@ public class AIQueueManagerEJBImpl
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void removeAssociatedAIPlatform(Platform platform)
         throws VetoException
@@ -385,22 +409,23 @@ public class AIQueueManagerEJBImpl
         if (aiPlat == null) {
             return;
         }
-        getAIPlatformDAO().remove(aiPlat);
+        aiPlatformDAO.remove(aiPlat);
     }
 
     /**
      * Get an AIServerValue by name.
      *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      * @return The AIServerValue with the given id, or null if that server name
      * does not exist in the queue.
      */
+    @Transactional
     public AIServerValue findAIServerByName(AuthzSubject subject,
                                             String name)
     {
         // XXX Do authz check
-        AIServer aiserver = getAIServerDAO().findByName(name);
+        AIServer aiserver = aIServerDAO.findByName(name);
         if (aiserver == null) {
             return null;
         }
@@ -411,14 +436,15 @@ public class AIQueueManagerEJBImpl
     /**
      * Get an AIIp by id.
      *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      * @return The AIIp with the given id, or null if that ip does not exist.
      */
+    @Transactional
     public AIIpValue findAIIpById(AuthzSubject subject,
                                   int ipID )
     {
-        AIIp aiip = getAIIpDAO().get(new Integer(ipID));
+        AIIp aiip = aiIpDAO.get(new Integer(ipID));
         if (aiip == null) {
             return null;
         }
@@ -428,16 +454,17 @@ public class AIQueueManagerEJBImpl
     /**
      * Get an AIIpValue by address.
      *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      * @return The AIIpValue with the given address, or null if an ip with
      * that address does not exist in the queue.
      */
+    @Transactional
     public AIIpValue findAIIpByAddress(AuthzSubject subject,
                                        String address)
     {
         // XXX Do authz check
-        List aiips = getAIIpDAO().findByAddress(address);
+        List aiips = aiIpDAO.findByAddress(address);
         if (aiips.size() == 0) {
             return null;
         }
@@ -461,9 +488,10 @@ public class AIQueueManagerEJBImpl
      * @return A List of AppdefResource's that were created as a result of
      * processing the queue.
      *
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
+    @Transactional
     public List processQueue(AuthzSubject subject,
                              List platformList,
                              List serverList,
@@ -473,20 +501,20 @@ public class AIQueueManagerEJBImpl
                RemoveException, AIQApprovalException
     {
         AuthzSubject s =
-            AuthzSubjectManagerImpl.getOne().findSubjectById(subject.getId());
+            authzSubjectManager.findSubjectById(subject.getId());
         boolean approved = false;
 
         try {
             if (action == AIQueueConstants.Q_DECISION_APPROVE) {
                 approved = true;
-                AuditManagerImpl.getOne()
+                auditManager
                                    .pushContainer(AIAudit.newImportAudit(s));
             }
             return _processQueue(subject, platformList, serverList, ipList,
                                  action, true);
         } finally {
             if (approved)
-                AuditManagerImpl.getOne().popContainer(false);
+                auditManager.popContainer(false);
         }
     }
 
@@ -510,15 +538,7 @@ public class AIQueueManagerEJBImpl
         Map aiserversToRemove = new HashMap();
         Object marker = new Object();
 
-        AIPlatformDAO aiplatformDao = getAIPlatformDAO();
-        AIIpDAO aiipDao = getAIIpDAO();
-        AIServerDAO aiserverDao = getAIServerDAO();
-
-        PlatformManagerLocal pmLocal = getPlatformManager();
-        ServerManagerLocal smLocal = getServerManager();
-        ConfigManager configMgr = getConfigManager();
-        CPropManager cpropMgr = getCPropManager();
-
+        
         AIPlatform aiplatform = null;
         List createdResources = new ArrayList();
 
@@ -535,7 +555,7 @@ public class AIQueueManagerEJBImpl
                     continue;
                 }
 
-                aiplatform = aiplatformDao.get(id);
+                aiplatform = aiPlatformDAO.get(id);
 
                 if (aiplatform == null) {
                     if (isPurgeAction) {
@@ -580,8 +600,8 @@ public class AIQueueManagerEJBImpl
                     }
                 }
 
-                visitor.visitPlatform(aiplatform, subject, pmLocal, configMgr,
-                                      cpropMgr, createdResources);
+                visitor.visitPlatform(aiplatform, subject, platformManager, configManager,
+                                      cPropManager, createdResources);
                 if (!isPurgeAction) aiplatformsToResync.put(id, marker);
             }
         }
@@ -594,7 +614,7 @@ public class AIQueueManagerEJBImpl
                     continue;
                 }
 
-                final AIIp aiip = aiipDao.get(id);
+                final AIIp aiip = aiIpDAO.get(id);
                 
                 if (aiip == null) {
                     if (isPurgeAction)
@@ -603,7 +623,7 @@ public class AIQueueManagerEJBImpl
                         throw new ObjectNotFoundException(id,
                                                           AIIp.class.getName());
                 }
-                visitor.visitIp(aiip, subject, pmLocal);
+                visitor.visitIp(aiip, subject, platformManager);
                 if (!isPurgeAction) {
                     Integer pk = aiip.getAIPlatform().getId();
                     aiplatformsToResync.put(pk, marker);
@@ -618,7 +638,7 @@ public class AIQueueManagerEJBImpl
                               " has a Server with ID=null");
                     continue;
                 }
-                final AIServer aiserver = aiserverDao.get(id);
+                final AIServer aiserver = aIServerDAO.get(id);
                 if (aiserver == null) {
                     if (isPurgeAction) {
                         continue;
@@ -628,8 +648,8 @@ public class AIQueueManagerEJBImpl
                     }
                 }
 
-                visitor.visitServer(aiserver,  subject, pmLocal, smLocal,
-                                    configMgr, cpropMgr, createdResources);
+                visitor.visitServer(aiserver,  subject, platformManager, serverManager,
+                                    configManager, cPropManager, createdResources);
                 if (isApproveAction) {
                     // Approved servers are removed from the queue
                     String aiid = aiserver.getAutoinventoryIdentifier();
@@ -647,7 +667,7 @@ public class AIQueueManagerEJBImpl
             iter = aiplatformsToResync.keySet().iterator();
             while ( iter.hasNext() ) { 
                 final Integer id = (Integer) iter.next();
-                aiplatform = aiplatformDao.get(id);
+                aiplatform = aiPlatformDAO.get(id);
                 syncQueue(aiplatform, isApproveAction);
             }
             
@@ -672,12 +692,12 @@ public class AIQueueManagerEJBImpl
         if (AIQueueConstants.Q_STATUS_CHANGED != aiplatform.getQueueStatus()) {
             return false;
         }
-        final AIIpDAO dao = getAIIpDAO();
+       
         boolean added = false;
         boolean removed = false;
         for (final Iterator it=ipList.iterator(); it.hasNext(); ) {
             final Integer id = (Integer)it.next();
-            final AIIp aiip = dao.get(id);
+            final AIIp aiip = aiIpDAO.get(id);
             if (AIQueueConstants.Q_STATUS_REMOVED == aiip.getQueueStatus()) {
                 removed = true;
             }
@@ -693,18 +713,19 @@ public class AIQueueManagerEJBImpl
 
     /**
      * Remove an AI platform from the queue.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
+    @Transactional
     public void removeFromQueue(AIPlatform aiplatform ) {
         // Remove the platform, this should recursively remove all queued 
         // servers and IPs
-        getAIPlatformDAO().remove(aiplatform);
+        aiPlatformDAO.remove(aiplatform);
     }
 
     /**
      * Find a platform given an AI platform id
-     * @ejb:interface-method
+     * 
      */
     public PlatformValue getPlatformByAI(AuthzSubject subject,
                                          int aiPlatformID)
@@ -713,13 +734,13 @@ public class AIQueueManagerEJBImpl
         AIPlatform aiplatform;
 
         // XXX Do authz check
-        aiplatform = getAIPlatformDAO().get(new Integer(aiPlatformID));
+        aiplatform = aiPlatformDAO.get(new Integer(aiPlatformID));
         return getPlatformByAI(subject, aiplatform).getPlatformValue();
     }
 
     /**
      * Get a platform given an AI platform, returns null if none found
-     * @ejb:interface-method
+     * 
      */
     public AIPlatformValue getAIPlatformByPlatformID(AuthzSubject subject,
                                                      Integer platformID) {
@@ -728,7 +749,7 @@ public class AIQueueManagerEJBImpl
     }
 
     private AIPlatform getAIPlatformByPlatformID(Integer platformID) {
-        return getAIPlatformByPlatform(getPlatformDAO().findById(platformID));
+        return getAIPlatformByPlatform(platformDAO.findById(platformID));
     }
 
     /**
@@ -749,7 +770,7 @@ public class AIQueueManagerEJBImpl
 
             if (mac != null && mac.length() > 0 &&
                 !mac.equals(NetFlags.NULL_HWADDR)) {
-                List addrs = getAIIpDAO().findByMACAddress(qip.getMacAddress());
+                List addrs = aiIpDAO.findByMACAddress(qip.getMacAddress());
                 if (addrs.size() > 0) {
                     AIPlatform aiplatform = ((AIIp)addrs.get(0)).getAIPlatform();
                     return aiplatform;
@@ -769,7 +790,7 @@ public class AIQueueManagerEJBImpl
                 continue;
             }
 
-            List addrs = getAIIpDAO().findByAddress(address);
+            List addrs = aiIpDAO.findByAddress(address);
             if (addrs.size() > 0) {
                 AIPlatform aiplatform = ((AIIp) addrs.get(0)).getAIPlatform();
                 return aiplatform;
@@ -781,15 +802,15 @@ public class AIQueueManagerEJBImpl
 
     /**
      * Find an AI platform given an platform
-     * @ejb:interface-method
+     * 
      */
     public Platform getPlatformByAI(AuthzSubject subject,
                                          AIPlatform aipLocal)
         throws PermissionException, PlatformNotFoundException
     {
-        PlatformManagerLocal pmLocal = getPlatformManager();
+        
         Platform p =
-            pmLocal.getPlatformByAIPlatform(subject,
+            platformManager.getPlatformByAIPlatform(subject,
                                             aipLocal.getAIPlatformValue());
 
         if (p != null)
@@ -804,47 +825,26 @@ public class AIQueueManagerEJBImpl
      * Check to see if the subject can perform an autoinventory scan
      * on the specified resource. This is another hack to publicly expose
      * this method in AppdefSessionEJB as an EJB interface method.
-     * @ejb:interface-method
+     * 
      */
     public void checkAIScanPermission(AuthzSubject subject, AppdefEntityID id)
     	throws PermissionException, GroupNotCompatibleException {
-    	super.checkAIScanPermission(subject, id);
+    	permissionManager.checkAIScanPermission(subject, id);
     }
 
-    public static AIQueueManagerLocal getOne() {
-        try {
-            return AIQueueManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    public static AIQueueManager getOne() {
+       return Bootstrap.getBean(AIQueueManager.class);
     }
 
     /**
-     * Create an AI queue manager session bean.
-     * @exception CreateException If an error occurs creating bean.
+     * 
      */
-    public void ejbCreate() throws CreateException {
-        try {
+    @PostConstruct
+    public void afterPropertiesSet() throws Exception {
+      
             aiplatformPager = Pager.getPager(AIPLATFORM_PROCESSOR);
-            aiplatformPager_noplaceholders = Pager.getPager(AIPLATFORM_PROCESSOR_NOPLACEHOLDERS);
-        } catch ( Exception e ) {
-            throw new CreateException("Could not create value pager:" + e);
-        }
+            aiplatformPagerNoPlaceholders = Pager.getPager(AIPLATFORM_PROCESSOR_NOPLACEHOLDERS);
+       
     }
-
-    public void ejbRemove   () {}
-    public void ejbActivate () {}
-    public void ejbPassivate() {}
-
-    protected AIPlatformDAO getAIPlatformDAO()
-    {
-        return DAOFactory.getDAOFactory().getAIPlatformDAO();
-    }
-
-    protected AIIpDAO getAIIpDAO()
-    {
-        return DAOFactory.getDAOFactory().getAIIpDAO();
-    }
-
 
 }

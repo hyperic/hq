@@ -1,7 +1,7 @@
 import org.hyperic.hq.hqu.rendit.BaseController
-import org.hyperic.hq.appdef.shared.AIQueueManagerLocal
+import org.hyperic.hq.appdef.shared.AIQueueManager
 import org.hyperic.util.pager.PageControl
-import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl as AIQMan
+import org.hyperic.hq.appdef.server.session.AIQueueManagerImpl as AIQMan
 import org.hyperic.hq.appdef.shared.AIPlatformValue
 import org.hyperic.hq.appdef.shared.AIQueueConstants
 import org.hyperic.hq.appdef.server.session.Platform
@@ -54,7 +54,7 @@ class AutodiscoveryController extends BaseController {
 
         String fqdn = params.getOne('fqdn')
 
-        AIQueueManagerLocal aiMan = AIQMan.one
+        AIQueueManager aiMan = AIQMan.one
 
         def list = aiMan.getQueue(user, true, true, 
                                   false, PageControl.PAGE_ALL)
@@ -79,7 +79,7 @@ class AutodiscoveryController extends BaseController {
     }
 
     private List processPlatform(AuthzSubject user,
-                                 AIQueueManagerLocal aiMan,
+                                 AIQueueManager aiMan,
                                  AIPlatformValue plat) {
         // If a platform is a placeholder, don't attempt to approve it.
         List platformIds = []

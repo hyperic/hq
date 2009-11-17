@@ -36,6 +36,7 @@ import javax.naming.NamingException;
 import org.hibernate.Query;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.CloningBoss;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
@@ -48,9 +49,12 @@ import org.hyperic.hq.authz.server.session.ResourceDAO;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
+import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.HierarchicalAlertingManager;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
+import org.hyperic.hq.grouping.server.session.GroupUtil;
+import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.util.pager.PageControl;
 
 public abstract class PermissionManager   {
@@ -91,6 +95,104 @@ public abstract class PermissionManager   {
     {
         Integer opId = getOpIdByResourceType(rtV, operation);
         check(subject.getId(), rtV.getId(), id, opId);
+    }
+    
+    /**
+     * Check to see if the subject can perform an autoinventory scan
+     * on the specified resource.  For platforms, the user must have
+     * modify platform permissions on the platform, and add server
+     * permissions on the platform.  For a group, the user must have
+     * these permission on every platform in the group.
+     * @param subject The user to check permissions on.
+     * @param id An ID of a platform or a group of platforms.
+     * @exception GroupNotCompatibleException If the group is not a compatible
+     * group.
+     * @exception SystemException If the group is empty or is not a group
+     * of platforms.
+     */
+    public void checkAIScanPermission(AuthzSubject subject, AppdefEntityID id)
+        throws PermissionException, GroupNotCompatibleException {
+
+        int type = id.getType();
+
+        // Check permissions - subject must have modify platform
+        // permission on the platform in question (or, if it's a group, the
+        // subject must have modify platform permissions on all platforms
+        // in the group), AND the global "add server" permission.
+        if (id.isPlatform()) {
+            checkAIScanPermissionForPlatform(subject, id);
+
+        } else if (id.isGroup()) {
+
+            // Check permissions for EVERY platform in the group
+            List groupMembers;
+            try {
+                groupMembers = GroupUtil.getCompatGroupMembers(
+                    subject, id, null, PageControl.PAGE_ALL);
+            } catch (AppdefEntityNotFoundException e) {
+                // should never happen
+                throw new SystemException("Error finding group: " + id, e);
+            }
+            if (groupMembers.isEmpty()) {
+                throw new SystemException("Can't perform autoinventory " +
+                                          "scan on an empty group");
+            }
+
+            for (Iterator i = groupMembers.iterator(); i.hasNext();) {
+                AppdefEntityID platformEntityID = (AppdefEntityID) i.next();
+                checkAIScanPermissionForPlatform(subject, platformEntityID);
+            }
+        } else {
+            throw new SystemException("Autoinventory scans may only be " +
+                                      "performed on platforms and groups " +
+                                      "of platforms");
+        }
+    }
+    
+    /**
+     * Chec to see if the subject can perform an autoinventory scan
+     * on a platform.  Don't use this method - instead use checkAIScanPermission
+     * which will call this method as necessary.
+     */
+    private void checkAIScanPermissionForPlatform(AuthzSubject subject,
+                                                  AppdefEntityID platformID)
+        throws PermissionException {
+        
+        AppdefResourcePermissions arp;
+        try {
+            arp = getResourcePermissions(subject, platformID);
+        } catch (FinderException e) {
+            throw new SystemException("Unexpected error reading "
+                                         + "permissions: " + e, e);
+        }
+        if (arp.canCreateChild() && arp.canModify()) {
+            // ok, legal operation
+        } else {
+            // boom, no permissions
+            throw new PermissionException("User " + subject.getName() +
+                                          " is not permitted to start an " +
+                                          "autoinventory scan on platform " +
+                                          platformID);
+        }
+    }
+    
+    /**
+     * Check for createPlatform permission for a resource
+     * @param subject
+     * @throws PermissionException
+     * @ejb:interface-method
+     * @ejb:transaction type="Required"
+     */
+    public void checkCreatePlatformPermission(AuthzSubject subject)
+        throws PermissionException {
+        try {    
+            checkPermission(subject, getResourceType(AuthzConstants.rootResType), 
+                            AuthzConstants.rootResourceId, 
+                            AuthzConstants.platformOpCreatePlatform);
+        } catch (FinderException e) {
+            // seed data error if this is not there
+            throw new SystemException(e);
+        }
     }
     
     /**

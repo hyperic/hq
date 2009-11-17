@@ -16,7 +16,7 @@ class AgentCategory {
     static boolean ping(Agent agent, AuthzSubject subject) {
         try {
             aMan.pingAgent(subject, agent)
-            return true
+            return true 
         } catch (PermissionException p) {
             throw p
         } catch (Exception e) {

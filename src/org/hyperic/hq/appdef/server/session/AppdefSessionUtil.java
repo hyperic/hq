@@ -27,7 +27,7 @@ package org.hyperic.hq.appdef.server.session;
 
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
-import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
+import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
@@ -44,7 +44,7 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.TypeInfo;
 
 public abstract class AppdefSessionUtil {
-    private AIQueueManagerLocal aiqManagerLocal;
+    private AIQueueManager aiqManagerLocal;
     private ConfigManager configMgrL;
     private ResourceManager rmLocal;
     private CPropManager cpropLocal;
@@ -96,9 +96,9 @@ public abstract class AppdefSessionUtil {
         return rmLocal;
     }
 
-    protected AIQueueManagerLocal getAIQManagerLocal() {
+    protected AIQueueManager getAIQManagerLocal() {
         if (aiqManagerLocal == null) {
-            aiqManagerLocal = AIQueueManagerEJBImpl.getOne();
+            aiqManagerLocal = AIQueueManagerImpl.getOne();
         }
         return aiqManagerLocal;
     }

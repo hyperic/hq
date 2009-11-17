@@ -33,7 +33,7 @@ class TwoPanedFilterBuilder extends BuilderSupport {
     }
     
     def createNode(name) {
-        createNode(name, 'unspecified')
+        createNode(name, 'unspecified') 
     }
     
     def createNode(name, Map attributes) {

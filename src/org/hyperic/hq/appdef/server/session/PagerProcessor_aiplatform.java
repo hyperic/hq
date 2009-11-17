@@ -25,20 +25,17 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import org.hyperic.util.pager.PagerProcessorExt;
-import org.hyperic.util.pager.PagerEventHandler;
-
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
-import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
-import org.hyperic.hq.appdef.shared.AIQueueManagerUtil;
+import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.autoinventory.AIPlatform;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.AIPlatformDAO;
+import org.hyperic.util.pager.PagerEventHandler;
+import org.hyperic.util.pager.PagerProcessorExt;
 
 public class PagerProcessor_aiplatform implements PagerProcessorExt {
 
-    protected AIQueueManagerLocal aiqManagerLocal;
+    protected AIQueueManager aiqManagerLocal;
 
     private AIPlatformDAO aPlatformDAO = Bootstrap.getBean(AIPlatformDAO.class);
 
@@ -78,7 +75,7 @@ public class PagerProcessor_aiplatform implements PagerProcessorExt {
 
         public void init () {
             try {
-                aiqManagerLocal = AIQueueManagerUtil.getLocalHome().create();
+                aiqManagerLocal = AIQueueManagerImpl.getOne();
             } catch (Exception e) {
                 IllegalStateException ise
                     = new IllegalStateException("Could not create " +

@@ -8,7 +8,7 @@ class HtmlUtil {
     }
     
     static String escapeHtml(o) {
-    	StringEscapeUtils.escapeHtml(o.toString())    
+    	StringEscapeUtils.escapeHtml(o.toString())     
     }
     
     /**

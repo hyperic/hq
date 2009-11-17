@@ -55,7 +55,7 @@ class HQUPlugin implements IHQUPlugin {
             this.descriptor.load(s)
         }
         this.log = LogFactory.getLog("hqu.plugin.${name}")
-    }
+    } 
     
     /**
      * Add a view to be linked & viewed within HQ.

@@ -13,7 +13,7 @@ class RoleCategory {
         roleMan.removeSubjects(user, role.id,
                                (role.subjects.collect {it.id}) as Integer[])
         roleMan.addSubjects(user, role.id, 
-                            (subjects.collect {it.id}) as Integer[])
+                            (subjects.collect {it.id}) as Integer[]) 
     }
 
     static void setGroups(Role role, AuthzSubject user, Collection groups) {

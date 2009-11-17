@@ -50,7 +50,7 @@ import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
-import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
+import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
@@ -1360,8 +1360,8 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
             if (existing.getAgent() != null) {
                 if (plat.getAgent() == null) {
                     // Create AIPlatform for manually created platform
-                    AIQueueManagerLocal aiqManagerLocal =
-                        AIQueueManagerEJBImpl.getOne();
+                    AIQueueManager aiqManagerLocal =
+                        AIQueueManagerImpl.getOne();
                     AIPlatformValue aiPlatform = new AIPlatformValue();
                     aiPlatform.setFqdn(existing.getFqdn());
                     aiPlatform.setName(existing.getName());

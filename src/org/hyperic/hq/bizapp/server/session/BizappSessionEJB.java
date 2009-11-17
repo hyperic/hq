@@ -29,7 +29,7 @@ import java.rmi.RemoteException;
 
 import javax.ejb.SessionContext;
 
-import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AIQueueManagerImpl;
 import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.server.session.AppdefStatManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
@@ -38,7 +38,7 @@ import org.hyperic.hq.appdef.server.session.ConfigManagerImpl;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
-import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
+import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
@@ -266,7 +266,7 @@ public abstract class BizappSessionEJB {
         }
     }
 
-    protected AIQueueManagerLocal getAIManager() {
-        return AIQueueManagerEJBImpl.getOne();
+    protected AIQueueManager getAIManager() {
+        return AIQueueManagerImpl.getOne();
     }
 }

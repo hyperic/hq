@@ -16,5 +16,5 @@ abstract class BaseHelper {
     
     protected AuthzSubject getOverlord() {
         this.overlord
-    }
+    } 
 }
