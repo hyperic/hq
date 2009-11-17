@@ -91,7 +91,7 @@ public class ResourceType extends AuthzNamedBean {
         return new Operation(this, name);
     }
 
-    public Collection getOperations() {
+    public Collection<Operation> getOperations() {
         return Collections.unmodifiableCollection(_operations);
     }
 

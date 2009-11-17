@@ -85,7 +85,7 @@ public abstract class PermissionManager   {
      * @param id - the id of the object
      * @param operation - the name of the operation to perform
      */
-    protected void checkPermission(AuthzSubject subject, ResourceType rtV,
+    public void checkPermission(AuthzSubject subject, ResourceType rtV,
                                    Integer id, String operation)
         throws PermissionException 
     {

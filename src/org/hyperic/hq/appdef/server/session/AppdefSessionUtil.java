@@ -30,7 +30,7 @@ import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
@@ -73,8 +73,8 @@ public abstract class AppdefSessionUtil {
         return configMgrL;
     }
 
-    protected ApplicationManagerLocal getApplicationManager() {
-        return ApplicationManagerEJBImpl.getOne();
+    protected ApplicationManager getApplicationManager() {
+        return ApplicationManagerImpl.getOne();
     }
 
     protected PlatformManagerLocal getPlatformManager() {

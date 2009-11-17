@@ -32,7 +32,7 @@ import java.util.List;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Server;
@@ -55,7 +55,7 @@ import org.hyperic.util.pager.PageList;
 
 public class AppdefEntityValue {
     private PlatformManagerLocal    platformManagerLocal;
-    private ApplicationManagerLocal applicationManagerLocal;
+    private ApplicationManager applicationManagerLocal;
     private ServerManagerLocal      serverManagerLocal;
     private ServiceManagerLocal     serviceManagerLocal;
 
@@ -107,9 +107,9 @@ public class AppdefEntityValue {
         return serviceManagerLocal;
     }
 
-    private ApplicationManagerLocal getApplicationManager() {
+    private ApplicationManager getApplicationManager() {
         if (applicationManagerLocal == null) {
-            applicationManagerLocal = ApplicationManagerEJBImpl.getOne();
+            applicationManagerLocal = ApplicationManagerImpl.getOne();
         }
         return applicationManagerLocal;
     }

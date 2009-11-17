@@ -45,7 +45,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.CPropChangeEvent;
 import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
@@ -86,7 +86,7 @@ public class CPropManagerImpl implements CPropManager {
 	private CpropDAO cPropDAO;
 	private CpropKeyDAO cPropKeyDAO;
 	private PlatformManagerLocal platformManager;
-	private ApplicationManagerLocal applicationManager;
+	private ApplicationManager applicationManager;
 	private ServerManagerLocal serverManager;
 	private ServiceManagerLocal serviceManager;
 	private PlatformTypeDAO platformTypeDAO;
@@ -96,7 +96,7 @@ public class CPropManagerImpl implements CPropManager {
 	@Autowired
 	public CPropManagerImpl(Messenger sender, CpropDAO cPropDAO,
 			CpropKeyDAO cPropKeyDAO, PlatformManagerLocal platformManager,
-			ApplicationManagerLocal applicationManager,
+			ApplicationManager applicationManager,
 			ServerManagerLocal serverManager,
 			ServiceManagerLocal serviceManager,
 			PlatformTypeDAO platformTypeDAO, ServerTypeDAO serverTypeDAO,

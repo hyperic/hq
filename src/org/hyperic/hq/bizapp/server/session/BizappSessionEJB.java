@@ -32,7 +32,7 @@ import javax.ejb.SessionContext;
 import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.server.session.AppdefStatManagerEJBImpl;
-import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.server.session.CPropManagerImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerImpl;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
@@ -41,7 +41,7 @@ import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
-import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
@@ -203,8 +203,8 @@ public abstract class BizappSessionEJB {
         return MeasurementManagerImpl.getOne();
     }
 
-    public ApplicationManagerLocal getApplicationManager() {
-        return ApplicationManagerEJBImpl.getOne();
+    public ApplicationManager getApplicationManager() {
+        return ApplicationManagerImpl.getOne();
     }
     
     public AgentManager getAgentManager() {

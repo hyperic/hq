@@ -31,89 +31,99 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
-import javax.ejb.SessionBean;
 
-import org.hyperic.hq.appdef.server.session.Application;
-import org.hyperic.hq.appdef.server.session.ApplicationType;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
+import org.hyperic.hq.appdef.AppService;
+import org.hyperic.hq.appdef.shared.AppServiceValue;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.DependencyTree;
+import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
-import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
-import org.hyperic.hq.appdef.shared.ApplicationManagerUtil;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
-import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.GroupChangeCallback;
+import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
+import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
-import org.hyperic.dao.DAOFactory;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.hibernate.ObjectNotFoundException;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * This class is responsible for managing Application objects in appdef
  * and their relationships
- * @ejb:bean name="ApplicationManager"
- *      jndi-name="ejb/appdef/ApplicationManager"
- *      local-jndi-name="LocalApplicationManager"
- *      view-type="local"
- *      type="Stateless"
- * @ejb:util generate="physical"
- * @ejb:transaction type="Required"
+ 
  */
-public class ApplicationManagerEJBImpl extends AppdefSessionEJB
-    implements SessionBean {
+@org.springframework.stereotype.Service
+@Transactional
+public class ApplicationManagerImpl implements ApplicationManager {
 
-    protected Log log =
-        LogFactory.getLog(ApplicationManagerEJBImpl.class.getName());
+    protected final Log log =
+        LogFactory.getLog(ApplicationManagerImpl.class.getName());
 
-    protected final String VALUE_PROCESSOR
+    protected static final String VALUE_PROCESSOR
         = "org.hyperic.hq.appdef.server.session.PagerProcessor_app";
-    private Pager valuePager = null;
+    private Pager valuePager;
 
-    private ApplicationTypeDAO applicationTypeDAO = Bootstrap.getBean(ApplicationTypeDAO.class);
+    private ApplicationTypeDAO applicationTypeDAO;
 
-    private AppServiceDAO appServiceDAO = Bootstrap.getBean(AppServiceDAO.class);
+    private AppServiceDAO appServiceDAO;
+    
+    private ApplicationDAO applicationDAO;
+    
+    private ServiceManagerLocal serviceManager;
+    
+    private ResourceManager resourceManager;
+    
+    private PermissionManager permissionManager;
+    
+    private AuthzSubjectManager authzSubjectManager;
+    
+    private ZeventEnqueuer zeventManager;
+    
+    private HQApp hqApp;
 
     /**
      * Get all Application types
      * @return list of ApplicationTypeValue objects
-     * @ejb:interface-method
+     * 
      */
-    public List getAllApplicationTypes(AuthzSubject who)
+    public List<AppdefResourceTypeValue> getAllApplicationTypes(AuthzSubject who)
         throws FinderException {
-        List all = applicationTypeDAO.findAll();
-        List ret = new ArrayList(all.size());
-        for (Iterator it = all.iterator(); it.hasNext(); ) {
-            ApplicationType type = (ApplicationType) it.next();
+        List<ApplicationType> all = applicationTypeDAO.findAll();
+        List<AppdefResourceTypeValue> ret = new ArrayList<AppdefResourceTypeValue>(all.size());
+        for (ApplicationType type : all ) {
             ret.add(type.getAppdefResourceTypeValue());
         }
         return ret;
@@ -121,7 +131,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get ApplicationType by ID
-     * @ejb:interface-method
+     * 
      */
     public ApplicationType findApplicationType(Integer id) {
         return applicationTypeDAO.findById(id);
@@ -134,16 +144,16 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @param services - A collection of ServiceValue objects that will be
      * the initial set of services for the application.  This can be
      * null if you are creating an empty application.
-     * @ejb:interface-method
+     * 
      */
     public Application createApplication(AuthzSubject subject,
                                          ApplicationValue newApp,
-                                         Collection services)
+                                         Collection<ServiceValue> services)
         throws ValidationException, PermissionException, CreateException,
                AppdefDuplicateNameException
     {
-        ApplicationType at =
-            applicationTypeDAO.findById(newApp.getApplicationType().getId());
+       
+        applicationTypeDAO.findById(newApp.getApplicationType().getId());
         if(log.isDebugEnabled()) {
             log.debug("Begin createApplication: " + newApp);
         }
@@ -167,12 +177,12 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             // set modified by
             newApp.setModifiedBy(subject.getName());
             // call the create
-            Application application = getApplicationDAO().create(newApp);
+            Application application = applicationDAO.create(newApp);
             // AUTHZ CHECK
             createAuthzApplication(subject, application);
             // now add the services
-            for(Iterator i = services.iterator(); i.hasNext();) {
-                ServiceValue aService = (ServiceValue)i.next();
+            for(ServiceValue aService : services) {
+               
                 log.debug("Adding service: " + aService + " to application");
                 application.addService(aService.getId());
             }
@@ -189,16 +199,16 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     /**
      * Update the basic properties of an application. Will NOT update
      * service dependencies, etc.
-     * @ejb:interface-method
-     * @ejb:transaction type="Required"
+     * 
+     * 
      */
     public ApplicationValue updateApplication(AuthzSubject subject,
                                               ApplicationValue newValue)
         throws ApplicationNotFoundException, PermissionException,
                UpdateException,  AppdefDuplicateNameException, FinderException {
-        ApplicationDAO dao = getApplicationDAO();
-        Application app = dao.findById(newValue.getId());
-        checkModifyPermission(subject, app.getEntityId());
+       
+        Application app = applicationDAO.findById(newValue.getId());
+        permissionManager.checkModifyPermission(subject, app.getEntityId());
         newValue.setModifiedBy(subject.getName());
         newValue.setMTime(new Long(System.currentTimeMillis()));
         trimStrings(newValue);
@@ -220,25 +230,46 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
 
             app.getResource().setName(newValue.getName());
         }
-        dao.setApplicationValue(app, newValue);
+        applicationDAO.setApplicationValue(app, newValue);
         return findApplicationById(subject, app.getId()).getApplicationValue();
     }
 
     /**
      * Remove an application
      *
-     * @ejb:interface-method
+     * 
      */
     public void removeApplication(AuthzSubject subject, Integer id)
         throws ApplicationNotFoundException, PermissionException,
                RemoveException, VetoException
     {
-        ApplicationDAO dao = getApplicationDAO();
-        Application app = dao.findById(id);
-        checkRemovePermission(subject, app.getEntityId());
-        dao.remove(app);
+       
+        Application app = applicationDAO.findById(id);
+        permissionManager.checkRemovePermission(subject, app.getEntityId());
+        applicationDAO.remove(app);
         removeAuthzResource(subject, app.getEntityId(), app.getResource());
-        dao.getSession().flush();
+        applicationDAO.getSession().flush();
+    }
+    
+    /**
+     * remove the authz resource entry
+     */
+    protected void removeAuthzResource(AuthzSubject subject,
+                                       AppdefEntityID aeid, Resource r)
+        throws RemoveException, PermissionException, VetoException 
+    {
+        if (log.isDebugEnabled()) {
+            log.debug("Removing authz resource: " + aeid);
+        }
+        
+      
+        AuthzSubject s = 
+           authzSubjectManager.findSubjectById(subject.getId()); 
+        resourceManager.removeResource(s, r);
+        
+        // Send resource delete event
+        ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, aeid);
+        zeventManager.enqueueEventAfterCommit(zevent);
     }
 
     /**
@@ -250,15 +281,15 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @throws ApplicationNotFoundException - when the app can't be found
      * @throws PermissionException - when caller is not authorized to remove.
      *
-     * @ejb:interface-method
+     * 
      */
     public void removeAppService(AuthzSubject caller, Integer appId,
                                  Integer appServiceId)
         throws ApplicationException, ApplicationNotFoundException,
                PermissionException {
         try {
-            Application app = getApplicationDAO().findById(appId);
-            checkModifyPermission(caller, app.getEntityId());
+            Application app = applicationDAO.findById(appId);
+            permissionManager.checkModifyPermission(caller, app.getEntityId());
 
 
             AppService appSvcLoc = appServiceDAO.findById(appServiceId);
@@ -270,17 +301,17 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void handleResourceDelete(Resource resource) {
-        getApplicationDAO().clearResource(resource);
+        applicationDAO.clearResource(resource);
     }
 
 
 
     /**
      * Get the service dependency map for an application
-     * @ejb:interface-method
+     * 
      * @param subject
      * @param appId
      */
@@ -288,10 +319,10 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         throws ApplicationNotFoundException, PermissionException {
         try {
             // find the app
-            ApplicationDAO dao = getApplicationDAO();
-            Application app = dao.findById(pk);
-            checkViewPermission(subject, app.getEntityId());
-            return dao.getDependencyTree(app);
+           
+            Application app = applicationDAO.findById(pk);
+            permissionManager.checkViewPermission(subject, app.getEntityId());
+            return applicationDAO.getDependencyTree(app);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(pk);
         }
@@ -300,15 +331,15 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get the # of applications within HQ inventory
-     * @ejb:interface-method
+     * 
      */
     public Number getApplicationCount() {
-        return new Integer(getApplicationDAO().size());
+        return new Integer(applicationDAO.size());
     }
 
     /**
      * Set the dependency map for an application
-     * @ejb:interface-method
+     * 
      * @param depTree
      * @param subject
      */
@@ -319,10 +350,10 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         Integer pk = depTree.getApplication().getId();
         try {
             // find the app
-            ApplicationDAO dao = getApplicationDAO();
-            Application app = dao.findById(pk);
-            checkModifyPermission(subject, app.getEntityId());
-            dao.setDependencyTree(app, depTree);
+           
+            Application app = applicationDAO.findById(pk);
+            permissionManager.checkModifyPermission(subject, app.getEntityId());
+            applicationDAO.setDependencyTree(app, depTree);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(pk);
         }
@@ -335,24 +366,24 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      */
     private Application findApplicationByName(AuthzSubject subject, String name)
         throws ApplicationNotFoundException, PermissionException {
-        Application app = getApplicationDAO().findByName(name);
+        Application app = applicationDAO.findByName(name);
         if (app == null) {
             throw new ApplicationNotFoundException(name);
         }
-        checkViewPermission(subject, app.getEntityId());
+        permissionManager.checkViewPermission(subject, app.getEntityId());
         return app;
     }
 
     /**
      * Get application pojo by id.
      *
-     * @ejb:interface-method
+     * 
      */
     public Application findApplicationById(AuthzSubject subject,  Integer id)
         throws ApplicationNotFoundException, PermissionException {
         try {
-            Application app = getApplicationDAO().findById(id);
-            checkViewPermission(subject, app.getEntityId());
+            Application app = applicationDAO.findById(id);
+            permissionManager.checkViewPermission(subject, app.getEntityId());
             return app;
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(id, e);
@@ -360,46 +391,86 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**
-     * @ejb.interface-method
+     * 
      */
-    public Collection findDeletedApplications() {
-        return getApplicationDAO().findDeletedApplications();
+    public Collection<Application> findDeletedApplications() {
+        return applicationDAO.findDeletedApplications();
     }
 
     /**
      * Get all applications.
-     * @ejb:interface-method
+     * 
      *
      * @param subject The subject trying to list applications.
      * @return A List of ApplicationValue objects representing all of the
      * applications that the given subject is allowed to view.
      */
-    public PageList getAllApplications(AuthzSubject subject, PageControl pc)
+    public PageList<ApplicationValue> getAllApplications(AuthzSubject subject, PageControl pc)
         throws FinderException, PermissionException {
-        Collection authzPks = getViewableApplications(subject);
-        Collection apps = null;
+        Collection<Integer> authzPks = getViewableApplications(subject);
+        Collection<Application> apps = null;
         int attr = -1;
         if(pc != null) {
             attr = pc.getSortattribute();
         }
-        ApplicationDAO dao = getApplicationDAO();
+       
         switch(attr) {
             case SortAttribute.RESOURCE_NAME:
                 if(pc != null) {
-                    apps = dao.findAll_orderName(!pc.isDescending());
+                    apps = applicationDAO.findAll_orderName(!pc.isDescending());
                 }
                 break;
             default:
-                apps = dao.findAll();
+                apps = applicationDAO.findAll();
                 break;
         }
-        for(Iterator i = apps.iterator(); i.hasNext();) {
-            Integer appPk = ((Application) i.next()).getId();
+        for(Iterator<Application> i = apps.iterator(); i.hasNext();) {
+            Integer appPk = i.next().getId();
             if(!authzPks.contains(appPk)) {
                 i.remove();
             }
         }
         return valuePager.seek(apps, pc);
+    }
+    
+    /**
+     * Find an operation by name inside a ResourcetypeValue object
+     */
+    protected Operation getOperationByName(ResourceType rtV,
+                                                String opName)
+        throws PermissionException
+    {
+        Collection<Operation> ops = rtV.getOperations();
+        for(Operation op : ops ) {
+          
+            if(op.getName().equals(opName)) {
+                return op;
+            }
+        }
+        throw new PermissionException("Operation: " + opName +
+                                      " not valid for ResourceType: " +
+                                      rtV.getName());
+    }
+    
+    /**
+     * Get the scope of viewable apps for a given user
+     * @param whoami     
+     * @return list of ApplicationPKs for which the subject has
+     * AuthzConstants.applicationOpViewApplication
+     */
+    protected List<Integer> getViewableApplications(AuthzSubject whoami)
+        throws FinderException, PermissionException
+    {
+        
+        Operation op = 
+            getOperationByName(resourceManager.findResourceTypeByName(AuthzConstants.applicationResType),
+                               AuthzConstants.appOpViewApplication);
+        List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
+        List<Integer> keyList = new ArrayList<Integer>(idList.size());
+        for(int i=0; i < idList.size(); i++) {
+            keyList.add(idList.get(i));
+        }
+        return keyList;
     }
 
     /**
@@ -407,22 +478,22 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @param subject
      * @param appId
      * @retur list of AppServiceValue objects
-     * @ejb:interface-method
+     * 
      */
-    public List getApplicationServices(AuthzSubject subject, Integer appId)
+    public List<AppServiceValue> getApplicationServices(AuthzSubject subject, Integer appId)
         throws ApplicationNotFoundException, PermissionException {
         // find the application
         Application app;
         try {
-            app = getApplicationDAO().findById(appId);
+            app = applicationDAO.findById(appId);
         } catch (ObjectNotFoundException e) {
             throw new ApplicationNotFoundException(appId);
         }
-        checkViewPermission(subject, app.getEntityId());
-        Collection ejbs = app.getAppServices();
-        List appSvc = new ArrayList(ejbs.size());
-        for(Iterator i = ejbs.iterator(); i.hasNext();) {
-            AppService aEJB = (AppService)i.next();
+        permissionManager.checkViewPermission(subject, app.getEntityId());
+        Collection<AppService> ejbs = app.getAppServices();
+        List<AppServiceValue> appSvc = new ArrayList<AppServiceValue>(ejbs.size());
+        for(AppService aEJB : ejbs) {
+           
             appSvc.add(aEJB.getAppServiceValue());
         }
         return appSvc;
@@ -433,17 +504,17 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * @param subject
      * @param map key: Integer service ID value: Boolean indicating
      * that the service is an entry point
-     * @ejb:interface-method
+     * 
      */
     public void setApplicationServices(AuthzSubject subject, Integer appId,
-                                       List entityIds)
+                                       List<AppdefEntityID> entityIds)
         throws ApplicationNotFoundException, CreateException,
                AppdefGroupNotFoundException, PermissionException {
         try {
-            Application app = getApplicationDAO().findById(appId);
-            checkModifyPermission(subject, app.getEntityId());
-            for(Iterator i = app.getAppServices().iterator();i.hasNext();) {
-                AppService appSvc = (AppService)i.next();
+            Application app = applicationDAO.findById(appId);
+            permissionManager.checkModifyPermission(subject, app.getEntityId());
+            for(Iterator<AppService> i = app.getAppServices().iterator();i.hasNext();) {
+                AppService appSvc = i.next();
                 AppdefEntityID anId = null;
                 if(appSvc.isIsGroup()) {
                     ResourceGroup group = appSvc.getResourceGroup();
@@ -476,10 +547,10 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     /*
      * Helper method to look up the applications by resource
      */
-    private Collection getApplicationsByResource(AppdefEntityID resource,
+    private Collection<Application> getApplicationsByResource(AppdefEntityID resource,
         PageControl pc)
         throws ApplicationNotFoundException {
-        Collection apps;
+        Collection<Application> apps;
         Integer id;
 
         id = resource.getId();
@@ -513,20 +584,20 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     /*
      * Helper method to do the looking up by platform.
      */
-    private Collection getApplicationsByPlatform(PageControl pc, Integer id)
+    private Collection<Application> getApplicationsByPlatform(PageControl pc, Integer id)
         throws FinderException {
-        ApplicationDAO  dao = getApplicationDAO();
-        Collection apps;
+      
+        Collection<Application> apps;
         pc = PageControl.initDefaults(pc,SortAttribute.RESOURCE_NAME);
         switch (pc.getSortattribute()) {
             case SortAttribute.RESOURCE_NAME:
-                apps = dao.findByPlatformId_orderName(id, pc.isAscending());
+                apps = applicationDAO.findByPlatformId_orderName(id, pc.isAscending());
                 break;
             case SortAttribute.OWNER_NAME:
-                apps = dao.findByPlatformId_orderOwner(id, pc.isAscending());
+                apps = applicationDAO.findByPlatformId_orderOwner(id, pc.isAscending());
                 break;
             default :
-                apps = dao.findByPlatformId_orderName(id, true);
+                apps = applicationDAO.findByPlatformId_orderName(id, true);
                 break;
         }
         return apps;
@@ -535,20 +606,20 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     /*
      * Helper method to do the looking up by server.
      */
-    private Collection getApplicationsByServer(PageControl pc, Integer id)
+    private Collection<Application> getApplicationsByServer(PageControl pc, Integer id)
         throws FinderException {
-        ApplicationDAO dao = getApplicationDAO();
-        Collection apps;
+        
+        Collection<Application> apps;
         pc = PageControl.initDefaults(pc,SortAttribute.RESOURCE_NAME);
         switch (pc.getSortattribute()) {
             case SortAttribute.RESOURCE_NAME:
-                apps = dao.findByServerId_orderName(id, pc.isAscending());
+                apps = applicationDAO.findByServerId_orderName(id, pc.isAscending());
                 break;
             case SortAttribute.OWNER_NAME:
-                apps = dao.findByServerId_orderOwner(id,pc.isAscending());
+                apps = applicationDAO.findByServerId_orderOwner(id,pc.isAscending());
                 break;
             default :
-                apps = dao.findByServerId_orderName(id, true);
+                apps = applicationDAO.findByServerId_orderName(id, true);
                 break;
         }
         return apps;
@@ -557,33 +628,33 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     /*
      * Helper method to do the looking up by service.
      */
-    private Collection getApplicationsByService(PageControl pc, Integer id)
+    private Collection<Application> getApplicationsByService(PageControl pc, Integer id)
         throws FinderException, AppdefEntityNotFoundException {
-        ApplicationDAO dao = getApplicationDAO();
+       
 
         // We need to look up the service so that we can see if we need to
         // look up its cluster, too
-        Service service = getServiceManager().findServiceById(id);
+        Service service = serviceManager.findServiceById(id);
 
         boolean cluster = service.getResourceGroup() != null;
 
-        Collection apps;
+        Collection<Application> apps;
         pc = PageControl.initDefaults(pc,SortAttribute.RESOURCE_NAME);
         switch (pc.getSortattribute()) {
             case SortAttribute.OWNER_NAME:
-                apps = dao.findByServiceId_orderOwner(id, pc.isAscending());
+                apps = applicationDAO.findByServiceId_orderOwner(id, pc.isAscending());
                 break;
             case SortAttribute.RESOURCE_NAME:
             default :
                 // ZZZ need to fix this up
                 if (cluster)
-                    apps = dao.findByServiceIdOrClusterId_orderName(
+                    apps = applicationDAO.findByServiceIdOrClusterId_orderName(
                             id, service.getResourceGroup().getId());
                 else
-                    apps = dao.findByServiceId_orderName(id);
+                    apps = applicationDAO.findByServiceId_orderName(id);
 
                 if (pc.isDescending()) {
-                    List appsList = new ArrayList(apps);
+                    List<Application> appsList = new ArrayList<Application>(apps);
                     Collections.reverse(appsList);
                     apps = appsList;
                 }
@@ -597,27 +668,27 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
     /*
      * Helper method to do the looking up by group.
      */
-    private Collection getApplicationsByGroup(AuthzSubject subject,
+    private Collection<Application> getApplicationsByGroup(AuthzSubject subject,
                                               AppdefEntityID resource,
                                               PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException,
                FinderException {
-        ApplicationDAO dao = getApplicationDAO();
-
+       
         // We need to look up the service so that we can see if we need to
         // look up its cluster, too
         AppdefGroupValue group = GroupUtil.getGroup(subject, resource);
 
         // Has to be a compatible group first
-        if (!group.isGroupCompat())
-            return new ArrayList();
+        if (!group.isGroupCompat()) {
+            return new ArrayList<Application>();
+        }
 
-        Collection apps =
-            dao.findByServiceIdOrClusterId_orderName(
+        Collection<Application> apps =
+            applicationDAO.findByServiceIdOrClusterId_orderName(
                     new Integer(0), new Integer(group.getClusterId()));
 
         if (pc.isDescending()) {
-            List appsList = new ArrayList(apps);
+            List<Application> appsList = new ArrayList<Application>(apps);
             Collections.reverse(appsList);
             apps = appsList;
         }
@@ -627,9 +698,9 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get all applications for a resource.
-     * @ejb:interface-method
+     * 
      */
-    public PageList getApplicationsByResource ( AuthzSubject subject,
+    public PageList<ApplicationValue> getApplicationsByResource ( AuthzSubject subject,
                                                 AppdefEntityID resource,
                                                 PageControl pc)
         throws ApplicationNotFoundException, PermissionException {
@@ -638,7 +709,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         // OR, alternatively, find everything, and then call out
         // to authz in batches to find out which ones we are
         // allowed to return.
-        Collection apps;
+        Collection<Application> apps;
         try {
             if (!resource.isGroup())
                 apps = getApplicationsByResource(resource, pc);
@@ -659,7 +730,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * Get all application IDs that use the specified resource.
-     * @ejb:interface-method
+     * 
      *
      * @param subject  The subject trying to get the app list
      * @param resource Server ID.
@@ -672,23 +743,23 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      */
     public Integer[] getApplicationIDsByResource(AppdefEntityID resource)
         throws ApplicationNotFoundException {
-        Collection apps = getApplicationsByResource(resource,
+        Collection<Application> apps = getApplicationsByResource(resource,
                                                     PageControl.PAGE_ALL);
 
         Integer[] ids = new Integer[apps.size()];
         int ind = 0;
-        for (Iterator i = apps.iterator(); i.hasNext(); ind++) {
-            Application app = (Application) i.next();
+        for (Iterator<Application> i = apps.iterator(); i.hasNext(); ind++) {
+            Application app = i.next();
             ids[ind] = app.getId();
         }
         return ids;
     }
 
     /**
-     * @ejb.interface-method
+     * 
      */
     public boolean isApplicationMember(AppdefEntityID application, AppdefEntityID service) {
-        return getApplicationDAO().isApplicationService(application.getId().intValue(), 
+        return applicationDAO.isApplicationService(application.getId().intValue(), 
                                                         service.getId().intValue());
     }
     
@@ -696,7 +767,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
      * Generate a resource tree based on the root resources and
      * the traversal (one of ResourceTreeGenerator.TRAVERSE_*)
      *
-     * @ejb:interface-method
+     * 
      */
     public ResourceTree getResourceTree(AuthzSubject subject,
                                         AppdefEntityID[] resources,
@@ -735,37 +806,38 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         throws FinderException, PermissionException
     {
         log.debug("Begin Authz CreateApplication");
-        checkPermission(subject, getRootResourceType(),
+        permissionManager.checkPermission(subject, resourceManager.findResourceTypeByName(AuthzConstants.rootResType),
                         AuthzConstants.rootResourceId,
                         AuthzConstants.appOpCreateApplication);
         log.debug("User has permission to create application. " +
                   "Adding authzresource");
 
-        ResourceType appProto = getApplicationPrototypeResourceType();
-        Resource proto = ResourceManagerImpl.getOne()
+        ResourceType appProto = resourceManager.findResourceTypeByName(AuthzConstants.appPrototypeTypeName);
+        Resource proto = resourceManager
             .findResourceByInstanceId(appProto,
                                       app.getApplicationType().getId());
-        Resource resource = createAuthzResource(subject,
-                                                getApplicationResourceType(),
-                                                proto, app.getId(),
-                                                app.getName(), null);
+        Resource resource = resourceManager.createResource(subject,
+            resourceManager.findResourceTypeByName(AuthzConstants.applicationResType),
+            proto, app.getId(),
+            app.getName(), false,null);
+     
         app.setResource(resource);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void startup() {
         log.info("Application manager starting up!");
 
-        HQApp.getInstance().registerCallbackListener(GroupChangeCallback.class,
+        hqApp.registerCallbackListener(GroupChangeCallback.class,
                                                      new GroupChangeCallback() {
             public void preGroupDelete(ResourceGroup g)
                 throws VetoException {
-                Collection apps = getApplicationDAO().findUsingGroup(g);
+                Collection<Application> apps = applicationDAO.findUsingGroup(g);
 
-                for (Iterator it = apps.iterator(); it.hasNext(); ) {
-                    Application app = (Application) it.next();
+                for (Application app : apps ) {
+                  
                     // Find the app service and remove it
                     try {
                         AppService svc = appServiceDAO.findByAppAndCluster(app, g);
@@ -783,25 +855,15 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
         });
     }
 
-    public static ApplicationManagerLocal getOne() {
-        try {
-            return ApplicationManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    public static ApplicationManager getOne() {
+       return Bootstrap.getBean(ApplicationManager.class);
     }
 
-    /**
-     * Create a service manager session bean.
-     * @exception CreateException If an error occurs creating the pager
-     * for the bean.
-     */
-    public void ejbCreate() throws CreateException {
-        try {
+   @PostConstruct
+    public void afterPropertiesSet() throws Exception {
+        
             valuePager = Pager.getPager(VALUE_PROCESSOR);
-        } catch ( Exception e ) {
-            throw new CreateException("Could not create value pager:" + e);
-        }
+      
     }
 
     private void trimStrings(ApplicationValue app) {
@@ -817,9 +879,7 @@ public class ApplicationManagerEJBImpl extends AppdefSessionEJB
             app.setOpsContact(app.getOpsContact().trim());
     }
 
-    public void ejbRemove() { }
-    public void ejbActivate() { }
-    public void ejbPassivate() { }
+   
 
 
 }
