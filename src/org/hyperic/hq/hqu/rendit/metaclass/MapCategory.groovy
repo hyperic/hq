@@ -7,7 +7,7 @@ class MapCategory {
      * Useful for dealing with parameter checking in controllers
      */
     static boolean hasOne(Map m, String key) {
-        m.get(key) != null && m.get(key).size() == 1
+        m.get(key) != null && m.get(key).size() == 1 
     }
 
     /**

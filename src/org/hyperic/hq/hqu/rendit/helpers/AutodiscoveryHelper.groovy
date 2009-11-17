@@ -1,6 +1,6 @@
 package org.hyperic.hq.hqu.rendit.helpers
 
-import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl as AIQMan
+import org.hyperic.hq.appdef.server.session.AIQueueManagerImpl as AIQMan
 import org.hyperic.hq.appdef.shared.AIPlatformValue
 import org.hyperic.hq.appdef.shared.AIQueueConstants
 import org.hyperic.hq.authz.server.session.AuthzSubject

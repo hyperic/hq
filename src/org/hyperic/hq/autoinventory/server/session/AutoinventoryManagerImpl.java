@@ -42,7 +42,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
-import org.hyperic.hq.appdef.server.session.AIQueueManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AIQueueManagerImpl;
 import org.hyperic.hq.appdef.server.session.AgentCreateCallback;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
@@ -54,7 +54,7 @@ import org.hyperic.hq.appdef.shared.AIAppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
-import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
+import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AIServiceValue;
 import org.hyperic.hq.appdef.shared.AgentManager;
@@ -138,14 +138,14 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private CPropManager cPropManager;
     private ServiceManagerLocal serviceManager;
     private AuthzSubjectManager authzSubjectManager;
-    private AIQueueManagerLocal aiQueueManager;
+    private AIQueueManager aiQueueManager;
 
     @Autowired
     public AutoinventoryManagerImpl(AgentReportStatusDAO agentReportStatusDao, AIHistoryDAO aiHistoryDao,
                                     AIPlatformDAO aiPlatformDao, ProductManager productManager, ServerManagerLocal serverManager,
                                     AIScheduleManager aiScheduleManager, ResourceManager resourceManager, ConfigManager configManager,
                                     AgentManager agentManager, CPropManager cPropManager, ServiceManagerLocal serviceManager,
-                                    AuthzSubjectManager authzSubjectManager, AIQueueManagerLocal aiQueueManager) {
+                                    AuthzSubjectManager authzSubjectManager, AIQueueManager aiQueueManager) {
         this.agentReportStatusDao = agentReportStatusDao;
         this.aiHistoryDao = aiHistoryDao;
         this.aiPlatformDao = aiPlatformDao;
@@ -407,8 +407,8 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
             AutoinventoryException, DuplicateAIScanNameException,
             ScheduleWillNeverFireException, PermissionException {
         try {
-            final AIQueueManagerEJBImpl authzChecker =
-                                                       new AIQueueManagerEJBImpl();
+            final AIQueueManagerImpl authzChecker =
+                                                       new AIQueueManagerImpl();
             authzChecker.checkAIScanPermission(subject, aid);
 
             ConfigResponse config = configManager.

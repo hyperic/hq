@@ -56,7 +56,7 @@ class RenderFrame {
     private Writer output
     private        controller
     private        parent
-    
+      
     RenderFrame(opts, controller) {
         this(opts, controller, null)
     }

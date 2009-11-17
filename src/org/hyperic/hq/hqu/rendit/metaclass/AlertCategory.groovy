@@ -10,7 +10,7 @@ import org.hyperic.hq.galerts.server.session.GalertLog
 class AlertCategory {
     static String urlFor(Alert a, String context) {
         def d = a.alertDefinition
-        "/alerts/Alerts.do?mode=viewAlert&eid=${d.appdefEntityId}&a=${a.id}"
+        "/alerts/Alerts.do?mode=viewAlert&eid=${d.appdefEntityId}&a=${a.id}" 
     }
     
     static String urlFor(GalertLog a, String context) {

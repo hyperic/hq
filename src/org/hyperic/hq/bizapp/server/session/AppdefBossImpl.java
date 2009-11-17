@@ -65,7 +65,7 @@ import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
-import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
+import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AgentManager;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateFQDNException;
@@ -194,7 +194,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     private AgentManager agentManager;
 
-    private AIQueueManagerLocal aiQueueManager;
+    private AIQueueManager aiQueueManager;
 
     private AppdefStatManagerLocal appdefStatManager;
 
@@ -239,7 +239,7 @@ public class AppdefBossImpl implements AppdefBoss {
     protected final int APPDEF_GROUP_TYPE_UNDEFINED = -1;
 
     @Autowired
-    public AppdefBossImpl(SessionManager sessionManager, AgentManager agentManager, AIQueueManagerLocal aiQueueManager,
+    public AppdefBossImpl(SessionManager sessionManager, AgentManager agentManager, AIQueueManager aiQueueManager,
                           AppdefStatManagerLocal appdefStatManager, ApplicationManager applicationManager,
                           AuthzSubjectManager authzSubjectManager, AutoinventoryManager autoinventoryManager,
                           AvailabilityManager availabilityManager, ConfigManager configManager,
@@ -2918,7 +2918,7 @@ public class AppdefBossImpl implements AppdefBoss {
                 // as insufficient permissions
                 AuthzSubject aiSubject = subject;
                 try {
-                    aiQueueManager.checkAIScanPermission(subject, id);
+                    permissionManager.checkAIScanPermission(subject, id);
                 } catch (PermissionException pe) {
                     aiSubject = authzSubjectManager.getSubjectById(AuthzConstants.rootSubjectId);
                 }

@@ -18,7 +18,7 @@ class AuthzSubjectCategory {
      * Check if the current user has administration permission
      */
     static boolean isSuperUser(AuthzSubject subject) {
-        PermissionManagerFactory.getInstance().hasAdminPermission(subject.id)
+        PermissionManagerFactory.getInstance().hasAdminPermission(subject.id) 
     }
 
     /**

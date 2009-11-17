@@ -14,7 +14,7 @@ class HQUtil {
      * Get the base URL which can be used to contact HQ
      */
     static String getBaseURL() {
-        synchronized (LOCK) {
+        synchronized (LOCK) { 
             if (BASE_URL == null) {
                 BASE_URL = ServerConfigManagerEJBImpl.one.
                                  getConfig().getProperty(HQConstants.BaseURL)

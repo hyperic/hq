@@ -20,7 +20,7 @@ class MetricCategory {
     static String urlFor(Measurement d, Map context) {
         def template = d.template
         if (context?.chart) {
-            def units    = template.units
+            def units    = template.units 
             def unitInt  = UnitsConvert.getUnitForUnit(units)
             def scale    = UnitsConvert.getScaleForUnit(units)
             def collType = template.collectionType

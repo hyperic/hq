@@ -21,6 +21,6 @@ class BundleMapFacade {
     }
     
     def getProperty(String propName) {
-        getAt(propName)
+        getAt(propName) 
     }
 }

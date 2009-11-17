@@ -24,7 +24,7 @@ class HQUWebUtil {
               }
            } %>
      *
-     */
+     */ 
     static hquTwoPanedFilter(Binding b, Closure yield) {
         def output = b.PAGE.getOutput()
         def builder = new TwoPanedFilterBuilder(output:output)

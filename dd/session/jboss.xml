@@ -86,11 +86,7 @@
 			<local-jndi-name>LocalServerManager</local-jndi-name>
 
 		</session>
-		<session>
-			<ejb-name>AIQueueManager</ejb-name>
-			<local-jndi-name>LocalAIQueueManager</local-jndi-name>
-
-		</session>
+		
 		<session>
 			<ejb-name>UIPluginManager</ejb-name>
 			<local-jndi-name>LocalUIPluginManager</local-jndi-name>

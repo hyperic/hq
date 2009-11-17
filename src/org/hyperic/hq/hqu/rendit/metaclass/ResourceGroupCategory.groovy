@@ -19,7 +19,7 @@ class ResourceGroupCategory {
         PermissionManagerFactory.getInstance().getMaintenanceEventManager();
 
     static String urlFor(ResourceGroup r, String context) {
-        "/Resource.do?eid=${AppdefEntityConstants.APPDEF_TYPE_GROUP}:${r.id}"
+        "/Resource.do?eid=${AppdefEntityConstants.APPDEF_TYPE_GROUP}:${r.id}" 
     }
     
     static void setResources(ResourceGroup group, AuthzSubject user,

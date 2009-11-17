@@ -49,7 +49,7 @@ class DefaultControllerDispatcher {
             log.warn "Unable to find resource bundle for " + 
                      "${p.name}_i18n"
         }
-
+ 
         def action = path[2][0..-5]  // Strip out the .hqu
         controller.setAction(action)
         controller.setControllerName(path[1])

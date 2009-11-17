@@ -9,7 +9,7 @@ import org.hyperic.hq.authz.shared.PermissionManager
 
 class AppdefCategory {
     static Resource getResource(AppdefResource r) {
-		ResourceMan.one.findResource(r.entityId)
+		ResourceMan.one.findResource(r.entityId) 
     }
 
     static Resource getResource(AppdefResourceType r) {

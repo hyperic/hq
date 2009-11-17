@@ -38,7 +38,7 @@ import org.apache.commons.logging.LogFactory
  */
 class Dispatcher implements IDispatcher {
     final int API_MAJOR = 0
-    final int API_MINOR = 1
+    final int API_MINOR = 1  
     
     private final CATEGORIES = [AuthzSubjectCategory, AlertCategory, 
                                 AlertDefinitionCategory, AppdefCategory,

@@ -42,14 +42,14 @@ import groovy.xml.StreamingMarkupBuilder
  * a controller method is being requested.
  */
 abstract class BaseController { 
-    Log log = LogFactory.getLog(this.getClass())
+    Log log = LogFactory.getLog(this.getClass()) 
     
     String             action          // Current action being executed
     File               pluginDir       // Directory of plugin containing us
     String             controllerName  // Name of the controller
     HQUPlugin          plugin          
     String             template        // Default template when rendering
-    
+     
     private beforeFilters = []         // Closures to run prior to any actions
     private RequestInvocationBindings invokeArgs  // Info about the request
     private File    viewDir            // Path to plugin/app/views

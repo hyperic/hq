@@ -16,7 +16,7 @@ class AlertDefinitionCategory {
 
     static void setEscalation(AlertDefinition d, AuthzSubject s,
                               Escalation e) {
-        AdefMan.one.setEscalation(s, d.getId(), e.getId())
+        AdefMan.one.setEscalation(s, d.getId(), e.getId()) 
     }
 
     static void unsetEscalation(AlertDefinition d, AuthzSubject s) {

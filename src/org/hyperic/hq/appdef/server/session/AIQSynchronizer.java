@@ -34,7 +34,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
-import org.hyperic.hq.appdef.shared.AIQueueManagerLocal;
+import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.autoinventory.AIPlatform;
@@ -56,7 +56,7 @@ public class AIQSynchronizer {
      * appdef exactly, such that the data should not be queued).
      */
     public AIPlatformValue sync(AuthzSubject subject,
-                                AIQueueManagerLocal aiqMgr,
+                                AIQueueManager aiqMgr,
                                 AIPlatformDAO aiPlatformLH,
                                 AIPlatformValue aiPlatform,
                                 boolean updateServers,
