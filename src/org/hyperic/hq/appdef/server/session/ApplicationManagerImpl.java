@@ -81,37 +81,34 @@ import org.hyperic.util.pager.SortAttribute;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * This class is responsible for managing Application objects in appdef
- * and their relationships
- 
+ * This class is responsible for managing Application objects in appdef and
+ * their relationships
  */
 @org.springframework.stereotype.Service
 @Transactional
 public class ApplicationManagerImpl implements ApplicationManager {
 
-    protected final Log log =
-        LogFactory.getLog(ApplicationManagerImpl.class.getName());
+    protected final Log log = LogFactory.getLog(ApplicationManagerImpl.class.getName());
 
-    protected static final String VALUE_PROCESSOR
-        = "org.hyperic.hq.appdef.server.session.PagerProcessor_app";
+    protected static final String VALUE_PROCESSOR = "org.hyperic.hq.appdef.server.session.PagerProcessor_app";
     private Pager valuePager;
 
     private ApplicationTypeDAO applicationTypeDAO;
 
     private AppServiceDAO appServiceDAO;
-    
+
     private ApplicationDAO applicationDAO;
-    
+
     private ServiceManagerLocal serviceManager;
-    
+
     private ResourceManager resourceManager;
-    
+
     private PermissionManager permissionManager;
-    
+
     private AuthzSubjectManager authzSubjectManager;
-    
+
     private ZeventEnqueuer zeventManager;
-    
+
     private HQApp hqApp;
 
     /**
@@ -119,11 +116,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @return list of ApplicationTypeValue objects
      * 
      */
-    public List<AppdefResourceTypeValue> getAllApplicationTypes(AuthzSubject who)
-        throws FinderException {
+    public List<AppdefResourceTypeValue> getAllApplicationTypes(AuthzSubject who) throws FinderException {
         List<ApplicationType> all = applicationTypeDAO.findAll();
         List<AppdefResourceTypeValue> ret = new ArrayList<AppdefResourceTypeValue>(all.size());
-        for (ApplicationType type : all ) {
+        for (ApplicationType type : all) {
             ret.add(type.getAppdefResourceTypeValue());
         }
         return ret;
@@ -141,20 +137,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * Create a Application of a specified type
      * @param subject - who
      * @param newApp - the new application to create
-     * @param services - A collection of ServiceValue objects that will be
-     * the initial set of services for the application.  This can be
-     * null if you are creating an empty application.
+     * @param services - A collection of ServiceValue objects that will be the
+     *        initial set of services for the application. This can be null if
+     *        you are creating an empty application.
      * 
      */
-    public Application createApplication(AuthzSubject subject,
-                                         ApplicationValue newApp,
-                                         Collection<ServiceValue> services)
-        throws ValidationException, PermissionException, CreateException,
-               AppdefDuplicateNameException
-    {
-       
+    public Application createApplication(AuthzSubject subject, ApplicationValue newApp,
+                                         Collection<ServiceValue> services) throws ValidationException,
+        PermissionException, CreateException, AppdefDuplicateNameException {
+
         applicationTypeDAO.findById(newApp.getApplicationType().getId());
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("Begin createApplication: " + newApp);
         }
 
@@ -181,47 +174,42 @@ public class ApplicationManagerImpl implements ApplicationManager {
             // AUTHZ CHECK
             createAuthzApplication(subject, application);
             // now add the services
-            for(ServiceValue aService : services) {
-               
+            for (ServiceValue aService : services) {
+
                 log.debug("Adding service: " + aService + " to application");
                 application.addService(aService.getId());
             }
             return application;
         } catch (FinderException e) {
             log.error("Unable to find dependent object", e);
-            throw new CreateException("Unable to find dependent object: " +
-                                      e.getMessage());
+            throw new CreateException("Unable to find dependent object: " + e.getMessage());
         } catch (ValidationException e) {
             throw e;
         }
     }
 
     /**
-     * Update the basic properties of an application. Will NOT update
-     * service dependencies, etc.
+     * Update the basic properties of an application. Will NOT update service
+     * dependencies, etc.
      * 
      * 
      */
-    public ApplicationValue updateApplication(AuthzSubject subject,
-                                              ApplicationValue newValue)
-        throws ApplicationNotFoundException, PermissionException,
-               UpdateException,  AppdefDuplicateNameException, FinderException {
-       
+    public ApplicationValue updateApplication(AuthzSubject subject, ApplicationValue newValue)
+        throws ApplicationNotFoundException, PermissionException, UpdateException, AppdefDuplicateNameException,
+        FinderException {
+
         Application app = applicationDAO.findById(newValue.getId());
         permissionManager.checkModifyPermission(subject, app.getEntityId());
         newValue.setModifiedBy(subject.getName());
         newValue.setMTime(new Long(System.currentTimeMillis()));
         trimStrings(newValue);
-        if(!newValue.getName().equals(app.getName())) {
+        if (!newValue.getName().equals(app.getName())) {
             // name has changed. check for duplicate and update authz
             // resource table
             try {
                 findApplicationByName(subject, newValue.getName());
                 // duplicate found, throw a duplicate object exception
-                throw new AppdefDuplicateNameException("there is already "
-                                                       + "an app named: '"
-                                                       + app.getName()
-                                                       + "'");
+                throw new AppdefDuplicateNameException("there is already " + "an app named: '" + app.getName() + "'");
             } catch (ApplicationNotFoundException e) {
                 // ok
             } catch (PermissionException e) {
@@ -236,37 +224,31 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     /**
      * Remove an application
-     *
+     * 
      * 
      */
-    public void removeApplication(AuthzSubject subject, Integer id)
-        throws ApplicationNotFoundException, PermissionException,
-               RemoveException, VetoException
-    {
-       
+    public void removeApplication(AuthzSubject subject, Integer id) throws ApplicationNotFoundException,
+        PermissionException, RemoveException, VetoException {
+
         Application app = applicationDAO.findById(id);
         permissionManager.checkRemovePermission(subject, app.getEntityId());
         applicationDAO.remove(app);
         removeAuthzResource(subject, app.getEntityId(), app.getResource());
         applicationDAO.getSession().flush();
     }
-    
+
     /**
      * remove the authz resource entry
      */
-    protected void removeAuthzResource(AuthzSubject subject,
-                                       AppdefEntityID aeid, Resource r)
-        throws RemoveException, PermissionException, VetoException 
-    {
+    protected void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r) throws RemoveException,
+        PermissionException, VetoException {
         if (log.isDebugEnabled()) {
             log.debug("Removing authz resource: " + aeid);
         }
-        
-      
-        AuthzSubject s = 
-           authzSubjectManager.findSubjectById(subject.getId()); 
+
+        AuthzSubject s = authzSubjectManager.findSubjectById(subject.getId());
         resourceManager.removeResource(s, r);
-        
+
         // Send resource delete event
         ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, aeid);
         zeventManager.enqueueEventAfterCommit(zevent);
@@ -274,23 +256,20 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     /**
      * Remove an application service.
-     * @param caller        - Valid spider subject of caller.
-     * @param appId         - The application identifier.
-     * @param appServiceId  - The service identifier
+     * @param caller - Valid spider subject of caller.
+     * @param appId - The application identifier.
+     * @param appServiceId - The service identifier
      * @throws ApplicationException when unable to perform remove
      * @throws ApplicationNotFoundException - when the app can't be found
      * @throws PermissionException - when caller is not authorized to remove.
-     *
+     * 
      * 
      */
-    public void removeAppService(AuthzSubject caller, Integer appId,
-                                 Integer appServiceId)
-        throws ApplicationException, ApplicationNotFoundException,
-               PermissionException {
+    public void removeAppService(AuthzSubject caller, Integer appId, Integer appServiceId) throws ApplicationException,
+        ApplicationNotFoundException, PermissionException {
         try {
             Application app = applicationDAO.findById(appId);
             permissionManager.checkModifyPermission(caller, app.getEntityId());
-
 
             AppService appSvcLoc = appServiceDAO.findById(appServiceId);
             app.removeService(appSvcLoc);
@@ -307,19 +286,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
         applicationDAO.clearResource(resource);
     }
 
-
-
     /**
      * Get the service dependency map for an application
      * 
      * @param subject
      * @param appId
      */
-    public DependencyTree getServiceDepsForApp(AuthzSubject subject, Integer pk)
-        throws ApplicationNotFoundException, PermissionException {
+    public DependencyTree getServiceDepsForApp(AuthzSubject subject, Integer pk) throws ApplicationNotFoundException,
+        PermissionException {
         try {
             // find the app
-           
+
             Application app = applicationDAO.findById(pk);
             permissionManager.checkViewPermission(subject, app.getEntityId());
             return applicationDAO.getDependencyTree(app);
@@ -327,7 +304,6 @@ public class ApplicationManagerImpl implements ApplicationManager {
             throw new ApplicationNotFoundException(pk);
         }
     }
-
 
     /**
      * Get the # of applications within HQ inventory
@@ -343,14 +319,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @param depTree
      * @param subject
      */
-    public void setServiceDepsForApp(AuthzSubject subject,
-                                     DependencyTree depTree)
-        throws ApplicationNotFoundException, RemoveException,
-               PermissionException, CreateException {
+    public void setServiceDepsForApp(AuthzSubject subject, DependencyTree depTree) throws ApplicationNotFoundException,
+        RemoveException, PermissionException, CreateException {
         Integer pk = depTree.getApplication().getId();
         try {
             // find the app
-           
+
             Application app = applicationDAO.findById(pk);
             permissionManager.checkModifyPermission(subject, app.getEntityId());
             applicationDAO.setDependencyTree(app, depTree);
@@ -364,8 +338,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @param subject - who
      * @param name - name of app
      */
-    private Application findApplicationByName(AuthzSubject subject, String name)
-        throws ApplicationNotFoundException, PermissionException {
+    private Application findApplicationByName(AuthzSubject subject, String name) throws ApplicationNotFoundException,
+        PermissionException {
         Application app = applicationDAO.findByName(name);
         if (app == null) {
             throw new ApplicationNotFoundException(name);
@@ -376,11 +350,11 @@ public class ApplicationManagerImpl implements ApplicationManager {
 
     /**
      * Get application pojo by id.
-     *
+     * 
      * 
      */
-    public Application findApplicationById(AuthzSubject subject,  Integer id)
-        throws ApplicationNotFoundException, PermissionException {
+    public Application findApplicationById(AuthzSubject subject, Integer id) throws ApplicationNotFoundException,
+        PermissionException {
         try {
             Application app = applicationDAO.findById(id);
             permissionManager.checkViewPermission(subject, app.getEntityId());
@@ -400,23 +374,23 @@ public class ApplicationManagerImpl implements ApplicationManager {
     /**
      * Get all applications.
      * 
-     *
+     * 
      * @param subject The subject trying to list applications.
      * @return A List of ApplicationValue objects representing all of the
-     * applications that the given subject is allowed to view.
+     *         applications that the given subject is allowed to view.
      */
-    public PageList<ApplicationValue> getAllApplications(AuthzSubject subject, PageControl pc)
-        throws FinderException, PermissionException {
+    public PageList<ApplicationValue> getAllApplications(AuthzSubject subject, PageControl pc) throws FinderException,
+        PermissionException {
         Collection<Integer> authzPks = getViewableApplications(subject);
         Collection<Application> apps = null;
         int attr = -1;
-        if(pc != null) {
+        if (pc != null) {
             attr = pc.getSortattribute();
         }
-       
-        switch(attr) {
+
+        switch (attr) {
             case SortAttribute.RESOURCE_NAME:
-                if(pc != null) {
+                if (pc != null) {
                     apps = applicationDAO.findAll_orderName(!pc.isDescending());
                 }
                 break;
@@ -424,50 +398,42 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 apps = applicationDAO.findAll();
                 break;
         }
-        for(Iterator<Application> i = apps.iterator(); i.hasNext();) {
+        for (Iterator<Application> i = apps.iterator(); i.hasNext();) {
             Integer appPk = i.next().getId();
-            if(!authzPks.contains(appPk)) {
+            if (!authzPks.contains(appPk)) {
                 i.remove();
             }
         }
         return valuePager.seek(apps, pc);
     }
-    
+
     /**
      * Find an operation by name inside a ResourcetypeValue object
      */
-    protected Operation getOperationByName(ResourceType rtV,
-                                                String opName)
-        throws PermissionException
-    {
+    protected Operation getOperationByName(ResourceType rtV, String opName) throws PermissionException {
         Collection<Operation> ops = rtV.getOperations();
-        for(Operation op : ops ) {
-          
-            if(op.getName().equals(opName)) {
+        for (Operation op : ops) {
+
+            if (op.getName().equals(opName)) {
                 return op;
             }
         }
-        throw new PermissionException("Operation: " + opName +
-                                      " not valid for ResourceType: " +
-                                      rtV.getName());
+        throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " + rtV.getName());
     }
-    
+
     /**
      * Get the scope of viewable apps for a given user
-     * @param whoami     
+     * @param whoami
      * @return list of ApplicationPKs for which the subject has
-     * AuthzConstants.applicationOpViewApplication
+     *         AuthzConstants.applicationOpViewApplication
      */
-    protected List<Integer> getViewableApplications(AuthzSubject whoami)
-        throws FinderException, PermissionException
-    {
-        
-        Operation op = 
-            getOperationByName(resourceManager.findResourceTypeByName(AuthzConstants.applicationResType),
-                               AuthzConstants.appOpViewApplication);
+    protected List<Integer> getViewableApplications(AuthzSubject whoami) throws FinderException, PermissionException {
+
+        Operation op = getOperationByName(resourceManager.findResourceTypeByName(AuthzConstants.applicationResType),
+            AuthzConstants.appOpViewApplication);
         List<Integer> idList = permissionManager.findOperationScopeBySubject(whoami, op.getId());
         List<Integer> keyList = new ArrayList<Integer>(idList.size());
-        for(int i=0; i < idList.size(); i++) {
+        for (int i = 0; i < idList.size(); i++) {
             keyList.add(idList.get(i));
         }
         return keyList;
@@ -492,8 +458,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
         permissionManager.checkViewPermission(subject, app.getEntityId());
         Collection<AppService> ejbs = app.getAppServices();
         List<AppServiceValue> appSvc = new ArrayList<AppServiceValue>(ejbs.size());
-        for(AppService aEJB : ejbs) {
-           
+        for (AppService aEJB : ejbs) {
+
             appSvc.add(aEJB.getAppServiceValue());
         }
         return appSvc;
@@ -502,28 +468,25 @@ public class ApplicationManagerImpl implements ApplicationManager {
     /**
      * Set the application services for this application
      * @param subject
-     * @param map key: Integer service ID value: Boolean indicating
-     * that the service is an entry point
+     * @param map key: Integer service ID value: Boolean indicating that the
+     *        service is an entry point
      * 
      */
-    public void setApplicationServices(AuthzSubject subject, Integer appId,
-                                       List<AppdefEntityID> entityIds)
-        throws ApplicationNotFoundException, CreateException,
-               AppdefGroupNotFoundException, PermissionException {
+    public void setApplicationServices(AuthzSubject subject, Integer appId, List<AppdefEntityID> entityIds)
+        throws ApplicationNotFoundException, CreateException, AppdefGroupNotFoundException, PermissionException {
         try {
             Application app = applicationDAO.findById(appId);
             permissionManager.checkModifyPermission(subject, app.getEntityId());
-            for(Iterator<AppService> i = app.getAppServices().iterator();i.hasNext();) {
+            for (Iterator<AppService> i = app.getAppServices().iterator(); i.hasNext();) {
                 AppService appSvc = i.next();
                 AppdefEntityID anId = null;
-                if(appSvc.isIsGroup()) {
+                if (appSvc.isIsGroup()) {
                     ResourceGroup group = appSvc.getResourceGroup();
                     anId = AppdefEntityID.newGroupID(group.getId());
                 } else {
-                    anId = AppdefEntityID
-                        .newServiceID(appSvc.getService().getId());
+                    anId = AppdefEntityID.newServiceID(appSvc.getService().getId());
                 }
-                if(!entityIds.contains(anId)) {
+                if (!entityIds.contains(anId)) {
                     i.remove();
                 } else {
                     entityIds.remove(anId);
@@ -547,8 +510,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
     /*
      * Helper method to look up the applications by resource
      */
-    private Collection<Application> getApplicationsByResource(AppdefEntityID resource,
-        PageControl pc)
+    private Collection<Application> getApplicationsByResource(AppdefEntityID resource, PageControl pc)
         throws ApplicationNotFoundException {
         Collection<Application> apps;
         Integer id;
@@ -556,26 +518,24 @@ public class ApplicationManagerImpl implements ApplicationManager {
         id = resource.getId();
         try {
             switch (resource.getType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM :
-                    apps = getApplicationsByPlatform(pc,id);
+                case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                    apps = getApplicationsByPlatform(pc, id);
                     break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER :
-                    apps = getApplicationsByServer(pc,id);
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                    apps = getApplicationsByServer(pc, id);
                     break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
-                    apps = getApplicationsByService(pc,id);
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    apps = getApplicationsByService(pc, id);
                     break;
-                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION :
-                    throw new IllegalArgumentException(
-                        "Applications cannot contain " + "other applications");
-                default :
+                case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                    throw new IllegalArgumentException("Applications cannot contain " + "other applications");
+                default:
                     throw new IllegalArgumentException("Unhandled resource type");
             }
         } catch (FinderException e) {
-            throw new ApplicationNotFoundException(
-                "Cannot find application by " + id);
+            throw new ApplicationNotFoundException("Cannot find application by " + id);
         } catch (AppdefEntityNotFoundException e) {
-            throw new ApplicationNotFoundException("Cannot find resource "+ id);
+            throw new ApplicationNotFoundException("Cannot find resource " + id);
         }
 
         return apps;
@@ -584,11 +544,10 @@ public class ApplicationManagerImpl implements ApplicationManager {
     /*
      * Helper method to do the looking up by platform.
      */
-    private Collection<Application> getApplicationsByPlatform(PageControl pc, Integer id)
-        throws FinderException {
-      
+    private Collection<Application> getApplicationsByPlatform(PageControl pc, Integer id) throws FinderException {
+
         Collection<Application> apps;
-        pc = PageControl.initDefaults(pc,SortAttribute.RESOURCE_NAME);
+        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
         switch (pc.getSortattribute()) {
             case SortAttribute.RESOURCE_NAME:
                 apps = applicationDAO.findByPlatformId_orderName(id, pc.isAscending());
@@ -596,7 +555,7 @@ public class ApplicationManagerImpl implements ApplicationManager {
             case SortAttribute.OWNER_NAME:
                 apps = applicationDAO.findByPlatformId_orderOwner(id, pc.isAscending());
                 break;
-            default :
+            default:
                 apps = applicationDAO.findByPlatformId_orderName(id, true);
                 break;
         }
@@ -606,19 +565,18 @@ public class ApplicationManagerImpl implements ApplicationManager {
     /*
      * Helper method to do the looking up by server.
      */
-    private Collection<Application> getApplicationsByServer(PageControl pc, Integer id)
-        throws FinderException {
-        
+    private Collection<Application> getApplicationsByServer(PageControl pc, Integer id) throws FinderException {
+
         Collection<Application> apps;
-        pc = PageControl.initDefaults(pc,SortAttribute.RESOURCE_NAME);
+        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
         switch (pc.getSortattribute()) {
             case SortAttribute.RESOURCE_NAME:
                 apps = applicationDAO.findByServerId_orderName(id, pc.isAscending());
                 break;
             case SortAttribute.OWNER_NAME:
-                apps = applicationDAO.findByServerId_orderOwner(id,pc.isAscending());
+                apps = applicationDAO.findByServerId_orderOwner(id, pc.isAscending());
                 break;
-            default :
+            default:
                 apps = applicationDAO.findByServerId_orderName(id, true);
                 break;
         }
@@ -628,9 +586,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
     /*
      * Helper method to do the looking up by service.
      */
-    private Collection<Application> getApplicationsByService(PageControl pc, Integer id)
-        throws FinderException, AppdefEntityNotFoundException {
-       
+    private Collection<Application> getApplicationsByService(PageControl pc, Integer id) throws FinderException,
+        AppdefEntityNotFoundException {
 
         // We need to look up the service so that we can see if we need to
         // look up its cluster, too
@@ -639,17 +596,16 @@ public class ApplicationManagerImpl implements ApplicationManager {
         boolean cluster = service.getResourceGroup() != null;
 
         Collection<Application> apps;
-        pc = PageControl.initDefaults(pc,SortAttribute.RESOURCE_NAME);
+        pc = PageControl.initDefaults(pc, SortAttribute.RESOURCE_NAME);
         switch (pc.getSortattribute()) {
             case SortAttribute.OWNER_NAME:
                 apps = applicationDAO.findByServiceId_orderOwner(id, pc.isAscending());
                 break;
             case SortAttribute.RESOURCE_NAME:
-            default :
+            default:
                 // ZZZ need to fix this up
                 if (cluster)
-                    apps = applicationDAO.findByServiceIdOrClusterId_orderName(
-                            id, service.getResourceGroup().getId());
+                    apps = applicationDAO.findByServiceIdOrClusterId_orderName(id, service.getResourceGroup().getId());
                 else
                     apps = applicationDAO.findByServiceId_orderName(id);
 
@@ -668,12 +624,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
     /*
      * Helper method to do the looking up by group.
      */
-    private Collection<Application> getApplicationsByGroup(AuthzSubject subject,
-                                              AppdefEntityID resource,
-                                              PageControl pc)
-        throws AppdefEntityNotFoundException, PermissionException,
-               FinderException {
-       
+    private Collection<Application> getApplicationsByGroup(AuthzSubject subject, AppdefEntityID resource, PageControl pc)
+        throws AppdefEntityNotFoundException, PermissionException, FinderException {
+
         // We need to look up the service so that we can see if we need to
         // look up its cluster, too
         AppdefGroupValue group = GroupUtil.getGroup(subject, resource);
@@ -683,9 +636,8 @@ public class ApplicationManagerImpl implements ApplicationManager {
             return new ArrayList<Application>();
         }
 
-        Collection<Application> apps =
-            applicationDAO.findByServiceIdOrClusterId_orderName(
-                    new Integer(0), new Integer(group.getClusterId()));
+        Collection<Application> apps = applicationDAO.findByServiceIdOrClusterId_orderName(new Integer(0), new Integer(
+            group.getClusterId()));
 
         if (pc.isDescending()) {
             List<Application> appsList = new ArrayList<Application>(apps);
@@ -700,10 +652,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * Get all applications for a resource.
      * 
      */
-    public PageList<ApplicationValue> getApplicationsByResource ( AuthzSubject subject,
-                                                AppdefEntityID resource,
-                                                PageControl pc)
-        throws ApplicationNotFoundException, PermissionException {
+    public PageList<ApplicationValue> getApplicationsByResource(AuthzSubject subject, AppdefEntityID resource,
+                                                                PageControl pc) throws ApplicationNotFoundException,
+        PermissionException {
         // XXX Call to authz, get the collection of all services
         // that we are allowed to see.
         // OR, alternatively, find everything, and then call out
@@ -716,11 +667,9 @@ public class ApplicationManagerImpl implements ApplicationManager {
             else
                 apps = getApplicationsByGroup(subject, resource, pc);
         } catch (FinderException e) {
-            throw new ApplicationNotFoundException(
-                "Cannot find application by " + resource);
+            throw new ApplicationNotFoundException("Cannot find application by " + resource);
         } catch (AppdefEntityNotFoundException e) {
-            throw new ApplicationNotFoundException(
-                "Cannot find application by " + resource);
+            throw new ApplicationNotFoundException("Cannot find application by " + resource);
         }
 
         // valuePager converts local/remote interfaces to value objects
@@ -731,20 +680,18 @@ public class ApplicationManagerImpl implements ApplicationManager {
     /**
      * Get all application IDs that use the specified resource.
      * 
-     *
-     * @param subject  The subject trying to get the app list
+     * 
+     * @param subject The subject trying to get the app list
      * @param resource Server ID.
-     * @param pagenum  The page number to start listing.  First page is zero.
+     * @param pagenum The page number to start listing. First page is zero.
      * @param pagesize The size of the page (the number of items to return).
-     * @param sort     The sort order.
-     *
+     * @param sort The sort order.
+     * 
      * @return A List of ApplicationValue objects which use the specified
      *         resource.
      */
-    public Integer[] getApplicationIDsByResource(AppdefEntityID resource)
-        throws ApplicationNotFoundException {
-        Collection<Application> apps = getApplicationsByResource(resource,
-                                                    PageControl.PAGE_ALL);
+    public Integer[] getApplicationIDsByResource(AppdefEntityID resource) throws ApplicationNotFoundException {
+        Collection<Application> apps = getApplicationsByResource(resource, PageControl.PAGE_ALL);
 
         Integer[] ids = new Integer[apps.size()];
         int ind = 0;
@@ -759,21 +706,17 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * 
      */
     public boolean isApplicationMember(AppdefEntityID application, AppdefEntityID service) {
-        return applicationDAO.isApplicationService(application.getId().intValue(), 
-                                                        service.getId().intValue());
+        return applicationDAO.isApplicationService(application.getId().intValue(), service.getId().intValue());
     }
-    
+
     /**
-     * Generate a resource tree based on the root resources and
-     * the traversal (one of ResourceTreeGenerator.TRAVERSE_*)
-     *
+     * Generate a resource tree based on the root resources and the traversal
+     * (one of ResourceTreeGenerator.TRAVERSE_*)
+     * 
      * 
      */
-    public ResourceTree getResourceTree(AuthzSubject subject,
-                                        AppdefEntityID[] resources,
-                                        int traversal)
-        throws AppdefEntityNotFoundException, PermissionException
-    {
+    public ResourceTree getResourceTree(AuthzSubject subject, AppdefEntityID[] resources, int traversal)
+        throws AppdefEntityNotFoundException, PermissionException {
         ResourceTreeGenerator generator = new ResourceTreeGenerator(subject);
         return generator.generate(resources, traversal);
     }
@@ -783,44 +726,36 @@ public class ApplicationManagerImpl implements ApplicationManager {
      * @param av
      * @throws ValidationException
      */
-    private void validateNewApplication(ApplicationValue av)
-        throws ValidationException {
+    private void validateNewApplication(ApplicationValue av) throws ValidationException {
         String msg = null;
         // first check if its new
-        if(av.idHasBeenSet()) {
+        if (av.idHasBeenSet()) {
             msg = "This Application is not new. It has id: " + av.getId();
         }
-        // else if(someotherthing)  ...
+        // else if(someotherthing) ...
 
         // Now check if there's a msg set and throw accordingly
-        if(msg != null) {
+        if (msg != null) {
             throw new ValidationException(msg);
         }
     }
 
     /**
-     * Create the authz resource and verify the subject has the createApplication
-     * permission.
+     * Create the authz resource and verify the subject has the
+     * createApplication permission.
      */
-    private void createAuthzApplication(AuthzSubject subject, Application app)
-        throws FinderException, PermissionException
-    {
+    private void createAuthzApplication(AuthzSubject subject, Application app) throws FinderException,
+        PermissionException {
         log.debug("Begin Authz CreateApplication");
         permissionManager.checkPermission(subject, resourceManager.findResourceTypeByName(AuthzConstants.rootResType),
-                        AuthzConstants.rootResourceId,
-                        AuthzConstants.appOpCreateApplication);
-        log.debug("User has permission to create application. " +
-                  "Adding authzresource");
+            AuthzConstants.rootResourceId, AuthzConstants.appOpCreateApplication);
+        log.debug("User has permission to create application. " + "Adding authzresource");
 
         ResourceType appProto = resourceManager.findResourceTypeByName(AuthzConstants.appPrototypeTypeName);
-        Resource proto = resourceManager
-            .findResourceByInstanceId(appProto,
-                                      app.getApplicationType().getId());
-        Resource resource = resourceManager.createResource(subject,
-            resourceManager.findResourceTypeByName(AuthzConstants.applicationResType),
-            proto, app.getId(),
-            app.getName(), false,null);
-     
+        Resource proto = resourceManager.findResourceByInstanceId(appProto, app.getApplicationType().getId());
+        Resource resource = resourceManager.createResource(subject, resourceManager
+            .findResourceTypeByName(AuthzConstants.applicationResType), proto, app.getId(), app.getName(), false, null);
+
         app.setResource(resource);
     }
 
@@ -830,14 +765,12 @@ public class ApplicationManagerImpl implements ApplicationManager {
     public void startup() {
         log.info("Application manager starting up!");
 
-        hqApp.registerCallbackListener(GroupChangeCallback.class,
-                                                     new GroupChangeCallback() {
-            public void preGroupDelete(ResourceGroup g)
-                throws VetoException {
+        hqApp.registerCallbackListener(GroupChangeCallback.class, new GroupChangeCallback() {
+            public void preGroupDelete(ResourceGroup g) throws VetoException {
                 Collection<Application> apps = applicationDAO.findUsingGroup(g);
 
-                for (Application app : apps ) {
-                  
+                for (Application app : apps) {
+
                     // Find the app service and remove it
                     try {
                         AppService svc = appServiceDAO.findByAppAndCluster(app, g);
@@ -849,21 +782,23 @@ public class ApplicationManagerImpl implements ApplicationManager {
                 }
             }
 
-            public void postGroupCreate(ResourceGroup g) {}
+            public void postGroupCreate(ResourceGroup g) {
+            }
 
-            public void groupMembersChanged(ResourceGroup g) {}
+            public void groupMembersChanged(ResourceGroup g) {
+            }
         });
     }
 
     public static ApplicationManager getOne() {
-       return Bootstrap.getBean(ApplicationManager.class);
+        return Bootstrap.getBean(ApplicationManager.class);
     }
 
-   @PostConstruct
+    @PostConstruct
     public void afterPropertiesSet() throws Exception {
-        
-            valuePager = Pager.getPager(VALUE_PROCESSOR);
-      
+
+        valuePager = Pager.getPager(VALUE_PROCESSOR);
+
     }
 
     private void trimStrings(ApplicationValue app) {
@@ -878,8 +813,5 @@ public class ApplicationManagerImpl implements ApplicationManager {
         if (app.getOpsContact() != null)
             app.setOpsContact(app.getOpsContact().trim());
     }
-
-   
-
 
 }
