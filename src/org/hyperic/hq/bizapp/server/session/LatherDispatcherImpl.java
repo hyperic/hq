@@ -64,7 +64,6 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
@@ -77,6 +76,7 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanStateCore;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
@@ -161,7 +161,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
 
     private ReportProcessor reportProcessor;
 
-    private ServerManagerLocal serverManager;
+    private PermissionManager permissionManager;
 
     private ZeventEnqueuer zeventManager;
 
@@ -170,7 +170,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
                                 AuthzSubjectManager authzSubjectManager, AutoinventoryManager autoinventoryManager,
                                 ConfigManager configManager, ControlManager controlManager,
                                 MeasurementManager measurementManager, PlatformManagerLocal platformManager,
-                                ReportProcessor reportProcessor, ServerManagerLocal serverManager,
+                                ReportProcessor reportProcessor, PermissionManager permissionManager,
                                 ZeventEnqueuer zeventManager) {
 
         this.sessionManager = sessionManager;
@@ -183,7 +183,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         this.measurementManager = measurementManager;
         this.platformManager = platformManager;
         this.reportProcessor = reportProcessor;
-        this.serverManager = serverManager;
+        this.permissionManager = permissionManager;
         this.zeventManager = zeventManager;
         for (int i = 0; i < CommandInfo.SECURE_COMMANDS.length; i++) {
             secureCommands.add(CommandInfo.SECURE_COMMANDS[i]);
@@ -249,7 +249,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
 
             int sessionId = authManager.getSessionId(user, pword);
             AuthzSubject subject = sessionManager.getSubject(sessionId);
-            serverManager.checkCreatePlatformPermission(subject);
+            permissionManager.checkCreatePlatformPermission(subject);
         } catch (SecurityException exc) {
             log.warn("Security exception when '" + user + "' tried to " + operation + " an Agent @ " +
                      ctx.getCallerIP(), exc);

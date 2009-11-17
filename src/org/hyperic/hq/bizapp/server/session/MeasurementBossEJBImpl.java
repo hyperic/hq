@@ -70,7 +70,7 @@ import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
@@ -2261,7 +2261,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException, PermissionException {
         final AuthzSubject subject = manager.getSubject(sessionId);
         final PlatformManagerLocal platMan = getPlatformManager();
-        final ServerManagerLocal serverMan = getServerManager();
+        final ServerManager serverMan = getServerManager();
         
         // Find the group
         final ResourceGroupManager resGrpMgr = getResourceGroupManager();

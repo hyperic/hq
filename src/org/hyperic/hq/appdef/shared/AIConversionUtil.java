@@ -86,7 +86,7 @@ public class AIConversionUtil {
      * @return an equivalent ServerValue object.
      */
     public static ServerValue convertAIServerToServer(AIServerValue aiserver,
-                                                      ServerManagerLocal serverMgr)
+                                                      ServerManager serverMgr)
         throws FinderException {
 
         ServerType stype =

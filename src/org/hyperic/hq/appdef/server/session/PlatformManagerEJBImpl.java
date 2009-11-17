@@ -68,7 +68,7 @@ import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
@@ -381,7 +381,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
     }
 
     private void removeServerReferences(Platform platform) {
-        final ServerManagerLocal sMan = getServerManager();
+        final ServerManager sMan = getServerManager();
         final Collection servers = platform.getServersBag();
         // since we are using the hibernate collection
         // we need to synchronize
@@ -1510,7 +1510,7 @@ public class PlatformManagerEJBImpl extends AppdefSessionEJB
         }
 
         // Need to remove all server types, too
-        ServerManagerLocal svrMan = ServerManagerEJBImpl.getOne();
+        ServerManager svrMan = ServerManagerImpl.getOne();
         for (Iterator it = pt.getServerTypes().iterator(); it.hasNext();) {
             ServerType st = (ServerType) it.next();
             svrMan.deleteServerType(st, overlord, resGroupMan, resMan);

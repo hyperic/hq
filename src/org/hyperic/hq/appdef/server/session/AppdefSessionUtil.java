@@ -34,7 +34,7 @@ import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
@@ -81,8 +81,8 @@ public abstract class AppdefSessionUtil {
         return PlatformManagerEJBImpl.getOne();
     }
 
-    protected ServerManagerLocal getServerManager() {
-        return ServerManagerEJBImpl.getOne();
+    protected ServerManager getServerManager() {
+        return ServerManagerImpl.getOne();
     }
 
     protected ServiceManagerLocal getServiceManager() {

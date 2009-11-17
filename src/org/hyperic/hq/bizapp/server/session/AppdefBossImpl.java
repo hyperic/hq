@@ -100,7 +100,7 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
@@ -222,7 +222,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     private ResourceManager resourceManager;
 
-    private ServerManagerLocal serverManager;
+    private ServerManager serverManager;
 
     private ServiceManagerLocal serviceManager;
 
@@ -246,7 +246,7 @@ public class AppdefBossImpl implements AppdefBoss {
                           CPropManager cPropManager, PermissionManager permissionManager,
                           MeasurementManager measurementManager, PlatformManagerLocal platformManager,
                           AIBossLocal aiBoss, ResourceGroupManager resourceGroupManager,
-                          ResourceManager resourceManager, ServerManagerLocal serverManager,
+                          ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManagerLocal serviceManager, TrackerManager trackerManager,
                           AppdefManager appdefManager, ZeventEnqueuer zEventManager) {
         this.sessionManager = sessionManager;

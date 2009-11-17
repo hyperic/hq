@@ -46,7 +46,7 @@ import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
@@ -88,7 +88,7 @@ public class ResourceManagerImpl implements ResourceManager {
     private Pager resourceTypePager = null;
     private ResourceEdgeDAO resourceEdgeDAO;
     private PlatformManagerLocal platformManager;
-    private ServerManagerLocal serverManager;
+    private ServerManager serverManager;
     private ServiceManagerLocal serviceManager;
     private AuthzSubjectManager authzSubjectManager;
     private ConfigManager configManager;
@@ -99,7 +99,7 @@ public class ResourceManagerImpl implements ResourceManager {
 
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformManagerLocal platformManager,
-                               ServerManagerLocal serverManager, ServiceManagerLocal serviceManager,
+                               ServerManager serverManager, ServiceManagerLocal serviceManager,
                                AuthzSubjectManager authzSubjectManager, ConfigManager configManager,
                                AuthzSubjectDAO authzSubjectDAO, ResourceDAO resourceDAO,
                                ResourceTypeDAO resourceTypeDAO, ResourceRelationDAO resourceRelationDAO) {

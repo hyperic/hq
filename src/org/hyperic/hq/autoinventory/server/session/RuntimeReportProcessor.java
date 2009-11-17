@@ -45,7 +45,7 @@ import org.hyperic.hq.appdef.server.session.ConfigManagerImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.appdef.shared.AIConversionUtil;
@@ -58,7 +58,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceTypeFactory;
@@ -87,8 +87,8 @@ public class RuntimeReportProcessor {
     private final PlatformManagerLocal
         _platformMgr = PlatformManagerEJBImpl.getOne();
     
-    private final ServerManagerLocal
-        _serverMgr = ServerManagerEJBImpl.getOne();
+    private final ServerManager
+        _serverMgr = ServerManagerImpl.getOne();
     
     private final ServiceManagerLocal
         _serviceMgr = ServiceManagerEJBImpl.getOne();

@@ -152,7 +152,7 @@ public class Platform extends PlatformBase
     /**
      * @return the persisted hibernate Bag of servers
      */
-    public Collection getServersBag() {
+    public Collection<Server> getServersBag() {
         return _servers;
     }
     

@@ -54,7 +54,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
@@ -109,7 +109,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
     private final Log log = LogFactory.getLog(ResourceGroupManagerImpl.class);
     private ResourceManager resourceManager;
     private PlatformManagerLocal platformManager;
-    private ServerManagerLocal serverManager;
+    private ServerManager serverManager;
     private ServiceManagerLocal serviceManager;
     private ApplicationManager applicationManager;
     private ResourceGroupDAO resourceGroupDAO;
@@ -120,7 +120,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
     @Autowired
     public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO, AuthzSubjectManager authzSubjectManager,
                                     EventLogManager eventLogManager, ResourceManager resourceManager,
-                                    PlatformManagerLocal platformManager, ServerManagerLocal serverManager,
+                                    PlatformManagerLocal platformManager, ServerManager serverManager,
                                     ServiceManagerLocal serviceManager, ApplicationManager applicationManager,
                                     ResourceGroupDAO resourceGroupDAO, ResourceDAO resourceDAO,
                                     ResourceRelationDAO resourceRelationDAO) {

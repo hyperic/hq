@@ -57,7 +57,7 @@ import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -105,7 +105,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private CPropManager cPropManager;
     private PlatformDAO platformDAO;
     private PlatformManagerLocal platformManager;
-    private ServerManagerLocal serverManager;
+    private ServerManager serverManager;
     private PermissionManager permissionManager;
     private AuditManager auditManager;
     private AuthzSubjectManager authzSubjectManager;
@@ -114,7 +114,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Autowired
     public AIQueueManagerImpl(AIServerDAO aIServerDAO, AIIpDAO aiIpDAO, AIPlatformDAO aiPlatformDAO,
                               ConfigManager configManager, CPropManager cPropManager, PlatformDAO platformDAO,
-                              PlatformManagerLocal platformManager, ServerManagerLocal serverManager,
+                              PlatformManagerLocal platformManager, ServerManager serverManager,
                               PermissionManager permissionManager, AuditManager auditManager,
                               AuthzSubjectManager authzSubjectManager) {
 

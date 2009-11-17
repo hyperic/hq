@@ -36,7 +36,7 @@ import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
 import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
 import org.hyperic.hq.appdef.server.session.Service;
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -56,7 +56,7 @@ import org.hyperic.util.pager.PageList;
 public class AppdefEntityValue {
     private PlatformManagerLocal    platformManagerLocal;
     private ApplicationManager applicationManagerLocal;
-    private ServerManagerLocal      serverManagerLocal;
+    private ServerManager      serverManagerLocal;
     private ServiceManagerLocal     serviceManagerLocal;
 
     private Application             application = null;
@@ -93,9 +93,9 @@ public class AppdefEntityValue {
         return platformManagerLocal;
     }
 
-    private ServerManagerLocal getServerManager() {
+    private ServerManager getServerManager() {
         if(serverManagerLocal == null){
-            serverManagerLocal = ServerManagerEJBImpl.getOne();
+            serverManagerLocal = ServerManagerImpl.getOne();
         }
         return serverManagerLocal;
     }
@@ -437,7 +437,7 @@ public class AppdefEntityValue {
      */
     public PageList getAssociatedServers(PageControl pc)
         throws PermissionException, AppdefEntityNotFoundException {
-        ServerManagerLocal sManager;
+        ServerManager sManager;
         PageList res;
         Integer iId;
 
@@ -475,7 +475,7 @@ public class AppdefEntityValue {
      */
     public PageList getAssociatedServers(Integer typeId, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException {
-        ServerManagerLocal sManager;
+        ServerManager sManager;
         PageList res;
         Integer iId;
 
@@ -511,7 +511,7 @@ public class AppdefEntityValue {
      */
     public List getAssociatedServerIds(Integer typeId)
         throws AppdefEntityNotFoundException, PermissionException {
-        ServerManagerLocal sManager;
+        ServerManager sManager;
         Integer[] ids;
         Integer iId;
     

@@ -42,7 +42,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -242,7 +242,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
     public void visitServer(AIServer aiserver,
                             AuthzSubject subject,
                             PlatformManagerLocal pmLocal,
-                            ServerManagerLocal smLocal,
+                            ServerManager smLocal,
                             ConfigManager configMgr,
                             CPropManager cpropMgr,
                             List createdResources)
@@ -286,7 +286,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                      ConfigManager configMgr,
                                      CPropManager cpropMgr,
                                      List createdResources,
-                                     ServerManagerLocal smLocal)
+                                     ServerManager smLocal)
         throws PermissionException
     {
         // If the platform has already been removed, do nothing.
@@ -322,7 +322,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                      ConfigManager configMgr,
                                      CPropManager cpropMgr,
                                      List createdResources,
-                                     ServerManagerLocal smLocal)
+                                     ServerManager smLocal)
         throws PermissionException, AIQApprovalException
     {
         if (platform == null) {
@@ -374,7 +374,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
                                    ConfigManager configMgr,
                                    CPropManager cpropMgr,
                                    List createdResources,
-                                   ServerManagerLocal smLocal)
+                                   ServerManager smLocal)
         throws AIQApprovalException, PermissionException
     {
         // If the platform does not exist in appdef, throw an exception
@@ -442,7 +442,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
     private Server getExistingServer(AuthzSubject subject,
                                      Platform platform,
                                      AIServer aiserver,
-                                     ServerManagerLocal smLocal)
+                                     ServerManager smLocal)
         throws PermissionException, FinderException {
         Server server = smLocal.findServerByAIID(
             subject, platform, aiserver.getAutoinventoryIdentifier());
