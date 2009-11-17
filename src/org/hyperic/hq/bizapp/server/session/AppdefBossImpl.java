@@ -84,7 +84,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
@@ -198,7 +198,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     private AppdefStatManagerLocal appdefStatManager;
 
-    private ApplicationManagerLocal applicationManager;
+    private ApplicationManager applicationManager;
 
     private AuthzSubjectManager authzSubjectManager;
 
@@ -240,7 +240,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     @Autowired
     public AppdefBossImpl(SessionManager sessionManager, AgentManager agentManager, AIQueueManagerLocal aiQueueManager,
-                          AppdefStatManagerLocal appdefStatManager, ApplicationManagerLocal applicationManager,
+                          AppdefStatManagerLocal appdefStatManager, ApplicationManager applicationManager,
                           AuthzSubjectManager authzSubjectManager, AutoinventoryManager autoinventoryManager,
                           AvailabilityManager availabilityManager, ConfigManager configManager,
                           CPropManager cPropManager, PermissionManager permissionManager,

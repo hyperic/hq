@@ -40,7 +40,7 @@ import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
@@ -90,7 +90,7 @@ public class ResourceManagerImpl implements ResourceManager {
     private PlatformManagerLocal platformManager;
     private ServerManagerLocal serverManager;
     private ServiceManagerLocal serviceManager;
-    private ApplicationManagerLocal applicationManager;
+    private ApplicationManager applicationManager;
     private AuthzSubjectManager authzSubjectManager;
     private ConfigManager configManager;
     private AuthzSubjectDAO authzSubjectDAO;
@@ -101,7 +101,7 @@ public class ResourceManagerImpl implements ResourceManager {
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformManagerLocal platformManager,
                                ServerManagerLocal serverManager, ServiceManagerLocal serviceManager,
-                               ApplicationManagerLocal applicationManager, AuthzSubjectManager authzSubjectManager,
+                               ApplicationManager applicationManager, AuthzSubjectManager authzSubjectManager,
                                ConfigManager configManager, AuthzSubjectDAO authzSubjectDAO,
                                ResourceDAO resourceDAO, ResourceTypeDAO resourceTypeDAO,
                                ResourceRelationDAO resourceRelationDAO) {

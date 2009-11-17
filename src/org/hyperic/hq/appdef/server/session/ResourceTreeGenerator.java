@@ -299,7 +299,7 @@ public class ResourceTreeGenerator {
             try {
                 AppdefEntityID id =
                     AppdefEntityID.newServiceID(service.getId());
-                apps = ApplicationManagerEJBImpl.getOne()
+                apps = ApplicationManagerImpl.getOne()
                     .getApplicationsByResource(_subject, id,
                                                PageControl.PAGE_ALL);
             } catch(ApplicationNotFoundException exc){

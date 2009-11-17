@@ -54,7 +54,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
@@ -107,7 +107,7 @@ public class MeasurementManagerImpl
     
     private ResourceManager resourceManager;
     private ResourceGroupManager resourceGroupManager;
-    private ApplicationManagerLocal applicationManager;
+    private ApplicationManager applicationManager;
     private AuthzSubjectManager authzSubjectManager;
     private MeasurementProcessor measurementProcessor;
     private ConfigManager configManager;
@@ -117,7 +117,7 @@ public class MeasurementManagerImpl
     @Autowired
     public MeasurementManagerImpl(ResourceManager resourceManager,
                                   ResourceGroupManager resourceGroupManager,
-                                  ApplicationManagerLocal applicationManager,
+                                  ApplicationManager applicationManager,
                                   AuthzSubjectManager authzSubjectManager,
                                   ConfigManager configManager) {
         this.resourceManager = resourceManager;

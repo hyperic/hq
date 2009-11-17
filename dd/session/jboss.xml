@@ -45,11 +45,7 @@
 
 		</session>
 		
-		<session>
-			<ejb-name>ApplicationManager</ejb-name>
-			<local-jndi-name>LocalApplicationManager</local-jndi-name>
-
-		</session>
+		
 		
 		<session>
 			<ejb-name>ProductBoss</ejb-name>

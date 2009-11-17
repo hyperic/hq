@@ -61,11 +61,11 @@ public class AppdefStartupListener
                     PlatformManagerEJBImpl.getOne().handleResourceDelete(r);
                     ServerManagerEJBImpl.getOne().handleResourceDelete(r);
                     ServiceManagerEJBImpl.getOne().handleResourceDelete(r);
-                    ApplicationManagerEJBImpl.getOne().handleResourceDelete(r);
+                    ApplicationManagerImpl.getOne().handleResourceDelete(r);
                 }
             });
         }
-        ApplicationManagerEJBImpl.getOne().startup();
+        ApplicationManagerImpl.getOne().startup();
         
         registerTransferAgentBundleZeventListener();
         registerTransferAgentPluginZeventListener();

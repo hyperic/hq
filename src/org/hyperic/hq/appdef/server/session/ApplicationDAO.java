@@ -41,12 +41,11 @@ import org.hyperic.hq.appdef.shared.DependencyNode;
 import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class ApplicationDAO extends HibernateDAO
+public class ApplicationDAO extends HibernateDAO<Application>
 {
     private static final Log log = LogFactory.getLog(ApplicationDAO.class);
 
@@ -206,7 +205,7 @@ public class ApplicationDAO extends HibernateDAO
         return app;
     }
 
-    public Collection findAll_orderName(boolean asc) {
+    public Collection<Application> findAll_orderName(boolean asc) {
         String sql = "from Application order by resource.sortName " +
                      (asc ? "asc" : "desc");
         return getSession().createQuery(sql).list();
@@ -219,7 +218,7 @@ public class ApplicationDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public Collection findByServiceId_orderName(Integer serviceId) {
+    public Collection<Application> findByServiceId_orderName(Integer serviceId) {
         String sql="select a from Application a " +
                    " join fetch a.appServices s " +
                    "where s.service.id=? " +
@@ -231,7 +230,7 @@ public class ApplicationDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByServiceIdOrClusterId_orderName(Integer serviceId,
+    public Collection<Application> findByServiceIdOrClusterId_orderName(Integer serviceId,
                                                            Integer groupId)
     {
         String sql="select a from Application a " +
@@ -244,7 +243,7 @@ public class ApplicationDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByServerId_orderName(Integer serverId, boolean asc) {
+    public Collection<Application> findByServerId_orderName(Integer serverId, boolean asc) {
         String sql="select a from Application a " +
                    " join fetch a.appServices asv " +
                    " join fetch asv.service s " +
@@ -255,7 +254,7 @@ public class ApplicationDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByPlatformId_orderName(Integer pid, boolean asc) {
+    public Collection<Application> findByPlatformId_orderName(Integer pid, boolean asc) {
         String sql="select a from Application a " +
                    " join fetch a.appServices asv " +
                    " join fetch asv.service s " +
@@ -267,7 +266,7 @@ public class ApplicationDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByServiceId_orderOwner(Integer serviceId, boolean asc)
+    public Collection<Application> findByServiceId_orderOwner(Integer serviceId, boolean asc)
     {
         String sql="select a from Application a " +
                    " join fetch a.appServices asv " +
@@ -279,7 +278,7 @@ public class ApplicationDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByServerId_orderOwner(Integer serverId, boolean asc) {
+    public Collection<Application> findByServerId_orderOwner(Integer serverId, boolean asc) {
         String sql="select a from Application a " +
                    " join fetch a.appServices asv " +
                    " join fetch asv.service s " +
@@ -291,7 +290,7 @@ public class ApplicationDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByPlatformId_orderOwner(Integer pid, boolean asc) {
+    public Collection<Application> findByPlatformId_orderOwner(Integer pid, boolean asc) {
         String sql="select a from Application a " +
                    " join fetch a.appServices asv " +
                    " join fetch asv.service s " +
@@ -304,7 +303,7 @@ public class ApplicationDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findUsingGroup(ResourceGroup g) {
+    public Collection<Application> findUsingGroup(ResourceGroup g) {
         String sql = "select a from Application a " +
                      "join a.appServices s " +
                      "where s.resourceGroup = :group";
@@ -320,7 +319,7 @@ public class ApplicationDAO extends HibernateDAO
             .executeUpdate();
     }
 
-    public Collection findDeletedApplications() {
+    public Collection<Application> findDeletedApplications() {
         String hql = "from Application where resource.resourceType = null";
         return createQuery(hql).list();
     }

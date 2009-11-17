@@ -13,14 +13,14 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -369,7 +369,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
         boolean result = false;
         
         if (application.isApplication()) {
-            ApplicationManagerLocal applicationManager = ApplicationManagerEJBImpl.getOne();
+            ApplicationManager applicationManager = ApplicationManagerImpl.getOne();
             
             result = applicationManager.isApplicationMember(application.getAppdefEntityId(), 
                                                             member.getAppdefEntityId());
@@ -421,7 +421,7 @@ public class ResourceBreadcrumbTag extends TagSupport {
                 
                 if (parentAppdef.isApplication()) {
                     // ...if the parent is an application we need to determine if the other is a member...
-                    ApplicationManagerLocal applicationManager = ApplicationManagerEJBImpl.getOne();
+                    ApplicationManager applicationManager = ApplicationManagerImpl.getOne();
                     
                     result = applicationManager.isApplicationMember(parentAppdef, member.getAppdefEntityId());
                 } else {

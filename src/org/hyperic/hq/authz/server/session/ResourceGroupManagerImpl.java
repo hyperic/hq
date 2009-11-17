@@ -51,7 +51,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManagerLocal;
@@ -111,7 +111,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
     private PlatformManagerLocal platformManager;
     private ServerManagerLocal serverManager;
     private ServiceManagerLocal serviceManager;
-    private ApplicationManagerLocal applicationManager;
+    private ApplicationManager applicationManager;
     private ResourceGroupDAO resourceGroupDAO;
     private ResourceDAO resourceDAO;
     private ResourceRelationDAO resourceRelationDAO;
@@ -121,7 +121,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
     public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO, AuthzSubjectManager authzSubjectManager,
                                     EventLogManager eventLogManager, ResourceManager resourceManager,
                                     PlatformManagerLocal platformManager, ServerManagerLocal serverManager,
-                                    ServiceManagerLocal serviceManager, ApplicationManagerLocal applicationManager,
+                                    ServiceManagerLocal serviceManager, ApplicationManager applicationManager,
                                     ResourceGroupDAO resourceGroupDAO, ResourceDAO resourceDAO,
                                     ResourceRelationDAO resourceRelationDAO) {
         this.resourceEdgeDAO = resourceEdgeDAO;

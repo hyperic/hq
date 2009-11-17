@@ -33,7 +33,7 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class ApplicationTypeDAO extends HibernateDAO
+public class ApplicationTypeDAO extends HibernateDAO<ApplicationType>
 {
     private static final Log log = LogFactory.getLog(ApplicationTypeDAO.class);
 

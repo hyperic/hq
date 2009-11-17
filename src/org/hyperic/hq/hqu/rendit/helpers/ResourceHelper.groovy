@@ -5,7 +5,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl as GroupMan
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerEJBImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl as ServiceMan
-import org.hyperic.hq.appdef.server.session.ApplicationManagerEJBImpl as AppMan
+import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl as AppMan
 import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl as EscMan
 import org.hyperic.hq.events.server.session.AlertManagerImpl as AlertMan
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as AlertDefMan

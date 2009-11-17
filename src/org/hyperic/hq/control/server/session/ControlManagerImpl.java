@@ -43,7 +43,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
-import org.hyperic.hq.appdef.shared.ApplicationManagerLocal;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
@@ -104,8 +104,7 @@ public class ControlManagerImpl implements ControlManager {
     private AuthzSubjectManager authzSubjectManager;
     private ServerManagerLocal serverManager;
     private ServiceManagerLocal serviceManager;
-    private ApplicationManagerLocal applicationManager;
-
+    private PermissionManager permissionManager;
     private ControlPluginManager controlPluginManager;
 
     @Autowired
@@ -115,7 +114,7 @@ public class ControlManagerImpl implements ControlManager {
                               PlatformManagerLocal platformManager,
                               AuthzSubjectManager authzSubjectManager, ServerManagerLocal serverManager,
                               ServiceManagerLocal serviceManager,
-                              ApplicationManagerLocal applicationManager) {
+                              PermissionManager permissionManager) {
         this.productManager = productManager;
         this.controlScheduleManager = controlScheduleManager;
         this.controlHistoryDao = controlHistoryDao;
@@ -125,7 +124,7 @@ public class ControlManagerImpl implements ControlManager {
         this.authzSubjectManager = authzSubjectManager;
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
-        this.applicationManager = applicationManager;
+        this.permissionManager = permissionManager;
     }
 
     @PostConstruct
@@ -602,7 +601,7 @@ public class ControlManagerImpl implements ControlManager {
                 serviceManager.checkModifyPermission(caller, id);
                 return;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                applicationManager.checkModifyPermission(caller, id);
+                permissionManager.checkModifyPermission(caller, id);
                 return;
             default:
                 throw new InvalidAppdefTypeException("Unknown type: " + type);
@@ -625,7 +624,7 @@ public class ControlManagerImpl implements ControlManager {
                 serviceManager.checkControlPermission(caller, id);
                 return;
             case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
-                applicationManager.checkControlPermission(caller, id);
+                permissionManager.checkControlPermission(caller, id);
                 return;
             default:
                 throw new InvalidAppdefTypeException("Unknown type: " + type);
