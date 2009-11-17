@@ -90,7 +90,6 @@ public class ResourceManagerImpl implements ResourceManager {
     private PlatformManagerLocal platformManager;
     private ServerManagerLocal serverManager;
     private ServiceManagerLocal serviceManager;
-    private ApplicationManager applicationManager;
     private AuthzSubjectManager authzSubjectManager;
     private ConfigManager configManager;
     private AuthzSubjectDAO authzSubjectDAO;
@@ -101,15 +100,13 @@ public class ResourceManagerImpl implements ResourceManager {
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformManagerLocal platformManager,
                                ServerManagerLocal serverManager, ServiceManagerLocal serviceManager,
-                               ApplicationManager applicationManager, AuthzSubjectManager authzSubjectManager,
-                               ConfigManager configManager, AuthzSubjectDAO authzSubjectDAO,
-                               ResourceDAO resourceDAO, ResourceTypeDAO resourceTypeDAO,
-                               ResourceRelationDAO resourceRelationDAO) {
+                               AuthzSubjectManager authzSubjectManager, ConfigManager configManager,
+                               AuthzSubjectDAO authzSubjectDAO, ResourceDAO resourceDAO,
+                               ResourceTypeDAO resourceTypeDAO, ResourceRelationDAO resourceRelationDAO) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
-        this.applicationManager = applicationManager;
         this.authzSubjectManager = authzSubjectManager;
         this.configManager = configManager;
         this.authzSubjectDAO = authzSubjectDAO;
@@ -117,6 +114,11 @@ public class ResourceManagerImpl implements ResourceManager {
         this.resourceTypeDAO = resourceTypeDAO;
         this.resourceRelationDAO = resourceRelationDAO;
         resourceTypePager = Pager.getDefaultPager();
+    }
+
+    // TODO resolve circular dependency
+    private ApplicationManager getApplicationManager() {
+        return Bootstrap.getBean(ApplicationManager.class);
     }
 
     /**
@@ -316,7 +318,7 @@ public class ResourceManagerImpl implements ResourceManager {
                     return resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
                 case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                     AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-                    return applicationManager.findApplicationById(overlord, id).getResource();
+                    return getApplicationManager().findApplicationById(overlord, id).getResource();
                 default:
                     return resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
             }
@@ -882,7 +884,7 @@ public class ResourceManagerImpl implements ResourceManager {
     public ResourceRelation getContainmentRelation() {
         return resourceRelationDAO.findById(AuthzConstants.RELATION_CONTAINMENT_ID);
     }
-    
+
     public ResourceRelation getNetworkRelation() {
         return resourceRelationDAO.findById(AuthzConstants.RELATION_NETWORK_ID);
     }
