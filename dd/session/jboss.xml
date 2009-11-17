@@ -66,12 +66,6 @@
 		</session>
 		
 		<session>
-			<ejb-name>LiveDataBoss</ejb-name>
-			<local-jndi-name>LocalLiveDataBoss</local-jndi-name>
-
-		</session>
-		
-		<session>
 			<ejb-name>PlatformManager</ejb-name>
 			<local-jndi-name>LocalPlatformManager</local-jndi-name>
 
