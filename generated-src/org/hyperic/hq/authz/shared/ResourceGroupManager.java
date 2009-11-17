@@ -163,7 +163,7 @@ public interface ResourceGroupManager
     */
    public AppdefGroupValue getGroupConvert( AuthzSubject subj,ResourceGroup g ) ;
 
-   public AppdefResourceType getAppdefResourceType( AuthzSubject subject,ResourceGroup group ) ;
+  
 
    /**
     * Get a list of {@link ResourceGroup}s which are compatible with the specified prototype. Do not return any groups contained within 'excludeGroups' (a list of {@link ResourceGroup}s

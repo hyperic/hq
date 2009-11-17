@@ -38,7 +38,7 @@ import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ApplicationValue;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.resourceTree.ApplicationNode;
 import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
@@ -69,7 +69,7 @@ public class ResourceTreeGenerator {
     private static final int GO_DOWN = 1 << 6;
 
     private final ServerManager  _serverMan;
-    private final ServiceManagerLocal _serviceMan;
+    private final ServiceManager _serviceMan;
     private final AuthzSubject        _subject;
 
     // Caches so we don't do much work twice
@@ -93,7 +93,7 @@ public class ResourceTreeGenerator {
         dnApps     = new HashSet();
 
         _serverMan  = ServerManagerImpl.getOne();
-        _serviceMan = ServiceManagerEJBImpl.getOne();
+        _serviceMan = ServiceManagerImpl.getOne();
     }
 
     /**

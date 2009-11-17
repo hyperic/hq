@@ -39,7 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -73,14 +73,14 @@ public class UpdateBossImpl
 
     private ServerManager serverManager;
 
-    private ServiceManagerLocal serviceManager;
+    private ServiceManager serviceManager;
 
     private UIPluginManagerLocal uiPluginManager;
 
     @Autowired
     public UpdateBossImpl(UpdateStatusDAO updateDAO, ServerConfigManagerLocal serverConfigManager,
                           PlatformManagerLocal platformManager, ServerManager serverManager,
-                          ServiceManagerLocal serviceManager, UIPluginManagerLocal uiPluginManager) {
+                          ServiceManager serviceManager, UIPluginManagerLocal uiPluginManager) {
         this.updateDAO = updateDAO;
         this.serverConfigManager = serverConfigManager;
         this.platformManager = platformManager;

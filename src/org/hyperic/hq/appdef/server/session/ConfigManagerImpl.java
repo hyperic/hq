@@ -25,12 +25,9 @@
 
 package org.hyperic.hq.appdef.server.session;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.ejb.CreateException;
 import javax.ejb.FinderException;
-import javax.ejb.RemoveException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,18 +39,13 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServerNotFoundException;
+import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AICompare;
-import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.product.PlatformTypeInfo;
 import org.hyperic.hq.product.ProductPlugin;
-import org.hyperic.hq.product.ServerTypeInfo;
-import org.hyperic.hq.product.ServiceTypeInfo;
-import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
@@ -69,8 +61,6 @@ public class ConfigManagerImpl implements ConfigManager {
     protected final Log log = LogFactory.getLog(ConfigManagerImpl.class.getName());
     private ConfigResponseDAO configResponseDAO;
     private PlatformManagerLocal platformManager;
-    private ServerManager serverManager;
-    private ServiceManagerLocal serviceManager;
     private ZeventEnqueuer zeventManager;
     private ServiceDAO serviceDAO;
     private ServerDAO serverDAO;
@@ -78,13 +68,10 @@ public class ConfigManagerImpl implements ConfigManager {
 
     @Autowired
     public ConfigManagerImpl(ConfigResponseDAO configResponseDAO, PlatformManagerLocal platformManager,
-                             ServerManager serverManager, ServiceManagerLocal serviceManager,
                              ZeventEnqueuer zeventManager, ServiceDAO serviceDAO, ServerDAO serverDAO,
                              PlatformDAO platformDAO) {
         this.configResponseDAO = configResponseDAO;
         this.platformManager = platformManager;
-        this.serverManager = serverManager;
-        this.serviceManager = serviceManager;
         this.zeventManager = zeventManager;
         this.serviceDAO = serviceDAO;
         this.serverDAO = serverDAO;
@@ -153,12 +140,18 @@ public class ConfigManagerImpl implements ConfigManager {
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                Server serv = serverManager.findServerById(intID);
+                Server serv = serverDAO.get(intID);
+                if(serv == null) {
+                    throw new ServerNotFoundException(intID);
+                }
                 pname = serv.getServerType().getPlugin();
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                org.hyperic.hq.appdef.server.session.Service service = serviceManager.findServiceById(intID);
+                org.hyperic.hq.appdef.server.session.Service service = serviceDAO.get(intID);
+                if(service == null) {
+                    throw new ServiceNotFoundException(intID);
+                }
                 pname = service.getServiceType().getPlugin();
                 break;
 
@@ -519,53 +512,7 @@ public class ConfigManagerImpl implements ConfigManager {
         }
     }
 
-    /**
-     * Update the appdef entities based on TypeInfo
-     * 
-     * 
-     */
-    @Transactional
-    public void updateAppdefEntities(String pluginName, TypeInfo[] entities) throws FinderException, RemoveException,
-        CreateException, VetoException {
-        ArrayList<TypeInfo> platforms = new ArrayList<TypeInfo>();
-        ArrayList<TypeInfo> servers = new ArrayList<TypeInfo>();
-        ArrayList<TypeInfo> services = new ArrayList<TypeInfo>();
-
-        // Organize the entity infos first
-        for (int i = 0; i < entities.length; i++) {
-            TypeInfo ei = entities[i];
-
-            switch (ei.getType()) {
-                case TypeInfo.TYPE_PLATFORM:
-                    platforms.add(ei);
-                    break;
-                case TypeInfo.TYPE_SERVER:
-                    servers.add(ei);
-                    break;
-                case TypeInfo.TYPE_SERVICE:
-                    services.add(ei);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        // Update platforms
-        if (platforms.size() > 0) {
-            this.platformManager.updatePlatformTypes(pluginName, (PlatformTypeInfo[]) platforms
-                .toArray(new PlatformTypeInfo[0]));
-        }
-
-        // Update servers
-        if (servers.size() > 0) {
-            serverManager.updateServerTypes(pluginName, (ServerTypeInfo[]) servers.toArray(new ServerTypeInfo[0]));
-        }
-
-        // Update services
-        if (services.size() > 0) {
-            serviceManager.updateServiceTypes(pluginName, (ServiceTypeInfo[]) services.toArray(new ServiceTypeInfo[0]));
-        }
-    }
+   
 
     private byte[] getConfigForType(ConfigResponseDB val, String productType, AppdefEntityID id, boolean fail)
         throws ConfigFetchException {

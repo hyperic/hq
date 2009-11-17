@@ -31,14 +31,23 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.ejb.FinderException;
+import javax.ejb.RemoveException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.ConfigResponseDB;
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.server.session.ConfigResponseDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
+import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.appdef.server.session.ServerDAO;
+import org.hyperic.hq.appdef.server.session.ServiceDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
@@ -46,9 +55,7 @@ import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
-import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -61,6 +68,7 @@ import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
@@ -88,31 +96,33 @@ public class ResourceManagerImpl implements ResourceManager {
     private Pager resourceTypePager = null;
     private ResourceEdgeDAO resourceEdgeDAO;
     private PlatformManagerLocal platformManager;
-    private ServerManager serverManager;
-    private ServiceManagerLocal serviceManager;
     private AuthzSubjectManager authzSubjectManager;
-    private ConfigManager configManager;
+    private ConfigResponseDAO configResponseDAO;
     private AuthzSubjectDAO authzSubjectDAO;
     private ResourceDAO resourceDAO;
     private ResourceTypeDAO resourceTypeDAO;
     private ResourceRelationDAO resourceRelationDAO;
+    private ZeventEnqueuer zeventManager;
+    private ServerDAO serverDAO;
+    private ServiceDAO serviceDAO;
 
     @Autowired
     public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformManagerLocal platformManager,
-                               ServerManager serverManager, ServiceManagerLocal serviceManager,
-                               AuthzSubjectManager authzSubjectManager, ConfigManager configManager,
+                               ServerDAO serverDAO, ServiceDAO serviceDAO,
+                               AuthzSubjectManager authzSubjectManager, ConfigResponseDAO configResponseDAO,
                                AuthzSubjectDAO authzSubjectDAO, ResourceDAO resourceDAO,
-                               ResourceTypeDAO resourceTypeDAO, ResourceRelationDAO resourceRelationDAO) {
+                               ResourceTypeDAO resourceTypeDAO, ResourceRelationDAO resourceRelationDAO, ZeventEnqueuer zeventManager) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.platformManager = platformManager;
-        this.serverManager = serverManager;
-        this.serviceManager = serviceManager;
+        this.serverDAO = serverDAO;
+        this.serviceDAO = serviceDAO;
         this.authzSubjectManager = authzSubjectManager;
-        this.configManager = configManager;
+        this.configResponseDAO = configResponseDAO;
         this.authzSubjectDAO = authzSubjectDAO;
         this.resourceDAO = resourceDAO;
         this.resourceTypeDAO = resourceTypeDAO;
         this.resourceRelationDAO = resourceRelationDAO;
+        this.zeventManager = zeventManager;
         resourceTypePager = Pager.getDefaultPager();
     }
 
@@ -136,6 +146,22 @@ public class ResourceManagerImpl implements ResourceManager {
         }
 
         return rt;
+    }
+    
+    /**
+     * remove the authz resource entry
+     */
+    public void removeAuthzResource(AuthzSubject subject, AppdefEntityID aeid, Resource r) throws RemoveException,
+        PermissionException, VetoException {
+        if (log.isDebugEnabled())
+            log.debug("Removing authz resource: " + aeid);
+
+        AuthzSubject s = authzSubjectManager.findSubjectById(subject.getId());
+        removeResource(s, r);
+
+        // Send resource delete event
+        ResourceDeletedZevent zevent = new ResourceDeletedZevent(subject, aeid);
+        zeventManager.enqueueEventAfterCommit(zevent);
     }
 
     /**
@@ -308,11 +334,19 @@ public class ResourceManagerImpl implements ResourceManager {
             final Integer id = aeid.getId();
             switch (aeid.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    return serverManager.findServerById(id).getResource();
+                    Server server = serverDAO.get(id);
+                    if(server == null) {
+                        return null;
+                    }
+                    return server.getResource();
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                     return platformManager.findPlatformById(id).getResource();
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    return serviceManager.findServiceById(id).getResource();
+                    org.hyperic.hq.appdef.server.session.Service service = serviceDAO.get(id);
+                    if(service == null) {
+                        return null;
+                    }
+                    return service.getResource();
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                     // XXX not sure about appdef group mapping since 4.0
                     return resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
@@ -322,14 +356,14 @@ public class ResourceManagerImpl implements ResourceManager {
                 default:
                     return resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
             }
-        } catch (ServerNotFoundException e) {
         } catch (PlatformNotFoundException e) {
-        } catch (ServiceNotFoundException e) {
         } catch (ApplicationNotFoundException e) {
         } catch (PermissionException e) {
         }
         return null;
     }
+    
+    
 
     /**
      * 
@@ -704,6 +738,28 @@ public class ResourceManagerImpl implements ResourceManager {
                                     AppdefEntityID[] children) throws PermissionException, ResourceEdgeCreateException {
         createResourceEdges(subject, relation, parent, children, false);
     }
+    
+    private ConfigResponseDB getConfigResponse(AppdefEntityID id) {
+        ConfigResponseDB config;
+
+        switch (id.getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                config = configResponseDAO.findByPlatformId(id.getId());
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                config = configResponseDAO.findByServerId(id.getId());
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                config = configResponseDAO.findByServiceId(id.getId());
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+            default:
+                throw new IllegalArgumentException("The passed entity type " + "does not support config " + "responses");
+        }
+
+        return config;
+    }
+
 
     /**
      *
@@ -745,7 +801,7 @@ public class ResourceManagerImpl implements ResourceManager {
         pm.check(subject.getId(), parentResource.getResourceType(), parentResource.getInstanceId(),
             AuthzConstants.platformOpModifyPlatform);
 
-        ConfigResponseDB config = configManager.getConfigResponse(parent);
+        ConfigResponseDB config = getConfigResponse(parent);
         if (config != null) {
             String validationError = config.getValidationError();
             if (validationError != null) {

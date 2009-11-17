@@ -10,7 +10,6 @@
 
 <bean class="org.hyperic.hq.appdef.server.session.AppdefStatManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.AIBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.ControlBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.GalertBossEJBImpl" factory-method="getOne"/>

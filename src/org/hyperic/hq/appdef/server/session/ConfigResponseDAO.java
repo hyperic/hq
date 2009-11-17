@@ -90,7 +90,7 @@ public class ConfigResponseDAO extends HibernateDAO
         return cLocal;
     }
 
-    ConfigResponseDB findByPlatformId(Integer id) {
+    public ConfigResponseDB findByPlatformId(Integer id) {
         Platform plat = platformDAO.findById(id);
         return plat.getConfigResponse();
     }

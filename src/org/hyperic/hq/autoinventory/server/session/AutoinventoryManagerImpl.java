@@ -68,7 +68,7 @@ import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -136,7 +136,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private ConfigManager configManager;
     private AgentManager agentManager;
     private CPropManager cPropManager;
-    private ServiceManagerLocal serviceManager;
+    private ServiceManager serviceManager;
     private AuthzSubjectManager authzSubjectManager;
     private AIQueueManager aiQueueManager;
     private PermissionManager permissionManager;
@@ -146,7 +146,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     public AutoinventoryManagerImpl(AgentReportStatusDAO agentReportStatusDao, AIHistoryDAO aiHistoryDao,
                                     AIPlatformDAO aiPlatformDao, ProductManager productManager, ServerManager serverManager,
                                     AIScheduleManager aiScheduleManager, ResourceManager resourceManager, ConfigManager configManager,
-                                    AgentManager agentManager, CPropManager cPropManager, ServiceManagerLocal serviceManager,
+                                    AgentManager agentManager, CPropManager cPropManager, ServiceManager serviceManager,
                                     AuthzSubjectManager authzSubjectManager, AIQueueManager aiQueueManager, PermissionManager permissionManager) {
         this.agentReportStatusDao = agentReportStatusDao;
         this.aiHistoryDao = aiHistoryDao;

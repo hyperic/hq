@@ -34,6 +34,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
+import org.hyperic.hq.appdef.server.session.ApplicationType;
+import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
+import org.hyperic.hq.appdef.server.session.ServerType;
+import org.hyperic.hq.appdef.server.session.ServiceManagerImpl;
+import org.hyperic.hq.appdef.server.session.ServiceType;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.server.session.ResourceGroup;
+
 /**
  * An abstract class which all appdef value objects inherit from
  * inheritance is achieved by using:
@@ -194,4 +206,61 @@ public abstract class AppdefResourceValue
             
         return this.getName().compareTo(((AppdefResourceValue) arg0).getName());
     }
+    
+    /**
+     * 
+     */
+    public static AppdefResourceType getAppdefResourceType(AuthzSubject subject, ResourceGroup group) {
+        if (group.isMixed())
+            throw new IllegalArgumentException("Group " + group.getId() +
+                                               " is a mixed group");
+        return getResourceTypeById(group.getGroupEntType().intValue(),
+                                   group.getGroupEntResType().intValue());
+    }
+
+    public AppdefResourceTypeValue getAppdefResourceTypeValue(AuthzSubject subject, ResourceGroup group) {
+        if (group.isMixed()) {
+            AppdefResourceTypeValue res = new GroupTypeValue();
+            int iGrpType = group.getGroupType().intValue();
+            res.setId(group.getGroupType());
+            res.setName(AppdefEntityConstants.getAppdefGroupTypeName(iGrpType));
+            return res;
+        } else {
+            return getAppdefResourceType(subject, group)
+                                                        .getAppdefResourceTypeValue();
+        }
+    }
+    
+    
+    private static AppdefResourceType getResourceTypeById(int type, int id) {
+        switch (type) {
+            case (AppdefEntityConstants.APPDEF_TYPE_PLATFORM):
+                return getPlatformTypeById(id);
+            case (AppdefEntityConstants.APPDEF_TYPE_SERVER):
+                return getServerTypeById(id);
+            case (AppdefEntityConstants.APPDEF_TYPE_SERVICE):
+                return getServiceTypeById(id);
+            case (AppdefEntityConstants.APPDEF_TYPE_APPLICATION):
+                return getApplicationTypeById(id);
+            default:
+                throw new IllegalArgumentException("Invalid resource type:" + type);
+        }
+    }
+    
+    private static PlatformType getPlatformTypeById(int id) {
+        return PlatformManagerEJBImpl.getOne().findPlatformType(new Integer(id));
+    }
+
+    private static ServerType getServerTypeById(int id) {
+        return ServerManagerImpl.getOne().findServerType(new Integer(id));
+    }
+
+    private static ServiceType getServiceTypeById(int id) {
+        return ServiceManagerImpl.getOne().findServiceType(new Integer(id));
+    }
+
+    private static ApplicationType getApplicationTypeById(int id) {
+        return ApplicationManagerImpl.getOne().findApplicationType(new Integer(id));
+    }
+    
 }

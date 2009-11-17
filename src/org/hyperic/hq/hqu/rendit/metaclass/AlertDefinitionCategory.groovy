@@ -10,7 +10,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.server.session.AppdefResourceType
 import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl
-import org.hyperic.hq.appdef.server.session.ServiceManagerEJBImpl
+import org.hyperic.hq.appdef.server.session.ServiceManagerImpl
 
 class AlertDefinitionCategory {
 
@@ -71,7 +71,7 @@ class AlertDefinitionCategory {
         } else if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
             return ServerManagerImpl.one.findServerType(appdefId)
         } else if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {
-            return ServiceManagerEJBImpl.one.findServiceType(appdefId)
+            return ServiceManagerImpl.one.findServiceType(appdefId)
         } else {
             throw new RuntimeException("Unhandled appdef type: ${appdefId}")
         }

@@ -105,7 +105,7 @@ import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
@@ -224,7 +224,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     private ServerManager serverManager;
 
-    private ServiceManagerLocal serviceManager;
+    private ServiceManager serviceManager;
 
     private TrackerManager trackerManager;
 
@@ -247,7 +247,7 @@ public class AppdefBossImpl implements AppdefBoss {
                           MeasurementManager measurementManager, PlatformManagerLocal platformManager,
                           AIBossLocal aiBoss, ResourceGroupManager resourceGroupManager,
                           ResourceManager resourceManager, ServerManager serverManager,
-                          ServiceManagerLocal serviceManager, TrackerManager trackerManager,
+                          ServiceManager serviceManager, TrackerManager trackerManager,
                           AppdefManager appdefManager, ZeventEnqueuer zEventManager) {
         this.sessionManager = sessionManager;
         this.agentManager = agentManager;

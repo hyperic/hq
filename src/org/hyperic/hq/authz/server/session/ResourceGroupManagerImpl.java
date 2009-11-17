@@ -55,7 +55,7 @@ import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServiceManagerLocal;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -108,10 +108,6 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
     private EventLogManager eventLogManager;
     private final Log log = LogFactory.getLog(ResourceGroupManagerImpl.class);
     private ResourceManager resourceManager;
-    private PlatformManagerLocal platformManager;
-    private ServerManager serverManager;
-    private ServiceManagerLocal serviceManager;
-    private ApplicationManager applicationManager;
     private ResourceGroupDAO resourceGroupDAO;
     private ResourceDAO resourceDAO;
     private ResourceRelationDAO resourceRelationDAO;
@@ -120,18 +116,12 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
     @Autowired
     public ResourceGroupManagerImpl(ResourceEdgeDAO resourceEdgeDAO, AuthzSubjectManager authzSubjectManager,
                                     EventLogManager eventLogManager, ResourceManager resourceManager,
-                                    PlatformManagerLocal platformManager, ServerManager serverManager,
-                                    ServiceManagerLocal serviceManager, ApplicationManager applicationManager,
                                     ResourceGroupDAO resourceGroupDAO, ResourceDAO resourceDAO,
                                     ResourceRelationDAO resourceRelationDAO) {
         this.resourceEdgeDAO = resourceEdgeDAO;
         this.authzSubjectManager = authzSubjectManager;
         this.eventLogManager = eventLogManager;
         this.resourceManager = resourceManager;
-        this.platformManager = platformManager;
-        this.serverManager = serverManager;
-        this.serviceManager = serviceManager;
-        this.applicationManager = applicationManager;
         this.resourceGroupDAO = resourceGroupDAO;
         this.resourceDAO = resourceDAO;
         this.resourceRelationDAO = resourceRelationDAO;
@@ -515,64 +505,15 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
             }
         }
 
-        retVal.setAppdefResourceTypeValue(getAppdefResourceTypeValue(subj, g));
+        retVal.setAppdefResourceTypeValue(retVal.getAppdefResourceTypeValue(subj, g));
         return retVal;
     }
 
-    /**
-     * 
-     */
-    public AppdefResourceType getAppdefResourceType(AuthzSubject subject, ResourceGroup group) {
-        if (group.isMixed())
-            throw new IllegalArgumentException("Group " + group.getId() +
-                                               " is a mixed group");
-        return getResourceTypeById(group.getGroupEntType().intValue(),
-                                   group.getGroupEntResType().intValue());
-    }
+ 
 
-    private AppdefResourceTypeValue getAppdefResourceTypeValue(AuthzSubject subject, ResourceGroup group) {
-        if (group.isMixed()) {
-            AppdefResourceTypeValue res = new GroupTypeValue();
-            int iGrpType = group.getGroupType().intValue();
-            res.setId(group.getGroupType());
-            res.setName(AppdefEntityConstants.getAppdefGroupTypeName(iGrpType));
-            return res;
-        } else {
-            return getAppdefResourceType(subject, group)
-                                                        .getAppdefResourceTypeValue();
-        }
-    }
+   
 
-    private AppdefResourceType getResourceTypeById(int type, int id) {
-        switch (type) {
-            case (AppdefEntityConstants.APPDEF_TYPE_PLATFORM):
-                return getPlatformTypeById(id);
-            case (AppdefEntityConstants.APPDEF_TYPE_SERVER):
-                return getServerTypeById(id);
-            case (AppdefEntityConstants.APPDEF_TYPE_SERVICE):
-                return getServiceTypeById(id);
-            case (AppdefEntityConstants.APPDEF_TYPE_APPLICATION):
-                return getApplicationTypeById(id);
-            default:
-                throw new IllegalArgumentException("Invalid resource type:" + type);
-        }
-    }
-
-    private PlatformType getPlatformTypeById(int id) {
-        return platformManager.findPlatformType(new Integer(id));
-    }
-
-    private ServerType getServerTypeById(int id) {
-        return serverManager.findServerType(new Integer(id));
-    }
-
-    private ServiceType getServiceTypeById(int id) {
-        return serviceManager.findServiceType(new Integer(id));
-    }
-
-    private ApplicationType getApplicationTypeById(int id) {
-        return applicationManager.findApplicationType(new Integer(id));
-    }
+  
 
     /**
      * Get a list of {@link ResourceGroup}s which are compatible with
