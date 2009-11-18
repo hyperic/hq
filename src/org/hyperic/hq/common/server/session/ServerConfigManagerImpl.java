@@ -61,43 +61,53 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * This class is responsible for setting/getting the server
- * configuration
+ * This class is responsible for setting/getting the server configuration
  */
 @Service
 @Transactional
 public class ServerConfigManagerImpl implements ServerConfigManager {
-   
 
-    private static final String SQL_VACUUM  = "VACUUM ANALYZE {0}";
+    private static final String SQL_VACUUM = "VACUUM ANALYZE {0}";
 
     private static final int DEFAULT_COST = 15;
-    
+
     private DBUtil dbUtil;
-    
+
     private AuthzSubjectManager authzSubjectManager;
 
-    private static final String[] APPDEF_TABLES
-        = { "EAM_PLATFORM", "EAM_SERVER", "EAM_SERVICE", "EAM_CONFIG_RESPONSE",
-            "EAM_AGENT", "EAM_IP", "EAM_RESOURCE", "EAM_CPROP_KEY",
-            "EAM_AUDIT", "EAM_AIQ_SERVER",
-            "EAM_AIQ_PLATFORM", "EAM_RESOURCE_EDGE",
-            "EAM_RES_GRP_RES_MAP" };
+    private static final String[] APPDEF_TABLES = { "EAM_PLATFORM",
+                                                   "EAM_SERVER",
+                                                   "EAM_SERVICE",
+                                                   "EAM_CONFIG_RESPONSE",
+                                                   "EAM_AGENT",
+                                                   "EAM_IP",
+                                                   "EAM_RESOURCE",
+                                                   "EAM_CPROP_KEY",
+                                                   "EAM_AUDIT",
+                                                   "EAM_AIQ_SERVER",
+                                                   "EAM_AIQ_PLATFORM",
+                                                   "EAM_RESOURCE_EDGE",
+                                                   "EAM_RES_GRP_RES_MAP" };
 
-    private static final String[] DATA_TABLES
-        = { "EAM_MEASUREMENT_DATA_1D", "EAM_MEASUREMENT_DATA_6H",
-            "EAM_MEASUREMENT_DATA_1H", "HQ_METRIC_DATA_COMPAT",
-            "EAM_METRIC_PROB", "EAM_REQUEST_STAT",
-            "EAM_ALERT_ACTION_LOG", "EAM_ALERT_CONDITION_LOG",
-            "EAM_ALERT", "EAM_EVENT_LOG", "EAM_CPROP", "EAM_MEASUREMENT",
-            "EAM_SRN", "HQ_AVAIL_DATA_RLE"};
+    private static final String[] DATA_TABLES = { "EAM_MEASUREMENT_DATA_1D",
+                                                 "EAM_MEASUREMENT_DATA_6H",
+                                                 "EAM_MEASUREMENT_DATA_1H",
+                                                 "HQ_METRIC_DATA_COMPAT",
+                                                 "EAM_METRIC_PROB",
+                                                 "EAM_REQUEST_STAT",
+                                                 "EAM_ALERT_ACTION_LOG",
+                                                 "EAM_ALERT_CONDITION_LOG",
+                                                 "EAM_ALERT",
+                                                 "EAM_EVENT_LOG",
+                                                 "EAM_CPROP",
+                                                 "EAM_MEASUREMENT",
+                                                 "EAM_SRN",
+                                                 "HQ_AVAIL_DATA_RLE" };
 
-    public static final String LOG_CTX
-        = "org.hyperic.hq.common.server.session.ServerConfigManagerImpl";
+    public static final String LOG_CTX = "org.hyperic.hq.common.server.session.ServerConfigManagerImpl";
     protected final Log log = LogFactory.getLog(LOG_CTX);
     private ConfigPropertyDAO configPropertyDAO;
-    
-    
+
     @Autowired
     public ServerConfigManagerImpl(DBUtil dbUtil, AuthzSubjectManager authzSubjectManager,
                                    ConfigPropertyDAO configPropertyDAO) {
@@ -107,8 +117,8 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     }
 
     /**
-     * Get the "root" server configuration, that means those keys that have
-     * the NULL prefix.
+     * Get the "root" server configuration, that means those keys that have the
+     * NULL prefix.
      * @return Properties
      * 
      */
@@ -125,23 +135,21 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     public Properties getConfig(String prefix) throws ConfigPropertyException {
 
         try {
-           
+
             Collection<ConfigProperty> allProps = getProps(prefix);
             Properties props = new Properties();
-           
 
-            for( ConfigProperty configProp : allProps) {
+            for (ConfigProperty configProp : allProps) {
                 String key = configProp.getKey();
                 // Check if the key has a value
-                if (configProp.getValue() != null &&
-                    configProp.getValue().length() != 0) {
+                if (configProp.getValue() != null && configProp.getValue().length() != 0) {
                     props.setProperty(key, configProp.getValue());
                 } else {
                     // Use defaults
                     if (configProp.getDefaultValue() != null) {
                         props.setProperty(key, configProp.getDefaultValue());
                     } else {
-                        // Otherwise return an empty key.  We dont want to
+                        // Otherwise return an empty key. We dont want to
                         // prune any keys from the config.
                         props.setProperty(key, "");
                     }
@@ -154,67 +162,52 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         }
     }
 
-    private void createChangeAudit(AuthzSubject subject, String key,
-                                   String oldVal, String newVal)
-    {
+    private void createChangeAudit(AuthzSubject subject, String key, String oldVal, String newVal) {
         if (key.equals(HQConstants.BaseURL)) {
             ServerConfigAudit.updateBaseURL(subject, newVal, oldVal);
-        }
-        else if (key.equals(HQConstants.EmailSender)) {
+        } else if (key.equals(HQConstants.EmailSender)) {
             ServerConfigAudit.updateFromEmail(subject, newVal, oldVal);
-        }
-        else if (key.equals(HQConstants.ExternalHelp)) {
+        } else if (key.equals(HQConstants.ExternalHelp)) {
             boolean oldExternal = oldVal.equals("true");
             boolean newExternal = newVal.equals("true");
 
-            ServerConfigAudit.updateExternalHelp(subject, newExternal,
-                                                 oldExternal);
+            ServerConfigAudit.updateExternalHelp(subject, newExternal, oldExternal);
         } else if (key.equals(HQConstants.DataMaintenance)) {
-            int oldHours = (int)(Long.parseLong(oldVal) / 60 / 60 / 1000);
-            int newHours = (int)(Long.parseLong(newVal) / 60 / 60 / 1000);
+            int oldHours = (int) (Long.parseLong(oldVal) / 60 / 60 / 1000);
+            int newHours = (int) (Long.parseLong(newVal) / 60 / 60 / 1000);
             ServerConfigAudit.updateDBMaint(subject, newHours, oldHours);
         } else if (key.equals(HQConstants.DataPurgeRaw)) {
-            int oldDays = (int)(Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
-            int newDays = (int)(Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
+            int oldDays = (int) (Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
+            int newDays = (int) (Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
             ServerConfigAudit.updateDeleteDetailed(subject, newDays, oldDays);
         } else if (key.equals(HQConstants.AlertPurge)) {
-            int oldPurge = (int)(Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
-            int newPurge = (int)(Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
-            ServerConfigAudit.updateAlertPurgeInterval(subject, newPurge,
-                                                       oldPurge);
+            int oldPurge = (int) (Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
+            int newPurge = (int) (Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
+            ServerConfigAudit.updateAlertPurgeInterval(subject, newPurge, oldPurge);
         } else if (key.equals(HQConstants.EventLogPurge)) {
-            int oldPurge = (int)(Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
-            int newPurge = (int)(Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
-            ServerConfigAudit.updateEventPurgeInterval(subject, newPurge,
-                                                       oldPurge);
+            int oldPurge = (int) (Long.parseLong(oldVal) / 24 / 60 / 60 / 1000);
+            int newPurge = (int) (Long.parseLong(newVal) / 24 / 60 / 60 / 1000);
+            ServerConfigAudit.updateEventPurgeInterval(subject, newPurge, oldPurge);
         } else if (key.equals(HQConstants.AlertsEnabled)) {
             boolean oldEnabled = oldVal.equals("true");
             boolean newEnabled = newVal.equals("true");
-            ServerConfigAudit.updateAlertsEnabled(subject,
-                                                  newEnabled,
-                                                  oldEnabled);
+            ServerConfigAudit.updateAlertsEnabled(subject, newEnabled, oldEnabled);
         } else if (key.equals(HQConstants.AlertNotificationsEnabled)) {
             boolean oldEnabled = oldVal.equals("true");
             boolean newEnabled = newVal.equals("true");
-            ServerConfigAudit.updateAlertNotificationsEnabled(subject,
-                                                              newEnabled,
-                                                              oldEnabled);
+            ServerConfigAudit.updateAlertNotificationsEnabled(subject, newEnabled, oldEnabled);
         } else if (key.equals(HQConstants.HIERARCHICAL_ALERTING_ENABLED)) {
             boolean oldEnabled = oldVal.equals("true");
             boolean newEnabled = newVal.equals("true");
-            ServerConfigAudit.updateHierarchicalAlertingEnabled(subject,
-                                                                newEnabled,
-                                                                oldEnabled);
+            ServerConfigAudit.updateHierarchicalAlertingEnabled(subject, newEnabled, oldEnabled);
         }
     }
 
-    private void createChangeAudits(AuthzSubject subject, Collection<ConfigProperty> allProps,
-                                    Properties newProps)
-    {
+    private void createChangeAudits(AuthzSubject subject, Collection<ConfigProperty> allProps, Properties newProps) {
         Properties oldProps = new Properties();
 
         for (ConfigProperty prop : allProps) {
-           
+
             String val = prop.getValue();
 
             if (val == null) {
@@ -228,10 +221,10 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
             oldProps.put(prop.getKey(), val);
         }
 
-        for (Map.Entry<Object,Object> newEnt  : newProps.entrySet() ) {
-            String newKey = (String)newEnt.getKey();
-            String newVal = (String)newEnt.getValue();
-            String oldVal = (String)oldProps.get(newKey);
+        for (Map.Entry<Object, Object> newEnt : newProps.entrySet()) {
+            String newKey = (String) newEnt.getKey();
+            String newVal = (String) newEnt.getValue();
+            String oldVal = (String) oldProps.get(newKey);
 
             if (oldVal == null || !oldVal.equals(newVal)) {
                 if (oldVal == null) {
@@ -244,51 +237,46 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
 
     /**
      * Set the server configuration
-     *
-     * @throws ConfigPropertyException - if the props object is missing
-     * a key that's currently in the database
+     * 
+     * @throws ConfigPropertyException - if the props object is missing a key
+     *         that's currently in the database
      * 
      */
-    public void setConfig(AuthzSubject subject, Properties newProps)
-        throws ApplicationException, ConfigPropertyException
-    {
+    public void setConfig(AuthzSubject subject, Properties newProps) throws ApplicationException,
+        ConfigPropertyException {
         setConfig(subject, null, newProps);
     }
 
     /**
      * Set the server Configuration
-     * @param prefix The config prefix to use when setting properties.  The prefix
-     * is used for namespace protection and property scoping.
+     * @param prefix The config prefix to use when setting properties. The
+     *        prefix is used for namespace protection and property scoping.
      * @param newProps The Properties to set.
-     * @throws ConfigPropertyException - if the props object is missing
-     * a key that's currently in the database
+     * @throws ConfigPropertyException - if the props object is missing a key
+     *         that's currently in the database
      * 
      */
-    public void setConfig(AuthzSubject subject, String prefix,
-                          Properties newProps)
-        throws ApplicationException, ConfigPropertyException
-    {
+    public void setConfig(AuthzSubject subject, String prefix, Properties newProps) throws ApplicationException,
+        ConfigPropertyException {
         ServerConfigCache cache = ServerConfigCache.getInstance();
-     
+
         Properties tempProps = new Properties();
         tempProps.putAll(newProps);
         try {
-           
+
             // get all properties
             Collection<ConfigProperty> allProps = getProps(prefix);
             // iterate over ejbs
             createChangeAudits(subject, allProps, newProps);
-            for(ConfigProperty ejb : allProps) {
-              
+            for (ConfigProperty ejb : allProps) {
 
                 // check if the props object has a key matching
                 String key = ejb.getKey();
-                if(newProps.containsKey(key)) {
+                if (newProps.containsKey(key)) {
                     tempProps.remove(key);
-                    String propValue = (String)newProps.get(key);
+                    String propValue = (String) newProps.get(key);
                     // delete null values from prefixed properties
-                    if ( prefix != null &&
-                         (propValue == null || propValue.equals("NULL")) ) {
+                    if (prefix != null && (propValue == null || propValue.equals("NULL"))) {
                         configPropertyDAO.remove(ejb);
                         cache.remove(key);
                     } else {
@@ -296,17 +284,16 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
                         ejb.setValue(propValue);
                         cache.put(key, propValue);
                     }
-                } else if ( prefix == null ) {
+                } else if (prefix == null) {
                     // Bomb out if props are missing for non-prefixed properties
-                    throw new ConfigPropertyException(
-                        "Updated configuration missing required key: " + key);
+                    throw new ConfigPropertyException("Updated configuration missing required key: " + key);
                 }
             }
 
             // create properties that are still left in tempProps
-            if (tempProps.size() > 0 ) {
+            if (tempProps.size() > 0) {
                 Enumeration propsToAdd = tempProps.propertyNames();
-                while ( propsToAdd.hasMoreElements() ) {
+                while (propsToAdd.hasMoreElements()) {
                     String key = (String) propsToAdd.nextElement();
                     String propValue = tempProps.getProperty(key);
                     // create the new property
@@ -320,10 +307,10 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     }
 
     /**
-     * Run an analyze command on all non metric tables.  The metric tables are
+     * Run an analyze command on all non metric tables. The metric tables are
      * handled seperately using analyzeHqMetricTables() so that only the tables
      * that have been modified are analyzed.
-     *
+     * 
      * @return The time taken in milliseconds to run the command.
      * 
      */
@@ -332,13 +319,12 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         HQDialect dialect = Util.getHQDialect();
         long duration = 0;
 
-        Connection conn  = null;
+        Connection conn = null;
         try {
-            conn = dbUtil.getConnByContext(getInitialContext(),
-                                           HQConstants.DATASOURCE);
+            conn = dbUtil.getConnByContext(getInitialContext(), HQConstants.DATASOURCE);
 
             for (Iterator i = Util.getTableMappings(); i.hasNext();) {
-                Table t = (Table)i.next();
+                Table t = (Table) i.next();
 
                 if (t.getName().toUpperCase().startsWith("EAM_MEASUREMENT_DATA") ||
                     t.getName().toUpperCase().startsWith("HQ_METRIC_DATA")) {
@@ -348,11 +334,11 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
                 String sql = dialect.getOptimizeStmt(t.getName(), 0);
                 duration += doCommand(conn, sql, null);
             }
-        } catch(SQLException e){
+        } catch (SQLException e) {
             log.error("Error analyzing table", e);
         } catch (NamingException e) {
             throw new SystemException(e);
-        } finally{
+        } finally {
             DBUtil.closeConnection(LOG_CTX, conn);
         }
 
@@ -360,16 +346,15 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     }
 
     /**
-     * Run an analyze command on both the current measurement data slice and
-     * the previous data slice if specified.
-     *
+     * Run an analyze command on both the current measurement data slice and the
+     * previous data slice if specified.
+     * 
      * @param analyzePrevMetricDataTable tells method to analyze previous metric
-     * data table as well as the current.
+     *        data table as well as the current.
      * @return The time taken in milliseconds to run the command.
      * 
      */
-    public long analyzeHqMetricTables(boolean analyzePrevMetricDataTable)
-    {
+    public long analyzeHqMetricTables(boolean analyzePrevMetricDataTable) {
         long systime = System.currentTimeMillis();
         String currMetricDataTable = MeasTabManagerUtil.getMeasTabname(systime);
         long prevtime = MeasTabManagerUtil.getPrevMeasTabTime(systime);
@@ -381,8 +366,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         Connection conn = null;
         try {
             String sql;
-            conn = dbUtil.getConnByContext(
-                getInitialContext(), HQConstants.DATASOURCE);
+            conn = dbUtil.getConnByContext(getInitialContext(), HQConstants.DATASOURCE);
             sql = dialect.getOptimizeStmt(currMetricDataTable, DEFAULT_COST);
             duration += doCommand(conn, sql, null);
             if (analyzePrevMetricDataTable) {
@@ -401,21 +385,20 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     }
 
     /**
-     * Run database-specific cleanup routines -- on PostgreSQL we
-     * do a VACUUM ANALYZE.  On other databases we just return -1.
-     * Since 3.1 we do not want to vacuum the hq_metric_data tables,
-     * only the compressed eam_measurement_xxx tables.
-     *
+     * Run database-specific cleanup routines -- on PostgreSQL we do a VACUUM
+     * ANALYZE. On other databases we just return -1. Since 3.1 we do not want
+     * to vacuum the hq_metric_data tables, only the compressed
+     * eam_measurement_xxx tables.
+     * 
      * @return The time it took to vaccum, in milliseconds, or -1 if the
-     * database is not PostgreSQL.
+     *         database is not PostgreSQL.
      * 
      */
     public long vacuum() {
         Connection conn = null;
         long duration = 0;
         try {
-            conn = dbUtil.getConnByContext(getInitialContext(),
-                                           HQConstants.DATASOURCE);
+            conn = dbUtil.getConnByContext(getInitialContext(), HQConstants.DATASOURCE);
             if (!DBUtil.isPostgreSQL(conn)) {
                 return -1;
             }
@@ -439,16 +422,15 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     /**
      * Run database-specific cleanup routines on appdef tables -- on PostgreSQL
      * we do a VACUUM ANALYZE against the relevant appdef, authz and measurement
-     * tables.  On other databases we just return -1.
+     * tables. On other databases we just return -1.
      * @return The time it took to vaccum, in milliseconds, or -1 if the
-     * database is not PostgreSQL.
+     *         database is not PostgreSQL.
      */
     private long vacuumAppdef() {
         Connection conn = null;
         long duration = 0;
         try {
-            conn = dbUtil.getConnByContext(getInitialContext(),
-                                           HQConstants.DATASOURCE);
+            conn = dbUtil.getConnByContext(getInitialContext(), HQConstants.DATASOURCE);
             if (!DBUtil.isPostgreSQL(conn)) {
                 return -1;
             }
@@ -467,9 +449,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
         }
     }
 
-    private long doCommand(Connection conn, String sql, String table)
-        throws SQLException
-    {
+    private long doCommand(Connection conn, String sql, String table) throws SQLException {
         Statement stmt = null;
         StopWatch watch = new StopWatch();
 
@@ -497,14 +477,12 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
      * 
      */
     public Collection<ConfigProperty> getConfigProperties() {
-        
 
         return configPropertyDAO.findAll();
     }
 
-    private Collection<ConfigProperty> getProps(
-                                String prefix) throws FinderException {
-        if ( prefix == null ) {
+    private Collection<ConfigProperty> getProps(String prefix) throws FinderException {
+        if (prefix == null) {
             return configPropertyDAO.findAll();
         } else {
             return configPropertyDAO.findByPrefix(prefix);
@@ -512,20 +490,19 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     }
 
     /**
-     * Gets the GUID for this HQ server instance.  The GUID is persistent for
-     * the duration of an HQ install and is created upon the first call of
-     * this method.  If for some reason it can't be determined, 'unknown'
-     * will be returned.
-     *
+     * Gets the GUID for this HQ server instance. The GUID is persistent for the
+     * duration of an HQ install and is created upon the first call of this
+     * method. If for some reason it can't be determined, 'unknown' will be
+     * returned.
+     * 
      * 
      */
     public String getGUID() {
         Properties p;
-       
 
         try {
             p = getConfig();
-        } catch(Exception e) {
+        } catch (Exception e) {
             throw new SystemException(e);
         }
 
@@ -536,9 +513,8 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
             }
             p.setProperty("HQ-GUID", res);
             try {
-                setConfig(authzSubjectManager.getOverlordPojo(),
-                          p);
-            } catch(Exception e) {
+                setConfig(authzSubjectManager.getOverlordPojo(), p);
+            } catch (Exception e) {
                 throw new SystemException(e);
             }
         }
@@ -546,6 +522,7 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     }
 
     private InitialContext ic = null;
+
     protected InitialContext getInitialContext() {
         if (ic == null) {
             try {
@@ -558,6 +535,6 @@ public class ServerConfigManagerImpl implements ServerConfigManager {
     }
 
     public static ServerConfigManager getOne() {
-       return Bootstrap.getBean(ServerConfigManager.class);
+        return Bootstrap.getBean(ServerConfigManager.class);
     }
 }
