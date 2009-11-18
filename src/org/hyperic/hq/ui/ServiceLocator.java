@@ -40,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.bizapp.server.session.EventsBossImpl;
+import org.hyperic.hq.bizapp.server.session.GalertBossImpl;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AIBossHome;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
@@ -51,7 +52,6 @@ import org.hyperic.hq.bizapp.shared.ControlBossHome;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
-import org.hyperic.hq.bizapp.shared.GalertBossHome;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBossHome;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
@@ -84,9 +84,6 @@ public class ServiceLocator {
 
     private static final String CONTROL_NAME = ControlBossHome.JNDI_NAME;
     private static final Class CONTROL_CLASS = ControlBossHome.class;
-
-    private static final String GALERT_NAME = GalertBossHome.JNDI_NAME;
-    private static final Class GALERT_CLASS = GalertBossHome.class;
 
     //private static final String UPDATE_NAME = UpdateBossHome.JNDI_NAME;
     //private static final Class UPDATE_CLASS = UpdateBossHome.class;
@@ -324,13 +321,7 @@ public class ServiceLocator {
     public GalertBoss getGalertBoss()
         throws ServiceLocatorException 
     {
-        GalertBossHome home = (GalertBossHome)lookup(GALERT_NAME, GALERT_CLASS);
-                                                      
-        try {
-            return (GalertBoss) home.create();
-        } catch (Exception e) {
-            throw new ServiceLocatorException(e);
-        }
+        return GalertBossImpl.getOne();
     }
 
     public UpdateBoss getUpdateBoss()  {

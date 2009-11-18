@@ -27,15 +27,8 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.CreateException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -43,15 +36,13 @@ import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.bizapp.shared.GalertBossLocal;
-import org.hyperic.hq.bizapp.shared.GalertBossUtil;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.authz.shared.ResourceGroupManager;
+import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
 import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
@@ -60,8 +51,6 @@ import org.hyperic.hq.galerts.server.session.ExecutionStrategyTypeInfo;
 import org.hyperic.hq.galerts.server.session.GalertDef;
 import org.hyperic.hq.galerts.server.session.GalertDefPartition;
 import org.hyperic.hq.galerts.server.session.GalertLog;
-import org.hyperic.hq.galerts.server.session.GalertManagerImpl;
-import org.hyperic.hq.galerts.server.session.GtriggerManagerImpl;
 import org.hyperic.hq.galerts.server.session.GtriggerType;
 import org.hyperic.hq.galerts.server.session.GtriggerTypeInfo;
 import org.hyperic.hq.galerts.shared.GalertManager;
@@ -73,137 +62,116 @@ import org.hyperic.util.pager.PageList;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.ejb.support.AbstractStatelessSessionBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
 * The BizApp's interface to the Events Subsystem
-*
-* @ejb:bean name="GalertBoss"
-*      jndi-name="ejb/bizapp/GalertBoss"
-*      local-jndi-name="LocalGalertBoss"
-*      view-type="both"
-*      type="Stateless"
-* @ejb:interface local-extends="javax.ejb.EJBLocalObject"
-* @ejb:home local-extends="javax.ejb.EJBLocalHome"
-* @ejb:transaction type="Required"
 */
-public class GalertBossEJBImpl  implements SessionBean 
+@Service
+@Transactional
+public class GalertBossImpl  implements GalertBoss 
 {
-    private final Log _log = LogFactory.getLog(GalertBossEJBImpl.class);
+    private SessionManager sessionManager;
+    private GalertManager galertManager;
+    private GtriggerManager gtriggerManager;
+    private AlertPermissionManager alertPermissionManager;
+    private ResourceGroupManager resourceGroupManager;
+    private EscalationManagerLocal escalationManager;
 
-    private SessionManager          _sessMan;
-   
-    
-   
-
-    public GalertBossEJBImpl() {
-        _sessMan = SessionManager.getInstance();
-       
+    @Autowired
+    public GalertBossImpl(GalertManager galertManager,
+                          GtriggerManager gtriggerManager,
+                          AlertPermissionManager alertPermissionManager,
+                          SessionManager sessionManager,
+                          ResourceGroupManager resourceGroupManager,
+                          EscalationManagerLocal escalationManager) {
+        this.galertManager = galertManager;
+        this.gtriggerManager = gtriggerManager;
+        this.alertPermissionManager = alertPermissionManager;
+        this.sessionManager = sessionManager;
+        this.resourceGroupManager = resourceGroupManager;
+        this.escalationManager = escalationManager;
     }
-
-    public GalertManager getGalertMan() {
-        return Bootstrap.getBean(GalertManager.class);
-    }
-
-    public GtriggerManager getTriggerMan() {
-        return  Bootstrap.getBean(GtriggerManager.class);
-    }
-
-
-
-    public AlertPermissionManager getAlertPermissionManager() {
-        return  Bootstrap.getBean(AlertPermissionManager.class);
-    }
-
-
-
 
     /**
-     * @ejb:interface-method
      */
     public ExecutionStrategyTypeInfo
         registerExecutionStrategy(int sessionId,
                                   ExecutionStrategyType stratType)
         throws PermissionException, SessionException
     {
-        _sessMan.authenticate(sessionId);
-        return getGalertMan().registerExecutionStrategy(stratType);
+        sessionManager.authenticate(sessionId);
+        return galertManager.registerExecutionStrategy(stratType);
 
     }
 
     /**
-     * @ejb:interface-method
      */
     public ExecutionStrategyTypeInfo
         findStrategyType(int sessionId, ExecutionStrategyType type)
         throws PermissionException, SessionException
     {
-        _sessMan.authenticate(sessionId);
-        return getGalertMan().findStrategyType(type);
+        sessionManager.authenticate(sessionId);
+        return galertManager.findStrategyType(type);
 
     }
 
     /**
-     * @ejb:interface-method
      */
     public GtriggerTypeInfo findTriggerType(int sessionId, GtriggerType type)
         throws SessionException
     {
-        _sessMan.authenticate(sessionId);
-        return getTriggerMan().findTriggerType(type);
+        sessionManager.authenticate(sessionId);
+        return gtriggerManager.findTriggerType(type);
     }
 
     /**
-     * @ejb:interface-method
      */
     public GtriggerTypeInfo registerTriggerType(int sessionId,
                                                 GtriggerType type)
         throws SessionException
     {
-        _sessMan.authenticate(sessionId);
-        return getTriggerMan().registerTriggerType(type);
+        sessionManager.authenticate(sessionId);
+        return gtriggerManager.registerTriggerType(type);
     }
 
 
     /**
-     * @ejb:interface-method
      */
-    public ExecutionStrategyInfo
-        addPartition(int sessionId, GalertDef def, GalertDefPartition partition,
+    public ExecutionStrategyInfo addPartition(int sessionId, GalertDef def, GalertDefPartition partition,
                      ExecutionStrategyTypeInfo stratType,
                      ConfigResponse stratConfig)
         throws SessionException
     {
-        _sessMan.authenticate(sessionId);
-        return getGalertMan().addPartition(def, partition, stratType, stratConfig);
+        sessionManager.authenticate(sessionId);
+        return galertManager.addPartition(def, partition, stratType, stratConfig);
     }
 
 
     /**
-     * @ejb:interface-method
      */
     public GalertDef createAlertDef(int sessionId, String name,
                                     String description, AlertSeverity severity,
                                     boolean enabled, ResourceGroup group)
         throws SessionException
     {
-        AuthzSubject subject = _sessMan.getSubject(sessionId);
-
-        return getGalertMan().createAlertDef(subject, name, description,
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return galertManager.createAlertDef(subject, name, description,
                                          severity, enabled, group);
     }
 
     /**
-     * @ejb:interface-method
      */
     public void configureTriggers(int sessionId, GalertDef def,
                                   GalertDefPartition partition,
-                                  List triggerInfos, List configs)
+                                  List<GtriggerTypeInfo> triggerInfos, List<ConfigResponse> configs)
         throws SessionException
     {
-        _sessMan.authenticate(sessionId);
-        getGalertMan().configureTriggers(def, partition, triggerInfos, configs);
+        sessionManager.authenticate(sessionId);
+        galertManager.configureTriggers(def, partition, triggerInfos, configs);
     }
 
     /**
@@ -211,132 +179,118 @@ public class GalertBossEJBImpl  implements SessionBean
      *
      * @return a collection of {@link AlertDefinitionBean}s
      * @throws PermissionException
-     * @ejb:interface-method
      */
-    public PageList findDefinitions(int sessionId, Integer gid, PageControl pc)
+    public PageList<GalertDef> findDefinitions(int sessionId, Integer gid, PageControl pc)
         throws SessionException, PermissionException
     {
-        AuthzSubject subj = _sessMan.getSubject(sessionId);
+        AuthzSubject subj = sessionManager.getSubject(sessionId);
 
         // Find the ResourceGroup
-        ResourceGroup g = ResourceGroupManagerImpl
-                                .getOne().findResourceGroupById(subj, gid);
-        PageList defList = null;
+        ResourceGroup g = resourceGroupManager.findResourceGroupById(subj, gid);
+        PageList<GalertDef> defList = null;
         try {
-            getAlertPermissionManager().canManageAlerts(subj,
+            alertPermissionManager.canManageAlerts(subj,
                                         new AppdefEntityID(g.getResource()));
-
-            defList = getGalertMan().findAlertDefs(g, pc);
+            defList = galertManager.findAlertDefs(g, pc);
         } catch (PermissionException e) {
             // user does not have sufficient permissions, so display no definitions
-            defList = new PageList();
+            defList = new PageList<GalertDef>();
         }
-
         return defList;
     }
 
     /**
-     * @ejb:interface-method
      */
     public void markDefsDeleted(int sessionId, GalertDef def)
         throws SessionException
     {
-        _sessMan.authenticate(sessionId);
-        getGalertMan().markDefDeleted(def);
+        sessionManager.authenticate(sessionId);
+        galertManager.markDefDeleted(def);
     }
 
     /**
-     * @ejb:interface-method
      */
     public void markDefsDeleted(int sessionId, Integer[] defIds)
         throws SessionException
     {
-        _sessMan.authenticate(sessionId);
+        sessionManager.authenticate(sessionId);
 
-        for (int i = 0; i < defIds.length; i++) {
-            GalertDef def = getGalertMan().findById(defIds[i]);
-            getGalertMan().markDefDeleted(def);
+        for (Integer defId : defIds) {
+            GalertDef def = galertManager.findById(defId);
+            galertManager.markDefDeleted(def);
         }
     }
 
     /**
-     * @ejb:interface-method
      */
     public GalertDef findDefinition(int sessionId, Integer id)
         throws SessionException
     {
-        _sessMan.authenticate(sessionId);
-        return getGalertMan().findById(id);
+        sessionManager.authenticate(sessionId);
+        return galertManager.findById(id);
     }
 
     /**
-     * @ejb:interface-method
      */
     public Escalatable findEscalatableAlert(int sessionId, Integer id)
         throws SessionException, PermissionException
     {
-        AuthzSubject subject = _sessMan.getSubject(sessionId);
-        Escalatable esc = getGalertMan().findEscalatableAlert(id);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        Escalatable esc = galertManager.findEscalatableAlert(id);
 
         // HQ-1295: Does user have sufficient permissions?
-        getAlertPermissionManager().canManageAlerts(subject,
+        alertPermissionManager.canManageAlerts(subject,
                                     esc.getDefinition().getDefinitionInfo());
 
         return esc;
     }
 
     /**
-     * @ejb:interface-method
      */
     public void update(int sessionId, GalertDef def, String name, String desc,
                        AlertSeverity severity, Boolean enabled)
         throws SessionException
     {
-        _sessMan.authenticate(sessionId);
-        getGalertMan().update(def, name, desc, severity, enabled);
+        sessionManager.authenticate(sessionId);
+        galertManager.update(def, name, desc, severity, enabled);
     }
 
     /**
-     * @ejb:interface-method
      */
     public void update(int sessionId, GalertDef def, Escalation escalation)
         throws SessionException
     {
-        _sessMan.authenticate(sessionId);
-        getGalertMan().update(def, escalation);
+        sessionManager.authenticate(sessionId);
+        galertManager.update(def, escalation);
     }
 
     /**
      * Bulk enable or disable GalertDefs
      * @throws SessionException if user session cannot be authenticated
-     * @ejb:interface-method
      */
     public void enable(int sessionId, GalertDef[] defs, boolean enable)
         throws SessionException
     {
-        _sessMan.authenticate(sessionId);
-        for (int i = 0; i < defs.length; i++) {
-            getGalertMan().enable(defs[i], enable);
+        sessionManager.authenticate(sessionId);
+        for (GalertDef def : defs) {
+            galertManager.enable(def, enable);
         }
     }
 
     /**
      * Count the total number of galerts in the time frame
-     * @ejb:interface-method
      */
     public int countAlertLogs(int sessionId, Integer gid, long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubject subj = _sessMan.getSubject(sessionId);
 
-        ResourceGroup g;
-        g = ResourceGroupManagerImpl.getOne().findResourceGroupById(subj,
-                                                                       gid);
-        PageList alertLogs = null;
+        PageList<GalertLog> alertLogs = null;
 
         try {
-            getAlertPermissionManager().canManageAlerts(subj,
+            AuthzSubject subj = sessionManager.getSubject(sessionId);
+            ResourceGroup g = resourceGroupManager.findResourceGroupById(subj, gid);
+            alertPermissionManager.canManageAlerts(subj,
                                         new AppdefEntityID(g.getResource()));
 
             // Don't need to have any results
@@ -344,10 +298,10 @@ public class GalertBossEJBImpl  implements SessionBean
             pc.setPagesize(0);
 
             alertLogs =
-                getGalertMan().findAlertLogsByTimeWindow(g, begin, end, pc);
+                galertManager.findAlertLogsByTimeWindow(g, begin, end, pc);
         } catch (PermissionException e) {
             // user does not have sufficient permissions, so display no alerts
-            alertLogs = new PageList();
+            alertLogs = new PageList<GalertLog>();
         }
 
         return alertLogs.getTotalSize();
@@ -359,30 +313,26 @@ public class GalertBossEJBImpl  implements SessionBean
      * Escalation json finders begin with json* to be consistent with
      * DAO finder convention
      *
-     * @ejb:interface-method
      */
     public JSONObject findAlertLogs(int sessionId, Integer gid, long begin,
                                     long end, PageControl pc)
         throws JSONException, SessionTimeoutException, SessionNotFoundException,
                PermissionException
     {
-        AuthzSubject subj = _sessMan.getSubject(sessionId);
+        AuthzSubject subj = sessionManager.getSubject(sessionId);
 
-        ResourceGroup g;
-        g = ResourceGroupManagerImpl.getOne().findResourceGroupById(subj,
+        ResourceGroup g = resourceGroupManager.findResourceGroupById(subj,
                                                                        gid);
-        PageList alertLogs = null;
+        PageList<GalertLog> alertLogs = null;
         JSONArray jarr = new JSONArray();
 
         try {
-            getAlertPermissionManager().canManageAlerts(subj,
+            alertPermissionManager.canManageAlerts(subj,
                                         new AppdefEntityID(g.getResource()));
             alertLogs =
-                getGalertMan().findAlertLogsByTimeWindow(g, begin, end, pc);
+                galertManager.findAlertLogsByTimeWindow(g, begin, end, pc);
 
-            for (Iterator i = alertLogs.iterator(); i.hasNext(); ) {
-                GalertLog alert = (GalertLog) i.next();
-
+            for (GalertLog alert : alertLogs) {
                 // Format the alertTime
                 SimpleDateFormat df =
                     new SimpleDateFormat(TimeUtil.DISPLAY_DATE_FORMAT);
@@ -409,7 +359,7 @@ public class GalertBossEJBImpl  implements SessionBean
             }
         } catch (PermissionException e) {
             // user does not have sufficient permissions, so display no alerts
-            alertLogs = new PageList();
+            alertLogs = new PageList<GalertLog>();
         }
 
         JSONObject jobj = new JSONObject();
@@ -420,31 +370,13 @@ public class GalertBossEJBImpl  implements SessionBean
     }
 
     /** Get the last fix if available
-     * @ejb:interface-method
      */
     public String getLastFix(int sessionID, GalertDef def)
         throws SessionNotFoundException, SessionTimeoutException {
-        // Look for the last fixed alert
-        return EscalationManagerEJBImpl.getOne().getLastFix(def);
+        return escalationManager.getLastFix(def);
     }
     
-    public static GalertBossLocal getOne() {
-        try {
-            return GalertBossUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static GalertBoss getOne() {
+        return Bootstrap.getBean(GalertBoss.class);
     }
-
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() {
-     
-        
-    }
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
 }
