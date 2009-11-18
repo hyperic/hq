@@ -40,10 +40,12 @@ import javax.ejb.FinderException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Application;
+import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
@@ -66,6 +68,7 @@ import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.context.Bootstrap;
@@ -107,7 +110,8 @@ public class MeasurementManagerImpl
     
     private ResourceManager resourceManager;
     private ResourceGroupManager resourceGroupManager;
-    private ApplicationManager applicationManager;
+    private ApplicationDAO applicationDAO;
+    private PermissionManager permissionManager;
     private AuthzSubjectManager authzSubjectManager;
     private MeasurementProcessor measurementProcessor;
     private ConfigManager configManager;
@@ -117,12 +121,13 @@ public class MeasurementManagerImpl
     @Autowired
     public MeasurementManagerImpl(ResourceManager resourceManager,
                                   ResourceGroupManager resourceGroupManager,
-                                  ApplicationManager applicationManager,
+                                  ApplicationDAO applicationDAO, PermissionManager permissionManager,
                                   AuthzSubjectManager authzSubjectManager,
                                   ConfigManager configManager) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
-        this.applicationManager = applicationManager;
+        this.applicationDAO = applicationDAO;
+        this.permissionManager = permissionManager;
         this.authzSubjectManager = authzSubjectManager;
         this.configManager = configManager;
     }
@@ -808,6 +813,17 @@ public class MeasurementManagerImpl
         }
         return rtn;
     }
+    
+    private Application findApplicationById(AuthzSubject subject, Integer id) throws ApplicationNotFoundException,
+    PermissionException {
+        try {
+            Application app = applicationDAO.findById(id);
+            permissionManager.checkViewPermission(subject, app.getEntityId());
+            return app;
+        } catch (ObjectNotFoundException e) {
+            throw new ApplicationNotFoundException(id, e);
+        }
+    }
 
     private final Map<Integer, List<Measurement>> getAvailMeas(Resource application) {
         final Integer typeId = application.getResourceType().getId();
@@ -816,7 +832,7 @@ public class MeasurementManagerImpl
         }
         final AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         try {
-            final Application app = applicationManager.findApplicationById(
+            final Application app = findApplicationById(
                                                                            overlord, application.getInstanceId());
             final Collection<AppService> appServices = app.getAppServices();
             final List<Resource> resources = new ArrayList<Resource>(appServices.size());
