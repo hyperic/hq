@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.hyperic.hq.appdef.server.session.AppdefStatManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AppdefStatManagerImpl;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 
@@ -237,8 +237,8 @@ public class AppdefInventorySummary implements java.io.Serializable {
         }
     }
 
-    private AppdefStatManagerLocal getAppdefStatManager() {
-        return AppdefStatManagerEJBImpl.getOne();
+    private AppdefStatManager getAppdefStatManager() {
+        return AppdefStatManagerImpl.getOne();
     }
 
     /* With groups, we have multiple types and each type may or may not

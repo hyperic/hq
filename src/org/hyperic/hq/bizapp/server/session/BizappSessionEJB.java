@@ -31,7 +31,7 @@ import javax.ejb.SessionContext;
 
 import org.hyperic.hq.appdef.server.session.AIQueueManagerImpl;
 import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
-import org.hyperic.hq.appdef.server.session.AppdefStatManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AppdefStatManagerImpl;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.server.session.CPropManagerImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerImpl;
@@ -40,7 +40,7 @@ import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerImpl;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AgentManager;
-import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
+import org.hyperic.hq.appdef.shared.AppdefStatManager;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
@@ -58,12 +58,10 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerImpl;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
-import org.hyperic.hq.bizapp.shared.AIBossLocal;
-import org.hyperic.hq.bizapp.shared.AIBossUtil;
+import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBossLocal;
-import org.hyperic.hq.bizapp.shared.ControlBossUtil;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
@@ -122,10 +120,10 @@ public abstract class BizappSessionEJB {
         return Bootstrap.getBean(AuthzBoss.class);
     }
 
-    public AIBossLocal getAIBoss() {
+    public AIBoss getAIBoss() {
 
         try {
-            return AIBossEJBImpl.getOne();
+            return AIBossImpl.getOne();
         } catch (Exception exc) {
             throw new SystemException(exc);
         }
@@ -167,8 +165,8 @@ public abstract class BizappSessionEJB {
         return ResourceGroupManagerImpl.getOne();
     }
 
-    public AppdefStatManagerLocal getAppdefStatManager() {
-        return AppdefStatManagerEJBImpl.getOne();
+    public AppdefStatManager getAppdefStatManager() {
+        return AppdefStatManagerImpl.getOne();
     }    
     
     public AuthzSubjectManager getAuthzSubjectManager() {

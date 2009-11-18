@@ -16,19 +16,7 @@
 			<local-jndi-name>LocalEscalationManager</local-jndi-name>
 
 		</session>
-		<session>
-			<ejb-name>AIBoss</ejb-name>
-			<jndi-name>ejb/bizapp/AIBoss</jndi-name>
-			<local-jndi-name>LocalAIBoss</local-jndi-name>
-
-		</session>
-		
-		
-		<session>
-			<ejb-name>AppdefStatManager</ejb-name>
-			<local-jndi-name>LocalAppdefStatManager</local-jndi-name>
-
-		</session>
+	
 		
 		
 		<session>

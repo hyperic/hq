@@ -82,7 +82,7 @@ import org.hyperic.hq.appdef.shared.AppdefManager;
 import org.hyperic.hq.appdef.shared.AppdefResourcePermissions;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
-import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
+import org.hyperic.hq.appdef.shared.AppdefStatManager;
 import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
@@ -137,7 +137,7 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
-import org.hyperic.hq.bizapp.shared.AIBossLocal;
+import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AllConfigResponses;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
@@ -196,7 +196,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     private AIQueueManager aiQueueManager;
 
-    private AppdefStatManagerLocal appdefStatManager;
+    private AppdefStatManager appdefStatManager;
 
     private ApplicationManager applicationManager;
 
@@ -216,7 +216,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     private PlatformManager platformManager;
 
-    private AIBossLocal aiBoss;
+    private AIBoss aiBoss;
 
     private ResourceGroupManager resourceGroupManager;
 
@@ -240,12 +240,12 @@ public class AppdefBossImpl implements AppdefBoss {
 
     @Autowired
     public AppdefBossImpl(SessionManager sessionManager, AgentManager agentManager, AIQueueManager aiQueueManager,
-                          AppdefStatManagerLocal appdefStatManager, ApplicationManager applicationManager,
+                          AppdefStatManager appdefStatManager, ApplicationManager applicationManager,
                           AuthzSubjectManager authzSubjectManager, AutoinventoryManager autoinventoryManager,
                           AvailabilityManager availabilityManager, ConfigManager configManager,
                           CPropManager cPropManager, PermissionManager permissionManager,
                           MeasurementManager measurementManager, PlatformManager platformManager,
-                          AIBossLocal aiBoss, ResourceGroupManager resourceGroupManager,
+                          AIBoss aiBoss, ResourceGroupManager resourceGroupManager,
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, TrackerManager trackerManager,
                           AppdefManager appdefManager, ZeventEnqueuer zEventManager) {
