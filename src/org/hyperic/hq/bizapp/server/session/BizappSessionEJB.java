@@ -58,12 +58,10 @@ import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerImpl;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
-import org.hyperic.hq.bizapp.shared.AIBossLocal;
-import org.hyperic.hq.bizapp.shared.AIBossUtil;
+import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBossLocal;
-import org.hyperic.hq.bizapp.shared.ControlBossUtil;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
@@ -122,10 +120,10 @@ public abstract class BizappSessionEJB {
         return Bootstrap.getBean(AuthzBoss.class);
     }
 
-    public AIBossLocal getAIBoss() {
+    public AIBoss getAIBoss() {
 
         try {
-            return AIBossEJBImpl.getOne();
+            return AIBossImpl.getOne();
         } catch (Exception exc) {
             throw new SystemException(exc);
         }

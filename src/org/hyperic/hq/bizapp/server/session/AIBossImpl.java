@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.FinderException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,6 +37,7 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AIIpValue;
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
+import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -46,6 +45,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -54,65 +54,76 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.autoinventory.AIHistory;
 import org.hyperic.hq.autoinventory.AutoinventoryException;
 import org.hyperic.hq.autoinventory.DuplicateAIScanNameException;
 import org.hyperic.hq.autoinventory.ScanConfigurationCore;
 import org.hyperic.hq.autoinventory.ScanStateCore;
-import org.hyperic.hq.autoinventory.server.session.AIScheduleManagerImpl;
+import org.hyperic.hq.autoinventory.ServerSignature;
 import org.hyperic.hq.autoinventory.shared.AIScheduleManager;
 import org.hyperic.hq.autoinventory.shared.AIScheduleValue;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
-import org.hyperic.hq.bizapp.shared.AIBossLocal;
-import org.hyperic.hq.bizapp.shared.AIBossUtil;
+import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.events.shared.AlertDefinitionManager;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.hq.scheduler.ScheduleWillNeverFireException;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** 
- * @ejb:bean name="AIBoss"
- *      jndi-name="ejb/bizapp/AIBoss"
- *      local-jndi-name="LocalAIBoss"
- *      view-type="both"
- *      type="Stateless"
- * @ejb:transaction type="Required"
+
  */
-public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
+@Service
+@Transactional
+public class AIBossImpl implements AIBoss {
 
-    private SessionManager sessionManager = SessionManager.getInstance();
+    private SessionManager sessionManager;
 
-    protected Log log = LogFactory.getLog(AIBossEJBImpl.class.getName());
+    protected final Log log = LogFactory.getLog(AIBossImpl.class.getName());
 
-    private AIScheduleManager getAIScheduleManager() {
-        return AIScheduleManagerImpl.getOne();
+    private AIQueueManager aiQueueManager;
+    
+    private AIScheduleManager aiScheduleManager;
+    
+    private AutoinventoryManager autoInventoryManager;
+    
+    
+    
+    @Autowired
+    public AIBossImpl(SessionManager sessionManager, AIQueueManager aiQueueManager,
+                      AIScheduleManager aiScheduleManager, AutoinventoryManager autoInventoryManager) {
+        this.sessionManager = sessionManager;
+        this.aiQueueManager = aiQueueManager;
+        this.aiScheduleManager = aiScheduleManager;
+        this.autoInventoryManager = autoInventoryManager;
     }
-
-    public AIBossEJBImpl() {}
 
     /**
      * Finder for all of the scheduled AI scans for an appdef entity.
      *
-     * @ejb:interface-method
+     * 
      */
-    public PageList findScheduledJobs(int sessionId, AppdefEntityID id,
+    public PageList<AIScheduleValue> findScheduledJobs(int sessionId, AppdefEntityID id,
                                       PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         try {
-            return getAIScheduleManager().findScheduledJobs(subject, id, pc);
+            return aiScheduleManager.findScheduledJobs(subject, id, pc);
         } catch (FinderException e) {
             throw new SystemException(e);
         }
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public AIScheduleValue findScheduledJobById(int sessionId, Integer id)
         throws SessionNotFoundException, SessionTimeoutException,
@@ -121,7 +132,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         AuthzSubject subject = sessionManager.getSubject(sessionId);;
 
         try {
-            return getAIScheduleManager().findScheduleByID(subject, id)
+            return aiScheduleManager.findScheduleByID(subject, id)
                 .getAIScheduleValue();
         } catch (Exception e) {
             throw new SystemException(e);
@@ -131,16 +142,16 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     /**
      * Get a job history based on appdef id
      *
-     * @ejb:interface-method
+     * 
      */
-    public PageList findJobHistory(int sessionId, AppdefEntityID id, 
+    public PageList<AIHistory> findJobHistory(int sessionId, AppdefEntityID id, 
                                    PageControl pc)
        throws SessionNotFoundException, SessionTimeoutException,
               PermissionException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         try {
-            return getAIScheduleManager().findJobHistory(subject, id, pc);
+            return aiScheduleManager.findJobHistory(subject, id, pc);
         } catch (Exception e) {
             throw new SystemException(e);
         }
@@ -149,7 +160,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
     /**
      * Delete a AIJob based on an id
      *
-     * @ejb:interface-method
+     * 
      * @param ids Array of job ids to be deleted
      */
     public void deleteAIJob(int sessionId, Integer[] ids)
@@ -157,7 +168,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                PermissionException, AutoinventoryException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        getAIScheduleManager().deleteAIJob(subject, ids);
+        aiScheduleManager.deleteAIJob(subject, ids);
     }
 
     /**
@@ -167,16 +178,16 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * signatures are returned.
      * @return A Map, where the keys are the names of the ServerTypeValues,
      * and the values are the ServerSignature objects.
-     * @ejb:interface-method
+     * 
      */
-    public Map getServerSignatures(int sessionID,
-                                   List serverTypes)
+    public Map<String,ServerSignature> getServerSignatures(int sessionID,
+                                   List<ServerTypeValue> serverTypes)
         throws SessionTimeoutException, SessionNotFoundException, 
                PermissionException, AutoinventoryException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         try {
-            return getAutoInventoryManager()
+            return autoInventoryManager
                 .getServerSignatures(subject, serverTypes);
 
         } catch (Exception e) {
@@ -194,7 +205,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * can be null) for immediate, one-time scans.
      * @param schedule Describes when the scan should be run.  If this is null,
      * then the scan is run as an immediate, one-time only scan.
-     * @ejb:interface-method
+     * 
      */
     public void startGroupScan(int sessionID,
                                int groupID,
@@ -211,7 +222,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         AppdefEntityID aid = AppdefEntityID.newGroupID(new Integer(groupID));
 
-        getAutoInventoryManager().startScan(subject, aid, 
+        autoInventoryManager.startScan(subject, aid, 
                                             scanConfig, scanName, scanDesc,
                                             schedule);
     }
@@ -226,7 +237,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * can be null) for immediate, one-time scans.
      * @param schedule Describes when the scan should be run.  If this is null,
      * then the scan is run as an immediate, one-time only scan.
-     * @ejb:interface-method
+     * 
      */
     public void startScan(int sessionID,
                           int platformID,
@@ -241,12 +252,12 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         AppdefEntityID aid =
             AppdefEntityID.newPlatformID(new Integer(platformID));
-        getAutoInventoryManager().startScan(subject, aid, scanConfig, scanName,
+        autoInventoryManager.startScan(subject, aid, scanConfig, scanName,
                                             scanDesc, schedule);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      */
     public void startScan(int sessionID,
                           String agentToken,
@@ -255,13 +266,13 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
                PermissionException, AutoinventoryException, 
                AgentConnectionException, AgentNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        getAutoInventoryManager().startScan(subject, agentToken, scanConfig);
+        autoInventoryManager.startScan(subject, agentToken, scanConfig);
     }
 
     /**
      * Stop an autoinventory scan.
      * @param platformID The platform ID of the platform to stop scanning on.
-     * @ejb:interface-method
+     * 
      */
     public void stopScan(int sessionID, int platformID)
         throws SessionTimeoutException, SessionNotFoundException, 
@@ -271,13 +282,13 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         AppdefEntityID aid =
             AppdefEntityID.newPlatformID(new Integer(platformID));
-        getAutoInventoryManager().stopScan(subject, aid);
+        autoInventoryManager.stopScan(subject, aid);
     }
 
     /**
      * Get status for a running autoinventory scan.
      * @param platformID The platform ID of the platform to get scan status for.
-     * @ejb:interface-method
+     * 
      */
     public ScanStateCore getScanStatus(int sessionID, int platformID)
         throws SessionTimeoutException, SessionNotFoundException, 
@@ -290,13 +301,13 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
             AppdefEntityID.newPlatformID(new Integer(platformID));
 
         ScanStateCore core =
-            getAutoInventoryManager().getScanStatus(subject, aid);
+            autoInventoryManager.getScanStatus(subject, aid);
         return core;
     }
 
     /**
      * Get status for a running autoinventory scan given the agentToken
-     * @ejb:interface-method
+     * 
      */
     public ScanStateCore getScanStatusByAgentToken(int sessionID,
                                                    String agentToken)
@@ -308,7 +319,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         ScanStateCore core;
 
-        core = getAutoInventoryManager().getScanStatusByAgentToken(subject, 
+        core = autoInventoryManager.getScanStatusByAgentToken(subject, 
                                                                    agentToken);
         return core;
     }
@@ -325,9 +336,9 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param pc How the results should be sorted/paged.
      * @return A List of AIPlatformValue objects representing the contents
      * of the autoinventory queue.
-     * @ejb:interface-method
+     * 
      */
-    public PageList getQueue(int sessionID, boolean showIgnored,
+    public PageList<AIPlatformValue> getQueue(int sessionID, boolean showIgnored,
                              boolean showPlaceholders, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException
     {
@@ -348,9 +359,9 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param pc How the results should be sorted/paged.
      * @return A List of AIPlatformValue objects representing the contents
      * of the autoinventory queue.
-     * @ejb:interface-method
+     * 
      */
-    public PageList getQueue(int sessionID, boolean showIgnored,
+    public PageList<AIPlatformValue> getQueue(int sessionID, boolean showIgnored,
                              boolean showPlaceholders,
                              boolean showAlreadyProcessed,
                              PageControl pc)
@@ -359,14 +370,14 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // TODO: pagecontrol is currently ignored here...
-        return getAIManager().getQueue(subject, showIgnored,
+        return aiQueueManager.getQueue(subject, showIgnored,
                                        showPlaceholders, showAlreadyProcessed,
                                        pc);
     }
 
     /**
      * Get details on a single platform from the AI queue, by aiplatformID
-     * @ejb:interface-method
+     * 
      */
     public AIPlatformValue findAIPlatformById(int sessionID, int aiplatformID)
         throws SessionNotFoundException, SessionTimeoutException {
@@ -375,7 +386,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         AIPlatformValue aiplatform;
 
         try {
-            aiplatform = getAIManager().findAIPlatformById(subject,
+            aiplatform = aiQueueManager.findAIPlatformById(subject,
                                                            aiplatformID);
         } catch(Exception exc){
             throw new SystemException(exc);
@@ -386,59 +397,59 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
     /**
      * Get details on a single platform from the AI queue, by FQDN
-     * @ejb:interface-method
+     * 
      */
     public AIPlatformValue findAIPlatformByFqdn(int sessionID, String fqdn)
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
-        return getAIManager().findAIPlatformByFqdn(subject, fqdn);
+        return aiQueueManager.findAIPlatformByFqdn(subject, fqdn);
     }
 
     /**
      * Get details on a single server from the AI queue, by serverID
-     * @ejb:interface-method
+     * 
      */
     public AIServerValue findAIServerById(int sessionID, int serverID)
         throws SessionNotFoundException, SessionTimeoutException {
         
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
-        return getAIManager().findAIServerById(subject, serverID);
+        return aiQueueManager.findAIServerById(subject, serverID);
     }
 
     /**
      * Get details on a single server from the AI queue, by name
-     * @ejb:interface-method
+     * 
      */
     public AIServerValue findAIServerByName( int sessionID, String name ) 
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        return getAIManager().findAIServerByName(subject, name);
+        return aiQueueManager.findAIServerByName(subject, name);
     }
 
     /**
      * Get details on a single ip from the AI queue, by ipID
-     * @ejb:interface-method
+     * 
      */
     public AIIpValue findAIIpById( int sessionID, int ipID ) 
         throws SessionNotFoundException, SessionTimeoutException {
         
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        return getAIManager().findAIIpById(subject, ipID);
+        return aiQueueManager.findAIIpById(subject, ipID);
     }
 
     /**
      * Get details on a single ip from the AI queue, by address
-     * @ejb:interface-method
+     * 
      */
     public AIIpValue findAIIpByAddress(int sessionID, String address)
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        return getAIManager().findAIIpByAddress(subject, address);
+        return aiQueueManager.findAIIpByAddress(subject, address);
     }
 
     /**
@@ -448,12 +459,12 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param ipList A List of ip IDs
      * @param action One of the AIQueueConstants.Q_DECISION_XXX constants
      * indicating what to do with the platforms, ips and servers.
-     * @ejb:interface-method
+     * 
      */
     public void processQueue(int sessionID,
-                             List platformList,
-                             List serverList,
-                             List ipList,
+                             List<Integer> platformList,
+                             List<Integer> serverList,
+                             List<Integer> ipList,
                              int action)
         throws SessionNotFoundException, SessionTimeoutException,
                AIQApprovalException, PermissionException, ValidationException {
@@ -461,7 +472,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         try {
-            getAIManager().processQueue(subject,
+            aiQueueManager.processQueue(subject,
                                         platformList, serverList, ipList,
                                         action);
         } catch (AIQApprovalException exc){
@@ -476,7 +487,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
      * @param id The server to enable runtime-AI for.
      * @param doEnable If true, runtime autodiscovery will be enabled,
      * if false, it will be disabled.
-     * @ejb:interface-method
+     * 
      */
     public void toggleRuntimeScan(AuthzSubject subject,
                                   AppdefEntityID id,
@@ -490,9 +501,9 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
             return;
         }
 
-        AutoinventoryManager aiManager = getAutoInventoryManager();
+      
         try {
-            aiManager.toggleRuntimeScan(subject, id, doEnable);
+            autoInventoryManager.toggleRuntimeScan(subject, id, doEnable);
         } catch (ResourceDeletedException e) {
             log.debug(e);
         } catch (Exception e) {
@@ -503,7 +514,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
 
     /**
      * Find an AI Platform from an appdef platform 
-     * @ejb:interface-method
+     * 
      */
     public AIPlatformValue findAIPlatformByPlatformID(int sessionId, 
                                                       Integer platformID)
@@ -513,7 +524,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         AIPlatformValue aiplatform =
-            getAIManager().getAIPlatformByPlatformID(subject, platformID);
+            aiQueueManager.getAIPlatformByPlatformID(subject, platformID);
         if (aiplatform != null) {
             throw new PlatformNotFoundException(platformID);
         }
@@ -521,18 +532,7 @@ public class AIBossEJBImpl extends BizappSessionEJB implements SessionBean {
         throw new PlatformNotFoundException(platformID);
     }
     
-    public static AIBossLocal getOne() {
-        try {
-            return AIBossUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static AIBoss getOne() {
+     return Bootstrap.getBean(AIBoss.class);
     }
-
-    /** @ejb:create-method */
-    public void ejbCreate() {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
 }

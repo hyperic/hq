@@ -51,20 +51,7 @@
 
 		</session>
 
-		<session>
-			<description><![CDATA[]]></description>
-
-			<ejb-name>AIBoss</ejb-name>
-
-			<home>org.hyperic.hq.bizapp.shared.AIBossHome</home>
-			<remote>org.hyperic.hq.bizapp.shared.AIBoss</remote>
-			<local-home>org.hyperic.hq.bizapp.shared.AIBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.AIBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.AIBossEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
+		
 		
 
 		
@@ -233,17 +220,6 @@
 			</method>
 			<trans-attribute>Required</trans-attribute>
 		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>AIBoss</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		
-		
-	
-		
 		
 		
 		<container-transaction>
