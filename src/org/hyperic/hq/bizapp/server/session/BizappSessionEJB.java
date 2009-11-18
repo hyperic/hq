@@ -68,8 +68,8 @@ import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
-import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.server.session.ControlManagerImpl;
 import org.hyperic.hq.control.server.session.ControlScheduleManagerImpl;
@@ -153,8 +153,8 @@ public abstract class BizappSessionEJB {
         return ConfigManagerImpl.getOne();
     }
 
-    public ServerConfigManagerLocal getServerConfigManager() {
-        return ServerConfigManagerEJBImpl.getOne();
+    public ServerConfigManager getServerConfigManager() {
+        return ServerConfigManagerImpl.getOne();
     }
 
     public ResourceManager getResourceManager() {

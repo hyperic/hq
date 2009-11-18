@@ -1,6 +1,6 @@
 package org.hyperic.hq.measurement.server.mbean;
 
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
+import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -162,7 +162,7 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
     private long getDetailedPurgeInterval()
         throws Exception
     {
-        Properties conf = ServerConfigManagerEJBImpl.getOne().getConfig();
+        Properties conf = ServerConfigManagerImpl.getOne().getConfig();
         String purgeRawString = conf.getProperty(HQConstants.DataPurgeRaw);
         return Long.parseLong(purgeRawString);
     }

@@ -55,8 +55,8 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.bizapp.server.session.EmailManagerImpl;
 import org.hyperic.hq.bizapp.shared.EmailManager;
 import org.hyperic.hq.bizapp.shared.action.EmailActionConfig;
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
-import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalationStateChange;
@@ -109,7 +109,7 @@ public class EmailAction extends EmailActionConfig
     private ResourceDAO resourceDAO = Bootstrap.getBean(ResourceDAO.class);
 
     static {
-        ServerConfigManagerLocal sConf = ServerConfigManagerEJBImpl.getOne();
+        ServerConfigManager sConf = ServerConfigManagerImpl.getOne();
         int tmp = 0;
         try {
             final Properties props = sConf.getConfig();

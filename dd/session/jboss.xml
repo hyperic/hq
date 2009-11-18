@@ -47,14 +47,6 @@
 
 		</session>
 		
-		
-		<session>
-			<ejb-name>ServerConfigManager</ejb-name>
-			<local-jndi-name>LocalServerConfigManager</local-jndi-name>
-
-		</session>
-		
-		
 		<session>
 			<ejb-name>UIPluginManager</ejb-name>
 			<local-jndi-name>LocalUIPluginManager</local-jndi-name>

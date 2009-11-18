@@ -3,30 +3,37 @@
  */
 package org.hyperic.hq.common.shared;
 
+import java.util.Collection;
+import java.util.Properties;
+
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.ConfigProperty;
+import org.hyperic.util.ConfigPropertyException;
+
 /**
  * Local interface for ServerConfigManager.
  */
-public interface ServerConfigManagerLocal
-   extends javax.ejb.EJBLocalObject
+public interface ServerConfigManager
 {
    /**
     * Get the "root" server configuration, that means those keys that have the NULL prefix.
     * @return Properties
     */
-   public java.util.Properties getConfig(  ) throws org.hyperic.util.ConfigPropertyException;
+   public Properties getConfig(  ) throws ConfigPropertyException;
 
    /**
     * Get the server configuration
     * @param prefix The prefix of the configuration to retrieve.
     * @return Properties
     */
-   public java.util.Properties getConfig( java.lang.String prefix ) throws org.hyperic.util.ConfigPropertyException;
+   public Properties getConfig( String prefix ) throws ConfigPropertyException;
 
    /**
     * Set the server configuration
     * @throws ConfigPropertyException - if the props object is missing a key that's currently in the database
     */
-   public void setConfig( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.util.Properties newProps ) throws org.hyperic.hq.common.ApplicationException, org.hyperic.util.ConfigPropertyException;
+   public void setConfig( AuthzSubject subject,Properties newProps ) throws ApplicationException, ConfigPropertyException;
 
    /**
     * Set the server Configuration
@@ -34,7 +41,7 @@ public interface ServerConfigManagerLocal
     * @param newProps The Properties to set.
     * @throws ConfigPropertyException - if the props object is missing a key that's currently in the database
     */
-   public void setConfig( org.hyperic.hq.authz.server.session.AuthzSubject subject,java.lang.String prefix,java.util.Properties newProps ) throws org.hyperic.hq.common.ApplicationException, org.hyperic.util.ConfigPropertyException;
+   public void setConfig( AuthzSubject subject,String prefix,Properties newProps ) throws ApplicationException, ConfigPropertyException;
 
    /**
     * Run an analyze command on all non metric tables. The metric tables are handled seperately using analyzeHqMetricTables() so that only the tables that have been modified are analyzed.
@@ -58,11 +65,11 @@ public interface ServerConfigManagerLocal
    /**
     * Get all the {@link ConfigProperty}s
     */
-   public java.util.Collection getConfigProperties(  ) ;
+   public Collection<ConfigProperty> getConfigProperties(  ) ;
 
    /**
     * Gets the GUID for this HQ server instance. The GUID is persistent for the duration of an HQ install and is created upon the first call of this method. If for some reason it can't be determined, 'unknown' will be returned.
     */
-   public java.lang.String getGUID(  ) ;
+   public String getGUID(  ) ;
 
 }

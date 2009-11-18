@@ -1,6 +1,6 @@
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl as MM
 import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl as PB
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl as SCM
+import org.hyperic.hq.common.server.session.ServerConfigManagerImpl as SCM
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as subMan
 import org.hyperic.hq.appdef.server.session.CPropManagerImpl as cpropMan
 import org.hyperic.hq.appdef.server.session.Server
