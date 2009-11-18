@@ -54,7 +54,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -112,14 +112,14 @@ public class ProductManagerImpl implements ProductManager {
     private static final String ALERT_DEFINITIONS_XML_FILE = "etc/alert-definitions.xml";
     private AlertDefinitionManager alertDefinitionManager;
     private PluginDAO pluginDao;
-    private PlatformManagerLocal platformManager;
+    private PlatformManager platformManager;
     private ServerManager serverManager;
     private ServiceManager serviceManager;
 
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
                               CPropManager cPropManager, TemplateManager templateManager,
-                              AuditManager auditManager, ServerManager serverManager, ServiceManager serviceManager, PlatformManagerLocal platformManager) {
+                              AuditManager auditManager, ServerManager serverManager, ServiceManager serviceManager, PlatformManager platformManager) {
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
         this.cPropManager = cPropManager;

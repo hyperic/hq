@@ -36,7 +36,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.autoinventory.AIHistory;
@@ -88,12 +88,12 @@ public class AIScheduleManagerImpl
     private static final String SCHEDULE_PAGER = PAGER_BASE + "PagerProcessor_ai_schedule";
 
     private AIScheduleDAO aiScheduleDao;
-    private PlatformManagerLocal platformManager;
+    private PlatformManager platformManager;
     private AIHistoryDAO aiHistoryDao;
 
     @Autowired
     public AIScheduleManagerImpl(Scheduler scheduler, DBUtil dbUtil, AIScheduleDAO aiScheduleDao,
-                                 PlatformManagerLocal platformManager, AIHistoryDAO aiHistoryDAO) {
+                                 PlatformManager platformManager, AIHistoryDAO aiHistoryDAO) {
         super(scheduler, dbUtil);
         this.aiScheduleDao = aiScheduleDao;
         this.platformManager = platformManager;

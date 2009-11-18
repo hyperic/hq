@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
@@ -63,7 +63,7 @@ public class HQInternalService implements HQInternalServiceMBean {
     }
 
     public int getPlatformCount() {
-        return PlatformManagerEJBImpl.getOne().getPlatformCount().intValue();
+        return PlatformManagerImpl.getOne().getPlatformCount().intValue();
     }
 
     public long getTransactionCount() {

@@ -2,7 +2,7 @@ import java.text.SimpleDateFormat
 import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.hqu.rendit.BaseController
 import org.hyperic.hq.authz.server.session.ResourceSortField
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
+import org.hyperic.hq.appdef.server.session.PlatformManagerImpl as PlatMan
 
 class ExporterController 
 	extends BaseController

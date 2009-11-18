@@ -38,36 +38,26 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hibernate.Util;
-import org.hyperic.hq.appdef.server.session.Cprop;
-import org.hyperic.hq.appdef.server.session.CpropKey;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.CPropChangeEvent;
 import org.hyperic.hq.appdef.shared.CPropKeyExistsException;
 import org.hyperic.hq.appdef.shared.CPropKeyNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManager;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
-import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
-import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.appdef.server.session.CpropDAO;
-import org.hyperic.hq.appdef.server.session.CpropKeyDAO;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.jdbc.DBUtil;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -84,7 +74,6 @@ public class CPropManagerImpl implements CPropManager {
     private Messenger sender;
     private CpropDAO cPropDAO;
     private CpropKeyDAO cPropKeyDAO;
-    private PlatformManagerLocal platformManager;
     private ApplicationTypeDAO applicationTypeDAO;
     private PlatformTypeDAO platformTypeDAO;
     private ServerTypeDAO serverTypeDAO;
@@ -92,12 +81,11 @@ public class CPropManagerImpl implements CPropManager {
 
     @Autowired
     public CPropManagerImpl(Messenger sender, CpropDAO cPropDAO, CpropKeyDAO cPropKeyDAO,
-                            PlatformManagerLocal platformManager, ApplicationTypeDAO applicationTypeDAO,
-                            PlatformTypeDAO platformTypeDAO, ServerTypeDAO serverTypeDAO, ServiceTypeDAO serviceTypeDAO) {
+                            ApplicationTypeDAO applicationTypeDAO, PlatformTypeDAO platformTypeDAO,
+                            ServerTypeDAO serverTypeDAO, ServiceTypeDAO serviceTypeDAO) {
         this.sender = sender;
         this.cPropDAO = cPropDAO;
         this.cPropKeyDAO = cPropKeyDAO;
-        this.platformManager = platformManager;
         this.applicationTypeDAO = applicationTypeDAO;
         this.platformTypeDAO = platformTypeDAO;
         this.serverTypeDAO = serverTypeDAO;
@@ -120,7 +108,7 @@ public class CPropManagerImpl implements CPropManager {
         Integer id = new Integer(appdefTypeId);
 
         if (appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            return platformManager.findPlatformType(id);
+            return platformTypeDAO.findById(id);
         } else if (appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
             try {
                 return serverTypeDAO.findById(id);

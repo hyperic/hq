@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,25 +39,23 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.ObjectNotFoundException;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.server.session.AppdefResourceType;
+import org.hyperic.hq.appdef.server.session.Application;
+import org.hyperic.hq.appdef.server.session.ApplicationDAO;
 import org.hyperic.hq.appdef.server.session.ConfigResponseDAO;
 import org.hyperic.hq.appdef.server.session.Platform;
+import org.hyperic.hq.appdef.server.session.PlatformDAO;
+import org.hyperic.hq.appdef.server.session.PlatformType;
+import org.hyperic.hq.appdef.server.session.PlatformTypeDAO;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerDAO;
 import org.hyperic.hq.appdef.server.session.ServiceDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
-import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
-import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
-import org.hyperic.hq.appdef.shared.ServerNotFoundException;
-import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -68,6 +67,7 @@ import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.product.PlatformDetector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
@@ -95,7 +95,7 @@ public class ResourceManagerImpl implements ResourceManager {
     private final Log log = LogFactory.getLog(ResourceManagerImpl.class);
     private Pager resourceTypePager = null;
     private ResourceEdgeDAO resourceEdgeDAO;
-    private PlatformManagerLocal platformManager;
+    private PlatformDAO platformDAO;
     private AuthzSubjectManager authzSubjectManager;
     private ConfigResponseDAO configResponseDAO;
     private AuthzSubjectDAO authzSubjectDAO;
@@ -105,15 +105,20 @@ public class ResourceManagerImpl implements ResourceManager {
     private ZeventEnqueuer zeventManager;
     private ServerDAO serverDAO;
     private ServiceDAO serviceDAO;
+    private PlatformTypeDAO platformTypeDAO;
+    private ApplicationDAO applicationDAO;
+    private PermissionManager permissionManager;
 
     @Autowired
-    public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformManagerLocal platformManager,
-                               ServerDAO serverDAO, ServiceDAO serviceDAO,
-                               AuthzSubjectManager authzSubjectManager, ConfigResponseDAO configResponseDAO,
-                               AuthzSubjectDAO authzSubjectDAO, ResourceDAO resourceDAO,
-                               ResourceTypeDAO resourceTypeDAO, ResourceRelationDAO resourceRelationDAO, ZeventEnqueuer zeventManager) {
+    public ResourceManagerImpl(ResourceEdgeDAO resourceEdgeDAO, PlatformDAO platformDAO, ServerDAO serverDAO,
+                               ServiceDAO serviceDAO, AuthzSubjectManager authzSubjectManager,
+                               ConfigResponseDAO configResponseDAO, AuthzSubjectDAO authzSubjectDAO,
+                               ResourceDAO resourceDAO, ResourceTypeDAO resourceTypeDAO,
+                               ResourceRelationDAO resourceRelationDAO, ZeventEnqueuer zeventManager,
+                               PlatformTypeDAO platformTypeDAO, ApplicationDAO applicationDAO,
+                               PermissionManager permissionManager) {
         this.resourceEdgeDAO = resourceEdgeDAO;
-        this.platformManager = platformManager;
+        this.platformDAO = platformDAO;
         this.serverDAO = serverDAO;
         this.serviceDAO = serviceDAO;
         this.authzSubjectManager = authzSubjectManager;
@@ -123,12 +128,10 @@ public class ResourceManagerImpl implements ResourceManager {
         this.resourceTypeDAO = resourceTypeDAO;
         this.resourceRelationDAO = resourceRelationDAO;
         this.zeventManager = zeventManager;
+        this.platformTypeDAO = platformTypeDAO;
+        this.applicationDAO = applicationDAO;
+        this.permissionManager = permissionManager;
         resourceTypePager = Pager.getDefaultPager();
-    }
-
-    // TODO resolve circular dependency
-    private ApplicationManager getApplicationManager() {
-        return Bootstrap.getBean(ApplicationManager.class);
     }
 
     /**
@@ -147,7 +150,7 @@ public class ResourceManagerImpl implements ResourceManager {
 
         return rt;
     }
-    
+
     /**
      * remove the authz resource entry
      */
@@ -326,6 +329,19 @@ public class ResourceManagerImpl implements ResourceManager {
         return resourceDAO.findByInstanceId(resType.getId(), instanceId);
     }
 
+    private Platform findPlatformById(Integer id) throws PlatformNotFoundException {
+        Platform platform = platformDAO.get(id);
+
+        if (platform == null)
+            throw new PlatformNotFoundException(id);
+
+        // Make sure that resource is loaded as to not get
+        // LazyInitializationException
+        platform.getName();
+
+        return platform;
+    }
+
     /**
      * 
      */
@@ -335,15 +351,15 @@ public class ResourceManagerImpl implements ResourceManager {
             switch (aeid.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                     Server server = serverDAO.get(id);
-                    if(server == null) {
+                    if (server == null) {
                         return null;
                     }
                     return server.getResource();
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                    return platformManager.findPlatformById(id).getResource();
+                    return findPlatformById(id).getResource();
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                     org.hyperic.hq.appdef.server.session.Service service = serviceDAO.get(id);
-                    if(service == null) {
+                    if (service == null) {
                         return null;
                     }
                     return service.getResource();
@@ -352,18 +368,27 @@ public class ResourceManagerImpl implements ResourceManager {
                     return resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
                 case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
                     AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-                    return getApplicationManager().findApplicationById(overlord, id).getResource();
+                    return findApplicationById(overlord, id).getResource();
                 default:
                     return resourceDAO.findByInstanceId(aeid.getAuthzTypeId(), id);
             }
-        } catch (PlatformNotFoundException e) {
         } catch (ApplicationNotFoundException e) {
         } catch (PermissionException e) {
+        } catch (PlatformNotFoundException e) {
         }
         return null;
     }
-    
-    
+
+    private Application findApplicationById(AuthzSubject subject, Integer id) throws ApplicationNotFoundException,
+        PermissionException {
+        try {
+            Application app = applicationDAO.findById(id);
+            permissionManager.checkViewPermission(subject, app.getEntityId());
+            return app;
+        } catch (ObjectNotFoundException e) {
+            throw new ApplicationNotFoundException(id, e);
+        }
+    }
 
     /**
      * 
@@ -738,7 +763,7 @@ public class ResourceManagerImpl implements ResourceManager {
                                     AppdefEntityID[] children) throws PermissionException, ResourceEdgeCreateException {
         createResourceEdges(subject, relation, parent, children, false);
     }
-    
+
     private ConfigResponseDB getConfigResponse(AppdefEntityID id) {
         ConfigResponseDB config;
 
@@ -760,6 +785,17 @@ public class ResourceManagerImpl implements ResourceManager {
         return config;
     }
 
+    private Collection<PlatformType> findSupportedPlatformTypes() {
+        Collection<PlatformType> platformTypes = platformTypeDAO.findAll();
+
+        for (Iterator<PlatformType> it = platformTypes.iterator(); it.hasNext();) {
+            PlatformType pType = it.next();
+            if (!PlatformDetector.isSupportedPlatform(pType.getName())) {
+                it.remove();
+            }
+        }
+        return platformTypes;
+    }
 
     /**
      *
@@ -781,12 +817,12 @@ public class ResourceManagerImpl implements ResourceManager {
         Platform parentPlatform = null;
 
         try {
-            parentPlatform = platformManager.findPlatformById(parent.getId());
+            parentPlatform = findPlatformById(parent.getId());
         } catch (PlatformNotFoundException pe) {
             throw new ResourceEdgeCreateException("Platform id " + parent.getId() + " not found.");
         }
-        // TODO: G
-        List supportedPlatformTypes = new ArrayList(platformManager.findSupportedPlatformTypes());
+
+        List<PlatformType> supportedPlatformTypes = new ArrayList<PlatformType>(findSupportedPlatformTypes());
 
         if (supportedPlatformTypes.contains(parentPlatform.getPlatformType())) {
             throw new ResourceEdgeCreateException(parentPlatform.getPlatformType().getName() +
@@ -831,7 +867,7 @@ public class ResourceManagerImpl implements ResourceManager {
                         throw new ResourceEdgeCreateException("Only platforms are supported.");
                     }
                     try {
-                        childPlatform = platformManager.findPlatformById(children[i].getId());
+                        childPlatform = findPlatformById(children[i].getId());
                         childResource = childPlatform.getResource();
 
                         if (!supportedPlatformTypes.contains(childPlatform.getPlatformType())) {

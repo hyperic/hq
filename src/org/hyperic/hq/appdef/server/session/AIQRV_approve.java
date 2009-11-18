@@ -41,7 +41,7 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ValidationException;
@@ -74,7 +74,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
     public void visitPlatform(AIPlatform aiplatform,
                               AuthzSubject subject,
-                              PlatformManagerLocal pmLocal,
+                              PlatformManager pmLocal,
                               ConfigManager configMgr,
                               CPropManager cpropMgr,
                               List createdResources)
@@ -206,7 +206,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
     }
 
     public void visitIp(AIIp aiip, AuthzSubject subject,
-                        PlatformManagerLocal platformMan)
+                        PlatformManager platformMan)
         throws AIQApprovalException, PermissionException
     {
         Platform platform = getExistingPlatform(
@@ -241,7 +241,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
 
     public void visitServer(AIServer aiserver,
                             AuthzSubject subject,
-                            PlatformManagerLocal pmLocal,
+                            PlatformManager pmLocal,
                             ServerManager smLocal,
                             ConfigManager configMgr,
                             CPropManager cpropMgr,
@@ -468,7 +468,7 @@ public class AIQRV_approve implements AIQResourceVisitor {
     }
 
     private Platform getExistingPlatform(AuthzSubject subject,
-                                         PlatformManagerLocal pmLocal,
+                                         PlatformManager pmLocal,
                                          AIPlatformValue aiplatform) {
         try {
             return pmLocal.getPlatformByAIPlatform(subject, aiplatform);

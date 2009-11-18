@@ -46,7 +46,7 @@ import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceTypeDAO;
@@ -97,7 +97,7 @@ public class ControlManagerImpl implements ControlManager {
     private ResourceTypeDAO resourceTypeDao;
 
     private ConfigManager configManager;
-    private PlatformManagerLocal platformManager;
+    private PlatformManager platformManager;
     private AuthzSubjectManager authzSubjectManager;
     private PermissionManager permissionManager;
     private ControlPluginManager controlPluginManager;
@@ -106,7 +106,7 @@ public class ControlManagerImpl implements ControlManager {
     public ControlManagerImpl(ProductManager productManager, ControlScheduleManager controlScheduleManager,
                               ControlHistoryDAO controlHistoryDao,
                               ResourceTypeDAO resourceTypeDao, ConfigManager configManager,
-                              PlatformManagerLocal platformManager,
+                              PlatformManager platformManager,
                               AuthzSubjectManager authzSubjectManager, 
                               PermissionManager permissionManager) {
         this.productManager = productManager;
@@ -584,7 +584,7 @@ public class ControlManagerImpl implements ControlManager {
         int type = id.getType();
         switch (type) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                platformManager.checkModifyPermission(caller, id);
+                permissionManager.checkModifyPermission(caller, id);
                 return;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 permissionManager.checkModifyPermission(caller, id);
@@ -607,7 +607,7 @@ public class ControlManagerImpl implements ControlManager {
         int type = id.getType();
         switch (type) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                platformManager.checkControlPermission(caller, id);
+                permissionManager.checkControlPermission(caller, id);
                 return;
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 permissionManager.checkControlPermission(caller, id);

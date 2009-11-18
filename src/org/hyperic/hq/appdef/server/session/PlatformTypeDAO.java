@@ -33,7 +33,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class PlatformTypeDAO extends HibernateDAO
+public class PlatformTypeDAO extends HibernateDAO<PlatformType>
 {
     @Autowired
     public PlatformTypeDAO(SessionFactory f) {
@@ -69,7 +69,7 @@ public class PlatformTypeDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public Collection findByPlugin(String plugin) {
+    public Collection<PlatformType> findByPlugin(String plugin) {
         String sql = "from PlatformType where plugin=?";
         return getSession().createQuery(sql)
             .setString(0, plugin)

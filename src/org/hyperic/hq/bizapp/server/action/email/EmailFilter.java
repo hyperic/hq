@@ -45,12 +45,12 @@ import javax.rmi.PortableRemoteObject;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
@@ -133,8 +133,8 @@ public class EmailFilter {
             
         // See if alert needs to be filtered
         if (filter) {
-            PlatformManagerLocal pltMan =
-                PlatformManagerEJBImpl.getOne();
+            PlatformManager pltMan =
+                PlatformManagerImpl.getOne();
             try {
                 // Now let's look up the platform ID
                 Integer platId;

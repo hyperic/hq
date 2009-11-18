@@ -35,7 +35,7 @@ import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
@@ -58,7 +58,7 @@ import org.hyperic.util.pager.PageList;
  */
 
 public class AppdefEntityValue {
-    private PlatformManagerLocal    platformManagerLocal;
+    private PlatformManager    platformManagerLocal;
     private ApplicationManager applicationManagerLocal;
     private ServerManager      serverManagerLocal;
     private ServiceManager     serviceManagerLocal;
@@ -90,9 +90,9 @@ public class AppdefEntityValue {
         return _subject;
     }
     
-    private PlatformManagerLocal getPlatformManager() {
+    private PlatformManager getPlatformManager() {
         if (platformManagerLocal == null) {
-            platformManagerLocal = PlatformManagerEJBImpl.getOne();
+            platformManagerLocal = PlatformManagerImpl.getOne();
         }
         return platformManagerLocal;
     }
@@ -396,7 +396,7 @@ public class AppdefEntityValue {
         throws PermissionException, AppdefEntityNotFoundException {
         Integer iId = _id.getId();
 
-        PlatformManagerLocal pManager = getPlatformManager();
+        PlatformManager pManager = getPlatformManager();
         if(_id.isApplication()){
             return pManager.getPlatformsByApplication(getSubject(), iId, pc);
         }

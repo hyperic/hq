@@ -95,7 +95,7 @@ import org.hyperic.hq.appdef.shared.DependencyTree;
 import org.hyperic.hq.appdef.shared.GroupTypeValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.PlatformValue;
@@ -214,7 +214,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
     private MeasurementManager measurementManager;
 
-    private PlatformManagerLocal platformManager;
+    private PlatformManager platformManager;
 
     private AIBossLocal aiBoss;
 
@@ -244,7 +244,7 @@ public class AppdefBossImpl implements AppdefBoss {
                           AuthzSubjectManager authzSubjectManager, AutoinventoryManager autoinventoryManager,
                           AvailabilityManager availabilityManager, ConfigManager configManager,
                           CPropManager cPropManager, PermissionManager permissionManager,
-                          MeasurementManager measurementManager, PlatformManagerLocal platformManager,
+                          MeasurementManager measurementManager, PlatformManager platformManager,
                           AIBossLocal aiBoss, ResourceGroupManager resourceGroupManager,
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, TrackerManager trackerManager,
@@ -3038,7 +3038,7 @@ public class AppdefBossImpl implements AppdefBoss {
                     // as insufficient permissions
                     if (entityId.isPlatform() && !ade.isPlatform()) {
                         try {
-                            platformManager.checkModifyPermission(subject, ade);
+                            permissionManager.checkModifyPermission(subject, ade);
                         } catch (PermissionException pe) {
                             eventSubject = hqadmin;
                         }

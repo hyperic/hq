@@ -8,7 +8,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl as ResourceMan
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl as PlatMan
+import org.hyperic.hq.appdef.server.session.PlatformManagerImpl as PlatMan
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 import org.hyperic.hq.hqu.server.session.Attachment
 import org.hyperic.hq.hqu.server.session.UIPlugin

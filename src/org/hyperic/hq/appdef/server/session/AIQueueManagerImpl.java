@@ -54,7 +54,7 @@ import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManager;
@@ -104,7 +104,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     private ConfigManager configManager;
     private CPropManager cPropManager;
     private PlatformDAO platformDAO;
-    private PlatformManagerLocal platformManager;
+    private PlatformManager platformManager;
     private ServerManager serverManager;
     private PermissionManager permissionManager;
     private AuditManager auditManager;
@@ -114,7 +114,7 @@ public class AIQueueManagerImpl implements AIQueueManager {
     @Autowired
     public AIQueueManagerImpl(AIServerDAO aIServerDAO, AIIpDAO aiIpDAO, AIPlatformDAO aiPlatformDAO,
                               ConfigManager configManager, CPropManager cPropManager, PlatformDAO platformDAO,
-                              PlatformManagerLocal platformManager, ServerManager serverManager,
+                              PlatformManager platformManager, ServerManager serverManager,
                               PermissionManager permissionManager, AuditManager auditManager,
                               AuthzSubjectManager authzSubjectManager) {
 

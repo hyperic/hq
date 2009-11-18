@@ -37,7 +37,7 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.application.HQApp;
@@ -69,7 +69,7 @@ public class UpdateBossImpl
 
     private ServerConfigManagerLocal serverConfigManager;
 
-    private PlatformManagerLocal platformManager;
+    private PlatformManager platformManager;
 
     private ServerManager serverManager;
 
@@ -79,7 +79,7 @@ public class UpdateBossImpl
 
     @Autowired
     public UpdateBossImpl(UpdateStatusDAO updateDAO, ServerConfigManagerLocal serverConfigManager,
-                          PlatformManagerLocal platformManager, ServerManager serverManager,
+                          PlatformManager platformManager, ServerManager serverManager,
                           ServiceManager serviceManager, UIPluginManagerLocal uiPluginManager) {
         this.updateDAO = updateDAO;
         this.serverConfigManager = serverConfigManager;

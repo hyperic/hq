@@ -32,7 +32,7 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.context.Bootstrap;
@@ -57,10 +57,10 @@ public class TrackerManagerImpl
     extends SessionEJB
     implements TrackerManager {
     private final Log log = LogFactory.getLog(TrackerManagerImpl.class);
-    private PlatformManagerLocal platformManager;
+    private PlatformManager platformManager;
 
     @Autowired
-    public TrackerManagerImpl(PlatformManagerLocal platformManager) {
+    public TrackerManagerImpl(PlatformManager platformManager) {
         this.platformManager = platformManager;
     }
 

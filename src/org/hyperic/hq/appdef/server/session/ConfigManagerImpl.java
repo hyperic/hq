@@ -38,7 +38,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -60,18 +60,15 @@ public class ConfigManagerImpl implements ConfigManager {
     private static final int MAX_VALIDATION_ERR_LEN = 512;
     protected final Log log = LogFactory.getLog(ConfigManagerImpl.class.getName());
     private ConfigResponseDAO configResponseDAO;
-    private PlatformManagerLocal platformManager;
     private ZeventEnqueuer zeventManager;
     private ServiceDAO serviceDAO;
     private ServerDAO serverDAO;
     private PlatformDAO platformDAO;
 
     @Autowired
-    public ConfigManagerImpl(ConfigResponseDAO configResponseDAO, PlatformManagerLocal platformManager,
-                             ZeventEnqueuer zeventManager, ServiceDAO serviceDAO, ServerDAO serverDAO,
-                             PlatformDAO platformDAO) {
+    public ConfigManagerImpl(ConfigResponseDAO configResponseDAO, ZeventEnqueuer zeventManager, ServiceDAO serviceDAO,
+                             ServerDAO serverDAO, PlatformDAO platformDAO) {
         this.configResponseDAO = configResponseDAO;
-        this.platformManager = platformManager;
         this.zeventManager = zeventManager;
         this.serviceDAO = serviceDAO;
         this.serverDAO = serverDAO;
@@ -126,6 +123,20 @@ public class ConfigManagerImpl implements ConfigManager {
         return config;
     }
 
+    private Platform findPlatformById(Integer id) throws PlatformNotFoundException {
+        Platform platform = platformDAO.get(id);
+
+        if (platform == null) {
+            throw new PlatformNotFoundException(id);
+        }
+
+        // Make sure that resource is loaded as to not get
+        // LazyInitializationException
+        platform.getName();
+
+        return platform;
+    }
+
     /**
      * 
      */
@@ -135,13 +146,13 @@ public class ConfigManagerImpl implements ConfigManager {
 
         switch (id.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                Platform plat = platformManager.findPlatformById(intID);
+                Platform plat = findPlatformById(intID);
                 pname = plat.getPlatformType().getPlugin();
                 break;
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 Server serv = serverDAO.get(intID);
-                if(serv == null) {
+                if (serv == null) {
                     throw new ServerNotFoundException(intID);
                 }
                 pname = serv.getServerType().getPlugin();
@@ -149,7 +160,7 @@ public class ConfigManagerImpl implements ConfigManager {
 
             case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
                 org.hyperic.hq.appdef.server.session.Service service = serviceDAO.get(intID);
-                if(service == null) {
+                if (service == null) {
                     throw new ServiceNotFoundException(intID);
                 }
                 pname = service.getServiceType().getPlugin();
@@ -461,13 +472,13 @@ public class ConfigManagerImpl implements ConfigManager {
         byte[] configBytes;
 
         boolean overwrite = ((userManaged != null) && userManaged.booleanValue()) || // via
-                                                                                     // UI
-                                                                                     // or
-                                                                                     // CLI
+                            // UI
+                            // or
+                            // CLI
                             !existingConfig.isUserManaged(); // via AI, dont
-                                                             // overwrite
-                                                             // changes made via
-                                                             // UI or CLI
+        // overwrite
+        // changes made via
+        // UI or CLI
 
         configBytes = mergeConfig(existingConfig.getProductResponse(), productConfig, overwrite, force);
         if (!AICompare.configsEqual(configBytes, existingConfig.getProductResponse())) {
@@ -511,8 +522,6 @@ public class ConfigManagerImpl implements ConfigManager {
             return null;
         }
     }
-
-   
 
     private byte[] getConfigForType(ConfigResponseDB val, String productType, AppdefEntityID id, boolean fail)
         throws ConfigFetchException {

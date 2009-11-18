@@ -42,7 +42,7 @@ import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.autoinventory.AICompare;
@@ -68,7 +68,7 @@ public class AI2AppdefDiff {
      * already identical to those in appdef are removed from the value object).  
      */
     public AIPlatformValue diffAgainstAppdef(AuthzSubject subject,
-                                             PlatformManagerLocal pmLH,
+                                             PlatformManager pmLH,
                                              ConfigManager cmLocal,
                                              CPropManager cpropMgr,
                                              AIPlatformValue aiplatform)

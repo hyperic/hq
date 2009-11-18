@@ -68,7 +68,7 @@ import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerValue;
@@ -2260,7 +2260,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
         final AuthzSubject subject = manager.getSubject(sessionId);
-        final PlatformManagerLocal platMan = getPlatformManager();
+        final PlatformManager platMan = getPlatformManager();
         final ServerManager serverMan = getServerManager();
         
         // Find the group
@@ -2833,7 +2833,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                InvalidAppdefTypeException, PermissionException,
                AppdefEntityNotFoundException {
         final AuthzSubject subject = manager.getSubject(sessionId);
-        PlatformManagerLocal platMan = getPlatformManager();
+        PlatformManager platMan = getPlatformManager();
         PlatformType pt = platMan.findPlatformType(platTypeId);
         List platforms = platMan.getPlatformsByType(subject, pt.getName());
         

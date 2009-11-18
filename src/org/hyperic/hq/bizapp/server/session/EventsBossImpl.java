@@ -55,7 +55,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.application.HQApp;
@@ -171,7 +171,7 @@ public class EventsBossImpl implements EventsBoss {
 
     private MeasurementManager measurementManager;
 
-    private PlatformManagerLocal platformManager;
+    private PlatformManager platformManager;
 
     private RegisteredTriggerManager registeredTriggerManager;
 
@@ -194,7 +194,7 @@ public class EventsBossImpl implements EventsBoss {
                           AlertDefinitionManager alertDefinitionManager, AlertManager alertManager,
                           AppdefBoss appdefBoss, AuthManager authManager,
                           EscalationManagerLocal escalationManager, MeasurementManager measurementManager,
-                          PlatformManagerLocal platformManager, RegisteredTriggerManager registeredTriggerManager,
+                          PlatformManager platformManager, RegisteredTriggerManager registeredTriggerManager,
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, PermissionManager permissionManager,
                           GalertManager galertManager, ResourceGroupManager resourceGroupManager,
@@ -1000,7 +1000,7 @@ public class EventsBossImpl implements EventsBoss {
         // CheckAlertingScope now only used for galerts
         if (ids == null) {
             // find ALL alertable resources
-            appentResources = platformManager.checkAlertingScope(subject);
+            appentResources = permissionManager.checkAlertingScope(subject);
         }
 
         List<Escalatable> galerts = galertManager.findEscalatables(subject, count, priority, timeRange, cur,

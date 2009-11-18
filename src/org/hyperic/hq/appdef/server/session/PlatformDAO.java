@@ -188,7 +188,7 @@ public class PlatformDAO extends HibernateDAO<Platform> {
             .list();
     }
 
-    public Collection findAll_orderName(boolean asc)
+    public Collection<Platform> findAll_orderName(boolean asc)
     {
         return createCriteria()
             .createAlias("resource", "r")
@@ -199,14 +199,14 @@ public class PlatformDAO extends HibernateDAO<Platform> {
             .list();
     }
 
-    public Collection findAll_orderCTime(boolean asc) {
+    public Collection<Platform> findAll_orderCTime(boolean asc) {
         return createCriteria()
             .addOrder(asc ? Order.asc("creationTime"):
                             Order.desc("creationTime"))
             .list();
     }
 
-    public Collection findByCTime(long ctime) {
+    public Collection<Platform> findByCTime(long ctime) {
         return createCriteria()
             .add(Restrictions.gt("creationTime", new Long(ctime)))
             .addOrder(Order.desc("creationTime"))
@@ -229,7 +229,7 @@ public class PlatformDAO extends HibernateDAO<Platform> {
             .uniqueResult();
     }
 
-    public List findByTypeAndRegEx(Integer pType, String regex) {
+    public List<Platform> findByTypeAndRegEx(Integer pType, String regex) {
         HQDialect dialect = Util.getHQDialect();
         String fqdnEx = dialect.getRegExSQL("p.fqdn", ":regex", true, false);
         String nameEx = dialect.getRegExSQL("rez.sort_name", ":regex", true, false);
@@ -246,7 +246,7 @@ public class PlatformDAO extends HibernateDAO<Platform> {
     }
 
     // TODO: G (this and other methods in this class)
-    public List findParentByNetworkRelation(List platformTypeIds,
+    public List<Platform> findParentByNetworkRelation(List platformTypeIds,
                                             String platformName,
                                             Boolean hasChildren) {
         String nameEx = null;
@@ -458,7 +458,7 @@ public class PlatformDAO extends HibernateDAO<Platform> {
         return platforms;
     }
 
-    public List getPlatformTypeCounts() {
+    public List<Object[]> getPlatformTypeCounts() {
         String sql = "select t.name, count(*) from PlatformType t, " +
                      "Platform p where p.platformType = t " +
                      "group by t.name order by t.name";
@@ -484,7 +484,7 @@ public class PlatformDAO extends HibernateDAO<Platform> {
             .executeUpdate();
     }
 
-    public Collection findDeletedPlatforms() {
+    public Collection<Platform> findDeletedPlatforms() {
         String hql = "from Platform where resource.resourceType = null";
         return createQuery(hql).list();
     }

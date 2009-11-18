@@ -63,7 +63,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServiceValue;
 import org.hyperic.hq.appdef.shared.resourceTree.PlatformNode;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
@@ -157,7 +157,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
 
     private MeasurementManager measurementManager;
 
-    private PlatformManagerLocal platformManager;
+    private PlatformManager platformManager;
 
     private ReportProcessor reportProcessor;
 
@@ -169,7 +169,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     public LatherDispatcherImpl(SessionManager sessionManager, AgentManager agentManager, AuthManager authManager,
                                 AuthzSubjectManager authzSubjectManager, AutoinventoryManager autoinventoryManager,
                                 ConfigManager configManager, ControlManager controlManager,
-                                MeasurementManager measurementManager, PlatformManagerLocal platformManager,
+                                MeasurementManager measurementManager, PlatformManager platformManager,
                                 ReportProcessor reportProcessor, PermissionManager permissionManager,
                                 ZeventEnqueuer zeventManager) {
 

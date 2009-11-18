@@ -58,7 +58,7 @@ public class AppdefStartupListener
                     throws VetoException {
                     // Go ahead and let every appdef type handle a resource
                     // delete
-                    PlatformManagerEJBImpl.getOne().handleResourceDelete(r);
+                    PlatformManagerImpl.getOne().handleResourceDelete(r);
                     ServerManagerImpl.getOne().handleResourceDelete(r);
                     ServiceManagerImpl.getOne().handleResourceDelete(r);
                     ApplicationManagerImpl.getOne().handleResourceDelete(r);

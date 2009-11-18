@@ -8,7 +8,7 @@ import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl as EscM
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.server.session.AppdefResourceType
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl
+import org.hyperic.hq.appdef.server.session.PlatformManagerImpl
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl
 import org.hyperic.hq.appdef.server.session.ServiceManagerImpl
 
@@ -67,7 +67,7 @@ class AlertDefinitionCategory {
             appdefId = d.resource.prototype.instanceId
             
         if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_PLATFORM) {
-            return PlatformManagerEJBImpl.one.findPlatformType(appdefId)
+            return PlatformManagerImpl.one.findPlatformType(appdefId)
         } else if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVER) {
             return ServerManagerImpl.one.findServerType(appdefId)
         } else if (d.appdefType == AppdefEntityConstants.APPDEF_TYPE_SERVICE) {

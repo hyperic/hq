@@ -47,14 +47,12 @@ import org.hibernate.ObjectNotFoundException;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.ServiceCluster;
 import org.hyperic.hq.appdef.shared.AppdefDuplicateNameException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
@@ -67,7 +65,6 @@ import org.hyperic.hq.appdef.shared.ValidationException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
 import org.hyperic.hq.authz.server.session.Resource;
-import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -111,7 +108,6 @@ public class ServerManagerImpl implements ServerManager {
     private ApplicationDAO applicationDAO;
     private ConfigResponseDAO configResponseDAO;
     private PlatformDAO platformDAO;
-    private PlatformManagerLocal platformManager;
     private ServerDAO serverDAO;
     private PlatformTypeDAO platformTypeDAO;
     private ResourceManager resourceManager;
@@ -129,20 +125,18 @@ public class ServerManagerImpl implements ServerManager {
 
     @Autowired
     public ServerManagerImpl(PermissionManager permissionManager, ApplicationDAO applicationDAO,
-                             ConfigResponseDAO configResponseDAO, PlatformDAO platformDAO,
-                             PlatformManagerLocal platformManager, ServerDAO serverDAO,
+                             ConfigResponseDAO configResponseDAO, PlatformDAO platformDAO, ServerDAO serverDAO,
                              PlatformTypeDAO platformTypeDAO, ResourceManager resourceManager,
                              ServerTypeDAO serverTypeDAO, ServiceDAO serviceDAO, ServiceTypeDAO serviceTypeDAO,
-                             ServiceManager serviceManager, CPropManager cpropManager,
-                             ConfigManager configManager, MeasurementManager measurementManager,
-                             AuditManager auditManager, AuthzSubjectManager authzSubjectManager,
-                             ResourceGroupManager resourceGroupManager, ZeventEnqueuer zeventManager) {
+                             ServiceManager serviceManager, CPropManager cpropManager, ConfigManager configManager,
+                             MeasurementManager measurementManager, AuditManager auditManager,
+                             AuthzSubjectManager authzSubjectManager, ResourceGroupManager resourceGroupManager,
+                             ZeventEnqueuer zeventManager) {
 
         this.permissionManager = permissionManager;
         this.applicationDAO = applicationDAO;
         this.configResponseDAO = configResponseDAO;
         this.platformDAO = platformDAO;
-        this.platformManager = platformManager;
         this.serverDAO = serverDAO;
         this.platformTypeDAO = platformTypeDAO;
         this.resourceManager = resourceManager;
@@ -450,11 +444,11 @@ public class ServerManagerImpl implements ServerManager {
         // Must also move all dependent services so that ancestor edges are
         // rebuilt and that service metrics are re-scheduled
         ArrayList<Service> services = new ArrayList<Service>(); // copy list
-                                                                // since the
-                                                                // move will
-                                                                // modify the
-                                                                // server
-                                                                // collection.
+        // since the
+        // move will
+        // modify the
+        // server
+        // collection.
         services.addAll(target.getServices());
 
         for (Service s : services) {
@@ -698,7 +692,7 @@ public class ServerManagerImpl implements ServerManager {
      */
     public PageList<ServerTypeValue> getServerTypesByPlatformType(AuthzSubject subject, Integer platformTypeId,
                                                                   PageControl pc) throws PlatformNotFoundException {
-        PlatformType platType = platformManager.findPlatformType(platformTypeId);
+        PlatformType platType = platformTypeDAO.findById(platformTypeId);
 
         Collection<ServerType> serverTypes = platType.getServerTypes();
 
@@ -1164,7 +1158,8 @@ public class ServerManagerImpl implements ServerManager {
             AppService appService = it.next();
 
             if (appService.isIsGroup()) {
-                Collection<Service> services = serviceManager.getServiceCluster(appService.getResourceGroup()).getServices();
+                Collection<Service> services = serviceManager.getServiceCluster(appService.getResourceGroup())
+                    .getServices();
 
                 Iterator<Service> serviceIterator = services.iterator();
                 while (serviceIterator.hasNext()) {
@@ -1413,8 +1408,6 @@ public class ServerManagerImpl implements ServerManager {
         throw new PermissionException("Operation: " + opName + " not valid for ResourceType: " + rtV.getName());
     }
 
- 
-
     /**
      * builds a list of resource types from the list of resources
      * @param resources - {@link Collection} of {@link AppdefResource}
@@ -1447,8 +1440,6 @@ public class ServerManagerImpl implements ServerManager {
         });
         return rtn;
     }
-
-   
 
     /**
      * 

@@ -28,7 +28,7 @@ package org.hyperic.hq.appdef.shared;
 import java.io.Serializable;
 
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerImpl;
 import org.hyperic.hq.common.SystemException;
@@ -63,7 +63,7 @@ public class AppdefEntityTypeID extends AppdefEntityID implements Serializable {
             Integer idInteger = getId();
             switch (getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-                return PlatformManagerEJBImpl.getOne()
+                return PlatformManagerImpl.getOne()
                         .findPlatformType(idInteger);
             case AppdefEntityConstants.APPDEF_TYPE_SERVER:
                 return ServerManagerImpl.getOne().findServerType(idInteger);

@@ -33,7 +33,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
@@ -104,7 +104,7 @@ public class OpenNMSAction implements ActionInterface {
             
             // Now get the POJO            
             params.put("platform",
-                       PlatformManagerEJBImpl.getOne()
+                       PlatformManagerImpl.getOne()
                            .findPlatformById(platVal.getId()));
         } catch (AppdefEntityNotFoundException e) {
             params.put("platform", null);

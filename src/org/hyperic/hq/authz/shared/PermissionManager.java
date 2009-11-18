@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.authz.shared;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -391,6 +392,57 @@ public abstract class PermissionManager   {
         // now check
         checkPermission(subject, id, opName);
     }
+    
+    /**
+     * Check the scope of alertable resources for a give subject
+     * @return a list of AppdefEntityIds
+     */
+    public List checkAlertingScope(AuthzSubject subj) {
+        List entityIds = new ArrayList();
+        try {
+          
+            // platforms 
+            List platIds = 
+                findOperationScopeBySubject(subj,
+                                               AuthzConstants.platformOpManageAlerts,
+                                               AuthzConstants.platformResType);
+            for(int i = 0; i < platIds.size(); i++) {
+                Integer id = (Integer)platIds.get(i);
+                entityIds.add(AppdefEntityID.newPlatformID(id));                                                             
+            }
+            // servers
+            List serverIds = 
+                findOperationScopeBySubject(subj,
+                                               AuthzConstants.serverOpManageAlerts,
+                                               AuthzConstants.serverResType);
+            for(int i = 0; i < serverIds.size(); i++) {
+                Integer id = (Integer)serverIds.get(i);
+                entityIds.add(AppdefEntityID.newServerID(id));                                                                           
+            }
+            // services
+            List serviceIds =
+               findOperationScopeBySubject(subj,
+                                               AuthzConstants.serviceOpManageAlerts,
+                                               AuthzConstants.serviceResType);
+            for(int i = 0; i < serviceIds.size(); i++) {
+                Integer id = (Integer)serviceIds.get(i);
+                entityIds.add(AppdefEntityID.newServiceID(id));
+            }
+            
+            // Groups
+            List groupids = 
+                findOperationScopeBySubject(subj, 
+                                               AuthzConstants.groupOpManageAlerts,
+                                               AuthzConstants.groupResType);
+            for (int i=0; i<groupids.size(); i++) {
+                Integer id = (Integer)groupids.get(i);
+                entityIds.add(AppdefEntityID.newGroupID(id));
+            }
+        } catch (Exception e) {
+            throw new SystemException(e);
+        }
+        return entityIds;                
+    }
     /**
      * Check for create child object permission for a given resource
      * Child Resources:
@@ -481,7 +533,7 @@ public abstract class PermissionManager   {
     /**
      * Check a permission
      */
-    protected void checkPermission(AuthzSubject subject, AppdefEntityID id,
+    public void checkPermission(AuthzSubject subject, AppdefEntityID id,
                                    String operation) 
         throws PermissionException 
     {

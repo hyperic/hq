@@ -105,7 +105,7 @@ public class PlatformType extends AppdefResourceType {
         _serverTypes = servers;
     }
 
-    public Collection getPlatforms() {
+    public Collection<Platform> getPlatforms() {
         return Collections.unmodifiableCollection(_platforms);
     }
     

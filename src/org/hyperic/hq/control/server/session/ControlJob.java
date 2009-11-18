@@ -34,10 +34,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
+import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
-import org.hyperic.hq.appdef.shared.PlatformManagerUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
@@ -85,7 +85,7 @@ public abstract class ControlJob extends BaseJob {
             ControlCommandsClient client =
                 ControlCommandsClientFactory.getInstance().getClient(id);
             String pluginName  = id.toString();
-            String productName = PlatformManagerUtil.getLocalHome().create()
+            String productName = PlatformManagerImpl.getOne()
                 .getPlatformPluginName(id);
 
             ControlScheduleManager cLocal =
@@ -113,10 +113,6 @@ public abstract class ControlJob extends BaseJob {
         } catch (AgentRemoteException e) {
             errorMsg = "Agent error: " + e.getMessage();
         } catch (SystemException e) {
-            errorMsg = "System error";
-        } catch (NamingException e) {
-            errorMsg = "System error";
-        } catch (CreateException e) {
             errorMsg = "System error";
         } catch (AppdefEntityNotFoundException e) {
             errorMsg = "System error";

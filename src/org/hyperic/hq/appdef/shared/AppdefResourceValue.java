@@ -37,7 +37,7 @@ import java.util.NoSuchElementException;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
 import org.hyperic.hq.appdef.server.session.ServerType;
@@ -248,7 +248,7 @@ public abstract class AppdefResourceValue
     }
     
     private static PlatformType getPlatformTypeById(int id) {
-        return PlatformManagerEJBImpl.getOne().findPlatformType(new Integer(id));
+        return PlatformManagerImpl.getOne().findPlatformType(new Integer(id));
     }
 
     private static ServerType getServerTypeById(int id) {

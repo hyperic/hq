@@ -59,11 +59,7 @@
 
 		</session>
 		
-		<session>
-			<ejb-name>PlatformManager</ejb-name>
-			<local-jndi-name>LocalPlatformManager</local-jndi-name>
-
-		</session>
+		
 		<session>
 			<ejb-name>ServerConfigManager</ejb-name>
 			<local-jndi-name>LocalServerConfigManager</local-jndi-name>

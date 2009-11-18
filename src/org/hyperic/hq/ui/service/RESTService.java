@@ -17,7 +17,7 @@ import org.apache.tapestry.engine.ILink;
 import org.apache.tapestry.services.ServiceConstants;
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.server.session.Platform;
-import org.hyperic.hq.appdef.server.session.PlatformManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -25,7 +25,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.CloningBoss;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -708,8 +708,8 @@ public class RESTService extends BaseService {
         							cloneTargetIdList);
         		
         	} else {
-        		PlatformManagerLocal platformMgr = 
-        				PlatformManagerEJBImpl.getOne();		
+        		PlatformManager platformMgr = 
+        				PlatformManagerImpl.getOne();		
         		Platform platform = 
         				platformMgr.findPlatformById(Integer.valueOf(platformId));
         		PlatformType platformType = 

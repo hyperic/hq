@@ -28,6 +28,8 @@ package org.hyperic.hq.appdef;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.hyperic.hq.appdef.server.session.Platform;
+
 public class Agent extends AppdefBean {
     private String _address;
     private Integer _port;
@@ -125,7 +127,7 @@ public class Agent extends AppdefBean {
         _agentType = agentType;
     }
 
-    public Collection getPlatforms() {
+    public Collection<Platform> getPlatforms() {
         return _platforms;
     }
 

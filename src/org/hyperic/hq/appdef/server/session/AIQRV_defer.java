@@ -32,7 +32,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AIQApprovalException;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
-import org.hyperic.hq.appdef.shared.PlatformManagerLocal;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
@@ -50,7 +50,7 @@ public class AIQRV_defer implements AIQResourceVisitor {
 
     public void visitPlatform(AIPlatform aiplatform,
                               AuthzSubject subject,
-                              PlatformManagerLocal pmLocal,
+                              PlatformManager pmLocal,
                               ConfigManager configMgr,
                               CPropManager cpropMgr,
                               List createdResources)
@@ -62,7 +62,7 @@ public class AIQRV_defer implements AIQResourceVisitor {
 
     public void visitIp(AIIp aiip,
                         AuthzSubject subject,
-                        PlatformManagerLocal pmLocal)
+                        PlatformManager pmLocal)
         throws AIQApprovalException, PermissionException {
         _log.info("Visiting ip: " + aiip.getId() +
                   " addr=" + aiip.getAddress());
@@ -70,7 +70,7 @@ public class AIQRV_defer implements AIQResourceVisitor {
 
     public void visitServer(AIServer aiserver,
                             AuthzSubject subject,
-                            PlatformManagerLocal pmLocal,
+                            PlatformManager pmLocal,
                             ServerManager smLocal,
                             ConfigManager configMgr,
                             CPropManager cpropMgr,
