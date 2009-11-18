@@ -88,13 +88,11 @@ public class AIBossImpl implements AIBoss {
     protected final Log log = LogFactory.getLog(AIBossImpl.class.getName());
 
     private AIQueueManager aiQueueManager;
-    
+
     private AIScheduleManager aiScheduleManager;
-    
+
     private AutoinventoryManager autoInventoryManager;
-    
-    
-    
+
     @Autowired
     public AIBossImpl(SessionManager sessionManager, AIQueueManager aiQueueManager,
                       AIScheduleManager aiScheduleManager, AutoinventoryManager autoInventoryManager) {
@@ -106,14 +104,11 @@ public class AIBossImpl implements AIBoss {
 
     /**
      * Finder for all of the scheduled AI scans for an appdef entity.
-     *
+     * 
      * 
      */
-    public PageList<AIScheduleValue> findScheduledJobs(int sessionId, AppdefEntityID id,
-                                      PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException
-    {
+    public PageList<AIScheduleValue> findScheduledJobs(int sessionId, AppdefEntityID id, PageControl pc)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         try {
             return aiScheduleManager.findScheduledJobs(subject, id, pc);
@@ -125,15 +120,13 @@ public class AIBossImpl implements AIBoss {
     /**
      * 
      */
-    public AIScheduleValue findScheduledJobById(int sessionId, Integer id)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException
-    {
-        AuthzSubject subject = sessionManager.getSubject(sessionId);;
+    public AIScheduleValue findScheduledJobById(int sessionId, Integer id) throws SessionNotFoundException,
+        SessionTimeoutException, PermissionException {
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        ;
 
         try {
-            return aiScheduleManager.findScheduleByID(subject, id)
-                .getAIScheduleValue();
+            return aiScheduleManager.findScheduleByID(subject, id).getAIScheduleValue();
         } catch (Exception e) {
             throw new SystemException(e);
         }
@@ -141,14 +134,11 @@ public class AIBossImpl implements AIBoss {
 
     /**
      * Get a job history based on appdef id
-     *
+     * 
      * 
      */
-    public PageList<AIHistory> findJobHistory(int sessionId, AppdefEntityID id, 
-                                   PageControl pc)
-       throws SessionNotFoundException, SessionTimeoutException,
-              PermissionException
-    {
+    public PageList<AIHistory> findJobHistory(int sessionId, AppdefEntityID id, PageControl pc)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         try {
             return aiScheduleManager.findJobHistory(subject, id, pc);
@@ -159,14 +149,12 @@ public class AIBossImpl implements AIBoss {
 
     /**
      * Delete a AIJob based on an id
-     *
+     * 
      * 
      * @param ids Array of job ids to be deleted
      */
-    public void deleteAIJob(int sessionId, Integer[] ids)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException, AutoinventoryException
-    {
+    public void deleteAIJob(int sessionId, Integer[] ids) throws SessionNotFoundException, SessionTimeoutException,
+        PermissionException, AutoinventoryException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         aiScheduleManager.deleteAIJob(subject, ids);
     }
@@ -174,97 +162,75 @@ public class AIBossImpl implements AIBoss {
     /**
      * Get server signatures for a set of servertypes.
      * @param serverTypes A List of ServerTypeValue objects representing the
-     * server types to get signatures for.  If this is null, all server
-     * signatures are returned.
-     * @return A Map, where the keys are the names of the ServerTypeValues,
-     * and the values are the ServerSignature objects.
+     *        server types to get signatures for. If this is null, all server
+     *        signatures are returned.
+     * @return A Map, where the keys are the names of the ServerTypeValues, and
+     *         the values are the ServerSignature objects.
      * 
      */
-    public Map<String,ServerSignature> getServerSignatures(int sessionID,
-                                   List<ServerTypeValue> serverTypes)
-        throws SessionTimeoutException, SessionNotFoundException, 
-               PermissionException, AutoinventoryException {
+    public Map<String, ServerSignature> getServerSignatures(int sessionID, List<ServerTypeValue> serverTypes)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, AutoinventoryException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         try {
-            return autoInventoryManager
-                .getServerSignatures(subject, serverTypes);
+            return autoInventoryManager.getServerSignatures(subject, serverTypes);
 
         } catch (Exception e) {
             throw new SystemException(e);
-        } 
+        }
     }
 
     /**
      * Start an autoinventory scan on a group of platforms
      * @param groupID The ID of the group of platforms to scan.
      * @param scanConfig The scan configuration to use when scanning.
-     * @param scanName The name of the scan - this is ignored (i.e. it can be 
-     * null) for immediate, one-time scans.
-     * @param scanDesc The description of the scan - this is ignored (i.e. it 
-     * can be null) for immediate, one-time scans.
-     * @param schedule Describes when the scan should be run.  If this is null,
-     * then the scan is run as an immediate, one-time only scan.
+     * @param scanName The name of the scan - this is ignored (i.e. it can be
+     *        null) for immediate, one-time scans.
+     * @param scanDesc The description of the scan - this is ignored (i.e. it
+     *        can be null) for immediate, one-time scans.
+     * @param schedule Describes when the scan should be run. If this is null,
+     *        then the scan is run as an immediate, one-time only scan.
      * 
      */
-    public void startGroupScan(int sessionID,
-                               int groupID,
-                               ScanConfigurationCore scanConfig,
-                               String scanName,
-                               String scanDesc,
-                               ScheduleValue schedule)
-        throws SessionTimeoutException, SessionNotFoundException, 
-               PermissionException, AutoinventoryException,
-               AgentConnectionException, AgentNotFoundException,
-               DuplicateAIScanNameException, ScheduleWillNeverFireException,
-               GroupNotCompatibleException {
+    public void startGroupScan(int sessionID, int groupID, ScanConfigurationCore scanConfig, String scanName,
+                               String scanDesc, ScheduleValue schedule) throws SessionTimeoutException,
+        SessionNotFoundException, PermissionException, AutoinventoryException, AgentConnectionException,
+        AgentNotFoundException, DuplicateAIScanNameException, ScheduleWillNeverFireException,
+        GroupNotCompatibleException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         AppdefEntityID aid = AppdefEntityID.newGroupID(new Integer(groupID));
 
-        autoInventoryManager.startScan(subject, aid, 
-                                            scanConfig, scanName, scanDesc,
-                                            schedule);
+        autoInventoryManager.startScan(subject, aid, scanConfig, scanName, scanDesc, schedule);
     }
 
     /**
      * Start an autoinventory scan.
      * @param platformID The platform ID of the platform to scan.
      * @param scanConfig The scan configuration to use when scanning.
-     * @param scanName The name of the scan - this is ignored (i.e. it can be 
-     * null) for immediate, one-time scans.
-     * @param scanDesc The description of the scan - this is ignored (i.e. it 
-     * can be null) for immediate, one-time scans.
-     * @param schedule Describes when the scan should be run.  If this is null,
-     * then the scan is run as an immediate, one-time only scan.
+     * @param scanName The name of the scan - this is ignored (i.e. it can be
+     *        null) for immediate, one-time scans.
+     * @param scanDesc The description of the scan - this is ignored (i.e. it
+     *        can be null) for immediate, one-time scans.
+     * @param schedule Describes when the scan should be run. If this is null,
+     *        then the scan is run as an immediate, one-time only scan.
      * 
      */
-    public void startScan(int sessionID,
-                          int platformID,
-                          ScanConfigurationCore scanConfig,
-                          String scanName,
-                          String scanDesc,
-                          ScheduleValue schedule)
-        throws SessionTimeoutException, SessionNotFoundException, 
-               PermissionException, AutoinventoryException, 
-               AgentConnectionException, AgentNotFoundException,
-               DuplicateAIScanNameException, ScheduleWillNeverFireException {
+    public void startScan(int sessionID, int platformID, ScanConfigurationCore scanConfig, String scanName,
+                          String scanDesc, ScheduleValue schedule) throws SessionTimeoutException,
+        SessionNotFoundException, PermissionException, AutoinventoryException, AgentConnectionException,
+        AgentNotFoundException, DuplicateAIScanNameException, ScheduleWillNeverFireException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        AppdefEntityID aid =
-            AppdefEntityID.newPlatformID(new Integer(platformID));
-        autoInventoryManager.startScan(subject, aid, scanConfig, scanName,
-                                            scanDesc, schedule);
+        AppdefEntityID aid = AppdefEntityID.newPlatformID(new Integer(platformID));
+        autoInventoryManager.startScan(subject, aid, scanConfig, scanName, scanDesc, schedule);
     }
 
     /**
      * 
      */
-    public void startScan(int sessionID,
-                          String agentToken,
-                          ScanConfigurationCore scanConfig)
-        throws SessionTimeoutException, SessionNotFoundException, 
-               PermissionException, AutoinventoryException, 
-               AgentConnectionException, AgentNotFoundException {
+    public void startScan(int sessionID, String agentToken, ScanConfigurationCore scanConfig)
+        throws SessionTimeoutException, SessionNotFoundException, PermissionException, AutoinventoryException,
+        AgentConnectionException, AgentNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         autoInventoryManager.startScan(subject, agentToken, scanConfig);
     }
@@ -274,14 +240,11 @@ public class AIBossImpl implements AIBoss {
      * @param platformID The platform ID of the platform to stop scanning on.
      * 
      */
-    public void stopScan(int sessionID, int platformID)
-        throws SessionTimeoutException, SessionNotFoundException, 
-               PermissionException, AutoinventoryException, 
-               AgentConnectionException, AgentNotFoundException {
+    public void stopScan(int sessionID, int platformID) throws SessionTimeoutException, SessionNotFoundException,
+        PermissionException, AutoinventoryException, AgentConnectionException, AgentNotFoundException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        AppdefEntityID aid =
-            AppdefEntityID.newPlatformID(new Integer(platformID));
+        AppdefEntityID aid = AppdefEntityID.newPlatformID(new Integer(platformID));
         autoInventoryManager.stopScan(subject, aid);
     }
 
@@ -290,18 +253,14 @@ public class AIBossImpl implements AIBoss {
      * @param platformID The platform ID of the platform to get scan status for.
      * 
      */
-    public ScanStateCore getScanStatus(int sessionID, int platformID)
-        throws SessionTimeoutException, SessionNotFoundException, 
-               PermissionException, AgentNotFoundException, 
-               AgentConnectionException, AgentRemoteException,
-               AutoinventoryException {
+    public ScanStateCore getScanStatus(int sessionID, int platformID) throws SessionTimeoutException,
+        SessionNotFoundException, PermissionException, AgentNotFoundException, AgentConnectionException,
+        AgentRemoteException, AutoinventoryException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        AppdefEntityID aid =
-            AppdefEntityID.newPlatformID(new Integer(platformID));
+        AppdefEntityID aid = AppdefEntityID.newPlatformID(new Integer(platformID));
 
-        ScanStateCore core =
-            autoInventoryManager.getScanStatus(subject, aid);
+        ScanStateCore core = autoInventoryManager.getScanStatus(subject, aid);
         return core;
     }
 
@@ -309,86 +268,75 @@ public class AIBossImpl implements AIBoss {
      * Get status for a running autoinventory scan given the agentToken
      * 
      */
-    public ScanStateCore getScanStatusByAgentToken(int sessionID,
-                                                   String agentToken)
-        throws SessionTimeoutException, SessionNotFoundException, 
-               PermissionException, AgentNotFoundException, 
-               AgentConnectionException, AgentRemoteException,
-               AutoinventoryException {
+    public ScanStateCore getScanStatusByAgentToken(int sessionID, String agentToken) throws SessionTimeoutException,
+        SessionNotFoundException, PermissionException, AgentNotFoundException, AgentConnectionException,
+        AgentRemoteException, AutoinventoryException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         ScanStateCore core;
 
-        core = autoInventoryManager.getScanStatusByAgentToken(subject, 
-                                                                   agentToken);
+        core = autoInventoryManager.getScanStatusByAgentToken(subject, agentToken);
         return core;
     }
 
     /**
      * Get the contents of the AI queue.
-     * @param showIgnored If true, even resources in the AI queue that have 
-     * the 'ignored' flag set will be returned.  By default, resources with
-     * the 'ignored' flag set are excluded when the queue is retrieved.
-     * @param showPlaceholders If true, even resources in the AI queue that are 
-     * unchanged with respect to appdef will be returned.  By default, resources
-     * that are unchanged with respect to appdef are excluded when the queue is
-     * retrieved.
+     * @param showIgnored If true, even resources in the AI queue that have the
+     *        'ignored' flag set will be returned. By default, resources with
+     *        the 'ignored' flag set are excluded when the queue is retrieved.
+     * @param showPlaceholders If true, even resources in the AI queue that are
+     *        unchanged with respect to appdef will be returned. By default,
+     *        resources that are unchanged with respect to appdef are excluded
+     *        when the queue is retrieved.
      * @param pc How the results should be sorted/paged.
-     * @return A List of AIPlatformValue objects representing the contents
-     * of the autoinventory queue.
+     * @return A List of AIPlatformValue objects representing the contents of
+     *         the autoinventory queue.
      * 
      */
-    public PageList<AIPlatformValue> getQueue(int sessionID, boolean showIgnored,
-                             boolean showPlaceholders, PageControl pc)
-        throws SessionNotFoundException, SessionTimeoutException
-    {
+    public PageList<AIPlatformValue> getQueue(int sessionID, boolean showIgnored, boolean showPlaceholders,
+                                              PageControl pc) throws SessionNotFoundException, SessionTimeoutException {
         return getQueue(sessionID, showIgnored, showPlaceholders, false, pc);
     }
 
     /**
      * Get the contents of the AI queue.
-     * @param showIgnored If true, even resources in the AI queue that have 
-     * the 'ignored' flag set will be returned.  By default, resources with
-     * the 'ignored' flag set are excluded when the queue is retrieved.
-     * @param showPlaceholders If true, even resources in the AI queue that are 
-     * unchanged with respect to appdef will be returned.  By default, resources
-     * that are unchanged with respect to appdef are excluded when the queue is
-     * retrieved.
+     * @param showIgnored If true, even resources in the AI queue that have the
+     *        'ignored' flag set will be returned. By default, resources with
+     *        the 'ignored' flag set are excluded when the queue is retrieved.
+     * @param showPlaceholders If true, even resources in the AI queue that are
+     *        unchanged with respect to appdef will be returned. By default,
+     *        resources that are unchanged with respect to appdef are excluded
+     *        when the queue is retrieved.
      * @param showAlreadyProcessed If true, even resources that have already
-     * been processed (approved or not approved) will be shown.
+     *        been processed (approved or not approved) will be shown.
      * @param pc How the results should be sorted/paged.
-     * @return A List of AIPlatformValue objects representing the contents
-     * of the autoinventory queue.
+     * @return A List of AIPlatformValue objects representing the contents of
+     *         the autoinventory queue.
      * 
      */
-    public PageList<AIPlatformValue> getQueue(int sessionID, boolean showIgnored,
-                             boolean showPlaceholders,
-                             boolean showAlreadyProcessed,
-                             PageControl pc)
+    public PageList<AIPlatformValue> getQueue(int sessionID, boolean showIgnored, boolean showPlaceholders,
+                                              boolean showAlreadyProcessed, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         // TODO: pagecontrol is currently ignored here...
-        return aiQueueManager.getQueue(subject, showIgnored,
-                                       showPlaceholders, showAlreadyProcessed,
-                                       pc);
+        return aiQueueManager.getQueue(subject, showIgnored, showPlaceholders, showAlreadyProcessed, pc);
     }
 
     /**
      * Get details on a single platform from the AI queue, by aiplatformID
      * 
      */
-    public AIPlatformValue findAIPlatformById(int sessionID, int aiplatformID)
-        throws SessionNotFoundException, SessionTimeoutException {
-        
+    public AIPlatformValue findAIPlatformById(int sessionID, int aiplatformID) throws SessionNotFoundException,
+        SessionTimeoutException {
+
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         AIPlatformValue aiplatform;
 
         try {
-            aiplatform = aiQueueManager.findAIPlatformById(subject,
-                                                           aiplatformID);
-        } catch(Exception exc){
+            aiplatform = aiQueueManager.findAIPlatformById(subject, aiplatformID);
+        } catch (Exception exc) {
             throw new SystemException(exc);
         }
 
@@ -399,8 +347,8 @@ public class AIBossImpl implements AIBoss {
      * Get details on a single platform from the AI queue, by FQDN
      * 
      */
-    public AIPlatformValue findAIPlatformByFqdn(int sessionID, String fqdn)
-        throws SessionNotFoundException, SessionTimeoutException {
+    public AIPlatformValue findAIPlatformByFqdn(int sessionID, String fqdn) throws SessionNotFoundException,
+        SessionTimeoutException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
@@ -411,9 +359,9 @@ public class AIBossImpl implements AIBoss {
      * Get details on a single server from the AI queue, by serverID
      * 
      */
-    public AIServerValue findAIServerById(int sessionID, int serverID)
-        throws SessionNotFoundException, SessionTimeoutException {
-        
+    public AIServerValue findAIServerById(int sessionID, int serverID) throws SessionNotFoundException,
+        SessionTimeoutException {
+
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         return aiQueueManager.findAIServerById(subject, serverID);
@@ -423,8 +371,8 @@ public class AIBossImpl implements AIBoss {
      * Get details on a single server from the AI queue, by name
      * 
      */
-    public AIServerValue findAIServerByName( int sessionID, String name ) 
-        throws SessionNotFoundException, SessionTimeoutException {
+    public AIServerValue findAIServerByName(int sessionID, String name) throws SessionNotFoundException,
+        SessionTimeoutException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return aiQueueManager.findAIServerByName(subject, name);
@@ -434,9 +382,8 @@ public class AIBossImpl implements AIBoss {
      * Get details on a single ip from the AI queue, by ipID
      * 
      */
-    public AIIpValue findAIIpById( int sessionID, int ipID ) 
-        throws SessionNotFoundException, SessionTimeoutException {
-        
+    public AIIpValue findAIIpById(int sessionID, int ipID) throws SessionNotFoundException, SessionTimeoutException {
+
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return aiQueueManager.findAIIpById(subject, ipID);
     }
@@ -445,8 +392,8 @@ public class AIBossImpl implements AIBoss {
      * Get details on a single ip from the AI queue, by address
      * 
      */
-    public AIIpValue findAIIpByAddress(int sessionID, String address)
-        throws SessionNotFoundException, SessionTimeoutException {
+    public AIIpValue findAIIpByAddress(int sessionID, String address) throws SessionNotFoundException,
+        SessionTimeoutException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
         return aiQueueManager.findAIIpByAddress(subject, address);
@@ -458,24 +405,18 @@ public class AIBossImpl implements AIBoss {
      * @param serverList A List of server IDs
      * @param ipList A List of ip IDs
      * @param action One of the AIQueueConstants.Q_DECISION_XXX constants
-     * indicating what to do with the platforms, ips and servers.
+     *        indicating what to do with the platforms, ips and servers.
      * 
      */
-    public void processQueue(int sessionID,
-                             List<Integer> platformList,
-                             List<Integer> serverList,
-                             List<Integer> ipList,
-                             int action)
-        throws SessionNotFoundException, SessionTimeoutException,
-               AIQApprovalException, PermissionException, ValidationException {
+    public void processQueue(int sessionID, List<Integer> platformList, List<Integer> serverList, List<Integer> ipList,
+                             int action) throws SessionNotFoundException, SessionTimeoutException,
+        AIQApprovalException, PermissionException, ValidationException {
 
         AuthzSubject subject = sessionManager.getSubject(sessionID);
 
         try {
-            aiQueueManager.processQueue(subject,
-                                        platformList, serverList, ipList,
-                                        action);
-        } catch (AIQApprovalException exc){
+            aiQueueManager.processQueue(subject, platformList, serverList, ipList, action);
+        } catch (AIQApprovalException exc) {
             throw exc;
         } catch (Exception exc) {
             throw new SystemException(exc);
@@ -485,54 +426,45 @@ public class AIBossImpl implements AIBoss {
     /**
      * Process queued AI resources.
      * @param id The server to enable runtime-AI for.
-     * @param doEnable If true, runtime autodiscovery will be enabled,
-     * if false, it will be disabled.
+     * @param doEnable If true, runtime autodiscovery will be enabled, if false,
+     *        it will be disabled.
      * 
      */
-    public void toggleRuntimeScan(AuthzSubject subject,
-                                  AppdefEntityID id,
-                                  boolean doEnable)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException, AppdefEntityNotFoundException,
-               AppdefGroupNotFoundException, GroupNotCompatibleException,
-               UpdateException, ConfigFetchException, EncodingException {
+    public void toggleRuntimeScan(AuthzSubject subject, AppdefEntityID id, boolean doEnable)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException, AppdefEntityNotFoundException,
+        AppdefGroupNotFoundException, GroupNotCompatibleException, UpdateException, ConfigFetchException,
+        EncodingException {
         if (!id.isServer()) {
             log.warn("toggleRuntimeScan called for non-server type=" + id);
             return;
         }
 
-      
         try {
             autoInventoryManager.toggleRuntimeScan(subject, id, doEnable);
         } catch (ResourceDeletedException e) {
             log.debug(e);
         } catch (Exception e) {
-            log.error("Unable to disable runtime auto-discovery:" +
-                      e.getMessage(), e);
+            log.error("Unable to disable runtime auto-discovery:" + e.getMessage(), e);
         }
     }
 
     /**
-     * Find an AI Platform from an appdef platform 
+     * Find an AI Platform from an appdef platform
      * 
      */
-    public AIPlatformValue findAIPlatformByPlatformID(int sessionId, 
-                                                      Integer platformID)
-        throws SessionNotFoundException, SessionTimeoutException,
-               PermissionException, PlatformNotFoundException
-    {
+    public AIPlatformValue findAIPlatformByPlatformID(int sessionId, Integer platformID)
+        throws SessionNotFoundException, SessionTimeoutException, PermissionException, PlatformNotFoundException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-        AIPlatformValue aiplatform =
-            aiQueueManager.getAIPlatformByPlatformID(subject, platformID);
+        AIPlatformValue aiplatform = aiQueueManager.getAIPlatformByPlatformID(subject, platformID);
         if (aiplatform != null) {
             throw new PlatformNotFoundException(platformID);
         }
 
         throw new PlatformNotFoundException(platformID);
     }
-    
+
     public static AIBoss getOne() {
-     return Bootstrap.getBean(AIBoss.class);
+        return Bootstrap.getBean(AIBoss.class);
     }
 }
