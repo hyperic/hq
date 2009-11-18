@@ -200,7 +200,7 @@ public class EditConfigPropertiesAction extends BaseAction {
 
                 } else {
                     if ( i == ProductPlugin.CFGTYPE_IDX_RESPONSE_TIME ) {
-                        if ( aeid.isServer() ) {
+                        if (aeid.isServer() || aeid.isPlatform()) {
                             // On servers, RT always gets an empty config
                             allConfigs.setConfig(i, new ConfigResponse());
                             allConfigs.setShouldConfig(i, true);
@@ -215,8 +215,8 @@ public class EditConfigPropertiesAction extends BaseAction {
                         }
                     }
                     if ( i == ProductPlugin.CFGTYPE_IDX_CONTROL 
-                         && !aeid.isService() && !aeid.isServer() ) {
-                        // Control is only supported on servers and services
+                         && !aeid.isService() && !aeid.isServer() && !aeid.isPlatform() ) {
+                        // Control is only supported on platforms, servers and services
                         blankoutConfig(i, allConfigs, allConfigsRollback);
                         continue;
                     }
