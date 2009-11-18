@@ -258,7 +258,7 @@ public abstract class HypericEnum
      * sorted by their code.
      * @param c Class to find enums for
      */
-    public static List getAll(Class c) {
+    public static <T> List<T> getAll(Class<T> c) {
         List res;
         Set vals;
         
