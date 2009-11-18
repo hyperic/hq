@@ -102,25 +102,6 @@
 
 		</session>
 
-		
-		
-
-		<session>
-			<description><![CDATA[This class is responsible for setting/getting the server configuration]]></description>
-
-			<ejb-name>ServerConfigManager</ejb-name>
-
-			<local-home>org.hyperic.hq.common.shared.ServerConfigManagerLocalHome</local-home>
-			<local>org.hyperic.hq.common.shared.ServerConfigManagerLocal</local>
-			<ejb-class>org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-	
-		
-
 		<session>
 			<description><![CDATA[]]></description>
 
@@ -244,47 +225,6 @@
 				</method>
 				<trans-attribute>Required</trans-attribute>
 	    </container-transaction>
-		
-		
-		<container-transaction>
-			<method>
-				<ejb-name>ServerConfigManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>ServerConfigManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>analyzeNonMetricTables</method-name>
-				<method-params>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>ServerConfigManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>analyzeHqMetricTables</method-name>
-				<method-params>
-					<method-param>boolean</method-param>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		<container-transaction>
-			<method>
-				<ejb-name>ServerConfigManager</ejb-name>
-				<method-intf>Local</method-intf>
-				<method-name>vacuum</method-name>
-				<method-params>
-				</method-params>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		
 		
 		<container-transaction>
 			<method>

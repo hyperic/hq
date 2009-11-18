@@ -3,7 +3,7 @@ package org.hyperic.hq.hqu.rendit.util
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as asm
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.common.shared.HQConstants
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl
+import org.hyperic.hq.common.server.session.ServerConfigManagerImpl
 
 class HQUtil {
     private static final Object LOCK = new Object()
@@ -16,7 +16,7 @@ class HQUtil {
     static String getBaseURL() {
         synchronized (LOCK) { 
             if (BASE_URL == null) {
-                BASE_URL = ServerConfigManagerEJBImpl.one.
+                BASE_URL = ServerConfigManagerImpl.one.
                                  getConfig().getProperty(HQConstants.BaseURL)
                 if (BASE_URL[-1] == '/')
                     BASE_URL = BASE_URL[0..-2]

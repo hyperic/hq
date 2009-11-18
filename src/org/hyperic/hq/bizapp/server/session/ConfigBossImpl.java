@@ -39,7 +39,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.ConfigPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,14 +54,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConfigBossImpl implements ConfigBoss {
     private SessionManager sessionManager;
 
-    private ServerConfigManagerLocal serverConfigManager;
+    private ServerConfigManager serverConfigManager;
 
     private PermissionManager permissionManager;
 
     private MBeanServer mbeanServer;
 
     @Autowired
-    public ConfigBossImpl(SessionManager sessionManager, ServerConfigManagerLocal serverConfigManager,
+    public ConfigBossImpl(SessionManager sessionManager, ServerConfigManager serverConfigManager,
                           PermissionManager permissionManager, MBeanServer mbeanServer) {
         this.sessionManager = sessionManager;
         this.serverConfigManager = serverConfigManager;

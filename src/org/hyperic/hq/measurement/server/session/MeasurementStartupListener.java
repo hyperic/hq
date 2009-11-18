@@ -42,7 +42,7 @@ import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
+import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
@@ -190,7 +190,7 @@ public class MeasurementStartupListener
         Properties cfg = new Properties();
 
         try {
-            cfg = ServerConfigManagerEJBImpl.getOne().getConfig();
+            cfg = ServerConfigManagerImpl.getOne().getConfig();
         } catch(Exception e) {
             _log.warn("Error getting server config", e);
         }

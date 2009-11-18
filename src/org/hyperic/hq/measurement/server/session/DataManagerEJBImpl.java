@@ -55,7 +55,7 @@ import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hibernate.dialect.HQDialectUtil;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
+import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.common.util.Messenger;
@@ -486,7 +486,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     }
 
     private void analyzeMetricData(List data)
-    {
+    {   setAnalyzer();
         if (analyzer != null)
         {
             for (Iterator i = data.iterator(); i.hasNext();) {
@@ -897,7 +897,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         _log.debug("Loading default purge intervals");
         Properties conf;
         try {
-            conf = ServerConfigManagerEJBImpl.getOne().getConfig();
+            conf = ServerConfigManagerImpl.getOne().getConfig();
         } catch (Exception e) {
             throw new SystemException(e);
         }
@@ -2079,13 +2079,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() throws CreateException {
+    //TODO this was in ejbCreate - moved out b/c of ServerConfigManager dependency
+    private void setAnalyzer() {
         boolean analyze = true;
         try {
-            Properties conf = ServerConfigManagerEJBImpl.getOne().getConfig();
+            Properties conf = ServerConfigManagerImpl.getOne().getConfig();
             if (conf.containsKey(HQConstants.OOBEnabled)) {
                 analyze = Boolean.valueOf(
                     conf.getProperty(HQConstants.OOBEnabled)).booleanValue();
@@ -2098,6 +2096,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     .getPropertyInstance("hyperic.hq.measurement.analyzer");
             }
         }
+    }
+    /**
+     * @ejb:create-method
+     */
+    public void ejbCreate() throws CreateException {
+       
     }
 
     public void ejbPostCreate() {}

@@ -40,7 +40,7 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.shared.AlertManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -84,11 +84,11 @@ public class DataCompressImpl
     private long purgeRaw, purge1h, purge6h, purge1d, purgeAlert;
 
     private DBUtil dbUtil;
-    private ServerConfigManagerLocal serverConfigManager;
+    private ServerConfigManager serverConfigManager;
     private AlertManager alertManager;
 
     @Autowired
-    public DataCompressImpl(DBUtil dbUtil, ServerConfigManagerLocal serverConfigManager, AlertManager alertManager) {
+    public DataCompressImpl(DBUtil dbUtil, ServerConfigManager serverConfigManager, AlertManager alertManager) {
         this.dbUtil = dbUtil;
         this.serverConfigManager = serverConfigManager;
         this.alertManager = alertManager;

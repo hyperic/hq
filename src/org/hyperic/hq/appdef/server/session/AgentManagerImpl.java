@@ -67,7 +67,7 @@ import org.hyperic.hq.autoinventory.server.session.AgentReportStatusDAO;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
@@ -97,12 +97,12 @@ public class AgentManagerImpl implements AgentManager {
     private ServerDAO serverDao;
     private PermissionManager permissionManager;
     private PlatformDAO platformDao;
-    private ServerConfigManagerLocal serverConfigManager;
+    private ServerConfigManager serverConfigManager;
 
     @Autowired
     public AgentManagerImpl(AgentReportStatusDAO agentReportStatusDao, AgentTypeDAO agentTypeDao, AgentDAO agentDao,
                             ServiceDAO serviceDao, ServerDAO serverDao, PermissionManager permissionManager,
-                            PlatformDAO platformDao, ServerConfigManagerLocal serverConfigManager) {
+                            PlatformDAO platformDao, ServerConfigManager serverConfigManager) {
         this.agentReportStatusDao = agentReportStatusDao;
         this.agentTypeDao = agentTypeDao;
         this.agentDao = agentDao;

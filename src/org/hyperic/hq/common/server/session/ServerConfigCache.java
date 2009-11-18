@@ -93,7 +93,7 @@ public class ServerConfigCache {
 
     private void loadConfig() {
         try {
-            Properties config = ServerConfigManagerEJBImpl.getOne().getConfig();
+            Properties config = ServerConfigManagerImpl.getOne().getConfig();
             String key = null;
             
             synchronized (_cacheLock) {

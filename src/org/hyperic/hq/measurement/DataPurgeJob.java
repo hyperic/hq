@@ -35,15 +35,14 @@ import javax.naming.NamingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
+import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
-import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.events.server.session.EventLogManagerImpl;
 import org.hyperic.hq.events.shared.EventLogManager;
-import org.hyperic.hq.measurement.shared.DataCompress;
 import org.hyperic.hq.measurement.server.session.DataCompressImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
+import org.hyperic.hq.measurement.shared.DataCompress;
 import org.hyperic.util.TimeUtil;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
 
@@ -71,7 +70,7 @@ public class DataPurgeJob implements Runnable {
             compressData();
             Properties conf = null; 
             try { 
-                conf = ServerConfigManagerEJBImpl.getOne().getConfig(); 
+                conf = ServerConfigManagerImpl.getOne().getConfig(); 
             } catch (Exception e) { 
                 throw new SystemException(e); 
             }
@@ -93,8 +92,8 @@ public class DataPurgeJob implements Runnable {
     public static void compressData()
         throws CreateException, NamingException
     {
-        final ServerConfigManagerLocal serverConfig =
-            ServerConfigManagerEJBImpl.getOne();
+        final ServerConfigManager serverConfig =
+            ServerConfigManagerImpl.getOne();
 
         final DataCompress dataCompress = DataCompressImpl.getOne();
 
@@ -145,7 +144,7 @@ public class DataPurgeJob implements Runnable {
         return System.currentTimeMillis();
     }
 
-    private static void runDBAnalyze(ServerConfigManagerLocal serverConfig)
+    private static void runDBAnalyze(ServerConfigManager serverConfig)
     {
         // First check if we are already running
         long analyzeStart = System.currentTimeMillis();
@@ -179,7 +178,7 @@ public class DataPurgeJob implements Runnable {
         }
     }
 
-    private static void runDBMaintenance(ServerConfigManagerLocal serverConfig)
+    private static void runDBMaintenance(ServerConfigManager serverConfig)
     {
         // Once compression finishes, we check to see if databae maintaince
         // should be performed.  This is defaulted to 1 hour, so it should
@@ -189,7 +188,7 @@ public class DataPurgeJob implements Runnable {
         Properties conf;
         
         try {
-            conf = ServerConfigManagerUtil.getLocalHome().create().getConfig();
+            conf = ServerConfigManagerImpl.getOne().getConfig();
         } catch(Exception e) {
             throw new SystemException(e);
         }

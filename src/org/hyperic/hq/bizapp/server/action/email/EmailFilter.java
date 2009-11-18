@@ -58,9 +58,9 @@ import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
+import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.util.ConfigPropertyException;
@@ -211,8 +211,8 @@ public class EmailFilter {
     
     private static InternetAddress getFromAddress() {
         final Log log = LogFactory.getLog(EmailFilter.class);
-        final ServerConfigManagerLocal configMan =
-            ServerConfigManagerEJBImpl.getOne();
+        final ServerConfigManager configMan =
+            ServerConfigManagerImpl.getOne();
         try {
             Properties props = configMan.getConfig();
             String from = props.getProperty(HQConstants.EmailSender);
