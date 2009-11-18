@@ -31,7 +31,7 @@ import javax.ejb.SessionContext;
 
 import org.hyperic.hq.appdef.server.session.AIQueueManagerImpl;
 import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
-import org.hyperic.hq.appdef.server.session.AppdefStatManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AppdefStatManagerImpl;
 import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl;
 import org.hyperic.hq.appdef.server.session.CPropManagerImpl;
 import org.hyperic.hq.appdef.server.session.ConfigManagerImpl;
@@ -40,7 +40,7 @@ import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
 import org.hyperic.hq.appdef.server.session.ServiceManagerImpl;
 import org.hyperic.hq.appdef.shared.AIQueueManager;
 import org.hyperic.hq.appdef.shared.AgentManager;
-import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
+import org.hyperic.hq.appdef.shared.AppdefStatManager;
 import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.CPropManager;
 import org.hyperic.hq.appdef.shared.ConfigManager;
@@ -167,8 +167,8 @@ public abstract class BizappSessionEJB {
         return ResourceGroupManagerImpl.getOne();
     }
 
-    public AppdefStatManagerLocal getAppdefStatManager() {
-        return AppdefStatManagerEJBImpl.getOne();
+    public AppdefStatManager getAppdefStatManager() {
+        return AppdefStatManagerImpl.getOne();
     }    
     
     public AuthzSubjectManager getAuthzSubjectManager() {

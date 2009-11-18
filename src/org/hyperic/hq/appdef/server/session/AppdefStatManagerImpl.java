@@ -39,9 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ejb.CreateException;
-import javax.ejb.SessionBean;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.Util;
@@ -50,25 +47,29 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.appdef.shared.AppdefStatManagerLocal;
-import org.hyperic.hq.appdef.shared.AppdefStatManagerUtil;
+import org.hyperic.hq.appdef.shared.AppdefStatManager;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
+import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerNotFoundException;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.ServiceNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceGroupManagerImpl;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.PermissionManager;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTreeNode;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * AppdefStatManagerEJB provides summary and aggregate statistical
@@ -76,62 +77,77 @@ import org.hyperic.util.timer.StopWatch;
  * <p>
  *
  * </p>
- * @ejb:bean name="AppdefStatManager"
- *      jndi-name="ejb/appdef/AppdefStatManager"
- *      local-jndi-name="LocalAppdefStatManager"
- *      view-type="local"
- *      type="Stateless"
+ * 
  */
+@org.springframework.stereotype.Service
+public class AppdefStatManagerImpl implements AppdefStatManager {
+    private static final String TBL_GROUP    = "EAM_RESOURCE_GROUP";
+    private static final String TBL_PLATFORM = "EAM_PLATFORM";
+    private static final String TBL_SERVICE  = "EAM_SERVICE";
+    private static final String TBL_SERVER   = "EAM_SERVER";
+    private static final String TBL_APP      = "EAM_APPLICATION";
+    private static final String TBL_RES      = "EAM_RESOURCE";
+    private static final String LOG_CTX = AppdefStatManagerImpl.class.getName();
+   
+    private final Log    log     = LogFactory.getLog(LOG_CTX);
+    private static int          DB_TYPE = -1;
 
-public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
-    implements SessionBean {
-    private final String TBL_GROUP    = "EAM_RESOURCE_GROUP";
-    private final String TBL_PLATFORM = "EAM_PLATFORM";
-    private final String TBL_SERVICE  = "EAM_SERVICE";
-    private final String TBL_SERVER   = "EAM_SERVER";
-    private final String TBL_APP      = "EAM_APPLICATION";
-    private final String TBL_RES      = "EAM_RESOURCE";
-
-    private final String logCtx  = AppdefStatManagerEJBImpl.class.getName();
-    private final Log    log     = LogFactory.getLog(logCtx);
-    private int          DB_TYPE = -1;
-
-    private final String platformResType = AuthzConstants.platformResType;
-    private final String applicationResType = AuthzConstants.applicationResType;
-    private final String serverResType = AuthzConstants.serverResType;
-    private final String serviceResType = AuthzConstants.serviceResType;
-    private final String groupResType = AuthzConstants.groupResType;
-    private final String platformOpViewPlatform =
+    private static final String PLATFORM_RES_TYPE = AuthzConstants.platformResType;
+    private static final String APPLICATION_RES_TYPE = AuthzConstants.applicationResType;
+    private static final String SERVER_RES_TYPE = AuthzConstants.serverResType;
+    private static final String SERVICE_RES_TYPE = AuthzConstants.serviceResType;
+    private static final String GROUP_RES_TYPE = AuthzConstants.groupResType;
+    private static final String PLATFORM_OP_VIEW_PLATFORM =
         AuthzConstants.platformOpViewPlatform;
-    private final String applicationOpViewApplication =
+    private static final String APPLICATION_OP_VIEW_APPLICATION =
         AuthzConstants.appOpViewApplication;
-    private final String serverOpViewServer = AuthzConstants.serverOpViewServer;
-    private final String serviceOpViewService =
+    private static final String SERVER_OP_VIEW_SERVER = AuthzConstants.serverOpViewServer;
+    private static final String SERVICE_OP_VIEW_SERVICE =
         AuthzConstants.serviceOpViewService;
-    private final String groupOpViewResourceGroup =
+    private static final String GROUP_OP_VIEW_RESOURCE_GROUP =
         AuthzConstants.groupOpViewResourceGroup;
 
-    private final int APPDEF_TYPE_PLATFORM =
+    private static final int APPDEF_TYPE_PLATFORM =
         AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-    private final int APPDEF_TYPE_SERVER =
+    private static final int APPDEF_TYPE_SERVER =
         AppdefEntityConstants.APPDEF_TYPE_SERVER;
-    private final int APPDEF_TYPE_SERVICE =
+    private static final int APPDEF_TYPE_SERVICE =
         AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-    private final int APPDEF_TYPE_GROUP =
+    private static final int APPDEF_TYPE_GROUP =
         AppdefEntityConstants.APPDEF_TYPE_GROUP;
 
-    private final PermissionManager pm = PermissionManagerFactory.getInstance();
-
-    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
+    private PermissionManager permissionManager;
+    
+    private ApplicationManager applicationManager;
+    
+    private PlatformManager platformManager;
+    
+    private ServerManager serverManager;
+    
+    private ServiceManager serviceManager;
+    
+    private ResourceGroupManager resourceGroupManager;
+    
+    
+    @Autowired
+    public AppdefStatManagerImpl(PermissionManager permissionManager, ApplicationManager applicationManager,
+                                 PlatformManager platformManager, ServerManager serverManager,
+                                 ServiceManager serviceManager, ResourceGroupManager resourceGroupManager) {
+        this.permissionManager = permissionManager;
+        this.applicationManager = applicationManager;
+        this.platformManager = platformManager;
+        this.serverManager = serverManager;
+        this.serviceManager = serviceManager;
+        this.resourceGroupManager = resourceGroupManager;
+    }
 
     /**
      * <p>Return map of platform counts.</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
      */
-    public Map getPlatformCountsByTypeMap (AuthzSubject subject)
+    @Transactional(propagation=Propagation.SUPPORTS)
+    public Map<String, Integer> getPlatformCountsByTypeMap (AuthzSubject subject)
     {
-        Map       platMap = new HashMap();
+        Map<String, Integer>       platMap = new HashMap<String, Integer>();
         Statement stmt = null;
         ResultSet rs = null;
         Integer subjectId = subject.getId();
@@ -143,8 +159,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "FROM " + TBL_PLATFORM + "_TYPE PLATT, " +
                           TBL_PLATFORM + " PLAT " +
                 "WHERE PLAT.PLATFORM_TYPE_ID = PLATT.ID AND EXISTS (" +
-                    pm.getResourceTypeSQL("PLAT.ID", subjectId, platformResType,
-                                          platformOpViewPlatform) + ") " +
+                    permissionManager.getResourceTypeSQL("PLAT.ID", subjectId, PLATFORM_RES_TYPE,
+                                          PLATFORM_OP_VIEW_PLATFORM) + ") " +
                 "GROUP BY PLATT.NAME ORDER BY PLATT.NAME";
             stmt = conn.createStatement();
 
@@ -166,7 +182,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                       e, e);
             throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
             disconnect();
         }
         return platMap;
@@ -174,9 +190,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * <p>Return platforms count.</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
+     *
      */
+    @Transactional(propagation=Propagation.SUPPORTS)
     public int getPlatformsCount (AuthzSubject subject) {
         Statement stmt = null;
         ResultSet rs = null;
@@ -190,8 +206,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "FROM " + TBL_PLATFORM + "_TYPE PLATT, " +
                           TBL_PLATFORM + " PLAT " +
                 "WHERE PLAT.PLATFORM_TYPE_ID = PLATT.ID AND EXISTS (" +
-                    pm.getResourceTypeSQL("PLAT.ID", subjectId, platformResType,
-                                          platformOpViewPlatform) + ")";
+                    permissionManager.getResourceTypeSQL("PLAT.ID", subjectId, PLATFORM_RES_TYPE,
+                                          PLATFORM_OP_VIEW_PLATFORM) + ")";
             stmt = conn.createStatement();
 
             if (log.isDebugEnabled())
@@ -206,7 +222,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             log.error("Caught SQL Exception counting Platforms: " + e, e);
             throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
             disconnect();
         }
         return 0;
@@ -214,12 +230,12 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * <p>Return map of server counts.</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
+     * 
      */
-    public Map getServerCountsByTypeMap (AuthzSubject subject)
+    @Transactional(propagation=Propagation.SUPPORTS)
+    public Map<String, Integer> getServerCountsByTypeMap (AuthzSubject subject)
     {
-        Map servMap = new HashMap();
+        Map<String, Integer> servMap = new HashMap<String, Integer>();
         Statement stmt = null;
         ResultSet rs = null;
         Integer subjectId = subject.getId();
@@ -230,8 +246,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "SELECT SERVT.NAME, COUNT(SERV.ID) " +
                 "FROM " + TBL_SERVER + "_TYPE SERVT, " + TBL_SERVER + " SERV " +
                 "WHERE SERV.SERVER_TYPE_ID = SERVT.ID AND EXISTS (" +
-                    pm.getResourceTypeSQL("SERV.ID", subjectId, serverResType,
-                                          serverOpViewServer) + ") " +
+                    permissionManager.getResourceTypeSQL("SERV.ID", subjectId, SERVER_RES_TYPE,
+                                          SERVER_OP_VIEW_SERVER) + ") " +
                 "GROUP BY SERVT.NAME ORDER BY SERVT.NAME";
             stmt = conn.createStatement();
 
@@ -249,7 +265,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
              log.error("Caught SQL Exception finding Servers by type: " + e, e);
              throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
             disconnect();
         }
         return servMap;
@@ -257,9 +273,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
 
     /**
      * <p>Return servers count.</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
      */
+    @Transactional(propagation=Propagation.SUPPORTS)
     public int getServersCount (AuthzSubject subject) {
         Statement stmt = null;
         ResultSet rs = null;
@@ -270,8 +285,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "SELECT COUNT(SERV.ID) " +
                 "FROM " + TBL_SERVER + "_TYPE SERVT, " + TBL_SERVER + " SERV " +
                 "WHERE SERV.SERVER_TYPE_ID = SERVT.ID AND EXISTS (" +
-                    pm.getResourceTypeSQL("SERV.ID", subjectId, serverResType,
-                                          serverOpViewServer) + ") ";
+                    permissionManager.getResourceTypeSQL("SERV.ID", subjectId, SERVER_RES_TYPE,
+                                          SERVER_OP_VIEW_SERVER) + ") ";
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
 
@@ -282,19 +297,19 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
              log.error("Caught SQL Exception finding Servers by type: " + e, e);
              throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
             disconnect();
         }
         return 0;
     }
 
     /**<p>Return map of service counts.</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
+    
      */
-    public Map getServiceCountsByTypeMap (AuthzSubject subject)
+    @Transactional(propagation=Propagation.SUPPORTS)
+    public Map<String,Integer> getServiceCountsByTypeMap (AuthzSubject subject)
     {
-        Map       svcMap = new HashMap();
+        Map<String, Integer>       svcMap = new HashMap<String, Integer>();
         Statement stmt = null;
         ResultSet rs = null;
         Integer subjectId = subject.getId();
@@ -305,8 +320,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "SELECT SVCT.NAME, COUNT(SVC.ID) " +
                 "FROM " + TBL_SERVICE + "_TYPE SVCT, " + TBL_SERVICE + " SVC " +
                 "WHERE SVC.SERVICE_TYPE_ID = SVCT.ID AND EXISTS (" +
-                    pm.getResourceTypeSQL("SVC.ID", subjectId, serviceResType,
-                                          serviceOpViewService) + ") " +
+                    permissionManager.getResourceTypeSQL("SVC.ID", subjectId, SERVICE_RES_TYPE,
+                                          SERVICE_OP_VIEW_SERVICE) + ") " +
                 "GROUP BY SVCT.NAME ORDER BY SVCT.NAME";
             stmt = conn.createStatement();
 
@@ -324,16 +339,16 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             log.error("Caught SQL Exception finding Services by type: " + e, e);
             throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
             disconnect();
         }
         return svcMap;
     }
 
     /**<p>Return services count.</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
+  
      */
+    @Transactional(propagation=Propagation.SUPPORTS)
     public int getServicesCount (AuthzSubject subject) {
         Statement stmt = null;
         ResultSet rs = null;
@@ -344,8 +359,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "SELECT COUNT(SVC.ID) " +
                 "FROM " + TBL_SERVICE + "_TYPE SVCT, " + TBL_SERVICE + " SVC " +
                 "WHERE SVC.SERVICE_TYPE_ID = SVCT.ID AND EXISTS (" +
-                    pm.getResourceTypeSQL("SVC.ID", subjectId, serviceResType,
-                                          serviceOpViewService) + ") ";
+                    permissionManager.getResourceTypeSQL("SVC.ID", subjectId, SERVICE_RES_TYPE,
+                                          SERVICE_OP_VIEW_SERVICE) + ") ";
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
 
@@ -356,19 +371,19 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             log.error("Caught SQL Exception finding Services by type: " + e, e);
             throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
             disconnect();
         }
         return 0;
     }
 
     /**<p>Return map of app counts.</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
+    
      */
-    public Map getApplicationCountsByTypeMap (AuthzSubject subject)
+    @Transactional(propagation=Propagation.SUPPORTS)
+    public Map<String, Integer>  getApplicationCountsByTypeMap (AuthzSubject subject)
     {
-        Map       appMap = new HashMap();
+        Map<String, Integer>       appMap = new HashMap<String, Integer>();
         Statement stmt = null;
         ResultSet rs = null;
         Integer subjectId = subject.getId();
@@ -379,9 +394,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "SELECT APPT.NAME, COUNT(APP.ID) " +
                 "FROM " + TBL_APP + "_TYPE APPT, " + TBL_APP + " APP " +
                 "WHERE APP.APPLICATION_TYPE_ID = APPT.ID AND EXISTS (" +
-                    pm.getResourceTypeSQL("APP.ID", subjectId,
-                                          applicationResType,
-                                          applicationOpViewApplication)
+                    permissionManager.getResourceTypeSQL("APP.ID", subjectId,
+                                          APPLICATION_RES_TYPE,
+                                          APPLICATION_OP_VIEW_APPLICATION)
                     + ") " +
                 "GROUP BY APPT.NAME ORDER BY APPT.NAME";
             stmt = conn.createStatement();
@@ -401,16 +416,16 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                       e);
             throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
             disconnect();
         }
         return appMap;
     }
 
     /**<p>Return apps count.</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
+   
      */
+    @Transactional(propagation=Propagation.SUPPORTS)
     public int getApplicationsCount(AuthzSubject subject) {
         Statement stmt = null;
         ResultSet rs = null;
@@ -422,9 +437,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 "SELECT COUNT(APP.ID) FROM " + TBL_APP + "_TYPE APPT, " +
                     TBL_APP + " APP " +
                 "WHERE APP.APPLICATION_TYPE_ID = APPT.ID AND EXISTS (" +
-                    pm.getResourceTypeSQL("APP.ID", subjectId,
-                                          applicationResType,
-                                          applicationOpViewApplication) + ") ";
+                    permissionManager.getResourceTypeSQL("APP.ID", subjectId,
+                                          APPLICATION_RES_TYPE,
+                                          APPLICATION_OP_VIEW_APPLICATION) + ") ";
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
 
@@ -436,19 +451,19 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                       e);
             throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
             disconnect();
         }
         return 0;
     }
 
     /**<p>Return map of grp counts.</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
+    
      */
-    public Map getGroupCountsMap (AuthzSubject subject)
+    @Transactional(propagation=Propagation.SUPPORTS)
+    public Map<Integer,Integer> getGroupCountsMap (AuthzSubject subject)
     {
-        Map grpMap = new HashMap();
+        Map<Integer, Integer> grpMap = new HashMap<Integer, Integer>();
         Statement stmt = null;
         ResultSet rs = null;
         int[] groupTypes = AppdefEntityConstants.getAppdefGroupTypes();
@@ -461,9 +476,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 String sql =
                     "SELECT COUNT(*) FROM " + TBL_GROUP + " GRP " +
                     "WHERE GRP.GROUPTYPE = " + groupTypes[x] + " AND EXISTS (" +
-                        pm.getResourceTypeSQL("GRP.ID",
-                                              subjectId, groupResType,
-                                              groupOpViewResourceGroup) + ")";
+                        permissionManager.getResourceTypeSQL("GRP.ID",
+                                              subjectId, GROUP_RES_TYPE,
+                                              GROUP_OP_VIEW_RESOURCE_GROUP) + ")";
 
                 try {
                     int total = 0;
@@ -476,7 +491,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                                    new Integer(total));
                     }
                 } finally {
-                    dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+                    DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
                 }
             }
         } catch (SQLException e) {
@@ -491,12 +506,12 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     /**
      * Method for determining whether or not to show a nav map
      * (this is a temporary method)
-     * @ejb:interface-method
+     * 
      */
     public boolean isNavMapSupported () {
         try {
             Connection conn = getDBConn();
-            switch (dbUtil.getDBType(conn)) {
+            switch (DBUtil.getDBType(conn)) {
             case DBUtil.DATABASE_ORACLE_8:
             case DBUtil.DATABASE_ORACLE_9:
             case DBUtil.DATABASE_ORACLE_10:
@@ -516,14 +531,14 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**<p>Return directly connected resource tree for node level platform</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
+     
      */
+    @Transactional(propagation=Propagation.SUPPORTS)
     public ResourceTreeNode[] getNavMapDataForPlatform(AuthzSubject subject,
                                                        Integer platformId)
         throws PlatformNotFoundException, PermissionException {
         try {
-            Platform plat = getPlatformManager().findPlatformById(platformId);
+            Platform plat = platformManager.findPlatformById(platformId);
             ResourceTreeNode[] retVal;
             retVal = getNavMapDataForPlatform(subject, plat);
             return retVal;
@@ -544,7 +559,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
 
         try {
             Connection conn = getDBConn();
-            String falseStr = dbUtil.getBooleanValue(false, conn);
+            String falseStr = DBUtil.getBooleanValue(false, conn);
             buf = new StringBuffer();
             buf.append("SELECT svr_svrt_svc_svct.server_id, ")
                .append(       "svr_svrt_svc_svct.server_name, ")
@@ -562,9 +577,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                    .append(TBL_APP)
                    .append(" app ")
                    .append("WHERE app.id=appsvc.application_id(+) AND EXISTS (")
-                   .append(pm.getResourceTypeSQL("app.id", subjectId,
-                                                 applicationResType,
-                                                 applicationOpViewApplication))
+                   .append(permissionManager.getResourceTypeSQL("app.id", subjectId,
+                                                 APPLICATION_RES_TYPE,
+                                                 APPLICATION_OP_VIEW_APPLICATION))
                    .append(") ) app_appsvc, ");
             }
             else {
@@ -572,9 +587,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                     .append(TBL_APP)
                     .append(" app ON app.id=appsvc.application_id ")
                    .append("WHERE EXISTS (")
-                   .append(pm.getResourceTypeSQL("app.id", subjectId,
-                                                 applicationResType,
-                                                 applicationOpViewApplication))
+                   .append(permissionManager.getResourceTypeSQL("app.id", subjectId,
+                                                 APPLICATION_RES_TYPE,
+                                                 APPLICATION_OP_VIEW_APPLICATION))
                    .append(") ) app_appsvc RIGHT JOIN ");
             }
             buf.append("(SELECT svr_svrt.server_id, ")
@@ -597,9 +612,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                .append(                 " res2 ON svc.resource_id = res2.id ")
                .append("         WHERE svc.service_type_id=svct.id ")
                .append("           AND EXISTS (")
-               .append(pm.getResourceTypeSQL("svc.id", subjectId,
-                                             serviceResType,
-                                             serviceOpViewService))
+               .append(permissionManager.getResourceTypeSQL("svc.id", subjectId,
+                                             SERVICE_RES_TYPE,
+                                             SERVICE_OP_VIEW_SERVICE))
                .append(") ) svc_svct ");
             if(isOracle8()) {
                 buf.append(",");
@@ -622,8 +637,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                .append("                    AND svrt.fvirtual = " + falseStr)
                .append("                    AND svrt.id=svr.server_type_id ")
                .append("                    AND EXISTS (")
-               .append(pm.getResourceTypeSQL("svr.id", subjectId, serverResType,
-                                             serverOpViewServer))
+               .append(permissionManager.getResourceTypeSQL("svr.id", subjectId, SERVER_RES_TYPE,
+                                             SERVER_OP_VIEW_SERVER))
                .append(") ) svr_svrt ");
             if(isOracle8()) {
                 buf.append(" WHERE svr_svrt.server_id=svc_svct.server_id(+)")
@@ -643,8 +658,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             if (log.isDebugEnabled())
                 log.debug(buf.toString());
 
-            Set servers = new HashSet();
-            Set services = new HashSet();
+            Set<ResourceTreeNode> servers = new HashSet<ResourceTreeNode>();
+            Set<ResourceTreeNode> services = new HashSet<ResourceTreeNode>();
 
             ResourceTreeNode aPlatformNode
                 = new ResourceTreeNode(
@@ -709,30 +724,31 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         } catch (SQLException e) {
             throw e;
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
             disconnect();
         }
-        if (log.isDebugEnabled())
+        if (log.isDebugEnabled()) {
             log.debug(mapToString(retVal));
+        }
         return retVal;
     }
 
     private boolean isOracle8() {
-        return DB_TYPE == dbUtil.DATABASE_ORACLE_8;
+        return DB_TYPE == DBUtil.DATABASE_ORACLE_8;
     }
 
     private boolean isOracle() {
-        return isOracle8() || DB_TYPE == dbUtil.DATABASE_ORACLE_9;
+        return isOracle8() || DB_TYPE == DBUtil.DATABASE_ORACLE_9;
     }
 
     /**<p>Return directly connected resource tree for node level server</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
+    
      */
+    @Transactional(propagation=Propagation.SUPPORTS)
     public ResourceTreeNode[] getNavMapDataForServer(AuthzSubject subject,
                                                      Integer serverId)
         throws ServerNotFoundException, PermissionException {
-        Server server = getServerManager().findServerById(serverId);
+        Server server = serverManager.findServerById(serverId);
 
         ResourceTreeNode[] retVal = null;
         Statement stmt = null;
@@ -759,18 +775,18 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                    .append(TBL_APP)
                    .append(" app ")
                    .append("WHERE app.id=appsvc.application_id(+) AND EXISTS (")
-                   .append(pm.getResourceTypeSQL("app.id", subjectId,
-                                                 applicationResType,
-                                                 applicationOpViewApplication))
+                   .append(permissionManager.getResourceTypeSQL("app.id", subjectId,
+                                                 APPLICATION_RES_TYPE,
+                                                 APPLICATION_OP_VIEW_APPLICATION))
                    .append(") ) app_appsvc, ");
             } else {
                 buf.append("  RIGHT JOIN ")
                    .append(TBL_APP)
                    .append(" app ON app.id=appsvc.application_id ")
                    .append(" WHERE EXISTS (")
-                   .append(pm.getResourceTypeSQL("app.id", subjectId,
-                                                 applicationResType,
-                                                 applicationOpViewApplication))
+                   .append(permissionManager.getResourceTypeSQL("app.id", subjectId,
+                                                 APPLICATION_RES_TYPE,
+                                                 APPLICATION_OP_VIEW_APPLICATION))
                    .append(") ) app_appsvc RIGHT JOIN ");
             }
             buf.append(" (SELECT svc_svct.service_id, ")
@@ -792,9 +808,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                .append(       " JOIN " + TBL_RES)
                .append(                 " res2 ON svc.resource_id = res2.id ")
                .append("        WHERE svc.service_type_id=svct.id AND EXISTS (")
-               .append(pm.getResourceTypeSQL("svc.id", subjectId,
-                                             serviceResType,
-                                             serviceOpViewService))
+               .append(permissionManager.getResourceTypeSQL("svc.id", subjectId,
+                                             SERVICE_RES_TYPE,
+                                             SERVICE_OP_VIEW_SERVICE))
                .append(") ) svc_svct ");
             if(isOracle()) {
                 buf.append(" ," + TBL_SERVER + " svr, ");
@@ -810,9 +826,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                .append(server.getId())
                .append("   AND platt.id=plat.platform_type_id ")
                .append("   AND plat.id=svr.platform_id AND EXISTS (")
-               .append(pm.getResourceTypeSQL("plat.id", subjectId,
-                                             platformResType,
-                                             platformOpViewPlatform))
+               .append(permissionManager.getResourceTypeSQL("plat.id", subjectId,
+                                             PLATFORM_RES_TYPE,
+                                             PLATFORM_OP_VIEW_PLATFORM))
                .append(") ");
 
             if(isOracle()) {
@@ -835,7 +851,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 log.debug("SQL: " + buf);
             }
 
-            Map serviceMap = new HashMap();
+            Map<Integer, ResourceTreeNode> serviceMap = new HashMap<Integer, ResourceTreeNode>();
             ResourceTreeNode aServerNode;
             ResourceTreeNode aPlatformNode;
 
@@ -906,20 +922,20 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
             disconnect();
         }
         return retVal;
     }
 
     /**<p>Return directly connected resource tree for node level service</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
+     
      */
+    @Transactional(propagation=Propagation.SUPPORTS)
     public ResourceTreeNode[] getNavMapDataForService(AuthzSubject subject,
                                                       Integer serviceId)
         throws ServiceNotFoundException, PermissionException {
-        Service service = getServiceManager().findServiceById(serviceId);
+        Service service = serviceManager.findServiceById(serviceId);
 
         ResourceTreeNode[] retVal = null;
         Statement stmt = null;
@@ -929,7 +945,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         try {
             Connection conn = getDBConn();
 
-            String trueStr = dbUtil.getBooleanValue(true, conn);
+            String trueStr = DBUtil.getBooleanValue(true, conn);
             buf = new StringBuffer();
             buf.append("SELECT plat.platform_id, ")
                .append(       "platform_name, ")
@@ -949,9 +965,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                                  " res0 ON plat.resource_id = res0.id " +
                              "WHERE plat.platform_type_id=platt.id AND " +
                                    " EXISTS (")
-               .append(pm.getResourceTypeSQL("plat.id", subjectId,
-                                             platformResType,
-                                             platformOpViewPlatform))
+               .append(permissionManager.getResourceTypeSQL("plat.id", subjectId,
+                                             PLATFORM_RES_TYPE,
+                                             PLATFORM_OP_VIEW_PLATFORM))
                .append(")) plat ");
 
             if(isOracle8()) {
@@ -989,9 +1005,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                    .append(" WHERE app.id=appsvc.application_id(+) ")
                    .append("   AND EAM_APPLICATION_TYPE.id=app.application_type_id ")
                    .append("   AND app.resource_id = r.id AND EXISTS (")
-                   .append(pm.getResourceTypeSQL("app.id", subjectId,
-                                                 applicationResType,
-                                                 applicationOpViewApplication))
+                   .append(permissionManager.getResourceTypeSQL("app.id", subjectId,
+                                                 APPLICATION_RES_TYPE,
+                                                 APPLICATION_OP_VIEW_APPLICATION))
                    .append(") ) app_appsvc, ")
                    .append(TBL_SERVICE)
                    .append(" svc WHERE svc.id=app_appsvc.service_id(+) AND svc.id=")
@@ -1005,9 +1021,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                    .append(" EAM_APPLICATION_TYPE  ")
                    .append(" WHERE EAM_APPLICATION_TYPE.id=app.application_type_id ")
                    .append("   AND EXISTS (")
-                   .append(pm.getResourceTypeSQL("app.id", subjectId,
-                                                 applicationResType,
-                                                 applicationOpViewApplication))
+                   .append(permissionManager.getResourceTypeSQL("app.id", subjectId,
+                                                 APPLICATION_RES_TYPE,
+                                                 APPLICATION_OP_VIEW_APPLICATION))
                    .append(") ) app_appsvc RIGHT JOIN ")
                    .append(TBL_SERVICE)
                    .append(" svc ON svc.id=app_appsvc.service_id ")
@@ -1021,16 +1037,16 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                    .append("   AND asvc.server_id=svr.id(+) ")
                    .append("   AND (fvirtual = ").append(trueStr)
                    .append("    OR EXISTS (")
-                   .append(pm.getResourceTypeSQL("svr.id", subjectId,
-                                                 serverResType,
-                                                 serverOpViewServer))
+                   .append(permissionManager.getResourceTypeSQL("svr.id", subjectId,
+                                                 SERVER_RES_TYPE,
+                                                 SERVER_OP_VIEW_SERVER))
                    .append(")) ) asvc_svr, ")
                    .append(TBL_PLATFORM + "_TYPE platt ")
                    .append("WHERE plat.platform_type_id=platt.id ")
                    .append("  AND asvc_svr.platform_id=plat.id(+) AND EXISTS (")
-                   .append(pm.getResourceTypeSQL("plat.id", subjectId,
-                                                 platformResType,
-                                                 platformOpViewPlatform))
+                   .append(permissionManager.getResourceTypeSQL("plat.id", subjectId,
+                                                 PLATFORM_RES_TYPE,
+                                                 PLATFORM_OP_VIEW_PLATFORM))
                    .append(") ");
             } else {
                 buf.append(" ON asvc.server_id=svr.id, ")
@@ -1038,9 +1054,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                    .append(" WHERE svr.server_type_id=svrt.id ")
                    .append("   AND (fvirtual = ").append(trueStr)
                    .append("    OR EXISTS (")
-                   .append(pm.getResourceTypeSQL("svr.id", subjectId,
-                                                 serverResType,
-                                                 serverOpViewServer))
+                   .append(permissionManager.getResourceTypeSQL("svr.id", subjectId,
+                                                 SERVER_RES_TYPE,
+                                                 SERVER_OP_VIEW_SERVER))
                    .append(")) ) asvc_svr ")
                    .append("     ON asvc_svr.platform_id = plat.platform_id");
             }
@@ -1058,7 +1074,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             ResourceTreeNode aPlatformNode = null;
             ResourceTreeNode aServerNode   = null;
             ResourceTreeNode aServiceNode  = null;
-            Map              appMap        = new HashMap();
+            Map<Integer, ResourceTreeNode>              appMap        = new HashMap<Integer, ResourceTreeNode>();
 
             aServiceNode = new ResourceTreeNode (
                   service.getName(),
@@ -1135,7 +1151,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
             disconnect();
         }
         return retVal;
@@ -1165,8 +1181,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             .append(TBL_GROUP).append(" grp, ")
             .append(TBL_RES).append(" res ")
             .append(" WHERE grp.resource_id = res.id AND EXISTS (")
-            .append(pm.getResourceTypeSQL("grp.id", subjectId, groupResType,
-                                          groupOpViewResourceGroup))
+            .append(permissionManager.getResourceTypeSQL("grp.id", subjectId, GROUP_RES_TYPE,
+                                          GROUP_OP_VIEW_RESOURCE_GROUP))
             .append(")");
         return rtn.toString();
     }
@@ -1178,21 +1194,21 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         	.append(" FROM  " + TBL_SERVICE + " svc JOIN ")
         	.append(TBL_RES).append(" res ON resource_id = svc.id ")
         	.append(" WHERE EXISTS (")
-            .append(pm.getResourceTypeSQL("svc.id", subjectId,
-                                          serviceResType, serviceOpViewService))
+            .append(permissionManager.getResourceTypeSQL("svc.id", subjectId,
+                                          SERVICE_RES_TYPE, SERVICE_OP_VIEW_SERVICE))
             .append(")");
         return rtn.toString();
     }
 
     /**<p>Return directly connected resource tree for node level service</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
+   
      */
+    @Transactional(propagation=Propagation.SUPPORTS)
     public ResourceTreeNode[] getNavMapDataForApplication(AuthzSubject subject,
                                                           Integer appId)
         throws ApplicationNotFoundException, PermissionException {
         Application app =
-            getApplicationManager().findApplicationById(subject, appId);
+            applicationManager.findApplicationById(subject, appId);
 
         ResourceTreeNode[] retVal = null;
         Statement stmt = null;
@@ -1244,7 +1260,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 log.debug("SQL: " + buf);
             }
 
-            Map svcMap = new HashMap();
+            Map<String, ResourceTreeNode> svcMap = new HashMap<String, ResourceTreeNode>();
 
             ResourceTreeNode appNode = new ResourceTreeNode (
                 app.getName(),
@@ -1308,16 +1324,16 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
             log.error("Unable to get NavMap data: " + e, e);
             throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
             disconnect();
         }
         return retVal;
     }
 
     /**<p>Return resources for autogroups</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
+   
      */
+    @Transactional(propagation=Propagation.SUPPORTS)
     public ResourceTreeNode[] getNavMapDataForAutoGroup(AuthzSubject subject,
                                                        AppdefEntityID[] parents,
                                                        Integer resType)
@@ -1340,11 +1356,11 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         throws AppdefEntityNotFoundException {
         switch (entityType) {
             case APPDEF_TYPE_PLATFORM:
-                return getPlatformManager().findPlatformType(resType);
+                return platformManager.findPlatformType(resType);
             case APPDEF_TYPE_SERVER:
-                return getServerManager().findServerType(resType);
+                return serverManager.findServerType(resType);
             case APPDEF_TYPE_SERVICE:
-                return getServiceManager().findServiceType(resType);
+                return serviceManager.findServiceType(resType);
             default:
                 return null;
         }
@@ -1365,7 +1381,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         String             authzResName;
         String             authzOpName;
         final int          APPDEF_TYPE_UNDEFINED = -1;
-        List               parentNodes = null;
+        List<ResourceTreeNode>               parentNodes = null;
 
         Integer subjectId = subject.getId();
         // derive parent and child entity types
@@ -1378,7 +1394,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
 
             // If the auto-group has parents, fetch the resources
             if (parents != null) {
-                parentNodes = new ArrayList(parents.length);
+                parentNodes = new ArrayList<ResourceTreeNode>(parents.length);
                 for (int x=0;x<parents.length;x++) {
                     AppdefEntityValue av =
                         new AppdefEntityValue(parents[x],subject);
@@ -1408,9 +1424,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                           TBL_PLATFORM + " p " + res_join +
                 " WHERE p.platform_type_id=pt.id AND platform_type_id=" +
                         type.getId() + " AND " +
-                       "EXISTS (" + pm.getResourceTypeSQL("p.id",
-                                                          subjectId,platformResType,
-                                                          platformOpViewPlatform) +
+                       "EXISTS (" + permissionManager.getResourceTypeSQL("p.id",
+                                                          subjectId,PLATFORM_RES_TYPE,
+                                                          PLATFORM_OP_VIEW_PLATFORM) +
                               ") ";
 
             final String svrAGSql =
@@ -1421,9 +1437,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 " WHERE s.server_type_id=st.id AND platform_id in ( " +
                         bindMarkerStr + " ) " +
                 "   AND server_type_id=" + type.getId() +
-                "   AND EXISTS (" + pm.getResourceTypeSQL("s.id", subjectId,
-                                                          serverResType,
-                                                          serverOpViewServer) +
+                "   AND EXISTS (" + permissionManager.getResourceTypeSQL("s.id", subjectId,
+                                                          SERVER_RES_TYPE,
+                                                          SERVER_OP_VIEW_SERVER) +
                               ") ";
 
             final String svcAGSql =
@@ -1434,9 +1450,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 " WHERE s.service_type_id=st.id AND s.server_id in ( " +
                         bindMarkerStr + " ) AND " +
                        "s.service_type_id=" + type.getId() +
-                "   AND EXISTS (" + pm.getResourceTypeSQL("s.id", subjectId,
-                                                          serviceResType,
-                                                          serviceOpViewService) +
+                "   AND EXISTS (" + permissionManager.getResourceTypeSQL("s.id", subjectId,
+                                                          SERVICE_RES_TYPE,
+                                                          SERVICE_OP_VIEW_SERVICE) +
                               ") ";
 
             final String appSvcAGSql =
@@ -1447,9 +1463,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 " WHERE s.service_type_id=st.id and s.id=aps.service_id AND " +
                        "aps.application_id in ( " + bindMarkerStr + " ) AND " +
                        "s.service_type_id=" + type.getId() +
-                "   AND EXISTS (" + pm.getResourceTypeSQL("s.id", subjectId,
-                                                          serviceResType,
-                                                          serviceOpViewService) +
+                "   AND EXISTS (" + permissionManager.getResourceTypeSQL("s.id", subjectId,
+                                                          SERVICE_RES_TYPE,
+                                                          SERVICE_OP_VIEW_SERVICE) +
                               ") ";
 
             switch (pEntityType) {
@@ -1488,7 +1504,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                                        parents,
                                        type.getId().intValue(),
                                        ResourceTreeNode.AUTO_GROUP);
-            Set entitySet = new HashSet();
+            Set<ResourceTreeNode> entitySet = new HashSet<ResourceTreeNode>();
             int x=0;
             try {
                 stmt = conn.prepareStatement(sqlStmt);
@@ -1549,7 +1565,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                 retVal = new ResourceTreeNode[] { agNode };
 
             } finally {
-                dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+                DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
             }
         } catch (SQLException e) {
             throw e;
@@ -1560,18 +1576,17 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
     }
 
     /**<p>Return resources for groups (not autogroups)</p>
-     * @ejb:interface-method
-     * @ejb:transaction type="Supports"
+   
      */
+    @Transactional(propagation=Propagation.SUPPORTS)
     public ResourceTreeNode[] getNavMapDataForGroup(AuthzSubject subject,
                                                     Integer groupId)
         throws PermissionException
     {
-        ResourceGroupManager groupMan =
-            ResourceGroupManagerImpl.getOne();
+        
 
-        ResourceGroup group = groupMan.findResourceGroupById(subject, groupId);
-        AppdefGroupValue groupVal = groupMan.getGroupConvert(subject, group);
+        ResourceGroup group = resourceGroupManager.findResourceGroupById(subject, groupId);
+        AppdefGroupValue groupVal = resourceGroupManager.getGroupConvert(subject, group);
         try {
             return getNavMapDataForGroup(subject, groupVal);
         } catch (SQLException e) {
@@ -1590,7 +1605,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                                            .getName()),
                                    groupVo.getEntityId(),
                                    ResourceTreeNode.CLUSTER);
-        final Collection agEntries = groupVo.getAppdefGroupEntries();
+        final Collection<AppdefEntityID> agEntries = groupVo.getAppdefGroupEntries();
         if (agEntries.size() == 0) {
             return new ResourceTreeNode[] {grpNode};
         }
@@ -1599,7 +1614,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         ResultSet            rs;
         final StringBuilder  grpSqlStmt = new StringBuilder();
         int                  entityType;
-        Set                  entitySet;
+        Set<ResourceTreeNode>                  entitySet;
         final boolean debug = log.isDebugEnabled();
 
         stmt = null;
@@ -1637,18 +1652,20 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                                                    "for specified type");
             }
 
-            if (debug) log.debug(grpSqlStmt);
-            entitySet = new HashSet();
+            if (debug) {
+                log.debug(grpSqlStmt);
+            }
+            entitySet = new HashSet<ResourceTreeNode>();
 
             int x;
-            Iterator i;
-            Map entNameMap = new HashMap();
+            Iterator<AppdefEntityID> i;
+            Map<Integer, String> entNameMap = new HashMap<Integer, String>();
             if (groupVo.getTotalSize() > 0) {
                 try {
                     stmt = conn.createStatement();
 
                     for (x=1,i=agEntries.iterator(); i.hasNext(); x++) {
-                        final AppdefEntityID mem = (AppdefEntityID) i.next();
+                        final AppdefEntityID mem = i.next();
                         grpSqlStmt.append(((x==1) ? "" : ","))
                                   .append(mem.getID());
 
@@ -1658,7 +1675,9 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                     grpSqlStmt.append(")");
                     StopWatch timer = new StopWatch();
 
-                    if (debug) log.debug("SQL: " + grpSqlStmt);
+                    if (debug) {
+                        log.debug("SQL: " + grpSqlStmt);
+                    }
 
                     rs = stmt.executeQuery(grpSqlStmt.toString());
 
@@ -1673,7 +1692,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
                                        thisEntityName);
                     }
                 } finally {
-                    dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+                    DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
                 }
 
                 // Let group member order drive node creation (not db order).
@@ -1712,7 +1731,7 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         Connection conn = Util.getConnection();
 
         if (DB_TYPE == -1) {
-            DB_TYPE = dbUtil.getDBType(conn);
+            DB_TYPE = DBUtil.getDBType(conn);
         }
 
         return conn;
@@ -1745,17 +1764,8 @@ public class AppdefStatManagerEJBImpl extends AppdefSessionEJB
         return desc;
     }
 
-    public static AppdefStatManagerLocal getOne() {
-        try {
-            return AppdefStatManagerUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    public static AppdefStatManager getOne() {
+       return Bootstrap.getBean(AppdefStatManager.class);
     }
 
-    public void setSessionContext(javax.ejb.SessionContext ctx) {}
-    public void ejbCreate() throws CreateException {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
 }

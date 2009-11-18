@@ -8,15 +8,12 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
-import javax.ejb.FinderException;
-
 import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
 import org.hyperic.hq.appdef.server.session.AgentSortField;
-import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AgentConnections.AgentConnection;
 import org.hyperic.hq.appdef.shared.resourceTree.ResourceTree;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -408,72 +405,5 @@ public interface AgentManager {
      */
     public long pingAgent(AuthzSubject subject, Agent agent) throws PermissionException, AgentNotFoundException,
         AgentConnectionException, AgentRemoteException, IOException, ConfigPropertyException;
-
-    /**
-     * Check for createPlatform permission for a resource
-     * @param subject
-     * @throws PermissionException
-     */
-    public void checkCreatePlatformPermission(AuthzSubject subject) throws PermissionException;
-
-    /**
-     * Check for modify permission for a given resource
-     */
-    public void checkModifyPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException;
-
-    /**
-     * Check for view permission for a given resource
-     */
-    public void checkViewPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException;
-
-    /**
-     * Check for control permission for a given resource
-     */
-    public void checkControlPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException;
-
-    /**
-     * Check for control permission for a given resource
-     */
-    public void checkRemovePermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException;
-
-    /**
-     * Check for monitor permission for a given resource
-     */
-    public void checkMonitorPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException;
-
-    /**
-     * Check for manage alerts permission for a given resource
-     */
-    public void checkAlertingPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException;
-
-    /**
-     * Check the scope of alertable resources for a give subject
-     * @return a list of AppdefEntityIds
-     */
-    public List checkAlertingScope(AuthzSubject subj);
-
-    /**
-     * Check for create child object permission for a given resource Child
-     * Resources: Platforms -> servers Servers -> services Any other resource
-     * will throw an InvalidAppdefTypeException since no other resources have
-     * this parent->child relationship with respect to their permissions
-     * @param subject
-     * @param id - what
-     * @param subject - who
-     */
-    public void checkCreateChildPermission(AuthzSubject subject, AppdefEntityID id) throws PermissionException;
-
-    /**
-     * Get the AppdefResourcePermissions for a given resource
-     * @deprecated Use the individual check*Permission methods instead.
-     */
-    public AppdefResourcePermissions getResourcePermissions(AuthzSubject who, AppdefEntityID eid)
-        throws FinderException;
-
-    /**
-     * Change appdef entity owner
-     */
-    public void changeOwner(AuthzSubject who, AppdefResource res, AuthzSubject newOwner) throws PermissionException,
-        ServerNotFoundException;
 
 }
