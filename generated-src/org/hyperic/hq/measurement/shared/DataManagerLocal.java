@@ -3,6 +3,8 @@
  */
 package org.hyperic.hq.measurement.shared;
 
+import java.util.Map;
+
 /**
  * Local interface for DataManager.
  */
@@ -116,7 +118,7 @@ public interface DataManagerLocal
     * @param useAggressiveRollup uses a measurement rollup table to fetch the data if the time range spans more than one data table's max timerange
     * @return the Map of data points
     */
-   public java.util.Map getAggregateDataByMetric( java.lang.Integer[] tids,java.lang.Integer[] iids,long begin,long end,boolean useAggressiveRollup ) ;
+   public java.util.Map<Integer, double[]> getAggregateDataByMetric( java.lang.Integer[] tids,java.lang.Integer[] iids,long begin,long end,boolean useAggressiveRollup ) ;
 
    /**
     * Fetch a map of aggregate data values keyed by metrics given a start and stop time range
