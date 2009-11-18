@@ -668,7 +668,7 @@ public class ServiceManagerImpl implements ServiceManager {
         List<AppdefEntityID> ids = new ArrayList<AppdefEntityID>();
         for (int i = 0; i < idList.size(); i++) {
             Integer pk = (Integer) idList.get(i);
-            ids.set(i, AppdefEntityID.newServiceID(pk));
+            ids.add(AppdefEntityID.newServiceID(pk));
         }
 
         List<Integer> viewableGroups = permissionManager.findOperationScopeBySubject(whoami,
@@ -676,7 +676,7 @@ public class ServiceManagerImpl implements ServiceManager {
         List<AppdefEntityID> groupIds = new ArrayList<AppdefEntityID>();
         for (int i = 0; i < viewableGroups.size(); i++) {
             Integer gid = (Integer) viewableGroups.get(i);
-            groupIds.set(i, AppdefEntityID.newGroupID(gid));
+            groupIds.add(AppdefEntityID.newGroupID(gid));
         }
         ids.addAll(groupIds);
         return ids;
