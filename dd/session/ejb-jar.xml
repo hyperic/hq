@@ -11,33 +11,6 @@
 
 		<!-- Session Beans -->
 		
-		
-
-		
-
-		
-
-		
-
-		
-
-		<session>
-			<description><![CDATA[The BizApp's interface to the Events Subsystem]]></description>
-
-			<ejb-name>GalertBoss</ejb-name>
-
-			<home>org.hyperic.hq.bizapp.shared.GalertBossHome</home>
-			<remote>org.hyperic.hq.bizapp.shared.GalertBoss</remote>
-			<local-home>org.hyperic.hq.bizapp.shared.GalertBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.GalertBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.GalertBossEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		
-
 		<session>
 			<description><![CDATA[]]></description>
 
@@ -233,17 +206,6 @@
 			the merge directory called ejb-container-transactions.ent that
 			contains them.
 		-->
-		
-		
-		
-		
-		<container-transaction>
-			<method>
-				<ejb-name>GalertBoss</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
 		
 		<container-transaction>
 			<method>
