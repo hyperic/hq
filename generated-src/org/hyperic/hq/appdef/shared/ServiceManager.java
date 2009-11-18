@@ -8,10 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.CreateException;
-import javax.ejb.FinderException;
 
 import org.hyperic.hq.appdef.ServiceCluster;
-import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.Server;
 import org.hyperic.hq.appdef.server.session.Service;
@@ -67,7 +65,7 @@ public interface ServiceManager
     * @return An array of service IDs.    */
    public java.lang.Integer[] getServiceIds( AuthzSubject subject,Integer servTypeId ) throws PermissionException;
 
-   public List findServicesById( AuthzSubject subject,java.lang.Integer[] serviceIds ) throws ServiceNotFoundException, PermissionException;
+   public List<ServiceValue> findServicesById( AuthzSubject subject,java.lang.Integer[] serviceIds ) throws ServiceNotFoundException, PermissionException;
 
    /**
     * Find Service by Id.
@@ -84,7 +82,7 @@ public interface ServiceManager
     * @return The Service identified by this id.    */
    public Service getServiceById( AuthzSubject subject,Integer id ) throws ServiceNotFoundException, PermissionException;
 
-   public java.util.List<org.hyperic.hq.appdef.server.session.Service> getServicesByAIID( Server server,String aiid ) ;
+   public List<Service> getServicesByAIID( Server server,String aiid ) ;
 
    public Service getServiceByName( Server server,String name ) ;
 
@@ -100,46 +98,46 @@ public interface ServiceManager
     */
    public ServiceType findServiceTypeByName( String name ) ;
 
-   public java.util.Collection<Service> findDeletedServices(  ) ;
+   public Collection<Service> findDeletedServices(  ) ;
 
-   public org.hyperic.util.pager.PageList<ServiceTypeValue> getAllServiceTypes( AuthzSubject subject,PageControl pc ) ;
+   public PageList<ServiceTypeValue> getAllServiceTypes( AuthzSubject subject,PageControl pc ) ;
 
-   public org.hyperic.util.pager.PageList<ServiceTypeValue> getViewableServiceTypes( AuthzSubject subject,PageControl pc ) throws javax.ejb.FinderException, PermissionException;
+   public PageList<ServiceTypeValue> getViewableServiceTypes( AuthzSubject subject,PageControl pc ) throws javax.ejb.FinderException, PermissionException;
 
-   public org.hyperic.util.pager.PageList<ServiceTypeValue> getServiceTypesByServerType( AuthzSubject subject,int serverTypeId ) ;
+   public PageList<ServiceTypeValue> getServiceTypesByServerType( AuthzSubject subject,int serverTypeId ) ;
 
-   public org.hyperic.util.pager.PageList<ServiceTypeValue> findVirtualServiceTypesByPlatform( AuthzSubject subject,Integer platformId ) ;
+   public PageList<ServiceTypeValue> findVirtualServiceTypesByPlatform( AuthzSubject subject,Integer platformId ) ;
 
-   public PageList getAllServices( AuthzSubject subject,PageControl pc ) throws javax.ejb.FinderException, PermissionException;
+   public PageList<ServiceValue> getAllServices( AuthzSubject subject,PageControl pc ) throws javax.ejb.FinderException, PermissionException;
 
    /**
     * Fetch all services that haven't been assigned to a cluster and that haven't been assigned to any applications.
     * @return A List of ServiceValue objects representing all of the unassigned services that the given subject is allowed to view.
     */
-   public PageList getAllClusterAppUnassignedServices( AuthzSubject subject,PageControl pc ) throws javax.ejb.FinderException, PermissionException;
+   public PageList<ServiceValue> getAllClusterAppUnassignedServices( AuthzSubject subject,PageControl pc ) throws javax.ejb.FinderException, PermissionException;
 
    /**
     * Get services by server and type.
     */
    public PageList getServicesByServer( AuthzSubject subject,Integer serverId,PageControl pc ) throws ServiceNotFoundException, ServerNotFoundException, PermissionException;
 
-   public org.hyperic.util.pager.PageList<ServiceValue> getServicesByServer( AuthzSubject subject,Integer serverId,Integer svcTypeId,PageControl pc ) throws ServiceNotFoundException, PermissionException;
+   public PageList<ServiceValue> getServicesByServer( AuthzSubject subject,Integer serverId,Integer svcTypeId,PageControl pc ) throws ServiceNotFoundException, PermissionException;
 
    /**
     * Get service POJOs by server and type.
     */
    public List getServicesByServer( AuthzSubject subject,Server server ) throws PermissionException, ServiceNotFoundException;
 
-   public java.lang.Integer[] getServiceIdsByServer( AuthzSubject subject,Integer serverId,Integer svcTypeId ) throws ServiceNotFoundException, PermissionException;
+   public Integer[] getServiceIdsByServer( AuthzSubject subject,Integer serverId,Integer svcTypeId ) throws ServiceNotFoundException, PermissionException;
 
-   public java.util.List<ServiceValue> getServicesByType( AuthzSubject subject,String svcName,boolean asc ) throws PermissionException, org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+   public List<ServiceValue> getServicesByType( AuthzSubject subject,String svcName,boolean asc ) throws PermissionException, org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 
    public PageList getServicesByService( AuthzSubject subject,Integer serviceId,PageControl pc ) throws ServiceNotFoundException, PermissionException;
 
    /**
     * Get services by server.
     */
-   public PageList getServicesByService( AuthzSubject subject,Integer serviceId,Integer svcTypeId,PageControl pc ) throws ServiceNotFoundException, PermissionException;
+   public PageList<ServiceValue> getServicesByService( AuthzSubject subject,Integer serviceId,Integer svcTypeId,PageControl pc ) throws ServiceNotFoundException, PermissionException;
 
    /**
     * Get service IDs by service.
@@ -151,22 +149,22 @@ public interface ServiceManager
    /**
     * Get platform services (children of virtual servers)
     */
-   public org.hyperic.util.pager.PageList<ServiceValue> getPlatformServices( AuthzSubject subject,Integer platId,PageControl pc ) throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException, ServiceNotFoundException;
+   public PageList<ServiceValue> getPlatformServices( AuthzSubject subject,Integer platId,PageControl pc ) throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException, ServiceNotFoundException;
 
    /**
     * Get platform services (children of virtual servers) of a specified type
     */
-   public org.hyperic.util.pager.PageList<ServiceValue> getPlatformServices( AuthzSubject subject,Integer platId,Integer typeId,PageControl pc ) throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException, ServiceNotFoundException;
+   public PageList<ServiceValue> getPlatformServices( AuthzSubject subject,Integer platId,Integer typeId,PageControl pc ) throws org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException, ServiceNotFoundException;
 
    /**
     * Get {@link Service}s which are children of the server, and of the specified type.
     */
-   public List findServicesByType( Server server,ServiceType st ) ;
+   public List<Service> findServicesByType( Server server,ServiceType st ) ;
 
    /**
     * Get platform service POJOs
     */
-   public List findPlatformServicesByType( Platform p,ServiceType st ) ;
+   public List<Service> findPlatformServicesByType( Platform p,ServiceType st ) ;
 
    /**
     * Get platform service POJOs
@@ -181,15 +179,15 @@ public interface ServiceManager
    /**
     * Get services by platform.
     */
-   public PageList getServicesByPlatform( AuthzSubject subject,Integer platId,Integer svcTypeId,PageControl pc ) throws ServiceNotFoundException, org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException;
+   public PageList<ServiceValue> getServicesByPlatform( AuthzSubject subject,Integer platId,Integer svcTypeId,PageControl pc ) throws ServiceNotFoundException, org.hyperic.hq.appdef.shared.PlatformNotFoundException, PermissionException;
 
-   public org.hyperic.util.pager.PageList<AppdefResourceValue> getServicesByApplication( AuthzSubject subject,Integer appId,PageControl pc ) throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException, PermissionException;
+   public PageList<AppdefResourceValue> getServicesByApplication( AuthzSubject subject,Integer appId,PageControl pc ) throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException, PermissionException;
 
    public PageList getServicesByApplication( AuthzSubject subject,Integer appId,Integer svcTypeId,PageControl pc ) throws PermissionException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException;
 
    public List getServicesByApplication( AuthzSubject subject,Integer appId ) throws PermissionException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException;
 
-   public org.hyperic.util.pager.PageList<AppdefResourceValue> getServiceInventoryByApplication( AuthzSubject subject,Integer appId,PageControl pc ) throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException, PermissionException;
+   public PageList<AppdefResourceValue> getServiceInventoryByApplication( AuthzSubject subject,Integer appId,PageControl pc ) throws org.hyperic.hq.appdef.shared.ApplicationNotFoundException, ServiceNotFoundException, PermissionException;
 
    /**
     * Get all services by application. This is to only be used for the Evident API.
@@ -203,7 +201,7 @@ public interface ServiceManager
     * @param subject The subject trying to list services.
     * @param appId Application id.
     * @return A List of ServiceValue objects representing all of the services that the given subject is allowed to view.    */
-   public java.lang.Integer[] getFlattenedServiceIdsByApplication( AuthzSubject subject,Integer appId ) throws ServiceNotFoundException, PermissionException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
+   public Integer[] getFlattenedServiceIdsByApplication( AuthzSubject subject,Integer appId ) throws ServiceNotFoundException, PermissionException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 
    public void updateServiceZombieStatus( AuthzSubject subject,Service svc,boolean zombieStatus ) throws PermissionException;
 
@@ -223,7 +221,7 @@ public interface ServiceManager
    /**
     * Returns a list of 2 element arrays. The first element is the name of the service type, the second element is the # of services of that type in the inventory.
     */
-   public List getServiceTypeCounts(  ) ;
+   public List<Object[]> getServiceTypeCounts(  ) ;
 
    /**
     * Get the # of services within HQ inventory

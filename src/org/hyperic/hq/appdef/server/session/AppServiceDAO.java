@@ -45,7 +45,7 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class AppServiceDAO extends HibernateDAO
+public class AppServiceDAO extends HibernateDAO<AppService>
 {
     private static final Log log = LogFactory.getLog(AppServiceDAO.class);
     private static final String serviceResType = AuthzConstants.serviceResType;
@@ -161,7 +161,7 @@ public class AppServiceDAO extends HibernateDAO
         return create(aClusterPK, a);
     }
 
-    public List findByApplication_orderName(Integer id)
+    public List<AppService> findByApplication_orderName(Integer id)
     {
         // TODO: fix this query after authz conversion
         String sql=
@@ -182,7 +182,7 @@ public class AppServiceDAO extends HibernateDAO
             .list();
     }
 
-    public List findByApplication_orderType(Integer id, boolean asc)
+    public List<AppService> findByApplication_orderType(Integer id, boolean asc)
     {
         String sql="select distinct a from AppService a " +
                    " join fetch a.serviceType st " +
@@ -202,7 +202,7 @@ public class AppServiceDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByApplication_orderSvcName(Integer id, boolean asc)
+    public Collection<AppService> findByApplication_orderSvcName(Integer id, boolean asc)
     {
         String sql=
             "select distinct a from AppService a " +
@@ -214,7 +214,7 @@ public class AppServiceDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByApplication_orderSvcType(Integer id, boolean asc)
+    public Collection<AppService> findByApplication_orderSvcType(Integer id, boolean asc)
     {
         String sql=
             "select distinct a from AppService a " +
