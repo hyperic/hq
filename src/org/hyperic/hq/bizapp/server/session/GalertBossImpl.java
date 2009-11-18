@@ -66,14 +66,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 /**
-* The BizApp's interface to the Events Subsystem
-*/
+ * The BizApp's interface to the Events Subsystem
+ */
 @Service
 @Transactional
-public class GalertBossImpl  implements GalertBoss 
-{
+public class GalertBossImpl implements GalertBoss {
     private SessionManager sessionManager;
     private GalertManager galertManager;
     private GtriggerManager gtriggerManager;
@@ -98,11 +96,9 @@ public class GalertBossImpl  implements GalertBoss
 
     /**
      */
-    public ExecutionStrategyTypeInfo
-        registerExecutionStrategy(int sessionId,
-                                  ExecutionStrategyType stratType)
-        throws PermissionException, SessionException
-    {
+    public ExecutionStrategyTypeInfo registerExecutionStrategy(int sessionId,
+                                                               ExecutionStrategyType stratType)
+        throws PermissionException, SessionException {
         sessionManager.authenticate(sessionId);
         return galertManager.registerExecutionStrategy(stratType);
 
@@ -110,10 +106,8 @@ public class GalertBossImpl  implements GalertBoss
 
     /**
      */
-    public ExecutionStrategyTypeInfo
-        findStrategyType(int sessionId, ExecutionStrategyType type)
-        throws PermissionException, SessionException
-    {
+    public ExecutionStrategyTypeInfo findStrategyType(int sessionId, ExecutionStrategyType type)
+        throws PermissionException, SessionException {
         sessionManager.authenticate(sessionId);
         return galertManager.findStrategyType(type);
 
@@ -122,8 +116,7 @@ public class GalertBossImpl  implements GalertBoss
     /**
      */
     public GtriggerTypeInfo findTriggerType(int sessionId, GtriggerType type)
-        throws SessionException
-    {
+        throws SessionException {
         sessionManager.authenticate(sessionId);
         return gtriggerManager.findTriggerType(type);
     }
@@ -132,35 +125,30 @@ public class GalertBossImpl  implements GalertBoss
      */
     public GtriggerTypeInfo registerTriggerType(int sessionId,
                                                 GtriggerType type)
-        throws SessionException
-    {
+        throws SessionException {
         sessionManager.authenticate(sessionId);
         return gtriggerManager.registerTriggerType(type);
     }
 
-
     /**
      */
     public ExecutionStrategyInfo addPartition(int sessionId, GalertDef def, GalertDefPartition partition,
-                     ExecutionStrategyTypeInfo stratType,
-                     ConfigResponse stratConfig)
-        throws SessionException
-    {
+                                              ExecutionStrategyTypeInfo stratType,
+                                              ConfigResponse stratConfig)
+        throws SessionException {
         sessionManager.authenticate(sessionId);
         return galertManager.addPartition(def, partition, stratType, stratConfig);
     }
-
 
     /**
      */
     public GalertDef createAlertDef(int sessionId, String name,
                                     String description, AlertSeverity severity,
                                     boolean enabled, ResourceGroup group)
-        throws SessionException
-    {
+        throws SessionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         return galertManager.createAlertDef(subject, name, description,
-                                         severity, enabled, group);
+                                            severity, enabled, group);
     }
 
     /**
@@ -168,21 +156,19 @@ public class GalertBossImpl  implements GalertBoss
     public void configureTriggers(int sessionId, GalertDef def,
                                   GalertDefPartition partition,
                                   List<GtriggerTypeInfo> triggerInfos, List<ConfigResponse> configs)
-        throws SessionException
-    {
+        throws SessionException {
         sessionManager.authenticate(sessionId);
         galertManager.configureTriggers(def, partition, triggerInfos, configs);
     }
 
     /**
      * Find all the group alert definitions for a given appdef group.
-     *
+     * 
      * @return a collection of {@link AlertDefinitionBean}s
      * @throws PermissionException
      */
     public PageList<GalertDef> findDefinitions(int sessionId, Integer gid, PageControl pc)
-        throws SessionException, PermissionException
-    {
+        throws SessionException, PermissionException {
         AuthzSubject subj = sessionManager.getSubject(sessionId);
 
         // Find the ResourceGroup
@@ -190,10 +176,11 @@ public class GalertBossImpl  implements GalertBoss
         PageList<GalertDef> defList = null;
         try {
             alertPermissionManager.canManageAlerts(subj,
-                                        new AppdefEntityID(g.getResource()));
+                                                   new AppdefEntityID(g.getResource()));
             defList = galertManager.findAlertDefs(g, pc);
         } catch (PermissionException e) {
-            // user does not have sufficient permissions, so display no definitions
+            // user does not have sufficient permissions, so display no
+            // definitions
             defList = new PageList<GalertDef>();
         }
         return defList;
@@ -202,8 +189,7 @@ public class GalertBossImpl  implements GalertBoss
     /**
      */
     public void markDefsDeleted(int sessionId, GalertDef def)
-        throws SessionException
-    {
+        throws SessionException {
         sessionManager.authenticate(sessionId);
         galertManager.markDefDeleted(def);
     }
@@ -211,8 +197,7 @@ public class GalertBossImpl  implements GalertBoss
     /**
      */
     public void markDefsDeleted(int sessionId, Integer[] defIds)
-        throws SessionException
-    {
+        throws SessionException {
         sessionManager.authenticate(sessionId);
 
         for (Integer defId : defIds) {
@@ -224,8 +209,7 @@ public class GalertBossImpl  implements GalertBoss
     /**
      */
     public GalertDef findDefinition(int sessionId, Integer id)
-        throws SessionException
-    {
+        throws SessionException {
         sessionManager.authenticate(sessionId);
         return galertManager.findById(id);
     }
@@ -233,14 +217,13 @@ public class GalertBossImpl  implements GalertBoss
     /**
      */
     public Escalatable findEscalatableAlert(int sessionId, Integer id)
-        throws SessionException, PermissionException
-    {
+        throws SessionException, PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         Escalatable esc = galertManager.findEscalatableAlert(id);
 
         // HQ-1295: Does user have sufficient permissions?
         alertPermissionManager.canManageAlerts(subject,
-                                    esc.getDefinition().getDefinitionInfo());
+                                               esc.getDefinition().getDefinitionInfo());
 
         return esc;
     }
@@ -249,8 +232,7 @@ public class GalertBossImpl  implements GalertBoss
      */
     public void update(int sessionId, GalertDef def, String name, String desc,
                        AlertSeverity severity, Boolean enabled)
-        throws SessionException
-    {
+        throws SessionException {
         sessionManager.authenticate(sessionId);
         galertManager.update(def, name, desc, severity, enabled);
     }
@@ -258,8 +240,7 @@ public class GalertBossImpl  implements GalertBoss
     /**
      */
     public void update(int sessionId, GalertDef def, Escalation escalation)
-        throws SessionException
-    {
+        throws SessionException {
         sessionManager.authenticate(sessionId);
         galertManager.update(def, escalation);
     }
@@ -269,8 +250,7 @@ public class GalertBossImpl  implements GalertBoss
      * @throws SessionException if user session cannot be authenticated
      */
     public void enable(int sessionId, GalertDef[] defs, boolean enable)
-        throws SessionException
-    {
+        throws SessionException {
         sessionManager.authenticate(sessionId);
         for (GalertDef def : defs) {
             galertManager.enable(def, enable);
@@ -282,8 +262,7 @@ public class GalertBossImpl  implements GalertBoss
      */
     public int countAlertLogs(int sessionId, Integer gid, long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
-               PermissionException
-    {
+        PermissionException {
 
         PageList<GalertLog> alertLogs = null;
 
@@ -291,14 +270,14 @@ public class GalertBossImpl  implements GalertBoss
             AuthzSubject subj = sessionManager.getSubject(sessionId);
             ResourceGroup g = resourceGroupManager.findResourceGroupById(subj, gid);
             alertPermissionManager.canManageAlerts(subj,
-                                        new AppdefEntityID(g.getResource()));
+                                                   new AppdefEntityID(g.getResource()));
 
             // Don't need to have any results
             PageControl pc = new PageControl();
             pc.setPagesize(0);
 
             alertLogs =
-                galertManager.findAlertLogsByTimeWindow(g, begin, end, pc);
+                        galertManager.findAlertLogsByTimeWindow(g, begin, end, pc);
         } catch (PermissionException e) {
             // user does not have sufficient permissions, so display no alerts
             alertLogs = new PageList<GalertLog>();
@@ -309,35 +288,34 @@ public class GalertBossImpl  implements GalertBoss
 
     /**
      * retrieve all escalation policy names as a Array of JSONObject.
-     *
+     * 
      * Escalation json finders begin with json* to be consistent with
      * DAO finder convention
-     *
+     * 
      */
     public JSONObject findAlertLogs(int sessionId, Integer gid, long begin,
                                     long end, PageControl pc)
         throws JSONException, SessionTimeoutException, SessionNotFoundException,
-               PermissionException
-    {
+        PermissionException {
         AuthzSubject subj = sessionManager.getSubject(sessionId);
 
         ResourceGroup g = resourceGroupManager.findResourceGroupById(subj,
-                                                                       gid);
+                                                                     gid);
         PageList<GalertLog> alertLogs = null;
         JSONArray jarr = new JSONArray();
 
         try {
             alertPermissionManager.canManageAlerts(subj,
-                                        new AppdefEntityID(g.getResource()));
+                                                   new AppdefEntityID(g.getResource()));
             alertLogs =
-                galertManager.findAlertLogsByTimeWindow(g, begin, end, pc);
+                        galertManager.findAlertLogsByTimeWindow(g, begin, end, pc);
 
             for (GalertLog alert : alertLogs) {
                 // Format the alertTime
                 SimpleDateFormat df =
-                    new SimpleDateFormat(TimeUtil.DISPLAY_DATE_FORMAT);
+                                      new SimpleDateFormat(TimeUtil.DISPLAY_DATE_FORMAT);
                 String date =
-                    df.format(new Date(alert.getTimestamp()));
+                              df.format(new Date(alert.getTimestamp()));
 
                 long maxPauseTime = 0;
                 Escalation esc = alert.getDefinition().getEscalation();
@@ -346,16 +324,16 @@ public class GalertBossImpl  implements GalertBoss
                 }
 
                 jarr.put(new JSONObject()
-                    .put("id", alert.getId())
-                    .put("time", date)
-                    .put("name", alert.getAlertDefinitionInterface().getName())
-                    .put("defId", alert.getAlertDefinitionInterface().getId())
-                    .put("priority",
-                        alert.getAlertDefinitionInterface().getPriority())
-                    .put("reason", alert.getShortReason())
-                    .put("fixed", alert.isFixed())
-                    .put("acknowledgeable", alert.isAcknowledgeable())
-                    .put("maxPauseTime", maxPauseTime));
+                                         .put("id", alert.getId())
+                                         .put("time", date)
+                                         .put("name", alert.getAlertDefinitionInterface().getName())
+                                         .put("defId", alert.getAlertDefinitionInterface().getId())
+                                         .put("priority",
+                                              alert.getAlertDefinitionInterface().getPriority())
+                                         .put("reason", alert.getShortReason())
+                                         .put("fixed", alert.isFixed())
+                                         .put("acknowledgeable", alert.isAcknowledgeable())
+                                         .put("maxPauseTime", maxPauseTime));
             }
         } catch (PermissionException e) {
             // user does not have sufficient permissions, so display no alerts
@@ -369,13 +347,14 @@ public class GalertBossImpl  implements GalertBoss
         return jobj;
     }
 
-    /** Get the last fix if available
+    /**
+     * Get the last fix if available
      */
     public String getLastFix(int sessionID, GalertDef def)
         throws SessionNotFoundException, SessionTimeoutException {
         return escalationManager.getLastFix(def);
     }
-    
+
     public static GalertBoss getOne() {
         return Bootstrap.getBean(GalertBoss.class);
     }

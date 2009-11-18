@@ -83,6 +83,6 @@ public interface GalertBoss {
    /**
     * Get the last fix if available
     */
-   public String getLastFix( int sessionID,GalertDef def ) throws SessionNotFoundException, SessionTimeoutException;
+    public String getLastFix(int sessionID, GalertDef def) throws SessionNotFoundException, SessionTimeoutException;
 
 }
