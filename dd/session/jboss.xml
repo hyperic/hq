@@ -35,13 +35,6 @@
 		
 		
 		<session>
-			<ejb-name>AppdefStatManager</ejb-name>
-			<local-jndi-name>LocalAppdefStatManager</local-jndi-name>
-
-		</session>
-		
-		
-		<session>
 			<ejb-name>ProductBoss</ejb-name>
 			<jndi-name>ejb/bizapp/ProductBoss</jndi-name>
 			<local-jndi-name>LocalProductBoss</local-jndi-name>
