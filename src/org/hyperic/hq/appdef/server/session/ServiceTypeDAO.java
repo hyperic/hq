@@ -35,7 +35,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class ServiceTypeDAO extends HibernateDAO
+public class ServiceTypeDAO extends HibernateDAO<ServiceType>
 {
     @Autowired
     public ServiceTypeDAO(SessionFactory f) {
@@ -79,14 +79,14 @@ public class ServiceTypeDAO extends HibernateDAO
             .uniqueResult();
     }
 
-    public Collection findByPlugin(String plugin) {
+    public Collection<ServiceType> findByPlugin(String plugin) {
         return createCriteria()
             .add(Restrictions.eq("plugin", plugin))
             .addOrder(Order.asc("sortName"))
             .list();
     }
 
-    public Collection findByServerType_orderName(int serverType, boolean asc) {
+    public Collection<ServiceType> findByServerType_orderName(int serverType, boolean asc) {
         String sql="from ServiceType where serverType.id=? " +
                    "order by sortName " +
                    (asc ? "asc" : "desc");
@@ -95,7 +95,7 @@ public class ServiceTypeDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findVirtualServiceTypesByPlatform(int platformId) {
+    public Collection<ServiceType> findVirtualServiceTypesByPlatform(int platformId) {
         // First get the platform
         Platform platform =
             DAOFactory.getDAOFactory().getPlatformDAO().findById(

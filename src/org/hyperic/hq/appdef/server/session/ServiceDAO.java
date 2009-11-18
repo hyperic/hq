@@ -49,7 +49,7 @@ import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 @Repository
-public class ServiceDAO extends HibernateDAO
+public class ServiceDAO extends HibernateDAO<Service>
 {
     @Autowired
     public ServiceDAO(SessionFactory f) {
@@ -146,7 +146,7 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByParentAndType(Integer parentId, Integer typeId)
+    public Collection<Service> findByParentAndType(Integer parentId, Integer typeId)
     {
         String sql="from Service where parentService.id=? and serviceType.id=?";
         return createQuery(sql)
@@ -159,7 +159,7 @@ public class ServiceDAO extends HibernateDAO
      * @param serviceIds - {@link List} of {@link Integer}
      * @return {@link Collection} of {@link ServiceType}
      */
-    Collection getServiceTypes(final List serviceIds, final boolean asc) {
+    Collection<ServiceType> getServiceTypes(final List serviceIds, final boolean asc) {
         final String hql = new StringBuilder()
             .append("SELECT distinct s.serviceType")
             .append(" FROM Service s")
@@ -202,7 +202,7 @@ public class ServiceDAO extends HibernateDAO
                            (asc ? "asc" : "desc")).list();
     }
 
-    public Collection findByType(Integer st, boolean asc)
+    public Collection<Service> findByType(Integer st, boolean asc)
     {
         String sql = "from Service where serviceType.id=? " +
         		     "order by resource.sortName " + (asc ? "asc" : "desc");
@@ -243,7 +243,7 @@ public class ServiceDAO extends HibernateDAO
     /**
      * @return {@link List} of {@link Service}
      */
-    public List getByAIID(Server server, String aiid) {
+    public List<Service> getByAIID(Server server, String aiid) {
         final String sql = new StringBuilder()
             .append("select s from Service s")
             .append(" WHERE s.server = :server")
@@ -255,7 +255,7 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByPlatform_orderName(Integer id, boolean asc)
+    public Collection<Service> findByPlatform_orderName(Integer id, boolean asc)
     {
         String sql="select sv from Service sv " +
                    " join fetch sv.server s " +
@@ -268,7 +268,7 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findByPlatform_orderType(Integer id, boolean asc)
+    public Collection<Service> findByPlatform_orderType(Integer id, boolean asc)
     {
         String sql="select sv from Service sv " +
                    " join fetch sv.server s " +
@@ -283,7 +283,7 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
-    public List findPlatformServicesByType(Platform p, ServiceType st) {
+    public List<Service> findPlatformServicesByType(Platform p, ServiceType st) {
         String sql = "select v from Service v " +
                   " join v.server s " +
                   " join s.platform p " +
@@ -298,7 +298,7 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
-    public Collection findPlatformServices_orderName(Integer platId,
+    public Collection<Service> findPlatformServices_orderName(Integer platId,
                                                      boolean asc)
     {
         String sql="select sv from Service sv " +
@@ -317,7 +317,7 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
-    public List findByServer_orderName(Integer id)
+    public List<Service> findByServer_orderName(Integer id)
     {
         String sql="from Service where server.id=? order by resource.sortName";
         return createQuery(sql)
@@ -325,7 +325,7 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
-    public List findByServer_orderType(Integer id)
+    public List<Service> findByServer_orderType(Integer id)
     {
         String sql="select s from Service s " +
                    " join fetch s.serviceType st " +
@@ -336,7 +336,7 @@ public class ServiceDAO extends HibernateDAO
             .list();
     }
 
-    public List findByServerAndType_orderName(Integer id, Integer tid)
+    public List<Service> findByServerAndType_orderName(Integer id, Integer tid)
     {
         String sql="from Service where server.id=? and serviceType.id=? " +
                    "order by resource.sortName";
@@ -366,7 +366,7 @@ public class ServiceDAO extends HibernateDAO
         return createQuery(sql).list();
     }
 
-    public Collection findAllClusterAppUnassigned_orderName(boolean asc)
+    public Collection<Service> findAllClusterAppUnassigned_orderName(boolean asc)
     {
         String sql="from Service where serviceCluster is null and " +
                    "appServices.size=0 " +
@@ -404,7 +404,7 @@ public class ServiceDAO extends HibernateDAO
         return services;
     }
 
-    public List getServiceTypeCounts() {
+    public List<Object[]> getServiceTypeCounts() {
         String sql = "select t.name, count(*) from ServiceType t, " +
                      "Service s where s.serviceType = t " +
                      "group by t.name order by t.name";
@@ -423,7 +423,7 @@ public class ServiceDAO extends HibernateDAO
             .executeUpdate();
     }
 
-    public Collection findDeletedServices() {
+    public Collection<Service> findDeletedServices() {
         String hql = "from Service where resource.resourceType = null";
         return createQuery(hql).list();
     }

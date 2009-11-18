@@ -92,7 +92,7 @@ public class ServiceType extends AppdefResourceType
         _appServices = appServices;
     }
 
-    public Collection getServices() {
+    public Collection<Service> getServices() {
         return _services;
     }
 
