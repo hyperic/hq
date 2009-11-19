@@ -62,6 +62,8 @@ public class ServiceValue extends AppdefResourceValue
     private boolean descriptionHasBeenSet = false;
     private Integer id;
     private boolean idHasBeenSet = false;
+    private Integer resourceId;
+    private boolean resourceIdHasBeenSet = false;
     private Long mTime;
     private boolean mTimeHasBeenSet = false;
     private Long cTime;
@@ -131,6 +133,8 @@ public class ServiceValue extends AppdefResourceValue
         configResponseIdHasBeenSet = true;
         this.parentId = otherValue.parentId;
         parentIdHasBeenSet = true;
+        this.resourceId = otherValue.resourceId;
+        resourceIdHasBeenSet = true;
         this.name = otherValue.name;
         nameHasBeenSet = true;
         this.description = otherValue.description;
@@ -287,6 +291,20 @@ public class ServiceValue extends AppdefResourceValue
     public boolean parentIdHasBeenSet(){
         return parentIdHasBeenSet;
     }
+    
+    public Integer getResourceId() {
+        return this.resourceId;
+    }
+    
+    public void setResourceId(Integer resourceId) {
+        this.resourceId = resourceId;
+        resourceIdHasBeenSet = true;
+    }
+    
+    public boolean resourceIdHasBeenSet() {
+        return resourceIdHasBeenSet;
+    }
+    
     public String getName()
     {
         return this.name;
