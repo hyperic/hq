@@ -26,62 +26,68 @@ import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
  */
 public interface UIPluginManager {
 
-   public UIPlugin createPlugin( String name,String ver ) ;
+	public UIPlugin createPlugin(String name, String ver);
 
-   public UIPlugin createOrUpdate( String name,String version ) ;
+	public UIPlugin createOrUpdate(String name, String version);
 
-   public View createAdminView( UIPlugin p,ViewDescriptor d ) ;
+	public View createAdminView(UIPlugin p, ViewDescriptor d);
 
-   public View createMastheadView( UIPlugin p,ViewDescriptor d ) ;
+	public View createMastheadView(UIPlugin p, ViewDescriptor d);
 
-   public View createResourceView( UIPlugin p,ViewDescriptor d ) ;
+	public View createResourceView(UIPlugin p, ViewDescriptor d);
 
-   public UIPlugin findPluginByName( String name ) ;
+	public UIPlugin findPluginByName(String name);
 
-   public UIPlugin findPluginById( Integer id ) ;
+	public UIPlugin findPluginById(Integer id);
 
-   public View findViewById( Integer id ) ;
+	public View findViewById(Integer id);
 
-   public Attachment findAttachmentById( Integer id ) ;
+	public Attachment findAttachmentById(Integer id);
 
-   /**
-    * Remove a plugin, all its views, and attach points from the system.
-    */
-   public void deletePlugin( UIPlugin p ) ;
+	/**
+	 * Remove a plugin, all its views, and attach points from the system.
+	 */
+	public void deletePlugin(UIPlugin p);
 
-   public void detach( Attachment a ) ;
+	public void detach(Attachment a);
 
-   public void attachView( ViewMasthead view,ViewMastheadCategory cat ) ;
+	public void attachView(ViewMasthead view, ViewMastheadCategory cat);
 
-   public void attachView( ViewAdmin view,ViewAdminCategory cat ) ;
+	public void attachView(ViewAdmin view, ViewAdminCategory cat);
 
-   public void attachView( ViewResource view,ViewResourceCategory cat,Resource r ) ;
+	public void attachView(ViewResource view, ViewResourceCategory cat,
+			Resource r);
 
-   public void updatePlugin( UIPlugin p,String version ) ;
+	public void updatePlugin(UIPlugin p, String version);
 
-   /**
-    * Finds all {@link UIPlugin}s
-    */
-   public Collection<UIPlugin> findAll(  ) ;
+	/**
+	 * Finds all {@link UIPlugin}s
+	 */
+	public Collection<UIPlugin> findAll();
 
-   /**
-    * Find all the views attached via a specific attach type
-    * @return a collection of {@link AttachType}s
-    */
-   public Collection<AttachType> findViews( AttachType type ) ;
+	/**
+	 * Find all the views attached via a specific attach type
+	 * 
+	 * @return a collection of {@link AttachType}s
+	 */
+	public Collection<AttachType> findViews(AttachType type);
 
-   /**
-    * Find all attachments for a specific type
-    * @return a collection of {@link AttachmentDescriptor}s
-    */
-   public Collection<AttachmentDescriptor> findAttachments( AttachType type,AuthzSubject user ) ;
+	/**
+	 * Find all attachments for a specific type
+	 * 
+	 * @return a collection of {@link AttachmentDescriptor}s
+	 */
+	public Collection<AttachmentDescriptor> findAttachments(AttachType type,
+			AuthzSubject user);
 
-   public AttachmentDescriptor findAttachmentDescriptorById( Integer id,AuthzSubject user ) ;
+	public AttachmentDescriptor findAttachmentDescriptorById(Integer id,
+			AuthzSubject user);
 
-   /**
-    * Find attachments for a resource.
-    * @return a collection of {@link AttachmentDescriptor}s
-    */
-   public Collection<AttachmentDescriptor> findAttachments( AppdefEntityID ent,ViewResourceCategory cat,AuthzSubject user ) ;
-
+	/**
+	 * Find attachments for a resource.
+	 * 
+	 * @return a collection of {@link AttachmentDescriptor}s
+	 */
+	public Collection<AttachmentDescriptor> findAttachments(AppdefEntityID ent,
+			ViewResourceCategory cat, AuthzSubject user);
 }
