@@ -119,9 +119,6 @@ public abstract class ResourceControlController extends ResourceController {
             } else {
                 request.setAttribute("hasControlActions", Boolean.FALSE);
             }
-        } catch (RemoteException e) {
-            // couldn't get servlet context. oh well.   
-            log.error("Unexpected exception: " + e, e);
         } catch (ServletException e) {
             // couldn't get servlet context. oh well.   
             log.error("Unexpected exception: " + e, e);

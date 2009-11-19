@@ -39,6 +39,7 @@ import javax.servlet.ServletContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
+import org.hyperic.hq.bizapp.server.session.ControlBossImpl;
 import org.hyperic.hq.bizapp.server.session.EventsBossImpl;
 import org.hyperic.hq.bizapp.server.session.GalertBossImpl;
 import org.hyperic.hq.bizapp.shared.AIBoss;
@@ -47,7 +48,6 @@ import org.hyperic.hq.bizapp.shared.AuthBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
-import org.hyperic.hq.bizapp.shared.ControlBossHome;
 import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
@@ -67,24 +67,11 @@ import org.hyperic.hq.ui.util.UIUtils;
  *
  */
 public class ServiceLocator {
-    
-   
-
-    
-    
     private final static Class MEASURE_CLASS = MeasurementBossHome.class;
     private final static String MEASURE_NAME = MeasurementBossHome.JNDI_NAME;
-
-  
     
     private final static Class PRODUCT_CLASS = ProductBossHome.class;
     private final static String PRODUCT_NAME = ProductBossHome.JNDI_NAME;
-
-    private static final String CONTROL_NAME = ControlBossHome.JNDI_NAME;
-    private static final Class CONTROL_CLASS = ControlBossHome.class;
-
-    //private static final String UPDATE_NAME = UpdateBossHome.JNDI_NAME;
-    //private static final Class UPDATE_CLASS = UpdateBossHome.class;
 
     private final static String CONTEXT_FACTORY_NAME =
         "ejb-remote-config.context-factory";
@@ -307,13 +294,7 @@ public class ServiceLocator {
      */
     public ControlBoss getControlBoss()
         throws ServiceLocatorException {
-            ControlBossHome home = (ControlBossHome) lookup(CONTROL_NAME,
-                                                            CONTROL_CLASS);
-            try {
-                return (ControlBoss) home.create();
-            } catch (Exception e) {
-                throw new ServiceLocatorException(e);
-            }
+            return ControlBossImpl.getOne();
         }
 
     public GalertBoss getGalertBoss()
