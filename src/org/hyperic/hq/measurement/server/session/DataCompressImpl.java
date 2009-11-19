@@ -62,22 +62,21 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 // TODO: Use SimpleJdbcTemplate
-public class DataCompressImpl
-    extends SessionEJB implements DataCompress {
-    private final String logCtx = DataCompressImpl.class.getName();
-    private final Log log = LogFactory.getLog(logCtx);
+public class DataCompressImpl implements DataCompress {
+    private static final String LOG_CTX = DataCompressImpl.class.getName();
+    private final Log log = LogFactory.getLog(LOG_CTX);
 
     // Data tables
-    private final String TAB_DATA = MeasurementConstants.TAB_DATA;
-    private final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
-    private final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
-    private final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
-    private final String TAB_PROB = MeasurementConstants.TAB_PROB;
+    private static final String TAB_DATA = MeasurementConstants.TAB_DATA;
+    private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
+    private static final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
+    private static final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
+    private static final String TAB_PROB = MeasurementConstants.TAB_PROB;
 
     // Utility constants
-    private final long HOUR = MeasurementConstants.HOUR;
-    private final long SIX_HOUR = MeasurementConstants.SIX_HOUR;
-    private final long DAY = MeasurementConstants.DAY;
+    private static final long HOUR = MeasurementConstants.HOUR;
+    private static final long SIX_HOUR = MeasurementConstants.SIX_HOUR;
+    private static final long DAY = MeasurementConstants.DAY;
 
     // Purge intervals, loaded once on first invocation.
     private boolean purgeDefaultsLoaded = false;
@@ -149,7 +148,7 @@ public class DataCompressImpl
         Connection conn = null;
         Statement stmt = null;
         try {
-            conn = dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            conn = dbUtil.getConnection();
             // check out HHQ-2789 for more info on why setAutoCommit(false)
             // was added
             conn.setAutoCommit(false);
@@ -177,7 +176,7 @@ public class DataCompressImpl
             log.info("Done Purging Raw Measurement Data (" +
                      ((watch.getElapsed()) / 1000) + " seconds)");
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
         }
     }
 
@@ -275,7 +274,7 @@ public class DataCompressImpl
         PreparedStatement insStmt = null;
 
         try {
-            conn = dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            conn = dbUtil.getConnection();
 
             // One special case.. If we are compressing from an
             // already compressed table, we'll take the MIN and
@@ -324,7 +323,7 @@ public class DataCompressImpl
                 begin = end;
             }
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, insStmt, null);
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, insStmt, null);
         }
 
         // Return the last interval that was compressed.
@@ -345,7 +344,7 @@ public class DataCompressImpl
 
         try {
             String sql = "SELECT MIN(timestamp) FROM " + dataTable;
-            conn = dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            conn = dbUtil.getConnection();
 
             stmt = conn.createStatement();
             rs = stmt.executeQuery(sql);
@@ -358,7 +357,7 @@ public class DataCompressImpl
                                        "measurement");
             }
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
         }
     }
 
@@ -372,7 +371,7 @@ public class DataCompressImpl
         ResultSet rs = null;
 
         try {
-            conn = dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            conn = dbUtil.getConnection();
 
             String sql;
             if (DBUtil.isPostgreSQL(conn)) {
@@ -394,7 +393,7 @@ public class DataCompressImpl
                 return 0l;
             }
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
         }
     }
 
@@ -420,7 +419,7 @@ public class DataCompressImpl
         StopWatch watch = new StopWatch();
         try {
             conn =
-                   dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+                   dbUtil.getConnection();
             conn.setAutoCommit(false);
 
             long endWindow = purgeAfter;
@@ -444,7 +443,7 @@ public class DataCompressImpl
                 startWindow -= interval;
             }
         } finally {
-            DBUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
         }
 
         log.info("Done (" + ((watch.getElapsed()) / 1000) + " seconds)");

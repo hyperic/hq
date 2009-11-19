@@ -81,8 +81,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class AvailabilityManagerImpl
-    extends SessionEJB implements AvailabilityManager {
+public class AvailabilityManagerImpl implements AvailabilityManager {
 
     private final Log _log = LogFactory.getLog(AvailabilityManagerImpl.class);
     private final Log _traceLog = LogFactory.getLog(AvailabilityManagerImpl.class.getName() + "Trace");
@@ -128,15 +127,22 @@ public class AvailabilityManagerImpl
 
     private MessagePublisher messenger;
 
+    private AvailabilityDataDAO availabilityDataDAO;
+
+    private MeasurementDAO measurementDAO;
+
     @Autowired
-    public AvailabilityManagerImpl(ResourceManager resourceManager,
-                                   MessagePublisher messenger) {
+    public AvailabilityManagerImpl(ResourceManager resourceManager, MessagePublisher messenger,
+                                   AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO) {
         this.resourceManager = resourceManager;
         this.messenger = messenger;
+        this.availabilityDataDAO = availabilityDataDAO;
+        this.measurementDAO = measurementDAO;
     }
 
     // To break AvailabilityManager - MeasurementManager circular dependency
-    // TODO: Check why we need this when we have MeasurementManagerImpl.setCircularDependencies()?
+    // TODO: Check why we need this when we have
+    // MeasurementManagerImpl.setCircularDependencies()?
     @Autowired
     public void setMeasurementManager(MeasurementManager measurementManager) {
         this.measurementManager = measurementManager;
@@ -1195,7 +1201,7 @@ public class AvailabilityManagerImpl
             if (RegisteredTriggers.isTriggerInterested(event) || allEventsInteresting) {
                 measurementManager.buildMeasurementEvent(event);
                 if (event.getValue().getValue() == AVAIL_DOWN) {
-                    Resource r = getResource(event.getResource());
+                    Resource r = resourceManager.findResource(event.getResource());
                     if (r != null && !r.isInAsyncDeleteState()) {
                         downEvents.put(r.getId(), event);
                     }
