@@ -31,7 +31,6 @@ import java.util.List;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Expression;
 import org.hibernate.criterion.Order;
-import org.hyperic.dao.DAOFactory;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,13 +88,13 @@ public class EscalationStateDAO
             .uniqueResult();
     }
 
-    Collection findStatesFor(Escalation mesc) {
+    Collection<EscalationState> findStatesFor(Escalation mesc) {
         return createCriteria()
             .add(Expression.eq("escalation", mesc))
             .list();
     }
 
-    List getActiveEscalations(int maxEscalations) {
+    List<EscalationState> getActiveEscalations(int maxEscalations) {
         return createCriteria()
             .addOrder(Order.asc("nextActionTime"))
             .setMaxResults(maxEscalations)

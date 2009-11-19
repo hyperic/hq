@@ -90,6 +90,31 @@ public class MetricSessionEJB extends BizappSessionEJB {
     protected SessionManager manager = SessionManager.getInstance();
     private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
 
+   
+
+    /**
+     * Fetch all metric summaries for specified resources
+     * @param resources the list of resources
+     * @param begin the beginning of time range
+     * @param end the end of time range
+     * @param showNoCollect TODO
+     * @return Map where key = category, value = List of summary beans
+     * @throws AppdefCompatException
+     */
+    protected Map getResourceMetrics(AuthzSubject subject, List resources,
+                                     String resourceType, long filters,
+                                     String keyword, long begin, long end,
+                                     boolean showNoCollect)
+        throws AppdefCompatException {
+        // Need to get the templates for this type
+        List tmpls = getTemplateManager().findTemplates(resourceType, filters,
+                                                        keyword);
+    
+        // Look up the metric summaries of associated servers
+        return getResourceMetrics(subject, resources, tmpls, begin, end,
+                                  Boolean.valueOf(showNoCollect));
+    }
+    
     /**
      * Fetch the metric summaries for specified resources and templates
      * @param resources the list of resources
@@ -212,95 +237,75 @@ public class MetricSessionEJB extends BizappSessionEJB {
         
         return resmap;
     }
-
-    /**
-     * Fetch all metric summaries for specified resources
-     * @param resources the list of resources
-     * @param begin the beginning of time range
-     * @param end the end of time range
-     * @param showNoCollect TODO
-     * @return Map where key = category, value = List of summary beans
-     * @throws AppdefCompatException
-     */
-    protected Map getResourceMetrics(AuthzSubject subject, List resources,
-                                     String resourceType, long filters,
-                                     String keyword, long begin, long end,
-                                     boolean showNoCollect)
-        throws AppdefCompatException {
-        // Need to get the templates for this type
-        List tmpls = getTemplateManager().findTemplates(resourceType, filters,
-                                                        keyword);
     
-        // Look up the metric summaries of associated servers
-        return getResourceMetrics(subject, resources, tmpls, begin, end,
-                                  Boolean.valueOf(showNoCollect));
+    public MetricDisplaySummary
+    getMetricDisplaySummary(MeasurementTemplate tmpl, Long interval,
+                            long begin, long end, double[] data,
+                            int totalConfigured) {
+    // Create a new metric summary bean
+    MetricDisplaySummary summary = new MetricDisplaySummary();
+        
+    // Set the time range
+    summary.setBeginTimeFrame(new Long(begin));
+    summary.setEndTimeFrame(new Long(end));
+        
+    // Set the template info
+    summary.setLabel(tmpl.getName());
+    summary.setTemplateId(tmpl.getId());
+    summary.setTemplateCat(tmpl.getCategory().getId());
+    summary.setCategory(tmpl.getCategory().getName());
+    summary.setUnits(tmpl.getUnits());
+    summary.setCollectionType(new Integer(tmpl.getCollectionType()));
+    summary.setDesignated(Boolean.valueOf(tmpl.isDesignate()));
+    summary.setMetricSource(tmpl.getMonitorableType().getName());
+    
+    summary.setCollecting(interval != null);
+    
+    if (summary.getCollecting())
+        summary.setInterval(interval.longValue());
+
+    if (data == null)
+        return summary;
+    
+    // Set the data values
+    summary.setMetric(MetricDisplayConstants.MIN_KEY,
+        new MetricDisplayValue(data[MeasurementConstants.IND_MIN]));
+    summary.setMetric(MetricDisplayConstants.AVERAGE_KEY,
+        new MetricDisplayValue(data[MeasurementConstants.IND_AVG]));
+    summary.setMetric(MetricDisplayConstants.MAX_KEY,
+        new MetricDisplayValue(data[MeasurementConstants.IND_MAX]));
+    
+    // Groups get sums, not last value
+    if (totalConfigured == 1 ||
+        tmpl.getCollectionType() == MeasurementConstants.COLL_TYPE_STATIC) {
+        summary.setMetric(MetricDisplayConstants.LAST_KEY,
+            new MetricDisplayValue(
+                    data[MeasurementConstants.IND_LAST_TIME]));
     }
-
-    protected MetricDisplaySummary
-        getMetricDisplaySummary(MeasurementTemplate tmpl, Long interval,
-                                long begin, long end, double[] data,
-                                int totalConfigured) {
-        // Create a new metric summary bean
-        MetricDisplaySummary summary = new MetricDisplaySummary();
-            
-        // Set the time range
-        summary.setBeginTimeFrame(new Long(begin));
-        summary.setEndTimeFrame(new Long(end));
-            
-        // Set the template info
-        summary.setLabel(tmpl.getName());
-        summary.setTemplateId(tmpl.getId());
-        summary.setTemplateCat(tmpl.getCategory().getId());
-        summary.setCategory(tmpl.getCategory().getName());
-        summary.setUnits(tmpl.getUnits());
-        summary.setCollectionType(new Integer(tmpl.getCollectionType()));
-        summary.setDesignated(Boolean.valueOf(tmpl.isDesignate()));
-        summary.setMetricSource(tmpl.getMonitorableType().getName());
-        
-        summary.setCollecting(interval != null);
-        
-        if (summary.getCollecting())
-            summary.setInterval(interval.longValue());
-    
-        if (data == null)
-            return summary;
-        
-        // Set the data values
-        summary.setMetric(MetricDisplayConstants.MIN_KEY,
-            new MetricDisplayValue(data[MeasurementConstants.IND_MIN]));
-        summary.setMetric(MetricDisplayConstants.AVERAGE_KEY,
-            new MetricDisplayValue(data[MeasurementConstants.IND_AVG]));
-        summary.setMetric(MetricDisplayConstants.MAX_KEY,
-            new MetricDisplayValue(data[MeasurementConstants.IND_MAX]));
-        
-        // Groups get sums, not last value
-        if (totalConfigured == 1 ||
-            tmpl.getCollectionType() == MeasurementConstants.COLL_TYPE_STATIC) {
+    else {
+        // Availability does not need to be summed
+        if (tmpl.isAvailability()) {
             summary.setMetric(MetricDisplayConstants.LAST_KEY,
-                new MetricDisplayValue(
-                        data[MeasurementConstants.IND_LAST_TIME]));
+                new MetricDisplayValue(data[MeasurementConstants.IND_AVG]));
         }
         else {
-            // Availability does not need to be summed
-            if (tmpl.isAvailability()) {
-                summary.setMetric(MetricDisplayConstants.LAST_KEY,
-                    new MetricDisplayValue(data[MeasurementConstants.IND_AVG]));
-            }
-            else {
-                summary.setMetric(MetricDisplayConstants.LAST_KEY,
-                    new MetricDisplayValue(
-                        data[MeasurementConstants.IND_AVG] *
-                        data[MeasurementConstants.IND_CFG_COUNT]));
-            }
+            summary.setMetric(MetricDisplayConstants.LAST_KEY,
+                new MetricDisplayValue(
+                    data[MeasurementConstants.IND_AVG] *
+                    data[MeasurementConstants.IND_CFG_COUNT]));
         }
-                        
-        // Number configured
-        summary.setAvailUp(
-            new Integer((int) data[MeasurementConstants.IND_CFG_COUNT]));
-        summary.setAvailUnknown(new Integer(totalConfigured));
-    
-        return summary;
     }
+                    
+    // Number configured
+    summary.setAvailUp(
+        new Integer((int) data[MeasurementConstants.IND_CFG_COUNT]));
+    summary.setAvailUnknown(new Integer(totalConfigured));
+
+    return summary;
+}
+
+
+   
 
     protected List getAGMemberIds(AuthzSubject subject,
                                   AppdefEntityID parentAid,
@@ -362,7 +367,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return getAvailability(subject, ids, getMidMap(getResources(ids)), null);
     }
     
-    private final List getResources(AppdefEntityID[] ids) {
+    protected final List getResources(AppdefEntityID[] ids) {
         final List resources = new ArrayList(ids.length);
         final ResourceManager rMan = ResourceManagerImpl.getOne();
         for (int i = 0; i < ids.length; i++) {
@@ -380,7 +385,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
      * @return {@link Map} of {@link Integer} to {@link Measurement}.
      * Integer = Resource.getId()
      */
-    private final Map getMidMap(Collection resources) {
+    protected final Map getMidMap(Collection resources) {
         final List aeids = new ArrayList();
         for (final Iterator it=resources.iterator(); it.hasNext(); ) {
             final Resource r = (Resource)it.next();
@@ -715,15 +720,15 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return b.doubleValue();
     }
 
-    protected Map findMetrics(int sessionId, AppdefEntityID entId, long begin,
-                              long end, PageControl pc)
-        throws SessionTimeoutException, SessionNotFoundException,
-            InvalidAppdefTypeException, PermissionException,
-            AppdefEntityNotFoundException, AppdefCompatException {
-        AppdefEntityID[] entIds = new AppdefEntityID[] { entId };
-        return findMetrics(sessionId, entIds, MeasurementConstants.FILTER_NONE,
-                           null, begin, end, false);
-    }
+    public Map findMetrics(int sessionId, AppdefEntityID entId, long begin,
+                           long end, PageControl pc)
+     throws SessionTimeoutException, SessionNotFoundException,
+         InvalidAppdefTypeException, PermissionException,
+         AppdefEntityNotFoundException, AppdefCompatException {
+     AppdefEntityID[] entIds = new AppdefEntityID[] { entId };
+     return findMetrics(sessionId, entIds, MeasurementConstants.FILTER_NONE,
+                        null, begin, end, false);
+ }
 
     protected Map findMetrics(int sessionId, AppdefEntityID[] entIds,
                               long filters, String keyword, long begin,
@@ -768,8 +773,25 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return getResourceMetrics(subject, entArr, monitorableType, filters,
                                   keyword, begin, end, showNoCollect);
     }
+    
+    protected Map findAGPlatformMetricsByType(int sessionId, 
+                                          AppdefEntityTypeID platTypeId,
+                                          long begin, long end,
+                                          boolean showAll)
+       throws SessionTimeoutException, SessionNotFoundException,
+              InvalidAppdefTypeException, AppdefEntityNotFoundException,
+              PermissionException, AppdefCompatException  {
+        AuthzSubject subject = manager.getSubject(sessionId);
+        
+        //Get the member IDs
+        List platforms = getPlatformAG(subject, platTypeId);
+        
+        PlatformType platType = getPlatformManager().findPlatformType(platTypeId.getId());
+        
+        return getResourceMetrics(subject, platforms, platType.getName(), MeasurementConstants.FILTER_NONE,null,begin, end, showAll);
+    }
 
-    protected Map findMetrics(int sessionId, AppdefEntityID entId, List mtids,
+    protected Map findMetrics(int sessionId, AppdefEntityID entId, List<Integer> mtids,
                               long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
             PermissionException, AppdefEntityNotFoundException,
@@ -837,33 +859,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return results;
     }
 
-    protected List findAllMetrics(int sessionId, AppdefEntityID aeid,
-                                  AppdefEntityTypeID ctype,
-                                  long begin, long end)
-        throws SessionTimeoutException, SessionNotFoundException,
-               AppdefEntityNotFoundException, PermissionException,
-               AppdefCompatException, InvalidAppdefTypeException {
-        ArrayList result = new ArrayList();
-        AppdefEntityID[] entIds = new AppdefEntityID[] { aeid };
-        
-        Map metrics = findAGMetricsByType(sessionId, entIds, ctype,
-                                          MeasurementConstants.FILTER_NONE,
-                                          null, begin, end, false);
-        for (Iterator it = metrics.values().iterator(); it.hasNext(); ) {
-            Collection metricColl = (Collection) it.next();
-            
-            for (Iterator it2 = metricColl.iterator(); it2.hasNext(); ) {
-                MetricDisplaySummary summary =
-                    (MetricDisplaySummary) it2.next();
-                ProblemMetricSummary pms =
-                    new ProblemMetricSummary(summary);
-                pms.setMultipleAppdefKey(ctype.getAppdefKey());
-                result.add(pms);
-            }
-        }
-        return result;
-    }
-
+   
     protected List findAllMetrics(int sessionId, AppdefEntityID[] aeids,
                                   long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
@@ -925,65 +921,9 @@ public class MetricSessionEJB extends BizappSessionEJB {
         return entIds;
     }
 
-    protected Map findAGPlatformMetricsByType(int sessionId, 
-                                              AppdefEntityTypeID platTypeId,
-                                              long begin, long end,
-                                              boolean showAll)
-        throws SessionTimeoutException, SessionNotFoundException,
-               InvalidAppdefTypeException, AppdefEntityNotFoundException,
-               PermissionException, AppdefCompatException {
-        AuthzSubject subject = manager.getSubject(sessionId);
     
-        // Get the member IDs
-        List platforms = getPlatformAG(subject, platTypeId);
-        
-        // Get resource type name
-        PlatformType platType =
-            getPlatformManager().findPlatformType(platTypeId.getId());
     
-        // Look up the metric summaries of platforms
-        return getResourceMetrics(subject, platforms, platType.getName(),
-                                  MeasurementConstants.FILTER_NONE, null,
-                                  begin, end, showAll);
-    }
     
-    protected Map findAGMetricsByType(int sessionId, AppdefEntityID[] entIds,
-                                      AppdefEntityTypeID typeId, long filters,
-                                      String keyword, long begin, long end,
-                                      boolean showAll)
-        throws SessionTimeoutException, SessionNotFoundException,
-               InvalidAppdefTypeException, PermissionException,
-               AppdefEntityNotFoundException, AppdefCompatException {
-        AuthzSubject subject = manager.getSubject(sessionId);
-        
-        List group = new ArrayList();
-        for (int i = 0; i < entIds.length; i++) {
-            AppdefEntityValue rv = new AppdefEntityValue(entIds[i], subject);
-            
-            switch (typeId.getType()) {
-                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-                    // Get the associated servers
-                    group.addAll(rv.getAssociatedServers(typeId.getId(),
-                                                         PageControl.PAGE_ALL));
-                    break;
-                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-                    // Get the associated services
-                    group.addAll(rv.getAssociatedServices(typeId.getId(),
-                                                          PageControl.PAGE_ALL));
-                    break;
-                default:
-                    break;
-            }
-        }
-    
-        // Need to get the templates for this type, using the first resource
-        AppdefResourceValue resource = (AppdefResourceValue) group.get(0);
-        String resourceType = resource.getAppdefResourceTypeValue().getName();
-    
-        // Look up the metric summaries of associated servers
-        return getResourceMetrics(subject, group, resourceType, filters,
-                                  keyword, begin, end, showAll);
-    }
 
     protected AppdefEntityID[] getGroupMemberIDs(AuthzSubject subject,
                                                  Integer gid)

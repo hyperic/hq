@@ -4,7 +4,7 @@ import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as AdefMa
 import org.hyperic.hq.events.server.session.AlertDefinition
 import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.escalation.server.session.Escalation
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl as EscMan
+import org.hyperic.hq.escalation.server.session.EscalationManagerImpl as EscMan
 import org.hyperic.hq.events.server.session.ClassicEscalationAlertType
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
 import org.hyperic.hq.appdef.server.session.AppdefResourceType
@@ -20,7 +20,7 @@ class AlertDefinitionCategory {
     }
 
     static void unsetEscalation(AlertDefinition d, AuthzSubject s) {
-        EscMan.one.setEscalation(ClassicEscalationAlertType.CLASSIC, d.getId(),
+        EscMan.one.EscalationManagerImpl(ClassicEscalationAlertType.CLASSIC, d.getId(),
                                  null)
     }
 

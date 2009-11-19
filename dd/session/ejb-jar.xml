@@ -10,20 +10,6 @@
 	<enterprise-beans>
 
 		<!-- Session Beans -->
-		
-		<session>
-			<description><![CDATA[]]></description>
-
-			<ejb-name>EscalationManager</ejb-name>
-
-			<local-home>org.hyperic.hq.escalation.shared.EscalationManagerLocalHome</local-home>
-			<local>org.hyperic.hq.escalation.shared.EscalationManagerLocal</local>
-			<ejb-class>org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
 
 		<session>
 			<description><![CDATA[BizApp interface to the Measurement subsystem]]></description>
@@ -92,16 +78,7 @@
 			the merge directory called ejb-container-transactions.ent that
 			contains them.
 		-->
-		
-		<container-transaction>
-			<method>
-				<ejb-name>EscalationManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
-		
-		
+				
 		<container-transaction>
 			<method>
 				<ejb-name>MeasurementBoss</ejb-name>

@@ -31,5 +31,5 @@ public interface MetricDeleteCallback {
     /**
      * Called before metrics are deleted.
      */
-    void beforeMetricsDelete(Collection mids);
+    void beforeMetricsDelete(Collection<Integer> mids);
 }

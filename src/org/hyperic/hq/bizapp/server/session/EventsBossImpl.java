@@ -87,7 +87,7 @@ import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
 import org.hyperic.hq.escalation.server.session.EscalationState;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.ActionConfigInterface;
 import org.hyperic.hq.events.ActionCreateException;
 import org.hyperic.hq.events.ActionExecuteException;
@@ -167,7 +167,7 @@ public class EventsBossImpl implements EventsBoss {
 
     private AuthManager authManager;
 
-    private EscalationManagerLocal escalationManager;
+    private EscalationManager escalationManager;
 
     private MeasurementManager measurementManager;
 
@@ -193,7 +193,7 @@ public class EventsBossImpl implements EventsBoss {
     public EventsBossImpl(SessionManager sessionManager, ActionManager actionManager,
                           AlertDefinitionManager alertDefinitionManager, AlertManager alertManager,
                           AppdefBoss appdefBoss, AuthManager authManager,
-                          EscalationManagerLocal escalationManager, MeasurementManager measurementManager,
+                          EscalationManager escalationManager, MeasurementManager measurementManager,
                           PlatformManager platformManager, RegisteredTriggerManager registeredTriggerManager,
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, PermissionManager permissionManager,

@@ -33,10 +33,10 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAlertType;
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.server.session.EscalationManagerImpl;
 import org.hyperic.hq.escalation.server.session.EscalationStateChange;
 import org.hyperic.hq.escalation.server.session.PerformsEscalations;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.events.shared.AlertManager;
 
@@ -89,7 +89,7 @@ public final class ClassicEscalationAlertType
     }
     
     protected void setEscalation(Integer defId, Escalation escalation) {
-        EscalationManagerLocal escMan = EscalationManagerEJBImpl.getOne();
+        EscalationManager escMan = EscalationManagerImpl.getOne();
         AlertDefinition def = getDefMan().getByIdNoCheck(defId);
         // End any escalation we were previously doing.
         escMan.endEscalation(def);
