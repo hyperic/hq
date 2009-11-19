@@ -12,14 +12,6 @@
 			<message-driven></message-driven> markup for those beans.
 		-->
 		<session>
-			<ejb-name>EscalationManager</ejb-name>
-			<local-jndi-name>LocalEscalationManager</local-jndi-name>
-
-		</session>
-	
-		
-		
-		<session>
 			<ejb-name>ProductBoss</ejb-name>
 			<jndi-name>ejb/bizapp/ProductBoss</jndi-name>
 			<local-jndi-name>LocalProductBoss</local-jndi-name>

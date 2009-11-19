@@ -40,6 +40,6 @@ public class EscalationStartupListener
     }
 
     public void pluginsDeployed(List plugins) {
-        EscalationManagerEJBImpl.getOne().startup();
+        EscalationManagerImpl.getOne().startup();
     }
 }

@@ -53,7 +53,7 @@ import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationState;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.server.session.Alert;
 import org.hyperic.hq.events.server.session.AlertDefinition;
 import org.hyperic.hq.events.server.session.AlertSortField;
@@ -108,7 +108,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
 
     private AlertDefinitionManager alertDefinitionManager;
 
-    private EscalationManagerLocal escalationManager;
+    private EscalationManager escalationManager;
 
     @Autowired
     public DashboardPortletBossImpl(PermissionManager permissionManager, ResourceManager resourceManager,
@@ -116,7 +116,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
                                     MeasurementBossLocal measurementBoss, ResourceGroupManager resourceGroupManager,
                                     GalertManager galertManager, AlertManager alertManager,
                                     AlertDefinitionManager alertDefinitionManager,
-                                    EscalationManagerLocal escalationManager) {
+                                    EscalationManager escalationManager) {
         this.permissionManager = permissionManager;
         this.resourceManager = resourceManager;
         this.measurementManager = measurementManager;

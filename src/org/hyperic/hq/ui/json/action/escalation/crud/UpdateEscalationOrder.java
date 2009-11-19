@@ -38,8 +38,8 @@ import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationAction;
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.escalation.server.session.EscalationManagerImpl;
+import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.ui.json.action.JsonActionContext;
 import org.hyperic.hq.ui.json.action.escalation.BaseAction;
 import org.json.JSONException;
@@ -60,7 +60,7 @@ public class UpdateEscalationOrder extends BaseAction {
         Integer id = context.getId();
         String[] sOrder = (String[]) map.get("viewEscalationUL[]");
         
-        EscalationManagerLocal eMan = EscalationManagerEJBImpl.getOne();
+        EscalationManager eMan = EscalationManagerImpl.getOne();
         Escalation esc = eMan.findById(id);
         List actions   = new ArrayList(sOrder.length);
         

@@ -53,7 +53,7 @@ import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.EscalatableCreator;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.shared.AlertConditionLogValue;
@@ -105,14 +105,14 @@ public class AlertManagerImpl implements AlertManager {
 
     private AuthzSubjectManager authzSubjectManager;
 
-    private EscalationManagerLocal escalationManager;
+    private EscalationManager escalationManager;
 
     @Autowired
     public AlertManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
                             AlertActionLogDAO alertActionLogDAO, AlertDAO alertDAO,
                             AlertConditionDAO alertConditionDAO, MeasurementDAO measurementDAO,
                             ResourceManager resourceManager, AlertDefinitionManager alertDefinitionManager,
-                            AuthzSubjectManager authzSubjectManager, EscalationManagerLocal escalationManager) {
+                            AuthzSubjectManager authzSubjectManager, EscalationManager escalationManager) {
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;
         this.alertActionLogDAO = alertActionLogDAO;

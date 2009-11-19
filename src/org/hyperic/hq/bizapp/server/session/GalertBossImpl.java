@@ -42,7 +42,7 @@ import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.AlertPermissionManager;
 import org.hyperic.hq.events.AlertSeverity;
 import org.hyperic.hq.galerts.server.session.ExecutionStrategyInfo;
@@ -77,7 +77,7 @@ public class GalertBossImpl implements GalertBoss {
     private GtriggerManager gtriggerManager;
     private AlertPermissionManager alertPermissionManager;
     private ResourceGroupManager resourceGroupManager;
-    private EscalationManagerLocal escalationManager;
+    private EscalationManager escalationManager;
 
     @Autowired
     public GalertBossImpl(GalertManager galertManager,
@@ -85,7 +85,7 @@ public class GalertBossImpl implements GalertBoss {
                           AlertPermissionManager alertPermissionManager,
                           SessionManager sessionManager,
                           ResourceGroupManager resourceGroupManager,
-                          EscalationManagerLocal escalationManager) {
+                          EscalationManager escalationManager) {
         this.galertManager = galertManager;
         this.gtriggerManager = gtriggerManager;
         this.alertPermissionManager = alertPermissionManager;

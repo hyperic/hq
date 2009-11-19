@@ -28,7 +28,7 @@ package org.hyperic.hq.events.server.session;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl;
+import org.hyperic.hq.escalation.server.session.EscalationManagerImpl;
 import org.hyperic.hq.events.shared.AlertValue;
 import org.hyperic.util.pager.PagerProcessor;
 
@@ -49,7 +49,7 @@ public class PagerProcessor_events implements PagerProcessor {
                 Alert alert = (Alert) o;
                 AlertValue aval = alert.getAlertValue();
                 aval.setAcknowledgeable(
-                    EscalationManagerEJBImpl.getOne().isAlertAcknowledgeable(
+                    EscalationManagerImpl.getOne().isAlertAcknowledgeable(
                         alert.getId(), alert.getAlertDefinition()));
                 return aval; 
             } else if (o instanceof AlertDefinition) {
