@@ -63,32 +63,32 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @Transactional
-public class ReportProcessorImpl
-    extends SessionEJB implements ReportProcessor {
+public class ReportProcessorImpl implements ReportProcessor {
     private final Log log = LogFactory.getLog(ReportProcessorImpl.class);
 
-    private final long MINUTE = MeasurementConstants.MINUTE;
-    private final long PRIORITY_OFFSET = MINUTE * 3;
+    private static final long MINUTE = MeasurementConstants.MINUTE;
+    private static final long PRIORITY_OFFSET = MINUTE * 3;
 
     private MeasurementManager measurementManager;
     private MeasurementProcessor measurementProcessor;
     private PlatformManager platformManager;
     private ServerManager serverManager;
     private ServiceManager serviceManager;
+    private SRNManager srnManager;
 
     @Autowired
-    public ReportProcessorImpl(MeasurementManager measurementManager,
-                               MeasurementProcessor measurementProcessor, PlatformManager platformManager,
-                               ServerManager serverManager, ServiceManager serviceManager) {
+    public ReportProcessorImpl(MeasurementManager measurementManager, MeasurementProcessor measurementProcessor,
+                               PlatformManager platformManager, ServerManager serverManager,
+                               ServiceManager serviceManager, SRNManager srnManager) {
         this.measurementManager = measurementManager;
         this.measurementProcessor = measurementProcessor;
         this.platformManager = platformManager;
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
+        this.srnManager = srnManager;
     }
 
-    private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts,
-                          Measurement m, MetricValue[] vals) {
+    private void addPoint(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] vals) {
         final boolean debug = log.isDebugEnabled();
         for (MetricValue val : vals) {
             final long now = TimingVoodoo.roundDownTime(System.currentTimeMillis(), MINUTE);
@@ -106,8 +106,7 @@ public class ReportProcessorImpl
                     log.debug("availability -> " + dataPoint);
                 }
             } catch (NumberFormatException e) {
-                log.warn("Unable to insert: " + e.getMessage() +
-                         ", metric id=" + m);
+                log.warn("Unable to insert: " + e.getMessage() + ", metric id=" + m);
             }
         }
     }
@@ -119,8 +118,7 @@ public class ReportProcessorImpl
         return false;
     }
 
-    private void addData(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m,
-                         MetricValue[] dpts) {
+    private void addData(List<DataPoint> points, List<DataPoint> priorityPts, Measurement m, MetricValue[] dpts) {
         long interval = m.getInterval();
 
         // Safeguard against an anomaly
@@ -139,20 +137,17 @@ public class ReportProcessorImpl
             long adjust = TimingVoodoo.roundDownTime(retrieval, interval);
 
             // Create new Measurement data point with the adjusted time
-            MetricValue modified = new MetricValue(dpts[i].getValue(),
-                                                   adjust);
+            MetricValue modified = new MetricValue(dpts[i].getValue(), adjust);
             passThroughs[i] = modified;
         }
         addPoint(points, priorityPts, m, passThroughs);
     }
 
     /**
-     * Method which takes data from the agent (or elsewhere) and throws
-     * it into the DataManager, doing the right things with all the
-     * derived measurements
+     * Method which takes data from the agent (or elsewhere) and throws it into
+     * the DataManager, doing the right things with all the derived measurements
      */
-    public void handleMeasurementReport(MeasurementReport report)
-        throws DataInserterException {
+    public void handleMeasurementReport(MeasurementReport report) throws DataInserterException {
         final DSNList[] dsnLists = report.getClientIdList();
         final String agentToken = report.getAgentToken();
 
@@ -179,15 +174,13 @@ public class ReportProcessorImpl
             final Resource res = m.getResource();
             if (res == null || res.isInAsyncDeleteState()) {
                 if (debug) {
-                    log.debug("dropping metricId=" + m.getId() +
-                              " since resource is in async delete state");
+                    log.debug("dropping metricId=" + m.getId() + " since resource is in async delete state");
                 }
                 continue;
             }
             if (!resourceMatchesAgent(res, agentToken)) {
-                log.warn("measurement (id=" + m.getId() + ") was sent to the " +
-                         "HQ server from agent (agentToken=" + agentToken + ")" +
-                         " but resource (id=" + res.getId() + ") is not associated " +
+                log.warn("measurement (id=" + m.getId() + ") was sent to the " + "HQ server from agent (agentToken=" +
+                         agentToken + ")" + " but resource (id=" + res.getId() + ") is not associated " +
                          " with that agent.  Dropping measurement.");
                 continue;
             }
@@ -211,20 +204,15 @@ public class ReportProcessorImpl
         sendMetricDataToDB(a, priorityAvailPts, true);
 
         // Check the SRNs to make sure the agent is up-to-date
-        // TODO: DI srnManager (see HE-133)
-        SRNManager srnManager = getSRNManager();
         Collection<AppdefEntityID> nonEntities = srnManager.reportAgentSRNs(report.getSRNList());
 
         if (report.getAgentToken() != null && nonEntities.size() > 0) {
             // Better tell the agent to stop reporting non-existent entities
-            AppdefEntityID[] entIds = (AppdefEntityID[])
-                                      nonEntities.toArray(new AppdefEntityID[nonEntities.size()]);
+            AppdefEntityID[] entIds = (AppdefEntityID[]) nonEntities.toArray(new AppdefEntityID[nonEntities.size()]);
             try {
-                measurementProcessor.unschedule(
-                                                report.getAgentToken(), entIds);
+                measurementProcessor.unschedule(report.getAgentToken(), entIds);
             } catch (MeasurementUnscheduleException e) {
-                log.error("Cannot unschedule entities: " +
-                          StringUtil.arrayToString(entIds));
+                log.error("Cannot unschedule entities: " + StringUtil.arrayToString(entIds));
             }
         }
     }
@@ -237,17 +225,14 @@ public class ReportProcessorImpl
         final Integer aeid = resource.getInstanceId();
         try {
             if (resType.equals(AuthzConstants.authzPlatform)) {
-                String token = platformManager.findPlatformById(
-                                                                aeid).getAgent().getAgentToken();
+                String token = platformManager.findPlatformById(aeid).getAgent().getAgentToken();
                 return token.equals(agentToken);
             } else if (resType.equals(AuthzConstants.authzServer)) {
-                String token = serverManager.findServerById(
-                                                            aeid).getPlatform().getAgent().getAgentToken();
+                String token = serverManager.findServerById(aeid).getPlatform().getAgent().getAgentToken();
                 return token.equals(agentToken);
             } else if (resType.equals(AuthzConstants.authzService)) {
-                String token = serviceManager.findServiceById(
-                                                              aeid).getServer().getPlatform().getAgent()
-                                             .getAgentToken();
+                String token = serviceManager.findServiceById(aeid).getServer().getPlatform().getAgent()
+                    .getAgentToken();
                 return token.equals(agentToken);
             }
         } catch (PlatformNotFoundException e) {
@@ -263,8 +248,7 @@ public class ReportProcessorImpl
     /**
      * Sends the actual data to the DB.
      */
-    private void sendMetricDataToDB(DataInserter d, List<DataPoint> dataPoints,
-                                    boolean isPriority)
+    private void sendMetricDataToDB(DataInserter d, List<DataPoint> dataPoints, boolean isPriority)
         throws DataInserterException {
         if (dataPoints.size() <= 0) {
             return;
@@ -275,8 +259,7 @@ public class ReportProcessorImpl
             long ts = System.currentTimeMillis();
             ReportStatsCollector.getInstance().getCollector().add(size, ts);
         } catch (InterruptedException e) {
-            throw new SystemException("Interrupted while attempting to " +
-                                      "insert data");
+            throw new SystemException("Interrupted while attempting to " + "insert data");
         }
     }
 

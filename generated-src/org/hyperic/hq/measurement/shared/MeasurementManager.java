@@ -336,4 +336,8 @@ public interface MeasurementManager {
      */
     public void buildMeasurementEvent(MeasurementEvent event);
 
+    void scheduleSynchronous(List<AppdefEntityID> aeids);
+
+    void unschedule(List<AppdefEntityID> aeids) throws MeasurementUnscheduleException;
+
 }

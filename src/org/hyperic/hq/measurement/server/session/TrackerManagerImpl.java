@@ -53,9 +53,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 // Not transactional
-public class TrackerManagerImpl
-    extends SessionEJB
-    implements TrackerManager {
+public class TrackerManagerImpl implements TrackerManager {
     private final Log log = LogFactory.getLog(TrackerManagerImpl.class);
     private PlatformManager platformManager;
 

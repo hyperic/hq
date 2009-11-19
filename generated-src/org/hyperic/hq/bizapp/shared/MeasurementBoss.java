@@ -3,6 +3,19 @@
  */
 package org.hyperic.hq.bizapp.shared;
 
+import java.util.List;
+import java.util.Map;
+
+import org.hyperic.hq.appdef.shared.AppdefCompatException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
+
 /**
  * Remote interface for MeasurementBoss.
  */
@@ -370,8 +383,13 @@ public interface MeasurementBoss
     * @return a list of CurrentHealthDisplaySummary beans
     * @throws AppdefCompatException
     */
-   public java.util.Map findAGMetricsByType( int sessionId,org.hyperic.hq.appdef.shared.AppdefEntityID[] entIds,org.hyperic.hq.appdef.shared.AppdefEntityTypeID typeId,long filters,java.lang.String keyword,long begin,long end,boolean showAll )
-      throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.appdef.shared.InvalidAppdefTypeException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, org.hyperic.hq.appdef.shared.AppdefCompatException, java.rmi.RemoteException;
+   public  Map findAGMetricsByType(int sessionId, AppdefEntityID[] entIds,
+                                   AppdefEntityTypeID typeId, long filters,
+                                   String keyword, long begin, long end,
+                                   boolean showAll)
+        throws SessionTimeoutException, SessionNotFoundException,
+            InvalidAppdefTypeException, PermissionException,
+            AppdefEntityNotFoundException, AppdefCompatException;
 
    /**
     * Return a MeasurementSummary bean for the resource's associated resources specified by type
@@ -523,5 +541,7 @@ public interface MeasurementBoss
     */
    public org.hyperic.hq.measurement.server.session.Measurement findAvailabilityMetric( int sessionId,org.hyperic.hq.appdef.shared.AppdefEntityID id )
       throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, java.rmi.RemoteException;
+   
+   
 
 }

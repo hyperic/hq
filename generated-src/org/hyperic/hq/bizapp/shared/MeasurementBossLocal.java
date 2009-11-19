@@ -3,6 +3,23 @@
  */
 package org.hyperic.hq.bizapp.shared;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.hyperic.hq.appdef.shared.AppdefCompatException;
+import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
+import org.hyperic.hq.auth.shared.SessionNotFoundException;
+import org.hyperic.hq.auth.shared.SessionTimeoutException;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
+import org.hyperic.hq.authz.shared.PermissionException;
+import org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary;
+import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.util.pager.PageControl;
+
 /**
  * Local interface for MeasurementBoss.
  */
@@ -263,6 +280,39 @@ public interface MeasurementBossLocal
     * Returns metadata for particular measurement
     */
    public java.util.List findMetricMetadata( int sessionId,org.hyperic.hq.appdef.shared.AppdefEntityID aid,org.hyperic.hq.appdef.shared.AppdefEntityTypeID ctype,java.lang.Integer tid ) throws org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.grouping.shared.GroupNotCompatibleException, org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, org.hyperic.hq.appdef.shared.ApplicationNotFoundException, org.hyperic.hq.measurement.TemplateNotFoundException, org.hyperic.hq.authz.shared.PermissionException;
+   
+   List findAllMetrics(int sessionId, AppdefEntityID aeid,
+                       long begin, long end)
+throws SessionTimeoutException, SessionNotFoundException,
+    AppdefEntityNotFoundException, PermissionException,
+    AppdefCompatException, InvalidAppdefTypeException;
+   
+   List findAllMetrics(int sessionId, AppdefEntityID[] aeids,
+                       long begin, long end)
+throws SessionTimeoutException, SessionNotFoundException,
+    AppdefEntityNotFoundException, PermissionException,
+    AppdefCompatException, InvalidAppdefTypeException;
+   
+   double[] getAvailability(AuthzSubject subject,
+                            AppdefEntityID[] ids)
+throws AppdefEntityNotFoundException,
+    PermissionException;
+   
+   List getAGMemberIds(AuthzSubject subject,
+                       AppdefEntityID parentAid,
+                       AppdefEntityTypeID ctype)
+throws AppdefEntityNotFoundException, PermissionException;
+   
+   public MetricDisplaySummary
+   getMetricDisplaySummary(MeasurementTemplate tmpl, Long interval,
+                           long begin, long end, double[] data,
+                           int totalConfigured);
+   
+   Map<String,Set<MetricDisplaySummary>> findMetrics(int sessionId, AppdefEntityID entId, long begin,
+                   long end, PageControl pc)
+throws SessionTimeoutException, SessionNotFoundException,
+ InvalidAppdefTypeException, PermissionException,
+ AppdefEntityNotFoundException, AppdefCompatException;
 
    /**
     * Method findMetrics. When the entId is a server, return all of the metrics that are instances of the measurement templates for the server's type. In this case, the MetricDisplaySummary's attributes to show the number collecting doesn't make sense; showNumberCollecting should false for each bean. <p> When the entId is a platform, return all of the metrics that are instances of the measurement templates for the platform's type. In this case, the MetricDisplaySummary's attributes to show the number collecting doesn't make sense; showNumberCollecting should false for each bean. </p> <p> When the entId is compatible group of servers or platforms, return all of the metrics for the type. Each MetricDisplaySummary actually represents the metrics summarized for all of the group members (cumulative/averaged as appropriate), showNumberCollecting should be true and the numberCollecting as well as the total number of members assigned in each bean. </p>
@@ -301,7 +351,7 @@ public interface MeasurementBossLocal
     * @return a list of ResourceTypeDisplaySummary beans
     * @throws AppdefCompatException
     */
-   public java.util.Map findMetrics( int sessionId,org.hyperic.hq.appdef.shared.AppdefEntityID[] entIds,long filters,java.lang.String keyword,long begin,long end,boolean showNoCollect ) throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.appdef.shared.InvalidAppdefTypeException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, org.hyperic.hq.appdef.shared.AppdefCompatException;
+   public Map<String,Set<MetricDisplaySummary>> findMetrics( int sessionId,org.hyperic.hq.appdef.shared.AppdefEntityID[] entIds,long filters,java.lang.String keyword,long begin,long end,boolean showNoCollect ) throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.appdef.shared.InvalidAppdefTypeException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, org.hyperic.hq.appdef.shared.AppdefCompatException;
 
    /**
     * Method findMetrics. When the entId is a server, return all of the metrics that are instances of the measurement templates for the server's type. In this case, the MetricDisplaySummary's attributes to show the number collecting doesn't make sense; showNumberCollecting should false for each bean. <p> When the entId is a platform, return all of the metrics that are instances of the measurement templates for the platform's type. In this case, the MetricDisplaySummary's attributes to show the number collecting doesn't make sense; showNumberCollecting should false for each bean. </p> <p> When the entId is compatible group of servers or platforms, return all of the metrics for the type. Each MetricDisplaySummary actually represents the metrics summarized for all of the group members (cumulative/averaged as appropriate), showNumberCollecting should be true and the numberCollecting as well as the total number of members assigned in each bean. </p>
@@ -309,7 +359,7 @@ public interface MeasurementBossLocal
     * @throws AppdefCompatException
     * @see org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary
     */
-   public java.util.Map findMetrics( int sessionId,org.hyperic.hq.appdef.shared.AppdefEntityID entId,java.util.List mtids,long begin,long end ) throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, org.hyperic.hq.appdef.shared.AppdefCompatException;
+   public Map<String,Set<MetricDisplaySummary>> findMetrics( int sessionId,org.hyperic.hq.appdef.shared.AppdefEntityID entId,java.util.List<Integer> mtids,long begin,long end ) throws org.hyperic.hq.auth.shared.SessionTimeoutException, org.hyperic.hq.auth.shared.SessionNotFoundException, org.hyperic.hq.authz.shared.PermissionException, org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException, org.hyperic.hq.appdef.shared.AppdefCompatException;
 
    /**
     * Return a MetricSummary bean for each of the servers of a specific type.
