@@ -26,7 +26,7 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload
 import org.apache.commons.fileupload.FileItemIterator
 import org.apache.commons.fileupload.FileItemStream
 
-import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl
+import org.hyperic.hq.hqu.server.session.UIPluginManagerImpl
 import org.hyperic.hq.hqu.server.session.Attachment
 
 import org.json.JSONObject
@@ -398,7 +398,7 @@ abstract class BaseController {
      * request.
      */
     protected Attachment getViewAttachment() {
-        def uiMan = UIPluginManagerEJBImpl.one
+        def uiMan = UIPluginManagerImpl.one
         def attachId = invokeArgs.request.parameterMap.getOne('attachId').toInteger()
         uiMan.findAttachmentById(attachId)
     }

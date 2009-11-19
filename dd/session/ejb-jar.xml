@@ -154,19 +154,6 @@
 		
 
 		<session>
-			<description><![CDATA[]]></description>
-
-			<ejb-name>UIPluginManager</ejb-name>
-
-			<local-home>org.hyperic.hq.hqu.shared.UIPluginManagerLocalHome</local-home>
-			<local>org.hyperic.hq.hqu.shared.UIPluginManagerLocal</local>
-			<ejb-class>org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
-
-		<session>
 			<description><![CDATA[BizApp interface to the Measurement subsystem]]></description>
 
 			<ejb-name>MeasurementBoss</ejb-name>
@@ -737,13 +724,6 @@
 		</container-transaction>
 		
 		
-		<container-transaction>
-			<method>
-				<ejb-name>UIPluginManager</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
 		<container-transaction>
 			<method>
 				<ejb-name>MeasurementBoss</ejb-name>

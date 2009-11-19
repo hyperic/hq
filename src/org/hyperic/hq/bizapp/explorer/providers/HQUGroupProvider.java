@@ -42,9 +42,9 @@ import org.hyperic.hq.bizapp.explorer.types.GroupItem;
 import org.hyperic.hq.bizapp.explorer.types.GroupItemType;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.Attachment;
-import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
+import org.hyperic.hq.hqu.server.session.UIPluginManagerImpl;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
-import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
+import org.hyperic.hq.hqu.shared.UIPluginManager;
 
 /**
  * This provider is capable of providing views for {@link GroupItem}s.
@@ -54,8 +54,8 @@ import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
  * indicator page. 
  */
 public class HQUGroupProvider implements ExplorerViewProvider {
-    private final UIPluginManagerLocal _pluginMan = 
-        UIPluginManagerEJBImpl.getOne();
+    private final UIPluginManager _pluginMan = 
+        UIPluginManagerImpl.getOne();
     
     public HQUGroupProvider() {
     }

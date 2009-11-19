@@ -16,7 +16,7 @@ import org.hyperic.hq.hqu.AttachmentDescriptor
 import org.hyperic.hq.hqu.IHQUPlugin;
 import org.hyperic.hq.hqu.SimpleAttachmentDescriptor
 import org.hyperic.hq.hqu.ViewDescriptor
-import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl as PluginMan 
+import org.hyperic.hq.hqu.server.session.UIPluginManagerImpl as PluginMan 
 import org.hyperic.hq.hqu.server.session.AttachType
 import org.hyperic.hq.hqu.server.session.ViewAdmin
 import org.hyperic.hq.hqu.server.session.ViewResource
@@ -141,7 +141,7 @@ class HQUPlugin implements IHQUPlugin {
     }
     
     private void createAndAttachAdmin(UIPlugin me, String name, Map parms) {
-        def pMan = PluginMan.one
+        def pMan = PluginMan.UIPluginManagerImpl
         ViewAdmin view = findViewByPath(me.views, parms.path)
         
         if (view == null) {
@@ -159,7 +159,7 @@ class HQUPlugin implements IHQUPlugin {
     }
     
     private void createAndAttachMasthead(UIPlugin me, String name, Map parms) {
-        def pMan= PluginMan.one
+        def pMan= PluginMan.UIPluginManagerImpl
         ViewMasthead view = findViewByPath(me.views, parms.path)
         
         if (view == null) {
@@ -190,7 +190,7 @@ class HQUPlugin implements IHQUPlugin {
      * resourceType:  Defines a list a of resource types to attach type
      */
     private void createAndAttachResource(UIPlugin me, String name, Map p) {
-        def pMan = PluginMan.one
+        def pMan = PluginMan.UIPluginManagerImpl
 
         ViewResource view
         if (me.views.empty) {
