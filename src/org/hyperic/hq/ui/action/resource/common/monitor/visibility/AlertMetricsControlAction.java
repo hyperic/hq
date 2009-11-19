@@ -42,7 +42,7 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl;
+import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.WebUser;

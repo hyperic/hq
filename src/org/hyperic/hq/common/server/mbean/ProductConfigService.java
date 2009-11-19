@@ -34,15 +34,14 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.security.auth.login.AppConfigurationEntry;
 
-import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.ServerConfigManagerUtil;
-import org.hyperic.hq.product.server.MBeanUtil;
-import org.hyperic.util.ConfigPropertyException;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.product.server.MBeanUtil;
+import org.hyperic.util.ConfigPropertyException;
 
 /**
  * ProductConfigService - used to do any special setup tasks that
@@ -142,10 +141,8 @@ public class ProductConfigService
     private Properties getConfig() throws ConfigPropertyException 
     {
         try {
-            return ServerConfigManagerUtil.getLocalHome().create().getConfig();
-        } catch (javax.naming.NamingException e) {
-            throw new SystemException("Naming error in ProductConfigService", e);
-        } catch (javax.ejb.CreateException e) {
+            return ServerConfigManagerImpl.getOne().getConfig();
+        } catch (Exception e) {
             throw new SystemException("Error in ProductConfigService", e);
         }
     }

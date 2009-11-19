@@ -47,7 +47,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.common.server.session.ServerConfigAudit;
 import org.hyperic.hq.common.shared.ProductProperties;
-import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
 import org.hyperic.hq.hqu.shared.UIPluginManager;
@@ -67,7 +67,7 @@ public class UpdateBossImpl
 
     private final Log log = LogFactory.getLog(UpdateBossImpl.class);
 
-    private ServerConfigManagerLocal serverConfigManager;
+    private ServerConfigManager serverConfigManager;
 
     private PlatformManager platformManager;
 
@@ -78,7 +78,7 @@ public class UpdateBossImpl
     private UIPluginManager uiPluginManager;
 
     @Autowired
-    public UpdateBossImpl(UpdateStatusDAO updateDAO, ServerConfigManagerLocal serverConfigManager,
+    public UpdateBossImpl(UpdateStatusDAO updateDAO, ServerConfigManager serverConfigManager,
                           PlatformManager platformManager, ServerManager serverManager,
                           ServiceManager serviceManager, UIPluginManager uiPluginManager) {
         this.updateDAO = updateDAO;

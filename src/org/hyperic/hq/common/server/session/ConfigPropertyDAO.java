@@ -34,7 +34,7 @@ import org.springframework.stereotype.Repository;
  * USA.
  */
 @Repository
-public class ConfigPropertyDAO extends HibernateDAO
+public class ConfigPropertyDAO extends HibernateDAO<ConfigProperty>
 {
     @Autowired
     public ConfigPropertyDAO(SessionFactory f) {
@@ -72,7 +72,7 @@ public class ConfigPropertyDAO extends HibernateDAO
         return c;
     }
 
-    public Collection findByPrefix(String s)
+    public Collection<ConfigProperty> findByPrefix(String s)
     {
         String sql="from ConfigProperty where prefix=?";
         return getSession().createQuery(sql)
