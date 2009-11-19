@@ -70,7 +70,7 @@ public class MetricProblemDAO
         return p;
     }
 
-    int deleteByMetricIds(Collection<Integer> ids) {
+    public int deleteByMetricIds(Collection<Integer> ids) {
         String hql = "delete MetricProblem where measurement_id in (:ids)";
 
         Session session = getSession();

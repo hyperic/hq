@@ -65,18 +65,36 @@ import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The TemplateManagerEJB class is a stateless session bean that can be
- * used to interact with Template EJB's
+ * The TemplateManagerEJB class is a stateless session bean that can be used to
+ * interact with Template EJB's
  */
 @Service
 @Transactional
-public class TemplateManagerImpl
-    extends SessionEJB implements TemplateManager {
+public class TemplateManagerImpl implements TemplateManager {
     private final Log log = LogFactory.getLog(TemplateManagerImpl.class);
+    private CategoryDAO categoryDAO;
+    private MeasurementDAO measurementDAO;
+    private MeasurementTemplateDAO measurementTemplateDAO;
+    private MonitorableTypeDAO monitorableTypeDAO;
+    private ScheduleRevNumDAO scheduleRevNumDAO;
+    private SRNManager srnManager;
+
+    @Autowired
+    public TemplateManagerImpl(CategoryDAO categoryDAO, MeasurementDAO measurementDAO,
+                               MeasurementTemplateDAO measurementTemplateDAO, MonitorableTypeDAO monitorableTypeDAO,
+                               ScheduleRevNumDAO scheduleRevNumDAO, SRNManager srnManager) {
+        this.categoryDAO = categoryDAO;
+        this.measurementDAO = measurementDAO;
+        this.measurementTemplateDAO = measurementTemplateDAO;
+        this.monitorableTypeDAO = monitorableTypeDAO;
+        this.scheduleRevNumDAO = scheduleRevNumDAO;
+        this.srnManager = srnManager;
+    }
 
     /**
      * Get a MeasurementTemplate
@@ -99,13 +117,11 @@ public class TemplateManagerImpl
      * @throws FinderException if no measurement templates are found.
      * @return a MeasurementTemplate value
      */
-    public List<MeasurementTemplate> getTemplates(Integer[] ids, PageControl pc)
-        throws TemplateNotFoundException {
+    public List<MeasurementTemplate> getTemplates(Integer[] ids, PageControl pc) throws TemplateNotFoundException {
         List<MeasurementTemplate> mts = measurementTemplateDAO.findTemplates(ids);
 
         if (ids.length != mts.size()) {
-            throw new TemplateNotFoundException("Could not look up " +
-                                                StringUtil.arrayToString(ids));
+            throw new TemplateNotFoundException("Could not look up " + StringUtil.arrayToString(ids));
         }
 
         if (pc.getSortorder() == PageControl.SORT_DESC) {
@@ -125,8 +141,7 @@ public class TemplateManagerImpl
      * 
      * @return a list of {@link MeasurementTemplate}s
      */
-    public List<MeasurementTemplate> findTemplates(AuthzSubject user, PageInfo pInfo,
-                                                   Boolean defaultOn)
+    public List<MeasurementTemplate> findTemplates(AuthzSubject user, PageInfo pInfo, Boolean defaultOn)
         throws PermissionException {
         assertSuperUser(user);
         return measurementTemplateDAO.findAllTemplates(pInfo, defaultOn);
@@ -142,17 +157,14 @@ public class TemplateManagerImpl
      * 
      * @return a list of {@link MeasurementTemplate}s
      */
-    public List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user, PageInfo pInfo,
-                                                                    String type, Boolean defaultOn)
-        throws PermissionException {
+    public List<MeasurementTemplate> findTemplatesByMonitorableType(AuthzSubject user, PageInfo pInfo, String type,
+                                                                    Boolean defaultOn) throws PermissionException {
         assertSuperUser(user);
         return measurementTemplateDAO.findTemplatesByMonitorableType(pInfo, type, defaultOn);
     }
 
-    private void assertSuperUser(AuthzSubject s)
-        throws PermissionException {
-        boolean authorized = PermissionManagerFactory.getInstance()
-                                                     .hasAdminPermission(s.getId());
+    private void assertSuperUser(AuthzSubject s) throws PermissionException {
+        boolean authorized = PermissionManagerFactory.getInstance().hasAdminPermission(s.getId());
 
         if (!authorized) {
             throw new PermissionException("Permission denied");
@@ -160,19 +172,16 @@ public class TemplateManagerImpl
     }
 
     /**
-     * Look up a measurement templates for a monitorable type and
-     * category.
+     * Look up a measurement templates for a monitorable type and category.
      * 
      * @return a MeasurementTemplate value
      */
-    public List<MeasurementTemplate> findTemplates(String type, String cat,
-                                                   Integer[] excludeIds, PageControl pc) {
+    public List<MeasurementTemplate> findTemplates(String type, String cat, Integer[] excludeIds, PageControl pc) {
         List<MeasurementTemplate> templates;
         if (cat == null) {
             templates = measurementTemplateDAO.findTemplatesByMonitorableType(type);
         } else {
-            templates = measurementTemplateDAO.findTemplatesByMonitorableTypeAndCategory(type,
-                                                                                         cat);
+            templates = measurementTemplateDAO.findTemplatesByMonitorableTypeAndCategory(type, cat);
         }
 
         if (templates == null) {
@@ -201,8 +210,8 @@ public class TemplateManagerImpl
     }
 
     /**
-     * Look up a measurement templates for a monitorable type and filtered
-     * by categories and keyword.
+     * Look up a measurement templates for a monitorable type and filtered by
+     * categories and keyword.
      * 
      * @return a MeasurementTemplate value
      */
@@ -210,28 +219,22 @@ public class TemplateManagerImpl
         MeasurementTemplateDAO dao = measurementTemplateDAO;
         List<MeasurementTemplate> mts;
 
-        if ((filters & MeasurementConstants.FILTER_AVAIL) == 0 ||
-            (filters & MeasurementConstants.FILTER_UTIL) == 0 ||
-            (filters & MeasurementConstants.FILTER_THRU) == 0 ||
-            (filters & MeasurementConstants.FILTER_PERF) == 0) {
+        if ((filters & MeasurementConstants.FILTER_AVAIL) == 0 || (filters & MeasurementConstants.FILTER_UTIL) == 0 ||
+            (filters & MeasurementConstants.FILTER_THRU) == 0 || (filters & MeasurementConstants.FILTER_PERF) == 0) {
             mts = new ArrayList<MeasurementTemplate>();
 
             // Go through each filter
             if ((filters & MeasurementConstants.FILTER_AVAIL) > 0) {
-                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type,
-                                                                         MeasurementConstants.CAT_AVAILABILITY));
+                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type, MeasurementConstants.CAT_AVAILABILITY));
             }
             if ((filters & MeasurementConstants.FILTER_UTIL) > 0) {
-                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type,
-                                                                         MeasurementConstants.CAT_UTILIZATION));
+                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type, MeasurementConstants.CAT_UTILIZATION));
             }
             if ((filters & MeasurementConstants.FILTER_THRU) > 0) {
-                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type,
-                                                                         MeasurementConstants.CAT_THROUGHPUT));
+                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type, MeasurementConstants.CAT_THROUGHPUT));
             }
             if ((filters & MeasurementConstants.FILTER_PERF) > 0) {
-                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type,
-                                                                         MeasurementConstants.CAT_PERFORMANCE));
+                mts.addAll(dao.findTemplatesByMonitorableTypeAndCategory(type, MeasurementConstants.CAT_PERFORMANCE));
             }
         } else {
             mts = dao.findTemplatesByMonitorableType(type);
@@ -308,9 +311,7 @@ public class TemplateManagerImpl
      * @param templIds - a list of integer template ids
      * @param interval - the interval of collection to set to
      */
-    public void updateTemplateDefaultInterval(AuthzSubject subject,
-                                              Integer[] templIds,
-                                              long interval) {
+    public void updateTemplateDefaultInterval(AuthzSubject subject, Integer[] templIds, long interval) {
         HashSet<AppdefEntityID> toReschedule = new HashSet<AppdefEntityID>();
         for (int i = 0; i < templIds.length; i++) {
             MeasurementTemplate template = measurementTemplateDAO.findById(templIds[i]);
@@ -328,21 +329,18 @@ public class TemplateManagerImpl
                 m.setInterval(template.getDefaultInterval());
             }
 
-            List<AppdefEntityID> appdefEntityIds =
-                                                   measurementDAO.findAppdefEntityIdsByTemplate(template.getId());
+            List<AppdefEntityID> appdefEntityIds = measurementDAO.findAppdefEntityIdsByTemplate(template.getId());
 
             toReschedule.addAll(appdefEntityIds);
         }
 
-        SRNManager srnManager = getSRNManager();
         SRNCache cache = SRNCache.getInstance();
 
         int count = 0;
         for (AppdefEntityID id : toReschedule) {
             ScheduleRevNum srn = cache.get(id);
             if (srn != null) {
-                srnManager.incrementSrn(id, Math.min(interval,
-                                                     srn.getMinInterval()));
+                srnManager.incrementSrn(id, Math.min(interval, srn.getMinInterval()));
                 if (++count % 100 == 0) {
                     scheduleRevNumDAO.flushSession();
                 }
@@ -356,10 +354,8 @@ public class TemplateManagerImpl
      * Make metrics disabled by default for a list of meas. templates
      * @param templIds - a list of integer template ids
      */
-    public void setTemplateEnabledByDefault(AuthzSubject subject,
-                                            Integer[] templIds, boolean on) {
-        // TODO: DI See HE-133
-        SRNManager srnMan = getSRNManager();
+    public void setTemplateEnabledByDefault(AuthzSubject subject, Integer[] templIds, boolean on) {
+
         long current = System.currentTimeMillis();
 
         Map<AppdefEntityID, Long> aeids = new HashMap<AppdefEntityID, Long>();
@@ -381,14 +377,12 @@ public class TemplateManagerImpl
                     dm.setInterval(template.getDefaultInterval());
                 }
 
-                final AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(),
-                                                               dm.getInstanceId());
+                final AppdefEntityID aeid = new AppdefEntityID(dm.getAppdefType(), dm.getInstanceId());
 
                 Long min = new Long(dm.getInterval());
                 if (aeids.containsKey(aeid)) {
                     // Set the minimum interval
-                    min = new Long(Math.min(((Long) aeids.get(aeid)).longValue(),
-                                            min.longValue()));
+                    min = new Long(Math.min(((Long) aeids.get(aeid)).longValue(), min.longValue()));
                 }
                 aeids.put(aeid, min);
             }
@@ -396,10 +390,8 @@ public class TemplateManagerImpl
 
         for (Map.Entry<AppdefEntityID, Long> entry : aeids.entrySet()) {
             AppdefEntityID aeid = entry.getKey();
-            ScheduleRevNum srn = srnMan.get(aeid);
-            srnMan.incrementSrn(aeid,
-                                (srn == null) ? entry.getValue().longValue() :
-                                             srn.getMinInterval());
+            ScheduleRevNum srn = srnManager.get(aeid);
+            srnManager.incrementSrn(aeid, (srn == null) ? entry.getValue().longValue() : srn.getMinInterval());
         }
     }
 
@@ -421,15 +413,14 @@ public class TemplateManagerImpl
     }
 
     /**
-     * Update measurement templates for a given entity. This still
-     * needs some refactoring.
+     * Update measurement templates for a given entity. This still needs some
+     * refactoring.
      * 
-     * @return A map of measurement info's that are new and will need
-     *         to be created.
+     * @return A map of measurement info's that are new and will need to be
+     *         created.
      */
     public Map<String, MeasurementInfo> updateTemplates(String pluginName, TypeInfo ownerEntity,
-                                                        MonitorableType monitorableType,
-                                                        MeasurementInfo[] tmpls)
+                                                        MonitorableType monitorableType, MeasurementInfo[] tmpls)
         throws CreateException, RemoveException {
         // Organize the templates first
         Map<String, MeasurementInfo> tmap = new HashMap<String, MeasurementInfo>();
@@ -456,8 +447,8 @@ public class TemplateManagerImpl
     /**
      * Add new measurement templates for a plugin.
      * 
-     * This does a batch style insert, and expects a map of maps
-     * indexed by the monitorable type id.
+     * This does a batch style insert, and expects a map of maps indexed by the
+     * monitorable type id.
      */
     public void createTemplates(String pluginName, Map<MonitorableType, Map<?, MeasurementInfo>> toAdd)
         throws CreateException {
@@ -468,16 +459,15 @@ public class TemplateManagerImpl
         Session session = measurementTemplateDAO.getSession();
         try {
             IdentifierGenerator tmplIdGenerator = sessionFactory
-                                                                .getEntityPersister(MeasurementTemplate.class.getName())
-                                                                .getIdentifierGenerator();
+                .getEntityPersister(MeasurementTemplate.class.getName()).getIdentifierGenerator();
 
             Connection conn = Util.getConnection();
 
-            final String templatesql = "INSERT INTO EAM_MEASUREMENT_TEMPL " +
-                                       "(id, name, alias, units, collection_type, default_on, " +
-                                       "default_interval, designate, monitorable_type_id, " +
-                                       "category_id, template, plugin, ctime, mtime) " +
-                                       "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            final String templatesql = "INSERT INTO EAM_MEASUREMENT_TEMPL "
+                                       + "(id, name, alias, units, collection_type, default_on, "
+                                       + "default_interval, designate, monitorable_type_id, "
+                                       + "category_id, template, plugin, ctime, mtime) "
+                                       + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             long current = System.currentTimeMillis();
 
@@ -489,8 +479,7 @@ public class TemplateManagerImpl
                 Map<?, MeasurementInfo> newMetrics = entry.getValue();
 
                 for (MeasurementInfo info : newMetrics.values()) {
-                    Category cat =
-                                   (Category) cats.get(info.getCategory());
+                    Category cat = (Category) cats.get(info.getCategory());
                     if (cat == null) {
                         cat = categoryDAO.findByName(info.getCategory());
                         if (cat == null) {
@@ -500,8 +489,8 @@ public class TemplateManagerImpl
                     }
 
                     int col = 1;
-                    Integer rawid = (Integer) tmplIdGenerator.generate((SessionImpl) session,
-                                                                       new MeasurementTemplate());
+                    Integer rawid = (Integer) tmplIdGenerator
+                        .generate((SessionImpl) session, new MeasurementTemplate());
 
                     stmt = conn.prepareStatement(templatesql);
                     stmt.setInt(col++, rawid.intValue());
@@ -523,8 +512,7 @@ public class TemplateManagerImpl
                 }
             }
         } catch (SQLException e) {
-            this.log.error("Unable to add measurements for: " +
-                           pluginName, e);
+            this.log.error("Unable to add measurements for: " + pluginName, e);
         } finally {
             Util.endConnection();
         }

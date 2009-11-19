@@ -30,7 +30,6 @@ import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
 import org.hyperic.hq.bizapp.shared.EmailManager;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.measurement.server.session.SessionEJB;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,8 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 // Really? TODO
-public class EmailManagerImpl
-    extends SessionEJB implements EmailManager {
+public class EmailManagerImpl implements EmailManager {
     /**
      */
     public void sendAlert(EmailFilter filter, AppdefEntityID appEnt,
