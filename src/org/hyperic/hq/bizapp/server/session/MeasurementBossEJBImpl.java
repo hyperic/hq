@@ -162,6 +162,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
         return metrics;
     }
+    
+ 
 
     /**
      * Get Autogroup member ids
@@ -1640,7 +1642,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         return summary;
     }
-
+    
+   
     /**
      * Method findResourceMetricSummary.
      * 
@@ -1809,13 +1812,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @see org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary
      * @ejb:interface-method
      */
-    public Map findMetrics(int sessionId, AppdefEntityID entId, List mtids,
+    public Map findMetrics(int sessionId, AppdefEntityID entId, List<Integer> mtids,
                            long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
             PermissionException, AppdefEntityNotFoundException,
             AppdefCompatException {
         return super.findMetrics(sessionId, entId, mtids, begin, end);
     }
+    
+    
 
     /** Return a MetricSummary bean for each of the servers of a specific type.
      * @param begin the beginning time frame
@@ -1834,6 +1839,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return super.findAGPlatformMetricsByType(sessionId, platTypeId,
                                                  begin, end, showAll);
     }
+    
+   
 
     /**
      * Return a Metric summary bean for each of the services of a specific type
@@ -1868,8 +1875,35 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
             InvalidAppdefTypeException, PermissionException,
             AppdefEntityNotFoundException, AppdefCompatException {
-        return super.findAGMetricsByType(sessionId, entIds, typeId, filters,
-                                         keyword, begin, end, showAll);
+  AuthzSubject subject = manager.getSubject(sessionId);
+        
+        List group = new ArrayList();
+        for (int i = 0; i < entIds.length; i++) {
+            AppdefEntityValue rv = new AppdefEntityValue(entIds[i], subject);
+            
+            switch (typeId.getType()) {
+                case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                    // Get the associated servers
+                    group.addAll(rv.getAssociatedServers(typeId.getId(),
+                                                         PageControl.PAGE_ALL));
+                    break;
+                case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                    // Get the associated services
+                    group.addAll(rv.getAssociatedServices(typeId.getId(),
+                                                          PageControl.PAGE_ALL));
+                    break;
+                default:
+                    break;
+            }
+        }
+    
+        // Need to get the templates for this type, using the first resource
+        AppdefResourceValue resource = (AppdefResourceValue) group.get(0);
+        String resourceType = resource.getAppdefResourceTypeValue().getName();
+    
+        // Look up the metric summaries of associated servers
+        return getResourceMetrics(subject, group, resourceType, filters,
+                                  keyword, begin, end, showAll);
     }
     
     /** Return a MeasurementSummary bean for the resource's associated resources
@@ -3067,8 +3101,74 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException,
                AppdefCompatException, InvalidAppdefTypeException {
-        return super.findAllMetrics(sessionId, aeid, ctype, begin, end);
+        ArrayList result = new ArrayList();
+        AppdefEntityID[] entIds = new AppdefEntityID[] { aeid };
+        
+        Map metrics = findAGMetricsByType(sessionId, entIds, ctype,
+                                          MeasurementConstants.FILTER_NONE,
+                                          null, begin, end, false);
+        for (Iterator it = metrics.values().iterator(); it.hasNext(); ) {
+            Collection metricColl = (Collection) it.next();
+            
+            for (Iterator it2 = metricColl.iterator(); it2.hasNext(); ) {
+                MetricDisplaySummary summary =
+                    (MetricDisplaySummary) it2.next();
+                ProblemMetricSummary pms =
+                    new ProblemMetricSummary(summary);
+                pms.setMultipleAppdefKey(ctype.getAppdefKey());
+                result.add(pms);
+            }
+        }
+        return result;
     }
+    
+    public List findAllMetrics(int sessionId, AppdefEntityID aeid,
+                                  long begin, long end)
+        throws SessionTimeoutException, SessionNotFoundException,
+               AppdefEntityNotFoundException, PermissionException,
+               AppdefCompatException, InvalidAppdefTypeException {
+        ArrayList result = new ArrayList();
+        Map metrics = findMetrics(sessionId, aeid, begin, end,
+                                  PageControl.PAGE_ALL);
+        for (Iterator it = metrics.values().iterator(); it.hasNext(); ) {
+            Collection metricColl = (Collection) it.next();
+            
+            for (Iterator it2 = metricColl.iterator(); it2.hasNext(); ) {
+                MetricDisplaySummary summary =
+                    (MetricDisplaySummary) it2.next();
+                ProblemMetricSummary pms =
+                    new ProblemMetricSummary(summary);
+                pms.setSingleAppdefKey(aeid.getAppdefKey());
+                result.add(pms);
+            }
+        }
+        return result;
+    }
+    
+    public List findAllMetrics(int sessionId, AppdefEntityID[] aeids,
+                                  long begin, long end)
+        throws SessionTimeoutException, SessionNotFoundException,
+               AppdefEntityNotFoundException, PermissionException,
+               AppdefCompatException, InvalidAppdefTypeException {
+        ArrayList result = new ArrayList();
+        Map metrics = findMetrics(sessionId, aeids,
+                                  MeasurementConstants.FILTER_NONE, null,
+                                  begin, end, false);
+        for (Iterator it = metrics.values().iterator(); it.hasNext(); ) {
+            Collection metricColl = (Collection) it.next();
+            
+            for (Iterator it2 = metricColl.iterator(); it2.hasNext(); ) {
+                MetricDisplaySummary summary =
+                    (MetricDisplaySummary) it2.next();
+                ProblemMetricSummary pms =
+                    new ProblemMetricSummary(summary);
+                result.add(pms);
+            }
+        }
+        return result;
+    }
+    
+    
 
     /**
      * Returns a list of problem metrics for a resource, and the selected
@@ -3126,6 +3226,21 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         
         return result;
+    }
+    
+    public double[] getAvailability(AuthzSubject subject,
+                                       AppdefEntityID[] ids)
+        throws AppdefEntityNotFoundException,
+               PermissionException {
+        // Allow for the maximum window based on collection interval
+        return getAvailability(subject, ids, getMidMap(getResources(ids)), null);
+    }
+    
+    public List getAGMemberIds(AuthzSubject subject,
+                                  AppdefEntityID parentAid,
+                                  AppdefEntityTypeID ctype)
+        throws AppdefEntityNotFoundException, PermissionException {
+        return getAGMemberIds(subject, new AppdefEntityID[] { parentAid }, ctype);
     }
 
     /**
