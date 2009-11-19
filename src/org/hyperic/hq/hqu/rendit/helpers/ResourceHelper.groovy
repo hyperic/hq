@@ -6,7 +6,7 @@ import org.hyperic.hq.appdef.server.session.PlatformManagerImpl as PlatMan
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl as ServerMan
 import org.hyperic.hq.appdef.server.session.ServiceManagerImpl as ServiceMan
 import org.hyperic.hq.appdef.server.session.ApplicationManagerImpl as AppMan
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl as EscMan
+import org.hyperic.hq.escalation.server.session.EscalationManagerImpl as EscMan
 import org.hyperic.hq.events.server.session.AlertManagerImpl as AlertMan
 import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as AlertDefMan
 import org.hyperic.hq.authz.server.session.RoleManagerImpl as RoleMan
@@ -90,8 +90,8 @@ class ResourceHelper extends BaseHelper {
             case 'resources': return ResMan.one.resourceCount
             case 'resourceTypes': return ResMan.one.resourceTypeCount
             case 'groups': return GroupMan.one.groupCount
-            case 'escalations': return EscMan.one.escalationCount
-            case 'activeEscalations': return EscMan.one.activeEscalationCount
+            case 'escalations': return EscMan.one.EscalationManagerImplnt
+            case 'activeEscalations': return EscMan.one.EscalationManagerImplionCount
             default:
                 throw new IllegalArgumentException("count ${args.count} must specify a " + 
                                                    "valid resource type")

@@ -3,7 +3,7 @@ package org.hyperic.hq.hqu.rendit.helpers
 import java.util.Collection
 
 import org.hyperic.hq.authz.server.session.AuthzSubject
-import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl as EscMan
+import org.hyperic.hq.escalation.server.session.EscalationManagerImpl as EscMan
 import org.hyperic.hq.escalation.server.session.Escalation
 import org.hyperic.hq.events.ActionInterface
 

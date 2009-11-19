@@ -53,7 +53,7 @@ import org.hyperic.hq.common.shared.CrispoManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.escalation.server.session.Escalation;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.AlertAuxLog;
 import org.hyperic.hq.events.AlertAuxLogProvider;
 import org.hyperic.hq.events.AlertSeverity;
@@ -84,7 +84,7 @@ public class GalertManagerImpl implements GalertManager {
     private GalertLogDAO _logDAO;
     private GalertActionLogDAO _actionLogDAO;
     private CrispoManager crispoManager;
-    private EscalationManagerLocal escalationManager;
+    private EscalationManager escalationManager;
 
     private ResourceGroupManager resourceGroupManager;
 
@@ -95,7 +95,7 @@ public class GalertManagerImpl implements GalertManager {
                              GalertLogDAO logDAO,
                              GalertActionLogDAO actionLogDAO,
                              CrispoManager crispoManager,
-                             EscalationManagerLocal escalationManager,
+                             EscalationManager escalationManager,
                              ResourceGroupManager resourceGroupManager) {
         _stratTypeDAO = stratTypeDAO;
         _defDAO = defDAO;

@@ -41,7 +41,7 @@ import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.action.EnableAlertDefActionConfig;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalation;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.events.ActionCreateException;
 import org.hyperic.hq.events.AlertConditionCreateException;
 import org.hyperic.hq.events.AlertDefinitionCreateException;
@@ -101,14 +101,14 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
 
     private ResourceManager resourceManager;
 
-    private EscalationManagerLocal escalationManager;
+    private EscalationManager escalationManager;
 
     @Autowired
     public AlertDefinitionManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
                                       ActionDAO actionDao, AlertConditionDAO alertConditionDAO, TriggerDAO triggerDAO,
                                       MeasurementDAO measurementDAO,
                                       RegisteredTriggerManager registeredTriggerManager,
-                                      ResourceManager resourceManager, EscalationManagerLocal escalationManager) {
+                                      ResourceManager resourceManager, EscalationManager escalationManager) {
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;
         this.actionDao = actionDao;
@@ -126,7 +126,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     }
 
     private boolean deleteAlertDefinitionStuff(AuthzSubject subj, AlertDefinition alertdef,
-                                               EscalationManagerLocal escMan) {
+                                               EscalationManager escMan) {
         StopWatch watch = new StopWatch();
 
         // Delete escalation state

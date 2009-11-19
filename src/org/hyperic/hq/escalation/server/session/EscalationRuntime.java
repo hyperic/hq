@@ -37,7 +37,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.TransactionListener;
-import org.hyperic.hq.escalation.shared.EscalationManagerLocal;
+import org.hyperic.hq.escalation.shared.EscalationManager;
 
 import EDU.oswego.cs.dl.util.concurrent.ClockDaemon;
 import EDU.oswego.cs.dl.util.concurrent.Executor;
@@ -48,7 +48,7 @@ import EDU.oswego.cs.dl.util.concurrent.Semaphore;
 /**
  * This class manages the runtime execution of escalation chains.  The
  * persistence part of the escalation engine lives within 
- * {@link EscalationManagerEJBImpl}
+ * {@link EscalationManagerImpl}
  * 
  * This class does very little within hanging onto and remembering state
  * data.  It only knows about the escalation state ID and the time that it
@@ -82,14 +82,14 @@ class EscalationRuntime {
     private final Set _uncomittedEscalatingEntities = 
                             Collections.synchronizedSet(new HashSet());
     private final PooledExecutor          _executor;
-    private final EscalationManagerLocal  _esclMan;
+    private final EscalationManager  _esclMan;
     
     private EscalationRuntime() {
         _executor = new PooledExecutor(new LinkedQueue());
         _executor.setKeepAliveTime(-1);  // Threads never die off
         _executor.createThreads(3);  // # of threads to service requests
         
-        _esclMan = EscalationManagerEJBImpl.getOne();
+        _esclMan = EscalationManagerImpl.getOne();
     }
 
     /**
