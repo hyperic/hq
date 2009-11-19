@@ -29,13 +29,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.appdef.server.session.AppdefManagerImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
@@ -43,6 +40,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefManager;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -50,15 +48,16 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
-import org.hyperic.hq.bizapp.shared.ControlBossLocal;
-import org.hyperic.hq.bizapp.shared.ControlBossUtil;
+import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.server.session.ControlHistory;
 import org.hyperic.hq.control.server.session.ControlSchedule;
+import org.hyperic.hq.control.shared.ControlFrequencyValue;
+import org.hyperic.hq.control.shared.ControlManager;
+import org.hyperic.hq.control.shared.ControlScheduleManager;
 import org.hyperic.hq.control.shared.ScheduledJobNotFoundException;
 import org.hyperic.hq.control.shared.ScheduledJobRemoveException;
-import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
@@ -66,42 +65,35 @@ import org.hyperic.hq.scheduler.ScheduleValue;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.quartz.SchedulerException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-/** 
- * @ejb:bean name="ControlBoss"
- *      jndi-name="ejb/bizapp/ControlBoss"
- *      local-jndi-name="LocalControlBoss"
- *      view-type="both"
- *      type="Stateless"
- *      
- * @ejb:transaction type="Required"
- */
-public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
+@Service
+@Transactional
+public class ControlBossImpl implements ControlBoss
 {
     // Our log instance
-    private Log log = LogFactory.getLog(ControlBossEJBImpl.class.getName());
+    private final static Log log = LogFactory.getLog(ControlBossImpl.class.getName());
 
     // Session manager
-    private SessionManager sessionManager = SessionManager.getInstance();
-
-    AppdefManager appdefMgr = null;
-    private AppdefManager getAppdefManager() {
-        if(appdefMgr == null){
-            appdefMgr = AppdefManagerImpl.getOne();
-        }
-        return appdefMgr;
+    private SessionManager sessionManager;
+    private AppdefManager appdefManager;
+    private AuthManager authManager;
+    private ControlManager controlManager;
+    private ControlScheduleManager controlScheduleManager;
+    
+    @Autowired
+    public ControlBossImpl(SessionManager sessionManager, AppdefManager appdefManager, AuthManager authManager, ControlManager controlManager, ControlScheduleManager controlScheduleManager) {
+    	this.appdefManager = appdefManager;
+    	this.authManager = authManager;
+    	this.controlManager = controlManager;
+    	this.controlScheduleManager = controlScheduleManager;
+    	this.sessionManager = sessionManager;
     }
-
-    /** @ejb:create-method */
-    public void ejbCreate() {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void setSessionContext(SessionContext ctx) {}
     
     /**
      * Execute a control action immediately on an appdef entity.
-     * @ejb:interface-method
      * @param action The action to perform
      */
     public void doAction(int sessionId, AppdefEntityID id, String action,
@@ -115,7 +107,8 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
             doGroupAction(sessionId, id, action, args, null);
         } else {
             AuthzSubject subject = sessionManager.getSubject(sessionId);
-            getControlManager().doAction(subject, id, action, args);
+            
+            controlManager.doAction(subject, id, action, args);
         }
     }
 
@@ -124,7 +117,6 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      *
      * This is used for doing scheduled control actions.
      *
-     * @ejb:interface-method
      * @param controlJob The control job action name
      * @param schedule The control job schedule
      */
@@ -139,14 +131,14 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
             doGroupAction(sessionId, id, action, null, schedule);
         } else {
             AuthzSubject subject = sessionManager.getSubject(sessionId);
-            getControlManager().doAction(subject, id, action, schedule);
+            
+            controlManager.doAction(subject, id, action, schedule);
         }
     }
 
     /**
      * Schedule a control action on a group entity.
      * 
-     * @ejb:interface-method
      * @param action The action to perform
      */
     public void doGroupAction(int sessionId, AppdefEntityID groupEnt,
@@ -158,14 +150,14 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                GroupNotCompatibleException, ApplicationException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        getControlManager().doGroupAction(subject, groupEnt, action, orderSpec,
+        
+        controlManager.doGroupAction(subject, groupEnt, action, orderSpec,
                                           schedule);
     }
 
     /**
      * Execute a control action immediately on a group entity.
      * 
-     * @ejb:interface-method
      * @param action The action to perform
      */
     public void doGroupAction(int sessionId, AppdefEntityID groupEnt,
@@ -175,37 +167,36 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                PermissionException, AppdefEntityNotFoundException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        getControlManager().doGroupAction(subject, groupEnt, action, args,
-                                          orderSpec);
+        
+        controlManager.doGroupAction(subject, groupEnt, action, args, orderSpec);
     }
 
     /**
      * Get the actions supported for an appdef entity
-     * @ejb:interface-method
      */
-    public List getActions(int sessionId, AppdefEntityID id)
+    public List<String> getActions(int sessionId, AppdefEntityID id)
         throws PluginNotFoundException, AppdefEntityNotFoundException,
                SessionNotFoundException, SessionTimeoutException,
                PermissionException, GroupNotCompatibleException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlManager().getActions(subject, id);
+        
+        return controlManager.getActions(subject, id);
     }
     
     /**
      * Get the actions supported for an appdef entity type
-     * @ejb:interface-method
      */
-    public List getActions(int sessionId, AppdefEntityTypeID aetid)
+    public List<String> getActions(int sessionId, AppdefEntityTypeID aetid)
         throws PluginNotFoundException, PermissionException,
                SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlManager().getActions(subject, aetid);
+        
+        return controlManager.getActions(subject, aetid);
     }
 
     /**
      * Check if a group has been enabled for control
-     * @ejb:interface-method
      */
     public boolean isGroupControlEnabled(int sessionId, AppdefEntityID id)
         throws AppdefEntityNotFoundException, PermissionException,
@@ -213,38 +204,37 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
    {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-        return getControlManager().isGroupControlEnabled(subject, id);
+        return controlManager.isGroupControlEnabled(subject, id);
     }
 
     /**
      * Check if the entity's resource supports control
-     * @ejb:interface-method
      */
     public boolean isControlSupported (int sessionId, AppdefResourceValue res)
         throws SessionNotFoundException, SessionTimeoutException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlManager().
+        
+        return controlManager.
             isControlSupported(subject, res.getEntityId(),
                                res.getAppdefResourceTypeValue().getName());
     }
 
     /**
      * Check if the entity's resource supports control
-     * @ejb:interface-method
      */
     public boolean isControlSupported (int sessionId, AppdefEntityTypeID tid)
         throws SessionNotFoundException, SessionTimeoutException               
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlManager().
+        
+        return controlManager.
             isControlSupported(subject, tid.getAppdefResourceType().getName());
     }
 
     /**
      * Check if anything has been enabled for control
      * 
-     * @ejb:interface-method
      */
     public boolean isControlEnabled(int sessionId)
         throws SessionNotFoundException,  SessionTimeoutException,
@@ -252,99 +242,98 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-        Map platTypes =
-            getAppdefManager().getControllablePlatformTypes(subject);
+        Map<String, AppdefEntityID> platTypes =
+            appdefManager.getControllablePlatformTypes(subject);
         
-        if (platTypes.size() > 0)
+        if (platTypes.size() > 0) {
             return true;
+        }
         
-        Map svrTypes = getAppdefManager().getControllableServerTypes(subject);
+        Map<String, AppdefEntityTypeID> svrTypes = appdefManager.getControllableServerTypes(subject);
         
-        if (svrTypes.size() > 0)
+        if (svrTypes.size() > 0) {
             return true;
+        }
         
-        Map svcTypes = getAppdefManager().getControllableServiceTypes(subject);
+        Map<String, AppdefEntityTypeID> svcTypes = appdefManager.getControllableServiceTypes(subject);
         
         return (svcTypes.size() > 0);
     }
     /**
      * Check if an entity has been enabled for control
-     * @ejb:interface-method
      */
     public boolean isControlEnabled(int sessionId, AppdefEntityID id)
         throws AppdefEntityNotFoundException, SessionNotFoundException, 
                SessionTimeoutException, PermissionException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlManager().isControlEnabled(subject, id);
+        
+        return controlManager.isControlEnabled(subject, id);
     }
 
     /**
      * Finder for all of the scheduled jobs for an appdef entity.
-     * @ejb:interface-method
      * @return List of scheduled actions
      */
-    public PageList findScheduledJobs(int sessionId, AppdefEntityID id,
+    public PageList<ControlSchedule> findScheduledJobs(int sessionId, AppdefEntityID id,
                                       PageControl pc)
         throws PluginException, ScheduledJobNotFoundException,
                SessionNotFoundException, SessionTimeoutException,
                PermissionException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlScheduleManager().findScheduledJobs(subject, id, pc);
+        
+        return controlScheduleManager.findScheduledJobs(subject, id, pc);
     }
     
     /**
      * Remove all of the scheduled jobs for an appdef entity.
-     * @ejb:interface-method
      */
     public void removeScheduledJobs(int sessionId, AppdefEntityID id)
         throws SessionNotFoundException, SessionTimeoutException,
                ScheduledJobRemoveException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        getControlScheduleManager().removeScheduledJobs(subject, id);
+        
+        controlScheduleManager.removeScheduledJobs(subject, id);
     }
 
     /**
      * Get a job history based on appdef id
      *
-     * @ejb:interface-method
-     *
      * @TODO Implement page controls, Authz integration
      */
-    public PageList findJobHistory(int sessionId, AppdefEntityID id, 
+    public PageList<ControlHistory> findJobHistory(int sessionId, AppdefEntityID id, 
                                    PageControl pc)
         throws PluginException, ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException               
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlScheduleManager().findJobHistory(subject, id, pc);
+        
+        return controlScheduleManager.findJobHistory(subject, id, pc);
     }
 
     /**
      * Group job history detail on group appdef id
-     *
-     * @ejb:interface-method
      */
-    public PageList findGroupJobHistory(int sessionId, AppdefEntityID id, 
+    public PageList<ControlHistory> findGroupJobHistory(int sessionId, AppdefEntityID id, 
                                         int batchJobId, PageControl pc)
         throws PluginException, ApplicationException,
                SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefGroupNotFoundException
     {
-        if (!id.isGroup())
+        if (!id.isGroup()) {
           throw new IllegalArgumentException ("Invalid group entity specified");
-
+        }
+        
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlScheduleManager().findGroupJobHistory(subject,
+        
+        return controlScheduleManager.findGroupJobHistory(subject,
                                                                batchJobId,
                                                                id, pc);
     }
 
     /**
      * Remove an entry from the control history
-     *
-     * @ejb:interface-method
      *
      * @TODO Authz integration
      */
@@ -353,14 +342,13 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionNotFoundException, SessionTimeoutException               
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        getControlScheduleManager().deleteJobHistory(subject, ids);
+        
+        controlScheduleManager.deleteJobHistory(subject, ids);
     }
    
     /**
      * Obtain the current action that is being executed.  If there is
      * no current running action, null is returned.
-     *
-     * @ejb:interface-method
      *
      * @return currently running ControlJob.
      */
@@ -369,13 +357,12 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                 SessionNotFoundException, SessionTimeoutException                
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlScheduleManager().getCurrentJob(subject, id);
+        
+        return controlScheduleManager.getCurrentJob(subject, id);
     }
 
     /**
      * Obtain a control action based on job id
-     *
-     * @ejb:interface-method
      *
      * @return last ControlJob that ran
      */
@@ -384,13 +371,12 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionNotFoundException, SessionTimeoutException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlScheduleManager().getJobByJobId(subject, id);
+        
+        return controlScheduleManager.getJobByJobId(subject, id);
     }
 
     /**
      * Obtain the last control action that fired
-     *
-     * @ejb:interface-method
      *
      * @return last ControlJob that ran
      */
@@ -399,13 +385,12 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionNotFoundException, SessionTimeoutException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlScheduleManager().getLastJob(subject, id);
+        
+        return controlScheduleManager.getLastJob(subject, id);
     }
 
     /**
      * Obtain a ControlJob based on an id
-     *
-     * @ejb:interface-method
      * @param triggerName The control trigger name
      *
      * @return The control job that was requested
@@ -415,13 +400,12 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionNotFoundException, SessionTimeoutException               
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);     
-        return getControlScheduleManager().getControlJob(subject, id);
+        
+        return controlScheduleManager.getControlJob(subject, id);
     }
 
     /**
      * Delete a ControlJob based on an id
-     *
-     * @ejb:interface-method
      * @param ids Array of job ids to be deleted
      */
     public void deleteControlJob(int sessionId, Integer[] ids)
@@ -429,22 +413,22 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionNotFoundException, SessionTimeoutException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        getControlScheduleManager().deleteControlJob(subject, ids);
+        
+        controlScheduleManager.deleteControlJob(subject, ids);
     }
 
     // Dashboard routines
 
     /**
      * Get a list of recent control actions in decending order
-     *
-     * @ejb:interface-method
      */
-    public PageList getRecentControlActions(int sessionId, int rows,
+    public PageList<ControlHistory> getRecentControlActions(int sessionId, int rows,
                                             long window)
         throws ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlScheduleManager()
+        
+        return controlScheduleManager
             .getRecentControlActions(subject, rows, window);
     }
 
@@ -457,40 +441,37 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      *             if user is not found
      * @throws LoginException
      *             if user account has been disabled
-     * 
-     * @ejb:interface-method
      */
-    public PageList getRecentControlActions(String user, int rows, long window)
+    public PageList<ControlHistory> getRecentControlActions(String user, int rows, long window)
         throws LoginException, ApplicationException {
-        int sessionId = getAuthManager().getUnauthSessionId(user);
+        int sessionId = authManager.getUnauthSessionId(user);
+        
         return getRecentControlActions(sessionId, rows, window);
     }
     
     /**
      * Get a list of pending control actions in decending order
-     * 
-     * @ejb:interface-method
      */
-    public PageList getPendingControlActions(int sessionId, int rows)
+    public PageList<ControlSchedule> getPendingControlActions(int sessionId, int rows)
         throws ApplicationException, PermissionException,
                SessionNotFoundException, SessionTimeoutException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlScheduleManager().getPendingControlActions(subject,
+        
+        return controlScheduleManager.getPendingControlActions(subject,
                                                                     rows);
     }
 
     /**
      * Get a list of most active control operations
-     *
-     * @ejb:interface-method
      */
-    public PageList getOnDemandControlFrequency(int sessionId, int numToReturn)
+    public PageList<ControlFrequencyValue> getOnDemandControlFrequency(int sessionId, int numToReturn)
         throws ApplicationException, PermissionException, ApplicationException,
                SessionNotFoundException, SessionTimeoutException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlScheduleManager().
+        
+        return controlScheduleManager.
             getOnDemandControlFrequency(subject, numToReturn);
     }
 
@@ -500,14 +481,14 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
     * the set or subset of entities where subject has control authorization.
     *
     * @return    List of entities that are control authorized.
-    * @ejb:interface-method
     */
-    public List batchCheckControlPermissions(int sessionId,
+    public List<AppdefEntityID> batchCheckControlPermissions(int sessionId,
                                              AppdefEntityID[] entities)
         throws AppdefEntityNotFoundException, PermissionException,
                SessionNotFoundException, SessionTimeoutException {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        return getControlManager().batchCheckControlPermissions(subject,
+        
+        return controlManager.batchCheckControlPermissions(subject,
                                                                 entities);
     }
 
@@ -516,13 +497,13 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      * 
      * @return A map of PlatformType names and AppdefEntityTypeIDs.
      * @throws PermissionException
-     * @ejb:interface-method
      */
-    public Map findControllablePlatformTypes(int sessionID)
+    public Map<String, AppdefEntityID> findControllablePlatformTypes(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        return getAppdefManager().getControllablePlatformTypes(subject);
+        
+        return appdefManager.getControllablePlatformTypes(subject);
     }
     
     /**
@@ -530,57 +511,55 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
      *
      * @return A map of ServerType names and AppdefEntityTypeIDs.
      * @throws PermissionException
-     * @ejb:interface-method
      */
-    public Map findControllableServerTypes(int sessionID)
+    public Map<String, AppdefEntityTypeID> findControllableServerTypes(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        return getAppdefManager().getControllableServerTypes(subject);
+        
+        return appdefManager.getControllableServerTypes(subject);
     }
     /**
      * Find types of all controllable services defined in the system.
      *
      * @return A map of ServiceType names and AppdefEntityTypeIDs.
      * @throws PermissionException
-     * @ejb:interface-method
      */
-    public Map findControllableServiceTypes(int sessionID)
+    public Map<String, AppdefEntityTypeID> findControllableServiceTypes(int sessionID)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        return getAppdefManager().getControllableServiceTypes(subject);
+        
+        return appdefManager.getControllableServiceTypes(subject);
     }
     /**
      * Find names of all controllable resources of a given type.
      *
      * @return A map of Service names and AppdefEntityIDs.
      * @throws PermissionException
-     * @ejb:interface-method
      */
-    public Map findControllableResourceNames(int sessionID,
+    public Map<String, AppdefEntityID> findControllableResourceNames(int sessionID,
                                              AppdefEntityTypeID aetid)
         throws SessionNotFoundException, SessionException,
                PermissionException {
         AuthzSubject subject = sessionManager.getSubject(sessionID);
-        
-        Map ret;
+        Map<String, AppdefEntityID> result;
         int groupType;
         
         // Return based on type
         switch (aetid.getType()) {
         case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
-            ret = getAppdefManager()
+        	result = appdefManager
                 .getControllablePlatformNames(subject, aetid.getID());
             groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVER:
-            ret = getAppdefManager()
+        	result = appdefManager
                 .getControllableServerNames(subject, aetid.getID());
             groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_PS;
             break;
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
-            ret = getAppdefManager()
+        	result = appdefManager
                 .getControllableServiceNames(subject, aetid.getID());
             groupType = AppdefEntityConstants.APPDEF_TYPE_GROUP_COMPAT_SVC;
             break;
@@ -593,15 +572,17 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
             // Get the controllable groups, too
             AppdefBoss aboss = AppdefBossImpl.getOne();
             
-            List groups = aboss.findCompatInventory(
+            List<AppdefResourceValue> groups = aboss.findCompatInventory(
                 sessionID, groupType, AppdefEntityConstants.APPDEF_TYPE_GROUP,
                 aetid.getType(), aetid.getID(), null, null,
                 PageControl.PAGE_ALL);
             
-            for (Iterator it = groups.iterator(); it.hasNext(); ) {
-                AppdefResourceValue grp = (AppdefResourceValue) it.next();
-                if (isControlSupported(sessionID, grp))
-                    ret.put(grp.getName(), grp.getEntityId());
+            for (Iterator<AppdefResourceValue> i = groups.iterator(); i.hasNext(); ) {
+                AppdefResourceValue group = i.next();
+                
+                if (isControlSupported(sessionID, group)) {
+                	result.put(group.getName(), group.getEntityId());
+                }
             }
         } catch (AppdefEntityNotFoundException e) {
             // Nothing to worry about
@@ -609,14 +590,10 @@ public class ControlBossEJBImpl extends BizappSessionEJB implements SessionBean
             // Nothing to worry about
         }
         
-        return ret;
+        return result;
     }
     
-    public static ControlBossLocal getOne() {
-        try {
-            return ControlBossUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static ControlBoss getOne() {
+        return Bootstrap.getBean(ControlBoss.class);
     }
 }
