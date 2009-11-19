@@ -5,10 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.CreateException;
-import javax.ejb.EJBException;
-import javax.ejb.RemoveException;
-
 import junit.framework.TestCase;
 
 import org.easymock.EasyMock;
@@ -22,8 +18,7 @@ import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.DataManagerLocalHome;
+import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.config.ConfigResponse;
@@ -39,21 +34,7 @@ public class ValueChangeTriggerTest
     extends TestCase
 {
 
-    private class MockDataManagerLocalHome implements DataManagerLocalHome {
-        private DataManagerLocal dataManager;
-
-        public DataManagerLocal create() throws CreateException {
-            return this.dataManager;
-        }
-
-        public void remove(Object arg0) throws RemoveException, EJBException {
-
-        }
-
-        public void setDataManager(DataManagerLocal dataManager) {
-            this.dataManager = dataManager;
-        }
-    }
+  
 
     private AlertConditionEvaluator alertConditionEvaluator;
 
@@ -65,13 +46,9 @@ public class ValueChangeTriggerTest
 
     private List measurements = new ArrayList();
 
-    //private MeasurementManagerLocalHome measurementManagerLocalHome = new MockMeasurementManagerLocalHome();
-
-    private DataManagerLocalHome dataManagerLocalHome = new MockDataManagerLocalHome();
-
     private MeasurementManager measurementManager;
 
-    private DataManagerLocal dataManagerLocal;
+    private DataManager dataManagerLocal;
 
     private void initTrigger() throws EncodingException, InvalidTriggerDataException {
         ConfigResponse measurementConfig = new ConfigResponse();
@@ -90,7 +67,7 @@ public class ValueChangeTriggerTest
         super.setUp();
         this.alertConditionEvaluator = EasyMock.createMock(AlertConditionEvaluator.class);
         this.measurementManager = EasyMock.createMock(MeasurementManager.class);
-        this.dataManagerLocal = EasyMock.createMock(DataManagerLocal.class);
+        this.dataManagerLocal = EasyMock.createMock(DataManager.class);
         measurements.add(new Measurement());
         // set the initial context factory
         MockContextFactory.setAsInitial();

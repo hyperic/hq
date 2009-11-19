@@ -2,7 +2,7 @@ package org.hyperic.hq.hqu.rendit.metaclass
 
 import org.hyperic.hq.product.MetricValue
 import org.hyperic.hq.measurement.UnitsConvert
-import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl
+import org.hyperic.hq.measurement.server.session.DataManagerImpl
 import org.hyperic.hq.measurement.server.session.TemplateManagerImpl
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl
 import org.hyperic.hq.measurement.server.session.Measurement
@@ -13,7 +13,7 @@ import org.hyperic.util.units.UnitsFormat
 import org.hyperic.hq.authz.server.session.AuthzSubject
 
 class MetricCategory {
-    private static dataMan = DataManagerEJBImpl.one
+    private static dataMan = DataManagerImpl.one
     private static tmplMan = TemplateManagerImpl.one
     private static measMan = MeasurementManagerImpl.one
 

@@ -14,7 +14,7 @@
 <bean class="org.hyperic.hq.bizapp.server.session.MeasurementBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl" factory-method="getOne"/>
 <bean class="org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl" factory-method="getOne"/>
-<bean class="org.hyperic.hq.measurement.server.session.DataManagerEJBImpl" factory-method="getOne"/>
+
 
 <!--  TODO figure out a way to switch b/w impls of same EE and .org interface when autowiring -->
 <bean class="org.hyperic.hq.bizapp.server.session.LatherBossImpl">

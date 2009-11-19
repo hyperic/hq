@@ -314,6 +314,15 @@ public class DBUtil  {
         throws SQLException, NamingException {
         return dataSource.getConnection();
     }
+    
+    /**
+     * get a connection for a datasource registered in JNDI
+     */
+    public Connection getConnection()
+        throws SQLException, NamingException {
+        return dataSource.getConnection();
+    }
+    
 
     /**
      * Get a database specific blob column, when you already have the result set
