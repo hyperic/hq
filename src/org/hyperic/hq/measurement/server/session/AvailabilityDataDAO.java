@@ -25,12 +25,13 @@
 
 package org.hyperic.hq.measurement.server.session;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -39,6 +40,8 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Query;
 import org.hibernate.type.IntegerType;
 import org.hyperic.dao.DAOFactory;
+import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.dao.HibernateDAO;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -64,7 +67,7 @@ public class AvailabilityDataDAO extends HibernateDAO {
         "(" + TOTAL_TIME + ") * rle.availVal";
     
     public AvailabilityDataDAO(DAOFactory f) {
-        super(AvailabilityDataDAO.class, f);
+        super(AvailabilityDataRLE.class, f);
     }
 
     List findLastAvail(List mids, long after) {
@@ -215,7 +218,9 @@ public class AvailabilityDataDAO extends HibernateDAO {
      */
     List getHistoricalAvails(Integer[] mids, long start,
                              long end, boolean descending) {
-        String sql = new StringBuilder()
+        final List rtn = new ArrayList(mids.length);
+        final List list = Arrays.asList(mids);
+        final String sql = new StringBuilder()
                     .append("FROM AvailabilityDataRLE rle")
                     .append(" WHERE rle.availabilityDataId.measurement in (:mids)")
                     .append(" AND rle.endtime > :startime")
@@ -223,12 +228,16 @@ public class AvailabilityDataDAO extends HibernateDAO {
                     .append(" ORDER BY rle.availabilityDataId.measurement,")
                     .append(" rle.availabilityDataId.startime")
                     .append(((descending) ? " DESC" : " ASC")).toString();
-        return getSession()
-            .createQuery(sql)
-            .setLong("startime", start)
-            .setLong("endtime", end)
-            .setParameterList("mids", mids, new IntegerType())
-            .list();
+        for (int i=0; i<list.size(); i+=BATCH_SIZE) {
+            final int last = Math.min(i+BATCH_SIZE, list.size());
+            rtn.addAll(getSession()
+                .createQuery(sql)
+                .setLong("startime", start)
+                .setLong("endtime", end)
+                .setParameterList("mids", list.subList(i, last), new IntegerType())
+                .list());
+        }
+        return rtn;
     }
     
     /**
