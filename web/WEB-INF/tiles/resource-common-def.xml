@@ -173,6 +173,9 @@
   <definition name=".resource.common.monitor.visibility.charts.metric.partrsrcs"
               path="/resource/common/monitor/visibility/ParticipatingResources.jsp"/>
 
+  <definition name=".resource.common.monitor.visibility.charts.metric.partrsrcs.smmr"
+              path="/resource/common/monitor/visibility/ParticipatingResourcesSMMR.jsp"/>
+
   <definition name=".resource.common.monitor.visibility.charts.metric.chartlegend"
               path="/resource/common/monitor/visibility/ChartLegend.jsp"/>
 
