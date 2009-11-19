@@ -373,10 +373,10 @@ public class FileUtil {
     /**
      * Read all the lines from a stream into a list
      */
-    public static List readLines(InputStream is)
+    public static List<String> readLines(InputStream is)
         throws IOException
     {
-        List res = new ArrayList();
+        List<String> res = new ArrayList<String>();
         InputStreamReader isR = new InputStreamReader(is);
         BufferedReader br = new BufferedReader(isR);
         String s;

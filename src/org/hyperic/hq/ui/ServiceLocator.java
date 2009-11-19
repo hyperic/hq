@@ -42,6 +42,7 @@ import org.hyperic.hq.bizapp.server.session.AppdefBossImpl;
 import org.hyperic.hq.bizapp.server.session.ControlBossImpl;
 import org.hyperic.hq.bizapp.server.session.EventsBossImpl;
 import org.hyperic.hq.bizapp.server.session.GalertBossImpl;
+import org.hyperic.hq.bizapp.server.session.ProductBossImpl;
 import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthBoss;
@@ -54,7 +55,6 @@ import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBossHome;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
-import org.hyperic.hq.bizapp.shared.ProductBossHome;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ui.exception.ServiceLocatorException;
@@ -70,9 +70,6 @@ public class ServiceLocator {
     private final static Class MEASURE_CLASS = MeasurementBossHome.class;
     private final static String MEASURE_NAME = MeasurementBossHome.JNDI_NAME;
     
-    private final static Class PRODUCT_CLASS = ProductBossHome.class;
-    private final static String PRODUCT_NAME = ProductBossHome.JNDI_NAME;
-
     private final static String CONTEXT_FACTORY_NAME =
         "ejb-remote-config.context-factory";
     private final static String PROVIDER_URL_NAME =
@@ -207,13 +204,7 @@ public class ServiceLocator {
      * @exception ServiceLocatorException if the lookup or create fails
      */
     public ProductBoss getProductBoss() throws ServiceLocatorException {
-        ProductBossHome home =
-            (ProductBossHome) lookup(PRODUCT_NAME, PRODUCT_CLASS);
-        try {
-            return (ProductBoss) home.create();
-        } catch (Exception e) {
-            throw new ServiceLocatorException(e);
-        }
+        return ProductBossImpl.getOne();
     }
     
     /**

@@ -256,7 +256,7 @@ public class ProductManagerImpl implements ProductManager {
     /**
      */
     // TODO: G
-    public String getMonitoringHelp(AppdefEntityValue entityVal, Map props)
+    public String getMonitoringHelp(AppdefEntityValue entityVal, Map<?,?> props)
         throws PluginNotFoundException, PermissionException,
         AppdefEntityNotFoundException {
         TypeInfo info = getTypeInfo(entityVal);

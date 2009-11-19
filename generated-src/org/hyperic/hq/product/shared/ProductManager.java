@@ -33,7 +33,7 @@ public interface ProductManager {
 
     public PluginManager getPluginManager(String type) throws PluginException;
 
-    public String getMonitoringHelp(AppdefEntityValue entityVal, Map props) throws PluginNotFoundException,
+    public String getMonitoringHelp(AppdefEntityValue entityVal, Map<?,?> props) throws PluginNotFoundException,
         PermissionException, AppdefEntityNotFoundException;
 
     public ConfigSchema getConfigSchema(String type, String name, AppdefEntityValue entityVal,

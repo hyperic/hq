@@ -37,8 +37,8 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.tiles.ComponentContext;
 import org.apache.struts.tiles.actions.TilesAction;
 import org.hyperic.hq.auth.shared.SessionException;
-import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl;
-import org.hyperic.hq.bizapp.shared.ProductBossLocal;
+import org.hyperic.hq.bizapp.server.session.ProductBossImpl;
+import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.hqu.server.session.AttachType;
 import org.hyperic.hq.ui.util.RequestUtils;
 
@@ -50,7 +50,7 @@ public class PluginsAction extends TilesAction {
         throws SessionException, ServletException
     {
 
-        ProductBossLocal pboss = ProductBossEJBImpl.getOne();
+        ProductBoss pboss = ProductBossImpl.getOne();
 		Collection a = 
             pboss.findAttachments(RequestUtils.getSessionIdInt(request),
                                   AttachType.ADMIN);
