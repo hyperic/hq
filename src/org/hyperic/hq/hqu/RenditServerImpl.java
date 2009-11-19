@@ -42,12 +42,9 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
-import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hyperic.hq.hqu.shared.UIPluginManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-
 
 @Service
 public class RenditServerImpl implements RenditServer {
@@ -60,13 +57,8 @@ public class RenditServerImpl implements RenditServer {
     private final Object cfgLock = new Object();
     private Map<String, PluginWrapper>  plugins = new HashMap<String, PluginWrapper>();
     private File sysDir;
-    private UIPluginManagerLocal uiPluginManager;
+    private UIPluginManager uiPluginManager;
    
-    @Autowired
-    public RenditServerImpl(UIPluginManagerLocal uiPluginManager) {
-        this.uiPluginManager = uiPluginManager;
-    }
-
     private ClassLoader getUseLoader() {
         return RenditServerImpl.class.getClassLoader();
     }
@@ -178,6 +170,9 @@ public class RenditServerImpl implements RenditServer {
    
     private void deployPlugin(final PluginWrapper plugin, final File path, String pluginName, String pluginVer) {
         try {
+        	// TODO Need to change this...this is done for short term to get past circular dependency w/ UIPluginManager
+        	uiPluginManager = Bootstrap.getBean(UIPluginManager.class);
+        	
             UIPlugin p = uiPluginManager.createOrUpdate(pluginName, pluginVer);
             plugin.deploy(p);
             HQApp.getInstance().addTransactionListener(

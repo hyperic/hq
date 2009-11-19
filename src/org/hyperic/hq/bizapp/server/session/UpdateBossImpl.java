@@ -50,7 +50,7 @@ import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.common.shared.ServerConfigManagerLocal;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.server.session.UIPlugin;
-import org.hyperic.hq.hqu.shared.UIPluginManagerLocal;
+import org.hyperic.hq.hqu.shared.UIPluginManager;
 import org.hyperic.util.thread.LoggingThreadGroup;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -75,12 +75,12 @@ public class UpdateBossImpl
 
     private ServiceManager serviceManager;
 
-    private UIPluginManagerLocal uiPluginManager;
+    private UIPluginManager uiPluginManager;
 
     @Autowired
     public UpdateBossImpl(UpdateStatusDAO updateDAO, ServerConfigManagerLocal serverConfigManager,
                           PlatformManager platformManager, ServerManager serverManager,
-                          ServiceManager serviceManager, UIPluginManagerLocal uiPluginManager) {
+                          ServiceManager serviceManager, UIPluginManager uiPluginManager) {
         this.updateDAO = updateDAO;
         this.serverConfigManager = serverConfigManager;
         this.platformManager = platformManager;

@@ -65,7 +65,7 @@ import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
-import org.hyperic.hq.hqu.server.session.UIPluginManagerEJBImpl;
+import org.hyperic.hq.hqu.server.session.UIPluginManagerImpl;
 import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
 import org.hyperic.hq.product.PluginException;
@@ -533,7 +533,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         
-        return UIPluginManagerEJBImpl.getOne().findAttachments(type, subject);
+        return UIPluginManagerImpl.getOne().findAttachments(type, subject);
     }
     
     /**
@@ -546,7 +546,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         
-        return UIPluginManagerEJBImpl.getOne().findAttachments(ent, cat, 
+        return UIPluginManagerImpl.getOne().findAttachments(ent, cat, 
                                                                subject);
     }
 
@@ -558,7 +558,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
         
-        return UIPluginManagerEJBImpl.getOne()
+        return UIPluginManagerImpl.getOne()
                     .findAttachmentDescriptorById(descId, subject);
     }
     
@@ -567,7 +567,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
      * @ejb:interface-method
      */
     public View findViewById(int sessionId, Integer id) {
-        return UIPluginManagerEJBImpl.getOne().findViewById(id);
+        return UIPluginManagerImpl.getOne().findViewById(id);
     }
     
     public static ProductBossLocal getOne() {
