@@ -79,7 +79,7 @@ import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
+import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.pager.PageControl;
@@ -169,7 +169,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
             
         // Now get the aggregate data, keyed by template ID's
         final MeasurementManager mMan = getMetricManager();
-        final DataManagerLocal dMan = getDataMan();
+        final DataManager dMan = getDataMan();
         final List measurements = mMan.getMeasurements(tids, eids);
         final Map datamap =
             dMan.getAggregateDataByTemplate(measurements, begin, end);

@@ -116,6 +116,7 @@ public class MeasurementManagerImpl
     private MeasurementProcessor measurementProcessor;
     private ConfigManager configManager;
     private AvailabilityManager availabilityManager;
+    private MetricDataCache metricDataCache;
     
 
     @Autowired
@@ -123,13 +124,14 @@ public class MeasurementManagerImpl
                                   ResourceGroupManager resourceGroupManager,
                                   ApplicationDAO applicationDAO, PermissionManager permissionManager,
                                   AuthzSubjectManager authzSubjectManager,
-                                  ConfigManager configManager) {
+                                  ConfigManager configManager, MetricDataCache metricDataCache) {
         this.resourceManager = resourceManager;
         this.resourceGroupManager = resourceGroupManager;
         this.applicationDAO = applicationDAO;
         this.permissionManager = permissionManager;
         this.authzSubjectManager = authzSubjectManager;
         this.configManager = configManager;
+        this.metricDataCache = metricDataCache;
     }
 
     // TODO: Better way?
@@ -197,9 +199,9 @@ public class MeasurementManagerImpl
      * @param mids
      */
     private void removeMeasurementsFromCache(Integer[] mids) {
-        MetricDataCache cache = MetricDataCache.getInstance();
+       
         for (Integer mid : mids) {
-            cache.remove(mid);
+            metricDataCache.remove(mid);
         }
     }
 

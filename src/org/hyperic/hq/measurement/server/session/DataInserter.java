@@ -29,7 +29,7 @@ import java.util.List;
 
 /**
  * The {@link DataInserter} takes data from the 
- * {@link ReportProcessorImpl} and sends it to the {@link DataManagerEJBImpl} 
+ * {@link ReportProcessorImpl} and sends it to the {@link DataManagerImpl} 
  * to put into the DB.
  */
 public interface DataInserter {

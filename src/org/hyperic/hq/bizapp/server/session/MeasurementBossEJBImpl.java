@@ -111,10 +111,10 @@ import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.Baseline;
-import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.DataManagerImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
+import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
@@ -1703,7 +1703,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         // Now, iterate through each AppdefEntityID
         ResourceManager resMan = getResourceManager();
-        final DataManagerLocal dMan = DataManagerEJBImpl.getOne();
+        final DataManager dMan = DataManagerImpl.getOne();
         for (int i = 0; i < entIds.length; i++) {            
             Integer[] eids = new Integer[] { entIds[i].getId() };
             // Now get the aggregate data, keyed by template ID's

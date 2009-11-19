@@ -40,10 +40,10 @@ import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
+import org.hyperic.hq.measurement.server.session.DataManagerImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.DataManagerUtil;
+import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.config.ConfigResponse;
@@ -120,7 +120,7 @@ public class ValueChangeTrigger
     private void initializeLastValue() {
         try {
             MeasurementManager measurementManager = MeasurementManagerImpl.getOne();
-            DataManagerLocal  dataManager = DataManagerUtil.getLocalHome().create();
+            DataManager  dataManager = DataManagerImpl.getOne();
             Measurement measurement = measurementManager.getMeasurement(measurementId);
             List measurements = new ArrayList();
             measurements.add(measurement);

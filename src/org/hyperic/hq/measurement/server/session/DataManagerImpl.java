@@ -44,20 +44,17 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.ejb.CreateException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
+import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hibernate.dialect.HQDialectUtil;
 import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
@@ -67,70 +64,70 @@ import org.hyperic.hq.measurement.TimingVoodoo;
 import org.hyperic.hq.measurement.data.MeasurementDataSourceException;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.DataManagerUtil;
-import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
-import org.hyperic.hq.measurement.shared.MeasRangeObj;
+import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
+import org.hyperic.hq.measurement.shared.MeasRangeObj;
+import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
-import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.product.MetricValue;
-import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.util.StringUtil;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
 import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** The DataManagerEJB class is a stateless session bean that can be
  *  used to retrieve measurement data points
  *
- * @ejb:bean name="DataManager"
- *      jndi-name="ejb/measurement/DataManager"
- *      local-jndi-name="LocalDataManager"
- *      view-type="local"
- *      type="Stateless"
- *      transaction-type="Required"
  */
-public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
-    private final String logCtx = DataManagerEJBImpl.class.getName();
-    private final Log _log = LogFactory.getLog(logCtx);
+@Service
+@Transactional
+public class DataManagerImpl implements DataManager {
+    
+  
+    private static final String ERR_START = "Begin and end times must be positive";
+    private static final String ERR_END   = "Start time must be earlier than end time";
+    private static final String LOG_CTX = DataManagerImpl.class.getName();
+    private final Log log = LogFactory.getLog(LOG_CTX);
 
     // The boolean system property that makes all events interesting. This
     // property is provided as a testing hook so we can flood the event
     // bus on demand.
-    public final String ALL_EVENTS_INTERESTING_PROP =
+    public static final String ALL_EVENTS_INTERESTING_PROP =
         "org.hq.triggers.all.events.interesting";
 
-    private final BigDecimal MAX_DB_NUMBER =
+    private static final BigDecimal MAX_DB_NUMBER =
         new BigDecimal("10000000000000000000000");
 
-    private final long MINUTE = 60 * 1000,
+    private static final long MINUTE = 60 * 1000,
                        HOUR = 60 * MINUTE;
 
     // Table names
-    private final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
-    private final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
-    private final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
-    private final String TAB_DATA    = MeasurementConstants.TAB_DATA;
-    private final String TAB_MEAS    = MeasurementConstants.TAB_MEAS;
-    private final String TAB_NUMS    = "EAM_NUMBERS";
+    private static final String TAB_DATA_1H = MeasurementConstants.TAB_DATA_1H;
+    private static final String TAB_DATA_6H = MeasurementConstants.TAB_DATA_6H;
+    private static final String TAB_DATA_1D = MeasurementConstants.TAB_DATA_1D;
+    private static final String TAB_DATA    = MeasurementConstants.TAB_DATA;
+    private static final String TAB_MEAS    = MeasurementConstants.TAB_MEAS;
+    private static final String TAB_NUMS    = "EAM_NUMBERS";
     private static final String DATA_MANAGER_INSERT_TIME =
         ConcurrentStatsCollector.DATA_MANAGER_INSERT_TIME;
 
     // Error strings
-    private final String ERR_DB    = "Cannot look up database instance";
-    private final String ERR_INTERVAL =
+    private static final String ERR_DB    = "Cannot look up database instance";
+    private static final String ERR_INTERVAL =
         "Interval cannot be larger than the time range";
 
     // Save some typing
-    private final int IND_MIN       = MeasurementConstants.IND_MIN;
-    private final int IND_AVG       = MeasurementConstants.IND_AVG;
-    private final int IND_MAX       = MeasurementConstants.IND_MAX;
-    private final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
+    private static final int IND_MIN       = MeasurementConstants.IND_MIN;
+    private static final int IND_AVG       = MeasurementConstants.IND_AVG;
+    private static final int IND_MAX       = MeasurementConstants.IND_MAX;
+    private static final int IND_CFG_COUNT = MeasurementConstants.IND_CFG_COUNT;
 
-    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
+    private DBUtil dbUtil;
 
     // Pager class name
     private boolean confDefaultsLoaded = false;
@@ -138,18 +135,56 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     // Purge intervals, loaded once on first invocation.
     private long purgeRaw, purge1h, purge6h;
 
-    private final long HOURS_PER_MEAS_TAB =
+    private static final long HOURS_PER_MEAS_TAB =
         MeasTabManagerUtil.NUMBER_OF_TABLES_PER_DAY;
 
-    private Analyzer analyzer = null;
+    private Analyzer analyzer;
+    
+    private MeasurementDAO measurementDAO;
+    
+    private MeasurementManager measurementManager;
+    
+    private ServerConfigManager serverConfigManager;
+    
+    private AvailabilityManager availabilityManager;
+    
+    private MetricDataCache metricDataCache;
+    
+    private ZeventEnqueuer zeventManager;
+    
+    
+    @Autowired
+    public DataManagerImpl(DBUtil dbUtil, MeasurementDAO measurementDAO, MeasurementManager measurementManager,
+                           ServerConfigManager serverConfigManager, AvailabilityManager availabilityManager,
+                           MetricDataCache metricDataCache, ZeventEnqueuer zeventManager) {
+        this.dbUtil = dbUtil;
+        this.measurementDAO = measurementDAO;
+        this.measurementManager = measurementManager;
+        this.serverConfigManager = serverConfigManager;
+        this.availabilityManager = availabilityManager;
+        this.metricDataCache = metricDataCache;
+        this.zeventManager = zeventManager;
+    }
 
     private double getValue(ResultSet rs) throws SQLException {
         double val = rs.getDouble("value");
 
-        if(rs.wasNull())
+        if(rs.wasNull()) {
             val = Double.NaN;
+        }
 
         return val;
+    }
+    
+    private void checkTimeArguments(long begin, long end)
+    throws IllegalArgumentException {
+        if (begin > end) {
+            throw new IllegalArgumentException(ERR_END);
+        }
+    
+        if (begin < 0) {
+            throw new IllegalArgumentException(ERR_START);
+        }
     }
 
     private HighLowMetricValue getMetricValue(ResultSet rs)
@@ -200,13 +235,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param dp the new MetricValue
      * @throws NumberFormatException if the value from the
      *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
-     * @ejb:transaction-type="Required"
-     * @ejb:interface-method
+     * 
+     * 
      */
     public void addData(Integer mid, MetricValue mv, boolean overwrite) {
-        MeasurementManager mMan = MeasurementManagerImpl.getOne();
-        Measurement meas = mMan.getMeasurement(mid);
-        List pts = Collections.singletonList(new DataPoint(meas.getId(), mv));
+        
+        Measurement meas = measurementManager.getMeasurement(mid);
+        List<DataPoint> pts = Collections.singletonList(new DataPoint(meas.getId(), mv));
 
         addData(pts, overwrite);
     }
@@ -218,20 +253,20 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @throws NumberFormatException if the value from the
      *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
      *
-     * @ejb:interface-method
+     * 
      */
-    public boolean addData(List data) {
+    public boolean addData(List<DataPoint> data) {
         if (shouldAbortDataInsertion(data)) {
             return true;
         }
 
         data = enforceUnmodifiable(data);
 
-        _log.debug("Attempting to insert data in a single transaction.");
+        log.debug("Attempting to insert data in a single transaction.");
 
         HQDialect dialect = Util.getHQDialect();
         boolean succeeded = false;
-        final boolean debug = _log.isDebugEnabled();
+        final boolean debug = log.isDebugEnabled();
 
         Connection conn = safeGetConnection();
         if (conn == null) {
@@ -255,9 +290,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     conn.commit();
                     final long end = System.currentTimeMillis();
                     if (debug) {
-                        _log.debug("Inserting data in a single transaction " +
+                        log.debug("Inserting data in a single transaction " +
                             "succeeded");
-                        _log.debug("Data Insertion process took " +
+                        log.debug("Data Insertion process took " +
                             (end-start) + " ms");
                     }
                     ConcurrentStatsCollector.getInstance().addStat(
@@ -265,18 +300,18 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     sendMetricEvents(data);
                 } else {
                     if (debug) {
-                        _log.debug("Inserting data in a single transaction failed." +
+                        log.debug("Inserting data in a single transaction failed." +
                                    "  Rolling back transaction.");
                     }
                     conn.rollback();
                     conn.setAutoCommit(true);
-                    List processed = addDataWithCommits(data, true, conn);
+                    List<DataPoint> processed = addDataWithCommits(data, true, conn);
                     final long end = System.currentTimeMillis();
                     ConcurrentStatsCollector.getInstance().addStat(
                         end-start, DATA_MANAGER_INSERT_TIME);
                     sendMetricEvents(processed);
                     if (debug) {
-                        _log.debug("Data Insertion process took " +
+                        log.debug("Data Insertion process took " +
                             (end-start) + " ms");
                     }
                 }
@@ -289,10 +324,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
         }
         catch (SQLException e) {
-            _log.debug("Transaction failed around inserting metric data.", e);
+            log.debug("Transaction failed around inserting metric data.", e);
         }
         finally {
-            dbUtil.closeConnection(logCtx, conn);
+            DBUtil.closeConnection(LOG_CTX, conn);
         }
         return succeeded;
     }
@@ -308,9 +343,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @throws NumberFormatException if the value from the
      *         DataPoint.getMetricValue() cannot instantiate a BigDecimal
      *
-     * @ejb:interface-method
+     * 
      */
-    public void addData(List data, boolean overwrite) {
+    public void addData(List<DataPoint> data, boolean overwrite) {
         /**
          * We have to account for 2 types of metric data insertion here:
          *  1 - New data, using 'insert'
@@ -330,14 +365,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             return;
         }
 
-        _log.debug("Attempting to insert/update data outside a transaction.");
+        log.debug("Attempting to insert/update data outside a transaction.");
 
         data = enforceUnmodifiable(data);
 
         Connection conn = safeGetConnection();
 
         if (conn == null) {
-            _log.debug("Inserting/Updating data outside a transaction failed.");
+            log.debug("Inserting/Updating data outside a transaction failed.");
             return;
         }
 
@@ -353,24 +388,24 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
         }
         catch (SQLException e) {
-            _log.debug("Inserting/Updating data outside a transaction failed " +
+            log.debug("Inserting/Updating data outside a transaction failed " +
                        "because autocommit management failed.", e);
         }
         finally {
-            dbUtil.closeConnection(logCtx, conn);
+            DBUtil.closeConnection(LOG_CTX, conn);
         }
     }
 
-    private List addDataWithCommits(List data, boolean overwrite,
+    private List<DataPoint> addDataWithCommits(List<DataPoint> data, boolean overwrite,
                                     Connection conn)
     {
-        Set failedToSaveMetrics = new HashSet();
-        List left = data;
+        Set<DataPoint> failedToSaveMetrics = new HashSet<DataPoint>();
+        List<DataPoint> left = data;
         while (!left.isEmpty())
         {
             int numLeft = left.size();
-            if (_log.isDebugEnabled()) {
-                _log.debug("Attempting to insert " + numLeft + " points");
+            if (log.isDebugEnabled()) {
+                log.debug("Attempting to insert " + numLeft + " points");
             }
 
             try {
@@ -379,16 +414,16 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 assert false : "The SQLException should not happen: "+e;
             }
 
-            if (_log.isDebugEnabled()) {
-                _log.debug("Num left = " + left.size());
+            if (log.isDebugEnabled()) {
+                log.debug("Num left = " + left.size());
             }
 
             if (left.isEmpty())
                 break;
 
             if (!overwrite) {
-                if (_log.isDebugEnabled()) {
-                    _log.debug("We are not updating the remaining "+
+                if (log.isDebugEnabled()) {
+                    log.debug("We are not updating the remaining "+
                                 left.size()+" points");
                 }
                 failedToSaveMetrics.addAll(left);
@@ -397,8 +432,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
             // The insert couldn't insert everything, so attempt to update
             // the things that are left
-            if (_log.isDebugEnabled()) {
-                _log.debug("Sending " + left.size() + " data points to update");
+            if (log.isDebugEnabled()) {
+                log.debug("Sending " + left.size() + " data points to update");
             }
 
             left = updateData(conn, left);
@@ -406,8 +441,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             if (left.isEmpty())
                 break;
 
-            if (_log.isDebugEnabled()) {
-                _log.debug("Update left " + left.size() + " points to process");
+            if (log.isDebugEnabled()) {
+                log.debug("Update left " + left.size() + " points to process");
             }
 
             if (numLeft == left.size()) {
@@ -415,38 +450,38 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 failedToSaveMetrics.add(remPt);
                 // There are some entries that we weren't able to do
                 // anything about ... that sucks.
-                _log.warn("Unable to do anything about " + numLeft +
+                log.warn("Unable to do anything about " + numLeft +
                           " data points.  Sorry.");
-                _log.warn("Throwing away data point " + remPt);
+                log.warn("Throwing away data point " + remPt);
             }
         }
 
-        _log.debug("Inserting/Updating data outside a transaction finished.");
+        log.debug("Inserting/Updating data outside a transaction finished.");
 
         return removeMetricsFromList(data, failedToSaveMetrics);
     }
 
-    private boolean shouldAbortDataInsertion(List data) {
+    private boolean shouldAbortDataInsertion(List<?> data) {
         if (data.isEmpty()) {
-            _log.debug("Aborting data insertion since data list is empty. This is ok.");
+            log.debug("Aborting data insertion since data list is empty. This is ok.");
             return true;
         } else {
             return false;
         }
     }
 
-    private List enforceUnmodifiable(List aList) {
+    private <T> List<T> enforceUnmodifiable(List<T> aList) {
         return Collections.unmodifiableList(aList);
     }
 
-    private List removeMetricsFromList(List data, Set metricsToRemove) {
+    private List<DataPoint> removeMetricsFromList(List<DataPoint> data, Set<DataPoint> metricsToRemove) {
         if (metricsToRemove.isEmpty()) {
             return data;
         }
 
-        Set allMetrics = new HashSet(data);
+        Set<DataPoint> allMetrics = new HashSet<DataPoint>(data);
         allMetrics.removeAll(metricsToRemove);
-        return new ArrayList(allMetrics);
+        return new ArrayList<DataPoint>(allMetrics);
     }
 
     /**
@@ -456,7 +491,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     private BigDecimal getDecimalInRange(BigDecimal val, Integer metricId) {
         val = val.setScale(5, BigDecimal.ROUND_HALF_EVEN);
         if (val.compareTo(MAX_DB_NUMBER) == 1) {
-            _log.warn("Value [" + val + "] for metric id=" + metricId +
+            log.warn("Value [" + val + "] for metric id=" + metricId +
                       "is too big to put into the DB.  Truncating to [" +
                       MAX_DB_NUMBER+ "]");
             return MAX_DB_NUMBER;
@@ -465,59 +500,62 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return val;
     }
 
-    private void sendMetricEvents(List data) {
+    private void sendMetricEvents(List<DataPoint> data) {
         if (data.isEmpty()) {
             return;
         }
 
         // Finally, for all the data which we put into the system, make sure
         // we update our internal cache, kick off the events, etc.
-        final boolean debug = _log.isDebugEnabled();
+        final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
-        if (debug) watch.markTimeBegin("analyzeMetricData");
+        if (debug) {
+            watch.markTimeBegin("analyzeMetricData");
+        }
         analyzeMetricData(data);
-        if (debug) watch.markTimeEnd("analyzeMetricData");
+        if (debug) {
+            watch.markTimeEnd("analyzeMetricData");
+        }
 
-        Collection cachedData = updateMetricDataCache(data);
+        Collection<DataPoint> cachedData = updateMetricDataCache(data);
         sendDataToEventHandlers(cachedData);
         if (debug) {
-            _log.debug(watch);
+            log.debug(watch);
         }
     }
 
-    private void analyzeMetricData(List data)
-    {   setAnalyzer();
+    private void analyzeMetricData(List<DataPoint> data)
+    {   
         if (analyzer != null)
         {
-            for (Iterator i = data.iterator(); i.hasNext();) {
-                DataPoint dp = (DataPoint) i.next();
+            for (DataPoint dp  : data) {
                 analyzer.analyzeMetricValue(dp.getMetricId(), dp.getMetricValue());
             }
         }
     }
 
-    private Collection updateMetricDataCache(List data) {
-        MetricDataCache cache = MetricDataCache.getInstance();
-        return cache.bulkAdd(data);
+    private Collection<DataPoint> updateMetricDataCache(List<DataPoint> data) {
+      
+        return metricDataCache.bulkAdd(data);
     }
 
-    private void sendDataToEventHandlers(Collection data) {
-        ArrayList events  = new ArrayList();
-        List zevents = new ArrayList();
-        MeasurementManager measMan = MeasurementManagerImpl.getOne();
+    private void sendDataToEventHandlers(Collection<DataPoint> data) {
+        ArrayList<MeasurementEvent> events  = new ArrayList<MeasurementEvent>();
+        List<MeasurementZevent> zevents = new ArrayList<MeasurementZevent>();
+      
         
         boolean allEventsInteresting = 
             Boolean.getBoolean(ALL_EVENTS_INTERESTING_PROP);
         
-        for (Iterator i = data.iterator(); i.hasNext();) {
-            DataPoint dp = (DataPoint) i.next();
+        for (DataPoint dp : data) {
+           
             Integer metricId = dp.getMetricId();
             MetricValue val = dp.getMetricValue();
             MeasurementEvent event = new MeasurementEvent(metricId, val);
 
             if (RegisteredTriggers.isTriggerInterested(event)
                     || allEventsInteresting) {
-                measMan.buildMeasurementEvent(event);
+                measurementManager.buildMeasurementEvent(event);
                 events.add(event);
             }
 
@@ -532,60 +570,62 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         if (!zevents.isEmpty()) {
             try {
                 // XXX:  Shouldn't this be a transactional queueing?
-                ZeventManager.getInstance().enqueueEvents(zevents);
+                zeventManager.enqueueEvents(zevents);
             } catch(InterruptedException e) {
-                _log.warn("Interrupted while sending events.  Some data may " +
+                log.warn("Interrupted while sending events.  Some data may " +
                           "be lost");
             }
         }
     }
 
-    private List getRemainingDataPoints(List data, int[] execInfo)
+    private List<DataPoint> getRemainingDataPoints(List<DataPoint> data, int[] execInfo)
     {
-        List res = new ArrayList();
+        List<DataPoint> res = new ArrayList<DataPoint>();
         int idx = 0;
 
         // this is the case for mysql
         if (execInfo.length == 0)
             return res;
 
-        for (Iterator i=data.iterator(); i.hasNext(); idx++) {
-            DataPoint pt = (DataPoint)i.next();
+        for (Iterator<DataPoint> i=data.iterator(); i.hasNext(); idx++) {
+            DataPoint pt = i.next();
 
-            if (execInfo[idx] == Statement.EXECUTE_FAILED)
+            if (execInfo[idx] == Statement.EXECUTE_FAILED) {
                 res.add(pt);
+            }
         }
 
-        if (_log.isDebugEnabled()) {
-            _log.debug("Need to deal with " + res.size() + " unhandled " +
+        if (log.isDebugEnabled()) {
+            log.debug("Need to deal with " + res.size() + " unhandled " +
                        "data points (out of " + execInfo.length + ")");
         }
         return res;
     }
 
-    private List getRemainingDataPointsAfterBatchFail(List data, int[] counts) {
-        List res = new ArrayList();
-        Iterator i=data.iterator();
+    private List<DataPoint> getRemainingDataPointsAfterBatchFail(List<DataPoint> data, int[] counts) {
+        List<DataPoint> res = new ArrayList<DataPoint>();
+        Iterator<DataPoint> i=data.iterator();
         int idx;
 
         for (idx=0; idx < counts.length; idx++) {
-            DataPoint pt = (DataPoint)i.next();
+            DataPoint pt = i.next();
 
             if (counts[idx] == Statement.EXECUTE_FAILED) {
                 res.add(pt);
             }
         }
 
-        if (_log.isDebugEnabled()) {
-            _log.debug("Need to deal with " + res.size() + " unhandled " +
+        if (log.isDebugEnabled()) {
+            log.debug("Need to deal with " + res.size() + " unhandled " +
                        "data points (out of " + counts.length + ").  " +
                        "datasize=" + data.size());
         }
 
         // It's also possible that counts[] is not as long as the list
         // of data points, so we have to return all the un-processed points
-        if (data.size() != counts.length)
+        if (data.size() != counts.length) {
             res.addAll(data.subList(idx, data.size()));
+        }
         return res;
     }
 
@@ -597,21 +637,21 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return <code>true</code> if the multi-insert succeeded; <code>false</code>
      *         otherwise.
      */
-    private boolean insertDataWithOneInsert(List data, Connection conn) {
+    private boolean insertDataWithOneInsert(List<DataPoint> data, Connection conn) {
         Statement stmt = null;
         ResultSet rs = null;
-        Map buckets = MeasRangeObj.getInstance().bucketData(data);
+        Map<String, List<DataPoint>> buckets = MeasRangeObj.getInstance().bucketData(data);
 
         try {
-            for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry entry = (Map.Entry) it.next();
-                String table = (String) entry.getKey();
-                List dpts = (List) entry.getValue();
+            for (Iterator<Map.Entry<String, List<DataPoint>>> it = buckets.entrySet().iterator(); it.hasNext(); ) {
+                Map.Entry<String, List<DataPoint>> entry = it.next();
+                String table =  entry.getKey();
+                List<DataPoint> dpts =  entry.getValue();
 
                 StringBuilder values = new StringBuilder();
                 int rowsToUpdate = 0;
-                for (Iterator i=dpts.iterator(); i.hasNext(); ) {
-                    DataPoint pt = (DataPoint)i.next();
+                for (Iterator<DataPoint> i=dpts.iterator(); i.hasNext(); ) {
+                    DataPoint pt = i.next();
                     Integer metricId  = pt.getMetricId();
                     MetricValue val   = pt.getMetricValue();
                     BigDecimal bigDec;
@@ -626,8 +666,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                              "value) values "+values.substring(0, values.length()-1);
                 stmt = conn.createStatement();
                 int rows = stmt.executeUpdate(sql);
-                if (_log.isDebugEnabled()) {
-                    _log.debug("Inserted "+rows+" rows into "+table+
+                if (log.isDebugEnabled()) {
+                    log.debug("Inserted "+rows+" rows into "+table+
                                " (attempted "+rowsToUpdate+" rows)");
                 }
                 if (rows < rowsToUpdate)
@@ -636,13 +676,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (SQLException e) {
             // If there is a SQLException, then none of the data points
             // should be inserted. Roll back the txn.
-            if (_log.isDebugEnabled()) {
-                _log.debug("Error inserting data with one insert stmt: " +
+            if (log.isDebugEnabled()) {
+                log.debug("Error inserting data with one insert stmt: " +
                     e.getMessage() + " (this is ok)");
             }
             return false;
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, null, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, null, stmt, rs);
         }
         return true;
     }
@@ -654,22 +694,22 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return <code>true</code> if the batch insert succeeded; <code>false</code>
      *         otherwise.
      */
-    private boolean insertDataInBatch(List data, Connection conn) {
-        List left = data;
+    private boolean insertDataInBatch(List<DataPoint> data, Connection conn) {
+        List<DataPoint> left = data;
 
         try {
-            if (_log.isDebugEnabled()) {
-                _log.debug("Attempting to insert " + left.size() + " points");
+            if (log.isDebugEnabled()) {
+                log.debug("Attempting to insert " + left.size() + " points");
             }
             left = insertData(conn, left, false);
-            if (_log.isDebugEnabled()) {
-                _log.debug("Num left = " + left.size());
+            if (log.isDebugEnabled()) {
+                log.debug("Num left = " + left.size());
             }
 
             if (!left.isEmpty()) {
-                if (_log.isDebugEnabled()) {
-                    _log.debug("Need to update " + left.size() + " data points.");
-                    _log.debug("Data points to update: " + left);
+                if (log.isDebugEnabled()) {
+                    log.debug("Need to update " + left.size() + " data points.");
+                    log.debug("Data points to update: " + left);
                 }
 
                 return false;
@@ -677,8 +717,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (SQLException e) {
             // If there is a SQLException, then none of the data points
             // should be inserted. Roll back the txn.
-            if (_log.isDebugEnabled()) {
-                _log.debug("Error while inserting data in batch (this is ok) " +
+            if (log.isDebugEnabled()) {
+                log.debug("Error while inserting data in batch (this is ok) " +
                     e.getMessage());
             }
             return false;
@@ -699,12 +739,11 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             // XXX:  Get a better connection here - directly from Hibernate
             // XXX scottmf, may not make a difference transactionally since
             // we use ConnectionReleaseMode.AFTER_STATEMENT
-            conn = dbUtil.getConnByContext(getInitialContext(),
-                        DATASOURCE_NAME);
+            conn = dbUtil.getConnection();
         } catch (NamingException e) {
-            _log.error("Failed to retrieve data source", e);
+            log.error("Failed to retrieve data source", e);
         } catch (SQLException e) {
-            _log.error("Failed to retrieve connection from data source", e);
+            log.error("Failed to retrieve connection from data source", e);
         }
 
         return conn;
@@ -727,13 +766,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      *                      point batch inserts and <code>continueOnSQLException</code>
      *                      is set to <code>false</code>.
      */
-    private List insertData(Connection conn,
-                            List data,
+    private List<DataPoint> insertData(Connection conn,
+                            List<DataPoint> data,
                             boolean continueOnSQLException)
         throws SQLException {
         PreparedStatement stmt = null;
-        final List left = new ArrayList();
-        final Map buckets = MeasRangeObj.getInstance().bucketData(data);
+        final List<DataPoint> left = new ArrayList<DataPoint>();
+        final Map<String, List<DataPoint>> buckets = MeasRangeObj.getInstance().bucketData(data);
         final HQDialect dialect = Util.getHQDialect();
         final boolean supportsDupInsStmt = dialect.supportsDuplicateInsertStmt();
         final boolean supportsPLSQL = dialect.supportsPLSQL();
@@ -747,12 +786,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             "END; ";
 
         final StringBuilder buf = new StringBuilder();
-        for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); )
+        for (Iterator<Map.Entry<String, List<DataPoint>>> it = buckets.entrySet().iterator(); it.hasNext(); )
         {
             buf.setLength(0);
-            Map.Entry entry = (Map.Entry) it.next();
-            final String table = (String) entry.getKey();
-            final List dpts = (List) entry.getValue();
+            Map.Entry<String, List<DataPoint>> entry =  it.next();
+            final String table =  entry.getKey();
+            final List<DataPoint> dpts =  entry.getValue();
 
             try
             {
@@ -774,9 +813,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                            .toString());
                 }
 
-                for (Iterator i=dpts.iterator(); i.hasNext(); )
+                for (Iterator<DataPoint> i=dpts.iterator(); i.hasNext(); )
                 {
-                    DataPoint pt = (DataPoint)i.next();
+                    DataPoint pt = i.next();
                     Integer metricId  = pt.getMetricId();
                     MetricValue val   = pt.getMetricValue();
                     BigDecimal bigDec;
@@ -818,14 +857,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 // Assume they all failed.
                 left.addAll(dpts);
 
-                if (_log.isDebugEnabled()) {
-                    _log.debug("A general SQLException occurred during the insert. " +
+                if (log.isDebugEnabled()) {
+                    log.debug("A general SQLException occurred during the insert. " +
                                "Assuming that none of the "+dpts.size()+
                                " data points were inserted.", e);
                 }
             }
             finally {
-                dbUtil.closeStatement(logCtx, stmt);
+                DBUtil.closeStatement(LOG_CTX, stmt);
             }
         }
 
@@ -838,23 +877,23 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @return The data insert result containing the data points that were
      *         not updated.
      */
-    private List updateData(Connection conn, List data) {
+    private List<DataPoint> updateData(Connection conn, List<DataPoint> data) {
         PreparedStatement stmt = null;
-        List left = new ArrayList();
-        Map buckets = MeasRangeObj.getInstance().bucketData(data);
+        List<DataPoint> left = new ArrayList<DataPoint>();
+        Map<String, List<DataPoint>> buckets = MeasRangeObj.getInstance().bucketData(data);
 
-        for (Iterator it = buckets.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry) it.next();
-            String table = (String) entry.getKey();
-            List dpts = (List) entry.getValue();
+        for (Iterator<Map.Entry<String, List<DataPoint>>> it = buckets.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<String, List<DataPoint>> entry =  it.next();
+            String table =  entry.getKey();
+            List<DataPoint> dpts =  entry.getValue();
 
             try {
                 stmt = conn.prepareStatement(
                     "UPDATE " + table +
                     " SET value = ? WHERE timestamp = ? AND measurement_id = ?");
 
-                for (Iterator i = dpts.iterator(); i.hasNext();) {
-                    DataPoint pt = (DataPoint) i.next();
+                for (Iterator<DataPoint> i = dpts.iterator(); i.hasNext();) {
+                    DataPoint pt = i.next();
                     Integer metricId  = pt.getMetricId();
                     MetricValue val   = pt.getMetricValue();
                     BigDecimal bigDec;
@@ -877,13 +916,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 // Assume they all failed.
                 left.addAll(dpts);
 
-                if (_log.isDebugEnabled()) {
-                    _log.debug("A general SQLException occurred during the update. " +
+                if (log.isDebugEnabled()) {
+                    log.debug("A general SQLException occurred during the update. " +
                                "Assuming that none of the "+dpts.size()+
                                " data points were updated.", e);
                 }
             } finally {
-                dbUtil.closeStatement(logCtx, stmt);
+                DBUtil.closeStatement(LOG_CTX, stmt);
             }
         }
         return left;
@@ -894,10 +933,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      */
     private void loadConfigDefaults() {
 
-        _log.debug("Loading default purge intervals");
+        log.debug("Loading default purge intervals");
         Properties conf;
         try {
-            conf = ServerConfigManagerImpl.getOne().getConfig();
+            conf = serverConfigManager.getConfig();
         } catch (Exception e) {
             throw new SystemException(e);
         }
@@ -988,13 +1027,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * availability is contiguous this will not occur unless the time range
      * precedes the first availability point.
      * @return the list of data points
-     * @ejb:interface-method
+     * 
      */
-    public PageList getHistoricalData(Measurement m, long begin, long end,
+    public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end,
                                       PageControl pc,
                                       boolean prependAvailUnknowns) {
         if (m.getTemplate().isAvailability()) {
-            return getAvailMan().getHistoricalAvailData(m, begin, end, pc,
+            return availabilityManager.getHistoricalAvailData(m, begin, end, pc,
                 prependAvailUnknowns);
         } else {
             return getHistData(m, begin, end, pc);
@@ -1009,20 +1048,20 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param begin the start of the time range
      * @param end the end of the time range
      * @return the list of data points
-     * @ejb:interface-method
+     * 
      */
-    public PageList getHistoricalData(Measurement m, long begin, long end,
+    public PageList<HighLowMetricValue> getHistoricalData(Measurement m, long begin, long end,
                                       PageControl pc) {
         return getHistoricalData(m, begin, end, pc, false);
     }
 
-    private PageList getHistData(final Measurement m,
+    private PageList<HighLowMetricValue> getHistData(final Measurement m,
                                  long begin, long end,
                                  final PageControl pc) {
         checkTimeArguments(begin, end);
         begin = TimingVoodoo.roundDownTime(begin, MINUTE);
         end = TimingVoodoo.roundDownTime(end, MINUTE);
-        final ArrayList history = new ArrayList();
+        final ArrayList<HighLowMetricValue> history = new ArrayList<HighLowMetricValue>();
         // Get the data points and add to the ArrayList
         Connection conn = null;
         Statement stmt = null;
@@ -1030,7 +1069,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         // The table to query from
         final String table = getDataTable(begin, end, m.getId().intValue());
         try {
-            conn = dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            conn = dbUtil.getConnection();
             stmt = conn.createStatement();
             try {
                 final boolean sizeLimit =
@@ -1053,10 +1092,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                         new Integer(rs.getInt(1)) : new Integer(1);
                     rs.close();
                     if (total.intValue() == 0) {
-                        return new PageList();
+                        return new PageList<HighLowMetricValue>();
                     }
-                    if (_log.isDebugEnabled()) {
-                        _log.debug("paging: offset= " + pc.getPageEntityIndex() +
+                    if (log.isDebugEnabled()) {
+                        log.debug("paging: offset= " + pc.getPageEntityIndex() +
                             ", pagesize=" + pc.getPagesize());
                     }
                 }
@@ -1066,21 +1105,21 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 final String sql = (sizeLimit) ?
                     dialect.getLimitBuf(sqlBuf.toString(), offset, limit) :
                     sqlBuf.toString();
-                if (_log.isDebugEnabled()) {
-                    _log.debug(sql);
+                if (log.isDebugEnabled()) {
+                    log.debug(sql);
                 }
                 final StopWatch timer = new StopWatch();
                 rs = stmt.executeQuery(
                     sql.replace(":fields", "value, timestamp"));
-                if (_log.isTraceEnabled()) {
-                    _log.trace("getHistoricalData() execute time: "
+                if (log.isTraceEnabled()) {
+                    log.trace("getHistoricalData() execute time: "
                         + timer.getElapsed());
                 }
                 while (rs.next()) {
                     history.add(getMetricValue(rs));
                 }
                 total = (total == null) ? new Integer(history.size()) : total;
-                return new PageList(history, total.intValue());
+                return new PageList<HighLowMetricValue>(history, total.intValue());
             } catch (SQLException e) {
                 throw new SystemException(
                     "Can't lookup historical data for " + m, e);
@@ -1090,7 +1129,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (SQLException e) {
             throw new SystemException("Can't open connection", e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
         }
     }
 
@@ -1116,18 +1155,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    private class MeasurementComparator implements Comparator {
-        public int compare(Object arg0, Object arg1) {
+    private class MeasurementComparator implements Comparator<Measurement> {
+        public int compare(Measurement arg0, Measurement arg1) {
             if (arg0 == arg1) {
                 return 0;
             }
-            if (!(arg0 instanceof Measurement) ||
-                !(arg1 instanceof Measurement)) {
-                throw new ClassCastException();
-            }
-            Measurement meas0 = (Measurement)arg0,
-                        meas1 = (Measurement)arg0;
-            return meas0.getId().compareTo(meas1.getId());
+            return arg0.getId().compareTo(arg1.getId());
         }
     }
 
@@ -1139,15 +1172,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param begin The start of the time range
      * @param end The end of the time range
      * @return the An array of aggregate values
-     * @ejb:interface-method
+     * 
      */
-    public double[] getAggregateData(final List measurements,
+    public double[] getAggregateData(final List<Measurement> measurements,
                                      final long begin,
                                      final long end) {
         checkTimeArguments(begin, end);
         long interval = end-begin;
         interval = (interval == 0) ? 1 : interval;
-        final List pts = getHistoricalData(measurements, begin, end, interval,
+        final List<HighLowMetricValue> pts = getHistoricalData(measurements, begin, end, interval,
             MeasurementConstants.COLL_TYPE_DYNAMIC, false, PageControl.PAGE_ALL);
         return getAggData(pts);
     }
@@ -1171,9 +1204,9 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl#getHistoricalData()
      * @return the {@link Map} of {@link Integer} to {@link double[]} which
      * represents templateId to data points
-     * @ejb:interface-method
+     * 
      */
-    public Map getAggregateDataByTemplate(final List measurements,
+    public Map<Integer,double[]> getAggregateDataByTemplate(final List<Measurement> measurements,
                                           final long begin,
                                           final long end) {
         // the idea here is to try and match the exact query executed by
@@ -1182,26 +1215,26 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         // cache will optimize performance.
         checkTimeArguments(begin, end);
         final long interval = (end - begin)/60;
-        final List availIds = new ArrayList();
-        final Map measIdsByTempl = new HashMap();
+        final List<Integer> availIds = new ArrayList<Integer>();
+        final Map<Integer, List<Measurement>> measIdsByTempl = new HashMap<Integer, List<Measurement>>();
         setMeasurementObjects(measurements, availIds, measIdsByTempl);
         final Integer[] avIds = (Integer[])availIds.toArray(new Integer[0]);
-        final Map rtn =
-            getAvailMan().getAggregateDataByTemplate(avIds, begin, end);
+        final Map<Integer,double[]> rtn =
+           availabilityManager.getAggregateDataByTemplate(avIds, begin, end);
         rtn.putAll(getAggDataByTempl(measIdsByTempl, begin, end, interval));
         return rtn;
     }
 
-    private final Map getAggDataByTempl(final Map measIdsByTempl,
+    private final Map<Integer, double[]> getAggDataByTempl(final Map<Integer,List<Measurement>> measIdsByTempl,
                                         final long begin,
                                         final long end,
                                         final long interval) {
-        final HashMap rtn = new HashMap(measIdsByTempl.size());
-        for (Iterator it=measIdsByTempl.entrySet().iterator(); it.hasNext(); ) {
-            final Map.Entry entry = (Map.Entry)it.next();
-            final Integer tid = (Integer)entry.getKey();
-            final List meas = (List)entry.getValue();
-            final List pts = getHistoricalData(meas, begin, end, interval,
+        final HashMap<Integer, double[]> rtn = new HashMap<Integer, double[]>(measIdsByTempl.size());
+        for (Iterator<Map.Entry<Integer,List<Measurement>>> it=measIdsByTempl.entrySet().iterator(); it.hasNext(); ) {
+            final Map.Entry<Integer,List<Measurement>> entry =it.next();
+            final Integer tid = entry.getKey();
+            final List<Measurement> meas = entry.getValue();
+            final List<HighLowMetricValue> pts = getHistoricalData(meas, begin, end, interval,
                 MeasurementConstants.COLL_TYPE_DYNAMIC, false,
                 PageControl.PAGE_ALL);
             final double[] aggData = getAggData(pts);
@@ -1213,19 +1246,19 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return rtn;
     }
 
-    private final void setMeasurementObjects(final List measurements,
-                                             final List availIds,
-                                             final Map measIdsByTempl) {
-        for (Iterator i = measurements.iterator(); i.hasNext(); ) {
-            final Measurement m = (Measurement)i.next();
+    private final void setMeasurementObjects(final List<Measurement> measurements,
+                                             final List<Integer> availIds,
+                                             final Map<Integer,List<Measurement>> measIdsByTempl) {
+        for (Measurement m : measurements ) {
+           
             final MeasurementTemplate t = m.getTemplate();
             if (m.getTemplate().isAvailability()) {
                 availIds.add(m.getId());
             } else {
                 final Integer tid = t.getId();
-                List list;
-                if (null == (list = (List)measIdsByTempl.get(tid))) {
-                    list = new ArrayList();
+                List<Measurement> list;
+                if (null == (list = measIdsByTempl.get(tid))) {
+                    list = new ArrayList<Measurement>();
                     measIdsByTempl.put(tid, list);
                 }
                 list.add(m);
@@ -1233,7 +1266,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    private final double[] getAggData(final List historicalData) {
+    private final double[] getAggData(final List<HighLowMetricValue> historicalData) {
         if (historicalData.size() == 0) {
             return null;
         }
@@ -1243,8 +1276,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         Double lastVal = null;
         int count = 0;
         long last = Long.MIN_VALUE;
-        for (Iterator it=historicalData.iterator(); it.hasNext(); ) {
-            final HighLowMetricValue mv = (HighLowMetricValue)it.next();
+        for (HighLowMetricValue mv : historicalData ) {
+           
             low  = Math.min(mv.getLowValue(), low);
             high = Math.max(mv.getHighValue(), high);
             if (mv.getTimestamp() > last) {
@@ -1278,23 +1311,22 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * be return as nulls
      * @see org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl#getHistoricalData()
      * @return the list of data points
-     * @ejb:interface-method
+     * 
      */
-    public PageList getHistoricalData(List measurements, long begin, long end,
+    public PageList<HighLowMetricValue> getHistoricalData(List<Measurement> measurements, long begin, long end,
                                       long interval, int type,
                                       boolean returnMetricNulls,
                                       PageControl pc) {
-        final List availIds = new ArrayList();
-        final List measIds = new ArrayList();
+        final List<Integer> availIds = new ArrayList<Integer>();
+        final List<Integer> measIds = new ArrayList<Integer>();
         checkTimeArguments(begin, end, interval);
         interval = (interval == 0) ? 1 : interval;
         // Want to sort in an attempt to make use of db query cache
-        final Comparator comparator = new MeasurementComparator();
+        final Comparator<Measurement> comparator = new MeasurementComparator();
         // ensure List may be modified
-        measurements = new ArrayList(measurements);
+        measurements = new ArrayList<Measurement>(measurements);
         Collections.sort(measurements, comparator);
-        for (Iterator i = measurements.iterator(); i.hasNext(); ) {
-            Measurement m = (Measurement)i.next();
+        for (Measurement m : measurements ) {
             if (m.getTemplate().isAvailability()) {
                 availIds.add(m.getId());
             } else {
@@ -1302,23 +1334,23 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
         }
         final Integer[] avIds = (Integer[])availIds.toArray(new Integer[0]);
-        final PageList rtn = getAvailMan().getHistoricalAvailData(
+        final PageList<HighLowMetricValue> rtn =availabilityManager.getHistoricalAvailData(
             avIds, begin, end, interval, pc, true);
         final HQDialect dialect = Util.getHQDialect();
         final int maxExprs = (dialect.getMaxExpressions() == -1) ?
             Integer.MAX_VALUE : dialect.getMaxExpressions();
         for (int i=0; i<measIds.size(); i+=maxExprs) {
             final int last = Math.min(i + maxExprs, measIds.size());
-            final List sublist = measIds.subList(i, last);
+            final List<Integer> sublist = measIds.subList(i, last);
             final Integer[] mids = (Integer[])sublist.toArray(new Integer[0]);
-            final PageList pList = getHistData(mids, begin, end, interval, type,
+            final PageList<HighLowMetricValue> pList = getHistData(mids, begin, end, interval, type,
                                                returnMetricNulls, pc);
             merge(rtn, pList);
         }
         return rtn;
     }
 
-    private void merge(PageList master, PageList toMerge) {
+    private void merge(PageList<HighLowMetricValue> master, PageList<HighLowMetricValue> toMerge) {
         if (master.size() == 0) {
             master.addAll(toMerge);
             return;
@@ -1327,8 +1359,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             if (toMerge.size() < (i+1)) {
                 break;
             }
-            final HighLowMetricValue val = (HighLowMetricValue)master.get(i);
-            final HighLowMetricValue mval = (HighLowMetricValue)toMerge.get(i);
+            final HighLowMetricValue val = master.get(i);
+            final HighLowMetricValue mval = toMerge.get(i);
             final int mcount = mval.getCount();
             final int count = val.getCount();
             final int tot = count+mcount;
@@ -1344,19 +1376,19 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         }
     }
 
-    private PageList getHistData(Integer[] ids, long start, long finish,
+    private PageList<HighLowMetricValue> getHistData(Integer[] ids, long start, long finish,
                                  long interval, int type, boolean returnNulls,
                                  PageControl pc) {
         if (ids == null || ids.length < 1) {
-            return new PageList();
+            return new PageList<HighLowMetricValue>();
         }
-        final boolean debug = _log.isDebugEnabled();
+        final boolean debug = log.isDebugEnabled();
         // Check the begin and end times
         checkTimeArguments(start, finish, interval);
         final long begin = TimingVoodoo.roundDownTime(start, MINUTE);
         final long end = TimingVoodoo.roundDownTime(finish, MINUTE);
         final long current = System.currentTimeMillis();
-        final ArrayList rtn = new ArrayList();
+        final ArrayList<HighLowMetricValue> rtn = new ArrayList<HighLowMetricValue>();
         Connection conn = null;
         Statement  stmt = null;
         ResultSet  rs   = null;
@@ -1369,7 +1401,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 Math.max(pc.getPagesize(), wndSize),
                 60);
             final long intervalWnd = interval * pagesize;
-            conn = dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            conn = dbUtil.getConnection();
             stmt = conn.createStatement();
             long endWnd, beginWnd;
             if(pc.isDescending()) {
@@ -1382,28 +1414,34 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             final String sql = getHistoricalSQL(selectType, begin, end, interval,
                                                 beginWnd, endWnd, ids,
                                                 pc.isDescending());
-            if (debug) watch.markTimeBegin("getHistoricalSQL");
+            if (debug) {
+                watch.markTimeBegin("getHistoricalSQL");
+            }
             rs = stmt.executeQuery(sql);
-            if (debug) watch.markTimeEnd("getHistoricalSQL");
-            List vals = processHistoricalRS(rs);
+            if (debug) {
+                watch.markTimeEnd("getHistoricalSQL");
+            }
+            List<HighLowMetricValue> vals = processHistoricalRS(rs);
             rtn.addAll(vals);
-            dbUtil.closeResultSet(logCtx, rs);
-            if (debug) _log.debug(watch);
+            DBUtil.closeResultSet(LOG_CTX, rs);
+            if (debug) {
+                log.debug(watch);
+            }
             return getPageList(begin, end, interval, rtn, returnNulls, pc);
         } catch (SQLException e) {
             throw new SystemException(e);
         } catch (NamingException e) {
             throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
         }
     }
 
-    private PageList getPageList(long begin, long end, long interval,
-                                 List points, boolean returnNulls,
+    private PageList<HighLowMetricValue> getPageList(long begin, long end, long interval,
+                                 List<HighLowMetricValue> points, boolean returnNulls,
                                  PageControl pc) {
-        List rtn = new ArrayList();
-        Iterator it=points.iterator();
+        List<HighLowMetricValue> rtn = new ArrayList<HighLowMetricValue>();
+        Iterator<HighLowMetricValue> it=points.iterator();
         HighLowMetricValue curr = null;
         for (long i=begin; i<end; i+=interval) {
             if (curr == null && !it.hasNext()) {
@@ -1418,16 +1456,16 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             final long currTimestamp = curr.getTimestamp();
             if (currTimestamp == i) {
                 rtn.add(curr);
-                curr = (it.hasNext()) ? (HighLowMetricValue)it.next() : null;
+                curr = (it.hasNext()) ? it.next() : null;
             } else if (returnNulls) {
                 rtn.add(new HighLowMetricValue(Double.NaN, i));
             }
         }
-        return new PageList(rtn, pc.getPageEntityIndex() + rtn.size());
+        return new PageList<HighLowMetricValue>(rtn, pc.getPageEntityIndex() + rtn.size());
     }
 
-    private List processHistoricalRS(ResultSet rs) throws SQLException {
-        List rtn = new ArrayList();
+    private List<HighLowMetricValue> processHistoricalRS(ResultSet rs) throws SQLException {
+        List<HighLowMetricValue> rtn = new ArrayList<HighLowMetricValue>();
         boolean tmp = true;
         int peakCol = -1,
             lowCol  = -1;
@@ -1507,12 +1545,12 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      *
      * @param m The Measurement
      * @return The MetricValue or null if one does not exist.
-     * @ejb:interface-method
+     * 
      */
     public MetricValue getLastHistoricalData(Measurement m)
     {
         if (m.getTemplate().isAvailability()) {
-            return getAvailMan().getLastAvail(m);
+            return availabilityManager.getLastAvail(m);
         } else {
             return getLastHistData(m);
         }
@@ -1520,8 +1558,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
     private MetricValue getLastHistData(Measurement m) {
         // Check the cache
-        MetricDataCache cache = MetricDataCache.getInstance();
-        MetricValue mval = cache.get(m.getId(), 0);
+       
+        MetricValue mval = metricDataCache.get(m.getId(), 0);
         if (mval != null) {
             return mval;
         }
@@ -1531,8 +1569,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         ResultSet  rs   = null;
 
         try {
-            conn = dbUtil.getConnByContext(getInitialContext(),
-                                           DATASOURCE_NAME);
+            conn = dbUtil.getConnection();
 
             final String metricUnion = MeasTabManagerUtil.getUnionStatement(
                 8*HOUR, m.getId().intValue());
@@ -1545,15 +1582,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
             stmt = conn.createStatement();
 
-            if (_log.isDebugEnabled()) {
-                _log.debug("getLastHistoricalData(): " + sqlBuf);
+            if (log.isDebugEnabled()) {
+                log.debug("getLastHistoricalData(): " + sqlBuf);
             }
 
             rs = stmt.executeQuery(sqlBuf.toString());
 
             if (rs.next()) {
                 MetricValue mv = getMetricValue(rs);
-                cache.add(m.getId(), mv);
+                metricDataCache.add(m.getId(), mv);
                 return mv;
             } else {
                 // No cached value, nothing in the database
@@ -1562,10 +1599,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (NamingException e) {
             throw new SystemException(ERR_DB, e);
         } catch (SQLException e) {
-            _log.error("Unable to look up historical data for " + m, e);
+            log.error("Unable to look up historical data for " + m, e);
             throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
         }
     }
 
@@ -1580,15 +1617,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * TODO: We should change this method to now allow NULL values.  This is
      * legacy and only used by the Metric viewer and Availabilty Summary
      * portlets.
-     * @ejb:interface-method
+     * 
      */
-    public Map getLastDataPoints(List measurements, long timestamp)
+    public Map<Integer,MetricValue> getLastDataPoints(List<Measurement> measurements, long timestamp)
     {
-        List availIds = new ArrayList();
-        List measurementIds = new ArrayList();
+        List<Integer> availIds = new ArrayList<Integer>();
+        List<Integer> measurementIds = new ArrayList<Integer>();
 
-        for (Iterator i = measurements.iterator(); i.hasNext(); ) {
-            Measurement m = (Measurement)i.next();
+        for (Measurement m : measurements ) {
+           
             if (m == null) {
                 //XXX: See above.
                 measurementIds.add(null);
@@ -1604,24 +1641,26 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         Integer[] avIds =
             (Integer[])availIds.toArray(new Integer[availIds.size()]);
 
-        Map data = getLastDataPts(sepMids, timestamp);
+        Map<Integer,MetricValue> data = getLastDataPts(sepMids, timestamp);
 
-        if (availIds.size() > 0)
-            data.putAll(getAvailMan().getLastAvail(avIds));
+        if (availIds.size() > 0) {
+            data.putAll(availabilityManager.getLastAvail(avIds));
+        }
 
         return data;
     }
 
-    private Map getLastDataPts(Integer[] ids, long timestamp)
+    private Map<Integer,MetricValue> getLastDataPts(Integer[] ids, long timestamp)
     {
         final int MAX_ID_LEN = 10;
         // The return map
-        Map data = new HashMap();
-        if (ids.length == 0)
+        Map<Integer, MetricValue> data = new HashMap<Integer, MetricValue>();
+        if (ids.length == 0) {
             return data;
+        }
 
         // Try to get the values from the cache first
-        ArrayList nodata = getCachedDataPoints(ids, data, timestamp);
+        ArrayList<Integer> nodata = getCachedDataPoints(ids, data, timestamp);
 
         if (nodata.size() == 0) {
             return data;
@@ -1635,7 +1674,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
         try {
             conn =
-                dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+                dbUtil.getConnection();
 
             int length;
             stmt = conn.createStatement();
@@ -1646,8 +1685,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 Integer[] subids = new Integer[length];
                 for (int j = 0; j < subids.length; j++) {
                     subids[j] = ids[ind++];
-                    if (_log.isDebugEnabled())
-                        _log.debug("arg" + (j+1) + ": " + subids[j]);
+                    if (log.isDebugEnabled())
+                        log.debug("arg" + (j+1) + ": " + subids[j]);
                 }
                 setDataPoints(data, timestamp, subids, stmt);
             }
@@ -1656,13 +1695,13 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (NamingException e) {
             throw new SystemException(e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, conn, stmt, null);
-            if (_log.isDebugEnabled()) {
-                _log.debug("getLastDataPoints(): Statement query elapsed " +
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
+            if (log.isDebugEnabled()) {
+                log.debug("getLastDataPoints(): Statement query elapsed " +
                           "time: " + timer.getElapsed());
             }
         }
-        List dataPoints = convertMetricId2MetricValueMapToDataPoints(data);
+        List<DataPoint> dataPoints = convertMetricId2MetricValueMapToDataPoints(data);
         updateMetricDataCache(dataPoints);
         return data;
     }
@@ -1670,18 +1709,18 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     /**
      * Get data points from cache only
      *
-     * @ejb:interface-method
+     * 
      */
-    public ArrayList getCachedDataPoints(Integer[] ids, Map data,
+    public ArrayList<Integer> getCachedDataPoints(Integer[] ids, Map<Integer,MetricValue> data,
                                          long timestamp) {
-        MetricDataCache cache = MetricDataCache.getInstance();
-        ArrayList nodata = new ArrayList();
+      
+        ArrayList<Integer> nodata = new ArrayList<Integer>();
         for (int i = 0; i < ids.length; i++) {
             if (ids[i] == null) {
                 continue;
             }
 
-            MetricValue mval = cache.get(ids[i], timestamp);
+            MetricValue mval = metricDataCache.get(ids[i], timestamp);
             if (mval != null) {
                 data.put(ids[i], mval);
             } else {
@@ -1691,7 +1730,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         return nodata;
     }
 
-    private void setDataPoints(Map data, long timestamp,
+    private void setDataPoints(Map<Integer,MetricValue> data, long timestamp,
                                Integer[] measIds, Statement stmt)
         throws SQLException
     {
@@ -1699,23 +1738,23 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         try
         {
             StringBuilder sqlBuf = getLastDataPointsSQL(timestamp, measIds);
-            if (_log.isTraceEnabled()) {
-                _log.trace("getLastDataPoints(): " + sqlBuf);
+            if (log.isTraceEnabled()) {
+                log.trace("getLastDataPoints(): " + sqlBuf);
             }
             rs = stmt.executeQuery(sqlBuf.toString());
 
-            MetricDataCache cache = MetricDataCache.getInstance();
+           
             while (rs.next()) {
                 Integer mid = new Integer(rs.getInt(1));
                 if (!data.containsKey(mid)) {
                     MetricValue mval = getMetricValue(rs);
                     data.put(mid, mval);
-                    cache.add(mid, mval);       // Add to cache to avoid lookup
+                    metricDataCache.add(mid, mval);       // Add to cache to avoid lookup
                 }
             }
         }
         finally {
-            dbUtil.closeResultSet(logCtx, rs);
+            DBUtil.closeResultSet(LOG_CTX, rs);
         }
     }
 
@@ -1748,15 +1787,15 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param metricId2MetricValueMap The map to convert.
      * @return The list of DataPoints.
      */
-    private List convertMetricId2MetricValueMapToDataPoints(
-            Map metricId2MetricValueMap) {
+    private List<DataPoint> convertMetricId2MetricValueMapToDataPoints(
+            Map<Integer,MetricValue> metricId2MetricValueMap) {
 
-        List dataPoints = new ArrayList(metricId2MetricValueMap.size());
+        List<DataPoint> dataPoints = new ArrayList<DataPoint>(metricId2MetricValueMap.size());
 
-        for (Iterator i = metricId2MetricValueMap.entrySet().iterator(); i.hasNext();) {
-            Map.Entry entry = (Map.Entry) i.next();
-            Integer mid = (Integer)entry.getKey();
-            MetricValue mval = (MetricValue)entry.getValue();
+        for (Iterator<Map.Entry<Integer,MetricValue>> i = metricId2MetricValueMap.entrySet().iterator(); i.hasNext();) {
+            Map.Entry<Integer,MetricValue> entry =  i.next();
+            Integer mid = entry.getKey();
+            MetricValue mval = entry.getValue();
             dataPoints.add(new DataPoint(mid, mval));
         }
 
@@ -1766,14 +1805,14 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
     /**
      * Get a Baseline data.
      *
-     * @ejb:interface-method
+     * 
      */
     public double[] getBaselineData(Measurement meas, long begin, long end) {
         if (meas.getTemplate().getAlias().equalsIgnoreCase("availability")) {
             Integer[] mids = new Integer[1];
             Integer id = meas.getId();
             mids[0] = id;
-            return (double[])getAvailMan()
+            return (double[])availabilityManager
                 .getAggregateData(mids, begin, end)
                 .get(id);
         } else {
@@ -1783,7 +1822,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
     private double[] getBaselineMeasData(Measurement meas, long begin, long end) {
         // Check the begin and end times
-        super.checkTimeArguments(begin, end);
+        checkTimeArguments(begin, end);
         Integer id = meas.getId();
 
         Connection conn = null;
@@ -1794,7 +1833,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         String table = getDataTable(begin, end, id.intValue());
         try {
             conn =
-                dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+                dbUtil.getConnection();
 
             StringBuilder sqlBuf = new StringBuilder(
                 "SELECT MIN(value), AVG(value), MAX(value) FROM ")
@@ -1819,7 +1858,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         } catch (NamingException e) {
             throw new SystemException(ERR_DB, e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, conn, stmt, rs);
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, rs);
         }
     }
 
@@ -1834,29 +1873,29 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param useAggressiveRollup uses a measurement rollup table to fetch the
      *      data if the time range spans more than one data table's max timerange
      * @return the Map of data points
-     * @ejb:interface-method
+     * 
      */
-    public Map getAggregateDataByMetric(Integer[] tids, Integer[] iids,
+    public Map<Integer,double[]> getAggregateDataByMetric(Integer[] tids, Integer[] iids,
                                         long begin, long end,
                                         boolean useAggressiveRollup) {
         checkTimeArguments(begin, end);
-        Map rtn =
+        Map<Integer,double[]> rtn =
             getAggDataByMetric(tids, iids, begin, end, useAggressiveRollup);
-        Collection metrics =
-            getMeasurementDAO().findAvailMeasurements(tids, iids);
+        Collection<Measurement> metrics =
+            measurementDAO.findAvailMeasurements(tids, iids);
         if (metrics.size() > 0) {
             Integer[] mids = new Integer[metrics.size()];
-            Iterator it = metrics.iterator();
+            Iterator<Measurement> it = metrics.iterator();
             for (int i = 0; i < mids.length; i++) {
-                Measurement m = (Measurement) it.next();
+                Measurement m =  it.next();
                 mids[i] = m.getId();
             }
-            rtn.putAll(getAvailMan().getAggregateData(mids, begin, end));
+            rtn.putAll(availabilityManager.getAggregateData(mids, begin, end));
         }
         return rtn;
     }
 
-    private Map getAggDataByMetric(Integer[] tids, Integer[] iids,
+    private Map<Integer,double[]> getAggDataByMetric(Integer[] tids, Integer[] iids,
                                    long begin, long end,
                                    boolean useAggressiveRollup) {
         // Check the begin and end times
@@ -1865,7 +1904,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         end = TimingVoodoo.roundDownTime(end, MINUTE);
 
         // Result set
-        HashMap resMap = new HashMap();
+        HashMap<Integer,double[]> resMap = new HashMap<Integer,double[]>();
 
         if (tids.length == 0 || iids.length == 0)
             return resMap;
@@ -1877,16 +1916,16 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         StopWatch timer        = new StopWatch();
 
         StringBuffer iconj = new StringBuffer(
-            dbUtil.composeConjunctions("instance_id", iids.length));
+            DBUtil.composeConjunctions("instance_id", iids.length));
 
-        dbUtil.replacePlaceHolders(iconj, iids);
+        DBUtil.replacePlaceHolders(iconj, iids);
         StringBuilder tconj = new StringBuilder(
-            dbUtil.composeConjunctions("template_id", tids.length));
+            DBUtil.composeConjunctions("template_id", tids.length));
 
         try {
-            conn = dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+            conn = dbUtil.getConnection();
             // The table to query from
-            List measids = MeasTabManagerUtil.getMeasIds(conn, tids, iids);
+            List<Integer> measids = MeasTabManagerUtil.getMeasIds(conn, tids, iids);
             String table = getDataTable(begin, end,
                 (Integer[])measids.toArray(new Integer[0]), useAggressiveRollup);
             // Use the already calculated min, max and average on
@@ -1902,8 +1941,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 " FROM " + table + "," + TAB_MEAS +
                 " WHERE timestamp BETWEEN ? AND ? AND measurement_id = id " +
                 " AND " + iconj + " AND " + tconj + " GROUP BY id";
-            if (_log.isTraceEnabled()) {
-                _log.trace("getAggregateDataByMetric(): " + aggregateSQL);
+            if (log.isTraceEnabled()) {
+                log.trace("getAggregateDataByMetric(): " + aggregateSQL);
             }
             stmt = conn.prepareStatement(aggregateSQL);
             int i = 1;
@@ -1927,20 +1966,20 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     resMap.put(mid, data);
                 }
             } finally {
-                dbUtil.closeResultSet(logCtx, rs);
+                DBUtil.closeResultSet(LOG_CTX, rs);
             }
-            if (_log.isTraceEnabled()) {
-                _log.trace("getAggregateDataByMetric(): Statement query elapsed "
+            if (log.isTraceEnabled()) {
+                log.trace("getAggregateDataByMetric(): Statement query elapsed "
                           + "time: " + timer.getElapsed());
             }
             return resMap;
         } catch (SQLException e) {
-            _log.debug("getAggregateDataByMetric()", e);
+            log.debug("getAggregateDataByMetric()", e);
             throw new SystemException(e);
         } catch (NamingException e) {
             throw new SystemException(ERR_DB, e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
         }
     }
 
@@ -1954,16 +1993,16 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
      * @param useAggressiveRollup uses a measurement rollup table to fetch the
      *      data if the time range spans more than one data table's max timerange
      * @return the map of data points
-     * @ejb:interface-method
+     * 
      */
-    public Map getAggregateDataByMetric(List measurements, long begin,
+    public Map<Integer,double[]> getAggregateDataByMetric(List<Measurement> measurements, long begin,
                                         long end, boolean useAggressiveRollup)
     {
         checkTimeArguments(begin, end);
-        List avids = new ArrayList();
-        List mids = new ArrayList();
-        for (Iterator i=measurements.iterator(); i.hasNext(); ) {
-            Measurement meas = (Measurement)i.next();
+        List<Integer> avids = new ArrayList<Integer>();
+        List<Integer> mids = new ArrayList<Integer>();
+        for (Measurement meas : measurements ) {
+           
             MeasurementTemplate t = meas.getTemplate();
             if (t.isAvailability()) {
                 avids.add(meas.getId());
@@ -1971,19 +2010,16 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                 mids.add(meas.getId());
             }
         }
-        Map rtn = getAggDataByMetric(
+        Map<Integer,double[]> rtn = getAggDataByMetric(
             (Integer[]) mids.toArray(new Integer[0]), begin, end,
             useAggressiveRollup);
-        rtn.putAll(getAvailMan().getAggregateData(
+        rtn.putAll(availabilityManager.getAggregateData(
             (Integer[]) avids.toArray(new Integer[0]), begin, end));
         return rtn;
     }
 
-    private AvailabilityManager getAvailMan() {
-        return AvailabilityManagerImpl.getOne();
-    }
 
-    private Map getAggDataByMetric(Integer[] mids, long begin,
+    private Map<Integer,double[]> getAggDataByMetric(Integer[] mids, long begin,
                                    long end, boolean useAggressiveRollup)
     {
         // Check the begin and end times
@@ -1994,7 +2030,7 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         // The table to query from
         String table = getDataTable(begin, end, mids, useAggressiveRollup);
         // Result set
-        HashMap resMap = new HashMap();
+        HashMap<Integer,double[]> resMap = new HashMap<Integer,double[]>();
 
         if (mids.length == 0)
             return resMap;
@@ -2006,8 +2042,8 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
         StopWatch timer        = new StopWatch();
 
         StringBuffer mconj = new StringBuffer(
-            dbUtil.composeConjunctions("measurement_id", mids.length));
-        dbUtil.replacePlaceHolders(mconj, mids);
+            DBUtil.composeConjunctions("measurement_id", mids.length));
+        DBUtil.replacePlaceHolders(mconj, mids);
 
         // Use the already calculated min, max and average on
         // compressed tables.
@@ -2026,10 +2062,10 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
 
         try {
             conn =
-                dbUtil.getConnByContext(getInitialContext(), DATASOURCE_NAME);
+                dbUtil.getConnection();
 
-            if (_log.isTraceEnabled())
-                _log.trace("getAggregateDataByMetric(): " + aggregateSQL);
+            if (log.isTraceEnabled())
+                log.trace("getAggregateDataByMetric(): " + aggregateSQL);
 
             stmt = conn.prepareStatement(aggregateSQL);
 
@@ -2053,43 +2089,39 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
                     resMap.put(mid, data);
                 }
             } finally {
-                dbUtil.closeResultSet(logCtx, rs);
+                DBUtil.closeResultSet(LOG_CTX, rs);
             }
 
-            if (_log.isTraceEnabled())
-                _log.trace("getAggregateDataByMetric(): Statement query elapsed "
+            if (log.isTraceEnabled())
+                log.trace("getAggregateDataByMetric(): Statement query elapsed "
                           + "time: " + timer.getElapsed());
 
             return resMap;
         } catch (SQLException e) {
-            _log.debug("getAggregateDataByMetric()", e);
+            log.debug("getAggregateDataByMetric()", e);
             throw new SystemException(e);
         } catch (NamingException e) {
             throw new SystemException(ERR_DB, e);
         } finally {
-            dbUtil.closeJDBCObjects(logCtx, conn, stmt, null);
+            DBUtil.closeJDBCObjects(LOG_CTX, conn, stmt, null);
         }
     }
 
-    public static DataManagerLocal getOne() {
-        try {
-            return DataManagerUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static DataManager getOne() {
+       return Bootstrap.getBean(DataManager.class);
     }
 
-    //TODO this was in ejbCreate - moved out b/c of ServerConfigManager dependency
-    private void setAnalyzer() {
+    @PostConstruct
+    public void setAnalyzer() {
         boolean analyze = true;
         try {
-            Properties conf = ServerConfigManagerImpl.getOne().getConfig();
+            Properties conf = serverConfigManager.getConfig();
             if (conf.containsKey(HQConstants.OOBEnabled)) {
                 analyze = Boolean.valueOf(
                     conf.getProperty(HQConstants.OOBEnabled)).booleanValue();
             }
         } catch (Exception e) {
-            _log.debug("Error looking up server configs", e);
+            log.debug("Error looking up server configs", e);
         } finally {
             if (analyze) {
                 analyzer = (Analyzer) ProductProperties
@@ -2097,16 +2129,4 @@ public class DataManagerEJBImpl extends SessionEJB implements SessionBean {
             }
         }
     }
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() throws CreateException {
-       
-    }
-
-    public void ejbPostCreate() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
-    public void ejbRemove() {}
-    public void setSessionContext(SessionContext ctx) {}
 }

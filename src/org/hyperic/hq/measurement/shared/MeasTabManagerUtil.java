@@ -400,11 +400,11 @@ public class MeasTabManagerUtil {
         return rtn;
     }
 
-    public static List getMeasIds(Connection conn, Integer[] tids,
+    public static List<Integer> getMeasIds(Connection conn, Integer[] tids,
                                   Integer[] iids)
         throws SQLException
     {
-        List rtn = new ArrayList();
+        List<Integer> rtn = new ArrayList<Integer>();
         StringBuffer iidsConj = new StringBuffer(
                 DBUtil.composeConjunctions("instance_id", iids.length));
         DBUtil.replacePlaceHolders(iidsConj, iids);

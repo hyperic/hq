@@ -4,9 +4,9 @@ import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
 import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
+import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
-import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
+import org.hyperic.hq.measurement.server.session.DataManagerImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
@@ -68,7 +68,7 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
 
         MeasurementManager dmManager =
             MeasurementManagerImpl.getOne();
-        DataManagerLocal dataMan = DataManagerEJBImpl.getOne();
+        DataManager dataMan = DataManagerImpl.getOne();
 
         long detailedPurgeInterval = getDetailedPurgeInterval();
         String cats[] = MeasurementConstants.VALID_CATEGORIES;

@@ -27,7 +27,7 @@ package org.hyperic.hq.measurement.server.session;
 
 import java.util.List;
 
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
+import org.hyperic.hq.measurement.shared.DataManager;
 
 /**
  * A {@link DataInserter} which immediately calls addData in the data manager
@@ -38,7 +38,7 @@ public class SynchronousDataInserter
 {
     private final Object _lock = new Object();
 
-    private final DataManagerLocal _dMan = DataManagerEJBImpl.getOne();
+    private final DataManager _dMan = DataManagerImpl.getOne();
     
     public void insertMetrics(List metricData) throws InterruptedException {
         _dMan.addData(metricData);

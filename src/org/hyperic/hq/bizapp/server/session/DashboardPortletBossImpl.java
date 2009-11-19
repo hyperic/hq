@@ -67,7 +67,7 @@ import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.shared.DataManagerLocal;
+import org.hyperic.hq.measurement.shared.DataManager;
 import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.util.pager.PageControl;
@@ -96,7 +96,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
 
     private MeasurementManager measurementManager;
 
-    private DataManagerLocal dataManager;
+    private DataManager dataManager;
 
     private MeasurementBossLocal measurementBoss;
 
@@ -112,7 +112,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
 
     @Autowired
     public DashboardPortletBossImpl(PermissionManager permissionManager, ResourceManager resourceManager,
-                                    MeasurementManager measurementManager, DataManagerLocal dataManager,
+                                    MeasurementManager measurementManager, DataManager dataManager,
                                     MeasurementBossLocal measurementBoss, ResourceGroupManager resourceGroupManager,
                                     GalertManager galertManager, AlertManager alertManager,
                                     AlertDefinitionManager alertDefinitionManager,
