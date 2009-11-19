@@ -63,887 +63,925 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-public class EscalationManagerImpl implements EscalationManager
-{
-    private static final Log log = LogFactory.getLog(EscalationManagerImpl.class);
-   
-    private ActionManager actionManager;
-    private AlertPermissionManager alertPermissionManager;
-    private AuthzSubjectManager authzSubjectManager;
-    private EscalationDAO escalationDAO;
-    private EscalationStateDAO escalationStateDAO;
-    // TODO Get these injected
-    private AlertRegulator alertRegulator;
-    // TODO This contains a reference to EscalationManager, need to fix that
-    private EscalationRuntime escalationRuntime; 
-    
-    @PostConstruct
-    public void afterPropertiesSet() throws Exception {
-    	alertRegulator = AlertRegulator.getInstance();
-    }
-
-    @Autowired
-    public EscalationManagerImpl(ActionManager actionManager, AlertPermissionManager alertPermissionManager, AuthzSubjectManager authzSubjectManager, EscalationDAO escalationDAO, EscalationStateDAO escalationStateDAO/*, AlertRegulator alertRegulator, EscalationRuntime escalationRuntime*/) {
-    	this.actionManager = actionManager;
-    	this.alertPermissionManager = alertPermissionManager;
-    	this.authzSubjectManager = authzSubjectManager;
-    	this.escalationDAO = escalationDAO;
-    	this.escalationStateDAO = escalationStateDAO;
-    	/*
-    	this.alertRegulator = alertRegulator;
-    	this.escalationRuntime = escalationRuntime;
-    	*/
-    }
-    
-    private void assertEscalationNameIsUnique(String name)
-        throws DuplicateObjectException
-    {
-        Escalation escalation;
-
-        if ((escalation = escalationDAO.findByName(name)) != null) {
-            throw new DuplicateObjectException("An escalation with that name " +
-                                               "already exists", escalation);
-        }
-    }
-
-    /**
-     * Create a new escalation chain
-     *
-     * @see Escalation for information on fields
-     */
-    public Escalation createEscalation(String name, String description,
-                                       boolean pauseAllowed, long maxWaitTime,
-                                       boolean notifyAll, boolean repeat)
-        throws DuplicateObjectException
-    {
-        Escalation escalation;
-
-        assertEscalationNameIsUnique(name);
-        
-        escalation = new Escalation(name, description, pauseAllowed, maxWaitTime,
-                             notifyAll, repeat);
-
-        escalationDAO.save(escalation);
-        
-        return escalation;
-    }
-
-    public EscalationState findEscalationState(PerformsEscalations def) {
-        return escalationStateDAO.find(def);
-    }
-
-    /**
-     * Update an escalation chain
-     *
-     * @see Escalation for information on fields
-     */
-    public void updateEscalation(AuthzSubject subject, Escalation escalation,
-                                 String name, String description,
-                                 boolean pauseAllowed, long maxWaitTime,
-                                 boolean notifyAll, boolean repeat)
-        throws DuplicateObjectException, PermissionException
-    {
-        alertPermissionManager.canModifyEscalation(subject.getId());
-
-        if (!escalation.getName().equals(name)) {
-            assertEscalationNameIsUnique(name);
-        }
-
-        escalation.setName(name);
-        escalation.setDescription(description);
-        escalation.setPauseAllowed(pauseAllowed);
-        escalation.setMaxPauseTime(maxWaitTime);
-        escalation.setNotifyAll(notifyAll);
-        escalation.setRepeat(repeat);
-    }
-
-    private void unscheduleEscalation(Escalation escalation) {
-        Collection<EscalationState> escalationStates = escalationStateDAO.findStatesFor(escalation);
-
-        // Unschedule any escalations currently in progress
-        for (Iterator<EscalationState> i = escalationStates.iterator(); i.hasNext(); ) {
-            endEscalation(i.next());
-        }
-    }
-
-    /**
-     * Add an action to the end of an escalation chain.  Any escalations
-     * currently in progress using this chain will be canceled.
-     */
-    public void addAction(Escalation escalation, ActionConfigInterface config,
-                          long waitTime)
-    {
-        Action action = actionManager.createAction(config);
-        
-        escalation.addAction(waitTime, action);
-        unscheduleEscalation(escalation);
-    }
-
-    /**
-     * Remove an action from an escalation chain.  Any escalations
-     * currently in progress using this chain will be canceled.
-     */
-    public void removeAction(Escalation escalation, Integer actionId) {
-        // Iterate through the actions and find the one escalation action
-        Action action = null;
-        
-        for (Iterator<EscalationAction> i = escalation.getActionsList().iterator(); i.hasNext(); ) {
-            EscalationAction escalationAction = i.next();
-            
-            if (escalationAction.getAction().getId().equals(actionId)) {
-                action = escalationAction.getAction();
-                i.remove();
-                
-                break;
-            }
-        }
-
-        if (action == null) {
-            return;
-        }
-
-        unscheduleEscalation(escalation);
-        actionManager.markActionDeleted(action);
-    }
-
-    /**
-     * Delete an escalation chain.  This method will throw an exception if
-     * the escalation chain is in use.
-     *
-     * TODO:  Probably want to allow for the fact that people DO want to delete
-     *        while states exist.
-     */
-    public void deleteEscalation(AuthzSubject subject, Escalation escalation)
-        throws PermissionException, ApplicationException
-    {
-        alertPermissionManager.canRemoveEscalation(subject.getId());
-
-        List<EscalationAlertType> escalationAlertTypes = EscalationAlertType.getAll();
-        
-        for (Iterator<EscalationAlertType> i = escalationAlertTypes.iterator(); i.hasNext(); ) {
-            EscalationAlertType escalationAlertType = i.next();
-
-            if (escalationAlertType.escalationInUse(escalation)) {
-                if (log.isDebugEnabled()) {
-                    log.debug("Escalation [" + escalation.getId() + ", " + escalation.getName() +
-                               "] in use by:");
-                    
-                    Collection<PerformsEscalations> performers = escalationAlertType.getPerformersOfEscalation(escalation);
-                    
-                    for (Iterator<PerformsEscalations> j = performers.iterator(); j.hasNext(); ) {
-                        PerformsEscalations alertDefinition = j.next();
-
-                        log.debug("[" + alertDefinition.getName() + " id=" + alertDefinition.getId() +"]");
-                    }
-                }
-                
-                throw new ApplicationException("The escalation is currently " +
-                                               "in use");
-            }
-        }
-        
-        escalationDAO.remove(escalation);
-    }
-
-    public Escalation findById(Integer id) {
-        return escalationDAO.findById(id);
-    }
-
-    public Escalation findById(AuthzSubject subject, Integer id)
-        throws PermissionException
-    {
-        return escalationDAO.findById(id);
-    }
-
-    public Collection<Escalation> findAll(AuthzSubject subject)
-        throws PermissionException
-    {
-        return escalationDAO.findAllOrderByName();
-    }
-
-    public Escalation findByName(AuthzSubject subject, String name)
-        throws PermissionException
-    {
-        return escalationDAO.findByName(name);
-    }
-
-    public Escalation findByName(String name) {
-        return escalationDAO.findByName(name);
-    }
-
-    /**
-     * Start an escalation. If the entity performing escalations does not have
-     * an assigned escalation or if the escalation has already been started,
-     * then this method call will be a no-op.
-     *
-     * @param def     The entity performing escalations.
-     * @param creator Object which will create an {@link Escalatable} object
-     *                if invoking this method actually starts an escalation.
-     * @return      <code>true</code> if the escalation is started;
-     *              <code>false</code> if not because either there is
-     *              no escalation assigned to the entity or the escalation
-     *              is already in progress.
-     */
-    public boolean startEscalation(PerformsEscalations alertDefinition,
-                                   EscalatableCreator creator)
-    {
-    	if (!alertRegulator.alertsAllowed()) {
-            return false;
-        }
-
-        if (alertDefinition.getEscalation() == null) {
-            return false;
-        }
-        
-        boolean started = false;
-
-        try {
-            // HHQ-1395: It would be preferable to acquire the exclusive
-            // lock until we schedule the escalation, but this may cause a
-            // deadlock since creating the escalatable executes actions which
-            // may take an arbitrary amount of time to execute.
-            //
-            // Assume we may throw an unchecked exception prior to scheduling.
-            // This is possible, especially when creating the escalatable. If
-            // this happens, make sure to clear the uncommitted escalation
-            // state cache.
-        	EscalationRuntime.getInstance().acquireMutex();
-
-            try {
-                if (escalationStateExists(alertDefinition)) {
-                    return started = false;
-                }
-            } finally {
-                EscalationRuntime.getInstance().releaseMutex();
-            }
-
-            try {
-                Escalatable alert = creator.createEscalatable();
-
-                // HQ-1348: Recovery alerts are automatically fixed
-                // so don't start escalation if the alert is fixed
-                if (!alert.getAlertInfo().isFixed()) {
-	                EscalationState escalationState = new EscalationState(alert);
-	                
-	                escalationStateDAO.save(escalationState);
-	                log.debug("Escalation started: state=" + escalationState.getId());
-	                EscalationRuntime.getInstance().scheduleEscalation(escalationState);
-	                
-	                started = true;
-                }
-            } catch (ResourceDeletedException e) {
-                log.debug(e);
-            } finally {
-                if (!started) {
-                    EscalationRuntime.getInstance()
-                        .removeFromUncommittedEscalationStateCache(alertDefinition, false);
-                }
-            }
-
-        } catch (InterruptedException e) {
-            log.error("Failed to start escalation for " +
-                       "alert def id=" + alertDefinition.getId() +
-                       "; type=" + alertDefinition.getAlertType().getCode(), e);
-        }
-
-        return started;
-    }
-
-    private boolean escalationStateExists(PerformsEscalations alertDefinition) {
-        // Checks if there is an uncommitted escalation state for this def.
-        boolean existsInCache = EscalationRuntime.getInstance()
-                                .addToUncommittedEscalationStateCache(alertDefinition);
-        boolean existsInDb = false;
-
-        try {
-            // Checks if there is a committed escalation state for this def.
-            existsInDb = escalationStateDAO.find(alertDefinition) != null;
-        } catch (Exception e) {
-            log.warn("There is already one escalation in progress for " +
-                    "alert def id=" + alertDefinition.getId() +
-                    "; type=" + alertDefinition.getAlertType().getCode());
-
-          // HHQ-915: A hibernate exception will occur when looking up the
-          // escalation state if more than one exists. This shouldn't happen,
-          // but if it does, don't create another escalation.
-            existsInDb = true;
-        }
-
-        // Possible scenarios when storing an escalation state ->
-        // how to remove the def from the uncommitted cache:
-        // in_cache=false, in_db=false -> schedule to remove on commit
-        // in_cache=true, in_db=false -> do nothing,
-        //                               - will be removed from cache post-commit
-        // in_cache=false, in_db=true -> remove immediately
-        // in_cache=true, in_db=true -> (a timing issue),
-        //                              - will be removed from cache post-commit,
-        //                                but to be safe, remove immediately
-        if (existsInDb) {
-        	EscalationRuntime.getInstance().removeFromUncommittedEscalationStateCache(alertDefinition, false);
-        } else if (!existsInCache && !existsInDb) {
-        	EscalationRuntime.getInstance().removeFromUncommittedEscalationStateCache(alertDefinition, true);
-        }
-
-        if (existsInCache || existsInDb) {
-            log.debug("startEscalation called on [" + alertDefinition + "] but it was " +
-            "already running");
-        }
-
-        return existsInCache || existsInDb;
-    }
-
-    public Escalatable getEscalatable(EscalationState escalationState) {
-        return escalationState.getAlertType().findEscalatable(new Integer(escalationState.getAlertId()));
-    }
-
-    /**
-     * End an escalation.  This will remove all state for the escalation
-     * tied to a specific definition.
-     */
-    public void endEscalation(PerformsEscalations alertDefinition) {
-    	EscalationRuntime.getInstance().unscheduleAllEscalationsFor(alertDefinition);
-    }
-
-    private void endEscalation(EscalationState escalationState) {
-        if (escalationState != null) {
-            escalationStateDAO.remove(escalationState);
-            EscalationRuntime.getInstance().unscheduleEscalation(escalationState);
-        }
-    }
-
-    /**
-     * This method is only for internal use by the {@link EscalationRuntime}.
-     *
-     * This method deletes in batch the given escalation states.
-     *
-     * @param stateIds The Ids for the escalation states to delete.
-     */
-    public void deleteAllEscalationStates(Integer[] stateIds) {
-        escalationStateDAO.removeAllEscalationStates(stateIds);
-    }
-
-    /**
-     * This method is only for internal use by the {@link EscalationRuntime}.
-     * It ensures that we have a session setup prior to executing any actions.
-     *
-     * This method executes the action pointed at by the state, determines
-     * the next stage of the escalation and (optionally) ends it, thus
-     * unscheduling any further executions.
-     */
-    public void executeState(Integer stateId) {
-        // Use a get() so that the state is retrieved from the
-        // database (in case the escalation state was deleted
-        // in a separate session when ending an escalation).
-        // The get() will return null if the escalation state
-        // does not exist.
-        EscalationState escalationState = escalationStateDAO.get(stateId);
-
-        if (hasEscalationStateOrEscalatingEntityBeenDeleted(escalationState)) {
-            // just to be safe
-            endEscalation(escalationState);
-            
-            return;
-        }
-
-        Escalation escalation = escalationState.getEscalation();
-        int actionIdx = escalationState.getNextAction();
-
-        // XXX -- Need to make sure the application is running before
-        //        we allow this to proceed
-        log.debug("Executing state[" + escalationState.getId() + "]");
-        
-        if (actionIdx >= escalation.getActions().size()) {
-            if (escalation.isRepeat() && escalation.getActions().size() > 0) {
-                actionIdx = 0;          // Loop back
-            } else {
-                log.debug("Reached the end of the escalation state[" +
-                		escalationState.getId() + "].  Ending it");
-                
-                endEscalation(escalationState);
-                
-                return;
-            }
-        }
-
-        EscalationAction escalationAction = (EscalationAction) escalation.getActions().get(actionIdx);
-        Action action = escalationAction.getAction();
-        Escalatable alert = getEscalatable(escalationState);
-
-        // HQ-1348: End escalation if alert is already fixed
-        if (alert.getAlertInfo().isFixed()){
-        	endEscalation(escalationState);
-        	
-        	return;
-        }
-
-        // Always make sure that we increase the state offset of the
-        // escalation so we don't loop fo-eva
-        Random random = new Random();
-        long offset = 65000 + random.nextInt(25000);
-        long nextTime = System.currentTimeMillis() +
-            Math.max(offset, escalationAction.getWaitTime());
-
-        log.debug("Moving onto next state of escalation, but waiting for "
-                   + escalationAction.getWaitTime() + " ms");
-        
-        escalationState.setNextAction(actionIdx + 1);
-        escalationState.setNextActionTime(nextTime);
-        escalationState.setAcknowledgedBy(null);
-        EscalationRuntime.getInstance().scheduleEscalation(escalationState);
-
-        try {
-            EscalationAlertType type = escalationState.getAlertType();
-            AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
-            ActionExecutionInfo execInfo =
-                new ActionExecutionInfo(alert.getShortReason(),
-                		alert.getLongReason(),
-                		alert.getAuxLogs());
-            String detail = action.executeAction(alert.getAlertInfo(), execInfo);
-            
-            type.changeAlertState(alert, overlord,
-                    EscalationStateChange.ESCALATED);
-            type.logActionDetails(alert, action, detail, null);
-        } catch(Exception e) {
-            log.error("Unable to execute action [" +
-                       action.getClassName() + "] for escalation definition [" +
-                       escalationState.getEscalation().getName() + "]", e);
-        }
-    }
-
-    /**
-     * Check if the escalation state or its associated escalating entity
-     * has been deleted.
-     *
-     * @param s The escalation state.
-     * @return <code>true</code> if the escalation state or escalating entity
-     *         has been deleted.
-     */
-    private boolean hasEscalationStateOrEscalatingEntityBeenDeleted(EscalationState escalationState) {
-        if (escalationState == null) {
-            return true;
-        }
-
-        try {
-            PerformsEscalations alertDefinition = escalationState.getAlertType().findDefinition(
-                                    new Integer(escalationState.getAlertDefinitionId()));
-
-            // galert defs may be deleted from the DB when the group is deleted,
-            // so we may get a null value.
-            return alertDefinition == null || alertDefinition.isDeleted();
-        } catch (Throwable e) {
-            return true;
-        }
-    }
-
-    /**
-     * Find an escalation based on the type and ID of the definition.
-     *
-     * @return null if the definition defined by the ID does not have any
-     *         escalation associated with it
-     */
-    public Escalation findByDefId(EscalationAlertType escalationAlertType, Integer definitionId) {
-        return escalationAlertType.findDefinition(definitionId).getEscalation();
-    }
-
-    /**
-     * Set the escalation for a given alert definition and type
-     */
-    public void setEscalation(EscalationAlertType escalationAlertType, Integer defId,
-                              Escalation escalation)
-    {
-    	escalationAlertType.setEscalation(defId, escalation);
-    }
-
-    /**
-     * Acknowledge an alert, potentially sending out notifications.
-     *
-     * @param subject Person who acknowledged the alert
-     * @param pause TODO
-     */
-    public boolean acknowledgeAlert(AuthzSubject subject, EscalationAlertType escalationAlertType,
-                                 Integer alertId, String moreInfo, long pause)
-        throws PermissionException
-    {
-        Escalatable alert = escalationAlertType.findEscalatable(alertId);
-        PerformsEscalations alertDefinition = alert.getDefinition();
-
-        if (!isAlertAcknowledgeable(alertId, alertDefinition)) {
-            return false;
-        }
-
-        if (moreInfo == null || moreInfo.trim().length() == 0) {
-            moreInfo = "";
-        }
-
-        EscalationState escalationState = escalationStateDAO.find(alert);
-        Escalation escalation = alertDefinition.getEscalation();
-
-        if (pause > 0 && escalation.isPauseAllowed()) {
-        	long nextTime;
-        	
-        	if (pause > escalation.getMaxPauseTime()) {
-        	    pause = escalation.getMaxPauseTime();
-        	}
-        	
-        	if (pause == Long.MAX_VALUE) {
-        		nextTime = pause;
-                moreInfo = " and paused escalation until fixed. " + moreInfo;
-        	} else {
-        		nextTime = System.currentTimeMillis() + pause;
-                
-        		FormattedNumber fmtd =
-                    UnitsFormat.format(new UnitNumber(pause,
-                                                      UnitsConstants.UNIT_DURATION,
-                                                      UnitsConstants.SCALE_MILLI));
-                
-                moreInfo = " and paused escalation for " + fmtd
-                                + ". " + moreInfo;
-        	}
-        	
-            if (nextTime > escalationState.getNextActionTime()) {
-            	escalationState.setNextActionTime(nextTime);
-                EscalationRuntime.getInstance().scheduleEscalation(escalationState);
-            }
-        } else {
-            if (moreInfo.length() > 0) {
-                moreInfo = ". " + moreInfo;
-            }
-        }
-        
-        fixOrNotify(subject, alert, escalationState, escalationAlertType, false, moreInfo, false);
-        
-        return true;
-    }
-
-    /**
-     * See if an alert is acknowledgeable
-     *
-     * @return true if the alert is currently acknowledgeable
-     */
-    public boolean isAlertAcknowledgeable(Integer alertId,
-                                          PerformsEscalations alertDefinition) {
-        if (alertDefinition.getEscalation() != null) {
-            EscalationState escState = escalationStateDAO.find(alertDefinition);
-
-            if (escState != null) {
-                if (escState.getAlertId() == alertId.intValue() &&
-                    escState.getAcknowledgedBy() == null) {
-                    return true;
-                }
-            }
-        }
-        
-        return false;
-    }
-
-    /**
-     * Fix an alert for a an escalation if there is one currently running.
-     *
-     * @return true if there was an alert to be fixed.
-     */
-    public boolean fixAlert(AuthzSubject subject, PerformsEscalations alertDefinition,
-                            String moreInfo)
-        throws PermissionException
-    {
-        EscalationState escalationState = escalationStateDAO.find(alertDefinition);
-        
-        if (escalationState == null) {
-            return false;
-        }
-        
-        // Find the alert, to see if it's been fixed.
-        Integer alertId = new Integer(escalationState.getAlertId());
-        Escalatable escalation = escalationState.getAlertType().findEscalatable(alertId);
-
-        // Strange condition, since we shouldn't have an escalation state if
-        // it has been fixed.
-        if (escalation.getAlertInfo().isFixed()) {
-            log.warn("Found a fixed alert inside an escalation.  alert=" +
-                      alertId + " defid=" + alertDefinition.getDefinitionInfo().getId() +
-                      " alertType=" + escalationState.getAlertType().getCode());
-            
-            return false;
-        }
-
-        fixOrNotify(subject, escalation, escalationState, escalationState.getAlertType(), true, moreInfo, false);
-        
-        return true;
-    }
-
-    /**
-     * Fix an alert, potentially sending out notifications.  The state of
-     * the escalation will be terminated and the alert will be marked fixed.
-     *
-     * @param subject Person who fixed the alert
-     */
-    public void fixAlert(AuthzSubject subject, EscalationAlertType escalationAlertType,
-                         Integer alertId, String moreInfo)
-        throws PermissionException
-    {
-        fixAlert(subject, escalationAlertType, alertId, moreInfo, false);
-    }
-
-    /**
-     * Fix an alert, potentially sending out notifications.  The state of
-     * the escalation will be terminated and the alert will be marked fixed.
-     *
-     * @param subject Person who fixed the alert
-     */
-    public void fixAlert(AuthzSubject subject, EscalationAlertType escalationAlertType,
-                         Integer alertId, String moreInfo,
-                         boolean suppressNotification)
-        throws PermissionException
-    {
-        Escalatable escalation = escalationAlertType.findEscalatable(alertId);
-        EscalationState escalationState = escalationStateDAO.find(escalation);
-        
-        fixOrNotify(subject, escalation, escalationState, escalationAlertType, true, moreInfo, suppressNotification);
-    }
-
-    private void fixOrNotify(AuthzSubject subject, Escalatable alert,
-                             EscalationState escalationState, EscalationAlertType escalationAlertType,
-                             boolean fixed, String moreInfo,
-                             boolean suppressNotification)
-        throws PermissionException
-    {
-        Integer alertId = alert.getAlertInfo().getId();
-        boolean acknowledged = !fixed;
-
-        if (alert.getAlertInfo().isFixed()) {
-            log.warn(subject.getFullName() + " attempted to fix or " +
-                      " acknowledge the " + escalationAlertType + " id=" + alertId +
-                      " but it was already fixed");
-            return;
-        }
-
-        if (escalationState == null && acknowledged) {
-            log.debug(subject.getFullName() + " acknowledged alertId[" +
-                       alertId + "] for type [" + escalationAlertType + "], but it wasn't " +
-                       "running or was previously acknowledged.  " +
-                       "Button Masher?");
-            return;
-        }
-
-        // HQ-1295: Does user have sufficient permissions?
-        alertPermissionManager.canManageAlerts(subject,
-        		alert.getDefinition().getDefinitionInfo());
-
-        if (fixed) {
-            if (moreInfo == null || moreInfo.trim().length() == 0) {
-                moreInfo = "(Fixed by " + subject.getFullName() + ")";
-            }
-            
-            log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
-            
-            escalationAlertType.changeAlertState(alert, subject, EscalationStateChange.FIXED);
-            escalationAlertType.logActionDetails(alert, null, moreInfo, subject);
-            
-            if (escalationState != null) {
-                endEscalation(escalationState);
-            }
-        } else {
-            if (moreInfo == null || moreInfo.trim().length() == 0) {
-                moreInfo = "";
-            }
-
-            if (escalationState.getAcknowledgedBy() != null) {
-                log.warn(subject.getFullName() + " attempted to acknowledge "+
-                		escalationAlertType + " alert=" + alertId + " but it was already "+
-                          "acknowledged by " +
-                          escalationState.getAcknowledgedBy().getFullName());
-                
-                return;
-            }
-            
-            log.debug(subject.getFullName() + " has acknowledged alertId=" +
-                       alertId);
-            
-            escalationAlertType.changeAlertState(alert, subject,
-                                  EscalationStateChange.ACKNOWLEDGED);
-            escalationAlertType.logActionDetails(alert, null,
-                                  subject.getFullName() + " acknowledged " +
-                                  "the alert" + moreInfo, subject);
-            escalationState.setAcknowledgedBy(subject);
-        }
-
-        if (!suppressNotification
-                && alertRegulator.alertNotificationsAllowed()) {
-            if (escalationState != null) {
-                sendNotifications(escalationState, alert, subject,
-                		escalationState.getEscalation().isNotifyAll(), fixed,
-                                  moreInfo);
-            } else if (fixed) {         // The alert's escalation chain has completed
-                sendFixedNotifications(subject, alert, moreInfo);
-            }
-        }
-    }
-
-    private String getNotificationMessage(AuthzSubject subject, boolean fixed,
-                                          Escalatable alert, String moreInfo) {
-        return subject.getFullName() + " has " +
-            (fixed ? "fixed" : "acknowledged") + " the alert raised by [" +
-            alert.getDefinition().getName() + "]. " + moreInfo;
-    }
-
-    /**
-     * Send a fixed notification for an alert whose escalation has ended
-     */
-    private void sendFixedNotifications(AuthzSubject subject, Escalatable alert,
-                                        String moreInfo) {
-        Escalation escalation = alert.getDefinition().getEscalation();
-        
-        if (escalation == null) {
-        	// nothing to do
-        	
-        	return;
-        }
-
-        String message = getNotificationMessage(subject, true, alert, moreInfo);
-        List<EscalationAction> escalationActions = escalation.getActions();
-
-        for (Iterator<EscalationAction> i = escalationActions.iterator(); i.hasNext(); ) {
-            EscalationAction escalationAction = i.next();
-            Action action = escalationAction.getAction();
-            
-            try {
-                Class clazz = Class.forName(action.getClassName());
-
-                if (!Notify.class.isAssignableFrom(clazz)) {
-                    continue;
-                }
-                
-                Notify notify = (Notify) action.getInitializedAction();
-                
-                notify.send(alert, EscalationStateChange.FIXED, message, new HashSet());
-            } catch(Exception e) {
-                log.warn("Unable to send fixed notification alert", e);
-            }
-        }
-    }
-
-    /**
-     * Send an acknowledge or fixed notification to the actions.
-     *
-     * @param state     State specifying the escalation chain to use
-     * @param notifyAll If false, only send to previously executed actions.
-     */
-    private void sendNotifications(EscalationState escalationState, Escalatable alert,
-                                   AuthzSubject subject, boolean notifyAll,
-                                   boolean fixed, String moreInfo)
-    {
-        String notificationMessage = getNotificationMessage(subject, fixed, alert, moreInfo);
-
-        List<EscalationAction> escalationActions = escalationState.getEscalation().getActions();
-        int idx = (notifyAll ? escalationActions.size() : escalationState.getNextAction()) - 1;
-
-        while (idx >= 0) {
-            EscalationAction escalationAction = escalationActions.get(idx--);
-            Action action = escalationAction.getAction();
-
-            try {
-                Class clazz = Class.forName(action.getClassName());
-                Notify notify;
-
-                if (!Notify.class.isAssignableFrom(clazz)) {
-                    continue;
-                }
-                
-                notify = (Notify) action.getInitializedAction();
-                
-                notify.send(alert, fixed ? EscalationStateChange.FIXED :
-                                      EscalationStateChange.ACKNOWLEDGED,
-                                      notificationMessage, 
-                                      new HashSet());
-            } catch(Exception e) {
-                log.warn("Unable to send notification alert", e);
-            }
-        }
-
-        // Send event to be logged
-        Messenger sender = new Messenger();
-        sender.publishMessage(EventConstants.EVENTS_TOPIC,
-                              new EscalationEvent(alert, notificationMessage));
-    }
-
-    /**
-     * Re-order the actions for an escalation.   If there are any states
-     * associated with the escalation, they will be cleared.
-     *
-     * @param actions a list of {@link EscalationAction}s (already contained
-     *                within the escalation) specifying the new order.
-     */
-    public void updateEscalationOrder(Escalation escalation, List<EscalationAction> actions) {
-        if (actions.size() != escalation.getActions().size()) {
-            throw new IllegalArgumentException("Actions size must be the same");
-        }
-        
-        for (Iterator<EscalationAction> i = actions.iterator(); i.hasNext(); ) {
-            EscalationAction action = i.next();
-
-            if (escalation.getAction(action.getAction().getId()) == null) {
-                throw new IllegalArgumentException("Action id=" +
-                                                   action.getAction().getId() +
-                                                   " not found");
-            }
-        }
-        
-        escalation.setActionsList(actions);
-
-        unscheduleEscalation(escalation);
-    }
-
-    /**
-     * Get the # of active escalations within HQ inventory
-     */
-    public Number getActiveEscalationCount() {
-        return new Integer(escalationStateDAO.size());
-    }
-
-    /**
-     * Get the # of escalations within HQ inventory
-     */
-    public Number getEscalationCount() {
-        return new Integer(escalationDAO.size());
-    }
-
-    public List<EscalationState> getActiveEscalations(int maxEscalations) {
-        return escalationStateDAO.getActiveEscalations(maxEscalations);
-    }
-
-    public String getLastFix(PerformsEscalations def) {
-        if (def != null) {
-            EscalationAlertType type = def.getAlertType();
-            return type.getLastFixedNote(def);
-        }
-        
-        return null;
-    }
-
-    /**
-     * Called when subject is removed and therefore have to null out the
-     * acknowledgedBy field
-     */
-    public void handleSubjectRemoval(AuthzSubject subject) {
-        escalationStateDAO.handleSubjectRemoval(subject);
-    }
-
-    public void startup() {
-        log.info("Starting up Escalation subsystem");
-        
-        boolean debugLog = log.isDebugEnabled();
-
-        for (Iterator<EscalationState> i = escalationStateDAO.findAll().iterator(); i.hasNext(); ) {
-            EscalationState state = i.next();
-
-            if (debugLog) {
-            	log.debug("Loading escalation state [" + state.getId() + "]");
-            }
-            
-            EscalationRuntime.getInstance().scheduleEscalation(state);
-        }
-    }
-
-    public static EscalationManager getOne() {
-        return Bootstrap.getBean(EscalationManager.class);
-    }
+public class EscalationManagerImpl implements EscalationManager {
+	private static final Log log = LogFactory
+			.getLog(EscalationManagerImpl.class);
+
+	private ActionManager actionManager;
+	private AlertPermissionManager alertPermissionManager;
+	private AuthzSubjectManager authzSubjectManager;
+	private EscalationDAO escalationDAO;
+	private EscalationStateDAO escalationStateDAO;
+	// TODO Get these injected
+	private AlertRegulator alertRegulator;
+	// TODO This contains a reference to EscalationManager, need to fix that
+	private EscalationRuntime escalationRuntime;
+
+	@PostConstruct
+	public void afterPropertiesSet() throws Exception {
+		alertRegulator = AlertRegulator.getInstance();
+	}
+
+	@Autowired
+	public EscalationManagerImpl(ActionManager actionManager,
+			AlertPermissionManager alertPermissionManager,
+			AuthzSubjectManager authzSubjectManager,
+			EscalationDAO escalationDAO, EscalationStateDAO escalationStateDAO/*
+																			 * ,
+																			 * AlertRegulator
+																			 * alertRegulator
+																			 * ,
+																			 * EscalationRuntime
+																			 * escalationRuntime
+																			 */) {
+		this.actionManager = actionManager;
+		this.alertPermissionManager = alertPermissionManager;
+		this.authzSubjectManager = authzSubjectManager;
+		this.escalationDAO = escalationDAO;
+		this.escalationStateDAO = escalationStateDAO;
+		/*
+		 * this.alertRegulator = alertRegulator; this.escalationRuntime =
+		 * escalationRuntime;
+		 */
+	}
+
+	private void assertEscalationNameIsUnique(String name)
+			throws DuplicateObjectException {
+		Escalation escalation;
+
+		if ((escalation = escalationDAO.findByName(name)) != null) {
+			throw new DuplicateObjectException("An escalation with that name "
+					+ "already exists", escalation);
+		}
+	}
+
+	/**
+	 * Create a new escalation chain
+	 * 
+	 * @see Escalation for information on fields
+	 */
+	public Escalation createEscalation(String name, String description,
+			boolean pauseAllowed, long maxWaitTime, boolean notifyAll,
+			boolean repeat) throws DuplicateObjectException {
+		Escalation escalation;
+
+		assertEscalationNameIsUnique(name);
+
+		escalation = new Escalation(name, description, pauseAllowed,
+				maxWaitTime, notifyAll, repeat);
+
+		escalationDAO.save(escalation);
+
+		return escalation;
+	}
+
+	public EscalationState findEscalationState(PerformsEscalations def) {
+		return escalationStateDAO.find(def);
+	}
+
+	/**
+	 * Update an escalation chain
+	 * 
+	 * @see Escalation for information on fields
+	 */
+	public void updateEscalation(AuthzSubject subject, Escalation escalation,
+			String name, String description, boolean pauseAllowed,
+			long maxWaitTime, boolean notifyAll, boolean repeat)
+			throws DuplicateObjectException, PermissionException {
+		alertPermissionManager.canModifyEscalation(subject.getId());
+
+		if (!escalation.getName().equals(name)) {
+			assertEscalationNameIsUnique(name);
+		}
+
+		escalation.setName(name);
+		escalation.setDescription(description);
+		escalation.setPauseAllowed(pauseAllowed);
+		escalation.setMaxPauseTime(maxWaitTime);
+		escalation.setNotifyAll(notifyAll);
+		escalation.setRepeat(repeat);
+	}
+
+	private void unscheduleEscalation(Escalation escalation) {
+		Collection<EscalationState> escalationStates = escalationStateDAO
+				.findStatesFor(escalation);
+
+		// Unschedule any escalations currently in progress
+		for (Iterator<EscalationState> i = escalationStates.iterator(); i
+				.hasNext();) {
+			endEscalation(i.next());
+		}
+	}
+
+	/**
+	 * Add an action to the end of an escalation chain. Any escalations
+	 * currently in progress using this chain will be canceled.
+	 */
+	public void addAction(Escalation escalation, ActionConfigInterface config,
+			long waitTime) {
+		Action action = actionManager.createAction(config);
+
+		escalation.addAction(waitTime, action);
+		unscheduleEscalation(escalation);
+	}
+
+	/**
+	 * Remove an action from an escalation chain. Any escalations currently in
+	 * progress using this chain will be canceled.
+	 */
+	public void removeAction(Escalation escalation, Integer actionId) {
+		// Iterate through the actions and find the one escalation action
+		Action action = null;
+
+		for (Iterator<EscalationAction> i = escalation.getActionsList()
+				.iterator(); i.hasNext();) {
+			EscalationAction escalationAction = i.next();
+
+			if (escalationAction.getAction().getId().equals(actionId)) {
+				action = escalationAction.getAction();
+				i.remove();
+
+				break;
+			}
+		}
+
+		if (action == null) {
+			return;
+		}
+
+		unscheduleEscalation(escalation);
+		actionManager.markActionDeleted(action);
+	}
+
+	/**
+	 * Delete an escalation chain. This method will throw an exception if the
+	 * escalation chain is in use.
+	 * 
+	 * TODO: Probably want to allow for the fact that people DO want to delete
+	 * while states exist.
+	 */
+	public void deleteEscalation(AuthzSubject subject, Escalation escalation)
+			throws PermissionException, ApplicationException {
+		alertPermissionManager.canRemoveEscalation(subject.getId());
+
+		List<EscalationAlertType> escalationAlertTypes = EscalationAlertType
+				.getAll();
+
+		for (Iterator<EscalationAlertType> i = escalationAlertTypes.iterator(); i
+				.hasNext();) {
+			EscalationAlertType escalationAlertType = i.next();
+
+			if (escalationAlertType.escalationInUse(escalation)) {
+				if (log.isDebugEnabled()) {
+					log.debug("Escalation [" + escalation.getId() + ", "
+							+ escalation.getName() + "] in use by:");
+
+					Collection<PerformsEscalations> performers = escalationAlertType
+							.getPerformersOfEscalation(escalation);
+
+					for (Iterator<PerformsEscalations> j = performers
+							.iterator(); j.hasNext();) {
+						PerformsEscalations alertDefinition = j.next();
+
+						log.debug("[" + alertDefinition.getName() + " id="
+								+ alertDefinition.getId() + "]");
+					}
+				}
+
+				throw new ApplicationException("The escalation is currently "
+						+ "in use");
+			}
+		}
+
+		escalationDAO.remove(escalation);
+	}
+
+	public Escalation findById(Integer id) {
+		return escalationDAO.findById(id);
+	}
+
+	public Escalation findById(AuthzSubject subject, Integer id)
+			throws PermissionException {
+		return escalationDAO.findById(id);
+	}
+
+	public Collection<Escalation> findAll(AuthzSubject subject)
+			throws PermissionException {
+		return escalationDAO.findAllOrderByName();
+	}
+
+	public Escalation findByName(AuthzSubject subject, String name)
+			throws PermissionException {
+		return escalationDAO.findByName(name);
+	}
+
+	public Escalation findByName(String name) {
+		return escalationDAO.findByName(name);
+	}
+
+	/**
+	 * Start an escalation. If the entity performing escalations does not have
+	 * an assigned escalation or if the escalation has already been started,
+	 * then this method call will be a no-op.
+	 * 
+	 * @param def
+	 *            The entity performing escalations.
+	 * @param creator
+	 *            Object which will create an {@link Escalatable} object if
+	 *            invoking this method actually starts an escalation.
+	 * @return <code>true</code> if the escalation is started;
+	 *         <code>false</code> if not because either there is no escalation
+	 *         assigned to the entity or the escalation is already in progress.
+	 */
+	public boolean startEscalation(PerformsEscalations alertDefinition,
+			EscalatableCreator creator) {
+		if (!alertRegulator.alertsAllowed()) {
+			return false;
+		}
+
+		if (alertDefinition.getEscalation() == null) {
+			return false;
+		}
+
+		boolean started = false;
+
+		try {
+			// HHQ-1395: It would be preferable to acquire the exclusive
+			// lock until we schedule the escalation, but this may cause a
+			// deadlock since creating the escalatable executes actions which
+			// may take an arbitrary amount of time to execute.
+			//
+			// Assume we may throw an unchecked exception prior to scheduling.
+			// This is possible, especially when creating the escalatable. If
+			// this happens, make sure to clear the uncommitted escalation
+			// state cache.
+			EscalationRuntime.getInstance().acquireMutex();
+
+			try {
+				if (escalationStateExists(alertDefinition)) {
+					return started = false;
+				}
+			} finally {
+				EscalationRuntime.getInstance().releaseMutex();
+			}
+
+			try {
+				Escalatable alert = creator.createEscalatable();
+
+				// HQ-1348: Recovery alerts are automatically fixed
+				// so don't start escalation if the alert is fixed
+				if (!alert.getAlertInfo().isFixed()) {
+					EscalationState escalationState = new EscalationState(alert);
+
+					escalationStateDAO.save(escalationState);
+					log.debug("Escalation started: state="
+							+ escalationState.getId());
+					EscalationRuntime.getInstance().scheduleEscalation(
+							escalationState);
+
+					started = true;
+				}
+			} catch (ResourceDeletedException e) {
+				log.debug(e);
+			} finally {
+				if (!started) {
+					EscalationRuntime.getInstance()
+							.removeFromUncommittedEscalationStateCache(
+									alertDefinition, false);
+				}
+			}
+
+		} catch (InterruptedException e) {
+			log.error("Failed to start escalation for " + "alert def id="
+					+ alertDefinition.getId() + "; type="
+					+ alertDefinition.getAlertType().getCode(), e);
+		}
+
+		return started;
+	}
+
+	private boolean escalationStateExists(PerformsEscalations alertDefinition) {
+		// Checks if there is an uncommitted escalation state for this def.
+		boolean existsInCache = EscalationRuntime.getInstance()
+				.addToUncommittedEscalationStateCache(alertDefinition);
+		boolean existsInDb = false;
+
+		try {
+			// Checks if there is a committed escalation state for this def.
+			existsInDb = escalationStateDAO.find(alertDefinition) != null;
+		} catch (Exception e) {
+			log.warn("There is already one escalation in progress for "
+					+ "alert def id=" + alertDefinition.getId() + "; type="
+					+ alertDefinition.getAlertType().getCode());
+
+			// HHQ-915: A hibernate exception will occur when looking up the
+			// escalation state if more than one exists. This shouldn't happen,
+			// but if it does, don't create another escalation.
+			existsInDb = true;
+		}
+
+		// Possible scenarios when storing an escalation state ->
+		// how to remove the def from the uncommitted cache:
+		// in_cache=false, in_db=false -> schedule to remove on commit
+		// in_cache=true, in_db=false -> do nothing,
+		// - will be removed from cache post-commit
+		// in_cache=false, in_db=true -> remove immediately
+		// in_cache=true, in_db=true -> (a timing issue),
+		// - will be removed from cache post-commit,
+		// but to be safe, remove immediately
+		if (existsInDb) {
+			EscalationRuntime.getInstance()
+					.removeFromUncommittedEscalationStateCache(alertDefinition,
+							false);
+		} else if (!existsInCache && !existsInDb) {
+			EscalationRuntime.getInstance()
+					.removeFromUncommittedEscalationStateCache(alertDefinition,
+							true);
+		}
+
+		if (existsInCache || existsInDb) {
+			log.debug("startEscalation called on [" + alertDefinition
+					+ "] but it was " + "already running");
+		}
+
+		return existsInCache || existsInDb;
+	}
+
+	public Escalatable getEscalatable(EscalationState escalationState) {
+		return escalationState.getAlertType().findEscalatable(
+				new Integer(escalationState.getAlertId()));
+	}
+
+	/**
+	 * End an escalation. This will remove all state for the escalation tied to
+	 * a specific definition.
+	 */
+	public void endEscalation(PerformsEscalations alertDefinition) {
+		EscalationRuntime.getInstance().unscheduleAllEscalationsFor(
+				alertDefinition);
+	}
+
+	private void endEscalation(EscalationState escalationState) {
+		if (escalationState != null) {
+			escalationStateDAO.remove(escalationState);
+			EscalationRuntime.getInstance().unscheduleEscalation(
+					escalationState);
+		}
+	}
+
+	/**
+	 * This method is only for internal use by the {@link EscalationRuntime}.
+	 * 
+	 * This method deletes in batch the given escalation states.
+	 * 
+	 * @param stateIds
+	 *            The Ids for the escalation states to delete.
+	 */
+	public void deleteAllEscalationStates(Integer[] stateIds) {
+		escalationStateDAO.removeAllEscalationStates(stateIds);
+	}
+
+	/**
+	 * This method is only for internal use by the {@link EscalationRuntime}. It
+	 * ensures that we have a session setup prior to executing any actions.
+	 * 
+	 * This method executes the action pointed at by the state, determines the
+	 * next stage of the escalation and (optionally) ends it, thus unscheduling
+	 * any further executions.
+	 */
+	public void executeState(Integer stateId) {
+		// Use a get() so that the state is retrieved from the
+		// database (in case the escalation state was deleted
+		// in a separate session when ending an escalation).
+		// The get() will return null if the escalation state
+		// does not exist.
+		EscalationState escalationState = escalationStateDAO.get(stateId);
+
+		if (hasEscalationStateOrEscalatingEntityBeenDeleted(escalationState)) {
+			// just to be safe
+			endEscalation(escalationState);
+
+			return;
+		}
+
+		Escalation escalation = escalationState.getEscalation();
+		int actionIdx = escalationState.getNextAction();
+
+		// XXX -- Need to make sure the application is running before
+		// we allow this to proceed
+		log.debug("Executing state[" + escalationState.getId() + "]");
+
+		if (actionIdx >= escalation.getActions().size()) {
+			if (escalation.isRepeat() && escalation.getActions().size() > 0) {
+				actionIdx = 0; // Loop back
+			} else {
+				log.debug("Reached the end of the escalation state["
+						+ escalationState.getId() + "].  Ending it");
+
+				endEscalation(escalationState);
+
+				return;
+			}
+		}
+
+		EscalationAction escalationAction = (EscalationAction) escalation
+				.getActions().get(actionIdx);
+		Action action = escalationAction.getAction();
+		Escalatable alert = getEscalatable(escalationState);
+
+		// HQ-1348: End escalation if alert is already fixed
+		if (alert.getAlertInfo().isFixed()) {
+			endEscalation(escalationState);
+
+			return;
+		}
+
+		// Always make sure that we increase the state offset of the
+		// escalation so we don't loop fo-eva
+		Random random = new Random();
+		long offset = 65000 + random.nextInt(25000);
+		long nextTime = System.currentTimeMillis()
+				+ Math.max(offset, escalationAction.getWaitTime());
+
+		log.debug("Moving onto next state of escalation, but waiting for "
+				+ escalationAction.getWaitTime() + " ms");
+
+		escalationState.setNextAction(actionIdx + 1);
+		escalationState.setNextActionTime(nextTime);
+		escalationState.setAcknowledgedBy(null);
+		EscalationRuntime.getInstance().scheduleEscalation(escalationState);
+
+		try {
+			EscalationAlertType type = escalationState.getAlertType();
+			AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
+			ActionExecutionInfo execInfo = new ActionExecutionInfo(alert
+					.getShortReason(), alert.getLongReason(), alert
+					.getAuxLogs());
+			String detail = action
+					.executeAction(alert.getAlertInfo(), execInfo);
+
+			type.changeAlertState(alert, overlord,
+					EscalationStateChange.ESCALATED);
+			type.logActionDetails(alert, action, detail, null);
+		} catch (Exception e) {
+			log.error("Unable to execute action [" + action.getClassName()
+					+ "] for escalation definition ["
+					+ escalationState.getEscalation().getName() + "]", e);
+		}
+	}
+
+	/**
+	 * Check if the escalation state or its associated escalating entity has
+	 * been deleted.
+	 * 
+	 * @param s
+	 *            The escalation state.
+	 * @return <code>true</code> if the escalation state or escalating entity
+	 *         has been deleted.
+	 */
+	private boolean hasEscalationStateOrEscalatingEntityBeenDeleted(
+			EscalationState escalationState) {
+		if (escalationState == null) {
+			return true;
+		}
+
+		try {
+			PerformsEscalations alertDefinition = escalationState
+					.getAlertType()
+					.findDefinition(
+							new Integer(escalationState.getAlertDefinitionId()));
+
+			// galert defs may be deleted from the DB when the group is deleted,
+			// so we may get a null value.
+			return alertDefinition == null || alertDefinition.isDeleted();
+		} catch (Throwable e) {
+			return true;
+		}
+	}
+
+	/**
+	 * Find an escalation based on the type and ID of the definition.
+	 * 
+	 * @return null if the definition defined by the ID does not have any
+	 *         escalation associated with it
+	 */
+	public Escalation findByDefId(EscalationAlertType escalationAlertType,
+			Integer definitionId) {
+		return escalationAlertType.findDefinition(definitionId).getEscalation();
+	}
+
+	/**
+	 * Set the escalation for a given alert definition and type
+	 */
+	public void setEscalation(EscalationAlertType escalationAlertType,
+			Integer defId, Escalation escalation) {
+		escalationAlertType.setEscalation(defId, escalation);
+	}
+
+	/**
+	 * Acknowledge an alert, potentially sending out notifications.
+	 * 
+	 * @param subject
+	 *            Person who acknowledged the alert
+	 * @param pause
+	 *            TODO
+	 */
+	public boolean acknowledgeAlert(AuthzSubject subject,
+			EscalationAlertType escalationAlertType, Integer alertId,
+			String moreInfo, long pause) throws PermissionException {
+		Escalatable alert = escalationAlertType.findEscalatable(alertId);
+		PerformsEscalations alertDefinition = alert.getDefinition();
+
+		if (!isAlertAcknowledgeable(alertId, alertDefinition)) {
+			return false;
+		}
+
+		if (moreInfo == null || moreInfo.trim().length() == 0) {
+			moreInfo = "";
+		}
+
+		EscalationState escalationState = escalationStateDAO.find(alert);
+		Escalation escalation = alertDefinition.getEscalation();
+
+		if (pause > 0 && escalation.isPauseAllowed()) {
+			long nextTime;
+
+			if (pause > escalation.getMaxPauseTime()) {
+				pause = escalation.getMaxPauseTime();
+			}
+
+			if (pause == Long.MAX_VALUE) {
+				nextTime = pause;
+				moreInfo = " and paused escalation until fixed. " + moreInfo;
+			} else {
+				nextTime = System.currentTimeMillis() + pause;
+
+				FormattedNumber fmtd = UnitsFormat.format(new UnitNumber(pause,
+						UnitsConstants.UNIT_DURATION,
+						UnitsConstants.SCALE_MILLI));
+
+				moreInfo = " and paused escalation for " + fmtd + ". "
+						+ moreInfo;
+			}
+
+			if (nextTime > escalationState.getNextActionTime()) {
+				escalationState.setNextActionTime(nextTime);
+				EscalationRuntime.getInstance().scheduleEscalation(
+						escalationState);
+			}
+		} else {
+			if (moreInfo.length() > 0) {
+				moreInfo = ". " + moreInfo;
+			}
+		}
+
+		fixOrNotify(subject, alert, escalationState, escalationAlertType,
+				false, moreInfo, false);
+
+		return true;
+	}
+
+	/**
+	 * See if an alert is acknowledgeable
+	 * 
+	 * @return true if the alert is currently acknowledgeable
+	 */
+	public boolean isAlertAcknowledgeable(Integer alertId,
+			PerformsEscalations alertDefinition) {
+		if (alertDefinition.getEscalation() != null) {
+			EscalationState escState = escalationStateDAO.find(alertDefinition);
+
+			if (escState != null) {
+				if (escState.getAlertId() == alertId.intValue()
+						&& escState.getAcknowledgedBy() == null) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Fix an alert for a an escalation if there is one currently running.
+	 * 
+	 * @return true if there was an alert to be fixed.
+	 */
+	public boolean fixAlert(AuthzSubject subject,
+			PerformsEscalations alertDefinition, String moreInfo)
+			throws PermissionException {
+		EscalationState escalationState = escalationStateDAO
+				.find(alertDefinition);
+
+		if (escalationState == null) {
+			return false;
+		}
+
+		// Find the alert, to see if it's been fixed.
+		Integer alertId = new Integer(escalationState.getAlertId());
+		Escalatable escalation = escalationState.getAlertType()
+				.findEscalatable(alertId);
+
+		// Strange condition, since we shouldn't have an escalation state if
+		// it has been fixed.
+		if (escalation.getAlertInfo().isFixed()) {
+			log.warn("Found a fixed alert inside an escalation.  alert="
+					+ alertId + " defid="
+					+ alertDefinition.getDefinitionInfo().getId()
+					+ " alertType=" + escalationState.getAlertType().getCode());
+
+			return false;
+		}
+
+		fixOrNotify(subject, escalation, escalationState, escalationState
+				.getAlertType(), true, moreInfo, false);
+
+		return true;
+	}
+
+	/**
+	 * Fix an alert, potentially sending out notifications. The state of the
+	 * escalation will be terminated and the alert will be marked fixed.
+	 * 
+	 * @param subject
+	 *            Person who fixed the alert
+	 */
+	public void fixAlert(AuthzSubject subject,
+			EscalationAlertType escalationAlertType, Integer alertId,
+			String moreInfo) throws PermissionException {
+		fixAlert(subject, escalationAlertType, alertId, moreInfo, false);
+	}
+
+	/**
+	 * Fix an alert, potentially sending out notifications. The state of the
+	 * escalation will be terminated and the alert will be marked fixed.
+	 * 
+	 * @param subject
+	 *            Person who fixed the alert
+	 */
+	public void fixAlert(AuthzSubject subject,
+			EscalationAlertType escalationAlertType, Integer alertId,
+			String moreInfo, boolean suppressNotification)
+			throws PermissionException {
+		Escalatable escalation = escalationAlertType.findEscalatable(alertId);
+		EscalationState escalationState = escalationStateDAO.find(escalation);
+
+		fixOrNotify(subject, escalation, escalationState, escalationAlertType,
+				true, moreInfo, suppressNotification);
+	}
+
+	private void fixOrNotify(AuthzSubject subject, Escalatable alert,
+			EscalationState escalationState,
+			EscalationAlertType escalationAlertType, boolean fixed,
+			String moreInfo, boolean suppressNotification)
+			throws PermissionException {
+		Integer alertId = alert.getAlertInfo().getId();
+		boolean acknowledged = !fixed;
+
+		if (alert.getAlertInfo().isFixed()) {
+			log.warn(subject.getFullName() + " attempted to fix or "
+					+ " acknowledge the " + escalationAlertType + " id="
+					+ alertId + " but it was already fixed");
+			return;
+		}
+
+		if (escalationState == null && acknowledged) {
+			log.debug(subject.getFullName() + " acknowledged alertId["
+					+ alertId + "] for type [" + escalationAlertType
+					+ "], but it wasn't "
+					+ "running or was previously acknowledged.  "
+					+ "Button Masher?");
+			return;
+		}
+
+		// HQ-1295: Does user have sufficient permissions?
+		alertPermissionManager.canManageAlerts(subject, alert.getDefinition()
+				.getDefinitionInfo());
+
+		if (fixed) {
+			if (moreInfo == null || moreInfo.trim().length() == 0) {
+				moreInfo = "(Fixed by " + subject.getFullName() + ")";
+			}
+
+			log.debug(subject.getFullName() + " has fixed alertId=" + alertId);
+
+			escalationAlertType.changeAlertState(alert, subject,
+					EscalationStateChange.FIXED);
+			escalationAlertType
+					.logActionDetails(alert, null, moreInfo, subject);
+
+			if (escalationState != null) {
+				endEscalation(escalationState);
+			}
+		} else {
+			if (moreInfo == null || moreInfo.trim().length() == 0) {
+				moreInfo = "";
+			}
+
+			if (escalationState.getAcknowledgedBy() != null) {
+				log.warn(subject.getFullName() + " attempted to acknowledge "
+						+ escalationAlertType + " alert=" + alertId
+						+ " but it was already " + "acknowledged by "
+						+ escalationState.getAcknowledgedBy().getFullName());
+
+				return;
+			}
+
+			log.debug(subject.getFullName() + " has acknowledged alertId="
+					+ alertId);
+
+			escalationAlertType.changeAlertState(alert, subject,
+					EscalationStateChange.ACKNOWLEDGED);
+			escalationAlertType.logActionDetails(alert, null, subject
+					.getFullName()
+					+ " acknowledged " + "the alert" + moreInfo, subject);
+			escalationState.setAcknowledgedBy(subject);
+		}
+
+		if (!suppressNotification && alertRegulator.alertNotificationsAllowed()) {
+			if (escalationState != null) {
+				sendNotifications(escalationState, alert, subject,
+						escalationState.getEscalation().isNotifyAll(), fixed,
+						moreInfo);
+			} else if (fixed) { // The alert's escalation chain has completed
+				sendFixedNotifications(subject, alert, moreInfo);
+			}
+		}
+	}
+
+	private String getNotificationMessage(AuthzSubject subject, boolean fixed,
+			Escalatable alert, String moreInfo) {
+		return subject.getFullName() + " has "
+				+ (fixed ? "fixed" : "acknowledged") + " the alert raised by ["
+				+ alert.getDefinition().getName() + "]. " + moreInfo;
+	}
+
+	/**
+	 * Send a fixed notification for an alert whose escalation has ended
+	 */
+	private void sendFixedNotifications(AuthzSubject subject,
+			Escalatable alert, String moreInfo) {
+		Escalation escalation = alert.getDefinition().getEscalation();
+
+		if (escalation == null) {
+			// nothing to do
+
+			return;
+		}
+
+		String message = getNotificationMessage(subject, true, alert, moreInfo);
+		List<EscalationAction> escalationActions = escalation.getActions();
+
+		for (Iterator<EscalationAction> i = escalationActions.iterator(); i
+				.hasNext();) {
+			EscalationAction escalationAction = i.next();
+			Action action = escalationAction.getAction();
+
+			try {
+				Class clazz = Class.forName(action.getClassName());
+
+				if (!Notify.class.isAssignableFrom(clazz)) {
+					continue;
+				}
+
+				Notify notify = (Notify) action.getInitializedAction();
+
+				notify.send(alert, EscalationStateChange.FIXED, message,
+						new HashSet());
+			} catch (Exception e) {
+				log.warn("Unable to send fixed notification alert", e);
+			}
+		}
+	}
+
+	/**
+	 * Send an acknowledge or fixed notification to the actions.
+	 * 
+	 * @param state
+	 *            State specifying the escalation chain to use
+	 * @param notifyAll
+	 *            If false, only send to previously executed actions.
+	 */
+	private void sendNotifications(EscalationState escalationState,
+			Escalatable alert, AuthzSubject subject, boolean notifyAll,
+			boolean fixed, String moreInfo) {
+		String notificationMessage = getNotificationMessage(subject, fixed,
+				alert, moreInfo);
+
+		List<EscalationAction> escalationActions = escalationState
+				.getEscalation().getActions();
+		int idx = (notifyAll ? escalationActions.size() : escalationState
+				.getNextAction()) - 1;
+
+		while (idx >= 0) {
+			EscalationAction escalationAction = escalationActions.get(idx--);
+			Action action = escalationAction.getAction();
+
+			try {
+				Class clazz = Class.forName(action.getClassName());
+				Notify notify;
+
+				if (!Notify.class.isAssignableFrom(clazz)) {
+					continue;
+				}
+
+				notify = (Notify) action.getInitializedAction();
+
+				notify.send(alert, fixed ? EscalationStateChange.FIXED
+						: EscalationStateChange.ACKNOWLEDGED,
+						notificationMessage, new HashSet());
+			} catch (Exception e) {
+				log.warn("Unable to send notification alert", e);
+			}
+		}
+
+		// Send event to be logged
+		Messenger sender = new Messenger();
+		sender.publishMessage(EventConstants.EVENTS_TOPIC, new EscalationEvent(
+				alert, notificationMessage));
+	}
+
+	/**
+	 * Re-order the actions for an escalation. If there are any states
+	 * associated with the escalation, they will be cleared.
+	 * 
+	 * @param actions
+	 *            a list of {@link EscalationAction}s (already contained within
+	 *            the escalation) specifying the new order.
+	 */
+	public void updateEscalationOrder(Escalation escalation,
+			List<EscalationAction> actions) {
+		if (actions.size() != escalation.getActions().size()) {
+			throw new IllegalArgumentException("Actions size must be the same");
+		}
+
+		for (Iterator<EscalationAction> i = actions.iterator(); i.hasNext();) {
+			EscalationAction action = i.next();
+
+			if (escalation.getAction(action.getAction().getId()) == null) {
+				throw new IllegalArgumentException("Action id="
+						+ action.getAction().getId() + " not found");
+			}
+		}
+
+		escalation.setActionsList(actions);
+
+		unscheduleEscalation(escalation);
+	}
+
+	/**
+	 * Get the # of active escalations within HQ inventory
+	 */
+	public Number getActiveEscalationCount() {
+		return new Integer(escalationStateDAO.size());
+	}
+
+	/**
+	 * Get the # of escalations within HQ inventory
+	 */
+	public Number getEscalationCount() {
+		return new Integer(escalationDAO.size());
+	}
+
+	public List<EscalationState> getActiveEscalations(int maxEscalations) {
+		return escalationStateDAO.getActiveEscalations(maxEscalations);
+	}
+
+	public String getLastFix(PerformsEscalations def) {
+		if (def != null) {
+			EscalationAlertType type = def.getAlertType();
+			return type.getLastFixedNote(def);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Called when subject is removed and therefore have to null out the
+	 * acknowledgedBy field
+	 */
+	public void handleSubjectRemoval(AuthzSubject subject) {
+		escalationStateDAO.handleSubjectRemoval(subject);
+	}
+
+	public void startup() {
+		log.info("Starting up Escalation subsystem");
+
+		boolean debugLog = log.isDebugEnabled();
+
+		for (Iterator<EscalationState> i = escalationStateDAO.findAll()
+				.iterator(); i.hasNext();) {
+			EscalationState state = i.next();
+
+			if (debugLog) {
+				log.debug("Loading escalation state [" + state.getId() + "]");
+			}
+
+			EscalationRuntime.getInstance().scheduleEscalation(state);
+		}
+	}
+
+	public static EscalationManager getOne() {
+		return Bootstrap.getBean(EscalationManager.class);
+	}
 }
