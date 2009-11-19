@@ -35,8 +35,8 @@ import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
-import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl;
-import org.hyperic.hq.bizapp.shared.ProductBossLocal;
+import org.hyperic.hq.bizapp.server.session.ProductBossImpl;
+import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
@@ -58,7 +58,7 @@ public class TabBodyAction extends BaseAction {
 			id = null;
 		}
 		AppdefEntityID eid = RequestUtils.getEntityId(request);
-        ProductBossLocal pBoss = ProductBossEJBImpl.getOne();
+        ProductBoss pBoss = ProductBossImpl.getOne();
 		int sessionId = RequestUtils.getSessionIdInt(request);
 		Collection availAttachents = 
             pBoss.findAttachments(sessionId, eid, ViewResourceCategory.VIEWS);

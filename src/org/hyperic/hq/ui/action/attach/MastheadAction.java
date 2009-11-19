@@ -32,9 +32,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.struts.action.ActionForm;
 import org.apache.struts.action.ActionForward;
 import org.apache.struts.action.ActionMapping;
-import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl;
+import org.hyperic.hq.bizapp.server.session.ProductBossImpl;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
-import org.hyperic.hq.bizapp.shared.ProductBossLocal;
+import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.UIPluginManagerImpl;
@@ -53,7 +53,7 @@ public class MastheadAction extends BaseAction {
         throws Exception {
         // Look up the id
         Integer id = RequestUtils.getIntParameter(request, "typeId");
-        ProductBossLocal pBoss = ProductBossEJBImpl.getOne();
+        ProductBoss pBoss = ProductBossImpl.getOne();
         int sessionId = RequestUtils.getSessionIdInt(request);
         AttachmentDescriptor attachDesc = pBoss.findAttachment(sessionId, id);
         if(attachDesc != null){

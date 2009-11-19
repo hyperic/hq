@@ -29,8 +29,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.tapestry.annotations.Persist;
 import org.apache.tapestry.event.PageBeginRenderListener;
 import org.apache.tapestry.event.PageEvent;
-import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl;
-import org.hyperic.hq.bizapp.shared.ProductBossLocal;
+import org.hyperic.hq.bizapp.server.session.ProductBossImpl;
+import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.Attachment;
 import org.hyperic.hq.hqu.server.session.View;
@@ -61,7 +61,7 @@ public abstract class Plugin extends MenuPage implements PageBeginRenderListener
                 .getParameter(RequestKeyConstants.PLUGIN_ID_PARAM);
         
         // Lookup the plugin
-        ProductBossLocal pBoss = ProductBossEJBImpl.getOne();
+        ProductBoss pBoss = ProductBossImpl.getOne();
         String baseUrl = null;
         int sessionId;
         AttachmentDescriptor attachDesc = null;

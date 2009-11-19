@@ -12,7 +12,7 @@ import org.hyperic.hq.authz.server.session.AuthzSubject
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as AuthzMan
 import org.hyperic.hq.authz.server.session.Resource
 import org.hyperic.hq.bizapp.server.session.AppdefBossImpl as AppdefBoss
-import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl as ProductBoss
+import org.hyperic.hq.bizapp.server.session.ProductBossImpl as ProductBoss
 import org.hyperic.hq.bizapp.shared.AllConfigResponses
 import org.hyperic.hq.product.ProductPlugin
 import org.hyperic.hq.product.PluginNotFoundException

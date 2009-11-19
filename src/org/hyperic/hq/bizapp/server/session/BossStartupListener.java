@@ -27,7 +27,7 @@ public class BossStartupListener
         EventLogBossImpl.getOne().startup();
         AuthBossImpl.getOne().startup();
         AppdefBossImpl.getOne().startup();
-        ProductBossEJBImpl.getOne().preload();
+        ProductBossImpl.getOne().preload();
         
         try {
             createStatsMBean();

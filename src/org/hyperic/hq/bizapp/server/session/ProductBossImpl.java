@@ -28,12 +28,10 @@ package org.hyperic.hq.bizapp.server.session;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.ejb.FinderException;
-import javax.ejb.SessionBean;
 
 import net.sf.ehcache.CacheManager;
 
@@ -42,13 +40,13 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.Session;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hq.appdef.ConfigResponseDB;
-import org.hyperic.hq.appdef.server.session.ConfigManagerImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -56,46 +54,65 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
+import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
-import org.hyperic.hq.bizapp.shared.ProductBossLocal;
-import org.hyperic.hq.bizapp.shared.ProductBossUtil;
-import org.hyperic.hq.bizapp.server.session.ProductBossEJBImpl.ConfigSchemaAndBaseResponse;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.AttachmentDescriptor;
 import org.hyperic.hq.hqu.server.session.AttachType;
-import org.hyperic.hq.hqu.server.session.UIPluginManagerImpl;
 import org.hyperic.hq.hqu.server.session.View;
 import org.hyperic.hq.hqu.server.session.ViewResourceCategory;
+import org.hyperic.hq.hqu.shared.UIPluginManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginNotFoundException;
 import org.hyperic.hq.product.ProductPlugin;
+import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
 import org.hyperic.util.config.EncodingException;
 import org.hyperic.util.file.FileUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * The Product Boss
- *
- * @ejb:bean name="ProductBoss"
- *      jndi-name="ejb/bizapp/ProductBoss"
- *      local-jndi-name="LocalProductBoss"
- *      view-type="both"
- *      type="Stateless"
- * @ejb:transaction type="Required"
  */
-public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
-{
-    private Log log = LogFactory.getLog(ProductBossEJBImpl.class.getName());
+@Service
+@Transactional
+public class ProductBossImpl implements ProductBoss {
+    private Log log = LogFactory.getLog(ProductBossImpl.class.getName());
 
-    private SessionManager sessionManager = SessionManager.getInstance();
+    private ResourceGroupManager resourceGroupManager;
+    private ProductManager productManager;
+    private PlatformManager platformManager;
+    private ConfigManager configManager;
+    private UIPluginManager uiPluginManager;
+    private AuthzSubjectManager authzSubjectManager;
+    private SessionManager sessionManager;
 
-    public void ejbCreate() {}
-    public void ejbRemove() {}
-    public void ejbActivate() {}
-    public void ejbPassivate() {}
+    @Autowired
+    public ProductBossImpl(ResourceGroupManager resourceGroupManager,
+                           ProductManager productManager,
+                           PlatformManager platformManager,
+                           ConfigManager configManager,
+                           UIPluginManager uiPluginManager,
+                           AuthzSubjectManager authzSubjectManager,
+                           SessionManager sessionManager) {
+        this.resourceGroupManager = resourceGroupManager;
+        this.productManager = productManager;
+        this.platformManager = platformManager;
+        this.configManager = configManager;
+        this.uiPluginManager = uiPluginManager;
+        this.authzSubjectManager = authzSubjectManager;
+        this.sessionManager = sessionManager;
+    }
+
+    private AuthzSubject getOverlord() {
+        return authzSubjectManager.getOverlordPojo();
+    }
 
     /**
      * Get the merged config responses for group entries.  This routine
@@ -108,7 +125,6 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
      * @param required    If true, all the entities required to make a 
      *                    merged config response must exist.  Else
      *                    as many values as can be gotten are tried.
-     * @ejb:interface-method
      */
     public ConfigResponse[] 
         getMergedGroupConfigResponse(int sessionId, String productType, 
@@ -117,26 +133,17 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                ConfigFetchException, SessionNotFoundException, 
                SessionTimeoutException, EncodingException
     {
-        ResourceGroupManager groupMan = getResourceGroupManager();
-        AuthzSubject subject;
-        ResourceGroup group;
-        ConfigResponse[] res;
-        Collection members;
-        int idx;
-
         // validate the session
-        subject = sessionManager.getSubject(sessionId);
-        group   = groupMan.findResourceGroupById(subject, new Integer(groupId));  
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        ResourceGroup group   = resourceGroupManager.findResourceGroupById(subject, new Integer(groupId));  
 
         // use the overlord to pull the merge
         subject = getOverlord();
-        members = groupMan.getMembers(group);
-        res     = new ConfigResponse[members.size()];
-        idx     = 0;
-        for(Iterator i=members.iterator(); i.hasNext(); ){
-            Resource r = (Resource)i.next();
+        Collection<Resource> members = resourceGroupManager.getMembers(group);
+        ConfigResponse[] res = new ConfigResponse[members.size()];
+        int idx = 0;
+        for(Resource r : members) {
             AppdefEntityID id = new AppdefEntityID(r); 
-
             res[idx++] = getMergedConfigResponse(subject,
                                                  productType, id, required);
         }
@@ -164,7 +171,6 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
      * @param required    If true, all the entities required to make a 
      *                    merged config response must exist.  Else
      *                    as many values as can be gotten are tried.
-     * @ejb:interface-method
      */
     public ConfigResponse getMergedConfigResponse(int sessionId,
                                                   String productType,
@@ -173,7 +179,6 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws AppdefEntityNotFoundException, EncodingException,
                PermissionException, ConfigFetchException, 
                SessionNotFoundException, SessionTimeoutException {
-
         // validate the session
         sessionManager.authenticate(sessionId);
         // use the overlord to pull the merge
@@ -183,7 +188,6 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     }
 
     /**
-     * @ejb:interface-method view-type="local"
      */
     public ConfigResponse getMergedConfigResponse(AuthzSubject subject,
                                                   String productType,
@@ -192,16 +196,12 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         throws AppdefEntityNotFoundException, PermissionException, 
                ConfigFetchException, EncodingException
     {
-        ConfigManager cman;
-
         // Get the merged config
-        cman = getConfigManager();
-        return cman.getMergedConfigResponse(subject, productType, id, 
+        return configManager.getMergedConfigResponse(subject, productType, id, 
                                             required);
     }
 
     /**
-     * @ejb:interface-method
      */
     public ConfigResponseDB getConfigResponse(int sessionId,
                                               AppdefEntityID id)
@@ -209,28 +209,25 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                SessionNotFoundException, SessionTimeoutException
     {
         sessionManager.authenticate(sessionId);
-        return getConfigManager().getConfigResponse(id);
+        return configManager.getConfigResponse(id);
     }
 
     /**
-     * @ejb:interface-method 
      */
     public String getMonitoringHelp(int sessionId, AppdefEntityID id,
-                                    Map props)
+                                    Map<?,?> props)
         throws PluginNotFoundException, PermissionException,
                AppdefEntityNotFoundException, SessionNotFoundException,
                SessionTimeoutException
     {
         AppdefEntityValue aval = new AppdefEntityValue(id, getOverlord());
-        return getProductManager().getMonitoringHelp(aval, props);
+        return productManager.getMonitoringHelp(aval, props);
     }
 
     /**
      * Get the config schema used to configure an entity.  If the appropriate
      * base entities have not yet been configured, an exception will be thrown
      * indicating which resource must be configured.
-     *
-     * @ejb:interface-method
      */
     public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id, 
                                         String type, ConfigResponse resp)
@@ -242,7 +239,6 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     }
 
     /**
-     * @ejb:interface-method 
      */
     public ConfigSchema getConfigSchema(int sessionId, AppdefEntityID id, 
                                         String type)
@@ -256,20 +252,20 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     }
 
     public static class ConfigSchemaAndBaseResponse {
-        private ConfigSchema   _schema;
-        private ConfigResponse _response;
+        private ConfigSchema   schema;
+        private ConfigResponse response;
         
         ConfigSchemaAndBaseResponse(ConfigSchema schema, ConfigResponse resp) {
-            _schema   = schema;
-            _response = resp;
+            this.schema   = schema;
+            this.response = resp;
         }
         
         public ConfigSchema getSchema() {
-            return _schema;
+            return schema;
         }
         
         public ConfigResponse getResponse() {
-            return _response;
+            return response;
         }
     }
     
@@ -281,8 +277,6 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
      * @param validateFlow If true a ConfigFetchException will be thrown
      *                     if the appropriate base entities are not
      *                     already configured.
-     *
-     * @ejb:interface-method view-type="local"
      */
     public ConfigSchemaAndBaseResponse
         getConfigSchemaAndBaseResponse(AuthzSubject subject, 
@@ -293,14 +287,13 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                PluginNotFoundException, PluginException, PermissionException,
                AppdefEntityNotFoundException
     {
-        ConfigManager  cman = getConfigManager();
         ConfigResponse      baseResponse = null;
 
         AuthzSubject overlord = getOverlord();
         if(validateFlow == true){
             try {
                 baseResponse =
-                    cman.getMergedConfigResponse(overlord, type, id, true);
+                    configManager.getMergedConfigResponse(overlord, type, id, true);
             } catch(ConfigFetchException exc){
                 // If the thing that failed is the thing we are trying to
                 // configure, then everything is okey-dokey ... else
@@ -311,7 +304,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         }
 
         if (baseResponse == null)
-            baseResponse = cman.getMergedConfigResponse(overlord, type, id, 
+            baseResponse = configManager.getMergedConfigResponse(overlord, type, id, 
                                                         false);
 
         return new ConfigSchemaAndBaseResponse(getConfigSchema(id, type, 
@@ -320,7 +313,6 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     }
 
     /**
-     * @ejb:interface-method
      */
     public ConfigSchema getConfigSchema(AuthzSubject subject, 
                                         AppdefEntityID id, String type,
@@ -347,15 +339,15 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
 
         String name;
         if (type.equals(ProductPlugin.TYPE_PRODUCT)) {
-            name = ConfigManagerImpl.getOne().getPluginName(id);
+            name = configManager.getPluginName(id);
         }
         else {
-            name = getPlatformManager().getPlatformPluginName(id);
+            name = platformManager.getPlatformPluginName(id);
         }
 
         AppdefEntityValue aval = new AppdefEntityValue(id, getOverlord());
 
-        return getProductManager().getConfigSchema(type, name, aval,
+        return productManager.getConfigSchema(type, name, aval,
                                                    baseResponse);
     }
 
@@ -371,8 +363,6 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
      * @param type     One of ProductPlugin.TYPE_*
      * @throws SessionTimeoutException 
      * @throws SessionNotFoundException 
-     *
-     * @ejb:interface-method
      */
     public void setConfigResponse(int sessionId, AppdefEntityID id,
                                   ConfigResponse response, String type)
@@ -385,7 +375,6 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     }
 
     /**
-     * @ejb:interface-method view-type="local"
      */
     public void setConfigResponse(AuthzSubject subject, AppdefEntityID id,
                                   ConfigResponse response, String type)
@@ -408,11 +397,9 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                InvalidConfigException, ConfigFetchException,
                AppdefEntityNotFoundException
     {
-        ConfigManager cMan;
         boolean doRollback = true;
         try {
-            cMan = getConfigManager();
-            if (cMan.setConfigResponse(subject, id, response, type, true)
+            if (configManager.setConfigResponse(subject, id, response, type, true)
                     != null) {
                 AppdefEntityID[] ids = new AppdefEntityID[] { id };
 
@@ -430,14 +417,14 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
 
         } finally {
             if (doRollback) {
-                rollback();
+                // FIXME: HE-215
+                throw new IllegalStateException("Exception to cause rollback");
             }
         }
     }
 
     /**
      * Gets the version number
-     * @ejb:interface-method
      */
     public String getVersion(){
         return ProductProperties.getVersion();
@@ -445,7 +432,6 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
 
     /**
      * Gets the build number, date, and type.
-     * @ejb:interface-method
      */
     public String getBuildNumber(){
         String build = ProductProperties.getBuild();
@@ -457,8 +443,8 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
     
     /**
      * Preload the 2nd level caches
-     * @ejb:interface-method
      */
+    @SuppressWarnings("unchecked")
     public void preload(){
         // We don't need to preload the 2nd level cache for unit tests.
         // Besides, hq.ear hot deployment after an undeploy is not working 
@@ -470,7 +456,7 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream is = 
             loader.getResourceAsStream("META-INF/preload_caches.txt"); 
-        List lines;
+        List<String> lines;
             
         try {
             lines = FileUtil.readLines(is);
@@ -483,11 +469,10 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
         }
             
         Session s = Util.getSessionFactory().getCurrentSession();
-        for (Iterator i=lines.iterator(); i.hasNext(); ) {
-            String className = (String)i.next();
+        for (String className : lines) {
             long start, end;
-            Collection vals;
-            Class c;
+            Collection<Object> vals;
+            Class<?> c;
             
             className = className.trim();
             if (className.length() == 0 || className.startsWith("#"))
@@ -508,73 +493,59 @@ public class ProductBossEJBImpl extends BizappSessionEJB implements SessionBean
                      "] in " + (end - start) + " millis");
             
             // Evict, to avoid dirty checking everything in the inventory
-            for (Iterator j=vals.iterator(); j.hasNext(); ) {
-                s.evict(j.next());
+            for (Object val : vals) {
+                s.evict(val);
             }
         }
     }
      
     /**
      * Clear out all the caches
-     * @ejb:interface-method
      */
     public void clearCaches(int sessionId) {
         CacheManager cacheManager = CacheManager.getInstance();
-        
         cacheManager.clearAll();
     }
     
     /**
      * Find {@link AttachmentDescriptor}s attached to the target type
-     * @ejb:interface-method
      */
-    public Collection findAttachments(int sessionId, AttachType type) 
+    public Collection<AttachmentDescriptor> findAttachments(int sessionId, AttachType type) 
         throws SessionException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        
-        return UIPluginManagerImpl.getOne().findAttachments(type, subject);
+        return uiPluginManager.findAttachments(type, subject);
     }
     
     /**
      * Find {@link AttachmentDescriptor}s attached to the target type
-     * @ejb:interface-method
      */
-    public Collection findAttachments(int sessionId, AppdefEntityID ent,
+    public Collection<AttachmentDescriptor> findAttachments(int sessionId, AppdefEntityID ent,
                                       ViewResourceCategory cat) 
         throws SessionException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        
-        return UIPluginManagerImpl.getOne().findAttachments(ent, cat, 
-                                                               subject);
+        return uiPluginManager.findAttachments(ent, cat, subject);
     }
 
     /**
-     * @ejb:interface-method
      */
     public AttachmentDescriptor findAttachment(int sessionId, Integer descId) 
         throws SessionException
     {
         AuthzSubject subject = sessionManager.getSubject(sessionId);
-        
-        return UIPluginManagerImpl.getOne()
+        return uiPluginManager
                     .findAttachmentDescriptorById(descId, subject);
     }
     
     /**
      * Get an attachment view by ID
-     * @ejb:interface-method
      */
     public View findViewById(int sessionId, Integer id) {
-        return UIPluginManagerImpl.getOne().findViewById(id);
+        return uiPluginManager.findViewById(id);
     }
     
-    public static ProductBossLocal getOne() {
-        try {
-            return ProductBossUtil.getLocalHome().create();
-        } catch(Exception e) {
-            throw new SystemException(e);
-        }
+    public static ProductBoss getOne() {
+        return Bootstrap.getBean(ProductBoss.class);
     }
 }
