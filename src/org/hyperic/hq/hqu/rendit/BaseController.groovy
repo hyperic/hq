@@ -413,7 +413,7 @@ abstract class BaseController {
         }
         
         def id = new AppdefEntityID(aeid)
-        ResourceManagerEJBImpl.one.findResource(id)
+        ResourceManagerImpl.one.findResource(id)
     }
 
     /**

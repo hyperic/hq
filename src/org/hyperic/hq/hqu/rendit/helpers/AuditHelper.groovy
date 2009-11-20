@@ -7,7 +7,7 @@ import org.hyperic.hq.common.server.session.AuditPurpose
 import org.hyperic.hq.common.server.session.AuditImportance
 
 class AuditHelper extends BaseHelper {
-    private auditMan = AuditManagerEJBImpl.one
+    private auditMan = AuditManagerImpl.one
     
     AuditHelper(AuthzSubject user) {
         super(user)

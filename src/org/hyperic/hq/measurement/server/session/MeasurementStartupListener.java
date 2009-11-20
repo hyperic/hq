@@ -113,7 +113,7 @@ public class MeasurementStartupListener
                                      new PluginsDeployedCallback() {
             public void pluginsDeployed(List plugins) {
                 MeasurementManagerLocal dman =
-                    MeasurementManagerEJBImpl.getOne();
+                    MeasurementManagerImpl.getOne();
                 for (Iterator i = plugins.iterator(); i.hasNext();) {
                     String pluginName = (String)i.next();
                     dman.syncPluginMetrics(pluginName);

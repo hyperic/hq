@@ -21,7 +21,7 @@ class EventController
             def typeCode = params.getOne('type', '0').toInteger()
             def timeCode = params.getOne('timeRange', '0').toInteger()
             def delta    = findTimeDeltaByCode(timeCode)
-            EventLogManagerEJBImpl.one.findLogs(user, now() - delta, now(), 
+            EventLogManagerImpl.one.findLogs(user, now() - delta, now(), 
                                                 pageInfo, getStatus(params),
                                                 findTypeByCode(typeCode),
                                                 getInGroups(params))

@@ -1,5 +1,5 @@
 import org.hyperic.hq.hqu.rendit.BaseController
-import org.hyperic.hq.common.server.session.ServerConfigManagerEJBImpl as SCM
+import org.hyperic.hq.common.server.session.ServerConfigManagerImpl as SCM
 
 class PropController 
 	extends BaseController

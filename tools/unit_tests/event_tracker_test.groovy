@@ -1,4 +1,4 @@
-import org.hyperic.hq.events.server.session.EventTrackerEJBImpl as eventTrackerImpl
+import org.hyperic.hq.events.server.session.EventTrackerImpl as eventTrackerImpl
 import org.hyperic.hq.measurement.ext.MeasurementEvent
 import org.hyperic.hq.product.MetricValue
 
