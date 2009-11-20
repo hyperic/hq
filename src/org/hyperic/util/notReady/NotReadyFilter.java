@@ -49,7 +49,7 @@ import javax.servlet.http.HttpServletResponse;
  * When all subsystems are initialized and started, call setReady().
  * 
  * Another option is to use the AuthenticationFilter ( for the HQ UI ) and 
- * the AgentCallbackBossEJBImpl ( for agent callbacks ). 
+ * the AgentCallbackBossImpl ( for agent callbacks ). 
  * 
  * In any case - the critical step is figuring when all things are started 
  * correctly, and calling the method that will unlock the filter.  

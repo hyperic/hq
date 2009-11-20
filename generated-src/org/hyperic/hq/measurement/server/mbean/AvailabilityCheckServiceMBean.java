@@ -9,7 +9,7 @@ package org.hyperic.hq.measurement.server.mbean;
 public interface AvailabilityCheckServiceMBean {
 
    /**
-    * This method is used mainly for the unittest from AvailabilityManager_testEJBImpl.invokeBackfiller()
+    * 
     */
   void hitWithDate(java.util.Date lDate) ;
 

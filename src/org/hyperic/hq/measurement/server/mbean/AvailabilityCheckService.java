@@ -72,8 +72,7 @@ public class AvailabilityCheckService
     private boolean _isRunning = false;
     
     /**
-     * This method is used mainly for the unittest from
-     * AvailabilityManager_testEJBImpl.invokeBackfiller()
+     * 
      * @jmx:managed-operation
      */
     public void hitWithDate(Date lDate) {

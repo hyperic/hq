@@ -206,7 +206,7 @@ public class ProductPluginDeployer
      */
     public void handleNotification(Notification n, Object o) {
         loadConfig();
-        Bootstrap.loadEJBApplicationContext();
+       
         loadStartupClasses();
      
 
@@ -237,9 +237,7 @@ public class ProductPluginDeployer
         //hq-plugins at anytime.
         pluginNotify("deployer", DEPLOYER_CLEARED);
 
-        if (Boolean.getBoolean("hq.unittest.run")) {
-            doInContainerUnitTestFrameworkSetup();
-        }
+       
 
         setReady(true);
 
@@ -278,33 +276,7 @@ public class ProductPluginDeployer
         }
     }
 
-    /**
-     * Do the setup necessary to run the in-container unit test framework.
-     */
-    private void doInContainerUnitTestFrameworkSetup() {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-
-        String[] jars = {
-            "hq.jar", "hq-test.jar", "hqee.jar", "hqee-test.jar"
-        };
-
-        for (int i = 0; i < jars.length; i++) {
-            URL jar = classLoader.getResource(jars[i]);
-
-            if (jar != null) {
-                try {
-                    _log.info("Preloading instance pools for Util classes in " +
-                              jar);
-                    preloadInstancePoolsForEJBs(jar, classLoader);
-                } catch (Exception e) {
-                    throw new RuntimeException("failed to preload cached local " +
-                                               "homes for " + jars[i], e);
-                }
-            }
-        }
-
-        registerEJBDeployerClassLoader(classLoader);
-    }
+ 
 
     /**
      * Register the EJB deployer classloader, making it accessible to the
@@ -329,50 +301,7 @@ public class ProductPluginDeployer
         }
     }
 
-    /**
-     * Find all EJBImpl classes in the jar file and invoke the getOne() static
-     * factory method on them, preloading the instance pool for that EJB. This
-     * is necessary for the in-container unit tests when looking up local
-     * references to EJBs.
-     *
-     * @param jarFile The jar file.
-     * @param deployerClassLoader The EJB deployer classloader.
-     * @throws Exception
-     */
-    private void preloadInstancePoolsForEJBs(URL jarFile, ClassLoader deployerClassLoader)
-        throws Exception {
-
-        ZipFile file = new ZipFile(new File(new URI(jarFile.toString())));
-        Enumeration enumeration = file.entries();
-
-        while (enumeration.hasMoreElements()) {
-            ZipEntry entry = (ZipEntry)enumeration.nextElement();
-            String name = entry.getName();
-
-            if (name.endsWith("EJBImpl.class")) {
-                String className = name.substring(0, name.length()-6)
-                                        .replace('/', '.');
-
-                _log.debug("Found class: "+className);
-
-                try {
-                    Class clazz = deployerClassLoader.loadClass(className);
-                    Method m = clazz.getMethod("getOne", new Class[0]);
-                    _log.info("Preloading instance pool for: "+className);
-                    m.invoke(clazz, new Object[0]);
-                } catch (ClassNotFoundException e) {
-                    // This is probably a Mock EJBImpl
-                    _log.warn("Cannot preload instance pool for (probably a mock EJB Impl): "+
-                               className);
-                } catch (NoSuchMethodException e) {
-                    // The getOne() method probably doesn't exist
-                    _log.warn("No getOne() static factory method found for: "+className);
-                } catch (Throwable t) {
-                    _log.error("Caught Throwable preloading instance pool for: "+className, t);
-                }
-            }
-        }
-    }
+   
 
     protected boolean isDeployable(String name, URL url) {
         boolean isDeployable = super.isDeployable(name, url);

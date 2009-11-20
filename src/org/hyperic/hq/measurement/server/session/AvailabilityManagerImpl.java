@@ -75,7 +75,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * The AvailabityManagerEJBImpl class is a stateless session bean that can be
+ * The AvailabityManagerImpl class is a stateless session bean that can be
  * used to retrieve Availability Data RLE points
  * 
  */

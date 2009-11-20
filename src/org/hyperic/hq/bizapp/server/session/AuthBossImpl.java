@@ -85,7 +85,7 @@ public class AuthBossImpl implements AuthBoss {
 
         public void processEvents(final List<UserLoginZevent> events) {
             // Process events needs to occur within a session due to
-            // UserAudit accessing pojo's outside of an EJBImpl.
+            // UserAudit accessing pojo's outside of a Transactional Impl.
             try {
                 org.hyperic.hq.hibernate.SessionManager
                     .runInSession(new org.hyperic.hq.hibernate.SessionManager.SessionRunner() {

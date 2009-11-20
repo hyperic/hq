@@ -222,7 +222,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
 
         AlertDefinition res = new AlertDefinition();
 
-        // The following is duplicated out of what the EJBImpl did. Makes sense
+        // The following is duplicated out of what the Impl did. Makes sense
         a.cleanAction();
         a.cleanCondition();
         a.cleanTrigger();

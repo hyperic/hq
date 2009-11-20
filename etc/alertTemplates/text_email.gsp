@@ -3,7 +3,7 @@
   import org.hyperic.hq.hqu.rendit.util.HQUtil
   import org.hyperic.hq.measurement.MeasurementConstants
   import org.hyperic.hq.events.EventConstants
-  import org.hyperic.hq.escalation.server.session.EscalationManagerEJBImpl
+  import org.hyperic.hq.escalation.server.session.EscalationManagerImpl
   
   DateFormat df = DateFormat.getDateTimeInstance(DateFormat.LONG, 
                                                  DateFormat.LONG)
@@ -22,7 +22,7 @@
 
   def lastFixStr = ""
   if (alertDef.performsEscalations()) {
-       def lastFix = EscalationManagerEJBImpl.one.getLastFix(alertDef)
+       def lastFix = EscalationManagerImpl.one.getLastFix(alertDef)
        if (lastFix) 
            lastFixStr = "\n- Previous Resolution:            ${lastFix}"
   }

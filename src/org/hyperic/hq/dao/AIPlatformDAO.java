@@ -109,7 +109,7 @@ public class AIPlatformDAO extends HibernateDAO<AIPlatform>
 
         // XXX hack around bug in xcraplet's generated
         // removeAllXXX methods (they actually don't remove anything)
-        // The AIQueueManagerEJBImpl.queue method relies on this working.
+        // The AIQueueManagerImpl.queue method relies on this working.
         HashSet xdocletServerHackSet = new HashSet();
         for (int i=0; i<newServers.length; i++) {
             AIServerValue serverVal = newServers[i];
