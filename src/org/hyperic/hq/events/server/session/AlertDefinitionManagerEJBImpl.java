@@ -67,7 +67,6 @@ import org.hyperic.hq.events.shared.AlertDefinitionManagerUtil;
 import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerManagerLocal;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
-import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementDAO;
 import org.hyperic.util.config.ConfigResponse;
@@ -741,56 +740,59 @@ public class AlertDefinitionManagerEJBImpl
         }
         aDao.getSession().flush();
     }
-
-    /** Clean up alert definitions and alerts for removed resources
-     *
+    
+    /**
      * @ejb:interface-method
      */
-    public void cleanupAlertDefinitions(AppdefEntityID aeid) {
-        StopWatch watch = new StopWatch();
+    public List getAllDeletedAlertDefs() {
+        return getAlertDefDAO().findAllDeletedResources();
+    }
 
-        final AlertDefinitionDAO aDao = getAlertDefDAO();
+    /**
+     * @param alertDefIds {@link List} of {@link Integer} of alertDefIds
+     * @ejb:interface-method
+     */
+    public void cleanupAlertDefs(List alertDefIds) {
+        if (alertDefIds.size() <= 0) {
+            return;
+        }
+        final StopWatch watch = new StopWatch();
+        final boolean debug = log.isDebugEnabled();
         final AlertDAO dao = getAlertDAO();
+        final AlertDefinitionDAO aDao = getAlertDefDAO();
         final ActionDAO actionDAO = getActionDAO();
-
-        List adefs = aDao.findAllDeletedResources();
-        for (Iterator i = adefs.iterator(); i.hasNext();) {
-            AlertDefinition alertdef = (AlertDefinition) i.next();
+        for (final Iterator i = alertDefIds.iterator(); i.hasNext();) {
+            final Integer alertdefId = (Integer) i.next();
+            final AlertDefinition alertdef = aDao.findById(alertdefId);
 
             // Delete the alerts
-            watch.markTimeBegin("deleteByAlertDefinition");
+            if (debug) watch.markTimeBegin("deleteByAlertDefinition");
             dao.deleteByAlertDefinition(alertdef);
-            watch.markTimeEnd("deleteByAlertDefinition");
-
-            // Get the alerts deleted
-            dao.getSession().flush();
+            if (debug) watch.markTimeEnd("deleteByAlertDefinition");
 
             // Remove the conditions
-            watch.markTimeBegin("remove conditions and triggers");
+            if (debug) watch.markTimeBegin("remove conditions and triggers");
             alertdef.clearConditions();
             alertdef.getTriggersBag().clear();
-            watch.markTimeEnd("remove conditions and triggers");
+            if (debug) watch.markTimeEnd("remove conditions and triggers");
 
             // Remove the actions
-            watch.markTimeBegin("removeActions");
+            if (debug) watch.markTimeBegin("removeActions");
             actionDAO.removeActions(alertdef);
-            watch.markTimeEnd("removeActions");
+            if (debug) watch.markTimeEnd("removeActions");
 
-            watch.markTimeBegin("remove from parent");
+            if (debug) watch.markTimeBegin("remove from parent");
             if (alertdef.getParent() != null) {
                 alertdef.getParent().getChildrenBag().remove(alertdef);
             }
-            watch.markTimeBegin("remove from parent");
+            if (debug) watch.markTimeEnd("remove from parent");
 
             // Actually remove the definition
-            watch.markTimeBegin("remove");
+            if (debug) watch.markTimeBegin("remove");
             aDao.remove(alertdef);
-            watch.markTimeBegin("remove");
-
-            if (log.isDebugEnabled()) {
-                log.debug("deleteAlertDefinition: " + watch);
-            }
+            if (debug) watch.markTimeEnd("remove");
         }
+        if (debug) log.debug("deleted " + alertDefIds.size() + " alertDefs: " + watch);
     }
 
     /** Find an alert definition and return a value object
