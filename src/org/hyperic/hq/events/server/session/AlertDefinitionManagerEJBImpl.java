@@ -27,6 +27,7 @@ package org.hyperic.hq.events.server.session;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.SortedMap;
@@ -657,10 +658,43 @@ public class AlertDefinitionManagerEJBImpl
                                                        boolean enable)
         throws FinderException, PermissionException {
 
-        AlertDefinition def = getAlertDefDAO().get(defId);
-
-        return updateAlertDefinitionInternalEnable(subj, def, enable);
+        return updateAlertDefinitionInternalEnable(
+                    subj, Collections.singletonList(defId), enable);
     }
+    
+    /**
+     * Enable/Disable an alert definition. For internal use only where the mtime
+     * does not need to be reset on each update.
+     *
+     * @return <code>true</code> if the enable/disable succeeded.
+     * @ejb:interface-method
+     */
+    public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj,
+                                                       List ids,
+                                                       boolean enable)
+        throws PermissionException {
+
+        AlertDefinitionDAO dao = getAlertDefDAO();
+        List triggerDefIds = new ArrayList(ids.size());
+        
+        for (Iterator it = ids.iterator(); it.hasNext(); ) {
+            AlertDefinition def = dao.get((Integer) it.next());
+            
+            if (def != null && def.isEnabled() != enable) {
+                canManageAlerts(subj, def.getAppdefEntityId());
+                def.setEnabledStatus(enable);
+                triggerDefIds.add(def.getId());
+            }
+        }
+        
+        if (!triggerDefIds.isEmpty()) {
+            // HQ-1799: enable the triggers in batch to improve performance
+            registeredTriggerManager.setAlertDefinitionTriggersEnabled(triggerDefIds, enable);
+            return true;
+        } else {
+            return false;
+        }
+    }    
 
     /**
      * Set the escalation on the alert definition
@@ -924,24 +958,6 @@ public class AlertDefinitionManagerEJBImpl
             }
             vals.add(a.getAlertDefinitionValue());
         }
-        return new PageList(vals, vals.size());
-    }
-
-    /** Get list of all child conditions
-     * @ejb:interface-method
-     */
-    public PageList findChildAlertDefinitions(Integer id) {
-        AlertDefinition def = getAlertDefDAO().findById(id);
-        List vals = new ArrayList();
-        Collection ads = def.getChildren();
-        for (Iterator i=ads.iterator(); i.hasNext(); ) {
-            AlertDefinition child = (AlertDefinition)i.next();
-            // Don't touch the deleted children
-            if (!child.isDeleted() && child.getResource() != null) {
-                vals.add(child.getAlertDefinitionValue());
-            }
-        }
-
         return new PageList(vals, vals.size());
     }
 

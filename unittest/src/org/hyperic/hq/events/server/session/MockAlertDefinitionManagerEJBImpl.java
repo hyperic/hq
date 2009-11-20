@@ -31,7 +31,11 @@ import org.jmock.core.Verifiable;
 public class MockAlertDefinitionManagerEJBImpl
 implements AlertDefinitionManagerLocal, Verifiable {
 
-	public void cleanupAlertDefinitions(AppdefEntityID aeid) {
+	public List getAllDeletedAlertDefs() {
+	    return null;
+	}
+    
+    public void cleanupAlertDefs(List alertDefIds) {
 		// TODO Auto-generated method stub
 
 	}
@@ -123,11 +127,6 @@ implements AlertDefinitionManagerLocal, Verifiable {
 
 	public Integer findChildAlertDefinitionId(AppdefEntityID aeid, Integer pid,
 			boolean allowStale) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public PageList findChildAlertDefinitions(Integer id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -245,13 +244,12 @@ implements AlertDefinitionManagerLocal, Verifiable {
 		return false;
 	}
 
-	public boolean updateAlertDefinitionInternalEnableForceNewTxn(
-			AuthzSubject subj, Integer defId, boolean enable)
-	throws PermissionException {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
+    public boolean updateAlertDefinitionInternalEnable(AuthzSubject subj,
+            List ids, boolean enable) throws PermissionException {
+        // TODO Auto-generated method stub
+        return false;
+    }
+	   
 	public void updateAlertDefinitionsActiveStatus(AuthzSubject subj,
 			Integer[] ids, boolean activate) throws PermissionException {
 		// TODO Auto-generated method stub

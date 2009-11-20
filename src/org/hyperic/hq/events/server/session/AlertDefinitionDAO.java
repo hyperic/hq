@@ -54,11 +54,6 @@ import org.hyperic.hq.events.shared.AlertDefinitionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 
 public class AlertDefinitionDAO extends HibernateDAO {
-    private static final String[] MANAGE_ALERTS_OPS = new String[] {
-        AuthzConstants.platformOpManageAlerts,
-        AuthzConstants.serverOpManageAlerts,
-        AuthzConstants.serviceOpManageAlerts
-    };
 
     public AlertDefinitionDAO(DAOFactory f) {
         super(AlertDefinition.class, f);
@@ -201,7 +196,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
 
         return wherePermCheck
             .addQueryParameters(q, subject, r, 0,
-                                Arrays.asList(MANAGE_ALERTS_OPS)).list();
+                                Arrays.asList(AuthzConstants.MANAGE_ALERTS_OPS)).list();
     }
 
     void save(AlertDefinition def) {
@@ -357,7 +352,7 @@ public class AlertDefinitionDAO extends HibernateDAO {
 
         if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subj.getId().intValue())
-             .setParameterList("ops", MANAGE_ALERTS_OPS);
+             .setParameterList("ops", AuthzConstants.MANAGE_ALERTS_OPS);
         }
 
         return pInfo.pageResults(q).list();

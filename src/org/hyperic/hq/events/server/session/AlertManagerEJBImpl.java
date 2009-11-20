@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  *
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  *
  * HQ is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
 
@@ -77,6 +78,7 @@ import org.hyperic.util.pager.PageList;
 import org.hyperic.util.pager.Pager;
 import org.hyperic.util.pager.SortAttribute;
 import org.hyperic.util.stats.ConcurrentStatsCollector;
+import org.hyperic.util.timer.StopWatch;
 
 /**
  * @ejb:bean name="AlertManager"
@@ -230,8 +232,7 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
     }
 
     /**
-     * Find the last alert by definition ID
-     * @throws PermissionException
+     * Find the last unfixed alert by definition ID
      *
      * @ejb:interface-method
      */
@@ -243,6 +244,33 @@ public class AlertManagerEJBImpl extends SessionBase implements SessionBean {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Find the last alerts for the given resource
+     *
+     * @ejb:interface-method
+     */
+    public Map findLastByResource(AuthzSubject subj, 
+                                  Resource r,
+                                  boolean includeDescendants,
+                                  boolean fixed) {
+        
+        StopWatch watch = new StopWatch();
+        Map unfixedAlerts = null;
+        try {
+            unfixedAlerts = 
+                getAlertDAO().findLastByResource(subj, r, includeDescendants, fixed);
+        } catch (Exception e) {
+            unfixedAlerts = Collections.EMPTY_MAP;
+            _log.error("Error finding the last alerts for resource id=" + r.getId(), e);
+        } finally {
+            if (_log.isDebugEnabled()) {
+                _log.debug("findLastByResource: " + watch);
+            }
+        }
+        
+        return unfixedAlerts;
     }
     
     /**
