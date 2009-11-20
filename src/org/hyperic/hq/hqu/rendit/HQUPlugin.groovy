@@ -141,7 +141,7 @@ class HQUPlugin implements IHQUPlugin {
     }
     
     private void createAndAttachAdmin(UIPlugin me, String name, Map parms) {
-        def pMan = PluginMan.UIPluginManagerImpl
+        def pMan = PluginMan.one
         ViewAdmin view = findViewByPath(me.views, parms.path)
         
         if (view == null) {
@@ -159,7 +159,7 @@ class HQUPlugin implements IHQUPlugin {
     }
     
     private void createAndAttachMasthead(UIPlugin me, String name, Map parms) {
-        def pMan= PluginMan.UIPluginManagerImpl
+        def pMan= PluginMan.one
         ViewMasthead view = findViewByPath(me.views, parms.path)
         
         if (view == null) {
@@ -190,7 +190,7 @@ class HQUPlugin implements IHQUPlugin {
      * resourceType:  Defines a list a of resource types to attach type
      */
     private void createAndAttachResource(UIPlugin me, String name, Map p) {
-        def pMan = PluginMan.UIPluginManagerImpl
+        def pMan = PluginMan.one
 
         ViewResource view
         if (me.views.empty) {
