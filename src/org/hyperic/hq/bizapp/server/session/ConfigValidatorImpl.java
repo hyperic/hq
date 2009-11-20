@@ -45,106 +45,100 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class ConfigValidatorImpl
-    implements ConfigValidator {
+public class ConfigValidatorImpl implements ConfigValidator {
 	private MeasurementManager measurementManager;
 	private TrackerManager trackerManager;
 	private ConfigManager configManager;
-	
+
 	@Autowired
-	public ConfigValidatorImpl(ConfigManager configManager, MeasurementManager measurementManager, TrackerManager trackerManager) {
+	public ConfigValidatorImpl(ConfigManager configManager,
+			MeasurementManager measurementManager, TrackerManager trackerManager) {
 		this.configManager = configManager;
 		this.measurementManager = measurementManager;
 		this.trackerManager = trackerManager;
 	}
-	
-    public void validate(AuthzSubject subject, String type,
-                         AppdefEntityID[] ids)
-        throws PermissionException, EncodingException, ConfigFetchException,
-               AppdefEntityNotFoundException, InvalidConfigException
-    {
-        if(type.equals(ProductPlugin.TYPE_PRODUCT) || 
-           type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
-            updateMeasurementConfigs(subject, ids);
-        }
 
-        if(type.equals(ProductPlugin.TYPE_PRODUCT) ||
-           type.equals(ProductPlugin.TYPE_CONTROL)) {
-            updateControlConfigs(subject, ids);
-        }
-    }
+	public void validate(AuthzSubject subject, String type, AppdefEntityID[] ids)
+			throws PermissionException, EncodingException,
+			ConfigFetchException, AppdefEntityNotFoundException,
+			InvalidConfigException {
+		if (type.equals(ProductPlugin.TYPE_PRODUCT)
+				|| type.equals(ProductPlugin.TYPE_MEASUREMENT)) {
+			updateMeasurementConfigs(subject, ids);
+		}
 
-    /**
-     * Tell the measurement subsystem that we have updated configuration
-     * for a number of entities.
-     */
-    private void updateMeasurementConfigs(AuthzSubject subject,
-                                          AppdefEntityID[] ids)
-        throws EncodingException, PermissionException,
-               AppdefEntityNotFoundException, InvalidConfigException
-    {
-        ConfigResponse[] responses;
-        
-        responses = new ConfigResponse[ids.length];
+		if (type.equals(ProductPlugin.TYPE_PRODUCT)
+				|| type.equals(ProductPlugin.TYPE_CONTROL)) {
+			updateControlConfigs(subject, ids);
+		}
+	}
 
-        for(int i=0; i<ids.length; i++){
-            try {
-                responses[i] =
-                	configManager.getMergedConfigResponse(subject,
-                                                 ProductPlugin.TYPE_MEASUREMENT,
-                                                 ids[i], true);
-                
-                measurementManager.checkConfiguration(subject, ids[i], responses[i]);
-            } catch(ConfigFetchException exc){
-                responses[i] = null;
-            } 
-        }
+	/**
+	 * Tell the measurement subsystem that we have updated configuration for a
+	 * number of entities.
+	 */
+	private void updateMeasurementConfigs(AuthzSubject subject,
+			AppdefEntityID[] ids) throws EncodingException,
+			PermissionException, AppdefEntityNotFoundException,
+			InvalidConfigException {
+		ConfigResponse[] responses;
 
-        for(int i=0; i<ids.length; i++){
-            if(responses[i] == null){
-                // This is OK, since this resource may not have been
-                // configured for measurement (or at all)
-                continue;
-            }
-            
-            // Metric configuration has been validated, check if we need
-            // to enable or disable log and config tracking.
-            try {
-            	trackerManager.toggleTrackers(subject, ids[i], responses[i]);
-            } catch (PluginException e) {
-                throw new InvalidConfigException("Unable to modify config " +
-                                                 "track config: " +
-                                                 e.getMessage(), e);
-            }
-        }
-    }
+		responses = new ConfigResponse[ids.length];
 
-    private void updateControlConfigs(AuthzSubject subject,
-                                      AppdefEntityID[] ids)
-        throws PermissionException, ConfigFetchException, EncodingException,
-               InvalidConfigException
-    {
-        ControlManager cLocal;
+		for (int i = 0; i < ids.length; i++) {
+			try {
+				responses[i] = configManager.getMergedConfigResponse(subject,
+						ProductPlugin.TYPE_MEASUREMENT, ids[i], true);
 
-        try {
-            cLocal = ControlManagerImpl.getOne();
-        } catch(Exception exc){
-            throw new SystemException(exc);
-        }
+				measurementManager.checkConfiguration(subject, ids[i],
+						responses[i]);
+			} catch (ConfigFetchException exc) {
+				responses[i] = null;
+			}
+		}
 
-        for (int i=0; i<ids.length; i++) {
-            try {
-                cLocal.checkControlEnabled(subject, ids[i]);
-            } catch (PluginException e) {
-                // Not configured for control
-                continue;
-            }
+		for (int i = 0; i < ids.length; i++) {
+			if (responses[i] == null) {
+				// This is OK, since this resource may not have been
+				// configured for measurement (or at all)
+				continue;
+			}
 
-            try {
-                cLocal.configureControlPlugin(subject, ids[i]);
-            } catch (Exception e) {
-                throw new InvalidConfigException(e.getMessage());
-            }
-        }
-    }
+			// Metric configuration has been validated, check if we need
+			// to enable or disable log and config tracking.
+			try {
+				trackerManager.toggleTrackers(subject, ids[i], responses[i]);
+			} catch (PluginException e) {
+				throw new InvalidConfigException("Unable to modify config "
+						+ "track config: " + e.getMessage(), e);
+			}
+		}
+	}
+
+	private void updateControlConfigs(AuthzSubject subject, AppdefEntityID[] ids)
+			throws PermissionException, ConfigFetchException,
+			EncodingException, InvalidConfigException {
+		ControlManager cLocal;
+
+		try {
+			cLocal = ControlManagerImpl.getOne();
+		} catch (Exception exc) {
+			throw new SystemException(exc);
+		}
+
+		for (int i = 0; i < ids.length; i++) {
+			try {
+				cLocal.checkControlEnabled(subject, ids[i]);
+			} catch (PluginException e) {
+				// Not configured for control
+				continue;
+			}
+
+			try {
+				cLocal.configureControlPlugin(subject, ids[i]);
+			} catch (Exception e) {
+				throw new InvalidConfigException(e.getMessage());
+			}
+		}
+	}
 }
