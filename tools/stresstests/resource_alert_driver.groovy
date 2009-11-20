@@ -4,8 +4,8 @@ import org.hyperic.hq.events.AbstractEvent
 import org.hyperic.hq.events.ext.AbstractTrigger
 import org.hyperic.hq.measurement.ext.MeasurementEvent
 import org.hyperic.hq.product.MetricValue
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerEJBImpl as adM
-import org.hyperic.hq.events.server.session.RegisteredTriggerManagerEJBImpl as rtM
+import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl as adM
+import org.hyperic.hq.events.server.session.RegisteredTriggerManagerImpl as rtM
 
 /**
  * This script publishes events that trigger resource alert definitions. The 

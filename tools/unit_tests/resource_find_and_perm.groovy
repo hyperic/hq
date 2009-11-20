@@ -1,5 +1,5 @@
 import org.hyperic.hq.authz.shared.PermissionException
-import org.hyperic.hq.authz.server.session.AuthzSubjectManagerEJBImpl as asm
+import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl as asm
 import org.hyperic.hq.hqu.rendit.helpers.ResourceHelper
 
 def overlord = asm.one.overlordPojo

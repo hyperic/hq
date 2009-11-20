@@ -1,6 +1,6 @@
 import org.hyperic.hq.measurement.server.session.DataPoint
 import org.hyperic.hq.product.MetricValue
-import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl as dM
+import org.hyperic.hq.measurement.server.session.DataManagerImpl as dM
 import org.hyperic.hq.measurement.server.session.MeasurementStartupListener
 
 /**

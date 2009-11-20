@@ -4,7 +4,7 @@ import org.hyperic.hq.measurement.shared.ResourceLogEvent
 import org.hyperic.hq.common.util.Messenger
 import org.hyperic.hq.events.EventConstants
 import org.hyperic.hq.product.LogTrackPlugin
-import org.hyperic.hq.events.server.session.EventLogManagerEJBImpl as elM
+import org.hyperic.hq.events.server.session.EventLogManagerImpl as elM
 
 /**
  * This script publishes resource log events for a given set of 

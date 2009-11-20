@@ -1,5 +1,5 @@
 import org.hyperic.hq.galerts.server.session.GalertDefPartition
-import org.hyperic.hq.galerts.server.session.GalertManagerEJBImpl as adM
+import org.hyperic.hq.galerts.server.session.GalertManagerImpl as adM
 import org.hyperic.hq.galerts.server.session.GalertDef
 import org.hyperic.hq.galerts.processor.Gtrigger
 import org.hyperic.hq.zevents.ZeventManager

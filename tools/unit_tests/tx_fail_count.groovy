@@ -1,7 +1,7 @@
 // This test verifies that the HQApp is correctly counting the transactions
 // (and failed transactions)
 
-import org.hyperic.hq.common.server.session.TransactionManagerEJBImpl as TxMan
+import org.hyperic.hq.common.server.session.TransactionManagerImpl as TxMan
 import org.hyperic.hq.application.HQApp
 import org.hyperic.util.Runnee
 
