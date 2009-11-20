@@ -56,7 +56,7 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
     private ProcessFinder processFinder = null;
     private static final Map AVAIL_ATTRS = new HashMap();
 
-    //Availaiblity helpers. Assume resource is available if
+    //Availability helpers. Assume resource is available if
     //we can collect the given attribute.
     static {
         AVAIL_ATTRS.put("DirUsage", "Total");
@@ -161,7 +161,6 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
     {
         Object systemValue;
         Double useVal;
-
         String domain = metric.getDomainName();
         String name = metric.getObjectName();
         String attr = metric.getAttributeName();
@@ -180,8 +179,8 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
                                       "Type=MountedFileSystemUsage");
         }
 
-        boolean isAvail = false;
-        boolean isProcessState = false;
+        boolean isAvailabilityAttribute = false;
+        boolean isStateAttribute = false;
         //check for Availability attribute aliases
         if (attr.equals(Metric.ATTR_AVAIL)) {
             String type =
@@ -189,11 +188,11 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
             String alias = (String)AVAIL_ATTRS.get(type);
             if (alias != null) {
                 attr = alias;
-                isAvail = true;
+                isAvailabilityAttribute = true;
             }
         }
         else {
-            isAvail = isProcessState = isProcessState(attr);
+            isAvailabilityAttribute = isStateAttribute = isProcessState(attr);
         }
         
         SigarInvokerJMX invoker =
@@ -206,18 +205,39 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
         } catch (SigarNotImplementedException e) {
             return MetricValue.NONE;
         } catch (SigarException e) {
-            if (isAvail) {
+            if (isAvailabilityAttribute) {
                 return new MetricValue(Metric.AVAIL_DOWN);
             }
             else {
                 throw new MetricNotFoundException(e.getMessage(), e);
             }
         }
-
-        if (isAvail && !isProcessState) {
-            useVal = new Double(Metric.AVAIL_UP);
+        /* If the availability metric was accessible then it is considered 
+         * "up" for certain cases (File, FileServer, NetworkInterface...), otherwise
+         * the metric would be set to down in the above SigarException catch statement.
+         * 
+         * We should also see the value returned from SIGAR to be the number of 
+         * processes found with the specified ptql. So if it is greater then 0 it 
+         * is Available. 
+         */
+        if (isAvailabilityAttribute && !isStateAttribute) {
+            if (systemValue instanceof Number && ((Number)systemValue).intValue() > 0){
+                useVal = new Double(Metric.AVAIL_UP);
+            } else {
+                useVal = new Double(Metric.AVAIL_DOWN);
+            }
+        }else {
+            useVal = convertToDouble(systemValue, isStateAttribute);
         }
-        else if (systemValue instanceof Double) {
+        if (useVal.doubleValue() == Sigar.FIELD_NOTIMPL) {
+            return MetricValue.NONE;
+        }
+        return new MetricValue(useVal, System.currentTimeMillis());
+    }
+    
+    private Double convertToDouble(Object systemValue, boolean isProcessState) throws MetricNotFoundException{
+        Double useVal;
+        if (systemValue instanceof Double) {
             useVal = (Double)systemValue;
         }
         else if (systemValue instanceof Long) {
@@ -229,7 +249,7 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
         else if (systemValue instanceof Character) {
             char c = ((Character)systemValue).charValue();
             //process state
-            if (isProcessState(attr)) {
+            if (isProcessState) {
                 double avail;
                 switch (c) {
                   case 'Z':
@@ -255,9 +275,6 @@ public class SigarMeasurementPlugin extends MeasurementPlugin {
                                                 " object, which could not " +
                                                 " be handled");
         }
-        if (useVal.doubleValue() == Sigar.FIELD_NOTIMPL) {
-            return MetricValue.NONE;
-        }
-        return new MetricValue(useVal, System.currentTimeMillis());
+        return useVal;
     }
 }
