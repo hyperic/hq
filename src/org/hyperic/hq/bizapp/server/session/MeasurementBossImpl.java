@@ -25,7 +25,8 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import java.rmi.RemoteException;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,17 +37,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 
-import javax.ejb.CreateException;
-import javax.ejb.EJBException;
 import javax.ejb.RemoveException;
-import javax.ejb.SessionBean;
-import javax.ejb.SessionContext;
-import javax.naming.NamingException;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.AppService;
 import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
@@ -54,8 +52,8 @@ import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.Platform;
 import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.Server;
-import org.hyperic.hq.appdef.server.session.ServiceManagerImpl;
-import org.hyperic.hq.appdef.server.session.VirtualManagerImpl;
+import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefCompatException;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -67,14 +65,15 @@ import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
+import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
-import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceClusterValue;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.appdef.shared.VirtualManager;
+import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -82,12 +81,10 @@ import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
-import org.hyperic.hq.authz.server.session.ResourceManagerImpl;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
-import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
-import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.uibeans.AutogroupDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.ClusterDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.GroupMetricDisplaySummary;
@@ -103,7 +100,11 @@ import org.hyperic.hq.bizapp.shared.uibeans.ResourceMetricDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.ResourceTypeDisplaySummary;
 import org.hyperic.hq.bizapp.shared.uibeans.SingletonDisplaySummary;
 import org.hyperic.hq.common.ApplicationException;
-import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.grouping.CritterList;
+import org.hyperic.hq.grouping.CritterTranslationContext;
+import org.hyperic.hq.grouping.CritterTranslator;
+import org.hyperic.hq.grouping.critters.DescendantProtoCritterType;
 import org.hyperic.hq.grouping.server.session.GroupUtil;
 import org.hyperic.hq.grouping.shared.GroupNotCompatibleException;
 import org.hyperic.hq.measurement.MeasurementConstants;
@@ -111,11 +112,13 @@ import org.hyperic.hq.measurement.MeasurementCreateException;
 import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.hq.measurement.TemplateNotFoundException;
 import org.hyperic.hq.measurement.server.session.Baseline;
-import org.hyperic.hq.measurement.server.session.DataManagerImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.MeasurementTemplate;
+import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.measurement.shared.DataManager;
+import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.measurement.shared.TemplateManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.ConfigPropertyException;
@@ -126,35 +129,78 @@ import org.hyperic.util.config.InvalidOptionException;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
 import org.hyperic.util.timer.StopWatch;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /** BizApp interface to the Measurement subsystem
- * @ejb:bean name="MeasurementBoss"
- *      jndi-name="ejb/bizapp/MeasurementBoss"
- *      local-jndi-name="LocalMeasurementBoss"
- *      view-type="both"
- *      type="Stateless"
- * @ejb:transaction type="Required"
+ 
  */
-public class MeasurementBossEJBImpl extends MetricSessionEJB
-    implements SessionBean 
+@Service
+@Transactional
+public class MeasurementBossImpl implements MeasurementBoss
 {
-    protected static Log _log = LogFactory.getLog(MeasurementBossEJBImpl.class);
+    protected final Log log = LogFactory.getLog(MeasurementBossImpl.class);
+    
+    private static final double AVAIL_DOWN = MeasurementConstants.AVAIL_DOWN;
+    
+    private SessionManager sessionManager;
+    private AuthManager authManager;
+    private MeasurementManager measurementManager;
+    private TemplateManager templateManager;
+    private AvailabilityManager availabilityManager;
+    private DataManager dataManager;
+    private ConfigManager configManager;
+    private PlatformManager platformManager;
+    private ResourceManager resourceManager;
+    private ResourceGroupManager resourceGroupManager;
+    private ServerManager serverManager;
+    private AgentManager agentManager;
+    private ServiceManager serviceManager;
+    private VirtualManager virtualManager;
+    
+    
+    @Autowired
+    public MeasurementBossImpl(SessionManager sessionManager, AuthManager authManager,
+                               MeasurementManager measurementManager, TemplateManager templateManager,
+                               AvailabilityManager availabilityManager, DataManager dataManager,
+                               ConfigManager configManager, PlatformManager platformManager,
+                               ResourceManager resourceManager, ResourceGroupManager resourceGroupManager,
+                               ServerManager serverManager, AgentManager agentManager, ServiceManager serviceManager,
+                               VirtualManager virtualManager) {
+        this.sessionManager = sessionManager;
+        this.authManager = authManager;
+        this.measurementManager = measurementManager;
+        this.templateManager = templateManager;
+        this.availabilityManager = availabilityManager;
+        this.dataManager = dataManager;
+        this.configManager = configManager;
+        this.platformManager = platformManager;
+        this.resourceManager = resourceManager;
+        this.resourceGroupManager = resourceGroupManager;
+        this.serverManager = serverManager;
+        this.agentManager = agentManager;
+        this.serviceManager = serviceManager;
+        this.virtualManager = virtualManager;
+    }
 
-    private List findDesignatedMetrics(AuthzSubject subject, AppdefEntityID id,
-                                       Set cats) {
-        final List metrics;
+
+
+    private List<Measurement> findDesignatedMetrics(AuthzSubject subject, AppdefEntityID id,
+                                       Set<String> cats) {
+        final List<Measurement> metrics;
         
         if (cats.size() == 1) {
             String cat = (String) cats.iterator().next();
             metrics =
-                getMetricManager().findDesignatedMeasurements(subject, id, cat);
+                measurementManager.findDesignatedMeasurements(subject, id, cat);
         }
         else {
-            metrics = getMetricManager().findDesignatedMeasurements(id);
+            metrics = measurementManager.findDesignatedMeasurements(id);
             
             // Now iterate through and throw out the metrics we don't need
-            for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                Measurement dm = (Measurement) it.next();
+            for (Iterator<Measurement> it = metrics.iterator(); it.hasNext(); ) {
+                Measurement dm =  it.next();
                 if (!cats.contains(dm.getTemplate().getCategory().getName()))
                     it.remove();
             }
@@ -167,71 +213,71 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
     /**
      * Get Autogroup member ids
-     * @ejb:interface-method
+     * 
      */
     public AppdefEntityID[] getAutoGroupMemberIDs(AuthzSubject subject,
                                                   AppdefEntityID[] aids,
                                                   AppdefEntityTypeID ctype)
         throws AppdefEntityNotFoundException, PermissionException {
         
-        final List members = getAGMemberIds(subject, aids, ctype);
-        return (AppdefEntityID[])
+        final List<AppdefEntityID> members = getAGMemberIds(subject, aids, ctype);
+        return 
             members.toArray(new AppdefEntityID[members.size()]);
     }
 
     /**
      * Update the default interval for a list of template ids
-     * @ejb:interface-method
+     * 
      */
     public void updateMetricDefaultInterval(int sessionId, Integer[] tids,
                                             long interval)
         throws SessionException
     {
-        final AuthzSubject subject = manager.getSubject(sessionId);
-        getTemplateManager().updateTemplateDefaultInterval(subject, tids, 
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
+        templateManager.updateTemplateDefaultInterval(subject, tids, 
                                                            interval);
     }
 
     /**
      * Update the templates to be indicators or not
-     * @ejb:interface-method
+     * 
      */
     public void updateIndicatorMetrics(int sessionId, AppdefEntityTypeID aetid,
                                        Integer[] tids)
         throws TemplateNotFoundException, SessionTimeoutException,
                SessionNotFoundException {
         String typeName = aetid.getAppdefResourceType().getName();
-        getTemplateManager().setDesignatedTemplates(typeName, tids);
+        templateManager.setDesignatedTemplates(typeName, tids);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      * @return a PageList of MeasurementTemplateValue objects
      */
-    public List findMeasurementTemplates(int sessionId,
+    public List<MeasurementTemplate> findMeasurementTemplates(int sessionId,
                                          AppdefEntityTypeID typeId,
                                          String category,
                                          PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException {
-        manager.authenticate(sessionId);
+        sessionManager.authenticate(sessionId);
         String typeName = typeId.getAppdefResourceType().getName();
-        return getTemplateManager().findTemplates(typeName, category,
+        return templateManager.findTemplates(typeName, category,
                                                   new Integer[] {}, pc);
     }
 
     /**
-     * @ejb:interface-method
+     * 
      * @return a PageList of MeasurementTemplateValue objects based on entity
      */
-    public List findMeasurementTemplates(int sessionId,
+    public List<MeasurementTemplate> findMeasurementTemplates(int sessionId,
                                          AppdefEntityID aeid)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         AppdefEntityValue aev = new AppdefEntityValue(aeid, subject);
         
         String typeName = aev.getMonitorableType();
-        return getTemplateManager().findTemplates(typeName, null,
+        return templateManager.findTemplates(typeName, null,
                                                   new Integer[] {},
                                                   PageControl.PAGE_ALL);
     }
@@ -241,65 +287,65 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * 
      * @param mtype the monitorableType
      * @return a List of MeasurementTemplateValue objects
-     * @ejb:interface-method
+     * 
      */
-    public List findMeasurementTemplates(int sessionId, String mtype,
+    public List<MeasurementTemplate> findMeasurementTemplates(int sessionId, String mtype,
                                          PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException {
-        manager.authenticate(sessionId);
-        return getTemplateManager().findTemplates(mtype, null, null, pc);
+        sessionManager.authenticate(sessionId);
+        return templateManager.findTemplates(mtype, null, null, pc);
     }
 
     /** Retrieve list of measurement templates given specific IDs
-     * @ejb:interface-method
+     * 
      */
-    public List findMeasurementTemplates(String user, Integer[] ids,
+    public List<MeasurementTemplate> findMeasurementTemplates(String user, Integer[] ids,
                                          PageControl pc)
         throws LoginException, ApplicationException, ConfigPropertyException {
-        int sessionId = getAuthManager().getUnauthSessionId(user);
+        int sessionId = authManager.getUnauthSessionId(user);
         return findMeasurementTemplates(sessionId, ids, pc);
     }
 
     /** Retrieve list of measurement templates given specific IDs
      * @return a List of MeasurementTemplateValue objects
-     * @ejb:interface-method
+     * 
      */
-    public List findMeasurementTemplates(int sessionId, Integer[] ids,
+    public List<MeasurementTemplate> findMeasurementTemplates(int sessionId, Integer[] ids,
                                              PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException,
                TemplateNotFoundException {
-        manager.authenticate(sessionId);
-        return getTemplateManager().getTemplates(ids, pc);
+        sessionManager.authenticate(sessionId);
+        return templateManager.getTemplates(ids, pc);
     }
 
     /** Retrieve a measurement template given specific ID
-     * @ejb:interface-method
+     * 
      */
     public MeasurementTemplate getMeasurementTemplate(int sessionId, Integer id)
         throws SessionNotFoundException, SessionTimeoutException,
                TemplateNotFoundException {
-        manager.authenticate(sessionId);
-        return getTemplateManager().getTemplate(id);
+        sessionManager.authenticate(sessionId);
+        return templateManager.getTemplate(id);
     }
 
     /**
      * Get the the availability metric template for the given autogroup
      * @return The availabililty metric template.
-     * @ejb:interface-method
+     * 
      */
     public MeasurementTemplate getAvailabilityMetricTemplate(
             int sessionId, AppdefEntityID aid, AppdefEntityTypeID ctype)
         throws SessionNotFoundException, SessionTimeoutException,
                MeasurementNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
     
         // Find the autogroup members
-        List entIds = getAGMemberIds(subject, new AppdefEntityID[] { aid },
+        List<AppdefEntityID> entIds = getAGMemberIds(subject, new AppdefEntityID[] { aid },
                                      ctype);
     
-        for (Iterator it = entIds.iterator(); it.hasNext();) {
-            AppdefEntityID aeId = (AppdefEntityID) it.next();
+        for (AppdefEntityID aeId : entIds) {
+           
             try {
                 return getAvailabilityMetricTemplate(sessionId, aeId);
             } catch (MeasurementNotFoundException e) {
@@ -318,7 +364,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Integer represents the AppdefEntityID.getId()
      */
     private MeasurementTemplate getAvailabilityMetricTemplate(
-        AuthzSubject subj, AppdefEntityID aeid, Map measCache)
+        AuthzSubject subj, AppdefEntityID aeid, Map<Integer,List<Measurement>> measCache)
         throws AppdefEntityNotFoundException,
                PermissionException,
                MeasurementNotFoundException {
@@ -328,21 +374,23 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             AppdefEntityValue aeval = new AppdefEntityValue(aeid, subj);
             Application app = (Application) aeval.getResourcePOJO();
             
-            Collection appSvcs = app.getAppServices();
-            for (Iterator it = appSvcs.iterator(); it.hasNext(); ) {
-                AppService appSvc = (AppService) it.next();
+            Collection<AppService> appSvcs = app.getAppServices();
+            for (AppService appSvc : appSvcs ) {
+               
                 // Let's try it
                 if (appSvc.isIsGroup()) {
-                    if (appSvc.getResourceGroup() == null)
+                    if (appSvc.getResourceGroup() == null) {
                         continue;
+                    }
                         
                     aeid = AppdefEntityID.newGroupID(
                         appSvc.getResourceGroup().getId());
                 }
                 else {
                     // Make sure this is a valid service
-                    if (appSvc.getService() == null)
+                    if (appSvc.getService() == null) {
                         continue;
+                    }
                     
                     // Get the metrics for the service                        
                     aeid = appSvc.getService().getEntityId();
@@ -357,11 +405,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         else if (aeid.isGroup())
         {
-            List grpMembers = getResourceIds(subj, aeid, null);
+            List<AppdefEntityID> grpMembers = getResourceIds(subj, aeid, null);
             
             // Go through the group members and return the first measurement
             // that we find
-            for (Iterator it = grpMembers.iterator(); it.hasNext(); ) {
+            for (Iterator<AppdefEntityID> it = grpMembers.iterator(); it.hasNext(); ) {
                 aeid = (AppdefEntityID) it.next();
                 dm = findAvailabilityMetric(subj, aeid, measCache);
                 if (dm != null) {
@@ -373,16 +421,18 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             dm = findAvailabilityMetric(subj, aeid, measCache);
         }
         
-        if (dm != null)
+        if (dm != null) {
             return dm.getTemplate();
-        else
+        }
+        else {
             throw new MeasurementNotFoundException(
                 "Availability metric not found for " + aeid);
+        }
     }
 
     private Measurement findAvailabilityMetric(AuthzSubject subj,
                                                AppdefEntityID aeid,
-                                               Map measCache) {
+                                               Map<Integer,List<Measurement>> measCache) {
         Measurement dm = null;
         if (measCache != null) {
             Object obj = measCache.get(aeid.getId());
@@ -400,7 +450,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
 
         if (dm == null) {
-            dm = findAvailabilityMetric(subj, aeid);
+            dm = measurementManager.getAvailabilityMeasurement(subj, aeid);
         }
         return dm;
     }
@@ -408,14 +458,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Get the the availability metric template for the given resource
      * @return template of availabililty metric
-     * @ejb:interface-method
+     * 
      */
     public MeasurementTemplate getAvailabilityMetricTemplate(
         int sessionId, AppdefEntityID aeid)
         throws MeasurementNotFoundException, SessionNotFoundException,
                SessionTimeoutException, AppdefEntityNotFoundException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getAvailabilityMetricTemplate(subject, aeid, null);
     }
 
@@ -423,22 +473,22 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Get the the designated measurement template for the given resource
      * and corresponding category.
      * @return Array of Measurement IDs
-     * @ejb:interface-method
+     * 
      */
-    public List getDesignatedTemplates(int sessionId, AppdefEntityID id,
-                                       Set cats) 
+    public List<MeasurementTemplate> getDesignatedTemplates(int sessionId, AppdefEntityID id,
+                                       Set<String> cats) 
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, PermissionException {
-        List metrics;
+        List<Measurement> metrics;
         try {
             metrics = getDesignatedMetrics(sessionId, id, cats);
         } catch (MeasurementNotFoundException e) {
-            return new ArrayList(0);
+            return new ArrayList<MeasurementTemplate>(0);
         }
         
-        ArrayList tmpls = new ArrayList(metrics.size());
-        for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-            Measurement dm = (Measurement) it.next();
+        ArrayList<MeasurementTemplate> tmpls = new ArrayList<MeasurementTemplate>(metrics.size());
+        for (Measurement dm : metrics ) {
+          
             tmpls.add(dm.getTemplate());
         }
             
@@ -450,21 +500,21 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * a type and corresponding category.
      * @param ctype the AppdefEntityTypeID of the AG members
      * @return Array of Measuremnt ids
-     * @ejb:interface-method
+     * 
      */
-    public List getAGDesignatedTemplates(int sessionId, AppdefEntityID[] aids, 
-                                         AppdefEntityTypeID ctype, Set cats) 
+    public List<MeasurementTemplate> getAGDesignatedTemplates(int sessionId, AppdefEntityID[] aids, 
+                                         AppdefEntityTypeID ctype, Set<String> cats) 
         throws SessionNotFoundException, SessionTimeoutException,
                MeasurementNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         
         // Find the autogroup members
-        List entIds = getAGMemberIds(subject, aids, ctype);
+        List<AppdefEntityID> entIds = getAGMemberIds(subject, aids, ctype);
         
-        for (Iterator it = entIds.iterator(); it.hasNext(); ) {
-            AppdefEntityID aeId = (AppdefEntityID) it.next();
-            List templs = getDesignatedTemplates(sessionId, aeId, cats);
+        for (AppdefEntityID aeId : entIds ) {
+           
+            List<MeasurementTemplate> templs = getDesignatedTemplates(sessionId, aeId, cats);
             if (templs.size() > 0) {
                 return templs;
             }
@@ -487,19 +537,19 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                TemplateNotFoundException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, MeasurementCreateException,
                MeasurementNotFoundException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         if (id.isGroup()) {
             // Recursively do this for each of the group members
-            List grpMembers = getResourceIds(subject, id, null);
+            List<AppdefEntityID> grpMembers = getResourceIds(subject, id, null);
         
-            AppdefEntityID[] aeids = (AppdefEntityID[])
+            AppdefEntityID[] aeids = 
                 grpMembers.toArray(new AppdefEntityID[grpMembers.size()]);
-            getMetricManager().enableMeasurements(subject, aeids, tids,
+            measurementManager.enableMeasurements(subject, aeids, tids,
                                                   interval);
         }
         else {
-            ConfigResponse mergedCR = getConfigManager()
-                .getMergedConfigResponse(subject, 
+            ConfigResponse mergedCR = configManager.
+                getMergedConfigResponse(subject, 
                                          ProductPlugin.TYPE_MEASUREMENT, 
                                          id, true);
             
@@ -507,10 +557,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 long[] intervals = new long[tids.length];
                 Arrays.fill(intervals, interval);
     
-                getMetricManager().createMeasurements(subject, id, tids,
+                measurementManager.createMeasurements(subject, id, tids,
                                                       intervals, mergedCR);
             } else {
-                getMetricManager().createMeasurements(subject, id, tids,
+                measurementManager.createMeasurements(subject, id, tids,
                                                       mergedCR);
             }
         }
@@ -520,7 +570,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param id the resource ID
      * @param tids the array of template ID's
      * @param interval the new interval value
-     * @ejb:interface-method
+     * 
      */
     public void updateMeasurements(int sessionId, AppdefEntityID id,
                                    Integer[] tids, long interval)
@@ -538,7 +588,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param ctype - the type of child resource
      * @param tids - template ids to update
      * @param interval - the interval to set
-     * @ejb:interface-method
+     * 
      */
     public void updateAGMeasurements(int sessionId, 
                                      AppdefEntityID parentid, 
@@ -550,8 +600,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                MeasurementCreateException, ConfigFetchException,
                PermissionException, EncodingException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
-        List kids = getAGMemberIds(subject, parentid, ctype);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
+        List<AppdefEntityID> kids = getAGMemberIds(subject, parentid, ctype);
         for(int i = 0; i < kids.size(); i++) {
             // Do create, because we want to create or update
             AppdefEntityID kid = (AppdefEntityID)kids.get(i);
@@ -562,49 +612,49 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Disable all measurements for an instance
      * @param id the resource's ID
-     * @ejb:interface-method
+     * 
      */
     public void disableMeasurements(int sessionId, AppdefEntityID id)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
-        getMetricManager().disableMeasurements(subject, id);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
+        measurementManager.disableMeasurements(subject, id);
     }
 
     /**
      * Disable all measurements for a resource
      * @param id the resource's ID
      * @param tids the array of measurement ID's
-     * @ejb:interface-method
+     * 
      */
     public void disableMeasurements(int sessionId, AppdefEntityID id,
                                     Integer[] tids)
         throws SessionException, RemoveException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, PermissionException
     {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-        MeasurementManager dmm = getMetricManager();
+       
         if (id == null) {
-            getTemplateManager().setTemplateEnabledByDefault(subject, tids, 
+            templateManager.setTemplateEnabledByDefault(subject, tids, 
                                                              false);
         } else if (id.isGroup()) {
             // Recursively do this for each of the group members
-            List grpMembers = getResourceIds(subject, id, null);
+            List<AppdefEntityID> grpMembers = getResourceIds(subject, id, null);
     
-            for (Iterator it = grpMembers.iterator(); it.hasNext();) {
-                dmm.disableMeasurements(subject, (AppdefEntityID) it.next(), 
+            for (Iterator<AppdefEntityID> it = grpMembers.iterator(); it.hasNext();) {
+                measurementManager.disableMeasurements(subject,  it.next(), 
                                         tids);
             }
         } else {
-            dmm.disableMeasurements(subject, id, tids); 
+            measurementManager.disableMeasurements(subject, id, tids); 
         }
     }
 
     /**
      * Disable all measurements for a resource
      * @param tids the array of measurement ID's
-     * @ejb:interface-method
+     * 
      */
     public void disableAGMeasurements(int sessionId, AppdefEntityID parentId,
                                       AppdefEntityTypeID childType,
@@ -612,13 +662,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                RemoveException, AppdefEntityNotFoundException,
                GroupNotCompatibleException, PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
     
-        List grpMembers = getAGMemberIds(subject, parentId, childType);
+        List<AppdefEntityID> grpMembers = getAGMemberIds(subject, parentId, childType);
     
-        for (Iterator it = grpMembers.iterator(); it.hasNext();) {
-            getMetricManager().disableMeasurements(
-                subject, (AppdefEntityID) it.next(), tids);
+        for (Iterator<AppdefEntityID> it = grpMembers.iterator(); it.hasNext();) {
+            measurementManager.disableMeasurements(
+                subject,  it.next(), tids);
         }
     }
 
@@ -627,7 +677,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * and corresponding category.
      * @return Array of Measurement IDs
      */
-    private List getDesignatedMetrics(int sessionId, AppdefEntityID id, Set cats) 
+    private List<Measurement> getDesignatedMetrics(int sessionId, AppdefEntityID id, Set<String> cats) 
         throws SessionNotFoundException, SessionTimeoutException,
                MeasurementNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
@@ -635,29 +685,31 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             throw new MeasurementNotFoundException("No categories specified");
         }
         
-        AuthzSubject subj = manager.getSubject(sessionId);
+        AuthzSubject subj = sessionManager.getSubject(sessionId);
         
-        List metrics = null;
+        List<Measurement> metrics = null;
         if (id.isApplication()) {
             // Get the appointed front-end service
             AppdefEntityValue aeval = new AppdefEntityValue(id, subj);
             Application app = (Application) aeval.getResourcePOJO();
             
-            Collection appSvcs = app.getAppServices();
-            for (Iterator it = appSvcs.iterator(); it.hasNext(); ) {
-                AppService appSvc = (AppService) it.next();
+            Collection<AppService> appSvcs = app.getAppServices();
+            for ( AppService appSvc : appSvcs) {
+               
                 // Let's try it
                 if (appSvc.isIsGroup()) {
-                    if (appSvc.getResourceGroup() == null)
+                    if (appSvc.getResourceGroup() == null) {
                         continue;
+                    }
                         
                     id = AppdefEntityID.newGroupID(appSvc.getResourceGroup()
                                                    .getId());
                 }
                 else {
                     // Make sure this is a valid service
-                    if (appSvc.getService() == null)
+                    if (appSvc.getService() == null) {
                         continue;
+                    }
                     
                     // Get the metrics for the service                        
                     id = appSvc.getService().getEntityId();
@@ -677,7 +729,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 }
                 else if (metrics == null &&
                          cats.contains(MeasurementConstants.CAT_AVAILABILITY)) {
-                    Measurement dm = findAvailabilityMetric(subj, id);
+                    Measurement dm = measurementManager.getAvailabilityMeasurement(subj, id);
                     
                     if (dm != null) {
                         metrics = Collections.singletonList(dm);
@@ -686,16 +738,17 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
         }
         else if (id.isGroup()) {
-            List grpMembers = getResourceIds(subj, id, null);
+            List<AppdefEntityID> grpMembers = getResourceIds(subj, id, null);
             
             // Go through the group members and return the first measurement
             // that we find
-            for (Iterator it = grpMembers.iterator(); it.hasNext(); ) {
+            for (Iterator<AppdefEntityID> it = grpMembers.iterator(); it.hasNext(); ) {
                 metrics = findDesignatedMetrics(
-                        subj, (AppdefEntityID) it.next(), cats);
+                        subj,  it.next(), cats);
     
-                if (metrics != null && metrics.size() > 0)
+                if (metrics != null && metrics.size() > 0) {
                     break;
+                }
             }
         }
         else {
@@ -703,15 +756,17 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         
         // Make sure we have valid metrics
-        if (metrics == null || metrics.size() == 0)
+        if (metrics == null || metrics.size() == 0) {
             throw new MeasurementNotFoundException(
                 "Designated metric not found for " + id);
+        }
     
         // Now iterate through and throw out the metrics we don't need
-        for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-            Measurement dm = (Measurement) it.next();
-            if (!cats.contains(dm.getTemplate().getCategory().getName()))
+        for (Iterator<Measurement> it = metrics.iterator(); it.hasNext(); ) {
+            Measurement dm =  it.next();
+            if (!cats.contains(dm.getTemplate().getCategory().getName())) {
                 it.remove();
+            }
         }
     
         return metrics;
@@ -720,32 +775,32 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * Find a measurement using measurement id
      * @param id measurement id
-     * @ejb:interface-method
+     * 
      */
     public Measurement getMeasurement(int sessionID, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException {
-        return getMetricManager().getMeasurement(id);
+        return measurementManager.getMeasurement(id);
     }
 
     /**
      * Get the last metric values for the given template IDs.
      *
      * @param tids The template IDs to get
-     * @ejb:interface-method
+     * 
      */
     public MetricValue[] getLastMetricValue(int sessionId,
                                             AppdefEntityID aeid,
                                             Integer[] tids)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-        List measurements = new ArrayList(tids.length);
+        List<Measurement> measurements = new ArrayList<Measurement>(tids.length);
         long interval = 0;
         for (int i = 0; i < tids.length; i++) {
             try {
-                Measurement m = getMetricManager()
+                Measurement m = measurementManager
                     .findMeasurement(subject, tids[i], aeid);
                 measurements.add(m);
                 interval = Math.max(interval, m.getInterval());
@@ -762,15 +817,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      *
      * @param measurements The List of Measurements to get metrics for
      * @param interval The allowable time in ms to go back looking for data.
-     * @ejb:interface-method
+     * 
      */
     public MetricValue[] getLastMetricValue(int sessionId,
-                                            List measurements,
+                                            List<Measurement> measurements,
                                             long interval)
     {
         MetricValue[] ret = new MetricValue[measurements.size()];
         long after =  System.currentTimeMillis() - (3 * interval);
-        Map data = getDataMan().getLastDataPoints(measurements, after);
+        Map<Integer,MetricValue> data = dataManager.getLastDataPoints(measurements, after);
 
         for (int i = 0; i < measurements.size(); i++) {
             Measurement m = (Measurement)measurements.get(i);
@@ -784,34 +839,36 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
     /**
      * Get the last indicator metric values
-     * @ejb:interface-method
+     * 
      */
-    public Map getLastIndicatorValues(Integer sessionId, AppdefEntityID aeid) {
-        final MeasurementManager metricManager = getMetricManager();
-        List metrics = metricManager.findDesignatedMeasurements(aeid);
+    public Map<Integer,MetricValue> getLastIndicatorValues(Integer sessionId, AppdefEntityID aeid) {
+        
+        List<Measurement> metrics = measurementManager.findDesignatedMeasurements(aeid);
         long interval = 0;
-        for (Iterator it = metrics.iterator(); it.hasNext();) {
-            Measurement m = (Measurement) it.next();
-            if (m.getTemplate().getAlias().equalsIgnoreCase("Availability"))
+        for (Iterator<Measurement> it = metrics.iterator(); it.hasNext();) {
+            Measurement m = it.next();
+            if (m.getTemplate().getAlias().equalsIgnoreCase("Availability")) {
                 it.remove();
-            else
+            }
+            else {
                 interval = Math.max(interval, m.getInterval());
+            }
         }
         
         Integer[] mids = new Integer[metrics.size()];
         int i = 0;
-        for (Iterator it = metrics.iterator(); it.hasNext();) {
-            Measurement m = (Measurement) it.next();
+        for (Iterator<Measurement> it = metrics.iterator(); it.hasNext();) {
+            Measurement m =  it.next();
             mids[i++] = m.getId();
         }
         
         final long after =  System.currentTimeMillis() - (3 * interval);
-        Map data = new HashMap();
-        getDataMan().getCachedDataPoints(mids, data, after);
+        Map<Integer, MetricValue> data = new HashMap<Integer,MetricValue>();
+        dataManager.getCachedDataPoints(mids, data, after);
         
-        Map ret = new HashMap(data.size());
-        for (Iterator it = metrics.iterator(); it.hasNext();) {
-            Measurement m = (Measurement) it.next();
+        Map<Integer, MetricValue> ret = new HashMap<Integer, MetricValue>(data.size());
+        for (Measurement m: metrics) {
+           
             if (data.containsKey(m.getId())) {
                 ret.put(m.getTemplate().getId(), data.get(m.getId()));
             }
@@ -823,30 +880,30 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /*
      * Private function to find the group measurements
      */
-    private PageList findGroupMeasurements(int sessionId, AppdefEntityID gid,
+    private PageList<MetricConfigSummary> findGroupMeasurements(int sessionId, AppdefEntityID gid,
                                            String cat, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
-        List grpMembers = getResourceIds(subject, gid, null);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
+        List<AppdefEntityID> grpMembers = getResourceIds(subject, gid, null);
         return findGroupMeasurements(sessionId, grpMembers, cat, pc);
     }
     
     /*
      * Private function to find the group measurements
      */
-    private PageList findGroupMeasurements(int sessionId, List grpMembers,
+    private PageList<MetricConfigSummary> findGroupMeasurements(int sessionId, List<AppdefEntityID> grpMembers,
                                            String cat, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
     
         String mtype = null;
         IntHashMap summaryMap = new IntHashMap();
-        for (Iterator it = grpMembers.iterator(); it.hasNext(); ) {
-            AppdefEntityID id = (AppdefEntityID) it.next();
+        for (AppdefEntityID id : grpMembers ) {
+           
             // Get the monitorable type from the first ID
             if (mtype == null) {
                 AppdefEntityValue aeVal = new AppdefEntityValue(id, subject);
@@ -854,12 +911,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
     
             // Get the list of measurements for this resource
-            List metrics = getMetricManager()
+            List<Measurement> metrics = measurementManager
                 .findMeasurements(subject, id, cat, PageControl.PAGE_ALL);
                 
             // Iterate through the measurements to get the interval
-            for (Iterator it2 = metrics.iterator(); it2.hasNext(); ) {
-                Measurement m = (Measurement) it2.next();
+            for (Measurement m:  metrics) {
+                
     
                 MeasurementTemplate tmpl = m.getTemplate();
                 GroupMetricDisplaySummary gmds = (GroupMetricDisplaySummary)
@@ -887,15 +944,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
         // No mtype == no group members
         if (mtype == null) {
-            return new PageList();
+            return new PageList<MetricConfigSummary>();
         }
         
-        List tmpls = getTemplateManager().findTemplates(mtype, cat, null, pc);
+        List<MeasurementTemplate> tmpls = templateManager.findTemplates(mtype, cat, null, pc);
             
-        PageList result = new PageList();
-        for (Iterator it = tmpls.iterator(); it.hasNext(); ) {
-            MeasurementTemplate tmpl =
-                (MeasurementTemplate) it.next();
+        PageList<MetricConfigSummary> result = new PageList<MetricConfigSummary>();
+        for (MeasurementTemplate tmpl : tmpls) {
+          
             GroupMetricDisplaySummary gmds = (GroupMetricDisplaySummary)
                 summaryMap.get(tmpl.getId().intValue());
     
@@ -919,7 +975,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
     /** Retrieve a Measurement for a specific instance
      *
-     * @ejb:interface-method
+     * 
      */
     public Measurement findMeasurement(int sessionId, Integer tid,
                                        AppdefEntityID id)
@@ -930,13 +986,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             return (Measurement)findMeasurements(sessionId, tid,
                                                  new AppdefEntityID[] { id }).get(0);
 
-        final AuthzSubject subject = manager.getSubject(sessionId);
-        return getMetricManager().findMeasurement(subject, tid, id);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return measurementManager.findMeasurement(subject, tid, id);
     }
 
     /** Retrieve List of measurements for a specific instance
      * @return List of Measurement objects
-     * @ejb:interface-method
+     * 
      */
     public List findMeasurements(int sessionId, AppdefEntityID id,
                                  PageControl pc)
@@ -947,10 +1003,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             return findGroupMeasurements(sessionId, id, null, pc);
 
         if (id instanceof AppdefEntityTypeID)
-            return new ArrayList(0);
+            return new ArrayList<Measurement>(0);
         
-        final AuthzSubject subject = manager.getSubject(sessionId);
-        return getMetricManager().findMeasurements(subject, id, null, pc);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return measurementManager.findMeasurements(subject, id, null, pc);
     }
 
     /**
@@ -961,14 +1017,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param entIds
      *            the array of entity IDs
      * @return a List of Measurement objects
-     * @ejb:interface-method
+     * 
      */
-    public List findMeasurements(int sessionId, Integer tid,
+    public List<Measurement> findMeasurements(int sessionId, Integer tid,
                                  AppdefEntityID[] entIds)
         throws SessionTimeoutException, SessionNotFoundException,
                MeasurementNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         
         List ids = new ArrayList();
         
@@ -987,7 +1043,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 ids.add(entIds[i].getId());
             }
         }
-        return getMetricManager().findMeasurements(subject, tid, entIds);
+        return measurementManager.findMeasurements(subject, tid, entIds);
     }
 
     /**
@@ -995,9 +1051,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param parentId - the parent resource appdefEntityID
      * @param childType - the type of child in the autogroup
      * @return a PageList of Measurement objects
-     * @ejb:interface-method
+     * 
      */
-    public List findEnabledAGMeasurements(int sessionId,
+    public List<MetricConfigSummary> findEnabledAGMeasurements(int sessionId,
                                           AppdefEntityID parentId,
                                           AppdefEntityTypeID childType,
                                           String cat,
@@ -1005,7 +1061,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     throws SessionNotFoundException, SessionTimeoutException,
            AppdefEntityNotFoundException, GroupNotCompatibleException,
            PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         return findGroupMeasurements(sessionId,
                                      getAGMemberIds(subject,parentId,childType), 
                                      cat, pc);
@@ -1013,14 +1069,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
     /** Retrieve list of measurements for a specific instance and category
      * @return a PageList of Measurement objects
-     * @ejb:interface-method
+     * 
      */
-    public PageList findEnabledMeasurements(int sessionId, AppdefEntityID id,
+    public PageList<MetricConfigSummary> findEnabledMeasurements(int sessionId, AppdefEntityID id,
                                             String cat, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         if (id.isGroup())
             return findGroupMeasurements(sessionId, id, cat, pc);
 
@@ -1028,19 +1084,19 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         String mtype = aeVal.getMonitorableType();
 
         IntHashMap dmvs = new IntHashMap();
-        List enabledMetrics =
-            getMetricManager().findEnabledMeasurements(subject, id, cat);
+        List<Measurement> enabledMetrics =
+            measurementManager.findEnabledMeasurements(subject, id, cat);
         
-        for (Iterator it = enabledMetrics.iterator(); it.hasNext(); ) {
-            Measurement dmv = (Measurement) it.next();
+        for (Measurement dmv : enabledMetrics ) {
+           
             dmvs.put(dmv.getTemplate().getId().intValue(), dmv);
         }
 
         // Create MetricConfigSummary beans
-        List tmpls = getTemplateManager().findTemplates(mtype, cat, null, pc);
-        ArrayList beans = new ArrayList(tmpls.size());
-        for (Iterator it = tmpls.iterator(); it.hasNext(); ) {
-            MeasurementTemplate mtv = (MeasurementTemplate) it.next();
+        List<MeasurementTemplate> tmpls = templateManager.findTemplates(mtype, cat, null, pc);
+        ArrayList<MetricConfigSummary> beans = new ArrayList<MetricConfigSummary>(tmpls.size());
+        for (MeasurementTemplate mtv  :  tmpls) {
+         
             MetricConfigSummary mcs =
                 new MetricConfigSummary(mtv.getId().intValue(), mtv.getName(),
                                         cat);
@@ -1054,17 +1110,17 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             beans.add(mcs);
         }
         
-        return new PageList(beans, tmpls.size());
+        return new PageList<MetricConfigSummary>(beans, tmpls.size());
     }
 
     /**
      * Dumps data for a specific measurement
      * @return a PageList of MetricValue objects
-     * @ejb:interface-method
+     * 
      */
-    public PageList findMeasurementData(int sessionId, Measurement m,
+    public PageList<HighLowMetricValue> findMeasurementData(int sessionId, Measurement m,
                                         long begin, long end, PageControl pc) {
-        return getDataMan().getHistoricalData(m, begin, end, pc);
+        return dataManager.getHistoricalData(m, begin, end, pc);
     }
 
     /**
@@ -1077,9 +1133,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param interval the time interval at which the data should be calculated
      * @param returnNulls whether or not nulls should be inserted for no data
      * @return a PageList of MetricValue objects
-     * @ejb:interface-method
+     * 
      */
-    public PageList findMeasurementData(int sessionId, Integer tid,
+    public PageList<HighLowMetricValue> findMeasurementData(int sessionId, Integer tid,
                                         AppdefEntityID aid, long begin,
                                         long end, long interval,
                                         boolean returnNulls, PageControl pc)
@@ -1087,17 +1143,17 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException,
                PermissionException, MeasurementNotFoundException {
 
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-        MeasurementTemplate tmpl = getTemplateManager().getTemplate(tid);
+        MeasurementTemplate tmpl = templateManager.getTemplate(tid);
             
-        List measurements = getMeasurementsForResource(subject, aid, tmpl);
+        List<Measurement> measurements = getMeasurementsForResource(subject, aid, tmpl);
         if (measurements == null || measurements.size() == 0) {
             throw new MeasurementNotFoundException(
                 "There is no measurement for " + aid + " with template " + tid);
         }
 
-        return getDataMan().getHistoricalData(measurements, begin, end,
+        return dataManager.getHistoricalData(measurements, begin, end,
                                               interval, tmpl.getCollectionType(),
                                               returnNulls, pc);
     }
@@ -1114,9 +1170,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param interval the interval
      * @param returnNulls whether or not to return nulls
      * @return a PageList of MetricValue objects
-     * @ejb:interface-method
+     * 
      */
-    public PageList findMeasurementData(int sessionId, Integer tid,
+    public PageList<HighLowMetricValue> findMeasurementData(int sessionId, Integer tid,
                                         AppdefEntityID aid,
                                         AppdefEntityTypeID ctype,
                                         long begin, long end, long interval,
@@ -1124,10 +1180,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException,
                PermissionException, MeasurementNotFoundException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         // Find the autogroup members
-        List entIds = getAGMemberIds(subject, aid, ctype);
+        List<AppdefEntityID> entIds = getAGMemberIds(subject, aid, ctype);
         
         return findMeasurementData(sessionId, tid, entIds, begin, end, interval,
                                    returnNulls, pc);
@@ -1144,28 +1200,28 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param returnNulls whether or not to return nulls
      *        associated with the platform
      * @return a PageList of MetricValue objects
-     * @ejb:interface-method
+     * 
      */
-    public PageList findMeasurementData(int sessionId, Integer tid,
-                                        List entIds,
+    public PageList<HighLowMetricValue> findMeasurementData(int sessionId, Integer tid,
+                                        List<AppdefEntityID> entIds,
                                         long begin, long end, long interval,
                                         boolean returnNulls, PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
     
-        MeasurementTemplate tmpl = getTemplateManager().getTemplate(tid);
+        MeasurementTemplate tmpl = templateManager.getTemplate(tid);
 
         // Find the measurement IDs of the members in the autogroup for the
         // template
         AppdefEntityID[] ids =
-            (AppdefEntityID[])entIds.toArray(new AppdefEntityID[entIds.size()]);
+            entIds.toArray(new AppdefEntityID[entIds.size()]);
         
-        List measurements =
-            getMetricManager().findMeasurements(subject, tid, ids);
+        List<Measurement> measurements =
+            measurementManager.findMeasurements(subject, tid, ids);
     
-        return getDataMan().getHistoricalData(measurements, begin, end,
+        return dataManager.getHistoricalData(measurements, begin, end,
                                              interval, tmpl.getCollectionType(),
                                              returnNulls, pc);
     }
@@ -1179,14 +1235,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param interval the time interval at which the data should be calculated
      * @param returnNulls whether or not nulls should be inserted for no data
      * @return a PageList of MetricValue objects
-     * @ejb:interface-method
+     * 
      */
-    public PageList findMeasurementData(String user, AppdefEntityID aid,
+    public PageList<HighLowMetricValue> findMeasurementData(String user, AppdefEntityID aid,
                                         MeasurementTemplate tmpl,
                                         long begin, long end, long interval,
                                         boolean returnNulls, PageControl pc)
         throws LoginException, ApplicationException, ConfigPropertyException {
-        int sessionId = getAuthManager().getUnauthSessionId(user);
+        int sessionId = authManager.getUnauthSessionId(user);
         return findMeasurementData(sessionId, aid, tmpl, begin, end, interval,
                                    returnNulls, pc); 
     }
@@ -1200,9 +1256,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param interval the time interval at which the data should be calculated
      * @param returnNulls whether or not nulls should be inserted for no data
      * @return a PageList of MetricValue objects
-     * @ejb:interface-method
+     * 
      */
-    public PageList findMeasurementData(int sessionId, AppdefEntityID aid,
+    public PageList<HighLowMetricValue> findMeasurementData(int sessionId, AppdefEntityID aid,
                                         MeasurementTemplate tmpl,
                                         long begin, long end, long interval,
                                         boolean returnNulls, PageControl pc)
@@ -1210,23 +1266,23 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException,
                PermissionException, MeasurementNotFoundException {
             
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
-        List measurements;
+        List<Measurement> measurements;
 
         if (aid.isApplication() && tmpl.isAvailability()) {
             // Special case for application availability
-            _log.debug("BEGIN findMeasurementData()");
+            log.debug("BEGIN findMeasurementData()");
             
             AppdefEntityValue aeval = new AppdefEntityValue(aid, subject);
             
             // Get the flattened list of services
             AppdefEntityID[] serviceIds = aeval.getFlattenedServiceIds();
             
-            Map midMap = getMetricManager()
+            Map<AppdefEntityID,Measurement> midMap = measurementManager
                 .findDesignatedMeasurements(subject, serviceIds,
                                             MeasurementConstants.CAT_AVAILABILITY);
-            measurements = new ArrayList(midMap.values());
+            measurements = new ArrayList<Measurement>(midMap.values());
         }
         else {
             measurements = getMeasurementsForResource(subject, aid, tmpl);
@@ -1237,7 +1293,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
         }
 
-	    return getDataMan().getHistoricalData(measurements, begin, end,
+	    return dataManager.getHistoricalData(measurements, begin, end,
                                               interval, tmpl.getCollectionType(),
                                               returnNulls, pc);
     }
@@ -1254,15 +1310,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @throws ConfigPropertyException
      * @throws ApplicationException
      * @throws LoginException
-     * @ejb:interface-method
+     * 
      */
-    public PageList findAGMeasurementData(String user, AppdefEntityID[] aids,
+    public PageList<HighLowMetricValue> findAGMeasurementData(String user, AppdefEntityID[] aids,
                                           MeasurementTemplate tmpl,
                                           AppdefEntityTypeID ctype,
                                           long begin, long end, long interval,
                                           boolean returnNulls, PageControl pc)
         throws LoginException, ApplicationException, ConfigPropertyException {
-        int sessionId = getAuthManager().getUnauthSessionId(user);
+        int sessionId = authManager.getUnauthSessionId(user);
         return findAGMeasurementData(sessionId, aids, tmpl, ctype, begin, end,
                                      interval, returnNulls, pc);
     }
@@ -1276,9 +1332,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param interval the interval
      * @param returnNulls whether or not to return nulls
      * @return a PageList of MetricValue objects
-     * @ejb:interface-method
+     * 
      */
-    public PageList findAGMeasurementData(int sessionId, AppdefEntityID[] aids,
+    public PageList<HighLowMetricValue> findAGMeasurementData(int sessionId, AppdefEntityID[] aids,
                                           MeasurementTemplate tmpl,
                                           AppdefEntityTypeID ctype,
                                           long begin, long end, long interval,
@@ -1287,47 +1343,47 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException,
                PermissionException, MeasurementNotFoundException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
     
         // Find the autogroup members
-        List entIds = getAGMemberIds(subject, aids, ctype);
+        List<AppdefEntityID> entIds = getAGMemberIds(subject, aids, ctype);
     
         // Find the measurement IDs of the members in the autogroup for the
         // template
         AppdefEntityID[] ids =
-            (AppdefEntityID[])entIds.toArray(new AppdefEntityID[entIds.size()]);
+            entIds.toArray(new AppdefEntityID[entIds.size()]);
 
-        List measurements =
-            getMetricManager().findMeasurements(subject, tmpl.getId(), ids);
+        List<Measurement> measurements =
+            measurementManager.findMeasurements(subject, tmpl.getId(), ids);
 
-        return getDataMan().getHistoricalData(measurements, begin, end,
+        return dataManager.getHistoricalData(measurements, begin, end,
                                               interval, tmpl.getCollectionType(),
                                               returnNulls, pc);
     }
 
     /**
      * Returns metadata for particular measurement
-     * @ejb:interface-method
+     * 
      */
-    public List findMetricMetadata(int sessionId, AppdefEntityID aid,
+    public List<MeasurementMetadataSummary> findMetricMetadata(int sessionId, AppdefEntityID aid,
                                    AppdefEntityTypeID ctype, Integer tid)
         throws SessionNotFoundException, SessionTimeoutException,
                GroupNotCompatibleException,
                AppdefEntityNotFoundException, ApplicationNotFoundException,
                TemplateNotFoundException, PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         
         // Get the template
-        getTemplateManager().getTemplate(tid);
+        templateManager.getTemplate(tid);
         
-        final List entities;
+        final List<AppdefResourceValue> entities;
 
         if (aid.isGroup()) {
-            List memberIds =
+            List<AppdefEntityID> memberIds =
                 GroupUtil.getCompatGroupMembers(subject, aid, null);
-            entities = new ArrayList();
-            for (Iterator iter = memberIds.iterator(); iter.hasNext();) {
-                AppdefEntityID anId = (AppdefEntityID) iter.next();
+            entities = new ArrayList<AppdefResourceValue>();
+            for (AppdefEntityID anId : memberIds) {
+               
                 AppdefEntityValue aev = new AppdefEntityValue(anId, subject);
                 entities.add(aev.getResourceValue());                
             }
@@ -1362,25 +1418,25 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         AppdefEntityID[] aeids = new AppdefEntityID[entities.size()];
         IntHashMap resourceMap = new IntHashMap();
-        Iterator iter = entities.iterator();
+        Iterator<AppdefResourceValue> iter = entities.iterator();
         for (int i = 0; iter.hasNext(); i++) {
-            AppdefResourceValue resource = (AppdefResourceValue) iter.next();
+            AppdefResourceValue resource =  iter.next();
             aeids[i] = resource.getEntityId();
             resourceMap.put(aeids[i].getID(), resource);
         }
 
         // get measurement summaries, enriched with metadata
         // tastes good and it's good for you 
-        List mds = new ArrayList();
-        List mms = getMetricManager().findMeasurements(subject, tid, aeids);
-        for (iter = mms.iterator(); iter.hasNext();) {
-            Measurement mm = (Measurement) iter.next();
+        List<MeasurementMetadataSummary> mds = new ArrayList<MeasurementMetadataSummary>();
+        List<Measurement> mms = measurementManager.findMeasurements(subject, tid, aeids);
+        for (Measurement mm : mms) {
+            
             Integer instanceId = mm.getInstanceId();
             AppdefResourceValue resource =
                 (AppdefResourceValue)resourceMap.get(instanceId.intValue());
             
             // Fetch the last data point
-            MetricValue mv = getDataMan().getLastHistoricalData(mm);
+            MetricValue mv = dataManager.getLastHistoricalData(mm);
             
             MeasurementMetadataSummary summary =
                 new MeasurementMetadataSummary(mm, mv, resource);
@@ -1416,7 +1472,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @return Map keyed on the category (String), values are List's of 
      * MetricDisplaySummary beans
      * @see org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary
-     * @ejb:interface-method
+     * 
      */
     public MetricDisplaySummary findMetric(int sessionId, AppdefEntityID aeid,
                                            AppdefEntityTypeID ctype,
@@ -1424,27 +1480,27 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefEntityNotFoundException,
                AppdefCompatException, MeasurementNotFoundException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         
-        List resources = getResourceIds(subject, aeid, ctype);
+        List<AppdefEntityID> resources = getResourceIds(subject, aeid, ctype);
     
         // Just one metric
-        final List mtids = Collections.singletonList(tid);
+        final List<Integer> mtids = Collections.singletonList(tid);
         
         // Look up the metric summaries of all associated resources
-        Map results = getResourceMetrics(subject, resources, mtids, begin, end,
+        Map<String,Set<MetricDisplaySummary>> results = getResourceMetrics(subject, resources, mtids, begin, end,
                                          null);
 
         // Should only be one
-        if (_log.isDebugEnabled()) {
-            _log.debug("getResourceMetrics() returned " + results.size());
+        if (log.isDebugEnabled()) {
+            log.debug("getResourceMetrics() returned " + results.size());
         }
 
         if (results.size() > 0) {
-            Iterator it = results.values().iterator();
-            Collection coll = (Collection) it.next();
-            it = coll.iterator();
-            MetricDisplaySummary summary = (MetricDisplaySummary) it.next();
+            Iterator<Set<MetricDisplaySummary>> it = results.values().iterator();
+            Collection<MetricDisplaySummary> coll =  it.next();
+            Iterator<MetricDisplaySummary> itr = coll.iterator();
+            MetricDisplaySummary summary =  itr.next();
             
             return summary;
         }
@@ -1479,32 +1535,32 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @return Map keyed on the category (String), values are List's of 
      * MetricDisplaySummary beans
      * @see org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary
-     * @ejb:interface-method
+     * 
      */
     public MetricDisplaySummary findMetric(int sessionId, List resources,
                                            Integer tid, long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefEntityNotFoundException,
                AppdefCompatException, MeasurementNotFoundException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         
         // Just one metric
-        final List mtids = Collections.singletonList(tid);
+        final List<Integer> mtids = Collections.singletonList(tid);
         
         // Look up the metric summaries of all associated resources
-        Map results = getResourceMetrics(subject, resources, mtids, begin, end,
+        Map<String,Set<MetricDisplaySummary>> results = getResourceMetrics(subject, resources, mtids, begin, end,
                                          null);
         
         // Should only be one
-        if (_log.isDebugEnabled()) {
-            _log.debug("getResourceMetrics() returned " + results.size());
+        if (log.isDebugEnabled()) {
+            log.debug("getResourceMetrics() returned " + results.size());
         }
     
         if (results.size() > 0) {
-            Iterator it = results.values().iterator();
-            Collection coll = (Collection) it.next();
-            it = coll.iterator();
-            MetricDisplaySummary summary = (MetricDisplaySummary) it.next();
+            Iterator<Set<MetricDisplaySummary>> it = results.values().iterator();
+            Collection<MetricDisplaySummary> coll = it.next();
+            Iterator<MetricDisplaySummary> itr = coll.iterator();
+            MetricDisplaySummary summary =  itr.next();
             
             return summary;
         }
@@ -1519,19 +1575,19 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param resources the resources
      * @param tid the metric template id
      * @return an array of resources
-     * @ejb:interface-method
+     * 
      */
     public AppdefResourceValue[] pruneResourcesNotCollecting(
         int sessionId, AppdefResourceValue[] resources, Integer tid)
         throws SessionNotFoundException, SessionTimeoutException,
                AppdefEntityNotFoundException, MeasurementNotFoundException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
-        MeasurementTemplate tmpl = getTemplateManager().getTemplate(tid);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
+        MeasurementTemplate tmpl = templateManager.getTemplate(tid);
 
-        List pruned = new ArrayList();
+        List<AppdefResourceValue> pruned = new ArrayList<AppdefResourceValue>();
         for (int i=0; i<resources.length; ++i) {
-            List measurements =
+            List<Measurement> measurements =
                 getMeasurementsForResource(subject, resources[i].getEntityId(),
                                            tmpl);
             if (measurements.size() > 0) {
@@ -1540,10 +1596,10 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         AppdefResourceValue[] prunedResources =
             new AppdefResourceValue[pruned.size()];
-        return (AppdefResourceValue[])pruned.toArray(prunedResources);
+        return pruned.toArray(prunedResources);
     }
 
-    private List getMeasurementsForResource(AuthzSubject subject,
+    private List<Measurement> getMeasurementsForResource(AuthzSubject subject,
                                             AppdefEntityID aid,
                                             MeasurementTemplate tmpl)
         throws PermissionException, AppdefEntityNotFoundException,
@@ -1553,11 +1609,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             AppdefEntityValue aeval = new AppdefEntityValue(aid, subject);
 
             Application app = (Application) aeval.getResourcePOJO();
-            Collection appSvcs = app.getAppServices();
+            Collection<AppService> appSvcs = app.getAppServices();
         
             // If it's availability, then we'd have to get data for all svcs
-            for (Iterator it = appSvcs.iterator(); it.hasNext(); ) {
-                AppService appSvc = (AppService) it.next();
+            for (AppService appSvc :  appSvcs ) {
+             
                 // Metric is based on the entry point
                 if (appSvc.isEntryPoint()) {
                     AppdefEntityID id;
@@ -1582,15 +1638,16 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         } else if (aid.isGroup()) {
             if (tmpl.isAvailability()) {
                 // Find the group
-                final ResourceGroup group = getResourceGroupManager()
+                final ResourceGroup group = resourceGroupManager
                     .findResourceGroupById(subject, aid.getId());
-                final Map mmap = getMetricManager()
+                final Map<Integer,List<Measurement>> mmap = measurementManager
                     .getAvailMeasurements(Collections.singleton(group));
-                List metrics = (List) mmap.get(group.getResource().getId());
-                for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                    Measurement m =  (Measurement) it.next();
-                    if (!m.getTemplate().equals(tmpl))
+                List<Measurement> metrics =  mmap.get(group.getResource().getId());
+                for (Iterator<Measurement> it = metrics.iterator(); it.hasNext(); ) {
+                    Measurement m =  it.next();
+                    if (!m.getTemplate().equals(tmpl)) {
                         it.remove();
+                    }
                 }
                 return metrics;
             }
@@ -1599,15 +1656,77 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                     getGroupMemberIDs(subject, aid.getId());
             
                 // Get the list of measurements
-                return getMetricManager().findMeasurements(subject,
+                return measurementManager.findMeasurements(subject,
                                                            tmpl.getId(),
                                                            ids);
             }
         } else {
             AppdefEntityID[] aids = { aid };
-            return getMetricManager().findMeasurements(subject, tmpl.getId(),
+            return measurementManager.findMeasurements(subject, tmpl.getId(),
                                                        aids);
         }
+    }
+    
+    /**
+     * Get a List of AppdefEntityIDs for the given resource.
+     * @param subject The user to use for searches.
+     * @param aeid The entity in question.
+     * @param ctype The entity type in question.
+     * @return A List of AppdefEntityIDs for the given resource.
+     */
+    private List<AppdefEntityID> getResourceIds(AuthzSubject subject, AppdefEntityID aeid,
+                                  AppdefEntityTypeID ctype)
+        throws AppdefEntityNotFoundException, PermissionException {
+        final List<AppdefEntityID> resources;
+        if (ctype == null) {
+            if (aeid.isGroup()) {
+               
+                final ResourceGroup group =
+                    resourceGroupManager.findResourceGroupById(subject, aeid.getId());
+        
+                final Collection<Resource> members = resourceGroupManager.getMembers(group);
+                resources = new ArrayList<AppdefEntityID>(members.size());
+                for (Resource r : members ) {
+                   
+                    if (r == null || r.isInAsyncDeleteState()) {
+                        continue;
+                    }
+                    resources.add(new AppdefEntityID(r));
+                }
+            }
+            else {
+                // Just one
+                resources = Collections.singletonList(aeid);
+            }
+        }
+        else {
+            // Autogroup
+            resources = getAGMemberIds(subject, aeid, ctype);
+        }
+        return resources;
+    }
+    
+    private final List<Resource> getResources(AppdefEntityID[] ids) {
+        final List<Resource> resources = new ArrayList<Resource>(ids.length);
+        
+        for (int i = 0; i < ids.length; i++) {
+            final Resource r = resourceManager.findResource(ids[i]);
+            if (r == null || r.isInAsyncDeleteState()) {
+                continue;
+            }
+            resources.add(resourceManager.findResource(ids[i]));
+        }
+        return resources;
+    }
+    
+    private AppdefEntityID[] getGroupMemberIDs(AuthzSubject subject,
+                                                 Integer gid)
+        throws AppdefEntityNotFoundException, PermissionException {
+        final List<AppdefEntityID> members = getResourceIds(subject,
+                                            AppdefEntityID.newGroupID(gid),
+                                            null);
+        return 
+            members.toArray(new AppdefEntityID[members.size()]);
     }
 
     private MetricDisplaySummary getMetricDisplaySummary(AuthzSubject subject,
@@ -1619,7 +1738,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         throws MeasurementNotFoundException
     {
         // Get baseline values
-        Measurement dmval = getMetricManager().findMeasurement(subject,
+        Measurement dmval = measurementManager.findMeasurement(subject,
                                                                tmpl.getId(),
                                                                id);
 
@@ -1670,68 +1789,69 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param begin the commencement of the timeframe of interest
      * @param end the end of the timeframe of interest
      * @return Map of measure templates and resource metric lists
-     * @ejb:interface-method
+     * 
      */
-    public Map findResourceMetricSummary(int sessionId,
+    public Map<MeasurementTemplate, List<MetricDisplaySummary>> findResourceMetricSummary(int sessionId,
                                          AppdefEntityID[] entIds,
                                          long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException, 
                AppdefEntityNotFoundException, MeasurementNotFoundException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
     
         // Assuming that all AppdefEntityIDs of the same type, use the first one
         AppdefEntityValue rv = new AppdefEntityValue(entIds[0], subject);
         String monitorableType = rv.getMonitorableType();        
     
         // Get the template ID's for that type
-        List tmpls = findMeasurementTemplates(sessionId, monitorableType,
+        List<MeasurementTemplate> tmpls = findMeasurementTemplates(sessionId, monitorableType,
                                               PageControl.PAGE_ALL);
     
         // Keep the templates in a map        
         IntHashMap tmplMap = new IntHashMap();
         Integer[] tids = new Integer[tmpls.size()];
         int idx = 0;
-        for (Iterator i = tmpls.iterator(); i.hasNext(); ) {
-            MeasurementTemplate tmpl = (MeasurementTemplate) i.next();
+        for (Iterator<MeasurementTemplate> i = tmpls.iterator(); i.hasNext(); ) {
+            MeasurementTemplate tmpl =  i.next();
             final Integer tid = tmpl.getId();
             tmplMap.put(tid.intValue(), tmpl);
             tids[idx++] = tid;
         }
     
         IntHashMap templateMetrics = new IntHashMap();
-        HashMap uniqueTemplates = new HashMap();
+        HashMap<Integer, MeasurementTemplate> uniqueTemplates = new HashMap<Integer, MeasurementTemplate>();
         // a temp cache to save rountrips to the db
-        HashMap seen = new HashMap();      
+        HashMap<AppdefEntityID,Resource> seen = new HashMap<AppdefEntityID,Resource>();      
         
         // Now, iterate through each AppdefEntityID
-        ResourceManager resMan = getResourceManager();
-        final DataManager dMan = DataManagerImpl.getOne();
+       
+       
         for (int i = 0; i < entIds.length; i++) {            
             Integer[] eids = new Integer[] { entIds[i].getId() };
             // Now get the aggregate data, keyed by template ID's
-            List measurements =
-                getMetricManager().getMeasurements(tids, eids);
-            Map datamap =
-                dMan.getAggregateDataByTemplate(measurements, begin, end);
+            List<Measurement> measurements =
+                measurementManager.getMeasurements(tids, eids);
+            Map<Integer,double[]> datamap =
+                dataManager.getAggregateDataByTemplate(measurements, begin, end);
     
             // For each template, add a new summary
-            for (Iterator it = datamap.entrySet().iterator(); it.hasNext(); ) {
-                Map.Entry entry = (Map.Entry) it.next();
+            for (Map.Entry<Integer,double[]> entry: datamap.entrySet()) {
+              
                     
-                Integer mtid = (Integer) entry.getKey();
+                Integer mtid =  entry.getKey();
                 // Get the MeasurementTemplate
                 MeasurementTemplate tmpl =
                     (MeasurementTemplate) tmplMap.get(mtid.intValue());
                         
                 // Use the MeasurementTemplate id to get the array List
-                List resSummaries =
-                    (List) templateMetrics.get(mtid.intValue());
-                if (resSummaries == null) // this key hasn't been seen yet
-                    resSummaries = new ArrayList();
+                List<ResourceMetricDisplaySummary> resSummaries =
+                    (List<ResourceMetricDisplaySummary>) templateMetrics.get(mtid.intValue());
+                if (resSummaries == null) { // this key hasn't been seen yet 
+                    resSummaries = new ArrayList<ResourceMetricDisplaySummary>();
+                }
                     
                 // Get the data
-                double[] data = (double[]) entry.getValue(); 
+                double[] data =  entry.getValue(); 
                     
                 Resource v;
                 rv = new AppdefEntityValue(entIds[i], subject);
@@ -1739,7 +1859,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 if (seen.containsKey(entIds[i])) {
                     v = (Resource) seen.get(entIds[i]);
                 } else {
-                    v = resMan.findResource(entIds[i]);
+                    v = resourceManager.findResource(entIds[i]);
                     seen.put(entIds[i], v);  // keep track of what we've seen
                 }
                     
@@ -1754,16 +1874,26 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         // now take all of the unique lists and unique 
         // MeasurementTemplate's and merge them into the result
-        HashMap result = new HashMap();
-        for (Iterator iter = uniqueTemplates.keySet().iterator(); 
+        HashMap<MeasurementTemplate, List<MetricDisplaySummary>> result = new HashMap<MeasurementTemplate, List<MetricDisplaySummary>>();
+        for (Iterator<Integer> iter = uniqueTemplates.keySet().iterator(); 
              iter.hasNext();) 
         {
             Integer mtid = (Integer) iter.next();
             result.put(uniqueTemplates.get(mtid),
-                       templateMetrics.get(mtid.intValue()));
+                       (List<MetricDisplaySummary>)templateMetrics.get(mtid.intValue()));
         }                
         return result;
     }
+    
+    public Map<String,Set<MetricDisplaySummary>> findMetrics(int sessionId, AppdefEntityID entId, long begin,
+                           long end, PageControl pc)
+     throws SessionTimeoutException, SessionNotFoundException,
+         InvalidAppdefTypeException, PermissionException,
+         AppdefEntityNotFoundException, AppdefCompatException {
+     AppdefEntityID[] entIds = new AppdefEntityID[] { entId };
+     return findMetrics(sessionId, entIds, MeasurementConstants.FILTER_NONE,
+                        null, begin, end, false);
+ }
 
     /**
      * Return a MetricSummary bean for each of the metrics (template) for the
@@ -1772,16 +1902,50 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param end the ending time frame
      * @return a list of ResourceTypeDisplaySummary beans
      * @throws AppdefCompatException
-     * @ejb:interface-method
+     * 
      */
-    public Map findMetrics(int sessionId, AppdefEntityID[] entIds,
+    public Map<String,Set<MetricDisplaySummary>> findMetrics(int sessionId, AppdefEntityID[] entIds,
                            long filters, String keyword, long begin, long end,
                            boolean showNoCollect)
         throws SessionTimeoutException, SessionNotFoundException,
             InvalidAppdefTypeException, PermissionException,
             AppdefEntityNotFoundException, AppdefCompatException {
-        return super.findMetrics(sessionId, entIds, filters, keyword,
-                                 begin, end, showNoCollect);
+AuthzSubject subject = sessionManager.getSubject(sessionId);
+        
+        // Assume all entities are of the same type
+        AppdefEntityValue rv = new AppdefEntityValue(entIds[0], subject);
+        
+        List<AppdefEntityID> entArr;
+        switch (entIds[0].getType()) {
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                entArr = Arrays.asList(entIds);
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                try {
+                    entArr = GroupUtil.getCompatGroupMembers(
+                        subject, entIds[0], null, PageControl.PAGE_ALL);
+                } catch (GroupNotCompatibleException e) {
+                    throw new IllegalArgumentException(
+                        "Metrics are not available for groups that " +
+                        "are not compatible types: " + e.getMessage());
+                }                    
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+                // No metric support for applications
+                return new HashMap<String,Set<MetricDisplaySummary>>(0);
+            default:
+                throw new InvalidAppdefTypeException(
+                    "entityID is not valid type, id type: " +
+                    entIds[0].getType());
+        }
+        
+        String monitorableType = rv.getMonitorableType();
+    
+        // Look up the metric summaries of associated servers
+        return getResourceMetrics(subject, entArr, monitorableType, filters,
+                                  keyword, begin, end, showNoCollect);
     }
 
     /**
@@ -1810,37 +1974,706 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      *         MetricDisplaySummary beans
      * @throws AppdefCompatException
      * @see org.hyperic.hq.bizapp.shared.uibeans.MetricDisplaySummary
-     * @ejb:interface-method
+     * 
      */
-    public Map findMetrics(int sessionId, AppdefEntityID entId, List<Integer> mtids,
+    public Map<String,Set<MetricDisplaySummary>> findMetrics(int sessionId, AppdefEntityID entId, List<Integer> mtids,
                            long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
             PermissionException, AppdefEntityNotFoundException,
             AppdefCompatException {
-        return super.findMetrics(sessionId, entId, mtids, begin, end);
+ AuthzSubject subject = sessionManager.getSubject(sessionId);
+        
+        boolean bPlatforms = false, bServers = false, bServices = false;
+        
+        // Let's get the templates to see what resources to gather
+        List<MeasurementTemplate> templates = templateManager.getTemplates(mtids);
+        for (MeasurementTemplate templ : templates) {
+            int type = templ.getMonitorableType().getAppdefType();
+            bPlatforms |= type == AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+            bServers   |= type == AppdefEntityConstants.APPDEF_TYPE_SERVER;
+            bServices  |= type == AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+        }
+    
+        AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
+        List platforms = null, servers = null, services = null;
+        
+        // Can't assume that all templates are only for given entity,
+        // might be for associated resources, too.
+        switch (rv.getID().getType()) {
+            // Hierarchical, not actually missing "break" statements
+            case AppdefEntityConstants.APPDEF_TYPE_APPLICATION:
+            case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
+                // Get the platforms
+                if (bPlatforms)
+                    platforms = rv.getAssociatedPlatforms(PageControl.PAGE_ALL);
+            case AppdefEntityConstants.APPDEF_TYPE_SERVER:
+                // Get the servers
+                if (bServers)
+                    servers = rv.getAssociatedServers(PageControl.PAGE_ALL);
+            case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
+                // Get the services
+                if (bServices)
+                    services = rv.getAssociatedServices(PageControl.PAGE_ALL);
+                break;
+            case AppdefEntityConstants.APPDEF_TYPE_GROUP:
+                // Does not matter what kind of group this is, just use platform
+                try {
+                    platforms =
+                        GroupUtil.getCompatGroupMembers(subject, entId, null,
+                                                        PageControl.PAGE_ALL);
+                } catch (GroupNotCompatibleException e) {
+                    log.debug("Group not compatible");
+                }
+                break;
+            default:
+                break;
+        }
+
+        // Look up the metric summaries of all associated resources
+        Map<String,Set<MetricDisplaySummary>> results = new HashMap<String,Set<MetricDisplaySummary>>();
+        if (bPlatforms)
+            results.putAll(getResourceMetrics(subject, platforms, mtids,
+                                              begin, end, Boolean.TRUE));
+        if (bServers)
+            results.putAll(getResourceMetrics(subject, servers, mtids,
+                                              begin, end, Boolean.TRUE));
+        if (bServices)
+            results.putAll(getResourceMetrics(subject, services, mtids,
+                                              begin, end, Boolean.TRUE));
+        return results;
     }
     
+    private final AppdefEntityID[] getAeids(final Collection resources) {
+        final AppdefEntityID[] aeids = new AppdefEntityID[resources.size()];
+        int i = 0;
+        for (final Iterator it=resources.iterator(); it.hasNext(); i++) {
+            final Object o = it.next();
+            AppdefEntityID aeid = null;
+            if (o instanceof AppdefEntityValue) {
+                final AppdefEntityValue rv = (AppdefEntityValue) o;
+                aeid = rv.getID();
+            } else if (o instanceof AppdefEntityID) {
+                aeid = (AppdefEntityID) o;
+            } else if (o instanceof AppdefResource) {
+                final AppdefResource r = (AppdefResource)o;
+                aeid = r.getEntityId();
+            } else if (o instanceof Resource) {
+                final Resource resource = (Resource) o;
+                aeid = new AppdefEntityID(resource);
+            } else if (o instanceof ResourceGroup) {
+                final ResourceGroup grp = (ResourceGroup) o;
+                final Resource resource = grp.getResource();
+                aeid = new AppdefEntityID(resource);
+            } else {
+                final AppdefResourceValue r = (AppdefResourceValue) o;
+                aeid = r.getEntityId();
+            }
+            aeids[i] = aeid;
+        }
+        return aeids;
+        
+    }
     
+    /**
+     * @param availCache {@link Map} of {@link Integer} to {@link MetricValue}
+     *  Integer => Measurement.getId(), may be null.
+     * 
+     * Given an array of AppdefEntityID's, disqulifies their aggregate
+     * availability (with the disqualifying status) for all of them if any are
+     * down or unknown, otherwise the aggregate is deemed available
+     * 
+     * If there's nothing in the array, then aggregate is not populated. Ergo,
+     * the availability shall be disqualified as unknown i.e. the (?)
+     * representation
+     */
+    private double getAggregateAvailability(AuthzSubject subject,
+                                              AppdefEntityID[] ids,
+                                              Map<Integer,List<Measurement>> measCache,
+                                              Map<Integer,MetricValue> availCache)
+        throws AppdefEntityNotFoundException, PermissionException {
+        if (ids.length == 0)
+            return MeasurementConstants.AVAIL_UNKNOWN;
+        
+        // Break them up and do 5 at a time
+        int length = 5;
+        double sum = 0;
+        int count = 0;
+        int unknownCount = 0;
+        final Map<Integer,Measurement> midMap = getMidMap(ids, measCache);
+        for (int ind = 0; ind < ids.length; ind += length) {
+            if (ids.length - ind < length) {
+                length = ids.length - ind;
+            }
+            AppdefEntityID[] subids = new AppdefEntityID[length];
+            for (int i = ind; i < ind + length; i++) {
+                subids[i - ind] = ids[i];
+            }
+            double[] avails =
+                getAvailability(subject, subids, midMap, availCache);
+            for (int i = 0; i < avails.length; i++) {
+                 if (avails[i] == MeasurementConstants.AVAIL_UNKNOWN) {
+                     unknownCount++;
+                 } else {
+                     sum += avails[i];
+                     count++;
+                 }
+             }
+        }
+        
+        if (unknownCount == ids.length) {
+            // All resources are unknown
+            return MeasurementConstants.AVAIL_UNKNOWN;
+        }
+        
+        return sum / count;
+    }
+    
+    private AppdefEntityID[] toAppdefEntityIDArray(List<AppdefEntityID> entities) {
+        AppdefEntityID[] result = new AppdefEntityID[entities.size()];
+        int idx = 0;
+        for (Iterator<AppdefEntityID> iter = entities.iterator(); iter.hasNext();) {
+            Object thisThing = iter.next();
+            if (thisThing instanceof AppdefResourceValue) {
+                result[idx++] = ((AppdefResourceValue) thisThing).getEntityId();
+                continue;
+            }
+            result[idx++] = (AppdefEntityID) thisThing;
+        }
+        return result;
+    }
+    
+    public MetricDisplaySummary
+    getMetricDisplaySummary(MeasurementTemplate tmpl, Long interval,
+                            long begin, long end, double[] data,
+                            int totalConfigured) {
+    // Create a new metric summary bean
+    MetricDisplaySummary summary = new MetricDisplaySummary();
+        
+    // Set the time range
+    summary.setBeginTimeFrame(new Long(begin));
+    summary.setEndTimeFrame(new Long(end));
+        
+    // Set the template info
+    summary.setLabel(tmpl.getName());
+    summary.setTemplateId(tmpl.getId());
+    summary.setTemplateCat(tmpl.getCategory().getId());
+    summary.setCategory(tmpl.getCategory().getName());
+    summary.setUnits(tmpl.getUnits());
+    summary.setCollectionType(new Integer(tmpl.getCollectionType()));
+    summary.setDesignated(Boolean.valueOf(tmpl.isDesignate()));
+    summary.setMetricSource(tmpl.getMonitorableType().getName());
+    
+    summary.setCollecting(interval != null);
+    
+    if (summary.getCollecting())
+        summary.setInterval(interval.longValue());
+
+    if (data == null)
+        return summary;
+    
+    // Set the data values
+    summary.setMetric(MetricDisplayConstants.MIN_KEY,
+        new MetricDisplayValue(data[MeasurementConstants.IND_MIN]));
+    summary.setMetric(MetricDisplayConstants.AVERAGE_KEY,
+        new MetricDisplayValue(data[MeasurementConstants.IND_AVG]));
+    summary.setMetric(MetricDisplayConstants.MAX_KEY,
+        new MetricDisplayValue(data[MeasurementConstants.IND_MAX]));
+    
+    // Groups get sums, not last value
+    if (totalConfigured == 1 ||
+        tmpl.getCollectionType() == MeasurementConstants.COLL_TYPE_STATIC) {
+        summary.setMetric(MetricDisplayConstants.LAST_KEY,
+            new MetricDisplayValue(
+                    data[MeasurementConstants.IND_LAST_TIME]));
+    }
+    else {
+        // Availability does not need to be summed
+        if (tmpl.isAvailability()) {
+            summary.setMetric(MetricDisplayConstants.LAST_KEY,
+                new MetricDisplayValue(data[MeasurementConstants.IND_AVG]));
+        }
+        else {
+            summary.setMetric(MetricDisplayConstants.LAST_KEY,
+                new MetricDisplayValue(
+                    data[MeasurementConstants.IND_AVG] *
+                    data[MeasurementConstants.IND_CFG_COUNT]));
+        }
+    }
+                    
+    // Number configured
+    summary.setAvailUp(
+        new Integer((int) data[MeasurementConstants.IND_CFG_COUNT]));
+    summary.setAvailUnknown(new Integer(totalConfigured));
+
+    return summary;
+}
+
+    
+    /**
+     * @param resources {@link List} of {@link Resource}
+     * @return {@link Map} of {@link Integer} to {@link Measurement}.
+     * Integer = Resource.getId()
+     */
+    private final Map<Integer,Measurement> getMidMap(Collection<Resource> resources) {
+        final List<AppdefEntityID> aeids = new ArrayList<AppdefEntityID>();
+        for (final Iterator<Resource> it=resources.iterator(); it.hasNext(); ) {
+            final Resource r = (Resource)it.next();
+            if (r == null || r.isInAsyncDeleteState()) {
+                continue;
+            }
+            aeids.add(new AppdefEntityID(r));
+        }
+        final AppdefEntityID[] ids =
+            (AppdefEntityID[])aeids.toArray(new AppdefEntityID[0]);
+        return getMidMap(ids, null);
+    }
+    
+    /**
+     * @return {@link Map} of {@link Integer} to {@link Measurement}
+     * Integer = Resource.getId()
+     */
+    private final Map<Integer,Measurement> getMidMap(AppdefEntityID[] ids, Map<Integer,List<Measurement>> measCache) {
+        final Map<Integer,Measurement> rtn = new HashMap<Integer,Measurement>(ids.length);
+       
+        final List<Resource> toGet = new ArrayList<Resource>();
+        for (final Iterator<AppdefEntityID> it=Arrays.asList(ids).iterator(); it.hasNext(); ) {
+            final AppdefEntityID id = it.next();
+            if (id == null) {
+                continue;
+            }
+            final Resource res = resourceManager.findResource(id);
+            List<Measurement> list;
+            if (null != measCache &&
+                null != (list = measCache.get(res.getId()))) {
+                if (list.size() > 1) {
+                    log.warn("resourceId " + res.getId() +
+                             " has more than one availability measurement " +
+                             " assigned to it");
+                } else if (list.size() <= 0) {
+                    continue;
+                }
+                final Measurement m = list.get(0);
+                rtn.put(res.getId(), m);
+            } else {
+                toGet.add(res);
+            }
+        }
+        final Map<Integer,List<Measurement>> measMap = measurementManager.getAvailMeasurements(toGet);
+        for (final Iterator<Map.Entry<Integer, List<Measurement>>> it=measMap.entrySet().iterator(); it.hasNext(); ) {
+            final Map.Entry<Integer,List<Measurement>> entry = it.next();
+            final Integer id = entry.getKey();
+            final Resource r = resourceManager.findResourceById(id);
+            final List<Measurement> vals = entry.getValue();
+            if (vals.size() == 0) {
+                continue;
+            }
+            final Measurement m = vals.get(0);
+            if (vals.size() > 1) {
+                log.warn("resourceId " + r.getId() +
+                         " has more than one availability measurement " +
+                         " assigned to it");
+            }
+            rtn.put(r.getId(), m);
+        }
+        return rtn;
+    }
+    
+    /**
+     * @param midMap {@link Map} of {@link Integer} to {@link Measurement}
+     * Integer = Resource.getId()
+     * @param availCache {@link Map} of {@link Integer} to {@link MetricValue}
+     * Integer = Measurement.getId()
+     */
+    private double[] getAvailability(final AuthzSubject subject,
+                                       final AppdefEntityID[] ids,
+                                       final Map<Integer,Measurement> midMap,
+                                       final Map<Integer,MetricValue> availCache)
+        throws ApplicationNotFoundException,
+               AppdefEntityNotFoundException,
+               PermissionException {
+       
+        final double[] result = new double[ids.length];
+        Arrays.fill(result, MeasurementConstants.AVAIL_UNKNOWN);
+        final Map<Integer, MetricValue> data = new HashMap<Integer, MetricValue>();
+       
+        if (midMap.size() > 0) {
+            final List<Integer> mids = new ArrayList<Integer>();
+            final List<AppdefEntityID> aeids = Arrays.asList(ids);
+            for (final Iterator<AppdefEntityID> it=aeids.iterator(); it.hasNext(); ) {
+                final AppdefEntityID aeid = it.next();
+                final Resource r = resourceManager.findResource(aeid);
+                if (r == null || r.isInAsyncDeleteState()) {
+                    continue;
+                }
+                Measurement meas;
+                if (null == midMap ||
+                    null == (meas = midMap.get(r.getId()))) {
+                    meas = measurementManager.getAvailabilityMeasurement(r);
+                }
+                if (meas == null) {
+                    continue;
+                }
+                MetricValue mv;
+                if (null != availCache &&
+                    null != (mv = availCache.get(meas.getId()))) {
+                    data.put(meas.getId(), mv);
+                } else {
+                    mids.add(meas.getId());
+                }
+            }
+            data.putAll(
+                availabilityManager.getLastAvail((Integer[])mids.toArray(new Integer[0])));
+        }
+    
+        // Organize by agent
+        HashMap<Agent, List<Integer>> toGetLive = new HashMap<Agent, List<Integer>>();
+        
+        for (int i = 0; i < ids.length; i++) {
+            final Resource r = resourceManager.findResource(ids[i]);
+            if (r == null || r.isInAsyncDeleteState()) {
+                continue;
+            }
+            if (midMap.containsKey(r.getId())) {
+                Integer mid = ((Measurement)midMap.get(r.getId())).getId();
+                MetricValue mval = null;
+                if (null != (mval = (MetricValue)data.get(mid))) {
+                    result[i] = mval.getValue();
+                } else {
+                    // First figure out if the agent of this appdef entity
+                    // already has a list
+                    try {
+                        Agent agent = agentManager.getAgent(ids[i]);
+                        List<Integer> toGetLiveList;
+                        if (null == (toGetLiveList = toGetLive.get(agent))) {
+                            toGetLiveList = new ArrayList<Integer>();
+                            toGetLive.put(agent, toGetLiveList);
+                        }
+                        // Now add to list
+                        toGetLiveList.add(new Integer(i));
+                    } catch (AgentNotFoundException e) {
+                        result[i] = AVAIL_DOWN;
+                    }
+                }
+            } else {
+                // cases for abstract resources whose availability are xor'd
+                switch (ids[i].getType()) {
+                    case AppdefEntityConstants.APPDEF_TYPE_APPLICATION :
+                        AppdefEntityValue appVal =
+                            new AppdefEntityValue(ids[i], subject);
+                        AppdefEntityID[] services =
+                            appVal.getFlattenedServiceIds();
+    
+                        result[i] = getAggregateAvailability(
+                            subject, services, null, availCache);
+                        break;
+                    case AppdefEntityConstants.APPDEF_TYPE_GROUP :
+                        result[i] = getGroupAvailability(
+                            subject, ids[i].getId(), null, null);
+                        break;
+                    default :
+                        break;
+                }
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Given a group, disqualifies their aggregate availability (with the
+     * disqualifying status) for all of them if any are down or unknown,
+     * otherwise the aggregate is deemed available
+     * 
+     * If there's nothing in the array, then aggregate is not populated. Ergo,
+     * the availability shall be disqualified as unknown i.e. the (?)
+     * representation
+     * 
+     * @param measCache {@link Map} of {@link Resource.getId} to
+     *  {@link List} of {@link Measurement}.  May be null.
+     * @param availCache {@link Map} of {@link Measurement.getId} to
+     *  {@link MetricValue}.  May be null.
+     */
+    private double getGroupAvailability(AuthzSubject subject, Integer gid,
+                                          Map<Integer,List<Measurement>> measCache, Map<Integer,MetricValue> availCache)
+        throws AppdefEntityNotFoundException,
+               PermissionException {
+       
+        final ResourceGroup group =
+            resourceGroupManager.findResourceGroupById(subject, gid);
+        if (group == null) {
+            return MeasurementConstants.AVAIL_UNKNOWN;
+        }
+        final Resource resource = group.getResource();
+        if (resource == null || resource.isInAsyncDeleteState()) {
+            return MeasurementConstants.AVAIL_UNKNOWN;
+        }
+        if (measCache == null) {
+            measCache = measurementManager
+                .getAvailMeasurements(Collections.singleton(group));
+        }
+        final List<Measurement> metrics =  measCache.get(resource.getId());
+
+        // Allow for the maximum window based on collection interval
+        Map<Integer,Measurement> midMap = new HashMap<Integer,Measurement>(metrics.size());
+        for (Measurement m : metrics ) {
+            
+            try {
+                midMap.put(m.getResource().getId(), m);
+            } catch (IllegalArgumentException e) {
+                // Resource has been deleted, waiting for purging.  Ignore.
+            }
+        }
+        
+        AppdefEntityID[] ids = getGroupMemberIDs(subject, gid);
+        
+        double sum = 0;
+        int count = 0;
+        double[] avails = getAvailability(subject, ids, midMap, availCache);
+
+        for (int i = 0; i < avails.length; i++) {
+             if (avails[i] != MeasurementConstants.AVAIL_UNKNOWN) {
+                 sum += avails[i];
+                 count++;
+             }
+         }
+        
+        final double r = (count == 0) ?
+            MeasurementConstants.AVAIL_UNKNOWN : sum / count;
+        final BigDecimal b = new BigDecimal(r, new MathContext(10));
+        return b.doubleValue();
+    }
+    
+  
+
+    private List<AppdefEntityID> getAGMemberIds(AuthzSubject subject,
+                                  AppdefEntityID[] aids,
+                                  AppdefEntityTypeID ctype)
+        throws AppdefEntityNotFoundException, PermissionException 
+    {
+        List<AppdefEntityID> res = new ArrayList<AppdefEntityID>();        
+        
+        Resource proto = resourceManager.findResourcePrototype(ctype); 
+
+        if (proto == null) {
+            log.warn("Unable to find prototype for ctype=[" + ctype + "]");
+            return res;
+        }
+        
+        DescendantProtoCritterType descType = new DescendantProtoCritterType();
+        CritterTranslator trans             = new CritterTranslator();
+        CritterTranslationContext ctx       =
+            new CritterTranslationContext(subject);
+        
+        for (int i = 0; i < aids.length; i++) {
+            if (aids[i].isApplication()) {
+                AppdefEntityValue rv = new AppdefEntityValue(aids[i], subject);
+                Collection<AppdefResourceValue> services = rv.getAssociatedServices(ctype.getId(),
+                                                               PageControl.PAGE_ALL);
+                for (AppdefResourceValue r : services) {
+                   
+                    res.add(r.getEntityId());
+                }
+            }
+            else {
+                Resource r = resourceManager.findResource(aids[i]);
+                List critters = new ArrayList(1);
+                critters.add(descType.newInstance(r, proto));
+                CritterList cList = new CritterList(critters, false);
+
+                List<Resource> children = trans.translate(ctx, cList).list();
+                for (Resource child : children) {
+                              
+                    res.add(new AppdefEntityID(child));
+                }
+            }
+        }
+        return res;
+    }
+
 
     /** Return a MetricSummary bean for each of the servers of a specific type.
      * @param begin the beginning time frame
      * @param end the ending time frame
      * @return a list of ResourceTypeDisplaySummary beans
      * @throws AppdefCompatException
-     * @ejb:interface-method
+     * 
      */
-    public Map findAGPlatformMetricsByType(int sessionId, 
+    public Map<String,Set<MetricDisplaySummary>> findAGPlatformMetricsByType(int sessionId, 
                                            AppdefEntityTypeID platTypeId,
                                            long begin, long end,
                                            boolean showAll)
         throws SessionTimeoutException, SessionNotFoundException,
                InvalidAppdefTypeException, AppdefEntityNotFoundException,
                PermissionException, AppdefCompatException {
-        return super.findAGPlatformMetricsByType(sessionId, platTypeId,
-                                                 begin, end, showAll);
+        AuthzSubject subject = sessionManager.getSubject(sessionId);
+        
+        //Get the member IDs
+        List<AppdefEntityID> platforms = getPlatformAG(subject, platTypeId);
+        
+        PlatformType platType = platformManager.findPlatformType(platTypeId.getId());
+        
+        return getResourceMetrics(subject, platforms, platType.getName(), MeasurementConstants.FILTER_NONE,null,begin, end, showAll);
     }
     
-   
+    private List<AppdefEntityID> getPlatformAG(AuthzSubject subject, AppdefEntityTypeID ctype)
+    throws AppdefEntityNotFoundException, PermissionException {
+    if(!ctype.isPlatform()) {
+        throw new IllegalArgumentException(ctype.getType() + 
+                " is not a platform type");
+    }
+    Integer[] platIds = 
+        platformManager.getPlatformIds(subject, ctype.getId());
+    List<AppdefEntityID> entIds = new ArrayList<AppdefEntityID>(platIds.length);
+    for(int i = 0; i < platIds.length; i++) {
+        entIds.add(AppdefEntityID.newPlatformID(platIds[i]));
+    }
+    return entIds;
+}
+    
+    /**
+     * Fetch all metric summaries for specified resources
+     * @param resources the list of resources
+     * @param begin the beginning of time range
+     * @param end the end of time range
+     * @param showNoCollect TODO
+     * @return Map where key = category, value = List of summary beans
+     * @throws AppdefCompatException
+     */
+    private Map<String,Set<MetricDisplaySummary>> getResourceMetrics(AuthzSubject subject, List resources,
+                                     String resourceType, long filters,
+                                     String keyword, long begin, long end,
+                                     boolean showNoCollect)
+        throws AppdefCompatException {
+        // Need to get the templates for this type
+        List<MeasurementTemplate> tmpls = templateManager.findTemplates(resourceType, filters,
+                                                        keyword);
+    
+        // Look up the metric summaries of associated servers
+        return getResourceMetrics(subject, resources, tmpls, begin, end,
+                                  Boolean.valueOf(showNoCollect));
+    }
+    
+    /**
+     * Fetch the metric summaries for specified resources and templates
+     * @param resources the list of resources
+     * @param tmpls the list of measurement templates
+     * @param begin the beginning of time range
+     * @param end the end of time range
+     * @param showNoCollect whether or not to include templates that have not
+     *        collected data
+     * @return Map where key = category, value = List of summary beans
+     */
+    private Map<String, Set<MetricDisplaySummary>> getResourceMetrics(AuthzSubject subject, List resources,
+                                     List tmpls, long begin, long end,
+                                     Boolean showNoCollect)
+        throws AppdefCompatException
+    {
+        List<MeasurementTemplate> templates;
+        Integer[] tids;
+
+        // Create Map of all resources
+        HashMap<String, Set<MetricDisplaySummary>> resmap = new HashMap<String, Set<MetricDisplaySummary>>(MeasurementConstants.VALID_CATEGORIES.length);
+
+        if (tmpls.size() == 0 || resources.size() == 0)
+            return resmap;
+            
+        if (tmpls.get(0) instanceof MeasurementTemplate) {
+            templates = tmpls;
+            tids = new Integer[templates.size()];
+            for (int i = 0; i < templates.size(); i++ ) {
+                MeasurementTemplate t = (MeasurementTemplate)templates.get(i);
+                tids[i] = t.getId();
+            }
+        }
+        else {
+            // If templates are just ID's, we have to look them up
+            tids = (Integer[])tmpls.toArray(new Integer[tmpls.size()]);
+            try {
+                templates = templateManager.getTemplates(tids,
+                                                              PageControl.PAGE_ALL);
+            } catch (TemplateNotFoundException e) {
+                templates = new ArrayList<MeasurementTemplate>(0);
+                // Well, if we don't find it, *shrug*
+            }
+        }
+        
+        // Create the EntityIds array and map of counts
+        Integer[] eids = new Integer[resources.size()];
+        AppdefEntityID[] aeids = new AppdefEntityID[resources.size()];
+        AppdefEntityID aeid;
+        Map<String,Integer> totalCounts = new HashMap<String,Integer>();
+        Iterator it = resources.iterator();
+        for (int i = 0; it.hasNext(); i++) {
+            // We understand two types
+            Object resource = it.next();
+            if (resource instanceof AppdefResourceValue) {
+                AppdefResourceValue resVal = (AppdefResourceValue) resource;
+                aeid = resVal.getEntityId();
+
+                // Increase count
+                String type = resVal.getAppdefResourceTypeValue().getName();
+                int count = 0;
+                if (totalCounts.containsKey(type)) {
+                    count = ((Integer) totalCounts.get(type)).intValue();
+                }
+                totalCounts.put(type, new Integer(++count));
+            }
+            else if (resource instanceof AppdefEntityID) {
+                aeid = (AppdefEntityID) resource;
+            }
+            else {
+                throw new AppdefCompatException("getResourceMetrics() does " +
+                    "not understand resource class: " + resource.getClass());
+            }
+            
+            eids[i]  = aeid.getId();
+            aeids[i] = aeid;
+        }
+            
+        // Now get the aggregate data, keyed by template ID's
+       
+        final List<Measurement> measurements = measurementManager.getMeasurements(tids, eids);
+        final Map<Integer,double[]> datamap =
+            dataManager.getAggregateDataByTemplate(measurements, begin, end);
+
+        // Get the intervals, keyed by template ID's as well
+        final Map<Integer,Long> intervals = (showNoCollect == null) ?
+            new HashMap<Integer,Long>() : measurementManager.findMetricIntervals(subject, aeids, tids);
+
+        for (it = templates.iterator(); it.hasNext(); ) {
+            MeasurementTemplate tmpl = (MeasurementTemplate) it.next();
+    
+            int total = eids.length;
+            String type = tmpl.getMonitorableType().getName();
+            if (totalCounts.containsKey(type)) {
+                total = ((Integer) totalCounts.get(type)).intValue();
+            }
+    
+            double[] data = (double[]) datamap.get(tmpl.getId());
+                
+            if (data == null &&
+                (showNoCollect == null || showNoCollect.equals(Boolean.FALSE)))
+                continue;
+    
+            String category = tmpl.getCategory().getName();
+            TreeSet<MetricDisplaySummary> summaries = (TreeSet<MetricDisplaySummary>) resmap.get(category);
+            if (summaries == null) {
+                summaries = new TreeSet<MetricDisplaySummary>();
+                resmap.put(category, summaries);
+            }
+                
+            Long interval = (Long) intervals.get(tmpl.getId());
+    
+            // Now create a MetricDisplaySummary and add it to the list
+            MetricDisplaySummary summary =
+                getMetricDisplaySummary(tmpl, interval, begin, end,
+                                        data, total);
+
+            summaries.add(summary);
+        }
+        
+        return resmap;
+    }
+    
 
     /**
      * Return a Metric summary bean for each of the services of a specific type
@@ -1866,16 +2699,16 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param end the ending time frame
      * @return a list of CurrentHealthDisplaySummary beans
      * @throws AppdefCompatException
-     * @ejb:interface-method
+     * 
      */
-    public Map findAGMetricsByType(int sessionId, AppdefEntityID[] entIds,
+    public Map<String,Set<MetricDisplaySummary>> findAGMetricsByType(int sessionId, AppdefEntityID[] entIds,
                                    AppdefEntityTypeID typeId, long filters,
                                    String keyword, long begin, long end,
                                    boolean showAll)
         throws SessionTimeoutException, SessionNotFoundException,
             InvalidAppdefTypeException, PermissionException,
             AppdefEntityNotFoundException, AppdefCompatException {
-  AuthzSubject subject = manager.getSubject(sessionId);
+  AuthzSubject subject = sessionManager.getSubject(sessionId);
         
         List group = new ArrayList();
         for (int i = 0; i < entIds.length; i++) {
@@ -1912,14 +2745,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @param appdefType the type (server, service, etc) of the specified resource type
      * @param typeId the specified resource type ID
      * @return a MeasurementSummary bean
-     * @ejb:interface-method
+     * 
      */
     public MeasurementSummary getSummarizedResourceAvailability(
         int sessionId, AppdefEntityID entId, int appdefType, Integer typeId)
         throws AppdefEntityNotFoundException, PermissionException,
                SessionNotFoundException, SessionTimeoutException,
                InvalidOptionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
     
         List resources;
         if (entId.isGroup()) {
@@ -1928,8 +2761,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             AppdefEntityValue aev = new AppdefEntityValue(entId, subject);
             resources = aev.getAssociatedServices(typeId, PageControl.PAGE_ALL);
             if (typeId != null) {
-                for (Iterator i = resources.iterator(); i.hasNext();) {
-                    AppdefResourceValue r = (AppdefResourceValue) i.next();
+                for (Iterator<AppdefResourceValue> i = resources.iterator(); i.hasNext();) {
+                    AppdefResourceValue r = i.next();
                     if (r instanceof ServiceClusterValue)
                         i.remove();
                 }
@@ -1983,7 +2816,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 // recognized as a valid state in MeasurementConstants.AVAIL_
                 // log as much info as possible and mark it as UNKNOWN.
                 unknownCnt++;
-                _log.error("Resource " + resourceArray[i] + " is reporting " +
+                log.error("Resource " + resourceArray[i] + " is reporting " +
                            "an invalid availability state of " +
                            data[i] + " (measurement id=" +
                            findAvailabilityMetric(sessionId,
@@ -2001,26 +2834,26 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @return a List of ResourceTypeDisplaySummary's
      * @deprecated use POJO API instead
      */    
-    private List getSummarizedResourceCurrentHealth(AuthzSubject subject, 
+    private List<ResourceTypeDisplaySummary> getSummarizedResourceCurrentHealth(AuthzSubject subject, 
                                                 AppdefResourceValue[] resources)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException 
     {
-        final List summaries = new ArrayList();
+        final List<ResourceTypeDisplaySummary> summaries = new ArrayList<ResourceTypeDisplaySummary>();
     
         // Create Map of auto-group'd/singleton resources and a List of clusters
         // since their current health summarizations are not flattened        
     
         // auto-group'd entities are kept track of in here where keys are the
         // type id's and the values are lists of resources
-        final HashMap resTypeMap = new HashMap(); 
+        final HashMap<Integer, List<AppdefEntityID>> resTypeMap = new HashMap<Integer, List<AppdefEntityID>>(); 
         // to avoid looking up singleton/autogroup resources again later, we
         // keep them here where keys are AppdefEntityID's and values are the
         // AppdefResourceValues
-        final HashMap resourcemap = new HashMap();
-        final List appdefVals = Arrays.asList(resources);
-        final Map tmp = getMetricManager().getAvailMeasurements(appdefVals);
-        final Map midMap = getMidMap(getAeids(appdefVals), tmp);
+        final HashMap<AppdefEntityID,AppdefResourceValue> resourcemap = new HashMap<AppdefEntityID, AppdefResourceValue>();
+        final List<AppdefResourceValue> appdefVals = Arrays.asList(resources);
+        final Map<Integer,List<Measurement>> tmp = measurementManager.getAvailMeasurements(appdefVals);
+        final Map<Integer,Measurement> midMap = getMidMap(getAeids(appdefVals), tmp);
         // keys are type id's and the values are AppdefResourceTypeValues
         for (int i = 0; i < resources.length; i++) {
             if (resources[i] instanceof ServiceClusterValue) {
@@ -2036,7 +2869,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 int size = agval.getTotalSize();
                 cds.setNumResources(new Integer(size));
                 // Replace the IDs with all of the members
-                List memberIds = getResourceIds(subject, aid, null);
+                List<AppdefEntityID> memberIds = getResourceIds(subject, aid, null);
                 AppdefEntityID[] ids = (AppdefEntityID[])
                     memberIds.toArray(new AppdefEntityID[0]);
                 setResourceTypeDisplaySummary(subject, cds,
@@ -2049,9 +2882,9 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 AppdefResourceTypeValue type =
                     resources[i].getAppdefResourceTypeValue();
                 Integer typeId = type.getId();
-                List siblings = (List) resTypeMap.get(typeId);
+                List<AppdefEntityID> siblings =  resTypeMap.get(typeId);
                 if (siblings == null) {
-                    siblings = new ArrayList();
+                    siblings = new ArrayList<AppdefEntityID>();
                     resTypeMap.put(typeId, siblings);               
                 }            
                 // Add resource to list
@@ -2061,19 +2894,20 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         // first deal with the autogroubz and singletons (singletons
         // are just the degenerative case of an autogroup, why it's
         // its own type is... silly)
-        for (Iterator it = resTypeMap.entrySet().iterator(); it.hasNext();){
-            Map.Entry entry = (Map.Entry)it.next();
-            Collection siblings = (Collection) entry.getValue();
+        for (Map.Entry<Integer,List<AppdefEntityID>> entry :resTypeMap.entrySet()){
+           
+            Collection<AppdefEntityID> siblings = entry.getValue();
             // Make sure we have valid IDs
-            if (siblings == null || siblings.size() == 0)
+            if (siblings == null || siblings.size() == 0) {
                 continue;                    
+            }
                 
             ResourceTypeDisplaySummary summary;
-            AppdefResourceValue resource;
+            
             AppdefEntityID[] ids =
                 (AppdefEntityID[])siblings.toArray(new AppdefEntityID[0]);                
             AppdefEntityID aid = ids[0];
-            resource = (AppdefResourceValue)resourcemap.get(aid);
+            AppdefResourceValue resource = resourcemap.get(aid);
             // autogroup
             if (ids.length > 1) {
                 summary = new AutogroupDisplaySummary();
@@ -2095,50 +2929,51 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     /**
      * @return a List of ResourceTypeDisplaySummary's
      */    
-    private List getSummarizedResourceCurrentHealth(AuthzSubject subject, 
-                                                    Collection resources)
+    private List<ResourceTypeDisplaySummary> getSummarizedResourceCurrentHealth(AuthzSubject subject, 
+                                                    Collection<AppdefResource> resources)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
-        List summaries = new ArrayList();
+        List<ResourceTypeDisplaySummary> summaries = new ArrayList<ResourceTypeDisplaySummary>();
 
         // auto-group'd entities are kept track of in here where keys are the
         // type id's and the values are lists of resources
-        HashMap resTypeMap = new HashMap(); 
+        HashMap<Integer, List<AppdefResource>> resTypeMap = new HashMap<Integer, List<AppdefResource>>(); 
         
         // keys are type id's and the values are AppdefResources
-        for (final Iterator it = resources.iterator(); it.hasNext(); ) {
-            AppdefResource resource = (AppdefResource) it.next();
+        for (AppdefResource resource : resources ) {
+           
             AppdefResourceType type = resource.getAppdefResourceType();
             Integer typeId = type.getId();
-            List siblings = (List) resTypeMap.get(typeId);
+            List<AppdefResource> siblings =  resTypeMap.get(typeId);
             if (siblings == null) {
-                siblings = new ArrayList();
+                siblings = new ArrayList<AppdefResource>();
                 resTypeMap.put(typeId, siblings);               
             }
 
             // Add resource to list
             siblings.add(resource);
         }
-        final Map measCache = getMetricManager().getAvailMeasurements(resources);
-        final Map midMap = getMidMap(getAeids(resources), measCache);
+        final Map<Integer,List<Measurement>> measCache = measurementManager.getAvailMeasurements(resources);
+        final Map<Integer,Measurement> midMap = getMidMap(getAeids(resources), measCache);
         
         // first deal with the autogroups and singletons (singletons
         // are just the degenerative case of an autogroup, why it's
         // its own type is... silly)
-        for (Iterator it = resTypeMap.entrySet().iterator(); it.hasNext();) {
-            final Map.Entry entry = (Map.Entry) it.next();
-            final Collection siblings = (Collection) entry.getValue();
+        for (Map.Entry<Integer,List<AppdefResource>> entry: resTypeMap.entrySet()) {
+            
+            final Collection<AppdefResource> siblings = (Collection<AppdefResource>) entry.getValue();
             // Make sure we have valid IDs
-            if (siblings == null || siblings.size() == 0)
+            if (siblings == null || siblings.size() == 0) {
                 continue;                    
+            }
                 
             ResourceTypeDisplaySummary summary = null;
 
             AppdefResourceType type = null;
             AppdefEntityID[] ids = new AppdefEntityID[siblings.size()];
             int i = 0;
-            for (Iterator sibIt = siblings.iterator(); sibIt.hasNext(); i++) {
-                AppdefResource res = (AppdefResource) sibIt.next();
+            for (Iterator<AppdefResource> sibIt = siblings.iterator(); sibIt.hasNext(); i++) {
+                AppdefResource res = sibIt.next();
                 ids[i] = res.getEntityId();
                 
                 if (type == null) {
@@ -2169,7 +3004,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     private void setResourceTypeDisplaySummary(AuthzSubject subject,
                                       ResourceTypeDisplaySummary summary, 
                                       AppdefResourceTypeValue resType,
-                                      AppdefEntityID[] ids, Map midMap) {
+                                      AppdefEntityID[] ids, Map<Integer,Measurement> midMap) {
         // Now get each category of measurements
         long end = System.currentTimeMillis();
         
@@ -2177,8 +3012,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         
         StopWatch watch = new StopWatch(end);
         
-        if (_log.isDebugEnabled())
-            _log.debug("BEGIN setResourceTypeDisplaySummary");
+        if (log.isDebugEnabled())
+            log.debug("BEGIN setResourceTypeDisplaySummary");
 
         // Availability
         try {
@@ -2197,8 +3032,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 new Double(MeasurementConstants.AVAIL_UNKNOWN));
         }
 
-        if (_log.isDebugEnabled())
-            _log.debug("END setResourceTypeDisplaySummary -- " +
+        if (log.isDebugEnabled())
+            log.debug("END setResourceTypeDisplaySummary -- " +
                     watch.getElapsed() + " msec");
     }
 
@@ -2213,13 +3048,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * see screen 2.2.2
      * </p>
      * @return List of ResourceTypeDisplaySummary beans
-     * @ejb:interface-method
+     * 
      */
-    public List findSummarizedServerCurrentHealth(int sessionId, 
+    public List<ResourceTypeDisplaySummary> findSummarizedServerCurrentHealth(int sessionId, 
                                                   AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
     
         // Get the associated servers        
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
@@ -2248,27 +3083,27 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * 
      * @param entId the appdef entity with child services
      * @return List a list of ResourceTypeDisplaySummary beans
-     * @ejb:interface-method
+     * 
      */
-    public List findSummarizedPlatformServiceCurrentHealth(int sessionId,
+    public List<ResourceTypeDisplaySummary> findSummarizedPlatformServiceCurrentHealth(int sessionId,
                                                            AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefEntityNotFoundException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
-        ServiceManager svcMgr = ServiceManagerImpl.getOne();
-        Collection services =
-            svcMgr.getPlatformServices(subject, entId.getId());
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
+       
+        Collection<AppdefResource> services =
+            serviceManager.getPlatformServices(subject, entId.getId());
         return getSummarizedResourceCurrentHealth(subject, services);
     }
     
     /**
-     * @ejb:interface-method
+     * 
      */
-    public List findSummarizedServiceCurrentHealth(int sessionId,
+    public List<ResourceTypeDisplaySummary> findSummarizedServiceCurrentHealth(int sessionId,
                                                    AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
                PermissionException, AppdefEntityNotFoundException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         // Get the associated services        
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
         List services= rv.getAssociatedServices(PageControl.PAGE_ALL);
@@ -2288,40 +3123,41 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * see screen 2.2.2
      * </p>
      * @return List of ResourceDisplaySummary beans
-     * @ejb:interface-method
+     * 
      */
-    public List findGroupCurrentHealth(int sessionId, Integer id)
+    public List<ResourceDisplaySummary> findGroupCurrentHealth(int sessionId, Integer id)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
-        final PlatformManager platMan = getPlatformManager();
-        final ServerManager serverMan = getServerManager();
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
+       
+        
         
         // Find the group
-        final ResourceGroupManager resGrpMgr = getResourceGroupManager();
+        
         final ResourceGroup group =
-            resGrpMgr.findResourceGroupById(subject, id);
+            resourceGroupManager.findResourceGroupById(subject, id);
 
-        Map cats = new HashMap(2);
+        Map<String, Map<Resource,Measurement> > cats = new HashMap< String,Map<Resource,Measurement> >(2);
         cats.put(MeasurementConstants.CAT_AVAILABILITY, null);
         // XXX scottmf need to review this, perf is bad and metric
         // is not very useful
         //cats.put(MeasurementConstants.CAT_THROUGHPUT, null);
 
         // Look up metrics by group first
-        MeasurementManager mman = getMetricManager();
-        for (Iterator it = cats.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry) it.next();
-            List metrics =
-                mman.findDesignatedMeasurements(subject, group,
+        
+        for (Map.Entry<String, Map<Resource,Measurement> > entry : cats.entrySet() ) {
+           
+            List<Measurement> metrics =
+                measurementManager.findDesignatedMeasurements(subject, group,
                                                 (String) entry.getKey());
-            Map mmap = new HashMap(metrics.size());
+            Map<Resource,Measurement> mmap = new HashMap<Resource,Measurement>(metrics.size());
             // Optimization for the fact that we can have multiple indicator
             // metrics for each category, only keep one
-            for (Iterator mit = metrics.iterator(); mit.hasNext(); ) {
-                Measurement m = (Measurement) mit.next();
-                if (mmap.containsKey(m.getResource()))
+            for (Measurement m  : metrics ) {
+               
+                if (mmap.containsKey(m.getResource())) {
                     continue;
+                }
                 
                 mmap.put(m.getResource(), m);
             }
@@ -2329,28 +3165,28 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
         
         final StopWatch watch = new StopWatch();
-        final PageList summaries = new PageList();
+        final PageList<ResourceDisplaySummary> summaries = new PageList<ResourceDisplaySummary>();
         watch.markTimeBegin("getAvailMeasurements");
-        final Map measCache = getMetricManager()
+        final Map<Integer,List<Measurement>> measCache = measurementManager
                 .getAvailMeasurements(Collections.singleton(group));
         watch.markTimeEnd("getAvailMeasurements");
         
         // Remap from list to map of metrics
-        List metrics = (List) measCache.remove(group.getResource().getId());
-        for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-            Measurement meas = (Measurement) it.next();
+        List<Measurement> metrics =  measCache.remove(group.getResource().getId());
+        for (Measurement meas : metrics ) {
+           
             measCache.put(meas.getResource().getId(),
                           Collections.singletonList(meas));
         }
 
         // Members are sorted
-        final Collection members = resGrpMgr.getMembers(group);
+        final Collection<Resource> members = resourceGroupManager.getMembers(group);
         watch.markTimeBegin("getLastAvail");
-        final Map availCache = getAvailManager().getLastAvail(
+        final Map<Integer,MetricValue> availCache = availabilityManager.getLastAvail(
             members, measCache);
         watch.markTimeEnd("getLastAvail");
-        for (Iterator it = members.iterator(); it.hasNext(); ) {
-            Resource res = (Resource) it.next();
+        for (Resource res :  members) {
+           
             AppdefEntityID aeid = new AppdefEntityID(res);
             ResourceDisplaySummary summary = new ResourceDisplaySummary();
         
@@ -2359,7 +3195,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             switch (aeid.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER :
                     watch.markTimeBegin("get platform from server");
-                    Server server = serverMan.findServerById(aeid.getId());
+                    Server server = serverManager.findServerById(aeid.getId());
                     parent = server.getPlatform().getPlatformValue();
                     watch.markTimeEnd("get platform from server");
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -2396,12 +3232,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             setResourceDisplaySummary(summary, res, aeid, parent);
             summaries.add(summary);
         }
-        if (_log.isDebugEnabled()) {
-            _log.debug("getGroupCurrentHealth: " + watch);
+        if (log.isDebugEnabled()) {
+            log.debug("getGroupCurrentHealth: " + watch);
         }
         summaries.setTotalSize(summaries.size());
         return summaries;
     }
+    
+    
 
     /**
      * Return a ResourceDisplaySummary bean for each of the resource's
@@ -2412,21 +3250,20 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * see screen 2.2.2
      * </p>
      * @return List of ResourceDisplaySummary beans
-     * @ejb:interface-method
+     * 
      */
-    public List findVirtualsCurrentHealth(int sessionId,
+    public List<ResourceDisplaySummary> findVirtualsCurrentHealth(int sessionId,
                                          AppdefEntityID entId)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, GroupNotCompatibleException,
                PermissionException {
         
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         
-            VirtualManager vman =
-                VirtualManagerImpl.getOne();
-            List resources =
-                vman.findVirtualResourcesByPhysical(subject, entId);
+            
+            List<AppdefResourceValue> resources =
+                virtualManager.findVirtualResourcesByPhysical(subject, entId);
             PageList resPageList = new PageList(resources, resources.size());
             return getResourcesCurrentHealth(subject, resPageList);
         
@@ -2471,16 +3308,16 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         }
     }
 
-    private PageList getResourcesCurrentHealth(AuthzSubject subject,
+    private PageList<ResourceDisplaySummary> getResourcesCurrentHealth(AuthzSubject subject,
                                                PageList resources)
         throws AppdefEntityNotFoundException, PermissionException {
         StopWatch watch = new StopWatch();
-        PageList summaries = new PageList();
+        PageList<ResourceDisplaySummary> summaries = new PageList<ResourceDisplaySummary>();
         watch.markTimeBegin("getAvailMeasurements");
-        final Map measCache = getMetricManager().getAvailMeasurements(resources);
+        final Map<Integer,List<Measurement>> measCache = measurementManager.getAvailMeasurements(resources);
         watch.markTimeEnd("getAvailMeasurements");
         watch.markTimeBegin("getLastAvail");
-        final Map availCache = getAvailManager().getLastAvail(
+        final Map<Integer,MetricValue> availCache = availabilityManager.getLastAvail(
             resources, measCache);
         watch.markTimeEnd("getLastAvail");
         for (Iterator it = resources.iterator(); it.hasNext(); ) {
@@ -2504,11 +3341,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 ResourceDisplaySummary summary = new ResourceDisplaySummary();
                 // Set the resource
                 AppdefResourceValue parent = null;
-                HashSet categories = new HashSet(4);
+                HashSet<String> categories = new HashSet<String>(4);
                 switch (aeid.getType()) {
                     case AppdefEntityConstants.APPDEF_TYPE_SERVER :
                         try {
-                            List platforms =
+                            List<AppdefResourceValue> platforms =
                                 rv.getAssociatedPlatforms(PageControl.PAGE_ALL);
                             if (platforms != null && platforms.size() > 0) {
                                 parent = (AppdefResourceValue) platforms.get(0);
@@ -2558,11 +3395,11 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 setResourceDisplaySummary(summary, rv, parent);
                 summaries.add(summary);
             } catch (AppdefEntityNotFoundException e) {
-                _log.debug(e.getMessage(), e);
+                log.debug(e.getMessage(), e);
             }
         }
-        if (_log.isDebugEnabled()) {
-            _log.debug("getResourcesCurrentHealth: " + watch);
+        if (log.isDebugEnabled()) {
+            log.debug("getResourcesCurrentHealth: " + watch);
         }
         summaries.setTotalSize(resources.getTotalSize());
         return summaries;
@@ -2580,20 +3417,20 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      */
     private void setResourceDisplaySummaryValueForCategory(AuthzSubject subject,
             AppdefEntityID aeid, ResourceDisplaySummary summary,
-            Set categories, Map measCache, Map availCache)
+            Set<String> categories, Map<Integer, List<Measurement>> measCache, Map<Integer, MetricValue> availCache)
         throws AppdefEntityNotFoundException,
                PermissionException {
         // Maybe we're not doing anything
         if (categories.size() == 0) {
             return;
         }
-        final Resource resource = getResourceManager().findResource(aeid);
+        final Resource resource = resourceManager.findResource(aeid);
         MetricValue mv = null;
         if (categories.remove(MeasurementConstants.CAT_AVAILABILITY)) {
             Measurement dm = null;
             // try to use prefetched caches
             if (measCache != null) {
-                List list = (List)measCache.get(resource.getId());
+                List<Measurement> list = measCache.get(resource.getId());
                 if (list == null) {
                     // nothing to do
                 } else if (list.size() == 1) {
@@ -2606,7 +3443,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 }
             }
             // check if prefetched caches didn't contain values
-            dm = (dm == null) ? findAvailabilityMetric(subject, aeid) : dm;
+            dm = (dm == null) ? measurementManager.getAvailabilityMeasurement(subject, aeid) : dm;
             if (dm != null && mv == null) {
                 summary.setAvailability(new Double(
                     getAvailability(subject, aeid, measCache, availCache)));
@@ -2616,12 +3453,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         if (categories.size() == 0) {
             return;
         }
-        List measurements = findDesignatedMetrics(subject, aeid, categories);
+        List<Measurement> measurements = findDesignatedMetrics(subject, aeid, categories);
         // Optimization for the fact that we can have multiple indicator
         // metrics for each category
-        HashSet done = new HashSet();
-        for (Iterator it = measurements.iterator(); it.hasNext(); ) {
-            Measurement m = (Measurement) it.next();
+        HashSet<String> done = new HashSet<String>();
+        for (Measurement m : measurements ) {
+           
             final MeasurementTemplate templ = m.getTemplate();
             if (!templ.isDesignate()) {
                 continue;
@@ -2633,7 +3470,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             // XXX scottmf need to review this, perf is bad and metrics
             // are not very useful
             mv = new MetricValue();
-            // XXX mv = getDataMan().getLastHistoricalData(m);
+            // XXX mv = dataManager.getLastHistoricalData(m);
             if (mv == null) {
                 continue;
             }
@@ -2665,23 +3502,23 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     private void setResourceDisplaySummaryValueForCategories(
                                             AuthzSubject subject, Resource res,
                                             ResourceDisplaySummary summary,
-                                            Map categories, Map measCache,
-                                            Map availCache)
+                                            Map<String, Map<Resource, Measurement>> categories, Map<Integer, List<Measurement>> measCache,
+                                            Map<Integer, MetricValue> availCache)
         throws AppdefEntityNotFoundException, PermissionException {        
         StopWatch watch = new StopWatch();
-        List resMetrics = new ArrayList(categories.size());
+        List<Measurement> resMetrics = new ArrayList<Measurement>(categories.size());
         
         // First find the measurements
-        for (Iterator it = categories.values().iterator(); it.hasNext(); ) {
-            Map metrics = (Map) it.next();
+        for (Map<Resource,Measurement> metrics : categories.values() ) {
+          
             if (metrics.containsKey(res)) {
-                resMetrics.add((Measurement) metrics.remove(res));
+                resMetrics.add( metrics.remove(res));
             }
         }
 
         final AppdefEntityID id = new AppdefEntityID(res);
-        for (Iterator it = resMetrics.iterator(); it.hasNext(); ) {
-            final Measurement m = (Measurement) it.next();
+        for (Measurement m : resMetrics) {
+           
             final MeasurementTemplate templ = m.getTemplate();
             final String category = templ.getCategory().getName();
     
@@ -2703,7 +3540,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             }
             
             // XXX scottmf, need to investigate this for perf
-            //MetricValue mv = getDataMan().getLastHistoricalData(m);
+            //MetricValue mv = dataManager.getLastHistoricalData(m);
             MetricValue mv = new MetricValue();
             if (mv == null) {
                 continue;
@@ -2720,8 +3557,8 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                 summary.setPerformTempl(templ.getId());
             }
         }
-        if (_log.isDebugEnabled()) {
-            _log.debug("setResourceDisplaySummaryValueForCategories: " + watch);
+        if (log.isDebugEnabled()) {
+            log.debug("setResourceDisplaySummaryValueForCategories: " + watch);
         }
     }
 
@@ -2735,13 +3572,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @throws ApplicationException if user is not found
      * @throws LoginException if user account has been disabled
      * @return PageList of ResourceDisplaySummary beans
-     * @ejb:interface-method
+     * 
      */
-    public List findResourcesCurrentHealth(String user, AppdefEntityID[] entIds)
+    public List<ResourceDisplaySummary> findResourcesCurrentHealth(String user, AppdefEntityID[] entIds)
         throws LoginException, ApplicationException, PermissionException,
                AppdefEntityNotFoundException, SessionNotFoundException,
                SessionTimeoutException {
-        int sessionId = getAuthManager().getUnauthSessionId(user);
+        int sessionId = authManager.getUnauthSessionId(user);
         return findResourcesCurrentHealth(sessionId, entIds);
     }
     
@@ -2752,13 +3589,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * be equivalent to the size of the entity ID's passed in.
      * 
      * @return PageList of ResourceDisplaySummary beans
-     * @ejb:interface-method
+     * 
      */
-    public List findResourcesCurrentHealth(int sessionId, 
+    public List<ResourceDisplaySummary> findResourcesCurrentHealth(int sessionId, 
                                            AppdefEntityID[] entIds)
         throws AppdefEntityNotFoundException, PermissionException,
                SessionNotFoundException, SessionTimeoutException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
 
         Log timingLog = LogFactory.getLog("DASHBOARD-TIMING");
         StopWatch timer = new StopWatch();
@@ -2775,13 +3612,13 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Find the current health of the entity's host(s)
      * 
      * @return PageList of ResourceDisplaySummary beans
-     * @ejb:interface-method
+     * 
      */
-    public List findHostsCurrentHealth(int sessionId, AppdefEntityID entId,
+    public List<ResourceDisplaySummary> findHostsCurrentHealth(int sessionId, AppdefEntityID entId,
                                        PageControl pc)
         throws SessionNotFoundException, SessionTimeoutException,
                PermissionException, AppdefEntityNotFoundException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
         int entType = entId.getType();
 
@@ -2799,21 +3636,23 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             hosts = rv.getAssociatedServers(pc);
             
             // Go through and see if we are looking at virtual servers
-            ArrayList virtIds = new ArrayList(hosts.size());
-            for (Iterator it = hosts.iterator(); it.hasNext(); ) {
-                ServerValue sv = (ServerValue) it.next();
-                if (!sv.getServerType().getVirtual())
+            ArrayList<AppdefEntityID> virtIds = new ArrayList<AppdefEntityID>(hosts.size());
+            for (Iterator<ServerValue> it = hosts.iterator(); it.hasNext(); ) {
+                ServerValue sv = it.next();
+                if (!sv.getServerType().getVirtual()) {
                     break;
+                }
                 
                 virtIds.add(sv.getEntityId());
             }
             
-            if (virtIds.size() > 0)
-                hosts = getPlatformManager().getPlatformsByServers(subject,
+            if (virtIds.size() > 0) {
+                hosts = platformManager.getPlatformsByServers(subject,
                                                                    virtIds);
+            }
             break;
         default:
-            return new PageList();
+            return new PageList<ResourceDisplaySummary>();
         }
         
         // Return a paged list of current health        
@@ -2835,14 +3674,14 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * represent all of the hosts.
      * 
      * @return PageList of ResourceDisplaySummary beans
-     * @ejb:interface-method
+     * 
      */
-    public PageList findPlatformsCurrentHealth(int sessionId, 
+    public PageList<ResourceDisplaySummary> findPlatformsCurrentHealth(int sessionId, 
                                                AppdefEntityID entId,
                                                PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         AppdefEntityValue rv = new AppdefEntityValue(entId, subject);
         PageList platforms = rv.getAssociatedPlatforms(pc);
         
@@ -2859,22 +3698,22 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * the current health of servers.
      *
      * @return a list of ResourceDisplaySummary beans
-     * @ejb:interface-method
+     * 
      */
-    public List findAGPlatformsCurrentHealthByType(int sessionId,
+    public List<ResourceDisplaySummary> findAGPlatformsCurrentHealthByType(int sessionId,
                                                    Integer platTypeId)
         throws SessionTimeoutException, SessionNotFoundException,
                InvalidAppdefTypeException, PermissionException,
                AppdefEntityNotFoundException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
-        PlatformManager platMan = getPlatformManager();
-        PlatformType pt = platMan.findPlatformType(platTypeId);
-        List platforms = platMan.getPlatformsByType(subject, pt.getName());
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
+        
+        PlatformType pt = platformManager.findPlatformType(platTypeId);
+        List<Platform> platforms = platformManager.getPlatformsByType(subject, pt.getName());
         
         // Need list of AppdefEntityValues
-        PageList aevs = new PageList();
-        for (Iterator it = platforms.iterator(); it.hasNext(); ) {
-            aevs.add(new AppdefEntityValue(subject, ((Platform) it.next())));
+        PageList<AppdefEntityValue> aevs = new PageList<AppdefEntityValue>();
+        for (Platform platform : platforms ) {
+            aevs.add(new AppdefEntityValue(subject, platform));
         }
         
         // Return a paged list of current health
@@ -2914,15 +3753,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * 
      * @param entId the platform's or application's ID
      * @return a list of ResourceDisplaySummary beans
-     * @ejb:interface-method
+     * 
      */
-    public PageList findServersCurrentHealth(int sessionId,
+    public PageList<ResourceDisplaySummary> findServersCurrentHealth(int sessionId,
                                              AppdefEntityID entId,
                                              PageControl pc)
         throws SessionTimeoutException, SessionNotFoundException,
                InvalidAppdefTypeException, AppdefEntityNotFoundException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         
         switch (entId.getType()) {
             case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
@@ -2951,15 +3790,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * the current health of servers.
      *
      * @return a list of ResourceDisplaySummary beans
-     * @ejb:interface-method
+     * 
      */
-    public List findAGServersCurrentHealthByType(int sessionId,
+    public List<ResourceDisplaySummary> findAGServersCurrentHealthByType(int sessionId,
                                                  AppdefEntityID[] entIds,
                                                  Integer serverTypeId)
         throws SessionTimeoutException, SessionNotFoundException,
                InvalidAppdefTypeException, AppdefEntityNotFoundException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         PageList servers = new PageList();
         PageControl pc = PageControl.PAGE_ALL;
         
@@ -2984,15 +3823,15 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * The only applicable resource is currently a compatible group (of
      * services...)
      * @return a list of ResourceDisplaySummary beans
-     * @ejb:interface-method
+     * 
      */
-    public List findAGServicesCurrentHealthByType(int sessionId,
+    public List<ResourceDisplaySummary> findAGServicesCurrentHealthByType(int sessionId,
                                                   AppdefEntityID[] entIds,
                                                   Integer serviceTypeId)
         throws SessionTimeoutException, SessionNotFoundException,
                InvalidAppdefTypeException, AppdefEntityNotFoundException,
                PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         PageList services = new PageList();
         
         for (int i = 0; i < entIds.length; i++){
@@ -3008,7 +3847,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
     
 	 /**
      * Get Availability measurement for a given entitiy
-     * @ejb:interface-method
+     * 
      */
     public double getAvailability(AuthzSubject subj, AppdefEntityID id)
         throws AppdefEntityNotFoundException,
@@ -3023,12 +3862,12 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      *  Integer => Measurement.getId(), may be null
      */
     private double getAvailability(AuthzSubject subject, AppdefEntityID id,
-                                   Map measCache, Map availCache)
+                                   Map<Integer,List<Measurement>> measCache, Map<Integer,MetricValue> availCache)
         throws AppdefEntityNotFoundException,
                PermissionException {
         StopWatch watch = new StopWatch();
-        if (_log.isDebugEnabled())
-            _log.debug("BEGIN getAvailability()");
+        if (log.isDebugEnabled())
+            log.debug("BEGIN getAvailability()");
     
         try {
             if (id.isGroup()) {
@@ -3047,40 +3886,40 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
             return getAvailability(
                 subject, ids, getMidMap(ids, measCache), availCache)[0];
         } finally {
-            if (_log.isDebugEnabled())
-                _log.debug("END getAvailability() -- " + watch);
+            if (log.isDebugEnabled())
+                log.debug("END getAvailability() -- " + watch);
         }
     }
 
     /** Get the availability of the resource
      * @param id the Appdef entity ID
-     * @ejb:interface-method
+     * 
      */
     public double getAvailability(int sessionId, AppdefEntityID id)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
         return getAvailability(subject, id);
     }
 
     /** Get the availability of autogroup resources
      * @return a MetricValue for the availability
-     * @ejb:interface-method
+     * 
      */
     public double getAGAvailability(int sessionId, AppdefEntityID[] aids,
                                     AppdefEntityTypeID ctype)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException {
-        final AuthzSubject subject = manager.getSubject(sessionId);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
     
         StopWatch watch = new StopWatch();
-        _log.debug("BEGIN getAGAvailability()");
+        log.debug("BEGIN getAGAvailability()");
     
-        List appdefIds = getAGMemberIds(subject, aids, ctype);
+        List<AppdefEntityID> appdefIds = getAGMemberIds(subject, aids, ctype);
         
         double ret = getAggregateAvailability(
             subject, toAppdefEntityIDArray(appdefIds), null, null);
-        _log.debug("END getAGAvailability() -- " + watch.getElapsed() + " msec");
+        log.debug("END getAGAvailability() -- " + watch.getElapsed() + " msec");
         return ret;
     }
 
@@ -3093,26 +3932,24 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * @throws PermissionException
      * @throws InvalidAppdefTypeException
      * @throws AppdefCompatException
-     * @ejb:interface-method
+     * 
      */
-    public List findAllMetrics(int sessionId, AppdefEntityID aeid,
+    public List<ProblemMetricSummary> findAllMetrics(int sessionId, AppdefEntityID aeid,
                                    AppdefEntityTypeID ctype,
                                    long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException,
                AppdefCompatException, InvalidAppdefTypeException {
-        ArrayList result = new ArrayList();
+        ArrayList<ProblemMetricSummary> result = new ArrayList<ProblemMetricSummary>();
         AppdefEntityID[] entIds = new AppdefEntityID[] { aeid };
         
-        Map metrics = findAGMetricsByType(sessionId, entIds, ctype,
+        Map<String,Set<MetricDisplaySummary>> metrics = findAGMetricsByType(sessionId, entIds, ctype,
                                           MeasurementConstants.FILTER_NONE,
                                           null, begin, end, false);
-        for (Iterator it = metrics.values().iterator(); it.hasNext(); ) {
-            Collection metricColl = (Collection) it.next();
-            
-            for (Iterator it2 = metricColl.iterator(); it2.hasNext(); ) {
-                MetricDisplaySummary summary =
-                    (MetricDisplaySummary) it2.next();
+        for (Collection<MetricDisplaySummary> metricColl : metrics.values() ) {
+           
+            for (MetricDisplaySummary summary : metricColl ) {
+                
                 ProblemMetricSummary pms =
                     new ProblemMetricSummary(summary);
                 pms.setMultipleAppdefKey(ctype.getAppdefKey());
@@ -3122,20 +3959,19 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return result;
     }
     
-    public List findAllMetrics(int sessionId, AppdefEntityID aeid,
+    public List<ProblemMetricSummary> findAllMetrics(int sessionId, AppdefEntityID aeid,
                                   long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException,
                AppdefCompatException, InvalidAppdefTypeException {
-        ArrayList result = new ArrayList();
-        Map metrics = findMetrics(sessionId, aeid, begin, end,
+        ArrayList<ProblemMetricSummary> result = new ArrayList<ProblemMetricSummary>();
+        Map<String,Set<MetricDisplaySummary>> metrics = findMetrics(sessionId, aeid, begin, end,
                                   PageControl.PAGE_ALL);
-        for (Iterator it = metrics.values().iterator(); it.hasNext(); ) {
-            Collection metricColl = (Collection) it.next();
+        for (Collection<MetricDisplaySummary> metricColl : metrics.values() ) {
+          
             
-            for (Iterator it2 = metricColl.iterator(); it2.hasNext(); ) {
-                MetricDisplaySummary summary =
-                    (MetricDisplaySummary) it2.next();
+            for ( MetricDisplaySummary summary : metricColl) {
+             
                 ProblemMetricSummary pms =
                     new ProblemMetricSummary(summary);
                 pms.setSingleAppdefKey(aeid.getAppdefKey());
@@ -3145,21 +3981,20 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return result;
     }
     
-    public List findAllMetrics(int sessionId, AppdefEntityID[] aeids,
+    public List<ProblemMetricSummary> findAllMetrics(int sessionId, AppdefEntityID[] aeids,
                                   long begin, long end)
         throws SessionTimeoutException, SessionNotFoundException,
                AppdefEntityNotFoundException, PermissionException,
                AppdefCompatException, InvalidAppdefTypeException {
-        ArrayList result = new ArrayList();
-        Map metrics = findMetrics(sessionId, aeids,
+        ArrayList<ProblemMetricSummary> result = new ArrayList<ProblemMetricSummary>();
+        Map<String,Set<MetricDisplaySummary>> metrics = findMetrics(sessionId, aeids,
                                   MeasurementConstants.FILTER_NONE, null,
                                   begin, end, false);
-        for (Iterator it = metrics.values().iterator(); it.hasNext(); ) {
-            Collection metricColl = (Collection) it.next();
+        for (Collection<MetricDisplaySummary> metricColl : metrics.values() ) {
+           
             
-            for (Iterator it2 = metricColl.iterator(); it2.hasNext(); ) {
-                MetricDisplaySummary summary =
-                    (MetricDisplaySummary) it2.next();
+            for (MetricDisplaySummary summary : metricColl ) {
+               
                 ProblemMetricSummary pms =
                     new ProblemMetricSummary(summary);
                 result.add(pms);
@@ -3174,7 +4009,7 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
      * Returns a list of problem metrics for a resource, and the selected
      * children and hosts of that resource.  Return a summarized
      * list of UI beans
-     * @ejb:interface-method
+     * 
      */
     public List findAllMetrics(int sessionId, AppdefEntityID aeid,
                                    AppdefEntityID[] hosts,
@@ -3185,34 +4020,37 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException, PermissionException,
                AppdefCompatException, InvalidAppdefTypeException
     {
-        List singlesList = new ArrayList();
+        List<AppdefEntityID> singlesList = new ArrayList<AppdefEntityID>();
         
-        if (aeid != null && members == null)
+        if (aeid != null && members == null) {
             singlesList.add(aeid);
+        }
         
         // Next add its hosts
-        if (hosts != null)
+        if (hosts != null) {
             singlesList.addAll(Arrays.asList(hosts));
+        }
     
-        ArrayList result = new ArrayList();
+        ArrayList<ProblemMetricSummary> result = new ArrayList<ProblemMetricSummary>();
         
         // Go through the singles list first
-        for (Iterator it = singlesList.iterator(); it.hasNext(); ) {
-            AppdefEntityID entity = (AppdefEntityID) it.next();
+        for (AppdefEntityID entity : singlesList) {
+           
             result.addAll(findAllMetrics(sessionId, entity, begin, end));
         }                
     
         if (members != null) {
             // AutoGroups and groups pass their entities in the entities
             // parameter
-            List metrics = findAllMetrics(sessionId, members, begin, end);
-            for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                ProblemMetricSummary metric =
-                    (ProblemMetricSummary) it.next();
-                if (aeid.isGroup())
+            List<ProblemMetricSummary> metrics = findAllMetrics(sessionId, members, begin, end);
+            for (ProblemMetricSummary metric : metrics ) {
+               
+                if (aeid.isGroup()) {
                     metric.setSingleAppdefKey(aeid.getAppdefKey());
-                else
+                }
+                else {
                     metric.setMultipleAppdefKey(children[0].getAppdefKey());
+                }
             }
             
             result.addAll(metrics);
@@ -3236,18 +4074,20 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
         return getAvailability(subject, ids, getMidMap(getResources(ids)), null);
     }
     
-    public List getAGMemberIds(AuthzSubject subject,
+    public List<AppdefEntityID> getAGMemberIds(AuthzSubject subject,
                                   AppdefEntityID parentAid,
                                   AppdefEntityTypeID ctype)
         throws AppdefEntityNotFoundException, PermissionException {
         return getAGMemberIds(subject, new AppdefEntityID[] { parentAid }, ctype);
     }
+    
+   
 
     /**
      * Returns a list of problem metrics for a resource, and the selected
      * children and hosts of that resource.  Return a summarized
      * list of UI beans
-     * @ejb:interface-method
+     * 
      */
     public List findAllMetrics(int sessionId, AppdefEntityID aeid,
                                    AppdefEntityID[] hosts,
@@ -3257,36 +4097,38 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
                AppdefEntityNotFoundException, PermissionException,
                AppdefCompatException, InvalidAppdefTypeException
     {
-        List singlesList = new ArrayList();
+        List<AppdefEntityID> singlesList = new ArrayList<AppdefEntityID>();
         
-        if (aeid != null)
+        if (aeid != null) {
             singlesList.add(aeid);
+        }
         
         // Next add its hosts
-        if (hosts != null)
+        if (hosts != null) {
             singlesList.addAll(Arrays.asList(hosts));
+        }
     
-        ArrayList result = new ArrayList();
+        ArrayList<ProblemMetricSummary> result = new ArrayList<ProblemMetricSummary>();
         
         if (aeid == null || (aeid.isGroup() && hosts != null)) {
             // AutoGroups and groups pass their entities in the hosts
             // parameter
-            List metrics = findAllMetrics(sessionId, hosts, begin, end);
+            List<ProblemMetricSummary> metrics = findAllMetrics(sessionId, hosts, begin, end);
             
-            for (Iterator it = metrics.iterator(); it.hasNext(); ) {
-                ProblemMetricSummary metric =
-                    (ProblemMetricSummary) it.next();
-                if (aeid != null)
+            for (ProblemMetricSummary metric : metrics ) {
+               
+                if (aeid != null) {
                     metric.setSingleAppdefKey(aeid.getAppdefKey());
-                else
+                }
+                else {
                     metric.setMultipleAppdefKey(children[0].getAppdefKey());
+                }
             }
             
             result.addAll(metrics);
         } else {
             // Go through the singles list first
-            for (Iterator it = singlesList.iterator(); it.hasNext(); ) {
-                AppdefEntityID entity = (AppdefEntityID) it.next();
+            for (AppdefEntityID entity :singlesList ) {
                 result.addAll(findAllMetrics(sessionId, entity,
                                              begin, end));
             }                
@@ -3305,50 +4147,18 @@ public class MeasurementBossEJBImpl extends MetricSessionEJB
 
     /**
      * Get the availability metric for a given resource
-     * @ejb:interface-method
+     * 
      */
     public Measurement findAvailabilityMetric(int sessionId,
                                                      AppdefEntityID id)
         throws SessionTimeoutException, SessionNotFoundException
     {
-        final AuthzSubject subject = manager.getSubject(sessionId);
-        return findAvailabilityMetric(subject, id);
+        final AuthzSubject subject = sessionManager.getSubject(sessionId);
+        return measurementManager.getAvailabilityMeasurement(subject, id);
     }
     
-    public static MeasurementBossLocal getOne() {
-        try {
-            return MeasurementBossUtil.getLocalHome().create();
-        } catch (Exception e) {
-            throw new SystemException(e);
-        }
+    public static MeasurementBoss getOne() {
+     return Bootstrap.getBean(MeasurementBoss.class);
     }
 
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate()
-        throws CreateException {
-    }
-
-    public void ejbActivate()
-        throws EJBException, RemoteException {
-    }
-
-    public void ejbPassivate()
-        throws EJBException, RemoteException {
-    }
-
-    public void ejbRemove()
-        throws EJBException, RemoteException {
-        ctx = null;
-    }
-
-    public void setSessionContext(SessionContext ctx)
-        throws EJBException, RemoteException {
-        this.ctx = ctx;
-    }
-
-    public SessionContext getSessionContext() {
-        return ctx;
-    }
 }

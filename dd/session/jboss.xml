@@ -12,12 +12,7 @@
 			<message-driven></message-driven> markup for those beans.
 		-->
 		
-		<session>
-			<ejb-name>MeasurementBoss</ejb-name>
-			<jndi-name>ejb/bizapp/MeasurementBoss</jndi-name>
-			<local-jndi-name>LocalMeasurementBoss</local-jndi-name>
-
-		</session>
+	
 		
 		<!--
 			write a merge file jboss-webservices.ent for webservice-description

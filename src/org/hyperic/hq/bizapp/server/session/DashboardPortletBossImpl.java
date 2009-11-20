@@ -49,7 +49,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.ResourceGroupManager;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.bizapp.shared.DashboardPortletBoss;
-import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalation;
 import org.hyperic.hq.escalation.server.session.EscalationState;
@@ -98,7 +98,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
 
     private DataManager dataManager;
 
-    private MeasurementBossLocal measurementBoss;
+    private MeasurementBoss measurementBoss;
 
     private ResourceGroupManager resourceGroupManager;
 
@@ -113,7 +113,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
     @Autowired
     public DashboardPortletBossImpl(PermissionManager permissionManager, ResourceManager resourceManager,
                                     MeasurementManager measurementManager, DataManager dataManager,
-                                    MeasurementBossLocal measurementBoss, ResourceGroupManager resourceGroupManager,
+                                    MeasurementBoss measurementBoss, ResourceGroupManager resourceGroupManager,
                                     GalertManager galertManager, AlertManager alertManager,
                                     AlertDefinitionManager alertDefinitionManager,
                                     EscalationManager escalationManager) {

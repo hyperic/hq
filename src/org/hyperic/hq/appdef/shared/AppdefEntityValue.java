@@ -392,16 +392,18 @@ public class AppdefEntityValue {
         return getGroup(false);
     }
 
-    public PageList getAssociatedPlatforms(PageControl pc)
+    public PageList<AppdefResourceValue> getAssociatedPlatforms(PageControl pc)
         throws PermissionException, AppdefEntityNotFoundException {
         Integer iId = _id.getId();
 
         PlatformManager pManager = getPlatformManager();
+        PageList<AppdefResourceValue> res = new PageList<AppdefResourceValue>();
         if(_id.isApplication()){
-            return pManager.getPlatformsByApplication(getSubject(), iId, pc);
+            res.addAll(pManager.getPlatformsByApplication(getSubject(), iId, pc));
+            return res;
         }
 
-        PageList res = new PageList();
+       
         switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
             res.add(pManager.getPlatformByService(getSubject(), iId));

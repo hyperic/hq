@@ -8,10 +8,6 @@
 		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
 
 
-
-
-<bean class="org.hyperic.hq.bizapp.server.session.MeasurementBossEJBImpl" factory-method="getOne"/>
-
 <!--  TODO figure out a way to switch b/w impls of same EE and .org interface when autowiring -->
 <bean class="org.hyperic.hq.bizapp.server.session.LatherBossImpl">
 	<constructor-arg ref="latherDispatcher"/>

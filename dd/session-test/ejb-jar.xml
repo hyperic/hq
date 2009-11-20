@@ -9,85 +9,7 @@
 
    <enterprise-beans>
 
-      <!-- Session Beans -->
-      <session >
-         <description><![CDATA[The session bean implementing the in-container unit tests for the AuthzSubjectManager.]]></description>
-
-         <ejb-name>AvailabilityManager_test</ejb-name>
-
-         <local-home>org.hyperic.hq.measurement.shared.AvailabilityManager_testLocalHome</local-home>
-         <local>org.hyperic.hq.measurement.shared.AvailabilityManager_testLocal</local>
-         <ejb-class>org.hyperic.hq.measurement.server.session.AvailabilityManager_testEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
-      <session >
-         <description><![CDATA[The session bean implementing the in-container unit tests for the AuthzSubjectManager.]]></description>
-
-         <ejb-name>CritterTranslator_test</ejb-name>
-
-         <local-home>org.hyperic.hq.grouping.shared.CritterTranslator_testLocalHome</local-home>
-         <local>org.hyperic.hq.grouping.shared.CritterTranslator_testLocal</local>
-         <ejb-class>org.hyperic.hq.grouping.server.session.CritterTranslator_testEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
-      <session >
-         <description><![CDATA[The session bean implementing the in-container unit tests for the ResourceGroupManager.]]></description>
-
-         <ejb-name>ResourceGroupManager_test</ejb-name>
-
-         <local-home>org.hyperic.hq.authz.shared.ResourceGroupManager_testLocalHome</local-home>
-         <local>org.hyperic.hq.authz.shared.ResourceGroupManager_testLocal</local>
-         <ejb-class>org.hyperic.hq.authz.server.session.ResourceGroupManager_testEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
-      <session >
-         <description><![CDATA[]]></description>
-
-         <ejb-name>EventsBoss_test</ejb-name>
-
-         <local-home>org.hyperic.hq.bizapp.shared.EventsBoss_testLocalHome</local-home>
-         <local>org.hyperic.hq.bizapp.shared.EventsBoss_testLocal</local>
-         <ejb-class>org.hyperic.hq.bizapp.server.session.EventsBoss_testEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
-      <session >
-         <description><![CDATA[The session bean implementing the in-container unit tests for the DataManager.]]></description>
-
-         <ejb-name>DataManager_test</ejb-name>
-
-         <local-home>org.hyperic.hq.measurement.shared.DataManager_testLocalHome</local-home>
-         <local>org.hyperic.hq.measurement.shared.DataManager_testLocal</local>
-         <ejb-class>org.hyperic.hq.measurement.server.session.DataManager_testEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
-      <session >
-         <description><![CDATA[The session bean implementing the in-container unit tests for the AuthzSubjectManager.]]></description>
-
-         <ejb-name>AuthzSubjectManager_test</ejb-name>
-
-         <local-home>org.hyperic.hq.authz.shared.AuthzSubjectManager_testLocalHome</local-home>
-         <local>org.hyperic.hq.authz.shared.AuthzSubjectManager_testLocal</local>
-         <ejb-class>org.hyperic.hq.authz.server.session.AuthzSubjectManager_testEJBImpl</ejb-class>
-         <session-type>Stateless</session-type>
-         <transaction-type>Container</transaction-type>
-
-      </session>
-
+     
      <!--
        To add session beans that you have deployment descriptor info for, add
        a file to your XDoclet merge directory called session-beans.xml that contains
@@ -136,48 +58,7 @@
        To specify additional container-transaction elements, add a file in the merge
        directory called ejb-container-transactions.ent that contains them.
      -->
-   <container-transaction >
-      <method >
-         <ejb-name>AvailabilityManager_test</ejb-name>
-          <method-name>*</method-name>
-       </method>
-       <trans-attribute>NotSupported</trans-attribute>
-    </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>CritterTranslator_test</ejb-name>
-          <method-name>*</method-name>
-       </method>
-       <trans-attribute>NotSupported</trans-attribute>
-    </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>ResourceGroupManager_test</ejb-name>
-          <method-name>*</method-name>
-       </method>
-       <trans-attribute>NotSupported</trans-attribute>
-    </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>EventsBoss_test</ejb-name>
-          <method-name>*</method-name>
-       </method>
-       <trans-attribute>NotSupported</trans-attribute>
-    </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>DataManager_test</ejb-name>
-          <method-name>*</method-name>
-       </method>
-       <trans-attribute>Supports</trans-attribute>
-    </container-transaction>
-   <container-transaction >
-      <method >
-         <ejb-name>AuthzSubjectManager_test</ejb-name>
-          <method-name>*</method-name>
-       </method>
-       <trans-attribute>NotSupported</trans-attribute>
-    </container-transaction>
+ 
 
    <!-- finder transactions -->
 
