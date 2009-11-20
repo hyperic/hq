@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2007], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -24,8 +24,11 @@
  */
 package org.hyperic.hq.events.server.session;
 
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Query;
 import org.hibernate.criterion.Order;
@@ -33,8 +36,10 @@ import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hyperic.dao.DAOFactory;
 import org.hyperic.hibernate.PageInfo;
+import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
+import org.hyperic.hq.authz.shared.EdgePermCheck;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.dao.HibernateDAO;
 
@@ -113,12 +118,7 @@ public class AlertDAO extends HibernateDAO {
                                      int priority, boolean inEsc,
                                      boolean notFixed, Integer groupId,
                                      Integer alertDefId, PageInfo pageInfo) {
-        String[] ops =
-            new String[] { AuthzConstants.platformOpManageAlerts,
-                           AuthzConstants.serverOpManageAlerts,
-                           AuthzConstants.serviceOpManageAlerts };
         AlertSortField sort = (AlertSortField)pageInfo.getSort();
-        Query q;
         
         String sql = PermissionManagerFactory.getInstance()
                         .getAlertsHQL(inEsc, notFixed, groupId, alertDefId, false)
@@ -132,7 +132,7 @@ public class AlertDAO extends HibernateDAO {
                    " DESC";
         }
             
-        q = getSession().createQuery(sql)
+        Query q = getSession().createQuery(sql)
             .setLong("begin", begin)
             .setLong("end", end)
             .setInteger("priority", priority);
@@ -142,7 +142,7 @@ public class AlertDAO extends HibernateDAO {
 
         if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subj.intValue())
-             .setParameterList("ops", ops);
+             .setParameterList("ops", AuthzConstants.MANAGE_ALERTS_OPS);
         }
 
         return pageInfo.pageResults(q).list();
@@ -152,24 +152,18 @@ public class AlertDAO extends HibernateDAO {
                                          int priority, boolean inEsc,
                                          boolean notFixed, Integer groupId,
                                          Integer alertDefId)   
-    {
-        String[] ops =
-            new String[] { AuthzConstants.platformOpManageAlerts,
-                           AuthzConstants.serverOpManageAlerts,
-                           AuthzConstants.serviceOpManageAlerts };
-        Query q;
-        
+    {        
         String sql = PermissionManagerFactory.getInstance()
                         .getAlertsHQL(inEsc, notFixed, groupId, alertDefId, true);
             
-        q = getSession().createQuery(sql)
+        Query q = getSession().createQuery(sql)
             .setLong("begin", begin)
             .setLong("end", end)
             .setInteger("priority", priority);
     
         if (sql.indexOf("subj") > 0) {
             q.setInteger("subj", subj.intValue())
-             .setParameterList("ops", ops);
+             .setParameterList("ops", AuthzConstants.MANAGE_ALERTS_OPS);
         }
     
         return (Integer) q.uniqueResult();
@@ -255,6 +249,51 @@ public class AlertDAO extends HibernateDAO {
         } catch (Exception e) {
             return null;
         }
+    }
+    
+    /**
+     * Return all last fixed alerts for the given resource
+     * 
+     * @param subject The HQ user
+     * @param r The root resource
+     * @param fixed Boolean to indicate whether to get fixed or unfixed alerts
+     * @return
+     */
+    public Map findLastByResource(AuthzSubject subject,
+                                  Resource r,
+                                  boolean includeDescendants,
+                                  boolean fixed) {
+        EdgePermCheck wherePermCheck =
+            getPermissionManager().makePermCheckHql("rez", includeDescendants);
+                
+        String hql = 
+            new StringBuilder()
+                    .append("select a ")
+                    .append("from Alert a ")
+                    .append("join a.alertDefinition ad ")
+                    .append("join ad.resource rez ")
+                    .append(wherePermCheck.toString())
+                    .append("and ad.deleted = false ")
+                    .append("and a.fixed = :fixed ")
+                    .append("order by a.ctime ")
+                    .toString();
+        
+        Query q = createQuery(hql).setBoolean("fixed", fixed);
+        
+        List alerts = wherePermCheck
+                        .addQueryParameters(q, subject, r, 0, 
+                                Arrays.asList(AuthzConstants.MANAGE_ALERTS_OPS))
+                        .list();
+                
+        Map lastAlerts = new HashMap(alerts.size());
+        for (Iterator it=alerts.iterator(); it.hasNext(); ) {
+            Alert a = (Alert) it.next();
+            // since it is ordered by ctime in ascending order, the
+            // last alert will eventually be put into the map
+            lastAlerts.put(a.getAlertDefinition().getId(), a);
+        }
+
+        return lastAlerts;
     }
 
     int deleteByAlertDefinition(AlertDefinition def) {

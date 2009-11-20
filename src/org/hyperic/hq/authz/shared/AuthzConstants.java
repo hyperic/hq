@@ -191,6 +191,14 @@ public final class AuthzConstants {
     public static final String ResourceEdgeContainmentRelation = "containment";
     public static final String ResourceEdgeNetworkRelation = "network";
     
+    // List of alert operations
+    public static final String[] MANAGE_ALERTS_OPS = 
+        new String[] {
+            platformOpManageAlerts,
+            serverOpManageAlerts,
+            serviceOpManageAlerts
+        };
+    
     public static boolean isOverlord(Integer subject) {
         return subject.equals(AuthzConstants.overlordId);
     }
