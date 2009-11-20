@@ -1724,9 +1724,8 @@ public class EventsBossEJBImpl
             _log.debug("fixPreviousAlerts: alertId = " + alertID
                             + ", previous alerts fixed = " + fixCount
                             + ", time = " + watch);
-
-            return fixCount;
         }
+        return fixCount;
     }
 
     /**
@@ -1833,16 +1832,30 @@ public class EventsBossEJBImpl
         // are deleted.
         HashSet events = new HashSet();
         events.add (ResourceDeletedZevent.class);
-        ZeventManager.getInstance().addBufferedListener(events,
-            new ZeventListener() {
+        ZeventManager inst = ZeventManager.getInstance();
+        inst.addBufferedListener(
+            events, new ZeventListener() {
                 public void processEvents(List events) {
-                    AlertDefinitionManagerLocal adm = getADM();
-                    for (Iterator i = events.iterator(); i.hasNext();) {
-                        ResourceZevent z = (ResourceZevent) i.next();
-                        if (z instanceof ResourceDeletedZevent) {
-                            adm.cleanupAlertDefinitions(z.getAppdefEntityID());
+                    final StopWatch watch = new StopWatch();
+                    final Log log = LogFactory.getLog(this.getClass().getName());
+                    final boolean debug = log.isDebugEnabled();
+                    final AlertDefinitionManagerLocal adm = getADM();
+                    final List alertDefs = getADM().getAllDeletedAlertDefs();
+                    final int batchSize = 1000;
+                    for (int i=0; i<alertDefs.size(); i+=batchSize) {
+                        final int end = Math.min(i+batchSize, alertDefs.size());
+                        final List sublist = alertDefs.subList(i, end);
+                        // can't pass in pojos since the session changes
+                        final List ids = new ArrayList(sublist.size());
+                        for (final Iterator it=sublist.iterator(); it.hasNext(); ) {
+                            final AlertDefinition def = (AlertDefinition) it.next();
+                            ids.add(def.getId());
                         }
+                        if (debug) watch.markTimeBegin("cleanupAlertDefs");
+                        adm.cleanupAlertDefs(ids);
+                        if (debug) watch.markTimeEnd("cleanupAlertDefs");
                     }
+                    if (debug) log.debug(watch);
                 }
 
                 public String toString() {
