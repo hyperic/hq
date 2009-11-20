@@ -47,20 +47,7 @@
 
 
 
-		<session>
-			<description><![CDATA[BizApp interface to the Measurement subsystem]]></description>
-
-			<ejb-name>MeasurementBoss</ejb-name>
-
-			<home>org.hyperic.hq.bizapp.shared.MeasurementBossHome</home>
-			<remote>org.hyperic.hq.bizapp.shared.MeasurementBoss</remote>
-			<local-home>org.hyperic.hq.bizapp.shared.MeasurementBossLocalHome</local-home>
-			<local>org.hyperic.hq.bizapp.shared.MeasurementBossLocal</local>
-			<ejb-class>org.hyperic.hq.bizapp.server.session.MeasurementBossEJBImpl</ejb-class>
-			<session-type>Stateless</session-type>
-			<transaction-type>Container</transaction-type>
-
-		</session>
+	
 
 		
 
@@ -133,13 +120,7 @@
 		</container-transaction>
 
 		
-		<container-transaction>
-			<method>
-				<ejb-name>MeasurementBoss</ejb-name>
-				<method-name>*</method-name>
-			</method>
-			<trans-attribute>Required</trans-attribute>
-		</container-transaction>
+	
 	
 	
 		<!-- finder transactions -->

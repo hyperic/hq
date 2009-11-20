@@ -63,8 +63,7 @@ import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.ControlBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
-import org.hyperic.hq.bizapp.shared.MeasurementBossLocal;
-import org.hyperic.hq.bizapp.shared.MeasurementBossUtil;
+import org.hyperic.hq.bizapp.shared.MeasurementBoss;
 import org.hyperic.hq.bizapp.shared.ProductBossLocal;
 import org.hyperic.hq.bizapp.shared.ProductBossUtil;
 import org.hyperic.hq.common.SystemException;
@@ -100,9 +99,9 @@ public abstract class BizappSessionEJB {
        return EventsBossImpl.getOne();
     }
 
-    public MeasurementBossLocal getMeasurementBoss() {
+    public MeasurementBoss getMeasurementBoss() {
         try {
-            return MeasurementBossUtil.getLocalHome().create();
+            return Bootstrap.getBean(MeasurementBoss.class);
         } catch (Exception e) {
             throw new SystemException();
         }

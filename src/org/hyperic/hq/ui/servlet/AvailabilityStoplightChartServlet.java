@@ -109,9 +109,7 @@ public class AvailabilityStoplightChartServlet extends ChartServlet {
             log.error("failed: ", e);
         } catch (InvalidOptionException e) {
             log.error("failed: ", e);
-        } catch (RemoteException e) {
-            log.error("failed: ", e);
-        }                   
+        }                 
     }
 
 }

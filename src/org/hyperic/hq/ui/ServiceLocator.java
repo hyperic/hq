@@ -52,7 +52,6 @@ import org.hyperic.hq.bizapp.shared.EventLogBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
 import org.hyperic.hq.bizapp.shared.GalertBoss;
 import org.hyperic.hq.bizapp.shared.MeasurementBoss;
-import org.hyperic.hq.bizapp.shared.MeasurementBossHome;
 import org.hyperic.hq.bizapp.shared.ProductBoss;
 import org.hyperic.hq.bizapp.shared.ProductBossHome;
 import org.hyperic.hq.bizapp.shared.UpdateBoss;
@@ -67,8 +66,7 @@ import org.hyperic.hq.ui.util.UIUtils;
  *
  */
 public class ServiceLocator {
-    private final static Class MEASURE_CLASS = MeasurementBossHome.class;
-    private final static String MEASURE_NAME = MeasurementBossHome.JNDI_NAME;
+   
     
     private final static Class PRODUCT_CLASS = ProductBossHome.class;
     private final static String PRODUCT_NAME = ProductBossHome.JNDI_NAME;
@@ -225,10 +223,9 @@ public class ServiceLocator {
      */
     public MeasurementBoss getMeasurementBoss()
     throws ServiceLocatorException {
-        MeasurementBossHome home =
-            (MeasurementBossHome) lookup(MEASURE_NAME, MEASURE_CLASS);
+       
         try {
-            return (MeasurementBoss) home.create();
+            return Bootstrap.getBean(MeasurementBoss.class);
         } catch (Exception e) {
             throw new ServiceLocatorException(e);
         }

@@ -392,16 +392,18 @@ public class AppdefEntityValue {
         return getGroup(false);
     }
 
-    public PageList getAssociatedPlatforms(PageControl pc)
+    public PageList<AppdefResourceValue> getAssociatedPlatforms(PageControl pc)
         throws PermissionException, AppdefEntityNotFoundException {
         Integer iId = _id.getId();
 
         PlatformManager pManager = getPlatformManager();
+        PageList<AppdefResourceValue> res = new PageList<AppdefResourceValue>();
         if(_id.isApplication()){
-            return pManager.getPlatformsByApplication(getSubject(), iId, pc);
+            res.addAll(pManager.getPlatformsByApplication(getSubject(), iId, pc));
+            return res;
         }
 
-        PageList res = new PageList();
+       
         switch(_id.getType()){
         case AppdefEntityConstants.APPDEF_TYPE_SERVICE:
             res.add(pManager.getPlatformByService(getSubject(), iId));
@@ -478,7 +480,7 @@ public class AppdefEntityValue {
      * @param pc the page control object
      * @return a PageList of ServiceValue's
      */
-    public PageList getAssociatedServers(Integer typeId, PageControl pc)
+    public PageList<AppdefResourceValue> getAssociatedServers(Integer typeId, PageControl pc)
         throws AppdefEntityNotFoundException, PermissionException {
         ServerManager sManager;
         PageList res;
@@ -592,7 +594,7 @@ public class AppdefEntityValue {
      * @return a PageList of ServiceValues and ServiceClusterValues (in case of
      *         applications)
      */
-    public PageList getAssociatedServices(Integer typeId, PageControl pc)
+    public PageList<AppdefResourceValue> getAssociatedServices(Integer typeId, PageControl pc)
         throws ApplicationNotFoundException, AppdefEntityNotFoundException,
                PermissionException {
         ServiceManager sManager;
