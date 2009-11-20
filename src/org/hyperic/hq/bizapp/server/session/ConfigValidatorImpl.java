@@ -41,11 +41,23 @@ import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.EncodingException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ConfigValidatorImpl
-    extends BizappSessionEJB
     implements ConfigValidator {
-
+	private MeasurementManager measurementManager;
+	private TrackerManager trackerManager;
+	private ConfigManager configManager;
+	
+	@Autowired
+	public ConfigValidatorImpl(ConfigManager configManager, MeasurementManager measurementManager, TrackerManager trackerManager) {
+		this.configManager = configManager;
+		this.measurementManager = measurementManager;
+		this.trackerManager = trackerManager;
+	}
+	
     public void validate(AuthzSubject subject, String type,
                          AppdefEntityID[] ids)
         throws PermissionException, EncodingException, ConfigFetchException,
@@ -71,23 +83,18 @@ public class ConfigValidatorImpl
         throws EncodingException, PermissionException,
                AppdefEntityNotFoundException, InvalidConfigException
     {
-        MeasurementManager dmMan = getMetricManager();
-        TrackerManager trackerMan = getTrackerManager();
-
         ConfigResponse[] responses;
-        ConfigManager cman;
-
-        cman      = getConfigManager();
+        
         responses = new ConfigResponse[ids.length];
 
         for(int i=0; i<ids.length; i++){
             try {
                 responses[i] =
-                    cman.getMergedConfigResponse(subject,
+                	configManager.getMergedConfigResponse(subject,
                                                  ProductPlugin.TYPE_MEASUREMENT,
                                                  ids[i], true);
                 
-                dmMan.checkConfiguration(subject, ids[i], responses[i]);
+                measurementManager.checkConfiguration(subject, ids[i], responses[i]);
             } catch(ConfigFetchException exc){
                 responses[i] = null;
             } 
@@ -103,7 +110,7 @@ public class ConfigValidatorImpl
             // Metric configuration has been validated, check if we need
             // to enable or disable log and config tracking.
             try {
-                trackerMan.toggleTrackers(subject, ids[i], responses[i]);
+            	trackerManager.toggleTrackers(subject, ids[i], responses[i]);
             } catch (PluginException e) {
                 throw new InvalidConfigException("Unable to modify config " +
                                                  "track config: " +

@@ -61,7 +61,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class UpdateBossImpl
-    extends BizappSessionEJB implements UpdateBoss {
+    implements UpdateBoss {
     private UpdateStatusDAO updateDAO;
     private static final String CHECK_URL = "http://updates.hyperic.com/hq-updates";
 
