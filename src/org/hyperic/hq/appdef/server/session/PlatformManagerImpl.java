@@ -122,8 +122,6 @@ public class PlatformManagerImpl implements PlatformManager {
 
     private Pager valuePager;
 
-    private PlatformCounter counter;
-
     private PlatformTypeDAO platformTypeDAO;
 
     private PermissionManager permissionManager;
@@ -188,6 +186,17 @@ public class PlatformManagerImpl implements PlatformManager {
     // TODO resolve circular dependency
     private AIQueueManager getAIQueueManager() {
         return Bootstrap.getBean(AIQueueManager.class);
+    }
+
+    // TODO remove after HE-54 allows injection
+    private PlatformCounter getCounter() {
+        PlatformCounter counter = (PlatformCounter) ProductProperties
+            .getPropertyInstance("hyperic.hq.platform.counter");
+
+        if (counter == null) {
+            counter = new DefaultPlatformCounter();
+        }
+        return counter;
     }
 
     /**
@@ -499,7 +508,7 @@ public class PlatformManagerImpl implements PlatformManager {
             }
 
             trimStrings(pValue);
-            counter.addCPUs(pValue.getCpuCount().intValue());
+            getCounter().addCPUs(pValue.getCpuCount().intValue());
             validateNewPlatform(pValue);
             PlatformType pType = findPlatformType(platformTypeId);
 
@@ -545,7 +554,7 @@ public class PlatformManagerImpl implements PlatformManager {
      */
     public Platform createPlatform(AuthzSubject subject, AIPlatformValue aipValue) throws ApplicationException,
         CreateException {
-        counter.addCPUs(aipValue.getCpuCount().intValue());
+        getCounter().addCPUs(aipValue.getCpuCount().intValue());
 
         PlatformType platType = platformTypeDAO.findByName(aipValue.getPlatformTypeName());
 
@@ -771,7 +780,7 @@ public class PlatformManagerImpl implements PlatformManager {
         if (p != null) {
             permissionManager.checkViewPermission(subject, p.getEntityId());
             if (isAgentPorker(Arrays.asList(ipvals)) && // Let agent porker
-                                                        // create new platforms
+                // create new platforms
                 !(p.getFqdn().equals(fqdn) || p.getCertdn().equals(certdn) || p.getAgent().getAgentToken().equals(
                     agentToken))) {
                 p = null;
@@ -1402,7 +1411,7 @@ public class PlatformManagerImpl implements PlatformManager {
             int newCount = existing.getCpuCount().intValue();
             int prevCpuCount = plat.getCpuCount().intValue();
             if (newCount > prevCpuCount) {
-                counter.addCPUs(newCount - prevCpuCount);
+                getCounter().addCPUs(newCount - prevCpuCount);
             }
 
             if (!(existing.getName().equals(plat.getName()))) {
@@ -1628,7 +1637,7 @@ public class PlatformManagerImpl implements PlatformManager {
         int prevCpuCount = platform.getCpuCount().intValue();
         Integer count = aiplatform.getCpuCount();
         if ((count != null) && (count.intValue() > prevCpuCount)) {
-            counter.addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
+            getCounter().addCPUs(aiplatform.getCpuCount().intValue() - prevCpuCount);
         }
 
         // Get the FQDN before we update
@@ -1798,14 +1807,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
     @PostConstruct
     public void afterPropertiesSet() throws Exception {
-        counter = (PlatformCounter) ProductProperties.getPropertyInstance("hyperic.hq.platform.counter");
-
-        if (counter == null) {
-            counter = new DefaultPlatformCounter();
-        }
-
         valuePager = Pager.getPager(VALUE_PROCESSOR);
-
     }
 
 }
