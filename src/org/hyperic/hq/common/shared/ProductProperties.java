@@ -32,6 +32,7 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.context.Bootstrap;
 
 public class ProductProperties {
     private static final String PROP_VERSION    = "version";
@@ -124,7 +125,8 @@ public class ProductProperties {
         if (className != null) {
             try {
                 _log.debug("Property " + key + " implemented by " + className);
-                return Class.forName(className).newInstance();
+                //TODO get rid of this whole thing and use app context to instantiate and inject
+                return Bootstrap.getBean(Class.forName(className));
             } catch (Exception e) {
                 _log.error("Unable to instantiate " + className +
                            " for property " + key, e);

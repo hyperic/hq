@@ -26,7 +26,8 @@
 package org.hyperic.hq.appdef.server.session;
 
 import org.hyperic.hq.common.ApplicationException;
-
+import org.springframework.stereotype.Service;
+@Service
 public class DefaultPlatformCounter implements PlatformCounter {
 
     public void addCPUs(int count) throws ApplicationException {}
