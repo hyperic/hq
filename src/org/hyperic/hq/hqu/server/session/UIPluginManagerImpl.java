@@ -299,7 +299,7 @@ public class UIPluginManagerImpl implements UIPluginManager {
 				continue;
 			}
 
-			if (attachmentDescriptors != null) {
+			if (attachmentDescriptor != null) {
 				attachmentDescriptors.add(attachmentDescriptor);
 			} else {
 				log.debug("Not returning attachment for [" + attachment
