@@ -20,7 +20,7 @@ class AlertDefinitionCategory {
     }
 
     static void unsetEscalation(AlertDefinition d, AuthzSubject s) {
-        EscMan.one.EscalationManagerImpl(ClassicEscalationAlertType.CLASSIC, d.getId(),
+        EscMan.one.setEscalation(ClassicEscalationAlertType.CLASSIC, d.getId(),
                                  null)
     }
 

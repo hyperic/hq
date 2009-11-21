@@ -90,8 +90,8 @@ class ResourceHelper extends BaseHelper {
             case 'resources': return ResMan.one.resourceCount
             case 'resourceTypes': return ResMan.one.resourceTypeCount
             case 'groups': return GroupMan.one.groupCount
-            case 'escalations': return EscMan.one.EscalationManagerImplnt
-            case 'activeEscalations': return EscMan.one.EscalationManagerImplionCount
+            case 'escalations': return EscMan.one.escalationCount
+            case 'activeEscalations': return EscMan.one.activeEscalationCount
             default:
                 throw new IllegalArgumentException("count ${args.count} must specify a " + 
                                                    "valid resource type")
