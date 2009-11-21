@@ -44,11 +44,11 @@ import org.hyperic.util.config.EncodingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service("configValidator")
 public class ConfigValidatorImpl implements ConfigValidator {
-	private MeasurementManager measurementManager;
-	private TrackerManager trackerManager;
-	private ConfigManager configManager;
+	protected MeasurementManager measurementManager;
+	protected TrackerManager trackerManager;
+	protected ConfigManager configManager;
 
 	@Autowired
 	public ConfigValidatorImpl(ConfigManager configManager,

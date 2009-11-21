@@ -121,14 +121,14 @@ public class ProductProperties {
     }
     
     public static Object getPropertyInstance(String key) {
-        String className = ProductProperties.getProperty(key);
-        if (className != null) {
+        String beanName = ProductProperties.getProperty(key);
+        if (beanName != null) {
             try {
-                _log.debug("Property " + key + " implemented by " + className);
+                _log.debug("Property " + key + " implemented by " + beanName);
                 //TODO get rid of this whole thing and use app context to instantiate and inject
-                return Bootstrap.getBean(Class.forName(className));
+                return Bootstrap.getBean(beanName);
             } catch (Exception e) {
-                _log.error("Unable to instantiate " + className +
+                _log.error("Unable to instantiate bean " + beanName +
                            " for property " + key, e);
             }
         }

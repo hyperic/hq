@@ -56,4 +56,21 @@ public class Bootstrap {
         }
         return null;
     }
+    
+    public static Object getBean(String name) {
+        try {
+            Object bean = getContext().getBean(name);
+            if(bean == null && getContext().getParent() != null) {
+                bean = getContext().getParent().getBean(name);
+            }
+            return bean;
+        } catch (BeansException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

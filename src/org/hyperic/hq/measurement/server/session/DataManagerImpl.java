@@ -132,8 +132,6 @@ public class DataManagerImpl implements DataManager {
 
     private static final long HOURS_PER_MEAS_TAB = MeasTabManagerUtil.NUMBER_OF_TABLES_PER_DAY;
 
-    private Analyzer analyzer;
-
     private MeasurementDAO measurementDAO;
 
     private MeasurementManager measurementManager;
@@ -490,6 +488,7 @@ public class DataManagerImpl implements DataManager {
     }
 
     private void analyzeMetricData(List<DataPoint> data) {
+        Analyzer analyzer = getAnalyzer();
         if (analyzer != null) {
             for (DataPoint dp : data) {
                 analyzer.analyzeMetricValue(dp.getMetricId(), dp.getMetricValue());
@@ -1922,8 +1921,8 @@ public class DataManagerImpl implements DataManager {
         return Bootstrap.getBean(DataManager.class);
     }
 
-    @PostConstruct
-    public void setAnalyzer() {
+    // TODO remove after HE-54 allows injection
+    public Analyzer getAnalyzer() {
         boolean analyze = true;
         try {
             Properties conf = serverConfigManager.getConfig();
@@ -1934,8 +1933,9 @@ public class DataManagerImpl implements DataManager {
             log.debug("Error looking up server configs", e);
         } finally {
             if (analyze) {
-                analyzer = (Analyzer) ProductProperties.getPropertyInstance("hyperic.hq.measurement.analyzer");
+                return (Analyzer) ProductProperties.getPropertyInstance("hyperic.hq.measurement.analyzer");
             }
         }
+        return null;
     }
 }
