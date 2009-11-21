@@ -116,11 +116,7 @@ public final class ConcurrentStatsCollector {
 
     private ConcurrentStatsCollector() {
     	final char fs = File.separatorChar;
-    	String unittestPropStringVal =  System.getProperty("hq.unittest.run");
-    	boolean inUnittestEnv =
-    		unittestPropStringVal == null ? false :
-    			(new Boolean(unittestPropStringVal)).booleanValue();
-    	if (!inUnittestEnv) {
+    	
         	final String d =
         		HQApp.getInstance().getRestartStorageDir().getAbsolutePath();
         	final String jbossLogSuffix =
@@ -133,10 +129,7 @@ public final class ConcurrentStatsCollector {
         	}
     		_mbeanServer = MBeanUtil.getMBeanServer();
     		registerInternalStats();
-    	} else {
-    		_mbeanServer = null;
-    		_baseDir = null;
-    	}
+    	
     }
 
     public final void register(final String statId) {

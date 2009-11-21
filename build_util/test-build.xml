@@ -34,7 +34,7 @@
     <sequential>
 
     <echo message="Using the following system properties..."/>
-    <echo message="-Dhq.unittest.run=true"/>
+    
     <echo message="-Dhq.unittest.jboss.home=${jboss.home}"/>
     <echo message="-Dhq.unittest.hq.home=${basedir}"/>
     <echo message="-Dhq.unittest.working.dir=${hq.home}/unittest/data"/>
@@ -49,7 +49,7 @@
         <jvmarg value="-Xmx1024m"/>
         <jvmarg value="-Xms1024m"/>
         <jvmarg value="-XX:MaxPermSize=512m"/>
-        <jvmarg value="-Dhq.unittest.run=true"/>
+       
         <jvmarg value="-Dhq.unittest.jboss.home=${jboss.home}"/>
         <jvmarg value="-Dhq.unittest.hq.home=${basedir}"/>
         <jvmarg value="-Dhq.unittest.working.dir=${hq.home}/unittest/data"/>

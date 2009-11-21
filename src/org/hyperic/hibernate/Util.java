@@ -73,7 +73,7 @@ public class Util {
      * If the system property with this name is set to <code>true</code>, then 
      * the HQ product is running within a unit test environment.
      */
-    public static final String HQ_UNITTEST_RUN = "hq.unittest.run";
+  
     
     private static Log log = LogFactory.getLog(Util.class);
 
@@ -184,13 +184,7 @@ public class Util {
         throws MalformedObjectNameException, InstanceAlreadyExistsException,
                MBeanRegistrationException, NotCompliantMBeanException
     {
-        // If we are running within a unit test environment, we don't want 
-        // to register this MBean since it is not properly removed on 
-        // application undeployment. This causes any future application 
-        // deployments within the same server instance to fail.
-        if (Boolean.getBoolean(HQ_UNITTEST_RUN)) {
-            return;
-        }
+       
         
         // get MBeanServer
         MBeanServer server = MBeanUtil.getMBeanServer();
