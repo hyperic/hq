@@ -9,9 +9,9 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 public class Bootstrap {
 
-    private static final String[] APP_CONTEXT_FILES = new String[] { "classpath*:/META-INF/spring/dao-context.xml","classpath*:/META-INF/spring/ejb-*context.xml" };
+    private static final String[] APP_CONTEXT_FILES = new String[] { "classpath*:/META-INF/spring/dao-context.xml" };
     
-    //private static final String[] EJB_APP_CONTEXT_FILES = new String[] { "classpath*:/META-INF/spring/ejb-*context.xml" };
+    private static final String[] EJB_APP_CONTEXT_FILES = new String[] { "classpath*:/META-INF/spring/ejb-*context.xml" };
 
     private static ApplicationContext APP_CONTEXT;
      
@@ -28,13 +28,13 @@ public class Bootstrap {
         return APP_CONTEXT;
     }
     
-//    public static synchronized void loadEJBApplicationContext() {
-//        try {
-//            APP_CONTEXT = new ClassPathXmlApplicationContext(EJB_APP_CONTEXT_FILES,APP_CONTEXT);
-//        }catch(Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public static synchronized void loadEJBApplicationContext() {
+      try {
+           APP_CONTEXT = new ClassPathXmlApplicationContext(EJB_APP_CONTEXT_FILES,APP_CONTEXT);
+       }catch(Exception e) {
+            e.printStackTrace();
+        }
+   }
 
     public static <T> T getBean(Class<T> beanClass)  {
         try {

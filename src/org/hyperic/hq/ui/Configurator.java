@@ -34,7 +34,7 @@ import javax.servlet.ServletContextListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.common.shared.ProductProperties;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.util.config.ConfigResponse;
 
@@ -200,13 +200,23 @@ public class Configurator implements ServletContextListener {
     }
         
     private void loadBuildNumber(ServletContext ctx){
-        ProductBoss boss = ContextUtils.getProductBoss(ctx);
+        
         
         try{
-            ctx.setAttribute(Constants.APP_VERSION, boss.getVersion());            
-            ctx.setAttribute(Constants.APP_BUILD, boss.getBuildNumber());
+            ctx.setAttribute(Constants.APP_VERSION, ProductProperties.getVersion());            
+            ctx.setAttribute(Constants.APP_BUILD, getBuildNumber());
         } catch(Exception e){
             error("Unable to load product version", e);
         }
     }
+    
+   
+        private String getBuildNumber() {
+            String build = ProductProperties.getBuild();
+            String buildDate = ProductProperties.getBuildDate();
+            String comment = ProductProperties.getComment();
+
+            return "(build #" + build + " - " + buildDate + " - " + comment + ")";
+        }
+    
 }

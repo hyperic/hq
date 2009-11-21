@@ -206,7 +206,7 @@ public class ProductPluginDeployer
      */
     public void handleNotification(Notification n, Object o) {
         loadConfig();
-       
+        Bootstrap.loadEJBApplicationContext();
         loadStartupClasses();
      
 
@@ -247,11 +247,7 @@ public class ProductPluginDeployer
     }
 
     private void startConcurrentStatsCollector() {
-        String prop = System.getProperty("hq.unittest.run");
-        System.out.println(prop);
-        if (prop != null && prop.equals("true")) {
-            return;
-        }
+       
         try {
             ConcurrentStatsCollector c = ConcurrentStatsCollector.getInstance();
             c.register(
