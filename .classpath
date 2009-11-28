@@ -50,6 +50,7 @@
 	<classpathentry kind="src" path="tools/txsnatch/src"/>
 	<classpathentry kind="src" path="unittest/src"/>
 	<classpathentry kind="src" path="web/js/dojo/0.4.3/src/storage/java"/>
+	<classpathentry kind="lib" path="thirdparty/lib/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="hq_bin/db2monitor_bin/lib/db2monitor.jar"/>
 	<classpathentry kind="lib" path="hq_bin/lather_bin/lather.jar"/>
 	<classpathentry kind="lib" path="hq_bin/sigar_bin/lib/sigar.jar"/>
@@ -95,7 +96,7 @@
 	<classpathentry kind="lib" path="thirdparty/lib/javax.servlet.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/jboss-common.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/jboss-jmx.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/jboss-remoting.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/jboss-remoting.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/jdom-1.1.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/jgroups-all.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/jmock-core-1.2.0.jar"/>
@@ -106,7 +107,6 @@
 	<classpathentry kind="lib" path="thirdparty/lib/jsr107cache-1.0.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/jug-asl-2.0.0.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/junit-3.8.jar"/>
-	<classpathentry kind="lib" path="thirdparty/lib/log4j-1.2.14.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/minify/jargs-1.0.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/minify/rhino-1.6R7.jar"/>
 	<classpathentry kind="lib" path="thirdparty/lib/minify/yuicompressor-2.3.5.jar"/>

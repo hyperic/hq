@@ -65,7 +65,7 @@ public class TestCommonValidator extends TestCase {
     
     public void testValidate () {
 
-        try {
+      
             String TEST_FORM_1 = "testFormOne";
             
             CommonValidator commonValidator =
@@ -83,8 +83,8 @@ public class TestCommonValidator extends TestCase {
                                          bean);
                 // If we haven't thrown an exception we're okay.
                 this.assertTrue ("good username",true);
-            } catch (Exception e) {
-                this.fail("failed testing username dave"+e.getMessage());
+            } catch (Throwable t) {
+                this.fail("failed testing username dave"+t.getMessage());
             }
             // Try a bad username (x>25 chars)
             try {
@@ -122,9 +122,6 @@ public class TestCommonValidator extends TestCase {
             } catch (SAXException e) {
             	fail("SAXException thrown" + e.getMessage());
             }
-        } catch (CommonValidatorException e) {
-            System.out.println ("Errors detected: "+e.collapseMessages());
-            fail("Errors in test"+e.collapseMessages());
-        }
+       
     }
 }

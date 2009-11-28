@@ -7,7 +7,6 @@
 <target name="init-tests">
   <delete dir="${junitResults.dir}"/>
   <mkdir dir="${junitResults.dir}"/>
-  <mkdir dir="${hq.home}/unittest/data"/>
 </target>
 
 <target name="single-test">
@@ -33,11 +32,6 @@
     <attribute name="input.dir"/>
     <sequential>
 
-    <echo message="Using the following system properties..."/>
-    
-    <echo message="-Dhq.unittest.jboss.home=${jboss.home}"/>
-    <echo message="-Dhq.unittest.hq.home=${basedir}"/>
-    <echo message="-Dhq.unittest.working.dir=${hq.home}/unittest/data"/>
 
   <condition property="test.halt" value="false" else="true">
     <istrue value="${ci.build}"/>
@@ -46,13 +40,7 @@
   <echo message="Halt on error or failure: ${test.halt}"/>
 
     <junit reloading="no" fork="true" forkmode="once" printsummary="yes" haltOnError="${test.halt}" haltOnFailure="${test.halt}">
-        <jvmarg value="-Xmx1024m"/>
-        <jvmarg value="-Xms1024m"/>
-        <jvmarg value="-XX:MaxPermSize=512m"/>
        
-        <jvmarg value="-Dhq.unittest.jboss.home=${jboss.home}"/>
-        <jvmarg value="-Dhq.unittest.hq.home=${basedir}"/>
-        <jvmarg value="-Dhq.unittest.working.dir=${hq.home}/unittest/data"/>
      <jvmarg value="-Dtest.halt=${test.halt}"/>
     <classpath refid="@{classpath.id}"/>
 
@@ -62,34 +50,9 @@
 
        <batchtest todir="${junitResults.dir}" unless="single.test">
            <fileset dir="@{input.dir}">
-               <include name="**/*_test.java"/>
 				<include name="**/*Test.java"/>
-
-               <!-- XXX scottmf, exclude Critter tests for now, need to upgrade
-                        dbunit schema -->
-               <exclude name="**/CritterTranslator_test.java"/>
-
-               <!-- Need to figure out why these tests are failing -->
-               <exclude name="**/AuthzSubjectManager_test.java"/>
-               <exclude name="**/ProblemMetricManager_test.java"/>
-         <exclude name="**/ResourceGroupManager_test.java"/>
-         <exclude name="**/InputStreamService_test.java"/>
- 			<exclude name="**/AvailabilityManager_test.java"/>
-	<exclude name="**/DataManager_test.java"/>
-               <!-- This unit test should be enabled only when testing the
-                    unit test framework itself -->
-               <exclude name="**/ServerLifecycleManagement_test.java"/>
            </fileset>
       </batchtest>
-
-      <sysproperty key="hq.example.plugins" value="${hq.home}/plugins/examples"/>
-      <sysproperty key="pdk.dir" value="${pdk.dir}"/>
-      <sysproperty key="hq.server.ds-mapping" value="${hq.server.ds-mapping}"/>
-      <sysproperty key="hq.jdbc.url" value="${hq.jdbc.url}"/>
-      <sysproperty key="hq.jdbc.name" value="${hq.jdbc.name}"/>
-      <sysproperty key="hq.jdbc.user" value="${hq.jdbc.user}"/>
-      <sysproperty key="hq.jdbc.password" value="${hq.jdbc.password}"/>
-      <sysproperty key="hq.jdbc.server" value="${hq.jdbc.server}"/>
     </junit>
   </sequential>
   </macrodef>

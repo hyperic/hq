@@ -40,22 +40,11 @@ import javax.ejb.FinderException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.PageInfo;
-import org.hyperic.hq.appdef.server.session.AppdefResourceType;
-import org.hyperic.hq.appdef.server.session.ApplicationType;
-import org.hyperic.hq.appdef.server.session.PlatformType;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
-import org.hyperic.hq.appdef.server.session.ServerType;
-import org.hyperic.hq.appdef.server.session.ServiceType;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
-import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
-import org.hyperic.hq.appdef.shared.ApplicationManager;
-import org.hyperic.hq.appdef.shared.GroupTypeValue;
-import org.hyperic.hq.appdef.shared.PlatformManager;
-import org.hyperic.hq.appdef.shared.ServerManager;
-import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
@@ -99,8 +88,6 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
                                        PagerProcessor_resourceGroup.class.getName();
     private static final String OWNEDGROUP_PAGER =
                                             PagerProcessor_ownedResourceGroup.class.getName();
-
-    private GroupChangeCallback groupChangeCallback;
 
     private ResourceEdgeDAO resourceEdgeDAO;
 
@@ -161,7 +148,7 @@ public class ResourceGroupManagerImpl implements ResourceGroupManager {
                        .create(res.getResource(), res.getResource(), 0,
                                getContainmentRelation()); // Self-edge
 
-        // groupChangeCallback.postGroupCreate(res);
+        GroupingStartupListener.getCallbackObj().postGroupCreate(res);
         return res;
     }
 

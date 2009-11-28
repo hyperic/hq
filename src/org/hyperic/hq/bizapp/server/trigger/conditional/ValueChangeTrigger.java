@@ -59,22 +59,31 @@ import org.hyperic.util.units.FormattedNumber;
  */
 
 public class ValueChangeTrigger
-    extends AbstractTrigger implements ConditionalTriggerInterface
-{
+    extends AbstractTrigger implements ConditionalTriggerInterface {
     static {
         // Register the trigger/condition
         ConditionalTriggerInterface.MAP_COND_TRIGGER.put(new Integer(EventConstants.TYPE_CHANGE),
-                                                         ValueChangeTrigger.class);
+            ValueChangeTrigger.class);
     }
 
-    private static final MessageFormat MESSAGE_FMT = new MessageFormat("Current value ({0}) differs from previous value ({1}).");
+    private static final MessageFormat MESSAGE_FMT = new MessageFormat(
+        "Current value ({0}) differs from previous value ({1}).");
 
     private final Object lock = new Object();
     private Integer measurementId;
     private MeasurementEvent last = null;
     private final Log log = LogFactory.getLog(ValueChangeTrigger.class);
+    private MeasurementManager measurementManager;
+    private DataManager dataManager;
 
     public ValueChangeTrigger() {
+        this.measurementManager = MeasurementManagerImpl.getOne();
+        this.dataManager = DataManagerImpl.getOne();
+    }
+
+    public ValueChangeTrigger(MeasurementManager measurementManager, DataManager dataManager) {
+        this.measurementManager = measurementManager;
+        this.dataManager = dataManager;
     }
 
     /**
@@ -89,8 +98,7 @@ public class ValueChangeTrigger
      *      org.hyperic.hq.events.shared.AlertConditionValue)
      */
     public ConfigResponse getConfigResponse(AppdefEntityID id, AlertConditionValue cond) throws InvalidOptionException,
-                                                                                        InvalidOptionValueException
-    {
+        InvalidOptionValueException {
         ConfigResponse resp = new ConfigResponse();
         resp.setValue(CFG_ID, String.valueOf(cond.getMeasurementId()));
         return resp;
@@ -99,8 +107,8 @@ public class ValueChangeTrigger
     /**
      * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#init(org.hyperic.hq.events.shared.RegisteredTriggerValue)
      */
-    public void init(RegisteredTriggerValue tval, AlertConditionEvaluator alertConditionEvaluator) throws InvalidTriggerDataException
-    {
+    public void init(RegisteredTriggerValue tval, AlertConditionEvaluator alertConditionEvaluator)
+        throws InvalidTriggerDataException {
         setId(tval.getId());
         setAlertConditionEvaluator(alertConditionEvaluator);
 
@@ -119,22 +127,22 @@ public class ValueChangeTrigger
 
     private void initializeLastValue() {
         try {
-            MeasurementManager measurementManager = MeasurementManagerImpl.getOne();
-            DataManager  dataManager = DataManagerImpl.getOne();
+
             Measurement measurement = measurementManager.getMeasurement(measurementId);
             List measurements = new ArrayList();
             measurements.add(measurement);
             Map lastDataPoints = dataManager.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED);
-            if(lastDataPoints.get(measurementId) == null) {
-                if(log.isDebugEnabled()) {
+            if (lastDataPoints.get(measurementId) == null) {
+                if (log.isDebugEnabled()) {
                     log.debug("No previous values found for measurement " + measurementId);
                 }
                 return;
             }
-            MetricValue value = (MetricValue)lastDataPoints.get(measurementId);
-            this.last = new MeasurementEvent(measurementId,value);
+            MetricValue value = (MetricValue) lastDataPoints.get(measurementId);
+            this.last = new MeasurementEvent(measurementId, value);
         } catch (Exception e) {
-            log.error("Error initializing last value.  Changes from previously stored value will not trigger an alert.",e);
+            log.error(
+                "Error initializing last value.  Changes from previously stored value will not trigger an alert.", e);
         }
     }
 
@@ -176,8 +184,7 @@ public class ValueChangeTrigger
             if (last == null) {
                 last = me;
             } else if (last.getValue().getValue() != me.getValue().getValue() &&
-                       last.getValue().getTimestamp() < me.getValue().getTimestamp())
-            {
+                       last.getValue().getTimestamp() < me.getValue().getTimestamp()) {
                 // Get ready to fire
                 myEvent = prepareTriggerFiredEvent(event);
                 double values[] = { me.getValue().getValue(), last.getValue().getValue() };

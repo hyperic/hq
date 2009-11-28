@@ -23,20 +23,38 @@
  * USA.
  */
 
-package org.hyperic.util.validator.common.test;
+package org.hyperic.util.test;
 
-public class TestBean {
+import junit.framework.TestCase;
+import org.hyperic.util.HostIP;
 
-    public String fieldStr1 = null;
-    public String fieldStr2 = null;
-    public int fieldint1 = 0;
+public class ValidateIPTest extends TestCase {
 
-    public void setFieldStr1 (String s) { fieldStr1 = s; }
-    public void setFieldStr2 (String s) { fieldStr2 = s; }
-    public void setFieldint1 (int i) { fieldint1 = i; }
+    public ValidateIPTest(String name) {
+        super(name);
+    }
 
-    public String getFieldStr1 () { return fieldStr1; }
-    public String getFieldStr2 () { return fieldStr2; }
-    public int    getFieldint1 () { return fieldint1; }
+    public void testGoodIPs () throws Exception {
+        String[] ips
+            = { "127.0.0.1",
+                "192.168.1.1",
+                "10.0.0.254" };
+        for ( int i=0; i<ips.length; i++ ) {
+            assertTrue("IP #" + i + " was invalid.", HostIP.isValidIP(ips[i]));
+        }
+    }
 
+    public void testBadIPs () throws Exception {
+        String[] ips
+            = { "127.0.0.0",
+                "192.168.1.1.10",
+                "0.168.1.1",
+                "10.0.0.255",
+                "10.255.2.2",
+                "1.2.3.400",
+                "1..2.3.4" };
+        for ( int i=0; i<ips.length; i++ ) {
+            assertTrue("IP #" + i + " was valid.", !HostIP.isValidIP(ips[i]));
+        }
+    }
 }
