@@ -28,6 +28,7 @@ package org.hyperic.hq.appdef.server.session;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
@@ -560,12 +561,37 @@ public class ConfigManagerEJBImpl
         }
 
         if (wasUpdated) {
-            // XXX: Need to cascade and send events for each resource that may
-            // have been affected by this config update.
             if (sendConfigEvent) {
-                ResourceUpdatedZevent event =
-                    new ResourceUpdatedZevent(subject, appdefID);
-                ZeventManager.getInstance().enqueueEventAfterCommit(event);
+                List events = new ArrayList();
+                events.add(new ResourceUpdatedZevent(subject, appdefID));
+
+                if (appdefID.isPlatform()) {
+                    try {
+                        Platform p = getPlatformManagerLocal().findPlatformById(appdefID.getId());
+                        for (Iterator i = p.getServers().iterator(); i.hasNext() ;) {
+                            Server s = (Server)i.next();
+                            events.add(new ResourceUpdatedZevent(subject, s.getEntityId()));
+                            for (Iterator it = s.getServices().iterator(); it.hasNext();) {
+                                Service svc = (Service)i.next();
+                                events.add(new ResourceUpdatedZevent(subject, svc.getEntityId()));
+                            }
+                        }
+                    } catch (org.hyperic.hq.appdef.shared.PlatformNotFoundException e) {
+                        log.warn("Error sending config event for: " + appdefID, e);
+                    }
+                } else if (appdefID.isServer()) {
+                    try {
+                        Server s = getServerManagerLocal().findServerById(appdefID.getId());
+                        for (Iterator i = s.getServices().iterator(); i.hasNext();) {
+                            Service svc = (Service)i.next();
+                            events.add(new ResourceUpdatedZevent(subject, svc.getEntityId()));
+                        }
+                    } catch (org.hyperic.hq.appdef.shared.ServerNotFoundException e) {
+                        log.warn("Error sending config event for: " + appdefID, e);
+                    }
+                }
+
+                ZeventManager.getInstance().enqueueEventsAfterCommit(events);
             }
             
             return appdefID;
