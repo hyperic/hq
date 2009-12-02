@@ -8,6 +8,7 @@ import org.hyperic.hq.authz.server.session.ResourceGroup
 import org.hyperic.hq.authz.server.session.ResourceGroup.ResourceGroupCreateInfo
 import org.hyperic.hq.authz.server.session.ResourceManagerEJBImpl as ResMan
 import org.hyperic.hq.authz.server.session.ResourceGroupManagerEJBImpl as GroupMan
+import org.hyperic.hq.authz.server.session.ResourceGroupSortField
 import org.hyperic.hq.appdef.Agent
 import org.hyperic.hq.appdef.shared.AppdefEntityID
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants
@@ -31,6 +32,7 @@ import org.hyperic.hq.control.server.session.ControlScheduleManagerEJBImpl as CS
 import org.hyperic.hq.product.PluginNotFoundException
 import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl as DMan
 
+import org.hyperic.hibernate.PageInfo
 import org.hyperic.hq.livedata.shared.LiveDataCommand
 import org.hyperic.hq.livedata.shared.LiveDataResult
 import org.hyperic.util.config.ConfigResponse
@@ -442,6 +444,23 @@ class ResourceCategory {
         }
         
         []
+    }
+
+    static List getGroupsContaining(Resource r, AuthzSubject user) {
+    	PageInfo pInfo = PageInfo.create(PageControl.PAGE_ALL, 
+    									 ResourceGroupSortField.NAME)
+    	return groupMan.findGroupsContaining(user, r,
+    										 Collections.EMPTY_LIST,
+    										 pInfo)
+    }
+        
+    static List getGroupsNotContaining(Resource r, AuthzSubject user) {    	
+    	PageInfo pInfo = PageInfo.create(PageControl.PAGE_ALL, 
+    									 ResourceGroupSortField.NAME)
+		
+    	return groupMan.findGroupsNotContaining(user, r, r.getPrototype(),
+    											Collections.EMPTY_LIST,
+    											pInfo)
     }
 
     static createInstance(Resource proto, Resource parent, String name,
