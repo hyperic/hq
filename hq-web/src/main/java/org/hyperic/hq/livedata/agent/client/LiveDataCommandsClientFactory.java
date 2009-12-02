@@ -74,7 +74,7 @@ public class LiveDataCommandsClientFactory {
 
             return new LiveDataCommandsClientImpl(agent, factory);
         } else {
-            return new LegacyLiveDataCommandsClientImpl(new SecureAgentConnection(agent));            
+            return new LegacyLiveDataCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),agent.getPort(),agent.getAuthToken()));            
         }         
     }
 

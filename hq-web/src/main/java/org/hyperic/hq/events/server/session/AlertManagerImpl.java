@@ -43,6 +43,7 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
@@ -528,7 +529,7 @@ public class AlertManagerImpl implements AlertManager {
      */
     public String getShortReason(Alert alert) {
         AlertDefinition def = alert.getAlertDefinition();
-        AppdefEntityID aeid = new AppdefEntityID(def.getResource());
+        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(def.getResource());
         AppdefEntityValue aev = new AppdefEntityValue(aeid, authzSubjectManager.getOverlordPojo());
 
         String name = "";

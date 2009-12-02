@@ -145,7 +145,7 @@ import org.hyperic.hq.bizapp.shared.uibeans.SearchResult;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.MaintenanceEvent;
 import org.hyperic.hq.events.shared.MaintenanceEventManager;
@@ -788,7 +788,7 @@ public class AppdefBossImpl implements AppdefBoss {
             List<AppdefResourceValue> appdefResources = new ArrayList<AppdefResourceValue>();
             for (Resource res : pl) {
                 try {
-                    appdefResources.add(findById(subject, new AppdefEntityID(res)));
+                    appdefResources.add(findById(subject, AppdefUtil.newAppdefEntityId(res)));
                 } catch (AppdefEntityNotFoundException e) {
                     log.error("Resource not found in Appdef: " + res.getId());
                 }
@@ -2457,7 +2457,7 @@ public class AppdefBossImpl implements AppdefBoss {
         res.setTotalSize(children.getTotalSize());
         for (Resource child : children) {
             try {
-                AppdefEntityID aeid = new AppdefEntityID(child);
+                AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(child);
                 AppdefEntityValue arv = new AppdefEntityValue(aeid, subject);
                 if (aeid.isGroup()) {
                     res.add(arv.getAppdefGroupValue());
@@ -2585,7 +2585,7 @@ public class AppdefBossImpl implements AppdefBoss {
 
         List<SearchResult> searchResults = new ArrayList<SearchResult>(resources.size());
         for (Resource res : resources) {
-            AppdefEntityID aeid = new AppdefEntityID(res);
+            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
             searchResults.add(new SearchResult(res.getName(), AppdefEntityConstants.typeToString(aeid.getType()), aeid
                 .getAppdefKey()));
         }
@@ -2639,7 +2639,7 @@ public class AppdefBossImpl implements AppdefBoss {
         }
 
         for (Resource rv : authzResources) {
-            AppdefEntityID id = new AppdefEntityID(rv);
+            AppdefEntityID id = AppdefUtil.newAppdefEntityId(rv);
             if (!assigned.contains(id)) {
                 toBePaged.add(id);
             }
@@ -2727,7 +2727,7 @@ public class AppdefBossImpl implements AppdefBoss {
         Collection<Resource> resources = resourceManager.findResourceByOwner(currentOwner);
         AuthzSubject overlord = authzSubjectManager.getOverlordPojo();
         for (Resource aRes : resources) {
-            AppdefEntityID aeid = new AppdefEntityID(aRes);
+            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(aRes);
 
             if (aeid.isGroup()) {
                 ResourceGroup g = resourceGroupManager.findResourceGroupById(overlord, aRes.getInstanceId());

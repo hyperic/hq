@@ -53,6 +53,7 @@ import org.hyperic.hq.appdef.server.session.ServiceDAO;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.PlatformNotFoundException;
 import org.hyperic.hq.appdef.shared.ResourcesCleanupZevent;
@@ -476,7 +477,7 @@ public class ResourceManagerImpl implements ResourceManager {
             removed.addAll(Arrays.asList(removeResourcePerms(subj, edge.getTo(), true)));
         }
 
-        removed.add(new AppdefEntityID(r));
+        removed.add(AppdefUtil.newAppdefEntityId(r));
         if (debug) {
             watch.markTimeBegin("removeResource");
         }

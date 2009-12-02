@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.hyperic.hq.appdef.server.session.Server;
+import org.hyperic.hq.authz.server.session.Resource;
+import org.hyperic.hq.authz.server.session.ResourceType;
 import org.hyperic.hq.authz.shared.AuthzConstants;
 
 /** AppdefUtil - utility methods for appdef entities and
@@ -103,6 +105,39 @@ public class AppdefUtil {
                  ( !server.isWasAutodiscovered() ||
                    ( server.isWasAutodiscovered() &&
                      !server.isServicesAutomanaged()) ));
+    }
+    
+    public static AppdefEntityID newAppdefEntityId(Resource rv) {
+      
+            ResourceType resType = rv.getResourceType();
+         
+            if (resType == null) {
+                throw new IllegalArgumentException(rv.getName() + 
+                    " does not have a Resource Type");
+            }
+            int entityID = rv.getInstanceId().intValue();
+            int entityType;
+            if(resType.getId().equals(AuthzConstants.authzPlatform)) {
+                entityType = AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+            }
+            else if(resType.getId().equals(AuthzConstants.authzServer)) {
+                entityType = AppdefEntityConstants.APPDEF_TYPE_SERVER;
+            }
+            else if(resType.getId().equals(AuthzConstants.authzService)) {
+                entityType = AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+            }
+            else if(resType.getId().equals(AuthzConstants.authzApplication)) {
+                entityType = AppdefEntityConstants.APPDEF_TYPE_APPLICATION;
+            }
+            else if(resType.getId().equals(AuthzConstants.authzGroup)) {
+                entityType = AppdefEntityConstants.APPDEF_TYPE_GROUP;
+            } 
+            else {
+                throw new IllegalArgumentException(resType.getName() + 
+                    " is not a valid Appdef Resource Type");
+            }
+            return new AppdefEntityID(entityType, entityID);
+        
     }
 
     public static Map groupByAppdefType(AppdefEntityID[] ids) {

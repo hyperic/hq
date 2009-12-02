@@ -63,6 +63,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
@@ -1691,7 +1692,7 @@ public class MeasurementBossImpl implements MeasurementBoss
                     if (r == null || r.isInAsyncDeleteState()) {
                         continue;
                     }
-                    resources.add(new AppdefEntityID(r));
+                    resources.add(AppdefUtil.newAppdefEntityId(r));
                 }
             }
             else {
@@ -2059,11 +2060,11 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
                 aeid = r.getEntityId();
             } else if (o instanceof Resource) {
                 final Resource resource = (Resource) o;
-                aeid = new AppdefEntityID(resource);
+                aeid = AppdefUtil.newAppdefEntityId(resource);
             } else if (o instanceof ResourceGroup) {
                 final ResourceGroup grp = (ResourceGroup) o;
                 final Resource resource = grp.getResource();
-                aeid = new AppdefEntityID(resource);
+                aeid = AppdefUtil.newAppdefEntityId(resource);
             } else {
                 final AppdefResourceValue r = (AppdefResourceValue) o;
                 aeid = r.getEntityId();
@@ -2221,7 +2222,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
-            aeids.add(new AppdefEntityID(r));
+            aeids.add(AppdefUtil.newAppdefEntityId(r));
         }
         final AppdefEntityID[] ids =
             (AppdefEntityID[])aeids.toArray(new AppdefEntityID[0]);
@@ -2482,7 +2483,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
                 List<Resource> children = trans.translate(ctx, cList).list();
                 for (Resource child : children) {
                               
-                    res.add(new AppdefEntityID(child));
+                    res.add(AppdefUtil.newAppdefEntityId(child));
                 }
             }
         }
@@ -3187,7 +3188,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
         watch.markTimeEnd("getLastAvail");
         for (Resource res :  members) {
            
-            AppdefEntityID aeid = new AppdefEntityID(res);
+            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
             ResourceDisplaySummary summary = new ResourceDisplaySummary();
         
             // Set the resource
@@ -3516,7 +3517,7 @@ AuthzSubject subject = sessionManager.getSubject(sessionId);
             }
         }
 
-        final AppdefEntityID id = new AppdefEntityID(res);
+        final AppdefEntityID id = AppdefUtil.newAppdefEntityId(res);
         for (Measurement m : resMetrics) {
            
             final MeasurementTemplate templ = m.getTemplate();

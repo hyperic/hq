@@ -43,6 +43,7 @@ import org.hyperic.hq.appdef.ConfigResponseDB;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
 import org.hyperic.hq.appdef.shared.InvalidConfigException;
@@ -141,7 +142,7 @@ public class ProductBossImpl implements ProductBoss {
         ConfigResponse[] res = new ConfigResponse[members.size()];
         int idx = 0;
         for (Resource r : members) {
-            AppdefEntityID id = new AppdefEntityID(r);
+            AppdefEntityID id = AppdefUtil.newAppdefEntityId(r);
             res[idx++] = getMergedConfigResponse(subject,
                                                  productType, id, required);
         }
@@ -390,7 +391,7 @@ public class ProductBossImpl implements ProductBoss {
                 AppdefEntityID[] ids = new AppdefEntityID[] { id };
 
                 ConfigValidator configValidator =
-                                                  (ConfigValidator) ProductProperties
+                                                  (ConfigValidator) org.hyperic.hq.common.ProductProperties
                                                                                      .getPropertyInstance(ConfigValidator.PDT_PROP);
 
                 if (shouldValidate) {

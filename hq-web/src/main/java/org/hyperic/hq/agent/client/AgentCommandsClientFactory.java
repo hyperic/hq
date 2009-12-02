@@ -70,7 +70,7 @@ public class AgentCommandsClientFactory {
             
             return new AgentCommandsClientImpl(agent, factory);
         } else {
-            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agent));            
+            return new LegacyAgentCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),agent.getPort(),agent.getAuthToken()));            
         }         
     }    
     

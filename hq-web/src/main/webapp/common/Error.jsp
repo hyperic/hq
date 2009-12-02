@@ -35,7 +35,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
 <%
-// XXX: move this all into an action
+    // XXX: move this all into an action
 /* get the exception from one of the many places it could be hiding */
 if (exception == null)
     exception = (Exception)request.getAttribute("javax.servlet.error.exception");
@@ -51,14 +51,14 @@ Exception root = null;
 try {
     if (exception != null) {
         if (exception instanceof ServletException) {
-            ServletException se = (ServletException) exception;
-            root = (Exception) se.getRootCause();
+    ServletException se = (ServletException) exception;
+    root = (Exception) se.getRootCause();
 %>
 <c:set var="root">
-<%= root %>
+<%=root%>
 </c:set>
 <%
-        }
+    }
     }
 }
 catch (ClassCastException ce) {
@@ -75,22 +75,22 @@ if (root != null &&
 %>
 
 <c:set var="exception">
-<%= exception %>
+<%=exception%>
 </c:set>
 
 <%
-int randomNum=(int)(Math.random()*1000);
+    int randomNum=(int)(Math.random()*1000);
 %>
 
 <c:if test="${param.errorMessage}">
-	<div id="errorMessage<%= randomNum %>" style="visibility:hidden"><fmt:message key="${param.errorMessage}"/></div>
+	<div id="errorMessage<%=randomNum%>" style="visibility:hidden"><fmt:message key="${param.errorMessage}"/></div>
 </c:if>
 
 <c:catch> 
   <c:if test="${not empty exception}"> 
-      <div id="exception<%= randomNum %>" style="visibility:hidden"><%=StringUtil.getStackTrace(exception)%></div>
+      <div id="exception<%=randomNum%>" style="visibility:hidden"><%=StringUtil.getStackTrace(exception)%></div>
     <c:if test="${not empty root}"> 
-      <div id="root<%= randomNum %>" style="visibility:hidden"><%=StringUtil.getStackTrace(root)%></div>
+      <div id="root<%=randomNum%>" style="visibility:hidden"><%=StringUtil.getStackTrace(root)%></div>
     </c:if> 
   </c:if> 
 </c:catch>

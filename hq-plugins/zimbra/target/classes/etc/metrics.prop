@@ -1,0 +1,1 @@
+mailboxd.csv = lmtp_rcvd_msgs,lmtp_rcvd_bytes,lmtp_rcvd_rcpt,lmtp_dlvd_msgs,lmtp_dlvd_bytes

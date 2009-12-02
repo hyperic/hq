@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<plugin>
+
+  <server name="xinetd">
+    <property name="PROC_QUERY"
+              value="State.Name.eq=xinetd"/>
+
+    <property name="INVENTORY_ID" value="${PROC_QUERY}"/>
+
+    <property name="DEFAULT_CONF"
+              value="/etc/xinetd.conf"/>
+
+    <property name="DEFAULT_LOG_FILE"
+              value="/var/log/xinetd.log"/>
+
+    <config>
+      <option name="process.query"
+              description="Process Query"
+              default="${PROC_QUERY}"/>
+    </config>
+
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.product.DaemonDetector"/>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+    <plugin type="log_track"
+            class="org.hyperic.hq.product.LogFileTailPlugin"/>
+
+    <plugin type="config_track"
+            class="org.hyperic.hq.product.ConfigFileTrackPlugin"/>
+
+    <metric name="Availability"
+            template="sigar:Type=ProcState,Arg=%process.query%:State"
+            indicator="true"/>
+
+    &process-metrics;
+  </server>
+</plugin>

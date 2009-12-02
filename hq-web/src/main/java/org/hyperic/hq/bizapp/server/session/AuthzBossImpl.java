@@ -39,6 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.UpdateException;
 import org.hyperic.hq.auth.shared.AuthManager;
 import org.hyperic.hq.auth.shared.SessionException;
@@ -253,7 +254,7 @@ public class AuthzBossImpl implements AuthzBoss {
             Resource res = resourceManager.findResource(entities[i]);
             if (res != null && !res.isInAsyncDeleteState()) {
                 try {
-                    appdefMap.put(new AppdefEntityID(res), res);
+                    appdefMap.put(AppdefUtil.newAppdefEntityId(res), res);
                 } catch (IllegalArgumentException e) {
                     // Not a valid appdef resource, continue
                 }

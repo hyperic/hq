@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
+
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -53,7 +53,7 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.context.Bootstrap;

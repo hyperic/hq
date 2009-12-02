@@ -54,6 +54,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefGroupValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
@@ -1033,7 +1034,7 @@ public class EventsBossImpl implements EventsBoss {
             AlertDefinitionInterface defInfo = def.getDefinitionInfo();
             AppdefEntityID aeid;
 
-            aeid = new AppdefEntityID(defInfo.getResource());
+            aeid = AppdefUtil.newAppdefEntityId(defInfo.getResource());
 
             if (badIds.contains(aeid))
                 continue;

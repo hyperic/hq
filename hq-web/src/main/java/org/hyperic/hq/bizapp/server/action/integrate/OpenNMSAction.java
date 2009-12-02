@@ -37,6 +37,7 @@ import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.PlatformValue;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
@@ -94,7 +95,7 @@ public class OpenNMSAction implements ActionInterface {
         params.put("port", _port);
 
         // Look up the platform
-        AppdefEntityID aeid = new AppdefEntityID(alertdef.getResource());
+        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(alertdef.getResource());
         AppdefEntityValue arv =
             new AppdefEntityValue(aeid, AuthzSubjectManagerImpl.getOne()
                                           .getOverlordPojo());

@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin name="netscaler">
+  <property name="MIBS"
+            value="/usr/share/snmp/mibs/NS-MIB-smiv2.mib"/>
+
+  <!-- index to get tabular interface data -->
+  <filter name="if.config"
+          value="snmpIndexName=wsIfName,snmpIndexValue=%if.name%"/>
+
+  <platform name="NetScaler">
+
+    <config>
+      <option name="snmpIp"
+              description="NetScaler IP address"
+              type="ipaddress"
+              default="10.0.0.11"/>
+
+      <option name="snmpPort"
+              description="NetScaler SNMP port"
+              type="port"
+              default="161"/>
+
+      <option name="snmpVersion"
+              description="SNMP Version"
+              default="v1"
+              type="enum">
+        <include name="v1"/>
+        <include name="v2c"/>
+      </option>
+
+      <option name="snmpCommunity"
+              description="SNMP Community"
+              default="public"/>
+    </config>
+
+    <plugin type="measurement"
+            class="net.hyperic.hq.product.SNMPMeasurementPlugin"/>
+
+    <server name="NetScaler Interface">
+      <config>
+        <option name="if.name"
+                description="Interface name"
+                default="www"/>
+      </config>
+
+      <plugin type="measurement"
+              class="net.hyperic.hq.product.SNMPMeasurementPlugin"/>
+
+      <metric name="Availability"
+              template="${snmp.template},Avail=true:wsIfMedia:${if.config}"
+              indicator="true"/>
+
+      <metric name="Bits Received"
+              template="${snmp.template}:rxRawBandwidthUsage:${if.config}"
+              collectionType="trendsup"
+              units="b"
+              rate="1s"
+              indicator="true"/>
+
+      <metric name="Packets Received"
+              template="${snmp.template}:rxCurrentPacketRate:${if.config}"
+              collectionType="trendsup"
+              rate="1s"
+              indicator="true"/>
+
+      <metric name="Bits Transmitted"
+              template="${snmp.template}:txRawBandwidthUsage:${if.config}"
+              collectionType="trendsup"
+              units="b"
+              rate="1s"
+              indicator="true"/>
+
+      <metric name="Packets Transmitted"
+              template="${snmp.template}:txCurrentPacketRate:${if.config}"
+              collectionType="trendsup"
+              rate="1s"
+              indicator="true"/>
+    </server>
+
+    <metric name="Availability"
+            template="${snmp.template},Avail=true:totalClientConnections"
+            indicator="true"/>
+
+    <metric name="Current Client Connections"
+            template="${snmp.template}:curClientConnections"
+            indicator="true"/>
+
+    <metric name="Total Client Connections"
+            template="${snmp.template}:totalClientConnections"
+            indicator="true"
+            collectionType="trendsup"/>
+
+    <metric name="Current Server Connections"
+            template="${snmp.template}:curServerConnections"
+            indicator="true"/>
+
+    <metric name="Total Server Connections"
+            template="${snmp.template}:totalServerConnections"
+            indicator="true"
+            collectionType="trendsup"/>
+
+  </platform>
+</plugin>

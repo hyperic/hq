@@ -41,6 +41,7 @@ import org.hyperic.hibernate.PageInfo;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
@@ -150,7 +151,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
         if (res == null || res.isInAsyncDeleteState()) {
             return rtn;
         }
-        AppdefEntityID aeid = new AppdefEntityID(res);
+        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(res);
         try {
             jObj.put("resourceName", res.getName());
 
@@ -337,7 +338,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
                 List<AlertDefinitionValue> alertDefs = null;
                 for (Resource r : resources) {
 
-                    AppdefEntityID aId = new AppdefEntityID(r);
+                    AppdefEntityID aId = AppdefUtil.newAppdefEntityId(r);
 
                     try {
                         permissionManager.checkViewPermission(subj, aId);
@@ -345,7 +346,7 @@ public class DashboardPortletBossImpl implements DashboardPortletBoss {
                         // go to next resource
                         continue;
                     }
-                    alertDefs = alertDefinitionManager.findAlertDefinitions(subj, new AppdefEntityID(r), pc);
+                    alertDefs = alertDefinitionManager.findAlertDefinitions(subj, AppdefUtil.newAppdefEntityId(r), pc);
                     if (alertDefs.size() > 0) {
                         return ALERT_OK;
                     }

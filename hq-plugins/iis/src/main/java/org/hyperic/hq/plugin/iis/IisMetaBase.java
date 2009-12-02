@@ -28,6 +28,7 @@ package org.hyperic.hq.plugin.iis;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,7 +47,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
-import edu.emory.mathcs.backport.java.util.Arrays;
+
 
 public class IisMetaBase {
     private static final Log _log =

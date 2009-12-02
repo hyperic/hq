@@ -563,7 +563,7 @@ public class ControlManagerImpl implements ControlManager {
                 Resource[] authz =
                                    pm.findOperationScopeBySubjectBatch(caller, resArr, opArr);
                 for (int x = 0; x < authz.length; x++) {
-                    retVal.add(new AppdefEntityID(authz[x]));
+                    retVal.add(AppdefUtil.newAppdefEntityId(authz[x]));
                 }
             } catch (FinderException e) {
                 // returns empty list as advertised

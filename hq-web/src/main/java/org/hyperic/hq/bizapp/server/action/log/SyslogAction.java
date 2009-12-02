@@ -36,6 +36,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.shared.action.SyslogActionConfig;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -94,7 +95,7 @@ public class SyslogAction extends SyslogActionConfig
         EmailFilter filter = new EmailFilter();
         AlertDefinitionInterface alertDef =
             alert.getAlertDefinitionInterface();
-        AppdefEntityID aeid = new AppdefEntityID(alertDef.getResource());
+        AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(alertDef.getResource());
         String resName = filter.getAppdefEntityName(aeid);
         resName = hackDBString(resName);
 

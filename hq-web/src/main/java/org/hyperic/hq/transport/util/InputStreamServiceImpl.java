@@ -30,13 +30,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 import org.hyperic.util.timer.Clock;
 import org.hyperic.util.timer.ClockFactory;
 import org.jboss.util.id.UID;
 
-import edu.emory.mathcs.backport.java.util.concurrent.ArrayBlockingQueue;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
+
 
 
 /**

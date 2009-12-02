@@ -25,9 +25,10 @@
 
 package org.hyperic.hq.transport.util;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import junit.framework.TestCase;
-import edu.emory.mathcs.backport.java.util.concurrent.CountDownLatch;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
 
 /**
  * Tests the HQInvokerLocator class.

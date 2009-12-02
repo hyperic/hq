@@ -45,6 +45,7 @@ import javax.mail.internet.InternetAddress;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -197,7 +198,7 @@ public class EmailAction extends EmailActionConfig
     }
 
     private AppdefEntityID getResource(AlertDefinitionInterface def) {
-        return new AppdefEntityID(def.getResource());
+        return AppdefUtil.newAppdefEntityId(def.getResource());
     }
 
     public String execute(AlertInterface alert, ActionExecutionInfo info)

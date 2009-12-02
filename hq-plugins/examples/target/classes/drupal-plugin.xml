@@ -1,0 +1,86 @@
+<plugin>
+  <classpath>
+    <!-- for SQLQueryDetector -->
+    <include name="pdk/plugins/sqlquery-plugin.jar"/>
+    <!-- for JDBC drivers -->
+    <include name="pdk/lib/jdbc"/>
+  </classpath>
+
+  <server name="Drupal">
+    <property name="INVENTORY_ID" value="drupal"/>
+
+    <property name="PROC_QUERY" value="State.Name.re=post(gres|master)"/>
+
+    <!-- default properties -->
+    <property name="jdbcUrl"
+              value="jdbc:postgresql://localhost/drupal?protocolVersion=2"/>
+    <property name="jdbcDriver" value="org.postgresql.Driver"/>
+    <property name="jdbcUser" value="drupal"/>
+    <property name="jdbcPassword" value="drupal"/>
+
+    <!-- config defined by the sqlquery plugin -->
+    <config include="sql,http"/>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.plugin.sqlquery.SQLQueryDetector"/>
+
+    <!-- "sql:" domain required to proxy through sqlquery-plugin -->
+    <filter name="template" value="sql:${query}:${name}"/>
+
+    <!-- use filters for common sql -->
+    <filter name="count"
+            value="SELECT COUNT(*) FROM"/>
+
+    <metric name="Availability"
+            template="${http.template}:Availability"
+            indicator="true"/>
+
+    <!-- row counts -->
+    <filter name="query" value="${count} ${name}"/>
+
+    <metric name="Sessions"
+            indicator="true"/>
+
+    <metric name="Users"/>
+
+    <metric name="Blocks"/>
+
+    <metric name="Comments"/>
+
+    <service name="Node">
+      <plugin type="autoinventory"/>
+
+      <config>
+        <option name="title"
+                description="Node title"/>
+        <option name="vid"
+                description="Node vid"/>
+      </config>
+
+      <property name="jdbcQuery"
+                value="SELECT title, vid FROM NODE"/>
+
+      <!-- format for auto-discovered services -->
+      <property name="AUTOINVENTORY_NAME" value="Drupal Node %title%"/>
+
+      <metric name="Availability"
+              template="${http.template},path=/?q=node/%vid%:Availability"
+              indicator="true"/>
+
+      <filter name="query" value="SELECT ${name} from NODE WHERE vid=%vid%"/>
+
+      <metric name="Created"
+              units="epoch-seconds"
+              defaultOn="true"
+              collectionType="static"/>
+
+      <metric name="Changed"
+              units="epoch-seconds"
+              defaultOn="true"
+              collectionType="static"/>
+    </service>
+  </server>
+</plugin>

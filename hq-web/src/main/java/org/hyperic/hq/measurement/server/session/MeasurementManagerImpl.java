@@ -58,6 +58,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.ConfigFetchException;
 import org.hyperic.hq.appdef.shared.ConfigManager;
@@ -947,7 +948,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
 
             if (!meas.isEnabled()) {
                 resource = meas.getResource();
-                appId = new AppdefEntityID(resource);
+                appId = AppdefUtil.newAppdefEntityId(resource);
 
                 permissionManager.checkModifyPermission(subject.getId(), appId);
                 appIdList.add(appId);
@@ -977,7 +978,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
             return;
         }
         Resource resource = meas.getResource();
-        AppdefEntityID appId = new AppdefEntityID(resource);
+        AppdefEntityID appId = AppdefUtil.newAppdefEntityId(resource);
         permissionManager.checkModifyPermission(subject.getId(), appId);
         MeasurementDAO dao = measurementDAO;
         for (Integer mid : mids) {
@@ -995,7 +996,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
      * scheduling after commit
      */
     public void enableDefaultMeasurements(AuthzSubject subj, Resource r) throws PermissionException {
-        AppdefEntityID appId = new AppdefEntityID(r);
+        AppdefEntityID appId = AppdefUtil.newAppdefEntityId(r);
         permissionManager.checkModifyPermission(subj.getId(), appId);
         boolean sendToAgent = false;
 
@@ -1056,7 +1057,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
             }
 
             resource = meas.getResource();
-            appId = new AppdefEntityID(resource);
+            appId = AppdefUtil.newAppdefEntityId(resource);
 
             permissionManager.checkModifyPermission(subject.getId(), appId);
             appIdList.add(appId);
@@ -1093,7 +1094,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
         meas.setEnabled((interval != 0));
         meas.setInterval(interval);
         Resource resource = meas.getResource();
-        AppdefEntityID appId = new AppdefEntityID(resource);
+        AppdefEntityID appId = AppdefUtil.newAppdefEntityId(resource);
         permissionManager.checkModifyPermission(subject.getId(), appId);
         enqueueZeventForMeasScheduleChange(meas, interval);
     }

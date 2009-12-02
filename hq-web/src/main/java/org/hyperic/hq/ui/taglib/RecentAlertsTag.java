@@ -39,6 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
@@ -143,7 +144,7 @@ public class RecentAlertsTag extends TagSupport {
                 AlertDefinitionInterface defInfo = 
                     alert.getDefinition().getDefinitionInfo();
                 AppdefEntityID adeId = 
-                    new AppdefEntityID(defInfo.getResource());
+                    AppdefUtil.newAppdefEntityId(defInfo.getResource());
                 AppdefEntityValue aVal = new AppdefEntityValue(adeId, subject); 
 
                 alertArr.add(

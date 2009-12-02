@@ -33,6 +33,7 @@ import java.util.Set;
 import org.hyperic.hibernate.PersistedObject;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceGroup;
 import org.hyperic.hq.common.server.session.Crispo;
@@ -177,7 +178,7 @@ public class GalertDef
     }
 
     public AppdefEntityID getAppdefID() {
-        return new AppdefEntityID(getResource());
+        return AppdefUtil.newAppdefEntityId(getResource());
     }
 
     public int getAppdefId() {

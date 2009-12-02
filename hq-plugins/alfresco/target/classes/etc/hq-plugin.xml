@@ -1,0 +1,200 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE plugin [
+  <!ENTITY process-metrics SYSTEM "/pdk/plugins/process-metrics.xml">
+]>
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin package="org.hyperic.hq.plugin.alfresco">
+
+  <classpath>
+    <include name="pdk/lib/jdbc/jconn3.jar"/>
+    <include name="pdk/lib/jdbc/oracle12.jar"/>
+    <include name="pdk/lib/jdbc/mysql-connector-java-5.0.5-bin.jar"/>
+  </classpath>
+
+  <!-- appended to each template by MeasurementInfoXML -->
+  <property name="template-config"
+            value="jdbcUrl=%jdbcUrl%,jdbcUser=%jdbcUser%,jdbcPassword=%jdbcPassword%"/>
+
+  <server name="Alfresco"
+          version="2.0.x">
+
+    <plugin type="autoinventory"
+            class="AlfrescoServerDetector"/>
+    <plugin type="measurement"
+            class="org.hyperic.hq.plugin.alfresco.AlfrescoMeasurementPlugin"/>
+
+    <properties>
+       <property name="version"
+                 description="Alfresco Version"/>
+    </properties>
+
+    <config>
+      <option name="jdbcUrl"
+              description="JDBC Url"
+              default="jdbc:mysql://localhost:3306/alfresco"/>
+      <option name="jdbcUser"
+              description="JDBC User"
+              default="alfresco"/>
+      <option name="jdbcPassword" type="secret"
+              optional="true"
+              description="JDBC Password"/>
+      <option name="installpath"
+              default="/opt/alfresco"
+              description="Alfresco Install Path"/>
+      <option name="alfresco-ptql"
+              default="State.Name.eq=java,Args.*.ct=/alfresco/"
+              description="Sigar PTQL Process Query"/>
+    </config>
+
+    <metric name="Availability"
+            template="sigar:Type=ProcState,Arg=%alfresco-ptql%:State"
+            indicator="true"/>
+
+    <filter name="template"
+            value="alfresco-stats:installpath=%installpath%:${alias}"/>
+
+    <metric name="Transactions"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"
+            units="none"/>
+
+    <metric name="Users"
+            category="UTILIZATION"
+            indicator="true"
+            collectionType="static"
+            units="none"/>
+
+    <service name="Lucene Index">
+      <plugin type="autoinventory"
+              class="AlfrescoServerDetector"/>
+      <config>
+        <option name="protocol"
+                description="Index Protocol"/>
+        <option name="identifier"
+                description="Index Identifier"/>
+      </config>
+      <filter name="template">
+        sigar:Type=DirUsage,Arg=%installpath%/alf_data/lucene-indexes/%protocol%/%identifier%/:DiskUsage
+      </filter>
+      <metric name="Disk Usage"
+              category="UTILIZATION"
+              indicator="true"
+              units="B"
+              collectionType="dynamic"/>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%alfresco-ptql%:State"
+              indicator="true"/>
+    </service>
+
+    <service name="Database Backend">
+      <plugin type="autoinventory"
+              class="AlfrescoServerDetector"/>
+      <config>
+        <option name="process.query"
+                default="State.Name.eq=mysqld"
+                description="PTQL for Alfresco Database Backend"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
+              indicator="true"/>
+      &process-metrics;
+    </service>
+
+    <service name="Tomcat">
+      <plugin type="autoinventory"
+              class="AlfrescoServerDetector"/>
+      <property name="DEFAULT_LOG_FILE"
+                value="tomcat/logs/catalina.out"/>
+      <plugin type="log_track"
+              class="org.hyperic.hq.product.Log4JLogTrackPlugin"/>
+      <config>
+        <option name="process.query"
+                default="State.Name.eq=java,Args.*.ct=/alfresco/"
+                description="PTQL for Alfresco Tomcat"/>
+      </config>
+      <metric name="Availability"
+              template="sigar:Type=ProcState,Arg=%process.query%:State"
+              indicator="true"/>
+      &process-metrics;
+    </service>
+
+    <service name="HTTP">
+      <config include="http"/>
+      <filter name="template"
+              value="${http.template}:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Inbound Connections"
+              indicator="true"/>
+
+      <metric name="Outbound Connections"
+              indicator="true"/>
+    </service>
+  </server>
+
+  <!-- ==================== Plugin Help =========================== -->
+  <help name="Alfresco">
+  <![CDATA[
+  <p>
+  <h3>Configure HQ for Alfresco Backend Database</h3>
+  </p>
+  <p>
+  Unfortunately for Alfresco's default hsql deployment, DB statistics cannot be tracked.
+  <br>
+  If you decide to use any Alfresco supported DB backends here are samples of the jdbcUrl
+  <br>
+  which allow the plugin to gather metrics from Alfresco's internal tables:
+  <br>
+  <br>
+  MySQL:  jdbc:mysql://&lt;hostname&gt;:&lt;port&gt;/alfresco
+  <br>
+  Oracle: jdbc:oracle:thin:@&lt;hostname&gt;:&lt;port&gt;:alfresco
+  <br>
+  Sybase: jdbc:sybase:Tds:&lt;hostname&gt;:&lt;port&gt;/alfresco
+  </p>
+  <p>
+  To monitor process metrics from the Alfresco DB backend here are samples of
+  <br>
+  ptql queries to match the database processes:
+  <br>
+  <br>
+  MySQL:  State.Name.eq=mysqld
+  <br>
+  Oracle: State.Name.eq=oracle
+  <br>
+  Sybase: State.Name.eq=dataserver
+  <br>
+  </p>
+  ]]>
+  </help>
+  <help name="Alfresco 2.0.x" include="Alfresco"/>
+</plugin>

@@ -70,7 +70,7 @@ public class MeasurementCommandsClientFactory {
             
             return new MeasurementCommandsClientImpl(agent, factory);
         } else {
-            return new LegacyMeasurementCommandsClientImpl(new SecureAgentConnection(agent));            
+            return new LegacyMeasurementCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),agent.getPort(),agent.getAuthToken()));            
         }         
     }
 

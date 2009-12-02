@@ -6,6 +6,7 @@ import java.util.Map;
 import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.Operation;
@@ -123,7 +124,7 @@ public class DefaultAlertPermissionManager implements AlertPermissionManager {
 
     public  AppdefEntityID getAppdefEntityID(AlertDefinitionInterface adi) {
         try {
-            return new AppdefEntityID(adi.getResource());
+            return AppdefUtil.newAppdefEntityId(adi.getResource());
         } catch (IllegalArgumentException e) {
             if (adi instanceof AlertDefinition) {
                 AlertDefinition ad = (AlertDefinition) adi;

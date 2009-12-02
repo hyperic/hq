@@ -93,7 +93,7 @@ import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.server.session.ResourceAudit;
 import org.hyperic.hq.common.shared.AuditManager;
-import org.hyperic.hq.common.shared.ProductProperties;
+import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.server.session.AgentScheduleSyncZevent;
 import org.hyperic.hq.product.PlatformDetector;

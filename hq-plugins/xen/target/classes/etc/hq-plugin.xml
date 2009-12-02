@@ -1,0 +1,295 @@
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004-2008], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin>
+
+  <config name="xconn">
+    <option name="url"
+            description="URL"
+            default="http://localhost:80"/>
+    <option name="user"
+            description="Username"
+            default=""/>
+    <option name="pass"
+            description="Password"
+            type="secret"
+            default=""/>
+  </config>
+
+  <config name="platform.uuid">
+    <option name="platform.uuid"
+            description="Server name or UUID"
+            default="xenserver-4.0"/>
+  </config>
+  <filter name="platform.config" value="${xconn.config},${platform.uuid.config}"/>
+
+  <config name="server.uuid">
+    <option name="server.uuid"
+            description="UUID"
+            default=""/>
+  </config>
+  <filter name="server.config" value="${xconn.config},${server.uuid.config}"/>
+
+  <config name="service.uuid">
+    <option name="service.uuid"
+            description="UUID"
+            default=""/>
+  </config>
+  <filter name="service.config" value="${xconn.config},${service.uuid.config}"/>
+
+  <platform name="Xen Host">
+
+    <config include="xconn,platform.uuid"/>
+
+    <properties>
+       <property name="version" description="Product Version"/>
+       <property name="brand" description="Product Brand"/>
+       <property name="build_id" description="Build Id"/>
+       <property name="hostname" description="Hostname"/>
+       <property name="date" description="Date"/>
+       <property name="build_number" description="Build Number"/>
+       <property name="linux" description="Linux Version"/>
+    </properties>
+
+    <plugin type="autoinventory"
+            class="org.hyperic.hq.plugin.xen.XenHostDetector"/>
+
+    <plugin type="measurement"
+            class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+    <plugin type="collector"
+            class="org.hyperic.hq.plugin.xen.XenHostCollector"/>
+
+    <filter name="template"
+            value="xenhost:${platform.config}:${alias}"/>
+
+    <metric name="Availability"
+            indicator="true"/>
+
+    <metric name="Memory Total"
+            units="B"/>
+
+    <metric name="Memory Free"
+            units="B"/>
+
+    <metric name="Memory Used"
+            indicator="true"
+            units="B"/>
+
+    <metric name="CPU Usage"
+            indicator="true"
+            units="percentage"/>
+    <server>
+      <plugin type="autoinventory"
+              class="org.hyperic.hq.plugin.xen.XenHostServiceDetector"/>
+
+      <service name="Storage">
+        <config include="service.uuid"/>
+
+        <properties>
+          <property name="type" description="Type"/>
+        </properties>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <plugin type="collector"
+                class="org.hyperic.hq.plugin.xen.XenStorageCollector"/>
+
+        <filter name="template"
+                value="xenstor:${service.config}:${alias}"/>
+
+        <metric name="Availability"
+                indicator="true"/>
+
+        <metric name="Size"
+                indicator="true"
+                units="B"/>
+
+        <metric name="Free"
+                indicator="true"
+                units="B"/>
+
+        <metric name="Used"
+                units="B"/>
+      </service>
+
+      <service name="NIC">
+        <config include="service.uuid"/>
+
+        <properties>
+          <property name="mtu" description="MTU"/>
+          <property name="mac" description="MAC"/>
+          <property name="address" description="IP Address"/>
+          <property name="netmask" description="Netmask"/>
+          <property name="gateway" description="Gateway"/>
+        </properties>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <plugin type="collector"
+                class="org.hyperic.hq.plugin.xen.XenNicCollector"/>
+
+        <filter name="template"
+                value="xennic:${service.config}:${alias}"/>
+
+        <metric name="Availability"
+                indicator="true"/>
+
+        <metric name="IO Read"
+                indicator="true"
+                category="THROUGHPUT"
+                units="KB"/>
+
+        <metric name="IO Write"
+                indicator="true"
+                category="THROUGHPUT"
+                units="KB"/>
+
+        <metric name="Speed"/>
+      </service>
+
+      <service name="CPU">
+        <config include="service.uuid"/>
+
+        <properties>
+          <property name="vendor" description="Vendor"/>
+          <property name="model" description="Model"/>
+          <property name="speed" description="Speed"/>
+        </properties>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <plugin type="collector"
+                class="org.hyperic.hq.plugin.xen.XenCpuCollector"/>
+
+        <filter name="template"
+                value="xencpu:${service.config}:${alias}"/>
+
+        <metric name="Availability"
+                indicator="true"/>
+
+        <metric name="CPU Usage"
+                indicator="true"
+                units="percentage"/>
+      </service>
+    </server>
+
+    <server name="Xen VM">
+      <config include="server.uuid"/>
+
+      <properties>
+        <property name="os" description="OS"/>
+      </properties>
+
+      <plugin type="autoinventory"
+              class="org.hyperic.hq.plugin.xen.XenVmDetector"/>
+
+      <plugin type="measurement"
+              class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+      <plugin type="collector"
+              class="org.hyperic.hq.plugin.xen.XenVmCollector"/>
+
+      <plugin type="control"
+              class="org.hyperic.hq.plugin.xen.XenVmControlPlugin"/>
+
+      <actions include="start,shutdown,forceShutdown,suspend,resume,reboot,forceReboot"/>
+
+      <filter name="template"
+              value="xenvm:${server.config}:${alias}"/>
+
+      <metric name="Availability"
+              indicator="true"/>
+
+      <metric name="Memory Actual"
+              indicator="true"
+              units="B"/>
+
+      <metric name="CPU Usage"
+              indicator="true"
+              units="percentage"/>
+
+      <service name="Storage">
+        <config include="service.uuid"/>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <plugin type="collector"
+                class="org.hyperic.hq.plugin.xen.XenVmStorageCollector"/>
+
+        <filter name="template"
+                value="xenvmstor:${service.config}:${alias}"/>
+
+        <metric name="Availability"
+                indicator="true"/>
+
+        <metric name="IO Read"
+                indicator="true"
+                category="THROUGHPUT"
+                units="KB"/>
+
+        <metric name="IO Write"
+                indicator="true"
+                category="THROUGHPUT"
+                units="KB"/>
+      </service>
+
+      <service name="NIC">
+        <config include="service.uuid"/>
+
+        <properties>
+          <property name="mac" description="MAC"/>
+          <property name="mtu" description="MTU"/>
+        </properties>
+
+        <plugin type="measurement"
+                class="org.hyperic.hq.product.MeasurementPlugin"/>
+
+        <plugin type="collector"
+                class="org.hyperic.hq.plugin.xen.XenVmNicCollector"/>
+
+        <filter name="template"
+                value="xenvmnic:${service.config}:${alias}"/>
+
+        <metric name="Availability"
+                indicator="true"/>
+
+        <metric name="IO Read"
+                indicator="true"
+                category="THROUGHPUT"
+                units="KB"/>
+
+        <metric name="IO Write"
+                indicator="true"
+                category="THROUGHPUT"
+                units="KB"/>
+      </service>
+    </server>
+  </platform>
+</plugin>

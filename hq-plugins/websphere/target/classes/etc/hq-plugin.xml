@@ -1,0 +1,610 @@
+<?xml version="1.0"?> 
+
+
+<!--
+  NOTE: This copyright does *not* cover user programs that use HQ
+  program services by normal system calls through the application
+  program interfaces provided as part of the Hyperic Plug-in Development
+  Kit or the Hyperic Client Development Kit - this is merely considered
+  normal use of the program, and does *not* fall under the heading of
+  "derived work".
+  
+  Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+  This file is part of HQ.
+  
+  HQ is free software; you can redistribute it and/or modify
+  it under the terms version 2 of the GNU General Public License as
+  published by the Free Software Foundation. This program is distributed
+  in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+  even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+  PARTICULAR PURPOSE. See the GNU General Public License for more
+  details.
+  
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+  USA.
+ -->
+
+<plugin name="websphere" class="WebsphereProductPlugin"> 
+  <filter name="domain"
+          value="%server.node%/%server.name%"/>
+  <filter name="auth"
+          value="username=%username%,password=%password%"/>
+	<filter name="template"
+		value="${OBJECT_NAME},cell=%cellName%,node=%server.node%,process=%server.name%:${alias}" />
+		
+	<property name="template"
+		value="${OBJECT_NAME}:${alias}" />
+	
+	<property name="measurement-class"
+		value="org.hyperic.hq.plugin.websphere.WebsphereServiceMeasurementPlugin" />
+	<property name="control-class"
+		value="org.hyperic.hq.plugin.websphere.WebsphereServiceControlPlugin" />
+	
+	 <property name="template-config"
+            value="admin.host=%admin.host%,admin.port=%admin.port%,${auth}"/>
+
+  <filter name="template"
+          value="${domain}:Module=jvmRuntimeModule:${alias}"/>
+
+  <metrics name="jvm">
+    <metric name="Availability"
+            category="AVAILABILITY"
+            indicator="true"/>
+
+    <metric name="JVM Total Memory"
+            alias="totalMemory"
+            units="KB"/>
+    <metric name="JVM Free Memory"
+            alias="freeMemory"
+            units="KB"/>
+    <metric name="JVM Used Memory"
+            alias="usedMemory"
+            indicator="true"
+            units="KB"/>
+  </metrics>
+
+  <filter name="template"
+          value="${domain}:Module=connectionPoolModule:${alias}"/>
+
+  <metrics name="connection">
+    <!-- XXX connectionPoolModule avgWaitTime,percentUsed,percentMaxed -->
+    <metric name="JDBC Pool Number of Creates"
+            alias="numCreates"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Number of Destroys"
+            alias="numDestroys"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Number of Allocates"
+            alias="numAllocates"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Number of Returns"
+            alias="numReturns"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Size"
+            alias="poolSize"/>
+    <metric name="JDBC Pool Concurrent Waiters"
+            alias="concurrentWaiters"/>
+    <metric name="JDBC Pool Number of Faults"
+            alias="faults"
+            collectionType="trendsup"/>
+    <metric name="JDBC Pool Prepared Statement Cache Discards"
+            alias="prepStmtCacheDiscards"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <filter name="template"
+          value="${domain}:Module=servletSessionsModule:${alias}"/>
+
+  <metrics name="servlet">
+    <!-- XXX servletSessionsModule sessionLifeTime -->
+    <metric name="Servlet Sessions Created"
+            alias="createdSessions"
+            collectionType="trendsup"/>
+    <metric name="Servlet Sessions Invalidated"
+            alias="invalidatedSessions"
+            collectionType="trendsup"/>
+    <metric name="Servlet Sessions Active"
+            alias="activeSessions"/>
+    <metric name="Servlet Sessions Live"
+            alias="liveSessions"/>
+  </metrics>
+
+  <filter name="template"
+          value="${domain}:Module=threadPoolModule:${alias}"/>
+
+  <metrics name="threadpool">
+    <!-- XXX threadPoolModule percentMaxed -->
+    <metric name="Thread Pool Creates"
+            alias="threadCreates"
+            collectionType="trendsup"/>
+    <metric name="Thread Pool Destroys"
+            alias="threadDestroys"
+            collectionType="trendsup"/>
+    <metric name="Thread Pool Active Threads"
+            alias="activeThreads"/>
+    <metric name="Thread Pool Size"
+            alias="poolSize"/>
+  </metrics>
+
+  <filter name="template"
+          value="${domain}:Module=transactionModule:${alias}"/>
+
+  <metrics name="tx">
+    <!-- XXX transactionModule - globalTranDuration,
+         localTranDuration, globalBeforeCompletionDuration,
+         globalPrepareDuration, globalCommitDuration
+         localBeforeCompletionDuration, localCommitDuration -->
+    <metric name="Global Transactions Begun"
+            alias="globalTransBegun"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+    <metric name="Global Transactions Involved"
+            alias="globalTransInvolved"
+            category="THROUGHPUT"/>
+    <metric name="Local Transactions Begun"
+            alias="localTransBegun"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+    <metric name="Global Transactions Active"
+            alias="activeGlobalTrans"
+            category="THROUGHPUT"/>
+    <metric name="Local Transactions Active"
+            alias="activeLocalTrans"
+            category="THROUGHPUT"/>
+    <metric name="Optmized Transactions"
+            alias="numOptimization"
+            collectionType="trendsup"/>
+    <metric name="Global Transactions Committed"
+            alias="globalTransCommitted"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"/>
+    <metric name="Local Transactions Committed"
+            alias="localTransCommitted"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+    <metric name="Global Transactions Rolled Back"
+            alias="globalTransRolledBack"
+            category="THROUGHPUT"
+            indicator="true"
+            collectionType="trendsup"/>
+    <metric name="Local Transactions Rolled Back"
+            alias="localTransRolledBack"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+    <metric name="Global Transactions Timed Out"
+            alias="globalTransTimeout"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+    <metric name="Local Transactions Timed Out"
+            alias="localTransTimeout"
+            category="THROUGHPUT"
+            collectionType="trendsup"/>
+  </metrics>
+
+  <filter name="template"
+          value="${domain}:Module=webAppModule:${alias}"/>
+
+  <metrics name="webapp">
+    <metric name="Webapp Number of Loaded Servlets"
+            alias="numLoadedServlets"/>
+    <metric name="Webapp Number of Servlet Reloads"
+            alias="numReloads"
+            collectionType="trendsup"/>
+    <!-- XXX beanModule avgMethodRt, avgCreateTime,
+             avgRemoveTime, avgDrainSize -->
+  </metrics>
+
+  <filter name="template"
+          value="${domain}:Module=beanModule:${alias}"/>
+
+  <metrics name="bean">
+    <metric name="EJB Creates"
+            alias="creates"
+            collectionType="trendsup"/>
+    <metric name="EJB Removes"
+            alias="removes"
+            collectionType="trendsup"/>
+    <metric name="EJB Activates"
+            alias="activates"
+            collectionType="trendsup"/>
+    <metric name="EJB Passivates"
+            alias="passivates"
+            collectionType="trendsup"/>
+    <metric name="EJB Instantiates"
+            alias="instantiates"
+            collectionType="trendsup"/>
+    <metric name="EJB Destroys"
+            alias="destroys"
+            collectionType="trendsup"/>
+    <metric name="EJB Loads"
+            alias="loads"
+            collectionType="trendsup"/>
+    <metric name="EJB Stores"
+            alias="stores"
+            collectionType="trendsup"/>
+    <metric name="EJB Conncurrent Lives"
+            alias="concurrentLives"/>
+    <metric name="EJB Total Method Calls"
+            alias="totalMethodCalls"
+            collectionType="trendsup"/>
+    <metric name="EJB Active Methods"
+            alias="activeMethods"/>
+    <metric name="EJB Gets From Pool"
+            alias="getsFromPool"
+            collectionType="trendsup"/>
+    <metric name="EJB Gets Found"
+            alias="getsFound"
+            collectionType="trendsup"/>
+    <metric name="EJB Returns to Pool"
+            alias="returnsToPool"
+            collectionType="trendsup"/>
+    <metric name="EJB Returns Discarded"
+            alias="returnsDiscarded"
+            collectionType="trendsup"/>
+    <metric name="EJB Drains From Pool"
+            alias="drainsFromPool"
+            collectionType="trendsup"/>
+    <metric name="EJB Pool Size"
+            alias="poolSize"/>
+  </metrics>
+
+  <help name="enable-pmi-6">
+  <![CDATA[
+    <p><h4>Enable WebSphere PMI</h4></p>
+
+    WebSphere 6.x has PMI enabled at the Basic level by default,
+    which is sufficient for HQ to collect the metrics enabled by
+    default.  The PMI level may need to be increased to collect
+    certain metrics not enabled by default.
+
+    <ul>
+      <li>Using a Web browser open http://${admin.host}:9060/admin </li>
+      <li><b>Server</b> -> <b>Application Servers</b> ->
+          <b>${server.name}</b> -> <b>Performance Monitoring</b> </li>
+      <li>Check the Startup button </li>
+      <li>Set level to Basic or higher </li>
+      <li>Click OK </li>
+      <li>Click Save to apply changes to the master configuration </li>
+      <li>Restart server </li>
+    </ul>
+  ]]>
+  </help>
+
+  <help name="agent-setup-6">
+  <![CDATA[
+    <p>
+    <h4>The HQ Agent must be run using the IBM JDK to monitor WebSphere:</h4>
+    </p>
+    
+    <pre>
+    ${CMD.prompt} ${CMD.env.set} HQ_JAVA_HOME=${was.install.root}${FILE.sep}java
+    ${CMD.prompt} hq-agent.${CMD.ext} start
+    </pre>
+  ]]>
+  </help>
+
+  <!-- same as above with ssl.client.props -->
+  <help name="config-auth-6">
+  <![CDATA[
+    <p>
+    <h4>Global Security Configuration</h4>
+    If Global Security is enabled,
+    check that the user running the agent has read access to 
+    <i>${installpath}${FILE.sep}properties${FILE.sep}ssl.client.props</i>
+    and that the following properties are correct:
+    </p>
+
+    <pre>
+    com.ibm.ssl.keyStore=...
+    com.ibm.ssl.keyStorePassword=...
+    com.ibm.ssl.trustStore=...
+    com.ibm.ssl.trustStorePassword=...
+    </pre>
+  ]]>
+  </help>
+
+  <!-- same as above with ssl.client.props -->
+  <help name="config-auth-6-1">
+  <![CDATA[
+    <p>
+    <h4>Global Security Configuration</h4>
+    If Global Security is enabled,
+    check that the user running the agent has read access to 
+    <i>${installpath}${FILE.sep}properties${FILE.sep}ssl.client.props</i>
+    and that the following properties are correct:
+    </p>
+
+    <pre>
+    javax.net.ssl.keyStore=...
+    javax.net.ssl.keyStorePassword=...
+    javax.net.ssl.trustStore=...
+    javax.net.ssl.trustStorePassword=...
+    </pre>
+    
+    <p>
+    <h4>Common Default Values For the Above Properties</h4>
+    WebSphere 6.1 typically has dummy kestore and truststore files installed under
+    <pre>
+    profile/AppSrv01/etc/DummyClientKeyFile.jks    (use as value for javax.net.ssl.keyStore)
+    profile/AppSrv01/etc/DummyClientTrustFile.jks  (use as value for javax.net.ssl.trustStore)
+    </pre>
+    Use "WebAS" for both <pre>javax.net.ssl.keyStorePassword</pre> and
+    <pre>javax.net.ssl.trustStorePassword</pre> when using the above dummy files.
+  ]]>
+  </help>
+
+  <help name="WebSphere Admin 6.1"
+        include="agent-setup-6,enable-pmi-6,config-auth-6-1"/>
+
+  <help name="WebSphere Admin 6.1 Win32,config-auth-6-1"
+        include="enable-pmi-6"/>
+
+  <help name="websphere-server">
+  <![CDATA[
+  <p>
+  <b>NOTE:</b> WebSphere ${product.version} server types are configured via
+  AutoDiscovery.
+  </p>
+  <p>
+  See <b>WebSphere Admin ${product.version}</b> server for product
+  setup information.
+  </p>
+  ]]>
+  </help>
+
+  <help name="websphere-rt-postamble">
+  <![CDATA[
+   <p>
+   Add the following snippet of XML just after the last
+   <b>&lt;context-param&gt;</b> tag, and before the first
+   <b>&lt;servlet&gt;</b> tag.
+   </p>
+
+    <pre>
+&lt;!-- HYPERIC HQ RESPONSE TIME FILTER --&gt;
+&lt;filter&gt;
+	&lt;filter-name&gt;JMXFilter&lt;/filter-name&gt;
+	&lt;filter-class&gt;org.hyperic.hq.product.servlet.filter.JMXFilter&lt;/filter-class&gt;
+	&lt;init-param&gt;
+		&lt;param-name&gt;responseTimeLogDir&lt;/param-name&gt;
+		&lt;param-value&gt;${installpath}${FILE.sep}logs&lt;/param-value&gt;
+	&lt;/init-param&gt;
+&lt;/filter&gt;
+&lt;filter-mapping&gt;
+	&lt;filter-name&gt;JMXFilter&lt;/filter-name&gt;
+	&lt;url-pattern&gt;/*&lt;/url-pattern&gt;
+&lt;/filter-mapping&gt;
+&lt;!-- END HYPERIC RESPONSE TIME FILTER --&gt;
+    </pre>
+
+    <ul>
+    <li>Add the filter jar</li>
+    </ul>
+
+    <pre>
+${CMD.prompt} mkdir ${websphere5-webinf-lib}
+${CMD.prompt} ${CMD.cp} agent-${HQVersion}${FILE.sep}product_connectors${FILE.sep}servlet${FILE.sep}libs${FILE.sep}hq-filter.jar \
+      ${websphere5-webinf-lib}
+    </pre>
+
+    <ul>
+    <li>Restart the WebSphere server. </li>
+    </ul>
+  ]]>
+  </help>
+
+  <config name="connector">
+    <option name="admin.port"
+            description="SOAP Connector Port"
+            default="8880"/>
+
+    <option name="admin.host"
+            description="SOAP Connector Host"
+            default="localhost"/>
+
+    <option name="server.node"
+            description="App Server Node"
+            default="hostname"/>
+
+    <option name="server.name"
+            description="App Server Node"
+            default="server1"/>
+
+    <option name="username"
+            description="Username for Authentication"
+            optional="true"/>
+
+    <option name="password"
+            description="Password for Authentication"
+            optional="true"
+            type="secret"/>
+  </config>
+
+  <property name="websphere.regkey"
+            value="SOFTWARE\IBM\WebSphere Application Server"/>
+
+  <server name="WebSphere Admin"
+          version="6.0"
+          description="Admin Server">
+
+    <property name="UNIQUE_FILE"
+              value="properties/version/WAS.product"/>
+
+    <plugin type="measurement"
+            class="WebsphereAdminMeasurementPlugin"/>
+
+    <plugin type="collector"
+            class="WebsphereAdminServerCollector"/>
+
+    <plugin type="control"
+            class="WebsphereControlPlugin"/>
+
+    <plugin type="autoinventory"
+            class="WebsphereDetector"/>
+
+    <scan registry="${websphere.regkey}">
+      <include name="InstallLocation"/>
+    </scan>
+
+    <scan>
+      <include name="/**/lib/wasjmx.jar"/>
+    </scan>
+
+    <config include="connector"/>
+
+  </server>
+
+  <server name="WebSphere"
+          version="6.0"
+          description="Application Server">
+
+    <plugin type="measurement"
+            class="WebsphereJmxMeasurementPlugin"/>
+
+    <plugin type="collector"
+            class="WebsphereServerCollector"/>
+
+    <plugin type="control"
+            class="WebsphereControlPlugin"/>
+
+    <plugin type="log_track"
+            class="WebsphereTraceLogFileTrackPlugin"/>
+
+    <config include="connector">
+      <option name="server.name"
+              description="App Server Name"
+              default="server1"/>
+      <option name="server.port"
+              description="App Server Port"
+              default="9080"/>
+    </config>
+
+    <properties>
+      <property name="javaVendor"
+                description="Java Vendor"/>
+
+      <property name="javaVersion"
+                description="Java Version"/>
+
+      <property name="version"
+                description="WebSphere Version"/>
+
+      <property name="pid"
+                description="Process ID"/>
+
+      <property name="cellName"
+                description="Cell Name"/>
+    </properties>
+
+    <service name="Application">
+      <plugin type="collector"
+              class="ApplicationCollector"/>
+
+      <plugin type="control"
+              class="WebsphereAppControl"/>
+
+      <config>
+        <option name="app"
+                description="Application Name"
+                default="sampleApp"/>
+      </config>
+    </service>
+
+    <service name="EJB">
+      <plugin type="collector"
+              class="EJBCollector"/>
+
+      <config>
+        <option name="app"
+                description="Application Name"
+                default="sampleApp"/>
+
+        <option name="ejb"
+                description="EJB Name"
+                default="Increment"/>
+      </config>
+    </service>
+
+    <service name="Webapp">
+      <plugin type="collector"
+              class="WebappCollector"/>
+
+      <plugin type="responsetime"
+              class="WebsphereRtPlugin"/>
+
+      <config>
+        <option name="app"
+                description="Application Name"
+                default="sampleApp"/>
+
+        <option name="webapp"
+                description="Webapp Name"
+                default="examples"/>
+
+        <option name="webapp.context"
+                description="Webapp Context"
+                default="/examples"/>
+      </config>
+    </service>
+
+    <service name="Connection Pool"
+             internal="true">
+
+      <plugin type="collector"
+              class="ConnectionPoolCollector"/>
+
+      <config>
+        <option name="connpool"
+                description="Connection Pool Name"
+                default="SamplesDataSource"/>
+      </config>
+
+      <properties>
+        <property name="implementationClassName"
+                  description="Implementation Class"/>
+      </properties>
+    </service>
+
+    <service name="Thread Pool"
+             internal="true">
+
+      <plugin type="collector"
+              class="ThreadPoolCollector"/>
+
+      <config>
+        <option name="thrpool"
+                description="Thread Pool Name"
+                default="ORB.thread.pool"/>
+      </config>
+
+      <properties>
+        <property name="minimumSize"
+                  description="Minimum Size"/>
+
+        <property name="maximumSize"
+                  description="Maximum Size"/>
+      </properties>
+    </service>
+  </server>
+
+  <server name="WebSphere"
+          version="6.1"
+          include="6.0"/>
+
+  <server name="WebSphere Admin"
+          version="6.1"
+          include="6.0">
+
+    <property name="was.install.root"
+              value="/opt/IBM/WebSphere/AppServer"/>
+
+    <config include="connector">
+      <option name="was.install.root"
+              description="WebSphere install root"
+              default="${was.install.root}"/>
+    </config>
+  </server>
+</plugin>

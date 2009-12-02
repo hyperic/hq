@@ -28,8 +28,7 @@ package org.hyperic.hq.common;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * An object for maintaining a group of metrics derived from method invocation 

@@ -28,6 +28,9 @@ package org.hyperic.hq.livedata.server.session;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,9 +38,7 @@ import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.livedata.agent.client.LiveDataCommandsClient;
 import org.hyperic.hq.livedata.shared.LiveDataResult;
 
-import edu.emory.mathcs.backport.java.util.concurrent.LinkedBlockingQueue;
-import edu.emory.mathcs.backport.java.util.concurrent.ThreadPoolExecutor;
-import edu.emory.mathcs.backport.java.util.concurrent.TimeUnit;
+
 
 public class LiveDataExecutor extends ThreadPoolExecutor {
 

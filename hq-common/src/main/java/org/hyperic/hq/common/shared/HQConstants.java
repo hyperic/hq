@@ -30,6 +30,10 @@ package org.hyperic.hq.common.shared;
  * constant used across subsystems
  */
 public class HQConstants {
+    
+    //Moved from DBUpgrader
+    public static final String SCHEMA_MOD_IN_PROGRESS
+    = " *** UPGRADE IN PROGRESS: migrating to version ";
 
     public static final String ServerVersion = "CAM_SERVER_VERSION";
 

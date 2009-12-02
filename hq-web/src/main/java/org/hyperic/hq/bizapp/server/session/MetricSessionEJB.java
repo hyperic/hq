@@ -52,6 +52,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityTypeID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.appdef.shared.ApplicationNotFoundException;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
 import org.hyperic.hq.auth.shared.SessionManager;
@@ -352,7 +353,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 List children = trans.translate(ctx, cList).list();
                 for (Iterator j=children.iterator(); j.hasNext(); ) {
                     Resource child = (Resource)j.next();                
-                    res.add(new AppdefEntityID(child));
+                    res.add(AppdefUtil.newAppdefEntityId(child));
                 }
             }
         }
@@ -392,7 +393,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
             if (r == null || r.isInAsyncDeleteState()) {
                 continue;
             }
-            aeids.add(new AppdefEntityID(r));
+            aeids.add(AppdefUtil.newAppdefEntityId(r));
         }
         final AppdefEntityID[] ids =
             (AppdefEntityID[])aeids.toArray(new AppdefEntityID[0]);
@@ -590,11 +591,11 @@ public class MetricSessionEJB extends BizappSessionEJB {
                 aeid = r.getEntityId();
             } else if (o instanceof Resource) {
                 final Resource resource = (Resource) o;
-                aeid = new AppdefEntityID(resource);
+                aeid = AppdefUtil.newAppdefEntityId(resource);
             } else if (o instanceof ResourceGroup) {
                 final ResourceGroup grp = (ResourceGroup) o;
                 final Resource resource = grp.getResource();
-                aeid = new AppdefEntityID(resource);
+                aeid = AppdefUtil.newAppdefEntityId(resource);
             } else {
                 final AppdefResourceValue r = (AppdefResourceValue) o;
                 aeid = r.getEntityId();
@@ -960,7 +961,7 @@ public class MetricSessionEJB extends BizappSessionEJB {
                     if (r == null || r.isInAsyncDeleteState()) {
                         continue;
                     }
-                    resources.add(new AppdefEntityID(r));
+                    resources.add(AppdefUtil.newAppdefEntityId(r));
                 }
             }
             else {

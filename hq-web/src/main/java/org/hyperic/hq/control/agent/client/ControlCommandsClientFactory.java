@@ -71,7 +71,7 @@ public class ControlCommandsClientFactory {
             
             return new ControlCommandsClientImpl(agent, factory);
         } else {
-            return new LegacyControlCommandsClientImpl(new SecureAgentConnection(agent));            
+            return new LegacyControlCommandsClientImpl(new SecureAgentConnection(agent.getAddress(),agent.getPort(),agent.getAuthToken()));            
         }         
     }
 

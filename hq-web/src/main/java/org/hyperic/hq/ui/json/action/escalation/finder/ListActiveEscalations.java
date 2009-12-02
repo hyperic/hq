@@ -30,6 +30,7 @@ import java.util.List;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.AuthzSubjectValue;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
@@ -65,7 +66,7 @@ public class ListActiveEscalations extends BaseAction {
             AlertDefinitionInterface defInfo = 
                 alert.getAlertInfo().getAlertDefinitionInterface();
             AppdefEntityID entId = 
-                new AppdefEntityID(defInfo.getResource());
+                AppdefUtil.newAppdefEntityId(defInfo.getResource());
             AppdefEntityValue ent = new AppdefEntityValue(entId, me);
                 
             sj.put(Escalation.JSON_NAME, s.getEscalation().toJSON());
@@ -73,7 +74,7 @@ public class ListActiveEscalations extends BaseAction {
             sj.put("alertType", s.getAlertType().getCode());
             sj.put("alertName", defInfo.getName()); 
             sj.put("entName", ent.getName());
-            AppdefEntityID aeid = new AppdefEntityID(defInfo.getResource());
+            AppdefEntityID aeid = AppdefUtil.newAppdefEntityId(defInfo.getResource());
             sj.put("entType", aeid.getType());
             sj.put("entId", aeid.getID()); 
             sj.put("timeUntilNext", 

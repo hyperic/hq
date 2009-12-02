@@ -28,6 +28,7 @@ package org.hyperic.hq.escalation;
 import java.io.Serializable;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.escalation.server.session.Escalatable;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.LoggableInterface;
@@ -47,7 +48,7 @@ public class EscalationEvent extends AbstractEvent
     public EscalationEvent(Escalatable alert, String msg) {
         super();
         setTimestamp(System.currentTimeMillis());
-        _aeid = new AppdefEntityID(
+        _aeid = AppdefUtil.newAppdefEntityId(
             alert.getDefinition().getDefinitionInfo().getResource());
         _alertName = alert.getDefinition().getName();
         _msg = msg;

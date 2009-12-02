@@ -27,7 +27,6 @@ package org.hyperic.util.jdbc;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -42,15 +41,9 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hibernate.dialect.HQDialect;
-import org.hyperic.hibernate.dialect.HQDialectUtil;
 import org.hyperic.util.pager.PageControl;
-import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
 
 
 @Component
@@ -324,34 +317,7 @@ public class DBUtil  {
     }
     
 
-    /**
-     * Get a database specific blob column, when you already have the result set
-     * open
-     *
-     * @param columnIndex where to read the blob column form.
-     */
-    public static byte[] getBlobColumn(ResultSet rs, int columnIndex)
-        throws SQLException {
-
-        int dbType = getDBType(rs.getStatement().getConnection());
-        byte[] rval;
-        switch (dbType) {
-            case DATABASE_ORACLE_8:
-            case DATABASE_ORACLE_9:
-            case DATABASE_ORACLE_10:
-            case DATABASE_ORACLE_11:
-                rval = OracleBlobColumn.doSelect(rs, columnIndex);
-                break;
-            case DATABASE_POSTGRESQL_7:
-            case DATABASE_POSTGRESQL_8:
-                rval = PostgresBlobColumn.doSelect(rs, columnIndex);
-                break;
-            default:
-                rval = StdBlobColumn.doSelect(rs, columnIndex);
-                break;
-        }
-        return rval;
-    }
+    
 
     /**
      * Get the type for a boolean as a string for the required database. This
@@ -486,42 +452,9 @@ public class DBUtil  {
         }
     }
 
-    public static boolean checkTableExists(String url, String user,
-                                           String password, String table)
-        throws DriverLoadException, SQLException {
+   
 
-        try {
-            Class.forName(JDBC.getDriverString(url)).newInstance();
-        } catch (Exception e) {
-            throw new DriverLoadException(e);
-        }
-        Connection conn = null;
-        try {
-            conn = DriverManager.getConnection(url, user, password);
-            return checkTableExists(conn, table);
-
-        } finally {
-            closeConnection(log, conn);
-        }
-    }
-
-    public static boolean checkTableExists(Connection conn, String table)
-        throws SQLException {
-
-        HQDialect dialect = HQDialectUtil.getHQDialect(conn);
-
-        Statement stmt = null;
-        boolean exists = false;
-
-        try {
-            stmt = conn.createStatement();
-            exists = dialect.tableExists(stmt, table);
-        } finally {
-            closeStatement(log, stmt);
-        }
-
-        return exists;
-    }
+   
 
     /**
      * Creates a string that consists of the clause repeated a number

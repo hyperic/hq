@@ -104,7 +104,7 @@
 
 <table width="425" cellpadding="2" cellspacing="0" border="0" id="listTable">
 <%
-Iterator i = list.iterator();
+    Iterator i = list.iterator();
 while ( i.hasNext() ) {
     AppdefResourceValue resource = (AppdefResourceValue) i.next();
     request.setAttribute("resource", resource);

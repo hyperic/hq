@@ -708,7 +708,7 @@ public class ServerConfig extends BaseConfig {
         String url      = config.getValue("server.database-url");
 
         try {
-            return DBUtil.checkTableExists(url, user, password,
+            return InstallDBUtil.checkTableExists(url, user, password,
                                            "EAM_CONFIG_PROPS");
         } catch (DriverLoadException e) {
             throw new EarlyExitException("Error connecting to database "

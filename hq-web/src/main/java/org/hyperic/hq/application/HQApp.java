@@ -60,7 +60,6 @@ import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hibernate.SessionManager;
 import org.hyperic.hq.transport.AgentProxyFactory;
 import org.hyperic.hq.transport.ServerTransport;
-import org.hyperic.tools.ant.dbupgrade.DBUpgrader;
 import org.hyperic.txsnatch.TxSnatch;
 import org.hyperic.util.callback.CallbackDispatcher;
 import org.hyperic.util.jdbc.DBUtil;
@@ -652,7 +651,7 @@ public class HQApp  {
             rs = stmt.executeQuery(sql);
             if (rs.next()) {
                 final String currSchema = rs.getString("propvalue");
-                if (currSchema.contains(DBUpgrader.SCHEMA_MOD_IN_PROGRESS)) {
+                if (currSchema.contains(HQConstants.SCHEMA_MOD_IN_PROGRESS)) {
                     _log.fatal("HQ DB schema is in a bad state: '" + currSchema +
                         "'.  This is most likely due to a failed upgrade.  " +
                         "Please either restore from backups and start your " +

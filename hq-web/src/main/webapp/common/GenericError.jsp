@@ -92,7 +92,7 @@
 </table>
 
 <%
-// XXX: move this all into an action
+    // XXX: move this all into an action
 /* get the exception from one of the many places it could be hiding */
 if (exception == null)
     exception = (Exception)request.getAttribute("javax.servlet.error.exception");
@@ -108,23 +108,22 @@ Exception root = null;
 try {
     if (exception != null) {
         if (exception instanceof ServletException) {
-            ServletException se = (ServletException) exception;
-            root = (Exception) se.getRootCause();
+    ServletException se = (ServletException) exception;
+    root = (Exception) se.getRootCause();
 %>
 <c:set var="root">
-<%= root %>
+<%=root%>
 </c:set>
 <%
-        }
+    }
     }
 }
 catch (ClassCastException ce) {
     // give up on having a printable root exception
 }
-
 %>
 <c:set var="exception">
-<%= exception %>
+<%=exception%>
 </c:set>
 
 <c:if test="${param.errorMessage}">
@@ -132,12 +131,16 @@ catch (ClassCastException ce) {
 </c:if>
 
 <c:catch> 
-	<% if (exception != null) { %> 
+	<%
+ 	    if (exception != null) {
+ 	%> 
  		<c:set var="exceptionStackTrace"><%=StringUtil.getStackTrace(exception)%></c:set>
  		
       	<div id="exception" style="visibility:hidden"><c:out value="${exceptionStackTrace}" /></div>
     
-    	<% if (root != null) { %> 
+    	<%
+        	    if (root != null) {
+        	%> 
     		<c:set var="rootStackTrace"><%=StringUtil.getStackTrace(root)%></c:set>
     		
       		<div id="root" style="visibility:hidden"><c:out value="${rootStackTrace}" /></div>

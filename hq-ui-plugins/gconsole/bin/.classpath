@@ -5,12 +5,9 @@
 	<classpathentry kind="src" path="views"/>
 	<classpathentry kind="src" path="etc"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/HQ"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
-	<classpathentry kind="lib" path="/HQ/thirdparty/lib/commons-logging-1.0.4.jar"/>
-	<classpathentry kind="lib" path="/HQ/thirdparty/lib/json.jar"/>
-	<classpathentry kind="lib" path="/HQ/thirdparty/lib/hibernate/hibernate3.jar"/>
 	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jboss.jar"/>
 	<classpathentry kind="var" path="JBOSS_HOME/server/default/lib/jboss-j2ee.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-web"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

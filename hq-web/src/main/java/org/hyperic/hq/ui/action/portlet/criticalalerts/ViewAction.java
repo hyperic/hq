@@ -42,6 +42,7 @@ import org.apache.struts.action.ActionMapping;
 import org.apache.struts.util.MessageResources;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.appdef.shared.AppdefEntityValue;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.bizapp.shared.EventsBoss;
@@ -153,7 +154,7 @@ public class ViewAction extends BaseAction {
             if (escalation != null && escalation.isPauseAllowed()) {
                 maxPauseTime = escalation.getMaxPauseTime();
             }
-            eid = new AppdefEntityID(def.getResource());
+            eid = AppdefUtil.newAppdefEntityId(def.getResource());
             aVal = new AppdefEntityValue(eid, subject);
             
             JSONObject jAlert = new JSONObject();

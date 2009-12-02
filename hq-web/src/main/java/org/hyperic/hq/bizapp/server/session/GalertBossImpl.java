@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.AppdefUtil;
 import org.hyperic.hq.auth.shared.SessionException;
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
@@ -176,7 +177,7 @@ public class GalertBossImpl implements GalertBoss {
         PageList<GalertDef> defList = null;
         try {
             alertPermissionManager.canManageAlerts(subj,
-                                                   new AppdefEntityID(g.getResource()));
+                AppdefUtil.newAppdefEntityId(g.getResource()));
             defList = galertManager.findAlertDefs(g, pc);
         } catch (PermissionException e) {
             // user does not have sufficient permissions, so display no
@@ -270,7 +271,7 @@ public class GalertBossImpl implements GalertBoss {
             AuthzSubject subj = sessionManager.getSubject(sessionId);
             ResourceGroup g = resourceGroupManager.findResourceGroupById(subj, gid);
             alertPermissionManager.canManageAlerts(subj,
-                                                   new AppdefEntityID(g.getResource()));
+                AppdefUtil.newAppdefEntityId(g.getResource()));
 
             // Don't need to have any results
             PageControl pc = new PageControl();
@@ -306,7 +307,7 @@ public class GalertBossImpl implements GalertBoss {
 
         try {
             alertPermissionManager.canManageAlerts(subj,
-                                                   new AppdefEntityID(g.getResource()));
+                AppdefUtil.newAppdefEntityId(g.getResource()));
             alertLogs =
                         galertManager.findAlertLogsByTimeWindow(g, begin, end, pc);
 
