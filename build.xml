@@ -22,8 +22,9 @@
   <property name="hq.common" location="${hq.home}/hq-common"/>
   <property name="hq.util" location="${hq.home}/hq-util"/>
   <property name="hq.pdk.shared" location="${hq.home}/hq-pdk-shared"/>
-  <property name="hq.pdk.agent" location="${hq.home}/hq-pdk-agent"/>
-  <property name="hq.agent" location="${hq.home}/hq-agent"/>
+  <property name="hq.pdk.agent" location="${hq.home}/hq-agent/hq-agent-pdk"/>
+  <property name="hq.agent" location="${hq.home}/hq-agent/hq-agent-core"/>
+  <property name="hq.agent.handlers" location="${hq.home}/hq-agent/hq-agent-handlers"/>
   <property name="hq.plugins" location="${hq.home}/hq-plugins" />
 
   <property name="jboss.home" location="${ENV.JBOSS_HOME}" />
@@ -1104,6 +1105,51 @@
 		</fileset>
 		<fileset dir="${thirdparty.lib}/hibernate" includes="concurrent*.jar"/>
     </copy>
+
+    <jar basedir="${hq.agent.handlers}/hq-agent-handler-autoinventory/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-autoinventory.jar">
+	   <manifest>
+		  <attribute name="Main-Class" value="org.hyperic.hq.autoinventory.agent.server.AutoinventoryCommandsServer"/>
+	   </manifest>
+    </jar>
+
+     <jar basedir="${hq.agent.handlers}/hq-agent-handler-bizapp/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-bizapp.jar">
+	   <manifest>
+		  <attribute name="Main-Class" value="org.hyperic.hq.bizapp.agent.server.CommandsServer"/>
+	   </manifest>
+    </jar>
+
+    <jar basedir="${hq.agent.handlers}/hq-agent-handler-measurement/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-measurement.jar">
+	   <manifest>
+		  <attribute name="Main-Class" value="org.hyperic.hq.measurement.agent.server.MeasurementCommandsServer"/>
+	   </manifest>
+    </jar>
+
+    <jar basedir="${hq.agent.handlers}/hq-agent-handler-commands/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-commands.jar">
+	   <manifest>
+		  <attribute name="Main-Class" value="org.hyperic.hq.agent.server.AgentCommandsServer"/>
+	   </manifest>
+    </jar>
+
+    <jar basedir="${hq.agent.handlers}/hq-agent-handler-control/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-control.jar">
+	   <manifest>
+		  <attribute name="Main-Class" value="org.hyperic.hq.control.agent.server.ControlCommandsServer"/>
+	   </manifest>
+    </jar>
+
+    <jar basedir="${hq.agent.handlers}/hq-agent-handler-livedata/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/hq-agent-handler-livedata.jar">
+	   <manifest>
+		  <attribute name="Main-Class" value="org.hyperic.hq.livedata.agent.server.LiveDataCommandsServer"/>
+	   </manifest>
+    </jar>
+
+	<!-- Agent jars -->
+    <jar basedir="${hq.agent}/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/hq-agent-core.jar">
+    </jar>
+
+    <!-- TODO move this to a common target -->
+    <jar basedir="${hq.common}/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/hq-common.jar">
+    </jar>
+
 	  
     <copy todir="${agent.dir}/wrapper/sbin" >
       <fileset dir="${wrapper.bin}" includes="*" />
@@ -1113,149 +1159,45 @@
       <fileset dir="${wrapper.lib}" includes="*" />
     </copy> 	
 	  
-    <!-- Autoinventory jars -->
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/AgentAutoinventoryServer.jar">
-      <include name="org/hyperic/hq/autoinventory/**"/>
-      <include name="org/hyperic/hq/authz/client/**"/>
-      <include name="org/hyperic/hq/authz/shared/**"/>
-      <include name="org/hyperic/hq/authz/values/**"/>
-      <include name="org/hyperic/hq/appdef/shared/**"/>
-      <manifest>
-        <attribute name="Main-Class" value="org.hyperic.hq.autoinventory.agent.server.AutoinventoryCommandsServer" />
-      </manifest>
-    </jar>
-
-    <!-- Bizapp jars -->
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/AgentBizappServer.jar">
-      <include name="org/hyperic/hq/bizapp/agent/server/**"/>
-      <include name="org/hyperic/hq/bizapp/agent/commands/**"/>
-      <include name="org/hyperic/hq/bizapp/agent/*"/>
-      <manifest>
-        <attribute name="Main-Class" value="org.hyperic.hq.bizapp.agent.server.CommandsServer" />
-      </manifest>
-    </jar>
-
-    <!-- Measurement jars -->
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/AgentMeasurementServer.jar">
-        <include name="org/hyperic/hq/measurement/agent/**"/>
-        <include name="org/hyperic/hq/measurement/ext/**"/>
-        <include name="org/hyperic/hq/measurement/shared/**"/>
-        <include name="org/hyperic/hq/measurement/monitor/**"/>
-        <include name="org/hyperic/hq/measurement/data/**"/>
-        <include name="org/hyperic/hq/measurement/client/**"/>
-        <include name="org/hyperic/hq/measurement/schedule/**"/>
-        <include name="org/hyperic/hq/measurement/*"/>
-        <include name="org/hyperic/hq/measurement/server/session/SRN.class"/>
-        <manifest>
-            <attribute name="Main-Class" value="org.hyperic.hq.measurement.agent.server.MeasurementCommandsServer"/>
-        </manifest>
-    </jar>
-	  
-	  <!-- New Handler for Transport -->
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/lib/AgentTransport.jar">
-	  <include name="org/hyperic/hq/agent/server/AgentTransportLifecycleImpl.class"/> 	
-      <include name="org/hyperic/hq/transport/AgentTransport*.class"/>
-      <include name="org/hyperic/hq/transport/PollerClient.class"/>
-      <include name="org/hyperic/hq/transport/util/*.class"/>   
-      <exclude name="org/hyperic/hq/transport/**/*_test*"/> 
-	  <include name="org/hyperic/hq/measurement/agent/commands/*.class"/>	 
-    </jar>
-	  	  
-    <!-- Top level stuff -->
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/AgentServer.jar">
-      <include name="org/hyperic/hq/agent/**"/>
-      <include name="org/hyperic/hq/bizapp/agent/*.class"/>
-      <include name="org/hyperic/hq/bizapp/client/*.class"/>
-      <include name="org/hyperic/hq/bizapp/shared/*.class"/>
-      <include name="org/hyperic/hq/common/*.class"/>
-	  <exclude name="org/hyperic/hq/common/*_test*.class"/>	
-	  <include name="org/hyperic/hq/common/Resources.properties"/>	
-      <exclude name="org/hyperic/hq/agent/server/AgentTransportLifecycleImpl.class"/>   
-	  <include name="org/hyperic/util/security/MD5.class"/>	
-		
-	  <!-- The agent commands server must be in its own server handler classloader for 
-		   agent send file data (over the new transport) to work correctly. Note 
-		   that the AgentCommandsService depends directly on new transport classes. -->
-      <exclude name="org/hyperic/hq/agent/server/AgentCommandsServer.class"/>
-      <exclude name="org/hyperic/hq/agent/server/AgentCommandsService.class"/> 		   			      
-    </jar>
-	  
-    <!-- Agent commands server handler (this handler is NOT optional) -->
-     <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/AgentCommandsServer.jar">
-        <include name="org/hyperic/hq/agent/server/AgentCommandsServer.class"/>
-        <include name="org/hyperic/hq/agent/server/AgentCommandsService.class"/> 
-        <manifest>
-            <attribute name="Main-Class" value="org.hyperic.hq.agent.server.AgentCommandsServer"/>
-        </manifest>
-    </jar>	  
-
-    <!-- Control agent server handler -->
-    <jar basedir="${build.dir}/classes"
-         jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/AgentControlServer.jar">
-      <include name="org/hyperic/hq/control/**"/>
-      <exclude name="org/hyperic/hq/control/**/*_test.java"/>
-      <manifest>
-        <attribute name="Main-Class" value="org.hyperic.hq.control.agent.server.ControlCommandsServer" />
-      </manifest>
-    </jar>
-
-    <jar basedir="${build.dir}/classes"
-         jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/handlers/LiveDataServer.jar">
-      <include name="org/hyperic/hq/livedata/**"/>
-      <manifest>
-        <attribute name="Main-Class" value="org.hyperic.hq.livedata.agent.server.LiveDataCommandsServer" />
-      </manifest>
-    </jar>
-
-    <jar basedir="${build.dir}/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/AgentClient.jar">
-      <exclude name="org/hyperic/hq/agent/server/**"/>
-      <include name="org/hyperic/hq/agent/**"/>
-      <include name="org/hyperic/hq/appdef/shared/*.class"/>
-      <include name="org/hyperic/hq/common/*.class"/>
-	  <exclude name="org/hyperic/hq/common/*_test*.class"/>	
-      <include name="org/hyperic/hq/bizapp/agent/**"/>
-      <include name="org/hyperic/hq/bizapp/client/*.class"/>
-      <include name="org/hyperic/hq/bizapp/shared/*.class"/>
-      <exclude name="org/hyperic/hq/bizapp/agent/server/**"/>	
-    </jar>
+    
 
     <!-- TODO: Copy and replace properties -->
-    <copy file="etc/agent.properties"
+    <copy file="${hq.agent}/src/main/resources/agent.properties"
         tofile="${agent.dir}/conf/agent.properties"/>
 
-    <copy file="etc/wrapper-master.conf"
+    <copy file="${hq.agent}/src/main/resources/wrapper-master.conf"
         tofile="${agent.dir}/conf/wrapper.conf"/>
   	
-    <copy file="bin/background.sh"
+    <copy file="${hq.agent}/bin/background.sh"
         tofile="${agent.dir}/bundles/${agent.bundle.dir}/background.sh"/>
-    <copy file="bin/background.bat"
+    <copy file="${hq.agent}/bin/background.bat"
         tofile="${agent.dir}/bundles/${agent.bundle.dir}/background.bat"/>
-    <copy file="etc/agent.jaas.config"
+    <copy file="${hq.agent}/src/main/resources/agent.jaas.config"
         tofile="${agent.dir}/bundles/${agent.bundle.dir}/jaas.config"/>
-    <copy file="bin/agent.rc"
+    <copy file="${hq.agent}/bin/agent.rc"
         tofile="${agent.dir}/bundles/${agent.bundle.dir}/rcfiles/agent.rc"/>
 
     <!-- DEPRECATED: replaced hq-agent.exe with Java Service Wrapper
     <copy file="${launcher.dir}/hq-agent.exe"
         tofile="${agent.dir}/bundles/${agent.bundle.dir}/hq-agent.exe" />
     -->
-    <copy file="bin/hq-agent-master.sh"
+    <copy file="${hq.agent}/bin/hq-agent-master.sh"
         tofile="${agent.dir}/bin/hq-agent.sh"/>  
-      <copy file="bin/hq-agent-master.bat"
+      <copy file="${hq.agent}/bin/hq-agent-master.bat"
           tofile="${agent.dir}/bin/hq-agent.bat"/>  
   	
-    <copy file="bin/hq-agent.sh"
+    <copy file="${hq.agent}/bin/hq-agent.sh"
         tofile="${agent.dir}/bundles/${agent.bundle.dir}/bin/hq-agent-nowrapper.sh"/>
   	
-    <copy file="bin/hq-agent-wrapper.bat"
+    <copy file="${hq.agent}/bin/hq-agent-wrapper.bat"
         tofile="${agent.dir}/bundles/${agent.bundle.dir}/bin/hq-agent.bat" />
-    <copy file="bin/hq-agent-wrapper.sh"
+    <copy file="${hq.agent}/bin/hq-agent-wrapper.sh"
         tofile="${agent.dir}/bundles/${agent.bundle.dir}/bin/hq-agent.sh"/> 	
   	
-    <copy file="etc/wrapper.conf"
+    <copy file="${hq.agent}/src/main/resources/wrapper.conf"
         tofile="${agent.dir}/bundles/${agent.bundle.dir}/conf/wrapper.conf"/> 		
   	
-    <copy file="etc/rollback.properties"
+    <copy file="${hq.agent}/src/main/resources/rollback.properties"
         tofile="${agent.dir}/conf/rollback.properties"/>      	
     <replace file="${agent.dir}/conf/rollback.properties">
     	<replacefilter token="@@@AGENT_BUNDLE_DIR@@@" value="${agent.bundle.dir}"/>
@@ -1268,7 +1210,7 @@
   </target>
 
   <target name="build-agent" description="Build and pack the agent directory structure" 
-          depends="compile,pack-pdk,pack-agent" />
+          depends="pack-pdk,pack-agent" />
 
   <!-- ==================== Catalina packaging ==================== -->
 
