@@ -44,7 +44,7 @@ import org.hyperic.hq.measurement.server.session.DataCompressImpl;
 import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.hq.measurement.shared.DataCompress;
 import org.hyperic.util.TimeUtil;
-import org.hyperic.util.stats.ConcurrentStatsCollector;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 
 public class DataPurgeJob implements Runnable {
 

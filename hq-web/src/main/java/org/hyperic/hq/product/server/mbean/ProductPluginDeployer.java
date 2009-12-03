@@ -72,7 +72,7 @@ import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.server.session.ProductStartupListener;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.file.FileUtil;
-import org.hyperic.util.stats.ConcurrentStatsCollector;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.jboss.deployment.DeploymentException;
 import org.jboss.deployment.DeploymentInfo;
 import org.jboss.deployment.SubDeployerSupport;

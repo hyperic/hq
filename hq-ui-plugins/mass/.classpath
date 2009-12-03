@@ -6,5 +6,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="con" path="GROOVY_SUPPORT"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-web"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-pdk-shared"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

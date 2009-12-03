@@ -61,7 +61,6 @@ import org.hyperic.hq.appdef.shared.AppdefGroupValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceTypeValue;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.appdef.shared.InvalidAppdefTypeException;
-import org.hyperic.hq.appdef.shared.PlatformTypeValue;
 import org.hyperic.hq.appdef.shared.ServerTypeValue;
 import org.hyperic.hq.appdef.shared.ServerValue;
 import org.hyperic.hq.appdef.shared.ServiceTypeValue;
@@ -78,12 +77,12 @@ import org.hyperic.hq.bizapp.shared.AIBoss;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.bizapp.shared.AuthzBoss;
 import org.hyperic.hq.common.ObjectNotFoundException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.server.session.Baseline;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.product.PlatformDetector;
-import org.hyperic.hq.product.PlatformServiceDetector;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.action.resource.platform.PlatformForm;
@@ -780,7 +779,7 @@ public class BizappUtils {
         String name = option.getName();
         String type = config.getValue(ProductPlugin.PROP_PLATFORM_TYPE);
         if (name.equals(SNMPClient.PROP_IP) ||
-            name.equals(PlatformServiceDetector.PROP_IPADDRESS))
+            name.equals(HQConstants.PROP_IPADDRESS))
         {
             //dont want to override those that default to the loopback
             //address, such as apache and iplanet servers

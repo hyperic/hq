@@ -51,7 +51,7 @@ import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticThread;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.PrintfFormat;
-import org.hyperic.util.stats.ConcurrentStatsCollector;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.thread.LoggingThreadGroup;
 import org.hyperic.util.thread.ThreadGroupFactory;
 import org.hyperic.util.thread.ThreadWatchdog;

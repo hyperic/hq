@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.appdef.shared;
 
-import org.hyperic.hq.product.TypeInfo;
 
 public final class AppdefEntityConstants {
 
@@ -162,34 +161,8 @@ public final class AppdefEntityConstants {
         }
     }
 
-    public static int entityInfoTypeToAppdefType(int entityInfoType){
-        switch(entityInfoType){
-        case TypeInfo.TYPE_PLATFORM:
-            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
-        case TypeInfo.TYPE_SERVER:
-            return AppdefEntityConstants.APPDEF_TYPE_SERVER;
-        case TypeInfo.TYPE_SERVICE:
-            return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
-        default:
-            throw new IllegalArgumentException("Unknown TypeInfo type");
-        }
-    }
+   
 
-    /**
-     * Convert a TypeInfo PDK entity type into an Appdef entity type.
-     */
-    public static int appdefTypeToEntityInfoType(int appdefType){
-        switch(appdefType){
-        case APPDEF_TYPE_PLATFORM:
-            return TypeInfo.TYPE_PLATFORM;
-        case APPDEF_TYPE_SERVER:
-            return TypeInfo.TYPE_SERVER;
-        case APPDEF_TYPE_SERVICE:
-            return TypeInfo.TYPE_SERVICE;
-        }
-        throw new IllegalArgumentException("Appdef type " + appdefType + 
-                                           " is an invalid entity type");
-    }
 
     public static boolean typeIsValid(int type){
         return type >= AppdefEntityConstants.APPDEF_TYPE_PLATFORM &&

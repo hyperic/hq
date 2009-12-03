@@ -9,16 +9,23 @@
   <property name="hq.home" location="." />
   
   <!-- Default build properties -->
-  <property file="etc/build.properties" />
+  <property file="build.properties" />
 
   <!-- Hibernate properties -->
-  <property file="etc/hibernate.properties" />
+  <!--><property file="etc/hibernate.properties" /> -->
 
   <!-- Version file -->
-  <property name="version.properties" value="etc/version.properties"/>
+  <property name="version.properties" value="version.properties"/>
   <property file="${version.properties}" />
  
   <!-- ==================== Defaults ==================== -->
+  <property name="hq.common" location="${hq.home}/hq-common"/>
+  <property name="hq.util" location="${hq.home}/hq-util"/>
+  <property name="hq.pdk.shared" location="${hq.home}/hq-pdk-shared"/>
+  <property name="hq.pdk.agent" location="${hq.home}/hq-pdk-agent"/>
+  <property name="hq.agent" location="${hq.home}/hq-agent"/>
+  <property name="hq.plugins" location="${hq.home}/hq-plugins" />
+
   <property name="jboss.home" location="${ENV.JBOSS_HOME}" />
   <property name="j2ee.jar" location="${jboss.home}/client/jboss-j2ee.jar" />
   <property name="jbossweb.home" value="jboss-web.deployer"/>
@@ -30,18 +37,14 @@
   <property name="archive.build.dir" location="${build.dir}/archive" />
 
   <!-- Native libs -->
-  <property name="hq.bin" location="hq_bin" />
+  <property name="hq.bin" location="${hq.common}/thirdparty/hq_bin" />
   <property name="lather.lib" location="${hq.bin}/lather_bin" />
   <property name="sigar.lib" location="${hq.bin}/sigar_bin/lib" />
   <property name="db2monitor.dir" location="${hq.bin}/db2monitor_bin"/>
   <property name="launcher.dir" location="${hq.bin}/launcher_bin"/>
 
-  <!-- UnitTest libs, initially empty and reset if the build is built
-        for unitTests -->
-  <property name="unittest.lib" location=""/>
-
   <!-- Thirdparty libs -->
-  <property name="thirdparty.lib" location="thirdparty/lib"/>
+  <property name="thirdparty.lib" location="${basedir}/hq-common/thirdparty/lib"/>
   <property name="hibernate.lib" location="${thirdparty.lib}/hibernate"/>
   <property name="tapestry_lib" location="${thirdparty.lib}/tapestry"/>
 
@@ -59,8 +62,7 @@
   <property name="pdk.plugins" location="${pdk.dir}/plugins" />
   <property name="pdk.mibs" location="${pdk.dir}/mibs" />
   <property name="pdk.scripts" location="${pdk.dir}/scripts" />
-  <property name="pdk.productStub"
-            value="plugins/etc/ProductPluginXML.stub"/>
+ 
 
   <!-- Java Service Wrapper destination -->
   <property name="wrapper.lib" location="${hq.bin}/wrapper_bin/lib" />
@@ -87,13 +89,10 @@
     <fileset dir="${db2monitor.dir}" includes="lib/db2monitor.jar" />
   </path>
 
-  <path id="unittest">
-    <fileset dir="${unittest.lib}" includes="*.jar" />
-  </path>
+ 
 
   <path id="alljars">
     <path refid="pdknative" />
-    <path refid="unittest" />
     <fileset dir="${lather.lib}" includes="lather.jar" />
     <fileset dir="${thirdparty.lib}" includes="*.jar" excludes="strutstest-*.jar,cactus*.jar,mockejb.jar,mockrunner-ejb.jar,dbunit*.jar,jaas.jar"/>
     <fileset dir="${thirdparty.lib}" includes="*.zip" />      
@@ -112,8 +111,8 @@
     <fileset dir="${jboss.home}/lib" includes="*.jar" />
     <fileset dir="${jboss.home}/client" includes="*.jar" />
     <fileset dir="${tomcat.home}" includes="*.jar" />
-    <fileset dir="${hq.home}/plugins" includes="**/build-lib/*.jar" />
-    <fileset dir="${hq.home}/plugins" includes="**/lib/*.jar" />
+    <fileset dir="${hq.plugins}" includes="**/build-lib/*.jar" />
+    <fileset dir="${hq.plugins}" includes="**/lib/*.jar" />
   </path>
 
   <path id="testjars">
@@ -143,9 +142,8 @@
     <!-- exclude hq-product.jar, else version.properties
          update will fail on windows -->
     <fileset dir="${pdk.lib}"
-             excludes="hq-product.jar"
              includes="**/*.jar" />
-    <path location="${build.dir}/classes" />
+    <path location="${hq.common}/target/classes" />
   </path>
 
   <path id="custom-ant-tasks.path" >
@@ -187,12 +185,10 @@
 	<path id="compile.classpath">
             <path refid="alljars"/>
             <path refid="testjars"/>
-            <path location="${build.dir}/tools/txsnatch/classes"/>
     </path>
     <path id="src.path">
-		  <path location="${build.dir}/src" />
-          <path location="${basedir}/src" />
-		  <path location="${basedir}/generated-src" />
+		   <path location="${hq.common}/src/main/java" />
+		   <path location="${hq.agent}/src/main/java" />
     </path>
     <compile-app classpath.id="compile.classpath" srcpath.id="src.path" output.dir="${build.dir}/classes"/>
 	
@@ -203,15 +199,11 @@
 		<attribute name="srcpath.id"/>
 		<attribute name="output.dir"/>
       <sequential>
-	  <antcall target="compile-txsnatch"/>
       <mkdir dir="@{output.dir}" />
 	  <mkdir dir="${war.dir}/WEB-INF/lib" />
       <hq-javac destdir="@{output.dir}">
         <classpath refid="@{classpath.id}"/>
         <src refid="@{srcpath.id}"/>
-        <src>
-			<path location="${basedir}/plugins/system/src"/>
-		</src>
      </hq-javac>
      <antcall target="compile-plugins"/>
 	</sequential>
@@ -225,8 +217,7 @@
 	        <path location="${build.dir}/classes"/>
 		</classpath>
         <src>
-          <dirset dir="${basedir}/plugins">
-            <include name="*/src"/>
+          <dirset dir="${hq.plugins}">
             <include name="*/src/main/java"/>
           </dirset>
         </src>
@@ -260,21 +251,9 @@
                  includes="cactus.properties,log_client.properties,spring-*.properties,META-INF/spring/**/*-context.xml" />
       </copy>
   </target>
-    
-  <target name="compile-txsnatch" depends="init">
-      <mkdir dir="${build.dir}/tools/txsnatch/classes" />
-      <hq-javac destdir="${build.dir}/tools/txsnatch/classes">
-        <classpath>
-            <path refid="alljars"/>
-        </classpath>
-        <src>
-          <path location="${basedir}/tools/txsnatch/src" />
-        </src>
-      </hq-javac>
-  </target>
 
   <target name="compile" description="Compile sources" 
-          depends="compile-app-sources,copy-resources"/>
+          depends="compile-app-sources"/>
 
   <!-- ==================== JSP precompile ============================ -->
   
@@ -844,81 +823,26 @@
   </target>
 
   <target name="pack-pdk-lib" description="Pack the PDK lib jars">
-    <copy file="${pdk.productStub}"
-          toDir="${build.dir}/classes/org/hyperic/hq/product"/>
     <mkdir dir="${pdk.lib}"/>
     <mkdir dir="${pdk.mibs}"/>
 
-    <jar basedir="${build.dir}/classes"
-         jarfile="${pdk.lib}/hyperic-util.jar">
-      <include name="org/hyperic/util/**"/>
+    <jar basedir="${hq.util}/target/classes"
+         jarfile="${pdk.lib}/hq-util.jar">
     </jar>
 
-    <jar basedir="${build.dir}/classes"
-         jarfile="${pdk.lib}/hq-product.jar">
-
+    <jar basedir="${hq.pdk.shared}/target/classes"
+         jarfile="${pdk.lib}/hq-pdk-shared.jar">
       <manifest>
         <attribute name="Main-Class"
                    value="org.hyperic.hq.product.util.PluginMain"/>
       </manifest>
-
-      <include name="org/hyperic/hq/bizapp/shared/lather/*.class" />
-      <include name="org/hyperic/hq/product/*.*" />
-      <include name="org/hyperic/hq/product/ant/*.class" />
-      <include name="org/hyperic/hq/product/servlet/client/*.class" />
-      <include name="org/hyperic/snmp/**" />
-      <include name="org/hyperic/hq/product/pluginxml/*.class" />
-      <include name="org/hyperic/hq/product/util/*.class" />
-      <include name="org/hyperic/hq/product/logparse/*.class" />
-      <include name="org/hyperic/hq/common/*.class" />
-      <include name="org/hyperic/hq/measurement/*.class"/>
-      <include name="org/hyperic/hq/measurement/server/session/SRN.class"/>
-      <include name="org/hyperic/hq/measurement/data/*.class"/>
-      <!-- For log/config track objects.  Should be moved into
-           the product package -->
-      <include name="org/hyperic/hq/measurement/shared/*.class"/>
-      <!-- following needed for ai server detector plugins -->
-      <include name="org/hyperic/hq/autoinventory/**"/>
-      <include name="org/hyperic/hq/appdef/shared/**"/>
-      <include name="org/hyperic/hq/authz/shared/**"/>
-      <!-- following needed for rt plugins -->
-      <include name="org/hyperic/hq/rt/shared/**"/>
-      <include name="${pdk.productStub}"/>
-      <!-- include hq version information -->
-      <include name="org/hyperic/hq/common/shared/ProductProperties.class"/>
-      <!-- workaround for StackOverflow w/ WLS 9.x -->
-      <include name="weblogic/net/file/Handler.class"/>
-      <!-- Livedata shared classes -->
-      <include name="org/hyperic/hq/livedata/shared/**"/>
     </jar>
 
-    <!-- Pack version info -->
-    <antcall target="write-version-file">
-      <param name="version-file"
-             value="${build.dir}/src/version.properties"/>
-    </antcall>
-
-    <copy todir="${build.dir}/src">
-      <fileset dir="etc" includes="product.properties" />
-    </copy>
-
-    <jar basedir="${build.dir}/src" 
-         jarfile="${pdk.lib}/hq-product.jar"
-         update="true">
-      <include name="version.properties"/>
-      <include name="product.properties"/>
-    </jar>
-
-    <!-- create the jxla.jar, used by rt -->
-    <mkdir dir="${build.dir}/lib"/>
-    <jar file="${build.dir}/lib/jxla.jar" basedir="${build.dir}/classes" >
-      <include name="org/novadeck/jxla/**" />
+    <jar basedir="${hq.pdk.agent}/target/classes"
+         jarfile="${pdk.lib}/hq-pdk-agent.jar">
     </jar>
 
     <copy todir="${pdk.lib}">
-      <fileset dir="${build.dir}/lib" >
-        <include name="jxla.jar" />
-      </fileset>
       <fileset dir="${sigar.lib}" includes="*.*" />
       <fileset dir="${thirdparty.lib}" >
         <!-- commons-{collections,beanutils} not in the
@@ -966,11 +890,7 @@
       </fileset>
     </copy>
 
-    <!-- product.jmx.* has to be loaded from the plugin ClassLoader -->
-    <jar basedir="${build.dir}/classes"
-         jarfile="${pdk.lib}/mx4j/hq-jmx.jar">
-      <include name="org/hyperic/hq/product/jmx/*.class" />
-    </jar>
+   
 
     <!-- Copy jdbc drivers for use with jdbc based plugins -->
     <mkdir dir="${pdk.lib}/jdbc"/>
@@ -996,16 +916,15 @@
     <mkdir dir="${plugin.dir}"/>
 
     <copy todir="${pdk.plugins}">
-      <!-- copy shared xml pieces but leave *-plugin.xml
-           to plugincopy below for validation -->
-      <fileset dir="${hq.home}/plugins/xml/"
-               excludes="${plugins.exclude}">
-        <include name="*.xml"/>
-        <exclude name="*-plugin.xml"/>
-      </fileset>
+	<!-- copy shared xml pieces prior to validation-->
+	   <fileset dir="${hq.plugins}/process/src/main/resources">
+		   <include name="*.xml"/>
+	    </fileset>
+	   <fileset dir="${hq.plugins}/jvm/src/main/resources" includes="*.xml"/>
     </copy>
 
     <hqplugin name="apache"/>
+
 
     <hqplugin name="tomcat"/>
 
@@ -1025,9 +944,7 @@
 
     <hqplugin name="samba"/>
 
-	<hqplugin name="spring">
-	  <fileset dir="plugins/spring/src/main/resources" includes="**"/>
-	</hqplugin>
+	<hqplugin name="spring"/>
 
     <hqplugin name="sybase"/>
 
@@ -1089,11 +1006,15 @@
 
     <hqplugin name="xen">
        <!-- XXX Xen sdk built w/ 1.6 + mods for Xen 4.0 compat -->
-       <fileset dir="${build.dir}/classes"
+       <fileset dir="${hq.plugins}/xen/target/classes"
                 includes="com/xensource/xenapi/*.class"/>
     </hqplugin>
 
     <hqplugin name="groovy-scripting"/>
+
+  
+
+	
   </target>
   
   <!-- Copy plugins -->
@@ -1122,28 +1043,27 @@
       </fileset>
     </copy>
 
-    <plugincopy todir="${pdk.plugins}">
-      <fileset dir="plugins/xml" includes="*-plugin.xml"/>
-    </plugincopy>
 
     <mkdir dir="${pdk.dir}/examples"/>
     <plugincopy todir="${pdk.dir}/examples">
-      <fileset dir="plugins/examples" includes="*.xml"/>
+      <fileset dir="hq-plugins/examples/src/main/resources" includes="*.xml"/>
     </plugincopy>
 
-    <!-- Copy plugins to server -->
-    <copy todir="${server.plugin.dir}">
-      <fileset dir="${pdk.plugins}">
-        <include name="*-plugin.jar"/>
-        <include name="*.xml"/>
-        <include name="scripting/*-scripting-plugin.jar"/>
-      </fileset>
-    </copy>
 
+    <plugincopy todir="${pdk.plugins}" file="hq-plugins/activemq/src/main/resources/activemq-plugin.xml"/>
+    <plugincopy todir="${pdk.plugins}" file="hq-plugins/geronimo/src/main/resources/geronimo-plugin.xml"/>
+    <plugincopy todir="${pdk.plugins}" file="hq-plugins/glassfish/src/main/resources/glassfish-plugin.xml"/>
+    <plugincopy todir="${pdk.plugins}" file="hq-plugins/hq-internal/src/main/resources/hq-internal-plugin.xml"/>
+    <plugincopy todir="${pdk.plugins}" file="hq-plugins/jetty/src/main/resources/jetty-plugin.xml"/>
+    <plugincopy todir="${pdk.plugins}" file="hq-plugins/jmx/src/main/resources/jmx-plugin.xml"/>
+    <plugincopy todir="${pdk.plugins}" file="hq-plugins/resin/src/main/resources/resin-plugin.xml"/>
+	<plugincopy todir="${pdk.plugins}" file="hq-plugins/sendmail/src/main/resources/sendmail-plugin.xml"/>
+
+    
     <!-- Copy scripts -->
     <mkdir dir="${pdk.scripts}"/>
     <copy todir="${pdk.scripts}">
-      <fileset dir="plugins/scripts" includes="*.*"/>
+      <fileset dir="${hq.pdk.agent}/scripts" includes="*.*"/>
     </copy>
   </target>
 

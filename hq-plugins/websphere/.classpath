@@ -5,9 +5,9 @@
 	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="con" path="org.maven.ide.eclipse.MAVEN2_CLASSPATH_CONTAINER"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/hq-agent"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/hq-common"/>
 	<classpathentry kind="lib" path="build-lib/websphere-jmx.jar"/>
 	<classpathentry kind="lib" path="build-lib/websphere-pmi.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-pdk-agent"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-pdk-shared"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
