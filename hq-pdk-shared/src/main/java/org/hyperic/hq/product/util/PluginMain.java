@@ -48,7 +48,7 @@ import org.hyperic.util.PluginLoader;
 /**
  * Run the main method for a plugin class.
  * Example:
- * java -jar pdk/lib/hq-product.jar apache ApacheServerDetector
+ * java -jar pdk/lib/hq-pdk-shared.jar apache ApacheServerDetector
  */
 //cut-n-pasted-n-chopped from sigar.cmd.Runner class
 public class PluginMain {

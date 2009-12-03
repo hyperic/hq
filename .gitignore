@@ -4,3 +4,5 @@ hq-ui-plugins/*/bin
 **/.DS_Store
 **/target
 hq-plugins/*/target
+hq-agent/**/target
+hq-agent/hq-agent-handlers/**/target
