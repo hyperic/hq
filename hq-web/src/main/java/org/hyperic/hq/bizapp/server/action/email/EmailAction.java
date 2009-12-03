@@ -77,7 +77,7 @@ import org.hyperic.hq.measurement.MeasurementNotFoundException;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.StringUtil;
 import org.hyperic.util.config.ConfigResponse;
-import org.hyperic.util.stats.ConcurrentStatsCollector;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 
 public class EmailAction extends EmailActionConfig
     implements ActionInterface, Notify

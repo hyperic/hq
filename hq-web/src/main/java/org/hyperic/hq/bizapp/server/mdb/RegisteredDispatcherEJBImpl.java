@@ -33,7 +33,7 @@ import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.TriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
-import org.hyperic.util.stats.ConcurrentStatsCollector;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 
 /**
  * The RegisteredDispatcher Message-Drive Bean registers Triggers and dispatches

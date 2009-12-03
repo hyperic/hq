@@ -405,11 +405,24 @@ public class TemplateManagerImpl implements TemplateManager {
 
         if (t == null) {
             int e = info.getType();
-            int a = AppdefEntityConstants.entityInfoTypeToAppdefType(e);
+            int a = entityInfoTypeToAppdefType(e);
             t = monitorableTypeDAO.create(info.getName(), a, pluginName);
         }
 
         return t;
+    }
+    
+    private int entityInfoTypeToAppdefType(int entityInfoType){
+        switch(entityInfoType){
+        case TypeInfo.TYPE_PLATFORM:
+            return AppdefEntityConstants.APPDEF_TYPE_PLATFORM;
+        case TypeInfo.TYPE_SERVER:
+            return AppdefEntityConstants.APPDEF_TYPE_SERVER;
+        case TypeInfo.TYPE_SERVICE:
+            return AppdefEntityConstants.APPDEF_TYPE_SERVICE;
+        default:
+            throw new IllegalArgumentException("Unknown TypeInfo type");
+        }
     }
 
     /**

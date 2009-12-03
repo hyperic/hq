@@ -34,6 +34,9 @@ public class HQConstants {
     //Moved from DBUpgrader
     public static final String SCHEMA_MOD_IN_PROGRESS
     = " *** UPGRADE IN PROGRESS: migrating to version ";
+    
+    //Movd from PlatformServiceDetector
+    public static final String PROP_IPADDRESS = "ipaddress";
 
     public static final String ServerVersion = "CAM_SERVER_VERSION";
 

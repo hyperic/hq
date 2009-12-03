@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.appdef.shared;
 
-import org.hyperic.hq.product.PlatformDetector;
 
 /**
  * Shared base class for the AIPlatform/AIIP/AIServer
@@ -48,12 +47,5 @@ public abstract class AIAppdefResourceValue {
         return AIQueueConstants.getQueueStatusString(getQueueStatus());
     }
     
-    public boolean isPlatformDevice() {
-        if (!(this instanceof AIPlatformValue)) {
-            return false;
-        }
-        AIPlatformValue platform = (AIPlatformValue)this;
-        //XXX add device flag to appdef schema, this works fine for now.
-        return !PlatformDetector.isSupportedPlatform(platform.getPlatformTypeName());
-    }
+  
 }

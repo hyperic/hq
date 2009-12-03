@@ -32,7 +32,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
 
-import org.hyperic.hq.product.ClientPluginDeployer;
+
 import org.hyperic.util.PropertyUtil;
 import org.hyperic.util.file.FileUtil;
 
@@ -44,6 +44,9 @@ import org.hyperic.util.file.FileUtil;
 public class AgentConfig {
 
     private static final String DEV_URANDOM = "/dev/urandom";
+    
+    //moved from ClientPluginDeployer
+    public static final String WORK_DIR = "work";
 
     static {
         //linux/freebsd/etc may block on /dev/random forever
@@ -114,7 +117,7 @@ public class AgentConfig {
     public static final String[] PROP_PDK_WORK_DIR = 
     { PDK_WORK_DIR_KEY, 
         System.getProperty(PDK_WORK_DIR_KEY, 
-                PROP_PDK_DIR[1] + "/" + ClientPluginDeployer.WORK_DIR) };      
+                PROP_PDK_DIR[1] + "/" + WORK_DIR) };      
     public static final String[] PROP_PROXYHOST = 
     { "agent.proxyHost", DEFAULT_PROXY_HOST };
     public static final String[] PROP_PROXYPORT = 

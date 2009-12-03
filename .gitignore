@@ -1,8 +1,6 @@
 build
 junit_results
-ui_plugins/*/bin
+hq-ui-plugins/*/bin
 **/.DS_Store
 **/target
-
-
-
+hq-plugins/*/target

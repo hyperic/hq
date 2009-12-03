@@ -119,5 +119,6 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/hq_bin/db2monitor_bin/lib/db2monitor.jar"/>
 	<classpathentry exported="true" kind="var" path="JBOSS_HOME/server/default/lib/jmx-adaptor-plugin.jar"/>
 	<classpathentry exported="true" kind="var" path="JBOSS_HOME/server/default/lib/jboss-jsr77.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hq-util"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
