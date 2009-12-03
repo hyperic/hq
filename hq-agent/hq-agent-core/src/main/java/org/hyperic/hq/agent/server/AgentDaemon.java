@@ -81,7 +81,7 @@ public class AgentDaemon
     public static final String PROP_CERTDN = "agent.certDN";
     public static final String PROP_HOSTNAME = "agent.hostName";
     
-    private static final String AGENT_COMMANDS_SERVER_JAR_NAME = "AgentCommandsServer.jar";
+    private static final String AGENT_COMMANDS_SERVER_JAR_NAME = "hq-agent-handler-commands.jar";
 
     private static AgentDaemon mainInstance;
     private static Object      mainInstanceLock = new Object();

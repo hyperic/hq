@@ -87,7 +87,7 @@ import org.hyperic.util.units.FormattedNumber;
  * class to dump plugin info to files.
  */
 public class PluginDumper {
-    static final String PRODUCT_JAR = "hq-product.jar";
+    static final String PRODUCT_JAR = "hq-pdk-shared.jar";
 
     PluginDumperConfig config;
 

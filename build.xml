@@ -15,7 +15,7 @@
   <!--><property file="etc/hibernate.properties" /> -->
 
   <!-- Version file -->
-  <property name="version.properties" value="version.properties"/>
+  <property name="version.properties" value="${hq.home}/hq-common/src/main/resources/version.properties"/>
   <property file="${version.properties}" />
  
   <!-- ==================== Defaults ==================== -->
@@ -182,32 +182,87 @@
   </target>
 
   <!-- ==================== Compile java sources ==================== -->
-  <target name="compile-app-sources" depends="init">
-	<path id="compile.classpath">
+ 
+
+   <target name="compile" depends="compile-shared"/>
+
+   <target name="compile-shared" depends="init">
+	   <path id="compile.classpath">
             <path refid="alljars"/>
             <path refid="testjars"/>
-    </path>
-    <path id="src.path">
-		   <path location="${hq.common}/src/main/java" />
-		   <path location="${hq.agent}/src/main/java" />
-    </path>
-    <compile-app classpath.id="compile.classpath" srcpath.id="src.path" output.dir="${build.dir}/classes"/>
-	
+            <path location="${hq.util}/target/classes"/>
+            <path location="${hq.common}/target/classes"/>
+      </path>
+      <compile-sources classpath.id="compile.classpath" src.dir="${hq.util}" output.dir="${hq.util}/target/classes"/>
+      <compile-sources classpath.id="compile.classpath" src.dir="${hq.common}" output.dir="${hq.common}/target/classes"/>
+      <compile-sources classpath.id="compile.classpath" src.dir="${hq.pdk.shared}" output.dir="${hq.pdk.shared}/target/classes"/>
    </target>
 
-  <macrodef name="compile-app">
+   <target name="compile-agent" depends="init">
+	 <path id="compile.classpath">
+            <path refid="alljars"/>
+            <path refid="testjars"/>
+            <path location="${hq.util}/target/classes"/>
+            <path location="${hq.common}/target/classes"/>
+            <path location="${hq.pdk.shared}/target/classes"/>
+            <path location="${hq.pdk.agent}/target/classes"/>
+      </path>
+      <path id="handler.classpath">
+	       <path refid="alljars"/>
+            <path refid="testjars"/>
+            <path location="${hq.util}/target/classes"/>
+            <path location="${hq.common}/target/classes"/>
+            <path location="${hq.pdk.shared}/target/classes"/>
+            <path location="${hq.pdk.agent}/target/classes"/>
+            <path location="${hq.agent}/target/classes"/>
+      </path>
+      <compile-sources classpath.id="compile.classpath" src.dir="${hq.agent}" output.dir="${hq.agent}/target/classes"/>
+      <compile-sources classpath.id="compile.classpath" src.dir="${hq.pdk.agent}" output.dir="${hq.pdk.agent}/target/classes"/>
+      <compile-agent-handlers classpath.id="handler.classpath" handler.name="autoinventory"/>
+      <compile-agent-handlers classpath.id="handler.classpath" handler.name="bizapp"/>
+      <compile-agent-handlers classpath.id="handler.classpath" handler.name="commands"/>
+      <compile-agent-handlers classpath.id="handler.classpath" handler.name="control"/>
+      <compile-agent-handlers classpath.id="handler.classpath" handler.name="livedata"/>
+      <compile-agent-handlers classpath.id="handler.classpath" handler.name="measurement"/>
+   </target>
+
+   <macrodef name="compile-sources">
 		<attribute name="classpath.id"/>
-		<attribute name="srcpath.id"/>
+		<attribute name="src.dir"/>
 		<attribute name="output.dir"/>
       <sequential>
       <mkdir dir="@{output.dir}" />
-	  <mkdir dir="${war.dir}/WEB-INF/lib" />
       <hq-javac destdir="@{output.dir}">
         <classpath refid="@{classpath.id}"/>
-        <src refid="@{srcpath.id}"/>
+        <src>
+	       <dirset dir="@{src.dir}">
+		      <include name="src/main/java"/>
+			</dirset>
+		</src>	 
      </hq-javac>
-     <antcall target="compile-plugins"/>
+     <copy toDir="@{output.dir}">
+	    <fileset dir="@{src.dir}/src/main/resources" includes="**/*"/>
+	 </copy>
 	</sequential>
+  </macrodef>
+
+  <macrodef name="compile-agent-handlers">
+	 <attribute name="handler.name"/>
+	 <attribute name="classpath.id"/>
+	 <sequential>
+	 <mkdir dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes" />	
+     <hq-javac destdir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes">
+        <classpath refid="@{classpath.id}"/>
+        <src>
+	    <dirset dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}">
+		  <include name="src/main/java"/>
+	    </dirset>
+    </src>
+     </hq-javac>
+	 <copy toDir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/target/classes">
+	    <fileset dir="${hq.agent.handlers}/hq-agent-handler-@{handler.name}/src/main/resources" includes="*"/>
+	 </copy>
+    </sequential>
   </macrodef>
 
   <target name="compile-plugins">
@@ -225,7 +280,7 @@
       </hq-javac>
   </target>
 
-   
+  
  <target name="copy-resources" depends="init">
 	
       <!-- Copy resources -->
@@ -253,8 +308,7 @@
       </copy>
   </target>
 
-  <target name="compile" description="Compile sources" 
-          depends="compile-app-sources"/>
+
 
   <!-- ==================== JSP precompile ============================ -->
   
@@ -827,8 +881,17 @@
     <mkdir dir="${pdk.lib}"/>
     <mkdir dir="${pdk.mibs}"/>
 
+ <!-- TODO move pack of util and common to a common target -->
     <jar basedir="${hq.util}/target/classes"
          jarfile="${pdk.lib}/hq-util.jar">
+    </jar>
+
+    <antcall target="write-version-file">
+      <param name="version-file"
+             value="${hq.common}/target/classes/version.properties"/>
+    </antcall>
+
+    <jar basedir="${hq.common}/target/classes" jarfile="${pdk.lib}/hq-common.jar">
     </jar>
 
     <jar basedir="${hq.pdk.shared}/target/classes"
@@ -1145,11 +1208,6 @@
 	<!-- Agent jars -->
     <jar basedir="${hq.agent}/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/hq-agent-core.jar">
     </jar>
-
-    <!-- TODO move this to a common target -->
-    <jar basedir="${hq.common}/target/classes" jarfile="${agent.dir}/bundles/${agent.bundle.dir}/lib/hq-common.jar">
-    </jar>
-
 	  
     <copy todir="${agent.dir}/wrapper/sbin" >
       <fileset dir="${wrapper.bin}" includes="*" />
@@ -1210,7 +1268,7 @@
   </target>
 
   <target name="build-agent" description="Build and pack the agent directory structure" 
-          depends="pack-pdk,pack-agent" />
+          depends="compile-shared,compile-agent,pack-pdk,pack-agent" />
 
   <!-- ==================== Catalina packaging ==================== -->
 
@@ -1365,8 +1423,16 @@
   <target name="build" depends="init,compile,pack" 
          description="Compile and pack - no code generation" />
 
-  <target name="clean" depends="remote-clean" description="Clean the build directory" >
+  <target name="clean" description="Clean the build directories" >
     <delete dir="${build.dir}"/>
+    <delete dir="${hq.util}/target/classes"/>
+    <delete dir="${hq.common}/target/classes"/>
+    <delete dir="${hq.pdk.shared}/target/classes"/>
+    <delete dir="${hq.pdk.agent}/target/classes"/>
+    <delete dir="${hq.agent}/target/classes"/>
+   	<delete includeemptydirs="true">
+       <fileset dir="${hq.agent.handlers}" includes="*/target/classes/**"/>
+    </delete>
   </target>
   
   <target name="mostly-clean" depends="remote-clean" description="Clean the build directory" >
