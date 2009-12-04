@@ -795,38 +795,41 @@ public class AlertDefinitionManagerEJBImpl
         final AlertDAO dao = getAlertDAO();
         final AlertDefinitionDAO aDao = getAlertDefDAO();
         final ActionDAO actionDAO = getActionDAO();
-        for (final Iterator i = alertDefIds.iterator(); i.hasNext();) {
-            final Integer alertdefId = (Integer) i.next();
-            final AlertDefinition alertdef = aDao.findById(alertdefId);
+        try {
+            for (final Iterator i = alertDefIds.iterator(); i.hasNext();) {
+                final Integer alertdefId = (Integer) i.next();
+                final AlertDefinition alertdef = aDao.findById(alertdefId);
 
-            // Delete the alerts
-            if (debug) watch.markTimeBegin("deleteByAlertDefinition");
-            dao.deleteByAlertDefinition(alertdef);
-            if (debug) watch.markTimeEnd("deleteByAlertDefinition");
+                // Delete the alerts
+                if (debug) watch.markTimeBegin("deleteByAlertDefinition");
+                dao.deleteByAlertDefinition(alertdef);
+                if (debug) watch.markTimeEnd("deleteByAlertDefinition");
 
-            // Remove the conditions
-            if (debug) watch.markTimeBegin("remove conditions and triggers");
-            alertdef.clearConditions();
-            alertdef.getTriggersBag().clear();
-            if (debug) watch.markTimeEnd("remove conditions and triggers");
+                // Remove the conditions
+                if (debug) watch.markTimeBegin("remove conditions and triggers");
+                alertdef.clearConditions();
+                alertdef.getTriggersBag().clear();
+                if (debug) watch.markTimeEnd("remove conditions and triggers");
 
-            // Remove the actions
-            if (debug) watch.markTimeBegin("removeActions");
-            actionDAO.removeActions(alertdef);
-            if (debug) watch.markTimeEnd("removeActions");
+                // Remove the actions
+                if (debug) watch.markTimeBegin("removeActions");
+                actionDAO.removeActions(alertdef);
+                if (debug) watch.markTimeEnd("removeActions");
 
-            if (debug) watch.markTimeBegin("remove from parent");
-            if (alertdef.getParent() != null) {
-                alertdef.getParent().getChildrenBag().remove(alertdef);
+                if (debug) watch.markTimeBegin("remove from parent");
+                if (alertdef.getParent() != null) {
+                    alertdef.getParent().getChildrenBag().remove(alertdef);
+                }
+                if (debug) watch.markTimeEnd("remove from parent");
+
+                // Actually remove the definition
+                if (debug) watch.markTimeBegin("remove");
+                aDao.remove(alertdef);
+                if (debug) watch.markTimeEnd("remove");
             }
-            if (debug) watch.markTimeEnd("remove from parent");
-
-            // Actually remove the definition
-            if (debug) watch.markTimeBegin("remove");
-            aDao.remove(alertdef);
-            if (debug) watch.markTimeEnd("remove");
+        } finally {
+            if (debug) log.debug("deleted " + alertDefIds.size() + " alertDefs: " + watch);
         }
-        if (debug) log.debug("deleted " + alertDefIds.size() + " alertDefs: " + watch);
     }
 
     /** Find an alert definition and return a value object
