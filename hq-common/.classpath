@@ -2,6 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="src" path="src/main/java"/>
+	<classpathentry kind="src" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/ant-contrib.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/ant-launcher.jar"/>
@@ -120,5 +121,6 @@
 	<classpathentry exported="true" kind="var" path="JBOSS_HOME/server/default/lib/jmx-adaptor-plugin.jar"/>
 	<classpathentry exported="true" kind="var" path="JBOSS_HOME/server/default/lib/jboss-jsr77.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-util"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/tapestry/backport-util-concurrent-3.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

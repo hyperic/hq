@@ -23,14 +23,38 @@
  * USA.
  */
 
-package org.hyperic.util.pager.test;
+package org.hyperic.util;
 
-import org.hyperic.util.pager.PagerProcessor;
+import junit.framework.TestCase;
+import org.hyperic.util.HostIP;
 
-public class UpcaseProcessor implements PagerProcessor {
-    
-    public Object processElement ( Object o ) {
-        if ( o == null ) return null;
-        return o.toString().toUpperCase();
+public class ValidateIPTest extends TestCase {
+
+    public ValidateIPTest(String name) {
+        super(name);
+    }
+
+    public void testGoodIPs () throws Exception {
+        String[] ips
+            = { "127.0.0.1",
+                "192.168.1.1",
+                "10.0.0.254" };
+        for ( int i=0; i<ips.length; i++ ) {
+            assertTrue("IP #" + i + " was invalid.", HostIP.isValidIP(ips[i]));
+        }
+    }
+
+    public void testBadIPs () throws Exception {
+        String[] ips
+            = { "127.0.0.0",
+                "192.168.1.1.10",
+                "0.168.1.1",
+                "10.0.0.255",
+                "10.255.2.2",
+                "1.2.3.400",
+                "1..2.3.4" };
+        for ( int i=0; i<ips.length; i++ ) {
+            assertTrue("IP #" + i + " was valid.", !HostIP.isValidIP(ips[i]));
+        }
     }
 }

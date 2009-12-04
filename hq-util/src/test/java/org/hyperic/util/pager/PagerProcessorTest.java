@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.util.pager.test;
+package org.hyperic.util.pager;
 
 import java.util.Arrays;
 import java.util.List;
@@ -123,7 +123,7 @@ public class PagerProcessorTest extends TestCase {
         String[] test_data = { "one", "two", "three" };
         String[] expected = { "ONE", "TWO", "THREE" };
         List results = new Vector();
-        Pager p = Pager.getPager("org.hyperic.util.pager.test.UpcaseProcessor");
+        Pager p = Pager.getPager("org.hyperic.util.pager.UpcaseProcessor");
 
         // Get page 0 of size 3
         p.seek(Arrays.asList(test_data), results, 0, 3);

@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.util.test;
+package org.hyperic.util;
 
 import java.util.Arrays;
 

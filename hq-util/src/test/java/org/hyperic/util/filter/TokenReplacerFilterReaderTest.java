@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.util.filter.test;
+package org.hyperic.util.filter;
 
 import junit.framework.TestCase;
 import org.hyperic.util.filter.TokenReplacerFilterReader;

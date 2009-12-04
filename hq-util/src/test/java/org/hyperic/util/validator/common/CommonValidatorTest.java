@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.util.validator.common.test;
+package org.hyperic.util.validator.common;
 
 import java.util.ResourceBundle;
 
@@ -42,12 +42,12 @@ import org.xml.sax.SAXException;
  * @testsetup Default TestCase
  * @testedclass TestCommonValidator
  */
-public class TestCommonValidator extends TestCase {
+public class CommonValidatorTest extends TestCase {
 
     private static ResourceBundle messages = null;
 
     /** Constructs a test case with the given name. */
-    public TestCommonValidator(String name) {
+    public CommonValidatorTest(String name) {
         super(name);
     }
 
@@ -55,7 +55,7 @@ public class TestCommonValidator extends TestCase {
         System.setProperty(
                            "org.apache.commons.logging.Log",
                            "org.apache.commons.logging.impl.NoOpLog");
-        messages = ResourceBundle.getBundle("org.hyperic.util.validator.common.test.TestResourceBundle");
+        messages = ResourceBundle.getBundle("org.hyperic.util.validator.common.TestResourceBundle");
         // Write your code here
     }
 

@@ -23,38 +23,44 @@
  * USA.
  */
 
-package org.hyperic.util.test;
+package org.hyperic.util;
 
 import junit.framework.TestCase;
-import org.hyperic.util.HostIP;
+import org.hyperic.util.config.ConfigResponse;
 
-public class ValidateIPTest extends TestCase {
-
-    public ValidateIPTest(String name) {
+public class ConfigResponseTest extends TestCase {
+    public ConfigResponseTest(String name) {
         super(name);
     }
 
-    public void testGoodIPs () throws Exception {
-        String[] ips
-            = { "127.0.0.1",
-                "192.168.1.1",
-                "10.0.0.254" };
-        for ( int i=0; i<ips.length; i++ ) {
-            assertTrue("IP #" + i + " was invalid.", HostIP.isValidIP(ips[i]));
-        }
+    public void testMergeSimple() throws Exception {
+        ConfigResponse one, two;
+
+        one = new ConfigResponse();
+        two = new ConfigResponse();
+        one.setValue("one", "bar");
+        two.setValue("two", "baz");
+
+        assertEquals(one.size(), two.size());
+        one.merge(two, false);
+        assertEquals(one.size(), two.size() + 1);
+        assertEquals(one.getValue("two"), "baz");
     }
 
-    public void testBadIPs () throws Exception {
-        String[] ips
-            = { "127.0.0.0",
-                "192.168.1.1.10",
-                "0.168.1.1",
-                "10.0.0.255",
-                "10.255.2.2",
-                "1.2.3.400",
-                "1..2.3.4" };
-        for ( int i=0; i<ips.length; i++ ) {
-            assertTrue("IP #" + i + " was valid.", !HostIP.isValidIP(ips[i]));
-        }
+    public void testMergeOverwrite() throws Exception {
+        ConfigResponse one, two;
+
+        one = new ConfigResponse();
+        two = new ConfigResponse();
+        one.setValue("one",   "bar");
+        one.setValue("two",   "baz");
+        one.setValue("three", "bong");
+        two.setValue("two",   "flub");
+
+        assertEquals(one.size(), two.size() + 2);
+        one.merge(two, true);
+        assertEquals(one.size(), two.size() + 2);
+        assertEquals(one.getValue("two"), "flub");
     }
 }
+
