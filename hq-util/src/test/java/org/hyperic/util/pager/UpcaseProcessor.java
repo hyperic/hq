@@ -23,20 +23,14 @@
  * USA.
  */
 
-package org.hyperic.util.validator.common.test;
+package org.hyperic.util.pager;
 
-public class TestBean {
+import org.hyperic.util.pager.PagerProcessor;
 
-    public String fieldStr1 = null;
-    public String fieldStr2 = null;
-    public int fieldint1 = 0;
-
-    public void setFieldStr1 (String s) { fieldStr1 = s; }
-    public void setFieldStr2 (String s) { fieldStr2 = s; }
-    public void setFieldint1 (int i) { fieldint1 = i; }
-
-    public String getFieldStr1 () { return fieldStr1; }
-    public String getFieldStr2 () { return fieldStr2; }
-    public int    getFieldint1 () { return fieldint1; }
-
+public class UpcaseProcessor implements PagerProcessor {
+    
+    public Object processElement ( Object o ) {
+        if ( o == null ) return null;
+        return o.toString().toUpperCase();
+    }
 }

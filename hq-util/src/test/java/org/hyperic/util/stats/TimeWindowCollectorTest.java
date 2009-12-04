@@ -23,44 +23,41 @@
  * USA.
  */
 
-package org.hyperic.util.test;
+package org.hyperic.util.stats;
 
 import junit.framework.TestCase;
-import org.hyperic.util.config.ConfigResponse;
+import org.hyperic.util.stats.TimeWindowCollector;
 
-public class ConfigResponseTest extends TestCase {
-    public ConfigResponseTest(String name) {
+public class TimeWindowCollectorTest extends TestCase {
+    public TimeWindowCollectorTest(String name) {
         super(name);
     }
 
-    public void testMergeSimple() throws Exception {
-        ConfigResponse one, two;
-
-        one = new ConfigResponse();
-        two = new ConfigResponse();
-        one.setValue("one", "bar");
-        two.setValue("two", "baz");
-
-        assertEquals(one.size(), two.size());
-        one.merge(two, false);
-        assertEquals(one.size(), two.size() + 1);
-        assertEquals(one.getValue("two"), "baz");
-    }
-
-    public void testMergeOverwrite() throws Exception {
-        ConfigResponse one, two;
-
-        one = new ConfigResponse();
-        two = new ConfigResponse();
-        one.setValue("one",   "bar");
-        one.setValue("two",   "baz");
-        one.setValue("three", "bong");
-        two.setValue("two",   "flub");
-
-        assertEquals(one.size(), two.size() + 2);
-        one.merge(two, true);
-        assertEquals(one.size(), two.size() + 2);
-        assertEquals(one.getValue("two"), "flub");
+    /**
+     * Setup a window of size 5, make sure that old entries are removed.
+     */
+    public void testWindow() throws Exception {
+        TimeWindowCollector c = new TimeWindowCollector(5);
+        assertTrue(c.getSum() == 0.0);
+        assertFalse(c.hasRolled());
+        c.addPoint(1, 10);
+        assertTrue(c.getSum() == 10.0);
+        c.addPoint(2, 11);
+        assertTrue(c.getSum() == 21.0);
+        c.addPoint(3, 12);
+        assertTrue(c.getSum() == 33.0);
+        c.addPoint(4, 13);
+        assertTrue(c.getSum() == 46.0);
+        c.addPoint(5, 14);
+        assertTrue(c.getSum() == 60.0);
+        c.addPoint(6, 15);
+        assertTrue(c.getSum() == 75.0);
+        c.addPoint(7, 16);
+        assertFalse(c.hasRolled());
+        assertTrue(c.getSum() == 91.0);
+        assertFalse(c.hasRolled());
+        c.removeOldPoints();
+        assertTrue(c.getSum() == 81.0);
+        assertTrue(c.hasRolled());
     }
 }
-
