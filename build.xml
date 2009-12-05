@@ -266,20 +266,131 @@
   </macrodef>
 
   <target name="compile-plugins">
-	 <hq-javac destdir="${build.dir}/classes">
+	<compile-plugin name="apache"/>
+	
+    <compile-plugin name="tomcat"/>
+
+    <compile-plugin name="iplanet"/>
+
+    <compile-plugin name="oracle"/>
+
+    <compile-plugin name="oc4j"/> 	
+
+    <compile-plugin name="db2"/>
+    
+    <compile-plugin name="postgresql"/>
+
+    <compile-plugin name="mysql"/>
+
+    <compile-plugin name="samba"/>
+
+	<compile-plugin name="spring"/>
+
+    <compile-plugin name="sybase"/>
+
+    <compile-plugin name="mysql_stats"/>
+
+    <compile-plugin name="coldfusion"/>
+
+    <compile-plugin name="alfresco"/>
+
+    <compile-plugin name="zimbra"/>
+
+    <compile-plugin name="openldap"/>
+
+    <compile-plugin name="servlet"/>
+
+    <compile-plugin name="jboss"/>
+
+    <compile-plugin name="system"/>
+
+    <compile-plugin name="weblogic"/>
+
+    <compile-plugin name="websphere"/>
+
+  
+
+    <compile-plugin name="exchange"/>
+
+    <compile-plugin name="iis"/>
+
+    <compile-plugin name="dotnet"/>
+
+    <compile-plugin name="mssql"/>
+
+    <compile-plugin name="ntp"/>
+
+    <compile-plugin name="bind"/>
+
+    <compile-plugin name="postfix"/>
+
+    <compile-plugin name="sqlquery"/>
+
+    <compile-plugin name="netdevice"/>
+
+    <compile-plugin name="netservices"/>
+
+    <compile-plugin name="nagios"/>
+
+    <compile-plugin name="ntds"/>
+
+    <compile-plugin name="memcached"/>
+
+    <compile-plugin name="perlbal"/>
+
+    <compile-plugin name="informix"/>
+
+    <compile-plugin name="vim"/>
+
+    <compile-plugin name="vmware"/>
+
+    <compile-plugin name="xen"/>
+    
+    <compile-plugin name="groovy-scripting"/>
+
+    <!-- special case.  hqagent plugin gets to reference hq-agent-core in classpath b/c its used for agent to self monitor.  Other plugins should not depend on this -->
+	<mkdir dir="${hq.plugins}/hqagent/target/classes"/>
+	<hq-javac destdir="${hq.plugins}/hqagent/target/classes">
+			 <src>
+			       <dirset dir="${hq.plugins}/hqagent">
+				      <include name="src/main/java"/>
+					</dirset>
+				</src>
         <classpath>
 	 		<path refid="alljars"/>
 	       	<path refid="testjars"/>
-	        <path location="${build.dir}/classes"/>
+	        <path location="${hq.agent}/target/classes"/>
+	        <path location="${hq.pdk.shared}/target/classes"/>
+	        <path location="${hq.pdk.agent}/target/classes"/>
+			<path location="${hq.util}/target/classes"/>
+			<path location="${hq.common}/target/classes"/>
 		</classpath>
-        <src>
-          <dirset dir="${hq.plugins}">
-            <include name="*/src/main/java"/>
-          </dirset>
-        </src>
-      </hq-javac>
+    </hq-javac>
   </target>
-
+  
+  <macrodef name="compile-plugin">
+	<attribute name="name"/>
+	<sequential>
+	<mkdir dir="${hq.plugins}/@{name}/target/classes"/>
+	<hq-javac destdir="${hq.plugins}/@{name}/target/classes">
+			 <src>
+			       <dirset dir="${hq.plugins}/@{name}">
+				      <include name="src/main/java"/>
+					</dirset>
+				</src>
+        <classpath>
+	 		<path refid="alljars"/>
+	       	<path refid="testjars"/>
+	        <path location="${hq.plugins}/@{name}/lib/*.jar"/>
+	        <path location="${hq.plugins}/@{name}/build-lib/*.jar"/>
+	        <path location="${hq.pdk.shared}/target/classes"/>
+	        <path location="${hq.pdk.agent}/target/classes"/>
+			<path location="${hq.util}/target/classes"/>
+			<path location="${hq.common}/target/classes"/>
+		</classpath>
+    </hq-javac>
+   </sequential>
+ </macrodef>	 
   
  <target name="copy-resources" depends="init">
 	
@@ -1268,7 +1379,7 @@
   </target>
 
   <target name="build-agent" description="Build and pack the agent directory structure" 
-          depends="compile-shared,compile-agent,pack-pdk,pack-agent" />
+          depends="compile-shared,compile-agent,compile-plugins,pack-pdk,pack-agent" />
 
   <!-- ==================== Catalina packaging ==================== -->
 
@@ -1431,7 +1542,10 @@
     <delete dir="${hq.pdk.agent}/target/classes"/>
     <delete dir="${hq.agent}/target/classes"/>
    	<delete includeemptydirs="true">
-       <fileset dir="${hq.agent.handlers}" includes="*/target/classes/**"/>
+       <fileset dir="${hq.agent.handlers}" defaultexcludes="false" includes="*/target/classes/**"/>
+    </delete>
+    <delete includeemptydirs="true">
+       <fileset dir="${hq.plugins}" defaultexcludes="false" includes="*/target/classes/**"/>
     </delete>
   </target>
   
