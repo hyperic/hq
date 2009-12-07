@@ -1840,7 +1840,7 @@ public class EventsBossEJBImpl
                     final boolean debug = log.isDebugEnabled();
                     final AlertDefinitionManagerLocal adm = getADM();
                     final List alertDefs = getADM().getAllDeletedAlertDefs();
-                    final int batchSize = 1000;
+                    final int batchSize = 500;
                     for (int i=0; i<alertDefs.size(); i+=batchSize) {
                         final int end = Math.min(i+batchSize, alertDefs.size());
                         final List sublist = alertDefs.subList(i, end);

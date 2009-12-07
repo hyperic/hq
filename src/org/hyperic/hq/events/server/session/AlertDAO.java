@@ -48,6 +48,10 @@ public class AlertDAO extends HibernateDAO {
         super(Alert.class, f);
     }
 
+    public Alert getById(Integer id) {
+        return (Alert)super.get(id);
+    }
+
     public Alert findById(Integer id) {
         return (Alert)super.findById(id);
     }
@@ -292,10 +296,28 @@ public class AlertDAO extends HibernateDAO {
             // last alert will eventually be put into the map
             lastAlerts.put(a.getAlertDefinition().getId(), a);
         }
-
         return lastAlerts;
     }
+    
+    /**
+     * @param {@link List} of {@link AlertDefinition}s
+     * Deletes all {@link Alert}s associated with the {@link AlertDefinition}s
+     */
+    int deleteByAlertDefinitions(List alertDefs) {
+        String sql = "DELETE FROM Alert WHERE alertDefinition in (:alertDefs)";
+        int rtn = 0;
+        for (int i=0; i<alertDefs.size(); i+=BATCH_SIZE) {
+            int end = Math.min(i+BATCH_SIZE, alertDefs.size());
+            rtn += getSession().createQuery(sql)
+                .setParameterList("alertDefs", alertDefs.subList(i, end))
+            	.executeUpdate();
+        }
+        return rtn;
+    }
 
+    /**
+     * Deletes all {@link Alert}s associated with the {@link AlertDefinition}
+     */
     int deleteByAlertDefinition(AlertDefinition def) {
         String sql = "DELETE FROM Alert WHERE alertDefinition = :alertDef";
 
