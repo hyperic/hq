@@ -1228,6 +1228,10 @@ public class AlertDefinitionManagerEJBImpl
                     AlertDefinition childDef = null;
                     for (Iterator it=def.getChildren().iterator(); it.hasNext(); ) {
                         childDef = (AlertDefinition) it.next();
+                        Resource r = childDef.getResource();
+                        if (r == null || r.isInAsyncDeleteState()) {
+                            continue;
+                        }
                         cache.remove(childDef.getAppdefEntityId());
                     }
                 }
