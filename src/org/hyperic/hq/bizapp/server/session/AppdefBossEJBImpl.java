@@ -1602,8 +1602,12 @@ public class AppdefBossEJBImpl
                     getOverlord(), server.getEntityId(), false);
             } catch (ResourceDeletedException e) {
                 log.debug(e);
+            } catch (AutoinventoryException e) {
+                log.warn("Exception while turning off RuntimeScan for: " +
+                         server + " (handled gracefully).  " + e);
             } catch (Exception e) {
-                log.error("Error turning off RuntimeScan for: " + server, e);
+                log.error("Unexpected error turning off RuntimeScan for: " +
+                          server + " (handled gracefully).", e);
             }
             // finally, remove the server
             getServerManager().removeServer(subject, server);
