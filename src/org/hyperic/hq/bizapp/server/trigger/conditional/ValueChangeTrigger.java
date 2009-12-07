@@ -1,27 +1,32 @@
 /*
- * NOTE: This copyright doesnot cover user programs that use HQ program services
- * by normal system calls through the application program interfaces provided as
- * part of the Hyperic Plug-in Development Kit or the Hyperic Client Development
- * Kit - this is merely considered normal use of the program, and doesnot fall
- * under the heading of "derived work". Copyright (C) [2004, 2005, 2006],
- * Hyperic, Inc. This file is part of HQ. HQ is free software; you can
- * redistribute it and/or modify it under the terms version 2 of the GNU General
- * Public License as published by the Free Software Foundation. This program is
- * distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
- * PARTICULAR PURPOSE. See the GNU General Public License for more details. You
- * should have received a copy of the GNU General Public License along with this
- * program; if not, write to the Free Software Foundation, Inc., 59 Temple
- * Place, Suite 330, Boston, MA 02111-1307 USA.
+ * NOTE: This copyright does *not* cover user programs that use HQ
+ * program services by normal system calls through the application
+ * program interfaces provided as part of the Hyperic Plug-in Development
+ * Kit or the Hyperic Client Development Kit - this is merely considered
+ * normal use of the program, and does *not* fall under the heading of
+ * "derived work".
+ *
+ * Copyright (C) [2004-2009], Hyperic, Inc.
+ * This file is part of HQ.
+ *
+ * HQ is free software; you can redistribute it and/or modify
+ * it under the terms version 2 of the GNU General Public License as
+ * published by the Free Software Foundation. This program is distributed
+ * in the hope that it will be useful, but WITHOUT ANY WARRANTY; without
+ * even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307
+ * USA.
  */
 
 package org.hyperic.hq.bizapp.server.trigger.conditional;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -37,14 +42,13 @@ import org.hyperic.hq.events.ext.AbstractTrigger;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
 import org.hyperic.hq.events.shared.AlertConditionValue;
 import org.hyperic.hq.events.shared.RegisteredTriggerValue;
-import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
+import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
-import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
-import org.hyperic.hq.measurement.shared.MeasurementManagerUtil;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -67,8 +71,8 @@ public class ValueChangeTrigger
                                                          ValueChangeTrigger.class);
     }
 
-    private static final MessageFormat MESSAGE_FMT = new MessageFormat("Current value ({0}) differs from previous value ({1}).");
-
+    private static final MessageFormat MESSAGE_FMT =
+        new MessageFormat("Current value ({0}) differs from previous value ({1}).");
     private final Object lock = new Object();
     private Integer measurementId;
     private MeasurementEvent last = null;
@@ -88,8 +92,8 @@ public class ValueChangeTrigger
      * @see org.hyperic.hq.bizapp.server.trigger.conditional.ConditionalTriggerInterface#getConfigResponse(org.hyperic.hq.appdef.shared.AppdefEntityID,
      *      org.hyperic.hq.events.shared.AlertConditionValue)
      */
-    public ConfigResponse getConfigResponse(AppdefEntityID id, AlertConditionValue cond) throws InvalidOptionException,
-                                                                                        InvalidOptionValueException
+    public ConfigResponse getConfigResponse(AppdefEntityID id, AlertConditionValue cond)
+    throws InvalidOptionException, InvalidOptionValueException
     {
         ConfigResponse resp = new ConfigResponse();
         resp.setValue(CFG_ID, String.valueOf(cond.getMeasurementId()));
@@ -99,13 +103,15 @@ public class ValueChangeTrigger
     /**
      * @see org.hyperic.hq.events.ext.RegisterableTriggerInterface#init(org.hyperic.hq.events.shared.RegisteredTriggerValue)
      */
-    public void init(RegisteredTriggerValue tval, AlertConditionEvaluator alertConditionEvaluator) throws InvalidTriggerDataException
+    public void init(RegisteredTriggerValue tval, AlertConditionEvaluator alertConditionEvaluator)
+    throws InvalidTriggerDataException
     {
         setId(tval.getId());
         setAlertConditionEvaluator(alertConditionEvaluator);
 
         try {
-            ConfigResponse triggerData = ConfigResponse.decode(getConfigSchema(), tval.getConfig());
+            ConfigResponse triggerData =
+                ConfigResponse.decode(getConfigSchema(), tval.getConfig());
             measurementId = Integer.valueOf(triggerData.getValue(CFG_ID));
         } catch (InvalidOptionException exc) {
             throw new InvalidTriggerDataException(exc);
@@ -119,22 +125,20 @@ public class ValueChangeTrigger
 
     private void initializeLastValue() {
         try {
-            MeasurementManagerLocal measurementManager = MeasurementManagerUtil.getLocalHome().create();
-            DataManagerLocal  dataManager = DataManagerUtil.getLocalHome().create();
-            Measurement measurement = measurementManager.getMeasurement(measurementId);
-            List measurements = new ArrayList();
-            measurements.add(measurement);
-            Map lastDataPoints = dataManager.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED);
-            if(lastDataPoints.get(measurementId) == null) {
+            MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
+            DataManagerLocal dMan = DataManagerEJBImpl.getOne();
+            Measurement measurement = mMan.getMeasurement(measurementId);
+            MetricValue val = dMan.getLastHistoricalData(measurement);
+            if(val == null) {
                 if(log.isDebugEnabled()) {
                     log.debug("No previous values found for measurement " + measurementId);
                 }
                 return;
             }
-            MetricValue value = (MetricValue)lastDataPoints.get(measurementId);
-            this.last = new MeasurementEvent(measurementId,value);
+            this.last = new MeasurementEvent(measurementId, val);
         } catch (Exception e) {
-            log.error("Error initializing last value.  Changes from previously stored value will not trigger an alert.",e);
+            log.error("Error initializing last value.  Changes from previously " +
+                      "stored value will not trigger an alert.",e);
         }
     }
 
@@ -168,8 +172,9 @@ public class ValueChangeTrigger
         }
         MeasurementEvent me = (MeasurementEvent) event;
         if (!me.getInstanceId().equals(measurementId)) {
-            throw new EventTypeException("Invalid instance ID passed (" + me.getInstanceId() + ") expected " +
-                                         measurementId);
+            throw new EventTypeException(
+                "Invalid instance ID passed (" + me.getInstanceId() +
+                ") expected " + measurementId);
         }
         synchronized (lock) {
             TriggerFiredEvent myEvent = null;
@@ -181,7 +186,8 @@ public class ValueChangeTrigger
                 // Get ready to fire
                 myEvent = prepareTriggerFiredEvent(event);
                 double values[] = { me.getValue().getValue(), last.getValue().getValue() };
-                FormattedNumber[] fmtValues = UnitsConvert.convertSame(values, me.getUnits(), Locale.getDefault());
+                FormattedNumber[] fmtValues =
+                    UnitsConvert.convertSame(values, me.getUnits(), Locale.getDefault());
                 StringBuffer sb = new StringBuffer();
                 MESSAGE_FMT.format(fmtValues, sb, null);
                 myEvent.setMessage(sb.toString());
