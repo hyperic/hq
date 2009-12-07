@@ -19,6 +19,7 @@ package org.hyperic.hq.bizapp.server.trigger.conditional;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,7 +41,9 @@ import org.hyperic.hq.events.shared.RegisteredTriggerValue;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.UnitsConvert;
 import org.hyperic.hq.measurement.ext.MeasurementEvent;
+import org.hyperic.hq.measurement.server.session.DataManagerEJBImpl;
 import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.server.session.MeasurementManagerEJBImpl;
 import org.hyperic.hq.measurement.shared.DataManagerLocal;
 import org.hyperic.hq.measurement.shared.DataManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManagerLocal;
@@ -119,22 +122,20 @@ public class ValueChangeTrigger
 
     private void initializeLastValue() {
         try {
-            MeasurementManagerLocal measurementManager = MeasurementManagerUtil.getLocalHome().create();
-            DataManagerLocal  dataManager = DataManagerUtil.getLocalHome().create();
-            Measurement measurement = measurementManager.getMeasurement(measurementId);
-            List measurements = new ArrayList();
-            measurements.add(measurement);
-            Map lastDataPoints = dataManager.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED);
-            if(lastDataPoints.get(measurementId) == null) {
+            MeasurementManagerLocal mMan = MeasurementManagerEJBImpl.getOne();
+            DataManagerLocal dMan = DataManagerEJBImpl.getOne();
+            Measurement measurement = mMan.getMeasurement(measurementId);
+            MetricValue val = dMan.getLastHistoricalData(measurement);
+            if(val == null) {
                 if(log.isDebugEnabled()) {
                     log.debug("No previous values found for measurement " + measurementId);
                 }
                 return;
             }
-            MetricValue value = (MetricValue)lastDataPoints.get(measurementId);
-            this.last = new MeasurementEvent(measurementId,value);
+            this.last = new MeasurementEvent(measurementId, val);
         } catch (Exception e) {
-            log.error("Error initializing last value.  Changes from previously stored value will not trigger an alert.",e);
+            log.error("Error initializing last value.  Changes from previously " +
+                      "stored value will not trigger an alert.",e);
         }
     }
 
