@@ -83,7 +83,7 @@ public class EventsStartupListener
         triggerEvents.add(TriggersCreatedZevent.class);
 
         ZeventManager.getInstance().addBufferedListener(
-                                                        triggerEvents, new TriggersCreatedListener());
+            triggerEvents, new TriggersCreatedListener());
 
         cleanupRegisteredTriggers();
     }
@@ -91,31 +91,60 @@ public class EventsStartupListener
     private void cleanupRegisteredTriggers() {
         Connection conn = null;
         Statement stmt = null;
+        Boolean autocommit = null;
+        boolean commit = false;
         try {
             conn = DBUtil.getConnByContext(
                 new InitialContext(), HQConstants.DATASOURCE);
+            autocommit = Boolean.valueOf(conn.getAutoCommit());
+            conn.setAutoCommit(false);
             stmt = conn.createStatement();
-            int rows = stmt.executeUpdate(
+            stmt.addBatch(
                 "update EAM_ALERT_CONDITION set trigger_id = null " +
                 "WHERE exists (" +
                     "select 1 from EAM_ALERT_DEFINITION WHERE deleted = '1' " +
                     "AND EAM_ALERT_CONDITION.alert_definition_id = id" +
                 ")");
-            _log.info("disassociated " + rows + " triggers in EAM_ALERT_CONDITION" +
-                " from their deleted alert definitions");
-            rows = stmt.executeUpdate(
+            stmt.addBatch(
                 "delete from EAM_REGISTERED_TRIGGER WHERE exists (" +
                     "select 1 from EAM_ALERT_DEFINITION WHERE deleted = '1' " +
                     "AND EAM_REGISTERED_TRIGGER.alert_definition_id = id" +
                 ")");
-            _log.info("deleted " + rows + " rows from EAM_REGISTERED_TRIGGER");
+            int[] rows = stmt.executeBatch();
+            conn.commit();
+            commit = true;
+            _log.info("disassociated " + rows[0] + " triggers in EAM_ALERT_CONDITION" +
+                " from their deleted alert definitions");
+            _log.info("deleted " + rows[1] + " rows from EAM_REGISTERED_TRIGGER");
         } catch (SQLException e) {
             _log.error(e, e);
         } catch (NamingException e) {
             _log.error(e, e);
         } finally {
+            resetAutocommit(conn, autocommit);
+            if (!commit) rollback(conn);
             DBUtil.closeJDBCObjects(
                 EventsStartupListener.class.getName(), conn, stmt, null);
+        }
+    }
+
+    private void rollback(Connection conn) {
+        try {
+            if (conn != null) {
+                conn.rollback();
+            }
+        } catch (SQLException e) {
+            _log.error(e, e);
+        }
+    }
+
+    private void resetAutocommit(Connection conn, Boolean autocommit) {
+        try {
+            if (autocommit != null) {
+                conn.setAutoCommit(autocommit.booleanValue());
+            }
+        } catch (SQLException e) {
+            _log.error(e, e);
         }
     }
 
