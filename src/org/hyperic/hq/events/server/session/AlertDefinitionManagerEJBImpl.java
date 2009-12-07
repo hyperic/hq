@@ -762,14 +762,19 @@ public class AlertDefinitionManagerEJBImpl
         final AlertDefinitionDAO aDao = getAlertDefDAO();
         final ActionDAO actionDAO = getActionDAO();
         try {
+            final List alertDefs = new ArrayList(alertDefIds.size());
             for (final Iterator i = alertDefIds.iterator(); i.hasNext();) {
                 final Integer alertdefId = (Integer) i.next();
                 final AlertDefinition alertdef = aDao.findById(alertdefId);
+                alertDefs.add(alertdef);
+            }
+            // Delete the alerts
+            if (debug) watch.markTimeBegin("deleteByAlertDefinition");
+            dao.deleteByAlertDefinitions(alertDefs);
+            if (debug) watch.markTimeEnd("deleteByAlertDefinition");
 
-                // Delete the alerts
-                if (debug) watch.markTimeBegin("deleteByAlertDefinition");
-                dao.deleteByAlertDefinition(alertdef);
-                if (debug) watch.markTimeEnd("deleteByAlertDefinition");
+            for (final Iterator i = alertDefs.iterator(); i.hasNext();) {
+                final AlertDefinition alertdef = (AlertDefinition) i.next();
 
                 // Remove the conditions
                 if (debug) watch.markTimeBegin("remove conditions and triggers");

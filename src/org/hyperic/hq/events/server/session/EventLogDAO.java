@@ -343,6 +343,9 @@ public class EventLogDAO extends HibernateDAO {
             if (alertId == null) {
                 continue;
             }
+            if (log.getResource().isInAsyncDeleteState()) {
+                continue;
+            }
             AlertFiredEvent alertFired = 
                 createAlertFiredEvent(alertDefId, alertId, log);
             rtn.put(alertDefId, alertFired);
