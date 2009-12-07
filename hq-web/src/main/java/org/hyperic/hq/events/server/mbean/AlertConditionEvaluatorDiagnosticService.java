@@ -27,52 +27,45 @@ package org.hyperic.hq.events.server.mbean;
 
 import java.io.Serializable;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.hyperic.hq.common.DiagnosticObject;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluator;
 import org.hyperic.hq.events.server.session.AlertConditionEvaluatorRepository;
-import org.hyperic.hq.events.server.session.AlertConditionEvaluatorRepositoryImpl;
 import org.hyperic.util.StringUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.stereotype.Service;
 
 /**
  * Alert Condition Evaluator Diagnostic service
  *
- * @jmx:mbean name="hyperic.jmx:type=Service,name=AlertConditionEvaluatorDiagnostic"
+ * 
  */
+@ManagedResource("hyperic.jmx:type=Service,name=AlertConditionEvaluatorDiagnostic")
+@Service
 public class AlertConditionEvaluatorDiagnosticService 
     implements AlertConditionEvaluatorDiagnosticServiceMBean, DiagnosticObject
 {
 
     private Log log = LogFactory.getLog(AlertConditionEvaluatorDiagnosticService.class);
-    private AlertConditionEvaluatorRepository alertConditionEvaluatorRepository = null;
+    private AlertConditionEvaluatorRepository alertConditionEvaluatorRepository ;
 
-    public AlertConditionEvaluatorDiagnosticService() {
-        //
+    @Autowired
+    public AlertConditionEvaluatorDiagnosticService(AlertConditionEvaluatorRepository alertConditionEvaluatorRepository) {
+        this.alertConditionEvaluatorRepository = alertConditionEvaluatorRepository;
     }
-    
-    void setAlertConditionEvaluatorRepository(AlertConditionEvaluatorRepository repository) {
-        this.alertConditionEvaluatorRepository = repository;
-    }
-    
-    private AlertConditionEvaluatorRepository getAlertConditionEvaluatorRepository() {
-        return (this.alertConditionEvaluatorRepository == null) 
-                    ? Bootstrap.getBean(AlertConditionEvaluatorRepository.class)
-                    : this.alertConditionEvaluatorRepository;
-    }
-    
+   
     public String getStatus() {
-        AlertConditionEvaluatorRepository repository = getAlertConditionEvaluatorRepository();
+      
         
         StringBuffer res = new StringBuffer();
-        Map alertConditionEvaluators = repository.getAlertConditionEvaluators();
-        Map stats = new HashMap();
+        Map<Integer,AlertConditionEvaluator> alertConditionEvaluators = alertConditionEvaluatorRepository.getAlertConditionEvaluators();
+        Map<String, AlertConditionEvaluatorStats> stats = new HashMap<String, AlertConditionEvaluatorStats>();
         
         if (log.isDebugEnabled()) {
             // this will give a list of all the alert condition evaluators
@@ -81,8 +74,8 @@ public class AlertConditionEvaluatorDiagnosticService
             log.debug("alertConditionEvaluators=" + alertConditionEvaluators);
         }
 
-        for (Iterator iterator = alertConditionEvaluators.values().iterator(); iterator.hasNext();) {
-            AlertConditionEvaluator alertConditionEvaluator = (AlertConditionEvaluator) iterator.next();
+        for (AlertConditionEvaluator alertConditionEvaluator  : alertConditionEvaluators.values()) {
+           
             
             String key = alertConditionEvaluator.getClass().getName();
             AlertConditionEvaluatorStats val = null;
@@ -111,8 +104,7 @@ public class AlertConditionEvaluatorDiagnosticService
 
         AlertConditionEvaluatorStats total = new AlertConditionEvaluatorStats();
         
-        for (Iterator iterator = stats.keySet().iterator(); iterator.hasNext();) {
-            String key = (String) iterator.next();
+        for ( String key : stats.keySet()) {
             AlertConditionEvaluatorStats val = (AlertConditionEvaluatorStats) stats.get(key);
             
             total.evaluatorCount += val.evaluatorCount;
@@ -135,8 +127,9 @@ public class AlertConditionEvaluatorDiagnosticService
     }
     
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public String displaySummary() {
         return getStatus();
     }
@@ -144,12 +137,13 @@ public class AlertConditionEvaluatorDiagnosticService
     /**
      * @param alertDefinitionIds A comma-separated list of alert definition ids to inspect 
      * 
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public String inspectByAlertDefinitionIds(String alertDefinitionIds) {        
         StringBuffer res = new StringBuffer();
-        List idList = StringUtil.explode(alertDefinitionIds, ",");
-        AlertConditionEvaluatorRepository repository = getAlertConditionEvaluatorRepository();
+        List<String> idList = StringUtil.explode(alertDefinitionIds, ",");
+       
                 
         res.append("<table border='1'>");
         res.append("<tr><th>Alert Definition ID</th>");
@@ -157,12 +151,12 @@ public class AlertConditionEvaluatorDiagnosticService
         res.append("<th>Alert Condition Evaluator State</th>");
         res.append("<th>Execution Strategy State</th></tr>");
         
-        for (Iterator iterator = idList.iterator(); iterator.hasNext();) {
-            String id = (String) iterator.next();
+        for (String id : idList) {
+            
             id = id.trim();
             
             AlertConditionEvaluator alertConditionEvaluator = 
-                repository.getAlertConditionEvaluatorById(new Integer(id));
+                alertConditionEvaluatorRepository.getAlertConditionEvaluatorById(new Integer(id));
             String evaluatorClassName = null;
             Serializable alertConditionEvaluatorState = null;
             Serializable executionStrategyState = null;

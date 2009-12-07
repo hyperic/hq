@@ -29,54 +29,74 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerImpl;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.SessionMBeanBase;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.stereotype.Service;
 
 /**
  * This job is responsible for notifying agents needing an auto inventory scan.
  *
- * @jmx:mbean name="hyperic.jmx:type=Service,name=AgentAIScan"
+ * 
  */
+@ManagedResource("hyperic.jmx:type=Service,name=AgentAIScan")
+@Service
 public class AgentAIScanService
     extends SessionMBeanBase
     implements AgentAIScanServiceMBean
 {
-    private Log _log = LogFactory.getLog(AgentAIScanService.class);
+    private Log log = LogFactory.getLog(AgentAIScanService.class);
+    
+    
+    private AutoinventoryManager autoinventoryManager;
+    
+    
+    @Autowired
+    public AgentAIScanService(AutoinventoryManager autoinventoryManager) {
+        this.autoinventoryManager = autoinventoryManager;
+    }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void hit(Date lDate) {
         super.hit(lDate);
     }
     
     protected void hitInSession(Date lDate) {
-        _log.debug("Agent AI Scan Service started executing: "+lDate);  
+        log.debug("Agent AI Scan Service started executing: "+lDate);  
         
-        AutoinventoryManagerImpl.getOne().notifyAgentsNeedingRuntimeScan();
+        autoinventoryManager.notifyAgentsNeedingRuntimeScan();
         
-        _log.debug("Agent AI Scan Service finished executing: "+lDate); 
+        log.debug("Agent AI Scan Service finished executing: "+lDate); 
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void init() {}
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void start() {}
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void stop() {
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void destroy() {}
 }
 

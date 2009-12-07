@@ -29,21 +29,19 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
@@ -56,43 +54,55 @@ import javax.management.NotificationBroadcasterSupport;
 import javax.management.NotificationFilter;
 import javax.management.NotificationListener;
 import javax.management.ObjectName;
+import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hyperic.hibernate.Util;
+import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.bizapp.server.session.SystemAudit;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.RenditServer;
-import org.hyperic.hq.hqu.RenditServerImpl;
+import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.ProductPluginManager;
 import org.hyperic.hq.product.server.session.ProductStartupListener;
 import org.hyperic.hq.product.shared.ProductManager;
-import org.hyperic.util.file.FileUtil;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
+import org.hyperic.util.file.FileUtil;
+import org.hyperic.util.jdbc.DBUtil;
 import org.jboss.deployment.DeploymentException;
 import org.jboss.deployment.DeploymentInfo;
 import org.jboss.deployment.SubDeployerSupport;
 import org.jboss.system.server.ServerConfig;
 import org.jboss.system.server.ServerConfigLocator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedMetric;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.stereotype.Service;
 
 /**
  * ProductPlugin deployer.
  * We accept $PLUGIN_DIR/*.{jar,xml}
  *
- * @jmx:mbean name="hyperic.jmx:type=Service,name=ProductPluginDeployer"
- *            extends="org.jboss.deployment.SubDeployerMBean"
+ * 
  */
-
+@ManagedResource("hyperic.jmx:type=Service,name=ProductPluginDeployer")
+@Service
 public class ProductPluginDeployer
     extends SubDeployerSupport
     implements NotificationBroadcaster,
                NotificationListener,
                ProductPluginDeployerMBean,
-               Comparator
+               Comparator<String>
 {
     private static final String READY_MGR_NAME =
         "hyperic.jmx:service=NotReadyManager";
@@ -104,13 +114,18 @@ public class ProductPluginDeployer
     private static final String PRODUCT = "HQ";
     private static final String PLUGIN_DIR = "hq-plugins";
     private static final String HQU = "hqu";
+    
+    private static final String TAB_DATA = MeasurementConstants.TAB_DATA,
+    MEAS_VIEW = MeasTabManagerUtil.MEAS_VIEW;
 
-    private static final HQApp _app = HQApp.getInstance();
+    private HQApp hqApp;
+    private DBUtil dbUtil;
+    private RenditServer renditServer;
 
     private Log _log = LogFactory.getLog(ProductPluginDeployer.class);
 
     private ProductPluginManager _ppm;
-    private List                 _plugins = new ArrayList();
+    private List<String>                 _plugins = new ArrayList<String>();
     private boolean              _isStarted = false;
     private ObjectName           _readyMgrName;
     private ObjectName           _serverName;
@@ -153,8 +168,12 @@ public class ProductPluginDeployer
         return PRODUCT + ".plugin." + type;
     }
 
-    public ProductPluginDeployer() {
+    @Autowired
+    public ProductPluginDeployer(HQApp hqApp, DBUtil dbUtil, RenditServer renditServer) {
         super();
+        this.hqApp = hqApp;
+        this.dbUtil = dbUtil;
+        this.renditServer = renditServer;
 
         //XXX un-hardcode these paths.
         String ear =
@@ -170,7 +189,7 @@ public class ProductPluginDeployer
         _hquDir = ear + "/hq.war/" + HQU;
 
         // Initialize database
-        DatabaseInitializer.init();
+        initDatabase();
 
         File propFile = ProductPluginManager.PLUGIN_PROPERTIES_FILE;
         _ppm = new ProductPluginManager(propFile);
@@ -188,6 +207,87 @@ public class ProductPluginDeployer
             _log.error(e);
         }
     }
+    
+    private void initDatabase() {
+        Connection conn = null;
+
+        try {
+         
+            conn = dbUtil.getConnection();
+
+            DatabaseRoutines[] dbrs = getDBRoutines(conn);
+
+            for (int i = 0; i < dbrs.length; i++) {
+                dbrs[i].runRoutines(conn);
+            }
+        } catch (SQLException e) {
+            log.error("SQLException creating connection to " +
+                      HQConstants.DATASOURCE, e);
+        } catch (NamingException e) {
+            log.error("NamingException creating connection to " +
+                      HQConstants.DATASOURCE, e);
+        } finally {
+            DBUtil.closeConnection(ProductPluginDeployer.class, conn);
+        }
+    }
+    
+    interface DatabaseRoutines {
+        public void runRoutines(Connection conn) throws SQLException;
+    }
+
+    private DatabaseRoutines[] getDBRoutines(Connection conn)
+        throws SQLException {
+        ArrayList<CommonRoutines> routines = new ArrayList<CommonRoutines>(2);
+
+        routines.add(new CommonRoutines());
+
+        return (DatabaseRoutines[]) routines.toArray(new DatabaseRoutines[0]);
+    }
+
+    class CommonRoutines implements DatabaseRoutines {
+        public void runRoutines(Connection conn) throws SQLException {
+            final String UNION_BODY =
+                "SELECT * FROM HQ_METRIC_DATA_0D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_0D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_1D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_1D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_2D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_2D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_3D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_3D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_4D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_4D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_5D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_5D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_6D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_6D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_7D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_7D_1S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_8D_0S UNION ALL " +
+                "SELECT * FROM HQ_METRIC_DATA_8D_1S";
+
+            final String HQ_METRIC_DATA_VIEW =
+                "CREATE VIEW "+MEAS_VIEW+" AS " + UNION_BODY;
+
+            final String EAM_METRIC_DATA_VIEW =
+                "CREATE VIEW "+TAB_DATA+" AS " + UNION_BODY +
+                " UNION ALL SELECT * FROM HQ_METRIC_DATA_COMPAT";
+
+            Statement stmt = null;
+            try {
+                HQDialect dialect = Util.getHQDialect();
+                stmt = conn.createStatement();
+                if (!dialect.viewExists(stmt, TAB_DATA))
+                    stmt.execute(EAM_METRIC_DATA_VIEW);
+                if (!dialect.viewExists(stmt, MEAS_VIEW))
+                    stmt.execute(HQ_METRIC_DATA_VIEW);
+            } catch (SQLException e) {
+                log.debug("Error Creating Metric Data Views", e);
+            } finally {
+                DBUtil.closeStatement(ProductPluginDeployer.class, stmt);
+            }
+        }
+    }
 
     /**
      * This is called when the full server startup has occurred, and you
@@ -202,8 +302,9 @@ public class ProductPluginDeployer
      * ends up being one, we can split the plugin loading into more stages so
      * that everyone has access to everyone.
      *
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void handleNotification(Notification n, Object o) {
         loadConfig();
         Bootstrap.loadEJBApplicationContext();
@@ -216,9 +317,8 @@ public class ProductPluginDeployer
 
         ProductManager pm = getProductManager();
 
-        for (Iterator i = _plugins.iterator(); i.hasNext();) {
-            String pluginName = (String)i.next();
-
+        for (String pluginName : _plugins) {
+          
             try {
                 deployPlugin(pluginName, pm);
             } catch(DeploymentException e) {
@@ -272,32 +372,6 @@ public class ProductPluginDeployer
         }
     }
 
- 
-
-    /**
-     * Register the EJB deployer classloader, making it accessible to the
-     * in-container unit tests for looking up local references to EJBs.
-     *
-     * @param deployerClassLoader The EJB deployer classloader.
-     */
-    private void registerEJBDeployerClassLoader(ClassLoader deployerClassLoader) {
-        // Have to use reflection - else we will get a ClassCastException
-        ClassLoader sysClassLoader = ClassLoader.getSystemClassLoader();
-
-        _log.info("Registering EJB deployer classloader for unit tests");
-
-        try {
-            Method method = sysClassLoader.getClass()
-                            .getMethod("registerEJBClassLoader",
-                                    new Class[]{ClassLoader.class});
-
-            method.invoke(sysClassLoader, new Object[]{deployerClassLoader});
-        } catch (Exception e) {
-            throw new RuntimeException("failed to register EJB classloader", e);
-        }
-    }
-
-   
 
     protected boolean isDeployable(String name, URL url) {
         boolean isDeployable = super.isDeployable(name, url);
@@ -331,22 +405,25 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-attribute
+     * 
      */
+    @ManagedAttribute
     public ProductPluginManager getProductPluginManager() {
         return _ppm;
     }
 
     /**
-     * @jmx:managed-attribute
+     * 
      */
+    @ManagedAttribute
     public void setPluginDir(String name) {
         _pluginDir = name;
     }
 
     /**
-     * @jmx:managed-attribute
+     * 
      */
+    @ManagedAttribute
     public String getPluginDir() {
         return _pluginDir;
     }
@@ -358,10 +435,11 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-attribute
+     * 
      * List registered plugin names of given type.
      * Intended for use via /jmx-console
      */
+    @ManagedAttribute
     public ArrayList getRegisteredPluginNames(String type)
         throws PluginException
     {
@@ -369,10 +447,11 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-attribute
+     * 
      * List registered product plugin names.
      * Intended for use via /jmx-console
      */
+    @ManagedAttribute
     public ArrayList getRegisteredPluginNames()
         throws PluginException
     {
@@ -380,8 +459,9 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-attribute
+     * 
      */
+    @ManagedMetric
     public int getProductPluginCount()
         throws PluginException
     {
@@ -389,8 +469,9 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-attribute
+     * 
      */
+    @ManagedMetric
     public int getMeasurementPluginCount()
         throws PluginException
     {
@@ -398,8 +479,9 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-attribute
+     * 
      */
+    @ManagedMetric
     public int getControlPluginCount()
         throws PluginException
     {
@@ -407,8 +489,9 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-attribute
+     * 
      */
+    @ManagedMetric
     public int getAutoInventoryPluginCount()
         throws PluginException
     {
@@ -416,8 +499,9 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-attribute
+     * 
      */
+    @ManagedMetric
     public int getLogTrackPluginCount()
         throws PluginException
     {
@@ -425,8 +509,9 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-attribute
+     * 
      */
+    @ManagedMetric
     public int getConfigTrackPluginCount()
         throws PluginException
     {
@@ -434,8 +519,9 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void setProperty(String name, String value) {
         String oldValue = _ppm.getProperty(name, "null");
         _ppm.setProperty(name, value);
@@ -444,15 +530,17 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public String getProperty(String name) {
        return _ppm.getProperty(name);
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public PluginInfo getPluginInfo(String name)
         throws PluginException
     {
@@ -482,10 +570,7 @@ public class ProductPluginDeployer
         return false;
     }
 
-    public int compare(Object o1, Object o2) {
-        String s1 = (String)o1;
-        String s2 = (String)o2;
-
+    public int compare(String s1, String s2) {
         int order1 = _ppm.getPluginInfo(s1).deploymentOrder;
         int order2 = _ppm.getPluginInfo(s2).deploymentOrder;
 
@@ -506,8 +591,9 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-attribute
+     *
      */
+    @ManagedAttribute
     public boolean isReady() {
         Boolean isReady;
         try {
@@ -523,19 +609,19 @@ public class ProductPluginDeployer
     
     private void loadConfig() {
         ServerConfig sc = ServerConfigLocator.locate();
-        _app.setRestartStorageDir(sc.getHomeDir());
+        hqApp.setRestartStorageDir(sc.getHomeDir());
         File deployDir = new File(sc.getServerHomeDir(), "deploy");
         File earDir    = new File(deployDir, "hq.ear");
-        _app.setResourceDir(earDir);
+        hqApp.setResourceDir(earDir);
         File warDir    = new File(earDir, "hq.war");
-        _app.setWebAccessibleDir(warDir);
+        hqApp.setWebAccessibleDir(warDir);
     }
 
     private void loadStartupClasses() {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream is =
             loader.getResourceAsStream("META-INF/startup_classes.txt");
-        List lines;
+        List<String> lines;
 
         try {
             lines = FileUtil.readLines(is);
@@ -544,16 +630,15 @@ public class ProductPluginDeployer
         }
 
      
-        for (Iterator i=lines.iterator(); i.hasNext(); ) {
-            String className = (String)i.next();
-
+        for (String className : lines) {
             className = className.trim();
-            if (className.length() == 0 || className.startsWith("#"))
+            if (className.length() == 0 || className.startsWith("#")) {
                 continue;
+            }
 
-            _app.addStartupClass(className);
+            hqApp.addStartupClass(className);
         }
-        _app.runStartupClasses();
+        hqApp.runStartupClasses();
     }
 
     private void pluginNotify(String name, String type) {
@@ -706,8 +791,9 @@ public class ProductPluginDeployer
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void stop() {
         super.stop();
         pluginNotify("deployer", DEPLOYER_SUSPENDED);
@@ -759,12 +845,12 @@ public class ProductPluginDeployer
 
         unpackJar(di.url, destDir, prefix);
 
-        RenditServer rendit = RenditServerImpl.getInstance();
-        if (rendit.getSysDir() != null) { //rendit.isReady() ?
+        
+        if (renditServer.getSysDir() != null) { //rendit.isReady() ?
             if (exists) {
                 //update ourselves to avoid having to delete,sleep,unpack
-                rendit.removePluginDir(destDir.getName());
-                rendit.addPluginDir(destDir);
+                renditServer.removePluginDir(destDir.getName());
+                renditServer.addPluginDir(destDir);
             } //else Rendit watcher will deploy the new plugin
         }
     }

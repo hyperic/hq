@@ -283,8 +283,8 @@ public class StringUtil {
      * @return an ArrayList comprised of elements split by the tokenizing
      */
 
-    public static List explode(String s, String delim) {
-        ArrayList res = new ArrayList();
+    public static List<String> explode(String s, String delim) {
+        ArrayList<String> res = new ArrayList<String>();
         if (s != null) {
             StringTokenizer tok = new StringTokenizer(s, delim);
 

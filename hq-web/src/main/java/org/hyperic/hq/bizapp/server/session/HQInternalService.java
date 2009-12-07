@@ -25,18 +25,40 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import java.util.Iterator;
 import java.util.List;
 
-import org.hyperic.hq.appdef.server.session.AgentManagerImpl;
-import org.hyperic.hq.appdef.server.session.PlatformManagerImpl;
+import org.hyperic.hq.appdef.shared.AgentManager;
+import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.measurement.server.session.CollectionSummary;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
 import org.hyperic.hq.measurement.server.session.ReportStatsCollector;
-import org.hyperic.hq.zevents.ZeventManager;
-
+import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.stereotype.Service;
+@Service
+@ManagedResource("hyperic.jmx:name=HQInternal")
 public class HQInternalService implements HQInternalServiceMBean {
+    
+    
+    private AgentManager agentManager;
+    private MeasurementManager measurementManager;
+    private HQApp hqApp;
+    private PlatformManager platformManager;
+    private ZeventEnqueuer zEventManager;
+    
+    
+    @Autowired
+    public HQInternalService(AgentManager agentManager, MeasurementManager measurementManager, HQApp hqApp,
+                             PlatformManager platformManager, ZeventEnqueuer zEventManager) {
+        this.agentManager = agentManager;
+        this.measurementManager = measurementManager;
+        this.hqApp = hqApp;
+        this.platformManager = platformManager;
+        this.zEventManager = zEventManager;
+    }
+
     public double getMetricInsertsPerMinute() {
         double val = ReportStatsCollector.getInstance()
                         .getCollector().valPerTimestamp(); 
@@ -45,17 +67,15 @@ public class HQInternalService implements HQInternalServiceMBean {
     }
 
     public int getAgentCount() {
-        return AgentManagerImpl.getOne().getAgentCountUsed();
+        return agentManager.getAgentCountUsed();
     }
 
     public double getMetricsCollectedPerMinute() { 
-        List vals = MeasurementManagerImpl.getOne()
+        List<CollectionSummary> vals = measurementManager
                         .findMetricCountSummaries();
         double total = 0.0;
         
-        for (Iterator i = vals.iterator(); i.hasNext(); ) {
-            CollectionSummary s = (CollectionSummary)i.next();
-            
+        for (CollectionSummary s : vals ) {
             total += (float)s.getTotal() / (float)s.getInterval();
         }
         
@@ -63,34 +83,34 @@ public class HQInternalService implements HQInternalServiceMBean {
     }
 
     public int getPlatformCount() {
-        return PlatformManagerImpl.getOne().getPlatformCount().intValue();
+        return platformManager.getPlatformCount().intValue();
     }
 
     public long getTransactionCount() {
-        return HQApp.getInstance().getTransactions();
+        return hqApp.getTransactions();
     }
 
     public long getTransactionFailureCount() {
-        return HQApp.getInstance().getTransactionsFailed();
+        return hqApp.getTransactionsFailed();
     }
 
     public long getAgentRequests() {
-        return AgentManagerImpl.getOne().getTotalConnectedAgents();
+        return agentManager.getTotalConnectedAgents();
     }
     
     public int getAgentConnections() {
-        return AgentManagerImpl.getOne().getNumConnectedAgents();
+        return agentManager.getNumConnectedAgents();
     }
 
     public long getZeventMaxWait() {
-        return ZeventManager.getInstance().getMaxTimeInQueue();
+        return zEventManager.getMaxTimeInQueue();
     }
 
     public long getZeventsProcessed() {
-        return ZeventManager.getInstance().getZeventsProcessed();
+        return zEventManager.getZeventsProcessed();
     }
 
     public long getZeventQueueSize() {
-        return ZeventManager.getInstance().getQueueSize();
+        return zEventManager.getQueueSize();
     }
 }

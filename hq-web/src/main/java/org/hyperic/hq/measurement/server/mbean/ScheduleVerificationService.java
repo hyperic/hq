@@ -30,12 +30,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import javax.ejb.CreateException;
-import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,14 +41,15 @@ import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.SessionMBeanBase;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementScheduleException;
 import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
-import org.hyperic.hq.measurement.server.session.MeasurementProcessorImpl;
-import org.hyperic.hq.measurement.server.session.SRNManagerImpl;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.stereotype.Service;
 
 /**
  * This job is responsible for verifying measurement jobs.
@@ -66,59 +63,68 @@ import org.hyperic.hq.measurement.shared.SRNManager;
  * shortest DM's interval. Otherwise, we'd keep blowing away and recreating
  * the schedule due to the absence of data rows.
  *
- * @jmx:mbean name="hyperic.jmx:type=Service,name=MeasurementSchedule"
+ * 
  * 
  */
+@ManagedResource("hyperic.jmx:type=Service,name=MeasurementSchedule")
+@Service
 public class ScheduleVerificationService
     extends SessionMBeanBase
     implements ScheduleVerificationServiceMBean
 {
-    private Log _log =
+    private Log log =
         LogFactory.getLog(ScheduleVerificationService.class.getName());
 
-    private boolean _firstTime = true;
+    private boolean firstTime = true;
 
-    private MeasurementProcessor getMeasurementProcessor() {
-        return MeasurementProcessorImpl.getOne();
+    private MeasurementProcessor measurementProcessor;
+    private SRNManager srnManager;
+    private AgentManager agentManager;
+    
+    
+    @Autowired
+    public ScheduleVerificationService(MeasurementProcessor measurementProcessor, SRNManager srnManager,
+                                       AgentManager agentManager) {
+        this.measurementProcessor = measurementProcessor;
+        this.srnManager = srnManager;
+        this.agentManager = agentManager;
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void hit(final Date lDate) {
         super.hit(lDate);
     }
     
     protected void hitInSession(final Date lDate) {
-        SRNManager srnMan = SRNManagerImpl.getOne();
+      
         
         // Skip first schedule verification, let the server warm up a bit
         // XXX: We should add a wait attribute for this, similar to the
         //      AvailCheckService --RPM
-        if (_firstTime) {
-            _firstTime = false;
+        if (firstTime) {
+            firstTime = false;
             return;
         }
 
-        AgentManager agentMan;
-
-        agentMan = Bootstrap.getBean(AgentManager.class);
-
+       
 
         // Ask the SRNCache what requires rescheduling
-        SRNManager srnManager = SRNManagerImpl.getOne();
-        Collection toResched = srnManager.getOutOfSyncEntities();
+       
+        Collection<AppdefEntityID> toResched = srnManager.getOutOfSyncEntities();
         
-        HashSet downAgents = new HashSet();
-        HashSet upAgents   = new HashSet();
-        Map aeids = new HashMap();
+        HashSet<Agent> downAgents = new HashSet<Agent>();
+        HashSet<Agent> upAgents   = new HashSet<Agent>();
+        Map<Integer, List<AppdefEntityID>> aeids = new HashMap<Integer,List<AppdefEntityID>>();
 
-        for (Iterator iter = toResched.iterator(); iter.hasNext();) {
-            AppdefEntityID entId = (AppdefEntityID) iter.next();
+        for (AppdefEntityID entId : toResched) {
+          
             Agent agent = null;
             // Get the agent connection
             try {
-                agent = agentMan.getAgent(entId);
+                agent = agentManager.getAgent(entId);
 
                 // If this is an entity on a platform whose agent is down,
                 // continue without rescheduling
@@ -126,7 +132,7 @@ public class ScheduleVerificationService
                     continue;
                 
                 if (!upAgents.contains(agent)) {
-                    if (getMeasurementProcessor().ping(agent)) {
+                    if (measurementProcessor.ping(agent)) {
                         upAgents.add(agent);
                     }
                     else {
@@ -135,63 +141,67 @@ public class ScheduleVerificationService
                     }
                 }
 
-                List list;
-                if (null == (list = (List)aeids.get(agent.getId()))) {
-                    list = new ArrayList();
+                List<AppdefEntityID> list;
+                if (null == (list = aeids.get(agent.getId()))) {
+                    list = new ArrayList<AppdefEntityID>();
                     aeids.put(agent.getId(), list);
                 }
                 list.add(entId);
             } catch (AgentNotFoundException e) {
-                _log.debug("Measurement Schedule Verification: " +
+                log.debug("Measurement Schedule Verification: " +
                            "Agent not found for " + entId);
                 // Resource not found, remove from SRN
                 srnManager.removeSrn(entId);
             } catch (PermissionException e) {
-                _log.debug("Measurement Schedule Verification: " +
+                log.debug("Measurement Schedule Verification: " +
                            "No permission to look up " + entId);
             }
         }
         // Now reschedule all metrics for these entities per agent
-        for (Iterator it=aeids.entrySet().iterator(); it.hasNext(); ) {
-            Map.Entry entry = (Map.Entry)it.next();
-            Integer agentId = (Integer)entry.getKey();
-            List eids = (List)entry.getValue();
+        for (Map.Entry<Integer,List<AppdefEntityID>> entry : aeids.entrySet() ) {
+           
+            Integer agentId = entry.getKey();
+           ;
             try {
-                srnMan.reschedule(eids);
+                srnManager.reschedule(entry.getValue());
             } catch (MeasurementScheduleException e) {
-                _log.debug("Scheduling error during rescheduling of agentId " +
+                log.debug("Scheduling error during rescheduling of agentId " +
                     agentId);
             } catch (MeasurementUnscheduleException e) {
-                _log.debug("Scheduling error during unscheduling of agentId " +
+                log.debug("Scheduling error during unscheduling of agentId " +
                     agentId);
             } catch (MonitorAgentException e) {
-                _log.debug("Measurement Schedule Verification: " +
+                log.debug("Measurement Schedule Verification: " +
                            "Could not connect to agent " + agentId);
             }
         }
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void init() {}
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void start() {
-        _log.info("Starting " + getClass().getName());
+        log.info("Starting " + getClass().getName());
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void stop() {
-        _log.info("Stopping " + getClass().getName());
+        log.info("Stopping " + getClass().getName());
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void destroy() {}
 }

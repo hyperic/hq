@@ -1,31 +1,31 @@
 package org.hyperic.hq.measurement.server.mbean;
 
-import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.measurement.shared.MeasurementManager;
-import org.hyperic.hq.measurement.shared.DataManager;
-import org.hyperic.hq.measurement.server.session.MeasurementManagerImpl;
-import org.hyperic.hq.measurement.server.session.DataManagerImpl;
-import org.hyperic.hq.measurement.server.session.Measurement;
-import org.hyperic.hq.measurement.server.session.DataPoint;
-import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
-import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.product.MetricValue;
-import org.hyperic.util.jdbc.DBUtil;
-import org.hyperic.util.TimeUtil;
-import org.hyperic.util.StringUtil;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import javax.naming.InitialContext;
-import java.util.Properties;
-import java.util.List;
-import java.util.ArrayList;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.common.shared.ServerConfigManager;
+import org.hyperic.hq.measurement.MeasurementConstants;
+import org.hyperic.hq.measurement.server.session.DataPoint;
+import org.hyperic.hq.measurement.server.session.Measurement;
+import org.hyperic.hq.measurement.shared.DataManager;
+import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
+import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.product.MetricValue;
+import org.hyperic.util.StringUtil;
+import org.hyperic.util.TimeUtil;
+import org.hyperic.util.jdbc.DBUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.stereotype.Service;
 
 /**
  * MBean used for testing purposes.  When the populate() method is invoked,
@@ -33,42 +33,57 @@ import java.sql.SQLException;
  * the detailed measurement data to simulate an environment that has been
  * running for as long as the 'keep detailed metric data' setting.
  *
- * @jmx:mbean name="hyperic.jmx:type=Service,name=DataPopulator"
+ *
  */
+@ManagedResource("hyperic.jmx:type=Service,name=DataPopulator")
+@Service
 public class DataPopulatorService implements DataPopulatorServiceMBean {
 
-    private static Log _log = LogFactory.getLog(DataPopulatorService.class);
+    private final Log log = LogFactory.getLog(DataPopulatorService.class);
 
-    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
-
-
-    public DataPopulatorService() {}
+    private DBUtil dbUtil;
+    private MeasurementManager measurementManager;
+    private DataManager dataManager;
+    private ServerConfigManager serverConfigManager;
+    
+    
+    
+    @Autowired
+    public DataPopulatorService(DBUtil dbUtil, MeasurementManager measurementManager, DataManager dataManager,
+                                ServerConfigManager serverConfigManager) {
+        this.dbUtil = dbUtil;
+        this.measurementManager = measurementManager;
+        this.dataManager = dataManager;
+        this.serverConfigManager = serverConfigManager;
+    }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void stop() {}
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void start() {}
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void populate() throws Exception {
         populate(Long.MAX_VALUE);
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void populate(long max) throws Exception {
 
-        MeasurementManager dmManager =
-            MeasurementManagerImpl.getOne();
-        DataManager dataMan = DataManagerImpl.getOne();
+     
 
         long detailedPurgeInterval = getDetailedPurgeInterval();
         String cats[] = MeasurementConstants.VALID_CATEGORIES;
@@ -76,43 +91,43 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
         long start = System.currentTimeMillis();
         long num = 0;
 
-        _log.info("Starting data populatation at " +
+        log.info("Starting data populatation at " +
                   TimeUtil.toString(start));
 
-        List measurements = new ArrayList();
+        List<Measurement> measurements = new ArrayList<Measurement>();
         for (int i = 0; i < cats.length; i++) {
-            _log.info("Loading " + cats[i] + " measurements.");
-            List meas = dmManager.findMeasurementsByCategory(cats[i]);
+            log.info("Loading " + cats[i] + " measurements.");
+            List<Measurement> meas = measurementManager.findMeasurementsByCategory(cats[i]);
             measurements.addAll(meas);
         }
 
-        _log.info("Loaded " + measurements.size() + " measurements");
+        log.info("Loaded " + measurements.size() + " measurements");
 
-        List dps = new ArrayList();
+        List<DataPoint> dps = new ArrayList<DataPoint>();
         max = (max < measurements.size()) ? max : measurements.size();
         for (int i = 0; i < max; i++ ) {
-            Measurement m = (Measurement)measurements.get(i);
-            _log.info("Loaded last data point for " + m.getId());
+            Measurement m = measurements.get(i);
+            log.info("Loaded last data point for " + m.getId());
             dps.add(getLastDataPoint(m.getId()));
         }
 
         for (int i = 0; i < dps.size(); i++) {
-            Measurement m = (Measurement)measurements.get(i);
-            DataPoint dp = (DataPoint)dps.get(i);
+            Measurement m = measurements.get(i);
+            DataPoint dp = dps.get(i);
 
             if (dp == null) {
                 continue; // No data for this metric id.
             }
 
-            List data = genData(m, dp, detailedPurgeInterval);
-            _log.info("Inserting " + data.size() + " data points");
-            dataMan.addData(data);
+            List<DataPoint> data = genData(m, dp, detailedPurgeInterval);
+            log.info("Inserting " + data.size() + " data points");
+            dataManager.addData(data);
             num += data.size();
         }
 
         long duration = System.currentTimeMillis() - start;
         double rate =  num / (duration/1000);
-        _log.info("Inserted " + num + " metrics in " +
+        log.info("Inserted " + num + " metrics in " +
                   StringUtil.formatDuration(duration) + " (" + rate +
                   " per second)");
     }
@@ -132,8 +147,7 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
         ResultSet rs = null;
 
         try {
-            conn = dbUtil.getConnByContext(new InitialContext(),
-                                           HQConstants.DATASOURCE);
+            conn = dbUtil.getConnection();
 
             stmt = conn.prepareStatement(SQL);
             stmt.setInt(1, mid.intValue());
@@ -142,7 +156,7 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
             rs = stmt.executeQuery();
 
             if (!rs.next()) {
-                _log.info("No metric data found for " + mid);
+                log.info("No metric data found for " + mid);
                 return null;
             }
 
@@ -152,24 +166,24 @@ public class DataPopulatorService implements DataPopulatorServiceMBean {
             return new DataPoint(mid, mv);
 
         } catch (SQLException e) {
-            _log.error("Error querying last data points", e);
+            log.error("Error querying last data points", e);
             throw e;
         } finally {
-            dbUtil.closeConnection(_log, conn);
+            DBUtil.closeConnection(log, conn);
         }
     }
 
     private long getDetailedPurgeInterval()
         throws Exception
     {
-        Properties conf = ServerConfigManagerImpl.getOne().getConfig();
+        Properties conf = serverConfigManager.getConfig();
         String purgeRawString = conf.getProperty(HQConstants.DataPurgeRaw);
         return Long.parseLong(purgeRawString);
     }
 
-    private List genData(Measurement dm, DataPoint dp, long range) {
+    private List<DataPoint> genData(Measurement dm, DataPoint dp, long range) {
 
-        ArrayList data = new ArrayList();
+        ArrayList<DataPoint> data = new ArrayList<DataPoint>();
         long last = dp.getMetricValue().getTimestamp();
         long end = System.currentTimeMillis() - range;
         double value = dp.getMetricValue().getValue();

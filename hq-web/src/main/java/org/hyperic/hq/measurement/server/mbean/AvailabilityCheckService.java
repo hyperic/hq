@@ -26,10 +26,8 @@
 package org.hyperic.hq.measurement.server.mbean;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,44 +35,60 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.authz.shared.PermissionManagerFactory;
+import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.common.SessionMBeanBase;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.TimingVoodoo;
-import org.hyperic.hq.measurement.server.session.AvailabilityManagerImpl;
-import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.AvailabilityCache;
+import org.hyperic.hq.measurement.server.session.DataPoint;
 import org.hyperic.hq.measurement.server.session.MeasDataPoint;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.server.session.ResourceDataPoint;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.TimeUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.stereotype.Service;
 
 /**
  * This job is responsible for filling in missing availabilty metric values.
  *
- * @jmx:mbean name="hyperic.jmx:type=Service,name=AvailabilityCheck"
+ * 
  */
+@ManagedResource("hyperic.jmx:type=Service,name=AvailabilityCheck")
+@Service
 public class AvailabilityCheckService
     extends SessionMBeanBase
     implements AvailabilityCheckServiceMBean
 {
-    private final Log _log = LogFactory.getLog(AvailabilityCheckService.class);
+    private final Log log = LogFactory.getLog(AvailabilityCheckService.class);
     private static final double AVAIL_DOWN   = MeasurementConstants.AVAIL_DOWN,
                                 AVAIL_PAUSED = MeasurementConstants.AVAIL_PAUSED,
                                 AVAIL_NULL   = MeasurementConstants.AVAIL_NULL;
 
-    private long _interval = 0;
-    private long _startTime = 0;
-    private long _wait = 5 * MeasurementConstants.MINUTE;
+    private long interval = 0;
+    private long startTime = 0;
+    private long wait = 5 * MeasurementConstants.MINUTE;
     private final Object IS_RUNNING_LOCK = new Object();
-    private boolean _isRunning = false;
+    private boolean isRunning = false;
+    private AvailabilityManager availabilityManager;
+    private PermissionManager permissionManager;
     
+    
+    @Autowired
+    public AvailabilityCheckService(AvailabilityManager availabilityManager, PermissionManager permissionManager) {
+        this.availabilityManager = availabilityManager;
+        this.permissionManager = permissionManager;
+    }
+
     /**
      * 
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void hitWithDate(Date lDate) {
         super.hit(lDate);
     }
@@ -85,8 +99,9 @@ public class AvailabilityCheckService
      * invalid date which is in the past.  Since AvailabilityCheckService is
      * very time sensitive this is not acceptable.  Therefore we use
      * System.currentTimeMillis() and ignore the date which is passed in.
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void hit(Date lDate) {
         Date date = new Date(System.currentTimeMillis());
         super.hit(date);
@@ -117,19 +132,19 @@ public class AvailabilityCheckService
      * please see the associated NOTE.
      * @return {@link Map} of {@link Integer} to {@link ResourceDataPoint}, Integer -> resource id
      */
-    private Map getDownPlatforms(Date lDate) {
-        final boolean debug = _log.isDebugEnabled();
+    private Map<Integer, ResourceDataPoint> getDownPlatforms(Date lDate) {
+        final boolean debug = log.isDebugEnabled();
         AvailabilityCache cache = AvailabilityCache.getInstance();
-        AvailabilityManager availMan = AvailabilityManagerImpl.getOne();
-        List platformResources = availMan.getPlatformResources();
+       
+        List<Measurement> platformResources = availabilityManager.getPlatformResources();
         final long now = TimingVoodoo.roundDownTime(
             lDate.getTime(), MeasurementConstants.MINUTE);
         final String nowTimestamp = TimeUtil.toString(now);
-        Map rtn = new HashMap(platformResources.size());
+        Map<Integer, ResourceDataPoint> rtn = new HashMap<Integer, ResourceDataPoint>(platformResources.size());
         Resource resource = null;
         synchronized (cache) {
-            for (Iterator i = platformResources.iterator(); i.hasNext();) {
-                Measurement meas = (Measurement)i.next();
+            for (Measurement meas : platformResources) {
+                
                 long interval = meas.getInterval();
                 long end = getEndWindow(now, meas);
                 long begin = getBeginWindow(end, meas);
@@ -141,7 +156,7 @@ public class AvailabilityCheckService
                     String msg = "Checking availability for " + last +
                         ", CacheValue=(" + TimeUtil.toString(lastTimestamp) +
                         ") vs. Now=(" + nowTimestamp + ")";
-                    _log.debug(msg);
+                    log.debug(msg);
                 }
                 if (begin > end) {
                     // this represents the scenario where the measurement mtime
@@ -179,7 +194,7 @@ public class AvailabilityCheckService
         }
         
         if (!rtn.isEmpty()) {
-            PermissionManagerFactory.getInstance().getHierarchicalAlertingManager()
+            permissionManager.getHierarchicalAlertingManager()
                 .performSecondaryAvailabilityCheck(rtn);
         }
 
@@ -187,24 +202,24 @@ public class AvailabilityCheckService
     }
 
     protected void hitInSession(Date lDate) {
-        final boolean debug = _log.isDebugEnabled();
+        final boolean debug = log.isDebugEnabled();
         if (debug) {
-            _log.debug("Availability Check Service started executing: "+lDate);            
+            log.debug("Availability Check Service started executing: "+lDate);            
         }
         long current = lDate.getTime();
         // Don't start backfilling immediately
         if (!canStart(current)) {
-            _log.debug("not starting availability check");
+            log.debug("not starting availability check");
             return;
         }
         AvailabilityCache cache = AvailabilityCache.getInstance();
         synchronized (IS_RUNNING_LOCK) {
-            if (_isRunning) {
-                _log.warn("Availability Check Service is already running, " +
+            if (isRunning) {
+                log.warn("Availability Check Service is already running, " +
                     "bailing out");
                 return;
             } else {
-                _isRunning = true;
+                isRunning = true;
             }
         }
         try {
@@ -215,18 +230,18 @@ public class AvailabilityCheckService
             // associated AVAIL_UP value from the agent.
             // The code must be extremely efficient or else it will have
             // a big impact on the performance of availability insertion.
-            Map backfillPoints = null;
+            Map<Integer,DataPoint> backfillPoints = null;
             synchronized (cache) {
-                Map downPlatforms = getDownPlatforms(lDate);
+                Map<Integer,ResourceDataPoint> downPlatforms = getDownPlatforms(lDate);
                 backfillPoints = getBackfillPts(downPlatforms, current);
-                backfillAvails(new ArrayList(backfillPoints.values()));
+                backfillAvails(new ArrayList<DataPoint>(backfillPoints.values()));
             }
             // send data to event handlers outside of synchronized block
-            AvailabilityManagerImpl.getOne()
+            availabilityManager
                 .sendDataToEventHandlers(backfillPoints);
         } finally {
             synchronized (IS_RUNNING_LOCK) {
-                _isRunning = false;
+                isRunning = false;
             }
         }
     }
@@ -235,37 +250,35 @@ public class AvailabilityCheckService
      * Since this method is called from the synchronized block in hitInSession()
      * please see the associated NOTE.
      */
-    private void backfillAvails(List backfillList) {
-        final boolean debug = _log.isDebugEnabled();
-        final AvailabilityManager availMan =
-            AvailabilityManagerImpl.getOne();
+    private void backfillAvails(List<DataPoint> backfillList) {
+        final boolean debug = log.isDebugEnabled();
+       
         final int batchSize = 500;
         for (int i=0; i<backfillList.size(); i+=batchSize) {
             if (debug) {
-                _log.debug("backfilling " + batchSize + " datapoints, " +
+                log.debug("backfilling " + batchSize + " datapoints, " +
                     (backfillList.size() - i) + " remaining");
             }
             int end = Math.min(i + batchSize, backfillList.size());
             // use this method signature to not send data to event handlers from here.
             // send it outside the synchronized cache block from the calling method
-            availMan.addData(backfillList.subList(i, end), false);
+            availabilityManager.addData(backfillList.subList(i, end), false);
         }
     }
 
-    private Map getBackfillPts(Map downPlatforms, long current) {
-        final boolean debug = _log.isDebugEnabled();
-        final AvailabilityManager availMan =
-            AvailabilityManagerImpl.getOne();
+    private Map<Integer,DataPoint> getBackfillPts(Map<Integer,ResourceDataPoint> downPlatforms, long current) {
+        final boolean debug = log.isDebugEnabled();
+       
         final AvailabilityCache cache = AvailabilityCache.getInstance();
-        final Map rtn = new HashMap();
-        final List resourceIds = new ArrayList(downPlatforms.keySet());
-        final Map rHierarchy = availMan.getAvailMeasurementChildren(
+        final Map<Integer, DataPoint> rtn = new HashMap<Integer, DataPoint>();
+        final List<Integer> resourceIds = new ArrayList<Integer>(downPlatforms.keySet());
+        final Map<Integer,List<Measurement>> rHierarchy = availabilityManager.getAvailMeasurementChildren(
             resourceIds, AuthzConstants.ResourceEdgeContainmentRelation);
-        for (final Iterator i=downPlatforms.values().iterator(); i.hasNext(); ) {
-            final ResourceDataPoint rdp = (ResourceDataPoint)i.next();
+        for (ResourceDataPoint rdp : downPlatforms.values()) {
+         
             final Resource platform = rdp.getResource();
             if (debug) {
-                _log.debug("platform measurement id " + rdp.getMetricId() +
+                log.debug("platform measurement id " + rdp.getMetricId() +
                            " is being marked " + rdp.getValue() +
                            " with timestamp = " +
                            TimeUtil.toString(rdp.getTimestamp()));
@@ -275,16 +288,16 @@ public class AvailabilityCheckService
                 // platform may be paused, so skip pausing its children
                 continue;
             }
-            final List associatedResources = (List)rHierarchy.get(platform.getId());
+            final List<Measurement> associatedResources =rHierarchy.get(platform.getId());
             if (associatedResources == null) {
                 continue;
             }
             if (debug) {
-                _log.debug("platform [resource id " + platform.getId() + "] has " +
+                log.debug("platform [resource id " + platform.getId() + "] has " +
                     associatedResources.size() + " associated resources");
             }
-            for (final Iterator j=associatedResources.iterator(); j.hasNext(); ) {
-                final Measurement meas = (Measurement)j.next();
+            for (Measurement meas  : associatedResources ) {
+              
                 if (!meas.isEnabled()) {
                     continue;
                 }
@@ -298,7 +311,7 @@ public class AvailabilityCheckService
                     continue;
                 }
                 if (debug) {
-                    _log.debug("measurement id " + meas.getId() + " is " +
+                    log.debug("measurement id " + meas.getId() + " is " +
                                "being marked down, time=" + backfillTime);
                 }
                 final MetricValue val =
@@ -312,10 +325,10 @@ public class AvailabilityCheckService
     }
 
     private boolean canStart(long now) {
-        if (_startTime == 0) {
-            _startTime = now;
+        if (startTime == 0) {
+            startTime = now;
             return false;
-        } else if ((_startTime + _wait) > now) {
+        } else if ((startTime + wait) > now) {
             return false;
         }
         return true;
@@ -324,59 +337,67 @@ public class AvailabilityCheckService
     /**
      * Get the interval for how often this mbean is called
      *
-     * @jmx:managed-attribute
+     * 
      */
+    @ManagedAttribute
     public long getInterval() {
-        return _interval;
+        return interval;
     }
 
     /**
      * Set the interval for how often this mbean is called
      *
-     * @jmx:managed-attribute
+     * 
      */
+    @ManagedAttribute
     public void setInterval(long interval) {
-        _interval = interval;
+        this.interval = interval;
     }
     
     /**
      * Get the wait for how long after service starts to backfill
      *
-     * @jmx:managed-attribute
+     *
      */
+    @ManagedAttribute
     public long getWait() {
-        return _wait;
+        return wait;
     }
 
     /**
      * Set the wait for how long after service starts to backfill
      *
-     * @jmx:managed-attribute
+     * 
      */
+    @ManagedAttribute
     public void setWait(long wait) {
-        _wait = wait;
+        this.wait = wait;
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void init() {}
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void start() throws Exception {}
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void stop() {
-        _log.info("Stopping " + this.getClass().getName());
+        log.info("Stopping " + this.getClass().getName());
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void destroy() {}
 }
 

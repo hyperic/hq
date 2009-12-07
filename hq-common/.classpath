@@ -85,7 +85,7 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.asm-3.0.0.M4.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.aspects-3.0.0.M4.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.beans-3.0.0.M4.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.context-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.context-3.0.0.M4.jar" sourcepath="thirdparty/lib-src/org.springframework.context-sources-3.0.0.M4.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.context.support-3.0.0.M4.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.core-3.0.0.M4.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.expression-3.0.0.M4.jar"/>

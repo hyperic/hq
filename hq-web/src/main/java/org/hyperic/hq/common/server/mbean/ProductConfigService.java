@@ -38,17 +38,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.product.server.MBeanUtil;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.util.ConfigPropertyException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.stereotype.Service;
 
 /**
  * ProductConfigService - used to do any special setup tasks that
  * relate to the data stored in the configuration tables.
  *
- * @jmx:mbean name="hyperic.jmx:type=Service,name=ProductConfig"
+ * 
  */
+@ManagedResource("hyperic.jmx:type=Service,name=ProductConfig")
+@Service
 public class ProductConfigService 
     implements ProductConfigServiceMBean {
 
@@ -58,77 +63,89 @@ public class ProductConfigService
     private static final String AUTH_OBJECTNAME = 
         "jboss.security:service=XMLLoginConfig";
     
-    protected Log _log = LogFactory.getLog(ProductConfigService.class);
+    protected Log log = LogFactory.getLog(ProductConfigService.class);
+    
+    private MBeanServer mbeanServer;
+    
+    private ServerConfigManager serverConfigManager;
 
-    public ProductConfigService() {}
-
-    /**
-     * @jmx:managed-operation
-     */
-    public void stop()
-    {
-        _log.info("Stopping ProductConfigService");
+    @Autowired
+    public ProductConfigService(MBeanServer mbeanServer, ServerConfigManager serverConfigManager) {
+        this.mbeanServer = mbeanServer;
+        this.serverConfigManager = serverConfigManager;
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
+    public void stop()
+    {
+        log.info("Stopping ProductConfigService");
+    }
+
+    /**
+     * 
+     */
+    @ManagedOperation
     public void start() {
-        _log.info("Starting " + this.getClass().getName());
-        _log.info("Initializing Hyperic Auth Providers");
+        log.info("Starting " + this.getClass().getName());
+        log.info("Initializing Hyperic Auth Providers");
 
         try {
             Properties conf = getConfig();
-            _log.info("Enabling Hyperic JAAS Providers");
+            log.info("Enabling Hyperic JAAS Providers");
             registerJAASModules(conf);
         } catch (Exception e) {
             // Shouldn't happen
-            _log.fatal("Error initializing " + this.getClass().getName(), e);
+            log.fatal("Error initializing " + this.getClass().getName(), e);
         }
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void restart() {
-        _log.info("Restarting " + this.getClass().getName());
+        log.info("Restarting " + this.getClass().getName());
         stop();
         start();
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void init() {}
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
     public void destroy() {}
 
     private void registerJAASModules(Properties conf) 
         throws SystemException 
     {
-        MBeanServer server = MBeanUtil.getMBeanServer();
-        ArrayList configEntries = new ArrayList();
-        AppConfigurationEntry ace;
-        Map configOptions;
-
+        
+        ArrayList<AppConfigurationEntry> configEntries = new ArrayList<AppConfigurationEntry>();
+       
+       
         try {
-            configOptions = getJdbcOptions(conf);
-            ace = new AppConfigurationEntry(
+            Map<String, String>  configOptions = getJdbcOptions(conf);
+            AppConfigurationEntry ace = new AppConfigurationEntry(
                 HQConstants.JDBCJAASProviderClass,
                 AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT,
                 configOptions);
             // We always add the JDBC provider to the auth config
-            _log.info("Enabling Hyperic JDBC JAAS Provider");
+            log.info("Enabling Hyperic JDBC JAAS Provider");
             configEntries.add(ace);
 
-            AppConfigurationEntry[] config = (AppConfigurationEntry[])
+            AppConfigurationEntry[] config = 
                 configEntries.toArray(new AppConfigurationEntry[0]);
 
             ObjectName objName = new ObjectName(AUTH_OBJECTNAME);
-            server.invoke(objName, AUTH_METHOD,
+            mbeanServer.invoke(objName, AUTH_METHOD,
                           new Object[] { AUTH_REALM, config },
                           new String[] { "java.lang.String",
                                          config.getClass().getName() });
@@ -141,16 +158,16 @@ public class ProductConfigService
     private Properties getConfig() throws ConfigPropertyException 
     {
         try {
-            return ServerConfigManagerImpl.getOne().getConfig();
+            return serverConfigManager.getConfig();
         } catch (Exception e) {
             throw new SystemException("Error in ProductConfigService", e);
         }
     }
 
-    private Map getJdbcOptions(Properties conf)
+    private Map<String,String> getJdbcOptions(Properties conf)
         throws ApplicationException, SystemException
     {
-        Map configOptions = new HashMap();
+        Map<String, String> configOptions = new HashMap<String, String>();
 
         // We always store passwords encoded.  Don't allow the end user
         // to change this behavior.

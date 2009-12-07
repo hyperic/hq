@@ -61,8 +61,8 @@ import net.sf.ehcache.CacheManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.measurement.MeasurementConstants;
-import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.sigar.Sigar;
 import org.hyperic.sigar.SigarException;
 import org.hyperic.util.stats.StatCollector;
@@ -130,7 +130,7 @@ public final class ConcurrentStatsCollector {
         	if (!dir.exists()) {
         		dir.mkdir();
         	}
-    		_mbeanServer = MBeanUtil.getMBeanServer();
+    		_mbeanServer = Bootstrap.getBean(MBeanServer.class);
     		registerInternalStats();
     	
     }

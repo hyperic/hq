@@ -30,64 +30,78 @@ import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedOperation;
+import org.springframework.jmx.export.annotation.ManagedResource;
+import org.springframework.stereotype.Service;
 
 /**
  * The HAService starts all internal HQ processes.
  *
- * @jmx:mbean name="hyperic.jmx:type=Service,name=HAService"
+ *
  */
+@ManagedResource("hyperic.jmx:type=Service,name=HAService")
+@Service
 public class HAService
     implements HAServiceMBean
 {
-    private static Log _log = LogFactory.getLog(HAService.class);
+    private final Log log = LogFactory.getLog(HAService.class);
+    private MBeanServer mbeanServer;
+    
+    
 
-    /**
-     * @jmx:managed-operation
-     */
-    public void startSingleton() {
-        MBeanServer server = MBeanUtil.getMBeanServer();
-
-        //Reset in-memory triggers
-        RegisteredTriggers.reset();
-        
-        _log.info("Starting HA Services");
-
-        startAvailCheckService(server);
-        startAgentAIScanService(server);
+    @Autowired
+    public HAService(MBeanServer mbeanServer) {
+        this.mbeanServer = mbeanServer;
     }
 
     /**
-     * @jmx:managed-operation
+     * 
      */
+    @ManagedOperation
+    public void startSingleton() {
+      
+        //Reset in-memory triggers
+        RegisteredTriggers.reset();
+        
+        log.info("Starting HA Services");
+
+        startAvailCheckService();
+        startAgentAIScanService();
+    }
+
+    /**
+     *
+     */
+    @ManagedOperation
     public void stopSingleton(String gracefulShutdown) {
         // XXX: shut down services
     }
 
-    private void startAvailCheckService(MBeanServer server) {
+    private void startAvailCheckService() {
         try {
-            invoke(server, "hyperic.jmx:service=Scheduler,name=AvailabilityCheck",
+            invoke("hyperic.jmx:service=Scheduler,name=AvailabilityCheck",
                     "startSchedule");
 
         } catch (Exception e) {
-            _log.info("Unable to start service: " + e);
+            log.info("Unable to start service: " + e);
         }
     }
 
-    private void startAgentAIScanService(MBeanServer server) {
+    private void startAgentAIScanService() {
         try {
-            invoke(server, "hyperic.jmx:service=Scheduler,name=AgentAIScan",
+            invoke( "hyperic.jmx:service=Scheduler,name=AgentAIScan",
                     "startSchedule");
         } catch (Exception e) {
-            _log.info("Unable to start service: " + e);
+            log.info("Unable to start service: " + e);
         }
     }
 
-    private void invoke(MBeanServer server, String mbean, String method)
+    private void invoke(String mbean, String method)
             throws Exception {
         ObjectName o = new ObjectName(mbean);
-        _log.info("Invoking " + o.getCanonicalName() + "." + method);
-        server.invoke(o, method, new Object[] {}, new String[] {});
+        log.info("Invoking " + o.getCanonicalName() + "." + method);
+        mbeanServer.invoke(o, method, new Object[] {}, new String[] {});
     }
 }

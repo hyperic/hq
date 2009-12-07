@@ -83,7 +83,6 @@ import org.hyperic.hq.product.ServiceType;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.pluginxml.PluginData;
-import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.hq.product.shared.PluginValue;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.config.ConfigOption;
@@ -115,11 +114,12 @@ public class ProductManagerImpl implements ProductManager {
     private PlatformManager platformManager;
     private ServerManager serverManager;
     private ServiceManager serviceManager;
+    private MBeanServer mbeanServer;
 
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
                               CPropManager cPropManager, TemplateManager templateManager,
-                              AuditManager auditManager, ServerManager serverManager, ServiceManager serviceManager, PlatformManager platformManager) {
+                              AuditManager auditManager, ServerManager serverManager, ServiceManager serviceManager, PlatformManager platformManager, MBeanServer mbeanServer) {
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
         this.cPropManager = cPropManager;
@@ -128,6 +128,7 @@ public class ProductManagerImpl implements ProductManager {
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
         this.platformManager = platformManager;
+        this.mbeanServer = mbeanServer;
         try {
             ppm = getProductPluginManager();
         } catch (PluginException e) {
@@ -190,7 +191,7 @@ public class ProductManagerImpl implements ProductManager {
     private ProductPluginManager getProductPluginManager()
         throws PluginException {
 
-        MBeanServer server = MBeanUtil.getMBeanServer();
+       
         ObjectName deployer;
 
         try {
@@ -201,7 +202,7 @@ public class ProductManagerImpl implements ProductManager {
         }
 
         try {
-            return (ProductPluginManager) server.getAttribute(deployer, "ProductPluginManager");
+            return (ProductPluginManager) mbeanServer.getAttribute(deployer, "ProductPluginManager");
         } catch (MBeanException e) {
             throw new PluginException(e.getMessage(), e);
         } catch (AttributeNotFoundException e) {
@@ -220,7 +221,7 @@ public class ProductManagerImpl implements ProductManager {
     /**
      */
     public boolean isReady() {
-        MBeanServer server = MBeanUtil.getMBeanServer();
+       
         ObjectName deployer;
 
         try {
@@ -231,7 +232,7 @@ public class ProductManagerImpl implements ProductManager {
         }
 
         try {
-            return ((Boolean) server.getAttribute(deployer, "Ready")).booleanValue();
+            return ((Boolean) mbeanServer.getAttribute(deployer, "Ready")).booleanValue();
         } catch (Exception e) {
             log.error("Unable to determine deployer state", e);
             return false;

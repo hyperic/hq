@@ -36,10 +36,8 @@ import java.util.Map;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -53,12 +51,10 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.engine.SessionFactoryImplementor;
 import org.hibernate.engine.SessionImplementor;
 import org.hibernate.id.IdentifierGenerator;
-import org.hibernate.jmx.StatisticsService;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.common.DiagnosticObject;
 import org.hyperic.hq.common.DiagnosticThread;
 import org.hyperic.hq.context.Bootstrap;
-import org.hyperic.hq.product.server.MBeanUtil;
 import org.hyperic.util.PrintfFormat;
 import org.hyperic.util.StringUtil;
 import org.springframework.orm.hibernate3.LocalSessionFactoryBean;
@@ -185,7 +181,7 @@ public class Util {
                MBeanRegistrationException, NotCompliantMBeanException
     {
        
-        
+       /** 
         // get MBeanServer
         MBeanServer server = MBeanUtil.getMBeanServer();
 
@@ -196,6 +192,7 @@ public class Util {
         mBean.setSessionFactory(getSessionFactory());
         server.registerMBean(mBean, on);
         log.info("HQ Hibernate Statistics MBean registered " + on);
+        **/
     }
 
     private static void hibernateVersionConfig() {

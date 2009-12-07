@@ -31,21 +31,19 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.common.server.mbean.ProductConfigService;
+import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ha.HAUtil;
-import org.hyperic.hq.ha.server.mbean.HAService;
 import org.hyperic.hq.measurement.server.session.MeasurementStartupListener;
-import org.hyperic.hq.product.server.MBeanUtil;
 
 public class HAStartupListener
     implements StartupListener, org.hyperic.hq.ha.HAService
 {
-    private Log _log = LogFactory.getLog(HAStartupListener.class);
+    private Log log = LogFactory.getLog(HAStartupListener.class);
 
     public void hqStarted() {
-        MBeanServer server = MBeanUtil.getMBeanServer();
+        MBeanServer server = Bootstrap.getBean(MBeanServer.class);
 
-        _log.info("Starting services");
+        log.info("Starting services");
 
         startConfigService(server);
        
@@ -64,11 +62,11 @@ public class HAStartupListener
         try {
             ObjectName o =
                 new ObjectName("hyperic.jmx:type=Service,name=HAService");
-            server.registerMBean(new HAService(), o);
+            
 
             server.invoke(o, "startSingleton", new Object[] {}, new String[] {});
         } catch (Exception e) {
-            _log.info("Unable to start service: "+e);
+            log.info("Unable to start service: "+e);
         }
     }
 
@@ -77,11 +75,11 @@ public class HAStartupListener
         try {
             ObjectName o =
                 new ObjectName("hyperic.jmx:type=Service,name=ProductConfig");
-            server.registerMBean(new ProductConfigService(), o);
+           
 
             server.invoke(o, "start", new Object[] {}, new String[] {});
         } catch (Exception e) {
-            _log.info("Unable to start service: "+e);
+            log.info("Unable to start service: "+e);
         }
     }
 }
