@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -206,8 +206,9 @@ public class MeasurementCommandsServer
             this.storage      = agent.getStorageProvider();
             this.bootConfig   = agent.getBootConfig();
             this.schedStorage = new MeasurementSchedule(this.storage, bootConfig.getBootProperties());
+            logMeasurementSchedule(this.schedStorage);
         } catch(AgentRunningException exc){
-            throw new AgentAssertionException("Agent should be running here");
+            throw new AgentAssertionException("Agent should be running here", exc);
         }
 
         try {
@@ -319,9 +320,40 @@ public class MeasurementCommandsServer
             }
         }
     }
+    
+    private void logMeasurementSchedule(MeasurementSchedule sched) {
+        if (this.log.isDebugEnabled()) { 
+            try {                
+                Iterator scheduleIter = sched.getMeasurementList();
+                int scheduleSize = 0;
+                
+                while (scheduleIter.hasNext()) { 
+                    ScheduledMeasurement metric = (ScheduledMeasurement) scheduleIter.next();
+                    if (metric != null) {
+                        scheduleSize++;
+                        StringBuffer s = new StringBuffer("Measurement Schedule[")
+                                .append(scheduleSize)
+                                .append("]: entityId=").append(metric.getEntity())
+                                .append(", category=").append(metric.getCategory())
+                                .append(", interval=").append(metric.getInterval())
+                                .append(", derivedId=").append(metric.getDerivedID())
+                                .append(", dsnId=").append(metric.getDsnID())
+                                .append(", dsn=").append(metric.getDSN());
+                    
+                        this.log.debug(s.toString());
+                    }
+                }
+                this.log.debug("Measurement schedule list size=" + scheduleSize);
+            } catch (Exception e) {
+                this.log.error("Error displaying measurement schedule: " + e.getMessage(), e);
+            }
+        }
+    }
 
     public void shutdown(){
         this.log.info("Measurement Commands Server shutting down");
+        logMeasurementSchedule(this.schedStorage);
+
         this.scheduleObject.die();
         this.senderObject.die();
 
