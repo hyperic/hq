@@ -122,5 +122,7 @@
 	<classpathentry exported="true" kind="var" path="JBOSS_HOME/server/default/lib/jboss-jsr77.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/hq-util"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/tapestry/backport-util-concurrent-3.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/activemq/activemq-all-5.3.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/activemq/activemq-pool-5.3.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

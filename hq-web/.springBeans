@@ -7,6 +7,9 @@
 	</configSuffixes>
 	<enableImports><![CDATA[true]]></enableImports>
 	<configs>
+		<config>src/main/resources/META-INF/spring/jms-context.xml</config>
+		<config>src/main/resources/META-INF/spring/dao-context.xml</config>
+		<config>src/main/resources/META-INF/spring/ejb-context.xml</config>
 	</configs>
 	<configSets>
 	</configSets>

@@ -41,6 +41,7 @@ import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.DuplicateObjectException;
+import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.EscalationEvent;
@@ -77,6 +78,8 @@ public class EscalationManagerImpl implements EscalationManager {
 	// TODO This contains a reference to EscalationManager, need to fix that
 	private EscalationRuntime escalationRuntime;
 
+    private MessagePublisher messagePublisher;
+
 	@PostConstruct
 	public void afterPropertiesSet() throws Exception {
 		alertRegulator = AlertRegulator.getInstance();
@@ -93,7 +96,8 @@ public class EscalationManagerImpl implements EscalationManager {
 																			 * ,
 																			 * EscalationRuntime
 																			 * escalationRuntime
-																			 */) {
+																			 */,
+			MessagePublisher messagePublisher) {
 		this.actionManager = actionManager;
 		this.alertPermissionManager = alertPermissionManager;
 		this.authzSubjectManager = authzSubjectManager;
@@ -103,6 +107,7 @@ public class EscalationManagerImpl implements EscalationManager {
 		 * this.alertRegulator = alertRegulator; this.escalationRuntime =
 		 * escalationRuntime;
 		 */
+		this.messagePublisher = messagePublisher;
 	}
 
 	private void assertEscalationNameIsUnique(String name)
@@ -896,8 +901,7 @@ public class EscalationManagerImpl implements EscalationManager {
 		}
 
 		// Send event to be logged
-		Messenger sender = new Messenger();
-		sender.publishMessage(EventConstants.EVENTS_TOPIC, new EscalationEvent(
+		messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, new EscalationEvent(
 				alert, notificationMessage));
 	}
 

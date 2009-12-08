@@ -40,6 +40,7 @@ import org.hyperic.hq.appdef.shared.AppdefEntityNotFoundException;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.common.ApplicationException;
+import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.ControlEvent;
@@ -200,7 +201,7 @@ public class ControlActionGroupJob extends ControlJob {
                                          cv.getDateScheduled(),
                                          status);
                     event.setMessage(errMsg);
-                    Messenger sender = new Messenger();
+                    MessagePublisher sender = Bootstrap.getBean(MessagePublisher.class);
                     sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
                 } catch (Exception e) {
                     this.log.error("Unable to update control history: " +

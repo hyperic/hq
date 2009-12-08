@@ -6,6 +6,8 @@ import java.io.Serializable;
  * @author jhickey
  *
  */
+
+// TODO: Get rid of? Given that we now use JmsTemplate, its implementation add hardly any convenience
 public interface MessagePublisher {
 
     /**

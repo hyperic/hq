@@ -11,7 +11,8 @@ public class Bootstrap {
 
     private static final String[] APP_CONTEXT_FILES = new String[] { "classpath*:/META-INF/spring/dao-context.xml" };
     
-    private static final String[] EJB_APP_CONTEXT_FILES = new String[] { "classpath*:/META-INF/spring/ejb-*context.xml" };
+    private static final String[] EJB_APP_CONTEXT_FILES = new String[] { "classpath*:/META-INF/spring/ejb-*context.xml", 
+                                                                         "classpath*:/META-INF/spring/jms-context.xml"};
 
     private static ApplicationContext APP_CONTEXT;
      
