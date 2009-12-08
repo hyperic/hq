@@ -82,7 +82,7 @@ public class ValueChangeTriggerTest
 
     private static final Integer MEASUREMENT_ID = Integer.valueOf(45);
 
-    private List measurements = new ArrayList();
+    private Measurement measurement = new Measurement();
 
     private MeasurementManagerLocalHome measurementManagerLocalHome = new MockMeasurementManagerLocalHome();
 
@@ -110,7 +110,6 @@ public class ValueChangeTriggerTest
         this.alertConditionEvaluator = EasyMock.createMock(AlertConditionEvaluator.class);
         this.measurementManagerLocal = EasyMock.createMock(MeasurementManagerLocal.class);
         this.dataManagerLocal = EasyMock.createMock(DataManagerLocal.class);
-        measurements.add(new Measurement());
         // set the initial context factory
         MockContextFactory.setAsInitial();
         // now register this EJB in the JNDI
@@ -146,8 +145,7 @@ public class ValueChangeTriggerTest
      */
     public void testInitializeNoLastValue() throws EncodingException, InvalidTriggerDataException {
         EasyMock.expect(measurementManagerLocal.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        EasyMock.expect(dataManagerLocal.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-                .andReturn(new HashMap());
+        EasyMock.expect(dataManagerLocal.getLastHistoricalData(measurement)).andReturn(null);
         replay();
         initTrigger();
         verify();
@@ -189,10 +187,7 @@ public class ValueChangeTriggerTest
         MeasurementEvent event = new MeasurementEvent(3, metricValue);
 
         EasyMock.expect(measurementManagerLocal.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        Map initialValues = new HashMap();
-        initialValues.put(MEASUREMENT_ID, new MetricValue(2));
-        EasyMock.expect(dataManagerLocal.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-                .andReturn(initialValues);
+        EasyMock.expect(dataManagerLocal.getLastHistoricalData(measurement)).andReturn(new MetricValue(2));
         replay();
         initTrigger();
         try {
@@ -212,10 +207,7 @@ public class ValueChangeTriggerTest
      */
     public void testProcessEventWrongType() throws EncodingException, InvalidTriggerDataException {
         EasyMock.expect(measurementManagerLocal.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        Map initialValues = new HashMap();
-        initialValues.put(MEASUREMENT_ID, new MetricValue(2));
-        EasyMock.expect(dataManagerLocal.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-                .andReturn(initialValues);
+        EasyMock.expect(dataManagerLocal.getLastHistoricalData(measurement)).andReturn(new MetricValue(2));
         replay();
         initTrigger();
         try {
@@ -237,11 +229,8 @@ public class ValueChangeTriggerTest
     {
         // initial measurement read 10 minutes ago
         EasyMock.expect(measurementManagerLocal.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        Map initialValues = new HashMap();
         MetricValue initialValue = new MetricValue(2d, System.currentTimeMillis() - (10 * 60 * 1000l));
-        initialValues.put(MEASUREMENT_ID, initialValue);
-        EasyMock.expect(dataManagerLocal.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-                .andReturn(initialValues);
+        EasyMock.expect(dataManagerLocal.getLastHistoricalData(measurement)).andReturn(initialValue);
 
         // occurred 5 minutes ago
         MetricValue metricValue = new MetricValue(10d, System.currentTimeMillis() - (5 * 60 * 1000l));
@@ -278,11 +267,8 @@ public class ValueChangeTriggerTest
     public void testProcessValueChanged() throws EventTypeException, EncodingException, InvalidTriggerDataException {
         // initial measurement read 10 minutes ago
         EasyMock.expect(measurementManagerLocal.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        Map initialValues = new HashMap();
         MetricValue initialValue = new MetricValue(2d, System.currentTimeMillis() - (10 * 60 * 1000l));
-        initialValues.put(MEASUREMENT_ID, initialValue);
-        EasyMock.expect(dataManagerLocal.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-                .andReturn(initialValues);
+        EasyMock.expect(dataManagerLocal.getLastHistoricalData(measurement)).andReturn(initialValue);
 
         // occurred 5 minutes ago
         MetricValue metricValue = new MetricValue(10d, System.currentTimeMillis() - (5 * 60 * 1000l));
@@ -322,11 +308,8 @@ public class ValueChangeTriggerTest
     {
         // initial value - measurement read 10 minutes ago
         EasyMock.expect(measurementManagerLocal.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        Map initialValues = new HashMap();
         MetricValue initialValue = new MetricValue(2d, System.currentTimeMillis() - (10 * 60 * 1000l));
-        initialValues.put(MEASUREMENT_ID, initialValue);
-        EasyMock.expect(dataManagerLocal.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-                .andReturn(initialValues);
+        EasyMock.expect(dataManagerLocal.getLastHistoricalData(measurement)).andReturn(initialValue);
 
         // event occurred 5 minutes ago
         MetricValue metricValue = new MetricValue(10d, System.currentTimeMillis() - (5 * 60 * 1000l));
@@ -353,11 +336,8 @@ public class ValueChangeTriggerTest
     public void testProcessValueSame() throws EventTypeException, EncodingException, InvalidTriggerDataException {
         // initial measurement read 10 minutes ago
         EasyMock.expect(measurementManagerLocal.getMeasurement(MEASUREMENT_ID)).andReturn(new Measurement());
-        Map initialValues = new HashMap();
         MetricValue initialValue = new MetricValue(10d, System.currentTimeMillis() - (10 * 60 * 1000l));
-        initialValues.put(MEASUREMENT_ID, initialValue);
-        EasyMock.expect(dataManagerLocal.getLastDataPoints(measurements, MeasurementConstants.TIMERANGE_UNLIMITED))
-                .andReturn(initialValues);
+        EasyMock.expect(dataManagerLocal.getLastHistoricalData(measurement)).andReturn(initialValue);
 
         // occurred 5 minutes ago
         MetricValue metricValue = new MetricValue(10d, System.currentTimeMillis() - (5 * 60 * 1000l));
