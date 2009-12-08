@@ -1148,6 +1148,21 @@ public class BizappUtils {
 
         }
 
+        /*
+        Collections.sort(uiAgents, new Comparator() {
+            public int compare(Object o1, Object o2) {
+                AgentBean a1 = (AgentBean) o1;
+                AgentBean a2 = (AgentBean) o2;
+
+                if (a1.getIp().equals(a2.getIp())) {
+                    return a1.getPort().compareTo(a2.getPort());
+                }
+                
+                return a1.getIp().compareToIgnoreCase(a2.getIp());
+            }
+        });
+        */
+        
         form.setAgents(uiAgents);
         request.setAttribute(Constants.AGENTS_COUNT, 
                              new Integer(uiAgents.size()));

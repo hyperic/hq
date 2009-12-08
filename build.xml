@@ -461,7 +461,7 @@
         <include name="quartz-1.6.5.jar" />
         <include name="quartz-oracle-1.6.5.jar" />
         <include name="quartz-jboss-1.6.5.jar" />
-        <include name="snmp4j.jar" />
+        <include name="snmp4j-1.10.2.jar" />
         <include name="dnsjava-2.0.3.jar" />
         <include name="ehcache-1.5.0.jar" />
         <include name="jsr107cache-1.0.jar" /> <!-- EHCache 1.5 dep -->
@@ -973,7 +973,7 @@
         <include name="commons-logging.jar" />
         <include name="log4j-1.2.14.jar" />
         <include name="jakarta-oro*.jar" />   <!-- RT -->
-        <include name="snmp4j.jar" />        <!-- All SNMP monitoring -->
+        <include name="snmp4j-1.10.2.jar" />        <!-- All SNMP monitoring -->
         <include name="ant.jar" />  <!-- AI scans + util.TokenReplacer -->
         <include name="junit-3.8.jar" />  <!-- test to help with support issues -->
         <include name="junit-4.4.jar" />

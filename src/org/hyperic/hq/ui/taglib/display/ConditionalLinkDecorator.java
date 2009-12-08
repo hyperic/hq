@@ -17,7 +17,7 @@ extends BaseDecorator
     @Override
     public String decorate(Object columnValue) {
         // This is the actual text of the column taken from the column tag...
-        String alertDefinitionName = (String) columnValue;
+        String columnText = (String) columnValue;
         
         // ...now figure out if we have to render a link or not, if we can't 
         // determine it, we just render the plain text as the default behavior...
@@ -55,14 +55,14 @@ extends BaseDecorator
                 StringBuffer result = new StringBuffer();
             
                 result.append("<a href=\"").append(href).append("\">");
-                result.append(alertDefinitionName);
+                result.append(columnText);
                 result.append("</a>");
                 
                 return result.toString();
             }
         }
         
-        return alertDefinitionName;
+        return columnText;
     }
 
     public String getTest() {
