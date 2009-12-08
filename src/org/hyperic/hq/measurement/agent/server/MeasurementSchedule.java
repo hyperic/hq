@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004, 2005, 2006], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -219,6 +219,7 @@ class MeasurementSchedule {
     }
 
     void removeSRN(AppdefEntityID ent) throws AgentStorageException {
+        boolean debug = this.log.isDebugEnabled();
         boolean toWrite = false, found = false;
 
         synchronized (this.srnList) {
@@ -233,8 +234,14 @@ class MeasurementSchedule {
                 }
             }
 
-            if (!found && this.log.isDebugEnabled()) {
-                this.log.debug("SRN for entity " + ent + " not found");
+            if (found) {
+                if (debug) {
+                    this.log.debug("SRN for entity " + ent + " removed");
+                }
+            } else {
+                if (debug) {
+                    this.log.debug("SRN for entity " + ent + " not found");
+                }
             }
 
             if (toWrite) {
@@ -256,6 +263,7 @@ class MeasurementSchedule {
     void deleteMeasurements(AppdefEntityID ent)
         throws AgentStorageException 
     {
+        boolean debug = this.log.isDebugEnabled();
         Iterator i;
 
         i = this.store.getListIterator(MeasurementSchedule.PROP_MSCHED);
@@ -264,12 +272,14 @@ class MeasurementSchedule {
             ScheduledMeasurement meas;
 
             if((meas = ScheduledMeasurement.decode(value)) == null){
-                this.log.error("Unable to decode metric from storage, nuking");
+                this.log.error("Unable to decode metric from storage, "
+                                    + "removing metric for entity " + ent);
                 i.remove();
                 continue;
             }
 
             if(meas.getEntity().equals(ent)){
+                this.log.debug("Removing scheduled measurement " + meas);
                 i.remove();
             }
         }
