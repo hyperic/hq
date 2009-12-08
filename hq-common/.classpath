@@ -94,7 +94,7 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.integration-tests-3.0.0.M4.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.jdbc-3.0.0.M4.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.jms-3.0.0.M4.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.orm-3.0.0.M4.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.orm-3.0.0.M4.jar" sourcepath="thirdparty/lib-src/org.springframework.orm-sources-3.0.0.M4.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.oxm-3.0.0.M4.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.test-3.0.0.M4.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.transaction-3.0.0.M4.jar"/>

@@ -236,7 +236,7 @@ public class HQApp  {
     private static Properties readTweakProperties() throws IOException {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream is =
-            loader.getResourceAsStream("META-INF/tweak.properties");
+            loader.getResourceAsStream("tweak.properties");
         Properties res = new Properties();
 
         if (is == null)

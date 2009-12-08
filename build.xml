@@ -49,9 +49,9 @@
   <property name="hibernate.lib" location="${thirdparty.lib}/hibernate"/>
   <property name="tapestry_lib" location="${thirdparty.lib}/tapestry"/>
 
-  <property name="webapp.home" location="${hq.home}/web" />
+  <property name="webapp.home" location="${hq.home}/hq-web/src/main/webapp" />
   <property name="ear.dir" location="${build.dir}/hq.ear" />
-  <property name="war.dir" location="${build.dir}/hq.ear/hq.war" />
+  <property name="war.dir" location="${build.dir}/hq.war" />
   <property name="ROOT.war" location="${build.dir}/ROOT.war"/>
   <property name="agent.dir" location="${build.dir}/agent" />
   <property name="agent.bundle.dir" value="agent-${version}-${build}"/>    
@@ -755,121 +755,133 @@
 	</sequential>
 </macrodef>
 
-  <target name="pack-hq-ui-jar">
-   <jar file="${war.dir}/WEB-INF/lib/hq-ui.jar" basedir="${hq.home}/build/classes" update="true">
-     <include name="org/hyperic/hq/ui/**" />
-     <fileset dir="${basedir}/src">
-       <include name="org/hyperic/hq/ui/**/*.html" />
-       <include name="org/hyperic/hq/ui/**/*.page" />
-       <include name="org/hyperic/hq/ui/**/*.properties" />
-     </fileset>
-     <include name="servletunit/struts/**" />
-     <exclude name="org/hyperic/hq/ui/server/session/**" />
-     <exclude name="org/hyperic/hq/ui/shared/**" />
-     <exclude name="org/hyperic/hq/ui/tapestry/**" />
-   </jar>
-  </target> 
   
-  <target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )"
-          depends="pack-ear,pack-test">
+  
+  <target name="pack-war" description="Create the war directory structure ( use if you modify .jsp or other web files, but no sources )">
     <mkdir dir="${war.dir}" />
     <mkdir dir="${war.dir}/WEB-INF/lib" />
+    <mkdir dir="${war.dir}/WEB-INF/classes" />
     
-    <copy todir="${war.dir}" >
+     <copy todir="${war.dir}" >
       <fileset dir="${webapp.home}">
         <include name="**"/>
-        <exclude name="**/*.in"/>
       </fileset>
     </copy>
 
-    <delete dir="${war.dir}/WEB-INF/classes/net"/>
 
-    <!-- Copy and replace params in hq.properties -->
-    <delete file="${war.dir}/WEB-INF/hq.properties"/>
-    <copy tofile="${war.dir}/WEB-INF/hq.properties"
-          file="${webapp.home}/WEB-INF/hq.properties.in"/>
-    <replace file="${war.dir}/WEB-INF/hq.properties">
-      <replacefilter token="@@@PROVIDER_URL@@@" 
-                     value="${hq.ejb.remote.config.ip}:2099"/>
-      <replacefilter token="@@@WEBAPP_ATTACH_REMOTELY_FLAG@@@" value="${hq.attach-remote-flag}"/>
-    </replace>
+    <!-- Assumes all .classes and resource files have been compiled to target dir-->
+   	<copy todir="${war.dir}/WEB-INF/classes" >
+      <fileset dir="${hq.home}/hq-web/target/classes">
+        <include name="**"/>
+      </fileset>
+    </copy>
 
     <replace file="${war.dir}/META-INF/context.xml">
       <replacefilter token="@@@HYPERIC_UI_HOTDEPLOY@@@" value="${hq.ui.hot-deploy}"/>
     </replace>
 
+    
+   
     <copy todir="${war.dir}/WEB-INF/lib/" >
       <fileset dir="${thirdparty.lib}" >
-        <include name="commons-beanutils-1.8.0.jar" />
-      	<include name="commons-chain-1.2.jar" />
-        <include name="commons-digester-1.8.jar" />
-		<include name="commons-validator-1.3.1.jar" />
-        <include name="jstl-1.1.2.jar" />
-        <include name="standard-1.1.2.jar" />
-      	<include name="spring-struts-2.0.8.jar" />
-      	<include name="struts-core-1.3.10.jar" />               
-        <include name="struts-extras-1.3.10.jar" />               
-        <include name="struts-taglib-1.3.10.jar" />               
-        <include name="struts-tiles-1.3.10.jar" />               
-        <include name="struts-el-1.3.10.jar" />
-        <include name="urlrewrite-3.1.0.jar" />
-      </fileset>
+		   <include name="commons-beanutils-1.8.0.jar" />
+	        <include name="commons-fileupload-1.2.1.jar" />          
+	        <include name="commons-lang-2.3.jar" />
+	        <include name="log4j-1.2.14.jar" />
+	        <include name="quartz-1.6.5.jar" />
+	        <include name="quartz-oracle-1.6.5.jar" />
+	        <include name="quartz-jboss-1.6.5.jar" />
+	        <include name="snmp4j.jar" />
+	        <include name="dnsjava-2.0.3.jar" />
+	        <include name="ehcache-1.5.0.jar" />
+	        <include name="jsr107cache-1.0.jar" /> <!-- EHCache 1.5 dep -->
+	        <include name="json.jar" />
+	        <include name="jug-asl-2.0.0.jar" />
+	        <include name="commons-httpclient-3.1.jar" />
+	        <include name="commons-codec-1.3.jar" /> <!-- HTTPClient dep -->
+	        <include name="groovy-all-1.6.jar" />
+	        <include name="xstream-1.3.1.jar" />
+	        <include name="xpp3_min-1.1.4c.jar" />
+			<include name="commons-collections-3.2.jar"/>
+	      	<include name="commons-chain-1.2.jar" />
+	        <include name="commons-digester-1.8.jar" />
+			<include name="commons-validator-1.3.1.jar" />
+	        <include name="jstl-1.1.2.jar" />
+	        <include name="standard-1.1.2.jar" />
+	      	<include name="spring-struts-2.0.8.jar" />
+	      	<include name="struts-core-1.3.10.jar" />               
+	        <include name="struts-extras-1.3.10.jar" />               
+	        <include name="struts-taglib-1.3.10.jar" />               
+	        <include name="struts-tiles-1.3.10.jar" />               
+	        <include name="struts-el-1.3.10.jar" />
+	        <include name="urlrewrite-3.1.0.jar" />
+
+	        <include name="ant.jar" />
+	        <include name="ant-lancher.jar" />
+
+			<include name="com.springsource.com.sun.xml.bind-*.jar"/>
+			<include name="com.springsource.javax.xml.bind-*.jar"/>
+			<include name="com.springsource.javax.xml.stream-*.jar"/>
+
+			<include name="*aopalliance*.jar"/>
+		    <include name="*dbcp*.jar"/>
+
+	      </fileset>
+	      <fileset dir="${thirdparty.lib}/spring" includes="*.jar"/>
+	      <fileset dir="${sigar.lib}" >
+	        <include name="sigar.jar" />
+	      </fileset> 
+	      <fileset dir="${lather.lib}" >
+	        <include name="lather.jar" />
+	      </fileset> 
+	
+	     <fileset dir="${thirdparty.lib}/mysql_jdbc">
+		   <include name="mysql-connector-java-5.0.5-bin.jar"/>
+		 </fileset>
+	     
+	      <fileset dir="${hibernate.lib}">
+	        <include name="cglib-2.1.3.jar" />
+	        <include name="concurrent-1.3.2.jar" />
+	      </fileset>
+	      <fileset dir="${tapestry_lib}">
+	         <include name="backport-util-concurrent-3.1.jar" />
+	         <include name="commons-fileupload-1.2.jar" />
+	         <include name="commons-io-1.4.jar" />
+	         <include name="commons-pool-1.4.jar" />
+	         <include name="hivemind-1.1.1.jar" />
+	         <include name="hivemind-lib-1.1.1.jar" />
+	         <include name="ognl-2.7.2.jar" />
+	         <include name="oro-2.0.8.jar" />
+	         <include name="portlet-api-1.0.jar" />
+	         <include name="tacos-core-4.1.2-20080213.jar" />
+	         <include name="tapdoc-0.7.0-20070512.jar" />
+	         <include name="tapdoc-0.7.0-20071218-sources" />
+	         <include name="tapestry-annotations-4.1.5.jar" />
+	         <include name="tapestry-archetype-4.1.2.jar" />
+	         <include name="tapestry-contrib-4.1.5.jar" />
+	         <include name="tapestry-framework-4.1.5.jar" />
+	         <include name="tapestry-portlet-4.1.5.jar" />
+	         <include name="tapestry-prop-1.0.0.jar" />
+	         <include name="tapestry-test-4.1.4-20080130-JUnit.jar" />
+	      </fileset>
+	      
     </copy>
 
-    <!--copy todir="${war.dir}/WEB-INF/classes" >
-      <fileset dir="${hq.home}/build/classes" includes="**/*Test*.class" />
-    </copy-->
+<antcall target="pack-common"/>
 
-    <copy todir="${war.dir}/" >
-     <fileset dir="${webapp.home}" includes="**/*.js*">
-        <include name="**/images/*"/>
-        <include name="**/*.property"/>
-        <include name="**/*.js"/>
-        <include name="**/*.xml"/>
-        <include name="**/*.css"/>
-        <include name="**/*.properties"/>
-        <include name="**/*.application"/>
-        <include name="**/*.page"/>
-        <include name="**/*.html"/>
-        <exclude name="**/*.jsp"/>
-      </fileset>
-    </copy>
-
-    <antcall target="pack-hq-ui-jar"/>
-
-    <jar file="${war.dir}/WEB-INF/lib/hq-tapestry-lib.jar" basedir="${hq.home}/build/classes" update="true">
-      <include name="org/hyperic/ui/tapestry/**" />
-      <fileset dir="${basedir}/src">
-        <include name="org/hyperic/ui/tapestry/**/*.html" />
-        <include name="org/hyperic/ui/tapestry/**/*.page" />
-        <include name="org/hyperic/ui/tapestry/**/*.jwc" />
-        <include name="org/hyperic/ui/tapestry/**/*.library" />
-        <include name="org/hyperic/ui/tapestry/**/*.script" />
-        <include name="org/hyperic/ui/tapestry/**/*.js" />
-        <include name="org/hyperic/ui/tapestry/**/*.properties" />
-      </fileset>
-    </jar>
-
-    <jar file="${war.dir}/WEB-INF/lib/display-taglib.jar" basedir="${hq.home}/build/classes" >
-      <include name="org/apache/taglibs/display/**" />
-    </jar>
-
-    <!-- Pack ROOT.war used for startup progress -->
-    <mkdir dir="${ROOT.war}" />
-    <mkdir dir="${ROOT.war}/WEB-INF" />
-    <mkdir dir="${ROOT.war}/WEB-INF/lib" />
-    <jar file="${ROOT.war}/WEB-INF/lib/boot-ui.jar" basedir="${hq.home}/build/classes" >
-      <include name="org/hyperic/util/notReady/StartupServlet.class" />
-      <include name="org/hyperic/util/notReady/NotReadyAppender*" />
-    </jar>
-    <copy tofile="${ROOT.war}/WEB-INF/web.xml"
-          file="src/org/hyperic/util/notReady/web.xml"/>
+ <copy todir="${war.dir}/WEB-INF/lib/" >
+      <fileset dir="${build.dir}" >
+		 <include name="hq-common.jar" />
+	      <include name="hq-util.jar" />
+	<include name="hq-pdk-shared.jar" />
+	  </fileset>
+	</copy>
 
     <!-- Pack UI plugins -->
-    <antcall target="hqu-deploy">
+    <!--><antcall target="hqu-deploy">
       <param name="eardir" value="${ear.dir}"/>
       <param name="wardir" value="${war.dir}"/>
-    </antcall>
+    </antcall> -->
   </target>
 
   <target name="deploy-ui" description="">
@@ -988,13 +1000,10 @@
     </javadoc>
   </target>
 
-  <target name="pack-pdk-lib" description="Pack the PDK lib jars">
-    <mkdir dir="${pdk.lib}"/>
-    <mkdir dir="${pdk.mibs}"/>
-
- <!-- TODO move pack of util and common to a common target -->
+  <target name="pack-common" description="Pack the common jars">
+	
     <jar basedir="${hq.util}/target/classes"
-         jarfile="${pdk.lib}/hq-util.jar">
+         jarfile="${build.dir}/hq-util.jar">
     </jar>
 
     <antcall target="write-version-file">
@@ -1002,8 +1011,28 @@
              value="${hq.common}/target/classes/version.properties"/>
     </antcall>
 
-    <jar basedir="${hq.common}/target/classes" jarfile="${pdk.lib}/hq-common.jar">
+    <jar basedir="${hq.common}/target/classes" jarfile="${build.dir}/hq-common.jar">
     </jar>
+
+    <jar basedir="${hq.pdk.shared}/target/classes"
+         jarfile="${build.dir}/hq-pdk-shared.jar">
+      <manifest>
+        <attribute name="Main-Class"
+                   value="org.hyperic.hq.product.util.PluginMain"/>
+      </manifest>
+    </jar>
+
+   </target>
+
+  <target name="pack-pdk-lib" description="Pack the PDK lib jars">
+    <mkdir dir="${pdk.lib}"/>
+    <mkdir dir="${pdk.mibs}"/>
+
+ 	<antcall target="pack-common"/>
+
+   <copy todir="${pdk.lib}" file="${build.dir}/hq-common.jar"/>
+   <copy todir="${pdk.lib}" file="${build.dir}/hq-util.jar"/>
+   <copy todir="${pdk.lib}" file="${build.dir}/hq-pdk-shared.jar"/>
 
     <jar basedir="${hq.pdk.shared}/target/classes"
          jarfile="${pdk.lib}/hq-pdk-shared.jar">
@@ -1582,27 +1611,23 @@
     </delete>
   </target>  
 
-  <target name="deploy" depends="precompile-jsp-check" 
-          description="Copy the ear to jboss deploy dir ( slow )">
+  <target name="deploy"
+          description="Copy the war to jboss deploy dir ( slow )">
     <property name="jboss.deploy.dir"
               value="${jboss.home}/server/default/deploy"/>
           
     <!-- create the deploy directory -->
-    <mkdir dir="${jboss.deploy.dir}/hq.ear" />
-    <copy todir="${jboss.deploy.dir}/hq.ear" >
-      <fileset dir="${ear.dir}" includes="**" />
-    </copy>
-    <mkdir dir="${jboss.deploy.dir}/hq.ear/hq.war" />
-    <copy todir="${jboss.deploy.dir}/hq.ear/hq.war" >
+    <mkdir dir="${jboss.deploy.dir}/hq.war" />
+    <copy todir="${jboss.deploy.dir}/hq.war" >
       <fileset dir="${war.dir}" includes="**" />
     </copy>
   </target>
 
   <target name="redeploy" depends="undeploy,deploy"/>
+
   <target name="undeploy" depends="init-taskdefs"
-          description="Remove the ear from jboss deploy dir">
-    <delete dir="${jboss.home}/server/default/deploy/hq.ear"/>
-    <delete dir="${jboss.home}/server/default/deploy/hq.ear/hq.war"/>
+          description="Remove the war from jboss deploy dir">
+    <delete dir="${jboss.home}/server/default/deploy/hq.war"/>
   </target>
 
   <!--

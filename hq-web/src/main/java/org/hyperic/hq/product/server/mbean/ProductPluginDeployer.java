@@ -307,7 +307,6 @@ public class ProductPluginDeployer
     @ManagedOperation
     public void handleNotification(Notification n, Object o) {
         loadConfig();
-        Bootstrap.loadEJBApplicationContext();
         loadStartupClasses();
      
 

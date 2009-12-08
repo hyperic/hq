@@ -38,21 +38,15 @@ import org.springframework.stereotype.Repository;
 public class ResourceTypeDAO
     extends HibernateDAO<ResourceType>
 {
-    private ResourceDAO rDao;
-    private ResourceGroupDAO gDao;
+   
 
     @Autowired
-    public ResourceTypeDAO(SessionFactory f, ResourceDAO resourceDAO) {
+    public ResourceTypeDAO(SessionFactory f) {
         super(ResourceType.class, f);
-        this.rDao =resourceDAO;
     }
     
     
-    @Autowired
-    public void setResourceGroupDao(ResourceGroupDAO gDao) {
-        this.gDao = gDao;
-    }
-
+   
 
 
     ResourceType create(AuthzSubject creator, String name, boolean system) {
@@ -62,12 +56,13 @@ public class ResourceTypeDAO
 
         // ResourceTypes also have Resources associated with them, so create
         // that and link  'em up.
+        //TODO resolve circular deps so can remove DAOFactory
         DAOFactory fact = DAOFactory.getDAOFactory();
 
 
         ResourceType typeResType = findTypeResourceType();
-        Resource prototype = rDao.findById(AuthzConstants.rootResourceId);
-        Resource res = rDao.create(typeResType, prototype, resType.getName(),
+        Resource prototype = fact.getResourceDAO().findById(AuthzConstants.rootResourceId);
+        Resource res = fact.getResourceDAO().create(typeResType, prototype, resType.getName(),
                                    creator, resType.getId(), false);
 
         resType.setResource(res);
@@ -80,7 +75,7 @@ public class ResourceTypeDAO
                                                AuthzConstants.authzResourceGroupName);
         }
 
-        gDao.addMembers(authzGroup, Collections.singleton(res));
+        fact.getResourceGroupDAO().addMembers(authzGroup, Collections.singleton(res));
         return resType;
     }
 

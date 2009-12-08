@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-2.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+	<context:property-placeholder location="classpath:/spring-jdbc.properties" />
+
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}"
+		p:username="${jdbc.username}" p:password="${jdbc.password}" />
+
+	<context:annotation-config />
+
+	<context:component-scan base-package="org.hyperic,com.hyperic" />
+
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mappingLocations" value="classpath:/**/*.hbm.xml" />
+		<property name="hibernateProperties">
+			<bean
+				class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+				<property name="location" value="classpath:/hibernate.properties" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	
+	<tx:annotation-driven />
+
+	<bean class="org.springframework.orm.hibernate3.HibernateTemplate">
+		<constructor-arg ref="sessionFactory" />
+	</bean>
+
+	<bean id="permissionManager" class="org.hyperic.hq.authz.shared.PermissionManagerFactory"
+		factory-method="getPermissionManager" autowire="constructor" />
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:/quartz.properties" />
+	</bean>
+
+	<context:mbean-export />
+	<context:mbean-server />
+
+	<!--
+		TODO figure out a way to switch b/w impls of same EE and .org
+		interface when autowiring
+	-->
+	<bean class="org.hyperic.hq.bizapp.server.session.LatherBossImpl">
+		<constructor-arg ref="latherDispatcher" />
+	</bean>
+
+	<!--
+		These components have to be initialized here instead of through
+		@Component because HQApp restart storage dir is set through
+		ProductPluginDeployer loadConfig() after server is started.
+	-->
+	<!--
+		TODO configure storage dir separately once we're off JBoss and then
+		these can be instantiated through component scanning
+	-->
+	<bean id="hqApp" class="org.hyperic.hq.application.HQApp"
+		factory-method="getInstance" />
+
+	<bean
+		class="org.hyperic.hq.events.server.session.FileAlertConditionEvaluatorStateRepository">
+		<constructor-arg value="#{ hqApp.restartStorageDir}" />
+	</bean>
+
+	<bean
+		class="org.hyperic.hq.events.server.session.AlertConditionEvaluatorFactoryImpl" />
+
+	<bean
+		class="org.hyperic.hq.events.server.session.AlertConditionEvaluatorRepositoryImpl" />
+
+	<bean class="org.hyperic.hq.events.server.session.TriggersCreatedListener" />
+
+	<!-- END required bean defs for restart storage dir -->
+
+
+
+</beans>

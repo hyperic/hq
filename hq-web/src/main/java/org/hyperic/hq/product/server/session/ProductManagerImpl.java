@@ -37,13 +37,6 @@ import java.util.SortedMap;
 import javax.ejb.CreateException;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
-import javax.management.AttributeNotFoundException;
-import javax.management.InstanceNotFoundException;
-import javax.management.MBeanException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.management.ReflectionException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,7 +51,6 @@ import org.hyperic.hq.appdef.shared.PlatformManager;
 import org.hyperic.hq.appdef.shared.ServerManager;
 import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.authz.shared.PermissionException;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.VetoException;
 import org.hyperic.hq.common.server.session.Audit;
 import org.hyperic.hq.common.shared.AuditManager;
@@ -83,6 +75,7 @@ import org.hyperic.hq.product.ServiceType;
 import org.hyperic.hq.product.ServiceTypeInfo;
 import org.hyperic.hq.product.TypeInfo;
 import org.hyperic.hq.product.pluginxml.PluginData;
+import org.hyperic.hq.product.server.mbean.ProductPluginDeployer;
 import org.hyperic.hq.product.shared.PluginValue;
 import org.hyperic.hq.product.shared.ProductManager;
 import org.hyperic.util.config.ConfigOption;
@@ -97,8 +90,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProductManagerImpl implements ProductManager {
 
-    // XXX constant should be elsewhere
-    private final String PLUGIN_DEPLOYER = "hyperic.jmx:type=Service,name=ProductPluginDeployer";
+  
 
     private Log log = LogFactory.getLog(ProductManagerImpl.class);
 
@@ -114,12 +106,13 @@ public class ProductManagerImpl implements ProductManager {
     private PlatformManager platformManager;
     private ServerManager serverManager;
     private ServiceManager serviceManager;
-    private MBeanServer mbeanServer;
+  
+    private ProductPluginDeployer productPluginDeployer;
 
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
                               CPropManager cPropManager, TemplateManager templateManager,
-                              AuditManager auditManager, ServerManager serverManager, ServiceManager serviceManager, PlatformManager platformManager, MBeanServer mbeanServer) {
+                              AuditManager auditManager, ServerManager serverManager, ServiceManager serviceManager, PlatformManager platformManager, ProductPluginDeployer productPluginDeployer) {
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
         this.cPropManager = cPropManager;
@@ -128,7 +121,7 @@ public class ProductManagerImpl implements ProductManager {
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
         this.platformManager = platformManager;
-        this.mbeanServer = mbeanServer;
+        
         try {
             ppm = getProductPluginManager();
         } catch (PluginException e) {
@@ -190,28 +183,7 @@ public class ProductManagerImpl implements ProductManager {
      */
     private ProductPluginManager getProductPluginManager()
         throws PluginException {
-
-       
-        ObjectName deployer;
-
-        try {
-            deployer = new ObjectName(PLUGIN_DEPLOYER);
-        } catch (MalformedObjectNameException e) {
-            // wont happen.
-            throw new PluginException(e.getMessage(), e);
-        }
-
-        try {
-            return (ProductPluginManager) mbeanServer.getAttribute(deployer, "ProductPluginManager");
-        } catch (MBeanException e) {
-            throw new PluginException(e.getMessage(), e);
-        } catch (AttributeNotFoundException e) {
-            throw new PluginException(e.getMessage(), e);
-        } catch (InstanceNotFoundException e) {
-            throw new PluginException(e.getMessage(), e);
-        } catch (ReflectionException e) {
-            throw new PluginException(e.getMessage(), e);
-        }
+        return productPluginDeployer.getProductPluginManager();
     }
 
     public static ProductManager getOne() {
@@ -221,18 +193,8 @@ public class ProductManagerImpl implements ProductManager {
     /**
      */
     public boolean isReady() {
-       
-        ObjectName deployer;
-
         try {
-            deployer = new ObjectName(PLUGIN_DEPLOYER);
-        } catch (MalformedObjectNameException e) {
-            // wont happen.
-            throw new SystemException(e.getMessage(), e);
-        }
-
-        try {
-            return ((Boolean) mbeanServer.getAttribute(deployer, "Ready")).booleanValue();
+            return productPluginDeployer.isReady();
         } catch (Exception e) {
             log.error("Unable to determine deployer state", e);
             return false;
