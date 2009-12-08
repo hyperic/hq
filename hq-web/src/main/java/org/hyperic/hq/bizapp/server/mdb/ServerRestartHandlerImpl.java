@@ -2,8 +2,7 @@
 
 package org.hyperic.hq.bizapp.server.mdb;
 
-import javax.ejb.MessageDrivenBean;
-import javax.ejb.MessageDrivenContext;
+import javax.annotation.PostConstruct;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -15,28 +14,26 @@ import org.hyperic.hq.appdef.server.session.ConfigManagerImpl;
 import org.hyperic.hq.appdef.server.session.ServerManagerImpl;
 import org.hyperic.hq.autoinventory.server.session.AutoinventoryManagerImpl;
 import org.hyperic.hq.control.ControlEvent;
-import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.control.server.session.ServerRestartHandler;
+import org.hyperic.hq.control.shared.ControlConstants;
 import org.hyperic.hq.measurement.server.session.TrackerManagerImpl;
 
 /**
- * 
- * 
- * @ejb:bean name="ServerRestartHandler"
- *           jndi-name="ejb/bizapp/ServerRestartHandler"
- *           local-jndi-name="ServerRestartHandler" transaction-type="Container"
- *           acknowledge-mode="Auto-acknowledge"
- *           destination-type="javax.jms.Topic"
- * 
- * @ejb:transaction type="REQUIRED"
- * 
- * @jboss:destination-jndi-name name="topic/eventsTopic"
+ * Uses transaction manager ("Required") and is bound to topic/eventsTopic 
  */
-public class ServerRestartHandlerEJBImpl implements MessageDrivenBean, MessageListener {
+public class ServerRestartHandlerImpl implements MessageListener {
 
     private ServerRestartHandler serverRestartHandler;
 
-    private Log log = LogFactory.getLog(ServerRestartHandlerEJBImpl.class);
+    private Log log = LogFactory.getLog(ServerRestartHandlerImpl.class);
+
+    @PostConstruct
+    public void init() {
+        serverRestartHandler = new ServerRestartHandler(ServerManagerImpl.getOne(),
+                                                        ConfigManagerImpl.getOne(),
+                                                        AutoinventoryManagerImpl.getOne(),
+                                                        TrackerManagerImpl.getOne());
+    }
 
     public void onMessage(Message message) {
         if (message instanceof ObjectMessage) {
@@ -60,42 +57,5 @@ public class ServerRestartHandlerEJBImpl implements MessageDrivenBean, MessageLi
         }
     }
 
-    /**
-     * @see javax.ejb.MessageDrivenBean#ejbCreate()
-     * @ejb:create-method
-     */
-    public void ejbCreate() {
-        serverRestartHandler = new ServerRestartHandler(ServerManagerImpl.getOne(),
-                                                        ConfigManagerImpl.getOne(),
-                                                        AutoinventoryManagerImpl.getOne(),
-                                                        TrackerManagerImpl.getOne());
-    }
 
-    /**
-     * @see javax.ejb.MessageDrivenBean#ejbPostCreate()
-     */
-    public void ejbPostCreate() {
-    }
-
-    /**
-     * @see javax.ejb.MessageDrivenBean#ejbActivate()
-     */
-    public void ejbActivate() {
-    }
-
-    /**
-     * @see javax.ejb.MessageDrivenBean#ejbPassivate()
-     */
-    public void ejbPassivate() {
-    }
-
-    /**
-     * @see javax.ejb.MessageDrivenBean#ejbRemove()
-     * @ejb:remove-method
-     */
-    public void ejbRemove() {
-    }
-
-    public void setMessageDrivenContext(MessageDrivenContext ctx) {
-    }
 }

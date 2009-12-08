@@ -50,6 +50,7 @@ import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.authz.shared.AuthzSubjectManager;
 import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.ResourceManager;
+import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.escalation.server.session.Escalatable;
@@ -108,12 +109,15 @@ public class AlertManagerImpl implements AlertManager {
 
     private EscalationManager escalationManager;
 
+    private MessagePublisher messagePublisher;
+
     @Autowired
     public AlertManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
                             AlertActionLogDAO alertActionLogDAO, AlertDAO alertDAO,
                             AlertConditionDAO alertConditionDAO, MeasurementDAO measurementDAO,
                             ResourceManager resourceManager, AlertDefinitionManager alertDefinitionManager,
-                            AuthzSubjectManager authzSubjectManager, EscalationManager escalationManager) {
+                            AuthzSubjectManager authzSubjectManager, EscalationManager escalationManager,
+                            MessagePublisher messagePublisher) {
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;
         this.alertActionLogDAO = alertActionLogDAO;
@@ -124,6 +128,8 @@ public class AlertManagerImpl implements AlertManager {
         this.alertDefinitionManager = alertDefinitionManager;
         this.authzSubjectManager = authzSubjectManager;
         this.escalationManager = escalationManager;
+        
+        this.messagePublisher = messagePublisher;
     }
 
     @PostConstruct
@@ -334,7 +340,7 @@ public class AlertManagerImpl implements AlertManager {
                     alertDef, false);
             }
 
-            EscalatableCreator creator = new ClassicEscalatableCreator(alertDef, event, new Messenger(), AlertManagerImpl.getOne());
+            EscalatableCreator creator = new ClassicEscalatableCreator(alertDef, event, messagePublisher, AlertManagerImpl.getOne());
             Resource res = creator.getAlertDefinition().getResource();
             if (res == null || res.isInAsyncDeleteState()) {
                 return;

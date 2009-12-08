@@ -52,7 +52,6 @@ import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceManager;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.util.MessagePublisher;
-import org.hyperic.hq.common.util.Messenger;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
@@ -66,10 +65,10 @@ import org.hyperic.hq.measurement.shared.HighLowMetricValue;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.AvailabilityMetricValue;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -130,14 +129,18 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
     private AvailabilityDataDAO availabilityDataDAO;
 
     private MeasurementDAO measurementDAO;
+    private MessagePublisher messagePublisher;
 
     @Autowired
     public AvailabilityManagerImpl(ResourceManager resourceManager, MessagePublisher messenger,
-                                   AvailabilityDataDAO availabilityDataDAO, MeasurementDAO measurementDAO) {
+                                   AvailabilityDataDAO availabilityDataDAO, 
+                                   MeasurementDAO measurementDAO, MessagePublisher messagePublisher) {
         this.resourceManager = resourceManager;
         this.messenger = messenger;
         this.availabilityDataDAO = availabilityDataDAO;
         this.measurementDAO = measurementDAO;
+        
+        this.messagePublisher = messagePublisher;
     }
 
     // To break AvailabilityManager - MeasurementManager circular dependency
@@ -1268,8 +1271,7 @@ public class AvailabilityManagerImpl implements AvailabilityManager {
             PermissionManagerFactory.getInstance().getHierarchicalAlertingManager().suppressMeasurementEvents(events,
                 false);
 
-            Messenger sender = new Messenger();
-            sender.publishMessage(EventConstants.EVENTS_TOPIC, new ArrayList<MeasurementEvent>(events.values()));
+            messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, new ArrayList<MeasurementEvent>(events.values()));
         }
 
         if (!zevents.isEmpty()) {

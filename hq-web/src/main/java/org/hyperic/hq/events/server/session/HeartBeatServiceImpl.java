@@ -29,12 +29,13 @@ import java.util.Date;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.HeartBeatEvent;
 import org.hyperic.hq.events.shared.HeartBeatService;
 import org.hyperic.hq.zevents.ZeventManager;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,11 +47,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class HeartBeatServiceImpl implements HeartBeatService {
     private final Log log = LogFactory.getLog(HeartBeatServiceImpl.class);
     private String topicName = EventConstants.EVENTS_TOPIC;
+    private MessagePublisher messagePublisher;
 
     public static HeartBeatService getOne() {
         return Bootstrap.getBean(HeartBeatService.class);
     }
 
+    @Autowired
+    public HeartBeatServiceImpl(MessagePublisher messagePublisher) {
+        this.messagePublisher = messagePublisher;
+    }
+    
     /**
      * Dispatch a heart beat.
      * 
@@ -68,8 +75,7 @@ public class HeartBeatServiceImpl implements HeartBeatService {
             RegisteredTriggerManagerImpl.getOne();
 
             // Send the heart beat event
-            Messenger sender = new Messenger();
-            sender.publishMessage(topicName, event);
+            messagePublisher.publishMessage(topicName, event);
         } catch (Exception e) {
             // Do not send out heart beat if services are not up
         }
