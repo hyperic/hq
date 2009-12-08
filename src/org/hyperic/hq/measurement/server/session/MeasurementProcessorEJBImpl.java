@@ -6,7 +6,7 @@
  * normal use of the program, and does *not* fall under the heading of
  * "derived work".
  * 
- * Copyright (C) [2004-2008], Hyperic, Inc.
+ * Copyright (C) [2004-2009], Hyperic, Inc.
  * This file is part of HQ.
  * 
  * HQ is free software; you can redistribute it and/or modify
@@ -41,6 +41,7 @@ import org.hyperic.hq.agent.AgentConnectionException;
 import org.hyperic.hq.agent.AgentRemoteException;
 import org.hyperic.hq.appdef.Agent;
 import org.hyperic.hq.appdef.server.session.AgentManagerEJBImpl;
+import org.hyperic.hq.appdef.server.session.AsyncDeleteAgentCache;
 import org.hyperic.hq.appdef.shared.AgentManagerLocal;
 import org.hyperic.hq.appdef.shared.AgentNotFoundException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -118,20 +119,33 @@ public class MeasurementProcessorEJBImpl
      */
     private Map getAgentMap(List aeids) {
         AgentManagerLocal aMan = AgentManagerEJBImpl.getOne();
+        AsyncDeleteAgentCache cache = AsyncDeleteAgentCache.getInstance();
         Map rtn = new HashMap(aeids.size());
         List tmp;
         for (Iterator it=aeids.iterator(); it.hasNext(); ) {
             AppdefEntityID eid = (AppdefEntityID)it.next();
-            Integer agentId;
+            Integer agentId = null;
             try {
                 agentId = aMan.getAgent(eid).getId();
+            } catch (AgentNotFoundException e) {
+                // HHQ-3585: It may be in an asynchronous
+                // delete state, so check the cache
+                agentId = cache.get(eid);
+                
+                if (agentId == null) {
+                    log.warn(e.getMessage());                    
+                } else {
+                    // No longer needed, remove from cache
+                    cache.remove(eid);
+                }
+            }
+            
+            if (agentId != null) {
                 if (null == (tmp = (List)rtn.get(agentId))) {
                     tmp = new ArrayList();
                     rtn.put(agentId, tmp);
                 }
                 tmp.add(eid);
-            } catch (AgentNotFoundException e) {
-                log.warn(e.getMessage());
             }
         }
         return rtn;

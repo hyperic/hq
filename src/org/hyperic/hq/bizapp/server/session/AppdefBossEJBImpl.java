@@ -58,6 +58,7 @@ import org.hyperic.hq.appdef.server.session.AppdefResource;
 import org.hyperic.hq.appdef.server.session.AppdefResourceType;
 import org.hyperic.hq.appdef.server.session.Application;
 import org.hyperic.hq.appdef.server.session.ApplicationType;
+import org.hyperic.hq.appdef.server.session.AsyncDeleteAgentCache;
 import org.hyperic.hq.appdef.server.session.CPropResource;
 import org.hyperic.hq.appdef.server.session.CPropResourceSortField;
 import org.hyperic.hq.appdef.server.session.Cprop;
@@ -1345,7 +1346,7 @@ public class AppdefBossEJBImpl
             switch (aeid.getType()) {
                 case AppdefEntityConstants.APPDEF_TYPE_SERVER :
                     final ServerManagerLocal sMan = getServerManager();
-                    sMan.removeServer(subject, sMan.findServerById(id));
+                    removeServer(subject, sMan.findServerById(id));
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_PLATFORM:
                     final PlatformManagerLocal pMan = getPlatformManager();
@@ -1353,7 +1354,7 @@ public class AppdefBossEJBImpl
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_SERVICE :
                     final ServiceManagerLocal svcMan = getServiceManager();
-                    svcMan.removeService(subject, svcMan.findServiceById(id));
+                    removeService(subject, svcMan.findServiceById(id));
                     break;
                 case AppdefEntityConstants.APPDEF_TYPE_GROUP:
                     final ResourceGroupManagerLocal rgMan =
@@ -1392,9 +1393,15 @@ public class AppdefBossEJBImpl
      */
     public void removeDeletedResources()
         throws ApplicationException, VetoException, RemoveException {
+        final boolean debug = log.isDebugEnabled();
         final StopWatch watch = new StopWatch();
         final AuthzSubject subject =
             getAuthzSubjectManager().findSubjectById(AuthzConstants.overlordId);
+
+        AsyncDeleteAgentCache cache = AsyncDeleteAgentCache.getInstance();
+        if (debug) {
+            log.debug("AsyncDeleteAgentCache start size=" + cache.getSize());
+        }
         
         watch.markTimeBegin("removeApplications");
         Collection applications =
@@ -1408,7 +1415,7 @@ public class AppdefBossEJBImpl
             }
         }
         watch.markTimeEnd("removeApplications");
-        if (log.isDebugEnabled()) {
+        if (debug) {
             log.debug("Removed " + applications.size() + " applications");
         }
 
@@ -1422,19 +1429,36 @@ public class AppdefBossEJBImpl
             }
         }
         watch.markTimeEnd("removeResourceGroups");
-        if (log.isDebugEnabled()) {
+        if (debug) {
             log.debug("Removed " + groups.size() + " resource groups");
         }
 
         // Look through services, servers, platforms, applications, and groups
+        watch.markTimeBegin("removeServices");
         Collection services = getServiceManager().findDeletedServices();
         removeServices(subject, services);
+        watch.markTimeEnd("removeServices");
 
+        watch.markTimeBegin("removeServers");
         Collection servers = getServerManager().findDeletedServers();
         removeServers(subject, servers);
+        watch.markTimeEnd("removeServers");
 
         watch.markTimeBegin("removePlatforms");
         Collection platforms = getPlatformManager().findDeletedPlatforms();
+        removePlatforms(subject, platforms);
+        watch.markTimeEnd("removePlatforms");
+        
+        if (debug) {
+            log.debug("removeDeletedResources: " + watch);
+            log.debug("AsyncDeleteAgentCache end size=" + cache.getSize());
+            if (cache.getSize() > 0) {
+                log.debug("AsyncDeleteAgentCache " + cache);
+            }
+        }
+    }
+    
+    private final void removePlatforms(AuthzSubject subject, Collection platforms) {
         for (final Iterator it = platforms.iterator(); it.hasNext(); ) {
             final Platform platform = (Platform)it.next();
             try {
@@ -1444,11 +1468,9 @@ public class AppdefBossEJBImpl
                 log.error("Unable to remove platform: " + e, e);
             }
         }
-        watch.markTimeEnd("removePlatforms");
         if (log.isDebugEnabled()) {
             log.debug("Removed " + platforms.size() + " platforms");
-            log.debug("removeDeletedResources() timing: " + watch);
-        }
+        }        
     }
 
     private final void removeServers(AuthzSubject subject, Collection servers) {
@@ -1471,7 +1493,7 @@ public class AppdefBossEJBImpl
         }
         watch.markTimeEnd("removeServers");
         if (log.isDebugEnabled()) {
-            log.debug("Removed " + servers.size() + " services");
+            log.debug("Removed " + servers.size() + " servers: " + watch);
         }
     }
 
@@ -1494,18 +1516,8 @@ public class AppdefBossEJBImpl
         }
         watch.markTimeEnd("removeServices");
         if (log.isDebugEnabled()) {
-            log.debug("Removed " + services.size() + " services");
+            log.debug("Removed " + services.size() + " services: " + watch);
         }
-    }
-
-    /**
-     * Disable all measurements for a resource
-     * @param id the resource's ID
-     */
-    private void disableMeasurements(AuthzSubject subject, Resource res)
-        throws PermissionException
-    {
-        getMetricManager().disableMeasurements(subject, res);
     }
 
     /**
@@ -1553,14 +1565,27 @@ public class AppdefBossEJBImpl
     public void removePlatform(AuthzSubject subject, Platform platform)
         throws ApplicationException, VetoException 
     {
+        boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+
         try {
+            // Update cache for asynchronous delete process
+            if (debug) watch.markTimeBegin("buildAsyncDeleteAgentCache");
+            buildAsyncDeleteAgentCache(platform);
+            if (debug) watch.markTimeEnd("buildAsyncDeleteAgentCache");
+
             // Disable all measurements for this platform.  We don't actually
             // remove the measurements here to avoid delays in deleting
             // resources.
-            disableMeasurements(subject, platform.getResource());
-
+            if (debug) watch.markTimeBegin("disableMeasurements");
+            getMetricManager().disableMeasurements(
+                    subject, platform.getResource(), true);
+            if (debug) watch.markTimeEnd("disableMeasurements");
+            
             // Remove from AI queue
             try {
+                if (debug) watch.markTimeBegin("removeFromAIQ");
+
                 List aiplatformList = new ArrayList();
                 Integer platformID = platform.getId();
                 final AIQueueManagerLocal aiMan = getAIManager();
@@ -1573,6 +1598,7 @@ public class AppdefBossEJBImpl
                     aiMan.processQueue(subject, aiplatformList, null, null,
                                        AIQueueConstants.Q_DECISION_PURGE);
                 }                
+                if (debug) watch.markTimeEnd("removeFromAIQ");
             } catch (AIQApprovalException e) {
                 log.error("Error removing from AI queue", e);
             } catch (FinderException e) {
@@ -1580,7 +1606,9 @@ public class AppdefBossEJBImpl
             }
 
             // now, remove the platform.
+            if (debug) watch.markTimeBegin("removePlatform");
             getPlatformManager().removePlatform(subject, platform);
+            if (debug) watch.markTimeEnd("removePlatform");
         } catch (RemoveException e) {
             log.error("Caught EJB RemoveException",e);
             throw new SystemException(e);
@@ -1588,18 +1616,36 @@ public class AppdefBossEJBImpl
             log.error("Caught PermissionException while removing platform: " +
                       platform.getId(),e);
             throw e;
+        } finally {
+            if (debug) {
+                log.debug("removePlatform[id=" + platform.getId() + "]: " + watch);
+            }            
         }
     }
 
     private void removeServer(AuthzSubject subject, Server server)
-        throws PermissionException,
-               VetoException {
+        throws PermissionException, VetoException 
+    {        
+        boolean debug = log.isDebugEnabled();
+        StopWatch watch = new StopWatch();
+        
         try {
+            // Update cache for asynchronous delete process
+            if (debug) watch.markTimeBegin("buildAsyncDeleteAgentCache");
+            buildAsyncDeleteAgentCache(server);
+            if (debug) watch.markTimeEnd("buildAsyncDeleteAgentCache");
+
             // now remove the measurements
-            disableMeasurements(subject, server.getResource());
+            if (debug) watch.markTimeBegin("disableMeasurements");
+            getMetricManager().disableMeasurements(
+                    subject, server.getResource(), true);
+            if (debug) watch.markTimeEnd("disableMeasurements");
+
             try {
+                if (debug) watch.markTimeBegin("toggleRuntimeScan");
                 getAutoInventoryManager().toggleRuntimeScan(
                     getOverlord(), server.getEntityId(), false);
+                if (debug) watch.markTimeEnd("toggleRuntimeScan");
             } catch (ResourceDeletedException e) {
                 log.debug(e);
             } catch (AutoinventoryException e) {
@@ -1609,8 +1655,11 @@ public class AppdefBossEJBImpl
                 log.error("Unexpected error turning off RuntimeScan for: " +
                           server + " (handled gracefully).", e);
             }
+            
             // finally, remove the server
+            if (debug) watch.markTimeBegin("removeServer");
             getServerManager().removeServer(subject, server);
+            if (debug) watch.markTimeEnd("removeServer");
         } catch (RemoveException e) {
             rollback();
             throw new SystemException(e);
@@ -1619,10 +1668,68 @@ public class AppdefBossEJBImpl
             log.error("Caught permission exception: [server:" + server.getId()
                     + "]");
             throw (PermissionException) e;
+        } finally {
+            if (debug) {
+                log.debug("removeServer[id=" + server.getId() + "]: " + watch);
+            }
+        }
+    }
+    
+    private void buildAsyncDeleteAgentCache(Server server) {        
+        AsyncDeleteAgentCache cache = AsyncDeleteAgentCache.getInstance();
+        
+        try {
+            Agent agent = findResourceAgent(server.getEntityId());
+            
+            for (Iterator i=server.getServices().iterator(); i.hasNext(); ) {
+                Service s = (Service)i.next();
+                AppdefEntityID eid = s.getEntityId();
+                cache.put(eid, agent.getId());
+            }
+        } catch (AgentNotFoundException anfe) {
+            if (cache.get(server.getEntityId()) == null) {
+                if (!server.getServerType().isVirtual()) {
+                    log.warn("Unable to build AsyncDeleteAgentCache for server[id=" 
+                                + server.getId() 
+                                + ", name=" + server.getName() + "]: "
+                                + anfe.getMessage());
+                }
+            } else {
+                log.debug("Platform has been asynchronously deleted: " 
+                            + anfe.getMessage());
+            }
+        } catch (Exception e) {
+            log.warn("Unable to build AsyncDeleteAgentCache for server[id=" 
+                            + server.getId()
+                            + ", name=" + server.getName() + "]: "
+                            + e.getMessage());
         }
     }
 
+    private void buildAsyncDeleteAgentCache(Platform platform) {
+        AsyncDeleteAgentCache cache = AsyncDeleteAgentCache.getInstance();
+
+        try {
+            Agent agent = platform.getAgent();
+            
+            for (Iterator i=platform.getServers().iterator(); i.hasNext(); ) {
+                Server s = (Server)i.next();
+                if (!s.getServerType().isVirtual()) {
+                    AppdefEntityID eid = s.getEntityId();
+                    cache.put(eid, agent.getId());
+                }
+                buildAsyncDeleteAgentCache(s);
+            }       
+        } catch (Exception e) {
+            log.warn("Unable to build AsyncDeleteAgentCache for platform[id=" 
+                        + platform.getId()
+                        + ", name=" + platform.getName() + "]: "
+                        + e.getMessage());        }
+    }
+    
     /**
+     * Used only during the asynchronous delete process.
+     * 
      * @ejb:transaction type="RequiresNew"
      * @ejb:interface-method
      */
@@ -1632,16 +1739,13 @@ public class AppdefBossEJBImpl
         removeServer(subject, server);
     }
 
-    /**
-     * @ejb:transaction type="RequiresNew"
-     * @ejb:interface-method
-     */
-    public void _removeServiceInNewTran(AuthzSubject subject, Service service)
+    private void removeService(AuthzSubject subject, Service service)
         throws VetoException, PermissionException, RemoveException 
     {
         try {    
             // now remove any measurements associated with the service
-            disableMeasurements(subject, service.getResource());
+            getMetricManager().disableMeasurements(
+                    subject, service.getResource(), true);
             removeTrackers(subject, service.getEntityId());
             getServiceManager().removeService(subject, service);
         } catch (PermissionException e) {
@@ -1651,6 +1755,18 @@ public class AppdefBossEJBImpl
             rollback();
             throw (RemoveException) e;
         }
+    }
+    
+    /**
+     * Used only during the asynchronous delete process.
+     * 
+     * @ejb:transaction type="RequiresNew"
+     * @ejb:interface-method
+     */
+    public void _removeServiceInNewTran(AuthzSubject subject, Service service)
+        throws VetoException, PermissionException, RemoveException 
+    {
+        removeService(subject, service);
     }
 
     /**
@@ -3999,7 +4115,11 @@ public class AppdefBossEJBImpl
     }
 
     /** @ejb:create-method */
-    public void ejbCreate() throws CreateException {}
+    public void ejbCreate() throws CreateException {
+        if (log.isDebugEnabled()) {
+            log.debug("ejbCreate called on " + this);
+        }
+    }
     
     public void ejbRemove() {}
     public void ejbActivate() {}

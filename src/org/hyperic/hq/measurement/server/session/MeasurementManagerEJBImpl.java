@@ -1183,12 +1183,42 @@ public class MeasurementManagerEJBImpl extends SessionEJB
      *
      * @ejb:interface-method
      */
-    public void disableMeasurements(AuthzSubject subject, Resource res)
-        throws PermissionException {
-        List mcol = getMeasurementDAO().findEnabledByResource(res);
+    public void disableMeasurements(AuthzSubject subject, Resource res) 
+        throws PermissionException
+    {    
+        disableMeasurements(subject, res, false);
+    }
+
+    /**
+     * Disable all Measurements for a resource
+     *
+     * @ejb:interface-method
+     */
+    public void disableMeasurements(AuthzSubject subject, 
+                                    Resource res,
+                                    boolean isAsyncDelete)
+        throws PermissionException 
+    {
+        List mcol = null;
         
-        if (mcol.size() == 0)
+        if (isAsyncDelete) {
+            // For asynchronous deletes, we need to get all measurements
+            // because some disabled measurements are not unscheduled
+            // from the agent (like during the maintenance window) and
+            // we need to unschedule these measurements
+            mcol = findMeasurements(subject, res);
+        } else {
+            mcol = getMeasurementDAO().findEnabledByResource(res);            
+        }
+        
+        if (mcol.size() == 0) {
+            if (log.isDebugEnabled()) {
+                log.debug("No measurements to disable for resourceId=" 
+                                + res.getId()
+                                + ", isAsyncDelete=" + isAsyncDelete);
+            }
             return;
+        }
         
         Integer[] mids = new Integer[mcol.size()];
         Iterator it = mcol.iterator();
