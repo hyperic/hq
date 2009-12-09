@@ -36,8 +36,6 @@ import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.SessionMBeanBase;
 import org.jboss.varia.scheduler.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 
 /**
@@ -45,7 +43,7 @@ import org.springframework.stereotype.Service;
  *
  * 
  */
-@ManagedResource("hyperic.jmx:type=Service,name=AgentAIScan")
+
 @Service
 public class AgentAIScanService
     extends SessionMBeanBase
@@ -82,7 +80,7 @@ public class AgentAIScanService
     /**
      * 
      */
-    @ManagedOperation
+   
     public void hit(Date lDate) {
         super.hit(lDate);
     }
@@ -98,26 +96,26 @@ public class AgentAIScanService
     /**
      * 
      */
-    @ManagedOperation
+   
     public void init() {}
 
     /**
      * 
      */
-    @ManagedOperation
+   
     public void start() {}
 
     /**
      * 
      */
-    @ManagedOperation
+ 
     public void stop() {
     }
 
     /**
      * 
      */
-    @ManagedOperation
+    
     public void destroy() {}
 }
 

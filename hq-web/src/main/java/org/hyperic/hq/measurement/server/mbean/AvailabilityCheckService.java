@@ -52,9 +52,6 @@ import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.TimeUtil;
 import org.jboss.varia.scheduler.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jmx.export.annotation.ManagedAttribute;
-import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 
 /**
@@ -62,7 +59,6 @@ import org.springframework.stereotype.Service;
  *
  * 
  */
-@ManagedResource("hyperic.jmx:type=Service,name=AvailabilityCheck")
 @Service
 public class AvailabilityCheckService
     extends SessionMBeanBase
@@ -109,7 +105,7 @@ public class AvailabilityCheckService
      * 
      * 
      */
-    @ManagedOperation
+   
     public void hitWithDate(Date lDate) {
         super.hit(lDate);
     }
@@ -122,7 +118,7 @@ public class AvailabilityCheckService
      * System.currentTimeMillis() and ignore the date which is passed in.
      * 
      */
-    @ManagedOperation
+   
     public void hit(Date lDate) {
         Date date = new Date(System.currentTimeMillis());
         super.hit(date);
@@ -360,7 +356,7 @@ public class AvailabilityCheckService
      *
      * 
      */
-    @ManagedAttribute
+    
     public long getInterval() {
         return interval;
     }
@@ -370,7 +366,7 @@ public class AvailabilityCheckService
      *
      * 
      */
-    @ManagedAttribute
+   
     public void setInterval(long interval) {
         this.interval = interval;
     }
@@ -380,7 +376,7 @@ public class AvailabilityCheckService
      *
      *
      */
-    @ManagedAttribute
+ 
     public long getWait() {
         return wait;
     }
@@ -390,7 +386,7 @@ public class AvailabilityCheckService
      *
      * 
      */
-    @ManagedAttribute
+   
     public void setWait(long wait) {
         this.wait = wait;
     }
@@ -398,13 +394,13 @@ public class AvailabilityCheckService
     /**
      * 
      */
-    @ManagedOperation
+   
     public void init() {}
 
     /**
      * 
      */
-    @ManagedOperation
+   
     public void start() throws Exception {
         
         
@@ -413,7 +409,7 @@ public class AvailabilityCheckService
     /**
      * 
      */
-    @ManagedOperation
+   
     public void stop() {
         log.info("Stopping " + this.getClass().getName());
     }
@@ -421,7 +417,7 @@ public class AvailabilityCheckService
     /**
      * 
      */
-    @ManagedOperation
+  
     public void destroy() {}
 }
 

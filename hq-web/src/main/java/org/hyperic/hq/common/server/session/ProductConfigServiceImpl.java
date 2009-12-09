@@ -51,7 +51,7 @@ import org.springframework.stereotype.Service;
  * 
  */
 
-@Service
+@Service("productConfigService")
 public class ProductConfigServiceImpl implements ProductConfigService {
 
     private static final String AUTH_REALM =

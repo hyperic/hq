@@ -1,6 +1,6 @@
 package org.hyperic.hq.ha.server.mbean;
 
-public interface HAServiceMBean {
+public interface HAMBean {
    
       void startSingleton() ;
 

@@ -32,22 +32,22 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.ha.HAService;
 import org.hyperic.hq.ha.HAUtil;
-import org.hyperic.hq.ha.server.mbean.HAServiceMBean;
+import org.hyperic.hq.ha.server.mbean.HAMBean;
 import org.hyperic.hq.measurement.server.session.MeasurementStartupListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service("haService")
 public class HAServiceImpl implements HAService
 {
     private final Log log = LogFactory.getLog(HAServiceImpl.class);
     private MBeanServer server;
-    private HAServiceMBean haService;
+    private HAMBean haService;
     
    
     
    @Autowired
-    public HAServiceImpl(MBeanServer server, HAServiceMBean haService) {
+    public HAServiceImpl(MBeanServer server, HAMBean haService) {
         this.server = server;
         this.haService = haService;
     }

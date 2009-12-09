@@ -25,6 +25,9 @@
 
 package org.hyperic.hq.ha.server.mbean;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.autoinventory.server.mbean.AgentAIScanService;
@@ -40,17 +43,19 @@ import org.springframework.stereotype.Service;
  */
 
 @Service
-public class HAServiceMBeanImpl implements HAServiceMBean
+public class HA implements HAMBean
 {
-    private final Log log = LogFactory.getLog(HAServiceMBeanImpl.class);
+    private final Log log = LogFactory.getLog(HA.class);
     private AvailabilityCheckService availabilityCheckService;
     private AgentAIScanService agentAIScanService;
+    private MBeanServer server;
     
 
     @Autowired
-    public HAServiceMBeanImpl(AvailabilityCheckService availabilityCheckService, AgentAIScanService agentAIScanService) {
+    public HA(AvailabilityCheckService availabilityCheckService, AgentAIScanService agentAIScanService, MBeanServer server) {
         this.availabilityCheckService = availabilityCheckService;
         this.agentAIScanService = agentAIScanService;
+        this.server = server;
     }
 
     /**
@@ -76,18 +81,23 @@ public class HAServiceMBeanImpl implements HAServiceMBean
     public void stopSingleton(String gracefulShutdown) {
         // XXX: shut down services
     }
-
+    
     private void startAvailCheckService() {
         try {
-          availabilityCheckService.startSchedule();
+            //TODO MBean has to be registered before startSchedule can be called.  Investigate using auto export once Scheduler dependency is removed
+            server.registerMBean(availabilityCheckService, new ObjectName("hyperic.jmx:service=Scheduler,name=AvailabilityCheck"));
+            availabilityCheckService.startSchedule();
 
         } catch (Exception e) {
             log.info("Unable to start service: " + e);
         }
     }
 
+  
     private void startAgentAIScanService() {
         try {
+            //TODO MBean has to be registered before startSchedule can be called.  Investigate using auto export once Scheduler dependency is removed
+           server.registerMBean(agentAIScanService, new ObjectName("hyperic.jmx:service=Scheduler,name=AgentAIScan"));
            agentAIScanService.startSchedule();
         } catch (Exception e) {
             log.info("Unable to start service: " + e);
