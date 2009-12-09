@@ -12,7 +12,7 @@
 
 	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
 		p:driverClassName="${jdbc.driverClassName}" p:url="${jdbc.url}"
-		p:username="${jdbc.username}" p:password="${jdbc.password}" />
+		p:username="${jdbc.username}" p:password="${jdbc.password}" p:defaultAutoCommit="false"/>
 
 	<context:annotation-config />
 
