@@ -864,8 +864,17 @@
 	         <include name="tapestry-prop-1.0.0.jar" />
 	         <include name="tapestry-test-4.1.4-20080130-JUnit.jar" />
 	      </fileset>
+	
 	      
     </copy>
+
+	
+		  <mkdir dir="${war.dir}/sigar_bin/lib" />
+		 <copy todir="${war.dir}/sigar_bin/lib" >
+		       <fileset dir="${sigar.lib}" >
+		          <exclude name="sigar.jar" />
+		       </fileset>
+		 </copy>
 
 <antcall target="pack-common"/>
 
