@@ -25,8 +25,6 @@
 
 package org.hyperic.hq.bizapp.server.session;
 
-import javax.annotation.PreDestroy;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.bizapp.shared.LatherBoss;
@@ -51,20 +49,11 @@ public class LatherBossImpl implements LatherBoss {
         this.dispatcher = dispatcher;
     }
 
-    @PreDestroy
-    public void destroyDispatcher() {
-        if (dispatcher != null) {
-            dispatcher.destroy();
-        }
-    }
-
     /**
      * 
      */
     public LatherValue dispatchWithTx(LatherContext ctx, String method, LatherValue arg) throws LatherRemoteException {
-
         return dispatchWithoutTx(ctx, method, arg);
-
     }
 
     /**

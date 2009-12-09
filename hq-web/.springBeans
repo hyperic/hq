@@ -7,7 +7,18 @@
 	</configSuffixes>
 	<enableImports><![CDATA[true]]></enableImports>
 	<configs>
+		<config>src/main/resources/META-INF/spring/jms-context.xml</config>
+		<config>src/main/resources/META-INF/spring/app-context.xml</config>
 	</configs>
 	<configSets>
+		<configSet>
+			<name><![CDATA[application]]></name>
+			<allowBeanDefinitionOverriding>true</allowBeanDefinitionOverriding>
+			<incomplete>false</incomplete>
+			<configs>
+				<config>src/main/resources/META-INF/spring/app-context.xml</config>
+				<config>src/main/resources/META-INF/spring/jms-context.xml</config>
+			</configs>
+		</configSet>
 	</configSets>
 </beansProjectDescription>

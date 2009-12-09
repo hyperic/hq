@@ -18,10 +18,7 @@
 package org.hyperic.hq.bizapp.server.mdb;
 
 import java.util.Collection;
-import java.util.Iterator;
 
-import javax.ejb.MessageDrivenBean;
-import javax.ejb.MessageDrivenContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -32,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.EventTypeException;
 import org.hyperic.hq.events.TriggerInterface;
+import org.hyperic.hq.events.ext.RegisterableTriggerInterface;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
 import org.hyperic.hq.stats.ConcurrentStatsCollector;
 
@@ -41,20 +39,14 @@ import org.hyperic.hq.stats.ConcurrentStatsCollector;
  * <p>
  *
  * </p>
- * @ejb:bean name="RegisteredDispatcher"
- *           jndi-name="ejb/event/RegisteredDispatcher"
- *           local-jndi-name="LocalRegisteredDispatcher"
- *           transaction-type="Bean" acknowledge-mode="Auto-acknowledge"
- *           destination-type="javax.jms.Topic"
- *
- * @ejb:transaction type="NotSupported"
- * @jboss:destination-jndi-name name="topic/eventsTopic"
+ * TODO: Check if dups-ok maps correctly to the expected non-transaction semantics.
+ * 
  * This is intentionally NOT TRANSACTIONAL.  Had to mark it specifically as NotSupported b/c MDBs are required to have some type of transactional boundary.
  * We are specifically NOT interacting with database or Hibernate sessions during message processing for performance reasons
+ * Bound to topic/eventsTopic
  */
-
-public class RegisteredDispatcherEJBImpl implements MessageDrivenBean, MessageListener {
-    private final Log log = LogFactory.getLog(RegisteredDispatcherEJBImpl.class);
+public class RegisteredDispatcherImpl implements MessageListener {
+    private final Log log = LogFactory.getLog(RegisteredDispatcherImpl.class);
 
     /**
      * Dispatch the event to interested triggers.
@@ -63,15 +55,15 @@ public class RegisteredDispatcherEJBImpl implements MessageDrivenBean, MessageLi
      */
     private void dispatchEvent(AbstractEvent event) {
         // Get interested triggers
-        Collection triggers = getInterestedTriggers(event);
+        Collection<RegisterableTriggerInterface> triggers = getInterestedTriggers(event);
 
         if (log.isDebugEnabled()) {
             log.debug("There are " + triggers.size() + " registered for event");
         }
 
         // Dispatch to each trigger
-        for (Iterator i = triggers.iterator(); i.hasNext();) {
-            TriggerInterface trigger = (TriggerInterface) i.next();
+        for (RegisterableTriggerInterface registerableTrigger : triggers) {
+            TriggerInterface trigger = (TriggerInterface) registerableTrigger;
             long startTime = System.currentTimeMillis();
             try {
                 trigger.processEvent(event);
@@ -87,7 +79,7 @@ public class RegisteredDispatcherEJBImpl implements MessageDrivenBean, MessageLi
         }
     }
 
-    protected Collection getInterestedTriggers(AbstractEvent evt) {
+    protected Collection<RegisterableTriggerInterface> getInterestedTriggers(AbstractEvent evt) {
         return RegisteredTriggers.getInterestedTriggers(evt);
     }
 
@@ -95,6 +87,7 @@ public class RegisteredDispatcherEJBImpl implements MessageDrivenBean, MessageLi
      * The onMessage method
      * @ejb:interface-method
      */
+    @SuppressWarnings("unchecked")
     public void onMessage(Message inMessage) {
         if (!(inMessage instanceof ObjectMessage)) {
             return;
@@ -120,41 +113,16 @@ public class RegisteredDispatcherEJBImpl implements MessageDrivenBean, MessageLi
             }
 
             dispatchEvent(event);
-        } else if (obj instanceof Collection) {
-            Collection events = (Collection) obj;
+        } else if (obj instanceof Collection<?>) {
+            Collection<AbstractEvent> events = (Collection<AbstractEvent>) obj;
 
             if (debug) {
                 log.debug(events.size() + " events in the message");
             }
 
-            for (Iterator it = events.iterator(); it.hasNext();) {
-                AbstractEvent event = (AbstractEvent) it.next();
+            for (AbstractEvent event : events) {
                 dispatchEvent(event);
             }
         }
-    }
-
-    /**
-     * @ejb:create-method
-     */
-    public void ejbCreate() {
-    }
-
-    public void ejbPostCreate() {
-    }
-
-    public void ejbActivate() {
-    }
-
-    public void ejbPassivate() {
-    }
-
-    /**
-     * @ejb:remove-method
-     */
-    public void ejbRemove() {
-    }
-
-    public void setMessageDrivenContext(MessageDrivenContext ctx) {
     }
 }

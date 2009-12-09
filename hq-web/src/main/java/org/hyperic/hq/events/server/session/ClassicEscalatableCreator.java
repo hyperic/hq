@@ -67,7 +67,7 @@ public class ClassicEscalatableCreator
     private final AlertDefinition   _def;
     private final AlertConditionsSatisfiedZEvent _event;
 
-    private final MessagePublisher messenger;
+    private final MessagePublisher messagePublisher;
     private final AlertManager alertMan;
 
     /**
@@ -75,13 +75,13 @@ public class ClassicEscalatableCreator
      *
      * @param def The alert definition.
      * @param event The event that triggered the escalation.
-     * @param messenger The messenger to use for publishing AlertFiredEvents
+     * @param messagePublisher The messenger to use for publishing AlertFiredEvents
      * @param alertMan The alert manager to use
      */
-    public ClassicEscalatableCreator(AlertDefinition def, AlertConditionsSatisfiedZEvent event, MessagePublisher messenger, AlertManager alertMan) {
+    public ClassicEscalatableCreator(AlertDefinition def, AlertConditionsSatisfiedZEvent event, MessagePublisher messagePublisher, AlertManager alertMan) {
         _def   = def;
         _event = event;
-        this.messenger = messenger;
+        this.messagePublisher = messagePublisher;
         this.alertMan = alertMan;
     }
 
@@ -169,7 +169,7 @@ public class ClassicEscalatableCreator
             HQApp.getInstance().addTransactionListener(new TransactionListener() {
                 public void afterCommit(boolean success) {
                     if(success) {
-                        messenger.publishMessage(EventConstants.EVENTS_TOPIC,new AlertFiredEvent(alertId, _def.getId(), AppdefUtil.newAppdefEntityId(_def.getResource()),_def.getName(),payload.getTimestamp(),
+                        messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC,new AlertFiredEvent(alertId, _def.getId(), AppdefUtil.newAppdefEntityId(_def.getResource()),_def.getName(),payload.getTimestamp(),
                                                                      payload.getMessage()));
                     }
                 }

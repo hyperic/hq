@@ -27,11 +27,8 @@ package org.hyperic.hq.bizapp.server.mdb;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
-import javax.ejb.MessageDrivenBean;
-import javax.ejb.MessageDrivenContext;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageListener;
@@ -43,32 +40,25 @@ import org.hyperic.hq.authz.server.shared.ResourceDeletedException;
 import org.hyperic.hq.events.AbstractEvent;
 import org.hyperic.hq.events.LoggableInterface;
 import org.hyperic.hq.events.server.session.EventLog;
-import org.hyperic.hq.events.server.session.EventLogManagerImpl;
 import org.hyperic.hq.events.shared.EventLogManager;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /** 
  * The LoggingDispatcher Message-Drive Bean is intended to be used
- * to log Events
- *
- * @ejb:bean name="LoggingDispatcher"
- *      jndi-name="ejb/bizapp/LoggingDispatcher"
- *      local-jndi-name="LocalLoggingDispatcher"
- *      transaction-type="Container"
- *      acknowledge-mode="Auto-acknowledge"
- *      destination-type="javax.jms.Topic"
- *
- * @ejb:transaction type="Required"
- *
- * @jboss:destination-jndi-name name="topic/eventsTopic"
+ * to log Events.
+ * 
+ * Uses transaction manager ("Required") and is bound to topic/eventsTopic 
  */
-public class LoggingDispatcherEJBImpl 
-    implements MessageDrivenBean, MessageListener {
-    private final Log log =
-        LogFactory.getLog(LoggingDispatcherEJBImpl.class);
+public class LoggingDispatcherImpl implements MessageListener {
+    private final Log log = LogFactory.getLog(LoggingDispatcherImpl.class);
+    private EventLogManager eventLogManager;
 
-    /**
-     * The onMessage method
-     */
+    @Autowired
+    public LoggingDispatcherImpl(EventLogManager eventLogManager) {
+        this.eventLogManager = eventLogManager;
+    }
+
+    @SuppressWarnings("unchecked")
     public void onMessage(Message inMessage) {
         if (!(inMessage instanceof ObjectMessage)) {
             return;
@@ -82,8 +72,8 @@ public class LoggingDispatcherEJBImpl
             if (obj instanceof AbstractEvent) {
                 AbstractEvent event = (AbstractEvent) obj;
                 logEvent(event);
-            } else if (obj instanceof Collection) {
-                Collection events = (Collection) obj;
+            } else if (obj instanceof Collection<?>) {
+                Collection<AbstractEvent> events = (Collection<AbstractEvent>) obj;
                 logEvents(events);
             }
         } catch (JMSException e) {
@@ -98,29 +88,24 @@ public class LoggingDispatcherEJBImpl
      * @param event The event.
      */
     private void logEvent(AbstractEvent event) {
-        EventLogManager elMan = EventLogManagerImpl.getOne();
-        
         try {
             if (event.isLoggingSupported()) {
                 LoggableInterface le = (LoggableInterface) event;            
-                elMan.createLog(event, le.getSubject(), le.getLevelString(), true);
+                eventLogManager.createLog(event, le.getSubject(), le.getLevelString(), true);
             }        
         } catch (ResourceDeletedException e) {
             log.debug(e);
         }
     }
     
-    private void logEvents(Collection events) {
-        EventLogManager elMan = EventLogManagerImpl.getOne();
-        List loggableEvents = new ArrayList();
+    private void logEvents(Collection<AbstractEvent> events) {
+        List<EventLog> loggableEvents = new ArrayList<EventLog>();
         
-        for (Iterator it = events.iterator(); it.hasNext();) {
-            AbstractEvent event = (AbstractEvent) it.next();
-            
+        for (AbstractEvent event : events) {
             try {
                 if (event.isLoggingSupported()) {
                     LoggableInterface le = (LoggableInterface) event;
-                    EventLog eventLog = elMan.createLog(event, 
+                    EventLog eventLog = eventLogManager.createLog(event, 
                                                         le.getSubject(), 
                                                         le.getLevelString(), 
                                                         false);
@@ -132,37 +117,8 @@ public class LoggingDispatcherEJBImpl
         }
         
         if (!loggableEvents.isEmpty()) {
-            elMan.insertEventLogs((EventLog[])loggableEvents.toArray(
+            eventLogManager.insertEventLogs(loggableEvents.toArray(
                                        new EventLog[loggableEvents.size()]));
         }
     }
-
-    /**
-     * @see javax.ejb.MessageDrivenBean#ejbCreate()
-     * @ejb:create-method
-     */
-    public void ejbCreate() {}
-
-    /**
-     * @see javax.ejb.MessageDrivenBean#ejbPostCreate()
-     */
-    public void ejbPostCreate() {}
-
-    /**
-     * @see javax.ejb.MessageDrivenBean#ejbActivate()
-     */
-    public void ejbActivate() {}
-
-    /**
-     * @see javax.ejb.MessageDrivenBean#ejbPassivate()
-     */
-    public void ejbPassivate() {}
-
-    /**
-     * @see javax.ejb.MessageDrivenBean#ejbRemove()
-     * @ejb:remove-method
-     */
-    public void ejbRemove() {}
-
-    public void setMessageDrivenContext(MessageDrivenContext ctx){}
 }

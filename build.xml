@@ -787,6 +787,8 @@
 		   <include name="commons-beanutils-1.8.0.jar" />
 	        <include name="commons-fileupload-1.2.1.jar" />          
 	        <include name="commons-lang-2.3.jar" />
+	        <include name="commons-logging-1.0.4" />
+	        <include name="com.springsource.org.apache.commons.pool-1.5.3.jar"/>
 	        <include name="log4j-1.2.14.jar" />
 	        <include name="quartz-1.6.5.jar" />
 	        <include name="quartz-oracle-1.6.5.jar" />
@@ -815,6 +817,7 @@
 	        <include name="struts-tiles-1.3.10.jar" />               
 	        <include name="struts-el-1.3.10.jar" />
 	        <include name="urlrewrite-3.1.0.jar" />
+	      
 
 	        <include name="ant.jar" />
 	        <include name="ant-lancher.jar" />
@@ -828,6 +831,8 @@
 
 	      </fileset>
 	      <fileset dir="${thirdparty.lib}/spring" includes="*.jar"/>
+	      <fileset dir="${thirdparty.lib}/activemq" includes="*.jar"/>
+	
 	      <fileset dir="${sigar.lib}" >
 	        <include name="sigar.jar" />
 	      </fileset> 

@@ -57,7 +57,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.authz.shared.PermissionManagerFactory;
 import org.hyperic.hq.authz.shared.ResourceValue;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.control.ControlEvent;
 import org.hyperic.hq.control.agent.client.ControlCommandsClient;
@@ -102,13 +102,16 @@ public class ControlManagerImpl implements ControlManager {
     private PermissionManager permissionManager;
     private ControlPluginManager controlPluginManager;
 
+    private MessagePublisher messagePublisher;
+
     @Autowired
     public ControlManagerImpl(ProductManager productManager, ControlScheduleManager controlScheduleManager,
                               ControlHistoryDAO controlHistoryDao,
                               ResourceTypeDAO resourceTypeDao, ConfigManager configManager,
                               PlatformManager platformManager,
                               AuthzSubjectManager authzSubjectManager, 
-                              PermissionManager permissionManager) {
+                              PermissionManager permissionManager,
+                              MessagePublisher messagePublisher) {
         this.productManager = productManager;
         this.controlScheduleManager = controlScheduleManager;
         this.controlHistoryDao = controlHistoryDao;
@@ -117,6 +120,8 @@ public class ControlManagerImpl implements ControlManager {
         this.platformManager = platformManager;
         this.authzSubjectManager = authzSubjectManager;
         this.permissionManager = permissionManager;
+        
+        this.messagePublisher = messagePublisher;
     }
 
     @PostConstruct
@@ -504,8 +509,7 @@ public class ControlManagerImpl implements ControlManager {
                                               cLocal.getDateScheduled(),
                                               status);
         event.setMessage(msg);
-        Messenger sender = new Messenger();
-        sender.publishMessage(EventConstants.EVENTS_TOPIC, event);
+        messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, event);
     }
 
     /**

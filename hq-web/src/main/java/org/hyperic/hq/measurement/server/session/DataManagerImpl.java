@@ -44,18 +44,17 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
-
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
+import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.common.ProductProperties;
 import org.hyperic.hq.common.shared.ServerConfigManager;
-import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.events.ext.RegisteredTriggers;
@@ -70,11 +69,11 @@ import org.hyperic.hq.measurement.shared.MeasRangeObj;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
 import org.hyperic.hq.product.MetricValue;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.jdbc.DBUtil;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.pager.PageList;
-import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.util.timer.StopWatch;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -143,11 +142,13 @@ public class DataManagerImpl implements DataManager {
     private MetricDataCache metricDataCache;
 
     private ZeventEnqueuer zeventManager;
+    private MessagePublisher messagePublisher;
 
     @Autowired
     public DataManagerImpl(DBUtil dbUtil, MeasurementDAO measurementDAO, MeasurementManager measurementManager,
                            ServerConfigManager serverConfigManager, AvailabilityManager availabilityManager,
-                           MetricDataCache metricDataCache, ZeventEnqueuer zeventManager) {
+                           MetricDataCache metricDataCache, ZeventEnqueuer zeventManager,
+                           MessagePublisher messagePublisher) {
         this.dbUtil = dbUtil;
         this.measurementDAO = measurementDAO;
         this.measurementManager = measurementManager;
@@ -155,6 +156,8 @@ public class DataManagerImpl implements DataManager {
         this.availabilityManager = availabilityManager;
         this.metricDataCache = metricDataCache;
         this.zeventManager = zeventManager;
+        
+        this.messagePublisher = messagePublisher;
     }
 
     private double getValue(ResultSet rs) throws SQLException {
@@ -522,8 +525,7 @@ public class DataManagerImpl implements DataManager {
         }
 
         if (!events.isEmpty()) {
-            Messenger sender = new Messenger();
-            sender.publishMessage(EventConstants.EVENTS_TOPIC, events);
+            messagePublisher.publishMessage(EventConstants.EVENTS_TOPIC, events);
         }
 
         if (!zevents.isEmpty()) {

@@ -33,13 +33,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import javax.jms.JMSException;
-import javax.jms.Session;
-import javax.jms.TopicConnection;
-import javax.jms.TopicConnectionFactory;
-import javax.jms.TopicSession;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
@@ -100,7 +93,7 @@ import org.hyperic.hq.bizapp.shared.lather.UserIsValid_args;
 import org.hyperic.hq.bizapp.shared.lather.UserIsValid_result;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
-import org.hyperic.hq.common.util.Messenger;
+import org.hyperic.hq.common.util.MessagePublisher;
 import org.hyperic.hq.control.shared.ControlManager;
 import org.hyperic.hq.events.EventConstants;
 import org.hyperic.hq.ha.HAUtil;
@@ -117,6 +110,7 @@ import org.hyperic.hq.product.LogTrackPlugin;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.ProductPlugin;
 import org.hyperic.hq.product.TrackEvent;
+import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.lather.LatherContext;
 import org.hyperic.lather.LatherRemoteException;
@@ -126,7 +120,6 @@ import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.pager.PageControl;
 import org.hyperic.util.security.SecurityUtil;
-import org.hyperic.hq.stats.ConcurrentStatsCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @org.springframework.stereotype.Service("latherDispatcher")
@@ -136,9 +129,6 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     private SessionManager sessionManager;
     protected HashSet<String> secureCommands = new HashSet<String>();
     private Set<String> noTxCommands = new HashSet<String>();
-    private final Object tConnLock = new Object();
-    private TopicConnection tConn;
-    private TopicSession tSession;
 
     private static final ConcurrentStatsCollector _stats = ConcurrentStatsCollector.getInstance();
     private static final String LATHER_NUMBER_OF_CONNECTIONS = ConcurrentStatsCollector.LATHER_NUMBER_OF_CONNECTIONS;
@@ -164,6 +154,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     private PermissionManager permissionManager;
 
     private ZeventEnqueuer zeventManager;
+    private MessagePublisher messagePublisher;
 
     @Autowired
     public LatherDispatcherImpl(SessionManager sessionManager, AgentManager agentManager, AuthManager authManager,
@@ -171,7 +162,8 @@ public class LatherDispatcherImpl implements LatherDispatcher {
                                 ConfigManager configManager, ControlManager controlManager,
                                 MeasurementManager measurementManager, PlatformManager platformManager,
                                 ReportProcessor reportProcessor, PermissionManager permissionManager,
-                                ZeventEnqueuer zeventManager) {
+                                ZeventEnqueuer zeventManager,
+                                MessagePublisher messagePublisher) {
 
         this.sessionManager = sessionManager;
         this.agentManager = agentManager;
@@ -191,6 +183,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
         for (int i = 0; i < CommandInfo.NOTX_COMMANDS.length; i++) {
             noTxCommands.add(CommandInfo.NOTX_COMMANDS[i]);
         }
+        this.messagePublisher = messagePublisher;
     }
 
     public boolean methIsTransactional(String meth) {
@@ -198,35 +191,7 @@ public class LatherDispatcherImpl implements LatherDispatcher {
     }
 
     private void sendTopicMessage(String msgTopic, Serializable data) throws LatherRemoteException {
-
-        synchronized (tConnLock) {
-            if (tConn == null) {
-                TopicConnectionFactory factory;
-                InitialContext ctx;
-
-                try {
-                    ctx = new InitialContext();
-                    factory = (TopicConnectionFactory) ctx.lookup(Messenger.CONN_FACTORY_JNDI);
-                } catch (NamingException exc) {
-                    log.error("Error looking up " + Messenger.CONN_FACTORY_JNDI + " while sending a message to " +
-                              msgTopic, exc);
-                    throw new LatherRemoteException("Unable to lookup " + "message queue '" + msgTopic + "'");
-                }
-
-                try {
-                    // Use ConnectionFactory to create JMS connection
-                    tConn = factory.createTopicConnection();
-
-                    // Use Connection to create session
-                    tSession = tConn.createTopicSession(false, Session.AUTO_ACKNOWLEDGE);
-                } catch (JMSException exc) {
-                    log.error("Error creating topic connection to '" + msgTopic + "'", exc);
-                    throw new LatherRemoteException("Error creating msgTopic " + "connection to '" + msgTopic + "'");
-                }
-            }
-        }
-        Messenger sender = new Messenger(tConn, tSession);
-        sender.publishMessage(msgTopic, data);
+        messagePublisher.publishMessage(msgTopic, data);
     }
 
     protected void validateAgent(LatherContext ctx, String agentToken) throws LatherRemoteException {
@@ -774,9 +739,6 @@ public class LatherDispatcherImpl implements LatherDispatcher {
             log.warn(ctx.getCallerIP() + " attempted to invoke '" + method + "' which could not be found");
             throw new LatherRemoteException("Unknown method, '" + method + "'");
         }
-    }
-
-    public void destroy() {
     }
 
     /**
