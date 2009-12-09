@@ -8,4 +8,6 @@ package org.hyperic.hq.ha;
 public interface HAService {
 
     boolean isMasterNode();
+    
+    void start();
 }

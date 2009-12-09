@@ -27,9 +27,6 @@ package org.hyperic.hq.bizapp.server.session;
 
 import java.util.Properties;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
-
 import org.hyperic.hq.auth.shared.SessionManager;
 import org.hyperic.hq.auth.shared.SessionNotFoundException;
 import org.hyperic.hq.auth.shared.SessionTimeoutException;
@@ -53,24 +50,20 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class ConfigBossImpl implements ConfigBoss {
+    private static final String PRODUCT_CONFIG_SVC_KEY = "hyperic.hq.config.service";
+
     private SessionManager sessionManager;
 
     private ServerConfigManager serverConfigManager;
 
     private PermissionManager permissionManager;
 
-    
-    private ProductConfigService productConfigService;
-    
-   
-
     @Autowired
     public ConfigBossImpl(SessionManager sessionManager, ServerConfigManager serverConfigManager,
-                          PermissionManager permissionManager, ProductConfigService productConfigService) {
+                          PermissionManager permissionManager) {
         this.sessionManager = sessionManager;
         this.serverConfigManager = serverConfigManager;
         this.permissionManager = permissionManager;
-        this.productConfigService = productConfigService;
     }
 
     /**
@@ -114,7 +107,8 @@ public class ConfigBossImpl implements ConfigBoss {
      */
     public void restartConfig() {
         try {
-           productConfigService.restart();
+            ((ProductConfigService) org.hyperic.hq.common.ProductProperties
+                .getPropertyInstance(PRODUCT_CONFIG_SVC_KEY)).restart();
         } catch (Exception e) {
             throw new SystemException(e);
         }

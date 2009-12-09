@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.hq.ha.server.session;
+package org.hyperic.hq.ha.server.mbean;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -40,15 +40,15 @@ import org.springframework.stereotype.Service;
  */
 
 @Service
-public class HAService
+public class HAServiceMBeanImpl implements HAServiceMBean
 {
-    private final Log log = LogFactory.getLog(HAService.class);
+    private final Log log = LogFactory.getLog(HAServiceMBeanImpl.class);
     private AvailabilityCheckService availabilityCheckService;
     private AgentAIScanService agentAIScanService;
     
 
     @Autowired
-    public HAService(AvailabilityCheckService availabilityCheckService, AgentAIScanService agentAIScanService) {
+    public HAServiceMBeanImpl(AvailabilityCheckService availabilityCheckService, AgentAIScanService agentAIScanService) {
         this.availabilityCheckService = availabilityCheckService;
         this.agentAIScanService = agentAIScanService;
     }
@@ -56,7 +56,7 @@ public class HAService
     /**
      * 
      */
-   
+  
     public void startSingleton() {
       
         //Reset in-memory triggers
@@ -71,7 +71,8 @@ public class HAService
     /**
      *
      */
-    
+  
+
     public void stopSingleton(String gracefulShutdown) {
         // XXX: shut down services
     }
