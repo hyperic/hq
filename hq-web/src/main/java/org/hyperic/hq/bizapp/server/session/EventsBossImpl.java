@@ -38,6 +38,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.FinderException;
 import javax.ejb.RemoveException;
 import javax.security.auth.login.LoginException;
@@ -126,8 +127,8 @@ import org.hyperic.hq.measurement.action.MetricAlertAction;
 import org.hyperic.hq.measurement.server.session.DefaultMetricEnableCallback;
 import org.hyperic.hq.measurement.server.session.Measurement;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
-import org.hyperic.hq.zevents.ZeventManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.hyperic.util.config.ConfigResponse;
 import org.hyperic.util.config.ConfigSchema;
@@ -189,6 +190,10 @@ public class EventsBossImpl implements EventsBoss {
     private ResourceGroupManager resourceGroupManager;
 
     private AuthzSubjectManager authzSubjectManager;
+    
+    private HQApp app;
+    
+    private ZeventEnqueuer zEventManager;
 
     @Autowired
     public EventsBossImpl(SessionManager sessionManager, ActionManager actionManager,
@@ -199,7 +204,7 @@ public class EventsBossImpl implements EventsBoss {
                           ResourceManager resourceManager, ServerManager serverManager,
                           ServiceManager serviceManager, PermissionManager permissionManager,
                           GalertManager galertManager, ResourceGroupManager resourceGroupManager,
-                          AuthzSubjectManager authzSubjectManager) {
+                          AuthzSubjectManager authzSubjectManager, HQApp app, ZeventEnqueuer zEventManager) {
         this.sessionManager = sessionManager;
         this.actionManager = actionManager;
         this.alertDefinitionManager = alertDefinitionManager;
@@ -217,6 +222,8 @@ public class EventsBossImpl implements EventsBoss {
         this.galertManager = galertManager;
         this.resourceGroupManager = resourceGroupManager;
         this.authzSubjectManager = authzSubjectManager;
+        this.app = app;
+        this.zEventManager = zEventManager;
     }
 
     /**
@@ -1476,7 +1483,7 @@ public class EventsBossImpl implements EventsBoss {
     public void startup() {
         log.info("Events Boss starting up!");
 
-        HQApp app = HQApp.getInstance();
+        
         app.registerCallbackListener(DefaultMetricEnableCallback.class, new DefaultMetricEnableCallback() {
             public void metricsEnabled(AppdefEntityID ent) {
                 try {
@@ -1507,7 +1514,7 @@ public class EventsBossImpl implements EventsBoss {
         // are deleted.
         HashSet<Class<ResourceDeletedZevent>> events = new HashSet<Class<ResourceDeletedZevent>>();
         events.add(ResourceDeletedZevent.class);
-        ZeventManager.getInstance().addBufferedListener(events, new ZeventListener<ResourceZevent>() {
+        zEventManager.addBufferedListener(events, new ZeventListener<ResourceZevent>() {
             public void processEvents(List<ResourceZevent> events) {
                 for (ResourceZevent z : events) {
                     if (z instanceof ResourceDeletedZevent) {

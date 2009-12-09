@@ -25,29 +25,34 @@
 
 package org.hyperic.hq.ha.server.session;
 
-import javax.management.MBeanServer;
-import javax.management.ObjectName;
+import javax.annotation.PostConstruct;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.ha.HAUtil;
 import org.hyperic.hq.measurement.server.session.MeasurementStartupListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class HAStartupListener
     implements StartupListener, org.hyperic.hq.ha.HAService
 {
-    private Log log = LogFactory.getLog(HAStartupListener.class);
+    private final Log log = LogFactory.getLog(HAStartupListener.class);
+    private org.hyperic.hq.ha.server.session.HAService haService;
+    
+    
+    @Autowired
+    public HAStartupListener(org.hyperic.hq.ha.server.session.HAService haService) {
+        this.haService = haService;
+    }
 
+    @PostConstruct
     public void hqStarted() {
-        MBeanServer server = Bootstrap.getBean(MBeanServer.class);
-
         log.info("Starting services");
 
-        startConfigService(server);
-       
-        startHAService(server);
+        startHAService();
         MeasurementStartupListener.startDataPurgeWorker();
         HAUtil.setHAService(this);
     }
@@ -57,27 +62,10 @@ public class HAStartupListener
         return true;
     }
 
-    private void startHAService(MBeanServer server)
+    private void startHAService()
     {
         try {
-            ObjectName o =
-                new ObjectName("hyperic.jmx:type=Service,name=HAService");
-            
-
-            server.invoke(o, "startSingleton", new Object[] {}, new String[] {});
-        } catch (Exception e) {
-            log.info("Unable to start service: "+e);
-        }
-    }
-
-    private void startConfigService(MBeanServer server)
-    {
-        try {
-            ObjectName o =
-                new ObjectName("hyperic.jmx:type=Service,name=ProductConfig");
-           
-
-            server.invoke(o, "start", new Object[] {}, new String[] {});
+            haService.startSingleton();
         } catch (Exception e) {
             log.info("Unable to start service: "+e);
         }

@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.security.auth.login.LoginException;
 
 import org.apache.commons.logging.Log;
@@ -74,13 +75,15 @@ public class DashboardManagerImpl implements DashboardManager {
     private DashboardConfigDAO dashDao;
     private CrispoManager crispoManager;
     private AuthzSubjectManager authzSubjectManager;
+    private HQApp hqApp;
 
     @Autowired
     public DashboardManagerImpl(DashboardConfigDAO dashDao, CrispoManager crispoManager,
-                                AuthzSubjectManager authzSubjectManager) {
+                                AuthzSubjectManager authzSubjectManager, HQApp hqApp) {
         this.dashDao = dashDao;
         this.crispoManager = crispoManager;
         this.authzSubjectManager = authzSubjectManager;
+        this.hqApp = hqApp;
     }
 
     /**
@@ -266,7 +269,7 @@ public class DashboardManagerImpl implements DashboardManager {
         log.info("Dashboard Manager starting up");
 
         // Register callback for subject removal
-        HQApp.getInstance()
+        hqApp
              .registerCallbackListener(SubjectRemoveCallback.class,
                                        new SubjectRemoveCallback() {
             public void subjectRemoved(AuthzSubject toDelete) {
@@ -276,7 +279,7 @@ public class DashboardManagerImpl implements DashboardManager {
              );
 
         // Register callback for role removal
-        HQApp.getInstance()
+        hqApp
              .registerCallbackListener(RoleRemoveCallback.class,
                                        new RoleRemoveCallback() {
             public void roleRemoved(Role r) {
@@ -301,7 +304,7 @@ public class DashboardManagerImpl implements DashboardManager {
              );
 
         // Register callback for role creation
-        HQApp.getInstance()
+        hqApp
              .registerCallbackListener(RoleCreateCallback.class,
                                        new RoleCreateCallback() {
             public void roleCreated(Role r) {
@@ -315,7 +318,7 @@ public class DashboardManagerImpl implements DashboardManager {
              );
 
         // Register callback for subject removed from role
-        HQApp.getInstance()
+        hqApp
              .registerCallbackListener(RoleRemoveFromSubjectCallback.class,
                                        new RoleRemoveFromSubjectCallback() {
             public void roleRemovedFromSubject(Role r,

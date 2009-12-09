@@ -87,6 +87,7 @@ public class GalertManagerImpl implements GalertManager {
     private EscalationManager escalationManager;
 
     private ResourceGroupManager resourceGroupManager;
+    private HQApp hqApp;
 
     @Autowired
     public GalertManagerImpl(ExecutionStrategyTypeInfoDAO stratTypeDAO,
@@ -96,7 +97,7 @@ public class GalertManagerImpl implements GalertManager {
                              GalertActionLogDAO actionLogDAO,
                              CrispoManager crispoManager,
                              EscalationManager escalationManager,
-                             ResourceGroupManager resourceGroupManager) {
+                             ResourceGroupManager resourceGroupManager, HQApp hqApp) {
         _stratTypeDAO = stratTypeDAO;
         _defDAO = defDAO;
         _auxLogDAO = auxLogDAO;
@@ -105,6 +106,7 @@ public class GalertManagerImpl implements GalertManager {
         this.crispoManager = crispoManager;
         this.escalationManager = escalationManager;
         this.resourceGroupManager = resourceGroupManager;
+        this.hqApp = hqApp;
     }
 
     /**
@@ -728,7 +730,7 @@ public class GalertManagerImpl implements GalertManager {
     public void startup() {
         _log.info("Galert manager starting up!");
 
-        HQApp.getInstance().registerCallbackListener(GroupChangeCallback.class,
+        hqApp.registerCallbackListener(GroupChangeCallback.class,
                                                      new GroupChangeCallback()
                                                      {
             public void postGroupCreate(ResourceGroup g) {
@@ -759,7 +761,7 @@ public class GalertManagerImpl implements GalertManager {
             }
         });
 
-        HQApp.getInstance()
+        hqApp
              .registerCallbackListener(SubjectRemoveCallback.class,
                                        new SubjectRemoveCallback() {
             public void subjectRemoved(AuthzSubject toDelete) {

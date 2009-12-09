@@ -33,6 +33,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.Agent;
@@ -46,6 +49,7 @@ import org.hyperic.hq.measurement.MeasurementUnscheduleException;
 import org.hyperic.hq.measurement.monitor.MonitorAgentException;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.measurement.shared.SRNManager;
+import org.jboss.varia.scheduler.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -80,6 +84,7 @@ public class ScheduleVerificationService
     private MeasurementProcessor measurementProcessor;
     private SRNManager srnManager;
     private AgentManager agentManager;
+   
     
     
     @Autowired
@@ -89,6 +94,9 @@ public class ScheduleVerificationService
         this.srnManager = srnManager;
         this.agentManager = agentManager;
     }
+    
+    
+   
 
     /**
      * 

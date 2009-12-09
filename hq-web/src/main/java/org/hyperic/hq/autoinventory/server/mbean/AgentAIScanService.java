@@ -27,10 +27,14 @@ package org.hyperic.hq.autoinventory.server.mbean;
 
 import java.util.Date;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.common.SessionMBeanBase;
+import org.jboss.varia.scheduler.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -52,11 +56,28 @@ public class AgentAIScanService
     
     private AutoinventoryManager autoinventoryManager;
     
+    private MBeanServer mbeanServer;
+    
     
     @Autowired
-    public AgentAIScanService(AutoinventoryManager autoinventoryManager) {
+    public AgentAIScanService(AutoinventoryManager autoinventoryManager, MBeanServer mbeanServer) {
         this.autoinventoryManager = autoinventoryManager;
+        this.mbeanServer = mbeanServer;
     }
+    
+    public void startSchedule() throws Exception {
+        Scheduler scheduler = new Scheduler();
+        scheduler.setSchedulableMBeanMethod("hit( DATE )");
+        scheduler.setSchedulableMBean("hyperic.jmx:type=Service,name=AgentAIScan");
+        scheduler.setInitialStartDate("NOW");
+        scheduler.setSchedulePeriod(300000);
+        scheduler.setInitialRepetitions(-1);
+        scheduler.setStartAtStartup(false);
+        ObjectName schedulerName = new ObjectName("hyperic.jmx:service=Scheduler,name=AgentAIScan");
+        mbeanServer.registerMBean(scheduler,schedulerName);
+        mbeanServer.invoke(schedulerName, "start", new Object[] {}, new String[] {});
+        mbeanServer.invoke(schedulerName, "startSchedule", new Object[] {}, new String[] {});
+     }
 
     /**
      * 

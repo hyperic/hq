@@ -29,48 +29,70 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.hqu.RenditServerImpl;
+import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
-import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.file.DirWatcher;
 import org.hyperic.util.file.DirWatcher.DirWatcherCallback;
 import org.jboss.system.server.ServerConfigLocator;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class UIStartupListener implements StartupListener {
-    private static final Log _log = LogFactory.getLog(UIStartupListener.class);
+    private final Log log = LogFactory.getLog(UIStartupListener.class);
 
-    private static final Object INIT_LOCK = new Object();
-    private static boolean INITIALIZED;
+    private final Object initLock = new Object();
+    private boolean initialized;
+    
+    private HQApp app;
+    private ZeventEnqueuer zeventManager;
+    private RenditServer renditServer;
+    private ResourceDeleteWatcher resourceDeleteWatcher;
+    
+    
+    @Autowired
+    public UIStartupListener(HQApp app, ZeventEnqueuer zeventManager, RenditServer renditServer,
+                             ResourceDeleteWatcher resourceDeleteWatcher) {
+        this.app = app;
+        this.zeventManager = zeventManager;
+        this.renditServer = renditServer;
+        this.resourceDeleteWatcher = resourceDeleteWatcher;
+    }
 
+    @PostConstruct
     public void hqStarted() {
-        HashSet events = new HashSet();
+        HashSet<Class<ResourceDeletedZevent>> events = new HashSet<Class<ResourceDeletedZevent>>();
         events.add(ResourceDeletedZevent.class);
-        ZeventManager.getInstance().
-            addBufferedListener(events, ResourceDeleteWatcher.getInstance());
+        zeventManager.
+            addBufferedListener(events, resourceDeleteWatcher);
 
-        HQApp app = HQApp.getInstance();
+       
         
         app.registerCallbackListener(PluginsDeployedCallback.class,
                                      new UIPluginInitializer());
     }
 
-    private static class UIPluginInitializer 
+    private class UIPluginInitializer 
         implements PluginsDeployedCallback
     {
-        public void pluginsDeployed(List plugins) {
+        public void pluginsDeployed(List<String> plugins) {
             initPlugins();
         }
     }
     
-    private static void initPlugins() {
-        synchronized(INIT_LOCK) {
-            if (INITIALIZED)
+    private  void initPlugins() {
+        synchronized(initLock) {
+            if (initialized) {
                 return;
+            }
         
             File homeDir   = ServerConfigLocator.locate().getServerHomeDir();
             File deployDir = new File(homeDir, "deploy");
@@ -78,10 +100,10 @@ public class UIStartupListener implements StartupListener {
             File warDir    = new File(earDir, "hq.war");
             File pluginDir = new File(warDir, "hqu");
             File sysDir    = new File(earDir, "rendit_sys");
-            RenditServerImpl.getInstance().setSysDir(sysDir);
+            renditServer.setSysDir(sysDir);
 
-            _log.info("HQU SysDir = [" + sysDir.getAbsolutePath() + "]");
-            _log.info("Watching for HQU plugins in [" + 
+            log.info("HQU SysDir = [" + sysDir.getAbsolutePath() + "]");
+            log.info("Watching for HQU plugins in [" + 
                       pluginDir.getAbsolutePath() + "]");
 
             DirWatcherCallback cb = new DirWatcherCallback() {
@@ -90,9 +112,9 @@ public class UIStartupListener implements StartupListener {
                         return;
 
                     try {
-                        RenditServerImpl.getInstance().addPluginDir(f);
+                        renditServer.addPluginDir(f);
                     } catch(Exception e) {
-                        _log.warn("Unable to add plugin in [" +
+                        log.warn("Unable to add plugin in [" +
                                   f.getAbsolutePath() + "]", e);
                     }
                 }
@@ -101,7 +123,7 @@ public class UIStartupListener implements StartupListener {
                     if (f.getName().equals("public"))
                         return;
 
-                    RenditServerImpl.getInstance().removePluginDir(f.getName());
+                    renditServer.removePluginDir(f.getName());
                 }
             };
 
@@ -111,7 +133,7 @@ public class UIStartupListener implements StartupListener {
                 try {
                     cb.fileAdded(plugins[i]);
                 } catch(Throwable t) {
-                    _log.error("Error loading plugin [" + plugins[i] + "]", t);
+                    log.error("Error loading plugin [" + plugins[i] + "]", t);
                 }
             }
 
@@ -122,7 +144,7 @@ public class UIStartupListener implements StartupListener {
             _watcherThread.setDaemon(true);
             _watcherThread.start();
                 
-            INITIALIZED = true;
+            initialized = true;
         }
     }    
 }

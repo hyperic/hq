@@ -1,41 +1,59 @@
 package org.hyperic.hq.bizapp.server.session;
 
-import org.hyperic.hq.application.HQApp;
-import org.hyperic.hq.application.StartupFinishedCallback;
-import org.hyperic.hq.application.StartupListener;
+import javax.annotation.PostConstruct;
 
-public class BossStartupListener 
-    implements StartupListener, StartupFinishedCallback
-{
-    private static final Object LOCK = new Object();
-    private static UpdateReportAppender _updateCallback; 
-    
-    public void hqStarted() {
-        EventsBossImpl.getOne().startup();
-        EventLogBossImpl.getOne().startup();
-        AuthBossImpl.getOne().startup();
-        AppdefBossImpl.getOne().startup();
-        ProductBossImpl.getOne().preload();
-       
-        
-        synchronized (LOCK) {
-            _updateCallback = (UpdateReportAppender)HQApp.getInstance()
-                 .registerCallbackCaller(UpdateReportAppender.class);
-        }
-        
-        HQApp.getInstance().registerCallbackListener(StartupFinishedCallback.class,
-                                                     this);
+import org.hyperic.hq.application.HQApp;
+import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.bizapp.shared.AppdefBoss;
+import org.hyperic.hq.bizapp.shared.AuthBoss;
+import org.hyperic.hq.bizapp.shared.EventLogBoss;
+import org.hyperic.hq.bizapp.shared.EventsBoss;
+import org.hyperic.hq.bizapp.shared.ProductBoss;
+import org.hyperic.hq.bizapp.shared.UpdateBoss;
+import org.hyperic.hq.measurement.server.session.MeasurementStartupListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class BossStartupListener implements StartupListener {
+
+    private static UpdateReportAppender updateCallback;
+
+    private AppdefBoss appdefBoss;
+
+    private EventsBoss eventsBoss;
+    private EventLogBoss eventLogBoss;
+    private AuthBoss authBoss;
+    private ProductBoss productBoss;
+    private UpdateBoss updateBoss;
+    private HQApp hqApp;
+
+    @Autowired
+    public BossStartupListener(AppdefBoss appdefBoss, EventsBoss eventsBoss, EventLogBoss eventLogBoss,
+                               AuthBoss authBoss, ProductBoss productBoss, UpdateBoss updateBoss, HQApp hqApp, MeasurementStartupListener measurementStartupListener) {
+        this.appdefBoss = appdefBoss;
+        this.eventsBoss = eventsBoss;
+        this.eventLogBoss = eventLogBoss;
+        this.authBoss = authBoss;
+        this.productBoss = productBoss;
+        this.updateBoss = updateBoss;
+        this.hqApp = hqApp;
+        //TODO MeasurementStartupListener has to be initialized first to register the DefaultMetricEnableCallback handler.  Injecting the listener here purely to wait for that
     }
-    
-    public void startupFinished() {
-        UpdateBossImpl.getOne().startup();
+
+    @PostConstruct
+    public void hqStarted() {
+        eventsBoss.startup();
+        eventLogBoss.startup();
+        authBoss.startup();
+        appdefBoss.startup();
+        productBoss.preload();
+        updateCallback = (UpdateReportAppender) hqApp.registerCallbackCaller(UpdateReportAppender.class);
+        updateBoss.startup();
     }
 
     static UpdateReportAppender getUpdateReportAppender() {
-        synchronized(LOCK) {
-            return _updateCallback;
-        }
+        return updateCallback;
     }
-    
-   
+
 }

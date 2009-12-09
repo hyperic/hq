@@ -26,7 +26,6 @@
 package org.hyperic.hq.events.server.session;
 
 import java.util.Collection;
-import java.util.Iterator;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
@@ -34,31 +33,27 @@ import net.sf.ehcache.Element;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.authz.server.session.AuthzSubject;
 import org.hyperic.hq.authz.server.session.AuthzSubjectManagerImpl;
-import org.hyperic.hq.authz.shared.PermissionException;
 import org.hyperic.hq.authz.shared.AuthzConstants;
-import org.hyperic.hq.events.server.session.AlertDefinition;
-import org.hyperic.hq.events.server.session.AlertDefinitionManagerImpl;
 import org.hyperic.hq.events.shared.AlertDefinitionManager;
+import org.springframework.stereotype.Repository;
 
 /**
  * This class is an in-memory map of whether "availability down"
  * alert definitions exist for a resource
  */
+@Repository
 public class AvailabilityDownAlertDefinitionCache {
     private Log log = LogFactory.getLog(AvailabilityDownAlertDefinitionCache.class);
 
     public static final String CACHENAME = "AvailabilityDownAlertDefinitionCache";
-    private static final Object _cacheLock = new Object();
+    private final Object _cacheLock = new Object();
     private final Cache _cache;
 
-    private static final AvailabilityDownAlertDefinitionCache singleton = 
-        new AvailabilityDownAlertDefinitionCache();
-
-    private AvailabilityDownAlertDefinitionCache() {
+    
+    public AvailabilityDownAlertDefinitionCache() {
         _cache = CacheManager.getInstance().getCache(CACHENAME);
     }
 
@@ -101,11 +96,9 @@ public class AvailabilityDownAlertDefinitionCache {
             AlertDefinitionManager adm = AlertDefinitionManagerImpl.getOne();
             AuthzSubject hqadmin = AuthzSubjectManagerImpl.getOne()
                                         .getSubjectById(AuthzConstants.rootSubjectId);
-            Collection alertDefs = adm.findAlertDefinitions(hqadmin, key);
+            Collection<AlertDefinition> alertDefs = adm.findAlertDefinitions(hqadmin, key);
 
-            for (Iterator it=alertDefs.iterator(); it.hasNext(); ) {
-                AlertDefinition def = (AlertDefinition) it.next();
-
+            for ( AlertDefinition def : alertDefs) {
                 if (def.isActive() && def.isAvailability(false)) {
                     value = Boolean.TRUE;
                     break;
@@ -114,7 +107,7 @@ public class AvailabilityDownAlertDefinitionCache {
             if (value == null) {
                 value = Boolean.FALSE;
             }
-            singleton.put(key, value);
+            put(key, value);
             
         } catch (Exception e) {
             log.error("Could not get alert definitions for " + key, e);
@@ -123,8 +116,6 @@ public class AvailabilityDownAlertDefinitionCache {
         return value;
     }
 
-    public static AvailabilityDownAlertDefinitionCache getInstance() {
-        return singleton;
-    }
+ 
 
 }

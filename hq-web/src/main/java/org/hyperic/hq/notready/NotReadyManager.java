@@ -23,14 +23,13 @@
  * USA.
  */
 
-package org.hyperic.util.notReady;
+package org.hyperic.hq.notready;
 
-import javax.management.MBeanRegistration;
-import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.stereotype.Service;
 
 /**
  * A simple MBean which calls the NotReadyFilter class to set the
@@ -39,11 +38,12 @@ import org.apache.commons.logging.LogFactory;
  * like the Filter class and such.  This also makes it a bit more
  * clear what the purposes of the objects are.
  */
+@Service
 public class NotReadyManager
-    implements NotReadyManagerMBean, MBeanRegistration
+    implements NotReadyManagerMBean
 {
     private Log         _log = LogFactory.getLog(NotReadyManager.class);
-    private MBeanServer _server;
+   
 
     public NotReadyManager(){
     }
@@ -56,10 +56,7 @@ public class NotReadyManager
         return NotReadyFilter.getReady();
     }
 
-    public ObjectName preRegister(MBeanServer server, ObjectName name) {
-        _server = server;
-        return name;
-    }
+    
 
     /**
      * JBoss waits until the server is fully started to start the connectors.  
@@ -71,9 +68,7 @@ public class NotReadyManager
         t.start();
     }
 
-    public void preDeregister() throws Exception {}
-
-    public void postDeregister() {}
+   
     
     private class WebServerConnectorStarter implements Runnable {
         public void run() {
@@ -88,8 +83,8 @@ public class NotReadyManager
                 ObjectName service = 
                     new ObjectName("jboss.web:service=WebServer");
 
-                _server.invoke(service, "startConnectors",
-                               new Object[0], new String[0]);
+                //_server.invoke(service, "startConnectors",
+                  //             new Object[0], new String[0]);
             } catch (Exception e) {
                 _log.error("Unable to start WebServer connectors: " 
                             + e.getClass().getName() + " - " + e.getMessage());

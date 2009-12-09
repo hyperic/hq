@@ -140,6 +140,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
     private AuthzSubjectManager authzSubjectManager;
     private AIQueueManager aiQueueManager;
     private PermissionManager permissionManager;
+    private HQApp hqApp;
     
 
     @Autowired
@@ -147,7 +148,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                                     AIPlatformDAO aiPlatformDao, ProductManager productManager, ServerManager serverManager,
                                     AIScheduleManager aiScheduleManager, ResourceManager resourceManager, ConfigManager configManager,
                                     AgentManager agentManager, CPropManager cPropManager, ServiceManager serviceManager,
-                                    AuthzSubjectManager authzSubjectManager, AIQueueManager aiQueueManager, PermissionManager permissionManager) {
+                                    AuthzSubjectManager authzSubjectManager, AIQueueManager aiQueueManager, PermissionManager permissionManager, HQApp hqApp) {
         this.agentReportStatusDao = agentReportStatusDao;
         this.aiHistoryDao = aiHistoryDao;
         this.aiPlatformDao = aiPlatformDao;
@@ -162,6 +163,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
         this.authzSubjectManager = authzSubjectManager;
         this.aiQueueManager = aiQueueManager;
         this.permissionManager = permissionManager;
+        this.hqApp =  hqApp;
     }
 
     /**
@@ -1016,7 +1018,7 @@ public class AutoinventoryManagerImpl implements AutoinventoryManager {
                 markServiceClean(agent, false);
             }
         };
-        HQApp.getInstance().registerCallbackListener(AgentCreateCallback.class,
+        hqApp.registerCallbackListener(AgentCreateCallback.class,
                                                      listener);
     }
 

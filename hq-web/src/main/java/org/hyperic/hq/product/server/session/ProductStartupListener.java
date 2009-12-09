@@ -24,24 +24,30 @@
  */
 package org.hyperic.hq.product.server.session;
 
+import javax.annotation.PostConstruct;
+
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class ProductStartupListener implements StartupListener {
-    private static final Object LOCK = new Object();
-    private static PluginsDeployedCallback _deployedCaller;
-    
-    public void hqStarted() {
-        HQApp app = HQApp.getInstance();
-        synchronized (LOCK) {
-            _deployedCaller = (PluginsDeployedCallback)
-                app.registerCallbackCaller(PluginsDeployedCallback.class);
-        }
+
+    private PluginsDeployedCallback deployedCaller;
+    private HQApp app;
+
+    @Autowired
+    public ProductStartupListener(HQApp app) {
+        this.app = app;
     }
-    
-    public static PluginsDeployedCallback getPluginsDeployedCaller() {
-        synchronized (LOCK) {
-            return _deployedCaller;
-        }
+
+    @PostConstruct
+    public void hqStarted() {
+        deployedCaller = (PluginsDeployedCallback) app.registerCallbackCaller(PluginsDeployedCallback.class);
+    }
+
+    public PluginsDeployedCallback getPluginsDeployedCaller() {
+        return deployedCaller;
     }
 }

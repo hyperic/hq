@@ -41,6 +41,8 @@ import javax.security.auth.login.LoginException;
 import javax.security.auth.login.FailedLoginException;
 
 import org.hyperic.hq.common.shared.HQConstants;
+import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.util.jdbc.DBUtil;
 
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.auth.spi.UsernamePasswordLoginModule;
@@ -64,7 +66,7 @@ import org.apache.commons.logging.LogFactory;
 
 public class JDBCLoginModule extends UsernamePasswordLoginModule
 {
-    private String dsJndiName;
+   
     private String principalsQuery = 
         "SELECT password FROM EAM_PRINCIPAL WHERE principal=?";
     protected Log log = LogFactory.getLog(JDBCLoginModule.class);
@@ -74,31 +76,16 @@ public class JDBCLoginModule extends UsernamePasswordLoginModule
     {
         super.initialize(subject, handler, sharedState, options);
         
-        dsJndiName = (String) options.get("dsJndiName");
-        if (dsJndiName == null) {
-            dsJndiName = HQConstants.DATASOURCE;
-        }
+      
         Object tmpQuery = options.get("principalsQuery");
         if (tmpQuery != null) {
             principalsQuery = tmpQuery.toString();
         }
-        log.debug("dsJndiName=" + dsJndiName);
+      
         log.debug("prinipalsQuery=" + principalsQuery);
     }
 
-    private Properties getProperties()
-    {
-        Properties props = new Properties();
-
-        props.put("java.naming.factory.initial",
-                  "org.jnp.interfaces.NamingContextFactory");
-        props.put("java.naming.provider.url",
-                  "jnp://localhost:1099");
-        props.put("java.naming.factory.url.pkgs",
-                  "org.jboss.naming:org.jnp.interfaces");
-        
-        return props;
-    }
+   
 
     protected String getUsersPassword() throws LoginException
     {
@@ -108,10 +95,9 @@ public class JDBCLoginModule extends UsernamePasswordLoginModule
         PreparedStatement ps = null;
 
         try {
-            Properties props = getProperties();
-            InitialContext ctx = new InitialContext(props);
-            DataSource ds = (DataSource) ctx.lookup(dsJndiName);
-            conn = ds.getConnection();
+           
+            conn = Bootstrap.getBean(DBUtil.class).getConnection();
+          
             
             ps = conn.prepareStatement(principalsQuery);
             ps.setString(1, username);

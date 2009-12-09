@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.util.notReady;
+package org.hyperic.hq.notready;
 
 import java.io.IOException;
 import javax.servlet.Filter;

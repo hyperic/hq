@@ -36,6 +36,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.ResourceBundle;
+
+import javax.annotation.PostConstruct;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.naming.InitialContext;
@@ -52,13 +54,15 @@ import org.hyperic.hq.bizapp.server.action.email.EmailFilter;
 import org.hyperic.hq.bizapp.server.action.email.EmailRecipient;
 import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
 import org.hyperic.util.jdbc.DBUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * The startup listener that schedules the HQ DB Health task
  */
+@Service
 public class HQDBHealthStartupListener
     implements StartupListener, PluginsDeployedCallback {
 
@@ -68,35 +72,44 @@ public class HQDBHealthStartupListener
     private static final int FAILURE_CHECK_PERIOD_MILLIS = 1000;
     private static final int MAX_NUM_OF_FAILURE_CHECKS = 10;
 
-    private final Log _log =
+    private final Log log =
         LogFactory.getLog(HQDBHealthStartupListener.class);
+    private HQApp hqApp;
+    private DBUtil dbUtil;
+    
+    @Autowired
+    public HQDBHealthStartupListener(HQApp hqApp, DBUtil dbUtil) {
+        this.hqApp = hqApp;
+        this.dbUtil = dbUtil;
+    }
 
     /**
      * @see org.hyperic.hq.application.StartupListener#hqStarted()
      */
+    @PostConstruct
     public void hqStarted() {
         // We want to start the health check only after all plugins
         // have been deployed since this is when the server starts accepting
         // metrics from agents.
-        HQApp.getInstance().
+        hqApp.
             registerCallbackListener(PluginsDeployedCallback.class, this);
     }
 
     /**
      * @see org.hyperic.hq.product.server.session.PluginsDeployedCallback#pluginsDeployed(java.util.List)
      */
-    public void pluginsDeployed(List plugins) {
-        _log.info("Scheduling HQ DB Health to perform a health check every " +
+    public void pluginsDeployed(List<String> plugins) {
+        log.info("Scheduling HQ DB Health to perform a health check every " +
                    (HEALTH_CHECK_PERIOD_MILLIS/1000) + " sec");
 
-        Scheduler scheduler = HQApp.getInstance().getScheduler();
+        Scheduler scheduler = hqApp.getScheduler();
 
         scheduler.scheduleAtFixedRate(new HQDBHealthTask(),
                                       Scheduler.NO_INITIAL_DELAY,
                                       HEALTH_CHECK_PERIOD_MILLIS);
     }
 
-    private static class HQDBHealthTask implements Runnable {
+    private class HQDBHealthTask implements Runnable {
 
         private final Log _log = LogFactory.getLog(HQDBHealthTask.class);
 
@@ -106,7 +119,7 @@ public class HQDBHealthStartupListener
         private final String HQADMIN_EMAIL_SQL = "SELECT email_address FROM EAM_SUBJECT WHERE id = "
                                                     + AuthzConstants.rootSubjectId;
         private String hqadminEmail = null;
-        private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
+       
 
         public void run() {
             Connection conn = null;
@@ -115,8 +128,7 @@ public class HQDBHealthStartupListener
 
             synchronized (HEALTH_CHECK_LOCK) {
                 try {
-                    conn = dbUtil.getConnByContext(new InitialContext(),
-                                                   HQConstants.DATASOURCE);
+                    conn = dbUtil.getConnection();
                     stmt = conn.createStatement();
 
                     if (healthOkStartTime == 0) {
@@ -134,7 +146,7 @@ public class HQDBHealthStartupListener
                     recordFailure(t);
                     performFailureCheck();
                 } finally {
-                    dbUtil.closeJDBCObjects(HQDBHealthTask.class, conn, stmt, rs);
+                    DBUtil.closeJDBCObjects(HQDBHealthTask.class, conn, stmt, rs);
                 }
             }
         }
@@ -171,7 +183,7 @@ public class HQDBHealthStartupListener
                         System.exit(1);
                     }
                 } finally {
-                    dbUtil.closeJDBCObjects(HQDBHealthTask.class, conn, stmt, rs);
+                    DBUtil.closeJDBCObjects(HQDBHealthTask.class, conn, stmt, rs);
                 }
             }
 

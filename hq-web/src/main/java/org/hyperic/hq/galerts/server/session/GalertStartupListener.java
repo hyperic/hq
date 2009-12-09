@@ -25,14 +25,27 @@
 
 package org.hyperic.hq.galerts.server.session;
 
-import org.hyperic.hq.application.StartupListener;
+import javax.annotation.PostConstruct;
 
+import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.galerts.shared.GalertManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+@Service
 public class GalertStartupListener 
     implements StartupListener
 {
-    public void hqStarted() {
-        GalertManagerImpl.getOne().startup();
+    private GalertManager gAlertManager;
+    
+    
+    @Autowired
+    public GalertStartupListener(GalertManager gAlertManager) {
+        this.gAlertManager = gAlertManager;
+    }
 
+    @PostConstruct
+    public void hqStarted() {
+        gAlertManager.startup();
         // Make sure the escalation enumeration is loaded and registered so 
         // that the escalations run
         GalertEscalationAlertType.class.getClass();

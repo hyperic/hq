@@ -52,10 +52,12 @@ public class AuditManagerImpl implements AuditManager {
     private static final ThreadLocal<Audit> CONTAINERS = new ThreadLocal<Audit>();
 
     private AuditDAO auditDao;
+    private HQApp hqApp;
 
     @Autowired
-    public AuditManagerImpl(AuditDAO auditDao) {
+    public AuditManagerImpl(AuditDAO auditDao, HQApp hqApp) {
         this.auditDao = auditDao;
+        this.hqApp = hqApp;
     }
 
     /**
@@ -240,9 +242,9 @@ public class AuditManagerImpl implements AuditManager {
     public void startup() {
         log.info("Audit Manager starting up");
 
-        HQApp.getInstance().registerCallbackListener(ResourceDeleteCallback.class, new ResourceDeleteWatcher());
+        hqApp.registerCallbackListener(ResourceDeleteCallback.class, new ResourceDeleteWatcher());
 
-        HQApp.getInstance().registerCallbackListener(SubjectRemoveCallback.class, new SubjectDeleteWatcher());
+        hqApp.registerCallbackListener(SubjectRemoveCallback.class, new SubjectDeleteWatcher());
     }
 
     public static AuditManager getOne() {

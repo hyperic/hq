@@ -25,6 +25,8 @@
 
 package org.hyperic.hq.livedata.server.session;
 
+import javax.annotation.PostConstruct;
+
 import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.livedata.formatters.CpuInfoFormatter;
 import org.hyperic.hq.livedata.formatters.CpuPercFormatter;
@@ -35,20 +37,31 @@ import org.hyperic.hq.livedata.formatters.ToStringFormatter;
 import org.hyperic.hq.livedata.formatters.TopFormatter;
 import org.hyperic.hq.livedata.formatters.WhoFormatter;
 import org.hyperic.hq.livedata.shared.LiveDataManager;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+@Service
 public class LiveDataStartupListener
     implements StartupListener
 {
+    private LiveDataManager liveDataManager;
+    
+    
+    @Autowired
+    public LiveDataStartupListener(LiveDataManager liveDataManager) {
+        this.liveDataManager = liveDataManager;
+    }
+
+
+
+    @PostConstruct
     public void hqStarted() {
-        LiveDataManager lman = LiveDataManagerImpl.getOne();
-        
-        lman.registerFormatter(new ToStringFormatter());
-        lman.registerFormatter(new CpuPercFormatter());
-        lman.registerFormatter(new WhoFormatter());
-        lman.registerFormatter(new TopFormatter());
-        lman.registerFormatter(new CpuInfoFormatter());
-        lman.registerFormatter(new DfFormatter());
-        lman.registerFormatter(new IfconfigFormatter());
-        lman.registerFormatter(new NetstatFormatter());
+        liveDataManager.registerFormatter(new ToStringFormatter());
+        liveDataManager.registerFormatter(new CpuPercFormatter());
+        liveDataManager.registerFormatter(new WhoFormatter());
+        liveDataManager.registerFormatter(new TopFormatter());
+        liveDataManager.registerFormatter(new CpuInfoFormatter());
+        liveDataManager.registerFormatter(new DfFormatter());
+        liveDataManager.registerFormatter(new IfconfigFormatter());
+        liveDataManager.registerFormatter(new NetstatFormatter());
     }
 }

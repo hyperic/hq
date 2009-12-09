@@ -27,19 +27,36 @@ package org.hyperic.hq.escalation.server.session;
 
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.escalation.shared.EscalationManager;
 import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class EscalationStartupListener 
     implements StartupListener, PluginsDeployedCallback
 {
+    private EscalationManager escalationManager;
+    private HQApp hqApp;
+    
+    
+    @Autowired
+    public EscalationStartupListener(EscalationManager escalationManager, HQApp hqApp) {
+        this.escalationManager = escalationManager;
+        this.hqApp = hqApp;
+    }
+
+    @PostConstruct
     public void hqStarted() {
-        HQApp.getInstance()
+        hqApp
              .registerCallbackListener(PluginsDeployedCallback.class, this);        
     }
 
-    public void pluginsDeployed(List plugins) {
-        EscalationManagerImpl.getOne().startup();
+    public void pluginsDeployed(List<String> plugins) {
+        escalationManager.startup();
     }
 }

@@ -31,6 +31,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.FinderException;
 
 import net.sf.ehcache.CacheManager;
@@ -437,7 +438,7 @@ public class ProductBossImpl implements ProductBoss {
 
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
         InputStream is =
-                         loader.getResourceAsStream("META-INF/preload_caches.txt");
+                         loader.getResourceAsStream("preload_caches.txt");
         List<String> lines;
 
         try {

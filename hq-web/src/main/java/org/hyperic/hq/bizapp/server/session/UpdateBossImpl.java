@@ -71,6 +71,7 @@ public class UpdateBossImpl implements UpdateBoss {
 	private UIPluginManager uiPluginManager;
 	private UpdateStatusDAO updateDAO;
 	
+	
 	@Autowired
 	public UpdateBossImpl(UpdateStatusDAO updateDAO,
 			ServerConfigManager serverConfigManager,
@@ -99,6 +100,7 @@ public class UpdateBossImpl implements UpdateBoss {
 	/**
      * 
      */
+	
 	public void startup() {
 		LoggingThreadGroup grp = new LoggingThreadGroup("Update Notifier");
 		Thread t = new Thread(grp, new UpdateFetcher(), "Update Notifier");

@@ -25,21 +25,34 @@
 
 package org.hyperic.hq.control.server.session;
 
-import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.zevents.ZeventManager;
-import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
-
 import java.util.HashSet;
 
+import javax.annotation.PostConstruct;
+
+import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
+import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+@Service
 public class ControlStartupListener implements StartupListener {
 
+    private ZeventEnqueuer zEventManager;
+    
+    @Autowired
+    public ControlStartupListener(ZeventEnqueuer zEventManager) {
+        this.zEventManager = zEventManager;
+    }
+
+
+    @PostConstruct
     public void hqStarted() {
 
         // Add listener to remove scheduled control actions after resources
         // are deleted.
-        HashSet events = new HashSet();
+        HashSet<Class<ResourceDeletedZevent>> events = new HashSet<Class<ResourceDeletedZevent>>();
         events.add(ResourceDeletedZevent.class);
-        ZeventManager.getInstance().
+        zEventManager.
             addBufferedListener(events,
                                 new ControlEventListener());
 

@@ -23,13 +23,14 @@
  * USA.
  */
 
-package org.hyperic.hq.common.server.mbean;
+package org.hyperic.hq.common.server.session;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.annotation.PostConstruct;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.security.auth.login.AppConfigurationEntry;
@@ -42,8 +43,6 @@ import org.hyperic.hq.common.shared.HQConstants;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.util.ConfigPropertyException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jmx.export.annotation.ManagedOperation;
-import org.springframework.jmx.export.annotation.ManagedResource;
 import org.springframework.stereotype.Service;
 
 /**
@@ -52,10 +51,9 @@ import org.springframework.stereotype.Service;
  *
  * 
  */
-@ManagedResource("hyperic.jmx:type=Service,name=ProductConfig")
+
 @Service
-public class ProductConfigService 
-    implements ProductConfigServiceMBean {
+public class ProductConfigService  {
 
     private static final String AUTH_REALM =
         HQConstants.ApplicationName;
@@ -75,19 +73,12 @@ public class ProductConfigService
         this.serverConfigManager = serverConfigManager;
     }
 
-    /**
-     * 
-     */
-    @ManagedOperation
-    public void stop()
-    {
-        log.info("Stopping ProductConfigService");
-    }
+   
 
     /**
      * 
      */
-    @ManagedOperation
+    @PostConstruct
     public void start() {
         log.info("Starting " + this.getClass().getName());
         log.info("Initializing Hyperic Auth Providers");
@@ -105,24 +96,13 @@ public class ProductConfigService
     /**
      * 
      */
-    @ManagedOperation
+
     public void restart() {
         log.info("Restarting " + this.getClass().getName());
-        stop();
         start();
     }
 
-    /**
-     * 
-     */
-    @ManagedOperation
-    public void init() {}
-
-    /**
-     * 
-     */
-    @ManagedOperation
-    public void destroy() {}
+   
 
     private void registerJAASModules(Properties conf) 
         throws SystemException 

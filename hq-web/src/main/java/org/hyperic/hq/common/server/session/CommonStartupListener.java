@@ -25,14 +25,30 @@
 
 package org.hyperic.hq.common.server.session;
 
-import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.ui.server.session.DashboardManagerImpl;
+import javax.annotation.PostConstruct;
 
+import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.common.shared.AuditManager;
+import org.hyperic.hq.ui.shared.DashboardManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+@Service
 public class CommonStartupListener
     implements StartupListener
 {
+    private AuditManager auditManager;
+    private DashboardManager dashboardManager;
+    
+    @Autowired
+    public CommonStartupListener(AuditManager auditManager, DashboardManager dashboardManager) {
+        this.auditManager = auditManager;
+        this.dashboardManager = dashboardManager;
+    }
+
+
+    @PostConstruct
     public void hqStarted() {
-        AuditManagerImpl.getOne().startup();
-        DashboardManagerImpl.getOne().startup();
+        auditManager.startup();
+        dashboardManager.startup();
     }
 }

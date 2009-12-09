@@ -31,5 +31,5 @@ public interface PluginsDeployedCallback {
      * Called when the server has started up and the plugins have been
      * fully deployed.
      */
-    void pluginsDeployed(List plugins);
+    void pluginsDeployed(List<String> plugins);
 }

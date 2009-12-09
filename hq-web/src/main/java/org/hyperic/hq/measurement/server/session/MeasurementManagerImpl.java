@@ -119,6 +119,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
     private MeasurementDAO measurementDAO;
     private MeasurementTemplateDAO measurementTemplateDAO;
     private AgentManager agentManager;
+   
 
     @Autowired
     public MeasurementManagerImpl(ResourceManager resourceManager, ResourceGroupManager resourceGroupManager,
@@ -151,6 +152,11 @@ public class MeasurementManagerImpl implements MeasurementManager {
     // TODO: Resolve circular dependency with ProductManager
     private MeasurementPluginManager getMeasurementPluginManager() throws Exception {
         return (MeasurementPluginManager) ProductManagerImpl.getOne().getPluginManager(ProductPlugin.TYPE_MEASUREMENT);
+    }
+    
+    //TODO resolve circular dependency
+    private AgentScheduleSynchronizer getAgentScheduleSynchronizer() {
+        return Bootstrap.getBean(AgentScheduleSynchronizer.class);
     }
 
     /**
@@ -1346,7 +1352,7 @@ public class MeasurementManagerImpl implements MeasurementManager {
                 log.warn("Unable to enable default metrics for [" + id + "]", e);
             }
         }
-        AgentScheduleSynchronizer.scheduleBuffered(eids);
+        getAgentScheduleSynchronizer().scheduleBuffered(eids);
     }
 
     private String[] getTemplatesToCheck(AuthzSubject s, AppdefEntityID id) throws AppdefEntityNotFoundException,

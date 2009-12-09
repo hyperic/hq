@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Element;
@@ -38,101 +40,103 @@ import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
 import org.hyperic.hq.measurement.shared.MeasurementProcessor;
 import org.hyperic.hq.zevents.Zevent;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
-import org.hyperic.hq.zevents.ZeventManager;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * This class is used to schedule and unschedule metrics for a given entity.
  * The schedule operation is synchronized to throttle rescheduling.
  */
+@Component
 public class AgentScheduleSynchronizer {
     
-    private static final Log _log =
+    private final Log log =
         LogFactory.getLog(AgentScheduleSynchronizer.class.getName());
 
-    private static AgentScheduleSynchronizer SINGLETON =
-        new AgentScheduleSynchronizer();
+    private ZeventEnqueuer zEventManager;
+    
+    private MeasurementProcessor measurementProcessor;
 
     /**
      * Cache of {@link AppdefEntityID}s onto themselves, of ents which are
      * currently in the zevent queue for processing. 
      */
-    private final Cache _inQueueCache = 
+    private final Cache inQueueCache = 
         CacheManager.getInstance().getCache("AgentScheduleInQueue");
     
-    public static AgentScheduleSynchronizer getInstance() {
-        return AgentScheduleSynchronizer.SINGLETON;
+    
+   
+    @Autowired
+    public AgentScheduleSynchronizer(ZeventEnqueuer zEventManager, MeasurementProcessor measurementProcessor) {
+        this.zEventManager = zEventManager;
+        this.measurementProcessor = measurementProcessor;
     }
 
-    private AgentScheduleSynchronizer() {
-    }
-
+    @PostConstruct
     void initialize() {
         ZeventListener l = new ZeventListener() {
             public void processEvents(List events) {
-                final MeasurementProcessor mProc =
-                    MeasurementProcessorImpl.getOne();
+               
                 List eids = new ArrayList();
                 for (Iterator i=events.iterator(); i.hasNext(); ) {
                     AgentScheduleSyncZevent z = 
                         (AgentScheduleSyncZevent)i.next();
                     
                     eids.addAll(z.getEntityIds());
-                    if (!_inQueueCache.remove(z.getEntityIds())) {
-                        _log.warn("Received eid=[" + z.getEntityIds() + 
+                    if (!inQueueCache.remove(z.getEntityIds())) {
+                        log.warn("Received eid=[" + z.getEntityIds() + 
                                   "] but was not found in cache");
                     }
                 }
-                mProc.scheduleSynchronous(eids);
+                measurementProcessor.scheduleSynchronous(eids);
             }
             public String toString() {
                 return "AgentScheduleSyncListener";
             }
         };
         
-        ZeventManager.getInstance()
+        zEventManager
             .addBufferedListener(AgentScheduleSyncZevent.class, l);
     }
-    
+
+
+
     /**
      * @param eids List<AppdefEntityID>
      */
-    private void _scheduleBuffered(List eids) {
+    public void scheduleBuffered(List eids) {
         /**
          * The following is done immediately (not in a tx listener), since
          * otherwise we will need to make sure that the entire thing behaves
          * transactionally.  The worst case, here (if the tx is rolled back)
          * is that we have excess things in the queue.
          */
-        synchronized (_inQueueCache) {
+        synchronized (inQueueCache) {
             for (Iterator it=eids.iterator(); it.hasNext(); ) {
                 AppdefEntityID eid = (AppdefEntityID)it.next();
-                if (_inQueueCache.get(eid) != null) {
+                if (inQueueCache.get(eid) != null) {
                     continue;
                 }
                 Element e = new Element(eid, eid);
-                _inQueueCache.put(e);
+                inQueueCache.put(e);
             }
         }
         Zevent z = new AgentScheduleSyncZevent(eids);
         try {
-            ZeventManager.getInstance().enqueueEvent(z);
+            zEventManager.enqueueEvent(z);
         } catch(InterruptedException e) {
-            synchronized (_inQueueCache) {
+            synchronized (inQueueCache) {
                 for (Iterator it=eids.iterator(); it.hasNext(); ) {
                     AppdefEntityID eid = (AppdefEntityID)it.next();
-                    _inQueueCache.remove(eid);
+                    inQueueCache.remove(eid);
                 }
             }
-            _log.warn("Interrupted while trying to enqueue event for eids: ["
+            log.warn("Interrupted while trying to enqueue event for eids: ["
                 + eids + "]");
         }
     }
     
-    /**
-     * @param eids List<AppdefEntityID>
-     */
-    public static void scheduleBuffered(List eids) {
-        AgentScheduleSynchronizer.SINGLETON._scheduleBuffered(eids);
-    }
+  
 }

@@ -90,12 +90,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ProductManagerImpl implements ProductManager {
 
-  
-
     private Log log = LogFactory.getLog(ProductManagerImpl.class);
 
-    private ProductPluginManager ppm;
-    
     private CPropManager cPropManager;
     private TemplateManager templateManager;
     private AuditManager auditManager;
@@ -106,13 +102,12 @@ public class ProductManagerImpl implements ProductManager {
     private PlatformManager platformManager;
     private ServerManager serverManager;
     private ServiceManager serviceManager;
-  
-    private ProductPluginDeployer productPluginDeployer;
 
     @Autowired
     public ProductManagerImpl(PluginDAO pluginDao, AlertDefinitionManager alertDefinitionManager,
-                              CPropManager cPropManager, TemplateManager templateManager,
-                              AuditManager auditManager, ServerManager serverManager, ServiceManager serviceManager, PlatformManager platformManager, ProductPluginDeployer productPluginDeployer) {
+                              CPropManager cPropManager, TemplateManager templateManager, AuditManager auditManager,
+                              ServerManager serverManager, ServiceManager serviceManager,
+                              PlatformManager platformManager) {
         this.pluginDao = pluginDao;
         this.alertDefinitionManager = alertDefinitionManager;
         this.cPropManager = cPropManager;
@@ -121,15 +116,8 @@ public class ProductManagerImpl implements ProductManager {
         this.serverManager = serverManager;
         this.serviceManager = serviceManager;
         this.platformManager = platformManager;
-        
-        try {
-            ppm = getProductPluginManager();
-        } catch (PluginException e) {
-            log.error("Unable to initialize plugin manager: " +
-                      e.getMessage());
-        }
     }
-    
+
     /**
      * Update the appdef entities based on TypeInfo
      * 
@@ -178,12 +166,11 @@ public class ProductManagerImpl implements ProductManager {
     }
 
     /*
-     * There is once instance of the ProductPluginDeployer service
-     * MBean, it will be deployed before we are created.
+     * There is once instance of the ProductPluginDeployer service MBean, it
+     * will be deployed before we are created.
      */
-    private ProductPluginManager getProductPluginManager()
-        throws PluginException {
-        return productPluginDeployer.getProductPluginManager();
+    private ProductPluginManager getProductPluginManager() {
+        return Bootstrap.getBean(ProductPluginDeployer.class).getProductPluginManager();
     }
 
     public static ProductManager getOne() {
@@ -194,7 +181,7 @@ public class ProductManagerImpl implements ProductManager {
      */
     public boolean isReady() {
         try {
-            return productPluginDeployer.isReady();
+            return Bootstrap.getBean(ProductPluginDeployer.class).isReady();
         } catch (Exception e) {
             log.error("Unable to determine deployer state", e);
             return false;
@@ -203,27 +190,23 @@ public class ProductManagerImpl implements ProductManager {
 
     /**
      */
-    public TypeInfo getTypeInfo(AppdefEntityValue value)
-        throws PermissionException, AppdefEntityNotFoundException {
-        return ppm.getTypeInfo(value.getBasePlatformName(),
-                               value.getTypeName());
+    public TypeInfo getTypeInfo(AppdefEntityValue value) throws PermissionException, AppdefEntityNotFoundException {
+        return getProductPluginManager().getTypeInfo(value.getBasePlatformName(), value.getTypeName());
     }
 
     /**
      */
-    public PluginManager getPluginManager(String type)
-        throws PluginException {
-        return ppm.getPluginManager(type);
+    public PluginManager getPluginManager(String type) throws PluginException {
+        return getProductPluginManager().getPluginManager(type);
     }
 
     /**
      */
     // TODO: G
-    public String getMonitoringHelp(AppdefEntityValue entityVal, Map<?,?> props)
-        throws PluginNotFoundException, PermissionException,
-        AppdefEntityNotFoundException {
+    public String getMonitoringHelp(AppdefEntityValue entityVal, Map<?, ?> props) throws PluginNotFoundException,
+        PermissionException, AppdefEntityNotFoundException {
         TypeInfo info = getTypeInfo(entityVal);
-        String help = ppm.getMeasurementPluginManager().getHelp(info, props);
+        String help = getProductPluginManager().getMeasurementPluginManager().getHelp(info, props);
         if (help == null) {
             return null;
         }
@@ -232,13 +215,9 @@ public class ProductManagerImpl implements ProductManager {
 
     /**
      */
-    public ConfigSchema getConfigSchema(String type,
-                                        String name,
-                                        AppdefEntityValue entityVal,
-                                        ConfigResponse baseResponse)
-        throws PluginException,
-        AppdefEntityNotFoundException,
-        PermissionException {
+    public ConfigSchema getConfigSchema(String type, String name, AppdefEntityValue entityVal,
+                                        ConfigResponse baseResponse) throws PluginException,
+        AppdefEntityNotFoundException, PermissionException {
 
         PluginManager manager = getPluginManager(type);
         TypeInfo info = getTypeInfo(entityVal);
@@ -258,10 +237,9 @@ public class ProductManagerImpl implements ProductManager {
     // e.g. in ~/.hq/plugin.properties
     // hq.plugins.system.forceUpdate=true
     private boolean forceUpdate(String plugin) {
-        String key =
-                     ProductPluginManager.getPropertyKey(plugin, "forceUpdate");
+        String key = ProductPluginManager.getPropertyKey(plugin, "forceUpdate");
 
-        return "true".equals(ppm.getProperties().getProperty(key));
+        return "true".equals(getProductPluginManager().getProperties().getProperty(key));
     }
 
     private void pluginDeployed(PluginInfo pInfo) {
@@ -284,22 +262,19 @@ public class ProductManagerImpl implements ProductManager {
     /**
      */
     @Transactional
-    public void deploymentNotify(String pluginName)
-        throws PluginNotFoundException, FinderException,
-        CreateException, RemoveException, VetoException {
-        ProductPlugin pplugin = (ProductPlugin) ppm.getPlugin(pluginName);
+    public void deploymentNotify(String pluginName) throws PluginNotFoundException, FinderException, CreateException,
+        RemoveException, VetoException {
+        ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
         PluginValue ejbPlugin;
         PluginInfo pInfo;
         boolean created = false;
         long start = System.currentTimeMillis();
 
-        pInfo = ppm.getPluginInfo(pluginName);
+        pInfo = getProductPluginManager().getPluginInfo(pluginName);
         Plugin plugin = pluginDao.findByName(pluginName);
         ejbPlugin = plugin != null ? plugin.getPluginValue() : null;
 
-        if (ejbPlugin != null &&
-            pInfo.name.equals(ejbPlugin.getName()) &&
-            pInfo.md5.equals(ejbPlugin.getMD5())) {
+        if (ejbPlugin != null && pInfo.name.equals(ejbPlugin.getName()) && pInfo.md5.equals(ejbPlugin.getMD5())) {
             log.info(pluginName + " plugin up to date");
             if (forceUpdate(pluginName)) {
                 log.info(pluginName + " configured to force update");
@@ -318,11 +293,9 @@ public class ProductManagerImpl implements ProductManager {
             log.info(pluginName + " does not define any resource types");
             updateEJBPlugin(pluginDao, pInfo);
             if (created)
-                PluginAudit.deployAudit(pluginName, start,
-                                        System.currentTimeMillis());
+                PluginAudit.deployAudit(pluginName, start, System.currentTimeMillis());
             else
-                PluginAudit.updateAudit(pluginName, start,
-                                        System.currentTimeMillis());
+                PluginAudit.updateAudit(pluginName, start, System.currentTimeMillis());
             return;
         }
 
@@ -357,7 +330,7 @@ public class ProductManagerImpl implements ProductManager {
     @Transactional
     public void updateDynamicServiceTypePlugin(String pluginName, Set<ServiceType> serviceTypes)
         throws PluginNotFoundException, FinderException, RemoveException, CreateException, VetoException {
-        ProductPlugin productPlugin = (ProductPlugin) ppm.getPlugin(pluginName);
+        ProductPlugin productPlugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
         try {
             pluginUpdater.updateServiceTypes(productPlugin, serviceTypes);
             updatePlugin(pluginName);
@@ -368,9 +341,9 @@ public class ProductManagerImpl implements ProductManager {
 
     private void updatePlugin(String pluginName) throws FinderException, RemoveException, CreateException,
         VetoException, PluginNotFoundException {
-        ProductPlugin pplugin = (ProductPlugin) ppm.getPlugin(pluginName);
+        ProductPlugin pplugin = (ProductPlugin) getProductPluginManager().getPlugin(pluginName);
 
-        PluginInfo pInfo = ppm.getPluginInfo(pluginName);
+        PluginInfo pInfo = getProductPluginManager().getPluginInfo(pluginName);
 
         TypeInfo[] entities = pplugin.getTypes();
         updateAppdefEntities(pluginName, entities);
@@ -378,7 +351,7 @@ public class ProductManagerImpl implements ProductManager {
         // Keep a list of templates to add
         // TODO: G (what are the parameters for the map returned by
         // TemplateManagerLocal.updateTemplates
-        HashMap<MonitorableType, Map<?,MeasurementInfo>> toAdd = new HashMap<MonitorableType, Map<?,MeasurementInfo>>();
+        HashMap<MonitorableType, Map<?, MeasurementInfo>> toAdd = new HashMap<MonitorableType, Map<?, MeasurementInfo>>();
 
         for (int i = 0; i < entities.length; i++) {
             TypeInfo info = entities[i];
@@ -386,22 +359,18 @@ public class ProductManagerImpl implements ProductManager {
             MeasurementInfo[] measurements;
 
             try {
-                measurements =
-                               ppm.getMeasurementPluginManager().getMeasurements(info);
+                measurements = getProductPluginManager().getMeasurementPluginManager().getMeasurements(info);
             } catch (PluginNotFoundException e) {
                 if (!isVirtualServer(info)) {
-                    log.info(info.getName() +
-                             " does not support measurement");
+                    log.info(info.getName() + " does not support measurement");
                 }
                 continue;
             }
 
             if (measurements != null && measurements.length > 0) {
-                MonitorableType monitorableType =
-                                                  templateManager.getMonitorableType(pluginName, info);
-                Map<?,MeasurementInfo> newMeasurements = templateManager.updateTemplates(pluginName, info,
-                                                                            monitorableType,
-                                                                            measurements);
+                MonitorableType monitorableType = templateManager.getMonitorableType(pluginName, info);
+                Map<?, MeasurementInfo> newMeasurements = templateManager.updateTemplates(pluginName, info,
+                    monitorableType, measurements);
                 toAdd.put(monitorableType, newMeasurements);
             }
         }
@@ -418,8 +387,7 @@ public class ProductManagerImpl implements ProductManager {
             for (ConfigOption opt : options) {
                 CpropKey c = cPropManager.findByKey(appdefType, opt.getName());
                 if (c == null) {
-                    cPropManager.addKey(appdefType, opt.getName(),
-                                        opt.getDescription());
+                    cPropManager.addKey(appdefType, opt.getName(), opt.getDescription());
                 }
             }
         }
@@ -440,12 +408,10 @@ public class ProductManagerImpl implements ProductManager {
             final Set<AlertDefinitionValue> alertDefs = alertDefXmlParser.parse(alertDefns);
             for (AlertDefinitionValue alertDefinition : alertDefs) {
                 try {
-                    final AppdefEntityID id = new AppdefEntityID(alertDefinition.getAppdefType(),
-                                                                 alertDefinition.getAppdefId());
+                    final AppdefEntityID id = new AppdefEntityID(alertDefinition.getAppdefType(), alertDefinition
+                        .getAppdefId());
                     final SortedMap<String, Integer> existingAlertDefinitions = alertDefinitionManager
-                                                                                                      .findAlertDefinitionNames(
-                                                                                                                                id,
-                                                                                                                                EventConstants.TYPE_ALERT_DEF_ID);
+                        .findAlertDefinitionNames(id, EventConstants.TYPE_ALERT_DEF_ID);
                     // TODO update existing alert defs - for now, just create if
                     // one does not exist. Be aware that this method is also
                     // called
@@ -466,8 +432,8 @@ public class ProductManagerImpl implements ProductManager {
             try {
                 alertDefns.close();
             } catch (IOException e) {
-                log.warn("Error closing InputStream to alert definitions file of plugin " + pInfo.name +
-                         ".  Cause: " + e.getMessage());
+                log.warn("Error closing InputStream to alert definitions file of plugin " + pInfo.name + ".  Cause: " +
+                         e.getMessage());
             }
         }
     }

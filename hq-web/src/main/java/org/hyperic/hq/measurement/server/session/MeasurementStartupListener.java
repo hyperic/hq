@@ -32,6 +32,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
@@ -42,12 +44,18 @@ import org.hyperic.hq.application.StartupListener;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.common.server.session.ServerConfigManagerImpl;
+import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.galerts.MetricAuxLogProvider;
+import org.hyperic.hq.measurement.server.mbean.ScheduleVerificationService;
 import org.hyperic.hq.measurement.shared.MeasurementManager;
-import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.measurement.shared.MetricAuxLogManager;
+import org.hyperic.hq.measurement.shared.SRNManager;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class MeasurementStartupListener
     implements StartupListener
 {
@@ -62,24 +70,46 @@ public class MeasurementStartupListener
     private static DefaultMetricEnableCallback _defEnableCallback;
     private static MetricDeleteCallback _delCallback;
     private static ScheduledFuture _dataPurgeFuture;
+    private static HQApp app;
+    private ZeventEnqueuer zEventManager;
+    private MetricAuxLogManager metricAuxLogManager;
+    private MeasurementManager measurementManager;
+    private ServerConfigManager serverConfigManager;
+    private SRNManager srnManager;
+   
+   
     
-    public void hqStarted() {
+    @Autowired
+    public MeasurementStartupListener(ZeventEnqueuer zEventManager, MetricAuxLogManager metricAuxLogManager,
+                                      MeasurementManager measurementManager, ServerConfigManager serverConfigManager, SRNManager srnManager, HQApp app
+                                      ) {
+        this.zEventManager = zEventManager;
+        this.metricAuxLogManager = metricAuxLogManager;
+        this.measurementManager = measurementManager;
+        this.serverConfigManager = serverConfigManager;
+        this.srnManager = srnManager;
+        MeasurementStartupListener.app = app;
+    }
+
+    @PostConstruct
+    public void hqStarted()  {
         // Make sure we have the aux-log provider loaded
         MetricAuxLogProvider.class.toString();
-        SRNManagerImpl.getOne().initializeCache();
+       
+        srnManager.initializeCache();
     
         /**
          * Add measurement enabler listener to enable metrics for newly
          * created resources or to reschedule when resources are updated.
          */
-        Set listenEvents = new HashSet();
+        Set<Class<?>> listenEvents = new HashSet<Class<?>>();
         listenEvents.add(ResourceCreatedZevent.class);
         listenEvents.add(ResourceUpdatedZevent.class);
         listenEvents.add(ResourceRefreshZevent.class);
-        ZeventManager.getInstance().addBufferedListener(
+        zEventManager.addBufferedListener(
             listenEvents, new MeasurementEnabler());
 
-        HQApp app = HQApp.getInstance();
+       
         synchronized (LOCK) {
             _defEnableCallback = (DefaultMetricEnableCallback)
                 app.registerCallbackCaller(DefaultMetricEnableCallback.class);
@@ -92,8 +122,8 @@ public class MeasurementStartupListener
         
         app.registerCallbackListener(MetricDeleteCallback.class, 
                                      new MetricDeleteCallback() {
-            public void beforeMetricsDelete(Collection mids) {
-                MetricAuxLogManagerImpl.getOne().metricsDeleted(mids);
+            public void beforeMetricsDelete(Collection<Integer> mids) {
+                metricAuxLogManager.metricsDeleted(mids);
             }
         });
         
@@ -102,29 +132,14 @@ public class MeasurementStartupListener
 
             public void preResourceDelete(Resource r)
                 throws VetoException {
-                MeasurementManagerImpl.getOne()
+                measurementManager
                     .handleResourceDelete(r);
             }
             
         });
 
-        /*
-        app.registerCallbackListener(PluginsDeployedCallback.class,
-                                     new PluginsDeployedCallback() {
-            public void pluginsDeployed(List plugins) {
-                MeasurementManagerLocal dman =
-                    MeasurementManagerImpl.getOne();
-                for (Iterator i = plugins.iterator(); i.hasNext();) {
-                    String pluginName = (String)i.next();
-                    dman.syncPluginMetrics(pluginName);
-                }
-            }
-        });
-        */
-
         prefetchEnabledMeasurementsAndTemplates();
         initReportsStats();
-        AgentScheduleSynchronizer.getInstance().initialize();
         startDataPurgeWorker();
     }
     
@@ -132,7 +147,7 @@ public class MeasurementStartupListener
         if (_dataPurgeFuture != null) {
             _log.info("Stopping Data Purge Worker");
             _dataPurgeFuture.cancel(true);
-            HQApp.getInstance().getScheduler().purgeTasks();
+            app.getScheduler().purgeTasks();
             _dataPurgeFuture = null;
         }
     }
@@ -172,7 +187,7 @@ public class MeasurementStartupListener
                 return;
             }
         }
-        final HQApp app = HQApp.getInstance();
+      
         _dataPurgeFuture = app.getScheduler().scheduleAtFixedRate(
             dataPurgeJob, initialDelay, MeasurementConstants.HOUR);
     }
@@ -182,15 +197,14 @@ public class MeasurementStartupListener
     }
 
     private void prefetchEnabledMeasurementsAndTemplates() {
-        MeasurementManager mMan = MeasurementManagerImpl.getOne();
-        mMan.findAllEnabledMeasurementsAndTemplates();
+        measurementManager.findAllEnabledMeasurementsAndTemplates();
     }
 
     private void initReportsStats() {
         Properties cfg = new Properties();
 
         try {
-            cfg = ServerConfigManagerImpl.getOne().getConfig();
+            cfg = serverConfigManager.getConfig();
         } catch(Exception e) {
             _log.warn("Error getting server config", e);
         }

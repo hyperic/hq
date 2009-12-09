@@ -77,7 +77,7 @@ public class HQApp  {
 
     private static Map         _txSynchs       = new HashMap();
     private ThreadLocal        _txListeners    = new ThreadLocal();
-    private List               _startupClasses = new ArrayList();
+   
     private CallbackDispatcher _callbacks;
     private ShutdownCallback   _shutdown;
     private File               _restartStorage;
@@ -88,6 +88,7 @@ public class HQApp  {
     private final ServerTransport _serverTransport;
 
     private final Object       STAT_LOCK = new Object();
+    private final Object initLock = new Object();
     private long               _numTx;
     private long               _numTxErrors;
 
@@ -97,7 +98,7 @@ public class HQApp  {
     private AtomicBoolean _collectMethStats = new AtomicBoolean();
     private static AtomicBoolean _isShutdown = new AtomicBoolean(false);
 
-    private StartupFinishedCallback _startupFinished;
+    
 
     private final HQHibernateLogger         _hiberLogger;
 
@@ -112,8 +113,7 @@ public class HQApp  {
         _callbacks = new CallbackDispatcher();
         _shutdown = (ShutdownCallback)
             _callbacks.generateCaller(ShutdownCallback.class);
-        _startupFinished = (StartupFinishedCallback)
-            _callbacks.generateCaller(StartupFinishedCallback.class);
+      
 
         _watchdog = new ThreadWatchdog("ThreadWatchdog");
         _watchdog.initialize();
@@ -124,7 +124,7 @@ public class HQApp  {
         try {
             _serverTransport = new ServerTransport(4);
             _serverTransport.start();
-            this.registerCallbackListener(ShutdownCallback.class, _serverTransport);
+            _callbacks.registerListener(ShutdownCallback.class, _serverTransport);
         } catch (Exception e) {
             throw new RuntimeException("Unable to start server transport", e);
         }
@@ -182,7 +182,7 @@ public class HQApp  {
     }
 
     public void setRestartStorageDir(File dir) {
-        synchronized (_startupClasses) {
+        synchronized (initLock) {
             _restartStorage = dir;
         }
     }
@@ -193,13 +193,13 @@ public class HQApp  {
      * extensive periods of time.
      */
     public File getRestartStorageDir() {
-        synchronized (_startupClasses) {
+        synchronized (initLock) {
             return _restartStorage;
         }
     }
 
     public void setResourceDir(File dir) {
-        synchronized (_startupClasses) {
+        synchronized (initLock) {
             _resourceDir = dir;
         }
     }
@@ -209,13 +209,13 @@ public class HQApp  {
      * application may need (templates, reports, license files, etc.)
      */
     public File getResourceDir() {
-        synchronized (_startupClasses) {
+        synchronized (initLock) {
             return _resourceDir;
         }
     }
 
     public void setWebAccessibleDir(File dir) {
-        synchronized(_startupClasses) {
+        synchronized(initLock) {
             _webAccessibleDir = dir;
         }
     }
@@ -224,7 +224,7 @@ public class HQApp  {
      * Get the directory which represents the URL root for the application
      */
     public File getWebAccessibleDir() {
-        synchronized(_startupClasses) {
+        synchronized(initLock) {
             return _webAccessibleDir;
         }
     }
@@ -250,6 +250,7 @@ public class HQApp  {
         return res;
     }
 
+ 
     /**
      * @see CallbackDispatcher#generateCaller(Class)
      */
@@ -264,15 +265,7 @@ public class HQApp  {
         _callbacks.registerListener(iFace, listener);
     }
 
-    /**
-     * Adds a class to the list of classes to invoke when the application has
-     * started.
-     */
-    public void addStartupClass(String className) {
-        synchronized (_startupClasses) {
-            _startupClasses.add(className);
-        }
-    }
+   
 
     void incrementTxCount(boolean txFailed) {
         synchronized (STAT_LOCK) {
@@ -596,46 +589,7 @@ public class HQApp  {
         }
     }
 
-    /**
-     * Execute the registered startup classes.
-     */
-    public void runStartupClasses() {
-        if (_isShutdown.get()) {
-            throw new SystemException("HQ is shutdown");
-        }
-        List classNames;
-
-        synchronized (_startupClasses) {
-            classNames = new ArrayList(_startupClasses);
-        }
-
-        // HHQ-2743, exit if db schema version is in a bad state
-        checkDBSchemaState();
-
-        for (Iterator i=classNames.iterator(); i.hasNext(); ) {
-            String name = (String)i.next();
-
-            try {
-                Class c = Class.forName(name);
-                StartupListener l = (StartupListener)c.newInstance();
-
-                _log.info("Executing startup: " + name);
-                l.hqStarted();
-            } catch(Throwable e) {
-                _log.warn("Error executing startup listener [" + name + "]", e);
-                if (e instanceof Error)
-                    throw (Error)e;
-                if (e instanceof RuntimeException)
-                    throw (RuntimeException)e;
-            }
-        }
-
-        try {
-            _startupFinished.startupFinished();
-        } catch(Throwable t) {
-            _log.error("Error calling startup finish listener", t);
-        }
-    }
+   
 
     private void checkDBSchemaState() {
         Connection conn = null;

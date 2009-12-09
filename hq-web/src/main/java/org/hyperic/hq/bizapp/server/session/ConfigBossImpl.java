@@ -39,6 +39,7 @@ import org.hyperic.hq.authz.shared.PermissionManager;
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.common.ApplicationException;
 import org.hyperic.hq.common.SystemException;
+import org.hyperic.hq.common.server.session.ProductConfigService;
 import org.hyperic.hq.common.shared.ServerConfigManager;
 import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.util.ConfigPropertyException;
@@ -58,15 +59,18 @@ public class ConfigBossImpl implements ConfigBoss {
 
     private PermissionManager permissionManager;
 
-    private MBeanServer mbeanServer;
+    
+    private ProductConfigService productConfigService;
+    
+   
 
     @Autowired
     public ConfigBossImpl(SessionManager sessionManager, ServerConfigManager serverConfigManager,
-                          PermissionManager permissionManager, MBeanServer mbeanServer) {
+                          PermissionManager permissionManager, ProductConfigService productConfigService) {
         this.sessionManager = sessionManager;
         this.serverConfigManager = serverConfigManager;
         this.permissionManager = permissionManager;
-        this.mbeanServer = mbeanServer;
+        this.productConfigService = productConfigService;
     }
 
     /**
@@ -110,8 +114,7 @@ public class ConfigBossImpl implements ConfigBoss {
      */
     public void restartConfig() {
         try {
-            ObjectName objName = new ObjectName("hyperic.jmx:type=Service,name=ProductConfig");
-            mbeanServer.invoke(objName, "restart", new Object[] {}, new String[] {});
+           productConfigService.restart();
         } catch (Exception e) {
             throw new SystemException(e);
         }

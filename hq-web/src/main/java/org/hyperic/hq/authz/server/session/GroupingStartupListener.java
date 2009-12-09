@@ -25,9 +25,13 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import javax.annotation.PostConstruct;
+
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+@Service
 public class GroupingStartupListener 
     implements StartupListener
 {
@@ -35,9 +39,15 @@ public class GroupingStartupListener
     
     private static GroupChangeCallback _callbacks;
     
-    public void hqStarted() {
-        HQApp app = HQApp.getInstance();
+    private HQApp app;
+    
+    @Autowired
+    public GroupingStartupListener(HQApp app) {
+        this.app = app;
+    }
 
+    @PostConstruct
+    public void hqStarted() {
         synchronized (LOCK) {
             _callbacks = (GroupChangeCallback)
                 app.registerCallbackCaller(GroupChangeCallback.class);

@@ -28,19 +28,23 @@ package org.hyperic.hq.events.server.session;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.Scheduler;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.events.shared.HeartBeatService;
 import org.hyperic.hq.product.server.session.PluginsDeployedCallback;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 /**
  * The startup listener that schedules the Heart Beat Service to dispatch 
  * heart beats at a fixed rate.
  */
+@Service
 public class HeartBeatServiceStartupListener 
     implements StartupListener, PluginsDeployedCallback {
 
@@ -50,56 +54,56 @@ public class HeartBeatServiceStartupListener
      */
     public static final int HEART_BEAT_PERIOD_MILLIS = 30*1000;
     
-    private final Log _log = 
+    private final Log log = 
         LogFactory.getLog(HeartBeatServiceStartupListener.class);
     
+    private HQApp hqApp;
+    private HeartBeatService heartBeatService;
+    
+    
+    @Autowired
+    public HeartBeatServiceStartupListener(HQApp hqApp, HeartBeatService heartBeatService) {
+        this.hqApp = hqApp;
+        this.heartBeatService = heartBeatService;
+    }
+
     /**
      * @see org.hyperic.hq.application.StartupListener#hqStarted()
      */
+    @PostConstruct
     public void hqStarted() {
         // We want to start dispatching heart beats only after all plugins 
         // have been deployed since this is when the server starts accepting 
         // metrics from agents.
-        HQApp.getInstance().
+        hqApp.
             registerCallbackListener(PluginsDeployedCallback.class, this);
     }
     
     /**
      * @see org.hyperic.hq.product.server.session.PluginsDeployedCallback#pluginsDeployed(java.util.List)
      */
-    public void pluginsDeployed(List plugins) {
-        _log.info("Scheduling Heart Beat Service to dispatch heart beats every "+
+    public void pluginsDeployed(List<String> plugins) {
+        log.info("Scheduling Heart Beat Service to dispatch heart beats every "+
                    (HEART_BEAT_PERIOD_MILLIS/1000)+" sec");
         
-        Scheduler scheduler = HQApp.getInstance().getScheduler();
+        Scheduler scheduler = hqApp.getScheduler();
         
         scheduler.scheduleAtFixedRate(new HeartBeatServiceTask(), 
                                       Scheduler.NO_INITIAL_DELAY, 
                                       HEART_BEAT_PERIOD_MILLIS);        
     }
     
-    private static class HeartBeatServiceTask implements Runnable {
+    private class HeartBeatServiceTask implements Runnable {
         
-        private final Log _log = LogFactory.getLog(HeartBeatServiceTask.class);
+        private final Log log = LogFactory.getLog(HeartBeatServiceTask.class);
 
         public void run() {
-            HeartBeatService heartBeatService;
-            
-            try {
-                heartBeatService = HeartBeatServiceImpl.getOne();                
-            } catch (SystemException e) {
-                // the server is still starting up or shutting down
-                _log.info("Failed to dispatch heart beat since Heart Beat " +
-                		  "Service is not reachable.");
-                return;
-            }
-            
             try {
                 heartBeatService.dispatchHeartBeat(new Date());
             } catch (Throwable t) {
                 // we want to catch everything so that the scheduled task 
                 // continues executing.
-                _log.error("Error while dispatching a heart beat", t);
+                log.error("Error while dispatching a heart beat", t);
             }
             
         }

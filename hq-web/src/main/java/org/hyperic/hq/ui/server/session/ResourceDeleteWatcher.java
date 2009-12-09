@@ -29,27 +29,30 @@ import java.util.List;
 
 import org.hyperic.hq.appdef.server.session.ResourceDeletedZevent;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.ui.shared.DashboardManager;
 import org.hyperic.hq.zevents.ZeventListener;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+@Service
+public class ResourceDeleteWatcher implements ZeventListener<ResourceDeletedZevent> {
 
-public class ResourceDeleteWatcher implements ZeventListener {
+   private DashboardManager dashboardManager;
+   
+   
+   @Autowired
+    public ResourceDeleteWatcher(DashboardManager dashboardManager) {
+    
+    this.dashboardManager = dashboardManager;
+}
 
-    private static final ResourceDeleteWatcher _instance =
-        new ResourceDeleteWatcher();
-
-    private ResourceDeleteWatcher() {}
-
-    static ResourceDeleteWatcher getInstance() {
-        return _instance;
-    }
-
-    public void processEvents(List events) {
+    public void processEvents(List<ResourceDeletedZevent> events) {
         AppdefEntityID[] ids = new AppdefEntityID[events.size()];
         for (int i = 0; i < events.size(); i++) {
-            ResourceDeletedZevent e = (ResourceDeletedZevent) events.get(i);
+            ResourceDeletedZevent e = events.get(i);
             ids[i] = e.getAppdefEntityID();
         }
 
-        DashboardManagerImpl.getOne().handleResourceDelete(ids);
+        dashboardManager.handleResourceDelete(ids);
     }
     
     public String toString() {

@@ -27,8 +27,6 @@ package org.hyperic.hq.product.server.mbean;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.sql.Connection;
@@ -43,10 +41,12 @@ import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import javax.annotation.PostConstruct;
 import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
 import javax.management.ListenerNotFoundException;
 import javax.management.MBeanNotificationInfo;
+import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.Notification;
 import javax.management.NotificationBroadcaster;
@@ -62,12 +62,11 @@ import org.hyperic.hibernate.Util;
 import org.hyperic.hibernate.dialect.HQDialect;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.bizapp.server.session.SystemAudit;
-import org.hyperic.hq.common.SystemException;
 import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.context.Bootstrap;
 import org.hyperic.hq.hqu.RenditServer;
 import org.hyperic.hq.measurement.MeasurementConstants;
 import org.hyperic.hq.measurement.shared.MeasTabManagerUtil;
+import org.hyperic.hq.notready.NotReadyManager;
 import org.hyperic.hq.product.PluginException;
 import org.hyperic.hq.product.PluginInfo;
 import org.hyperic.hq.product.ProductPlugin;
@@ -104,8 +103,7 @@ public class ProductPluginDeployer
                ProductPluginDeployerMBean,
                Comparator<String>
 {
-    private static final String READY_MGR_NAME =
-        "hyperic.jmx:service=NotReadyManager";
+   
     private static final String SERVER_NAME =
         "jboss.system:type=Server";
     private static final String URL_SCANNER_NAME =
@@ -121,13 +119,15 @@ public class ProductPluginDeployer
     private HQApp hqApp;
     private DBUtil dbUtil;
     private RenditServer renditServer;
+    private ProductStartupListener productStartupListener;
+    private ProductManager productManager;
+    private NotReadyManager notReadyManager;
 
     private Log _log = LogFactory.getLog(ProductPluginDeployer.class);
 
     private ProductPluginManager _ppm;
     private List<String>                 _plugins = new ArrayList<String>();
     private boolean              _isStarted = false;
-    private ObjectName           _readyMgrName;
     private ObjectName           _serverName;
     private String               _pluginDir = PLUGIN_DIR;
     private String               _hquDir;
@@ -169,24 +169,28 @@ public class ProductPluginDeployer
     }
 
     @Autowired
-    public ProductPluginDeployer(HQApp hqApp, DBUtil dbUtil, RenditServer renditServer) {
+    public ProductPluginDeployer(HQApp hqApp, DBUtil dbUtil, RenditServer renditServer, MBeanServer mbeanServer, ProductStartupListener productStartupListener, 
+                                 ProductManager productManager, NotReadyManager notReadyManager) {
         super();
+        this.server = mbeanServer;
         this.hqApp = hqApp;
         this.dbUtil = dbUtil;
         this.renditServer = renditServer;
-
+        this.productStartupListener = productStartupListener;
+        this.productManager = productManager;
+        this.notReadyManager = notReadyManager;
         //XXX un-hardcode these paths.
-        String ear =
+        String war =
             System.getProperty("jboss.server.home.dir") +
-            "/deploy/hq.ear";
+            "/deploy/hq.war";
 
         //native libraries are deployed into another directory
         //which is not next to sigar.jar, so we drop this hint
         //to find it.
         System.setProperty("org.hyperic.sigar.path",
-                           ear + "/sigar_bin/lib");
+                           war + "/sigar_bin/lib");
 
-        _hquDir = ear + "/hq.war/" + HQU;
+        _hquDir = war + "/" + HQU;
 
         // Initialize database
         initDatabase();
@@ -200,7 +204,7 @@ public class ProductPluginDeployer
         }
 
         try {
-            _readyMgrName = new ObjectName(READY_MGR_NAME);
+           
             _serverName   = new ObjectName(SERVER_NAME);
         } catch (MalformedObjectNameException e) {
             //notgonnahappen
@@ -306,26 +310,33 @@ public class ProductPluginDeployer
      */
     @ManagedOperation
     public void handleNotification(Notification n, Object o) {
+        afterServerStart();
+        if (n != null && n.getType().equals("org.jboss.system.server.started")) {
+            SystemAudit.createUpAudit(((Number)n.getUserData()).longValue());
+        }
+    }
+    
+    private void afterServerStart() {
         loadConfig();
-        loadStartupClasses();
+        
      
 
         pluginNotify("deployer", DEPLOYER_READY);
 
         Collections.sort(_plugins, this);
 
-        ProductManager pm = getProductManager();
+        
 
         for (String pluginName : _plugins) {
           
             try {
-                deployPlugin(pluginName, pm);
+                deployPlugin(pluginName);
             } catch(DeploymentException e) {
                 _log.error("Unable to deploy plugin [" + pluginName + "]", e);
             }
         }
 
-        ProductStartupListener
+        productStartupListener
             .getPluginsDeployedCaller().pluginsDeployed(_plugins);
 
         _plugins.clear();
@@ -340,9 +351,7 @@ public class ProductPluginDeployer
 
         setReady(true);
 
-        if (n != null && n.getType().equals("org.jboss.system.server.started")) {
-            SystemAudit.createUpAudit(((Number)n.getUserData()).longValue());
-        }
+        
     }
 
     private void startConcurrentStatsCollector() {
@@ -577,15 +586,10 @@ public class ProductPluginDeployer
     }
 
     private void setReady(boolean ready) {
-        if (getServer() != null) {
-            try {
-                getServer().setAttribute(_readyMgrName,
-                                         new Attribute(READY_ATTR,
-                                                       ready ? Boolean.TRUE :
-                                                       Boolean.FALSE));
-            } catch(Exception e) {
-                _log.error("Unable to declare application ready", e);
-            }
+        try {
+            notReadyManager.setReady(ready);
+        } catch(Exception e) {
+            _log.error("Unable to declare application ready", e);
         }
     }
 
@@ -596,8 +600,7 @@ public class ProductPluginDeployer
     public boolean isReady() {
         Boolean isReady;
         try {
-            isReady = (Boolean)getServer().getAttribute(_readyMgrName,
-                                                        READY_ATTR);
+            isReady = notReadyManager.isReady();
         } catch (Exception e) {
             _log.error("Unable to get Application's ready state", e);
             return false;
@@ -616,30 +619,7 @@ public class ProductPluginDeployer
         hqApp.setWebAccessibleDir(warDir);
     }
 
-    private void loadStartupClasses() {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        InputStream is =
-            loader.getResourceAsStream("META-INF/startup_classes.txt");
-        List<String> lines;
-
-        try {
-            lines = FileUtil.readLines(is);
-        } catch(IOException e) {
-            throw new SystemException(e);
-        }
-
-     
-        for (String className : lines) {
-            className = className.trim();
-            if (className.length() == 0 || className.startsWith("#")) {
-                continue;
-            }
-
-            hqApp.addStartupClass(className);
-        }
-        hqApp.runStartupClasses();
-    }
-
+   
     private void pluginNotify(String name, String type) {
         String action = type.substring(type.lastIndexOf(".") + 1);
         String msg = PRODUCT + " plugin " + name + " " + action;
@@ -668,9 +648,6 @@ public class ProductPluginDeployer
         _broadcaster.sendNotification(notif);
     }
 
-    private ProductManager getProductManager() {
-        return Bootstrap.getBean(ProductManager.class);
-    }
 
     private String registerPluginJar(DeploymentInfo di) {
         String pluginJar = di.url.getFile();
@@ -691,11 +668,11 @@ public class ProductPluginDeployer
         }
     }
 
-    private void deployPlugin(String plugin, ProductManager pm)
+    private void deployPlugin(String plugin)
         throws DeploymentException {
 
         try {
-            pm.deploymentNotify(plugin);
+            productManager.deploymentNotify(plugin);
             pluginNotify(plugin, PLUGIN_DEPLOYED);
         } catch (Exception e) {
             _log.error("Unable to deploy plugin '" + plugin + "'", e);
@@ -752,6 +729,7 @@ public class ProductPluginDeployer
      * this method does is queue up the plugins that are ready for deployment.
      * The actual deployment occurs when the startDeployer() method is called.
      */
+    @PostConstruct
     public void start() throws Exception {
         if(_isStarted)
             return;
@@ -787,6 +765,7 @@ public class ProductPluginDeployer
         });
 
         addCustomPluginDir();
+        afterServerStart();
     }
 
     /**
@@ -873,8 +852,8 @@ public class ProductPluginDeployer
 
         //plugin metadata cannot be deployed until HQ is up
         if (isReady()) {
-            ProductManager pm = getProductManager();
-            deployPlugin(plugin, pm);
+           
+            deployPlugin(plugin);
         }
         else {
             _plugins.add(plugin);

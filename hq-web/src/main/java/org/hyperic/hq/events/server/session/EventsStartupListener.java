@@ -32,7 +32,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import javax.naming.InitialContext;
+import javax.annotation.PostConstruct;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -40,12 +40,14 @@ import org.apache.commons.logging.LogFactory;
 import org.hibernate.PropertyNotFoundException;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
-import org.hyperic.hq.common.shared.HQConstants;
-import org.hyperic.hq.context.Bootstrap;
+import org.hyperic.hq.events.shared.AlertDefinitionManager;
 import org.hyperic.hq.measurement.server.session.AlertConditionsSatisfiedZEvent;
-import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.util.jdbc.DBUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class EventsStartupListener
     implements StartupListener
 {
@@ -53,39 +55,52 @@ public class EventsStartupListener
         LogFactory.getLog(EventsStartupListener.class);
     private static final Object LOCK = new Object();
     private static AlertDefinitionChangeCallback _alertDefChangeCallback;
-    private DBUtil dbUtil = Bootstrap.getBean(DBUtil.class);
+    private DBUtil dbUtil;
+    private HQApp app;
+    private ZeventEnqueuer zEventManager;
+    private TriggersCreatedListener triggersCreatedListener;
+    private AlertDefinitionManager alertDefinitionManager;
+    
+    
+    @Autowired
+    public EventsStartupListener(DBUtil dbUtil, HQApp app, ZeventEnqueuer zEventManager,
+                                 TriggersCreatedListener triggersCreatedListener, AlertDefinitionManager alertDefinitionManager) {
+       
+        this.dbUtil = dbUtil;
+        this.app = app;
+        this.zEventManager = zEventManager;
+        this.triggersCreatedListener = triggersCreatedListener;
+        this.alertDefinitionManager = alertDefinitionManager;
+    }
 
+    @PostConstruct
     public void hqStarted() {
         // Make sure the escalation enumeration is loaded and registered so
         // that the escalations run
         ClassicEscalationAlertType.class.getClass();
         AlertableRoleCalendarType.class.getClass();
 
-        HQApp app = HQApp.getInstance();
+       
 
         synchronized (LOCK) {
             _alertDefChangeCallback = (AlertDefinitionChangeCallback)
                 app.registerCallbackCaller(AlertDefinitionChangeCallback.class);
         }
 
-        AlertDefinitionManagerImpl.getOne().startup();
-
-        loadConfigProps("triggers");
-        loadConfigProps("actions");
-
-        ZeventManager.getInstance().registerEventClass(AlertConditionsSatisfiedZEvent.class);
-        Set alertEvents = new HashSet();
+       alertDefinitionManager.startup();
+       zEventManager.registerEventClass(AlertConditionsSatisfiedZEvent.class);
+        Set<Class<?>> alertEvents = new HashSet<Class<?>>();
         alertEvents.add(AlertConditionsSatisfiedZEvent.class);
 
-        ZeventManager.getInstance().addBufferedListener(
+        zEventManager.addBufferedListener(
             alertEvents, new AlertConditionsSatisfiedListener());
 
 
-        Set triggerEvents = new HashSet();
+        Set<Class<?>> triggerEvents = new HashSet<Class<?>>();
         triggerEvents.add(TriggersCreatedZevent.class);
 
-        ZeventManager.getInstance().addBufferedListener(
-                                                        triggerEvents, Bootstrap.getBean(TriggersCreatedListener.class));
+        zEventManager.addBufferedListener(
+                                                        triggerEvents, triggersCreatedListener);
 
         cleanupRegisteredTriggers();
     }
@@ -94,8 +109,7 @@ public class EventsStartupListener
         Connection conn = null;
         Statement stmt = null;
         try {
-            conn = dbUtil.getConnByContext(
-                new InitialContext(), HQConstants.DATASOURCE);
+            conn = dbUtil.getConnection();
             stmt = conn.createStatement();
             int rows = stmt.executeUpdate(
                 "update EAM_ALERT_CONDITION set trigger_id = null " +
@@ -116,42 +130,12 @@ public class EventsStartupListener
         } catch (NamingException e) {
             _log.error(e, e);
         } finally {
-            dbUtil.closeJDBCObjects(
+            DBUtil.closeJDBCObjects(
                 EventsStartupListener.class.getName(), conn, stmt, null);
         }
     }
 
-    private void loadConfigProps(String prop) {
-        try {
-            String property = System.getProperty(prop);
-
-            if (property == null) {
-                throw new PropertyNotFoundException(prop + " list not found");
-            }
-
-            _log.info(prop + " list: " + property);
-
-            StringTokenizer tok = new StringTokenizer(property, ", ");
-            while (tok.hasMoreTokens()) {
-                String className = tok.nextToken();
-                    _log.debug("Initialize class: " + className);
-
-                try {
-                    Class classObj = Class.forName(className);
-                    classObj.newInstance();
-                } catch (ClassNotFoundException e) {
-                    _log.error("Class: " + className + " not found");
-                } catch (InstantiationException e) {
-                    _log.error("Error instantiating class: " + className);
-                } catch (IllegalAccessException e) {
-                    _log.error("Error instantiating class: " + className);
-                }
-            }
-        } catch (Exception e) {
-            // Swallow all exceptions
-            _log.error("Encountered error initializing " + prop, e);
-        }
-    }
+   
 
     static AlertDefinitionChangeCallback getAlertDefinitionChangeCallback() {
         synchronized (LOCK) {

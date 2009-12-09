@@ -23,7 +23,7 @@
  * USA.
  */
 
-package org.hyperic.util.notReady;
+package org.hyperic.hq.notready;
 
 import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;

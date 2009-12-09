@@ -25,16 +25,25 @@
 
 package org.hyperic.hq.appdef.server.session;
 
+import javax.annotation.PostConstruct;
+
 import org.hyperic.hq.appdef.galerts.ResourceAuxLogProvider;
-import org.hyperic.hq.appdef.shared.AppdefEntityConstants;
-import org.hyperic.hq.appdef.shared.AppdefEntityID;
+import org.hyperic.hq.appdef.shared.ApplicationManager;
+import org.hyperic.hq.appdef.shared.PlatformManager;
+import org.hyperic.hq.appdef.shared.ServerManager;
+import org.hyperic.hq.appdef.shared.ServiceManager;
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.authz.server.session.AuthzStartupListener;
 import org.hyperic.hq.authz.server.session.Resource;
 import org.hyperic.hq.authz.server.session.ResourceDeleteCallback;
 import org.hyperic.hq.common.VetoException;
-import org.hyperic.hq.zevents.ZeventManager;
+import org.hyperic.hq.zevents.ZeventEnqueuer;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+
+@Service
 public class AppdefStartupListener
     implements StartupListener
 {
@@ -42,11 +51,34 @@ public class AppdefStartupListener
     
     private static AgentCreateCallback   _agentCreateCallback;
     
+    private HQApp app;
+    private PlatformManager platformManager;
+    private ServerManager serverManager;
+    private ServiceManager serviceManager;
+    private ApplicationManager applicationManager;
+    private ZeventEnqueuer zEventManager;
+    
+    
+    
+    @Autowired
+    public AppdefStartupListener(HQApp app, PlatformManager platformManager, ServerManager serverManager,
+                                 ServiceManager serviceManager, ApplicationManager applicationManager,
+                                 ZeventEnqueuer zEventManager, AuthzStartupListener authzStartupListener) {
+        this.app = app;
+        this.platformManager = platformManager;
+        this.serverManager = serverManager;
+        this.serviceManager = serviceManager;
+        this.applicationManager = applicationManager;
+        this.zEventManager = zEventManager;
+        //TODO AuthzStartupListener has to be initialized first to register the ResourceDeleteCallback handler.  Injecting the listener here purely to wait for that
+    }
+
+    @PostConstruct
     public void hqStarted() {
         // Make sure we have the aux-log provider loaded
         ResourceAuxLogProvider.class.toString();
 
-        HQApp app = HQApp.getInstance();
+       
 
         synchronized (LOCK) {
             _agentCreateCallback = (AgentCreateCallback)
@@ -58,14 +90,14 @@ public class AppdefStartupListener
                     throws VetoException {
                     // Go ahead and let every appdef type handle a resource
                     // delete
-                    PlatformManagerImpl.getOne().handleResourceDelete(r);
-                    ServerManagerImpl.getOne().handleResourceDelete(r);
-                    ServiceManagerImpl.getOne().handleResourceDelete(r);
-                    ApplicationManagerImpl.getOne().handleResourceDelete(r);
+                    platformManager.handleResourceDelete(r);
+                    serverManager.handleResourceDelete(r);
+                    serviceManager.handleResourceDelete(r);
+                    applicationManager.handleResourceDelete(r);
                 }
             });
         }
-        ApplicationManagerImpl.getOne().startup();
+      
         
         registerTransferAgentBundleZeventListener();
         registerTransferAgentPluginZeventListener();
@@ -79,19 +111,19 @@ public class AppdefStartupListener
     }
     
     private void registerTransferAgentBundleZeventListener() {
-        ZeventManager.getInstance()
+        zEventManager
         .addBufferedListener(TransferAgentBundleZevent.class,
                              new TransferAgentBundleZeventListener());
     }
     
     private void registerTransferAgentPluginZeventListener() {
-        ZeventManager.getInstance()
+        zEventManager
         .addBufferedListener(TransferAgentPluginZevent.class,
                              new TransferAgentPluginZeventListener());
     }
     
     private void registerUpgradeAgentZeventListener() {
-        ZeventManager.getInstance()
+        zEventManager
         .addBufferedListener(UpgradeAgentZevent.class,
                              new UpgradeAgentZeventListener());
     }

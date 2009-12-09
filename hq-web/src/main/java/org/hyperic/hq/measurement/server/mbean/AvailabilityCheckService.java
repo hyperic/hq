@@ -31,6 +31,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.authz.server.session.Resource;
@@ -47,6 +50,7 @@ import org.hyperic.hq.measurement.server.session.ResourceDataPoint;
 import org.hyperic.hq.measurement.shared.AvailabilityManager;
 import org.hyperic.hq.product.MetricValue;
 import org.hyperic.util.TimeUtil;
+import org.jboss.varia.scheduler.Scheduler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
@@ -69,19 +73,36 @@ public class AvailabilityCheckService
                                 AVAIL_PAUSED = MeasurementConstants.AVAIL_PAUSED,
                                 AVAIL_NULL   = MeasurementConstants.AVAIL_NULL;
 
-    private long interval = 0;
+    private long interval = 120000;
     private long startTime = 0;
     private long wait = 5 * MeasurementConstants.MINUTE;
     private final Object IS_RUNNING_LOCK = new Object();
     private boolean isRunning = false;
     private AvailabilityManager availabilityManager;
     private PermissionManager permissionManager;
+    private MBeanServer mbeanServer;
     
     
     @Autowired
-    public AvailabilityCheckService(AvailabilityManager availabilityManager, PermissionManager permissionManager) {
+    public AvailabilityCheckService(AvailabilityManager availabilityManager, PermissionManager permissionManager, MBeanServer mbeanServer) {
         this.availabilityManager = availabilityManager;
         this.permissionManager = permissionManager;
+        this.mbeanServer = mbeanServer;
+    }
+    
+   
+    public void startSchedule() throws Exception {
+       Scheduler scheduler = new Scheduler();
+       scheduler.setSchedulableMBeanMethod("hit( DATE )");
+       scheduler.setSchedulableMBean("hyperic.jmx:type=Service,name=AvailabilityCheck");
+       scheduler.setInitialStartDate("NOW");
+       scheduler.setSchedulePeriod(120000);
+       scheduler.setInitialRepetitions(-1);
+       scheduler.setStartAtStartup(false);
+       ObjectName schedulerName = new ObjectName("hyperic.jmx:service=Scheduler,name=AvailabilityCheck");
+       mbeanServer.registerMBean(scheduler,schedulerName);
+       mbeanServer.invoke(schedulerName, "start", new Object[] {}, new String[] {});
+       mbeanServer.invoke(schedulerName, "startSchedule", new Object[] {}, new String[] {});
     }
 
     /**
@@ -384,7 +405,10 @@ public class AvailabilityCheckService
      * 
      */
     @ManagedOperation
-    public void start() throws Exception {}
+    public void start() throws Exception {
+        
+        
+    }
 
     /**
      * 

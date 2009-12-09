@@ -25,9 +25,13 @@
 
 package org.hyperic.hq.authz.server.session;
 
+import javax.annotation.PostConstruct;
+
 import org.hyperic.hq.application.HQApp;
 import org.hyperic.hq.application.StartupListener;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+@Service
 public class AuthzStartupListener 
     implements StartupListener
 {
@@ -38,9 +42,17 @@ public class AuthzStartupListener
     private static RoleRemoveCallback     _roleRemoveCallback;
     private static RoleCreateCallback     _roleCreateCallback;
     private static RoleRemoveFromSubjectCallback _roleSubjRemoveCallback;
+    private HQApp  app;
     
+    
+    @Autowired
+    public AuthzStartupListener(HQApp app) {
+        this.app = app;
+    }
+
+    @PostConstruct
     public void hqStarted() {
-        HQApp app = HQApp.getInstance();
+       
 
         synchronized (LOCK) {
             _resourceDeleteCallback = (ResourceDeleteCallback)

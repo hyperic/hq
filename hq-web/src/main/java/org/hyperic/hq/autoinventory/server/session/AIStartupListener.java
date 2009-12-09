@@ -29,47 +29,63 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
+
 import org.hyperic.hq.appdef.server.session.ResourceCreatedZevent;
 import org.hyperic.hq.appdef.server.session.ResourceRefreshZevent;
 import org.hyperic.hq.appdef.server.session.ResourceUpdatedZevent;
+import org.hyperic.hq.appdef.server.session.ResourceZevent;
 import org.hyperic.hq.application.StartupListener;
+import org.hyperic.hq.autoinventory.shared.AutoinventoryManager;
 import org.hyperic.hq.zevents.ZeventEnqueuer;
 import org.hyperic.hq.zevents.ZeventListener;
-import org.hyperic.hq.zevents.ZeventManager;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+@Service
 public class AIStartupListener
     implements StartupListener
 {
+    private AutoinventoryManager autoinventoryManager;
+    private ZeventEnqueuer zEventManager;
+    
+    
+    @Autowired
+    public AIStartupListener(AutoinventoryManager autoinventoryManager, ZeventEnqueuer zEventManager) {
+        this.autoinventoryManager = autoinventoryManager;
+        this.zEventManager = zEventManager;
+    }
+
+    @PostConstruct
     public void hqStarted() {
 
         /**
          * Add the runtime-AI listener to enable resources for runtime
          * autodiscovery as they are created.
          */
-        ZeventEnqueuer zMan = ZeventManager.getInstance();
-        Set events = new HashSet();
+        
+        Set<Class<?>> events = new HashSet<Class<?>>();
         events.add(ResourceCreatedZevent.class);
         events.add(ResourceUpdatedZevent.class);
         events.add(ResourceRefreshZevent.class);
-        zMan.addBufferedListener(events, new RuntimeAIEnabler());
+        zEventManager.addBufferedListener(events, new RuntimeAIEnabler());
         
-        events = new HashSet();
+        events = new HashSet<Class<?>>();
         events.add(MergeServiceReportZevent.class);
-        zMan.addBufferedListener(events, new ServiceMerger());
+        zEventManager.addBufferedListener(events, new ServiceMerger());
 
-        events = new HashSet();
+        events = new HashSet<Class<?>>();
         events.add(MergePlatformAndServersZevent.class);
-        zMan.addBufferedListener(events, new RuntimePlatformAndServerMerger());
-        AutoinventoryManagerImpl.getOne().startup();
+        zEventManager.addBufferedListener(events, new RuntimePlatformAndServerMerger());
+        autoinventoryManager.startup();
     }
 
     /**
      * Listener class that enables runtime-AI on newly created resources.
      */
-    private class RuntimeAIEnabler implements ZeventListener {
+    private class RuntimeAIEnabler implements ZeventListener<ResourceZevent> {
 
-        public void processEvents(List events) {
-            AutoinventoryManagerImpl.getOne().handleResourceEvents(events);
+        public void processEvents(List<ResourceZevent> events) {
+            autoinventoryManager.handleResourceEvents(events);
         }
         
         public String toString() {

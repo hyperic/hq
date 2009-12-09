@@ -30,6 +30,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hyperic.hq.appdef.shared.AppdefEntityID;
@@ -58,6 +60,7 @@ public class SRNManagerImpl implements SRNManager {
     private AuthzSubjectManager authzSubjectManager;
     private MeasurementManager measurementManager;
     private ScheduleRevNumDAO scheduleRevNumDAO;
+  
 
     @Autowired
     public SRNManagerImpl(AuthzSubjectManager authzSubjectManager, MeasurementManager measurementManager,
@@ -65,6 +68,11 @@ public class SRNManagerImpl implements SRNManager {
         this.authzSubjectManager = authzSubjectManager;
         this.measurementManager = measurementManager;
         this.scheduleRevNumDAO = scheduleRevNumDAO;
+    }
+    
+    //TODO resolve circular dependency
+    private AgentScheduleSynchronizer getAgentScheduleSynchronizer() {
+        return Bootstrap.getBean(AgentScheduleSynchronizer.class);
     }
 
     /**
@@ -230,7 +238,7 @@ public class SRNManagerImpl implements SRNManager {
                     }
                     List<AppdefEntityID> eids = new ArrayList<AppdefEntityID>();
                     eids.add(srns[i].getEntity());
-                    AgentScheduleSynchronizer.scheduleBuffered(eids);
+                    getAgentScheduleSynchronizer().scheduleBuffered(eids);
                 }
                 srn.setLastReported(current);
             }

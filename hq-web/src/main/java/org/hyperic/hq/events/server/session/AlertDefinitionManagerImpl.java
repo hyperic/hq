@@ -103,12 +103,16 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
 
     private EscalationManager escalationManager;
 
+    private HQApp hqApp;
+
+    private AvailabilityDownAlertDefinitionCache cache;
+
     @Autowired
     public AlertDefinitionManagerImpl(AlertPermissionManager alertPermissionManager, AlertDefinitionDAO alertDefDao,
                                       ActionDAO actionDao, AlertConditionDAO alertConditionDAO, TriggerDAO triggerDAO,
-                                      MeasurementDAO measurementDAO,
-                                      RegisteredTriggerManager registeredTriggerManager,
-                                      ResourceManager resourceManager, EscalationManager escalationManager) {
+                                      MeasurementDAO measurementDAO, RegisteredTriggerManager registeredTriggerManager,
+                                      ResourceManager resourceManager, EscalationManager escalationManager,
+                                      HQApp hqApp, AvailabilityDownAlertDefinitionCache cache) {
         this.alertPermissionManager = alertPermissionManager;
         this.alertDefDao = alertDefDao;
         this.actionDao = actionDao;
@@ -118,6 +122,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
         this.registeredTriggerManager = registeredTriggerManager;
         this.resourceManager = resourceManager;
         this.escalationManager = escalationManager;
+        this.hqApp = hqApp;
+        this.cache = cache;
     }
 
     @PostConstruct
@@ -125,8 +131,7 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
         _valuePager = Pager.getPager(VALUE_PROCESSOR);
     }
 
-    private boolean deleteAlertDefinitionStuff(AuthzSubject subj, AlertDefinition alertdef,
-                                               EscalationManager escMan) {
+    private boolean deleteAlertDefinitionStuff(AuthzSubject subj, AlertDefinition alertdef, EscalationManager escMan) {
         StopWatch watch = new StopWatch();
 
         // Delete escalation state
@@ -888,8 +893,8 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
      * Get list of alert conditions for a resource or resource type
      * 
      */
-    public PageList<AlertDefinitionValue> findAlertDefinitions(AuthzSubject subj, AppdefEntityTypeID aetid, PageControl pc)
-        throws PermissionException {
+    public PageList<AlertDefinitionValue> findAlertDefinitions(AuthzSubject subj, AppdefEntityTypeID aetid,
+                                                               PageControl pc) throws PermissionException {
         Resource res = resourceManager.findResourcePrototype(aetid);
         Collection<AlertDefinition> adefs;
         if (pc.getSortattribute() == SortAttribute.CTIME) {
@@ -987,32 +992,29 @@ public class AlertDefinitionManagerImpl implements AlertDefinitionManager {
     public void startup() {
         log.info("Alert Definition Manager starting up!");
 
-        HQApp.getInstance().registerCallbackListener(AlertDefinitionChangeCallback.class,
-            new AlertDefinitionChangeCallback() {
-                public void postCreate(AlertDefinition def) {
-                    removeFromCache(def);
-                }
+        hqApp.registerCallbackListener(AlertDefinitionChangeCallback.class, new AlertDefinitionChangeCallback() {
+            public void postCreate(AlertDefinition def) {
+                removeFromCache(def);
+            }
 
-                public void postDelete(AlertDefinition def) {
-                    removeFromCache(def);
-                }
+            public void postDelete(AlertDefinition def) {
+                removeFromCache(def);
+            }
 
-                public void postUpdate(AlertDefinition def) {
-                    removeFromCache(def);
-                }
+            public void postUpdate(AlertDefinition def) {
+                removeFromCache(def);
+            }
 
-                private void removeFromCache(AlertDefinition def) {
-                    AvailabilityDownAlertDefinitionCache cache = AvailabilityDownAlertDefinitionCache.getInstance();
+            private void removeFromCache(AlertDefinition def) {
+                synchronized (cache) {
+                    cache.remove(def.getAppdefEntityId());
 
-                    synchronized (cache) {
-                        cache.remove(def.getAppdefEntityId());
-
-                        for (AlertDefinition childDef : def.getChildren()) {
-                            cache.remove(childDef.getAppdefEntityId());
-                        }
+                    for (AlertDefinition childDef : def.getChildren()) {
+                        cache.remove(childDef.getAppdefEntityId());
                     }
                 }
-            });
+            }
+        });
     }
 
     public static AlertDefinitionManager getOne() {
