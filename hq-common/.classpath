@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src/main/resources"/>
 	<classpathentry kind="src" path="src/main/java"/>
-	<classpathentry kind="src" output="target/test-classes"  path="src/test/java"/>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/ant-contrib.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/ant-launcher.jar"/>
@@ -126,5 +126,6 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/activemq/activemq-pool-5.3.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/com.springsource.org.apache.commons.pool-1.5.3.jar"/>
 	<classpathentry exported="true" kind="var" path="JBOSS_HOME/server/default/lib/scheduler-plugin.jar"/>
+	<classpathentry exported="true" kind="var" path="JBOSS_HOME/server/default/lib/mail-plugin.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

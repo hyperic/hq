@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+          <!-- Change to your mail server prototocol -->
+          <property name="mail.store.protocol" value="pop3"/>
+          <property name="mail.transport.protocol" value="smtp"/>
+
+          <!-- Change to the user who will receive mail  -->
+          <property name="mail.user" value="nobody"/>
+
+          <!-- Change to the mail server  -->
+          <property name="mail.pop3.host" value="pop3.nosuchhost.nosuchdomain.com"/>
+
+          <!-- Change to the SMTP gateway server -->
+          <property name="mail.smtp.host" value="localhost"/>
+
+          <!-- Enable debugging output from the javamail classes -->
+          <property name="mail.debug" value="false"/>
+</configuration>
+   
