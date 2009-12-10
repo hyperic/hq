@@ -25,43 +25,30 @@
 
 package org.hyperic.hq.ui.taglib;
 
+import java.rmi.RemoteException;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
 import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.JspTagException;
 
 import org.hyperic.hq.bizapp.shared.ConfigBoss;
 import org.hyperic.hq.ui.util.ContextUtils;
+import org.hyperic.util.ConfigPropertyException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 
 /**
  * A JSP tag that looks up a named CAM config property and returns the
  * value as a scoped variable.
  */
 public class ConfigTag extends VarSetterBaseTag {
+    private static final long serialVersionUID = 1L;
 
-    private static Log log = LogFactory.getLog(ConfigTag.class.getName());
+	private static Log log = LogFactory.getLog(ConfigTag.class.getName());
 
-    //----------------------------------------------------instance variables
-
-    /* the property to look up */
     private String prop = null;
-
-    /* the value to test against */
     private String value = null;
-
-    //----------------------------------------------------constructors
-
-    public ConfigTag() {
-        super();
-    }
-
-    //----------------------------------------------------public methods
 
     /**
      * Set the name of the property to look up
@@ -72,6 +59,10 @@ public class ConfigTag extends VarSetterBaseTag {
         this.prop = prop;
     }
     
+    public String getProp() {
+		return prop;
+	}
+    
     /**
      * Set the value to look up
      *
@@ -80,8 +71,12 @@ public class ConfigTag extends VarSetterBaseTag {
     public void setValue(String value) {
         this.value = value;
     }
-    
-    /**
+
+	public String getValue() {
+		return value;
+	}
+
+	/**
      * Process the tag, looking up the config property and setting the
      * scoped variable.
      *
@@ -89,47 +84,29 @@ public class ConfigTag extends VarSetterBaseTag {
      * found or if there is an error processing the tag
      */
     public final int doStartTag() throws JspException {
-        String prop = null;
-        String value = null;
-
         try {
-            prop = (String) evalAttr("prop", this.prop, String.class);
-        }
-        catch (NullAttributeException ne) {
-            throw new JspTagException("bean " + this.prop + " not found");
-        }
-        catch (JspException je) {
-            throw new JspTagException(je.toString());
-        }
-
-        try {
-            value = (String) evalAttr("value", this.value, String.class);
-        }
-        catch (NullAttributeException ne) {
-            value = null;
-        }
-        catch (JspException je) {
-            throw new JspTagException(je.toString());
-        }
-
-        try {
-            ServletContext ctx = pageContext.getServletContext();
+        	ServletContext ctx = pageContext.getServletContext();
             ConfigBoss configBoss = ContextUtils.getConfigBoss(ctx);
 
             log.trace("getting CAM config property [" + prop + "]");
+
             Properties conf = configBoss.getConfig();
+            String prop = getProp();
+            String value = getValue();
             String propVal = conf.getProperty(prop);
 
             if (value != null) {
                 setScopedVariable(new Boolean(propVal.equals(value)));
-            }
-            else {
+            } else {
                 setScopedVariable(propVal);
             }
-        }
-        catch (Exception e) {
-            log.error("config properties lookup failed", e);
-        }
+        } catch (NullPointerException npe) {
+            log.error("Prop or Value attribute value is null", npe);
+        } catch (RemoteException re) {
+            log.error("RemoteException throw while retrieving config", re);
+		} catch (ConfigPropertyException cpe) {
+            log.error("ConfigPropertyException thrown while retrieving config", cpe);
+		}
 
         return SKIP_BODY;
     }
@@ -142,11 +119,5 @@ public class ConfigTag extends VarSetterBaseTag {
         prop = null;
         value = null;
         super.release();
-    }
-
-    private Object evalAttr(String name, String value, Class type)
-        throws JspException, NullAttributeException {
-        return ExpressionUtil.evalNotNull("config", name, value,
-                                          type, this, pageContext);
     }
 }

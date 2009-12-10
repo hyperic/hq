@@ -29,12 +29,8 @@ import java.io.IOException;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
-import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.TagSupport;
-
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 
 import org.hyperic.hq.appdef.shared.AIPlatformValue;
 import org.hyperic.hq.appdef.shared.AIQueueConstants;
@@ -43,45 +39,32 @@ import org.hyperic.hq.appdef.shared.AIQueueConstants;
  * Generates a String representing the diff for an AIPlatform
  */
 public class AutoInventoryDiff extends TagSupport {
+	private static final long serialVersionUID = 1L;
+	
+	private AIPlatformValue resource;
 
-    private String resource;
-    
-    public AutoInventoryDiff() { super(); }
+	public int doStartTag() throws JspException {
+		try {
+			JspWriter output = pageContext.getOut();
+			AIPlatformValue platformValue = getResource();
+			String diffString = AIQueueConstants.getPlatformDiffString(
+					platformValue.getQueueStatus(), platformValue.getDiff());
 
-    public int doStartTag() throws JspException{
+			output.print(diffString);
+		} catch (NullPointerException npe) {
+			throw new JspTagException("Resource attribute value is null", npe);
+		} catch (IOException e) {
+			throw new JspException(e);
+		}
 
-        JspWriter output = pageContext.getOut();
-        String diffString;
-        AIPlatformValue platformValue;
-        try {
-            platformValue = (AIPlatformValue) ExpressionUtil.evalNotNull("spider", 
-                                                        "resource", 
-                                                        getResource(), 
-                                                        AIPlatformValue.class, 
-                                                        this, 
-                                                        pageContext );
-        }
-        catch (NullAttributeException ne) {
-            throw new JspTagException("typeId not found: " + ne);
-        }
-        catch (JspException je) {
-            throw new JspTagException( je.toString() );
-        }
-                                         
-        diffString = AIQueueConstants.getPlatformDiffString(platformValue.getQueueStatus(), 
-                                               platformValue.getDiff());          
-        try{
-            output.print(diffString);            
-        } catch(IOException e) {
-            throw new JspException(e);        
-        }
-        return SKIP_BODY;
-    }
-    
-    public String getResource() {
-        return this.resource;
-    }    
-    public void setResource(String resource) {
-        this.resource = resource;
-    }
+		return SKIP_BODY;
+	}
+
+	public AIPlatformValue getResource() {
+		return this.resource;
+	}
+
+	public void setResource(AIPlatformValue resource) {
+		this.resource = resource;
+	}
 }

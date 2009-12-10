@@ -25,7 +25,6 @@
 
 package org.hyperic.hq.ui.taglib.display;
 
-import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
@@ -33,101 +32,76 @@ import javax.servlet.jsp.tagext.TagSupport;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.hq.appdef.shared.AppdefResourceValue;
 import org.hyperic.hq.ui.taglib.QuicknavUtil;
 
 /**
  * This class is a two in one decorator/tag for use within the
- * <code>TableTag</code>; it is a <code>ColumnDecorator</code> tag
- * that that creates a row of quicknav icons for the resource hub.
+ * <code>TableTag</code>; it is a <code>ColumnDecorator</code> tag that that
+ * creates a row of quicknav icons for the resource hub.
  */
 public class QuicknavDecorator extends ColumnDecorator implements Tag {
+	private static Log log = LogFactory.getLog(QuicknavDecorator.class.getName());
 
-    //----------------------------------------------------static variables
+	private AppdefResourceValue resource;
+	private PageContext context;
+	private Tag parent;
 
-    protected static Log log =
-        LogFactory.getLog(QuicknavDecorator.class.getName());
+	public AppdefResourceValue getResource() {
+		return resource;
+	}
 
-    //----------------------------------------------------instance variables
+	public void setResource(AppdefResourceValue s) {
+		resource = s;
+	}
 
-    private String resource;
-    private PageContext context;
-    private Tag parent;
+	public String decorate(Object obj) throws Exception {
+		try {
+			AppdefResourceValue rv = getResource();
 
-    //----------------------------------------------------constructors
+			if (rv.getEntityId() == null) {
+				return QuicknavUtil.getNA();
+			}
 
-    public QuicknavDecorator() {
-        super();
-    }
+			return QuicknavUtil.getOutput(rv, context);
+		} catch (NullPointerException npe) {
+			log.debug(npe);
+		}
+		
+		return QuicknavUtil.getNA();
+	}
 
-    //----------------------------------------------------public methods
+	public int doStartTag() throws JspTagException {
+		ColumnTag ancestorTag = (ColumnTag) TagSupport.findAncestorWithClass(this, ColumnTag.class);
+		
+		if (ancestorTag == null) {
+			throw new JspTagException("An QuicknavDecorator must be used within a ColumnTag.");
+		}
+		
+		ancestorTag.setDecorator(this);
+		
+		return SKIP_BODY;
+	}
 
-    public String getResource() {
-        return resource;
-    }
+	public int doEndTag() {
+		return EVAL_PAGE;
+	}
 
-    public void setResource(String s) {
-        resource = s;
-    }
+	public Tag getParent() {
+		return parent;
+	}
 
-    public String decorate(Object obj) throws Exception{
-        AppdefResourceValue rv = null;
-        try {
-            rv = (AppdefResourceValue) evalAttr("resource", getResource(),
-                                                AppdefResourceValue.class);
-        } catch (NullAttributeException ne) {
-            log.debug("bean " + getResource() + " not found");
-            return QuicknavUtil.getNA();
-        } catch (JspException je) {
-            log.debug("can't evaluate resource type [" + getResource() + "]",
-                      je);
-            return QuicknavUtil.getNA();
-        }
+	public void setParent(Tag t) {
+		parent = t;
+	}
 
-        if (rv.getEntityId() == null) {
-            return QuicknavUtil.getNA();
-        }
+	public void setPageContext(PageContext pc) {
+		context = pc;
+	}
 
-        return QuicknavUtil.getOutput(rv, context);
-    }
-
-    public int doStartTag() throws JspTagException {
-        ColumnTag ancestorTag =
-            (ColumnTag) TagSupport.findAncestorWithClass(this, ColumnTag.class);
-        if (ancestorTag == null) {
-            throw new JspTagException(
-                    "An QuicknavDecorator must be used within a ColumnTag.");
-        }
-        ancestorTag.setDecorator(this);
-        return SKIP_BODY;
-    }
-
-    public int doEndTag() {
-        return EVAL_PAGE;
-    }
-
-    public Tag getParent() {
-        return parent;
-    }
-    public void setParent(Tag t) {
-        parent = t;
-    }
-
-    public void setPageContext(PageContext pc) {
-        context = pc;
-    }
-
-    public void release() {
-        parent = null;
-        context = null;
-        resource = null;
-    }
-
-    private Object evalAttr(String name, String value, Class type)
-        throws JspException, NullAttributeException {
-        return ExpressionUtil.evalNotNull("quicknavdecorator", name, value,
-                                          type, this, context);
-    }
+	public void release() {
+		parent = null;
+		context = null;
+		resource = null;
+	}
 }

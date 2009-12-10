@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<!DOCTYPE web-app
-    PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
-    "http://java.sun.com/dtd/web-app_2_3.dtd">
-
-<web-app>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+  		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  		 xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee 
+      						 http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" 
+      	 version="2.4">
   <display-name>Hyperic HQ</display-name>
   <context-param>
     <param-name>javax.servlet.jsp.jstl.fmt.localizationContext</param-name>
@@ -318,59 +318,4 @@
     <error-code>404</error-code>
     <location>/common/GenericError.jsp</location>
   </error-page>
-  <!-- Struts Tag Library Descriptors -->
-  <taglib>
-    <taglib-uri>struts-bean</taglib-uri>
-    <taglib-location>/WEB-INF/tld/struts-bean.tld</taglib-location>
-  </taglib>
-  <taglib>
-    <taglib-uri>struts-html</taglib-uri>
-    <taglib-location>/WEB-INF/tld/struts-html.tld</taglib-location>
-  </taglib>
-  <taglib>
-    <taglib-uri>struts-logic</taglib-uri>
-    <taglib-location>/WEB-INF/tld/struts-logic.tld</taglib-location>
-  </taglib>
-  <taglib>
-    <taglib-uri>struts-nested</taglib-uri>
-    <taglib-location>/WEB-INF/tld/struts-nested.tld</taglib-location>
-  </taglib>
-  <taglib>
-    <taglib-uri>struts-tiles</taglib-uri>
-    <taglib-location>/WEB-INF/tld/struts-tiles.tld</taglib-location>
-  </taglib>
-<!--
-  <taglib>
-    <taglib-uri>struts-validator</taglib-uri>
-    <taglib-location>/WEB-INF/tld/struts-validator.tld</taglib-location>
-  </taglib>
--->
-  <taglib>
-    <taglib-uri>struts-html-el</taglib-uri>
-    <taglib-location>/WEB-INF/tld/struts-html-el.tld</taglib-location>
-  </taglib>
-  <taglib>
-    <taglib-uri>struts-logic-el</taglib-uri>
-    <taglib-location>/WEB-INF/tld/struts-logic-el.tld</taglib-location>
-  </taglib>
-  <taglib>
-    <taglib-uri>jstl-c</taglib-uri>
-    <taglib-location>/WEB-INF/tld/c.tld</taglib-location>
-  </taglib>
-  <taglib>
-    <taglib-uri>jstl-c-rt</taglib-uri>
-    <taglib-location>/WEB-INF/tld/c-rt.tld</taglib-location>
-  </taglib>
-  <taglib>
-    <taglib-uri>jstl-fmt</taglib-uri>
-    <taglib-location>/WEB-INF/tld/fmt.tld</taglib-location>
-  </taglib>
-  <taglib>
-    <taglib-uri>hq</taglib-uri>
-    <taglib-location>/WEB-INF/tld/hq.tld</taglib-location>
-  </taglib>
-  <taglib>
-    <taglib-uri>display</taglib-uri>
-    <taglib-location>/WEB-INF/tld/display.tld</taglib-location>
-  </taglib>
 </web-app>

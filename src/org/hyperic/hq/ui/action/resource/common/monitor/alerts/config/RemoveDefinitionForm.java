@@ -25,14 +25,7 @@
 
 package org.hyperic.hq.ui.action.resource.common.monitor.alerts.config;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.hyperic.hq.ui.action.resource.ResourceForm;
-
-import org.apache.struts.action.ActionError;
-import org.apache.struts.action.ActionErrors;
-import org.apache.struts.action.ActionForm;
-import org.apache.struts.action.ActionMapping;
 
 /**
  * A subclass of <code>ResourceForm</code> representing the

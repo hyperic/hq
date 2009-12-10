@@ -31,9 +31,6 @@ import java.text.SimpleDateFormat;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.jsp.JspException;
 
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
-
 import org.hyperic.hq.ui.Constants;
 import org.hyperic.hq.ui.util.RequestUtils;
 import org.hyperic.util.units.DateFormatter.DateSpecifics;
@@ -43,142 +40,136 @@ import org.hyperic.util.units.UnitsConstants;
 import org.hyperic.util.units.UnitsFormat;
 
 /**
- *  Tag that will take a value that is a long, or a runtime expression,
- *  and output a date representation of that long.
+ * Tag that will take a value that is a long, or a runtime expression, and
+ * output a date representation of that long.
  */
 public class DateFormatter extends VarSetterBaseTag {
+	private static final long serialVersionUID = 1L;
 
-    /** 
-     * A string which contains the long, or the expression,
-     * we hope to convert into a Long, and format as a date.
-     */
-    private String _value = null;
-    private Boolean _time = Boolean.FALSE;
-    private Boolean _showDate = Boolean.TRUE;
-    private Boolean _showTime = Boolean.TRUE;
-    private Boolean _approx = Boolean.FALSE;
-    
-    public DateFormatter() {
-        super();
-    }
-    
-    public String getValue() {
-        return _value;
-    }
-    
-    public void setValue(String v) {
-        _value = v;
-    }
-    
-    /**
-     * Utility method for formatting dates.
-     *
-     * XXX Might want to pass in a dateFmt'r if need more than 1 
-     * format. Right now, using simple "time" flag in tag to
-     * decide if should format as a time.
-     *
-     * @param date The long to convert to a date.
-     */
-    private String formatDate(Long date) {
-        int unit;
-        
-        if (_time) {
-            if (_approx) {
-                unit = UnitsConstants.UNIT_APPROX_DUR;
-            }
-            else {
-                unit = UnitsConstants.UNIT_DURATION;
-            }
-        }
-        else {
-            unit = UnitsConstants.UNIT_DATE;
-        }
-            
-        String key = Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis";
-        
-        if (!_showTime)
-            key += ".dateonly";
-        
-        if (!_showDate)
-            key += ".timeonly";
-        
-        String formatString =
-            RequestUtils.message((HttpServletRequest) pageContext.getRequest(), 
-                                 key);
-        DateSpecifics specs = new DateSpecifics();
-        specs.setDateFormat(new SimpleDateFormat(formatString));
-        FormattedNumber fmtd =
-            UnitsFormat.format(new UnitNumber(date.doubleValue(), unit,
-                                              UnitsConstants.SCALE_MILLI),
-                               pageContext.getRequest().getLocale(), specs);
-        return fmtd.toString();
-    }
-    
-    /**
-     * This evaluates <em>value</em> as a struts expression, then
-     * outputs the resulting string to the <em>pageContext</em>'s out.
-     */
-    public int doStartTag() throws JspException {
-        Long newDate;
-        
-        try {
-            newDate = (Long) ExpressionUtil.evalNotNull("dateFormatter",
-                                                        "value", _value,
-                                                        Long.class, this,
-                                                        pageContext);
-        } catch (NullAttributeException ne) {
-            newDate = new Long(System.currentTimeMillis());
-        }
-        
-        String d = formatDate(newDate);
+	/**
+	 * A string which contains the long, or the expression, we hope to convert
+	 * into a Long, and format as a date.
+	 */
+	private Long value;
+	private Boolean time = Boolean.FALSE;
+	private Boolean showDate = Boolean.TRUE;
+	private Boolean showTime = Boolean.TRUE;
+	private Boolean approx = Boolean.FALSE;
 
-    	if (getVar() != null) {
-    	    setScopedVariable(d);
-    	} else {
-    	    try { 
-    		  pageContext.getOut().write(d);
-    	    } catch (IOException ioe) {
-    		  throw new JspException(getClass().getName() +
-                                     " Could not output date.");
-	       }
-	   }
+	public Long getValue() {
+		return value;
+	}
 
-	   return SKIP_BODY;
-    }
+	public void setValue(Long v) {
+		value = v;
+	}
 
-    public void release() {
-        _value = null;
-    }
+	/**
+	 * Utility method for formatting dates.
+	 * 
+	 * XXX Might want to pass in a dateFmt'r if need more than 1 format. Right
+	 * now, using simple "time" flag in tag to decide if should format as a
+	 * time.
+	 * 
+	 * @param date
+	 *            The long to convert to a date.
+	 */
+	private String formatDate(Long date) {
+		int unit;
 
-    public Boolean getTime() {
-        return _time;
-    }
+		if (time) {
+			if (approx) {
+				unit = UnitsConstants.UNIT_APPROX_DUR;
+			} else {
+				unit = UnitsConstants.UNIT_DURATION;
+			}
+		} else {
+			unit = UnitsConstants.UNIT_DATE;
+		}
 
-    public void setTime(Boolean time) {
-        _time = time;
-    }
+		String key = Constants.UNIT_FORMAT_PREFIX_KEY + "epoch-millis";
 
-    public Boolean getApprox() {
-        return _approx;
-    }
+		if (!showTime) {
+			key += ".dateonly";
+		}
+		
+		if (!showDate) {
+			key += ".timeonly";
+		}
+		
+		String formatString = RequestUtils.message((HttpServletRequest) pageContext.getRequest(), key);
+		DateSpecifics specs = new DateSpecifics();
+		
+		specs.setDateFormat(new SimpleDateFormat(formatString));
+		
+		FormattedNumber fmtd = UnitsFormat.format(new UnitNumber(date.doubleValue(), 
+				                                                 unit, 
+				                                                 UnitsConstants.SCALE_MILLI), 
+				                                  pageContext.getRequest().getLocale(), 
+				                                  specs);
+		
+		return fmtd.toString();
+	}
 
-    public void setApprox(Boolean approx) {
-        _approx = approx;
-    }
+	/**
+	 * This evaluates <em>value</em> as a struts expression, then outputs the
+	 * resulting string to the <em>pageContext</em>'s out.
+	 */
+	public int doStartTag() throws JspException {
+		Long newDate = getValue();
 
-    public Boolean getShowDate() {
-        return _showDate;
-    }
+		if (newDate == null) {
+			newDate = new Long(System.currentTimeMillis());
+		}
 
-    public void setShowDate(Boolean showDate) {
-        _showDate = showDate;
-    }
-    
-    public Boolean getShowTime() {
-        return _showTime;
-    }
+		String d = formatDate(newDate);
 
-    public void setShowTime(Boolean showTime) {
-        _showTime = showTime;
-    }
+		if (getVar() != null) {
+			setScopedVariable(d);
+		} else {
+			try {
+				pageContext.getOut().write(d);
+			} catch (IOException ioe) {
+				throw new JspException(getClass().getName() + " Could not output date.");
+			}
+		}
+
+		return SKIP_BODY;
+	}
+
+	public void release() {
+		value = null;
+	}
+
+	public Boolean getTime() {
+		return time;
+	}
+
+	public void setTime(Boolean time) {
+		this.time = time;
+	}
+
+	public Boolean getApprox() {
+		return approx;
+	}
+
+	public void setApprox(Boolean approx) {
+		this.approx = approx;
+	}
+
+	public Boolean getShowDate() {
+		return showDate;
+	}
+
+	public void setShowDate(Boolean showDate) {
+		this.showDate = showDate;
+	}
+
+	public Boolean getShowTime() {
+		return showTime;
+	}
+
+	public void setShowTime(Boolean showTime) {
+		this.showTime = showTime;
+	}
 }

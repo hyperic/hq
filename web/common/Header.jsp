@@ -1,11 +1,11 @@
 <%@ page pageEncoding="UTF-8"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="hq" prefix="hq" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="/WEB-INF/tld/hq.tld" prefix="hq" %>
 
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
@@ -113,11 +113,11 @@
     <div id="navTabContainer">
         <c:set var="pageURL" value="${requestURL}"/>
         <ul class="adxm mainMenu" style="position: absolute; z-index: 10">
-            <li id="dashTab"><a href="/Dashboard.do"><fmt:message key="header.dashboard"/></a></li>
-            <li id="resTab"><a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.resources"/></a>
+            <li id="dashTab"><a href="<html:rewrite action="/Dashboard" />"><fmt:message key="header.dashboard"/></a></li>
+            <li id="resTab"><a href="<html:rewrite action="/ResourceHub" />" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.resources"/></a>
               <div>
               <ul>
-                <li><a href="<html:rewrite page="/ResourceHub.do"/>" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.Browse"/></a></li>
+                <li><a href="<html:rewrite action="/ResourceHub" />" onclick="useBreadcrumbHrefIfAvailable(this);"><fmt:message key="header.Browse"/></a></li>
                 <tiles:insert definition=".header.optional.tabs">
                   <tiles:put name="location" value="resources"/>
                 </tiles:insert>
@@ -140,7 +140,7 @@
               </ul>
               </div>
             </li>
-            <li id="adminTab"><a href="/Admin.do"><fmt:message key="header.admin"/></a></li>
+            <li id="adminTab"><a href="<html:rewrite action="/Admin" />"><fmt:message key="header.admin"/></a></li>
         </ul>
     </div>
     <div class="ajaxLoading" style="display:none;" id="loading">
@@ -166,7 +166,7 @@
                 <c:out value="${sessionScope.webUser.firstName}"/>
             </c:otherwise>
         </c:choose>
-        <span><a href="<html:rewrite page='/Logout.do'/>"><fmt:message key="header.SignOut"/></a></span>
+        <span><a href="<html:rewrite action="Logout" />"><fmt:message key="header.SignOut"/></a></span>
         <span><html:link href="javascript:void(0)" onclick="tutorialWin=window.open('http://www.hyperic.com/demo/screencasts.html','tutorials','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');tutorialWin.focus();return false;"><fmt:message key="header.Screencasts"/></html:link></span>
         <span><a href="javascript:void(0)" onclick="helpWin=window.open((typeof help != 'undefined' ? help : '<hq:help/>'),'help','width=800,height=650,scrollbars=yes,toolbar=yes,left=80,top=80,resizable=yes');helpWin.focus();return false;"><fmt:message key="header.Help"/></a></span>
     </div>
@@ -178,10 +178,6 @@
     </div>
     <div id="headerSearchResults" style="display:none">
         <div id="searchClose" class="cancelButton right"></div>
-        <!--
-        <a class="all left" href="/resource/Hub.html"><fmt:message key="header.SearchShowAll"/></a>
-        <div class="clear">&nbsp;</div>
-        -->
         <div class="resultsGroup">
             <div class="category"><fmt:message key="header.Resources"/> (<span id="resourceResultsCount"></span>)</div>
             <ul id="resourceResults">

@@ -1,9 +1,10 @@
 <%@ page language="java" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -88,7 +89,7 @@
 		  						       value="<fmt:message key='common.label.Cancel' />" class="CompactButton" />
 		  					</span>
 		  					<span id="AddToFavorites_Progress" style="display:none">
-		  						<img src="/images/4.0/icons/ajax-loader-gray.gif" align="absMiddle" />
+		  						<img src="<html:rewrite page="/images/4.0/icons/ajax-loader-gray.gif" />" align="absMiddle" />
 		  					</span>
 		  					<span id="AddToFavorites_SuccessMsg" style="display:none;" class="successDialogMsg">
 		  						<fmt:message key="resource.common.DashboardUpdatedMessage" />
@@ -99,7 +100,7 @@
 						</div>
 					</div>
 				</div>
-				<script src="/js/addtodashboard.js"></script>
+				<script src="<html:rewrite page="/js/addtodashboard.js" />"></script>
 				<script type="text/javascript">
 				    dojo.addOnLoad(function() {
 					    var config = {

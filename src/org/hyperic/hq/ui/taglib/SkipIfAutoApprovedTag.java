@@ -31,8 +31,6 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
 
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.hq.appdef.shared.AIServerValue;
 import org.hyperic.hq.bizapp.shared.AppdefBoss;
 import org.hyperic.hq.ui.WebUser;
@@ -41,41 +39,35 @@ import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.SessionUtils;
 
 public class SkipIfAutoApprovedTag extends BodyTagSupport {
+	private static final long serialVersionUID = 1L;
 
-    private String aiserver = null;
+	private AIServerValue aiserver = null;
 
-    public SkipIfAutoApprovedTag () { super(); }
+	public int doStartTag() throws JspException {
+		try {
+			ServletContext ctx = pageContext.getServletContext();
+			AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
+			WebUser user = SessionUtils
+					.getWebUser(((HttpServletRequest) pageContext.getRequest())
+							.getSession());
+			int sessionId = user.getSessionId().intValue();
+			AIServerValue aiServer = getAiserver();
+	
+			if (BizappUtils.isAutoApprovedServer(sessionId, appdefBoss, aiServer)) {
+				return SKIP_BODY;
+			}
+		} catch (NullPointerException npe) {
+			throw new JspTagException(npe);
+		}
 
-    public int doStartTag() throws JspException {
+		return EVAL_BODY_INCLUDE;
+	}
 
-        AIServerValue aiServer;
-        try {
-            aiServer = (AIServerValue)
-                ExpressionUtil.evalNotNull("spider", "aiserver", getAiserver(),
-                                           AIServerValue.class, this,
-                                           pageContext);
-        } catch (NullAttributeException ne) {
-            throw new JspTagException("typeId not found: " + ne);
-        } catch (JspException je) {
-            throw new JspTagException( je.toString() );
-        }
+	public AIServerValue getAiserver() {
+		return this.aiserver;
+	}
 
-        ServletContext ctx = pageContext.getServletContext();
-        AppdefBoss appdefBoss = ContextUtils.getAppdefBoss(ctx);
-        WebUser user
-            = SessionUtils.getWebUser
-            (((HttpServletRequest)pageContext.getRequest()).getSession());
-        int sessionId = user.getSessionId().intValue();
-        if (BizappUtils.isAutoApprovedServer(sessionId, appdefBoss, aiServer)) {
-            return SKIP_BODY;
-        }
-        return EVAL_BODY_INCLUDE;
-    }
-
-    public String getAiserver() {
-        return this.aiserver;
-    }    
-    public void setAiserver(String aiserver) {
-        this.aiserver = aiserver;
-    }
+	public void setAiserver(AIServerValue aiserver) {
+		this.aiserver = aiserver;
+	}
 }

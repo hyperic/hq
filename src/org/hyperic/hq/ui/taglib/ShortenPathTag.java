@@ -31,111 +31,103 @@ import javax.servlet.jsp.tagext.TagSupport;
 
 import org.hyperic.hq.ui.util.TaglibUtils;
 
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
-
 public class ShortenPathTag extends TagSupport {
+	private static final long serialVersionUID = 1L;
 
-    private int preChars;
-    private int postChars;
-    private String value = null;
-    private String realValue = null;
-    private String newValue = null;
-    private String property = null;
-    private boolean strict = false;
-    private String styleClass = null;
-    private boolean shorten = false;
-    
-    public ShortenPathTag () { super(); }
+	private int preChars;
+	private int postChars;
+	private String value = null;
+	private String realValue = null;
+	private String newValue = null;
+	private String property = null;
+	private boolean strict = false;
+	private String styleClass = null;
+	private boolean shorten = false;
 
-    public int doStartTag() throws JspException {
+	public int doStartTag() throws JspException {
+		try {
+			realValue = getValue();
+			newValue = TaglibUtils.shortenPath(realValue, preChars, postChars, strict);
+			shorten = !newValue.equals(realValue);
+		} catch(NullPointerException npe) {
+			throw new JspTagException(npe);
+		}
+		
+		return SKIP_BODY;
+	}
 
-        try {
-            realValue = (String) ExpressionUtil.evalNotNull("spider", 
-                                                            "value", 
-                                                            getValue(), 
-                                                            String.class, 
-                                                            this, 
-                                                            pageContext );
-        } catch (NullAttributeException ne) {
-            throw new JspTagException("typeId not found: " + ne);
-        } catch (JspException je) {
-            throw new JspTagException( je.toString() );
-        }
+	public int doEndTag() throws JspException {
+		try {
+			if (shorten && styleClass != null) {
+				StringBuffer text = new StringBuffer("<a href=\"#\" class=\"")
+						.append(styleClass).append("\">").append(newValue)
+						.append("<span>").append(realValue).append(
+								"</span></a>");
 
-        newValue = TaglibUtils.shortenPath(realValue, preChars, postChars, strict);        
-        shorten = !newValue.equals(realValue);
-        
-        return SKIP_BODY;
-    }
+				if (property == null) {
+					pageContext.getOut().println(text.toString());
+				} else {
+					pageContext.setAttribute(property, text.toString());
+				}
+			} else {
+				if (property == null) {
+					pageContext.getOut().println(newValue);
+				} else {
+					pageContext.setAttribute(property, newValue);
+				}
+			}
+		} catch (java.io.IOException e) {
+			throw new JspException(e);
+		}
 
-    public int doEndTag() throws JspException {
-        try {
-            if (shorten && styleClass != null) {
-                StringBuffer text =
-                    new StringBuffer("<a href=\"#\" class=\"")
-                            .append(styleClass)
-                            .append("\">")
-                            .append(newValue)
-                            .append("<span>")
-                            .append(realValue)
-                            .append("</span></a>");
-                    
-                if (property == null) {
-                    pageContext.getOut().println(text.toString());
-                } else {
-                    pageContext.setAttribute(property, text.toString());
-                }
-            } else {
-                if (property == null) {
-                    pageContext.getOut().println(newValue);
-                } else {
-                    pageContext.setAttribute(property, newValue);
-                }
-            }
-        } catch (java.io.IOException e) {
-            throw new JspException(e);
-        }
-        
-        return super.doEndTag();
-    }
+		return super.doEndTag();
+	}
 
-    public String getValue() {
-        return this.value;
-    }    
-    public void setValue(String value) {
-        this.value = value;
-    }
+	public String getValue() {
+		return this.value;
+	}
 
-    public String getProperty() {
-        return this.property;
-    }    
-    public void setProperty(String property) {
-        this.property = property;
-    }
+	public void setValue(String value) {
+		this.value = value;
+	}
 
-    public int getPreChars() {
-        return this.preChars;
-    }    
-    public void setPreChars(int preChars) {
-        this.preChars = preChars;
-    }
-    public int getPostChars() {
-        return this.postChars;
-    }    
-    public void setPostChars(int postChars) {
-        this.postChars = postChars;
-    }
-    public boolean getStrict() {
-        return strict;
-    }
-    public void setStrict(boolean strict) {
-        this.strict = strict;
-    }
-    public String getStyleClass() {
-        return styleClass;
-    }
-    public void setStyleClass(String styleClass) {
-        this.styleClass = styleClass;
-    }
+	public String getProperty() {
+		return this.property;
+	}
+
+	public void setProperty(String property) {
+		this.property = property;
+	}
+
+	public int getPreChars() {
+		return this.preChars;
+	}
+
+	public void setPreChars(int preChars) {
+		this.preChars = preChars;
+	}
+
+	public int getPostChars() {
+		return this.postChars;
+	}
+
+	public void setPostChars(int postChars) {
+		this.postChars = postChars;
+	}
+
+	public boolean getStrict() {
+		return strict;
+	}
+
+	public void setStrict(boolean strict) {
+		this.strict = strict;
+	}
+
+	public String getStyleClass() {
+		return styleClass;
+	}
+
+	public void setStyleClass(String styleClass) {
+		this.styleClass = styleClass;
+	}
 }

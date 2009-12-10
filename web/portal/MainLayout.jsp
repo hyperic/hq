@@ -23,13 +23,7 @@
   USA.
  --%>
 <%@ page pageEncoding="UTF-8"%>
-<%@ page language="java" contentType="text/html; charset=UTF-8" %>
-<%@ page errorPage="/common/Error.jsp"  %>
-<%@ taglib uri="struts-tiles" prefix="tiles" %>
-<%@ taglib uri="struts-html-el" prefix="html" %>
-<%@ taglib uri="jstl-c" prefix="c" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
-<html>
+<%@ page language="java" contentType="text/html; charset=UTF-8"%><%@ page errorPage="/common/Error.jsp"%><%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%><%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html"%><%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles"%><%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%><html>
 <head>
   <tiles:insert attribute="head" />
   <title>
@@ -89,7 +83,7 @@
   <tiles:insert attribute="header" />
   <div id="migContainer">
   <tiles:insert attribute='body' />
-  <img src="/images/spacer.gif" width="1" height="60" alt="" border="0" class="footerSpacer" style="clear: both;" id="footerSpacer">
+  <img src="/images/spacer.gif" width="1" height="60" alt="" border="0" class="footerSpacer" style="clear: both;" id="footerSpacer" />
   <tiles:insert attribute="footer" />
   </div>
 </body>

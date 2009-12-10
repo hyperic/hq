@@ -1,9 +1,10 @@
 <%@ page language="java"%>
 <%@ page errorPage="/common/Error.jsp"%>
-<%@ taglib uri="struts-tiles" prefix="tiles"%>
-<%@ taglib uri="jstl-fmt" prefix="fmt"%>
-<%@ taglib uri="struts-html-el" prefix="html"%>
-<%@ taglib uri="jstl-c" prefix="c"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+<%@ taglib uri="http://struts.apache.org/tags-tiles" prefix="tiles" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -43,7 +44,7 @@
 <!-- TODO: ADxMenu.js script invocation must be moved to the "lte IE 6" section above once we start using the HTML5 doctype which will kick IE7 into strict mode. -->
 <!--[if IE]>
 <link rel="stylesheet" href="<html:rewrite page="/css/ie.css"/>" type="text/css"/>
-<script type="text/javascript" src="/js/ADxMenu.js"></script>
+<script type="text/javascript" src="<html:rewrite page="/js/ADxMenu.js" />"></script>
 <![endif]-->
 
 <script type="text/javascript">

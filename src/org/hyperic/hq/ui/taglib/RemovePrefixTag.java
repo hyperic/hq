@@ -31,78 +31,63 @@ import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.tagext.TagSupport;
 
-import org.apache.taglibs.standard.tag.common.core.NullAttributeException;
-import org.apache.taglibs.standard.tag.el.core.ExpressionUtil;
 import org.hyperic.util.StringUtil;
 
 public class RemovePrefixTag extends TagSupport {
+	private static final long serialVersionUID = 1L;
 
-    private String prefix = null;
-    private String value = null;
-    private String property = null;
+	private String prefix = null;
+	private String value = null;
+	private String property = null;
 
-    public RemovePrefixTag () { super(); }
+	public int doStartTag() throws JspException {
+		try {
+			String realPrefix = getPrefix();
+			String realValue = getValue();
+	
+			value = StringUtil.removePrefix(realValue, realPrefix);
+		} catch(NullPointerException npe) {
+			throw new JspTagException("prefix or value attribute value is null", npe);
+		}
+		
+		return SKIP_BODY;
+	}
 
-    public int doStartTag() throws JspException {
+	public int doEndTag() throws JspException {
+		try {
+			if (property == null) {
+				pageContext.getOut().println(value);
+			} else {
+				pageContext.setAttribute(property, value);
+			}
+		} catch (IOException e) {
+			throw new JspException(e);
+		}
 
-        String realPrefix;
-        String realValue;
-        try {
-            realPrefix = (String) ExpressionUtil.evalNotNull("spider", 
-                                                             "prefix", 
-                                                             getPrefix(), 
-                                                             String.class, 
-                                                             this, 
-                                                             pageContext );
-            realValue = (String) ExpressionUtil.evalNotNull("spider", 
-                                                            "value", 
-                                                            getValue(), 
-                                                            String.class, 
-                                                            this, 
-                                                            pageContext );
-        } catch (NullAttributeException ne) {
-            throw new JspTagException("typeId not found: " + ne);
-        } catch (JspException je) {
-            throw new JspTagException( je.toString() );
-        }
+		return super.doEndTag();
+	}
 
-        value = StringUtil.removePrefix(realValue, realPrefix);
-        
-        return SKIP_BODY;
-    }
+	public String getValue() {
+		return this.value;
+	}
 
-    public int doEndTag() throws JspException {
-        try {
-            if (property == null) {
-                pageContext.getOut().println(value);
-            } else {
-                pageContext.setAttribute(property, value);                
-            }
-        } catch (IOException e) {
-            throw new JspException(e);
-        }
-        
-        return super.doEndTag();
-    }
-    
-    public String getValue() {
-        return this.value;
-    }    
-    public void setValue(String value) {
-        this.value = value;
-    }
+	public void setValue(String value) {
+		this.value = value;
+	}
 
-    public String getPrefix() {
-        return this.prefix;
-    }    
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
-    }
-    
-    public String getProperty() {
-        return this.property;
-    }    
-    public void setProperty(String property) {
-        this.property = property;
-    }
+	public String getPrefix() {
+		return this.prefix;
+	}
+
+	public void setPrefix(String prefix) {
+		this.prefix = prefix;
+	}
+
+	public String getProperty() {
+		return this.property;
+	}
+
+	public void setProperty(String property) {
+		this.property = property;
+	}
 }

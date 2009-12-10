@@ -39,9 +39,8 @@ import org.hyperic.hq.ui.action.resource.hub.ResourceHubForm;
 import org.hyperic.hq.ui.util.ContextUtils;
 import org.hyperic.hq.ui.util.RequestUtils;
 
-public class ResourceBreadcrumbTag
-    extends TagSupport
-{
+public class ResourceBreadcrumbTag extends TagSupport {
+    private final static long serialVersionUID = 1L;
     private final static String RESOURCE_BREADCRUMB_TAG_NAME = "breadcrumb";
     private final static String RESOURCE_ID_ATTR_NAME = "resourceId";
     private final static String CTYPE_ATTR_NAME = "ctype";
@@ -88,30 +87,10 @@ public class ResourceBreadcrumbTag
     @Override
     public int doStartTag() throws JspException {
         try {
-            String resourceId = (String) ExpressionUtil.evalNotNull(RESOURCE_BREADCRUMB_TAG_NAME,
-                                                                    RESOURCE_ID_ATTR_NAME,
-                                                                    getResourceId(),
-                                                                    String.class,
-                                                                    this,
-                                                                    pageContext);
-            String ctype = (String) ExpressionUtil.evalNotNull(RESOURCE_BREADCRUMB_TAG_NAME,
-                                                               CTYPE_ATTR_NAME,
-                                                               getCtype(),
-                                                               String.class,
-                                                               this,
-                                                               pageContext);
-            String baseBrowseUrl = (String) ExpressionUtil.evalNotNull(RESOURCE_BREADCRUMB_TAG_NAME,
-                                                                       BASE_BROWSE_URL_ATTR_NAME,
-                                                                       getBaseBrowseUrl(),
-                                                                       String.class,
-                                                                       this,
-                                                                       pageContext);
-            String baseResourceUrl = (String) ExpressionUtil.evalNotNull(RESOURCE_BREADCRUMB_TAG_NAME,
-                                                                         BASE_RESOURCE_URL_ATTR_NAME,
-                                                                         getBaseResourceUrl(),
-                                                                         String.class,
-                                                                         this,
-                                                                         pageContext);
+            String resourceId = getResourceId();
+            String ctype = getCtype();
+            String baseBrowseUrl = getBaseBrowseUrl();
+            String baseResourceUrl = getBaseResourceUrl();
             
             // ...first, backup the bread crumb, we may need it later...
             List<BreadcrumbItem> backupBreadcrumbs = processBackupBreadcrumb();
@@ -129,9 +108,7 @@ public class ResourceBreadcrumbTag
     }
 
     private List<BreadcrumbItem> processBackupBreadcrumb() 
-    throws ServletException,
-           CloneNotSupportedException
-    {
+    throws ServletException, CloneNotSupportedException {
         HttpServletRequest request = (HttpServletRequest) pageContext.getRequest();
         HttpSession session = request.getSession();
         String[] returnToValues = request.getParameterValues(Constants.RETURN_TO_LINK_PARAM_NAME);

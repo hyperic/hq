@@ -1,7 +1,5 @@
 package org.hyperic.hq.ui.taglib.display;
 
-import java.util.Locale;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.struts.taglib.TagUtils;
@@ -9,59 +7,43 @@ import org.apache.struts.taglib.TagUtils;
 @Deprecated
 public class AlertDefinitionStateDecorator extends BaseDecorator {
 	private static final String ICON_URL = "/images/flag_yellow.gif";
-    private static final Locale defaultLocale = Locale.getDefault();
-
+    
 	private static Log log = LogFactory.getLog(AlertDefinitionStateDecorator.class.getName());
 	private String bundle = org.apache.struts.Globals.MESSAGES_KEY;
 	private String locale = org.apache.struts.Globals.LOCALE_KEY;
 
-	private String active;
-	private String disabled;
+	private Boolean active;
+	private Boolean disabled;
 
 	@Override
 	public String decorate(Object columnValue) {
 		return generateOutput();
 	}
 	
-	public String getActive() {
+	public Boolean getActive() {
 		return active;
 	}
 	
-	public void setActive(String active) {
+	public void setActive(Boolean active) {
 		this.active = active;
 	}
 	
-	public String getDisabled() {
+	public Boolean getDisabled() {
 		return disabled;
 	}
 	
-	public void setDisabled(String disabled) {
+	public void setDisabled(Boolean disabled) {
 		this.disabled = disabled;
 	}
 
 	private String generateOutput() {
 		StringBuffer sb = new StringBuffer();
-        Boolean activeVal = Boolean.FALSE;
-        Boolean disabledVal = Boolean.FALSE;
         
-        try {      
-        	activeVal = (Boolean) evalAttr("active", this.active, Boolean.class);
-        } catch(Exception e) {
-        	sb.append(generateErrorComment(e.getClass().getName(), "active", getActive(), e));
-        }
-        
-        if (sb.length() > 0) return sb.toString();
-
-        try {      
-        	disabledVal = (Boolean) evalAttr("disabled", this.disabled, Boolean.class);
-        } catch(Exception e) {
-        	sb.append(generateErrorComment(e.getClass().getName(), "disabled", getDisabled(), e));
-        }
-        
-        if (sb.length() > 0) return sb.toString();
-
         try {
-        	sb.append("<span style=\"whitespace:nowrap\">");
+        	Boolean activeVal = getActive();
+            Boolean disabledVal = getDisabled();
+            
+            sb.append("<span style=\"whitespace:nowrap\">");
         	
 	        if (activeVal) {
 	           	sb.append(TagUtils.getInstance().message(getPageContext(), bundle, locale, "alert.config.props.PB.ActiveYes"));
@@ -77,6 +59,7 @@ public class AlertDefinitionStateDecorator extends BaseDecorator {
 	        sb.append("</span>");
         } catch(Exception e) {
         	log.debug("Markup rendering failed.", e);
+        	
         	sb.append(e.getClass().getName()).append(" triggered while rendering markup.");
         }
         

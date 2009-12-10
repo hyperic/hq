@@ -28,8 +28,8 @@ package org.hyperic.util.validator.common;
 
 import org.apache.commons.validator.Field;
 import org.apache.commons.validator.Validator;
-import org.apache.commons.validator.ValidatorUtil;
 import org.apache.commons.validator.GenericValidator;
+import org.apache.commons.validator.util.ValidatorUtils;
                                                          
 /**                                                       
  * <p>Contains validation utility methods for different types of fields.
@@ -48,7 +48,7 @@ public class CommonValidatorUtil {
     *                           Otherwise <code>false</code>.
    */
    public static boolean validateRequired(Object bean, Field field) {
-      String value = ValidatorUtil.getValueAsString(bean, field.getProperty());
+      String value = ValidatorUtils.getValueAsString(bean, field.getProperty());
 
       return !GenericValidator.isBlankOrNull(value);
    }
@@ -62,7 +62,7 @@ public class CommonValidatorUtil {
     *                           Otherwise <code>false</code>.
    */
    public static boolean validateEmail(Object bean, Field field) {
-      String value = ValidatorUtil.getValueAsString(bean, field.getProperty());
+      String value = ValidatorUtils.getValueAsString(bean, field.getProperty());
 
       return GenericValidator.isEmail(value);
    }
@@ -91,7 +91,7 @@ public class CommonValidatorUtil {
     boolean valid = false;
     // validate the length and characters.
     String userName =
-        ValidatorUtil.getValueAsString(bean, field.getProperty());
+        ValidatorUtils.getValueAsString(bean, field.getProperty());
     if (	(userName != null)											&&
             (GenericValidator.matchRegexp(userName,USERNAME_VALID_REGEXP)) )
         valid = true;
@@ -115,7 +115,7 @@ public class CommonValidatorUtil {
    public static boolean validatePassword (Object bean, Field field) {
     boolean valid = false;
     // fetch the text to validate and enforce
-    String pwd = ValidatorUtil.getValueAsString(bean, field.getProperty());
+    String pwd = ValidatorUtils.getValueAsString(bean, field.getProperty());
     if (	(pwd != null)											&&
         	(GenericValidator.minLength(pwd,PASSWORD_MIN_LENGTH))	&&
             (GenericValidator.maxLength(pwd,PASSWORD_MAX_LENGTH))   )
@@ -134,8 +134,8 @@ public class CommonValidatorUtil {
     */
    public static boolean validatePasswordVerification (Object bean, Field field){
     boolean valid = false;
-    String pwdv = ValidatorUtil.getValueAsString(bean, field.getProperty());
-    String pwd  = ValidatorUtil.getValueAsString(bean, field.getArg1().getKey());
+    String pwdv = ValidatorUtils.getValueAsString(bean, field.getProperty());
+    String pwd  = ValidatorUtils.getValueAsString(bean, field.getArg(1).getKey());
     // compare the pw verification field to the pw field.
     if (	(pwd != null && pwdv!=null)		&&
         	(pwdv.compareTo(pwd)==0)		)
@@ -157,13 +157,13 @@ public class CommonValidatorUtil {
   public static boolean validateRequiredIf(Object bean,
       Field field,
       Validator validator) {
-    Object form = validator.getResource(Validator.BEAN_KEY);
+    Object form = validator.getParameterValue(Validator.BEAN_PARAM);
     String value = null;
     boolean required = false;
     if (isString(bean)) {
       value = (String) bean;
     } else {
-      value = ValidatorUtil.getValueAsString(bean, field.getProperty());
+      value = ValidatorUtils.getValueAsString(bean, field.getProperty());
     }
     int i = 0;
     String fieldJoin = "AND";
@@ -189,7 +189,7 @@ public class CommonValidatorUtil {
           dependProp = ind + dependProp;
         }
       }
-      dependVal = ValidatorUtil.getValueAsString(form, dependProp);
+      dependVal = ValidatorUtils.getValueAsString(form, dependProp);
       if (dependTest.equals(FIELD_TEST_NULL)) {
         if ((dependVal != null ) && (dependVal.length() > 0)) {
           this_required =  false;

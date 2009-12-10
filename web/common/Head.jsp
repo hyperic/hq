@@ -1,8 +1,9 @@
 <%@ page pageEncoding="UTF-8"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" %>
 <%@ page errorPage="/common/Error.jsp" %>
-<%@ taglib uri="struts-html" prefix="html" %>
-<%@ taglib uri="jstl-fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://struts.apache.org/tags-html-el" prefix="html" %>
+
 <%--
   NOTE: This copyright does *not* cover user programs that use HQ
   program services by normal system calls through the application
@@ -42,7 +43,7 @@
 <!-- TODO: ADxMenu.js script invocation must be moved to the "lte IE 6" section above once we start using the HTML5 doctype which will kick IE7 into strict mode. -->
 <!--[if IE]>
 <link rel="stylesheet" href="<html:rewrite page="/css/ie.css"/>" type="text/css"/>
-<script type="text/javascript" src="/js/ADxMenu.js"></script>
+<script type="text/javascript" src="<html:rewrite page="/js/ADxMenu.js" />"></script>
 <![endif]-->
 
 <script type="text/javascript">

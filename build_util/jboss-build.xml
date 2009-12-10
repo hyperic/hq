@@ -80,6 +80,10 @@
       <fileset dir="${thirdparty.lib}">
         <include name="commons-modeler.jar" />
         <include name="commons-collections-3.2.jar" />
+      	<include name="commons-codec-1.3.jar" />
+      	<include name="commons-digester-1.8.jar" />
+      	<include name="commons-logging-1.0.4.jar" />
+      	<include name="commons-httpclient-3.1.jar" />
         <include name="quartz-1.6.5.jar" />
       </fileset>
       <fileset dir="${thirdparty.lib}/oracle_jdbc" includes="ojdbc14.jar"/>
@@ -97,13 +101,17 @@
       </fileset>
     </copy>
 
-    <delete file="${jboss.home}/server/default/lib/commons-collections.jar"/>
-
     <!-- HA support -->
     <copy file="${jboss.home}/server/all/lib/jbossha.jar"
           tofile="${jboss.home}/server/default/lib/jbossha.jar"/>
 
     <!-- remove obsolete jars -->
+  	<delete file="${jboss.home}/server/default/lib/commons-collections.jar"/>
+  	<delete file="${jboss.home}/server/default/lib/commons-codec.jar"/>
+  	<delete file="${jboss.home}/server/default/lib/commons-digester.jar"/>
+  	<delete file="${jboss.home}/server/default/lib/commons-logging.jar"/>
+  	<delete file="${jboss.home}/server/default/lib/commons-httpclient.jar"/>
+  	<delete file="${jboss.home}/server/default/lib/jakarta-oro-2.0.7.jar"/>
     <delete file="${jboss.home}/server/default/lib/antlr-2.7.5H3.jar" />
     <delete file="${jboss.home}/server/default/lib/quartz.jar"/>
     <delete file="${jboss.home}/server/default/lib/quartz-1.6.3.jar"/>
