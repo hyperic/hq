@@ -381,8 +381,12 @@
         <classpath>
 	 		<path refid="alljars"/>
 	       	<path refid="testjars"/>
-	        <path location="${hq.plugins}/@{name}/lib/*.jar"/>
-	        <path location="${hq.plugins}/@{name}/build-lib/*.jar"/>
+	       	 <path>
+			    <fileset dir="${hq.plugins}/@{name}" includes="build-lib/*.jar"/>
+		     </path>
+		     <path>
+			    <fileset dir="${hq.plugins}/@{name}" includes="lib/*.jar"/>
+		     </path>
 	        <path location="${hq.pdk.shared}/target/classes"/>
 	        <path location="${hq.pdk.agent}/target/classes"/>
 			<path location="${hq.util}/target/classes"/>
