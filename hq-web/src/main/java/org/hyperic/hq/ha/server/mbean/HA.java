@@ -85,7 +85,7 @@ public class HA implements HAMBean
     private void startAvailCheckService() {
         try {
             //TODO MBean has to be registered before startSchedule can be called.  Investigate using auto export once Scheduler dependency is removed
-            server.registerMBean(availabilityCheckService, new ObjectName("hyperic.jmx:service=Scheduler,name=AvailabilityCheck"));
+            server.registerMBean(availabilityCheckService, new ObjectName("hyperic.jmx:type=Service,name=AvailabilityCheck"));
             availabilityCheckService.startSchedule();
 
         } catch (Exception e) {
@@ -97,7 +97,7 @@ public class HA implements HAMBean
     private void startAgentAIScanService() {
         try {
             //TODO MBean has to be registered before startSchedule can be called.  Investigate using auto export once Scheduler dependency is removed
-           server.registerMBean(agentAIScanService, new ObjectName("hyperic.jmx:service=Scheduler,name=AgentAIScan"));
+           server.registerMBean(agentAIScanService, new ObjectName("hyperic.jmx:type=Service,name=AgentAIScan"));
            agentAIScanService.startSchedule();
         } catch (Exception e) {
             log.info("Unable to start service: " + e);
