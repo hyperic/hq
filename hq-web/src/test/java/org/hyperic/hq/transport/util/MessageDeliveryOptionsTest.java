@@ -25,6 +25,7 @@
 
 package org.hyperic.hq.transport.util;
 
+
 import junit.framework.TestCase;
 
 /**

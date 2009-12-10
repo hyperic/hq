@@ -28,6 +28,7 @@ package org.hyperic.hq.transport.util;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+
 import junit.framework.TestCase;
 
 /**
