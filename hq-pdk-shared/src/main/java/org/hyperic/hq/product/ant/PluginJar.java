@@ -131,8 +131,7 @@ public class PluginJar
     }
 
     public void execute() throws BuildException {
-        // String buildDir = getProperty("build.dir", getName() + "/target");
-        String buildDir = "hq-plugins/" + getName() + "/target";
+        String buildDir = getDir() + "/target";
         String pluginDir = getProperty("plugin.dir", "build/plugins");
         String packageName = getPackage();
         if (packageName == null) {
