@@ -315,10 +315,7 @@ public class CPropManagerImpl implements CPropManager {
             DBUtil.closeResultSet(this, rs);
             DBUtil.closeStatement(this, stmt);
             DBUtil.closeStatement(this, pstmt);
-            // XXX scottmf, this is probably not the right thing to do since
-            // it will commit the transaction which is already container
-            // managed
-            Util.endConnection();
+            
         }
     }
 
@@ -377,7 +374,7 @@ public class CPropManagerImpl implements CPropManager {
         } finally {
             DBUtil.closeResultSet(this, rs);
             DBUtil.closeStatement(this, stmt);
-            Util.endConnection();
+            
         }
     }
 
@@ -430,7 +427,7 @@ public class CPropManagerImpl implements CPropManager {
         } finally {
             DBUtil.closeResultSet(this, rs);
             DBUtil.closeStatement(this, stmt);
-            Util.endConnection();
+         
         }
 
         return res;
@@ -522,7 +519,7 @@ public class CPropManagerImpl implements CPropManager {
             throw new SystemException(exc);
         } finally {
             DBUtil.closeStatement(this, stmt);
-            Util.endConnection();
+            
         }
     }
 

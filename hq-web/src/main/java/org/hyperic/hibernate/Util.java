@@ -249,13 +249,7 @@ public class Util {
         return getSessionFactory().getCurrentSession().connection();
     }
 
-    /**
-     * disconnect SQL Connection from current JTA context
-     */
-    public static void endConnection()
-    {
-        getSessionFactory().getCurrentSession().disconnect();
-    }
+
 
     public static void flushCurrentSession()
     {

@@ -54,9 +54,7 @@ class SysStats {
         } catch(SQLException e) {
             _log.warn("Error get db stats");
             return props;
-        } finally {
-            Util.endConnection();
-        }
+        } 
         
         return props;
     }

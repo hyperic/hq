@@ -101,7 +101,7 @@
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web-3.0.0.M4.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/lib/spring/org.springframework.web.servlet-3.0.0.M4.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/hq_bin/sigar_bin/lib/sigar.jar"/>
-	<classpathentry exported="true" kind="lib" path="thirdparty/lib/hibernate/hibernate3.jar"/>
+	<classpathentry exported="true" kind="lib" path="thirdparty/lib/hibernate/hibernate3.jar" sourcepath="thirdparty/lib-src/com.springsource.org.hibernate-sources-3.2.6.ga.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/hq_bin/lather_bin/lather.jar"/>
 	<classpathentry exported="true" kind="lib" path="thirdparty/hq_bin/wrapper_bin/lib/wrapper.jar"/>
 	<classpathentry exported="true" kind="var" path="JBOSS_HOME/server/default/lib/jsp-api.jar"/>
